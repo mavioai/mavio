@@ -23,8 +23,10 @@ type Credential struct {
 	UserID core.ID `json:"user_id,omitempty"`
 	// Kind holds the value of the "kind" field.
 	Kind core.CredentialKind `json:"kind,omitempty"`
-	// Secret holds the value of the "secret" field.
-	Secret string `json:"-"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Data holds the value of the "data" field.
+	Data string `json:"-"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// LastUsedAt holds the value of the "last_used_at" field.
@@ -62,7 +64,7 @@ func (*Credential) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case credential.FieldID, credential.FieldUserID:
 			values[i] = new(core.ID)
-		case credential.FieldKind, credential.FieldSecret:
+		case credential.FieldKind, credential.FieldName, credential.FieldData:
 			values[i] = new(sql.NullString)
 		case credential.FieldCreatedAt, credential.FieldLastUsedAt:
 			values[i] = new(sql.NullTime)
@@ -99,11 +101,17 @@ func (_m *Credential) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Kind = core.CredentialKind(value.String)
 			}
-		case credential.FieldSecret:
+		case credential.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field secret", values[i])
+				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				_m.Secret = value.String
+				_m.Name = value.String
+			}
+		case credential.FieldData:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field data", values[i])
+			} else if value.Valid {
+				_m.Data = value.String
 			}
 		case credential.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -165,7 +173,10 @@ func (_m *Credential) String() string {
 	builder.WriteString("kind=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
 	builder.WriteString(", ")
-	builder.WriteString("secret=<sensitive>")
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("data=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

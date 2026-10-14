@@ -207,7 +207,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 
 * A `User` has a unique, case-insensitive `Name` and a `Kind` ([Accounts §4.1](accounts.md#41-users)): `administrator` (exactly one per server, kept by a unique index; `IsAdmin` tells it), `member`, or `managed`, a user without credentials reached only by switching. A user signs in with its own credentials, or through a plugin named by `AuthProvider`; managed users have no `AuthProvider`. `Disabled` keeps a user from signing in.
 * A managed user may have a `RestrictionProfile`, which other users may not: `younger_child`, `older_child` or `teen`, allowing rating scores up to 6, 12 and 16 (G and TV-G; PG and TV-PG; PG-13 and TV-14) and no unrated items. `User.Access` gives the effective policy: `Policy` with the profile's limit applied when it is lower, and `BlockUnrated` set.
-* A `Credential` is a user's secret in standalone mode, kept apart from the user: a `password` or a four-digit `pin`, whose `Secret` is a PHC-format hash such as `$argon2id$…`, with `CreatedAt` and `LastUsedAt`. A user has at most one credential of each kind; deleting a user deletes its credentials. A PIN guards switching to the user and never signs in.
+* A `Credential` is what a user signs in or switches with in standalone mode, kept apart from the user, with `CreatedAt` and `LastUsedAt`. Its `Data` is a PHC-format hash such as `$argon2id$…` for a `password` and a four-digit `pin`, the sealed secret for `totp`, and the public key credential for a `passkey`, which also has a `Name`. A user has at most one credential of each kind but passkeys (`CredentialKind.Single`); deleting a user deletes its credentials. A PIN guards switching to the user and never signs in.
 * `UserPolicy`:
   * `Libraries` limits access to listed libraries (nil means all); `CanAccessLibrary` applies it.
   * `MaxParentalRating` is the highest allowed rating score (content ratings such as "PG-13" map to scores per country rating system; nil means unrestricted, zero allows only content for all ages); `BlockUnrated` hides unrated items when a maximum is set.
@@ -249,7 +249,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `ImageRepository` | `Get` an image; list an owner's images, or several owners' at once (`ListForOwners`), and `Replace` them |
 | `PersonRepository` | `Get`, case-insensitive `FindByName`, batch `Upsert`, `Search` (credited people with item counts, see §9.2), list and `Replace` an item's credits |
 | `UserRepository` | CRUD and case-insensitive `GetByName` |
-| `CredentialRepository` | A user's credentials: `List`, `Get` of a kind, `Put` (replacing the user's credential of its kind), `Delete` of a kind |
+| `CredentialRepository` | A user's credentials: `List` (oldest first), `Get` of a single kind, `Put` (adding a credential or updating the one with its ID; one of a single kind replaces the user's other), `Delete` of a kind, `Remove` of one |
 | `UserDataRepository` | `Get` (`ErrNotFound` when absent), `GetMany` for a list of items, `Put` |
 | `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `Get`, `ListForUser` (most recently seen first), `Touch`, `Delete`, `PurgeIdle` (the sessions last seen before a time) |
 | `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail`, `List` (paged, see §8), `Purge` of jobs finished before a time |

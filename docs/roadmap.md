@@ -797,7 +797,7 @@ flowchart TD
 - [x] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes: sessions bound to the device's Ed25519 key, hour-long access tokens authenticated with a key derived from the server's identity key in `identity.key`, `StartRefresh` and `RefreshSession`, `SessionIdleDays` with the daily cleanup, and the device keys and refreshes of the web UI, the dev player and the shared Rust core
 - [x] Signed media URLs: `signed/{token}/{path}` for one session and the first segments of a path, under a key derived from the identity key; playbacks' URLs expire with the playback and images' after 12 to 24 hours; the URLs of images, collages, trickplay sheets and chapter images in responses, used by the web UI, the dev player and the shared Rust core; the unsigned paths take bearer tokens and plugins
 - [x] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling: user kinds with one administrator, credentials in a table of their own, `UserService.SetPin`, managed users made members by a password, and failed sign-ins throttled per name and address
-- [ ] Passkeys and TOTP for standalone sign-in
+- [x] Passkeys and TOTP for standalone sign-in: discoverable passkeys at the host of the request's origin, TOTP as the second factor of passwords with sealed secrets, and a software authenticator for tests
 - [ ] Library access records and their enforcement
 - [ ] Invitation links, Quick Connect and switching on the administrator's devices
 - [ ] Recovery of the administrator from the command line
@@ -807,7 +807,7 @@ flowchart TD
 - [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
 - [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges
 - [ ] `apps/relay` and relay tickets
-- [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users
+- [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
 
 ---
 
@@ -827,6 +827,7 @@ flowchart TD
 | Indexer churn | Sites change their pages and APIs | Cardigann definitions are fetched at run time; the indexers plugin is upgraded from the catalog without a server release |
 | Subtitle site churn | Most of Bazarr's providers scrape sites that change their pages, block bots or close | The providers are in `plugins/subtitles`, upgraded from the catalog without a server release; recorded responses keep their parsers tested |
 | Speech detection for synchronization | Silero VAD, a neural network, costs about 0.7 million multiply-adds every 32 ms of audio in pure Go, about a minute of one core for a two-hour film; ffsubsync's offsets come from WebRTC's VAD by default | The convolutions run in parallel and only the LSTM in order, as a low-priority job yielding to playback; offsets compared with ffsubsync's on recorded samples in P26 |
+| Passkeys in the native apps | A passkey belongs to the host name of a web origin; the web UI uses it, but the Apple and Android apps can use passkeys only of domains that list them (associated domains, Digital Asset Links), which a self-hosted server's own host name cannot do for an app from a store | Decide with the clients' sign-in in P27: for example, signing in with a passkey through the server's web UI in the system browser |
 | Live TV, DVR and channels | Large parts of Jellyfin that Mavio has neither adopted nor ruled out; the plugin platform leaves out their provider types | Decide before P21 |
 | Client licensing and app stores | The clients would be GPL-3.0 like the rest of the repository, whose terms conflict with the App Store's; LGPL builds of FFmpeg (AetherEngine's frameworks on Apple platforms) also oblige letting users relink them, and the Android apps' libmpv, built as GPL-3.0, binds them to GPL-3.0 | Decide before the first App Store release: a separate license for the clients, a contributor agreement, or no App Store distribution |
 | AetherEngine | The second engine of the Apple apps is a young package, mostly by one maintainer, releasing often in 7.x | Prototype first in P21: EDR output of an HDR10 Matroska source, Dolby Vision, styled ASS subtitles and Picture in Picture on macOS, iOS and tvOS; pin the version and follow its releases |

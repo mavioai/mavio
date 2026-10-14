@@ -8,8 +8,9 @@ import "google/protobuf/timestamp.proto";
 
 // UserService manages accounts: the server's one administrator, members
 // and managed users (docs/accounts.md §4.1). All methods except
-// GetCurrentUser, UpdatePreferences and changing one's own password or PIN
-// require the administrator.
+// GetCurrentUser, UpdatePreferences, and managing one's own password, PIN,
+// passkeys and TOTP require the administrator. Managed users have no
+// passwords, passkeys or TOTP.
 service UserService {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
@@ -30,6 +31,27 @@ service UserService {
   // SetPin sets or clears a user's PIN, which guards switching to it: the
   // administrator sets managed users' PINs, other users set their own.
   rpc SetPin(SetPinRequest) returns (SetPinResponse);
+  // StartPasskeyRegistration begins creating a passkey of the calling user
+  // at the origin of the request (its Origin header), which must be HTTPS,
+  // or HTTP on localhost, at a host name; the passkey works at that origin's
+  // host. The ceremony lasts five minutes.
+  rpc StartPasskeyRegistration(StartPasskeyRegistrationRequest) returns (StartPasskeyRegistrationResponse);
+  // FinishPasskeyRegistration stores the passkey from the authenticator's
+  // response; one that does not verify fails with INVALID_ARGUMENT.
+  rpc FinishPasskeyRegistration(FinishPasskeyRegistrationRequest) returns (FinishPasskeyRegistrationResponse);
+  // DeletePasskey removes a passkey of the calling user, or of anyone for
+  // the administrator.
+  rpc DeletePasskey(DeletePasskeyRequest) returns (DeletePasskeyResponse);
+  // StartTotp begins setting up TOTP for the calling user, which signs in
+  // with a password: it returns a new secret, which ConfirmTotp stores once
+  // given a code of it within ten minutes.
+  rpc StartTotp(StartTotpRequest) returns (StartTotpResponse);
+  // ConfirmTotp ends setting up TOTP, replacing the user's previous
+  // secret; a wrong code fails with INVALID_ARGUMENT.
+  rpc ConfirmTotp(ConfirmTotpRequest) returns (ConfirmTotpResponse);
+  // DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
+  // for the administrator.
+  rpc DeleteTotp(DeleteTotpRequest) returns (DeleteTotpResponse);
   // UpdatePreferences changes the calling user's playback preferences.
   rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
 }
@@ -86,6 +108,19 @@ message User {
   bool has_pin = 11;
   // A managed user's restriction profile.
   RestrictionProfile restriction = 12;
+  // Whether signing in with a password needs a TOTP code.
+  bool has_totp = 13;
+  repeated Passkey passkeys = 14;
+}
+
+// Passkey is a user's WebAuthn credential.
+message Passkey {
+  string id = 1;
+  string name = 2;
+  // The host the passkey works at.
+  string rp_id = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp last_use_time = 5;
 }
 
 message UserPolicy {
@@ -264,6 +299,76 @@ message SetPinRequest {
 }
 
 message SetPinResponse {}
+
+message StartPasskeyRegistrationRequest {}
+
+message StartPasskeyRegistrationResponse {
+  string ceremony_id = 1;
+  // The creation options, as
+  // PublicKeyCredential.parseCreationOptionsFromJSON takes them.
+  string options_json = 2;
+}
+
+message FinishPasskeyRegistrationRequest {
+  string ceremony_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  // What the user calls the passkey, such as the device it is on.
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  // The authenticator's response, as PublicKeyCredential.toJSON gives it.
+  string credential_json = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 65536
+  ];
+}
+
+message FinishPasskeyRegistrationResponse {
+  Passkey passkey = 1;
+}
+
+message DeletePasskeyRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  string id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeletePasskeyResponse {}
+
+message StartTotpRequest {}
+
+message StartTotpResponse {
+  // The secret in base32, for entering by hand.
+  string secret = 1;
+  // The otpauth URI of the secret, for a QR code.
+  string uri = 2;
+}
+
+message ConfirmTotpRequest {
+  string code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^[0-9]{6}$"
+  ];
+}
+
+message ConfirmTotpResponse {}
+
+message DeleteTotpRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteTotpResponse {}
 
 message UpdatePreferencesRequest {
   UserPreferences preferences = 1 [(buf.validate.field).required = true];

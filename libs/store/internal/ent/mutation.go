@@ -4285,7 +4285,8 @@ type CredentialMutation struct {
 	typ           string
 	id            *core.ID
 	kind          *core.CredentialKind
-	secret        *string
+	name          *string
+	data          *string
 	created_at    *time.Time
 	last_used_at  *time.Time
 	clearedFields map[string]struct{}
@@ -4472,40 +4473,76 @@ func (m *CredentialMutation) ResetKind() {
 	m.kind = nil
 }
 
-// SetSecret sets the "secret" field.
-func (m *CredentialMutation) SetSecret(s string) {
-	m.secret = &s
+// SetName sets the "name" field.
+func (m *CredentialMutation) SetName(s string) {
+	m.name = &s
 }
 
-// Secret returns the value of the "secret" field in the mutation.
-func (m *CredentialMutation) Secret() (r string, exists bool) {
-	v := m.secret
+// Name returns the value of the "name" field in the mutation.
+func (m *CredentialMutation) Name() (r string, exists bool) {
+	v := m.name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSecret returns the old "secret" field's value of the Credential entity.
+// OldName returns the old "name" field's value of the Credential entity.
 // If the Credential object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialMutation) OldSecret(ctx context.Context) (v string, err error) {
+func (m *CredentialMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSecret is only allowed on UpdateOne operations")
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSecret requires an ID field in the mutation")
+		return v, errors.New("OldName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSecret: %w", err)
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
 	}
-	return oldValue.Secret, nil
+	return oldValue.Name, nil
 }
 
-// ResetSecret resets all changes to the "secret" field.
-func (m *CredentialMutation) ResetSecret() {
-	m.secret = nil
+// ResetName resets all changes to the "name" field.
+func (m *CredentialMutation) ResetName() {
+	m.name = nil
+}
+
+// SetData sets the "data" field.
+func (m *CredentialMutation) SetData(s string) {
+	m.data = &s
+}
+
+// Data returns the value of the "data" field in the mutation.
+func (m *CredentialMutation) Data() (r string, exists bool) {
+	v := m.data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldData returns the old "data" field's value of the Credential entity.
+// If the Credential object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialMutation) OldData(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldData: %w", err)
+	}
+	return oldValue.Data, nil
+}
+
+// ResetData resets all changes to the "data" field.
+func (m *CredentialMutation) ResetData() {
+	m.data = nil
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -4654,15 +4691,18 @@ func (m *CredentialMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CredentialMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.user != nil {
 		fields = append(fields, credential.FieldUserID)
 	}
 	if m.kind != nil {
 		fields = append(fields, credential.FieldKind)
 	}
-	if m.secret != nil {
-		fields = append(fields, credential.FieldSecret)
+	if m.name != nil {
+		fields = append(fields, credential.FieldName)
+	}
+	if m.data != nil {
+		fields = append(fields, credential.FieldData)
 	}
 	if m.created_at != nil {
 		fields = append(fields, credential.FieldCreatedAt)
@@ -4682,8 +4722,10 @@ func (m *CredentialMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case credential.FieldKind:
 		return m.Kind()
-	case credential.FieldSecret:
-		return m.Secret()
+	case credential.FieldName:
+		return m.Name()
+	case credential.FieldData:
+		return m.Data()
 	case credential.FieldCreatedAt:
 		return m.CreatedAt()
 	case credential.FieldLastUsedAt:
@@ -4701,8 +4743,10 @@ func (m *CredentialMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUserID(ctx)
 	case credential.FieldKind:
 		return m.OldKind(ctx)
-	case credential.FieldSecret:
-		return m.OldSecret(ctx)
+	case credential.FieldName:
+		return m.OldName(ctx)
+	case credential.FieldData:
+		return m.OldData(ctx)
 	case credential.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case credential.FieldLastUsedAt:
@@ -4730,12 +4774,19 @@ func (m *CredentialMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetKind(v)
 		return nil
-	case credential.FieldSecret:
+	case credential.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSecret(v)
+		m.SetName(v)
+		return nil
+	case credential.FieldData:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetData(v)
 		return nil
 	case credential.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -4815,8 +4866,11 @@ func (m *CredentialMutation) ResetField(name string) error {
 	case credential.FieldKind:
 		m.ResetKind()
 		return nil
-	case credential.FieldSecret:
-		m.ResetSecret()
+	case credential.FieldName:
+		m.ResetName()
+		return nil
+	case credential.FieldData:
+		m.ResetData()
 		return nil
 	case credential.FieldCreatedAt:
 		m.ResetCreatedAt()

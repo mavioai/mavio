@@ -154,17 +154,20 @@ type UserRepository interface {
 }
 
 // CredentialRepository stores users' credentials. A user has at most one
-// credential of each kind.
+// credential of each kind but passkeys.
 type CredentialRepository interface {
-	// List returns the user's credentials.
+	// List returns the user's credentials, oldest first.
 	List(ctx context.Context, userID ID) ([]Credential, error)
-	// Get returns the user's credential of kind.
+	// Get returns the user's credential of a single kind.
 	Get(ctx context.Context, userID ID, kind CredentialKind) (Credential, error)
-	// Put adds a credential, replacing the user's credential of its kind.
+	// Put adds a credential or updates the one with its ID; a credential
+	// of a single kind replaces the user's other one.
 	Put(ctx context.Context, c *Credential) error
-	// Delete removes the user's credential of kind; it is not an error when
-	// there is none.
+	// Delete removes the user's credentials of kind; it is not an error
+	// when there are none.
 	Delete(ctx context.Context, userID ID, kind CredentialKind) error
+	// Remove removes one credential.
+	Remove(ctx context.Context, id ID) error
 }
 
 // AuthSessionRepository stores signed-in clients.

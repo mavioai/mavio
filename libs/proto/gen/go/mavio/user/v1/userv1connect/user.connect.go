@@ -52,6 +52,21 @@ const (
 	UserServiceSetPasswordProcedure = "/mavio.user.v1.UserService/SetPassword"
 	// UserServiceSetPinProcedure is the fully-qualified name of the UserService's SetPin RPC.
 	UserServiceSetPinProcedure = "/mavio.user.v1.UserService/SetPin"
+	// UserServiceStartPasskeyRegistrationProcedure is the fully-qualified name of the UserService's
+	// StartPasskeyRegistration RPC.
+	UserServiceStartPasskeyRegistrationProcedure = "/mavio.user.v1.UserService/StartPasskeyRegistration"
+	// UserServiceFinishPasskeyRegistrationProcedure is the fully-qualified name of the UserService's
+	// FinishPasskeyRegistration RPC.
+	UserServiceFinishPasskeyRegistrationProcedure = "/mavio.user.v1.UserService/FinishPasskeyRegistration"
+	// UserServiceDeletePasskeyProcedure is the fully-qualified name of the UserService's DeletePasskey
+	// RPC.
+	UserServiceDeletePasskeyProcedure = "/mavio.user.v1.UserService/DeletePasskey"
+	// UserServiceStartTotpProcedure is the fully-qualified name of the UserService's StartTotp RPC.
+	UserServiceStartTotpProcedure = "/mavio.user.v1.UserService/StartTotp"
+	// UserServiceConfirmTotpProcedure is the fully-qualified name of the UserService's ConfirmTotp RPC.
+	UserServiceConfirmTotpProcedure = "/mavio.user.v1.UserService/ConfirmTotp"
+	// UserServiceDeleteTotpProcedure is the fully-qualified name of the UserService's DeleteTotp RPC.
+	UserServiceDeleteTotpProcedure = "/mavio.user.v1.UserService/DeleteTotp"
 	// UserServiceUpdatePreferencesProcedure is the fully-qualified name of the UserService's
 	// UpdatePreferences RPC.
 	UserServiceUpdatePreferencesProcedure = "/mavio.user.v1.UserService/UpdatePreferences"
@@ -78,6 +93,27 @@ type UserServiceClient interface {
 	// SetPin sets or clears a user's PIN, which guards switching to it: the
 	// administrator sets managed users' PINs, other users set their own.
 	SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error)
+	// StartPasskeyRegistration begins creating a passkey of the calling user
+	// at the origin of the request (its Origin header), which must be HTTPS,
+	// or HTTP on localhost, at a host name; the passkey works at that origin's
+	// host. The ceremony lasts five minutes.
+	StartPasskeyRegistration(context.Context, *v1.StartPasskeyRegistrationRequest) (*v1.StartPasskeyRegistrationResponse, error)
+	// FinishPasskeyRegistration stores the passkey from the authenticator's
+	// response; one that does not verify fails with INVALID_ARGUMENT.
+	FinishPasskeyRegistration(context.Context, *v1.FinishPasskeyRegistrationRequest) (*v1.FinishPasskeyRegistrationResponse, error)
+	// DeletePasskey removes a passkey of the calling user, or of anyone for
+	// the administrator.
+	DeletePasskey(context.Context, *v1.DeletePasskeyRequest) (*v1.DeletePasskeyResponse, error)
+	// StartTotp begins setting up TOTP for the calling user, which signs in
+	// with a password: it returns a new secret, which ConfirmTotp stores once
+	// given a code of it within ten minutes.
+	StartTotp(context.Context, *v1.StartTotpRequest) (*v1.StartTotpResponse, error)
+	// ConfirmTotp ends setting up TOTP, replacing the user's previous
+	// secret; a wrong code fails with INVALID_ARGUMENT.
+	ConfirmTotp(context.Context, *v1.ConfirmTotpRequest) (*v1.ConfirmTotpResponse, error)
+	// DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
+	// for the administrator.
+	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
 }
@@ -144,6 +180,42 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("SetPin")),
 			connect.WithClientOptions(opts...),
 		),
+		startPasskeyRegistration: connect.NewClient[v1.StartPasskeyRegistrationRequest, v1.StartPasskeyRegistrationResponse](
+			httpClient,
+			baseURL+UserServiceStartPasskeyRegistrationProcedure,
+			connect.WithSchema(userServiceMethods.ByName("StartPasskeyRegistration")),
+			connect.WithClientOptions(opts...),
+		),
+		finishPasskeyRegistration: connect.NewClient[v1.FinishPasskeyRegistrationRequest, v1.FinishPasskeyRegistrationResponse](
+			httpClient,
+			baseURL+UserServiceFinishPasskeyRegistrationProcedure,
+			connect.WithSchema(userServiceMethods.ByName("FinishPasskeyRegistration")),
+			connect.WithClientOptions(opts...),
+		),
+		deletePasskey: connect.NewClient[v1.DeletePasskeyRequest, v1.DeletePasskeyResponse](
+			httpClient,
+			baseURL+UserServiceDeletePasskeyProcedure,
+			connect.WithSchema(userServiceMethods.ByName("DeletePasskey")),
+			connect.WithClientOptions(opts...),
+		),
+		startTotp: connect.NewClient[v1.StartTotpRequest, v1.StartTotpResponse](
+			httpClient,
+			baseURL+UserServiceStartTotpProcedure,
+			connect.WithSchema(userServiceMethods.ByName("StartTotp")),
+			connect.WithClientOptions(opts...),
+		),
+		confirmTotp: connect.NewClient[v1.ConfirmTotpRequest, v1.ConfirmTotpResponse](
+			httpClient,
+			baseURL+UserServiceConfirmTotpProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ConfirmTotp")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteTotp: connect.NewClient[v1.DeleteTotpRequest, v1.DeleteTotpResponse](
+			httpClient,
+			baseURL+UserServiceDeleteTotpProcedure,
+			connect.WithSchema(userServiceMethods.ByName("DeleteTotp")),
+			connect.WithClientOptions(opts...),
+		),
 		updatePreferences: connect.NewClient[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse](
 			httpClient,
 			baseURL+UserServiceUpdatePreferencesProcedure,
@@ -155,15 +227,21 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	listUsers         *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
-	getUser           *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
-	getCurrentUser    *connect.Client[v1.GetCurrentUserRequest, v1.GetCurrentUserResponse]
-	createUser        *connect.Client[v1.CreateUserRequest, v1.CreateUserResponse]
-	updateUser        *connect.Client[v1.UpdateUserRequest, v1.UpdateUserResponse]
-	deleteUser        *connect.Client[v1.DeleteUserRequest, v1.DeleteUserResponse]
-	setPassword       *connect.Client[v1.SetPasswordRequest, v1.SetPasswordResponse]
-	setPin            *connect.Client[v1.SetPinRequest, v1.SetPinResponse]
-	updatePreferences *connect.Client[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse]
+	listUsers                 *connect.Client[v1.ListUsersRequest, v1.ListUsersResponse]
+	getUser                   *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	getCurrentUser            *connect.Client[v1.GetCurrentUserRequest, v1.GetCurrentUserResponse]
+	createUser                *connect.Client[v1.CreateUserRequest, v1.CreateUserResponse]
+	updateUser                *connect.Client[v1.UpdateUserRequest, v1.UpdateUserResponse]
+	deleteUser                *connect.Client[v1.DeleteUserRequest, v1.DeleteUserResponse]
+	setPassword               *connect.Client[v1.SetPasswordRequest, v1.SetPasswordResponse]
+	setPin                    *connect.Client[v1.SetPinRequest, v1.SetPinResponse]
+	startPasskeyRegistration  *connect.Client[v1.StartPasskeyRegistrationRequest, v1.StartPasskeyRegistrationResponse]
+	finishPasskeyRegistration *connect.Client[v1.FinishPasskeyRegistrationRequest, v1.FinishPasskeyRegistrationResponse]
+	deletePasskey             *connect.Client[v1.DeletePasskeyRequest, v1.DeletePasskeyResponse]
+	startTotp                 *connect.Client[v1.StartTotpRequest, v1.StartTotpResponse]
+	confirmTotp               *connect.Client[v1.ConfirmTotpRequest, v1.ConfirmTotpResponse]
+	deleteTotp                *connect.Client[v1.DeleteTotpRequest, v1.DeleteTotpResponse]
+	updatePreferences         *connect.Client[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse]
 }
 
 // ListUsers calls mavio.user.v1.UserService.ListUsers.
@@ -238,6 +316,60 @@ func (c *userServiceClient) SetPin(ctx context.Context, req *v1.SetPinRequest) (
 	return nil, err
 }
 
+// StartPasskeyRegistration calls mavio.user.v1.UserService.StartPasskeyRegistration.
+func (c *userServiceClient) StartPasskeyRegistration(ctx context.Context, req *v1.StartPasskeyRegistrationRequest) (*v1.StartPasskeyRegistrationResponse, error) {
+	response, err := c.startPasskeyRegistration.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// FinishPasskeyRegistration calls mavio.user.v1.UserService.FinishPasskeyRegistration.
+func (c *userServiceClient) FinishPasskeyRegistration(ctx context.Context, req *v1.FinishPasskeyRegistrationRequest) (*v1.FinishPasskeyRegistrationResponse, error) {
+	response, err := c.finishPasskeyRegistration.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// DeletePasskey calls mavio.user.v1.UserService.DeletePasskey.
+func (c *userServiceClient) DeletePasskey(ctx context.Context, req *v1.DeletePasskeyRequest) (*v1.DeletePasskeyResponse, error) {
+	response, err := c.deletePasskey.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// StartTotp calls mavio.user.v1.UserService.StartTotp.
+func (c *userServiceClient) StartTotp(ctx context.Context, req *v1.StartTotpRequest) (*v1.StartTotpResponse, error) {
+	response, err := c.startTotp.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ConfirmTotp calls mavio.user.v1.UserService.ConfirmTotp.
+func (c *userServiceClient) ConfirmTotp(ctx context.Context, req *v1.ConfirmTotpRequest) (*v1.ConfirmTotpResponse, error) {
+	response, err := c.confirmTotp.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// DeleteTotp calls mavio.user.v1.UserService.DeleteTotp.
+func (c *userServiceClient) DeleteTotp(ctx context.Context, req *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error) {
+	response, err := c.deleteTotp.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // UpdatePreferences calls mavio.user.v1.UserService.UpdatePreferences.
 func (c *userServiceClient) UpdatePreferences(ctx context.Context, req *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
 	response, err := c.updatePreferences.CallUnary(ctx, connect.NewRequest(req))
@@ -262,6 +394,27 @@ type UserServiceHandler interface {
 	// SetPin sets or clears a user's PIN, which guards switching to it: the
 	// administrator sets managed users' PINs, other users set their own.
 	SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error)
+	// StartPasskeyRegistration begins creating a passkey of the calling user
+	// at the origin of the request (its Origin header), which must be HTTPS,
+	// or HTTP on localhost, at a host name; the passkey works at that origin's
+	// host. The ceremony lasts five minutes.
+	StartPasskeyRegistration(context.Context, *v1.StartPasskeyRegistrationRequest) (*v1.StartPasskeyRegistrationResponse, error)
+	// FinishPasskeyRegistration stores the passkey from the authenticator's
+	// response; one that does not verify fails with INVALID_ARGUMENT.
+	FinishPasskeyRegistration(context.Context, *v1.FinishPasskeyRegistrationRequest) (*v1.FinishPasskeyRegistrationResponse, error)
+	// DeletePasskey removes a passkey of the calling user, or of anyone for
+	// the administrator.
+	DeletePasskey(context.Context, *v1.DeletePasskeyRequest) (*v1.DeletePasskeyResponse, error)
+	// StartTotp begins setting up TOTP for the calling user, which signs in
+	// with a password: it returns a new secret, which ConfirmTotp stores once
+	// given a code of it within ten minutes.
+	StartTotp(context.Context, *v1.StartTotpRequest) (*v1.StartTotpResponse, error)
+	// ConfirmTotp ends setting up TOTP, replacing the user's previous
+	// secret; a wrong code fails with INVALID_ARGUMENT.
+	ConfirmTotp(context.Context, *v1.ConfirmTotpRequest) (*v1.ConfirmTotpResponse, error)
+	// DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
+	// for the administrator.
+	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
 }
@@ -324,6 +477,42 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("SetPin")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceStartPasskeyRegistrationHandler := connect.NewUnaryHandlerSimple(
+		UserServiceStartPasskeyRegistrationProcedure,
+		svc.StartPasskeyRegistration,
+		connect.WithSchema(userServiceMethods.ByName("StartPasskeyRegistration")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceFinishPasskeyRegistrationHandler := connect.NewUnaryHandlerSimple(
+		UserServiceFinishPasskeyRegistrationProcedure,
+		svc.FinishPasskeyRegistration,
+		connect.WithSchema(userServiceMethods.ByName("FinishPasskeyRegistration")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceDeletePasskeyHandler := connect.NewUnaryHandlerSimple(
+		UserServiceDeletePasskeyProcedure,
+		svc.DeletePasskey,
+		connect.WithSchema(userServiceMethods.ByName("DeletePasskey")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceStartTotpHandler := connect.NewUnaryHandlerSimple(
+		UserServiceStartTotpProcedure,
+		svc.StartTotp,
+		connect.WithSchema(userServiceMethods.ByName("StartTotp")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceConfirmTotpHandler := connect.NewUnaryHandlerSimple(
+		UserServiceConfirmTotpProcedure,
+		svc.ConfirmTotp,
+		connect.WithSchema(userServiceMethods.ByName("ConfirmTotp")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceDeleteTotpHandler := connect.NewUnaryHandlerSimple(
+		UserServiceDeleteTotpProcedure,
+		svc.DeleteTotp,
+		connect.WithSchema(userServiceMethods.ByName("DeleteTotp")),
+		connect.WithHandlerOptions(opts...),
+	)
 	userServiceUpdatePreferencesHandler := connect.NewUnaryHandlerSimple(
 		UserServiceUpdatePreferencesProcedure,
 		svc.UpdatePreferences,
@@ -348,6 +537,18 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceSetPasswordHandler.ServeHTTP(w, r)
 		case UserServiceSetPinProcedure:
 			userServiceSetPinHandler.ServeHTTP(w, r)
+		case UserServiceStartPasskeyRegistrationProcedure:
+			userServiceStartPasskeyRegistrationHandler.ServeHTTP(w, r)
+		case UserServiceFinishPasskeyRegistrationProcedure:
+			userServiceFinishPasskeyRegistrationHandler.ServeHTTP(w, r)
+		case UserServiceDeletePasskeyProcedure:
+			userServiceDeletePasskeyHandler.ServeHTTP(w, r)
+		case UserServiceStartTotpProcedure:
+			userServiceStartTotpHandler.ServeHTTP(w, r)
+		case UserServiceConfirmTotpProcedure:
+			userServiceConfirmTotpHandler.ServeHTTP(w, r)
+		case UserServiceDeleteTotpProcedure:
+			userServiceDeleteTotpHandler.ServeHTTP(w, r)
 		case UserServiceUpdatePreferencesProcedure:
 			userServiceUpdatePreferencesHandler.ServeHTTP(w, r)
 		default:
@@ -389,6 +590,30 @@ func (UnimplementedUserServiceHandler) SetPassword(context.Context, *v1.SetPassw
 
 func (UnimplementedUserServiceHandler) SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.SetPin is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) StartPasskeyRegistration(context.Context, *v1.StartPasskeyRegistrationRequest) (*v1.StartPasskeyRegistrationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.StartPasskeyRegistration is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) FinishPasskeyRegistration(context.Context, *v1.FinishPasskeyRegistrationRequest) (*v1.FinishPasskeyRegistrationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.FinishPasskeyRegistration is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) DeletePasskey(context.Context, *v1.DeletePasskeyRequest) (*v1.DeletePasskeyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.DeletePasskey is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) StartTotp(context.Context, *v1.StartTotpRequest) (*v1.StartTotpResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.StartTotp is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ConfirmTotp(context.Context, *v1.ConfirmTotpRequest) (*v1.ConfirmTotpResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.ConfirmTotp is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.DeleteTotp is not implemented"))
 }
 
 func (UnimplementedUserServiceHandler) UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {

@@ -1274,6 +1274,10 @@ pub struct LoginRequest {
     pub password: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `device`
     pub device: ::buffa::MessageField<Device, ::buffa::Inline<Device>>,
+    /// The current code of the user's TOTP, when it has one.
+    ///
+    /// Field 4: `totp_code`
+    pub totp_code: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1283,6 +1287,7 @@ impl ::core::fmt::Debug for LoginRequest {
             .field("name", &self.name)
             .field("password", &self.password)
             .field("device", &self.device)
+            .field("totp_code", &self.totp_code)
             .finish()
     }
 }
@@ -1312,6 +1317,16 @@ impl LoginRequest {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.password = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::totp_code`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_totp_code(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.totp_code = Some(value.into());
         self
     }
 }
@@ -1349,6 +1364,9 @@ impl ::buffa::Message for LoginRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.totp_code {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1372,6 +1390,9 @@ impl ::buffa::Message for LoginRequest {
                 buf,
             );
             self.device.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.totp_code {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1419,6 +1440,18 @@ impl ::buffa::Message for LoginRequest {
                     ctx,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .totp_code
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1430,6 +1463,7 @@ impl ::buffa::Message for LoginRequest {
         self.name = ::core::option::Option::None;
         self.password = ::core::option::Option::None;
         self.device = ::buffa::MessageField::none();
+        self.totp_code = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1653,6 +1687,634 @@ impl ::buffa::Message for LoginResponse {
 }
 impl ::buffa::ExtensionSet for LoginResponse {
     const PROTO_FQN: &'static str = "mavio.auth.v1.LoginResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartPasskeySignInRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartPasskeySignInRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartPasskeySignInRequest").finish()
+    }
+}
+impl StartPasskeySignInRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInRequest";
+}
+::buffa::impl_default_instance!(StartPasskeySignInRequest);
+impl ::buffa::MessageName for StartPasskeySignInRequest {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartPasskeySignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartPasskeySignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInRequest";
+}
+impl ::buffa::Message for StartPasskeySignInRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartPasskeySignInRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartPasskeySignInRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartPasskeySignInResponse {
+    /// Field 1: `ceremony_id`
+    pub ceremony_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The request options, as PublicKeyCredential.parseRequestOptionsFromJSON
+    /// takes them.
+    ///
+    /// Field 2: `options_json`
+    pub options_json: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartPasskeySignInResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartPasskeySignInResponse")
+            .field("ceremony_id", &self.ceremony_id)
+            .field("options_json", &self.options_json)
+            .finish()
+    }
+}
+impl StartPasskeySignInResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInResponse";
+}
+impl StartPasskeySignInResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::ceremony_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_ceremony_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.ceremony_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::options_json`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_options_json(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.options_json = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(StartPasskeySignInResponse);
+impl ::buffa::MessageName for StartPasskeySignInResponse {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartPasskeySignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartPasskeySignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInResponse";
+}
+impl ::buffa::Message for StartPasskeySignInResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.ceremony_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.options_json {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.ceremony_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.options_json {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .ceremony_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .options_json
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.ceremony_id = ::core::option::Option::None;
+        self.options_json = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartPasskeySignInResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartPasskeySignInResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct FinishPasskeySignInRequest {
+    /// Field 1: `ceremony_id`
+    pub ceremony_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The passkey's response, as PublicKeyCredential.toJSON gives it.
+    ///
+    /// Field 2: `credential_json`
+    pub credential_json: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `device`
+    pub device: ::buffa::MessageField<Device, ::buffa::Inline<Device>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for FinishPasskeySignInRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("FinishPasskeySignInRequest")
+            .field("ceremony_id", &self.ceremony_id)
+            .field("credential_json", &self.credential_json)
+            .field("device", &self.device)
+            .finish()
+    }
+}
+impl FinishPasskeySignInRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInRequest";
+}
+impl FinishPasskeySignInRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::ceremony_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_ceremony_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.ceremony_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::credential_json`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_credential_json(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.credential_json = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(FinishPasskeySignInRequest);
+impl ::buffa::MessageName for FinishPasskeySignInRequest {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "FinishPasskeySignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.FinishPasskeySignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInRequest";
+}
+impl ::buffa::Message for FinishPasskeySignInRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.ceremony_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.credential_json {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.device.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.device.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.ceremony_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.credential_json {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if self.device.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.device.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .ceremony_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .credential_json
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.device.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.ceremony_id = ::core::option::Option::None;
+        self.credential_json = ::core::option::Option::None;
+        self.device = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for FinishPasskeySignInRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.FinishPasskeySignInRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct FinishPasskeySignInResponse {
+    /// Sent as "Authorization: Bearer \<access_token\>".
+    ///
+    /// Field 1: `access_token`
+    pub access_token: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `user`
+    pub user: ::buffa::MessageField<
+        super::super::user::v1::User,
+        ::buffa::Inline<super::super::user::v1::User>,
+    >,
+    /// Field 3: `session`
+    pub session: ::buffa::MessageField<Session, ::buffa::Inline<Session>>,
+    /// When the access token expires.
+    ///
+    /// Field 4: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for FinishPasskeySignInResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("FinishPasskeySignInResponse")
+            .field("access_token", &self.access_token)
+            .field("user", &self.user)
+            .field("session", &self.session)
+            .field("access_token_expire_time", &self.access_token_expire_time)
+            .finish()
+    }
+}
+impl FinishPasskeySignInResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInResponse";
+}
+impl FinishPasskeySignInResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::access_token`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_access_token(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.access_token = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(FinishPasskeySignInResponse);
+impl ::buffa::MessageName for FinishPasskeySignInResponse {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "FinishPasskeySignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.FinishPasskeySignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInResponse";
+}
+impl ::buffa::Message for FinishPasskeySignInResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.access_token {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.user.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.session.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.session.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.access_token {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if self.user.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user.write_to(__cache, buf);
+        }
+        if self.session.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.session.write_to(__cache, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .access_token
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.user.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.session.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.access_token_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.access_token = ::core::option::Option::None;
+        self.user = ::buffa::MessageField::none();
+        self.session = ::buffa::MessageField::none();
+        self.access_token_expire_time = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for FinishPasskeySignInResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.FinishPasskeySignInResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

@@ -22,6 +22,24 @@ pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<StartPasskeySignInRequestView<'static>>`.
+pub type OwnedStartPasskeySignInRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInRequestView<'static>,
+>;
+///Shorthand for `OwnedView<StartPasskeySignInResponseView<'static>>`.
+pub type OwnedStartPasskeySignInResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInResponseView<'static>,
+>;
+///Shorthand for `OwnedView<FinishPasskeySignInRequestView<'static>>`.
+pub type OwnedFinishPasskeySignInRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInRequestView<'static>,
+>;
+///Shorthand for `OwnedView<FinishPasskeySignInResponseView<'static>>`.
+pub type OwnedFinishPasskeySignInResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<StartRefreshRequestView<'static>>`.
 pub type OwnedStartRefreshRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::StartRefreshRequestView<'static>,
@@ -226,6 +244,76 @@ for crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'_> {
 impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::LoginResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartPasskeySignInResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartPasskeySignInResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::FinishPasskeySignInResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::FinishPasskeySignInResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -758,6 +846,18 @@ pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::serv
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartPasskeySignIn` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_START_PASSKEY_SIGN_IN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/StartPasskeySignIn",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `FinishPasskeySignIn` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_FINISH_PASSKEY_SIGN_IN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/FinishPasskeySignIn",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `StartRefresh` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_START_REFRESH_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.auth.v1.AuthService/StartRefresh",
@@ -843,8 +943,8 @@ pub const AUTH_SERVICE_RESET_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::S
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
-/// Login, StartRefresh and RefreshSession are public; the other methods act
-/// on the calling user.
+/// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh and
+/// RefreshSession are public; the other methods act on the calling user.
 ///
 /// A session belongs to a device's Ed25519 key. Its access token lasts an
 /// hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -948,8 +1048,13 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// Login signs a device in, replacing its previous session. Wrong
-    /// credentials and disabled users fail with UNAUTHENTICATED.
+    /// Login signs a device in with a password, replacing its previous
+    /// session. Wrong credentials and disabled users fail with
+    /// UNAUTHENTICATED; a user with TOTP needs its code, and fails with
+    /// FAILED_PRECONDITION when the right password comes without one. After
+    /// three failures for a name or from an address, each failure locks them
+    /// out twice as long as the one before, from a second up to 15 minutes,
+    /// and sign-ins fail with RESOURCE_EXHAUSTED meanwhile.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -969,6 +1074,56 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::auth::v1::LoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartPasskeySignIn begins signing in with a passkey at the origin of
+    /// the request (its Origin header), which must be HTTPS, or HTTP on
+    /// localhost, at a host name; the ceremony lasts five minutes.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_passkey_sign_in<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::StartPasskeySignInResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// FinishPasskeySignIn signs a device in with the passkey's response,
+    /// which names its user. A passkey needs no TOTP code; one that does not
+    /// verify fails with UNAUTHENTICATED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn finish_passkey_sign_in<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::FinishPasskeySignInResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1434,6 +1589,64 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_LOGIN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "StartPasskeySignIn",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_passkey_sign_in(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::StartPasskeySignInResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_START_PASSKEY_SIGN_IN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "FinishPasskeySignIn",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.finish_passkey_sign_in(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::FinishPasskeySignInResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_FINISH_PASSKEY_SIGN_IN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
                 "StartRefresh",
@@ -1912,6 +2125,18 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_LOGIN_SPEC),
                 )
             }
+            "StartPasskeySignIn" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_START_PASSKEY_SIGN_IN_SPEC),
+                )
+            }
+            "FinishPasskeySignIn" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_FINISH_PASSKEY_SIGN_IN_SPEC),
+                )
+            }
             "StartRefresh" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -2073,6 +2298,50 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.login(ctx, req)
                         .await?
                         .encode::<crate::proto::mavio::auth::v1::LoginResponse>(format)
+                })
+            }
+            "StartPasskeySignIn" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_passkey_sign_in(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::StartPasskeySignInResponse,
+                        >(format)
+                })
+            }
+            "FinishPasskeySignIn" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+                    >::from_parts(&req, &body);
+                    svc.finish_passkey_sign_in(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::FinishPasskeySignInResponse,
+                        >(format)
                 })
             }
             "StartRefresh" => {
@@ -2631,6 +2900,96 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_LOGIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartPasskeySignIn RPC. Sends a request to /mavio.auth.v1.AuthService/StartPasskeySignIn.
+    pub async fn start_passkey_sign_in(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_passkey_sign_in_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartPasskeySignIn RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_passkey_sign_in_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartPasskeySignInRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartPasskeySignInResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_START_PASSKEY_SIGN_IN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the FinishPasskeySignIn RPC. Sends a request to /mavio.auth.v1.AuthService/FinishPasskeySignIn.
+    pub async fn finish_passkey_sign_in(
+        &self,
+        request: crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.finish_passkey_sign_in_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the FinishPasskeySignIn RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn finish_passkey_sign_in_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::FinishPasskeySignInRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::FinishPasskeySignInResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_FINISH_PASSKEY_SIGN_IN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

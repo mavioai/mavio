@@ -19,8 +19,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldKind holds the string denoting the kind field in the database.
 	FieldKind = "kind"
-	// FieldSecret holds the string denoting the secret field in the database.
-	FieldSecret = "secret"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldData holds the string denoting the data field in the database.
+	FieldData = "data"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldLastUsedAt holds the string denoting the last_used_at field in the database.
@@ -43,7 +45,8 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldKind,
-	FieldSecret,
+	FieldName,
+	FieldData,
 	FieldCreatedAt,
 	FieldLastUsedAt,
 }
@@ -59,6 +62,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultName holds the default value on creation for the "name" field.
+	DefaultName string
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -83,9 +88,14 @@ func ByKind(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKind, opts...).ToFunc()
 }
 
-// BySecret orders the results by the secret field.
-func BySecret(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSecret, opts...).ToFunc()
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByData orders the results by the data field.
+func ByData(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldData, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

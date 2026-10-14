@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 )
@@ -47,6 +48,12 @@ func describeUser(ctx context.Context, store core.Store, u *core.User) (*userv1.
 // userToProto converts a user with its credentials, leaving out their
 // secrets.
 func userToProto(u *core.User, creds []core.Credential) *userv1.User {
+	var passkeys []*userv1.Passkey
+	for i := range creds {
+		if creds[i].Kind == core.CredentialPasskey {
+			passkeys = append(passkeys, passkeyToProto(&creds[i]))
+		}
+	}
 	libraries := make([]string, len(u.Policy.Libraries))
 	for i, id := range u.Policy.Libraries {
 		libraries[i] = id.String()
@@ -63,6 +70,8 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 		Disabled:     &u.Disabled,
 		Managed:      new(u.Kind == core.UserManaged),
 		HasPin:       new(slices.ContainsFunc(creds, func(c core.Credential) bool { return c.Kind == core.CredentialPIN })),
+		HasTotp:      new(slices.ContainsFunc(creds, func(c core.Credential) bool { return c.Kind == core.CredentialTOTP })),
+		Passkeys:     passkeys,
 		Restriction:  new(restrictions[u.Restriction]),
 		Policy: userv1.UserPolicy_builder{
 			AllLibraries:        new(u.Policy.Libraries == nil),
@@ -98,4 +107,16 @@ func quotaToProto(q *core.Quota) *userv1.RequestQuota {
 		return nil
 	}
 	return userv1.RequestQuota_builder{Limit: new(int32(q.Limit)), Days: new(int32(q.Days))}.Build()
+}
+
+// passkeyToProto converts a passkey credential, leaving out its key.
+func passkeyToProto(c *core.Credential) *userv1.Passkey {
+	var lastUse *timestamppb.Timestamp
+	if c.LastUsedAt != nil {
+		lastUse = timestamppb.New(*c.LastUsedAt)
+	}
+	return userv1.Passkey_builder{
+		Id: new(c.ID.String()), Name: &c.Name, RpId: new(auth.PasskeyRPID(c.Data)),
+		CreateTime: timestamppb.New(c.CreatedAt), LastUseTime: lastUse,
+	}.Build()
 }

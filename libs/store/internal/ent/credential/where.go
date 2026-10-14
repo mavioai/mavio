@@ -67,9 +67,14 @@ func Kind(v core.CredentialKind) predicate.Credential {
 	return predicate.Credential(sql.FieldEQ(FieldKind, vc))
 }
 
-// Secret applies equality check predicate on the "secret" field. It's identical to SecretEQ.
-func Secret(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldEQ(FieldSecret, v))
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEQ(FieldName, v))
+}
+
+// Data applies equality check predicate on the "data" field. It's identical to DataEQ.
+func Data(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEQ(FieldData, v))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -186,69 +191,134 @@ func KindContainsFold(v core.CredentialKind) predicate.Credential {
 	return predicate.Credential(sql.FieldContainsFold(FieldKind, vc))
 }
 
-// SecretEQ applies the EQ predicate on the "secret" field.
-func SecretEQ(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldEQ(FieldSecret, v))
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEQ(FieldName, v))
 }
 
-// SecretNEQ applies the NEQ predicate on the "secret" field.
-func SecretNEQ(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldNEQ(FieldSecret, v))
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldNEQ(FieldName, v))
 }
 
-// SecretIn applies the In predicate on the "secret" field.
-func SecretIn(vs ...string) predicate.Credential {
-	return predicate.Credential(sql.FieldIn(FieldSecret, vs...))
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Credential {
+	return predicate.Credential(sql.FieldIn(FieldName, vs...))
 }
 
-// SecretNotIn applies the NotIn predicate on the "secret" field.
-func SecretNotIn(vs ...string) predicate.Credential {
-	return predicate.Credential(sql.FieldNotIn(FieldSecret, vs...))
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Credential {
+	return predicate.Credential(sql.FieldNotIn(FieldName, vs...))
 }
 
-// SecretGT applies the GT predicate on the "secret" field.
-func SecretGT(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldGT(FieldSecret, v))
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldGT(FieldName, v))
 }
 
-// SecretGTE applies the GTE predicate on the "secret" field.
-func SecretGTE(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldGTE(FieldSecret, v))
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldGTE(FieldName, v))
 }
 
-// SecretLT applies the LT predicate on the "secret" field.
-func SecretLT(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldLT(FieldSecret, v))
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldLT(FieldName, v))
 }
 
-// SecretLTE applies the LTE predicate on the "secret" field.
-func SecretLTE(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldLTE(FieldSecret, v))
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldLTE(FieldName, v))
 }
 
-// SecretContains applies the Contains predicate on the "secret" field.
-func SecretContains(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldContains(FieldSecret, v))
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldContains(FieldName, v))
 }
 
-// SecretHasPrefix applies the HasPrefix predicate on the "secret" field.
-func SecretHasPrefix(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldHasPrefix(FieldSecret, v))
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldHasPrefix(FieldName, v))
 }
 
-// SecretHasSuffix applies the HasSuffix predicate on the "secret" field.
-func SecretHasSuffix(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldHasSuffix(FieldSecret, v))
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldHasSuffix(FieldName, v))
 }
 
-// SecretEqualFold applies the EqualFold predicate on the "secret" field.
-func SecretEqualFold(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldEqualFold(FieldSecret, v))
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEqualFold(FieldName, v))
 }
 
-// SecretContainsFold applies the ContainsFold predicate on the "secret" field.
-func SecretContainsFold(v string) predicate.Credential {
-	return predicate.Credential(sql.FieldContainsFold(FieldSecret, v))
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldContainsFold(FieldName, v))
+}
+
+// DataEQ applies the EQ predicate on the "data" field.
+func DataEQ(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEQ(FieldData, v))
+}
+
+// DataNEQ applies the NEQ predicate on the "data" field.
+func DataNEQ(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldNEQ(FieldData, v))
+}
+
+// DataIn applies the In predicate on the "data" field.
+func DataIn(vs ...string) predicate.Credential {
+	return predicate.Credential(sql.FieldIn(FieldData, vs...))
+}
+
+// DataNotIn applies the NotIn predicate on the "data" field.
+func DataNotIn(vs ...string) predicate.Credential {
+	return predicate.Credential(sql.FieldNotIn(FieldData, vs...))
+}
+
+// DataGT applies the GT predicate on the "data" field.
+func DataGT(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldGT(FieldData, v))
+}
+
+// DataGTE applies the GTE predicate on the "data" field.
+func DataGTE(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldGTE(FieldData, v))
+}
+
+// DataLT applies the LT predicate on the "data" field.
+func DataLT(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldLT(FieldData, v))
+}
+
+// DataLTE applies the LTE predicate on the "data" field.
+func DataLTE(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldLTE(FieldData, v))
+}
+
+// DataContains applies the Contains predicate on the "data" field.
+func DataContains(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldContains(FieldData, v))
+}
+
+// DataHasPrefix applies the HasPrefix predicate on the "data" field.
+func DataHasPrefix(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldHasPrefix(FieldData, v))
+}
+
+// DataHasSuffix applies the HasSuffix predicate on the "data" field.
+func DataHasSuffix(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldHasSuffix(FieldData, v))
+}
+
+// DataEqualFold applies the EqualFold predicate on the "data" field.
+func DataEqualFold(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldEqualFold(FieldData, v))
+}
+
+// DataContainsFold applies the ContainsFold predicate on the "data" field.
+func DataContainsFold(v string) predicate.Credential {
+	return predicate.Credential(sql.FieldContainsFold(FieldData, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

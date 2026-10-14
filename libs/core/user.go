@@ -71,15 +71,20 @@ func (u *User) Validate() error {
 	return nil
 }
 
-// Credential is a secret a user signs in or switches with, in standalone
-// mode. Secrets are stored as hashes or public keys.
+// Credential is what a user signs in or switches with in standalone mode:
+// a password, a PIN, a TOTP secret or a passkey. What is stored lets
+// nobody sign in from a copy of the database: hashes, public keys, and
+// TOTP secrets sealed with a key derived from the server's identity key.
 type Credential struct {
 	ID     ID
 	UserID ID
 	Kind   CredentialKind
-	// Secret is a PHC-format hash (e.g. "$argon2id$v=19$…") for passwords
-	// and PINs.
-	Secret     string
+	// Name tells a user's passkeys apart; empty for other kinds.
+	Name string
+	// Data is a PHC-format hash (e.g. "$argon2id$v=19$…") for passwords
+	// and PINs, the sealed secret for TOTP, and the public key credential
+	// for passkeys.
+	Data       string
 	CreatedAt  time.Time
 	LastUsedAt *time.Time
 }
@@ -94,12 +99,22 @@ const (
 	// CredentialPIN is four digits guarding switching to the user; never a
 	// credential for signing in.
 	CredentialPIN CredentialKind = "pin"
+	// CredentialTOTP is the secret of time-based one-time passwords (RFC
+	// 6238), a second factor to a password.
+	CredentialTOTP CredentialKind = "totp"
+	// CredentialPasskey is a WebAuthn credential, which signs a member in
+	// alone; a user may have several.
+	CredentialPasskey CredentialKind = "passkey"
 )
 
 // Valid reports whether k is a known credential kind.
 func (k CredentialKind) Valid() bool {
-	return slices.Contains([]CredentialKind{CredentialPassword, CredentialPIN}, k)
+	return slices.Contains([]CredentialKind{CredentialPassword, CredentialPIN, CredentialTOTP, CredentialPasskey}, k)
 }
+
+// Single reports whether a user has at most one credential of kind k:
+// every kind but passkeys.
+func (k CredentialKind) Single() bool { return k != CredentialPasskey }
 
 // Validate checks the credential's invariants.
 func (c *Credential) Validate() error {
@@ -108,8 +123,8 @@ func (c *Credential) Validate() error {
 		return fmt.Errorf("%w: credential requires ID and user", ErrInvalid)
 	case !c.Kind.Valid():
 		return fmt.Errorf("%w: unknown credential kind %q", ErrInvalid, c.Kind)
-	case c.Secret == "":
-		return fmt.Errorf("%w: %s credential without a secret", ErrInvalid, c.Kind)
+	case c.Data == "":
+		return fmt.Errorf("%w: %s credential without data", ErrInvalid, c.Kind)
 	}
 	return nil
 }

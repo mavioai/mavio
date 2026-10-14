@@ -78,7 +78,8 @@ func (Credential) Fields() []ent.Field {
 		idField(),
 		field.UUID("user_id", core.ID{}),
 		field.String("kind").GoType(core.CredentialKind("")),
-		field.String("secret").Sensitive(),
+		field.String("name").Default(""),
+		field.String("data").Sensitive(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("last_used_at").Optional().Nillable(),
 	}
@@ -93,7 +94,10 @@ func (Credential) Edges() []ent.Edge {
 
 // Indexes of Credential.
 func (Credential) Indexes() []ent.Index {
-	return []ent.Index{index.Fields("user_id", "kind").Unique()}
+	return []ent.Index{
+		// A user has one credential of each kind but passkeys.
+		index.Fields("user_id", "kind").Unique().Annotations(entsql.IndexWhere("kind <> 'passkey'")),
+	}
 }
 
 // UserData holds the schema of core.UserData.

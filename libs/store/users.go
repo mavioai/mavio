@@ -8,6 +8,7 @@ import (
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
+	"github.com/mavioai/mavio/libs/store/internal/ent/predicate"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -117,7 +118,8 @@ func toUser(u *ent.User) core.User {
 type credentials struct{ s *Store }
 
 func (r credentials) List(ctx context.Context, userID core.ID) ([]core.Credential, error) {
-	list, err := r.s.read.Credential.Query().Where(credential.UserID(userID)).Order(ent.Asc(credential.FieldKind)).All(ctx)
+	list, err := r.s.read.Credential.Query().Where(credential.UserID(userID)).
+		Order(ent.Asc(credential.FieldCreatedAt), ent.Asc(credential.FieldID)).All(ctx)
 	if err != nil {
 		return nil, mapErr(err, "list credentials")
 	}
@@ -129,7 +131,7 @@ func (r credentials) List(ctx context.Context, userID core.ID) ([]core.Credentia
 }
 
 func (r credentials) Get(ctx context.Context, userID core.ID, kind core.CredentialKind) (core.Credential, error) {
-	c, err := r.s.read.Credential.Query().Where(credential.UserID(userID), credential.Kind(kind)).Only(ctx)
+	c, err := r.s.read.Credential.Query().Where(credential.UserID(userID), credential.Kind(kind)).First(ctx)
 	if err != nil {
 		return core.Credential{}, mapErr(err, "get "+string(kind)+" credential")
 	}
@@ -144,14 +146,19 @@ func (r credentials) Put(ctx context.Context, c *core.Credential) error {
 		return err
 	}
 	return r.s.writeTx(ctx, func(tx *Store) error {
-		if _, err := tx.write.Credential.Delete().Where(credential.UserID(c.UserID), credential.Kind(c.Kind)).Exec(ctx); err != nil {
+		old := []predicate.Credential{credential.ID(c.ID)}
+		if c.Kind.Single() {
+			old = append(old, credential.And(credential.UserID(c.UserID), credential.Kind(c.Kind)))
+		}
+		if _, err := tx.write.Credential.Delete().Where(credential.Or(old...)).Exec(ctx); err != nil {
 			return mapErr(err, "replace "+string(c.Kind)+" credential")
 		}
 		created, err := tx.write.Credential.Create().
 			SetID(c.ID).
 			SetUserID(c.UserID).
 			SetKind(c.Kind).
-			SetSecret(c.Secret).
+			SetName(c.Name).
+			SetData(c.Data).
 			SetCreatedAt(orNow(c.CreatedAt)).
 			SetNillableLastUsedAt(c.LastUsedAt).
 			Save(ctx)
@@ -165,7 +172,11 @@ func (r credentials) Put(ctx context.Context, c *core.Credential) error {
 
 func (r credentials) Delete(ctx context.Context, userID core.ID, kind core.CredentialKind) error {
 	_, err := r.s.write.Credential.Delete().Where(credential.UserID(userID), credential.Kind(kind)).Exec(ctx)
-	return mapErr(err, "delete "+string(kind)+" credential")
+	return mapErr(err, "delete "+string(kind)+" credentials")
+}
+
+func (r credentials) Remove(ctx context.Context, id core.ID) error {
+	return mapErr(r.s.write.Credential.DeleteOneID(id).Exec(ctx), "remove credential "+id.String())
 }
 
 func toCredential(c *ent.Credential) core.Credential {
@@ -173,7 +184,8 @@ func toCredential(c *ent.Credential) core.Credential {
 		ID:         c.ID,
 		UserID:     c.UserID,
 		Kind:       c.Kind,
-		Secret:     c.Secret,
+		Name:       c.Name,
+		Data:       c.Data,
 		CreatedAt:  c.CreatedAt.UTC(),
 		LastUsedAt: utcPtr(c.LastUsedAt),
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
@@ -34,6 +35,8 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetAuthInfoProcedure,
 	authv1connect.AuthServiceCreateFirstUserProcedure,
 	authv1connect.AuthServiceLoginProcedure,
+	authv1connect.AuthServiceStartPasskeySignInProcedure,
+	authv1connect.AuthServiceFinishPasskeySignInProcedure,
 	authv1connect.AuthServiceStartRefreshProcedure,
 	authv1connect.AuthServiceRefreshSessionProcedure,
 	authv1connect.AuthServiceStartQuickConnectProcedure,
@@ -68,6 +71,10 @@ var UserBoundProcedures = []string{
 // do not have (auth.Interceptor.RequireSession).
 var SessionBoundProcedures = []string{
 	authv1connect.AuthServiceLogoutProcedure,
+	userv1connect.UserServiceStartPasskeyRegistrationProcedure,
+	userv1connect.UserServiceFinishPasskeyRegistrationProcedure,
+	userv1connect.UserServiceStartTotpProcedure,
+	userv1connect.UserServiceConfirmTotpProcedure,
 	sessionv1connect.EventServiceName,
 	sessionv1connect.SyncPlayServiceName,
 }
@@ -86,6 +93,11 @@ type AuthService struct {
 	quick     *auth.QuickConnect
 	// Activity records sign-ins and API keys; nil records none.
 	Activity *activity.Log
+	// Passkeys signs users in with passkeys; nil lets none sign in.
+	Passkeys *auth.Passkeys
+	// TOTP checks the codes of users with TOTP; nil lets none of them sign
+	// in.
+	TOTP *auth.TOTP
 	// Authenticate checks the credentials of users of authentication
 	// plugins; nil lets none of them sign in.
 	Authenticate func(ctx context.Context, pluginID, name, password string) (plugins.AuthResult, error)
@@ -385,7 +397,7 @@ func (s *AuthService) login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		} else if err != nil {
 			return nil, connectError(ctx, err)
 		}
-		ok, rehash, err = auth.VerifyPassword(password.Secret, req.GetPassword())
+		ok, rehash, err = auth.VerifyPassword(password.Data, req.GetPassword())
 		if err != nil {
 			slog.ErrorContext(ctx, "unreadable password hash", "user", user.ID, "err", err)
 			return nil, loginFailed("unreadable password hash")
@@ -397,41 +409,163 @@ func (s *AuthService) login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	if user.Disabled {
 		return nil, loginFailed("disabled user")
 	}
-
-	var sess core.AuthSession
-	err = s.store.InTx(ctx, func(tx core.Store) error {
-		now := s.now()
-		user.LastLoginAt = &now
-		if err := tx.Users().Update(ctx, &user); err != nil {
-			return err
+	totp, err := s.store.Credentials().Get(ctx, user.ID, core.CredentialTOTP)
+	hasTOTP := err == nil
+	switch {
+	case errors.Is(err, core.ErrNotFound):
+	case err != nil:
+		return nil, connectError(ctx, err)
+	case req.GetTotpCode() == "":
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("a TOTP code is required"))
+	case s.TOTP == nil:
+		return nil, loginFailed("TOTP is unavailable")
+	default:
+		used, ok, err := s.TOTP.Verify(user.ID, totp.Data, req.GetTotpCode(), totp.LastUsedAt)
+		if err != nil {
+			slog.ErrorContext(ctx, "unreadable TOTP secret", "user", user.ID, "err", err)
+			return nil, loginFailed("unreadable TOTP secret")
+		} else if !ok {
+			return nil, loginFailed("wrong TOTP code")
 		}
+		totp.LastUsedAt = &used
+	}
+	in, err := s.signIn(ctx, user, req.GetDevice(), "password", func(tx core.Store) error {
 		if rehash {
 			if err := putSecret(ctx, tx, user.ID, core.CredentialPassword, req.GetPassword()); err != nil {
 				return err
 			}
 		}
+		if hasTOTP {
+			return tx.Credentials().Put(ctx, &totp)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return authv1.LoginResponse_builder{
+		AccessToken:           &in.token,
+		AccessTokenExpireTime: timestamppb.New(in.expires),
+		User:                  in.user,
+		Session:               sessionToProto(&in.session, true),
+	}.Build(), nil
+}
+
+// StartPasskeySignIn begins signing in with a passkey at the request's
+// origin.
+func (s *AuthService) StartPasskeySignIn(ctx context.Context, _ *authv1.StartPasskeySignInRequest) (*authv1.StartPasskeySignInResponse, error) {
+	if s.Passkeys == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
+	}
+	rp, err := requestRelyingParty(ctx)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	id, options, err := s.Passkeys.StartSignIn(rp)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return authv1.StartPasskeySignInResponse_builder{CeremonyId: &id, OptionsJson: new(string(options))}.Build(), nil
+}
+
+// FinishPasskeySignIn signs a device in as the user whose passkey
+// answered. Failures slow down per address, as Login's.
+func (s *AuthService) FinishPasskeySignIn(ctx context.Context, req *authv1.FinishPasskeySignInRequest) (*authv1.FinishPasskeySignInResponse, error) {
+	if s.Passkeys == nil {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
+	}
+	keys := signInKeys(ctx, "")[1:]
+	if err := s.throttled(keys); err != nil {
+		return nil, err
+	}
+	failed := connect.NewError(connect.CodeUnauthenticated, errors.New("passkey not accepted"))
+	user, cred, err := s.Passkeys.FinishSignIn(req.GetCeremonyId(), []byte(req.GetCredentialJson()), func(id core.ID) (core.User, []core.Credential, error) {
+		u, err := s.store.Users().Get(ctx, id)
+		if err != nil {
+			return core.User{}, nil, err
+		}
+		creds, err := s.store.Credentials().List(ctx, id)
+		return u, creds, err
+	})
+	switch {
+	case errors.Is(err, auth.ErrPasskey):
+		slog.InfoContext(ctx, "passkey sign-in failed", "err", err)
+		s.throttle.Fail(keys...)
+		return nil, failed
+	case err != nil:
+		return nil, connectError(ctx, err)
+	case user.Disabled || user.Kind == core.UserManaged || user.AuthProvider != "":
+		s.Activity.Record(ctx, core.Activity{
+			Type: "user.login_failed", Severity: core.SeverityWarning, UserID: user.ID,
+			Title: "Failed sign-in as " + user.Name, Message: "the user cannot sign in with a passkey",
+			Attributes: map[string]string{"device": req.GetDevice().GetName()},
+		})
+		s.throttle.Fail(keys...)
+		return nil, failed
+	}
+	now := s.now()
+	cred.LastUsedAt = &now
+	in, err := s.signIn(ctx, user, req.GetDevice(), "passkey", func(tx core.Store) error {
+		return tx.Credentials().Put(ctx, &cred)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return authv1.FinishPasskeySignInResponse_builder{
+		AccessToken:           &in.token,
+		AccessTokenExpireTime: timestamppb.New(in.expires),
+		User:                  in.user,
+		Session:               sessionToProto(&in.session, true),
+	}.Build(), nil
+}
+
+// requestRelyingParty returns the relying party of the request's origin.
+func requestRelyingParty(ctx context.Context) (auth.RelyingParty, error) {
+	var origin string
+	if info, ok := connect.CallInfoForHandlerContext(ctx); ok {
+		origin = info.RequestHeader().Get("Origin")
+	}
+	return auth.RelyingPartyOf(origin)
+}
+
+// signedIn is a new session with its access token.
+type signedIn struct {
+	token   string
+	expires time.Time
+	session core.AuthSession
+	user    *userv1.User
+}
+
+// signIn records the user's sign-in on the device by method, after
+// writing what also writes, and starts its session.
+func (s *AuthService) signIn(ctx context.Context, user core.User, d *authv1.Device, method string, also func(tx core.Store) error) (signedIn, error) {
+	var sess core.AuthSession
+	err := s.store.InTx(ctx, func(tx core.Store) error {
+		now := s.now()
+		user.LastLoginAt = &now
+		if err := tx.Users().Update(ctx, &user); err != nil {
+			return err
+		}
+		if err := also(tx); err != nil {
+			return err
+		}
 		var err error
-		sess, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
+		sess, err = s.createSession(ctx, tx, user.ID, d)
 		return err
 	})
 	if err != nil {
-		return nil, connectError(ctx, err)
+		return signedIn{}, connectError(ctx, err)
 	}
 	s.Activity.Record(ctx, core.Activity{
 		Type: "user.login", UserID: user.ID, Title: user.Name + " signed in",
-		Attributes: map[string]string{"device": req.GetDevice().GetName(), "client": req.GetDevice().GetClient()},
+		Attributes: map[string]string{"device": d.GetName(), "client": d.GetClient(), "method": method},
 	})
 	described, err := describeUser(ctx, s.store, &user)
 	if err != nil {
-		return nil, connectError(ctx, err)
+		return signedIn{}, connectError(ctx, err)
 	}
 	token, expires := s.tokens.Issue(sess.ID)
-	return authv1.LoginResponse_builder{
-		AccessToken:           &token,
-		AccessTokenExpireTime: timestamppb.New(expires),
-		User:                  described,
-		Session:               sessionToProto(&sess, true),
-	}.Build(), nil
+	return signedIn{token: token, expires: expires, session: sess, user: described}, nil
 }
 
 func (s *AuthService) createSession(ctx context.Context, tx core.Store, userID core.ID, d *authv1.Device) (core.AuthSession, error) {
@@ -689,5 +823,5 @@ func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 
 // putSecret hashes secret and stores it as the user's credential of kind.
 func putSecret(ctx context.Context, tx core.Store, userID core.ID, kind core.CredentialKind, secret string) error {
-	return tx.Credentials().Put(ctx, &core.Credential{UserID: userID, Kind: kind, Secret: auth.HashPassword(secret)})
+	return tx.Credentials().Put(ctx, &core.Credential{UserID: userID, Kind: kind, Data: auth.HashPassword(secret)})
 }

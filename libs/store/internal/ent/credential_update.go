@@ -59,16 +59,30 @@ func (_u *CredentialUpdate) SetNillableKind(v *core.CredentialKind) *CredentialU
 	return _u
 }
 
-// SetSecret sets the "secret" field.
-func (_u *CredentialUpdate) SetSecret(v string) *CredentialUpdate {
-	_u.mutation.SetSecret(v)
+// SetName sets the "name" field.
+func (_u *CredentialUpdate) SetName(v string) *CredentialUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
-// SetNillableSecret sets the "secret" field if the given value is not nil.
-func (_u *CredentialUpdate) SetNillableSecret(v *string) *CredentialUpdate {
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *CredentialUpdate) SetNillableName(v *string) *CredentialUpdate {
 	if v != nil {
-		_u.SetSecret(*v)
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetData sets the "data" field.
+func (_u *CredentialUpdate) SetData(v string) *CredentialUpdate {
+	_u.mutation.SetData(v)
+	return _u
+}
+
+// SetNillableData sets the "data" field if the given value is not nil.
+func (_u *CredentialUpdate) SetNillableData(v *string) *CredentialUpdate {
+	if v != nil {
+		_u.SetData(*v)
 	}
 	return _u
 }
@@ -165,8 +179,11 @@ func (_u *CredentialUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.Kind(); ok {
 		_spec.SetField(credential.FieldKind, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Secret(); ok {
-		_spec.SetField(credential.FieldSecret, field.TypeString, value)
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(credential.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Data(); ok {
+		_spec.SetField(credential.FieldData, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.LastUsedAt(); ok {
 		_spec.SetField(credential.FieldLastUsedAt, field.TypeTime, value)
@@ -253,16 +270,30 @@ func (_u *CredentialUpdateOne) SetNillableKind(v *core.CredentialKind) *Credenti
 	return _u
 }
 
-// SetSecret sets the "secret" field.
-func (_u *CredentialUpdateOne) SetSecret(v string) *CredentialUpdateOne {
-	_u.mutation.SetSecret(v)
+// SetName sets the "name" field.
+func (_u *CredentialUpdateOne) SetName(v string) *CredentialUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
-// SetNillableSecret sets the "secret" field if the given value is not nil.
-func (_u *CredentialUpdateOne) SetNillableSecret(v *string) *CredentialUpdateOne {
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *CredentialUpdateOne) SetNillableName(v *string) *CredentialUpdateOne {
 	if v != nil {
-		_u.SetSecret(*v)
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetData sets the "data" field.
+func (_u *CredentialUpdateOne) SetData(v string) *CredentialUpdateOne {
+	_u.mutation.SetData(v)
+	return _u
+}
+
+// SetNillableData sets the "data" field if the given value is not nil.
+func (_u *CredentialUpdateOne) SetNillableData(v *string) *CredentialUpdateOne {
+	if v != nil {
+		_u.SetData(*v)
 	}
 	return _u
 }
@@ -389,8 +420,11 @@ func (_u *CredentialUpdateOne) sqlSave(ctx context.Context) (_node *Credential, 
 	if value, ok := _u.mutation.Kind(); ok {
 		_spec.SetField(credential.FieldKind, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Secret(); ok {
-		_spec.SetField(credential.FieldSecret, field.TypeString, value)
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(credential.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Data(); ok {
+		_spec.SetField(credential.FieldData, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.LastUsedAt(); ok {
 		_spec.SetField(credential.FieldLastUsedAt, field.TypeTime, value)

@@ -617,23 +617,51 @@ func TestUsers(t *testing.T) {
 		// Credentials: one of each kind, replaced, and deleted with the user.
 		creds := s.Credentials()
 		for _, c := range []core.Credential{
-			{UserID: u.ID, Kind: core.CredentialPassword, Secret: "$argon2id$a"},
-			{UserID: u.ID, Kind: core.CredentialPassword, Secret: "$argon2id$b"},
-			{UserID: u.ID, Kind: core.CredentialPIN, Secret: "$argon2id$pin"},
-			{UserID: kid.ID, Kind: core.CredentialPIN, Secret: "$argon2id$kid"},
+			{UserID: u.ID, Kind: core.CredentialPassword, Data: "$argon2id$a"},
+			{UserID: u.ID, Kind: core.CredentialPassword, Data: "$argon2id$b"},
+			{UserID: u.ID, Kind: core.CredentialPIN, Data: "$argon2id$pin"},
+			{UserID: kid.ID, Kind: core.CredentialPIN, Data: "$argon2id$kid"},
 		} {
 			if err := creds.Put(ctx, &c); err != nil {
 				t.Fatal(err)
 			}
 		}
-		if err := creds.Put(ctx, &core.Credential{UserID: u.ID, Kind: "magic", Secret: "x"}); !errors.Is(err, core.ErrInvalid) {
+		if err := creds.Put(ctx, &core.Credential{UserID: u.ID, Kind: "magic", Data: "x"}); !errors.Is(err, core.ErrInvalid) {
 			t.Errorf("unknown credential kind: %v, want ErrInvalid", err)
 		}
-		if got, err := creds.Get(ctx, u.ID, core.CredentialPassword); err != nil || got.Secret != "$argon2id$b" {
+		if got, err := creds.Get(ctx, u.ID, core.CredentialPassword); err != nil || got.Data != "$argon2id$b" {
 			t.Errorf("replaced password = %+v, %v", got, err)
 		}
 		if list, err := creds.List(ctx, u.ID); err != nil || len(list) != 2 {
 			t.Errorf("List = %+v, %v", list, err)
+		}
+		// Passkeys are many; putting one with its ID updates it.
+		laptop := core.Credential{UserID: u.ID, Kind: core.CredentialPasskey, Name: "laptop", Data: `{"id":"a"}`}
+		phone := core.Credential{UserID: u.ID, Kind: core.CredentialPasskey, Name: "phone", Data: `{"id":"b"}`}
+		for _, c := range []*core.Credential{&laptop, &phone} {
+			if err := creds.Put(ctx, c); err != nil {
+				t.Fatal(err)
+			}
+		}
+		used := time.Now().Truncate(time.Second)
+		laptop.Data, laptop.LastUsedAt = `{"id":"a","count":2}`, &used
+		if err := creds.Put(ctx, &laptop); err != nil {
+			t.Fatal(err)
+		}
+		if list, err := creds.List(ctx, u.ID); err != nil || len(list) != 4 {
+			t.Errorf("List with passkeys = %+v, %v", list, err)
+		} else if i := slices.IndexFunc(list, func(c core.Credential) bool { return c.ID == laptop.ID }); i < 0 ||
+			list[i].Data != laptop.Data || list[i].LastUsedAt == nil || !list[i].LastUsedAt.Equal(used) {
+			t.Errorf("updated passkey = %+v", list)
+		}
+		if err := creds.Remove(ctx, phone.ID); err != nil {
+			t.Fatal(err)
+		}
+		if err := creds.Delete(ctx, u.ID, core.CredentialPasskey); err != nil {
+			t.Fatal(err)
+		}
+		if list, err := creds.List(ctx, u.ID); err != nil || len(list) != 2 {
+			t.Errorf("List after removing passkeys = %+v, %v", list, err)
 		}
 		if err := creds.Delete(ctx, u.ID, core.CredentialPIN); err != nil {
 			t.Fatal(err)

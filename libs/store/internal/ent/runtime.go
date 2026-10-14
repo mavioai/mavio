@@ -146,8 +146,12 @@ func init() {
 	blocklistentry.DefaultID = blocklistentryDescID.Default.(func() core.ID)
 	credentialFields := schema.Credential{}.Fields()
 	_ = credentialFields
+	// credentialDescName is the schema descriptor for name field.
+	credentialDescName := credentialFields[3].Descriptor()
+	// credential.DefaultName holds the default value on creation for the name field.
+	credential.DefaultName = credentialDescName.Default.(string)
 	// credentialDescCreatedAt is the schema descriptor for created_at field.
-	credentialDescCreatedAt := credentialFields[4].Descriptor()
+	credentialDescCreatedAt := credentialFields[5].Descriptor()
 	// credential.DefaultCreatedAt holds the default value on creation for the created_at field.
 	credential.DefaultCreatedAt = credentialDescCreatedAt.Default.(func() time.Time)
 	// credentialDescID is the schema descriptor for id field.

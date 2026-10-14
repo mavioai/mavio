@@ -174,7 +174,8 @@ var (
 	CredentialsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "kind", Type: field.TypeString},
-		{Name: "secret", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Default: ""},
+		{Name: "data", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "last_used_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID},
@@ -187,7 +188,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "credentials_users_credentials",
-				Columns:    []*schema.Column{CredentialsColumns[5]},
+				Columns:    []*schema.Column{CredentialsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -196,7 +197,10 @@ var (
 			{
 				Name:    "credential_user_id_kind",
 				Unique:  true,
-				Columns: []*schema.Column{CredentialsColumns[5], CredentialsColumns[1]},
+				Columns: []*schema.Column{CredentialsColumns[6], CredentialsColumns[1]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "kind <> 'passkey'",
+				},
 			},
 		},
 	}

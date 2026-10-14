@@ -145,6 +145,8 @@ type User struct {
 	xxx_hidden_Managed       bool                   `protobuf:"varint,10,opt,name=managed"`
 	xxx_hidden_HasPin        bool                   `protobuf:"varint,11,opt,name=has_pin,json=hasPin"`
 	xxx_hidden_Restriction   RestrictionProfile     `protobuf:"varint,12,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
+	xxx_hidden_HasTotp       bool                   `protobuf:"varint,13,opt,name=has_totp,json=hasTotp"`
+	xxx_hidden_Passkeys      *[]*Passkey            `protobuf:"bytes,14,rep,name=passkeys"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -271,29 +273,45 @@ func (x *User) GetRestriction() RestrictionProfile {
 	return RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
 }
 
+func (x *User) GetHasTotp() bool {
+	if x != nil {
+		return x.xxx_hidden_HasTotp
+	}
+	return false
+}
+
+func (x *User) GetPasskeys() []*Passkey {
+	if x != nil {
+		if x.xxx_hidden_Passkeys != nil {
+			return *x.xxx_hidden_Passkeys
+		}
+	}
+	return nil
+}
+
 func (x *User) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *User) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *User) SetAuthProvider(v string) {
 	x.xxx_hidden_AuthProvider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *User) SetAdmin(v bool) {
 	x.xxx_hidden_Admin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 14)
 }
 
 func (x *User) SetDisabled(v bool) {
 	x.xxx_hidden_Disabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
 }
 
 func (x *User) SetPolicy(v *UserPolicy) {
@@ -314,17 +332,26 @@ func (x *User) SetLastLoginTime(v *timestamppb.Timestamp) {
 
 func (x *User) SetManaged(v bool) {
 	x.xxx_hidden_Managed = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
 }
 
 func (x *User) SetHasPin(v bool) {
 	x.xxx_hidden_HasPin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
 }
 
 func (x *User) SetRestriction(v RestrictionProfile) {
 	x.xxx_hidden_Restriction = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
+}
+
+func (x *User) SetHasTotp(v bool) {
+	x.xxx_hidden_HasTotp = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 14)
+}
+
+func (x *User) SetPasskeys(v []*Passkey) {
+	x.xxx_hidden_Passkeys = &v
 }
 
 func (x *User) HasId() bool {
@@ -411,6 +438,13 @@ func (x *User) HasRestriction() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
 }
 
+func (x *User) HasHasTotp() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
 func (x *User) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -467,6 +501,11 @@ func (x *User) ClearRestriction() {
 	x.xxx_hidden_Restriction = RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
 }
 
+func (x *User) ClearHasTotp() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_HasTotp = false
+}
+
 type User_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -489,6 +528,9 @@ type User_builder struct {
 	HasPin *bool
 	// A managed user's restriction profile.
 	Restriction *RestrictionProfile
+	// Whether signing in with a password needs a TOTP code.
+	HasTotp  *bool
+	Passkeys []*Passkey
 }
 
 func (b0 User_builder) Build() *User {
@@ -496,23 +538,23 @@ func (b0 User_builder) Build() *User {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.AuthProvider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_AuthProvider = b.AuthProvider
 	}
 	if b.Admin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 14)
 		x.xxx_hidden_Admin = *b.Admin
 	}
 	if b.Disabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
 		x.xxx_hidden_Disabled = *b.Disabled
 	}
 	x.xxx_hidden_Policy = b.Policy
@@ -520,17 +562,218 @@ func (b0 User_builder) Build() *User {
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_LastLoginTime = b.LastLoginTime
 	if b.Managed != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
 		x.xxx_hidden_Managed = *b.Managed
 	}
 	if b.HasPin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_HasPin = *b.HasPin
 	}
 	if b.Restriction != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
 		x.xxx_hidden_Restriction = *b.Restriction
 	}
+	if b.HasTotp != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 14)
+		x.xxx_hidden_HasTotp = *b.HasTotp
+	}
+	x.xxx_hidden_Passkeys = &b.Passkeys
+	return m0
+}
+
+// Passkey is a user's WebAuthn credential.
+type Passkey struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_RpId        *string                `protobuf:"bytes,3,opt,name=rp_id,json=rpId"`
+	xxx_hidden_CreateTime  *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=create_time,json=createTime"`
+	xxx_hidden_LastUseTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_use_time,json=lastUseTime"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Passkey) Reset() {
+	*x = Passkey{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Passkey) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Passkey) ProtoMessage() {}
+
+func (x *Passkey) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Passkey) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Passkey) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Passkey) GetRpId() string {
+	if x != nil {
+		if x.xxx_hidden_RpId != nil {
+			return *x.xxx_hidden_RpId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Passkey) GetCreateTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_CreateTime
+	}
+	return nil
+}
+
+func (x *Passkey) GetLastUseTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_LastUseTime
+	}
+	return nil
+}
+
+func (x *Passkey) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *Passkey) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *Passkey) SetRpId(v string) {
+	x.xxx_hidden_RpId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *Passkey) SetCreateTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_CreateTime = v
+}
+
+func (x *Passkey) SetLastUseTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_LastUseTime = v
+}
+
+func (x *Passkey) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Passkey) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Passkey) HasRpId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Passkey) HasCreateTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_CreateTime != nil
+}
+
+func (x *Passkey) HasLastUseTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_LastUseTime != nil
+}
+
+func (x *Passkey) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *Passkey) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *Passkey) ClearRpId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_RpId = nil
+}
+
+func (x *Passkey) ClearCreateTime() {
+	x.xxx_hidden_CreateTime = nil
+}
+
+func (x *Passkey) ClearLastUseTime() {
+	x.xxx_hidden_LastUseTime = nil
+}
+
+type Passkey_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id   *string
+	Name *string
+	// The host the passkey works at.
+	RpId        *string
+	CreateTime  *timestamppb.Timestamp
+	LastUseTime *timestamppb.Timestamp
+}
+
+func (b0 Passkey_builder) Build() *Passkey {
+	m0 := &Passkey{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.RpId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_RpId = b.RpId
+	}
+	x.xxx_hidden_CreateTime = b.CreateTime
+	x.xxx_hidden_LastUseTime = b.LastUseTime
 	return m0
 }
 
@@ -559,7 +802,7 @@ type UserPolicy struct {
 
 func (x *UserPolicy) Reset() {
 	*x = UserPolicy{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[1]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -571,7 +814,7 @@ func (x *UserPolicy) String() string {
 func (*UserPolicy) ProtoMessage() {}
 
 func (x *UserPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[1]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1028,7 +1271,7 @@ type RequestQuota struct {
 
 func (x *RequestQuota) Reset() {
 	*x = RequestQuota{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1040,7 +1283,7 @@ func (x *RequestQuota) String() string {
 func (*RequestQuota) ProtoMessage() {}
 
 func (x *RequestQuota) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[2]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1137,7 +1380,7 @@ type UserPreferences struct {
 
 func (x *UserPreferences) Reset() {
 	*x = UserPreferences{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1149,7 +1392,7 @@ func (x *UserPreferences) String() string {
 func (*UserPreferences) ProtoMessage() {}
 
 func (x *UserPreferences) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[3]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1279,7 +1522,7 @@ type UserData struct {
 
 func (x *UserData) Reset() {
 	*x = UserData{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1291,7 +1534,7 @@ func (x *UserData) String() string {
 func (*UserData) ProtoMessage() {}
 
 func (x *UserData) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1579,7 +1822,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1591,7 +1834,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[5]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1623,7 +1866,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1635,7 +1878,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[6]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1684,7 +1927,7 @@ type GetUserRequest struct {
 
 func (x *GetUserRequest) Reset() {
 	*x = GetUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1696,7 +1939,7 @@ func (x *GetUserRequest) String() string {
 func (*GetUserRequest) ProtoMessage() {}
 
 func (x *GetUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[7]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1760,7 +2003,7 @@ type GetUserResponse struct {
 
 func (x *GetUserResponse) Reset() {
 	*x = GetUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1772,7 +2015,7 @@ func (x *GetUserResponse) String() string {
 func (*GetUserResponse) ProtoMessage() {}
 
 func (x *GetUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[8]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1827,7 +2070,7 @@ type GetCurrentUserRequest struct {
 
 func (x *GetCurrentUserRequest) Reset() {
 	*x = GetCurrentUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1839,7 +2082,7 @@ func (x *GetCurrentUserRequest) String() string {
 func (*GetCurrentUserRequest) ProtoMessage() {}
 
 func (x *GetCurrentUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[9]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1871,7 +2114,7 @@ type GetCurrentUserResponse struct {
 
 func (x *GetCurrentUserResponse) Reset() {
 	*x = GetCurrentUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1883,7 +2126,7 @@ func (x *GetCurrentUserResponse) String() string {
 func (*GetCurrentUserResponse) ProtoMessage() {}
 
 func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[10]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1949,7 +2192,7 @@ type CreateUserRequest struct {
 
 func (x *CreateUserRequest) Reset() {
 	*x = CreateUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1961,7 +2204,7 @@ func (x *CreateUserRequest) String() string {
 func (*CreateUserRequest) ProtoMessage() {}
 
 func (x *CreateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[11]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2263,7 +2506,7 @@ type CreateUserResponse struct {
 
 func (x *CreateUserResponse) Reset() {
 	*x = CreateUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2275,7 +2518,7 @@ func (x *CreateUserResponse) String() string {
 func (*CreateUserResponse) ProtoMessage() {}
 
 func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[12]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2338,7 +2581,7 @@ type UpdateUserRequest struct {
 
 func (x *UpdateUserRequest) Reset() {
 	*x = UpdateUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2350,7 +2593,7 @@ func (x *UpdateUserRequest) String() string {
 func (*UpdateUserRequest) ProtoMessage() {}
 
 func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[13]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2564,7 +2807,7 @@ type UpdateUserResponse struct {
 
 func (x *UpdateUserResponse) Reset() {
 	*x = UpdateUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2576,7 +2819,7 @@ func (x *UpdateUserResponse) String() string {
 func (*UpdateUserResponse) ProtoMessage() {}
 
 func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[14]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2634,7 +2877,7 @@ type DeleteUserRequest struct {
 
 func (x *DeleteUserRequest) Reset() {
 	*x = DeleteUserRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2646,7 +2889,7 @@ func (x *DeleteUserRequest) String() string {
 func (*DeleteUserRequest) ProtoMessage() {}
 
 func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[15]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2709,7 +2952,7 @@ type DeleteUserResponse struct {
 
 func (x *DeleteUserResponse) Reset() {
 	*x = DeleteUserResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2721,7 +2964,7 @@ func (x *DeleteUserResponse) String() string {
 func (*DeleteUserResponse) ProtoMessage() {}
 
 func (x *DeleteUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[16]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2757,7 +3000,7 @@ type SetPasswordRequest struct {
 
 func (x *SetPasswordRequest) Reset() {
 	*x = SetPasswordRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2769,7 +3012,7 @@ func (x *SetPasswordRequest) String() string {
 func (*SetPasswordRequest) ProtoMessage() {}
 
 func (x *SetPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[17]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2897,7 +3140,7 @@ type SetPasswordResponse struct {
 
 func (x *SetPasswordResponse) Reset() {
 	*x = SetPasswordResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2909,7 +3152,7 @@ func (x *SetPasswordResponse) String() string {
 func (*SetPasswordResponse) ProtoMessage() {}
 
 func (x *SetPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[18]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2944,7 +3187,7 @@ type SetPinRequest struct {
 
 func (x *SetPinRequest) Reset() {
 	*x = SetPinRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2956,7 +3199,7 @@ func (x *SetPinRequest) String() string {
 func (*SetPinRequest) ProtoMessage() {}
 
 func (x *SetPinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3052,7 +3295,7 @@ type SetPinResponse struct {
 
 func (x *SetPinResponse) Reset() {
 	*x = SetPinResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3064,7 +3307,7 @@ func (x *SetPinResponse) String() string {
 func (*SetPinResponse) ProtoMessage() {}
 
 func (x *SetPinResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3087,6 +3330,928 @@ func (b0 SetPinResponse_builder) Build() *SetPinResponse {
 	return m0
 }
 
+type StartPasskeyRegistrationRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartPasskeyRegistrationRequest) Reset() {
+	*x = StartPasskeyRegistrationRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPasskeyRegistrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPasskeyRegistrationRequest) ProtoMessage() {}
+
+func (x *StartPasskeyRegistrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type StartPasskeyRegistrationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 StartPasskeyRegistrationRequest_builder) Build() *StartPasskeyRegistrationRequest {
+	m0 := &StartPasskeyRegistrationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type StartPasskeyRegistrationResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CeremonyId  *string                `protobuf:"bytes,1,opt,name=ceremony_id,json=ceremonyId"`
+	xxx_hidden_OptionsJson *string                `protobuf:"bytes,2,opt,name=options_json,json=optionsJson"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *StartPasskeyRegistrationResponse) Reset() {
+	*x = StartPasskeyRegistrationResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPasskeyRegistrationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPasskeyRegistrationResponse) ProtoMessage() {}
+
+func (x *StartPasskeyRegistrationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartPasskeyRegistrationResponse) GetCeremonyId() string {
+	if x != nil {
+		if x.xxx_hidden_CeremonyId != nil {
+			return *x.xxx_hidden_CeremonyId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartPasskeyRegistrationResponse) GetOptionsJson() string {
+	if x != nil {
+		if x.xxx_hidden_OptionsJson != nil {
+			return *x.xxx_hidden_OptionsJson
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartPasskeyRegistrationResponse) SetCeremonyId(v string) {
+	x.xxx_hidden_CeremonyId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *StartPasskeyRegistrationResponse) SetOptionsJson(v string) {
+	x.xxx_hidden_OptionsJson = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *StartPasskeyRegistrationResponse) HasCeremonyId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *StartPasskeyRegistrationResponse) HasOptionsJson() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *StartPasskeyRegistrationResponse) ClearCeremonyId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_CeremonyId = nil
+}
+
+func (x *StartPasskeyRegistrationResponse) ClearOptionsJson() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_OptionsJson = nil
+}
+
+type StartPasskeyRegistrationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	CeremonyId *string
+	// The creation options, as
+	// PublicKeyCredential.parseCreationOptionsFromJSON takes them.
+	OptionsJson *string
+}
+
+func (b0 StartPasskeyRegistrationResponse_builder) Build() *StartPasskeyRegistrationResponse {
+	m0 := &StartPasskeyRegistrationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.CeremonyId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_CeremonyId = b.CeremonyId
+	}
+	if b.OptionsJson != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_OptionsJson = b.OptionsJson
+	}
+	return m0
+}
+
+type FinishPasskeyRegistrationRequest struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CeremonyId     *string                `protobuf:"bytes,1,opt,name=ceremony_id,json=ceremonyId"`
+	xxx_hidden_Name           *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_CredentialJson *string                `protobuf:"bytes,3,opt,name=credential_json,json=credentialJson"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *FinishPasskeyRegistrationRequest) Reset() {
+	*x = FinishPasskeyRegistrationRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FinishPasskeyRegistrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FinishPasskeyRegistrationRequest) ProtoMessage() {}
+
+func (x *FinishPasskeyRegistrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FinishPasskeyRegistrationRequest) GetCeremonyId() string {
+	if x != nil {
+		if x.xxx_hidden_CeremonyId != nil {
+			return *x.xxx_hidden_CeremonyId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeyRegistrationRequest) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeyRegistrationRequest) GetCredentialJson() string {
+	if x != nil {
+		if x.xxx_hidden_CredentialJson != nil {
+			return *x.xxx_hidden_CredentialJson
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeyRegistrationRequest) SetCeremonyId(v string) {
+	x.xxx_hidden_CeremonyId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *FinishPasskeyRegistrationRequest) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *FinishPasskeyRegistrationRequest) SetCredentialJson(v string) {
+	x.xxx_hidden_CredentialJson = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *FinishPasskeyRegistrationRequest) HasCeremonyId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *FinishPasskeyRegistrationRequest) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *FinishPasskeyRegistrationRequest) HasCredentialJson() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *FinishPasskeyRegistrationRequest) ClearCeremonyId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_CeremonyId = nil
+}
+
+func (x *FinishPasskeyRegistrationRequest) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *FinishPasskeyRegistrationRequest) ClearCredentialJson() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_CredentialJson = nil
+}
+
+type FinishPasskeyRegistrationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	CeremonyId *string
+	// What the user calls the passkey, such as the device it is on.
+	Name *string
+	// The authenticator's response, as PublicKeyCredential.toJSON gives it.
+	CredentialJson *string
+}
+
+func (b0 FinishPasskeyRegistrationRequest_builder) Build() *FinishPasskeyRegistrationRequest {
+	m0 := &FinishPasskeyRegistrationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.CeremonyId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_CeremonyId = b.CeremonyId
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.CredentialJson != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_CredentialJson = b.CredentialJson
+	}
+	return m0
+}
+
+type FinishPasskeyRegistrationResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Passkey *Passkey               `protobuf:"bytes,1,opt,name=passkey"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *FinishPasskeyRegistrationResponse) Reset() {
+	*x = FinishPasskeyRegistrationResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FinishPasskeyRegistrationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FinishPasskeyRegistrationResponse) ProtoMessage() {}
+
+func (x *FinishPasskeyRegistrationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FinishPasskeyRegistrationResponse) GetPasskey() *Passkey {
+	if x != nil {
+		return x.xxx_hidden_Passkey
+	}
+	return nil
+}
+
+func (x *FinishPasskeyRegistrationResponse) SetPasskey(v *Passkey) {
+	x.xxx_hidden_Passkey = v
+}
+
+func (x *FinishPasskeyRegistrationResponse) HasPasskey() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Passkey != nil
+}
+
+func (x *FinishPasskeyRegistrationResponse) ClearPasskey() {
+	x.xxx_hidden_Passkey = nil
+}
+
+type FinishPasskeyRegistrationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Passkey *Passkey
+}
+
+func (b0 FinishPasskeyRegistrationResponse_builder) Build() *FinishPasskeyRegistrationResponse {
+	m0 := &FinishPasskeyRegistrationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Passkey = b.Passkey
+	return m0
+}
+
+type DeletePasskeyRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,2,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeletePasskeyRequest) Reset() {
+	*x = DeletePasskeyRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeletePasskeyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeletePasskeyRequest) ProtoMessage() {}
+
+func (x *DeletePasskeyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeletePasskeyRequest) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeletePasskeyRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeletePasskeyRequest) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *DeletePasskeyRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *DeletePasskeyRequest) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeletePasskeyRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *DeletePasskeyRequest) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *DeletePasskeyRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Id = nil
+}
+
+type DeletePasskeyRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	UserId *string
+	Id     *string
+}
+
+func (b0 DeletePasskeyRequest_builder) Build() *DeletePasskeyRequest {
+	m0 := &DeletePasskeyRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type DeletePasskeyResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeletePasskeyResponse) Reset() {
+	*x = DeletePasskeyResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeletePasskeyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeletePasskeyResponse) ProtoMessage() {}
+
+func (x *DeletePasskeyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DeletePasskeyResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 DeletePasskeyResponse_builder) Build() *DeletePasskeyResponse {
+	m0 := &DeletePasskeyResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type StartTotpRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartTotpRequest) Reset() {
+	*x = StartTotpRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartTotpRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartTotpRequest) ProtoMessage() {}
+
+func (x *StartTotpRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type StartTotpRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 StartTotpRequest_builder) Build() *StartTotpRequest {
+	m0 := &StartTotpRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type StartTotpResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Secret      *string                `protobuf:"bytes,1,opt,name=secret"`
+	xxx_hidden_Uri         *string                `protobuf:"bytes,2,opt,name=uri"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *StartTotpResponse) Reset() {
+	*x = StartTotpResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartTotpResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartTotpResponse) ProtoMessage() {}
+
+func (x *StartTotpResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartTotpResponse) GetSecret() string {
+	if x != nil {
+		if x.xxx_hidden_Secret != nil {
+			return *x.xxx_hidden_Secret
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartTotpResponse) GetUri() string {
+	if x != nil {
+		if x.xxx_hidden_Uri != nil {
+			return *x.xxx_hidden_Uri
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartTotpResponse) SetSecret(v string) {
+	x.xxx_hidden_Secret = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *StartTotpResponse) SetUri(v string) {
+	x.xxx_hidden_Uri = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *StartTotpResponse) HasSecret() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *StartTotpResponse) HasUri() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *StartTotpResponse) ClearSecret() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Secret = nil
+}
+
+func (x *StartTotpResponse) ClearUri() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Uri = nil
+}
+
+type StartTotpResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The secret in base32, for entering by hand.
+	Secret *string
+	// The otpauth URI of the secret, for a QR code.
+	Uri *string
+}
+
+func (b0 StartTotpResponse_builder) Build() *StartTotpResponse {
+	m0 := &StartTotpResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Secret != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Secret = b.Secret
+	}
+	if b.Uri != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Uri = b.Uri
+	}
+	return m0
+}
+
+type ConfirmTotpRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Code        *string                `protobuf:"bytes,1,opt,name=code"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ConfirmTotpRequest) Reset() {
+	*x = ConfirmTotpRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfirmTotpRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfirmTotpRequest) ProtoMessage() {}
+
+func (x *ConfirmTotpRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ConfirmTotpRequest) GetCode() string {
+	if x != nil {
+		if x.xxx_hidden_Code != nil {
+			return *x.xxx_hidden_Code
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ConfirmTotpRequest) SetCode(v string) {
+	x.xxx_hidden_Code = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ConfirmTotpRequest) HasCode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ConfirmTotpRequest) ClearCode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Code = nil
+}
+
+type ConfirmTotpRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Code *string
+}
+
+func (b0 ConfirmTotpRequest_builder) Build() *ConfirmTotpRequest {
+	m0 := &ConfirmTotpRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Code != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Code = b.Code
+	}
+	return m0
+}
+
+type ConfirmTotpResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConfirmTotpResponse) Reset() {
+	*x = ConfirmTotpResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConfirmTotpResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfirmTotpResponse) ProtoMessage() {}
+
+func (x *ConfirmTotpResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ConfirmTotpResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ConfirmTotpResponse_builder) Build() *ConfirmTotpResponse {
+	m0 := &ConfirmTotpResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type DeleteTotpRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteTotpRequest) Reset() {
+	*x = DeleteTotpRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTotpRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTotpRequest) ProtoMessage() {}
+
+func (x *DeleteTotpRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteTotpRequest) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeleteTotpRequest) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteTotpRequest) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteTotpRequest) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_UserId = nil
+}
+
+type DeleteTotpRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	UserId *string
+}
+
+func (b0 DeleteTotpRequest_builder) Build() *DeleteTotpRequest {
+	m0 := &DeleteTotpRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	return m0
+}
+
+type DeleteTotpResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTotpResponse) Reset() {
+	*x = DeleteTotpResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTotpResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTotpResponse) ProtoMessage() {}
+
+func (x *DeleteTotpResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DeleteTotpResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 DeleteTotpResponse_builder) Build() *DeleteTotpResponse {
+	m0 := &DeleteTotpResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 type UpdatePreferencesRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Preferences *UserPreferences       `protobuf:"bytes,1,opt,name=preferences"`
@@ -3096,7 +4261,7 @@ type UpdatePreferencesRequest struct {
 
 func (x *UpdatePreferencesRequest) Reset() {
 	*x = UpdatePreferencesRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3108,7 +4273,7 @@ func (x *UpdatePreferencesRequest) String() string {
 func (*UpdatePreferencesRequest) ProtoMessage() {}
 
 func (x *UpdatePreferencesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3164,7 +4329,7 @@ type UpdatePreferencesResponse struct {
 
 func (x *UpdatePreferencesResponse) Reset() {
 	*x = UpdatePreferencesResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3176,7 +4341,7 @@ func (x *UpdatePreferencesResponse) String() string {
 func (*UpdatePreferencesResponse) ProtoMessage() {}
 
 func (x *UpdatePreferencesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3232,7 +4397,7 @@ type GetUserDataRequest struct {
 
 func (x *GetUserDataRequest) Reset() {
 	*x = GetUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3244,7 +4409,7 @@ func (x *GetUserDataRequest) String() string {
 func (*GetUserDataRequest) ProtoMessage() {}
 
 func (x *GetUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3289,7 +4454,7 @@ type GetUserDataResponse struct {
 
 func (x *GetUserDataResponse) Reset() {
 	*x = GetUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3301,7 +4466,7 @@ func (x *GetUserDataResponse) String() string {
 func (*GetUserDataResponse) ProtoMessage() {}
 
 func (x *GetUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3356,7 +4521,7 @@ type UpdateUserDataRequest struct {
 
 func (x *UpdateUserDataRequest) Reset() {
 	*x = UpdateUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3368,7 +4533,7 @@ func (x *UpdateUserDataRequest) String() string {
 func (*UpdateUserDataRequest) ProtoMessage() {}
 
 func (x *UpdateUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3543,7 +4708,7 @@ type UpdateUserDataResponse struct {
 
 func (x *UpdateUserDataResponse) Reset() {
 	*x = UpdateUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3555,7 +4720,7 @@ func (x *UpdateUserDataResponse) String() string {
 func (*UpdateUserDataResponse) ProtoMessage() {}
 
 func (x *UpdateUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3606,7 +4771,7 @@ var File_mavio_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xef\x03\n" +
+	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x04\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3621,7 +4786,16 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\amanaged\x18\n" +
 	" \x01(\bR\amanaged\x12\x17\n" +
 	"\ahas_pin\x18\v \x01(\bR\x06hasPin\x12C\n" +
-	"\vrestriction\x18\f \x01(\x0e2!.mavio.user.v1.RestrictionProfileR\vrestriction\"\xcd\x05\n" +
+	"\vrestriction\x18\f \x01(\x0e2!.mavio.user.v1.RestrictionProfileR\vrestriction\x12\x19\n" +
+	"\bhas_totp\x18\r \x01(\bR\ahasTotp\x122\n" +
+	"\bpasskeys\x18\x0e \x03(\v2\x16.mavio.user.v1.PasskeyR\bpasskeys\"\xbf\x01\n" +
+	"\aPasskey\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x13\n" +
+	"\x05rp_id\x18\x03 \x01(\tR\x04rpId\x12;\n" +
+	"\vcreate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"createTime\x12>\n" +
+	"\rlast_use_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vlastUseTime\"\xcd\x05\n" +
 	"\n" +
 	"UserPolicy\x12#\n" +
 	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12.\n" +
@@ -3708,7 +4882,36 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\rSetPinRequest\x12$\n" +
 	"\auser_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06userId\x12&\n" +
 	"\x03pin\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([0-9]{4})?$R\x03pin\"\x10\n" +
-	"\x0eSetPinResponse\"d\n" +
+	"\x0eSetPinResponse\"!\n" +
+	"\x1fStartPasskeyRegistrationRequest\"f\n" +
+	" StartPasskeyRegistrationResponse\x12\x1f\n" +
+	"\vceremony_id\x18\x01 \x01(\tR\n" +
+	"ceremonyId\x12!\n" +
+	"\foptions_json\x18\x02 \x01(\tR\voptionsJson\"\xa6\x01\n" +
+	" FinishPasskeyRegistrationRequest\x12+\n" +
+	"\vceremony_id\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x18dR\n" +
+	"ceremonyId\x12\x1e\n" +
+	"\x04name\x18\x02 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x18dR\x04name\x125\n" +
+	"\x0fcredential_json\x18\x03 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x18\x80\x80\x04R\x0ecredentialJson\"U\n" +
+	"!FinishPasskeyRegistrationResponse\x120\n" +
+	"\apasskey\x18\x01 \x01(\v2\x16.mavio.user.v1.PasskeyR\apasskey\"Y\n" +
+	"\x14DeletePasskeyRequest\x12$\n" +
+	"\auser_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06userId\x12\x1b\n" +
+	"\x02id\x18\x02 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\x17\n" +
+	"\x15DeletePasskeyResponse\"\x12\n" +
+	"\x10StartTotpRequest\"=\n" +
+	"\x11StartTotpResponse\x12\x16\n" +
+	"\x06secret\x18\x01 \x01(\tR\x06secret\x12\x10\n" +
+	"\x03uri\x18\x02 \x01(\tR\x03uri\">\n" +
+	"\x12ConfirmTotpRequest\x12(\n" +
+	"\x04code\x18\x01 \x01(\tB\x14\xbaH\x11\xc8\x01\x01r\f2\n" +
+	"^[0-9]{6}$R\x04code\"\x15\n" +
+	"\x13ConfirmTotpResponse\"9\n" +
+	"\x11DeleteTotpRequest\x12$\n" +
+	"\auser_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06userId\"\x14\n" +
+	"\x12DeleteTotpResponse\"d\n" +
 	"\x18UpdatePreferencesRequest\x12H\n" +
 	"\vpreferences\x18\x01 \x01(\v2\x1e.mavio.user.v1.UserPreferencesB\x06\xbaH\x03\xc8\x01\x01R\vpreferences\"]\n" +
 	"\x19UpdatePreferencesResponse\x12@\n" +
@@ -3736,7 +4939,8 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x1fRESTRICTION_PROFILE_UNSPECIFIED\x10\x00\x12%\n" +
 	"!RESTRICTION_PROFILE_YOUNGER_CHILD\x10\x01\x12#\n" +
 	"\x1fRESTRICTION_PROFILE_OLDER_CHILD\x10\x02\x12\x1c\n" +
-	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\x93\x06\n" +
+	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\xe5\n" +
+	"\n" +
 	"\vUserService\x12S\n" +
 	"\tListUsers\x12\x1f.mavio.user.v1.ListUsersRequest\x1a .mavio.user.v1.ListUsersResponse\"\x03\x90\x02\x01\x12M\n" +
 	"\aGetUser\x12\x1d.mavio.user.v1.GetUserRequest\x1a\x1e.mavio.user.v1.GetUserResponse\"\x03\x90\x02\x01\x12b\n" +
@@ -3748,7 +4952,14 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"DeleteUser\x12 .mavio.user.v1.DeleteUserRequest\x1a!.mavio.user.v1.DeleteUserResponse\x12T\n" +
 	"\vSetPassword\x12!.mavio.user.v1.SetPasswordRequest\x1a\".mavio.user.v1.SetPasswordResponse\x12E\n" +
-	"\x06SetPin\x12\x1c.mavio.user.v1.SetPinRequest\x1a\x1d.mavio.user.v1.SetPinResponse\x12f\n" +
+	"\x06SetPin\x12\x1c.mavio.user.v1.SetPinRequest\x1a\x1d.mavio.user.v1.SetPinResponse\x12{\n" +
+	"\x18StartPasskeyRegistration\x12..mavio.user.v1.StartPasskeyRegistrationRequest\x1a/.mavio.user.v1.StartPasskeyRegistrationResponse\x12~\n" +
+	"\x19FinishPasskeyRegistration\x12/.mavio.user.v1.FinishPasskeyRegistrationRequest\x1a0.mavio.user.v1.FinishPasskeyRegistrationResponse\x12Z\n" +
+	"\rDeletePasskey\x12#.mavio.user.v1.DeletePasskeyRequest\x1a$.mavio.user.v1.DeletePasskeyResponse\x12N\n" +
+	"\tStartTotp\x12\x1f.mavio.user.v1.StartTotpRequest\x1a .mavio.user.v1.StartTotpResponse\x12T\n" +
+	"\vConfirmTotp\x12!.mavio.user.v1.ConfirmTotpRequest\x1a\".mavio.user.v1.ConfirmTotpResponse\x12Q\n" +
+	"\n" +
+	"DeleteTotp\x12 .mavio.user.v1.DeleteTotpRequest\x1a!.mavio.user.v1.DeleteTotpResponse\x12f\n" +
 	"\x11UpdatePreferences\x12'.mavio.user.v1.UpdatePreferencesRequest\x1a(.mavio.user.v1.UpdatePreferencesResponse2\xcb\x01\n" +
 	"\x0fUserDataService\x12Y\n" +
 	"\vGetUserData\x12!.mavio.user.v1.GetUserDataRequest\x1a\".mavio.user.v1.GetUserDataResponse\"\x03\x90\x02\x01\x12]\n" +
@@ -3756,93 +4967,122 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x11com.mavio.user.v1B\tUserProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1;userv1\xa2\x02\x03MUX\xaa\x02\rMavio.User.V1\xca\x02\rMavio\\User\\V1\xe2\x02\x19Mavio\\User\\V1\\GPBMetadata\xea\x02\x0fMavio::User::V1b\beditionsp\xe8\a"
 
 var file_mavio_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_mavio_user_v1_user_proto_goTypes = []any{
-	(SubtitleMode)(0),                 // 0: mavio.user.v1.SubtitleMode
-	(RestrictionProfile)(0),           // 1: mavio.user.v1.RestrictionProfile
-	(*User)(nil),                      // 2: mavio.user.v1.User
-	(*UserPolicy)(nil),                // 3: mavio.user.v1.UserPolicy
-	(*RequestQuota)(nil),              // 4: mavio.user.v1.RequestQuota
-	(*UserPreferences)(nil),           // 5: mavio.user.v1.UserPreferences
-	(*UserData)(nil),                  // 6: mavio.user.v1.UserData
-	(*ListUsersRequest)(nil),          // 7: mavio.user.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),         // 8: mavio.user.v1.ListUsersResponse
-	(*GetUserRequest)(nil),            // 9: mavio.user.v1.GetUserRequest
-	(*GetUserResponse)(nil),           // 10: mavio.user.v1.GetUserResponse
-	(*GetCurrentUserRequest)(nil),     // 11: mavio.user.v1.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil),    // 12: mavio.user.v1.GetCurrentUserResponse
-	(*CreateUserRequest)(nil),         // 13: mavio.user.v1.CreateUserRequest
-	(*CreateUserResponse)(nil),        // 14: mavio.user.v1.CreateUserResponse
-	(*UpdateUserRequest)(nil),         // 15: mavio.user.v1.UpdateUserRequest
-	(*UpdateUserResponse)(nil),        // 16: mavio.user.v1.UpdateUserResponse
-	(*DeleteUserRequest)(nil),         // 17: mavio.user.v1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),        // 18: mavio.user.v1.DeleteUserResponse
-	(*SetPasswordRequest)(nil),        // 19: mavio.user.v1.SetPasswordRequest
-	(*SetPasswordResponse)(nil),       // 20: mavio.user.v1.SetPasswordResponse
-	(*SetPinRequest)(nil),             // 21: mavio.user.v1.SetPinRequest
-	(*SetPinResponse)(nil),            // 22: mavio.user.v1.SetPinResponse
-	(*UpdatePreferencesRequest)(nil),  // 23: mavio.user.v1.UpdatePreferencesRequest
-	(*UpdatePreferencesResponse)(nil), // 24: mavio.user.v1.UpdatePreferencesResponse
-	(*GetUserDataRequest)(nil),        // 25: mavio.user.v1.GetUserDataRequest
-	(*GetUserDataResponse)(nil),       // 26: mavio.user.v1.GetUserDataResponse
-	(*UpdateUserDataRequest)(nil),     // 27: mavio.user.v1.UpdateUserDataRequest
-	(*UpdateUserDataResponse)(nil),    // 28: mavio.user.v1.UpdateUserDataResponse
-	(*timestamppb.Timestamp)(nil),     // 29: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),       // 30: google.protobuf.Duration
+	(SubtitleMode)(0),                         // 0: mavio.user.v1.SubtitleMode
+	(RestrictionProfile)(0),                   // 1: mavio.user.v1.RestrictionProfile
+	(*User)(nil),                              // 2: mavio.user.v1.User
+	(*Passkey)(nil),                           // 3: mavio.user.v1.Passkey
+	(*UserPolicy)(nil),                        // 4: mavio.user.v1.UserPolicy
+	(*RequestQuota)(nil),                      // 5: mavio.user.v1.RequestQuota
+	(*UserPreferences)(nil),                   // 6: mavio.user.v1.UserPreferences
+	(*UserData)(nil),                          // 7: mavio.user.v1.UserData
+	(*ListUsersRequest)(nil),                  // 8: mavio.user.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),                 // 9: mavio.user.v1.ListUsersResponse
+	(*GetUserRequest)(nil),                    // 10: mavio.user.v1.GetUserRequest
+	(*GetUserResponse)(nil),                   // 11: mavio.user.v1.GetUserResponse
+	(*GetCurrentUserRequest)(nil),             // 12: mavio.user.v1.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil),            // 13: mavio.user.v1.GetCurrentUserResponse
+	(*CreateUserRequest)(nil),                 // 14: mavio.user.v1.CreateUserRequest
+	(*CreateUserResponse)(nil),                // 15: mavio.user.v1.CreateUserResponse
+	(*UpdateUserRequest)(nil),                 // 16: mavio.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),                // 17: mavio.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),                 // 18: mavio.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),                // 19: mavio.user.v1.DeleteUserResponse
+	(*SetPasswordRequest)(nil),                // 20: mavio.user.v1.SetPasswordRequest
+	(*SetPasswordResponse)(nil),               // 21: mavio.user.v1.SetPasswordResponse
+	(*SetPinRequest)(nil),                     // 22: mavio.user.v1.SetPinRequest
+	(*SetPinResponse)(nil),                    // 23: mavio.user.v1.SetPinResponse
+	(*StartPasskeyRegistrationRequest)(nil),   // 24: mavio.user.v1.StartPasskeyRegistrationRequest
+	(*StartPasskeyRegistrationResponse)(nil),  // 25: mavio.user.v1.StartPasskeyRegistrationResponse
+	(*FinishPasskeyRegistrationRequest)(nil),  // 26: mavio.user.v1.FinishPasskeyRegistrationRequest
+	(*FinishPasskeyRegistrationResponse)(nil), // 27: mavio.user.v1.FinishPasskeyRegistrationResponse
+	(*DeletePasskeyRequest)(nil),              // 28: mavio.user.v1.DeletePasskeyRequest
+	(*DeletePasskeyResponse)(nil),             // 29: mavio.user.v1.DeletePasskeyResponse
+	(*StartTotpRequest)(nil),                  // 30: mavio.user.v1.StartTotpRequest
+	(*StartTotpResponse)(nil),                 // 31: mavio.user.v1.StartTotpResponse
+	(*ConfirmTotpRequest)(nil),                // 32: mavio.user.v1.ConfirmTotpRequest
+	(*ConfirmTotpResponse)(nil),               // 33: mavio.user.v1.ConfirmTotpResponse
+	(*DeleteTotpRequest)(nil),                 // 34: mavio.user.v1.DeleteTotpRequest
+	(*DeleteTotpResponse)(nil),                // 35: mavio.user.v1.DeleteTotpResponse
+	(*UpdatePreferencesRequest)(nil),          // 36: mavio.user.v1.UpdatePreferencesRequest
+	(*UpdatePreferencesResponse)(nil),         // 37: mavio.user.v1.UpdatePreferencesResponse
+	(*GetUserDataRequest)(nil),                // 38: mavio.user.v1.GetUserDataRequest
+	(*GetUserDataResponse)(nil),               // 39: mavio.user.v1.GetUserDataResponse
+	(*UpdateUserDataRequest)(nil),             // 40: mavio.user.v1.UpdateUserDataRequest
+	(*UpdateUserDataResponse)(nil),            // 41: mavio.user.v1.UpdateUserDataResponse
+	(*timestamppb.Timestamp)(nil),             // 42: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),               // 43: google.protobuf.Duration
 }
 var file_mavio_user_v1_user_proto_depIdxs = []int32{
-	3,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
-	5,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
-	29, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
-	29, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
+	4,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
+	6,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
+	42, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
+	42, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
 	1,  // 4: mavio.user.v1.User.restriction:type_name -> mavio.user.v1.RestrictionProfile
-	4,  // 5: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
-	4,  // 6: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
-	0,  // 7: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
-	30, // 8: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
-	29, // 9: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
-	2,  // 10: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
-	2,  // 11: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
-	2,  // 12: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
-	3,  // 13: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	5,  // 14: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	1,  // 15: mavio.user.v1.CreateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
-	2,  // 16: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
-	3,  // 17: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	1,  // 18: mavio.user.v1.UpdateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
-	2,  // 19: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
-	5,  // 20: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	5,  // 21: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
-	6,  // 22: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	30, // 23: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
-	6,  // 24: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	7,  // 25: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
-	9,  // 26: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
-	11, // 27: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
-	13, // 28: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
-	15, // 29: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
-	17, // 30: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
-	19, // 31: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
-	21, // 32: mavio.user.v1.UserService.SetPin:input_type -> mavio.user.v1.SetPinRequest
-	23, // 33: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
-	25, // 34: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
-	27, // 35: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
-	8,  // 36: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
-	10, // 37: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
-	12, // 38: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
-	14, // 39: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
-	16, // 40: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
-	18, // 41: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
-	20, // 42: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
-	22, // 43: mavio.user.v1.UserService.SetPin:output_type -> mavio.user.v1.SetPinResponse
-	24, // 44: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
-	26, // 45: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
-	28, // 46: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
-	36, // [36:47] is the sub-list for method output_type
-	25, // [25:36] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	3,  // 5: mavio.user.v1.User.passkeys:type_name -> mavio.user.v1.Passkey
+	42, // 6: mavio.user.v1.Passkey.create_time:type_name -> google.protobuf.Timestamp
+	42, // 7: mavio.user.v1.Passkey.last_use_time:type_name -> google.protobuf.Timestamp
+	5,  // 8: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
+	5,  // 9: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
+	0,  // 10: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
+	43, // 11: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
+	42, // 12: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
+	2,  // 13: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
+	2,  // 14: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
+	2,  // 15: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
+	4,  // 16: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	6,  // 17: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	1,  // 18: mavio.user.v1.CreateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	2,  // 19: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
+	4,  // 20: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	1,  // 21: mavio.user.v1.UpdateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	2,  // 22: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
+	3,  // 23: mavio.user.v1.FinishPasskeyRegistrationResponse.passkey:type_name -> mavio.user.v1.Passkey
+	6,  // 24: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	6,  // 25: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
+	7,  // 26: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	43, // 27: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
+	7,  // 28: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	8,  // 29: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
+	10, // 30: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
+	12, // 31: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
+	14, // 32: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
+	16, // 33: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
+	18, // 34: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
+	20, // 35: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
+	22, // 36: mavio.user.v1.UserService.SetPin:input_type -> mavio.user.v1.SetPinRequest
+	24, // 37: mavio.user.v1.UserService.StartPasskeyRegistration:input_type -> mavio.user.v1.StartPasskeyRegistrationRequest
+	26, // 38: mavio.user.v1.UserService.FinishPasskeyRegistration:input_type -> mavio.user.v1.FinishPasskeyRegistrationRequest
+	28, // 39: mavio.user.v1.UserService.DeletePasskey:input_type -> mavio.user.v1.DeletePasskeyRequest
+	30, // 40: mavio.user.v1.UserService.StartTotp:input_type -> mavio.user.v1.StartTotpRequest
+	32, // 41: mavio.user.v1.UserService.ConfirmTotp:input_type -> mavio.user.v1.ConfirmTotpRequest
+	34, // 42: mavio.user.v1.UserService.DeleteTotp:input_type -> mavio.user.v1.DeleteTotpRequest
+	36, // 43: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
+	38, // 44: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
+	40, // 45: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
+	9,  // 46: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
+	11, // 47: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
+	13, // 48: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
+	15, // 49: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
+	17, // 50: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
+	19, // 51: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
+	21, // 52: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
+	23, // 53: mavio.user.v1.UserService.SetPin:output_type -> mavio.user.v1.SetPinResponse
+	25, // 54: mavio.user.v1.UserService.StartPasskeyRegistration:output_type -> mavio.user.v1.StartPasskeyRegistrationResponse
+	27, // 55: mavio.user.v1.UserService.FinishPasskeyRegistration:output_type -> mavio.user.v1.FinishPasskeyRegistrationResponse
+	29, // 56: mavio.user.v1.UserService.DeletePasskey:output_type -> mavio.user.v1.DeletePasskeyResponse
+	31, // 57: mavio.user.v1.UserService.StartTotp:output_type -> mavio.user.v1.StartTotpResponse
+	33, // 58: mavio.user.v1.UserService.ConfirmTotp:output_type -> mavio.user.v1.ConfirmTotpResponse
+	35, // 59: mavio.user.v1.UserService.DeleteTotp:output_type -> mavio.user.v1.DeleteTotpResponse
+	37, // 60: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
+	39, // 61: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
+	41, // 62: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
+	46, // [46:63] is the sub-list for method output_type
+	29, // [29:46] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_mavio_user_v1_user_proto_init() }
@@ -3856,7 +5096,7 @@ func file_mavio_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_user_v1_user_proto_rawDesc), len(file_mavio_user_v1_user_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   27,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

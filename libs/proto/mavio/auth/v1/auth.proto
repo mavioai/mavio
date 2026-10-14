@@ -7,8 +7,8 @@ import "google/protobuf/timestamp.proto";
 import "mavio/user/v1/user.proto";
 
 // AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
-// Login, StartRefresh and RefreshSession are public; the other methods act
-// on the calling user.
+// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh and
+// RefreshSession are public; the other methods act on the calling user.
 //
 // A session belongs to a device's Ed25519 key. Its access token lasts an
 // hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -23,9 +23,22 @@ service AuthService {
   // mode, creates the administrator and signs it in. It fails with
   // FAILED_PRECONDITION once the server's mode is chosen.
   rpc CreateFirstUser(CreateFirstUserRequest) returns (CreateFirstUserResponse);
-  // Login signs a device in, replacing its previous session. Wrong
-  // credentials and disabled users fail with UNAUTHENTICATED.
+  // Login signs a device in with a password, replacing its previous
+  // session. Wrong credentials and disabled users fail with
+  // UNAUTHENTICATED; a user with TOTP needs its code, and fails with
+  // FAILED_PRECONDITION when the right password comes without one. After
+  // three failures for a name or from an address, each failure locks them
+  // out twice as long as the one before, from a second up to 15 minutes,
+  // and sign-ins fail with RESOURCE_EXHAUSTED meanwhile.
   rpc Login(LoginRequest) returns (LoginResponse);
+  // StartPasskeySignIn begins signing in with a passkey at the origin of
+  // the request (its Origin header), which must be HTTPS, or HTTP on
+  // localhost, at a host name; the ceremony lasts five minutes.
+  rpc StartPasskeySignIn(StartPasskeySignInRequest) returns (StartPasskeySignInResponse);
+  // FinishPasskeySignIn signs a device in with the passkey's response,
+  // which names its user. A passkey needs no TOTP code; one that does not
+  // verify fails with UNAUTHENTICATED.
+  rpc FinishPasskeySignIn(FinishPasskeySignInRequest) returns (FinishPasskeySignInResponse);
   // StartRefresh gives a session's device a nonce to sign for
   // RefreshSession, valid for two minutes. Unknown sessions are
   // UNAUTHENTICATED.
@@ -173,9 +186,42 @@ message LoginRequest {
   ];
   string password = 2 [(buf.validate.field).string.max_len = 1024];
   Device device = 3 [(buf.validate.field).required = true];
+  // The current code of the user's TOTP, when it has one.
+  string totp_code = 4 [(buf.validate.field).string.pattern = "^[0-9]{6}$"];
 }
 
 message LoginResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+  // When the access token expires.
+  google.protobuf.Timestamp access_token_expire_time = 4;
+}
+
+message StartPasskeySignInRequest {}
+
+message StartPasskeySignInResponse {
+  string ceremony_id = 1;
+  // The request options, as PublicKeyCredential.parseRequestOptionsFromJSON
+  // takes them.
+  string options_json = 2;
+}
+
+message FinishPasskeySignInRequest {
+  string ceremony_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100
+  ];
+  // The passkey's response, as PublicKeyCredential.toJSON gives it.
+  string credential_json = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 65536
+  ];
+  Device device = 3 [(buf.validate.field).required = true];
+}
+
+message FinishPasskeySignInResponse {
   // Sent as "Authorization: Bearer <access_token>".
   string access_token = 1;
   mavio.user.v1.User user = 2;

@@ -62,6 +62,62 @@ pub type OwnedSetPinRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetPinResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'static>,
 >;
+///Shorthand for `OwnedView<StartPasskeyRegistrationRequestView<'static>>`.
+pub type OwnedStartPasskeyRegistrationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<StartPasskeyRegistrationResponseView<'static>>`.
+pub type OwnedStartPasskeyRegistrationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<FinishPasskeyRegistrationRequestView<'static>>`.
+pub type OwnedFinishPasskeyRegistrationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<FinishPasskeyRegistrationResponseView<'static>>`.
+pub type OwnedFinishPasskeyRegistrationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<DeletePasskeyRequestView<'static>>`.
+pub type OwnedDeletePasskeyRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyRequestView<'static>,
+>;
+///Shorthand for `OwnedView<DeletePasskeyResponseView<'static>>`.
+pub type OwnedDeletePasskeyResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyResponseView<'static>,
+>;
+///Shorthand for `OwnedView<StartTotpRequestView<'static>>`.
+pub type OwnedStartTotpRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartTotpRequestView<'static>,
+>;
+///Shorthand for `OwnedView<StartTotpResponseView<'static>>`.
+pub type OwnedStartTotpResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartTotpResponseView<'static>,
+>;
+///Shorthand for `OwnedView<ConfirmTotpRequestView<'static>>`.
+pub type OwnedConfirmTotpRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ConfirmTotpResponseView<'static>>`.
+pub type OwnedConfirmTotpResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpResponseView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteTotpRequestView<'static>>`.
+pub type OwnedDeleteTotpRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteTotpRequestView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteTotpResponseView<'static>>`.
+pub type OwnedDeleteTotpResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<UpdatePreferencesRequestView<'static>>`.
 pub type OwnedUpdatePreferencesRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesRequestView<'static>,
@@ -358,6 +414,226 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::StartPasskeyRegistrationResponse,
+>
+for crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::StartPasskeyRegistrationResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::FinishPasskeyRegistrationResponse,
+>
+for crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::FinishPasskeyRegistrationResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeletePasskeyResponse>
+for crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeletePasskeyResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::StartTotpResponse>
+for crate::proto::mavio::user::v1::__buffa::view::StartTotpResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::StartTotpResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::StartTotpResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::ConfirmTotpResponse>
+for crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::ConfirmTotpResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeleteTotpResponse>
+for crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::DeleteTotpResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::UpdatePreferencesResponse>
 for crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'_> {
     fn encode(
@@ -510,6 +786,42 @@ pub const USER_SERVICE_SET_PIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::se
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartPasskeyRegistration` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_START_PASSKEY_REGISTRATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/StartPasskeyRegistration",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `FinishPasskeyRegistration` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_FINISH_PASSKEY_REGISTRATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/FinishPasskeyRegistration",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `DeletePasskey` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_DELETE_PASSKEY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/DeletePasskey",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartTotp` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_START_TOTP_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/StartTotp",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ConfirmTotp` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_CONFIRM_TOTP_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/ConfirmTotp",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `DeleteTotp` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_DELETE_TOTP_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/DeleteTotp",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `UpdatePreferences` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const USER_SERVICE_UPDATE_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.user.v1.UserService/UpdatePreferences",
@@ -518,8 +830,9 @@ pub const USER_SERVICE_UPDATE_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrp
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// UserService manages accounts: the server's one administrator, members
 /// and managed users (docs/accounts.md §4.1). All methods except
-/// GetCurrentUser, UpdatePreferences and changing one's own password or PIN
-/// require the administrator.
+/// GetCurrentUser, UpdatePreferences, and managing one's own password, PIN,
+/// passkeys and TOTP require the administrator. Managed users have no
+/// passwords, passkeys or TOTP.
 ///
 /// # Implementing handlers
 ///
@@ -754,6 +1067,153 @@ pub trait UserService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::user::v1::SetPinResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartPasskeyRegistration begins creating a passkey of the calling user
+    /// at the origin of the request (its Origin header), which must be HTTPS,
+    /// or HTTP on localhost, at a host name; the passkey works at that origin's
+    /// host. The ceremony lasts five minutes.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_passkey_registration<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::StartPasskeyRegistrationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// FinishPasskeyRegistration stores the passkey from the authenticator's
+    /// response; one that does not verify fails with INVALID_ARGUMENT.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn finish_passkey_registration<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::FinishPasskeyRegistrationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// DeletePasskey removes a passkey of the calling user, or of anyone for
+    /// the administrator.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn delete_passkey<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::DeletePasskeyRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::DeletePasskeyResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartTotp begins setting up TOTP for the calling user, which signs in
+    /// with a password: it returns a new secret, which ConfirmTotp stores once
+    /// given a code of it within ten minutes.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_totp<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::StartTotpRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::StartTotpResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ConfirmTotp ends setting up TOTP, replacing the user's previous
+    /// secret; a wrong code fails with INVALID_ARGUMENT.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn confirm_totp<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::ConfirmTotpRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::ConfirmTotpResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
+    /// for the administrator.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn delete_totp<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::DeleteTotpRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::DeleteTotpResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1046,6 +1506,180 @@ impl<S: UserService> UserServiceExt for S {
             .with_spec(USER_SERVICE_SET_PIN_SPEC)
             .route_view(
                 USER_SERVICE_SERVICE_NAME,
+                "StartPasskeyRegistration",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_passkey_registration(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::StartPasskeyRegistrationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_START_PASSKEY_REGISTRATION_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "FinishPasskeyRegistration",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.finish_passkey_registration(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::FinishPasskeyRegistrationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_FINISH_PASSKEY_REGISTRATION_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "DeletePasskey",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::DeletePasskeyRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.delete_passkey(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::DeletePasskeyResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_DELETE_PASSKEY_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "StartTotp",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::StartTotpRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::StartTotpRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_totp(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::StartTotpResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_START_TOTP_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "ConfirmTotp",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::ConfirmTotpRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.confirm_totp(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::ConfirmTotpResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_CONFIRM_TOTP_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
+                "DeleteTotp",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::DeleteTotpRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::DeleteTotpRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.delete_totp(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::DeleteTotpResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_DELETE_TOTP_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
                 "UpdatePreferences",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1173,6 +1807,42 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(USER_SERVICE_SET_PIN_SPEC),
+                )
+            }
+            "StartPasskeyRegistration" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_START_PASSKEY_REGISTRATION_SPEC),
+                )
+            }
+            "FinishPasskeyRegistration" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_FINISH_PASSKEY_REGISTRATION_SPEC),
+                )
+            }
+            "DeletePasskey" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_DELETE_PASSKEY_SPEC),
+                )
+            }
+            "StartTotp" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_START_TOTP_SPEC),
+                )
+            }
+            "ConfirmTotp" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_CONFIRM_TOTP_SPEC),
+                )
+            }
+            "DeleteTotp" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_DELETE_TOTP_SPEC),
                 )
             }
             "UpdatePreferences" => {
@@ -1366,6 +2036,138 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                     svc.set_pin(ctx, req)
                         .await?
                         .encode::<crate::proto::mavio::user::v1::SetPinResponse>(format)
+                })
+            }
+            "StartPasskeyRegistration" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_passkey_registration(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::StartPasskeyRegistrationResponse,
+                        >(format)
+                })
+            }
+            "FinishPasskeyRegistration" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+                    >::from_parts(&req, &body);
+                    svc.finish_passkey_registration(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::FinishPasskeyRegistrationResponse,
+                        >(format)
+                })
+            }
+            "DeletePasskey" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::DeletePasskeyRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::DeletePasskeyRequest,
+                    >::from_parts(&req, &body);
+                    svc.delete_passkey(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::DeletePasskeyResponse,
+                        >(format)
+                })
+            }
+            "StartTotp" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::StartTotpRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::StartTotpRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::StartTotpRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_totp(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::StartTotpResponse,
+                        >(format)
+                })
+            }
+            "ConfirmTotp" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::ConfirmTotpRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::ConfirmTotpRequest,
+                    >::from_parts(&req, &body);
+                    svc.confirm_totp(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::ConfirmTotpResponse,
+                        >(format)
+                })
+            }
+            "DeleteTotp" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::DeleteTotpRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::DeleteTotpRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::DeleteTotpRequest,
+                    >::from_parts(&req, &body);
+                    svc.delete_totp(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::user::v1::DeleteTotpResponse,
+                        >(format)
                 })
             }
             "UpdatePreferences" => {
@@ -1861,6 +2663,276 @@ where
                 &self.transport,
                 &self.config,
                 USER_SERVICE_SET_PIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartPasskeyRegistration RPC. Sends a request to /mavio.user.v1.UserService/StartPasskeyRegistration.
+    pub async fn start_passkey_registration(
+        &self,
+        request: crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_passkey_registration_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartPasskeyRegistration RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_passkey_registration_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::StartPasskeyRegistrationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::StartPasskeyRegistrationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_START_PASSKEY_REGISTRATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the FinishPasskeyRegistration RPC. Sends a request to /mavio.user.v1.UserService/FinishPasskeyRegistration.
+    pub async fn finish_passkey_registration(
+        &self,
+        request: crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.finish_passkey_registration_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the FinishPasskeyRegistration RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn finish_passkey_registration_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::FinishPasskeyRegistrationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::FinishPasskeyRegistrationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_FINISH_PASSKEY_REGISTRATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the DeletePasskey RPC. Sends a request to /mavio.user.v1.UserService/DeletePasskey.
+    pub async fn delete_passkey(
+        &self,
+        request: crate::proto::mavio::user::v1::DeletePasskeyRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.delete_passkey_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the DeletePasskey RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn delete_passkey_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::DeletePasskeyRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeletePasskeyResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_DELETE_PASSKEY_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartTotp RPC. Sends a request to /mavio.user.v1.UserService/StartTotp.
+    pub async fn start_totp(
+        &self,
+        request: crate::proto::mavio::user::v1::StartTotpRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::StartTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_totp_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartTotp RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_totp_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::StartTotpRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::StartTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_START_TOTP_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ConfirmTotp RPC. Sends a request to /mavio.user.v1.UserService/ConfirmTotp.
+    pub async fn confirm_totp(
+        &self,
+        request: crate::proto::mavio::user::v1::ConfirmTotpRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.confirm_totp_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ConfirmTotp RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn confirm_totp_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::ConfirmTotpRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::ConfirmTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_CONFIRM_TOTP_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the DeleteTotp RPC. Sends a request to /mavio.user.v1.UserService/DeleteTotp.
+    pub async fn delete_totp(
+        &self,
+        request: crate::proto::mavio::user::v1::DeleteTotpRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.delete_totp_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the DeleteTotp RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn delete_totp_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::DeleteTotpRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_DELETE_TOTP_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

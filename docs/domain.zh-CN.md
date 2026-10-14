@@ -207,7 +207,7 @@ erDiagram
 
 * `User` 的 `Name` 唯一且不区分大小写，`Kind`（[账户 §4.1](accounts.zh-CN.md#41-用户)）为 `administrator`（每台服务器恰有一个，由唯一索引保证；`IsAdmin` 判断）、`member`，或 `managed`——没有凭据、只能通过切换进入的用户。用户用自己的凭据登录，或通过 `AuthProvider` 指定的插件认证；托管用户没有 `AuthProvider`。`Disabled` 禁止用户登录。
 * 托管用户可以有 `RestrictionProfile`，其他用户不可以：`younger_child`、`older_child` 或 `teen`，分别允许分级分数不超过 6、12 和 16（G 与 TV-G；PG 与 TV-PG；PG-13 与 TV-14），且不允许未分级条目。`User.Access` 给出生效的权限策略：在 `Policy` 上应用档案的限制（较低时），并设置 `BlockUnrated`。
-* `Credential` 是独立模式下用户的秘密，与用户分开存放：`password`，或四位数字的 `pin`，其 `Secret` 是 PHC 格式的哈希（如 `$argon2id$…`），另有 `CreatedAt` 与 `LastUsedAt`。每个用户每种凭据至多一个；删除用户时一并删除其凭据。PIN 用于保护切换到该用户，从不用于登录。
+* `Credential` 是独立模式下用户登录或切换所用的凭据，与用户分开存放，带有 `CreatedAt` 与 `LastUsedAt`。其 `Data` 对 `password` 和四位数字的 `pin` 是 PHC 格式的哈希（如 `$argon2id$…`），对 `totp` 是密封的秘密，对 `passkey` 是公钥凭据；通行密钥还有 `Name`。除通行密钥外，每个用户每种凭据至多一个（`CredentialKind.Single`）；删除用户时一并删除其凭据。PIN 用于保护切换到该用户，从不用于登录。
 * `UserPolicy`：
   * `Libraries` 把访问限制在列出的媒体库内（nil 表示全部）；由 `CanAccessLibrary` 判断。
   * `MaxParentalRating` 是允许的最高分级分数（"PG-13" 这类内容分级按国家分级体系映射为分数；nil 表示不限制，为零表示只允许适合所有年龄的内容）；设置了上限时，`BlockUnrated` 会隐藏没有分级的条目。
@@ -249,7 +249,7 @@ erDiagram
 | `ImageRepository` | `Get` 单张图片；列出一个所有者的图片，或一次列出多个所有者的图片（`ListForOwners`），并 `Replace` 它们 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（有署名的人员及其条目数，见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
-| `CredentialRepository` | 用户的凭据：`List`、按种类 `Get`、`Put`（替换该用户同一种类的凭据）、按种类 `Delete` |
+| `CredentialRepository` | 用户的凭据：`List`（按创建先后）、按单一种类 `Get`、`Put`（添加凭据，或更新同 ID 的凭据；单一种类的凭据替换该用户原有的那个）、按种类 `Delete`、`Remove` 单个凭据 |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`Get`、`ListForUser`（按最近活动排序）、`Touch`、`Delete`、`PurgeIdle`（某一时间之前最后活动的会话） |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail`、`List`（分页，见 §8）、`Purge` 清除某时间之前结束的任务 |

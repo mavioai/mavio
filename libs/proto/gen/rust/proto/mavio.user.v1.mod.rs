@@ -28,6 +28,10 @@ pub use self::__buffa::view::UserView;
 #[doc(inline)]
 pub use self::__buffa::view::UserOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::PasskeyView;
+#[doc(inline)]
+pub use self::__buffa::view::PasskeyOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::UserPolicyView;
 #[doc(inline)]
 pub use self::__buffa::view::UserPolicyOwnedView;
@@ -107,6 +111,54 @@ pub use self::__buffa::view::SetPinRequestOwnedView;
 pub use self::__buffa::view::SetPinResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPinResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeyRegistrationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeyRegistrationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeyRegistrationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeyRegistrationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeyRegistrationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeyRegistrationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeyRegistrationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeyRegistrationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeletePasskeyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeletePasskeyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeletePasskeyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeletePasskeyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTotpRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTotpRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTotpResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartTotpResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ConfirmTotpRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ConfirmTotpRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ConfirmTotpResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ConfirmTotpResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteTotpRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteTotpRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteTotpResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteTotpResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::UpdatePreferencesRequestView;
 #[doc(inline)]

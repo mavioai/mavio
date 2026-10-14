@@ -164,8 +164,11 @@ func Handler(opts Options) (http.Handler, error) {
 		Plugins: opts.Plugins, Hub: opts.Hub, Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs,
 		Activity: opts.Activity,
 	}, interceptors))
+	passkeys := auth.NewPasskeys()
+	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))
 	authService := rpc.NewAuthService(opts.Store, tokens)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
+	authService.Passkeys, authService.TOTP = passkeys, totp
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	authService.Info = opts.ServerInfo
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
@@ -221,6 +224,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	users := rpc.NewUserService(opts.Store)
 	users.Activity, users.Requests = opts.Activity, requestSettings
+	users.Passkeys, users.TOTP = passkeys, totp
 	mux.Handle(userv1connect.NewUserServiceHandler(users, interceptors))
 	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))

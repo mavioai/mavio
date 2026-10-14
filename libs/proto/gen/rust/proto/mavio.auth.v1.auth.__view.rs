@@ -1959,6 +1959,10 @@ pub struct LoginRequestView<'a> {
     pub password: ::core::option::Option<&'a str>,
     /// Field 3: `device`
     pub device: ::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'a>>,
+    /// The current code of the user's TOTP, when it has one.
+    ///
+    /// Field 4: `totp_code`
+    pub totp_code: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LoginRequestView<'a> {
@@ -2026,6 +2030,13 @@ impl<'a> ::buffa::MessageView<'a> for LoginRequestView<'a> {
                     }
                 }
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.totp_code = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2059,6 +2070,7 @@ impl<'a> ::buffa::MessageView<'a> for LoginRequestView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            totp_code: self.totp_code.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2084,6 +2096,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LoginRequestView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.totp_code {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2108,6 +2123,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LoginRequestView<'a> {
                 buf,
             );
             self.device.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.totp_code {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2216,6 +2234,13 @@ impl LoginRequestOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'_>> {
         &self.0.reborrow().device
+    }
+    /// The current code of the user's TOTP, when it has one.
+    ///
+    /// Field 4: `totp_code`
+    #[must_use]
+    pub fn totp_code(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().totp_code
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LoginRequestView<'static>>>
@@ -2633,6 +2658,1167 @@ for LoginResponseOwnedView {
 impl ::buffa::HasMessageView for super::super::LoginResponse {
     type View<'a> = LoginResponseView<'a>;
     type ViewHandle = LoginResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct StartPasskeySignInRequestView<'a> {
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for StartPasskeySignInRequestView<'a> {
+    type Owned = super::super::StartPasskeySignInRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::StartPasskeySignInRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::StartPasskeySignInRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::StartPasskeySignInRequest {
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for StartPasskeySignInRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for StartPasskeySignInRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartPasskeySignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartPasskeySignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInRequest";
+}
+::buffa::impl_default_view_instance!(StartPasskeySignInRequestView);
+::buffa::impl_view_reborrow!(StartPasskeySignInRequestView);
+/** Self-contained, `'static` owned view of a `StartPasskeySignInRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`StartPasskeySignInRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartPasskeySignInRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct StartPasskeySignInRequestOwnedView(
+    ::buffa::OwnedView<StartPasskeySignInRequestView<'static>>,
+);
+impl StartPasskeySignInRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::StartPasskeySignInRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`StartPasskeySignInRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &StartPasskeySignInRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::StartPasskeySignInRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<StartPasskeySignInRequestView<'static>>>
+for StartPasskeySignInRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<StartPasskeySignInRequestView<'static>>) -> Self {
+        StartPasskeySignInRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<StartPasskeySignInRequestOwnedView>
+for ::buffa::OwnedView<StartPasskeySignInRequestView<'static>> {
+    fn from(wrapper: StartPasskeySignInRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<StartPasskeySignInRequestView<'static>>>
+for StartPasskeySignInRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<StartPasskeySignInRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::StartPasskeySignInRequest {
+    type View<'a> = StartPasskeySignInRequestView<'a>;
+    type ViewHandle = StartPasskeySignInRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct StartPasskeySignInResponseView<'a> {
+    /// Field 1: `ceremony_id`
+    pub ceremony_id: ::core::option::Option<&'a str>,
+    /// The request options, as PublicKeyCredential.parseRequestOptionsFromJSON
+    /// takes them.
+    ///
+    /// Field 2: `options_json`
+    pub options_json: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for StartPasskeySignInResponseView<'a> {
+    type Owned = super::super::StartPasskeySignInResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.ceremony_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.options_json = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::StartPasskeySignInResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::StartPasskeySignInResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::StartPasskeySignInResponse {
+            ceremony_id: self.ceremony_id.map(|s| s.to_string()),
+            options_json: self.options_json.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for StartPasskeySignInResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.ceremony_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.options_json {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.ceremony_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.options_json {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for StartPasskeySignInResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartPasskeySignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartPasskeySignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartPasskeySignInResponse";
+}
+::buffa::impl_default_view_instance!(StartPasskeySignInResponseView);
+::buffa::impl_view_reborrow!(StartPasskeySignInResponseView);
+/** Self-contained, `'static` owned view of a `StartPasskeySignInResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`StartPasskeySignInResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartPasskeySignInResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct StartPasskeySignInResponseOwnedView(
+    ::buffa::OwnedView<StartPasskeySignInResponseView<'static>>,
+);
+impl StartPasskeySignInResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::StartPasskeySignInResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            StartPasskeySignInResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`StartPasskeySignInResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &StartPasskeySignInResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::StartPasskeySignInResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `ceremony_id`
+    #[must_use]
+    pub fn ceremony_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().ceremony_id
+    }
+    /// The request options, as PublicKeyCredential.parseRequestOptionsFromJSON
+    /// takes them.
+    ///
+    /// Field 2: `options_json`
+    #[must_use]
+    pub fn options_json(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().options_json
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<StartPasskeySignInResponseView<'static>>>
+for StartPasskeySignInResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<StartPasskeySignInResponseView<'static>>) -> Self {
+        StartPasskeySignInResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<StartPasskeySignInResponseOwnedView>
+for ::buffa::OwnedView<StartPasskeySignInResponseView<'static>> {
+    fn from(wrapper: StartPasskeySignInResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<StartPasskeySignInResponseView<'static>>>
+for StartPasskeySignInResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<StartPasskeySignInResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::StartPasskeySignInResponse {
+    type View<'a> = StartPasskeySignInResponseView<'a>;
+    type ViewHandle = StartPasskeySignInResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct FinishPasskeySignInRequestView<'a> {
+    /// Field 1: `ceremony_id`
+    pub ceremony_id: ::core::option::Option<&'a str>,
+    /// The passkey's response, as PublicKeyCredential.toJSON gives it.
+    ///
+    /// Field 2: `credential_json`
+    pub credential_json: ::core::option::Option<&'a str>,
+    /// Field 3: `device`
+    pub device: ::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'a>>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for FinishPasskeySignInRequestView<'a> {
+    type Owned = super::super::FinishPasskeySignInRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.ceremony_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.credential_json = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.device.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.device = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::DeviceView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::FinishPasskeySignInRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::FinishPasskeySignInRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::FinishPasskeySignInRequest {
+            ceremony_id: self.ceremony_id.map(|s| s.to_string()),
+            credential_json: self.credential_json.map(|s| s.to_string()),
+            device: match self.device.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::Device,
+                        ::buffa::Inline<super::super::Device>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for FinishPasskeySignInRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.ceremony_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.credential_json {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.device.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.device.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.ceremony_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.credential_json {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if self.device.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.device.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for FinishPasskeySignInRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "FinishPasskeySignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.FinishPasskeySignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInRequest";
+}
+::buffa::impl_default_view_instance!(FinishPasskeySignInRequestView);
+::buffa::impl_view_reborrow!(FinishPasskeySignInRequestView);
+/** Self-contained, `'static` owned view of a `FinishPasskeySignInRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`FinishPasskeySignInRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`FinishPasskeySignInRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct FinishPasskeySignInRequestOwnedView(
+    ::buffa::OwnedView<FinishPasskeySignInRequestView<'static>>,
+);
+impl FinishPasskeySignInRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::FinishPasskeySignInRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`FinishPasskeySignInRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &FinishPasskeySignInRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::FinishPasskeySignInRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `ceremony_id`
+    #[must_use]
+    pub fn ceremony_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().ceremony_id
+    }
+    /// The passkey's response, as PublicKeyCredential.toJSON gives it.
+    ///
+    /// Field 2: `credential_json`
+    #[must_use]
+    pub fn credential_json(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().credential_json
+    }
+    /// Field 3: `device`
+    #[must_use]
+    pub fn device(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'_>> {
+        &self.0.reborrow().device
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<FinishPasskeySignInRequestView<'static>>>
+for FinishPasskeySignInRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<FinishPasskeySignInRequestView<'static>>) -> Self {
+        FinishPasskeySignInRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<FinishPasskeySignInRequestOwnedView>
+for ::buffa::OwnedView<FinishPasskeySignInRequestView<'static>> {
+    fn from(wrapper: FinishPasskeySignInRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<FinishPasskeySignInRequestView<'static>>>
+for FinishPasskeySignInRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<FinishPasskeySignInRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::FinishPasskeySignInRequest {
+    type View<'a> = FinishPasskeySignInRequestView<'a>;
+    type ViewHandle = FinishPasskeySignInRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct FinishPasskeySignInResponseView<'a> {
+    /// Sent as "Authorization: Bearer \<access_token\>".
+    ///
+    /// Field 1: `access_token`
+    pub access_token: ::core::option::Option<&'a str>,
+    /// Field 2: `user`
+    pub user: ::buffa::MessageFieldView<
+        super::super::super::super::user::v1::__buffa::view::UserView<'a>,
+    >,
+    /// Field 3: `session`
+    pub session: ::buffa::MessageFieldView<super::super::__buffa::view::SessionView<'a>>,
+    /// When the access token expires.
+    ///
+    /// Field 4: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for FinishPasskeySignInResponseView<'a> {
+    type Owned = super::super::FinishPasskeySignInResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.access_token = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.user.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.user = ::buffa::MessageFieldView::set(
+                            <super::super::super::super::user::v1::__buffa::view::UserView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.session.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.session = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::SessionView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.access_token_expire_time.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.access_token_expire_time = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::FinishPasskeySignInResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::FinishPasskeySignInResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::FinishPasskeySignInResponse {
+            access_token: self.access_token.map(|s| s.to_string()),
+            user: match self.user.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::super::super::user::v1::User,
+                        ::buffa::Inline<super::super::super::super::user::v1::User>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            session: match self.session.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::Session,
+                        ::buffa::Inline<super::super::Session>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            access_token_expire_time: match self.access_token_expire_time.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Timestamp,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for FinishPasskeySignInResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.access_token {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.user.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.user.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.session.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.session.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.access_token {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if self.user.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.user.write_to(__cache, buf);
+        }
+        if self.session.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.session.write_to(__cache, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for FinishPasskeySignInResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "FinishPasskeySignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.FinishPasskeySignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.FinishPasskeySignInResponse";
+}
+::buffa::impl_default_view_instance!(FinishPasskeySignInResponseView);
+::buffa::impl_view_reborrow!(FinishPasskeySignInResponseView);
+/** Self-contained, `'static` owned view of a `FinishPasskeySignInResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`FinishPasskeySignInResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`FinishPasskeySignInResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct FinishPasskeySignInResponseOwnedView(
+    ::buffa::OwnedView<FinishPasskeySignInResponseView<'static>>,
+);
+impl FinishPasskeySignInResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::FinishPasskeySignInResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            FinishPasskeySignInResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`FinishPasskeySignInResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &FinishPasskeySignInResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::FinishPasskeySignInResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Sent as "Authorization: Bearer \<access_token\>".
+    ///
+    /// Field 1: `access_token`
+    #[must_use]
+    pub fn access_token(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().access_token
+    }
+    /// Field 2: `user`
+    #[must_use]
+    pub fn user(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::super::super::user::v1::__buffa::view::UserView<'_>,
+    > {
+        &self.0.reborrow().user
+    }
+    /// Field 3: `session`
+    #[must_use]
+    pub fn session(
+        &self,
+    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::SessionView<'_>> {
+        &self.0.reborrow().session
+    }
+    /// When the access token expires.
+    ///
+    /// Field 4: `access_token_expire_time`
+    #[must_use]
+    pub fn access_token_expire_time(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+    > {
+        &self.0.reborrow().access_token_expire_time
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<FinishPasskeySignInResponseView<'static>>>
+for FinishPasskeySignInResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<FinishPasskeySignInResponseView<'static>>,
+    ) -> Self {
+        FinishPasskeySignInResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<FinishPasskeySignInResponseOwnedView>
+for ::buffa::OwnedView<FinishPasskeySignInResponseView<'static>> {
+    fn from(wrapper: FinishPasskeySignInResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<FinishPasskeySignInResponseView<'static>>>
+for FinishPasskeySignInResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<FinishPasskeySignInResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::FinishPasskeySignInResponse {
+    type View<'a> = FinishPasskeySignInResponseView<'a>;
+    type ViewHandle = FinishPasskeySignInResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct StartRefreshRequestView<'a> {

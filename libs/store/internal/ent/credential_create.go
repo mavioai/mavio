@@ -37,9 +37,23 @@ func (_c *CredentialCreate) SetKind(v core.CredentialKind) *CredentialCreate {
 	return _c
 }
 
-// SetSecret sets the "secret" field.
-func (_c *CredentialCreate) SetSecret(v string) *CredentialCreate {
-	_c.mutation.SetSecret(v)
+// SetName sets the "name" field.
+func (_c *CredentialCreate) SetName(v string) *CredentialCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_c *CredentialCreate) SetNillableName(v *string) *CredentialCreate {
+	if v != nil {
+		_c.SetName(*v)
+	}
+	return _c
+}
+
+// SetData sets the "data" field.
+func (_c *CredentialCreate) SetData(v string) *CredentialCreate {
+	_c.mutation.SetData(v)
 	return _c
 }
 
@@ -125,6 +139,10 @@ func (_c *CredentialCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CredentialCreate) defaults() {
+	if _, ok := _c.mutation.Name(); !ok {
+		v := credential.DefaultName
+		_c.mutation.SetName(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := credential.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -143,8 +161,11 @@ func (_c *CredentialCreate) check() error {
 	if _, ok := _c.mutation.Kind(); !ok {
 		return &ValidationError{Name: "kind", err: errors.New(`ent: missing required field "Credential.kind"`)}
 	}
-	if _, ok := _c.mutation.Secret(); !ok {
-		return &ValidationError{Name: "secret", err: errors.New(`ent: missing required field "Credential.secret"`)}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Credential.name"`)}
+	}
+	if _, ok := _c.mutation.Data(); !ok {
+		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Credential.data"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Credential.created_at"`)}
@@ -192,9 +213,13 @@ func (_c *CredentialCreate) createSpec() (*Credential, *sqlgraph.CreateSpec) {
 		_spec.SetField(credential.FieldKind, field.TypeString, value)
 		_node.Kind = value
 	}
-	if value, ok := _c.mutation.Secret(); ok {
-		_spec.SetField(credential.FieldSecret, field.TypeString, value)
-		_node.Secret = value
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(credential.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := _c.mutation.Data(); ok {
+		_spec.SetField(credential.FieldData, field.TypeString, value)
+		_node.Data = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(credential.FieldCreatedAt, field.TypeTime, value)
@@ -297,15 +322,27 @@ func (u *CredentialUpsert) UpdateKind() *CredentialUpsert {
 	return u
 }
 
-// SetSecret sets the "secret" field.
-func (u *CredentialUpsert) SetSecret(v string) *CredentialUpsert {
-	u.Set(credential.FieldSecret, v)
+// SetName sets the "name" field.
+func (u *CredentialUpsert) SetName(v string) *CredentialUpsert {
+	u.Set(credential.FieldName, v)
 	return u
 }
 
-// UpdateSecret sets the "secret" field to the value that was provided on create.
-func (u *CredentialUpsert) UpdateSecret() *CredentialUpsert {
-	u.SetExcluded(credential.FieldSecret)
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CredentialUpsert) UpdateName() *CredentialUpsert {
+	u.SetExcluded(credential.FieldName)
+	return u
+}
+
+// SetData sets the "data" field.
+func (u *CredentialUpsert) SetData(v string) *CredentialUpsert {
+	u.Set(credential.FieldData, v)
+	return u
+}
+
+// UpdateData sets the "data" field to the value that was provided on create.
+func (u *CredentialUpsert) UpdateData() *CredentialUpsert {
+	u.SetExcluded(credential.FieldData)
 	return u
 }
 
@@ -406,17 +443,31 @@ func (u *CredentialUpsertOne) UpdateKind() *CredentialUpsertOne {
 	})
 }
 
-// SetSecret sets the "secret" field.
-func (u *CredentialUpsertOne) SetSecret(v string) *CredentialUpsertOne {
+// SetName sets the "name" field.
+func (u *CredentialUpsertOne) SetName(v string) *CredentialUpsertOne {
 	return u.Update(func(s *CredentialUpsert) {
-		s.SetSecret(v)
+		s.SetName(v)
 	})
 }
 
-// UpdateSecret sets the "secret" field to the value that was provided on create.
-func (u *CredentialUpsertOne) UpdateSecret() *CredentialUpsertOne {
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CredentialUpsertOne) UpdateName() *CredentialUpsertOne {
 	return u.Update(func(s *CredentialUpsert) {
-		s.UpdateSecret()
+		s.UpdateName()
+	})
+}
+
+// SetData sets the "data" field.
+func (u *CredentialUpsertOne) SetData(v string) *CredentialUpsertOne {
+	return u.Update(func(s *CredentialUpsert) {
+		s.SetData(v)
+	})
+}
+
+// UpdateData sets the "data" field to the value that was provided on create.
+func (u *CredentialUpsertOne) UpdateData() *CredentialUpsertOne {
+	return u.Update(func(s *CredentialUpsert) {
+		s.UpdateData()
 	})
 }
 
@@ -687,17 +738,31 @@ func (u *CredentialUpsertBulk) UpdateKind() *CredentialUpsertBulk {
 	})
 }
 
-// SetSecret sets the "secret" field.
-func (u *CredentialUpsertBulk) SetSecret(v string) *CredentialUpsertBulk {
+// SetName sets the "name" field.
+func (u *CredentialUpsertBulk) SetName(v string) *CredentialUpsertBulk {
 	return u.Update(func(s *CredentialUpsert) {
-		s.SetSecret(v)
+		s.SetName(v)
 	})
 }
 
-// UpdateSecret sets the "secret" field to the value that was provided on create.
-func (u *CredentialUpsertBulk) UpdateSecret() *CredentialUpsertBulk {
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CredentialUpsertBulk) UpdateName() *CredentialUpsertBulk {
 	return u.Update(func(s *CredentialUpsert) {
-		s.UpdateSecret()
+		s.UpdateName()
+	})
+}
+
+// SetData sets the "data" field.
+func (u *CredentialUpsertBulk) SetData(v string) *CredentialUpsertBulk {
+	return u.Update(func(s *CredentialUpsert) {
+		s.SetData(v)
+	})
+}
+
+// UpdateData sets the "data" field to the value that was provided on create.
+func (u *CredentialUpsertBulk) UpdateData() *CredentialUpsertBulk {
+	return u.Update(func(s *CredentialUpsert) {
+		s.UpdateData()
 	})
 }
 

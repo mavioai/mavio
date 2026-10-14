@@ -21,6 +21,10 @@ type UserService struct {
 	store core.Store
 	// Activity records account changes; nil records none.
 	Activity *activity.Log
+	// Passkeys creates users' passkeys; nil creates none.
+	Passkeys *auth.Passkeys
+	// TOTP sets up users' TOTP; nil sets up none.
+	TOTP *auth.TOTP
 	// Requests returns the request settings, whose default permissions new
 	// users get; nil uses the defaults.
 	Requests func() core.RequestSettings
@@ -251,7 +255,7 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 			if err != nil && !errors.Is(err, core.ErrNotFound) {
 				return err
 			}
-			if ok, _, err := auth.VerifyPassword(current.Secret, req.GetCurrentPassword()); err != nil || !ok {
+			if ok, _, err := auth.VerifyPassword(current.Data, req.GetCurrentPassword()); err != nil || !ok {
 				return connect.NewError(connect.CodePermissionDenied, errors.New("wrong current password"))
 			}
 		}

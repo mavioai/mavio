@@ -1023,6 +1023,7 @@ type LoginRequest struct {
 	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
 	xxx_hidden_Password    *string                `protobuf:"bytes,2,opt,name=password"`
 	xxx_hidden_Device      *Device                `protobuf:"bytes,3,opt,name=device"`
+	xxx_hidden_TotpCode    *string                `protobuf:"bytes,4,opt,name=totp_code,json=totpCode"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1081,18 +1082,33 @@ func (x *LoginRequest) GetDevice() *Device {
 	return nil
 }
 
+func (x *LoginRequest) GetTotpCode() string {
+	if x != nil {
+		if x.xxx_hidden_TotpCode != nil {
+			return *x.xxx_hidden_TotpCode
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *LoginRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *LoginRequest) SetPassword(v string) {
 	x.xxx_hidden_Password = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *LoginRequest) SetDevice(v *Device) {
 	x.xxx_hidden_Device = v
+}
+
+func (x *LoginRequest) SetTotpCode(v string) {
+	x.xxx_hidden_TotpCode = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *LoginRequest) HasName() bool {
@@ -1116,6 +1132,13 @@ func (x *LoginRequest) HasDevice() bool {
 	return x.xxx_hidden_Device != nil
 }
 
+func (x *LoginRequest) HasTotpCode() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *LoginRequest) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1130,12 +1153,19 @@ func (x *LoginRequest) ClearDevice() {
 	x.xxx_hidden_Device = nil
 }
 
+func (x *LoginRequest) ClearTotpCode() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_TotpCode = nil
+}
+
 type LoginRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Name     *string
 	Password *string
 	Device   *Device
+	// The current code of the user's TOTP, when it has one.
+	TotpCode *string
 }
 
 func (b0 LoginRequest_builder) Build() *LoginRequest {
@@ -1143,14 +1173,18 @@ func (b0 LoginRequest_builder) Build() *LoginRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Password != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Password = b.Password
 	}
 	x.xxx_hidden_Device = b.Device
+	if b.TotpCode != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_TotpCode = b.TotpCode
+	}
 	return m0
 }
 
@@ -1309,6 +1343,454 @@ func (b0 LoginResponse_builder) Build() *LoginResponse {
 	return m0
 }
 
+type StartPasskeySignInRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartPasskeySignInRequest) Reset() {
+	*x = StartPasskeySignInRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPasskeySignInRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPasskeySignInRequest) ProtoMessage() {}
+
+func (x *StartPasskeySignInRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type StartPasskeySignInRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 StartPasskeySignInRequest_builder) Build() *StartPasskeySignInRequest {
+	m0 := &StartPasskeySignInRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type StartPasskeySignInResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CeremonyId  *string                `protobuf:"bytes,1,opt,name=ceremony_id,json=ceremonyId"`
+	xxx_hidden_OptionsJson *string                `protobuf:"bytes,2,opt,name=options_json,json=optionsJson"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *StartPasskeySignInResponse) Reset() {
+	*x = StartPasskeySignInResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPasskeySignInResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPasskeySignInResponse) ProtoMessage() {}
+
+func (x *StartPasskeySignInResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartPasskeySignInResponse) GetCeremonyId() string {
+	if x != nil {
+		if x.xxx_hidden_CeremonyId != nil {
+			return *x.xxx_hidden_CeremonyId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartPasskeySignInResponse) GetOptionsJson() string {
+	if x != nil {
+		if x.xxx_hidden_OptionsJson != nil {
+			return *x.xxx_hidden_OptionsJson
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *StartPasskeySignInResponse) SetCeremonyId(v string) {
+	x.xxx_hidden_CeremonyId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *StartPasskeySignInResponse) SetOptionsJson(v string) {
+	x.xxx_hidden_OptionsJson = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *StartPasskeySignInResponse) HasCeremonyId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *StartPasskeySignInResponse) HasOptionsJson() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *StartPasskeySignInResponse) ClearCeremonyId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_CeremonyId = nil
+}
+
+func (x *StartPasskeySignInResponse) ClearOptionsJson() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_OptionsJson = nil
+}
+
+type StartPasskeySignInResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	CeremonyId *string
+	// The request options, as PublicKeyCredential.parseRequestOptionsFromJSON
+	// takes them.
+	OptionsJson *string
+}
+
+func (b0 StartPasskeySignInResponse_builder) Build() *StartPasskeySignInResponse {
+	m0 := &StartPasskeySignInResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.CeremonyId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_CeremonyId = b.CeremonyId
+	}
+	if b.OptionsJson != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_OptionsJson = b.OptionsJson
+	}
+	return m0
+}
+
+type FinishPasskeySignInRequest struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_CeremonyId     *string                `protobuf:"bytes,1,opt,name=ceremony_id,json=ceremonyId"`
+	xxx_hidden_CredentialJson *string                `protobuf:"bytes,2,opt,name=credential_json,json=credentialJson"`
+	xxx_hidden_Device         *Device                `protobuf:"bytes,3,opt,name=device"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *FinishPasskeySignInRequest) Reset() {
+	*x = FinishPasskeySignInRequest{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FinishPasskeySignInRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FinishPasskeySignInRequest) ProtoMessage() {}
+
+func (x *FinishPasskeySignInRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FinishPasskeySignInRequest) GetCeremonyId() string {
+	if x != nil {
+		if x.xxx_hidden_CeremonyId != nil {
+			return *x.xxx_hidden_CeremonyId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeySignInRequest) GetCredentialJson() string {
+	if x != nil {
+		if x.xxx_hidden_CredentialJson != nil {
+			return *x.xxx_hidden_CredentialJson
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeySignInRequest) GetDevice() *Device {
+	if x != nil {
+		return x.xxx_hidden_Device
+	}
+	return nil
+}
+
+func (x *FinishPasskeySignInRequest) SetCeremonyId(v string) {
+	x.xxx_hidden_CeremonyId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *FinishPasskeySignInRequest) SetCredentialJson(v string) {
+	x.xxx_hidden_CredentialJson = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *FinishPasskeySignInRequest) SetDevice(v *Device) {
+	x.xxx_hidden_Device = v
+}
+
+func (x *FinishPasskeySignInRequest) HasCeremonyId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *FinishPasskeySignInRequest) HasCredentialJson() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *FinishPasskeySignInRequest) HasDevice() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Device != nil
+}
+
+func (x *FinishPasskeySignInRequest) ClearCeremonyId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_CeremonyId = nil
+}
+
+func (x *FinishPasskeySignInRequest) ClearCredentialJson() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_CredentialJson = nil
+}
+
+func (x *FinishPasskeySignInRequest) ClearDevice() {
+	x.xxx_hidden_Device = nil
+}
+
+type FinishPasskeySignInRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	CeremonyId *string
+	// The passkey's response, as PublicKeyCredential.toJSON gives it.
+	CredentialJson *string
+	Device         *Device
+}
+
+func (b0 FinishPasskeySignInRequest_builder) Build() *FinishPasskeySignInRequest {
+	m0 := &FinishPasskeySignInRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.CeremonyId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_CeremonyId = b.CeremonyId
+	}
+	if b.CredentialJson != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_CredentialJson = b.CredentialJson
+	}
+	x.xxx_hidden_Device = b.Device
+	return m0
+}
+
+type FinishPasskeySignInResponse struct {
+	state                            protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccessToken           *string                `protobuf:"bytes,1,opt,name=access_token,json=accessToken"`
+	xxx_hidden_User                  *v1.User               `protobuf:"bytes,2,opt,name=user"`
+	xxx_hidden_Session               *Session               `protobuf:"bytes,3,opt,name=session"`
+	xxx_hidden_AccessTokenExpireTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=access_token_expire_time,json=accessTokenExpireTime"`
+	XXX_raceDetectHookData           protoimpl.RaceDetectHookData
+	XXX_presence                     [1]uint32
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
+}
+
+func (x *FinishPasskeySignInResponse) Reset() {
+	*x = FinishPasskeySignInResponse{}
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FinishPasskeySignInResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FinishPasskeySignInResponse) ProtoMessage() {}
+
+func (x *FinishPasskeySignInResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FinishPasskeySignInResponse) GetAccessToken() string {
+	if x != nil {
+		if x.xxx_hidden_AccessToken != nil {
+			return *x.xxx_hidden_AccessToken
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FinishPasskeySignInResponse) GetUser() *v1.User {
+	if x != nil {
+		return x.xxx_hidden_User
+	}
+	return nil
+}
+
+func (x *FinishPasskeySignInResponse) GetSession() *Session {
+	if x != nil {
+		return x.xxx_hidden_Session
+	}
+	return nil
+}
+
+func (x *FinishPasskeySignInResponse) GetAccessTokenExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_AccessTokenExpireTime
+	}
+	return nil
+}
+
+func (x *FinishPasskeySignInResponse) SetAccessToken(v string) {
+	x.xxx_hidden_AccessToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *FinishPasskeySignInResponse) SetUser(v *v1.User) {
+	x.xxx_hidden_User = v
+}
+
+func (x *FinishPasskeySignInResponse) SetSession(v *Session) {
+	x.xxx_hidden_Session = v
+}
+
+func (x *FinishPasskeySignInResponse) SetAccessTokenExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_AccessTokenExpireTime = v
+}
+
+func (x *FinishPasskeySignInResponse) HasAccessToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *FinishPasskeySignInResponse) HasUser() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_User != nil
+}
+
+func (x *FinishPasskeySignInResponse) HasSession() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Session != nil
+}
+
+func (x *FinishPasskeySignInResponse) HasAccessTokenExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_AccessTokenExpireTime != nil
+}
+
+func (x *FinishPasskeySignInResponse) ClearAccessToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AccessToken = nil
+}
+
+func (x *FinishPasskeySignInResponse) ClearUser() {
+	x.xxx_hidden_User = nil
+}
+
+func (x *FinishPasskeySignInResponse) ClearSession() {
+	x.xxx_hidden_Session = nil
+}
+
+func (x *FinishPasskeySignInResponse) ClearAccessTokenExpireTime() {
+	x.xxx_hidden_AccessTokenExpireTime = nil
+}
+
+type FinishPasskeySignInResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Sent as "Authorization: Bearer <access_token>".
+	AccessToken *string
+	User        *v1.User
+	Session     *Session
+	// When the access token expires.
+	AccessTokenExpireTime *timestamppb.Timestamp
+}
+
+func (b0 FinishPasskeySignInResponse_builder) Build() *FinishPasskeySignInResponse {
+	m0 := &FinishPasskeySignInResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AccessToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_AccessToken = b.AccessToken
+	}
+	x.xxx_hidden_User = b.User
+	x.xxx_hidden_Session = b.Session
+	x.xxx_hidden_AccessTokenExpireTime = b.AccessTokenExpireTime
+	return m0
+}
+
 type StartRefreshRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_SessionId   *string                `protobuf:"bytes,1,opt,name=session_id,json=sessionId"`
@@ -1320,7 +1802,7 @@ type StartRefreshRequest struct {
 
 func (x *StartRefreshRequest) Reset() {
 	*x = StartRefreshRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[8]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1332,7 +1814,7 @@ func (x *StartRefreshRequest) String() string {
 func (*StartRefreshRequest) ProtoMessage() {}
 
 func (x *StartRefreshRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[8]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1399,7 +1881,7 @@ type StartRefreshResponse struct {
 
 func (x *StartRefreshResponse) Reset() {
 	*x = StartRefreshResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[9]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1411,7 +1893,7 @@ func (x *StartRefreshResponse) String() string {
 func (*StartRefreshResponse) ProtoMessage() {}
 
 func (x *StartRefreshResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[9]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1503,7 +1985,7 @@ type RefreshSessionRequest struct {
 
 func (x *RefreshSessionRequest) Reset() {
 	*x = RefreshSessionRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[10]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1515,7 +1997,7 @@ func (x *RefreshSessionRequest) String() string {
 func (*RefreshSessionRequest) ProtoMessage() {}
 
 func (x *RefreshSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[10]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1646,7 +2128,7 @@ type RefreshSessionResponse struct {
 
 func (x *RefreshSessionResponse) Reset() {
 	*x = RefreshSessionResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[11]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1658,7 +2140,7 @@ func (x *RefreshSessionResponse) String() string {
 func (*RefreshSessionResponse) ProtoMessage() {}
 
 func (x *RefreshSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[11]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1746,7 +2228,7 @@ type LogoutRequest struct {
 
 func (x *LogoutRequest) Reset() {
 	*x = LogoutRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[12]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1758,7 +2240,7 @@ func (x *LogoutRequest) String() string {
 func (*LogoutRequest) ProtoMessage() {}
 
 func (x *LogoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[12]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1789,7 +2271,7 @@ type LogoutResponse struct {
 
 func (x *LogoutResponse) Reset() {
 	*x = LogoutResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[13]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1801,7 +2283,7 @@ func (x *LogoutResponse) String() string {
 func (*LogoutResponse) ProtoMessage() {}
 
 func (x *LogoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[13]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1832,7 +2314,7 @@ type ListSessionsRequest struct {
 
 func (x *ListSessionsRequest) Reset() {
 	*x = ListSessionsRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1844,7 +2326,7 @@ func (x *ListSessionsRequest) String() string {
 func (*ListSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[14]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1876,7 +2358,7 @@ type ListSessionsResponse struct {
 
 func (x *ListSessionsResponse) Reset() {
 	*x = ListSessionsResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1888,7 +2370,7 @@ func (x *ListSessionsResponse) String() string {
 func (*ListSessionsResponse) ProtoMessage() {}
 
 func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[15]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1937,7 +2419,7 @@ type RevokeSessionRequest struct {
 
 func (x *RevokeSessionRequest) Reset() {
 	*x = RevokeSessionRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1949,7 +2431,7 @@ func (x *RevokeSessionRequest) String() string {
 func (*RevokeSessionRequest) ProtoMessage() {}
 
 func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[16]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2012,7 +2494,7 @@ type RevokeSessionResponse struct {
 
 func (x *RevokeSessionResponse) Reset() {
 	*x = RevokeSessionResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2024,7 +2506,7 @@ func (x *RevokeSessionResponse) String() string {
 func (*RevokeSessionResponse) ProtoMessage() {}
 
 func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[17]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2056,7 +2538,7 @@ type StartQuickConnectRequest struct {
 
 func (x *StartQuickConnectRequest) Reset() {
 	*x = StartQuickConnectRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2068,7 +2550,7 @@ func (x *StartQuickConnectRequest) String() string {
 func (*StartQuickConnectRequest) ProtoMessage() {}
 
 func (x *StartQuickConnectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[18]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2128,7 +2610,7 @@ type StartQuickConnectResponse struct {
 
 func (x *StartQuickConnectResponse) Reset() {
 	*x = StartQuickConnectResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2140,7 +2622,7 @@ func (x *StartQuickConnectResponse) String() string {
 func (*StartQuickConnectResponse) ProtoMessage() {}
 
 func (x *StartQuickConnectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[19]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2264,7 +2746,7 @@ type GetQuickConnectStateRequest struct {
 
 func (x *GetQuickConnectStateRequest) Reset() {
 	*x = GetQuickConnectStateRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2276,7 +2758,7 @@ func (x *GetQuickConnectStateRequest) String() string {
 func (*GetQuickConnectStateRequest) ProtoMessage() {}
 
 func (x *GetQuickConnectStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[20]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2343,7 +2825,7 @@ type GetQuickConnectStateResponse struct {
 
 func (x *GetQuickConnectStateResponse) Reset() {
 	*x = GetQuickConnectStateResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2355,7 +2837,7 @@ func (x *GetQuickConnectStateResponse) String() string {
 func (*GetQuickConnectStateResponse) ProtoMessage() {}
 
 func (x *GetQuickConnectStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[21]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2442,7 +2924,7 @@ type AuthorizeQuickConnectRequest struct {
 
 func (x *AuthorizeQuickConnectRequest) Reset() {
 	*x = AuthorizeQuickConnectRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[22]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2454,7 +2936,7 @@ func (x *AuthorizeQuickConnectRequest) String() string {
 func (*AuthorizeQuickConnectRequest) ProtoMessage() {}
 
 func (x *AuthorizeQuickConnectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[22]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2518,7 +3000,7 @@ type AuthorizeQuickConnectResponse struct {
 
 func (x *AuthorizeQuickConnectResponse) Reset() {
 	*x = AuthorizeQuickConnectResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[23]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2530,7 +3012,7 @@ func (x *AuthorizeQuickConnectResponse) String() string {
 func (*AuthorizeQuickConnectResponse) ProtoMessage() {}
 
 func (x *AuthorizeQuickConnectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[23]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2589,7 +3071,7 @@ type LoginWithQuickConnectRequest struct {
 
 func (x *LoginWithQuickConnectRequest) Reset() {
 	*x = LoginWithQuickConnectRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[24]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2601,7 +3083,7 @@ func (x *LoginWithQuickConnectRequest) String() string {
 func (*LoginWithQuickConnectRequest) ProtoMessage() {}
 
 func (x *LoginWithQuickConnectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[24]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2671,7 +3153,7 @@ type LoginWithQuickConnectResponse struct {
 
 func (x *LoginWithQuickConnectResponse) Reset() {
 	*x = LoginWithQuickConnectResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[25]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2683,7 +3165,7 @@ func (x *LoginWithQuickConnectResponse) String() string {
 func (*LoginWithQuickConnectResponse) ProtoMessage() {}
 
 func (x *LoginWithQuickConnectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[25]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2826,7 +3308,7 @@ type ApiKey struct {
 
 func (x *ApiKey) Reset() {
 	*x = ApiKey{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[26]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2838,7 +3320,7 @@ func (x *ApiKey) String() string {
 func (*ApiKey) ProtoMessage() {}
 
 func (x *ApiKey) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[26]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3017,7 +3499,7 @@ type CreateApiKeyRequest struct {
 
 func (x *CreateApiKeyRequest) Reset() {
 	*x = CreateApiKeyRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[27]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3029,7 +3511,7 @@ func (x *CreateApiKeyRequest) String() string {
 func (*CreateApiKeyRequest) ProtoMessage() {}
 
 func (x *CreateApiKeyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[27]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3096,7 +3578,7 @@ type CreateApiKeyResponse struct {
 
 func (x *CreateApiKeyResponse) Reset() {
 	*x = CreateApiKeyResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[28]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3108,7 +3590,7 @@ func (x *CreateApiKeyResponse) String() string {
 func (*CreateApiKeyResponse) ProtoMessage() {}
 
 func (x *CreateApiKeyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[28]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3196,7 +3678,7 @@ type ListApiKeysRequest struct {
 
 func (x *ListApiKeysRequest) Reset() {
 	*x = ListApiKeysRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[29]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3208,7 +3690,7 @@ func (x *ListApiKeysRequest) String() string {
 func (*ListApiKeysRequest) ProtoMessage() {}
 
 func (x *ListApiKeysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[29]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3240,7 +3722,7 @@ type ListApiKeysResponse struct {
 
 func (x *ListApiKeysResponse) Reset() {
 	*x = ListApiKeysResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[30]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3252,7 +3734,7 @@ func (x *ListApiKeysResponse) String() string {
 func (*ListApiKeysResponse) ProtoMessage() {}
 
 func (x *ListApiKeysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[30]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3301,7 +3783,7 @@ type RevokeApiKeyRequest struct {
 
 func (x *RevokeApiKeyRequest) Reset() {
 	*x = RevokeApiKeyRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[31]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3313,7 +3795,7 @@ func (x *RevokeApiKeyRequest) String() string {
 func (*RevokeApiKeyRequest) ProtoMessage() {}
 
 func (x *RevokeApiKeyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[31]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3376,7 +3858,7 @@ type RevokeApiKeyResponse struct {
 
 func (x *RevokeApiKeyResponse) Reset() {
 	*x = RevokeApiKeyResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[32]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3388,7 +3870,7 @@ func (x *RevokeApiKeyResponse) String() string {
 func (*RevokeApiKeyResponse) ProtoMessage() {}
 
 func (x *RevokeApiKeyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[32]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3422,7 +3904,7 @@ type ForgotPasswordRequest struct {
 
 func (x *ForgotPasswordRequest) Reset() {
 	*x = ForgotPasswordRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[33]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3434,7 +3916,7 @@ func (x *ForgotPasswordRequest) String() string {
 func (*ForgotPasswordRequest) ProtoMessage() {}
 
 func (x *ForgotPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[33]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3498,7 +3980,7 @@ type ForgotPasswordResponse struct {
 
 func (x *ForgotPasswordResponse) Reset() {
 	*x = ForgotPasswordResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[34]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3510,7 +3992,7 @@ func (x *ForgotPasswordResponse) String() string {
 func (*ForgotPasswordResponse) ProtoMessage() {}
 
 func (x *ForgotPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[34]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3571,7 +4053,7 @@ type ResetPasswordRequest struct {
 
 func (x *ResetPasswordRequest) Reset() {
 	*x = ResetPasswordRequest{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[35]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3583,7 +4065,7 @@ func (x *ResetPasswordRequest) String() string {
 func (*ResetPasswordRequest) ProtoMessage() {}
 
 func (x *ResetPasswordRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[35]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3710,7 +4192,7 @@ type ResetPasswordResponse struct {
 
 func (x *ResetPasswordResponse) Reset() {
 	*x = ResetPasswordResponse{}
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[36]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3722,7 +4204,7 @@ func (x *ResetPasswordResponse) String() string {
 func (*ResetPasswordResponse) ProtoMessage() {}
 
 func (x *ResetPasswordResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_auth_v1_auth_proto_msgTypes[36]
+	mi := &file_mavio_auth_v1_auth_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3782,13 +4264,31 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12'\n" +
 	"\x04user\x18\x02 \x01(\v2\x13.mavio.user.v1.UserR\x04user\x120\n" +
 	"\asession\x18\x03 \x01(\v2\x16.mavio.auth.v1.SessionR\asession\x12S\n" +
-	"\x18access_token_expire_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x15accessTokenExpireTime\"\x8b\x01\n" +
+	"\x18access_token_expire_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x15accessTokenExpireTime\"\xbb\x01\n" +
 	"\fLoginRequest\x12\x1e\n" +
 	"\x04name\x18\x01 \x01(\tB\n" +
 	"\xbaH\a\xc8\x01\x01r\x02\x18dR\x04name\x12$\n" +
 	"\bpassword\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\bR\bpassword\x125\n" +
-	"\x06device\x18\x03 \x01(\v2\x15.mavio.auth.v1.DeviceB\x06\xbaH\x03\xc8\x01\x01R\x06device\"\xe2\x01\n" +
+	"\x06device\x18\x03 \x01(\v2\x15.mavio.auth.v1.DeviceB\x06\xbaH\x03\xc8\x01\x01R\x06device\x12.\n" +
+	"\ttotp_code\x18\x04 \x01(\tB\x11\xbaH\x0er\f2\n" +
+	"^[0-9]{6}$R\btotpCode\"\xe2\x01\n" +
 	"\rLoginResponse\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12'\n" +
+	"\x04user\x18\x02 \x01(\v2\x13.mavio.user.v1.UserR\x04user\x120\n" +
+	"\asession\x18\x03 \x01(\v2\x16.mavio.auth.v1.SessionR\asession\x12S\n" +
+	"\x18access_token_expire_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\x15accessTokenExpireTime\"\x1b\n" +
+	"\x19StartPasskeySignInRequest\"`\n" +
+	"\x1aStartPasskeySignInResponse\x12\x1f\n" +
+	"\vceremony_id\x18\x01 \x01(\tR\n" +
+	"ceremonyId\x12!\n" +
+	"\foptions_json\x18\x02 \x01(\tR\voptionsJson\"\xb7\x01\n" +
+	"\x1aFinishPasskeySignInRequest\x12+\n" +
+	"\vceremony_id\x18\x01 \x01(\tB\n" +
+	"\xbaH\a\xc8\x01\x01r\x02\x18dR\n" +
+	"ceremonyId\x125\n" +
+	"\x0fcredential_json\x18\x02 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x18\x80\x80\x04R\x0ecredentialJson\x125\n" +
+	"\x06device\x18\x03 \x01(\v2\x15.mavio.auth.v1.DeviceB\x06\xbaH\x03\xc8\x01\x01R\x06device\"\xf0\x01\n" +
+	"\x1bFinishPasskeySignInResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12'\n" +
 	"\x04user\x18\x02 \x01(\v2\x13.mavio.user.v1.UserR\x04user\x120\n" +
 	"\asession\x18\x03 \x01(\v2\x16.mavio.auth.v1.SessionR\asession\x12S\n" +
@@ -3878,11 +4378,13 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\vAccountMode\x12\x1c\n" +
 	"\x18ACCOUNT_MODE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17ACCOUNT_MODE_STANDALONE\x10\x01\x12\x1a\n" +
-	"\x16ACCOUNT_MODE_MAVIO_DEV\x10\x022\xd5\f\n" +
+	"\x16ACCOUNT_MODE_MAVIO_DEV\x10\x022\xae\x0e\n" +
 	"\vAuthService\x12Y\n" +
 	"\vGetAuthInfo\x12!.mavio.auth.v1.GetAuthInfoRequest\x1a\".mavio.auth.v1.GetAuthInfoResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\x0fCreateFirstUser\x12%.mavio.auth.v1.CreateFirstUserRequest\x1a&.mavio.auth.v1.CreateFirstUserResponse\x12B\n" +
-	"\x05Login\x12\x1b.mavio.auth.v1.LoginRequest\x1a\x1c.mavio.auth.v1.LoginResponse\x12W\n" +
+	"\x05Login\x12\x1b.mavio.auth.v1.LoginRequest\x1a\x1c.mavio.auth.v1.LoginResponse\x12i\n" +
+	"\x12StartPasskeySignIn\x12(.mavio.auth.v1.StartPasskeySignInRequest\x1a).mavio.auth.v1.StartPasskeySignInResponse\x12l\n" +
+	"\x13FinishPasskeySignIn\x12).mavio.auth.v1.FinishPasskeySignInRequest\x1a*.mavio.auth.v1.FinishPasskeySignInResponse\x12W\n" +
 	"\fStartRefresh\x12\".mavio.auth.v1.StartRefreshRequest\x1a#.mavio.auth.v1.StartRefreshResponse\x12]\n" +
 	"\x0eRefreshSession\x12$.mavio.auth.v1.RefreshSessionRequest\x1a%.mavio.auth.v1.RefreshSessionResponse\x12E\n" +
 	"\x06Logout\x12\x1c.mavio.auth.v1.LogoutRequest\x1a\x1d.mavio.auth.v1.LogoutResponse\x12\\\n" +
@@ -3900,7 +4402,7 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\x11com.mavio.auth.v1B\tAuthProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1;authv1\xa2\x02\x03MAX\xaa\x02\rMavio.Auth.V1\xca\x02\rMavio\\Auth\\V1\xe2\x02\x19Mavio\\Auth\\V1\\GPBMetadata\xea\x02\x0fMavio::Auth::V1b\beditionsp\xe8\a"
 
 var file_mavio_auth_v1_auth_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_mavio_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_mavio_auth_v1_auth_proto_goTypes = []any{
 	(AccountMode)(0),                      // 0: mavio.auth.v1.AccountMode
 	(*Device)(nil),                        // 1: mavio.auth.v1.Device
@@ -3911,105 +4413,117 @@ var file_mavio_auth_v1_auth_proto_goTypes = []any{
 	(*CreateFirstUserResponse)(nil),       // 6: mavio.auth.v1.CreateFirstUserResponse
 	(*LoginRequest)(nil),                  // 7: mavio.auth.v1.LoginRequest
 	(*LoginResponse)(nil),                 // 8: mavio.auth.v1.LoginResponse
-	(*StartRefreshRequest)(nil),           // 9: mavio.auth.v1.StartRefreshRequest
-	(*StartRefreshResponse)(nil),          // 10: mavio.auth.v1.StartRefreshResponse
-	(*RefreshSessionRequest)(nil),         // 11: mavio.auth.v1.RefreshSessionRequest
-	(*RefreshSessionResponse)(nil),        // 12: mavio.auth.v1.RefreshSessionResponse
-	(*LogoutRequest)(nil),                 // 13: mavio.auth.v1.LogoutRequest
-	(*LogoutResponse)(nil),                // 14: mavio.auth.v1.LogoutResponse
-	(*ListSessionsRequest)(nil),           // 15: mavio.auth.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),          // 16: mavio.auth.v1.ListSessionsResponse
-	(*RevokeSessionRequest)(nil),          // 17: mavio.auth.v1.RevokeSessionRequest
-	(*RevokeSessionResponse)(nil),         // 18: mavio.auth.v1.RevokeSessionResponse
-	(*StartQuickConnectRequest)(nil),      // 19: mavio.auth.v1.StartQuickConnectRequest
-	(*StartQuickConnectResponse)(nil),     // 20: mavio.auth.v1.StartQuickConnectResponse
-	(*GetQuickConnectStateRequest)(nil),   // 21: mavio.auth.v1.GetQuickConnectStateRequest
-	(*GetQuickConnectStateResponse)(nil),  // 22: mavio.auth.v1.GetQuickConnectStateResponse
-	(*AuthorizeQuickConnectRequest)(nil),  // 23: mavio.auth.v1.AuthorizeQuickConnectRequest
-	(*AuthorizeQuickConnectResponse)(nil), // 24: mavio.auth.v1.AuthorizeQuickConnectResponse
-	(*LoginWithQuickConnectRequest)(nil),  // 25: mavio.auth.v1.LoginWithQuickConnectRequest
-	(*LoginWithQuickConnectResponse)(nil), // 26: mavio.auth.v1.LoginWithQuickConnectResponse
-	(*ApiKey)(nil),                        // 27: mavio.auth.v1.ApiKey
-	(*CreateApiKeyRequest)(nil),           // 28: mavio.auth.v1.CreateApiKeyRequest
-	(*CreateApiKeyResponse)(nil),          // 29: mavio.auth.v1.CreateApiKeyResponse
-	(*ListApiKeysRequest)(nil),            // 30: mavio.auth.v1.ListApiKeysRequest
-	(*ListApiKeysResponse)(nil),           // 31: mavio.auth.v1.ListApiKeysResponse
-	(*RevokeApiKeyRequest)(nil),           // 32: mavio.auth.v1.RevokeApiKeyRequest
-	(*RevokeApiKeyResponse)(nil),          // 33: mavio.auth.v1.RevokeApiKeyResponse
-	(*ForgotPasswordRequest)(nil),         // 34: mavio.auth.v1.ForgotPasswordRequest
-	(*ForgotPasswordResponse)(nil),        // 35: mavio.auth.v1.ForgotPasswordResponse
-	(*ResetPasswordRequest)(nil),          // 36: mavio.auth.v1.ResetPasswordRequest
-	(*ResetPasswordResponse)(nil),         // 37: mavio.auth.v1.ResetPasswordResponse
-	(*timestamppb.Timestamp)(nil),         // 38: google.protobuf.Timestamp
-	(*v1.User)(nil),                       // 39: mavio.user.v1.User
+	(*StartPasskeySignInRequest)(nil),     // 9: mavio.auth.v1.StartPasskeySignInRequest
+	(*StartPasskeySignInResponse)(nil),    // 10: mavio.auth.v1.StartPasskeySignInResponse
+	(*FinishPasskeySignInRequest)(nil),    // 11: mavio.auth.v1.FinishPasskeySignInRequest
+	(*FinishPasskeySignInResponse)(nil),   // 12: mavio.auth.v1.FinishPasskeySignInResponse
+	(*StartRefreshRequest)(nil),           // 13: mavio.auth.v1.StartRefreshRequest
+	(*StartRefreshResponse)(nil),          // 14: mavio.auth.v1.StartRefreshResponse
+	(*RefreshSessionRequest)(nil),         // 15: mavio.auth.v1.RefreshSessionRequest
+	(*RefreshSessionResponse)(nil),        // 16: mavio.auth.v1.RefreshSessionResponse
+	(*LogoutRequest)(nil),                 // 17: mavio.auth.v1.LogoutRequest
+	(*LogoutResponse)(nil),                // 18: mavio.auth.v1.LogoutResponse
+	(*ListSessionsRequest)(nil),           // 19: mavio.auth.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),          // 20: mavio.auth.v1.ListSessionsResponse
+	(*RevokeSessionRequest)(nil),          // 21: mavio.auth.v1.RevokeSessionRequest
+	(*RevokeSessionResponse)(nil),         // 22: mavio.auth.v1.RevokeSessionResponse
+	(*StartQuickConnectRequest)(nil),      // 23: mavio.auth.v1.StartQuickConnectRequest
+	(*StartQuickConnectResponse)(nil),     // 24: mavio.auth.v1.StartQuickConnectResponse
+	(*GetQuickConnectStateRequest)(nil),   // 25: mavio.auth.v1.GetQuickConnectStateRequest
+	(*GetQuickConnectStateResponse)(nil),  // 26: mavio.auth.v1.GetQuickConnectStateResponse
+	(*AuthorizeQuickConnectRequest)(nil),  // 27: mavio.auth.v1.AuthorizeQuickConnectRequest
+	(*AuthorizeQuickConnectResponse)(nil), // 28: mavio.auth.v1.AuthorizeQuickConnectResponse
+	(*LoginWithQuickConnectRequest)(nil),  // 29: mavio.auth.v1.LoginWithQuickConnectRequest
+	(*LoginWithQuickConnectResponse)(nil), // 30: mavio.auth.v1.LoginWithQuickConnectResponse
+	(*ApiKey)(nil),                        // 31: mavio.auth.v1.ApiKey
+	(*CreateApiKeyRequest)(nil),           // 32: mavio.auth.v1.CreateApiKeyRequest
+	(*CreateApiKeyResponse)(nil),          // 33: mavio.auth.v1.CreateApiKeyResponse
+	(*ListApiKeysRequest)(nil),            // 34: mavio.auth.v1.ListApiKeysRequest
+	(*ListApiKeysResponse)(nil),           // 35: mavio.auth.v1.ListApiKeysResponse
+	(*RevokeApiKeyRequest)(nil),           // 36: mavio.auth.v1.RevokeApiKeyRequest
+	(*RevokeApiKeyResponse)(nil),          // 37: mavio.auth.v1.RevokeApiKeyResponse
+	(*ForgotPasswordRequest)(nil),         // 38: mavio.auth.v1.ForgotPasswordRequest
+	(*ForgotPasswordResponse)(nil),        // 39: mavio.auth.v1.ForgotPasswordResponse
+	(*ResetPasswordRequest)(nil),          // 40: mavio.auth.v1.ResetPasswordRequest
+	(*ResetPasswordResponse)(nil),         // 41: mavio.auth.v1.ResetPasswordResponse
+	(*timestamppb.Timestamp)(nil),         // 42: google.protobuf.Timestamp
+	(*v1.User)(nil),                       // 43: mavio.user.v1.User
 }
 var file_mavio_auth_v1_auth_proto_depIdxs = []int32{
 	1,  // 0: mavio.auth.v1.Session.device:type_name -> mavio.auth.v1.Device
-	38, // 1: mavio.auth.v1.Session.create_time:type_name -> google.protobuf.Timestamp
-	38, // 2: mavio.auth.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
+	42, // 1: mavio.auth.v1.Session.create_time:type_name -> google.protobuf.Timestamp
+	42, // 2: mavio.auth.v1.Session.last_seen_time:type_name -> google.protobuf.Timestamp
 	0,  // 3: mavio.auth.v1.GetAuthInfoResponse.mode:type_name -> mavio.auth.v1.AccountMode
 	1,  // 4: mavio.auth.v1.CreateFirstUserRequest.device:type_name -> mavio.auth.v1.Device
-	39, // 5: mavio.auth.v1.CreateFirstUserResponse.user:type_name -> mavio.user.v1.User
+	43, // 5: mavio.auth.v1.CreateFirstUserResponse.user:type_name -> mavio.user.v1.User
 	2,  // 6: mavio.auth.v1.CreateFirstUserResponse.session:type_name -> mavio.auth.v1.Session
-	38, // 7: mavio.auth.v1.CreateFirstUserResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
+	42, // 7: mavio.auth.v1.CreateFirstUserResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
 	1,  // 8: mavio.auth.v1.LoginRequest.device:type_name -> mavio.auth.v1.Device
-	39, // 9: mavio.auth.v1.LoginResponse.user:type_name -> mavio.user.v1.User
+	43, // 9: mavio.auth.v1.LoginResponse.user:type_name -> mavio.user.v1.User
 	2,  // 10: mavio.auth.v1.LoginResponse.session:type_name -> mavio.auth.v1.Session
-	38, // 11: mavio.auth.v1.LoginResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
-	38, // 12: mavio.auth.v1.StartRefreshResponse.expire_time:type_name -> google.protobuf.Timestamp
-	38, // 13: mavio.auth.v1.RefreshSessionResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
-	2,  // 14: mavio.auth.v1.ListSessionsResponse.sessions:type_name -> mavio.auth.v1.Session
-	1,  // 15: mavio.auth.v1.StartQuickConnectRequest.device:type_name -> mavio.auth.v1.Device
-	38, // 16: mavio.auth.v1.StartQuickConnectResponse.expire_time:type_name -> google.protobuf.Timestamp
-	38, // 17: mavio.auth.v1.GetQuickConnectStateResponse.expire_time:type_name -> google.protobuf.Timestamp
-	1,  // 18: mavio.auth.v1.AuthorizeQuickConnectResponse.device:type_name -> mavio.auth.v1.Device
-	39, // 19: mavio.auth.v1.LoginWithQuickConnectResponse.user:type_name -> mavio.user.v1.User
-	2,  // 20: mavio.auth.v1.LoginWithQuickConnectResponse.session:type_name -> mavio.auth.v1.Session
-	38, // 21: mavio.auth.v1.LoginWithQuickConnectResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
-	38, // 22: mavio.auth.v1.ApiKey.create_time:type_name -> google.protobuf.Timestamp
-	38, // 23: mavio.auth.v1.ApiKey.last_use_time:type_name -> google.protobuf.Timestamp
-	27, // 24: mavio.auth.v1.CreateApiKeyResponse.api_key:type_name -> mavio.auth.v1.ApiKey
-	27, // 25: mavio.auth.v1.ListApiKeysResponse.api_keys:type_name -> mavio.auth.v1.ApiKey
-	38, // 26: mavio.auth.v1.ForgotPasswordResponse.expire_time:type_name -> google.protobuf.Timestamp
-	3,  // 27: mavio.auth.v1.AuthService.GetAuthInfo:input_type -> mavio.auth.v1.GetAuthInfoRequest
-	5,  // 28: mavio.auth.v1.AuthService.CreateFirstUser:input_type -> mavio.auth.v1.CreateFirstUserRequest
-	7,  // 29: mavio.auth.v1.AuthService.Login:input_type -> mavio.auth.v1.LoginRequest
-	9,  // 30: mavio.auth.v1.AuthService.StartRefresh:input_type -> mavio.auth.v1.StartRefreshRequest
-	11, // 31: mavio.auth.v1.AuthService.RefreshSession:input_type -> mavio.auth.v1.RefreshSessionRequest
-	13, // 32: mavio.auth.v1.AuthService.Logout:input_type -> mavio.auth.v1.LogoutRequest
-	15, // 33: mavio.auth.v1.AuthService.ListSessions:input_type -> mavio.auth.v1.ListSessionsRequest
-	17, // 34: mavio.auth.v1.AuthService.RevokeSession:input_type -> mavio.auth.v1.RevokeSessionRequest
-	19, // 35: mavio.auth.v1.AuthService.StartQuickConnect:input_type -> mavio.auth.v1.StartQuickConnectRequest
-	21, // 36: mavio.auth.v1.AuthService.GetQuickConnectState:input_type -> mavio.auth.v1.GetQuickConnectStateRequest
-	23, // 37: mavio.auth.v1.AuthService.AuthorizeQuickConnect:input_type -> mavio.auth.v1.AuthorizeQuickConnectRequest
-	25, // 38: mavio.auth.v1.AuthService.LoginWithQuickConnect:input_type -> mavio.auth.v1.LoginWithQuickConnectRequest
-	28, // 39: mavio.auth.v1.AuthService.CreateApiKey:input_type -> mavio.auth.v1.CreateApiKeyRequest
-	30, // 40: mavio.auth.v1.AuthService.ListApiKeys:input_type -> mavio.auth.v1.ListApiKeysRequest
-	32, // 41: mavio.auth.v1.AuthService.RevokeApiKey:input_type -> mavio.auth.v1.RevokeApiKeyRequest
-	34, // 42: mavio.auth.v1.AuthService.ForgotPassword:input_type -> mavio.auth.v1.ForgotPasswordRequest
-	36, // 43: mavio.auth.v1.AuthService.ResetPassword:input_type -> mavio.auth.v1.ResetPasswordRequest
-	4,  // 44: mavio.auth.v1.AuthService.GetAuthInfo:output_type -> mavio.auth.v1.GetAuthInfoResponse
-	6,  // 45: mavio.auth.v1.AuthService.CreateFirstUser:output_type -> mavio.auth.v1.CreateFirstUserResponse
-	8,  // 46: mavio.auth.v1.AuthService.Login:output_type -> mavio.auth.v1.LoginResponse
-	10, // 47: mavio.auth.v1.AuthService.StartRefresh:output_type -> mavio.auth.v1.StartRefreshResponse
-	12, // 48: mavio.auth.v1.AuthService.RefreshSession:output_type -> mavio.auth.v1.RefreshSessionResponse
-	14, // 49: mavio.auth.v1.AuthService.Logout:output_type -> mavio.auth.v1.LogoutResponse
-	16, // 50: mavio.auth.v1.AuthService.ListSessions:output_type -> mavio.auth.v1.ListSessionsResponse
-	18, // 51: mavio.auth.v1.AuthService.RevokeSession:output_type -> mavio.auth.v1.RevokeSessionResponse
-	20, // 52: mavio.auth.v1.AuthService.StartQuickConnect:output_type -> mavio.auth.v1.StartQuickConnectResponse
-	22, // 53: mavio.auth.v1.AuthService.GetQuickConnectState:output_type -> mavio.auth.v1.GetQuickConnectStateResponse
-	24, // 54: mavio.auth.v1.AuthService.AuthorizeQuickConnect:output_type -> mavio.auth.v1.AuthorizeQuickConnectResponse
-	26, // 55: mavio.auth.v1.AuthService.LoginWithQuickConnect:output_type -> mavio.auth.v1.LoginWithQuickConnectResponse
-	29, // 56: mavio.auth.v1.AuthService.CreateApiKey:output_type -> mavio.auth.v1.CreateApiKeyResponse
-	31, // 57: mavio.auth.v1.AuthService.ListApiKeys:output_type -> mavio.auth.v1.ListApiKeysResponse
-	33, // 58: mavio.auth.v1.AuthService.RevokeApiKey:output_type -> mavio.auth.v1.RevokeApiKeyResponse
-	35, // 59: mavio.auth.v1.AuthService.ForgotPassword:output_type -> mavio.auth.v1.ForgotPasswordResponse
-	37, // 60: mavio.auth.v1.AuthService.ResetPassword:output_type -> mavio.auth.v1.ResetPasswordResponse
-	44, // [44:61] is the sub-list for method output_type
-	27, // [27:44] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	42, // 11: mavio.auth.v1.LoginResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
+	1,  // 12: mavio.auth.v1.FinishPasskeySignInRequest.device:type_name -> mavio.auth.v1.Device
+	43, // 13: mavio.auth.v1.FinishPasskeySignInResponse.user:type_name -> mavio.user.v1.User
+	2,  // 14: mavio.auth.v1.FinishPasskeySignInResponse.session:type_name -> mavio.auth.v1.Session
+	42, // 15: mavio.auth.v1.FinishPasskeySignInResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
+	42, // 16: mavio.auth.v1.StartRefreshResponse.expire_time:type_name -> google.protobuf.Timestamp
+	42, // 17: mavio.auth.v1.RefreshSessionResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
+	2,  // 18: mavio.auth.v1.ListSessionsResponse.sessions:type_name -> mavio.auth.v1.Session
+	1,  // 19: mavio.auth.v1.StartQuickConnectRequest.device:type_name -> mavio.auth.v1.Device
+	42, // 20: mavio.auth.v1.StartQuickConnectResponse.expire_time:type_name -> google.protobuf.Timestamp
+	42, // 21: mavio.auth.v1.GetQuickConnectStateResponse.expire_time:type_name -> google.protobuf.Timestamp
+	1,  // 22: mavio.auth.v1.AuthorizeQuickConnectResponse.device:type_name -> mavio.auth.v1.Device
+	43, // 23: mavio.auth.v1.LoginWithQuickConnectResponse.user:type_name -> mavio.user.v1.User
+	2,  // 24: mavio.auth.v1.LoginWithQuickConnectResponse.session:type_name -> mavio.auth.v1.Session
+	42, // 25: mavio.auth.v1.LoginWithQuickConnectResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
+	42, // 26: mavio.auth.v1.ApiKey.create_time:type_name -> google.protobuf.Timestamp
+	42, // 27: mavio.auth.v1.ApiKey.last_use_time:type_name -> google.protobuf.Timestamp
+	31, // 28: mavio.auth.v1.CreateApiKeyResponse.api_key:type_name -> mavio.auth.v1.ApiKey
+	31, // 29: mavio.auth.v1.ListApiKeysResponse.api_keys:type_name -> mavio.auth.v1.ApiKey
+	42, // 30: mavio.auth.v1.ForgotPasswordResponse.expire_time:type_name -> google.protobuf.Timestamp
+	3,  // 31: mavio.auth.v1.AuthService.GetAuthInfo:input_type -> mavio.auth.v1.GetAuthInfoRequest
+	5,  // 32: mavio.auth.v1.AuthService.CreateFirstUser:input_type -> mavio.auth.v1.CreateFirstUserRequest
+	7,  // 33: mavio.auth.v1.AuthService.Login:input_type -> mavio.auth.v1.LoginRequest
+	9,  // 34: mavio.auth.v1.AuthService.StartPasskeySignIn:input_type -> mavio.auth.v1.StartPasskeySignInRequest
+	11, // 35: mavio.auth.v1.AuthService.FinishPasskeySignIn:input_type -> mavio.auth.v1.FinishPasskeySignInRequest
+	13, // 36: mavio.auth.v1.AuthService.StartRefresh:input_type -> mavio.auth.v1.StartRefreshRequest
+	15, // 37: mavio.auth.v1.AuthService.RefreshSession:input_type -> mavio.auth.v1.RefreshSessionRequest
+	17, // 38: mavio.auth.v1.AuthService.Logout:input_type -> mavio.auth.v1.LogoutRequest
+	19, // 39: mavio.auth.v1.AuthService.ListSessions:input_type -> mavio.auth.v1.ListSessionsRequest
+	21, // 40: mavio.auth.v1.AuthService.RevokeSession:input_type -> mavio.auth.v1.RevokeSessionRequest
+	23, // 41: mavio.auth.v1.AuthService.StartQuickConnect:input_type -> mavio.auth.v1.StartQuickConnectRequest
+	25, // 42: mavio.auth.v1.AuthService.GetQuickConnectState:input_type -> mavio.auth.v1.GetQuickConnectStateRequest
+	27, // 43: mavio.auth.v1.AuthService.AuthorizeQuickConnect:input_type -> mavio.auth.v1.AuthorizeQuickConnectRequest
+	29, // 44: mavio.auth.v1.AuthService.LoginWithQuickConnect:input_type -> mavio.auth.v1.LoginWithQuickConnectRequest
+	32, // 45: mavio.auth.v1.AuthService.CreateApiKey:input_type -> mavio.auth.v1.CreateApiKeyRequest
+	34, // 46: mavio.auth.v1.AuthService.ListApiKeys:input_type -> mavio.auth.v1.ListApiKeysRequest
+	36, // 47: mavio.auth.v1.AuthService.RevokeApiKey:input_type -> mavio.auth.v1.RevokeApiKeyRequest
+	38, // 48: mavio.auth.v1.AuthService.ForgotPassword:input_type -> mavio.auth.v1.ForgotPasswordRequest
+	40, // 49: mavio.auth.v1.AuthService.ResetPassword:input_type -> mavio.auth.v1.ResetPasswordRequest
+	4,  // 50: mavio.auth.v1.AuthService.GetAuthInfo:output_type -> mavio.auth.v1.GetAuthInfoResponse
+	6,  // 51: mavio.auth.v1.AuthService.CreateFirstUser:output_type -> mavio.auth.v1.CreateFirstUserResponse
+	8,  // 52: mavio.auth.v1.AuthService.Login:output_type -> mavio.auth.v1.LoginResponse
+	10, // 53: mavio.auth.v1.AuthService.StartPasskeySignIn:output_type -> mavio.auth.v1.StartPasskeySignInResponse
+	12, // 54: mavio.auth.v1.AuthService.FinishPasskeySignIn:output_type -> mavio.auth.v1.FinishPasskeySignInResponse
+	14, // 55: mavio.auth.v1.AuthService.StartRefresh:output_type -> mavio.auth.v1.StartRefreshResponse
+	16, // 56: mavio.auth.v1.AuthService.RefreshSession:output_type -> mavio.auth.v1.RefreshSessionResponse
+	18, // 57: mavio.auth.v1.AuthService.Logout:output_type -> mavio.auth.v1.LogoutResponse
+	20, // 58: mavio.auth.v1.AuthService.ListSessions:output_type -> mavio.auth.v1.ListSessionsResponse
+	22, // 59: mavio.auth.v1.AuthService.RevokeSession:output_type -> mavio.auth.v1.RevokeSessionResponse
+	24, // 60: mavio.auth.v1.AuthService.StartQuickConnect:output_type -> mavio.auth.v1.StartQuickConnectResponse
+	26, // 61: mavio.auth.v1.AuthService.GetQuickConnectState:output_type -> mavio.auth.v1.GetQuickConnectStateResponse
+	28, // 62: mavio.auth.v1.AuthService.AuthorizeQuickConnect:output_type -> mavio.auth.v1.AuthorizeQuickConnectResponse
+	30, // 63: mavio.auth.v1.AuthService.LoginWithQuickConnect:output_type -> mavio.auth.v1.LoginWithQuickConnectResponse
+	33, // 64: mavio.auth.v1.AuthService.CreateApiKey:output_type -> mavio.auth.v1.CreateApiKeyResponse
+	35, // 65: mavio.auth.v1.AuthService.ListApiKeys:output_type -> mavio.auth.v1.ListApiKeysResponse
+	37, // 66: mavio.auth.v1.AuthService.RevokeApiKey:output_type -> mavio.auth.v1.RevokeApiKeyResponse
+	39, // 67: mavio.auth.v1.AuthService.ForgotPassword:output_type -> mavio.auth.v1.ForgotPasswordResponse
+	41, // 68: mavio.auth.v1.AuthService.ResetPassword:output_type -> mavio.auth.v1.ResetPasswordResponse
+	50, // [50:69] is the sub-list for method output_type
+	31, // [31:50] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_mavio_auth_v1_auth_proto_init() }
@@ -4023,7 +4537,7 @@ func file_mavio_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_auth_v1_auth_proto_rawDesc), len(file_mavio_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   37,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

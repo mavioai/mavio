@@ -54,6 +54,22 @@ pub use self::__buffa::view::LoginResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LoginResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::StartPasskeySignInRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeySignInRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeySignInResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartPasskeySignInResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeySignInRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeySignInRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeySignInResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishPasskeySignInResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::StartRefreshRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::StartRefreshRequestOwnedView;

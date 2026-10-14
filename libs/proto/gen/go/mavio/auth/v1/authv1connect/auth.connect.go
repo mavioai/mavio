@@ -40,6 +40,12 @@ const (
 	AuthServiceCreateFirstUserProcedure = "/mavio.auth.v1.AuthService/CreateFirstUser"
 	// AuthServiceLoginProcedure is the fully-qualified name of the AuthService's Login RPC.
 	AuthServiceLoginProcedure = "/mavio.auth.v1.AuthService/Login"
+	// AuthServiceStartPasskeySignInProcedure is the fully-qualified name of the AuthService's
+	// StartPasskeySignIn RPC.
+	AuthServiceStartPasskeySignInProcedure = "/mavio.auth.v1.AuthService/StartPasskeySignIn"
+	// AuthServiceFinishPasskeySignInProcedure is the fully-qualified name of the AuthService's
+	// FinishPasskeySignIn RPC.
+	AuthServiceFinishPasskeySignInProcedure = "/mavio.auth.v1.AuthService/FinishPasskeySignIn"
 	// AuthServiceStartRefreshProcedure is the fully-qualified name of the AuthService's StartRefresh
 	// RPC.
 	AuthServiceStartRefreshProcedure = "/mavio.auth.v1.AuthService/StartRefresh"
@@ -90,9 +96,22 @@ type AuthServiceClient interface {
 	// mode, creates the administrator and signs it in. It fails with
 	// FAILED_PRECONDITION once the server's mode is chosen.
 	CreateFirstUser(context.Context, *v1.CreateFirstUserRequest) (*v1.CreateFirstUserResponse, error)
-	// Login signs a device in, replacing its previous session. Wrong
-	// credentials and disabled users fail with UNAUTHENTICATED.
+	// Login signs a device in with a password, replacing its previous
+	// session. Wrong credentials and disabled users fail with
+	// UNAUTHENTICATED; a user with TOTP needs its code, and fails with
+	// FAILED_PRECONDITION when the right password comes without one. After
+	// three failures for a name or from an address, each failure locks them
+	// out twice as long as the one before, from a second up to 15 minutes,
+	// and sign-ins fail with RESOURCE_EXHAUSTED meanwhile.
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// StartPasskeySignIn begins signing in with a passkey at the origin of
+	// the request (its Origin header), which must be HTTPS, or HTTP on
+	// localhost, at a host name; the ceremony lasts five minutes.
+	StartPasskeySignIn(context.Context, *v1.StartPasskeySignInRequest) (*v1.StartPasskeySignInResponse, error)
+	// FinishPasskeySignIn signs a device in with the passkey's response,
+	// which names its user. A passkey needs no TOTP code; one that does not
+	// verify fails with UNAUTHENTICATED.
+	FinishPasskeySignIn(context.Context, *v1.FinishPasskeySignInRequest) (*v1.FinishPasskeySignInResponse, error)
 	// StartRefresh gives a session's device a nonce to sign for
 	// RefreshSession, valid for two minutes. Unknown sessions are
 	// UNAUTHENTICATED.
@@ -172,6 +191,18 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			httpClient,
 			baseURL+AuthServiceLoginProcedure,
 			connect.WithSchema(authServiceMethods.ByName("Login")),
+			connect.WithClientOptions(opts...),
+		),
+		startPasskeySignIn: connect.NewClient[v1.StartPasskeySignInRequest, v1.StartPasskeySignInResponse](
+			httpClient,
+			baseURL+AuthServiceStartPasskeySignInProcedure,
+			connect.WithSchema(authServiceMethods.ByName("StartPasskeySignIn")),
+			connect.WithClientOptions(opts...),
+		),
+		finishPasskeySignIn: connect.NewClient[v1.FinishPasskeySignInRequest, v1.FinishPasskeySignInResponse](
+			httpClient,
+			baseURL+AuthServiceFinishPasskeySignInProcedure,
+			connect.WithSchema(authServiceMethods.ByName("FinishPasskeySignIn")),
 			connect.WithClientOptions(opts...),
 		),
 		startRefresh: connect.NewClient[v1.StartRefreshRequest, v1.StartRefreshResponse](
@@ -269,6 +300,8 @@ type authServiceClient struct {
 	getAuthInfo           *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
 	createFirstUser       *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
 	login                 *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	startPasskeySignIn    *connect.Client[v1.StartPasskeySignInRequest, v1.StartPasskeySignInResponse]
+	finishPasskeySignIn   *connect.Client[v1.FinishPasskeySignInRequest, v1.FinishPasskeySignInResponse]
 	startRefresh          *connect.Client[v1.StartRefreshRequest, v1.StartRefreshResponse]
 	refreshSession        *connect.Client[v1.RefreshSessionRequest, v1.RefreshSessionResponse]
 	logout                *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
@@ -306,6 +339,24 @@ func (c *authServiceClient) CreateFirstUser(ctx context.Context, req *v1.CreateF
 // Login calls mavio.auth.v1.AuthService.Login.
 func (c *authServiceClient) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginResponse, error) {
 	response, err := c.login.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// StartPasskeySignIn calls mavio.auth.v1.AuthService.StartPasskeySignIn.
+func (c *authServiceClient) StartPasskeySignIn(ctx context.Context, req *v1.StartPasskeySignInRequest) (*v1.StartPasskeySignInResponse, error) {
+	response, err := c.startPasskeySignIn.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// FinishPasskeySignIn calls mavio.auth.v1.AuthService.FinishPasskeySignIn.
+func (c *authServiceClient) FinishPasskeySignIn(ctx context.Context, req *v1.FinishPasskeySignInRequest) (*v1.FinishPasskeySignInResponse, error) {
+	response, err := c.finishPasskeySignIn.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -446,9 +497,22 @@ type AuthServiceHandler interface {
 	// mode, creates the administrator and signs it in. It fails with
 	// FAILED_PRECONDITION once the server's mode is chosen.
 	CreateFirstUser(context.Context, *v1.CreateFirstUserRequest) (*v1.CreateFirstUserResponse, error)
-	// Login signs a device in, replacing its previous session. Wrong
-	// credentials and disabled users fail with UNAUTHENTICATED.
+	// Login signs a device in with a password, replacing its previous
+	// session. Wrong credentials and disabled users fail with
+	// UNAUTHENTICATED; a user with TOTP needs its code, and fails with
+	// FAILED_PRECONDITION when the right password comes without one. After
+	// three failures for a name or from an address, each failure locks them
+	// out twice as long as the one before, from a second up to 15 minutes,
+	// and sign-ins fail with RESOURCE_EXHAUSTED meanwhile.
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// StartPasskeySignIn begins signing in with a passkey at the origin of
+	// the request (its Origin header), which must be HTTPS, or HTTP on
+	// localhost, at a host name; the ceremony lasts five minutes.
+	StartPasskeySignIn(context.Context, *v1.StartPasskeySignInRequest) (*v1.StartPasskeySignInResponse, error)
+	// FinishPasskeySignIn signs a device in with the passkey's response,
+	// which names its user. A passkey needs no TOTP code; one that does not
+	// verify fails with UNAUTHENTICATED.
+	FinishPasskeySignIn(context.Context, *v1.FinishPasskeySignInRequest) (*v1.FinishPasskeySignInResponse, error)
 	// StartRefresh gives a session's device a nonce to sign for
 	// RefreshSession, valid for two minutes. Unknown sessions are
 	// UNAUTHENTICATED.
@@ -524,6 +588,18 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		AuthServiceLoginProcedure,
 		svc.Login,
 		connect.WithSchema(authServiceMethods.ByName("Login")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceStartPasskeySignInHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceStartPasskeySignInProcedure,
+		svc.StartPasskeySignIn,
+		connect.WithSchema(authServiceMethods.ByName("StartPasskeySignIn")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceFinishPasskeySignInHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceFinishPasskeySignInProcedure,
+		svc.FinishPasskeySignIn,
+		connect.WithSchema(authServiceMethods.ByName("FinishPasskeySignIn")),
 		connect.WithHandlerOptions(opts...),
 	)
 	authServiceStartRefreshHandler := connect.NewUnaryHandlerSimple(
@@ -621,6 +697,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceCreateFirstUserHandler.ServeHTTP(w, r)
 		case AuthServiceLoginProcedure:
 			authServiceLoginHandler.ServeHTTP(w, r)
+		case AuthServiceStartPasskeySignInProcedure:
+			authServiceStartPasskeySignInHandler.ServeHTTP(w, r)
+		case AuthServiceFinishPasskeySignInProcedure:
+			authServiceFinishPasskeySignInHandler.ServeHTTP(w, r)
 		case AuthServiceStartRefreshProcedure:
 			authServiceStartRefreshHandler.ServeHTTP(w, r)
 		case AuthServiceRefreshSessionProcedure:
@@ -668,6 +748,14 @@ func (UnimplementedAuthServiceHandler) CreateFirstUser(context.Context, *v1.Crea
 
 func (UnimplementedAuthServiceHandler) Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.Login is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) StartPasskeySignIn(context.Context, *v1.StartPasskeySignInRequest) (*v1.StartPasskeySignInResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartPasskeySignIn is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) FinishPasskeySignIn(context.Context, *v1.FinishPasskeySignInRequest) (*v1.FinishPasskeySignInResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.FinishPasskeySignIn is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) StartRefresh(context.Context, *v1.StartRefreshRequest) (*v1.StartRefreshResponse, error) {
