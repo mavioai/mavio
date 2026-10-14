@@ -50,6 +50,7 @@ type Interceptor struct {
 	public       map[string]bool
 	userBound    map[string]bool
 	sessionBound map[string]bool
+	media        *MediaURLs
 	now          func() time.Time
 }
 
@@ -102,6 +103,9 @@ func (i *Interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 
 func (i *Interceptor) authenticate(ctx context.Context, spec connect.Spec, h http.Header) (context.Context, error) {
 	procedure := spec.Procedure
+	if i.media != nil {
+		ctx = WithMediaURLs(ctx, i.media)
+	}
 	if g, ok := ctx.Value(pluginKey{}).(Plugin); ok {
 		p, err := i.authenticatePlugin(ctx, g, procedure, spec.IdempotencyLevel == connect.IdempotencyNoSideEffects, h)
 		if err != nil {

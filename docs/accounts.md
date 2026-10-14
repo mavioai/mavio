@@ -154,6 +154,12 @@ A client generates an Ed25519 key pair per installation and keeps the private ke
 ### 5.4 Media URLs
 Direct play, HLS playlists and segments, images and subtitles are fetched with short-lived URLs the server signs for one session and one item, so that players and casting receivers need no headers and no token appears in a URL that outlives its use.
 
+* A signed URL is `signed/{token}/{path}`. The token names the session and its expiry and authenticates them, with the first segments of the path, under a key derived from the server's identity key; the paths below those segments share it, so an HLS playlist's relative segments, subtitles and attachments need no tokens of their own.
+* The server returns signed URLs in its responses: a playback's media, subtitles and attachments, items' and people's images, libraries' collages, trickplay sheets and chapter images.
+* A playback's URLs expire with the playback. An image's URL stays the same for twelve hours, so that caches keep their copies, and is accepted for twelve more.
+* Every URL stops working when its session ends or its user is disabled, checked at most every 30 seconds.
+* The same paths without the prefix take the credentials of the Connect API instead, for API keys and plugins.
+
 ### 5.5 Sign-in Assertions
 A **sign-in assertion** is a JWT mavio.dev signs for one server: its audience is the server's ID, it names the account, the device's public key and a nonce, and it is valid for two minutes. The server checks it against mavio.dev's keys, which it caches, checks the account's access record, and accepts each assertion once.
 

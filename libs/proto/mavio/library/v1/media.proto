@@ -112,7 +112,11 @@ message MediaStream {
 message Chapter {
   google.protobuf.Duration start = 1;
   string title = 2;
-  // Its image is served at
-  // /images/chapters/{item_id}/{media_source_id}/{index}.
   bool has_image = 3;
+  // The signed URL of its image relative to the server's base URL, for
+  // the caller's session; it takes the size parameters of images. Empty
+  // without an image, or for callers without a session, which fetch
+  // /images/chapters/{item_id}/{media_source_id}/{index} with their
+  // credentials.
+  string image_url = 4;
 }

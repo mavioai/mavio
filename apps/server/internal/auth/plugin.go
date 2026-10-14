@@ -70,6 +70,13 @@ func (i *Interceptor) RequireUser(procedures ...string) *Interceptor {
 	return i
 }
 
+// SignMedia has the interceptor sign media URLs with m for the requests it
+// authenticates, as MediaURL returns them.
+func (i *Interceptor) SignMedia(m *MediaURLs) *Interceptor {
+	i.media = m
+	return i
+}
+
 // RequireSession names the procedures that need a signed-in session, in the
 // form of RequireUser. Plugins have none.
 func (i *Interceptor) RequireSession(procedures ...string) *Interceptor {

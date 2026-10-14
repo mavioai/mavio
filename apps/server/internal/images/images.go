@@ -51,9 +51,8 @@ type Config struct {
 	Logger *slog.Logger
 }
 
-// Server serves images by ID at /images/{id}. The ID, which clients only
-// learn from API responses filtered by their access, is the only
-// credential.
+// Server serves images by ID at /images/{id}, to requests the HTTP server
+// let through: signed media URLs or credentials.
 type Server struct {
 	cfg   Config
 	log   *slog.Logger
@@ -80,7 +79,7 @@ func New(cfg Config) *Server {
 // collection or playlist, with the same parameters, the trickplay sheets
 // of items at GET /images/trickplay/{item}/{width}/{sheet}.jpg, and their
 // chapter images at GET /images/chapters/{item}/{source}/{index}, which
-// take the parameters too; the IDs are the credentials.
+// take the parameters too.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /images/{id}", s.serve)

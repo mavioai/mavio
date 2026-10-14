@@ -83,7 +83,7 @@ func (s *PlaybackService) ListMediaSources(ctx context.Context, req *playbackv1.
 	}
 	out := make([]*libraryv1.MediaSource, len(sources))
 	for i := range sources {
-		out[i] = mediaSourceToProto(&sources[i], p.User.Admin)
+		out[i] = mediaSourceToProto(ctx, &sources[i], p.User.Admin)
 		out[i].SetRemote(i >= local)
 	}
 	return playbackv1.ListMediaSourcesResponse_builder{MediaSources: out}.Build(), nil
@@ -132,13 +132,13 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 			Forced:      &st.Forced,
 			Method:      new(subtitleMethodsToProto[sub.Method]),
 			Format:      &sub.Format,
-			Url:         new(pb.SubtitleURL(sub)),
+			Url:         new(playbackURL(ctx, pb.SubtitleURL(sub))),
 		}.Build()
 	}
 	var attachments []*playbackv1.Attachment
 	for _, a := range pb.Attachments() {
 		attachments = append(attachments, playbackv1.Attachment_builder{
-			Index: new(int32(a.Index)), FileName: &a.Title, MimeType: &a.MimeType, Url: new(pb.AttachmentURL(a.Index)),
+			Index: new(int32(a.Index)), FileName: &a.Title, MimeType: &a.MimeType, Url: new(playbackURL(ctx, pb.AttachmentURL(a.Index))),
 		}.Build())
 	}
 	reasons := reasonsToProto(pb.Decision.Reasons)
@@ -151,7 +151,7 @@ func (s *PlaybackService) StartPlayback(ctx context.Context, req *playbackv1.Sta
 		MediaSourceId:       new(pb.Source().ID.String()),
 		Method:              new(playMethods[pb.Method]),
 		TranscodeReasons:    reasons,
-		Url:                 new(pb.URL()),
+		Url:                 new(playbackURL(ctx, pb.URL())),
 		AudioStreamIndex:    new(int32(pb.AudioStream)),
 		SubtitleStreamIndex: new(int32(pb.SubtitleStream)),
 		Subtitles:           subs,

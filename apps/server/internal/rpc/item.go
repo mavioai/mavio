@@ -163,7 +163,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := itemToProto(&item, images[item.ID], p.User.Admin)
+	out := itemToProto(ctx, &item, images[item.ID], p.User.Admin)
 	switch d, err := s.store.UserData().Get(ctx, p.User.ID, item.ID); {
 	case err == nil:
 		out.SetUserData(events.UserDataToProto(&d))
@@ -177,11 +177,11 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 
 	resp := libraryv1.GetItemResponse_builder{Item: out}
 	for i := range sources {
-		resp.MediaSources = append(resp.MediaSources, mediaSourceToProto(&sources[i], p.User.Admin))
+		resp.MediaSources = append(resp.MediaSources, mediaSourceToProto(ctx, &sources[i], p.User.Admin))
 	}
 	for i, c := range credits {
 		resp.Credits = append(resp.Credits, libraryv1.Credit_builder{
-			Person: personToProto(&people[i], images[c.PersonID]),
+			Person: personToProto(ctx, &people[i], images[c.PersonID]),
 			Kind:   new(creditKinds[c.Kind]),
 			Role:   &c.Role,
 			Order:  new(int32(c.Order)),
@@ -196,6 +196,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 			Width: new(int32(t.Width)), Height: new(int32(t.Height)), TileWidth: new(int32(t.TileWidth)),
 			TileHeight: new(int32(t.TileHeight)), ThumbnailCount: new(int32(t.ThumbnailCount)),
 			Interval: durationpb.New(t.Interval), Bandwidth: new(int32(t.Bandwidth)), SheetCount: new(int32(t.Sheets())),
+			Url: new(imageURL(ctx, fmt.Sprintf("images/trickplay/%s/%d", item.ID, t.Width), 4)),
 		}.Build())
 	}
 	segments, err := s.store.MediaSegments().List(ctx, item.ID)
@@ -577,7 +578,7 @@ func itemsToProto(ctx context.Context, store core.Store, items []core.Item, admi
 	anc := newAncestry(store)
 	out := make([]*libraryv1.Item, len(items))
 	for i := range items {
-		out[i] = itemToProto(&items[i], images[items[i].ID], admin)
+		out[i] = itemToProto(ctx, &items[i], images[items[i].ID], admin)
 		if d, ok := data[items[i].ID]; ok {
 			out[i].SetUserData(events.UserDataToProto(&d))
 		}
@@ -664,7 +665,7 @@ func (s *ItemService) GetPerson(ctx context.Context, req *libraryv1.GetPersonReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := personToProto(&person, images)
+	out := personToProto(ctx, &person, images)
 	out.SetExternalUrls(externalURLsToProto(metadata.PersonExternalURLs(externalIDKinds(s.ExternalIDKinds), person.ExternalIDs)))
 	return libraryv1.GetPersonResponse_builder{Person: out}.Build(), nil
 }
@@ -734,7 +735,7 @@ func (s *ItemService) ListPeople(ctx context.Context, req *libraryv1.ListPeopleR
 	for i := range people {
 		pc := &people[i]
 		out[i] = libraryv1.PersonCount_builder{
-			Person:    personToProto(&pc.Person, images[pc.Person.ID]),
+			Person:    personToProto(ctx, &pc.Person, images[pc.Person.ID]),
 			ItemCount: new(int32(pc.Count)),
 		}.Build()
 	}
@@ -781,7 +782,7 @@ func itemKindsFromProto(kinds []libraryv1.ItemKind) []core.ItemKind {
 	return out
 }
 
-func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item {
+func itemToProto(ctx context.Context, it *core.Item, images []core.Image, admin bool) *libraryv1.Item {
 	b := libraryv1.Item_builder{
 		Id:                new(it.ID.String()),
 		LibraryId:         new(it.LibraryID.String()),
@@ -801,7 +802,7 @@ func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item
 		Artists:           it.Artists,
 		AlbumArtists:      it.AlbumArtists,
 		DateAdded:         timestamp(it.DateAdded),
-		Images:            imagesToProto(images),
+		Images:            imagesToProto(ctx, images),
 		CustomRating:      &it.CustomRating,
 		CollectionName:    &it.CollectionName,
 		NormalizationGain: it.NormalizationGain(),
@@ -853,7 +854,7 @@ func itemToProto(it *core.Item, images []core.Image, admin bool) *libraryv1.Item
 	return b.Build()
 }
 
-func mediaSourceToProto(ms *core.MediaSource, admin bool) *libraryv1.MediaSource {
+func mediaSourceToProto(ctx context.Context, ms *core.MediaSource, admin bool) *libraryv1.MediaSource {
 	b := libraryv1.MediaSource_builder{
 		Id:        new(ms.ID.String()),
 		ItemId:    new(ms.ItemID.String()),
@@ -872,10 +873,12 @@ func mediaSourceToProto(ms *core.MediaSource, admin bool) *libraryv1.MediaSource
 	for i := range ms.Streams {
 		b.Streams = append(b.Streams, streamToProto(&ms.Streams[i], admin))
 	}
-	for _, c := range ms.Chapters {
-		b.Chapters = append(b.Chapters, libraryv1.Chapter_builder{
-			Start: durationpb.New(c.Start), Title: &c.Title, HasImage: new(c.ImagePath != ""),
-		}.Build())
+	for i, c := range ms.Chapters {
+		ch := libraryv1.Chapter_builder{Start: durationpb.New(c.Start), Title: &c.Title, HasImage: new(c.ImagePath != "")}
+		if c.ImagePath != "" {
+			ch.ImageUrl = new(imageURL(ctx, fmt.Sprintf("images/chapters/%s/%s/%d", ms.ItemID, ms.ID, i), 5))
+		}
+		b.Chapters = append(b.Chapters, ch.Build())
 	}
 	return b.Build()
 }
@@ -934,14 +937,14 @@ func rationalToProto(r core.Rational) *libraryv1.Rational {
 	return libraryv1.Rational_builder{Num: &r.Num, Den: &r.Den}.Build()
 }
 
-func personToProto(p *core.Person, images []core.Image) *libraryv1.Person {
+func personToProto(ctx context.Context, p *core.Person, images []core.Image) *libraryv1.Person {
 	b := libraryv1.Person_builder{
 		Id:         new(p.ID.String()),
 		Name:       &p.Name,
 		SortName:   &p.SortName,
 		Overview:   &p.Overview,
 		BirthPlace: &p.BirthPlace,
-		Images:     imagesToProto(images),
+		Images:     imagesToProto(ctx, images),
 	}
 	if p.BirthDate != nil {
 		b.BirthDate = timestamppb.New(*p.BirthDate)
@@ -976,8 +979,8 @@ func externalURLsToProto(urls []metadata.ExternalURL) []*libraryv1.ExternalUrl {
 }
 
 // imagesToProto describes images without their file paths or source URLs;
-// clients fetch them from the image endpoint by ID.
-func imagesToProto(images []core.Image) []*libraryv1.Image {
+// clients fetch them from their URLs signed for the caller's session.
+func imagesToProto(ctx context.Context, images []core.Image) []*libraryv1.Image {
 	out := make([]*libraryv1.Image, len(images))
 	for i := range images {
 		img := &images[i]
@@ -989,6 +992,7 @@ func imagesToProto(images []core.Image) []*libraryv1.Image {
 			Height:    new(int32(img.Height)),
 			Blurhash:  &img.Blurhash,
 			Thumbhash: img.Thumbhash,
+			Url:       new(imageURL(ctx, "images/"+img.ID.String(), 2)),
 		}.Build()
 	}
 	return out

@@ -1964,6 +1964,13 @@ pub struct ImageView<'a> {
     pub blurhash: ::core::option::Option<&'a str>,
     /// Field 7: `thumbhash`
     pub thumbhash: ::core::option::Option<&'a [u8]>,
+    /// The image's signed URL relative to the server's base URL, for the
+    /// caller's session (docs/accounts.md §5.4); it takes the size
+    /// parameters. Empty for callers without a session, such as API keys,
+    /// which fetch /images/{id} with their credentials.
+    ///
+    /// Field 8: `url`
+    pub url: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ImageView<'a> {
@@ -2047,6 +2054,13 @@ impl<'a> ::buffa::MessageView<'a> for ImageView<'a> {
                 )?;
                 view.thumbhash = Some(::buffa::types::borrow_bytes(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2076,6 +2090,7 @@ impl<'a> ::buffa::MessageView<'a> for ImageView<'a> {
             height: self.height,
             blurhash: self.blurhash.map(|s| s.to_string()),
             thumbhash: self.thumbhash.map(|b| (b).to_vec()),
+            url: self.url.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2108,6 +2123,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ImageView<'a> {
         if let Some(ref v) = self.thumbhash {
             size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2139,6 +2157,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ImageView<'a> {
         }
         if let Some(ref v) = self.thumbhash {
             ::buffa::types::put_shared_bytes_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2263,6 +2284,16 @@ impl ImageOwnedView {
     #[must_use]
     pub fn thumbhash(&self) -> ::core::option::Option<&'_ [u8]> {
         self.0.reborrow().thumbhash
+    }
+    /// The image's signed URL relative to the server's base URL, for the
+    /// caller's session (docs/accounts.md §5.4); it takes the size
+    /// parameters. Empty for callers without a session, such as API keys,
+    /// which fetch /images/{id} with their credentials.
+    ///
+    /// Field 8: `url`
+    #[must_use]
+    pub fn url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().url
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ImageView<'static>>> for ImageOwnedView {
@@ -3420,8 +3451,7 @@ pub struct GetItemResponseView<'a> {
     >,
     /// Field 3: `credits`
     pub credits: ::buffa::RepeatedView<'a, super::super::__buffa::view::CreditView<'a>>,
-    /// Thumbnail sheets for seeking, by width; a sheet is served at
-    /// /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+    /// Thumbnail sheets for seeking, by width.
     ///
     /// Field 4: `trickplay`
     pub trickplay: ::buffa::RepeatedView<
@@ -3831,8 +3861,7 @@ impl GetItemResponseOwnedView {
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::CreditView<'_>> {
         &self.0.reborrow().credits
     }
-    /// Thumbnail sheets for seeking, by width; a sheet is served at
-    /// /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+    /// Thumbnail sheets for seeking, by width.
     ///
     /// Field 4: `trickplay`
     #[must_use]
@@ -3898,6 +3927,13 @@ pub struct TrickplayView<'a> {
     pub bandwidth: ::core::option::Option<i32>,
     /// Field 8: `sheet_count`
     pub sheet_count: ::core::option::Option<i32>,
+    /// The signed URL of the sheets relative to the server's base URL, for
+    /// the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers
+    /// without a session, which fetch
+    /// /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials.
+    ///
+    /// Field 9: `url`
+    pub url: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TrickplayView<'a> {
@@ -4000,6 +4036,13 @@ impl<'a> ::buffa::MessageView<'a> for TrickplayView<'a> {
                 )?;
                 view.sheet_count = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -4038,6 +4081,7 @@ impl<'a> ::buffa::MessageView<'a> for TrickplayView<'a> {
             },
             bandwidth: self.bandwidth,
             sheet_count: self.sheet_count,
+            url: self.url.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -4078,6 +4122,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TrickplayView<'a> {
         if let Some(v) = self.sheet_count {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4117,6 +4164,9 @@ impl<'a> ::buffa::ViewEncode<'a> for TrickplayView<'a> {
         }
         if let Some(v) = self.sheet_count {
             ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4254,6 +4304,16 @@ impl TrickplayOwnedView {
     #[must_use]
     pub fn sheet_count(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().sheet_count
+    }
+    /// The signed URL of the sheets relative to the server's base URL, for
+    /// the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers
+    /// without a session, which fetch
+    /// /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials.
+    ///
+    /// Field 9: `url`
+    #[must_use]
+    pub fn url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().url
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<TrickplayView<'static>>>

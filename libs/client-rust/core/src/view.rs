@@ -122,17 +122,18 @@ fn non_empty(s: &Option<String>) -> Option<String> {
     s.clone().filter(|s| !s.is_empty())
 }
 
-/// The first image of a kind.
+/// The first image of a kind the server signed a URL for.
 pub fn artwork(conn: &Connection, item: &Item, kind: ImageKind) -> Option<Artwork> {
     let image = item
         .images
         .iter()
         .filter(|i| i.kind.as_ref().and_then(|k| k.as_known()) == Some(kind))
+        .filter(|i| i.url.as_deref().is_some_and(|u| !u.is_empty()))
         .min_by_key(|i| i.index.unwrap_or_default())?;
-    let id = image.id.as_deref().filter(|id| !id.is_empty())?;
+    let path = image.url.as_deref()?;
     let (w, h) = (image.width.unwrap_or(0), image.height.unwrap_or(0));
     Some(Artwork {
-        url: conn.url(&format!("images/{id}")),
+        url: conn.url(path),
         aspect: if h > 0 { w as f32 / h as f32 } else { 0.0 },
         blurhash: non_empty(&image.blurhash),
     })

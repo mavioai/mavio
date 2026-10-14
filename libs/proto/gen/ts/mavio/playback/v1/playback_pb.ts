@@ -450,7 +450,7 @@ export type SubtitleTrack = Message<"mavio.playback.v1.SubtitleTrack"> & {
 
   /**
    * For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
-   * server's base URL.
+   * server's base URL; signed like the playback's url.
    *
    * @generated from field: string url = 8;
    */
@@ -562,7 +562,11 @@ export type StartPlaybackResponse = Message<"mavio.playback.v1.StartPlaybackResp
 
   /**
    * The media to play, relative to the server's base URL: the file for
-   * direct play, else an HLS master playlist or a progressive stream.
+   * direct play, else an HLS master playlist or a progressive stream. It
+   * is signed for the session that started the playback and works until
+   * the playback ends (docs/accounts.md §5.4), so players need no headers;
+   * for callers without a session, such as API keys, it is unsigned and
+   * fetched with their credentials.
    *
    * @generated from field: string url = 5;
    */
@@ -633,7 +637,7 @@ export type Attachment = Message<"mavio.playback.v1.Attachment"> & {
   mimeType: string;
 
   /**
-   * Relative to the server's base URL.
+   * Relative to the server's base URL; signed like the playback's url.
    *
    * @generated from field: string url = 4;
    */

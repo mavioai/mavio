@@ -55,9 +55,9 @@ type Options struct {
 	Store core.Store
 	// Hub keeps the devices' event streams.
 	Hub *events.Hub
-	// Tokens issues and checks the sessions' access tokens; nil uses a key
-	// of the run only.
-	Tokens *auth.AccessTokens
+	// Identity is the server's identity key, from which the keys of access
+	// tokens and media URLs derive; nil uses a key of the run only.
+	Identity *identity.Key
 	// Database is "sqlite" or "postgres".
 	Database string
 	// FFmpegVersion is the version of the ffmpeg in use, if any.
@@ -147,10 +147,13 @@ func Handler(opts Options) (http.Handler, error) {
 	public := append([]string{systemv1connect.SystemServiceGetHealthProcedure}, rpc.AuthPublicProcedures...)
 	// Authentication runs first, so that invalid requests from strangers
 	// learn nothing about the rules.
-	if opts.Tokens == nil {
-		opts.Tokens = auth.NewAccessTokens(identity.Generate().Derive(auth.TokenKeyPurpose))
+	if opts.Identity == nil {
+		opts.Identity = identity.Generate()
 	}
-	authn := auth.NewInterceptor(opts.Store, opts.Tokens, public...).
+	tokens := auth.NewAccessTokens(opts.Identity.Derive(auth.TokenKeyPurpose))
+	mediaURLs := auth.NewMediaURLs(opts.Store, opts.Identity.Derive(auth.MediaKeyPurpose))
+	authn := auth.NewInterceptor(opts.Store, tokens, public...).
+		SignMedia(mediaURLs).
 		RequireUser(rpc.UserBoundProcedures...).
 		RequireSession(rpc.SessionBoundProcedures...)
 	interceptors := connect.WithInterceptors(authn, validate)
@@ -161,7 +164,7 @@ func Handler(opts Options) (http.Handler, error) {
 		Plugins: opts.Plugins, Hub: opts.Hub, Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs,
 		Activity: opts.Activity,
 	}, interceptors))
-	authService := rpc.NewAuthService(opts.Store, opts.Tokens)
+	authService := rpc.NewAuthService(opts.Store, tokens)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	authService.Info = opts.ServerInfo
@@ -266,8 +269,13 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(rpc.NewRequestService(reqs), interceptors))
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(rpc.NewIssueService(reqs), interceptors))
 	mux.Handle(homev1connect.NewHomeServiceHandler(rpc.NewHomeService(opts.Store, home.New(opts.Store, reqs)), interceptors))
-	mux.Handle("GET /media/", opts.Playbacks.Handler())
-	mux.Handle("GET /images/", opts.Images.Handler())
+	// Media is fetched through signed URLs, or with credentials.
+	media := http.NewServeMux()
+	media.Handle("GET /media/", opts.Playbacks.Handler())
+	media.Handle("GET /images/", opts.Images.Handler())
+	mux.Handle("GET /"+auth.MediaPrefix, mediaURLs.Handler(media))
+	mux.Handle("GET /media/", auth.RequireMedia(authn, media))
+	mux.Handle("GET /images/", auth.RequireMedia(authn, media))
 	mux.Handle("/plugins/{id}/", pluginRoutes(authn, opts.PluginRoutes))
 	if opts.Dev {
 		mux.Handle("GET /dev/", devplayer.Handler())

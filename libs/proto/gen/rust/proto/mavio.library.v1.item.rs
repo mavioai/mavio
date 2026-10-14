@@ -3132,6 +3132,13 @@ pub struct Image {
     pub blurhash: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 7: `thumbhash`
     pub thumbhash: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    /// The image's signed URL relative to the server's base URL, for the
+    /// caller's session (docs/accounts.md §5.4); it takes the size
+    /// parameters. Empty for callers without a session, such as API keys,
+    /// which fetch /images/{id} with their credentials.
+    ///
+    /// Field 8: `url`
+    pub url: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3145,6 +3152,7 @@ impl ::core::fmt::Debug for Image {
             .field("height", &self.height)
             .field("blurhash", &self.blurhash)
             .field("thumbhash", &self.thumbhash)
+            .field("url", &self.url)
             .finish()
     }
 }
@@ -3211,6 +3219,13 @@ impl Image {
         self.thumbhash = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_url(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.url = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Image);
 impl ::buffa::MessageName for Image {
@@ -3253,6 +3268,9 @@ impl ::buffa::Message for Image {
         if let Some(ref v) = self.thumbhash {
             size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3283,6 +3301,9 @@ impl ::buffa::Message for Image {
         }
         if let Some(ref v) = self.thumbhash {
             ::buffa::types::put_shared_bytes_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3365,6 +3386,16 @@ impl ::buffa::Message for Image {
                     buf,
                 )?;
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.url.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3380,6 +3411,7 @@ impl ::buffa::Message for Image {
         self.height = ::core::option::Option::None;
         self.blurhash = ::core::option::Option::None;
         self.thumbhash = ::core::option::Option::None;
+        self.url = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4110,8 +4142,7 @@ pub struct GetItemResponse {
     pub media_sources: ::buffa::alloc::vec::Vec<MediaSource>,
     /// Field 3: `credits`
     pub credits: ::buffa::alloc::vec::Vec<Credit>,
-    /// Thumbnail sheets for seeking, by width; a sheet is served at
-    /// /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+    /// Thumbnail sheets for seeking, by width.
     ///
     /// Field 4: `trickplay`
     pub trickplay: ::buffa::alloc::vec::Vec<Trickplay>,
@@ -4373,6 +4404,13 @@ pub struct Trickplay {
     pub bandwidth: ::core::option::Option<i32>,
     /// Field 8: `sheet_count`
     pub sheet_count: ::core::option::Option<i32>,
+    /// The signed URL of the sheets relative to the server's base URL, for
+    /// the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers
+    /// without a session, which fetch
+    /// /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials.
+    ///
+    /// Field 9: `url`
+    pub url: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4387,6 +4425,7 @@ impl ::core::fmt::Debug for Trickplay {
             .field("interval", &self.interval)
             .field("bandwidth", &self.bandwidth)
             .field("sheet_count", &self.sheet_count)
+            .field("url", &self.url)
             .finish()
     }
 }
@@ -4447,6 +4486,13 @@ impl Trickplay {
         self.sheet_count = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_url(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.url = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Trickplay);
 impl ::buffa::MessageName for Trickplay {
@@ -4497,6 +4543,9 @@ impl ::buffa::Message for Trickplay {
         if let Some(v) = self.sheet_count {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4535,6 +4584,9 @@ impl ::buffa::Message for Trickplay {
         }
         if let Some(v) = self.sheet_count {
             ::buffa::types::put_int32_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4623,6 +4675,16 @@ impl ::buffa::Message for Trickplay {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.url.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4639,6 +4701,7 @@ impl ::buffa::Message for Trickplay {
         self.interval = ::buffa::MessageField::none();
         self.bandwidth = ::core::option::Option::None;
         self.sheet_count = ::core::option::Option::None;
+        self.url = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

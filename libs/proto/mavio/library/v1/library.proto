@@ -86,6 +86,11 @@ message Library {
   // The storage class of each path as the server classifies it: the one
   // set, or the one of the device holding it.
   map<string, StorageClass> effective_storage_classes = 20;
+  // The signed URL of the library's collage of its items, relative to the
+  // server's base URL, for the caller's session; it takes the size
+  // parameters of images. Empty for callers without a session, which
+  // fetch /images/collages/{id} with their credentials.
+  string image_url = 21;
 }
 
 // StorageClass tells what reading a file of a storage costs, which decides

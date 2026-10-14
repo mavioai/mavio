@@ -35,7 +35,7 @@ export function LibrariesScreen() {
                 className="group block"
               >
                 <Artwork
-                  src={libraryImageUrl(server, l.id, 480)}
+                  src={libraryImageUrl(server, l, 480)}
                   alt={l.name}
                   className="aspect-video rounded-md transition group-hover:brightness-110"
                 />

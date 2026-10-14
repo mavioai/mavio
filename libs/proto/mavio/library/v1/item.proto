@@ -307,6 +307,11 @@ message Image {
   int32 height = 5;
   string blurhash = 6;
   bytes thumbhash = 7;
+  // The image's signed URL relative to the server's base URL, for the
+  // caller's session (docs/accounts.md §5.4); it takes the size
+  // parameters. Empty for callers without a session, such as API keys,
+  // which fetch /images/{id} with their credentials.
+  string url = 8;
 }
 
 message Person {
@@ -344,8 +349,7 @@ message GetItemResponse {
   Item item = 1;
   repeated MediaSource media_sources = 2;
   repeated Credit credits = 3;
-  // Thumbnail sheets for seeking, by width; a sheet is served at
-  // /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+  // Thumbnail sheets for seeking, by width.
   repeated Trickplay trickplay = 4;
   // Stretches clients may offer to skip, by start.
   repeated MediaSegment segments = 5;
@@ -364,6 +368,11 @@ message Trickplay {
   // Bits per second the sheets take while playing.
   int32 bandwidth = 7;
   int32 sheet_count = 8;
+  // The signed URL of the sheets relative to the server's base URL, for
+  // the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers
+  // without a session, which fetch
+  // /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials.
+  string url = 9;
 }
 
 enum SegmentKind {

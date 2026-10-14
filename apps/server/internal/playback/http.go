@@ -61,8 +61,9 @@ func sourceExt(p *Playback) string {
 	return strings.ToLower(filepath.Ext(name))
 }
 
-// Handler serves the media of playbacks at /media/{playback}/{file}. The
-// playback ID is the only credential.
+// Handler serves the media of playbacks at /media/{playback}/{file}, to
+// requests the HTTP server let through: URLs signed for the playback's
+// session, or credentials.
 func (m *Manager) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /media/{playback}/{file}", m.serveMedia)

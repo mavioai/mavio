@@ -31,7 +31,7 @@
 | SyncPlay、Quick Connect | 遵循 Jellyfin 的语义 | 消息转换 |
 
 ### 3.2 难点
-1. **媒体授权（主要冲突）。** Jellyfin 客户端以 `Authorization: MediaBrowser Token=…`、`X-Emby-Token`、`X-MediaBrowser-Token` 或 `api_key` 查询参数发送令牌，并自行拼接媒体 URL，例如 `/Videos/{id}/stream?static=true&api_key=…`。Mavio 的媒体 URL 有意不接受令牌：只有经认证的 `PlaybackService` 发放的不可猜 playback ID 才能访问，令牌因此不会进入 URL、日志或缓存（架构 §11）。垫片必须在它自己的媒体路由上接受 URL 中的令牌，并为每次请求在内部开启一次 playback。这个例外只能留在垫片内。
+1. **媒体授权（主要冲突）。** Jellyfin 客户端以 `Authorization: MediaBrowser Token=…`、`X-Emby-Token`、`X-MediaBrowser-Token` 或 `api_key` 查询参数发送令牌，并自行拼接媒体 URL，例如 `/Videos/{id}/stream?static=true&api_key=…`。Mavio 的媒体 URL 有意不接受访问令牌：服务端为一个会话和一个条目为其签名，访问令牌因此不会进入 URL、日志或缓存（架构 §11）。垫片必须在它自己的媒体路由上接受 URL 中的令牌，并为每次请求在内部开启一次 playback。这个例外只能留在垫片内。
 2. **事件。** Jellyfin 通过 WebSocket 推送会话、媒体库、用户数据、远程控制与 SyncPlay 消息（34 种消息类型）；Mavio 使用 Connect 服务端流（`EventService`）。垫片需要双向桥接。
 3. **发现与版本。** 客户端通过 UDP 发送 `who is JellyfinServer?`，Mavio 的发现服务也要应答。`/System/Info/Public` 必须报告一个 Jellyfin 版本号，客户端据此启用功能，因此垫片要跟随 Jellyfin 发版。
 4. **缺失的功能。** 直播电视、频道、插件商店、品牌定制与启动向导没有对应实现。垫片返回空结果或桩实现，部分客户端可能处理不好。

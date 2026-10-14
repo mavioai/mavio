@@ -160,12 +160,17 @@ func TestMediaExtras(t *testing.T) {
 	if tp.GetWidth() != 320 || tp.GetHeight() != 180 || tp.GetThumbnailCount() != 3 || tp.GetSheetCount() != 1 {
 		t.Errorf("trickplay = %v", tp)
 	}
-	sheet := get(t, srv.url+"/images/trickplay/"+movie+"/320/0.jpg")
+	// Media is fetched through the URLs signed for the session.
+	if resp, err := http.Get(srv.url + "/images/trickplay/" + movie + "/320/0.jpg"); err != nil || resp.StatusCode != http.StatusUnauthorized {
+		t.Errorf("unsigned sheet = %v, %v; want = 401", resp.StatusCode, err)
+	} else {
+		resp.Body.Close()
+	}
+	sheet := get(t, srv.url+"/"+tp.GetUrl()+"/0.jpg")
 	if cfg, err := jpeg.DecodeConfig(bytes.NewReader(sheet)); err != nil || cfg.Width != 3200 || cfg.Height != 1800 {
 		t.Errorf("sheet = %+v, %v", cfg, err)
 	}
-	source := resp.GetMediaSources()[0].GetId()
-	chapter := get(t, srv.url+"/images/chapters/"+movie+"/"+source+"/1?maxWidth=160&format=jpg")
+	chapter := get(t, srv.url+"/"+resp.GetMediaSources()[0].GetChapters()[1].GetImageUrl()+"?maxWidth=160&format=jpg")
 	if cfg, err := jpeg.DecodeConfig(bytes.NewReader(chapter)); err != nil || cfg.Width != 160 {
 		t.Errorf("chapter image = %+v, %v", cfg, err)
 	}

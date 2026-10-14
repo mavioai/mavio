@@ -19,7 +19,6 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
-	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
@@ -309,7 +308,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// search for its subtitles once the files are probed.
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
-		Version: cfg.Version, Store: db, Tokens: auth.NewAccessTokens(key.Derive(auth.TokenKeyPurpose)), Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+		Version: cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,

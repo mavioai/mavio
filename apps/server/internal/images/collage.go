@@ -26,8 +26,7 @@ var latestTopKinds = []core.ItemKind{
 }
 
 // serveCollage serves GET /images/collages/{id}: the collage of a library,
-// collection or playlist, with the size parameters of other images. Like
-// an image ID, the owner's ID is the credential.
+// collection or playlist, with the size parameters of other images.
 func (s *Server) serveCollage(w http.ResponseWriter, r *http.Request) {
 	id, err := core.ParseID(r.PathValue("id"))
 	if err != nil {

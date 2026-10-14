@@ -386,7 +386,7 @@ func (s *MetadataService) SetItemImage(ctx context.Context, req *libraryv1.SetIt
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.SetItemImageResponse_builder{Image: imagesToProto([]core.Image{img})[0]}.Build(), nil
+	return libraryv1.SetItemImageResponse_builder{Image: imagesToProto(ctx, []core.Image{img})[0]}.Build(), nil
 }
 
 // DeleteItemImage removes an image of an item.

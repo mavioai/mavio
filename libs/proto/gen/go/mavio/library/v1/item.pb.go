@@ -2311,6 +2311,7 @@ type Image struct {
 	xxx_hidden_Height      int32                  `protobuf:"varint,5,opt,name=height"`
 	xxx_hidden_Blurhash    *string                `protobuf:"bytes,6,opt,name=blurhash"`
 	xxx_hidden_Thumbhash   []byte                 `protobuf:"bytes,7,opt,name=thumbhash"`
+	xxx_hidden_Url         *string                `protobuf:"bytes,8,opt,name=url"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2399,34 +2400,44 @@ func (x *Image) GetThumbhash() []byte {
 	return nil
 }
 
+func (x *Image) GetUrl() string {
+	if x != nil {
+		if x.xxx_hidden_Url != nil {
+			return *x.xxx_hidden_Url
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Image) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *Image) SetKind(v ImageKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *Image) SetIndex(v int32) {
 	x.xxx_hidden_Index = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *Image) SetWidth(v int32) {
 	x.xxx_hidden_Width = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *Image) SetHeight(v int32) {
 	x.xxx_hidden_Height = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *Image) SetBlurhash(v string) {
 	x.xxx_hidden_Blurhash = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
 func (x *Image) SetThumbhash(v []byte) {
@@ -2434,7 +2445,12 @@ func (x *Image) SetThumbhash(v []byte) {
 		v = []byte{}
 	}
 	x.xxx_hidden_Thumbhash = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *Image) SetUrl(v string) {
+	x.xxx_hidden_Url = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
 func (x *Image) HasId() bool {
@@ -2486,6 +2502,13 @@ func (x *Image) HasThumbhash() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
 }
 
+func (x *Image) HasUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
 func (x *Image) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -2521,6 +2544,11 @@ func (x *Image) ClearThumbhash() {
 	x.xxx_hidden_Thumbhash = nil
 }
 
+func (x *Image) ClearUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Url = nil
+}
+
 type Image_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2531,6 +2559,11 @@ type Image_builder struct {
 	Height    *int32
 	Blurhash  *string
 	Thumbhash []byte
+	// The image's signed URL relative to the server's base URL, for the
+	// caller's session (docs/accounts.md §5.4); it takes the size
+	// parameters. Empty for callers without a session, such as API keys,
+	// which fetch /images/{id} with their credentials.
+	Url *string
 }
 
 func (b0 Image_builder) Build() *Image {
@@ -2538,32 +2571,36 @@ func (b0 Image_builder) Build() *Image {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Index != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Index = *b.Index
 	}
 	if b.Width != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Width = *b.Width
 	}
 	if b.Height != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_Height = *b.Height
 	}
 	if b.Blurhash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Blurhash = b.Blurhash
 	}
 	if b.Thumbhash != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
 		x.xxx_hidden_Thumbhash = b.Thumbhash
+	}
+	if b.Url != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Url = b.Url
 	}
 	return m0
 }
@@ -3237,8 +3274,7 @@ type GetItemResponse_builder struct {
 	Item         *Item
 	MediaSources []*MediaSource
 	Credits      []*Credit
-	// Thumbnail sheets for seeking, by width; a sheet is served at
-	// /images/trickplay/{item_id}/{width}/{sheet}.jpg.
+	// Thumbnail sheets for seeking, by width.
 	Trickplay []*Trickplay
 	// Stretches clients may offer to skip, by start.
 	Segments []*MediaSegment
@@ -3269,6 +3305,7 @@ type Trickplay struct {
 	xxx_hidden_Interval       *durationpb.Duration   `protobuf:"bytes,6,opt,name=interval"`
 	xxx_hidden_Bandwidth      int32                  `protobuf:"varint,7,opt,name=bandwidth"`
 	xxx_hidden_SheetCount     int32                  `protobuf:"varint,8,opt,name=sheet_count,json=sheetCount"`
+	xxx_hidden_Url            *string                `protobuf:"bytes,9,opt,name=url"`
 	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
 	XXX_presence              [1]uint32
 	unknownFields             protoimpl.UnknownFields
@@ -3356,29 +3393,39 @@ func (x *Trickplay) GetSheetCount() int32 {
 	return 0
 }
 
+func (x *Trickplay) GetUrl() string {
+	if x != nil {
+		if x.xxx_hidden_Url != nil {
+			return *x.xxx_hidden_Url
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Trickplay) SetWidth(v int32) {
 	x.xxx_hidden_Width = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
 }
 
 func (x *Trickplay) SetHeight(v int32) {
 	x.xxx_hidden_Height = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
 }
 
 func (x *Trickplay) SetTileWidth(v int32) {
 	x.xxx_hidden_TileWidth = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
 }
 
 func (x *Trickplay) SetTileHeight(v int32) {
 	x.xxx_hidden_TileHeight = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
 }
 
 func (x *Trickplay) SetThumbnailCount(v int32) {
 	x.xxx_hidden_ThumbnailCount = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
 }
 
 func (x *Trickplay) SetInterval(v *durationpb.Duration) {
@@ -3387,12 +3434,17 @@ func (x *Trickplay) SetInterval(v *durationpb.Duration) {
 
 func (x *Trickplay) SetBandwidth(v int32) {
 	x.xxx_hidden_Bandwidth = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
 }
 
 func (x *Trickplay) SetSheetCount(v int32) {
 	x.xxx_hidden_SheetCount = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+}
+
+func (x *Trickplay) SetUrl(v string) {
+	x.xxx_hidden_Url = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
 }
 
 func (x *Trickplay) HasWidth() bool {
@@ -3451,6 +3503,13 @@ func (x *Trickplay) HasSheetCount() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *Trickplay) HasUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *Trickplay) ClearWidth() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Width = 0
@@ -3490,6 +3549,11 @@ func (x *Trickplay) ClearSheetCount() {
 	x.xxx_hidden_SheetCount = 0
 }
 
+func (x *Trickplay) ClearUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_Url = nil
+}
+
 type Trickplay_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3502,6 +3566,11 @@ type Trickplay_builder struct {
 	// Bits per second the sheets take while playing.
 	Bandwidth  *int32
 	SheetCount *int32
+	// The signed URL of the sheets relative to the server's base URL, for
+	// the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers
+	// without a session, which fetch
+	// /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials.
+	Url *string
 }
 
 func (b0 Trickplay_builder) Build() *Trickplay {
@@ -3509,33 +3578,37 @@ func (b0 Trickplay_builder) Build() *Trickplay {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Width != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
 		x.xxx_hidden_Width = *b.Width
 	}
 	if b.Height != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
 		x.xxx_hidden_Height = *b.Height
 	}
 	if b.TileWidth != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
 		x.xxx_hidden_TileWidth = *b.TileWidth
 	}
 	if b.TileHeight != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
 		x.xxx_hidden_TileHeight = *b.TileHeight
 	}
 	if b.ThumbnailCount != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
 		x.xxx_hidden_ThumbnailCount = *b.ThumbnailCount
 	}
 	x.xxx_hidden_Interval = b.Interval
 	if b.Bandwidth != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
 		x.xxx_hidden_Bandwidth = *b.Bandwidth
 	}
 	if b.SheetCount != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
 		x.xxx_hidden_SheetCount = *b.SheetCount
+	}
+	if b.Url != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		x.xxx_hidden_Url = b.Url
 	}
 	return m0
 }
@@ -7306,7 +7379,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"3\n" +
 	"\vExternalUrl\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
-	"\x03url\x18\x02 \x01(\tR\x03url\"\xc6\x01\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\"\xd8\x01\n" +
 	"\x05Image\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12/\n" +
 	"\x04kind\x18\x02 \x01(\x0e2\x1b.mavio.library.v1.ImageKindR\x04kind\x12\x14\n" +
@@ -7314,7 +7387,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x05width\x18\x04 \x01(\x05R\x05width\x12\x16\n" +
 	"\x06height\x18\x05 \x01(\x05R\x06height\x12\x1a\n" +
 	"\bblurhash\x18\x06 \x01(\tR\bblurhash\x12\x1c\n" +
-	"\tthumbhash\x18\a \x01(\fR\tthumbhash\"\xff\x03\n" +
+	"\tthumbhash\x18\a \x01(\fR\tthumbhash\x12\x10\n" +
+	"\x03url\x18\b \x01(\tR\x03url\"\xff\x03\n" +
 	"\x06Person\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
@@ -7345,7 +7419,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\rmedia_sources\x18\x02 \x03(\v2\x1d.mavio.library.v1.MediaSourceR\fmediaSources\x122\n" +
 	"\acredits\x18\x03 \x03(\v2\x18.mavio.library.v1.CreditR\acredits\x129\n" +
 	"\ttrickplay\x18\x04 \x03(\v2\x1b.mavio.library.v1.TrickplayR\ttrickplay\x12:\n" +
-	"\bsegments\x18\x05 \x03(\v2\x1e.mavio.library.v1.MediaSegmentR\bsegments\"\x98\x02\n" +
+	"\bsegments\x18\x05 \x03(\v2\x1e.mavio.library.v1.MediaSegmentR\bsegments\"\xaa\x02\n" +
 	"\tTrickplay\x12\x14\n" +
 	"\x05width\x18\x01 \x01(\x05R\x05width\x12\x16\n" +
 	"\x06height\x18\x02 \x01(\x05R\x06height\x12\x1d\n" +
@@ -7357,7 +7431,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\binterval\x18\x06 \x01(\v2\x19.google.protobuf.DurationR\binterval\x12\x1c\n" +
 	"\tbandwidth\x18\a \x01(\x05R\tbandwidth\x12\x1f\n" +
 	"\vsheet_count\x18\b \x01(\x05R\n" +
-	"sheetCount\"\xaf\x01\n" +
+	"sheetCount\x12\x10\n" +
+	"\x03url\x18\t \x01(\tR\x03url\"\xaf\x01\n" +
 	"\fMediaSegment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x121\n" +
 	"\x04kind\x18\x02 \x01(\x0e2\x1d.mavio.library.v1.SegmentKindR\x04kind\x12/\n" +

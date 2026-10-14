@@ -2649,7 +2649,7 @@ type SubtitleTrack_builder struct {
 	// The delivered format, e.g. "vtt".
 	Format *string
 	// For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
-	// server's base URL.
+	// server's base URL; signed like the playback's url.
 	Url *string
 }
 
@@ -3251,7 +3251,11 @@ type StartPlaybackResponse_builder struct {
 	// Why the source is not played directly.
 	TranscodeReasons []TranscodeReason
 	// The media to play, relative to the server's base URL: the file for
-	// direct play, else an HLS master playlist or a progressive stream.
+	// direct play, else an HLS master playlist or a progressive stream. It
+	// is signed for the session that started the playback and works until
+	// the playback ends (docs/accounts.md §5.4), so players need no headers;
+	// for callers without a session, such as API keys, it is unsigned and
+	// fetched with their credentials.
 	Url *string
 	// The selected streams; subtitle_stream_index is -1 without subtitles.
 	AudioStreamIndex    *int32
@@ -3451,7 +3455,7 @@ type Attachment_builder struct {
 	Index    *int32
 	FileName *string
 	MimeType *string
-	// Relative to the server's base URL.
+	// Relative to the server's base URL; signed like the playback's url.
 	Url *string
 }
 

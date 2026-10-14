@@ -8601,8 +8601,12 @@
           },
           "hasImage": {
             "type": "boolean",
-            "title": "has_image",
-            "description": "Its image is served at\n /images/chapters/{item_id}/{media_source_id}/{index}."
+            "title": "has_image"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "image_url",
+            "description": "The signed URL of its image relative to the server's base URL, for\n the caller's session; it takes the size parameters of images. Empty\n without an image, or for callers without a session, which fetch\n /images/chapters/{item_id}/{media_source_id}/{index} with their\n credentials."
           }
         },
         "title": "Chapter",
@@ -9108,7 +9112,7 @@
               "$ref": "#/components/schemas/mavio.library.v1.Trickplay"
             },
             "title": "trickplay",
-            "description": "Thumbnail sheets for seeking, by width; a sheet is served at\n /images/trickplay/{item_id}/{width}/{sheet}.jpg."
+            "description": "Thumbnail sheets for seeking, by width."
           },
           "segments": {
             "type": "array",
@@ -9346,6 +9350,11 @@
             "type": "string",
             "title": "thumbhash",
             "format": "byte"
+          },
+          "url": {
+            "type": "string",
+            "title": "url",
+            "description": "The image's signed URL relative to the server's base URL, for the\n caller's session (docs/accounts.md §5.4); it takes the size\n parameters. Empty for callers without a session, such as API keys,\n which fetch /images/{id} with their credentials."
           }
         },
         "title": "Image",
@@ -10042,6 +10051,11 @@
               "title": "value"
             },
             "description": "The storage class of each path as the server classifies it: the one\n set, or the one of the device holding it."
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "image_url",
+            "description": "The signed URL of the library's collage of its items, relative to the\n server's base URL, for the caller's session; it takes the size\n parameters of images. Empty for callers without a session, which\n fetch /images/collages/{id} with their credentials."
           }
         },
         "title": "Library",
@@ -12163,6 +12177,11 @@
             "type": "integer",
             "title": "sheet_count",
             "format": "int32"
+          },
+          "url": {
+            "type": "string",
+            "title": "url",
+            "description": "The signed URL of the sheets relative to the server's base URL, for\n the caller's session; sheet n is at {url}/{n}.jpg. Empty for callers\n without a session, which fetch\n /images/trickplay/{item_id}/{width}/{n}.jpg with their credentials."
           }
         },
         "title": "Trickplay",
@@ -12422,7 +12441,7 @@
           "url": {
             "type": "string",
             "title": "url",
-            "description": "Relative to the server's base URL."
+            "description": "Relative to the server's base URL; signed like the playback's url."
           }
         },
         "title": "Attachment",
@@ -12994,7 +13013,7 @@
           "url": {
             "type": "string",
             "title": "url",
-            "description": "The media to play, relative to the server's base URL: the file for\n direct play, else an HLS master playlist or a progressive stream."
+            "description": "The media to play, relative to the server's base URL: the file for\n direct play, else an HLS master playlist or a progressive stream. It\n is signed for the session that started the playback and works until\n the playback ends (docs/accounts.md §5.4), so players need no headers;\n for callers without a session, such as API keys, it is unsigned and\n fetched with their credentials."
           },
           "audioStreamIndex": {
             "type": "integer",
@@ -13161,7 +13180,7 @@
           "url": {
             "type": "string",
             "title": "url",
-            "description": "For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the\n server's base URL."
+            "description": "For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the\n server's base URL; signed like the playback's url."
           }
         },
         "title": "SubtitleTrack",

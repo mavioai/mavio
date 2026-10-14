@@ -2157,11 +2157,16 @@ pub struct ChapterView<'a> {
     >,
     /// Field 2: `title`
     pub title: ::core::option::Option<&'a str>,
-    /// Its image is served at
-    /// /images/chapters/{item_id}/{media_source_id}/{index}.
-    ///
     /// Field 3: `has_image`
     pub has_image: ::core::option::Option<bool>,
+    /// The signed URL of its image relative to the server's base URL, for
+    /// the caller's session; it takes the size parameters of images. Empty
+    /// without an image, or for callers without a session, which fetch
+    /// /images/chapters/{item_id}/{media_source_id}/{index} with their
+    /// credentials.
+    ///
+    /// Field 4: `image_url`
+    pub image_url: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ChapterView<'a> {
@@ -2229,6 +2234,13 @@ impl<'a> ::buffa::MessageView<'a> for ChapterView<'a> {
                 )?;
                 view.has_image = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.image_url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -2262,6 +2274,7 @@ impl<'a> ::buffa::MessageView<'a> for ChapterView<'a> {
             },
             title: self.title.map(|s| s.to_string()),
             has_image: self.has_image,
+            image_url: self.image_url.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2287,6 +2300,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ChapterView<'a> {
         if self.has_image.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if let Some(ref v) = self.image_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2311,6 +2327,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ChapterView<'a> {
         }
         if let Some(v) = self.has_image {
             ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.image_url {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2415,13 +2434,21 @@ impl ChapterOwnedView {
     pub fn title(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().title
     }
-    /// Its image is served at
-    /// /images/chapters/{item_id}/{media_source_id}/{index}.
-    ///
     /// Field 3: `has_image`
     #[must_use]
     pub fn has_image(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().has_image
+    }
+    /// The signed URL of its image relative to the server's base URL, for
+    /// the caller's session; it takes the size parameters of images. Empty
+    /// without an image, or for callers without a session, which fetch
+    /// /images/chapters/{item_id}/{media_source_id}/{index} with their
+    /// credentials.
+    ///
+    /// Field 4: `image_url`
+    #[must_use]
+    pub fn image_url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().image_url
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ChapterView<'static>>>

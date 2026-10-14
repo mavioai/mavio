@@ -2824,7 +2824,7 @@ pub struct SubtitleTrackView<'a> {
     /// Field 7: `format`
     pub format: ::core::option::Option<&'a str>,
     /// For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
-    /// server's base URL.
+    /// server's base URL; signed like the playback's url.
     ///
     /// Field 8: `url`
     pub url: ::core::option::Option<&'a str>,
@@ -3153,7 +3153,7 @@ impl SubtitleTrackOwnedView {
         self.0.reborrow().format
     }
     /// For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
-    /// server's base URL.
+    /// server's base URL; signed like the playback's url.
     ///
     /// Field 8: `url`
     #[must_use]
@@ -3681,7 +3681,11 @@ pub struct StartPlaybackResponseView<'a> {
         ::buffa::EnumValue<super::super::TranscodeReason>,
     >,
     /// The media to play, relative to the server's base URL: the file for
-    /// direct play, else an HLS master playlist or a progressive stream.
+    /// direct play, else an HLS master playlist or a progressive stream. It
+    /// is signed for the session that started the playback and works until
+    /// the playback ends (docs/accounts.md §5.4), so players need no headers;
+    /// for callers without a session, such as API keys, it is unsigned and
+    /// fetched with their credentials.
     ///
     /// Field 5: `url`
     pub url: ::core::option::Option<&'a str>,
@@ -4183,7 +4187,11 @@ impl StartPlaybackResponseOwnedView {
         &self.0.reborrow().transcode_reasons
     }
     /// The media to play, relative to the server's base URL: the file for
-    /// direct play, else an HLS master playlist or a progressive stream.
+    /// direct play, else an HLS master playlist or a progressive stream. It
+    /// is signed for the session that started the playback and works until
+    /// the playback ends (docs/accounts.md §5.4), so players need no headers;
+    /// for callers without a session, such as API keys, it is unsigned and
+    /// fetched with their credentials.
     ///
     /// Field 5: `url`
     #[must_use]
@@ -4265,7 +4273,7 @@ pub struct AttachmentView<'a> {
     pub file_name: ::core::option::Option<&'a str>,
     /// Field 3: `mime_type`
     pub mime_type: ::core::option::Option<&'a str>,
-    /// Relative to the server's base URL.
+    /// Relative to the server's base URL; signed like the playback's url.
     ///
     /// Field 4: `url`
     pub url: ::core::option::Option<&'a str>,
@@ -4507,7 +4515,7 @@ impl AttachmentOwnedView {
     pub fn mime_type(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().mime_type
     }
-    /// Relative to the server's base URL.
+    /// Relative to the server's base URL; signed like the playback's url.
     ///
     /// Field 4: `url`
     #[must_use]

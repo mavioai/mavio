@@ -69,7 +69,7 @@ func (s *LibraryService) ListLibraries(ctx context.Context, _ *libraryv1.ListLib
 	var out []*libraryv1.Library
 	for i := range libs {
 		if canAccessLibrary(&p.User, &libs[i]) {
-			out = append(out, s.toProto(&libs[i], p.User.Admin))
+			out = append(out, s.toProto(ctx, &libs[i], p.User.Admin))
 		}
 	}
 	return libraryv1.ListLibrariesResponse_builder{Libraries: out}.Build(), nil
@@ -88,7 +88,7 @@ func (s *LibraryService) GetLibrary(ctx context.Context, req *libraryv1.GetLibra
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.GetLibraryResponse_builder{Library: s.toProto(&lib, p.User.Admin)}.Build(), nil
+	return libraryv1.GetLibraryResponse_builder{Library: s.toProto(ctx, &lib, p.User.Admin)}.Build(), nil
 }
 
 // canAccessLibrary reports whether the user may see a library: every user
@@ -115,7 +115,7 @@ func (s *LibraryService) CreateLibrary(ctx context.Context, req *libraryv1.Creat
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.CreateLibraryResponse_builder{Library: s.toProto(&lib, true)}.Build(), nil
+	return libraryv1.CreateLibraryResponse_builder{Library: s.toProto(ctx, &lib, true)}.Build(), nil
 }
 
 // UpdateLibrary changes a library and queues a scan of it.
@@ -149,7 +149,7 @@ func (s *LibraryService) UpdateLibrary(ctx context.Context, req *libraryv1.Updat
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.UpdateLibraryResponse_builder{Library: s.toProto(&lib, true)}.Build(), nil
+	return libraryv1.UpdateLibraryResponse_builder{Library: s.toProto(ctx, &lib, true)}.Build(), nil
 }
 
 // queueScans queues a scan of the library now and, with a scan interval,
@@ -262,8 +262,9 @@ func (s *LibraryService) isFolder(ctx context.Context, p string) bool {
 
 // toProto converts a library; folder paths and their storage classes only
 // for administrators.
-func (s *LibraryService) toProto(lib *core.Library, admin bool) *libraryv1.Library {
+func (s *LibraryService) toProto(ctx context.Context, lib *core.Library, admin bool) *libraryv1.Library {
 	l := libraryToProto(lib, admin)
+	l.SetImageUrl(imageURL(ctx, "images/collages/"+lib.ID.String(), 3))
 	if admin && len(lib.Paths) > 0 {
 		classes := lib.StorageClasses
 		if s.Classes != nil {

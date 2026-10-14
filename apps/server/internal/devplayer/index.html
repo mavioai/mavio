@@ -180,9 +180,9 @@ async function list() {
   const box = $("items"); box.textContent = "";
   for (const it of resp.items || []) {
     const card = document.createElement("div"); card.className = "item";
-    const poster = (it.images || []).find((i) => i.kind === "IMAGE_KIND_PRIMARY");
+    const poster = (it.images || []).find((i) => i.kind === "IMAGE_KIND_PRIMARY" && i.url);
     const img = document.createElement(poster ? "img" : "div");
-    if (poster) { img.src = "/images/" + poster.id + "?maxWidth=280"; img.loading = "lazy"; } else img.className = "ph";
+    if (poster) { img.src = "/" + poster.url + "?maxWidth=280"; img.loading = "lazy"; } else img.className = "ph";
     const label = document.createElement("div");
     label.textContent = it.name + (it.productionYear ? " (" + it.productionYear + ")" : "");
     card.append(img, label);

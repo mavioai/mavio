@@ -97,6 +97,13 @@ pub struct LibraryView<'a> {
         &'a str,
         ::buffa::EnumValue<super::super::StorageClass>,
     >,
+    /// The signed URL of the library's collage of its items, relative to the
+    /// server's base URL, for the caller's session; it takes the size
+    /// parameters of images. Empty for callers without a session, which
+    /// fetch /images/collages/{id} with their credentials.
+    ///
+    /// Field 21: `image_url`
+    pub image_url: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
@@ -336,6 +343,13 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                     }
                 }
             }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.image_url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -531,6 +545,7 @@ impl<'a> ::buffa::MessageView<'a> for LibraryView<'a> {
                 .iter()
                 .map(|(k, v)| (k.to_string(), *v))
                 .collect(),
+            image_url: self.image_url.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -637,6 +652,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
             let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
                 + 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
             size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        if let Some(ref v) = self.image_url {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -770,6 +788,9 @@ impl<'a> ::buffa::ViewEncode<'a> for LibraryView<'a> {
             ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
                 .encode(buf);
             ::buffa::types::encode_int32(v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.image_url {
+            ::buffa::types::put_string_field(21u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1018,6 +1039,16 @@ impl LibraryOwnedView {
         &self,
     ) -> &::buffa::MapView<'_, &'_ str, ::buffa::EnumValue<super::super::StorageClass>> {
         &self.0.reborrow().effective_storage_classes
+    }
+    /// The signed URL of the library's collage of its items, relative to the
+    /// server's base URL, for the caller's session; it takes the size
+    /// parameters of images. Empty for callers without a session, which
+    /// fetch /images/collages/{id} with their credentials.
+    ///
+    /// Field 21: `image_url`
+    #[must_use]
+    pub fn image_url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().image_url
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<LibraryView<'static>>>

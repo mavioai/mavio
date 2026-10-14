@@ -1867,6 +1867,7 @@ type Chapter struct {
 	xxx_hidden_Start       *durationpb.Duration   `protobuf:"bytes,1,opt,name=start"`
 	xxx_hidden_Title       *string                `protobuf:"bytes,2,opt,name=title"`
 	xxx_hidden_HasImage    bool                   `protobuf:"varint,3,opt,name=has_image,json=hasImage"`
+	xxx_hidden_ImageUrl    *string                `protobuf:"bytes,4,opt,name=image_url,json=imageUrl"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -1922,18 +1923,33 @@ func (x *Chapter) GetHasImage() bool {
 	return false
 }
 
+func (x *Chapter) GetImageUrl() string {
+	if x != nil {
+		if x.xxx_hidden_ImageUrl != nil {
+			return *x.xxx_hidden_ImageUrl
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Chapter) SetStart(v *durationpb.Duration) {
 	x.xxx_hidden_Start = v
 }
 
 func (x *Chapter) SetTitle(v string) {
 	x.xxx_hidden_Title = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *Chapter) SetHasImage(v bool) {
 	x.xxx_hidden_HasImage = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *Chapter) SetImageUrl(v string) {
+	x.xxx_hidden_ImageUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *Chapter) HasStart() bool {
@@ -1957,6 +1973,13 @@ func (x *Chapter) HasHasImage() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *Chapter) HasImageUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *Chapter) ClearStart() {
 	x.xxx_hidden_Start = nil
 }
@@ -1971,14 +1994,23 @@ func (x *Chapter) ClearHasImage() {
 	x.xxx_hidden_HasImage = false
 }
 
+func (x *Chapter) ClearImageUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_ImageUrl = nil
+}
+
 type Chapter_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Start *durationpb.Duration
-	Title *string
-	// Its image is served at
-	// /images/chapters/{item_id}/{media_source_id}/{index}.
+	Start    *durationpb.Duration
+	Title    *string
 	HasImage *bool
+	// The signed URL of its image relative to the server's base URL, for
+	// the caller's session; it takes the size parameters of images. Empty
+	// without an image, or for callers without a session, which fetch
+	// /images/chapters/{item_id}/{media_source_id}/{index} with their
+	// credentials.
+	ImageUrl *string
 }
 
 func (b0 Chapter_builder) Build() *Chapter {
@@ -1987,12 +2019,16 @@ func (b0 Chapter_builder) Build() *Chapter {
 	_, _ = b, x
 	x.xxx_hidden_Start = b.Start
 	if b.Title != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Title = b.Title
 	}
 	if b.HasImage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_HasImage = *b.HasImage
+	}
+	if b.ImageUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_ImageUrl = b.ImageUrl
 	}
 	return m0
 }
@@ -2070,11 +2106,12 @@ const file_mavio_library_v1_media_proto_rawDesc = "" +
 	"\vsample_rate\x18* \x01(\x05R\n" +
 	"sampleRate\x12\x1d\n" +
 	"\n" +
-	"text_based\x182 \x01(\bR\ttextBased\"m\n" +
+	"text_based\x182 \x01(\bR\ttextBased\"\x8a\x01\n" +
 	"\aChapter\x12/\n" +
 	"\x05start\x18\x01 \x01(\v2\x19.google.protobuf.DurationR\x05start\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x1b\n" +
-	"\thas_image\x18\x03 \x01(\bR\bhasImage*\xba\x01\n" +
+	"\thas_image\x18\x03 \x01(\bR\bhasImage\x12\x1b\n" +
+	"\timage_url\x18\x04 \x01(\tR\bimageUrl*\xba\x01\n" +
 	"\n" +
 	"StreamKind\x12\x1b\n" +
 	"\x17STREAM_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +

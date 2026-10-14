@@ -303,7 +303,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	i := slices.IndexFunc(imgs, func(img *libraryv1.Image) bool { return img.GetKind() == libraryv1.ImageKind_IMAGE_KIND_PRIMARY })
 	if i < 0 || imgs[i].GetWidth() != 4 {
 		t.Errorf("photo images = %v, want = the photo as primary", imgs)
-	} else if resp, err := http.Get(srv.url + "/images/" + imgs[i].GetId() + "?format=jpg"); err != nil {
+	} else if resp, err := http.Get(srv.url + "/" + imgs[i].GetUrl() + "?format=jpg"); err != nil {
 		t.Error(err)
 	} else {
 		resp.Body.Close()

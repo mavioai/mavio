@@ -211,7 +211,7 @@ func TestMetadataManagement(t *testing.T) {
 	if i < 0 {
 		t.Fatalf("film read back without a poster: %v", again.GetImages())
 	}
-	if got := string(get(t, url+"/images/"+again.GetImages()[i].GetId())); got != string(poster) {
+	if got := string(get(t, url+"/"+again.GetImages()[i].GetUrl())); got != string(poster) {
 		t.Errorf("poster read back = %q, want = %q", got, poster)
 	}
 }

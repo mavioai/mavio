@@ -271,6 +271,7 @@ type Library struct {
 	xxx_hidden_Hubs                    *LibraryHubs            `protobuf:"bytes,18,opt,name=hubs"`
 	xxx_hidden_StorageClasses          map[string]StorageClass `protobuf:"bytes,19,rep,name=storage_classes,json=storageClasses" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=mavio.library.v1.StorageClass"`
 	xxx_hidden_EffectiveStorageClasses map[string]StorageClass `protobuf:"bytes,20,rep,name=effective_storage_classes,json=effectiveStorageClasses" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value,enum=mavio.library.v1.StorageClass"`
+	xxx_hidden_ImageUrl                *string                 `protobuf:"bytes,21,opt,name=image_url,json=imageUrl"`
 	XXX_raceDetectHookData             protoimpl.RaceDetectHookData
 	XXX_presence                       [1]uint32
 	unknownFields                      protoimpl.UnknownFields
@@ -456,19 +457,29 @@ func (x *Library) GetEffectiveStorageClasses() map[string]StorageClass {
 	return nil
 }
 
+func (x *Library) GetImageUrl() string {
+	if x != nil {
+		if x.xxx_hidden_ImageUrl != nil {
+			return *x.xxx_hidden_ImageUrl
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *Library) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 21)
 }
 
 func (x *Library) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 21)
 }
 
 func (x *Library) SetKind(v LibraryKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 21)
 }
 
 func (x *Library) SetPaths(v []string) {
@@ -481,12 +492,12 @@ func (x *Library) SetScanInterval(v *durationpb.Duration) {
 
 func (x *Library) SetPreferredLanguage(v string) {
 	x.xxx_hidden_PreferredLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 21)
 }
 
 func (x *Library) SetMetadataCountry(v string) {
 	x.xxx_hidden_MetadataCountry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 21)
 }
 
 func (x *Library) SetCreateTime(v *timestamppb.Timestamp) {
@@ -499,32 +510,32 @@ func (x *Library) SetUpdateTime(v *timestamppb.Timestamp) {
 
 func (x *Library) SetSaveLocalMetadata(v bool) {
 	x.xxx_hidden_SaveLocalMetadata = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 21)
 }
 
 func (x *Library) SetAutoCollections(v bool) {
 	x.xxx_hidden_AutoCollections = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 21)
 }
 
 func (x *Library) SetExtractTrickplay(v bool) {
 	x.xxx_hidden_ExtractTrickplay = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 21)
 }
 
 func (x *Library) SetExtractChapterImages(v bool) {
 	x.xxx_hidden_ExtractChapterImages = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 21)
 }
 
 func (x *Library) SetAnalyzeLoudness(v bool) {
 	x.xxx_hidden_AnalyzeLoudness = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 21)
 }
 
 func (x *Library) SetDownloadLyrics(v bool) {
 	x.xxx_hidden_DownloadLyrics = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 20)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 21)
 }
 
 func (x *Library) SetProviderOrder(v *ProviderOrder) {
@@ -545,6 +556,11 @@ func (x *Library) SetStorageClasses(v map[string]StorageClass) {
 
 func (x *Library) SetEffectiveStorageClasses(v map[string]StorageClass) {
 	x.xxx_hidden_EffectiveStorageClasses = v
+}
+
+func (x *Library) SetImageUrl(v string) {
+	x.xxx_hidden_ImageUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 21)
 }
 
 func (x *Library) HasId() bool {
@@ -666,6 +682,13 @@ func (x *Library) HasHubs() bool {
 	return x.xxx_hidden_Hubs != nil
 }
 
+func (x *Library) HasImageUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
+}
+
 func (x *Library) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -745,6 +768,11 @@ func (x *Library) ClearHubs() {
 	x.xxx_hidden_Hubs = nil
 }
 
+func (x *Library) ClearImageUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 20)
+	x.xxx_hidden_ImageUrl = nil
+}
+
 type Library_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -788,6 +816,11 @@ type Library_builder struct {
 	// The storage class of each path as the server classifies it: the one
 	// set, or the one of the device holding it.
 	EffectiveStorageClasses map[string]StorageClass
+	// The signed URL of the library's collage of its items, relative to the
+	// server's base URL, for the caller's session; it takes the size
+	// parameters of images. Empty for callers without a session, which
+	// fetch /images/collages/{id} with their credentials.
+	ImageUrl *string
 }
 
 func (b0 Library_builder) Build() *Library {
@@ -795,51 +828,51 @@ func (b0 Library_builder) Build() *Library {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 21)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 21)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 21)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	x.xxx_hidden_Paths = b.Paths
 	x.xxx_hidden_ScanInterval = b.ScanInterval
 	if b.PreferredLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 21)
 		x.xxx_hidden_PreferredLanguage = b.PreferredLanguage
 	}
 	if b.MetadataCountry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 21)
 		x.xxx_hidden_MetadataCountry = b.MetadataCountry
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_UpdateTime = b.UpdateTime
 	if b.SaveLocalMetadata != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 21)
 		x.xxx_hidden_SaveLocalMetadata = *b.SaveLocalMetadata
 	}
 	if b.AutoCollections != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 21)
 		x.xxx_hidden_AutoCollections = *b.AutoCollections
 	}
 	if b.ExtractTrickplay != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 21)
 		x.xxx_hidden_ExtractTrickplay = *b.ExtractTrickplay
 	}
 	if b.ExtractChapterImages != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 21)
 		x.xxx_hidden_ExtractChapterImages = *b.ExtractChapterImages
 	}
 	if b.AnalyzeLoudness != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 21)
 		x.xxx_hidden_AnalyzeLoudness = *b.AnalyzeLoudness
 	}
 	if b.DownloadLyrics != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 20)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 21)
 		x.xxx_hidden_DownloadLyrics = *b.DownloadLyrics
 	}
 	x.xxx_hidden_ProviderOrder = b.ProviderOrder
@@ -847,6 +880,10 @@ func (b0 Library_builder) Build() *Library {
 	x.xxx_hidden_Hubs = b.Hubs
 	x.xxx_hidden_StorageClasses = b.StorageClasses
 	x.xxx_hidden_EffectiveStorageClasses = b.EffectiveStorageClasses
+	if b.ImageUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 21)
+		x.xxx_hidden_ImageUrl = b.ImageUrl
+	}
 	return m0
 }
 
@@ -2787,7 +2824,7 @@ var File_mavio_library_v1_library_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\n" +
-	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x80\n" +
+	"\x1emavio/library/v1/library.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\n" +
 	"\n" +
 	"\aLibrary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -2812,7 +2849,8 @@ const file_mavio_library_v1_library_proto_rawDesc = "" +
 	"\x10virtual_episodes\x18\x11 \x01(\v2!.mavio.library.v1.VirtualEpisodesR\x0fvirtualEpisodes\x121\n" +
 	"\x04hubs\x18\x12 \x01(\v2\x1d.mavio.library.v1.LibraryHubsR\x04hubs\x12V\n" +
 	"\x0fstorage_classes\x18\x13 \x03(\v2-.mavio.library.v1.Library.StorageClassesEntryR\x0estorageClasses\x12r\n" +
-	"\x19effective_storage_classes\x18\x14 \x03(\v26.mavio.library.v1.Library.EffectiveStorageClassesEntryR\x17effectiveStorageClasses\x1aa\n" +
+	"\x19effective_storage_classes\x18\x14 \x03(\v26.mavio.library.v1.Library.EffectiveStorageClassesEntryR\x17effectiveStorageClasses\x12\x1b\n" +
+	"\timage_url\x18\x15 \x01(\tR\bimageUrl\x1aa\n" +
 	"\x13StorageClassesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x124\n" +
 	"\x05value\x18\x02 \x01(\x0e2\x1e.mavio.library.v1.StorageClassR\x05value:\x028\x01\x1aj\n" +

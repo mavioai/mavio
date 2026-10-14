@@ -80,7 +80,7 @@ flowchart LR
 | 能力 | 客户端 | 用平台自身的 API 探测：AVFoundation 与 VideoToolbox、`MediaCodecList` 与 `Display.HdrCapabilities`、浏览器的 `MediaSource.isTypeSupported` 与 `canPlayType`，以及随附的第二引擎（AetherEngine、libmpv）的解码器。以两个引擎播放的客户端，声明两者任一能播放的内容，使服务端只在两者都不能播放时才处理媒体（§4.2） |
 | 进度 | 客户端上报，服务端记录 | 通过 `PlaybackService` 在播放时每 10 秒上报一次，并在暂停、跳转与停止时上报；服务端在最后一次上报五分钟后结束该播放 |
 | 实时更新 | 服务端推送 | 每台设备一条 `EventService` 流：条目与媒体库变更、用户数据、会话、远程控制命令与 SyncPlay。客户端以退避重连，不轮询 |
-| 媒体与图片 | 普通 HTTP | `/media/{playback}/…` 与 `/images/…`；ID 即凭据，播放器无需附加请求头 |
+| 媒体与图片 | 普通 HTTP | 服务端为会话签名的 URL（[账户 §5.4](accounts.zh-CN.md#54-媒体-url)），播放器无需附加请求头 |
 | 登录 | 服务端 | 绑定设备密钥的会话与短期 Bearer 令牌；电视应用通过 Quick Connect 登录 |
 | 首页 | 服务端生成，客户端合并 | 每台服务器用 `HomeService` 为用户生成其推荐行（[架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)）；客户端合并它所登录的每台服务器的推荐行（§5.4） |
 | 发现服务器 | 客户端 | 局域网内 UDP 7359 端口的发现，或手动输入地址 |
@@ -93,7 +93,7 @@ flowchart LR
 ### 4.1 Web（`apps/web`）
 * **定位**：全部功能——浏览、播放、请求、管理与首次运行设置——无需安装。
 * **提供方式**：Vite 构建到 `apps/server/internal/webui/dist`，服务端以 `//go:embed` 内嵌并在 `/` 提供，SPA 的路由回退到 `index.html`。仓库中该目录只有一个 `.gitkeep`；未带 Web UI 构建的服务端会提供一个说明此情况的页面。Nx 让服务端的 `build` 依赖 Web 的 `build`。API 参考保留在 `/api`。
-* **服务器**：Web UI 登录到提供它的服务器，并像各应用一样添加其他服务器（§5.4），以跨域方式调用它们；服务器的所有路由允许任何来源，它们接受 Bearer 令牌与 ID 凭据，从不使用 Cookie。设备密钥是保存在 IndexedDB 中不可导出的 WebCrypto Ed25519 密钥，会话保存在浏览器的本地存储中；传输层在访问令牌过期前或被服务端拒绝后为其续期，服务端不再续期的会话会让用户退出该服务器。服务器列表（会话除外）保存在提供它的服务器上用户的显示偏好中，从而跟随用户跨浏览器。
+* **服务器**：Web UI 登录到提供它的服务器，并像各应用一样添加其他服务器（§5.4），以跨域方式调用它们；服务器的所有路由允许任何来源，它们接受 Bearer 令牌与签名的媒体 URL，从不使用 Cookie。设备密钥是保存在 IndexedDB 中不可导出的 WebCrypto Ed25519 密钥，会话保存在浏览器的本地存储中；传输层在访问令牌过期前或被服务端拒绝后为其续期，服务端不再续期的会话会让用户退出该服务器。服务器列表（会话除外）保存在提供它的服务器上用户的显示偏好中，从而跟随用户跨浏览器。
 * **API**：`libs/client-ts`，基于 `connect-es` v2 与 `protobuf-es` v2 以及从 `libs/proto` 生成的代码，用 TanStack Query 做缓存与失效，由事件流驱动。
 * **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaSource.isTypeSupported` 与 `canPlayType`。ASS 字幕借助 JASSUB（WebAssembly 版 libass）保留样式。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
 

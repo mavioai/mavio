@@ -536,6 +536,13 @@ pub struct Library {
         ::buffa::alloc::string::String,
         ::buffa::EnumValue<StorageClass>,
     >,
+    /// The signed URL of the library's collage of its items, relative to the
+    /// server's base URL, for the caller's session; it takes the size
+    /// parameters of images. Empty for callers without a session, which
+    /// fetch /images/collages/{id} with their credentials.
+    ///
+    /// Field 21: `image_url`
+    pub image_url: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -562,6 +569,7 @@ impl ::core::fmt::Debug for Library {
             .field("hubs", &self.hubs)
             .field("storage_classes", &self.storage_classes)
             .field("effective_storage_classes", &self.effective_storage_classes)
+            .field("image_url", &self.image_url)
             .finish()
     }
 }
@@ -660,6 +668,16 @@ impl Library {
     ///Sets [`Self::download_lyrics`] to `Some(value)`, consuming and returning `self`.
     pub fn with_download_lyrics(mut self, value: bool) -> Self {
         self.download_lyrics = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::image_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_image_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.image_url = Some(value.into());
         self
     }
 }
@@ -779,6 +797,9 @@ impl ::buffa::Message for Library {
                 ::buffa::map_codec::OpenEnum<_>,
                 _,
             >(&self.effective_storage_classes, 2u64);
+        if let Some(ref v) = self.image_url {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -883,6 +904,9 @@ impl ::buffa::Message for Library {
             ::buffa::map_codec::OpenEnum<_>,
             _,
         >(&self.effective_storage_classes, 20u32, buf);
+        if let Some(ref v) = self.image_url {
+            ::buffa::types::put_string_field(21u32, v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -1102,6 +1126,18 @@ impl ::buffa::Message for Library {
                     _,
                 >(&mut self.effective_storage_classes, buf, ctx)?;
             }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .image_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1130,6 +1166,7 @@ impl ::buffa::Message for Library {
         self.hubs = ::buffa::MessageField::none();
         self.storage_classes.clear();
         self.effective_storage_classes.clear();
+        self.image_url = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -720,7 +720,8 @@ impl Core {
                         server_id: server_id.to_owned(),
                         image_url: base
                             .as_ref()
-                            .map(|b| b.url(&format!("images/collages/{id}")))
+                            .zip(l.image_url.as_deref().filter(|u| !u.is_empty()))
+                            .map(|(b, u)| b.url(u))
                             .unwrap_or_default(),
                         id,
                         name: l.name.clone().unwrap_or_default(),

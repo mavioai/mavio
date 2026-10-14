@@ -3468,7 +3468,7 @@ pub struct SubtitleTrack {
     /// Field 7: `format`
     pub format: ::core::option::Option<::buffa::alloc::string::String>,
     /// For SUBTITLE_METHOD_EXTERNAL, the subtitle file, relative to the
-    /// server's base URL.
+    /// server's base URL; signed like the playback's url.
     ///
     /// Field 8: `url`
     pub url: ::core::option::Option<::buffa::alloc::string::String>,
@@ -4111,7 +4111,11 @@ pub struct StartPlaybackResponse {
     /// Field 4: `transcode_reasons`
     pub transcode_reasons: ::buffa::alloc::vec::Vec<::buffa::EnumValue<TranscodeReason>>,
     /// The media to play, relative to the server's base URL: the file for
-    /// direct play, else an HLS master playlist or a progressive stream.
+    /// direct play, else an HLS master playlist or a progressive stream. It
+    /// is signed for the session that started the playback and works until
+    /// the playback ends (docs/accounts.md §5.4), so players need no headers;
+    /// for callers without a session, such as API keys, it is unsigned and
+    /// fetched with their credentials.
     ///
     /// Field 5: `url`
     pub url: ::core::option::Option<::buffa::alloc::string::String>,
@@ -4536,7 +4540,7 @@ pub struct Attachment {
     pub file_name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `mime_type`
     pub mime_type: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Relative to the server's base URL.
+    /// Relative to the server's base URL; signed like the playback's url.
     ///
     /// Field 4: `url`
     pub url: ::core::option::Option<::buffa::alloc::string::String>,

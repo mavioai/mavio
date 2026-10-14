@@ -795,7 +795,7 @@ flowchart TD
 **进度**：
 - [x] 首次启动时选择模式：账户设置、`GetAuthInfo` 中的模式，以及通过 `CreateFirstUser` 以独立模式安装；以 mavio.dev 模式安装随认领实现
 - [x] 会话与设备密钥；以签名随机数续期的访问令牌；只保存哈希的 API 密钥：绑定设备 Ed25519 密钥的会话，以从 `identity.key` 中服务端身份密钥派生的密钥认证、有效期一小时的访问令牌，`StartRefresh` 与 `RefreshSession`，`SessionIdleDays` 与每日清理，以及 Web UI、开发播放器与共享 Rust 核心的设备密钥与续期
-- [ ] 签名的媒体 URL
+- [x] 签名的媒体 URL：`signed/{token}/{path}`，为一个会话和路径的前几段签名，密钥从身份密钥派生；播放的 URL 随播放失效，图片的 URL 在 12 到 24 小时后失效；响应中图片、拼贴图、缩略图拼图和章节图片的 URL，由 Web UI、开发播放器和共享的 Rust 核心使用；不带签名的路径接受 Bearer 令牌和插件
 - [ ] 独立模式的用户：管理员、成员、托管用户、PIN、限制档、登录限速
 - [ ] 媒体库访问记录及其执行
 - [ ] 邀请链接、Quick Connect 与在管理员设备上的切换
