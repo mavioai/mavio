@@ -4,8 +4,16 @@ import { useEffect } from "react";
 
 type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
 
-const focusable =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea, [tabindex]:not([tabindex="-1"])';
+const focusable = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea",
+  "[tabindex]",
+]
+  .map((s) => `${s}:not([tabindex="-1"])`)
+  .join(", ");
 
 function visible(el: HTMLElement): boolean {
   const r = el.getBoundingClientRect();

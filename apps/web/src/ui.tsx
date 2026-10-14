@@ -144,8 +144,8 @@ export function ItemCard({
           className={`${aspects[s]} rounded-md transition group-hover:brightness-110 group-active:opacity-80`}
         />
         {progress !== undefined && (
-          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-scrim">
-            <div className="h-full bg-progress" style={{ width: `${progress * 100}%` }} />
+          <div className="absolute inset-x-2.5 bottom-2.5 h-1 overflow-hidden rounded-full bg-white/35 shadow-level1">
+            <div className="h-full rounded-full bg-white" style={{ width: `${progress * 100}%` }} />
           </div>
         )}
         {item.userData?.played && (
@@ -189,7 +189,7 @@ export function Shelf({
       <div className="mb-2 flex items-baseline gap-3 px-margin">
         <h2 className="truncate type-title3">{title}</h2>
         {badge}
-        <div className="ml-auto shrink-0 type-callout text-text-secondary hover:text-on-background">{more}</div>
+        <div className="ml-auto shrink-0 type-callout text-accent-text hover:opacity-80">{more}</div>
       </div>
       <div className="relative">
         <div ref={row} className="scroll-row flex gap-gutter overflow-x-auto px-margin pb-1">

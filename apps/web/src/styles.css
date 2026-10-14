@@ -120,6 +120,12 @@
   }
 }
 
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
 body {
   background: var(--mavio-color-background);
   color: var(--mavio-color-text-primary);

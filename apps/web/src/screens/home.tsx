@@ -6,7 +6,9 @@ import { Link } from "@tanstack/react-router";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { Artwork, CardPlaceholder, ItemCard, Shelf, StatusView } from "../ui.tsx";
+import { Hero, heroEntries } from "./hero.tsx";
 
 /** The title of a section, named by its kind, library and seed. */
 export function sectionTitle(s: Section): string {
@@ -51,9 +53,14 @@ export function sectionTitle(s: Section): string {
 export function HomeScreen() {
   const sections = useHome();
   const several = useSignedIn().length > 1;
-  const signedOut = useServers().filter((s) => !s.token);
+  const servers = useServers();
+  const signedOut = servers.filter((s) => !s.token);
+  const hero = heroEntries(sections, servers);
+  const { tv } = usePrefs();
   return (
-    <div className="pt-4">
+    <div className={hero.length ? "" : tv ? "pt-32" : "pt-4"}>
+      <Hero entries={hero} />
+      {hero.length > 0 && <div className="h-4" />}
       {sections.map((s) => (
         <SectionView key={s.id} section={s} several={several} />
       ))}
@@ -112,7 +119,11 @@ export function SectionView({ section: s, several }: { section: Section; several
     ) : undefined;
   if (c.type === "titles") {
     return (
-      <Shelf title={sectionTitle(s)} badge={badge} more={more}>
+      <Shelf
+        title={sectionTitle(s)}
+        badge={<span className="shrink-0 type-footnote text-text-tertiary">{t("home.notOnServers")}</span>}
+        more={more}
+      >
         {c.titles.map(({ title, available }) => {
           const card = (
             <>

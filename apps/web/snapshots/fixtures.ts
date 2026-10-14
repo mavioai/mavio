@@ -8,6 +8,7 @@ import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { HomeService } from "@mavio/proto/mavio/home/v1/home_pb";
 import { ImageKind, ItemKind, ItemService, type ItemSchema } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind, LibraryKind, LibraryService } from "@mavio/proto/mavio/library/v1/library_pb";
+import { StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
 import { EventService, SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
 import { DisplayPreferencesService } from "@mavio/proto/mavio/user/v1/display_preferences_pb";
 import { UserDataService, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
@@ -94,6 +95,28 @@ function item(id: string, user: { progressMinutes?: number; played?: boolean } =
   };
 }
 
+/** What the user has watched of an item, as Home shows it. */
+function watched(id: string) {
+  return screens.home.flatMap((h) => h.items).find((i) => i.id === id);
+}
+
+/** An item's one file: 1080p HEVC in HDR10 with 5.1 sound and subtitles. */
+function source(id: string) {
+  const i = screens.items[id];
+  return {
+    id: `${id}-source`,
+    itemId: id,
+    path: `/media/${i.name}/${i.name}.mkv`,
+    container: "mkv",
+    sizeBytes: 8_400_000_000n,
+    streams: [
+      { index: 0, kind: StreamKind.VIDEO, codec: "hevc", width: 1920, height: 1080, range: VideoRange.HDR10 },
+      { index: 1, kind: StreamKind.AUDIO, codec: "eac3", language: "eng", channels: 6, default: true },
+      { index: 2, kind: StreamKind.SUBTITLE, codec: "subrip", language: "eng" },
+    ],
+  };
+}
+
 /** The server of the screens, as the web UI keeps it once signed in. */
 export const signedIn = [
   {
@@ -128,5 +151,28 @@ export function fixtures(): Fixtures {
         libraryName: library(h.library)?.name ?? "",
         items: h.items.map((i) => item(i.id, i)),
       })),
-    }));
+    }))
+    .on(LibraryService, "getLibrary", (r) => {
+      const l = library(r.id);
+      return l ? { library: { id: l.id, name: l.name, kind: l.kind === "movies" ? LibraryKind.MOVIES : LibraryKind.SHOWS } } : {};
+    })
+    .on(ItemService, "getItem", (r) => {
+      const id = r.id ?? "";
+      const i = screens.items[id];
+      if (!i) return {};
+      return { item: item(id, watched(id)), mediaSources: i.kind === "series" ? [] : [source(id)] };
+    })
+    .on(ItemService, "listItems", (r) => {
+      const ids = Object.keys(screens.items).filter((id) => {
+        const i = screens.items[id];
+        if (r.parentId) return i.series === r.parentId;
+        return (r.libraryIds ?? []).includes(i.library) && i.kind !== "episode";
+      });
+      return { items: ids.map((id) => item(id, watched(id))), total: ids.length };
+    })
+    .on(ItemService, "listSimilarItems", (r) => {
+      const of = screens.items[r.id ?? ""];
+      const ids = Object.keys(screens.items).filter((id) => id !== r.id && screens.items[id].kind === of?.kind);
+      return { items: ids.map((id) => item(id)) };
+    });
 }
