@@ -50,14 +50,14 @@ func newEnv(t *testing.T) *env {
 		t.Fatal(err)
 	}
 	e := &env{store: s, file: []byte("not really a movie, but bytes to serve")}
-	path := filepath.Join(root, "Film (2020)", "Film.mp4")
+	path := filepath.ToSlash(filepath.Join(root, "Film (2020)", "Film.mp4")) // as the scanner records paths
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(path, e.file, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	srt := filepath.Join(filepath.Dir(path), "Film.fr.srt")
+	srt := filepath.ToSlash(filepath.Join(filepath.Dir(path), "Film.fr.srt"))
 	if err := os.WriteFile(srt, []byte("1\r\n00:00:01,000 --> 00:00:02,500\r\nBonjour\r\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

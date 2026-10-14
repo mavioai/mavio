@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -99,13 +100,13 @@ func newEnv(t *testing.T) *env {
 	}
 	t.Cleanup(func() { _ = db.Close() })
 	e := &env{t: t, ctx: ctx, db: db, plugin: &fakePlugin{bad: map[string]bool{}}, s: core.DefaultSubtitleSettings()}
-	root := t.TempDir()
+	root := filepath.ToSlash(t.TempDir()) // as the scanner records paths
 	e.lib = core.Library{ID: core.NewID(), Name: "Movies", Kind: core.LibraryMovies, Paths: []string{root}}
 	if err := db.Libraries().Create(ctx, &e.lib); err != nil {
 		t.Fatal(err)
 	}
-	e.dir = filepath.Join(root, "The Matrix (1999)")
-	video := filepath.Join(e.dir, "The Matrix (1999).mkv")
+	e.dir = path.Join(root, "The Matrix (1999)")
+	video := path.Join(e.dir, "The Matrix (1999).mkv")
 	if err := os.MkdirAll(e.dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +162,7 @@ func (e *env) history(actions ...core.SubtitleAction) []core.SubtitleHistoryEven
 
 func (e *env) file(name string) string {
 	e.t.Helper()
-	data, err := os.ReadFile(filepath.Join(e.dir, name))
+	data, err := os.ReadFile(path.Join(e.dir, name))
 	if err != nil {
 		e.t.Fatal(err)
 	}
@@ -191,7 +192,7 @@ func TestSearchItem(t *testing.T) {
 	if got, want := e.file("The Matrix (1999).fr.srt"), "1\n00:00:01,000 --> 00:00:02,000\nBonjour strong\n"; got != want {
 		t.Errorf("subtitle = %q, want = %q", got, want)
 	}
-	if h := e.history(core.SubtitleDownloaded); len(h) != 1 || h[0].Path != filepath.Join(e.dir, "The Matrix (1999).fr.srt") {
+	if h := e.history(core.SubtitleDownloaded); len(h) != 1 || h[0].Path != path.Join(e.dir, "The Matrix (1999).fr.srt") {
 		t.Errorf("history = %+v", h)
 	}
 	it, err := e.rt.Item(e.ctx, e.movie.ID)
@@ -289,7 +290,7 @@ func TestWantedKept(t *testing.T) {
 		t.Fatal(err)
 	}
 	src[0].Streams = append(src[0].Streams, core.MediaStream{
-		Index: 3, Kind: core.StreamSubtitle, Codec: "subrip", Language: "fre", ExternalPath: filepath.Join(e.dir, "The Matrix (1999).fr.srt"),
+		Index: 3, Kind: core.StreamSubtitle, Codec: "subrip", Language: "fre", ExternalPath: path.Join(e.dir, "The Matrix (1999).fr.srt"),
 	})
 	if err := e.db.MediaSources().Replace(e.ctx, e.movie.ID, src); err != nil {
 		t.Fatal(err)
@@ -347,7 +348,7 @@ func TestManual(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ev.Action != core.SubtitleManual || ev.Path != filepath.Join(e.dir, "The Matrix (1999).fr.srt") {
+	if ev.Action != core.SubtitleManual || ev.Path != path.Join(e.dir, "The Matrix (1999).fr.srt") {
 		t.Errorf("ManualDownload = %+v", ev)
 	}
 	// Blocklisting the download deletes it and searches again.
@@ -370,7 +371,7 @@ func TestManual(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p != filepath.Join(e.dir, "The Matrix (1999).fr.forced.srt") {
+	if p != path.Join(e.dir, "The Matrix (1999).fr.forced.srt") {
 		t.Errorf("Upload path = %q", p)
 	}
 	if err := e.rt.Delete(e.ctx, e.movie.ID, p); err != nil {
@@ -474,10 +475,10 @@ func TestExtract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got, want := filepath.Base(p), "The Matrix (1999).en.srt"; got != want {
+	if got, want := path.Base(p), "The Matrix (1999).en.srt"; got != want {
 		t.Errorf("Extract path = %s, want %s", got, want)
 	}
-	if got := e.file(filepath.Base(p)); !strings.Contains(got, "Hello") {
+	if got := e.file(path.Base(p)); !strings.Contains(got, "Hello") {
 		t.Errorf("extracted subtitle = %q, want the stream's cues", got)
 	}
 	if h := e.history(core.SubtitleExtracted); len(h) != 1 || h[0].Path != p || h[0].Language.Language != "en" {

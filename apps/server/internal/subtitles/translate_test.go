@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"strings"
 	"sync"
 	"testing"
@@ -149,7 +149,7 @@ func TestAudio(t *testing.T) {
 	speech := fixtures.Require(t, "speech.wav")
 	e := newEnv(t)
 	e.rt.FFmpeg = ffmpeg
-	video := filepath.Join(e.dir, "The Matrix (1999).mkv")
+	video := path.Join(e.dir, "The Matrix (1999).mkv")
 	data, err := os.ReadFile(speech)
 	if err != nil {
 		t.Fatal(err)
