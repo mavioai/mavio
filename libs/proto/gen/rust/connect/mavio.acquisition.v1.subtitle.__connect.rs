@@ -236,6 +236,30 @@ pub type OwnedTranslateSubtitleResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<ProofreadSubtitleRequestView<'static>>`.
+pub type OwnedProofreadSubtitleRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ProofreadSubtitleResponseView<'static>>`.
+pub type OwnedProofreadSubtitleResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>>`.
+pub type OwnedGetSubtitleTranslationStatisticsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>>`.
+pub type OwnedGetSubtitleTranslationStatisticsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<ListSubtitleTranslatorsRequestView<'static>>`.
 pub type OwnedListSubtitleTranslatorsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::ListSubtitleTranslatorsRequestView<
@@ -1125,6 +1149,90 @@ for ::buffa::view::OwnedView<
     }
 }
 impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ProofreadSubtitleResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ProofreadSubtitleResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
     crate::proto::mavio::acquisition::v1::ListSubtitleTranslatorsResponse,
 >
 for crate::proto::mavio::acquisition::v1::__buffa::view::ListSubtitleTranslatorsResponseView<
@@ -1456,6 +1564,18 @@ pub const SUBTITLE_SERVICE_TRANSLATE_SUBTITLE_SPEC: ::connectrpc::Spec = ::conne
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ProofreadSubtitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SUBTITLE_SERVICE_PROOFREAD_SUBTITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.SubtitleService/ProofreadSubtitle",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetSubtitleTranslationStatistics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SUBTITLE_SERVICE_GET_SUBTITLE_TRANSLATION_STATISTICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListSubtitleTranslators` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SUBTITLE_SERVICE_LIST_SUBTITLE_TRANSLATORS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.SubtitleService/ListSubtitleTranslators",
@@ -1995,10 +2115,11 @@ pub trait SubtitleService: Send + Sync + 'static {
         >,
     > + Send;
     /// TranslateSubtitle queues the translation of a subtitle of a movie or
-    /// episode into another language by a translator plugin, as Bazarr's
-    /// translation: an external subtitle file, or an embedded text subtitle
-    /// stream from playback's extraction cache (refused on cloud storage, as
-    /// ExtractSubtitle). The translation is saved as a subtitle file.
+    /// episode into another language, as Lingarr's: an external subtitle
+    /// file, or an embedded text subtitle stream from playback's extraction
+    /// cache (refused on cloud storage, as ExtractSubtitle), translated by an
+    /// AI model or a translator plugin. The translation is saved as a
+    /// subtitle file.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -2018,6 +2139,55 @@ pub trait SubtitleService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::TranslateSubtitleResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ProofreadSubtitle queues the proofreading of a translation by an AI
+    /// model, as Lingarr's: each cue's translation is compared with the
+    /// subtitle it was translated from and corrected.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn proofread_subtitle<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::ProofreadSubtitleResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetSubtitleTranslationStatistics sums up the translations of the
+    /// subtitle history, as Lingarr's statistics.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_subtitle_translation_statistics<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2751,6 +2921,64 @@ impl<S: SubtitleService> SubtitleServiceExt for S {
                 },
             )
             .with_spec(SUBTITLE_SERVICE_TRANSLATE_SUBTITLE_SPEC)
+            .route_view(
+                SUBTITLE_SERVICE_SERVICE_NAME,
+                "ProofreadSubtitle",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.proofread_subtitle(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::ProofreadSubtitleResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SUBTITLE_SERVICE_PROOFREAD_SUBTITLE_SPEC)
+            .route_view_idempotent(
+                SUBTITLE_SERVICE_SERVICE_NAME,
+                "GetSubtitleTranslationStatistics",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_subtitle_translation_statistics(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SUBTITLE_SERVICE_GET_SUBTITLE_TRANSLATION_STATISTICS_SPEC)
             .route_view_idempotent(
                 SUBTITLE_SERVICE_SERVICE_NAME,
                 "ListSubtitleTranslators",
@@ -3068,6 +3296,20 @@ impl<T: SubtitleService> ::connectrpc::Dispatcher for SubtitleServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SUBTITLE_SERVICE_TRANSLATE_SUBTITLE_SPEC),
+                )
+            }
+            "ProofreadSubtitle" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SUBTITLE_SERVICE_PROOFREAD_SUBTITLE_SPEC),
+                )
+            }
+            "GetSubtitleTranslationStatistics" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(
+                            SUBTITLE_SERVICE_GET_SUBTITLE_TRANSLATION_STATISTICS_SPEC,
+                        ),
                 )
             }
             "ListSubtitleTranslators" => {
@@ -3553,6 +3795,50 @@ impl<T: SubtitleService> ::connectrpc::Dispatcher for SubtitleServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::TranslateSubtitleResponse,
+                        >(format)
+                })
+            }
+            "ProofreadSubtitle" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+                    >::from_parts(&req, &body);
+                    svc.proofread_subtitle(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::ProofreadSubtitleResponse,
+                        >(format)
+                })
+            }
+            "GetSubtitleTranslationStatistics" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_subtitle_translation_statistics(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsResponse,
                         >(format)
                 })
             }
@@ -4691,6 +4977,96 @@ where
                 &self.transport,
                 &self.config,
                 SUBTITLE_SERVICE_TRANSLATE_SUBTITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ProofreadSubtitle RPC. Sends a request to /mavio.acquisition.v1.SubtitleService/ProofreadSubtitle.
+    pub async fn proofread_subtitle(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.proofread_subtitle_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ProofreadSubtitle RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn proofread_subtitle_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ProofreadSubtitleRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ProofreadSubtitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SUBTITLE_SERVICE_PROOFREAD_SUBTITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetSubtitleTranslationStatistics RPC. Sends a request to /mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics.
+    pub async fn get_subtitle_translation_statistics(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_subtitle_translation_statistics_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetSubtitleTranslationStatistics RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_subtitle_translation_statistics_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetSubtitleTranslationStatisticsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetSubtitleTranslationStatisticsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SUBTITLE_SERVICE_GET_SUBTITLE_TRANSLATION_STATISTICS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

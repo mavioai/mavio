@@ -4957,6 +4957,13 @@ pub struct SubtitleTranslatorInfoView<'a> {
     ///
     /// Field 6: `markup`
     pub markup: ::core::option::Option<bool>,
+    /// The languages the translator translates from and into, as BCP 47
+    /// tags; empty for any.
+    ///
+    /// Field 7: `source_languages`
+    pub source_languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 8: `target_languages`
+    pub target_languages: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SubtitleTranslatorInfoView<'a> {
@@ -5044,6 +5051,28 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleTranslatorInfoView<'a> {
                         )?,
                     );
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.source_languages.push(__elem);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.target_languages.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5082,6 +5111,16 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleTranslatorInfoView<'a> {
             enabled: self.enabled,
             batch_size: self.batch_size,
             markup: self.markup,
+            source_languages: self
+                .source_languages
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            target_languages: self
+                .target_languages
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5116,6 +5155,12 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslatorInfoView<'a> {
         if self.markup.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.source_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.target_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -5149,6 +5194,12 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslatorInfoView<'a> {
         }
         if let Some(v) = self.markup {
             ::buffa::types::put_bool_field(6u32, v, buf);
+        }
+        for v in &self.source_languages {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        for v in &self.target_languages {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5287,6 +5338,19 @@ impl SubtitleTranslatorInfoOwnedView {
     #[must_use]
     pub fn markup(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().markup
+    }
+    /// The languages the translator translates from and into, as BCP 47
+    /// tags; empty for any.
+    ///
+    /// Field 7: `source_languages`
+    #[must_use]
+    pub fn source_languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().source_languages
+    }
+    /// Field 8: `target_languages`
+    #[must_use]
+    pub fn target_languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().target_languages
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SubtitleTranslatorInfoView<'static>>>

@@ -3760,11 +3760,14 @@ impl ::buffa::ExtensionSet for SubtitleSettings {
     }
 }
 /// SubtitleTranslationSettings are how subtitles are translated, as
-/// Bazarr's translator settings.
+/// Lingarr's translation settings and Bazarr's. Translators are named
+/// "\<plugin\>/\<translator\>" for the translators of subtitle translator
+/// plugins and "ai/\<provider\>/\<model\>" for the models of the AI gateway
+/// (AiService.ListAiModels).
 #[derive(Clone, PartialEq, Default)]
 pub struct SubtitleTranslationSettings {
-    /// The translator used when a translation names none, as
-    /// "\<plugin\>/\<translator\>"; empty for the first enabled one.
+    /// The translator used when a translation names none; empty for the
+    /// first enabled translator of a plugin.
     ///
     /// Field 1: `translator`
     pub translator: ::core::option::Option<::buffa::alloc::string::String>,
@@ -3777,6 +3780,88 @@ pub struct SubtitleTranslationSettings {
     ///
     /// Field 3: `credit`
     pub credit: ::core::option::Option<bool>,
+    /// Translators tried in order after the first when it fails or does not
+    /// translate between the languages; those matching the languages
+    /// exactly are tried before those matching them more loosely.
+    ///
+    /// Field 4: `fallback_translators`
+    pub fallback_translators: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The instructions of AI models, and the message carrying each cue,
+    /// with the placeholders {sourceLanguage}, {targetLanguage},
+    /// {lineToTranslate}, {contextBefore} and {contextAfter}.
+    ///
+    /// Field 5: `prompt`
+    pub prompt: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 6: `user_prompt`
+    pub user_prompt: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The instructions and message of proofreading, with {sourceLine} and
+    /// {translatedLine} besides the languages.
+    ///
+    /// Field 7: `proofread_prompt`
+    pub proofread_prompt: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 8: `proofread_user_prompt`
+    pub proofread_user_prompt: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The cues before and after each cue given to AI models as context.
+    ///
+    /// Field 9: `context_before`
+    pub context_before: ::core::option::Option<i32>,
+    /// Field 10: `context_after`
+    pub context_after: ::core::option::Option<i32>,
+    /// Gives the context as JSON objects with each cue's position and text,
+    /// and the translations of those before.
+    ///
+    /// Field 11: `translated_context`
+    pub translated_context: ::core::option::Option<bool>,
+    /// Translates with AI models in batches of max_batch_size cues (every
+    /// cue when 0) answered as JSON, rather than cue by cue.
+    ///
+    /// Field 12: `batch`
+    pub batch: ::core::option::Option<bool>,
+    /// Field 13: `max_batch_size`
+    pub max_batch_size: ::core::option::Option<i32>,
+    /// Names languages in prompts by their codes rather than their English
+    /// names.
+    ///
+    /// Field 14: `language_codes`
+    pub language_codes: ::core::option::Option<bool>,
+    /// Retries of a translation failing for a reason worth retrying, such as
+    /// a rate limit: max_retries attempts in all, the delay multiplied after
+    /// each.
+    ///
+    /// Field 15: `max_retries`
+    pub max_retries: ::core::option::Option<i32>,
+    /// Field 16: `retry_delay_seconds`
+    pub retry_delay_seconds: ::core::option::Option<i32>,
+    /// Field 17: `retry_multiplier`
+    pub retry_multiplier: ::core::option::Option<i32>,
+    /// How long one request to a translator may take.
+    ///
+    /// Field 18: `request_timeout_seconds`
+    pub request_timeout_seconds: ::core::option::Option<i32>,
+    /// Translates the cues' plain text, and drops the styles of ASS files.
+    ///
+    /// Field 19: `strip_formatting`
+    pub strip_formatting: ::core::option::Option<bool>,
+    /// Translates a cue's lines keeping its line breaks; otherwise the lines
+    /// are joined, and the translation split again at 42 characters when
+    /// formatting is stripped.
+    ///
+    /// Field 20: `preserve_line_breaks`
+    pub preserve_line_breaks: ::core::option::Option<bool>,
+    /// Trims the end of a cue overlapping the next.
+    ///
+    /// Field 21: `fix_overlaps`
+    pub fix_overlaps: ::core::option::Option<bool>,
+    /// Field 22: `validation`
+    pub validation: ::buffa::MessageField<
+        SubtitleTranslationValidation,
+        ::buffa::Inline<SubtitleTranslationValidation>,
+    >,
+    /// Field 23: `automation`
+    pub automation: ::buffa::MessageField<
+        SubtitleTranslationAutomation,
+        ::buffa::Inline<SubtitleTranslationAutomation>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3786,6 +3871,26 @@ impl ::core::fmt::Debug for SubtitleTranslationSettings {
             .field("translator", &self.translator)
             .field("default_score", &self.default_score)
             .field("credit", &self.credit)
+            .field("fallback_translators", &self.fallback_translators)
+            .field("prompt", &self.prompt)
+            .field("user_prompt", &self.user_prompt)
+            .field("proofread_prompt", &self.proofread_prompt)
+            .field("proofread_user_prompt", &self.proofread_user_prompt)
+            .field("context_before", &self.context_before)
+            .field("context_after", &self.context_after)
+            .field("translated_context", &self.translated_context)
+            .field("batch", &self.batch)
+            .field("max_batch_size", &self.max_batch_size)
+            .field("language_codes", &self.language_codes)
+            .field("max_retries", &self.max_retries)
+            .field("retry_delay_seconds", &self.retry_delay_seconds)
+            .field("retry_multiplier", &self.retry_multiplier)
+            .field("request_timeout_seconds", &self.request_timeout_seconds)
+            .field("strip_formatting", &self.strip_formatting)
+            .field("preserve_line_breaks", &self.preserve_line_breaks)
+            .field("fix_overlaps", &self.fix_overlaps)
+            .field("validation", &self.validation)
+            .field("automation", &self.automation)
             .finish()
     }
 }
@@ -3821,6 +3926,137 @@ impl SubtitleTranslationSettings {
         self.credit = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::prompt`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_prompt(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.prompt = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::user_prompt`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_user_prompt(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.user_prompt = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proofread_prompt`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proofread_prompt(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proofread_prompt = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proofread_user_prompt`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proofread_user_prompt(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.proofread_user_prompt = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::context_before`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_context_before(mut self, value: i32) -> Self {
+        self.context_before = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::context_after`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_context_after(mut self, value: i32) -> Self {
+        self.context_after = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::translated_context`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_translated_context(mut self, value: bool) -> Self {
+        self.translated_context = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::batch`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_batch(mut self, value: bool) -> Self {
+        self.batch = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_batch_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_batch_size(mut self, value: i32) -> Self {
+        self.max_batch_size = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::language_codes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_language_codes(mut self, value: bool) -> Self {
+        self.language_codes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_retries`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_retries(mut self, value: i32) -> Self {
+        self.max_retries = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::retry_delay_seconds`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_retry_delay_seconds(mut self, value: i32) -> Self {
+        self.retry_delay_seconds = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::retry_multiplier`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_retry_multiplier(mut self, value: i32) -> Self {
+        self.retry_multiplier = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::request_timeout_seconds`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_request_timeout_seconds(mut self, value: i32) -> Self {
+        self.request_timeout_seconds = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::strip_formatting`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_strip_formatting(mut self, value: bool) -> Self {
+        self.strip_formatting = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::preserve_line_breaks`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_preserve_line_breaks(mut self, value: bool) -> Self {
+        self.preserve_line_breaks = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::fix_overlaps`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_fix_overlaps(mut self, value: bool) -> Self {
+        self.fix_overlaps = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(SubtitleTranslationSettings);
 impl ::buffa::MessageName for SubtitleTranslationSettings {
@@ -3838,7 +4074,7 @@ impl ::buffa::Message for SubtitleTranslationSettings {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -3851,12 +4087,82 @@ impl ::buffa::Message for SubtitleTranslationSettings {
         if self.credit.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.fallback_translators {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.user_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proofread_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proofread_user_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.context_before {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.context_after {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.translated_context.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.batch.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_batch_size {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.language_codes.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_retries {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.retry_delay_seconds {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.retry_multiplier {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.request_timeout_seconds {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.strip_formatting.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.preserve_line_breaks.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.fix_overlaps.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.validation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.validation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.automation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.automation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -3869,6 +4175,76 @@ impl ::buffa::Message for SubtitleTranslationSettings {
         }
         if let Some(v) = self.credit {
             ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        for v in &self.fallback_translators {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.prompt {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.user_prompt {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.proofread_prompt {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.proofread_user_prompt {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(v) = self.context_before {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(v) = self.context_after {
+            ::buffa::types::put_int32_field(10u32, v, buf);
+        }
+        if let Some(v) = self.translated_context {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(v) = self.batch {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.max_batch_size {
+            ::buffa::types::put_int32_field(13u32, v, buf);
+        }
+        if let Some(v) = self.language_codes {
+            ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(v) = self.max_retries {
+            ::buffa::types::put_int32_field(15u32, v, buf);
+        }
+        if let Some(v) = self.retry_delay_seconds {
+            ::buffa::types::put_int32_field(16u32, v, buf);
+        }
+        if let Some(v) = self.retry_multiplier {
+            ::buffa::types::put_int32_field(17u32, v, buf);
+        }
+        if let Some(v) = self.request_timeout_seconds {
+            ::buffa::types::put_int32_field(18u32, v, buf);
+        }
+        if let Some(v) = self.strip_formatting {
+            ::buffa::types::put_bool_field(19u32, v, buf);
+        }
+        if let Some(v) = self.preserve_line_breaks {
+            ::buffa::types::put_bool_field(20u32, v, buf);
+        }
+        if let Some(v) = self.fix_overlaps {
+            ::buffa::types::put_bool_field(21u32, v, buf);
+        }
+        if self.validation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                22u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.validation.write_to(__cache, buf);
+        }
+        if self.automation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                23u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.automation.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3913,6 +4289,202 @@ impl ::buffa::Message for SubtitleTranslationSettings {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.fallback_translators.push(__elem);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.prompt.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .user_prompt
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .proofread_prompt
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .proofread_user_prompt
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.context_before = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.context_after = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.translated_context = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.batch = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_batch_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.language_codes = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_retries = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.retry_delay_seconds = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.retry_multiplier = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.request_timeout_seconds = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.strip_formatting = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.preserve_line_breaks = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.fix_overlaps = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.validation.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.automation.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3924,11 +4496,524 @@ impl ::buffa::Message for SubtitleTranslationSettings {
         self.translator = ::core::option::Option::None;
         self.default_score = ::core::option::Option::None;
         self.credit = ::core::option::Option::None;
+        self.fallback_translators.clear();
+        self.prompt = ::core::option::Option::None;
+        self.user_prompt = ::core::option::Option::None;
+        self.proofread_prompt = ::core::option::Option::None;
+        self.proofread_user_prompt = ::core::option::Option::None;
+        self.context_before = ::core::option::Option::None;
+        self.context_after = ::core::option::Option::None;
+        self.translated_context = ::core::option::Option::None;
+        self.batch = ::core::option::Option::None;
+        self.max_batch_size = ::core::option::Option::None;
+        self.language_codes = ::core::option::Option::None;
+        self.max_retries = ::core::option::Option::None;
+        self.retry_delay_seconds = ::core::option::Option::None;
+        self.retry_multiplier = ::core::option::Option::None;
+        self.request_timeout_seconds = ::core::option::Option::None;
+        self.strip_formatting = ::core::option::Option::None;
+        self.preserve_line_breaks = ::core::option::Option::None;
+        self.fix_overlaps = ::core::option::Option::None;
+        self.validation = ::buffa::MessageField::none();
+        self.automation = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for SubtitleTranslationSettings {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationSettings";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslationValidation refuses to translate subtitles that look
+/// broken, as Lingarr's subtitle validation.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslationValidation {
+    /// Field 1: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    /// Field 2: `max_file_size`
+    pub max_file_size: ::core::option::Option<i64>,
+    /// The longest and shortest text of a cue, in characters.
+    ///
+    /// Field 3: `max_cue_length`
+    pub max_cue_length: ::core::option::Option<i32>,
+    /// Field 4: `min_cue_length`
+    pub min_cue_length: ::core::option::Option<i32>,
+    /// The shortest and longest a cue may last.
+    ///
+    /// Field 5: `min_duration_ms`
+    pub min_duration_ms: ::core::option::Option<i32>,
+    /// Field 6: `max_duration_seconds`
+    pub max_duration_seconds: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslationValidation {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslationValidation")
+            .field("enabled", &self.enabled)
+            .field("max_file_size", &self.max_file_size)
+            .field("max_cue_length", &self.max_cue_length)
+            .field("min_cue_length", &self.min_cue_length)
+            .field("min_duration_ms", &self.min_duration_ms)
+            .field("max_duration_seconds", &self.max_duration_seconds)
+            .finish()
+    }
+}
+impl SubtitleTranslationValidation {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationValidation";
+}
+impl SubtitleTranslationValidation {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::enabled`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_enabled(mut self, value: bool) -> Self {
+        self.enabled = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_file_size`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_file_size(mut self, value: i64) -> Self {
+        self.max_file_size = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_cue_length`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_cue_length(mut self, value: i32) -> Self {
+        self.max_cue_length = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_cue_length`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_cue_length(mut self, value: i32) -> Self {
+        self.min_cue_length = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::min_duration_ms`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_min_duration_ms(mut self, value: i32) -> Self {
+        self.min_duration_ms = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_duration_seconds`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_duration_seconds(mut self, value: i32) -> Self {
+        self.max_duration_seconds = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslationValidation);
+impl ::buffa::MessageName for SubtitleTranslationValidation {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationValidation";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationValidation";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationValidation";
+}
+impl ::buffa::Message for SubtitleTranslationValidation {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_file_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_cue_length {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_cue_length {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_duration_ms {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_duration_seconds {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.max_file_size {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        if let Some(v) = self.max_cue_length {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(v) = self.min_cue_length {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.min_duration_ms {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.max_duration_seconds {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.enabled = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_file_size = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_cue_length = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_cue_length = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.min_duration_ms = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_duration_seconds = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.enabled = ::core::option::Option::None;
+        self.max_file_size = ::core::option::Option::None;
+        self.max_cue_length = ::core::option::Option::None;
+        self.min_cue_length = ::core::option::Option::None;
+        self.min_duration_ms = ::core::option::Option::None;
+        self.max_duration_seconds = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslationValidation {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationValidation";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslationAutomation translates subtitles movies and episodes
+/// lack, as Lingarr's automation: a movie or episode still lacking
+/// subtitles its profile wants, whose file is old enough, gets them
+/// translated by the settings' translator from a subtitle it has in one of
+/// the source languages.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslationAutomation {
+    /// Field 1: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    /// How often it runs.
+    ///
+    /// Field 2: `interval_hours`
+    pub interval_hours: ::core::option::Option<i32>,
+    /// The languages translated from, in order of preference.
+    ///
+    /// Field 3: `source_languages`
+    pub source_languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The most translations a run queues.
+    ///
+    /// Field 4: `max_per_run`
+    pub max_per_run: ::core::option::Option<i32>,
+    /// How old a movie's or an episode's file must be, giving searches time
+    /// to find subtitles first.
+    ///
+    /// Field 5: `movie_age_hours`
+    pub movie_age_hours: ::core::option::Option<i32>,
+    /// Field 6: `episode_age_hours`
+    pub episode_age_hours: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslationAutomation {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslationAutomation")
+            .field("enabled", &self.enabled)
+            .field("interval_hours", &self.interval_hours)
+            .field("source_languages", &self.source_languages)
+            .field("max_per_run", &self.max_per_run)
+            .field("movie_age_hours", &self.movie_age_hours)
+            .field("episode_age_hours", &self.episode_age_hours)
+            .finish()
+    }
+}
+impl SubtitleTranslationAutomation {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationAutomation";
+}
+impl SubtitleTranslationAutomation {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::enabled`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_enabled(mut self, value: bool) -> Self {
+        self.enabled = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::interval_hours`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_interval_hours(mut self, value: i32) -> Self {
+        self.interval_hours = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::max_per_run`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_max_per_run(mut self, value: i32) -> Self {
+        self.max_per_run = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::movie_age_hours`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_movie_age_hours(mut self, value: i32) -> Self {
+        self.movie_age_hours = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::episode_age_hours`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_episode_age_hours(mut self, value: i32) -> Self {
+        self.episode_age_hours = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslationAutomation);
+impl ::buffa::MessageName for SubtitleTranslationAutomation {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationAutomation";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationAutomation";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationAutomation";
+}
+impl ::buffa::Message for SubtitleTranslationAutomation {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.interval_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        for v in &self.source_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_per_run {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.movie_age_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.episode_age_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.interval_hours {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        for v in &self.source_languages {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.max_per_run {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.movie_age_hours {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.episode_age_hours {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.enabled = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.interval_hours = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.source_languages.push(__elem);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.max_per_run = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.movie_age_hours = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.episode_age_hours = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.enabled = ::core::option::Option::None;
+        self.interval_hours = ::core::option::Option::None;
+        self.source_languages.clear();
+        self.max_per_run = ::core::option::Option::None;
+        self.movie_age_hours = ::core::option::Option::None;
+        self.episode_age_hours = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslationAutomation {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationAutomation";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -9025,7 +10110,8 @@ pub struct TranslateSubtitleRequest {
         SubtitleLanguageSpec,
         ::buffa::Inline<SubtitleLanguageSpec>,
     >,
-    /// "\<plugin\>/\<translator\>"; empty for the settings' translator.
+    /// "\<plugin\>/\<translator\>" or "ai/\<provider\>/\<model\>"; empty for the
+    /// settings' translators.
     ///
     /// Field 5: `translator`
     pub translator: ::core::option::Option<::buffa::alloc::string::String>,
@@ -9361,6 +10447,913 @@ impl ::buffa::Message for TranslateSubtitleResponse {
 }
 impl ::buffa::ExtensionSet for TranslateSubtitleResponse {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.TranslateSubtitleResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ProofreadSubtitleRequest {
+    /// Field 1: `item_id`
+    pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// A subtitle file of the item translated by the server.
+    ///
+    /// Field 2: `path`
+    pub path: ::core::option::Option<::buffa::alloc::string::String>,
+    /// "ai/\<provider\>/\<model\>"; empty for the first AI model that
+    /// translated it, else the first among the settings' translators.
+    ///
+    /// Field 3: `translator`
+    pub translator: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ProofreadSubtitleRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ProofreadSubtitleRequest")
+            .field("item_id", &self.item_id)
+            .field("path", &self.path)
+            .field("translator", &self.translator)
+            .finish()
+    }
+}
+impl ProofreadSubtitleRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleRequest";
+}
+impl ProofreadSubtitleRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::item_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_item_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.item_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::path`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_path(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.path = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::translator`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_translator(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.translator = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(ProofreadSubtitleRequest);
+impl ::buffa::MessageName for ProofreadSubtitleRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ProofreadSubtitleRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ProofreadSubtitleRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleRequest";
+}
+impl ::buffa::Message for ProofreadSubtitleRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.item_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.translator {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.item_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.path {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.translator {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.item_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.path.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .translator
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.item_id = ::core::option::Option::None;
+        self.path = ::core::option::Option::None;
+        self.translator = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ProofreadSubtitleRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.ProofreadSubtitleRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ProofreadSubtitleResponse {
+    /// Field 1: `job_id`
+    pub job_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ProofreadSubtitleResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ProofreadSubtitleResponse")
+            .field("job_id", &self.job_id)
+            .finish()
+    }
+}
+impl ProofreadSubtitleResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleResponse";
+}
+impl ProofreadSubtitleResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::job_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_job_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.job_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(ProofreadSubtitleResponse);
+impl ::buffa::MessageName for ProofreadSubtitleResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ProofreadSubtitleResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ProofreadSubtitleResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleResponse";
+}
+impl ::buffa::Message for ProofreadSubtitleResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.job_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.job_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.job_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.job_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ProofreadSubtitleResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.ProofreadSubtitleResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSubtitleTranslationStatisticsRequest {
+    /// The days counted in daily, up to today.
+    ///
+    /// Field 1: `days`
+    pub days: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSubtitleTranslationStatisticsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSubtitleTranslationStatisticsRequest")
+            .field("days", &self.days)
+            .finish()
+    }
+}
+impl GetSubtitleTranslationStatisticsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+}
+impl GetSubtitleTranslationStatisticsRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_days(mut self, value: i32) -> Self {
+        self.days = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(GetSubtitleTranslationStatisticsRequest);
+impl ::buffa::MessageName for GetSubtitleTranslationStatisticsRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSubtitleTranslationStatisticsRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+}
+impl ::buffa::Message for GetSubtitleTranslationStatisticsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.days {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.days = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSubtitleTranslationStatisticsRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSubtitleTranslationStatisticsResponse {
+    /// The files translated, and their cues and characters.
+    ///
+    /// Field 1: `files`
+    pub files: ::core::option::Option<i64>,
+    /// Field 2: `cues`
+    pub cues: ::core::option::Option<i64>,
+    /// Field 3: `characters`
+    pub characters: ::core::option::Option<i64>,
+    /// What AI models used and cost.
+    ///
+    /// Field 4: `input_tokens`
+    pub input_tokens: ::core::option::Option<i64>,
+    /// Field 5: `output_tokens`
+    pub output_tokens: ::core::option::Option<i64>,
+    /// Field 6: `cost`
+    pub cost: ::core::option::Option<f64>,
+    /// Files by translator, by "\<source\>:\<target\>" language pair and by
+    /// "movie" or "episode".
+    ///
+    /// Field 7: `by_translator`
+    pub by_translator: ::buffa::__private::HashMap<::buffa::alloc::string::String, i64>,
+    /// Field 8: `by_language_pair`
+    pub by_language_pair: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        i64,
+    >,
+    /// Field 9: `by_media`
+    pub by_media: ::buffa::__private::HashMap<::buffa::alloc::string::String, i64>,
+    /// Files translated each day, oldest first, in the server's time zone.
+    ///
+    /// Field 10: `daily`
+    pub daily: ::buffa::alloc::vec::Vec<SubtitleTranslationDay>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSubtitleTranslationStatisticsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSubtitleTranslationStatisticsResponse")
+            .field("files", &self.files)
+            .field("cues", &self.cues)
+            .field("characters", &self.characters)
+            .field("input_tokens", &self.input_tokens)
+            .field("output_tokens", &self.output_tokens)
+            .field("cost", &self.cost)
+            .field("by_translator", &self.by_translator)
+            .field("by_language_pair", &self.by_language_pair)
+            .field("by_media", &self.by_media)
+            .field("daily", &self.daily)
+            .finish()
+    }
+}
+impl GetSubtitleTranslationStatisticsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+}
+impl GetSubtitleTranslationStatisticsResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::files`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_files(mut self, value: i64) -> Self {
+        self.files = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::cues`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_cues(mut self, value: i64) -> Self {
+        self.cues = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::characters`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_characters(mut self, value: i64) -> Self {
+        self.characters = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::input_tokens`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_input_tokens(mut self, value: i64) -> Self {
+        self.input_tokens = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::output_tokens`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_output_tokens(mut self, value: i64) -> Self {
+        self.output_tokens = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::cost`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_cost(mut self, value: f64) -> Self {
+        self.cost = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(GetSubtitleTranslationStatisticsResponse);
+impl ::buffa::MessageName for GetSubtitleTranslationStatisticsResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSubtitleTranslationStatisticsResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+}
+impl ::buffa::Message for GetSubtitleTranslationStatisticsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.files {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.cues {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.characters {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.input_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.output_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if self.cost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Int64,
+                _,
+            >(&self.by_translator, 1u64);
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Int64,
+                _,
+            >(&self.by_language_pair, 1u64);
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Int64,
+                _,
+            >(&self.by_media, 1u64);
+        for v in &self.daily {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.files {
+            ::buffa::types::put_int64_field(1u32, v, buf);
+        }
+        if let Some(v) = self.cues {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        if let Some(v) = self.characters {
+            ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if let Some(v) = self.input_tokens {
+            ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        if let Some(v) = self.output_tokens {
+            ::buffa::types::put_int64_field(5u32, v, buf);
+        }
+        if let Some(v) = self.cost {
+            ::buffa::types::put_double_field(6u32, v, buf);
+        }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Int64,
+            _,
+        >(&self.by_translator, 7u32, buf);
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Int64,
+            _,
+        >(&self.by_language_pair, 8u32, buf);
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Int64,
+            _,
+        >(&self.by_media, 9u32, buf);
+        for v in &self.daily {
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.files = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.cues = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.characters = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.input_tokens = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.output_tokens = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.cost = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Int64,
+                    _,
+                >(&mut self.by_translator, buf, ctx)?;
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Int64,
+                    _,
+                >(&mut self.by_language_pair, buf, ctx)?;
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Int64,
+                    _,
+                >(&mut self.by_media, buf, ctx)?;
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.daily.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.files = ::core::option::Option::None;
+        self.cues = ::core::option::Option::None;
+        self.characters = ::core::option::Option::None;
+        self.input_tokens = ::core::option::Option::None;
+        self.output_tokens = ::core::option::Option::None;
+        self.cost = ::core::option::Option::None;
+        self.by_translator.clear();
+        self.by_language_pair.clear();
+        self.by_media.clear();
+        self.daily.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSubtitleTranslationStatisticsResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslationDay is the number of files translated on a day.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslationDay {
+    /// "YYYY-MM-DD".
+    ///
+    /// Field 1: `date`
+    pub date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `files`
+    pub files: ::core::option::Option<i64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslationDay {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslationDay")
+            .field("date", &self.date)
+            .field("files", &self.files)
+            .finish()
+    }
+}
+impl SubtitleTranslationDay {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationDay";
+}
+impl SubtitleTranslationDay {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::files`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_files(mut self, value: i64) -> Self {
+        self.files = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslationDay);
+impl ::buffa::MessageName for SubtitleTranslationDay {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationDay";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationDay";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationDay";
+}
+impl ::buffa::Message for SubtitleTranslationDay {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.date {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.files {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.date {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.files {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.date.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.files = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.date = ::core::option::Option::None;
+        self.files = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslationDay {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationDay";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -10060,6 +12053,13 @@ pub struct SubtitleHistoryEvent {
     ///
     /// Field 16: `upgraded_from`
     pub upgraded_from: ::core::option::Option<::buffa::alloc::string::String>,
+    /// What a translation translated.
+    ///
+    /// Field 17: `translation`
+    pub translation: ::buffa::MessageField<
+        SubtitleTranslationRecord,
+        ::buffa::Inline<SubtitleTranslationRecord>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -10082,6 +12082,7 @@ impl ::core::fmt::Debug for SubtitleHistoryEvent {
             .field("matched", &self.matched)
             .field("not_matched", &self.not_matched)
             .field("upgraded_from", &self.upgraded_from)
+            .field("translation", &self.translation)
             .finish()
     }
 }
@@ -10283,6 +12284,14 @@ impl ::buffa::Message for SubtitleHistoryEvent {
         if let Some(ref v) = self.upgraded_from {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.translation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.translation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -10350,6 +12359,14 @@ impl ::buffa::Message for SubtitleHistoryEvent {
         }
         if let Some(ref v) = self.upgraded_from {
             ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        if self.translation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.translation.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -10537,6 +12554,17 @@ impl ::buffa::Message for SubtitleHistoryEvent {
                     buf,
                 )?;
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.translation.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -10561,11 +12589,396 @@ impl ::buffa::Message for SubtitleHistoryEvent {
         self.matched.clear();
         self.not_matched.clear();
         self.upgraded_from = ::core::option::Option::None;
+        self.translation = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for SubtitleHistoryEvent {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleHistoryEvent";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslationRecord is what a translation translated and what it
+/// took.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslationRecord {
+    /// The subtitle translated: an external file, or an embedded stream.
+    ///
+    /// Field 1: `source_path`
+    pub source_path: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `source_stream_index`
+    pub source_stream_index: ::core::option::Option<i32>,
+    /// Field 3: `source_language`
+    pub source_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The translators that translated the cues, the first one's first.
+    ///
+    /// Field 4: `translators`
+    pub translators: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 5: `cues`
+    pub cues: ::core::option::Option<i32>,
+    /// Field 6: `characters`
+    pub characters: ::core::option::Option<i64>,
+    /// Field 7: `input_tokens`
+    pub input_tokens: ::core::option::Option<i64>,
+    /// Field 8: `output_tokens`
+    pub output_tokens: ::core::option::Option<i64>,
+    /// Field 9: `cost`
+    pub cost: ::core::option::Option<f64>,
+    /// Set once the translation was proofread, with the cues revised.
+    ///
+    /// Field 10: `proofread`
+    pub proofread: ::core::option::Option<bool>,
+    /// Field 11: `revised`
+    pub revised: ::core::option::Option<i32>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslationRecord {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslationRecord")
+            .field("source_path", &self.source_path)
+            .field("source_stream_index", &self.source_stream_index)
+            .field("source_language", &self.source_language)
+            .field("translators", &self.translators)
+            .field("cues", &self.cues)
+            .field("characters", &self.characters)
+            .field("input_tokens", &self.input_tokens)
+            .field("output_tokens", &self.output_tokens)
+            .field("cost", &self.cost)
+            .field("proofread", &self.proofread)
+            .field("revised", &self.revised)
+            .finish()
+    }
+}
+impl SubtitleTranslationRecord {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationRecord";
+}
+impl SubtitleTranslationRecord {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source_path`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source_path(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.source_path = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source_stream_index`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source_stream_index(mut self, value: i32) -> Self {
+        self.source_stream_index = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::source_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_source_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.source_language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::cues`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_cues(mut self, value: i32) -> Self {
+        self.cues = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::characters`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_characters(mut self, value: i64) -> Self {
+        self.characters = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::input_tokens`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_input_tokens(mut self, value: i64) -> Self {
+        self.input_tokens = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::output_tokens`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_output_tokens(mut self, value: i64) -> Self {
+        self.output_tokens = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::cost`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_cost(mut self, value: f64) -> Self {
+        self.cost = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::proofread`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_proofread(mut self, value: bool) -> Self {
+        self.proofread = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::revised`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_revised(mut self, value: i32) -> Self {
+        self.revised = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslationRecord);
+impl ::buffa::MessageName for SubtitleTranslationRecord {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationRecord";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationRecord";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationRecord";
+}
+impl ::buffa::Message for SubtitleTranslationRecord {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.source_path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.source_stream_index {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.source_language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.translators {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.cues {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.characters {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.input_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.output_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if self.cost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.proofread.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.revised {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.source_path {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.source_stream_index {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.source_language {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        for v in &self.translators {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.cues {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.characters {
+            ::buffa::types::put_int64_field(6u32, v, buf);
+        }
+        if let Some(v) = self.input_tokens {
+            ::buffa::types::put_int64_field(7u32, v, buf);
+        }
+        if let Some(v) = self.output_tokens {
+            ::buffa::types::put_int64_field(8u32, v, buf);
+        }
+        if let Some(v) = self.cost {
+            ::buffa::types::put_double_field(9u32, v, buf);
+        }
+        if let Some(v) = self.proofread {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.revised {
+            ::buffa::types::put_int32_field(11u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .source_path
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.source_stream_index = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .source_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.translators.push(__elem);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.cues = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.characters = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.input_tokens = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.output_tokens = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.cost = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.proofread = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.revised = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.source_path = ::core::option::Option::None;
+        self.source_stream_index = ::core::option::Option::None;
+        self.source_language = ::core::option::Option::None;
+        self.translators.clear();
+        self.cues = ::core::option::Option::None;
+        self.characters = ::core::option::Option::None;
+        self.input_tokens = ::core::option::Option::None;
+        self.output_tokens = ::core::option::Option::None;
+        self.cost = ::core::option::Option::None;
+        self.proofread = ::core::option::Option::None;
+        self.revised = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslationRecord {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationRecord";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

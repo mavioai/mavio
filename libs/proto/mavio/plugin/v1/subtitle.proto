@@ -225,6 +225,10 @@ message SubtitleTranslatorInfo {
   // <font>): the server then sends cues as SubRip holds them and saves
   // SubRip; otherwise it sends their plain text and keeps the format.
   bool markup = 6;
+  // The languages the translator translates from and into, as BCP 47
+  // tags; empty for any.
+  repeated string source_languages = 7;
+  repeated string target_languages = 8;
 }
 
 // SubtitleTranslationMedia describes what a subtitle being translated is

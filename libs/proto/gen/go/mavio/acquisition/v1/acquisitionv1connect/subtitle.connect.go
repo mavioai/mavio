@@ -93,6 +93,12 @@ const (
 	// SubtitleServiceTranslateSubtitleProcedure is the fully-qualified name of the SubtitleService's
 	// TranslateSubtitle RPC.
 	SubtitleServiceTranslateSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/TranslateSubtitle"
+	// SubtitleServiceProofreadSubtitleProcedure is the fully-qualified name of the SubtitleService's
+	// ProofreadSubtitle RPC.
+	SubtitleServiceProofreadSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/ProofreadSubtitle"
+	// SubtitleServiceGetSubtitleTranslationStatisticsProcedure is the fully-qualified name of the
+	// SubtitleService's GetSubtitleTranslationStatistics RPC.
+	SubtitleServiceGetSubtitleTranslationStatisticsProcedure = "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics"
 	// SubtitleServiceListSubtitleTranslatorsProcedure is the fully-qualified name of the
 	// SubtitleService's ListSubtitleTranslators RPC.
 	SubtitleServiceListSubtitleTranslatorsProcedure = "/mavio.acquisition.v1.SubtitleService/ListSubtitleTranslators"
@@ -165,11 +171,19 @@ type SubtitleServiceClient interface {
 	// local and network storage.
 	SyncSubtitle(context.Context, *v1.SyncSubtitleRequest) (*v1.SyncSubtitleResponse, error)
 	// TranslateSubtitle queues the translation of a subtitle of a movie or
-	// episode into another language by a translator plugin, as Bazarr's
-	// translation: an external subtitle file, or an embedded text subtitle
-	// stream from playback's extraction cache (refused on cloud storage, as
-	// ExtractSubtitle). The translation is saved as a subtitle file.
+	// episode into another language, as Lingarr's: an external subtitle
+	// file, or an embedded text subtitle stream from playback's extraction
+	// cache (refused on cloud storage, as ExtractSubtitle), translated by an
+	// AI model or a translator plugin. The translation is saved as a
+	// subtitle file.
 	TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error)
+	// ProofreadSubtitle queues the proofreading of a translation by an AI
+	// model, as Lingarr's: each cue's translation is compared with the
+	// subtitle it was translated from and corrected.
+	ProofreadSubtitle(context.Context, *v1.ProofreadSubtitleRequest) (*v1.ProofreadSubtitleResponse, error)
+	// GetSubtitleTranslationStatistics sums up the translations of the
+	// subtitle history, as Lingarr's statistics.
+	GetSubtitleTranslationStatistics(context.Context, *v1.GetSubtitleTranslationStatisticsRequest) (*v1.GetSubtitleTranslationStatisticsResponse, error)
 	// ListSubtitleTranslators lists the translators of the subtitle
 	// translator plugins.
 	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
@@ -325,6 +339,19 @@ func NewSubtitleServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(subtitleServiceMethods.ByName("TranslateSubtitle")),
 			connect.WithClientOptions(opts...),
 		),
+		proofreadSubtitle: connect.NewClient[v1.ProofreadSubtitleRequest, v1.ProofreadSubtitleResponse](
+			httpClient,
+			baseURL+SubtitleServiceProofreadSubtitleProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("ProofreadSubtitle")),
+			connect.WithClientOptions(opts...),
+		),
+		getSubtitleTranslationStatistics: connect.NewClient[v1.GetSubtitleTranslationStatisticsRequest, v1.GetSubtitleTranslationStatisticsResponse](
+			httpClient,
+			baseURL+SubtitleServiceGetSubtitleTranslationStatisticsProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("GetSubtitleTranslationStatistics")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		listSubtitleTranslators: connect.NewClient[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse](
 			httpClient,
 			baseURL+SubtitleServiceListSubtitleTranslatorsProcedure,
@@ -364,31 +391,33 @@ func NewSubtitleServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // subtitleServiceClient implements SubtitleServiceClient.
 type subtitleServiceClient struct {
-	listSubtitleProfiles    *connect.Client[v1.ListSubtitleProfilesRequest, v1.ListSubtitleProfilesResponse]
-	createSubtitleProfile   *connect.Client[v1.CreateSubtitleProfileRequest, v1.CreateSubtitleProfileResponse]
-	updateSubtitleProfile   *connect.Client[v1.UpdateSubtitleProfileRequest, v1.UpdateSubtitleProfileResponse]
-	deleteSubtitleProfile   *connect.Client[v1.DeleteSubtitleProfileRequest, v1.DeleteSubtitleProfileResponse]
-	assignSubtitleProfile   *connect.Client[v1.AssignSubtitleProfileRequest, v1.AssignSubtitleProfileResponse]
-	getSubtitleSettings     *connect.Client[v1.GetSubtitleSettingsRequest, v1.GetSubtitleSettingsResponse]
-	updateSubtitleSettings  *connect.Client[v1.UpdateSubtitleSettingsRequest, v1.UpdateSubtitleSettingsResponse]
-	listSubtitleProviders   *connect.Client[v1.ListSubtitleProvidersRequest, v1.ListSubtitleProvidersResponse]
-	listWantedSubtitles     *connect.Client[v1.ListWantedSubtitlesRequest, v1.ListWantedSubtitlesResponse]
-	searchWantedSubtitles   *connect.Client[v1.SearchWantedSubtitlesRequest, v1.SearchWantedSubtitlesResponse]
-	upgradeSubtitles        *connect.Client[v1.UpgradeSubtitlesRequest, v1.UpgradeSubtitlesResponse]
-	getItemSubtitles        *connect.Client[v1.GetItemSubtitlesRequest, v1.GetItemSubtitlesResponse]
-	searchItemSubtitles     *connect.Client[v1.SearchItemSubtitlesRequest, v1.SearchItemSubtitlesResponse]
-	downloadItemSubtitle    *connect.Client[v1.DownloadItemSubtitleRequest, v1.DownloadItemSubtitleResponse]
-	uploadSubtitle          *connect.Client[v1.UploadSubtitleRequest, v1.UploadSubtitleResponse]
-	extractSubtitle         *connect.Client[v1.ExtractSubtitleRequest, v1.ExtractSubtitleResponse]
-	deleteSubtitle          *connect.Client[v1.DeleteSubtitleRequest, v1.DeleteSubtitleResponse]
-	modifySubtitle          *connect.Client[v1.ModifySubtitleRequest, v1.ModifySubtitleResponse]
-	syncSubtitle            *connect.Client[v1.SyncSubtitleRequest, v1.SyncSubtitleResponse]
-	translateSubtitle       *connect.Client[v1.TranslateSubtitleRequest, v1.TranslateSubtitleResponse]
-	listSubtitleTranslators *connect.Client[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse]
-	blocklistSubtitle       *connect.Client[v1.BlocklistSubtitleRequest, v1.BlocklistSubtitleResponse]
-	listSubtitleHistory     *connect.Client[v1.ListSubtitleHistoryRequest, v1.ListSubtitleHistoryResponse]
-	listSubtitleBlocklist   *connect.Client[v1.ListSubtitleBlocklistRequest, v1.ListSubtitleBlocklistResponse]
-	deleteSubtitleBlocklist *connect.Client[v1.DeleteSubtitleBlocklistRequest, v1.DeleteSubtitleBlocklistResponse]
+	listSubtitleProfiles             *connect.Client[v1.ListSubtitleProfilesRequest, v1.ListSubtitleProfilesResponse]
+	createSubtitleProfile            *connect.Client[v1.CreateSubtitleProfileRequest, v1.CreateSubtitleProfileResponse]
+	updateSubtitleProfile            *connect.Client[v1.UpdateSubtitleProfileRequest, v1.UpdateSubtitleProfileResponse]
+	deleteSubtitleProfile            *connect.Client[v1.DeleteSubtitleProfileRequest, v1.DeleteSubtitleProfileResponse]
+	assignSubtitleProfile            *connect.Client[v1.AssignSubtitleProfileRequest, v1.AssignSubtitleProfileResponse]
+	getSubtitleSettings              *connect.Client[v1.GetSubtitleSettingsRequest, v1.GetSubtitleSettingsResponse]
+	updateSubtitleSettings           *connect.Client[v1.UpdateSubtitleSettingsRequest, v1.UpdateSubtitleSettingsResponse]
+	listSubtitleProviders            *connect.Client[v1.ListSubtitleProvidersRequest, v1.ListSubtitleProvidersResponse]
+	listWantedSubtitles              *connect.Client[v1.ListWantedSubtitlesRequest, v1.ListWantedSubtitlesResponse]
+	searchWantedSubtitles            *connect.Client[v1.SearchWantedSubtitlesRequest, v1.SearchWantedSubtitlesResponse]
+	upgradeSubtitles                 *connect.Client[v1.UpgradeSubtitlesRequest, v1.UpgradeSubtitlesResponse]
+	getItemSubtitles                 *connect.Client[v1.GetItemSubtitlesRequest, v1.GetItemSubtitlesResponse]
+	searchItemSubtitles              *connect.Client[v1.SearchItemSubtitlesRequest, v1.SearchItemSubtitlesResponse]
+	downloadItemSubtitle             *connect.Client[v1.DownloadItemSubtitleRequest, v1.DownloadItemSubtitleResponse]
+	uploadSubtitle                   *connect.Client[v1.UploadSubtitleRequest, v1.UploadSubtitleResponse]
+	extractSubtitle                  *connect.Client[v1.ExtractSubtitleRequest, v1.ExtractSubtitleResponse]
+	deleteSubtitle                   *connect.Client[v1.DeleteSubtitleRequest, v1.DeleteSubtitleResponse]
+	modifySubtitle                   *connect.Client[v1.ModifySubtitleRequest, v1.ModifySubtitleResponse]
+	syncSubtitle                     *connect.Client[v1.SyncSubtitleRequest, v1.SyncSubtitleResponse]
+	translateSubtitle                *connect.Client[v1.TranslateSubtitleRequest, v1.TranslateSubtitleResponse]
+	proofreadSubtitle                *connect.Client[v1.ProofreadSubtitleRequest, v1.ProofreadSubtitleResponse]
+	getSubtitleTranslationStatistics *connect.Client[v1.GetSubtitleTranslationStatisticsRequest, v1.GetSubtitleTranslationStatisticsResponse]
+	listSubtitleTranslators          *connect.Client[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse]
+	blocklistSubtitle                *connect.Client[v1.BlocklistSubtitleRequest, v1.BlocklistSubtitleResponse]
+	listSubtitleHistory              *connect.Client[v1.ListSubtitleHistoryRequest, v1.ListSubtitleHistoryResponse]
+	listSubtitleBlocklist            *connect.Client[v1.ListSubtitleBlocklistRequest, v1.ListSubtitleBlocklistResponse]
+	deleteSubtitleBlocklist          *connect.Client[v1.DeleteSubtitleBlocklistRequest, v1.DeleteSubtitleBlocklistResponse]
 }
 
 // ListSubtitleProfiles calls mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles.
@@ -571,6 +600,25 @@ func (c *subtitleServiceClient) TranslateSubtitle(ctx context.Context, req *v1.T
 	return nil, err
 }
 
+// ProofreadSubtitle calls mavio.acquisition.v1.SubtitleService.ProofreadSubtitle.
+func (c *subtitleServiceClient) ProofreadSubtitle(ctx context.Context, req *v1.ProofreadSubtitleRequest) (*v1.ProofreadSubtitleResponse, error) {
+	response, err := c.proofreadSubtitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetSubtitleTranslationStatistics calls
+// mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics.
+func (c *subtitleServiceClient) GetSubtitleTranslationStatistics(ctx context.Context, req *v1.GetSubtitleTranslationStatisticsRequest) (*v1.GetSubtitleTranslationStatisticsResponse, error) {
+	response, err := c.getSubtitleTranslationStatistics.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ListSubtitleTranslators calls mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators.
 func (c *subtitleServiceClient) ListSubtitleTranslators(ctx context.Context, req *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {
 	response, err := c.listSubtitleTranslators.CallUnary(ctx, connect.NewRequest(req))
@@ -671,11 +719,19 @@ type SubtitleServiceHandler interface {
 	// local and network storage.
 	SyncSubtitle(context.Context, *v1.SyncSubtitleRequest) (*v1.SyncSubtitleResponse, error)
 	// TranslateSubtitle queues the translation of a subtitle of a movie or
-	// episode into another language by a translator plugin, as Bazarr's
-	// translation: an external subtitle file, or an embedded text subtitle
-	// stream from playback's extraction cache (refused on cloud storage, as
-	// ExtractSubtitle). The translation is saved as a subtitle file.
+	// episode into another language, as Lingarr's: an external subtitle
+	// file, or an embedded text subtitle stream from playback's extraction
+	// cache (refused on cloud storage, as ExtractSubtitle), translated by an
+	// AI model or a translator plugin. The translation is saved as a
+	// subtitle file.
 	TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error)
+	// ProofreadSubtitle queues the proofreading of a translation by an AI
+	// model, as Lingarr's: each cue's translation is compared with the
+	// subtitle it was translated from and corrected.
+	ProofreadSubtitle(context.Context, *v1.ProofreadSubtitleRequest) (*v1.ProofreadSubtitleResponse, error)
+	// GetSubtitleTranslationStatistics sums up the translations of the
+	// subtitle history, as Lingarr's statistics.
+	GetSubtitleTranslationStatistics(context.Context, *v1.GetSubtitleTranslationStatisticsRequest) (*v1.GetSubtitleTranslationStatisticsResponse, error)
 	// ListSubtitleTranslators lists the translators of the subtitle
 	// translator plugins.
 	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
@@ -827,6 +883,19 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 		connect.WithSchema(subtitleServiceMethods.ByName("TranslateSubtitle")),
 		connect.WithHandlerOptions(opts...),
 	)
+	subtitleServiceProofreadSubtitleHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceProofreadSubtitleProcedure,
+		svc.ProofreadSubtitle,
+		connect.WithSchema(subtitleServiceMethods.ByName("ProofreadSubtitle")),
+		connect.WithHandlerOptions(opts...),
+	)
+	subtitleServiceGetSubtitleTranslationStatisticsHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceGetSubtitleTranslationStatisticsProcedure,
+		svc.GetSubtitleTranslationStatistics,
+		connect.WithSchema(subtitleServiceMethods.ByName("GetSubtitleTranslationStatistics")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	subtitleServiceListSubtitleTranslatorsHandler := connect.NewUnaryHandlerSimple(
 		SubtitleServiceListSubtitleTranslatorsProcedure,
 		svc.ListSubtitleTranslators,
@@ -903,6 +972,10 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 			subtitleServiceSyncSubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceTranslateSubtitleProcedure:
 			subtitleServiceTranslateSubtitleHandler.ServeHTTP(w, r)
+		case SubtitleServiceProofreadSubtitleProcedure:
+			subtitleServiceProofreadSubtitleHandler.ServeHTTP(w, r)
+		case SubtitleServiceGetSubtitleTranslationStatisticsProcedure:
+			subtitleServiceGetSubtitleTranslationStatisticsHandler.ServeHTTP(w, r)
 		case SubtitleServiceListSubtitleTranslatorsProcedure:
 			subtitleServiceListSubtitleTranslatorsHandler.ServeHTTP(w, r)
 		case SubtitleServiceBlocklistSubtitleProcedure:
@@ -1000,6 +1073,14 @@ func (UnimplementedSubtitleServiceHandler) SyncSubtitle(context.Context, *v1.Syn
 
 func (UnimplementedSubtitleServiceHandler) TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.TranslateSubtitle is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) ProofreadSubtitle(context.Context, *v1.ProofreadSubtitleRequest) (*v1.ProofreadSubtitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.ProofreadSubtitle is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) GetSubtitleTranslationStatistics(context.Context, *v1.GetSubtitleTranslationStatisticsRequest) (*v1.GetSubtitleTranslationStatisticsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics is not implemented"))
 }
 
 func (UnimplementedSubtitleServiceHandler) ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {

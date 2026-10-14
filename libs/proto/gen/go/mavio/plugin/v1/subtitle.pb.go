@@ -2665,17 +2665,19 @@ func (b0 ListSubtitleTranslatorsResponse_builder) Build() *ListSubtitleTranslato
 
 // SubtitleTranslatorInfo is a translator a plugin implements.
 type SubtitleTranslatorInfo struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_DisplayName *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
-	xxx_hidden_Settings    *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
-	xxx_hidden_Enabled     bool                   `protobuf:"varint,4,opt,name=enabled"`
-	xxx_hidden_BatchSize   int32                  `protobuf:"varint,5,opt,name=batch_size,json=batchSize"`
-	xxx_hidden_Markup      bool                   `protobuf:"varint,6,opt,name=markup"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name            *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_DisplayName     *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName"`
+	xxx_hidden_Settings        *[]*SettingField       `protobuf:"bytes,3,rep,name=settings"`
+	xxx_hidden_Enabled         bool                   `protobuf:"varint,4,opt,name=enabled"`
+	xxx_hidden_BatchSize       int32                  `protobuf:"varint,5,opt,name=batch_size,json=batchSize"`
+	xxx_hidden_Markup          bool                   `protobuf:"varint,6,opt,name=markup"`
+	xxx_hidden_SourceLanguages []string               `protobuf:"bytes,7,rep,name=source_languages,json=sourceLanguages"`
+	xxx_hidden_TargetLanguages []string               `protobuf:"bytes,8,rep,name=target_languages,json=targetLanguages"`
+	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
+	XXX_presence               [1]uint32
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *SubtitleTranslatorInfo) Reset() {
@@ -2753,14 +2755,28 @@ func (x *SubtitleTranslatorInfo) GetMarkup() bool {
 	return false
 }
 
+func (x *SubtitleTranslatorInfo) GetSourceLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_SourceLanguages
+	}
+	return nil
+}
+
+func (x *SubtitleTranslatorInfo) GetTargetLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_TargetLanguages
+	}
+	return nil
+}
+
 func (x *SubtitleTranslatorInfo) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *SubtitleTranslatorInfo) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *SubtitleTranslatorInfo) SetSettings(v []*SettingField) {
@@ -2769,17 +2785,25 @@ func (x *SubtitleTranslatorInfo) SetSettings(v []*SettingField) {
 
 func (x *SubtitleTranslatorInfo) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *SubtitleTranslatorInfo) SetBatchSize(v int32) {
 	x.xxx_hidden_BatchSize = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *SubtitleTranslatorInfo) SetMarkup(v bool) {
 	x.xxx_hidden_Markup = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+}
+
+func (x *SubtitleTranslatorInfo) SetSourceLanguages(v []string) {
+	x.xxx_hidden_SourceLanguages = v
+}
+
+func (x *SubtitleTranslatorInfo) SetTargetLanguages(v []string) {
+	x.xxx_hidden_TargetLanguages = v
 }
 
 func (x *SubtitleTranslatorInfo) HasName() bool {
@@ -2858,6 +2882,10 @@ type SubtitleTranslatorInfo_builder struct {
 	// <font>): the server then sends cues as SubRip holds them and saves
 	// SubRip; otherwise it sends their plain text and keeps the format.
 	Markup *bool
+	// The languages the translator translates from and into, as BCP 47
+	// tags; empty for any.
+	SourceLanguages []string
+	TargetLanguages []string
 }
 
 func (b0 SubtitleTranslatorInfo_builder) Build() *SubtitleTranslatorInfo {
@@ -2865,26 +2893,28 @@ func (b0 SubtitleTranslatorInfo_builder) Build() *SubtitleTranslatorInfo {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_DisplayName = b.DisplayName
 	}
 	x.xxx_hidden_Settings = &b.Settings
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	if b.BatchSize != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_BatchSize = *b.BatchSize
 	}
 	if b.Markup != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Markup = *b.Markup
 	}
+	x.xxx_hidden_SourceLanguages = b.SourceLanguages
+	x.xxx_hidden_TargetLanguages = b.TargetLanguages
 	return m0
 }
 
@@ -3795,7 +3825,7 @@ const file_mavio_plugin_v1_subtitle_proto_rawDesc = "" +
 	"\afailure\x18\x04 \x01(\v2(.mavio.plugin.v1.SubtitleProviderFailureR\afailure\" \n" +
 	"\x1eListSubtitleTranslatorsRequest\"l\n" +
 	"\x1fListSubtitleTranslatorsResponse\x12I\n" +
-	"\vtranslators\x18\x01 \x03(\v2'.mavio.plugin.v1.SubtitleTranslatorInfoR\vtranslators\"\xdb\x01\n" +
+	"\vtranslators\x18\x01 \x03(\v2'.mavio.plugin.v1.SubtitleTranslatorInfoR\vtranslators\"\xb1\x02\n" +
 	"\x16SubtitleTranslatorInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
@@ -3803,7 +3833,9 @@ const file_mavio_plugin_v1_subtitle_proto_rawDesc = "" +
 	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x1d\n" +
 	"\n" +
 	"batch_size\x18\x05 \x01(\x05R\tbatchSize\x12\x16\n" +
-	"\x06markup\x18\x06 \x01(\bR\x06markup\"\xcd\x03\n" +
+	"\x06markup\x18\x06 \x01(\bR\x06markup\x12)\n" +
+	"\x10source_languages\x18\a \x03(\tR\x0fsourceLanguages\x12)\n" +
+	"\x10target_languages\x18\b \x03(\tR\x0ftargetLanguages\"\xcd\x03\n" +
 	"\x18SubtitleTranslationMedia\x12.\n" +
 	"\x04kind\x18\x01 \x01(\x0e2\x1a.mavio.plugin.v1.MediaKindR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +

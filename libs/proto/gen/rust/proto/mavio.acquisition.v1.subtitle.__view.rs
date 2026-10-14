@@ -5432,11 +5432,14 @@ impl ::buffa::HasMessageView for super::super::SubtitleSettings {
     type ViewHandle = SubtitleSettingsOwnedView;
 }
 /// SubtitleTranslationSettings are how subtitles are translated, as
-/// Bazarr's translator settings.
+/// Lingarr's translation settings and Bazarr's. Translators are named
+/// "\<plugin\>/\<translator\>" for the translators of subtitle translator
+/// plugins and "ai/\<provider\>/\<model\>" for the models of the AI gateway
+/// (AiService.ListAiModels).
 #[derive(Clone, Debug, Default)]
 pub struct SubtitleTranslationSettingsView<'a> {
-    /// The translator used when a translation names none, as
-    /// "\<plugin\>/\<translator\>"; empty for the first enabled one.
+    /// The translator used when a translation names none; empty for the
+    /// first enabled translator of a plugin.
     ///
     /// Field 1: `translator`
     pub translator: ::core::option::Option<&'a str>,
@@ -5449,6 +5452,86 @@ pub struct SubtitleTranslationSettingsView<'a> {
     ///
     /// Field 3: `credit`
     pub credit: ::core::option::Option<bool>,
+    /// Translators tried in order after the first when it fails or does not
+    /// translate between the languages; those matching the languages
+    /// exactly are tried before those matching them more loosely.
+    ///
+    /// Field 4: `fallback_translators`
+    pub fallback_translators: ::buffa::RepeatedView<'a, &'a str>,
+    /// The instructions of AI models, and the message carrying each cue,
+    /// with the placeholders {sourceLanguage}, {targetLanguage},
+    /// {lineToTranslate}, {contextBefore} and {contextAfter}.
+    ///
+    /// Field 5: `prompt`
+    pub prompt: ::core::option::Option<&'a str>,
+    /// Field 6: `user_prompt`
+    pub user_prompt: ::core::option::Option<&'a str>,
+    /// The instructions and message of proofreading, with {sourceLine} and
+    /// {translatedLine} besides the languages.
+    ///
+    /// Field 7: `proofread_prompt`
+    pub proofread_prompt: ::core::option::Option<&'a str>,
+    /// Field 8: `proofread_user_prompt`
+    pub proofread_user_prompt: ::core::option::Option<&'a str>,
+    /// The cues before and after each cue given to AI models as context.
+    ///
+    /// Field 9: `context_before`
+    pub context_before: ::core::option::Option<i32>,
+    /// Field 10: `context_after`
+    pub context_after: ::core::option::Option<i32>,
+    /// Gives the context as JSON objects with each cue's position and text,
+    /// and the translations of those before.
+    ///
+    /// Field 11: `translated_context`
+    pub translated_context: ::core::option::Option<bool>,
+    /// Translates with AI models in batches of max_batch_size cues (every
+    /// cue when 0) answered as JSON, rather than cue by cue.
+    ///
+    /// Field 12: `batch`
+    pub batch: ::core::option::Option<bool>,
+    /// Field 13: `max_batch_size`
+    pub max_batch_size: ::core::option::Option<i32>,
+    /// Names languages in prompts by their codes rather than their English
+    /// names.
+    ///
+    /// Field 14: `language_codes`
+    pub language_codes: ::core::option::Option<bool>,
+    /// Retries of a translation failing for a reason worth retrying, such as
+    /// a rate limit: max_retries attempts in all, the delay multiplied after
+    /// each.
+    ///
+    /// Field 15: `max_retries`
+    pub max_retries: ::core::option::Option<i32>,
+    /// Field 16: `retry_delay_seconds`
+    pub retry_delay_seconds: ::core::option::Option<i32>,
+    /// Field 17: `retry_multiplier`
+    pub retry_multiplier: ::core::option::Option<i32>,
+    /// How long one request to a translator may take.
+    ///
+    /// Field 18: `request_timeout_seconds`
+    pub request_timeout_seconds: ::core::option::Option<i32>,
+    /// Translates the cues' plain text, and drops the styles of ASS files.
+    ///
+    /// Field 19: `strip_formatting`
+    pub strip_formatting: ::core::option::Option<bool>,
+    /// Translates a cue's lines keeping its line breaks; otherwise the lines
+    /// are joined, and the translation split again at 42 characters when
+    /// formatting is stripped.
+    ///
+    /// Field 20: `preserve_line_breaks`
+    pub preserve_line_breaks: ::core::option::Option<bool>,
+    /// Trims the end of a cue overlapping the next.
+    ///
+    /// Field 21: `fix_overlaps`
+    pub fix_overlaps: ::core::option::Option<bool>,
+    /// Field 22: `validation`
+    pub validation: ::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationValidationView<'a>,
+    >,
+    /// Field 23: `automation`
+    pub automation: ::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationAutomationView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationSettingsView<'a> {
@@ -5502,6 +5585,180 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationSettingsView<'a> {
                 )?;
                 view.credit = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.prompt = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.user_prompt = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.proofread_prompt = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.proofread_user_prompt = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.context_before = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.context_after = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.translated_context = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.batch = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_batch_size = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.language_codes = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_retries = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.retry_delay_seconds = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.retry_multiplier = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            18u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.request_timeout_seconds = Some(
+                    ::buffa::types::decode_int32(&mut cur)?,
+                );
+            }
+            19u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.strip_formatting = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            20u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.preserve_line_breaks = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            21u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.fix_overlaps = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.validation.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.validation = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::SubtitleTranslationValidationView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.automation.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.automation = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::SubtitleTranslationAutomationView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.fallback_translators.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5533,6 +5790,46 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationSettingsView<'a> {
             translator: self.translator.map(|s| s.to_string()),
             default_score: self.default_score,
             credit: self.credit,
+            fallback_translators: self
+                .fallback_translators
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            prompt: self.prompt.map(|s| s.to_string()),
+            user_prompt: self.user_prompt.map(|s| s.to_string()),
+            proofread_prompt: self.proofread_prompt.map(|s| s.to_string()),
+            proofread_user_prompt: self.proofread_user_prompt.map(|s| s.to_string()),
+            context_before: self.context_before,
+            context_after: self.context_after,
+            translated_context: self.translated_context,
+            batch: self.batch,
+            max_batch_size: self.max_batch_size,
+            language_codes: self.language_codes,
+            max_retries: self.max_retries,
+            retry_delay_seconds: self.retry_delay_seconds,
+            retry_multiplier: self.retry_multiplier,
+            request_timeout_seconds: self.request_timeout_seconds,
+            strip_formatting: self.strip_formatting,
+            preserve_line_breaks: self.preserve_line_breaks,
+            fix_overlaps: self.fix_overlaps,
+            validation: match self.validation.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::SubtitleTranslationValidation,
+                        ::buffa::Inline<super::super::SubtitleTranslationValidation>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            automation: match self.automation.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::SubtitleTranslationAutomation,
+                        ::buffa::Inline<super::super::SubtitleTranslationAutomation>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5540,7 +5837,7 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationSettingsView<'a> {
 }
 impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationSettingsView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -5553,13 +5850,83 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationSettingsView<'a> {
         if self.credit.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.fallback_translators {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.user_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proofread_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.proofread_user_prompt {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.context_before {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.context_after {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.translated_context.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.batch.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_batch_size {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.language_codes.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_retries {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.retry_delay_seconds {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.retry_multiplier {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.request_timeout_seconds {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.strip_formatting.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.preserve_line_breaks.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.fix_overlaps.is_some() {
+            size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.validation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.validation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.automation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.automation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -5572,6 +5939,76 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationSettingsView<'a> {
         }
         if let Some(v) = self.credit {
             ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        for v in &self.fallback_translators {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.prompt {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        if let Some(ref v) = self.user_prompt {
+            ::buffa::types::put_string_field(6u32, v, buf);
+        }
+        if let Some(ref v) = self.proofread_prompt {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.proofread_user_prompt {
+            ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(v) = self.context_before {
+            ::buffa::types::put_int32_field(9u32, v, buf);
+        }
+        if let Some(v) = self.context_after {
+            ::buffa::types::put_int32_field(10u32, v, buf);
+        }
+        if let Some(v) = self.translated_context {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(v) = self.batch {
+            ::buffa::types::put_bool_field(12u32, v, buf);
+        }
+        if let Some(v) = self.max_batch_size {
+            ::buffa::types::put_int32_field(13u32, v, buf);
+        }
+        if let Some(v) = self.language_codes {
+            ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(v) = self.max_retries {
+            ::buffa::types::put_int32_field(15u32, v, buf);
+        }
+        if let Some(v) = self.retry_delay_seconds {
+            ::buffa::types::put_int32_field(16u32, v, buf);
+        }
+        if let Some(v) = self.retry_multiplier {
+            ::buffa::types::put_int32_field(17u32, v, buf);
+        }
+        if let Some(v) = self.request_timeout_seconds {
+            ::buffa::types::put_int32_field(18u32, v, buf);
+        }
+        if let Some(v) = self.strip_formatting {
+            ::buffa::types::put_bool_field(19u32, v, buf);
+        }
+        if let Some(v) = self.preserve_line_breaks {
+            ::buffa::types::put_bool_field(20u32, v, buf);
+        }
+        if let Some(v) = self.fix_overlaps {
+            ::buffa::types::put_bool_field(21u32, v, buf);
+        }
+        if self.validation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                22u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.validation.write_to(__cache, buf);
+        }
+        if self.automation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                23u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.automation.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5668,8 +6105,8 @@ impl SubtitleTranslationSettingsOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The translator used when a translation names none, as
-    /// "\<plugin\>/\<translator\>"; empty for the first enabled one.
+    /// The translator used when a translation names none; empty for the
+    /// first enabled translator of a plugin.
     ///
     /// Field 1: `translator`
     #[must_use]
@@ -5690,6 +6127,150 @@ impl SubtitleTranslationSettingsOwnedView {
     #[must_use]
     pub fn credit(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().credit
+    }
+    /// Translators tried in order after the first when it fails or does not
+    /// translate between the languages; those matching the languages
+    /// exactly are tried before those matching them more loosely.
+    ///
+    /// Field 4: `fallback_translators`
+    #[must_use]
+    pub fn fallback_translators(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().fallback_translators
+    }
+    /// The instructions of AI models, and the message carrying each cue,
+    /// with the placeholders {sourceLanguage}, {targetLanguage},
+    /// {lineToTranslate}, {contextBefore} and {contextAfter}.
+    ///
+    /// Field 5: `prompt`
+    #[must_use]
+    pub fn prompt(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().prompt
+    }
+    /// Field 6: `user_prompt`
+    #[must_use]
+    pub fn user_prompt(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().user_prompt
+    }
+    /// The instructions and message of proofreading, with {sourceLine} and
+    /// {translatedLine} besides the languages.
+    ///
+    /// Field 7: `proofread_prompt`
+    #[must_use]
+    pub fn proofread_prompt(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().proofread_prompt
+    }
+    /// Field 8: `proofread_user_prompt`
+    #[must_use]
+    pub fn proofread_user_prompt(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().proofread_user_prompt
+    }
+    /// The cues before and after each cue given to AI models as context.
+    ///
+    /// Field 9: `context_before`
+    #[must_use]
+    pub fn context_before(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().context_before
+    }
+    /// Field 10: `context_after`
+    #[must_use]
+    pub fn context_after(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().context_after
+    }
+    /// Gives the context as JSON objects with each cue's position and text,
+    /// and the translations of those before.
+    ///
+    /// Field 11: `translated_context`
+    #[must_use]
+    pub fn translated_context(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().translated_context
+    }
+    /// Translates with AI models in batches of max_batch_size cues (every
+    /// cue when 0) answered as JSON, rather than cue by cue.
+    ///
+    /// Field 12: `batch`
+    #[must_use]
+    pub fn batch(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().batch
+    }
+    /// Field 13: `max_batch_size`
+    #[must_use]
+    pub fn max_batch_size(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_batch_size
+    }
+    /// Names languages in prompts by their codes rather than their English
+    /// names.
+    ///
+    /// Field 14: `language_codes`
+    #[must_use]
+    pub fn language_codes(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().language_codes
+    }
+    /// Retries of a translation failing for a reason worth retrying, such as
+    /// a rate limit: max_retries attempts in all, the delay multiplied after
+    /// each.
+    ///
+    /// Field 15: `max_retries`
+    #[must_use]
+    pub fn max_retries(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_retries
+    }
+    /// Field 16: `retry_delay_seconds`
+    #[must_use]
+    pub fn retry_delay_seconds(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().retry_delay_seconds
+    }
+    /// Field 17: `retry_multiplier`
+    #[must_use]
+    pub fn retry_multiplier(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().retry_multiplier
+    }
+    /// How long one request to a translator may take.
+    ///
+    /// Field 18: `request_timeout_seconds`
+    #[must_use]
+    pub fn request_timeout_seconds(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().request_timeout_seconds
+    }
+    /// Translates the cues' plain text, and drops the styles of ASS files.
+    ///
+    /// Field 19: `strip_formatting`
+    #[must_use]
+    pub fn strip_formatting(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().strip_formatting
+    }
+    /// Translates a cue's lines keeping its line breaks; otherwise the lines
+    /// are joined, and the translation split again at 42 characters when
+    /// formatting is stripped.
+    ///
+    /// Field 20: `preserve_line_breaks`
+    #[must_use]
+    pub fn preserve_line_breaks(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().preserve_line_breaks
+    }
+    /// Trims the end of a cue overlapping the next.
+    ///
+    /// Field 21: `fix_overlaps`
+    #[must_use]
+    pub fn fix_overlaps(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().fix_overlaps
+    }
+    /// Field 22: `validation`
+    #[must_use]
+    pub fn validation(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationValidationView<'_>,
+    > {
+        &self.0.reborrow().validation
+    }
+    /// Field 23: `automation`
+    #[must_use]
+    pub fn automation(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationAutomationView<'_>,
+    > {
+        &self.0.reborrow().automation
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<SubtitleTranslationSettingsView<'static>>>
@@ -5715,6 +6296,713 @@ for SubtitleTranslationSettingsOwnedView {
 impl ::buffa::HasMessageView for super::super::SubtitleTranslationSettings {
     type View<'a> = SubtitleTranslationSettingsView<'a>;
     type ViewHandle = SubtitleTranslationSettingsOwnedView;
+}
+/// SubtitleTranslationValidation refuses to translate subtitles that look
+/// broken, as Lingarr's subtitle validation.
+#[derive(Clone, Debug, Default)]
+pub struct SubtitleTranslationValidationView<'a> {
+    /// Field 1: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    /// Field 2: `max_file_size`
+    pub max_file_size: ::core::option::Option<i64>,
+    /// The longest and shortest text of a cue, in characters.
+    ///
+    /// Field 3: `max_cue_length`
+    pub max_cue_length: ::core::option::Option<i32>,
+    /// Field 4: `min_cue_length`
+    pub min_cue_length: ::core::option::Option<i32>,
+    /// The shortest and longest a cue may last.
+    ///
+    /// Field 5: `min_duration_ms`
+    pub min_duration_ms: ::core::option::Option<i32>,
+    /// Field 6: `max_duration_seconds`
+    pub max_duration_seconds: ::core::option::Option<i32>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationValidationView<'a> {
+    type Owned = super::super::SubtitleTranslationValidation;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_file_size = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_cue_length = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.min_cue_length = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.min_duration_ms = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_duration_seconds = Some(
+                    ::buffa::types::decode_int32(&mut cur)?,
+                );
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationValidation,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationValidation,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SubtitleTranslationValidation {
+            enabled: self.enabled,
+            max_file_size: self.max_file_size,
+            max_cue_length: self.max_cue_length,
+            min_cue_length: self.min_cue_length,
+            min_duration_ms: self.min_duration_ms,
+            max_duration_seconds: self.max_duration_seconds,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationValidationView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.max_file_size {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_cue_length {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_cue_length {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.min_duration_ms {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_duration_seconds {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.max_file_size {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        if let Some(v) = self.max_cue_length {
+            ::buffa::types::put_int32_field(3u32, v, buf);
+        }
+        if let Some(v) = self.min_cue_length {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.min_duration_ms {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.max_duration_seconds {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SubtitleTranslationValidationView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationValidation";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationValidation";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationValidation";
+}
+::buffa::impl_default_view_instance!(SubtitleTranslationValidationView);
+::buffa::impl_view_reborrow!(SubtitleTranslationValidationView);
+/** Self-contained, `'static` owned view of a `SubtitleTranslationValidation` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SubtitleTranslationValidationView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SubtitleTranslationValidationView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SubtitleTranslationValidationOwnedView(
+    ::buffa::OwnedView<SubtitleTranslationValidationView<'static>>,
+);
+impl SubtitleTranslationValidationOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationValidationOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationValidationOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SubtitleTranslationValidation,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationValidationOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SubtitleTranslationValidationView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SubtitleTranslationValidationView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SubtitleTranslationValidation {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `enabled`
+    #[must_use]
+    pub fn enabled(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().enabled
+    }
+    /// Field 2: `max_file_size`
+    #[must_use]
+    pub fn max_file_size(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().max_file_size
+    }
+    /// The longest and shortest text of a cue, in characters.
+    ///
+    /// Field 3: `max_cue_length`
+    #[must_use]
+    pub fn max_cue_length(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_cue_length
+    }
+    /// Field 4: `min_cue_length`
+    #[must_use]
+    pub fn min_cue_length(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().min_cue_length
+    }
+    /// The shortest and longest a cue may last.
+    ///
+    /// Field 5: `min_duration_ms`
+    #[must_use]
+    pub fn min_duration_ms(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().min_duration_ms
+    }
+    /// Field 6: `max_duration_seconds`
+    #[must_use]
+    pub fn max_duration_seconds(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_duration_seconds
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<SubtitleTranslationValidationView<'static>>,
+> for SubtitleTranslationValidationOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<SubtitleTranslationValidationView<'static>>,
+    ) -> Self {
+        SubtitleTranslationValidationOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SubtitleTranslationValidationOwnedView>
+for ::buffa::OwnedView<SubtitleTranslationValidationView<'static>> {
+    fn from(wrapper: SubtitleTranslationValidationOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<SubtitleTranslationValidationView<'static>>,
+> for SubtitleTranslationValidationOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SubtitleTranslationValidationView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SubtitleTranslationValidation {
+    type View<'a> = SubtitleTranslationValidationView<'a>;
+    type ViewHandle = SubtitleTranslationValidationOwnedView;
+}
+/// SubtitleTranslationAutomation translates subtitles movies and episodes
+/// lack, as Lingarr's automation: a movie or episode still lacking
+/// subtitles its profile wants, whose file is old enough, gets them
+/// translated by the settings' translator from a subtitle it has in one of
+/// the source languages.
+#[derive(Clone, Debug, Default)]
+pub struct SubtitleTranslationAutomationView<'a> {
+    /// Field 1: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    /// How often it runs.
+    ///
+    /// Field 2: `interval_hours`
+    pub interval_hours: ::core::option::Option<i32>,
+    /// The languages translated from, in order of preference.
+    ///
+    /// Field 3: `source_languages`
+    pub source_languages: ::buffa::RepeatedView<'a, &'a str>,
+    /// The most translations a run queues.
+    ///
+    /// Field 4: `max_per_run`
+    pub max_per_run: ::core::option::Option<i32>,
+    /// How old a movie's or an episode's file must be, giving searches time
+    /// to find subtitles first.
+    ///
+    /// Field 5: `movie_age_hours`
+    pub movie_age_hours: ::core::option::Option<i32>,
+    /// Field 6: `episode_age_hours`
+    pub episode_age_hours: ::core::option::Option<i32>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationAutomationView<'a> {
+    type Owned = super::super::SubtitleTranslationAutomation;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.enabled = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.interval_hours = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.max_per_run = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.movie_age_hours = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.episode_age_hours = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.source_languages.push(__elem);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationAutomation,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationAutomation,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SubtitleTranslationAutomation {
+            enabled: self.enabled,
+            interval_hours: self.interval_hours,
+            source_languages: self
+                .source_languages
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            max_per_run: self.max_per_run,
+            movie_age_hours: self.movie_age_hours,
+            episode_age_hours: self.episode_age_hours,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationAutomationView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.interval_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        for v in &self.source_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.max_per_run {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.movie_age_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.episode_age_hours {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(1u32, v, buf);
+        }
+        if let Some(v) = self.interval_hours {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        for v in &self.source_languages {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.max_per_run {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(v) = self.movie_age_hours {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.episode_age_hours {
+            ::buffa::types::put_int32_field(6u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SubtitleTranslationAutomationView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationAutomation";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationAutomation";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationAutomation";
+}
+::buffa::impl_default_view_instance!(SubtitleTranslationAutomationView);
+::buffa::impl_view_reborrow!(SubtitleTranslationAutomationView);
+/** Self-contained, `'static` owned view of a `SubtitleTranslationAutomation` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SubtitleTranslationAutomationView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SubtitleTranslationAutomationView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SubtitleTranslationAutomationOwnedView(
+    ::buffa::OwnedView<SubtitleTranslationAutomationView<'static>>,
+);
+impl SubtitleTranslationAutomationOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationAutomationOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationAutomationOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SubtitleTranslationAutomation,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationAutomationOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SubtitleTranslationAutomationView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SubtitleTranslationAutomationView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SubtitleTranslationAutomation {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `enabled`
+    #[must_use]
+    pub fn enabled(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().enabled
+    }
+    /// How often it runs.
+    ///
+    /// Field 2: `interval_hours`
+    #[must_use]
+    pub fn interval_hours(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().interval_hours
+    }
+    /// The languages translated from, in order of preference.
+    ///
+    /// Field 3: `source_languages`
+    #[must_use]
+    pub fn source_languages(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().source_languages
+    }
+    /// The most translations a run queues.
+    ///
+    /// Field 4: `max_per_run`
+    #[must_use]
+    pub fn max_per_run(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().max_per_run
+    }
+    /// How old a movie's or an episode's file must be, giving searches time
+    /// to find subtitles first.
+    ///
+    /// Field 5: `movie_age_hours`
+    #[must_use]
+    pub fn movie_age_hours(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().movie_age_hours
+    }
+    /// Field 6: `episode_age_hours`
+    #[must_use]
+    pub fn episode_age_hours(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().episode_age_hours
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<SubtitleTranslationAutomationView<'static>>,
+> for SubtitleTranslationAutomationOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<SubtitleTranslationAutomationView<'static>>,
+    ) -> Self {
+        SubtitleTranslationAutomationOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SubtitleTranslationAutomationOwnedView>
+for ::buffa::OwnedView<SubtitleTranslationAutomationView<'static>> {
+    fn from(wrapper: SubtitleTranslationAutomationOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<SubtitleTranslationAutomationView<'static>>,
+> for SubtitleTranslationAutomationOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SubtitleTranslationAutomationView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SubtitleTranslationAutomation {
+    type View<'a> = SubtitleTranslationAutomationView<'a>;
+    type ViewHandle = SubtitleTranslationAutomationOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct GetSubtitleSettingsRequestView<'a> {
@@ -14718,7 +16006,8 @@ pub struct TranslateSubtitleRequestView<'a> {
     pub language: ::buffa::MessageFieldView<
         super::super::__buffa::view::SubtitleLanguageSpecView<'a>,
     >,
-    /// "\<plugin\>/\<translator\>"; empty for the settings' translator.
+    /// "\<plugin\>/\<translator\>" or "ai/\<provider\>/\<model\>"; empty for the
+    /// settings' translators.
     ///
     /// Field 5: `translator`
     pub translator: ::core::option::Option<&'a str>,
@@ -15062,7 +16351,8 @@ impl TranslateSubtitleRequestOwnedView {
     > {
         &self.0.reborrow().language
     }
-    /// "\<plugin\>/\<translator\>"; empty for the settings' translator.
+    /// "\<plugin\>/\<translator\>" or "ai/\<provider\>/\<model\>"; empty for the
+    /// settings' translators.
     ///
     /// Field 5: `translator`
     #[must_use]
@@ -15329,6 +16619,1636 @@ for TranslateSubtitleResponseOwnedView {
 impl ::buffa::HasMessageView for super::super::TranslateSubtitleResponse {
     type View<'a> = TranslateSubtitleResponseView<'a>;
     type ViewHandle = TranslateSubtitleResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct ProofreadSubtitleRequestView<'a> {
+    /// Field 1: `item_id`
+    pub item_id: ::core::option::Option<&'a str>,
+    /// A subtitle file of the item translated by the server.
+    ///
+    /// Field 2: `path`
+    pub path: ::core::option::Option<&'a str>,
+    /// "ai/\<provider\>/\<model\>"; empty for the first AI model that
+    /// translated it, else the first among the settings' translators.
+    ///
+    /// Field 3: `translator`
+    pub translator: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ProofreadSubtitleRequestView<'a> {
+    type Owned = super::super::ProofreadSubtitleRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.item_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.path = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.translator = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::ProofreadSubtitleRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::ProofreadSubtitleRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ProofreadSubtitleRequest {
+            item_id: self.item_id.map(|s| s.to_string()),
+            path: self.path.map(|s| s.to_string()),
+            translator: self.translator.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ProofreadSubtitleRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.item_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.translator {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.item_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.path {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.translator {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ProofreadSubtitleRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ProofreadSubtitleRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ProofreadSubtitleRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleRequest";
+}
+::buffa::impl_default_view_instance!(ProofreadSubtitleRequestView);
+::buffa::impl_view_reborrow!(ProofreadSubtitleRequestView);
+/** Self-contained, `'static` owned view of a `ProofreadSubtitleRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ProofreadSubtitleRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ProofreadSubtitleRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ProofreadSubtitleRequestOwnedView(
+    ::buffa::OwnedView<ProofreadSubtitleRequestView<'static>>,
+);
+impl ProofreadSubtitleRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ProofreadSubtitleRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ProofreadSubtitleRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ProofreadSubtitleRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ProofreadSubtitleRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `item_id`
+    #[must_use]
+    pub fn item_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().item_id
+    }
+    /// A subtitle file of the item translated by the server.
+    ///
+    /// Field 2: `path`
+    #[must_use]
+    pub fn path(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().path
+    }
+    /// "ai/\<provider\>/\<model\>"; empty for the first AI model that
+    /// translated it, else the first among the settings' translators.
+    ///
+    /// Field 3: `translator`
+    #[must_use]
+    pub fn translator(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().translator
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ProofreadSubtitleRequestView<'static>>>
+for ProofreadSubtitleRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<ProofreadSubtitleRequestView<'static>>) -> Self {
+        ProofreadSubtitleRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ProofreadSubtitleRequestOwnedView>
+for ::buffa::OwnedView<ProofreadSubtitleRequestView<'static>> {
+    fn from(wrapper: ProofreadSubtitleRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ProofreadSubtitleRequestView<'static>>>
+for ProofreadSubtitleRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ProofreadSubtitleRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ProofreadSubtitleRequest {
+    type View<'a> = ProofreadSubtitleRequestView<'a>;
+    type ViewHandle = ProofreadSubtitleRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct ProofreadSubtitleResponseView<'a> {
+    /// Field 1: `job_id`
+    pub job_id: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ProofreadSubtitleResponseView<'a> {
+    type Owned = super::super::ProofreadSubtitleResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.job_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::ProofreadSubtitleResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::ProofreadSubtitleResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ProofreadSubtitleResponse {
+            job_id: self.job_id.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ProofreadSubtitleResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.job_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.job_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ProofreadSubtitleResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ProofreadSubtitleResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ProofreadSubtitleResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ProofreadSubtitleResponse";
+}
+::buffa::impl_default_view_instance!(ProofreadSubtitleResponseView);
+::buffa::impl_view_reborrow!(ProofreadSubtitleResponseView);
+/** Self-contained, `'static` owned view of a `ProofreadSubtitleResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ProofreadSubtitleResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ProofreadSubtitleResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ProofreadSubtitleResponseOwnedView(
+    ::buffa::OwnedView<ProofreadSubtitleResponseView<'static>>,
+);
+impl ProofreadSubtitleResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ProofreadSubtitleResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ProofreadSubtitleResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ProofreadSubtitleResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ProofreadSubtitleResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ProofreadSubtitleResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `job_id`
+    #[must_use]
+    pub fn job_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().job_id
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ProofreadSubtitleResponseView<'static>>>
+for ProofreadSubtitleResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<ProofreadSubtitleResponseView<'static>>) -> Self {
+        ProofreadSubtitleResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ProofreadSubtitleResponseOwnedView>
+for ::buffa::OwnedView<ProofreadSubtitleResponseView<'static>> {
+    fn from(wrapper: ProofreadSubtitleResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ProofreadSubtitleResponseView<'static>>>
+for ProofreadSubtitleResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ProofreadSubtitleResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ProofreadSubtitleResponse {
+    type View<'a> = ProofreadSubtitleResponseView<'a>;
+    type ViewHandle = ProofreadSubtitleResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct GetSubtitleTranslationStatisticsRequestView<'a> {
+    /// The days counted in daily, up to today.
+    ///
+    /// Field 1: `days`
+    pub days: ::core::option::Option<i32>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for GetSubtitleTranslationStatisticsRequestView<'a> {
+    type Owned = super::super::GetSubtitleTranslationStatisticsRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.days = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::GetSubtitleTranslationStatisticsRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::GetSubtitleTranslationStatisticsRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::GetSubtitleTranslationStatisticsRequest {
+            days: self.days,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetSubtitleTranslationStatisticsRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.days {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for GetSubtitleTranslationStatisticsRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSubtitleTranslationStatisticsRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest";
+}
+::buffa::impl_default_view_instance!(GetSubtitleTranslationStatisticsRequestView);
+::buffa::impl_view_reborrow!(GetSubtitleTranslationStatisticsRequestView);
+/** Self-contained, `'static` owned view of a `GetSubtitleTranslationStatisticsRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetSubtitleTranslationStatisticsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetSubtitleTranslationStatisticsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetSubtitleTranslationStatisticsRequestOwnedView(
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>>,
+);
+impl GetSubtitleTranslationStatisticsRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsRequestOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetSubtitleTranslationStatisticsRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsRequestOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
+        )
+    }
+    /// Borrow the full [`GetSubtitleTranslationStatisticsRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetSubtitleTranslationStatisticsRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(
+        &self,
+    ) -> super::super::GetSubtitleTranslationStatisticsRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The days counted in daily, up to today.
+    ///
+    /// Field 1: `days`
+    #[must_use]
+    pub fn days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().days
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>>,
+> for GetSubtitleTranslationStatisticsRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>>,
+    ) -> Self {
+        GetSubtitleTranslationStatisticsRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetSubtitleTranslationStatisticsRequestOwnedView>
+for ::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>> {
+    fn from(wrapper: GetSubtitleTranslationStatisticsRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>>,
+> for GetSubtitleTranslationStatisticsRequestOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<GetSubtitleTranslationStatisticsRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetSubtitleTranslationStatisticsRequest {
+    type View<'a> = GetSubtitleTranslationStatisticsRequestView<'a>;
+    type ViewHandle = GetSubtitleTranslationStatisticsRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct GetSubtitleTranslationStatisticsResponseView<'a> {
+    /// The files translated, and their cues and characters.
+    ///
+    /// Field 1: `files`
+    pub files: ::core::option::Option<i64>,
+    /// Field 2: `cues`
+    pub cues: ::core::option::Option<i64>,
+    /// Field 3: `characters`
+    pub characters: ::core::option::Option<i64>,
+    /// What AI models used and cost.
+    ///
+    /// Field 4: `input_tokens`
+    pub input_tokens: ::core::option::Option<i64>,
+    /// Field 5: `output_tokens`
+    pub output_tokens: ::core::option::Option<i64>,
+    /// Field 6: `cost`
+    pub cost: ::core::option::Option<f64>,
+    /// Files by translator, by "\<source\>:\<target\>" language pair and by
+    /// "movie" or "episode".
+    ///
+    /// Field 7: `by_translator` (map)
+    pub by_translator: ::buffa::MapView<'a, &'a str, i64>,
+    /// Field 8: `by_language_pair` (map)
+    pub by_language_pair: ::buffa::MapView<'a, &'a str, i64>,
+    /// Field 9: `by_media` (map)
+    pub by_media: ::buffa::MapView<'a, &'a str, i64>,
+    /// Files translated each day, oldest first, in the server's time zone.
+    ///
+    /// Field 10: `daily`
+    pub daily: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::SubtitleTranslationDayView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for GetSubtitleTranslationStatisticsResponseView<'a> {
+    type Owned = super::super::GetSubtitleTranslationStatisticsResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.files = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.cues = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.characters = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.input_tokens = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.output_tokens = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.cost = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::SubtitleTranslationDayView,
+                    >(),
+                )?;
+                view.daily
+                    .push(
+                        <super::super::__buffa::view::SubtitleTranslationDayView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::types::decode_int64(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.by_translator.push(key, val);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::types::decode_int64(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.by_language_pair.push(key, val);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let entry_bytes = ::buffa::types::borrow_bytes(&mut cur)?;
+                let mut entry_cur: &'a [u8] = entry_bytes;
+                let mut key = "";
+                let mut val = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&key)
+                        + ::buffa::__private::element_footprint(&val),
+                )?;
+                while !entry_cur.is_empty() {
+                    let entry_tag = ::buffa::encoding::Tag::decode(&mut entry_cur)?;
+                    match entry_tag.field_number() {
+                        1 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::LengthDelimited,
+                            )?;
+                            key = ::buffa::types::borrow_str(&mut entry_cur)?;
+                        }
+                        2 => {
+                            ::buffa::encoding::check_wire_type(
+                                entry_tag,
+                                ::buffa::encoding::WireType::Varint,
+                            )?;
+                            val = ::buffa::types::decode_int64(&mut entry_cur)?;
+                        }
+                        _ => {
+                            ::buffa::encoding::skip_field_depth(
+                                entry_tag,
+                                &mut entry_cur,
+                                ctx.depth(),
+                            )?;
+                        }
+                    }
+                }
+                view.by_media.push(key, val);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::GetSubtitleTranslationStatisticsResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::GetSubtitleTranslationStatisticsResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::GetSubtitleTranslationStatisticsResponse {
+            files: self.files,
+            cues: self.cues,
+            characters: self.characters,
+            input_tokens: self.input_tokens,
+            output_tokens: self.output_tokens,
+            cost: self.cost,
+            by_translator: self
+                .by_translator
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
+            by_language_pair: self
+                .by_language_pair
+                .iter()
+                .map(|(k, v)| (k.to_string(), *v))
+                .collect(),
+            by_media: self.by_media.iter().map(|(k, v)| (k.to_string(), *v)).collect(),
+            daily: self
+                .daily
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for GetSubtitleTranslationStatisticsResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.files {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.cues {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.characters {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.input_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.output_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if self.cost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.by_translator {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.by_language_pair {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        #[allow(clippy::for_kv_map)]
+        for (k, v) in &self.by_media {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            size += 1u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        for v in &self.daily {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.files {
+            ::buffa::types::put_int64_field(1u32, v, buf);
+        }
+        if let Some(v) = self.cues {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        if let Some(v) = self.characters {
+            ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if let Some(v) = self.input_tokens {
+            ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        if let Some(v) = self.output_tokens {
+            ::buffa::types::put_int64_field(5u32, v, buf);
+        }
+        if let Some(v) = self.cost {
+            ::buffa::types::put_double_field(6u32, v, buf);
+        }
+        for (k, v) in &self.by_translator {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            ::buffa::encoding::Tag::new(
+                    7u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(*v, buf);
+        }
+        for (k, v) in &self.by_language_pair {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            ::buffa::encoding::Tag::new(
+                    8u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(*v, buf);
+        }
+        for (k, v) in &self.by_media {
+            let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
+                + 1u64 + ::buffa::types::int64_encoded_len(*v) as u64;
+            ::buffa::encoding::Tag::new(
+                    9u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::encoding::encode_varint(entry_size, buf);
+            ::buffa::encoding::Tag::new(
+                    1u32,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )
+                .encode(buf);
+            ::buffa::types::encode_string(k, buf);
+            ::buffa::encoding::Tag::new(2u32, ::buffa::encoding::WireType::Varint)
+                .encode(buf);
+            ::buffa::types::encode_int64(*v, buf);
+        }
+        for v in &self.daily {
+            ::buffa::types::put_len_delimited_header(
+                10u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for GetSubtitleTranslationStatisticsResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSubtitleTranslationStatisticsResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse";
+}
+::buffa::impl_default_view_instance!(GetSubtitleTranslationStatisticsResponseView);
+::buffa::impl_view_reborrow!(GetSubtitleTranslationStatisticsResponseView);
+/** Self-contained, `'static` owned view of a `GetSubtitleTranslationStatisticsResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`GetSubtitleTranslationStatisticsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`GetSubtitleTranslationStatisticsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct GetSubtitleTranslationStatisticsResponseOwnedView(
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>>,
+);
+impl GetSubtitleTranslationStatisticsResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsResponseOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::GetSubtitleTranslationStatisticsResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            GetSubtitleTranslationStatisticsResponseOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
+        )
+    }
+    /// Borrow the full [`GetSubtitleTranslationStatisticsResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &GetSubtitleTranslationStatisticsResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(
+        &self,
+    ) -> super::super::GetSubtitleTranslationStatisticsResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The files translated, and their cues and characters.
+    ///
+    /// Field 1: `files`
+    #[must_use]
+    pub fn files(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().files
+    }
+    /// Field 2: `cues`
+    #[must_use]
+    pub fn cues(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().cues
+    }
+    /// Field 3: `characters`
+    #[must_use]
+    pub fn characters(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().characters
+    }
+    /// What AI models used and cost.
+    ///
+    /// Field 4: `input_tokens`
+    #[must_use]
+    pub fn input_tokens(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().input_tokens
+    }
+    /// Field 5: `output_tokens`
+    #[must_use]
+    pub fn output_tokens(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().output_tokens
+    }
+    /// Field 6: `cost`
+    #[must_use]
+    pub fn cost(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().cost
+    }
+    /// Files by translator, by "\<source\>:\<target\>" language pair and by
+    /// "movie" or "episode".
+    ///
+    /// Field 7: `by_translator` (map)
+    #[must_use]
+    pub fn by_translator(&self) -> &::buffa::MapView<'_, &'_ str, i64> {
+        &self.0.reborrow().by_translator
+    }
+    /// Field 8: `by_language_pair` (map)
+    #[must_use]
+    pub fn by_language_pair(&self) -> &::buffa::MapView<'_, &'_ str, i64> {
+        &self.0.reborrow().by_language_pair
+    }
+    /// Field 9: `by_media` (map)
+    #[must_use]
+    pub fn by_media(&self) -> &::buffa::MapView<'_, &'_ str, i64> {
+        &self.0.reborrow().by_media
+    }
+    /// Files translated each day, oldest first, in the server's time zone.
+    ///
+    /// Field 10: `daily`
+    #[must_use]
+    pub fn daily(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::__buffa::view::SubtitleTranslationDayView<'_>,
+    > {
+        &self.0.reborrow().daily
+    }
+}
+impl ::core::convert::From<
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>>,
+> for GetSubtitleTranslationStatisticsResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>>,
+    ) -> Self {
+        GetSubtitleTranslationStatisticsResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<GetSubtitleTranslationStatisticsResponseOwnedView>
+for ::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>> {
+    fn from(wrapper: GetSubtitleTranslationStatisticsResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>>,
+> for GetSubtitleTranslationStatisticsResponseOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<GetSubtitleTranslationStatisticsResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::GetSubtitleTranslationStatisticsResponse {
+    type View<'a> = GetSubtitleTranslationStatisticsResponseView<'a>;
+    type ViewHandle = GetSubtitleTranslationStatisticsResponseOwnedView;
+}
+/// SubtitleTranslationDay is the number of files translated on a day.
+#[derive(Clone, Debug, Default)]
+pub struct SubtitleTranslationDayView<'a> {
+    /// "YYYY-MM-DD".
+    ///
+    /// Field 1: `date`
+    pub date: ::core::option::Option<&'a str>,
+    /// Field 2: `files`
+    pub files: ::core::option::Option<i64>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationDayView<'a> {
+    type Owned = super::super::SubtitleTranslationDay;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.files = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationDay,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationDay,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SubtitleTranslationDay {
+            date: self.date.map(|s| s.to_string()),
+            files: self.files,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationDayView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.date {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.files {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.date {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.files {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SubtitleTranslationDayView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationDay";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationDay";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationDay";
+}
+::buffa::impl_default_view_instance!(SubtitleTranslationDayView);
+::buffa::impl_view_reborrow!(SubtitleTranslationDayView);
+/** Self-contained, `'static` owned view of a `SubtitleTranslationDay` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SubtitleTranslationDayView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SubtitleTranslationDayView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SubtitleTranslationDayOwnedView(
+    ::buffa::OwnedView<SubtitleTranslationDayView<'static>>,
+);
+impl SubtitleTranslationDayOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationDayOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationDayOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SubtitleTranslationDay,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationDayOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SubtitleTranslationDayView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SubtitleTranslationDayView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SubtitleTranslationDay {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// "YYYY-MM-DD".
+    ///
+    /// Field 1: `date`
+    #[must_use]
+    pub fn date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().date
+    }
+    /// Field 2: `files`
+    #[must_use]
+    pub fn files(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().files
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<SubtitleTranslationDayView<'static>>>
+for SubtitleTranslationDayOwnedView {
+    fn from(inner: ::buffa::OwnedView<SubtitleTranslationDayView<'static>>) -> Self {
+        SubtitleTranslationDayOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SubtitleTranslationDayOwnedView>
+for ::buffa::OwnedView<SubtitleTranslationDayView<'static>> {
+    fn from(wrapper: SubtitleTranslationDayOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<SubtitleTranslationDayView<'static>>>
+for SubtitleTranslationDayOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SubtitleTranslationDayView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SubtitleTranslationDay {
+    type View<'a> = SubtitleTranslationDayView<'a>;
+    type ViewHandle = SubtitleTranslationDayOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListSubtitleTranslatorsRequestView<'a> {
@@ -16618,6 +19538,12 @@ pub struct SubtitleHistoryEventView<'a> {
     ///
     /// Field 16: `upgraded_from`
     pub upgraded_from: ::core::option::Option<&'a str>,
+    /// What a translation translated.
+    ///
+    /// Field 17: `translation`
+    pub translation: ::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationRecordView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for SubtitleHistoryEventView<'a> {
@@ -16778,6 +19704,27 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleHistoryEventView<'a> {
                 )?;
                 view.upgraded_from = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.translation.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.translation = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::SubtitleTranslationRecordView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             14u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -16860,6 +19807,15 @@ impl<'a> ::buffa::MessageView<'a> for SubtitleHistoryEventView<'a> {
             matched: self.matched.iter().map(|s| s.to_string()).collect(),
             not_matched: self.not_matched.iter().map(|s| s.to_string()).collect(),
             upgraded_from: self.upgraded_from.map(|s| s.to_string()),
+            translation: match self.translation.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::SubtitleTranslationRecord,
+                        ::buffa::Inline<super::super::SubtitleTranslationRecord>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -16929,6 +19885,14 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleHistoryEventView<'a> {
         if let Some(ref v) = self.upgraded_from {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.translation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.translation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -16997,6 +19961,14 @@ impl<'a> ::buffa::ViewEncode<'a> for SubtitleHistoryEventView<'a> {
         }
         if let Some(ref v) = self.upgraded_from {
             ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        if self.translation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                17u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.translation.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -17187,6 +20159,17 @@ impl SubtitleHistoryEventOwnedView {
     pub fn upgraded_from(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().upgraded_from
     }
+    /// What a translation translated.
+    ///
+    /// Field 17: `translation`
+    #[must_use]
+    pub fn translation(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleTranslationRecordView<'_>,
+    > {
+        &self.0.reborrow().translation
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<SubtitleHistoryEventView<'static>>>
 for SubtitleHistoryEventOwnedView {
@@ -17209,6 +20192,457 @@ for SubtitleHistoryEventOwnedView {
 impl ::buffa::HasMessageView for super::super::SubtitleHistoryEvent {
     type View<'a> = SubtitleHistoryEventView<'a>;
     type ViewHandle = SubtitleHistoryEventOwnedView;
+}
+/// SubtitleTranslationRecord is what a translation translated and what it
+/// took.
+#[derive(Clone, Debug, Default)]
+pub struct SubtitleTranslationRecordView<'a> {
+    /// The subtitle translated: an external file, or an embedded stream.
+    ///
+    /// Field 1: `source_path`
+    pub source_path: ::core::option::Option<&'a str>,
+    /// Field 2: `source_stream_index`
+    pub source_stream_index: ::core::option::Option<i32>,
+    /// Field 3: `source_language`
+    pub source_language: ::core::option::Option<&'a str>,
+    /// The translators that translated the cues, the first one's first.
+    ///
+    /// Field 4: `translators`
+    pub translators: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 5: `cues`
+    pub cues: ::core::option::Option<i32>,
+    /// Field 6: `characters`
+    pub characters: ::core::option::Option<i64>,
+    /// Field 7: `input_tokens`
+    pub input_tokens: ::core::option::Option<i64>,
+    /// Field 8: `output_tokens`
+    pub output_tokens: ::core::option::Option<i64>,
+    /// Field 9: `cost`
+    pub cost: ::core::option::Option<f64>,
+    /// Set once the translation was proofread, with the cues revised.
+    ///
+    /// Field 10: `proofread`
+    pub proofread: ::core::option::Option<bool>,
+    /// Field 11: `revised`
+    pub revised: ::core::option::Option<i32>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SubtitleTranslationRecordView<'a> {
+    type Owned = super::super::SubtitleTranslationRecord;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.source_path = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.source_stream_index = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.source_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.cues = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.characters = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.input_tokens = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.output_tokens = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.cost = Some(::buffa::types::decode_double(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.proofread = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.revised = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.translators.push(__elem);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationRecord,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::SubtitleTranslationRecord,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SubtitleTranslationRecord {
+            source_path: self.source_path.map(|s| s.to_string()),
+            source_stream_index: self.source_stream_index,
+            source_language: self.source_language.map(|s| s.to_string()),
+            translators: self.translators.iter().map(|s| s.to_string()).collect(),
+            cues: self.cues,
+            characters: self.characters,
+            input_tokens: self.input_tokens,
+            output_tokens: self.output_tokens,
+            cost: self.cost,
+            proofread: self.proofread,
+            revised: self.revised,
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SubtitleTranslationRecordView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.source_path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.source_stream_index {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.source_language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.translators {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.cues {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.characters {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.input_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.output_tokens {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if self.cost.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.proofread.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.revised {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.source_path {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.source_stream_index {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.source_language {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        for v in &self.translators {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.cues {
+            ::buffa::types::put_int32_field(5u32, v, buf);
+        }
+        if let Some(v) = self.characters {
+            ::buffa::types::put_int64_field(6u32, v, buf);
+        }
+        if let Some(v) = self.input_tokens {
+            ::buffa::types::put_int64_field(7u32, v, buf);
+        }
+        if let Some(v) = self.output_tokens {
+            ::buffa::types::put_int64_field(8u32, v, buf);
+        }
+        if let Some(v) = self.cost {
+            ::buffa::types::put_double_field(9u32, v, buf);
+        }
+        if let Some(v) = self.proofread {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.revised {
+            ::buffa::types::put_int32_field(11u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SubtitleTranslationRecordView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationRecord";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationRecord";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationRecord";
+}
+::buffa::impl_default_view_instance!(SubtitleTranslationRecordView);
+::buffa::impl_view_reborrow!(SubtitleTranslationRecordView);
+/** Self-contained, `'static` owned view of a `SubtitleTranslationRecord` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SubtitleTranslationRecordView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SubtitleTranslationRecordView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SubtitleTranslationRecordOwnedView(
+    ::buffa::OwnedView<SubtitleTranslationRecordView<'static>>,
+);
+impl SubtitleTranslationRecordOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationRecordOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationRecordOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SubtitleTranslationRecord,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SubtitleTranslationRecordOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SubtitleTranslationRecordView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SubtitleTranslationRecordView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SubtitleTranslationRecord {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The subtitle translated: an external file, or an embedded stream.
+    ///
+    /// Field 1: `source_path`
+    #[must_use]
+    pub fn source_path(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().source_path
+    }
+    /// Field 2: `source_stream_index`
+    #[must_use]
+    pub fn source_stream_index(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().source_stream_index
+    }
+    /// Field 3: `source_language`
+    #[must_use]
+    pub fn source_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().source_language
+    }
+    /// The translators that translated the cues, the first one's first.
+    ///
+    /// Field 4: `translators`
+    #[must_use]
+    pub fn translators(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().translators
+    }
+    /// Field 5: `cues`
+    #[must_use]
+    pub fn cues(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().cues
+    }
+    /// Field 6: `characters`
+    #[must_use]
+    pub fn characters(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().characters
+    }
+    /// Field 7: `input_tokens`
+    #[must_use]
+    pub fn input_tokens(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().input_tokens
+    }
+    /// Field 8: `output_tokens`
+    #[must_use]
+    pub fn output_tokens(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().output_tokens
+    }
+    /// Field 9: `cost`
+    #[must_use]
+    pub fn cost(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().cost
+    }
+    /// Set once the translation was proofread, with the cues revised.
+    ///
+    /// Field 10: `proofread`
+    #[must_use]
+    pub fn proofread(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().proofread
+    }
+    /// Field 11: `revised`
+    #[must_use]
+    pub fn revised(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().revised
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<SubtitleTranslationRecordView<'static>>>
+for SubtitleTranslationRecordOwnedView {
+    fn from(inner: ::buffa::OwnedView<SubtitleTranslationRecordView<'static>>) -> Self {
+        SubtitleTranslationRecordOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SubtitleTranslationRecordOwnedView>
+for ::buffa::OwnedView<SubtitleTranslationRecordView<'static>> {
+    fn from(wrapper: SubtitleTranslationRecordOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<SubtitleTranslationRecordView<'static>>>
+for SubtitleTranslationRecordOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SubtitleTranslationRecordView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SubtitleTranslationRecord {
+    type View<'a> = SubtitleTranslationRecordView<'a>;
+    type ViewHandle = SubtitleTranslationRecordOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListSubtitleHistoryRequestView<'a> {

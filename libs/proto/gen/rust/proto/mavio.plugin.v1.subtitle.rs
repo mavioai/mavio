@@ -3381,6 +3381,13 @@ pub struct SubtitleTranslatorInfo {
     ///
     /// Field 6: `markup`
     pub markup: ::core::option::Option<bool>,
+    /// The languages the translator translates from and into, as BCP 47
+    /// tags; empty for any.
+    ///
+    /// Field 7: `source_languages`
+    pub source_languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 8: `target_languages`
+    pub target_languages: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3393,6 +3400,8 @@ impl ::core::fmt::Debug for SubtitleTranslatorInfo {
             .field("enabled", &self.enabled)
             .field("batch_size", &self.batch_size)
             .field("markup", &self.markup)
+            .field("source_languages", &self.source_languages)
+            .field("target_languages", &self.target_languages)
             .finish()
     }
 }
@@ -3489,6 +3498,12 @@ impl ::buffa::Message for SubtitleTranslatorInfo {
         if self.markup.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        for v in &self.source_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.target_languages {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3521,6 +3536,12 @@ impl ::buffa::Message for SubtitleTranslatorInfo {
         }
         if let Some(v) = self.markup {
             ::buffa::types::put_bool_field(6u32, v, buf);
+        }
+        for v in &self.source_languages {
+            ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        for v in &self.target_languages {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3596,6 +3617,28 @@ impl ::buffa::Message for SubtitleTranslatorInfo {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.source_languages.push(__elem);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.target_languages.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3610,6 +3653,8 @@ impl ::buffa::Message for SubtitleTranslatorInfo {
         self.enabled = ::core::option::Option::None;
         self.batch_size = ::core::option::Option::None;
         self.markup = ::core::option::Option::None;
+        self.source_languages.clear();
+        self.target_languages.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

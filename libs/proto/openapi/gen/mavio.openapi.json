@@ -2149,6 +2149,96 @@
         "title": "GetSubtitleSettingsResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "days",
+            "maximum": 366,
+            "minimum": 0,
+            "format": "int32",
+            "description": "The days counted in daily, up to today."
+          }
+        },
+        "title": "GetSubtitleTranslationStatisticsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "string",
+            "title": "files",
+            "format": "int64",
+            "description": "The files translated, and their cues and characters."
+          },
+          "cues": {
+            "type": "string",
+            "title": "cues",
+            "format": "int64"
+          },
+          "characters": {
+            "type": "string",
+            "title": "characters",
+            "format": "int64"
+          },
+          "inputTokens": {
+            "type": "string",
+            "title": "input_tokens",
+            "format": "int64",
+            "description": "What AI models used and cost."
+          },
+          "outputTokens": {
+            "type": "string",
+            "title": "output_tokens",
+            "format": "int64"
+          },
+          "cost": {
+            "type": "number",
+            "title": "cost",
+            "format": "double"
+          },
+          "byTranslator": {
+            "type": "object",
+            "title": "by_translator",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value",
+              "format": "int64"
+            },
+            "description": "Files by translator, by \"\u003csource\u003e:\u003ctarget\u003e\" language pair and by\n \"movie\" or \"episode\"."
+          },
+          "byLanguagePair": {
+            "type": "object",
+            "title": "by_language_pair",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value",
+              "format": "int64"
+            }
+          },
+          "byMedia": {
+            "type": "object",
+            "title": "by_media",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value",
+              "format": "int64"
+            }
+          },
+          "daily": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleTranslationDay"
+            },
+            "title": "daily",
+            "description": "Files translated each day, oldest first, in the server's time zone."
+          }
+        },
+        "title": "GetSubtitleTranslationStatisticsResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.GetTitleRequest": {
         "type": "object",
         "properties": {
@@ -4028,6 +4118,40 @@
         "additionalProperties": false,
         "description": "ParsedRelease is a release title parsed with Radarr's rules for movies\n and Sonarr's for episodes."
       },
+      "mavio.acquisition.v1.ProofreadSubtitleRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string",
+            "title": "path",
+            "minLength": 1,
+            "description": "A subtitle file of the item translated by the server."
+          },
+          "translator": {
+            "type": "string",
+            "title": "translator",
+            "description": "\"ai/\u003cprovider\u003e/\u003cmodel\u003e\"; empty for the first AI model that\n translated it, else the first among the settings' translators."
+          }
+        },
+        "title": "ProofreadSubtitleRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ProofreadSubtitleResponse": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "title": "job_id"
+          }
+        },
+        "title": "ProofreadSubtitleResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.QualityDefinition": {
         "type": "object",
         "properties": {
@@ -5641,6 +5765,15 @@
             "type": "string",
             "title": "upgraded_from",
             "description": "The event of the download an upgrade replaced."
+          },
+          "translation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleTranslationRecord"
+              }
+            ],
+            "title": "translation",
+            "description": "What a translation translated."
           }
         },
         "title": "SubtitleHistoryEvent",
@@ -6161,13 +6294,146 @@
         "additionalProperties": false,
         "description": "SubtitleSyncSettings are how downloaded subtitles are synchronized, as\n Bazarr's subsync settings."
       },
+      "mavio.acquisition.v1.SubtitleTranslationAutomation": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled"
+          },
+          "intervalHours": {
+            "type": "integer",
+            "title": "interval_hours",
+            "maximum": 8760,
+            "minimum": 1,
+            "format": "int32",
+            "description": "How often it runs."
+          },
+          "sourceLanguages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 2
+            },
+            "title": "source_languages",
+            "description": "The languages translated from, in order of preference."
+          },
+          "maxPerRun": {
+            "type": "integer",
+            "title": "max_per_run",
+            "maximum": 1000,
+            "minimum": 1,
+            "format": "int32",
+            "description": "The most translations a run queues."
+          },
+          "movieAgeHours": {
+            "type": "integer",
+            "title": "movie_age_hours",
+            "minimum": 0,
+            "format": "int32",
+            "description": "How old a movie's or an episode's file must be, giving searches time\n to find subtitles first."
+          },
+          "episodeAgeHours": {
+            "type": "integer",
+            "title": "episode_age_hours",
+            "minimum": 0,
+            "format": "int32"
+          }
+        },
+        "title": "SubtitleTranslationAutomation",
+        "additionalProperties": false,
+        "description": "SubtitleTranslationAutomation translates subtitles movies and episodes\n lack, as Lingarr's automation: a movie or episode still lacking\n subtitles its profile wants, whose file is old enough, gets them\n translated by the settings' translator from a subtitle it has in one of\n the source languages."
+      },
+      "mavio.acquisition.v1.SubtitleTranslationDay": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "date",
+            "description": "\"YYYY-MM-DD\"."
+          },
+          "files": {
+            "type": "string",
+            "title": "files",
+            "format": "int64"
+          }
+        },
+        "title": "SubtitleTranslationDay",
+        "additionalProperties": false,
+        "description": "SubtitleTranslationDay is the number of files translated on a day."
+      },
+      "mavio.acquisition.v1.SubtitleTranslationRecord": {
+        "type": "object",
+        "properties": {
+          "sourcePath": {
+            "type": "string",
+            "title": "source_path",
+            "description": "The subtitle translated: an external file, or an embedded stream."
+          },
+          "sourceStreamIndex": {
+            "type": "integer",
+            "title": "source_stream_index",
+            "format": "int32"
+          },
+          "sourceLanguage": {
+            "type": "string",
+            "title": "source_language"
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "translators",
+            "description": "The translators that translated the cues, the first one's first."
+          },
+          "cues": {
+            "type": "integer",
+            "title": "cues",
+            "format": "int32"
+          },
+          "characters": {
+            "type": "string",
+            "title": "characters",
+            "format": "int64"
+          },
+          "inputTokens": {
+            "type": "string",
+            "title": "input_tokens",
+            "format": "int64"
+          },
+          "outputTokens": {
+            "type": "string",
+            "title": "output_tokens",
+            "format": "int64"
+          },
+          "cost": {
+            "type": "number",
+            "title": "cost",
+            "format": "double"
+          },
+          "proofread": {
+            "type": "boolean",
+            "title": "proofread",
+            "description": "Set once the translation was proofread, with the cues revised."
+          },
+          "revised": {
+            "type": "integer",
+            "title": "revised",
+            "format": "int32"
+          }
+        },
+        "title": "SubtitleTranslationRecord",
+        "additionalProperties": false,
+        "description": "SubtitleTranslationRecord is what a translation translated and what it\n took."
+      },
       "mavio.acquisition.v1.SubtitleTranslationSettings": {
         "type": "object",
         "properties": {
           "translator": {
             "type": "string",
             "title": "translator",
-            "description": "The translator used when a translation names none, as\n \"\u003cplugin\u003e/\u003ctranslator\u003e\"; empty for the first enabled one."
+            "description": "The translator used when a translation names none; empty for the\n first enabled translator of a plugin."
           },
           "defaultScore": {
             "type": "integer",
@@ -6181,11 +6447,186 @@
             "type": "boolean",
             "title": "credit",
             "description": "Adds a first cue to SubRip translations crediting the translator."
+          },
+          "fallbackTranslators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "fallback_translators",
+            "description": "Translators tried in order after the first when it fails or does not\n translate between the languages; those matching the languages\n exactly are tried before those matching them more loosely."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "prompt",
+            "minLength": 1,
+            "description": "The instructions of AI models, and the message carrying each cue,\n with the placeholders {sourceLanguage}, {targetLanguage},\n {lineToTranslate}, {contextBefore} and {contextAfter}."
+          },
+          "userPrompt": {
+            "type": "string",
+            "title": "user_prompt",
+            "minLength": 1
+          },
+          "proofreadPrompt": {
+            "type": "string",
+            "title": "proofread_prompt",
+            "minLength": 1,
+            "description": "The instructions and message of proofreading, with {sourceLine} and\n {translatedLine} besides the languages."
+          },
+          "proofreadUserPrompt": {
+            "type": "string",
+            "title": "proofread_user_prompt",
+            "minLength": 1
+          },
+          "contextBefore": {
+            "type": "integer",
+            "title": "context_before",
+            "maximum": 50,
+            "minimum": 0,
+            "format": "int32",
+            "description": "The cues before and after each cue given to AI models as context."
+          },
+          "contextAfter": {
+            "type": "integer",
+            "title": "context_after",
+            "maximum": 50,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "translatedContext": {
+            "type": "boolean",
+            "title": "translated_context",
+            "description": "Gives the context as JSON objects with each cue's position and text,\n and the translations of those before."
+          },
+          "batch": {
+            "type": "boolean",
+            "title": "batch",
+            "description": "Translates with AI models in batches of max_batch_size cues (every\n cue when 0) answered as JSON, rather than cue by cue."
+          },
+          "maxBatchSize": {
+            "type": "integer",
+            "title": "max_batch_size",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "languageCodes": {
+            "type": "boolean",
+            "title": "language_codes",
+            "description": "Names languages in prompts by their codes rather than their English\n names."
+          },
+          "maxRetries": {
+            "type": "integer",
+            "title": "max_retries",
+            "maximum": 20,
+            "minimum": 1,
+            "format": "int32",
+            "description": "Retries of a translation failing for a reason worth retrying, such as\n a rate limit: max_retries attempts in all, the delay multiplied after\n each."
+          },
+          "retryDelaySeconds": {
+            "type": "integer",
+            "title": "retry_delay_seconds",
+            "maximum": 600,
+            "minimum": 0,
+            "format": "int32"
+          },
+          "retryMultiplier": {
+            "type": "integer",
+            "title": "retry_multiplier",
+            "maximum": 10,
+            "minimum": 1,
+            "format": "int32"
+          },
+          "requestTimeoutSeconds": {
+            "type": "integer",
+            "title": "request_timeout_seconds",
+            "maximum": 3600,
+            "minimum": 1,
+            "format": "int32",
+            "description": "How long one request to a translator may take."
+          },
+          "stripFormatting": {
+            "type": "boolean",
+            "title": "strip_formatting",
+            "description": "Translates the cues' plain text, and drops the styles of ASS files."
+          },
+          "preserveLineBreaks": {
+            "type": "boolean",
+            "title": "preserve_line_breaks",
+            "description": "Translates a cue's lines keeping its line breaks; otherwise the lines\n are joined, and the translation split again at 42 characters when\n formatting is stripped."
+          },
+          "fixOverlaps": {
+            "type": "boolean",
+            "title": "fix_overlaps",
+            "description": "Trims the end of a cue overlapping the next."
+          },
+          "validation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleTranslationValidation"
+              }
+            ],
+            "title": "validation"
+          },
+          "automation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleTranslationAutomation"
+              }
+            ],
+            "title": "automation"
           }
         },
         "title": "SubtitleTranslationSettings",
+        "required": [
+          "validation",
+          "automation"
+        ],
         "additionalProperties": false,
-        "description": "SubtitleTranslationSettings are how subtitles are translated, as\n Bazarr's translator settings."
+        "description": "SubtitleTranslationSettings are how subtitles are translated, as\n Lingarr's translation settings and Bazarr's. Translators are named\n \"\u003cplugin\u003e/\u003ctranslator\u003e\" for the translators of subtitle translator\n plugins and \"ai/\u003cprovider\u003e/\u003cmodel\u003e\" for the models of the AI gateway\n (AiService.ListAiModels)."
+      },
+      "mavio.acquisition.v1.SubtitleTranslationValidation": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled"
+          },
+          "maxFileSize": {
+            "exclusiveMinimum": 0,
+            "type": "string",
+            "title": "max_file_size",
+            "format": "int64"
+          },
+          "maxCueLength": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "title": "max_cue_length",
+            "format": "int32",
+            "description": "The longest and shortest text of a cue, in characters."
+          },
+          "minCueLength": {
+            "type": "integer",
+            "title": "min_cue_length",
+            "minimum": 0,
+            "format": "int32"
+          },
+          "minDurationMs": {
+            "type": "integer",
+            "title": "min_duration_ms",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The shortest and longest a cue may last."
+          },
+          "maxDurationSeconds": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "title": "max_duration_seconds",
+            "format": "int32"
+          }
+        },
+        "title": "SubtitleTranslationValidation",
+        "additionalProperties": false,
+        "description": "SubtitleTranslationValidation refuses to translate subtitles that look\n broken, as Lingarr's subtitle validation."
       },
       "mavio.acquisition.v1.SubtitleTranslatorState": {
         "type": "object",
@@ -6491,7 +6932,7 @@
           "translator": {
             "type": "string",
             "title": "translator",
-            "description": "\"\u003cplugin\u003e/\u003ctranslator\u003e\"; empty for the settings' translator."
+            "description": "\"\u003cplugin\u003e/\u003ctranslator\u003e\" or \"ai/\u003cprovider\u003e/\u003cmodel\u003e\"; empty for the\n settings' translators."
           }
         },
         "title": "TranslateSubtitleRequest",
@@ -18857,13 +19298,14 @@
         }
       }
     },
-    "/mavio.library.v1.PlaylistService/ListPlaylists": {
+    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
       "post": {
         "tags": [
-          "PlaylistService"
+          "IssueService"
         ],
-        "summary": "ListPlaylists",
-        "operationId": "mavio.library.v1.PlaylistService.ListPlaylists",
+        "summary": "ReopenIssue",
+        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -18888,7 +19330,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListPlaylistsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
               }
             }
           },
@@ -18910,7 +19352,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListPlaylistsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
                 }
               }
             }
@@ -19969,14 +20411,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "IssueService"
+          "CollectionService"
         ],
-        "summary": "ReopenIssue",
-        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
-        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20001,7 +20442,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -20023,7 +20464,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -20953,13 +21394,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListReleaseProfiles": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "ProfileService"
+          "CollectionService"
         ],
-        "summary": "ListReleaseProfiles",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListReleaseProfiles",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20984,7 +21426,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -21006,7 +21448,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -23054,6 +23496,68 @@
         }
       }
     },
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "GetSubtitleTranslationStatistics",
+        "description": "GetSubtitleTranslationStatistics sums up the translations of the\n subtitle history, as Lingarr's statistics.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.SubtitleService/ListSubtitleBlocklist": {
       "post": {
         "tags": [
@@ -23486,6 +23990,68 @@
         }
       }
     },
+    "/mavio.acquisition.v1.SubtitleService/ProofreadSubtitle": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ProofreadSubtitle",
+        "description": "ProofreadSubtitle queues the proofreading of a translation by an AI\n model, as Lingarr's: each cue's translation is compared with the\n subtitle it was translated from and corrected.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ProofreadSubtitle",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ProofreadSubtitleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ProofreadSubtitleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.SubtitleService/SearchItemSubtitles": {
       "post": {
         "tags": [
@@ -23678,7 +24244,7 @@
           "SubtitleService"
         ],
         "summary": "TranslateSubtitle",
-        "description": "TranslateSubtitle queues the translation of a subtitle of a movie or\n episode into another language by a translator plugin, as Bazarr's\n translation: an external subtitle file, or an embedded text subtitle\n stream from playback's extraction cache (refused on cloud storage, as\n ExtractSubtitle). The translation is saved as a subtitle file.",
+        "description": "TranslateSubtitle queues the translation of a subtitle of a movie or\n episode into another language, as Lingarr's: an external subtitle\n file, or an embedded text subtitle stream from playback's extraction\n cache (refused on cloud storage, as ExtractSubtitle), translated by an\n AI model or a translator plugin. The translation is saved as a\n subtitle file.",
         "operationId": "mavio.acquisition.v1.SubtitleService.TranslateSubtitle",
         "parameters": [
           {
@@ -25593,14 +26159,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.ProfileService/ListReleaseProfiles": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListReleaseProfiles",
+        "operationId": "mavio.acquisition.v1.ProfileService.ListReleaseProfiles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25625,7 +26190,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesRequest"
               }
             }
           },
@@ -25647,129 +26212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
-      "post": {
-        "tags": [
-          "SyncPlayService"
-        ],
-        "summary": "LeaveGroup",
-        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesResponse"
                 }
               }
             }
@@ -25839,13 +26282,14 @@
         }
       }
     },
-    "/mavio.system.v1.BackupService/DeleteBackup": {
+    "/mavio.system.v1.SystemService/UpdateServerSettings": {
       "post": {
         "tags": [
-          "BackupService"
+          "SystemService"
         ],
-        "summary": "DeleteBackup",
-        "operationId": "mavio.system.v1.BackupService.DeleteBackup",
+        "summary": "UpdateServerSettings",
+        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25870,7 +26314,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.DeleteBackupRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
               }
             }
           },
@@ -25892,7 +26336,129 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.DeleteBackupResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -27813,13 +28379,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.library.v1.PlaylistService/ListPlaylists": {
       "post": {
         "tags": [
-          "CollectionService"
+          "PlaylistService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "ListPlaylists",
+        "operationId": "mavio.library.v1.PlaylistService.ListPlaylists",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -27844,7 +28410,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListPlaylistsRequest"
               }
             }
           },
@@ -27866,7 +28432,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListPlaylistsResponse"
                 }
               }
             }
@@ -28679,13 +29245,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.session.v1.SyncPlayService/LeaveGroup": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SyncPlayService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "LeaveGroup",
+        "operationId": "mavio.session.v1.SyncPlayService.LeaveGroup",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28710,7 +29276,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupRequest"
               }
             }
           },
@@ -28732,7 +29298,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.LeaveGroupResponse"
                 }
               }
             }
@@ -30655,13 +31221,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.system.v1.BackupService/DeleteBackup": {
       "post": {
         "tags": [
-          "CollectionService"
+          "BackupService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "DeleteBackup",
+        "operationId": "mavio.system.v1.BackupService.DeleteBackup",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30686,7 +31252,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.DeleteBackupRequest"
               }
             }
           },
@@ -30708,7 +31274,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.DeleteBackupResponse"
                 }
               }
             }
@@ -31642,14 +32208,13 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/UpdateServerSettings": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "SystemService"
+          "CollectionService"
         ],
-        "summary": "UpdateServerSettings",
-        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31674,7 +32239,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -31696,7 +32261,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }

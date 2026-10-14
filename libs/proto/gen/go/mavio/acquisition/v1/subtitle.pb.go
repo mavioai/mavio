@@ -3041,16 +3041,39 @@ func (b0 SubtitleSettings_builder) Build() *SubtitleSettings {
 }
 
 // SubtitleTranslationSettings are how subtitles are translated, as
-// Bazarr's translator settings.
+// Lingarr's translation settings and Bazarr's. Translators are named
+// "<plugin>/<translator>" for the translators of subtitle translator
+// plugins and "ai/<provider>/<model>" for the models of the AI gateway
+// (AiService.ListAiModels).
 type SubtitleTranslationSettings struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Translator   *string                `protobuf:"bytes,1,opt,name=translator"`
-	xxx_hidden_DefaultScore int32                  `protobuf:"varint,2,opt,name=default_score,json=defaultScore"`
-	xxx_hidden_Credit       bool                   `protobuf:"varint,3,opt,name=credit"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                            protoimpl.MessageState         `protogen:"opaque.v1"`
+	xxx_hidden_Translator            *string                        `protobuf:"bytes,1,opt,name=translator"`
+	xxx_hidden_DefaultScore          int32                          `protobuf:"varint,2,opt,name=default_score,json=defaultScore"`
+	xxx_hidden_Credit                bool                           `protobuf:"varint,3,opt,name=credit"`
+	xxx_hidden_FallbackTranslators   []string                       `protobuf:"bytes,4,rep,name=fallback_translators,json=fallbackTranslators"`
+	xxx_hidden_Prompt                *string                        `protobuf:"bytes,5,opt,name=prompt"`
+	xxx_hidden_UserPrompt            *string                        `protobuf:"bytes,6,opt,name=user_prompt,json=userPrompt"`
+	xxx_hidden_ProofreadPrompt       *string                        `protobuf:"bytes,7,opt,name=proofread_prompt,json=proofreadPrompt"`
+	xxx_hidden_ProofreadUserPrompt   *string                        `protobuf:"bytes,8,opt,name=proofread_user_prompt,json=proofreadUserPrompt"`
+	xxx_hidden_ContextBefore         int32                          `protobuf:"varint,9,opt,name=context_before,json=contextBefore"`
+	xxx_hidden_ContextAfter          int32                          `protobuf:"varint,10,opt,name=context_after,json=contextAfter"`
+	xxx_hidden_TranslatedContext     bool                           `protobuf:"varint,11,opt,name=translated_context,json=translatedContext"`
+	xxx_hidden_Batch                 bool                           `protobuf:"varint,12,opt,name=batch"`
+	xxx_hidden_MaxBatchSize          int32                          `protobuf:"varint,13,opt,name=max_batch_size,json=maxBatchSize"`
+	xxx_hidden_LanguageCodes         bool                           `protobuf:"varint,14,opt,name=language_codes,json=languageCodes"`
+	xxx_hidden_MaxRetries            int32                          `protobuf:"varint,15,opt,name=max_retries,json=maxRetries"`
+	xxx_hidden_RetryDelaySeconds     int32                          `protobuf:"varint,16,opt,name=retry_delay_seconds,json=retryDelaySeconds"`
+	xxx_hidden_RetryMultiplier       int32                          `protobuf:"varint,17,opt,name=retry_multiplier,json=retryMultiplier"`
+	xxx_hidden_RequestTimeoutSeconds int32                          `protobuf:"varint,18,opt,name=request_timeout_seconds,json=requestTimeoutSeconds"`
+	xxx_hidden_StripFormatting       bool                           `protobuf:"varint,19,opt,name=strip_formatting,json=stripFormatting"`
+	xxx_hidden_PreserveLineBreaks    bool                           `protobuf:"varint,20,opt,name=preserve_line_breaks,json=preserveLineBreaks"`
+	xxx_hidden_FixOverlaps           bool                           `protobuf:"varint,21,opt,name=fix_overlaps,json=fixOverlaps"`
+	xxx_hidden_Validation            *SubtitleTranslationValidation `protobuf:"bytes,22,opt,name=validation"`
+	xxx_hidden_Automation            *SubtitleTranslationAutomation `protobuf:"bytes,23,opt,name=automation"`
+	XXX_raceDetectHookData           protoimpl.RaceDetectHookData
+	XXX_presence                     [1]uint32
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
 }
 
 func (x *SubtitleTranslationSettings) Reset() {
@@ -3102,19 +3125,268 @@ func (x *SubtitleTranslationSettings) GetCredit() bool {
 	return false
 }
 
+func (x *SubtitleTranslationSettings) GetFallbackTranslators() []string {
+	if x != nil {
+		return x.xxx_hidden_FallbackTranslators
+	}
+	return nil
+}
+
+func (x *SubtitleTranslationSettings) GetPrompt() string {
+	if x != nil {
+		if x.xxx_hidden_Prompt != nil {
+			return *x.xxx_hidden_Prompt
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationSettings) GetUserPrompt() string {
+	if x != nil {
+		if x.xxx_hidden_UserPrompt != nil {
+			return *x.xxx_hidden_UserPrompt
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationSettings) GetProofreadPrompt() string {
+	if x != nil {
+		if x.xxx_hidden_ProofreadPrompt != nil {
+			return *x.xxx_hidden_ProofreadPrompt
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationSettings) GetProofreadUserPrompt() string {
+	if x != nil {
+		if x.xxx_hidden_ProofreadUserPrompt != nil {
+			return *x.xxx_hidden_ProofreadUserPrompt
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationSettings) GetContextBefore() int32 {
+	if x != nil {
+		return x.xxx_hidden_ContextBefore
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetContextAfter() int32 {
+	if x != nil {
+		return x.xxx_hidden_ContextAfter
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetTranslatedContext() bool {
+	if x != nil {
+		return x.xxx_hidden_TranslatedContext
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetBatch() bool {
+	if x != nil {
+		return x.xxx_hidden_Batch
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetMaxBatchSize() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxBatchSize
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetLanguageCodes() bool {
+	if x != nil {
+		return x.xxx_hidden_LanguageCodes
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetMaxRetries() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxRetries
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetRetryDelaySeconds() int32 {
+	if x != nil {
+		return x.xxx_hidden_RetryDelaySeconds
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetRetryMultiplier() int32 {
+	if x != nil {
+		return x.xxx_hidden_RetryMultiplier
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetRequestTimeoutSeconds() int32 {
+	if x != nil {
+		return x.xxx_hidden_RequestTimeoutSeconds
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationSettings) GetStripFormatting() bool {
+	if x != nil {
+		return x.xxx_hidden_StripFormatting
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetPreserveLineBreaks() bool {
+	if x != nil {
+		return x.xxx_hidden_PreserveLineBreaks
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetFixOverlaps() bool {
+	if x != nil {
+		return x.xxx_hidden_FixOverlaps
+	}
+	return false
+}
+
+func (x *SubtitleTranslationSettings) GetValidation() *SubtitleTranslationValidation {
+	if x != nil {
+		return x.xxx_hidden_Validation
+	}
+	return nil
+}
+
+func (x *SubtitleTranslationSettings) GetAutomation() *SubtitleTranslationAutomation {
+	if x != nil {
+		return x.xxx_hidden_Automation
+	}
+	return nil
+}
+
 func (x *SubtitleTranslationSettings) SetTranslator(v string) {
 	x.xxx_hidden_Translator = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 23)
 }
 
 func (x *SubtitleTranslationSettings) SetDefaultScore(v int32) {
 	x.xxx_hidden_DefaultScore = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 23)
 }
 
 func (x *SubtitleTranslationSettings) SetCredit(v bool) {
 	x.xxx_hidden_Credit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetFallbackTranslators(v []string) {
+	x.xxx_hidden_FallbackTranslators = v
+}
+
+func (x *SubtitleTranslationSettings) SetPrompt(v string) {
+	x.xxx_hidden_Prompt = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetUserPrompt(v string) {
+	x.xxx_hidden_UserPrompt = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetProofreadPrompt(v string) {
+	x.xxx_hidden_ProofreadPrompt = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetProofreadUserPrompt(v string) {
+	x.xxx_hidden_ProofreadUserPrompt = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetContextBefore(v int32) {
+	x.xxx_hidden_ContextBefore = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetContextAfter(v int32) {
+	x.xxx_hidden_ContextAfter = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetTranslatedContext(v bool) {
+	x.xxx_hidden_TranslatedContext = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetBatch(v bool) {
+	x.xxx_hidden_Batch = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetMaxBatchSize(v int32) {
+	x.xxx_hidden_MaxBatchSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetLanguageCodes(v bool) {
+	x.xxx_hidden_LanguageCodes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetMaxRetries(v int32) {
+	x.xxx_hidden_MaxRetries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetRetryDelaySeconds(v int32) {
+	x.xxx_hidden_RetryDelaySeconds = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetRetryMultiplier(v int32) {
+	x.xxx_hidden_RetryMultiplier = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetRequestTimeoutSeconds(v int32) {
+	x.xxx_hidden_RequestTimeoutSeconds = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetStripFormatting(v bool) {
+	x.xxx_hidden_StripFormatting = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetPreserveLineBreaks(v bool) {
+	x.xxx_hidden_PreserveLineBreaks = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetFixOverlaps(v bool) {
+	x.xxx_hidden_FixOverlaps = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 23)
+}
+
+func (x *SubtitleTranslationSettings) SetValidation(v *SubtitleTranslationValidation) {
+	x.xxx_hidden_Validation = v
+}
+
+func (x *SubtitleTranslationSettings) SetAutomation(v *SubtitleTranslationAutomation) {
+	x.xxx_hidden_Automation = v
 }
 
 func (x *SubtitleTranslationSettings) HasTranslator() bool {
@@ -3138,6 +3410,139 @@ func (x *SubtitleTranslationSettings) HasCredit() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *SubtitleTranslationSettings) HasPrompt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *SubtitleTranslationSettings) HasUserPrompt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *SubtitleTranslationSettings) HasProofreadPrompt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *SubtitleTranslationSettings) HasProofreadUserPrompt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *SubtitleTranslationSettings) HasContextBefore() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *SubtitleTranslationSettings) HasContextAfter() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *SubtitleTranslationSettings) HasTranslatedContext() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *SubtitleTranslationSettings) HasBatch() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *SubtitleTranslationSettings) HasMaxBatchSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
+}
+
+func (x *SubtitleTranslationSettings) HasLanguageCodes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
+func (x *SubtitleTranslationSettings) HasMaxRetries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 14)
+}
+
+func (x *SubtitleTranslationSettings) HasRetryDelaySeconds() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
+}
+
+func (x *SubtitleTranslationSettings) HasRetryMultiplier() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 16)
+}
+
+func (x *SubtitleTranslationSettings) HasRequestTimeoutSeconds() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 17)
+}
+
+func (x *SubtitleTranslationSettings) HasStripFormatting() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 18)
+}
+
+func (x *SubtitleTranslationSettings) HasPreserveLineBreaks() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 19)
+}
+
+func (x *SubtitleTranslationSettings) HasFixOverlaps() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
+}
+
+func (x *SubtitleTranslationSettings) HasValidation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Validation != nil
+}
+
+func (x *SubtitleTranslationSettings) HasAutomation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Automation != nil
+}
+
 func (x *SubtitleTranslationSettings) ClearTranslator() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Translator = nil
@@ -3153,17 +3558,154 @@ func (x *SubtitleTranslationSettings) ClearCredit() {
 	x.xxx_hidden_Credit = false
 }
 
+func (x *SubtitleTranslationSettings) ClearPrompt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Prompt = nil
+}
+
+func (x *SubtitleTranslationSettings) ClearUserPrompt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_UserPrompt = nil
+}
+
+func (x *SubtitleTranslationSettings) ClearProofreadPrompt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_ProofreadPrompt = nil
+}
+
+func (x *SubtitleTranslationSettings) ClearProofreadUserPrompt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_ProofreadUserPrompt = nil
+}
+
+func (x *SubtitleTranslationSettings) ClearContextBefore() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_ContextBefore = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearContextAfter() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_ContextAfter = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearTranslatedContext() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_TranslatedContext = false
+}
+
+func (x *SubtitleTranslationSettings) ClearBatch() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Batch = false
+}
+
+func (x *SubtitleTranslationSettings) ClearMaxBatchSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 12)
+	x.xxx_hidden_MaxBatchSize = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearLanguageCodes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_LanguageCodes = false
+}
+
+func (x *SubtitleTranslationSettings) ClearMaxRetries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 14)
+	x.xxx_hidden_MaxRetries = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearRetryDelaySeconds() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 15)
+	x.xxx_hidden_RetryDelaySeconds = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearRetryMultiplier() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 16)
+	x.xxx_hidden_RetryMultiplier = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearRequestTimeoutSeconds() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 17)
+	x.xxx_hidden_RequestTimeoutSeconds = 0
+}
+
+func (x *SubtitleTranslationSettings) ClearStripFormatting() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 18)
+	x.xxx_hidden_StripFormatting = false
+}
+
+func (x *SubtitleTranslationSettings) ClearPreserveLineBreaks() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 19)
+	x.xxx_hidden_PreserveLineBreaks = false
+}
+
+func (x *SubtitleTranslationSettings) ClearFixOverlaps() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 20)
+	x.xxx_hidden_FixOverlaps = false
+}
+
+func (x *SubtitleTranslationSettings) ClearValidation() {
+	x.xxx_hidden_Validation = nil
+}
+
+func (x *SubtitleTranslationSettings) ClearAutomation() {
+	x.xxx_hidden_Automation = nil
+}
+
 type SubtitleTranslationSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The translator used when a translation names none, as
-	// "<plugin>/<translator>"; empty for the first enabled one.
+	// The translator used when a translation names none; empty for the
+	// first enabled translator of a plugin.
 	Translator *string
 	// The score translations are recorded with, as a percentage of the
 	// maximum score.
 	DefaultScore *int32
 	// Adds a first cue to SubRip translations crediting the translator.
 	Credit *bool
+	// Translators tried in order after the first when it fails or does not
+	// translate between the languages; those matching the languages
+	// exactly are tried before those matching them more loosely.
+	FallbackTranslators []string
+	// The instructions of AI models, and the message carrying each cue,
+	// with the placeholders {sourceLanguage}, {targetLanguage},
+	// {lineToTranslate}, {contextBefore} and {contextAfter}.
+	Prompt     *string
+	UserPrompt *string
+	// The instructions and message of proofreading, with {sourceLine} and
+	// {translatedLine} besides the languages.
+	ProofreadPrompt     *string
+	ProofreadUserPrompt *string
+	// The cues before and after each cue given to AI models as context.
+	ContextBefore *int32
+	ContextAfter  *int32
+	// Gives the context as JSON objects with each cue's position and text,
+	// and the translations of those before.
+	TranslatedContext *bool
+	// Translates with AI models in batches of max_batch_size cues (every
+	// cue when 0) answered as JSON, rather than cue by cue.
+	Batch        *bool
+	MaxBatchSize *int32
+	// Names languages in prompts by their codes rather than their English
+	// names.
+	LanguageCodes *bool
+	// Retries of a translation failing for a reason worth retrying, such as
+	// a rate limit: max_retries attempts in all, the delay multiplied after
+	// each.
+	MaxRetries        *int32
+	RetryDelaySeconds *int32
+	RetryMultiplier   *int32
+	// How long one request to a translator may take.
+	RequestTimeoutSeconds *int32
+	// Translates the cues' plain text, and drops the styles of ASS files.
+	StripFormatting *bool
+	// Translates a cue's lines keeping its line breaks; otherwise the lines
+	// are joined, and the translation split again at 42 characters when
+	// formatting is stripped.
+	PreserveLineBreaks *bool
+	// Trims the end of a cue overlapping the next.
+	FixOverlaps *bool
+	Validation  *SubtitleTranslationValidation
+	Automation  *SubtitleTranslationAutomation
 }
 
 func (b0 SubtitleTranslationSettings_builder) Build() *SubtitleTranslationSettings {
@@ -3171,16 +3713,535 @@ func (b0 SubtitleTranslationSettings_builder) Build() *SubtitleTranslationSettin
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Translator != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 23)
 		x.xxx_hidden_Translator = b.Translator
 	}
 	if b.DefaultScore != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 23)
 		x.xxx_hidden_DefaultScore = *b.DefaultScore
 	}
 	if b.Credit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 23)
 		x.xxx_hidden_Credit = *b.Credit
+	}
+	x.xxx_hidden_FallbackTranslators = b.FallbackTranslators
+	if b.Prompt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 23)
+		x.xxx_hidden_Prompt = b.Prompt
+	}
+	if b.UserPrompt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 23)
+		x.xxx_hidden_UserPrompt = b.UserPrompt
+	}
+	if b.ProofreadPrompt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 23)
+		x.xxx_hidden_ProofreadPrompt = b.ProofreadPrompt
+	}
+	if b.ProofreadUserPrompt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 23)
+		x.xxx_hidden_ProofreadUserPrompt = b.ProofreadUserPrompt
+	}
+	if b.ContextBefore != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 23)
+		x.xxx_hidden_ContextBefore = *b.ContextBefore
+	}
+	if b.ContextAfter != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 23)
+		x.xxx_hidden_ContextAfter = *b.ContextAfter
+	}
+	if b.TranslatedContext != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 23)
+		x.xxx_hidden_TranslatedContext = *b.TranslatedContext
+	}
+	if b.Batch != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 23)
+		x.xxx_hidden_Batch = *b.Batch
+	}
+	if b.MaxBatchSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 23)
+		x.xxx_hidden_MaxBatchSize = *b.MaxBatchSize
+	}
+	if b.LanguageCodes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 23)
+		x.xxx_hidden_LanguageCodes = *b.LanguageCodes
+	}
+	if b.MaxRetries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 23)
+		x.xxx_hidden_MaxRetries = *b.MaxRetries
+	}
+	if b.RetryDelaySeconds != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 23)
+		x.xxx_hidden_RetryDelaySeconds = *b.RetryDelaySeconds
+	}
+	if b.RetryMultiplier != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 23)
+		x.xxx_hidden_RetryMultiplier = *b.RetryMultiplier
+	}
+	if b.RequestTimeoutSeconds != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 23)
+		x.xxx_hidden_RequestTimeoutSeconds = *b.RequestTimeoutSeconds
+	}
+	if b.StripFormatting != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 23)
+		x.xxx_hidden_StripFormatting = *b.StripFormatting
+	}
+	if b.PreserveLineBreaks != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 23)
+		x.xxx_hidden_PreserveLineBreaks = *b.PreserveLineBreaks
+	}
+	if b.FixOverlaps != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 23)
+		x.xxx_hidden_FixOverlaps = *b.FixOverlaps
+	}
+	x.xxx_hidden_Validation = b.Validation
+	x.xxx_hidden_Automation = b.Automation
+	return m0
+}
+
+// SubtitleTranslationValidation refuses to translate subtitles that look
+// broken, as Lingarr's subtitle validation.
+type SubtitleTranslationValidation struct {
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Enabled            bool                   `protobuf:"varint,1,opt,name=enabled"`
+	xxx_hidden_MaxFileSize        int64                  `protobuf:"varint,2,opt,name=max_file_size,json=maxFileSize"`
+	xxx_hidden_MaxCueLength       int32                  `protobuf:"varint,3,opt,name=max_cue_length,json=maxCueLength"`
+	xxx_hidden_MinCueLength       int32                  `protobuf:"varint,4,opt,name=min_cue_length,json=minCueLength"`
+	xxx_hidden_MinDurationMs      int32                  `protobuf:"varint,5,opt,name=min_duration_ms,json=minDurationMs"`
+	xxx_hidden_MaxDurationSeconds int32                  `protobuf:"varint,6,opt,name=max_duration_seconds,json=maxDurationSeconds"`
+	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
+	XXX_presence                  [1]uint32
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
+}
+
+func (x *SubtitleTranslationValidation) Reset() {
+	*x = SubtitleTranslationValidation{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubtitleTranslationValidation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubtitleTranslationValidation) ProtoMessage() {}
+
+func (x *SubtitleTranslationValidation) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SubtitleTranslationValidation) GetEnabled() bool {
+	if x != nil {
+		return x.xxx_hidden_Enabled
+	}
+	return false
+}
+
+func (x *SubtitleTranslationValidation) GetMaxFileSize() int64 {
+	if x != nil {
+		return x.xxx_hidden_MaxFileSize
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationValidation) GetMaxCueLength() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxCueLength
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationValidation) GetMinCueLength() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinCueLength
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationValidation) GetMinDurationMs() int32 {
+	if x != nil {
+		return x.xxx_hidden_MinDurationMs
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationValidation) GetMaxDurationSeconds() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxDurationSeconds
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationValidation) SetEnabled(v bool) {
+	x.xxx_hidden_Enabled = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *SubtitleTranslationValidation) SetMaxFileSize(v int64) {
+	x.xxx_hidden_MaxFileSize = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *SubtitleTranslationValidation) SetMaxCueLength(v int32) {
+	x.xxx_hidden_MaxCueLength = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+}
+
+func (x *SubtitleTranslationValidation) SetMinCueLength(v int32) {
+	x.xxx_hidden_MinCueLength = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *SubtitleTranslationValidation) SetMinDurationMs(v int32) {
+	x.xxx_hidden_MinDurationMs = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *SubtitleTranslationValidation) SetMaxDurationSeconds(v int32) {
+	x.xxx_hidden_MaxDurationSeconds = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *SubtitleTranslationValidation) HasEnabled() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SubtitleTranslationValidation) HasMaxFileSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SubtitleTranslationValidation) HasMaxCueLength() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SubtitleTranslationValidation) HasMinCueLength() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *SubtitleTranslationValidation) HasMinDurationMs() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *SubtitleTranslationValidation) HasMaxDurationSeconds() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *SubtitleTranslationValidation) ClearEnabled() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Enabled = false
+}
+
+func (x *SubtitleTranslationValidation) ClearMaxFileSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_MaxFileSize = 0
+}
+
+func (x *SubtitleTranslationValidation) ClearMaxCueLength() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MaxCueLength = 0
+}
+
+func (x *SubtitleTranslationValidation) ClearMinCueLength() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_MinCueLength = 0
+}
+
+func (x *SubtitleTranslationValidation) ClearMinDurationMs() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_MinDurationMs = 0
+}
+
+func (x *SubtitleTranslationValidation) ClearMaxDurationSeconds() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_MaxDurationSeconds = 0
+}
+
+type SubtitleTranslationValidation_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Enabled     *bool
+	MaxFileSize *int64
+	// The longest and shortest text of a cue, in characters.
+	MaxCueLength *int32
+	MinCueLength *int32
+	// The shortest and longest a cue may last.
+	MinDurationMs      *int32
+	MaxDurationSeconds *int32
+}
+
+func (b0 SubtitleTranslationValidation_builder) Build() *SubtitleTranslationValidation {
+	m0 := &SubtitleTranslationValidation{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Enabled != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Enabled = *b.Enabled
+	}
+	if b.MaxFileSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_MaxFileSize = *b.MaxFileSize
+	}
+	if b.MaxCueLength != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		x.xxx_hidden_MaxCueLength = *b.MaxCueLength
+	}
+	if b.MinCueLength != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_MinCueLength = *b.MinCueLength
+	}
+	if b.MinDurationMs != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_MinDurationMs = *b.MinDurationMs
+	}
+	if b.MaxDurationSeconds != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_MaxDurationSeconds = *b.MaxDurationSeconds
+	}
+	return m0
+}
+
+// SubtitleTranslationAutomation translates subtitles movies and episodes
+// lack, as Lingarr's automation: a movie or episode still lacking
+// subtitles its profile wants, whose file is old enough, gets them
+// translated by the settings' translator from a subtitle it has in one of
+// the source languages.
+type SubtitleTranslationAutomation struct {
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Enabled         bool                   `protobuf:"varint,1,opt,name=enabled"`
+	xxx_hidden_IntervalHours   int32                  `protobuf:"varint,2,opt,name=interval_hours,json=intervalHours"`
+	xxx_hidden_SourceLanguages []string               `protobuf:"bytes,3,rep,name=source_languages,json=sourceLanguages"`
+	xxx_hidden_MaxPerRun       int32                  `protobuf:"varint,4,opt,name=max_per_run,json=maxPerRun"`
+	xxx_hidden_MovieAgeHours   int32                  `protobuf:"varint,5,opt,name=movie_age_hours,json=movieAgeHours"`
+	xxx_hidden_EpisodeAgeHours int32                  `protobuf:"varint,6,opt,name=episode_age_hours,json=episodeAgeHours"`
+	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
+	XXX_presence               [1]uint32
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *SubtitleTranslationAutomation) Reset() {
+	*x = SubtitleTranslationAutomation{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubtitleTranslationAutomation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubtitleTranslationAutomation) ProtoMessage() {}
+
+func (x *SubtitleTranslationAutomation) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SubtitleTranslationAutomation) GetEnabled() bool {
+	if x != nil {
+		return x.xxx_hidden_Enabled
+	}
+	return false
+}
+
+func (x *SubtitleTranslationAutomation) GetIntervalHours() int32 {
+	if x != nil {
+		return x.xxx_hidden_IntervalHours
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationAutomation) GetSourceLanguages() []string {
+	if x != nil {
+		return x.xxx_hidden_SourceLanguages
+	}
+	return nil
+}
+
+func (x *SubtitleTranslationAutomation) GetMaxPerRun() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxPerRun
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationAutomation) GetMovieAgeHours() int32 {
+	if x != nil {
+		return x.xxx_hidden_MovieAgeHours
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationAutomation) GetEpisodeAgeHours() int32 {
+	if x != nil {
+		return x.xxx_hidden_EpisodeAgeHours
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationAutomation) SetEnabled(v bool) {
+	x.xxx_hidden_Enabled = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *SubtitleTranslationAutomation) SetIntervalHours(v int32) {
+	x.xxx_hidden_IntervalHours = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *SubtitleTranslationAutomation) SetSourceLanguages(v []string) {
+	x.xxx_hidden_SourceLanguages = v
+}
+
+func (x *SubtitleTranslationAutomation) SetMaxPerRun(v int32) {
+	x.xxx_hidden_MaxPerRun = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *SubtitleTranslationAutomation) SetMovieAgeHours(v int32) {
+	x.xxx_hidden_MovieAgeHours = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *SubtitleTranslationAutomation) SetEpisodeAgeHours(v int32) {
+	x.xxx_hidden_EpisodeAgeHours = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *SubtitleTranslationAutomation) HasEnabled() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SubtitleTranslationAutomation) HasIntervalHours() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SubtitleTranslationAutomation) HasMaxPerRun() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *SubtitleTranslationAutomation) HasMovieAgeHours() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *SubtitleTranslationAutomation) HasEpisodeAgeHours() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *SubtitleTranslationAutomation) ClearEnabled() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Enabled = false
+}
+
+func (x *SubtitleTranslationAutomation) ClearIntervalHours() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_IntervalHours = 0
+}
+
+func (x *SubtitleTranslationAutomation) ClearMaxPerRun() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_MaxPerRun = 0
+}
+
+func (x *SubtitleTranslationAutomation) ClearMovieAgeHours() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_MovieAgeHours = 0
+}
+
+func (x *SubtitleTranslationAutomation) ClearEpisodeAgeHours() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_EpisodeAgeHours = 0
+}
+
+type SubtitleTranslationAutomation_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Enabled *bool
+	// How often it runs.
+	IntervalHours *int32
+	// The languages translated from, in order of preference.
+	SourceLanguages []string
+	// The most translations a run queues.
+	MaxPerRun *int32
+	// How old a movie's or an episode's file must be, giving searches time
+	// to find subtitles first.
+	MovieAgeHours   *int32
+	EpisodeAgeHours *int32
+}
+
+func (b0 SubtitleTranslationAutomation_builder) Build() *SubtitleTranslationAutomation {
+	m0 := &SubtitleTranslationAutomation{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Enabled != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Enabled = *b.Enabled
+	}
+	if b.IntervalHours != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_IntervalHours = *b.IntervalHours
+	}
+	x.xxx_hidden_SourceLanguages = b.SourceLanguages
+	if b.MaxPerRun != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_MaxPerRun = *b.MaxPerRun
+	}
+	if b.MovieAgeHours != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_MovieAgeHours = *b.MovieAgeHours
+	}
+	if b.EpisodeAgeHours != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_EpisodeAgeHours = *b.EpisodeAgeHours
 	}
 	return m0
 }
@@ -3193,7 +4254,7 @@ type GetSubtitleSettingsRequest struct {
 
 func (x *GetSubtitleSettingsRequest) Reset() {
 	*x = GetSubtitleSettingsRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[17]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3205,7 +4266,7 @@ func (x *GetSubtitleSettingsRequest) String() string {
 func (*GetSubtitleSettingsRequest) ProtoMessage() {}
 
 func (x *GetSubtitleSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[17]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3237,7 +4298,7 @@ type GetSubtitleSettingsResponse struct {
 
 func (x *GetSubtitleSettingsResponse) Reset() {
 	*x = GetSubtitleSettingsResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[18]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3249,7 +4310,7 @@ func (x *GetSubtitleSettingsResponse) String() string {
 func (*GetSubtitleSettingsResponse) ProtoMessage() {}
 
 func (x *GetSubtitleSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[18]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3305,7 +4366,7 @@ type UpdateSubtitleSettingsRequest struct {
 
 func (x *UpdateSubtitleSettingsRequest) Reset() {
 	*x = UpdateSubtitleSettingsRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[19]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3317,7 +4378,7 @@ func (x *UpdateSubtitleSettingsRequest) String() string {
 func (*UpdateSubtitleSettingsRequest) ProtoMessage() {}
 
 func (x *UpdateSubtitleSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[19]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3373,7 +4434,7 @@ type UpdateSubtitleSettingsResponse struct {
 
 func (x *UpdateSubtitleSettingsResponse) Reset() {
 	*x = UpdateSubtitleSettingsResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[20]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3385,7 +4446,7 @@ func (x *UpdateSubtitleSettingsResponse) String() string {
 func (*UpdateSubtitleSettingsResponse) ProtoMessage() {}
 
 func (x *UpdateSubtitleSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[20]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3440,7 +4501,7 @@ type ListSubtitleProvidersRequest struct {
 
 func (x *ListSubtitleProvidersRequest) Reset() {
 	*x = ListSubtitleProvidersRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[21]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3452,7 +4513,7 @@ func (x *ListSubtitleProvidersRequest) String() string {
 func (*ListSubtitleProvidersRequest) ProtoMessage() {}
 
 func (x *ListSubtitleProvidersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[21]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3496,7 +4557,7 @@ type SubtitleProviderState struct {
 
 func (x *SubtitleProviderState) Reset() {
 	*x = SubtitleProviderState{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[22]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3508,7 +4569,7 @@ func (x *SubtitleProviderState) String() string {
 func (*SubtitleProviderState) ProtoMessage() {}
 
 func (x *SubtitleProviderState) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[22]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3828,7 +4889,7 @@ type ListSubtitleProvidersResponse struct {
 
 func (x *ListSubtitleProvidersResponse) Reset() {
 	*x = ListSubtitleProvidersResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[23]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3840,7 +4901,7 @@ func (x *ListSubtitleProvidersResponse) String() string {
 func (*ListSubtitleProvidersResponse) ProtoMessage() {}
 
 func (x *ListSubtitleProvidersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[23]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3911,7 +4972,7 @@ type WantedSubtitles struct {
 
 func (x *WantedSubtitles) Reset() {
 	*x = WantedSubtitles{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[24]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3923,7 +4984,7 @@ func (x *WantedSubtitles) String() string {
 func (*WantedSubtitles) ProtoMessage() {}
 
 func (x *WantedSubtitles) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[24]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4194,7 +5255,7 @@ type ListWantedSubtitlesRequest struct {
 
 func (x *ListWantedSubtitlesRequest) Reset() {
 	*x = ListWantedSubtitlesRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[25]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4206,7 +5267,7 @@ func (x *ListWantedSubtitlesRequest) String() string {
 func (*ListWantedSubtitlesRequest) ProtoMessage() {}
 
 func (x *ListWantedSubtitlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[25]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4330,7 +5391,7 @@ type ListWantedSubtitlesResponse struct {
 
 func (x *ListWantedSubtitlesResponse) Reset() {
 	*x = ListWantedSubtitlesResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[26]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4342,7 +5403,7 @@ func (x *ListWantedSubtitlesResponse) String() string {
 func (*ListWantedSubtitlesResponse) ProtoMessage() {}
 
 func (x *ListWantedSubtitlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[26]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4421,7 +5482,7 @@ type SearchWantedSubtitlesRequest struct {
 
 func (x *SearchWantedSubtitlesRequest) Reset() {
 	*x = SearchWantedSubtitlesRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[27]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4433,7 +5494,7 @@ func (x *SearchWantedSubtitlesRequest) String() string {
 func (*SearchWantedSubtitlesRequest) ProtoMessage() {}
 
 func (x *SearchWantedSubtitlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[27]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4513,7 +5574,7 @@ type SearchWantedSubtitlesResponse struct {
 
 func (x *SearchWantedSubtitlesResponse) Reset() {
 	*x = SearchWantedSubtitlesResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[28]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4525,7 +5586,7 @@ func (x *SearchWantedSubtitlesResponse) String() string {
 func (*SearchWantedSubtitlesResponse) ProtoMessage() {}
 
 func (x *SearchWantedSubtitlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[28]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4586,7 +5647,7 @@ type UpgradeSubtitlesRequest struct {
 
 func (x *UpgradeSubtitlesRequest) Reset() {
 	*x = UpgradeSubtitlesRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[29]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4598,7 +5659,7 @@ func (x *UpgradeSubtitlesRequest) String() string {
 func (*UpgradeSubtitlesRequest) ProtoMessage() {}
 
 func (x *UpgradeSubtitlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[29]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4629,7 +5690,7 @@ type UpgradeSubtitlesResponse struct {
 
 func (x *UpgradeSubtitlesResponse) Reset() {
 	*x = UpgradeSubtitlesResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[30]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4641,7 +5702,7 @@ func (x *UpgradeSubtitlesResponse) String() string {
 func (*UpgradeSubtitlesResponse) ProtoMessage() {}
 
 func (x *UpgradeSubtitlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[30]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4680,7 +5741,7 @@ type ItemSubtitle struct {
 
 func (x *ItemSubtitle) Reset() {
 	*x = ItemSubtitle{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[31]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4692,7 +5753,7 @@ func (x *ItemSubtitle) String() string {
 func (*ItemSubtitle) ProtoMessage() {}
 
 func (x *ItemSubtitle) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[31]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4875,7 +5936,7 @@ type GetItemSubtitlesRequest struct {
 
 func (x *GetItemSubtitlesRequest) Reset() {
 	*x = GetItemSubtitlesRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[32]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4887,7 +5948,7 @@ func (x *GetItemSubtitlesRequest) String() string {
 func (*GetItemSubtitlesRequest) ProtoMessage() {}
 
 func (x *GetItemSubtitlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[32]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4957,7 +6018,7 @@ type GetItemSubtitlesResponse struct {
 
 func (x *GetItemSubtitlesResponse) Reset() {
 	*x = GetItemSubtitlesResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[33]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4969,7 +6030,7 @@ func (x *GetItemSubtitlesResponse) String() string {
 func (*GetItemSubtitlesResponse) ProtoMessage() {}
 
 func (x *GetItemSubtitlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[33]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5105,7 +6166,7 @@ type ScoredSubtitle struct {
 
 func (x *ScoredSubtitle) Reset() {
 	*x = ScoredSubtitle{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[34]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5117,7 +6178,7 @@ func (x *ScoredSubtitle) String() string {
 func (*ScoredSubtitle) ProtoMessage() {}
 
 func (x *ScoredSubtitle) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[34]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5494,7 +6555,7 @@ type SearchItemSubtitlesRequest struct {
 
 func (x *SearchItemSubtitlesRequest) Reset() {
 	*x = SearchItemSubtitlesRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[35]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5506,7 +6567,7 @@ func (x *SearchItemSubtitlesRequest) String() string {
 func (*SearchItemSubtitlesRequest) ProtoMessage() {}
 
 func (x *SearchItemSubtitlesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[35]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5587,7 +6648,7 @@ type SearchItemSubtitlesResponse struct {
 
 func (x *SearchItemSubtitlesResponse) Reset() {
 	*x = SearchItemSubtitlesResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[36]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5599,7 +6660,7 @@ func (x *SearchItemSubtitlesResponse) String() string {
 func (*SearchItemSubtitlesResponse) ProtoMessage() {}
 
 func (x *SearchItemSubtitlesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[36]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5666,7 +6727,7 @@ type DownloadItemSubtitleRequest struct {
 
 func (x *DownloadItemSubtitleRequest) Reset() {
 	*x = DownloadItemSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[37]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5678,7 +6739,7 @@ func (x *DownloadItemSubtitleRequest) String() string {
 func (*DownloadItemSubtitleRequest) ProtoMessage() {}
 
 func (x *DownloadItemSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[37]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5833,7 +6894,7 @@ type DownloadItemSubtitleResponse struct {
 
 func (x *DownloadItemSubtitleResponse) Reset() {
 	*x = DownloadItemSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[38]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5845,7 +6906,7 @@ func (x *DownloadItemSubtitleResponse) String() string {
 func (*DownloadItemSubtitleResponse) ProtoMessage() {}
 
 func (x *DownloadItemSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[38]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5915,7 +6976,7 @@ type UploadSubtitleRequest struct {
 
 func (x *UploadSubtitleRequest) Reset() {
 	*x = UploadSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[39]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5927,7 +6988,7 @@ func (x *UploadSubtitleRequest) String() string {
 func (*UploadSubtitleRequest) ProtoMessage() {}
 
 func (x *UploadSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[39]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6082,7 +7143,7 @@ type UploadSubtitleResponse struct {
 
 func (x *UploadSubtitleResponse) Reset() {
 	*x = UploadSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[40]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6094,7 +7155,7 @@ func (x *UploadSubtitleResponse) String() string {
 func (*UploadSubtitleResponse) ProtoMessage() {}
 
 func (x *UploadSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[40]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6162,7 +7223,7 @@ type ExtractSubtitleRequest struct {
 
 func (x *ExtractSubtitleRequest) Reset() {
 	*x = ExtractSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[41]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6174,7 +7235,7 @@ func (x *ExtractSubtitleRequest) String() string {
 func (*ExtractSubtitleRequest) ProtoMessage() {}
 
 func (x *ExtractSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[41]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6296,7 +7357,7 @@ type ExtractSubtitleResponse struct {
 
 func (x *ExtractSubtitleResponse) Reset() {
 	*x = ExtractSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[42]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6308,7 +7369,7 @@ func (x *ExtractSubtitleResponse) String() string {
 func (*ExtractSubtitleResponse) ProtoMessage() {}
 
 func (x *ExtractSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[42]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6376,7 +7437,7 @@ type DeleteSubtitleRequest struct {
 
 func (x *DeleteSubtitleRequest) Reset() {
 	*x = DeleteSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[43]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6388,7 +7449,7 @@ func (x *DeleteSubtitleRequest) String() string {
 func (*DeleteSubtitleRequest) ProtoMessage() {}
 
 func (x *DeleteSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[43]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6484,7 +7545,7 @@ type DeleteSubtitleResponse struct {
 
 func (x *DeleteSubtitleResponse) Reset() {
 	*x = DeleteSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[44]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6496,7 +7557,7 @@ func (x *DeleteSubtitleResponse) String() string {
 func (*DeleteSubtitleResponse) ProtoMessage() {}
 
 func (x *DeleteSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[44]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6532,7 +7593,7 @@ type ModifySubtitleRequest struct {
 
 func (x *ModifySubtitleRequest) Reset() {
 	*x = ModifySubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[45]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6544,7 +7605,7 @@ func (x *ModifySubtitleRequest) String() string {
 func (*ModifySubtitleRequest) ProtoMessage() {}
 
 func (x *ModifySubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[45]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6653,7 +7714,7 @@ type ModifySubtitleResponse struct {
 
 func (x *ModifySubtitleResponse) Reset() {
 	*x = ModifySubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[46]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6665,7 +7726,7 @@ func (x *ModifySubtitleResponse) String() string {
 func (*ModifySubtitleResponse) ProtoMessage() {}
 
 func (x *ModifySubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[46]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6701,7 +7762,7 @@ type SyncSubtitleRequest struct {
 
 func (x *SyncSubtitleRequest) Reset() {
 	*x = SyncSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[47]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6713,7 +7774,7 @@ func (x *SyncSubtitleRequest) String() string {
 func (*SyncSubtitleRequest) ProtoMessage() {}
 
 func (x *SyncSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[47]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6846,7 +7907,7 @@ type SyncSubtitleResponse struct {
 
 func (x *SyncSubtitleResponse) Reset() {
 	*x = SyncSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[48]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6858,7 +7919,7 @@ func (x *SyncSubtitleResponse) String() string {
 func (*SyncSubtitleResponse) ProtoMessage() {}
 
 func (x *SyncSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[48]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6954,7 +8015,7 @@ type TranslateSubtitleRequest struct {
 
 func (x *TranslateSubtitleRequest) Reset() {
 	*x = TranslateSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[49]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6966,7 +8027,7 @@ func (x *TranslateSubtitleRequest) String() string {
 func (*TranslateSubtitleRequest) ProtoMessage() {}
 
 func (x *TranslateSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[49]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7150,7 +8211,8 @@ type TranslateSubtitleRequest_builder struct {
 	// The language translated into, with the forced and hearing-impaired
 	// flags of the file saved.
 	Language *SubtitleLanguageSpec
-	// "<plugin>/<translator>"; empty for the settings' translator.
+	// "<plugin>/<translator>" or "ai/<provider>/<model>"; empty for the
+	// settings' translators.
 	Translator *string
 }
 
@@ -7179,7 +8241,7 @@ func (b0 TranslateSubtitleRequest_builder) Build() *TranslateSubtitleRequest {
 type case_TranslateSubtitleRequest_Source protoreflect.FieldNumber
 
 func (x case_TranslateSubtitleRequest_Source) String() string {
-	md := file_mavio_acquisition_v1_subtitle_proto_msgTypes[49].Descriptor()
+	md := file_mavio_acquisition_v1_subtitle_proto_msgTypes[51].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -7213,7 +8275,7 @@ type TranslateSubtitleResponse struct {
 
 func (x *TranslateSubtitleResponse) Reset() {
 	*x = TranslateSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[50]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7225,7 +8287,7 @@ func (x *TranslateSubtitleResponse) String() string {
 func (*TranslateSubtitleResponse) ProtoMessage() {}
 
 func (x *TranslateSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[50]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7282,6 +8344,705 @@ func (b0 TranslateSubtitleResponse_builder) Build() *TranslateSubtitleResponse {
 	return m0
 }
 
+type ProofreadSubtitleRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	xxx_hidden_Path        *string                `protobuf:"bytes,2,opt,name=path"`
+	xxx_hidden_Translator  *string                `protobuf:"bytes,3,opt,name=translator"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ProofreadSubtitleRequest) Reset() {
+	*x = ProofreadSubtitleRequest{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProofreadSubtitleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProofreadSubtitleRequest) ProtoMessage() {}
+
+func (x *ProofreadSubtitleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ProofreadSubtitleRequest) GetItemId() string {
+	if x != nil {
+		if x.xxx_hidden_ItemId != nil {
+			return *x.xxx_hidden_ItemId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ProofreadSubtitleRequest) GetPath() string {
+	if x != nil {
+		if x.xxx_hidden_Path != nil {
+			return *x.xxx_hidden_Path
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ProofreadSubtitleRequest) GetTranslator() string {
+	if x != nil {
+		if x.xxx_hidden_Translator != nil {
+			return *x.xxx_hidden_Translator
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ProofreadSubtitleRequest) SetItemId(v string) {
+	x.xxx_hidden_ItemId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ProofreadSubtitleRequest) SetPath(v string) {
+	x.xxx_hidden_Path = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ProofreadSubtitleRequest) SetTranslator(v string) {
+	x.xxx_hidden_Translator = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *ProofreadSubtitleRequest) HasItemId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ProofreadSubtitleRequest) HasPath() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ProofreadSubtitleRequest) HasTranslator() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ProofreadSubtitleRequest) ClearItemId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ItemId = nil
+}
+
+func (x *ProofreadSubtitleRequest) ClearPath() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Path = nil
+}
+
+func (x *ProofreadSubtitleRequest) ClearTranslator() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Translator = nil
+}
+
+type ProofreadSubtitleRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemId *string
+	// A subtitle file of the item translated by the server.
+	Path *string
+	// "ai/<provider>/<model>"; empty for the first AI model that
+	// translated it, else the first among the settings' translators.
+	Translator *string
+}
+
+func (b0 ProofreadSubtitleRequest_builder) Build() *ProofreadSubtitleRequest {
+	m0 := &ProofreadSubtitleRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ItemId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_ItemId = b.ItemId
+	}
+	if b.Path != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Path = b.Path
+	}
+	if b.Translator != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Translator = b.Translator
+	}
+	return m0
+}
+
+type ProofreadSubtitleResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_JobId       *string                `protobuf:"bytes,1,opt,name=job_id,json=jobId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ProofreadSubtitleResponse) Reset() {
+	*x = ProofreadSubtitleResponse{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProofreadSubtitleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProofreadSubtitleResponse) ProtoMessage() {}
+
+func (x *ProofreadSubtitleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ProofreadSubtitleResponse) GetJobId() string {
+	if x != nil {
+		if x.xxx_hidden_JobId != nil {
+			return *x.xxx_hidden_JobId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ProofreadSubtitleResponse) SetJobId(v string) {
+	x.xxx_hidden_JobId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ProofreadSubtitleResponse) HasJobId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ProofreadSubtitleResponse) ClearJobId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_JobId = nil
+}
+
+type ProofreadSubtitleResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	JobId *string
+}
+
+func (b0 ProofreadSubtitleResponse_builder) Build() *ProofreadSubtitleResponse {
+	m0 := &ProofreadSubtitleResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.JobId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_JobId = b.JobId
+	}
+	return m0
+}
+
+type GetSubtitleTranslationStatisticsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Days        int32                  `protobuf:"varint,1,opt,name=days"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) Reset() {
+	*x = GetSubtitleTranslationStatisticsRequest{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSubtitleTranslationStatisticsRequest) ProtoMessage() {}
+
+func (x *GetSubtitleTranslationStatisticsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) GetDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_Days
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) SetDays(v int32) {
+	x.xxx_hidden_Days = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) HasDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetSubtitleTranslationStatisticsRequest) ClearDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Days = 0
+}
+
+type GetSubtitleTranslationStatisticsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The days counted in daily, up to today.
+	Days *int32
+}
+
+func (b0 GetSubtitleTranslationStatisticsRequest_builder) Build() *GetSubtitleTranslationStatisticsRequest {
+	m0 := &GetSubtitleTranslationStatisticsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Days != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Days = *b.Days
+	}
+	return m0
+}
+
+type GetSubtitleTranslationStatisticsResponse struct {
+	state                     protoimpl.MessageState     `protogen:"opaque.v1"`
+	xxx_hidden_Files          int64                      `protobuf:"varint,1,opt,name=files"`
+	xxx_hidden_Cues           int64                      `protobuf:"varint,2,opt,name=cues"`
+	xxx_hidden_Characters     int64                      `protobuf:"varint,3,opt,name=characters"`
+	xxx_hidden_InputTokens    int64                      `protobuf:"varint,4,opt,name=input_tokens,json=inputTokens"`
+	xxx_hidden_OutputTokens   int64                      `protobuf:"varint,5,opt,name=output_tokens,json=outputTokens"`
+	xxx_hidden_Cost           float64                    `protobuf:"fixed64,6,opt,name=cost"`
+	xxx_hidden_ByTranslator   map[string]int64           `protobuf:"bytes,7,rep,name=by_translator,json=byTranslator" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	xxx_hidden_ByLanguagePair map[string]int64           `protobuf:"bytes,8,rep,name=by_language_pair,json=byLanguagePair" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	xxx_hidden_ByMedia        map[string]int64           `protobuf:"bytes,9,rep,name=by_media,json=byMedia" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	xxx_hidden_Daily          *[]*SubtitleTranslationDay `protobuf:"bytes,10,rep,name=daily"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) Reset() {
+	*x = GetSubtitleTranslationStatisticsResponse{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSubtitleTranslationStatisticsResponse) ProtoMessage() {}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetFiles() int64 {
+	if x != nil {
+		return x.xxx_hidden_Files
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetCues() int64 {
+	if x != nil {
+		return x.xxx_hidden_Cues
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetCharacters() int64 {
+	if x != nil {
+		return x.xxx_hidden_Characters
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetInputTokens() int64 {
+	if x != nil {
+		return x.xxx_hidden_InputTokens
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetOutputTokens() int64 {
+	if x != nil {
+		return x.xxx_hidden_OutputTokens
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetCost() float64 {
+	if x != nil {
+		return x.xxx_hidden_Cost
+	}
+	return 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetByTranslator() map[string]int64 {
+	if x != nil {
+		return x.xxx_hidden_ByTranslator
+	}
+	return nil
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetByLanguagePair() map[string]int64 {
+	if x != nil {
+		return x.xxx_hidden_ByLanguagePair
+	}
+	return nil
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetByMedia() map[string]int64 {
+	if x != nil {
+		return x.xxx_hidden_ByMedia
+	}
+	return nil
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) GetDaily() []*SubtitleTranslationDay {
+	if x != nil {
+		if x.xxx_hidden_Daily != nil {
+			return *x.xxx_hidden_Daily
+		}
+	}
+	return nil
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetFiles(v int64) {
+	x.xxx_hidden_Files = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetCues(v int64) {
+	x.xxx_hidden_Cues = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetCharacters(v int64) {
+	x.xxx_hidden_Characters = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetInputTokens(v int64) {
+	x.xxx_hidden_InputTokens = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetOutputTokens(v int64) {
+	x.xxx_hidden_OutputTokens = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetCost(v float64) {
+	x.xxx_hidden_Cost = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetByTranslator(v map[string]int64) {
+	x.xxx_hidden_ByTranslator = v
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetByLanguagePair(v map[string]int64) {
+	x.xxx_hidden_ByLanguagePair = v
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetByMedia(v map[string]int64) {
+	x.xxx_hidden_ByMedia = v
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) SetDaily(v []*SubtitleTranslationDay) {
+	x.xxx_hidden_Daily = &v
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasFiles() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasCues() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasCharacters() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasInputTokens() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasOutputTokens() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) HasCost() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearFiles() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Files = 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearCues() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Cues = 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearCharacters() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Characters = 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearInputTokens() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_InputTokens = 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearOutputTokens() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_OutputTokens = 0
+}
+
+func (x *GetSubtitleTranslationStatisticsResponse) ClearCost() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Cost = 0
+}
+
+type GetSubtitleTranslationStatisticsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The files translated, and their cues and characters.
+	Files      *int64
+	Cues       *int64
+	Characters *int64
+	// What AI models used and cost.
+	InputTokens  *int64
+	OutputTokens *int64
+	Cost         *float64
+	// Files by translator, by "<source>:<target>" language pair and by
+	// "movie" or "episode".
+	ByTranslator   map[string]int64
+	ByLanguagePair map[string]int64
+	ByMedia        map[string]int64
+	// Files translated each day, oldest first, in the server's time zone.
+	Daily []*SubtitleTranslationDay
+}
+
+func (b0 GetSubtitleTranslationStatisticsResponse_builder) Build() *GetSubtitleTranslationStatisticsResponse {
+	m0 := &GetSubtitleTranslationStatisticsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Files != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		x.xxx_hidden_Files = *b.Files
+	}
+	if b.Cues != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		x.xxx_hidden_Cues = *b.Cues
+	}
+	if b.Characters != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		x.xxx_hidden_Characters = *b.Characters
+	}
+	if b.InputTokens != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		x.xxx_hidden_InputTokens = *b.InputTokens
+	}
+	if b.OutputTokens != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
+		x.xxx_hidden_OutputTokens = *b.OutputTokens
+	}
+	if b.Cost != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		x.xxx_hidden_Cost = *b.Cost
+	}
+	x.xxx_hidden_ByTranslator = b.ByTranslator
+	x.xxx_hidden_ByLanguagePair = b.ByLanguagePair
+	x.xxx_hidden_ByMedia = b.ByMedia
+	x.xxx_hidden_Daily = &b.Daily
+	return m0
+}
+
+// SubtitleTranslationDay is the number of files translated on a day.
+type SubtitleTranslationDay struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Date        *string                `protobuf:"bytes,1,opt,name=date"`
+	xxx_hidden_Files       int64                  `protobuf:"varint,2,opt,name=files"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SubtitleTranslationDay) Reset() {
+	*x = SubtitleTranslationDay{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubtitleTranslationDay) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubtitleTranslationDay) ProtoMessage() {}
+
+func (x *SubtitleTranslationDay) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SubtitleTranslationDay) GetDate() string {
+	if x != nil {
+		if x.xxx_hidden_Date != nil {
+			return *x.xxx_hidden_Date
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationDay) GetFiles() int64 {
+	if x != nil {
+		return x.xxx_hidden_Files
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationDay) SetDate(v string) {
+	x.xxx_hidden_Date = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *SubtitleTranslationDay) SetFiles(v int64) {
+	x.xxx_hidden_Files = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *SubtitleTranslationDay) HasDate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SubtitleTranslationDay) HasFiles() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SubtitleTranslationDay) ClearDate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Date = nil
+}
+
+func (x *SubtitleTranslationDay) ClearFiles() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Files = 0
+}
+
+type SubtitleTranslationDay_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// "YYYY-MM-DD".
+	Date  *string
+	Files *int64
+}
+
+func (b0 SubtitleTranslationDay_builder) Build() *SubtitleTranslationDay {
+	m0 := &SubtitleTranslationDay{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Date != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Date = b.Date
+	}
+	if b.Files != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Files = *b.Files
+	}
+	return m0
+}
+
 type ListSubtitleTranslatorsRequest struct {
 	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -7290,7 +9051,7 @@ type ListSubtitleTranslatorsRequest struct {
 
 func (x *ListSubtitleTranslatorsRequest) Reset() {
 	*x = ListSubtitleTranslatorsRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[51]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7302,7 +9063,7 @@ func (x *ListSubtitleTranslatorsRequest) String() string {
 func (*ListSubtitleTranslatorsRequest) ProtoMessage() {}
 
 func (x *ListSubtitleTranslatorsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[51]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7342,7 +9103,7 @@ type SubtitleTranslatorState struct {
 
 func (x *SubtitleTranslatorState) Reset() {
 	*x = SubtitleTranslatorState{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[52]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7354,7 +9115,7 @@ func (x *SubtitleTranslatorState) String() string {
 func (*SubtitleTranslatorState) ProtoMessage() {}
 
 func (x *SubtitleTranslatorState) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[52]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7545,7 +9306,7 @@ type ListSubtitleTranslatorsResponse struct {
 
 func (x *ListSubtitleTranslatorsResponse) Reset() {
 	*x = ListSubtitleTranslatorsResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[53]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7557,7 +9318,7 @@ func (x *ListSubtitleTranslatorsResponse) String() string {
 func (*ListSubtitleTranslatorsResponse) ProtoMessage() {}
 
 func (x *ListSubtitleTranslatorsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[53]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7620,7 +9381,7 @@ type BlocklistSubtitleRequest struct {
 
 func (x *BlocklistSubtitleRequest) Reset() {
 	*x = BlocklistSubtitleRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[54]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7632,7 +9393,7 @@ func (x *BlocklistSubtitleRequest) String() string {
 func (*BlocklistSubtitleRequest) ProtoMessage() {}
 
 func (x *BlocklistSubtitleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[54]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7696,7 +9457,7 @@ type BlocklistSubtitleResponse struct {
 
 func (x *BlocklistSubtitleResponse) Reset() {
 	*x = BlocklistSubtitleResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[55]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7708,7 +9469,7 @@ func (x *BlocklistSubtitleResponse) String() string {
 func (*BlocklistSubtitleResponse) ProtoMessage() {}
 
 func (x *BlocklistSubtitleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[55]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7733,23 +9494,24 @@ func (b0 BlocklistSubtitleResponse_builder) Build() *BlocklistSubtitleResponse {
 
 // SubtitleHistoryEvent is something that happened to a subtitle.
 type SubtitleHistoryEvent struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id           *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Action       SubtitleAction         `protobuf:"varint,2,opt,name=action,enum=mavio.acquisition.v1.SubtitleAction"`
-	xxx_hidden_ItemId       *string                `protobuf:"bytes,3,opt,name=item_id,json=itemId"`
-	xxx_hidden_SeriesId     *string                `protobuf:"bytes,4,opt,name=series_id,json=seriesId"`
-	xxx_hidden_Time         *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=time"`
-	xxx_hidden_Language     *SubtitleLanguageSpec  `protobuf:"bytes,6,opt,name=language"`
-	xxx_hidden_Provider     *string                `protobuf:"bytes,7,opt,name=provider"`
-	xxx_hidden_SubtitleId   *string                `protobuf:"bytes,8,opt,name=subtitle_id,json=subtitleId"`
-	xxx_hidden_Score        int32                  `protobuf:"varint,9,opt,name=score"`
-	xxx_hidden_MaxScore     int32                  `protobuf:"varint,10,opt,name=max_score,json=maxScore"`
-	xxx_hidden_Path         *string                `protobuf:"bytes,11,opt,name=path"`
-	xxx_hidden_VideoPath    *string                `protobuf:"bytes,12,opt,name=video_path,json=videoPath"`
-	xxx_hidden_Description  *string                `protobuf:"bytes,13,opt,name=description"`
-	xxx_hidden_Matched      []string               `protobuf:"bytes,14,rep,name=matched"`
-	xxx_hidden_NotMatched   []string               `protobuf:"bytes,15,rep,name=not_matched,json=notMatched"`
-	xxx_hidden_UpgradedFrom *string                `protobuf:"bytes,16,opt,name=upgraded_from,json=upgradedFrom"`
+	state                   protoimpl.MessageState     `protogen:"opaque.v1"`
+	xxx_hidden_Id           *string                    `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Action       SubtitleAction             `protobuf:"varint,2,opt,name=action,enum=mavio.acquisition.v1.SubtitleAction"`
+	xxx_hidden_ItemId       *string                    `protobuf:"bytes,3,opt,name=item_id,json=itemId"`
+	xxx_hidden_SeriesId     *string                    `protobuf:"bytes,4,opt,name=series_id,json=seriesId"`
+	xxx_hidden_Time         *timestamppb.Timestamp     `protobuf:"bytes,5,opt,name=time"`
+	xxx_hidden_Language     *SubtitleLanguageSpec      `protobuf:"bytes,6,opt,name=language"`
+	xxx_hidden_Provider     *string                    `protobuf:"bytes,7,opt,name=provider"`
+	xxx_hidden_SubtitleId   *string                    `protobuf:"bytes,8,opt,name=subtitle_id,json=subtitleId"`
+	xxx_hidden_Score        int32                      `protobuf:"varint,9,opt,name=score"`
+	xxx_hidden_MaxScore     int32                      `protobuf:"varint,10,opt,name=max_score,json=maxScore"`
+	xxx_hidden_Path         *string                    `protobuf:"bytes,11,opt,name=path"`
+	xxx_hidden_VideoPath    *string                    `protobuf:"bytes,12,opt,name=video_path,json=videoPath"`
+	xxx_hidden_Description  *string                    `protobuf:"bytes,13,opt,name=description"`
+	xxx_hidden_Matched      []string                   `protobuf:"bytes,14,rep,name=matched"`
+	xxx_hidden_NotMatched   []string                   `protobuf:"bytes,15,rep,name=not_matched,json=notMatched"`
+	xxx_hidden_UpgradedFrom *string                    `protobuf:"bytes,16,opt,name=upgraded_from,json=upgradedFrom"`
+	xxx_hidden_Translation  *SubtitleTranslationRecord `protobuf:"bytes,17,opt,name=translation"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -7758,7 +9520,7 @@ type SubtitleHistoryEvent struct {
 
 func (x *SubtitleHistoryEvent) Reset() {
 	*x = SubtitleHistoryEvent{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[56]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7770,7 +9532,7 @@ func (x *SubtitleHistoryEvent) String() string {
 func (*SubtitleHistoryEvent) ProtoMessage() {}
 
 func (x *SubtitleHistoryEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[56]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7922,24 +9684,31 @@ func (x *SubtitleHistoryEvent) GetUpgradedFrom() string {
 	return ""
 }
 
+func (x *SubtitleHistoryEvent) GetTranslation() *SubtitleTranslationRecord {
+	if x != nil {
+		return x.xxx_hidden_Translation
+	}
+	return nil
+}
+
 func (x *SubtitleHistoryEvent) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetAction(v SubtitleAction) {
 	x.xxx_hidden_Action = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetSeriesId(v string) {
 	x.xxx_hidden_SeriesId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetTime(v *timestamppb.Timestamp) {
@@ -7952,37 +9721,37 @@ func (x *SubtitleHistoryEvent) SetLanguage(v *SubtitleLanguageSpec) {
 
 func (x *SubtitleHistoryEvent) SetProvider(v string) {
 	x.xxx_hidden_Provider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetSubtitleId(v string) {
 	x.xxx_hidden_SubtitleId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetScore(v int32) {
 	x.xxx_hidden_Score = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetMaxScore(v int32) {
 	x.xxx_hidden_MaxScore = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetPath(v string) {
 	x.xxx_hidden_Path = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetVideoPath(v string) {
 	x.xxx_hidden_VideoPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 17)
 }
 
 func (x *SubtitleHistoryEvent) SetMatched(v []string) {
@@ -7995,7 +9764,11 @@ func (x *SubtitleHistoryEvent) SetNotMatched(v []string) {
 
 func (x *SubtitleHistoryEvent) SetUpgradedFrom(v string) {
 	x.xxx_hidden_UpgradedFrom = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 15, 17)
+}
+
+func (x *SubtitleHistoryEvent) SetTranslation(v *SubtitleTranslationRecord) {
+	x.xxx_hidden_Translation = v
 }
 
 func (x *SubtitleHistoryEvent) HasId() bool {
@@ -8096,6 +9869,13 @@ func (x *SubtitleHistoryEvent) HasUpgradedFrom() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 15)
 }
 
+func (x *SubtitleHistoryEvent) HasTranslation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Translation != nil
+}
+
 func (x *SubtitleHistoryEvent) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -8164,6 +9944,10 @@ func (x *SubtitleHistoryEvent) ClearUpgradedFrom() {
 	x.xxx_hidden_UpgradedFrom = nil
 }
 
+func (x *SubtitleHistoryEvent) ClearTranslation() {
+	x.xxx_hidden_Translation = nil
+}
+
 type SubtitleHistoryEvent_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -8185,6 +9969,8 @@ type SubtitleHistoryEvent_builder struct {
 	NotMatched  []string
 	// The event of the download an upgrade replaced.
 	UpgradedFrom *string
+	// What a translation translated.
+	Translation *SubtitleTranslationRecord
 }
 
 func (b0 SubtitleHistoryEvent_builder) Build() *SubtitleHistoryEvent {
@@ -8192,56 +9978,427 @@ func (b0 SubtitleHistoryEvent_builder) Build() *SubtitleHistoryEvent {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Action != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 17)
 		x.xxx_hidden_Action = *b.Action
 	}
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
 		x.xxx_hidden_ItemId = b.ItemId
 	}
 	if b.SeriesId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 17)
 		x.xxx_hidden_SeriesId = b.SeriesId
 	}
 	x.xxx_hidden_Time = b.Time
 	x.xxx_hidden_Language = b.Language
 	if b.Provider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
 		x.xxx_hidden_Provider = b.Provider
 	}
 	if b.SubtitleId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 17)
 		x.xxx_hidden_SubtitleId = b.SubtitleId
 	}
 	if b.Score != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 17)
 		x.xxx_hidden_Score = *b.Score
 	}
 	if b.MaxScore != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 17)
 		x.xxx_hidden_MaxScore = *b.MaxScore
 	}
 	if b.Path != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 17)
 		x.xxx_hidden_Path = b.Path
 	}
 	if b.VideoPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 17)
 		x.xxx_hidden_VideoPath = b.VideoPath
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 17)
 		x.xxx_hidden_Description = b.Description
 	}
 	x.xxx_hidden_Matched = b.Matched
 	x.xxx_hidden_NotMatched = b.NotMatched
 	if b.UpgradedFrom != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 15, 17)
 		x.xxx_hidden_UpgradedFrom = b.UpgradedFrom
+	}
+	x.xxx_hidden_Translation = b.Translation
+	return m0
+}
+
+// SubtitleTranslationRecord is what a translation translated and what it
+// took.
+type SubtitleTranslationRecord struct {
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_SourcePath        *string                `protobuf:"bytes,1,opt,name=source_path,json=sourcePath"`
+	xxx_hidden_SourceStreamIndex int32                  `protobuf:"varint,2,opt,name=source_stream_index,json=sourceStreamIndex"`
+	xxx_hidden_SourceLanguage    *string                `protobuf:"bytes,3,opt,name=source_language,json=sourceLanguage"`
+	xxx_hidden_Translators       []string               `protobuf:"bytes,4,rep,name=translators"`
+	xxx_hidden_Cues              int32                  `protobuf:"varint,5,opt,name=cues"`
+	xxx_hidden_Characters        int64                  `protobuf:"varint,6,opt,name=characters"`
+	xxx_hidden_InputTokens       int64                  `protobuf:"varint,7,opt,name=input_tokens,json=inputTokens"`
+	xxx_hidden_OutputTokens      int64                  `protobuf:"varint,8,opt,name=output_tokens,json=outputTokens"`
+	xxx_hidden_Cost              float64                `protobuf:"fixed64,9,opt,name=cost"`
+	xxx_hidden_Proofread         bool                   `protobuf:"varint,10,opt,name=proofread"`
+	xxx_hidden_Revised           int32                  `protobuf:"varint,11,opt,name=revised"`
+	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
+	XXX_presence                 [1]uint32
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
+}
+
+func (x *SubtitleTranslationRecord) Reset() {
+	*x = SubtitleTranslationRecord{}
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubtitleTranslationRecord) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubtitleTranslationRecord) ProtoMessage() {}
+
+func (x *SubtitleTranslationRecord) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SubtitleTranslationRecord) GetSourcePath() string {
+	if x != nil {
+		if x.xxx_hidden_SourcePath != nil {
+			return *x.xxx_hidden_SourcePath
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationRecord) GetSourceStreamIndex() int32 {
+	if x != nil {
+		return x.xxx_hidden_SourceStreamIndex
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetSourceLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_SourceLanguage != nil {
+			return *x.xxx_hidden_SourceLanguage
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SubtitleTranslationRecord) GetTranslators() []string {
+	if x != nil {
+		return x.xxx_hidden_Translators
+	}
+	return nil
+}
+
+func (x *SubtitleTranslationRecord) GetCues() int32 {
+	if x != nil {
+		return x.xxx_hidden_Cues
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetCharacters() int64 {
+	if x != nil {
+		return x.xxx_hidden_Characters
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetInputTokens() int64 {
+	if x != nil {
+		return x.xxx_hidden_InputTokens
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetOutputTokens() int64 {
+	if x != nil {
+		return x.xxx_hidden_OutputTokens
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetCost() float64 {
+	if x != nil {
+		return x.xxx_hidden_Cost
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) GetProofread() bool {
+	if x != nil {
+		return x.xxx_hidden_Proofread
+	}
+	return false
+}
+
+func (x *SubtitleTranslationRecord) GetRevised() int32 {
+	if x != nil {
+		return x.xxx_hidden_Revised
+	}
+	return 0
+}
+
+func (x *SubtitleTranslationRecord) SetSourcePath(v string) {
+	x.xxx_hidden_SourcePath = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetSourceStreamIndex(v int32) {
+	x.xxx_hidden_SourceStreamIndex = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetSourceLanguage(v string) {
+	x.xxx_hidden_SourceLanguage = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetTranslators(v []string) {
+	x.xxx_hidden_Translators = v
+}
+
+func (x *SubtitleTranslationRecord) SetCues(v int32) {
+	x.xxx_hidden_Cues = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetCharacters(v int64) {
+	x.xxx_hidden_Characters = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetInputTokens(v int64) {
+	x.xxx_hidden_InputTokens = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetOutputTokens(v int64) {
+	x.xxx_hidden_OutputTokens = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetCost(v float64) {
+	x.xxx_hidden_Cost = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetProofread(v bool) {
+	x.xxx_hidden_Proofread = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+}
+
+func (x *SubtitleTranslationRecord) SetRevised(v int32) {
+	x.xxx_hidden_Revised = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+}
+
+func (x *SubtitleTranslationRecord) HasSourcePath() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SubtitleTranslationRecord) HasSourceStreamIndex() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SubtitleTranslationRecord) HasSourceLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SubtitleTranslationRecord) HasCues() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *SubtitleTranslationRecord) HasCharacters() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *SubtitleTranslationRecord) HasInputTokens() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *SubtitleTranslationRecord) HasOutputTokens() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *SubtitleTranslationRecord) HasCost() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
+func (x *SubtitleTranslationRecord) HasProofread() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *SubtitleTranslationRecord) HasRevised() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *SubtitleTranslationRecord) ClearSourcePath() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_SourcePath = nil
+}
+
+func (x *SubtitleTranslationRecord) ClearSourceStreamIndex() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_SourceStreamIndex = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearSourceLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_SourceLanguage = nil
+}
+
+func (x *SubtitleTranslationRecord) ClearCues() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Cues = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearCharacters() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Characters = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearInputTokens() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_InputTokens = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearOutputTokens() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_OutputTokens = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearCost() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_Cost = 0
+}
+
+func (x *SubtitleTranslationRecord) ClearProofread() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_Proofread = false
+}
+
+func (x *SubtitleTranslationRecord) ClearRevised() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_Revised = 0
+}
+
+type SubtitleTranslationRecord_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The subtitle translated: an external file, or an embedded stream.
+	SourcePath        *string
+	SourceStreamIndex *int32
+	SourceLanguage    *string
+	// The translators that translated the cues, the first one's first.
+	Translators  []string
+	Cues         *int32
+	Characters   *int64
+	InputTokens  *int64
+	OutputTokens *int64
+	Cost         *float64
+	// Set once the translation was proofread, with the cues revised.
+	Proofread *bool
+	Revised   *int32
+}
+
+func (b0 SubtitleTranslationRecord_builder) Build() *SubtitleTranslationRecord {
+	m0 := &SubtitleTranslationRecord{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.SourcePath != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		x.xxx_hidden_SourcePath = b.SourcePath
+	}
+	if b.SourceStreamIndex != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		x.xxx_hidden_SourceStreamIndex = *b.SourceStreamIndex
+	}
+	if b.SourceLanguage != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		x.xxx_hidden_SourceLanguage = b.SourceLanguage
+	}
+	x.xxx_hidden_Translators = b.Translators
+	if b.Cues != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
+		x.xxx_hidden_Cues = *b.Cues
+	}
+	if b.Characters != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		x.xxx_hidden_Characters = *b.Characters
+	}
+	if b.InputTokens != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
+		x.xxx_hidden_InputTokens = *b.InputTokens
+	}
+	if b.OutputTokens != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
+		x.xxx_hidden_OutputTokens = *b.OutputTokens
+	}
+	if b.Cost != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
+		x.xxx_hidden_Cost = *b.Cost
+	}
+	if b.Proofread != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		x.xxx_hidden_Proofread = *b.Proofread
+	}
+	if b.Revised != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_Revised = *b.Revised
 	}
 	return m0
 }
@@ -8260,7 +10417,7 @@ type ListSubtitleHistoryRequest struct {
 
 func (x *ListSubtitleHistoryRequest) Reset() {
 	*x = ListSubtitleHistoryRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[57]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8272,7 +10429,7 @@ func (x *ListSubtitleHistoryRequest) String() string {
 func (*ListSubtitleHistoryRequest) ProtoMessage() {}
 
 func (x *ListSubtitleHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[57]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8392,7 +10549,7 @@ type ListSubtitleHistoryResponse struct {
 
 func (x *ListSubtitleHistoryResponse) Reset() {
 	*x = ListSubtitleHistoryResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[58]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8404,7 +10561,7 @@ func (x *ListSubtitleHistoryResponse) String() string {
 func (*ListSubtitleHistoryResponse) ProtoMessage() {}
 
 func (x *ListSubtitleHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[58]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8492,7 +10649,7 @@ type SubtitleBlocklistEntry struct {
 
 func (x *SubtitleBlocklistEntry) Reset() {
 	*x = SubtitleBlocklistEntry{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[59]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8504,7 +10661,7 @@ func (x *SubtitleBlocklistEntry) String() string {
 func (*SubtitleBlocklistEntry) ProtoMessage() {}
 
 func (x *SubtitleBlocklistEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[59]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8780,7 +10937,7 @@ type ListSubtitleBlocklistRequest struct {
 
 func (x *ListSubtitleBlocklistRequest) Reset() {
 	*x = ListSubtitleBlocklistRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[60]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8792,7 +10949,7 @@ func (x *ListSubtitleBlocklistRequest) String() string {
 func (*ListSubtitleBlocklistRequest) ProtoMessage() {}
 
 func (x *ListSubtitleBlocklistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[60]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8918,7 +11075,7 @@ type ListSubtitleBlocklistResponse struct {
 
 func (x *ListSubtitleBlocklistResponse) Reset() {
 	*x = ListSubtitleBlocklistResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[61]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8930,7 +11087,7 @@ func (x *ListSubtitleBlocklistResponse) String() string {
 func (*ListSubtitleBlocklistResponse) ProtoMessage() {}
 
 func (x *ListSubtitleBlocklistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[61]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9010,7 +11167,7 @@ type DeleteSubtitleBlocklistRequest struct {
 
 func (x *DeleteSubtitleBlocklistRequest) Reset() {
 	*x = DeleteSubtitleBlocklistRequest{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[62]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9022,7 +11179,7 @@ func (x *DeleteSubtitleBlocklistRequest) String() string {
 func (*DeleteSubtitleBlocklistRequest) ProtoMessage() {}
 
 func (x *DeleteSubtitleBlocklistRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[62]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9096,7 +11253,7 @@ type DeleteSubtitleBlocklistResponse struct {
 
 func (x *DeleteSubtitleBlocklistResponse) Reset() {
 	*x = DeleteSubtitleBlocklistResponse{}
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[63]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9108,7 +11265,7 @@ func (x *DeleteSubtitleBlocklistResponse) String() string {
 func (*DeleteSubtitleBlocklistResponse) ProtoMessage() {}
 
 func (x *DeleteSubtitleBlocklistResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[63]
+	mi := &file_mavio_acquisition_v1_subtitle_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9230,13 +11387,59 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x13series_profile_tags\x18\x1c \x01(\bR\x11seriesProfileTags\x12&\n" +
 	"\x0fno_profile_tags\x18\x1d \x03(\tR\rnoProfileTags\x12F\n" +
 	"\x04sync\x18\x1e \x01(\v2*.mavio.acquisition.v1.SubtitleSyncSettingsB\x06\xbaH\x03\xc8\x01\x01R\x04sync\x12[\n" +
-	"\vtranslation\x18\x1f \x01(\v21.mavio.acquisition.v1.SubtitleTranslationSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranslation\"\x85\x01\n" +
+	"\vtranslation\x18\x1f \x01(\v21.mavio.acquisition.v1.SubtitleTranslationSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranslation\"\x8d\t\n" +
 	"\x1bSubtitleTranslationSettings\x12\x1e\n" +
 	"\n" +
 	"translator\x18\x01 \x01(\tR\n" +
 	"translator\x12.\n" +
 	"\rdefault_score\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\fdefaultScore\x12\x16\n" +
-	"\x06credit\x18\x03 \x01(\bR\x06credit\"\x1c\n" +
+	"\x06credit\x18\x03 \x01(\bR\x06credit\x121\n" +
+	"\x14fallback_translators\x18\x04 \x03(\tR\x13fallbackTranslators\x12\x1f\n" +
+	"\x06prompt\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x06prompt\x12(\n" +
+	"\vuser_prompt\x18\x06 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\n" +
+	"userPrompt\x122\n" +
+	"\x10proofread_prompt\x18\a \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x0fproofreadPrompt\x12;\n" +
+	"\x15proofread_user_prompt\x18\b \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x13proofreadUserPrompt\x120\n" +
+	"\x0econtext_before\x18\t \x01(\x05B\t\xbaH\x06\x1a\x04\x182(\x00R\rcontextBefore\x12.\n" +
+	"\rcontext_after\x18\n" +
+	" \x01(\x05B\t\xbaH\x06\x1a\x04\x182(\x00R\fcontextAfter\x12-\n" +
+	"\x12translated_context\x18\v \x01(\bR\x11translatedContext\x12\x14\n" +
+	"\x05batch\x18\f \x01(\bR\x05batch\x12-\n" +
+	"\x0emax_batch_size\x18\r \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\fmaxBatchSize\x12%\n" +
+	"\x0elanguage_codes\x18\x0e \x01(\bR\rlanguageCodes\x12*\n" +
+	"\vmax_retries\x18\x0f \x01(\x05B\t\xbaH\x06\x1a\x04\x18\x14(\x01R\n" +
+	"maxRetries\x12:\n" +
+	"\x13retry_delay_seconds\x18\x10 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xd8\x04(\x00R\x11retryDelaySeconds\x124\n" +
+	"\x10retry_multiplier\x18\x11 \x01(\x05B\t\xbaH\x06\x1a\x04\x18\n" +
+	"(\x01R\x0fretryMultiplier\x12B\n" +
+	"\x17request_timeout_seconds\x18\x12 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\x90\x1c(\x01R\x15requestTimeoutSeconds\x12)\n" +
+	"\x10strip_formatting\x18\x13 \x01(\bR\x0fstripFormatting\x120\n" +
+	"\x14preserve_line_breaks\x18\x14 \x01(\bR\x12preserveLineBreaks\x12!\n" +
+	"\ffix_overlaps\x18\x15 \x01(\bR\vfixOverlaps\x12[\n" +
+	"\n" +
+	"validation\x18\x16 \x01(\v23.mavio.acquisition.v1.SubtitleTranslationValidationB\x06\xbaH\x03\xc8\x01\x01R\n" +
+	"validation\x12[\n" +
+	"\n" +
+	"automation\x18\x17 \x01(\v23.mavio.acquisition.v1.SubtitleTranslationAutomationB\x06\xbaH\x03\xc8\x01\x01R\n" +
+	"automation\"\xb0\x02\n" +
+	"\x1dSubtitleTranslationValidation\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12+\n" +
+	"\rmax_file_size\x18\x02 \x01(\x03B\a\xbaH\x04\"\x02 \x00R\vmaxFileSize\x12-\n" +
+	"\x0emax_cue_length\x18\x03 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\fmaxCueLength\x12-\n" +
+	"\x0emin_cue_length\x18\x04 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\fminCueLength\x12/\n" +
+	"\x0fmin_duration_ms\x18\x05 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\rminDurationMs\x129\n" +
+	"\x14max_duration_seconds\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x12maxDurationSeconds\"\xb7\x02\n" +
+	"\x1dSubtitleTranslationAutomation\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x121\n" +
+	"\x0einterval_hours\x18\x02 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xb8D(\x01R\rintervalHours\x127\n" +
+	"\x10source_languages\x18\x03 \x03(\tB\f\xbaH\t\x92\x01\x06\"\x04r\x02\x10\x02R\x0fsourceLanguages\x12*\n" +
+	"\vmax_per_run\x18\x04 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xe8\a(\x01R\tmaxPerRun\x12/\n" +
+	"\x0fmovie_age_hours\x18\x05 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\rmovieAgeHours\x123\n" +
+	"\x11episode_age_hours\x18\x06 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x0fepisodeAgeHours\"\x1c\n" +
 	"\x1aGetSubtitleSettingsRequest\"a\n" +
 	"\x1bGetSubtitleSettingsResponse\x12B\n" +
 	"\bsettings\x18\x01 \x01(\v2&.mavio.acquisition.v1.SubtitleSettingsR\bsettings\"k\n" +
@@ -9369,7 +11572,44 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"translatorB\x0f\n" +
 	"\x06source\x12\x05\xbaH\x02\b\x01\"2\n" +
 	"\x19TranslateSubtitleResponse\x12\x15\n" +
-	"\x06job_id\x18\x01 \x01(\tR\x05jobId\" \n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"z\n" +
+	"\x18ProofreadSubtitleRequest\x12!\n" +
+	"\aitem_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06itemId\x12\x1b\n" +
+	"\x04path\x18\x02 \x01(\tB\a\xbaH\x04r\x02\x10\x01R\x04path\x12\x1e\n" +
+	"\n" +
+	"translator\x18\x03 \x01(\tR\n" +
+	"translator\"2\n" +
+	"\x19ProofreadSubtitleResponse\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\"I\n" +
+	"'GetSubtitleTranslationStatisticsRequest\x12\x1e\n" +
+	"\x04days\x18\x01 \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xee\x02(\x00R\x04days\"\xb1\x06\n" +
+	"(GetSubtitleTranslationStatisticsResponse\x12\x14\n" +
+	"\x05files\x18\x01 \x01(\x03R\x05files\x12\x12\n" +
+	"\x04cues\x18\x02 \x01(\x03R\x04cues\x12\x1e\n" +
+	"\n" +
+	"characters\x18\x03 \x01(\x03R\n" +
+	"characters\x12!\n" +
+	"\finput_tokens\x18\x04 \x01(\x03R\vinputTokens\x12#\n" +
+	"\routput_tokens\x18\x05 \x01(\x03R\foutputTokens\x12\x12\n" +
+	"\x04cost\x18\x06 \x01(\x01R\x04cost\x12u\n" +
+	"\rby_translator\x18\a \x03(\v2P.mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByTranslatorEntryR\fbyTranslator\x12|\n" +
+	"\x10by_language_pair\x18\b \x03(\v2R.mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByLanguagePairEntryR\x0ebyLanguagePair\x12f\n" +
+	"\bby_media\x18\t \x03(\v2K.mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByMediaEntryR\abyMedia\x12B\n" +
+	"\x05daily\x18\n" +
+	" \x03(\v2,.mavio.acquisition.v1.SubtitleTranslationDayR\x05daily\x1a?\n" +
+	"\x11ByTranslatorEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1aA\n" +
+	"\x13ByLanguagePairEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\x1a:\n" +
+	"\fByMediaEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"B\n" +
+	"\x16SubtitleTranslationDay\x12\x12\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\x12\x14\n" +
+	"\x05files\x18\x02 \x01(\x03R\x05files\" \n" +
 	"\x1eListSubtitleTranslatorsRequest\"\x97\x01\n" +
 	"\x17SubtitleTranslatorState\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
@@ -9382,7 +11622,7 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x0efailed_plugins\x18\x02 \x03(\tR\rfailedPlugins\"N\n" +
 	"\x18BlocklistSubtitleRequest\x122\n" +
 	"\x10history_event_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x0ehistoryEventId\"\x1b\n" +
-	"\x19BlocklistSubtitleResponse\"\xb7\x04\n" +
+	"\x19BlocklistSubtitleResponse\"\x8a\x05\n" +
 	"\x14SubtitleHistoryEvent\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12<\n" +
 	"\x06action\x18\x02 \x01(\x0e2$.mavio.acquisition.v1.SubtitleActionR\x06action\x12\x17\n" +
@@ -9403,7 +11643,24 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\amatched\x18\x0e \x03(\tR\amatched\x12\x1f\n" +
 	"\vnot_matched\x18\x0f \x03(\tR\n" +
 	"notMatched\x12#\n" +
-	"\rupgraded_from\x18\x10 \x01(\tR\fupgradedFrom\"\xda\x01\n" +
+	"\rupgraded_from\x18\x10 \x01(\tR\fupgradedFrom\x12Q\n" +
+	"\vtranslation\x18\x11 \x01(\v2/.mavio.acquisition.v1.SubtitleTranslationRecordR\vtranslation\"\xff\x02\n" +
+	"\x19SubtitleTranslationRecord\x12\x1f\n" +
+	"\vsource_path\x18\x01 \x01(\tR\n" +
+	"sourcePath\x12.\n" +
+	"\x13source_stream_index\x18\x02 \x01(\x05R\x11sourceStreamIndex\x12'\n" +
+	"\x0fsource_language\x18\x03 \x01(\tR\x0esourceLanguage\x12 \n" +
+	"\vtranslators\x18\x04 \x03(\tR\vtranslators\x12\x12\n" +
+	"\x04cues\x18\x05 \x01(\x05R\x04cues\x12\x1e\n" +
+	"\n" +
+	"characters\x18\x06 \x01(\x03R\n" +
+	"characters\x12!\n" +
+	"\finput_tokens\x18\a \x01(\x03R\vinputTokens\x12#\n" +
+	"\routput_tokens\x18\b \x01(\x03R\foutputTokens\x12\x12\n" +
+	"\x04cost\x18\t \x01(\x01R\x04cost\x12\x1c\n" +
+	"\tproofread\x18\n" +
+	" \x01(\bR\tproofread\x12\x18\n" +
+	"\arevised\x18\v \x01(\x05R\arevised\"\xda\x01\n" +
 	"\x1aListSubtitleHistoryRequest\x12(\n" +
 	"\bitem_ids\x18\x01 \x03(\tB\r\xbaH\n" +
 	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\aitemIds\x12O\n" +
@@ -9458,7 +11715,7 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x18SUBTITLE_ACTION_UPLOADED\x10\x05\x12\x1a\n" +
 	"\x16SUBTITLE_ACTION_SYNCED\x10\x06\x12\x1d\n" +
 	"\x19SUBTITLE_ACTION_EXTRACTED\x10\a\x12\x1e\n" +
-	"\x1aSUBTITLE_ACTION_TRANSLATED\x10\b2\xe8\x18\n" +
+	"\x1aSUBTITLE_ACTION_TRANSLATED\x10\b2\x87\x1b\n" +
 	"\x0fSubtitleService\x12\x82\x01\n" +
 	"\x14ListSubtitleProfiles\x121.mavio.acquisition.v1.ListSubtitleProfilesRequest\x1a2.mavio.acquisition.v1.ListSubtitleProfilesResponse\"\x03\x90\x02\x01\x12\x80\x01\n" +
 	"\x15CreateSubtitleProfile\x122.mavio.acquisition.v1.CreateSubtitleProfileRequest\x1a3.mavio.acquisition.v1.CreateSubtitleProfileResponse\x12\x85\x01\n" +
@@ -9479,7 +11736,9 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x0eDeleteSubtitle\x12+.mavio.acquisition.v1.DeleteSubtitleRequest\x1a,.mavio.acquisition.v1.DeleteSubtitleResponse\"\x03\x90\x02\x02\x12k\n" +
 	"\x0eModifySubtitle\x12+.mavio.acquisition.v1.ModifySubtitleRequest\x1a,.mavio.acquisition.v1.ModifySubtitleResponse\x12e\n" +
 	"\fSyncSubtitle\x12).mavio.acquisition.v1.SyncSubtitleRequest\x1a*.mavio.acquisition.v1.SyncSubtitleResponse\x12t\n" +
-	"\x11TranslateSubtitle\x12..mavio.acquisition.v1.TranslateSubtitleRequest\x1a/.mavio.acquisition.v1.TranslateSubtitleResponse\x12\x8b\x01\n" +
+	"\x11TranslateSubtitle\x12..mavio.acquisition.v1.TranslateSubtitleRequest\x1a/.mavio.acquisition.v1.TranslateSubtitleResponse\x12t\n" +
+	"\x11ProofreadSubtitle\x12..mavio.acquisition.v1.ProofreadSubtitleRequest\x1a/.mavio.acquisition.v1.ProofreadSubtitleResponse\x12\xa6\x01\n" +
+	" GetSubtitleTranslationStatistics\x12=.mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest\x1a>.mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse\"\x03\x90\x02\x01\x12\x8b\x01\n" +
 	"\x17ListSubtitleTranslators\x124.mavio.acquisition.v1.ListSubtitleTranslatorsRequest\x1a5.mavio.acquisition.v1.ListSubtitleTranslatorsResponse\"\x03\x90\x02\x01\x12t\n" +
 	"\x11BlocklistSubtitle\x12..mavio.acquisition.v1.BlocklistSubtitleRequest\x1a/.mavio.acquisition.v1.BlocklistSubtitleResponse\x12\x7f\n" +
 	"\x13ListSubtitleHistory\x120.mavio.acquisition.v1.ListSubtitleHistoryRequest\x1a1.mavio.acquisition.v1.ListSubtitleHistoryResponse\"\x03\x90\x02\x01\x12\x85\x01\n" +
@@ -9488,77 +11747,88 @@ const file_mavio_acquisition_v1_subtitle_proto_rawDesc = "" +
 	"\x18com.mavio.acquisition.v1B\rSubtitleProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
 var file_mavio_acquisition_v1_subtitle_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mavio_acquisition_v1_subtitle_proto_msgTypes = make([]protoimpl.MessageInfo, 64)
+var file_mavio_acquisition_v1_subtitle_proto_msgTypes = make([]protoimpl.MessageInfo, 75)
 var file_mavio_acquisition_v1_subtitle_proto_goTypes = []any{
-	(SubtitleHearingImpaired)(0),            // 0: mavio.acquisition.v1.SubtitleHearingImpaired
-	(SubtitleFolder)(0),                     // 1: mavio.acquisition.v1.SubtitleFolder
-	(SubtitleItemKind)(0),                   // 2: mavio.acquisition.v1.SubtitleItemKind
-	(SubtitleAction)(0),                     // 3: mavio.acquisition.v1.SubtitleAction
-	(*SubtitleLanguageSpec)(nil),            // 4: mavio.acquisition.v1.SubtitleLanguageSpec
-	(*SubtitleProfileItem)(nil),             // 5: mavio.acquisition.v1.SubtitleProfileItem
-	(*SubtitleProfile)(nil),                 // 6: mavio.acquisition.v1.SubtitleProfile
-	(*ListSubtitleProfilesRequest)(nil),     // 7: mavio.acquisition.v1.ListSubtitleProfilesRequest
-	(*ListSubtitleProfilesResponse)(nil),    // 8: mavio.acquisition.v1.ListSubtitleProfilesResponse
-	(*CreateSubtitleProfileRequest)(nil),    // 9: mavio.acquisition.v1.CreateSubtitleProfileRequest
-	(*CreateSubtitleProfileResponse)(nil),   // 10: mavio.acquisition.v1.CreateSubtitleProfileResponse
-	(*UpdateSubtitleProfileRequest)(nil),    // 11: mavio.acquisition.v1.UpdateSubtitleProfileRequest
-	(*UpdateSubtitleProfileResponse)(nil),   // 12: mavio.acquisition.v1.UpdateSubtitleProfileResponse
-	(*DeleteSubtitleProfileRequest)(nil),    // 13: mavio.acquisition.v1.DeleteSubtitleProfileRequest
-	(*DeleteSubtitleProfileResponse)(nil),   // 14: mavio.acquisition.v1.DeleteSubtitleProfileResponse
-	(*AssignSubtitleProfileRequest)(nil),    // 15: mavio.acquisition.v1.AssignSubtitleProfileRequest
-	(*AssignSubtitleProfileResponse)(nil),   // 16: mavio.acquisition.v1.AssignSubtitleProfileResponse
-	(*SubtitleLanguageEquivalence)(nil),     // 17: mavio.acquisition.v1.SubtitleLanguageEquivalence
-	(*SubtitleSyncSettings)(nil),            // 18: mavio.acquisition.v1.SubtitleSyncSettings
-	(*SubtitleSettings)(nil),                // 19: mavio.acquisition.v1.SubtitleSettings
-	(*SubtitleTranslationSettings)(nil),     // 20: mavio.acquisition.v1.SubtitleTranslationSettings
-	(*GetSubtitleSettingsRequest)(nil),      // 21: mavio.acquisition.v1.GetSubtitleSettingsRequest
-	(*GetSubtitleSettingsResponse)(nil),     // 22: mavio.acquisition.v1.GetSubtitleSettingsResponse
-	(*UpdateSubtitleSettingsRequest)(nil),   // 23: mavio.acquisition.v1.UpdateSubtitleSettingsRequest
-	(*UpdateSubtitleSettingsResponse)(nil),  // 24: mavio.acquisition.v1.UpdateSubtitleSettingsResponse
-	(*ListSubtitleProvidersRequest)(nil),    // 25: mavio.acquisition.v1.ListSubtitleProvidersRequest
-	(*SubtitleProviderState)(nil),           // 26: mavio.acquisition.v1.SubtitleProviderState
-	(*ListSubtitleProvidersResponse)(nil),   // 27: mavio.acquisition.v1.ListSubtitleProvidersResponse
-	(*WantedSubtitles)(nil),                 // 28: mavio.acquisition.v1.WantedSubtitles
-	(*ListWantedSubtitlesRequest)(nil),      // 29: mavio.acquisition.v1.ListWantedSubtitlesRequest
-	(*ListWantedSubtitlesResponse)(nil),     // 30: mavio.acquisition.v1.ListWantedSubtitlesResponse
-	(*SearchWantedSubtitlesRequest)(nil),    // 31: mavio.acquisition.v1.SearchWantedSubtitlesRequest
-	(*SearchWantedSubtitlesResponse)(nil),   // 32: mavio.acquisition.v1.SearchWantedSubtitlesResponse
-	(*UpgradeSubtitlesRequest)(nil),         // 33: mavio.acquisition.v1.UpgradeSubtitlesRequest
-	(*UpgradeSubtitlesResponse)(nil),        // 34: mavio.acquisition.v1.UpgradeSubtitlesResponse
-	(*ItemSubtitle)(nil),                    // 35: mavio.acquisition.v1.ItemSubtitle
-	(*GetItemSubtitlesRequest)(nil),         // 36: mavio.acquisition.v1.GetItemSubtitlesRequest
-	(*GetItemSubtitlesResponse)(nil),        // 37: mavio.acquisition.v1.GetItemSubtitlesResponse
-	(*ScoredSubtitle)(nil),                  // 38: mavio.acquisition.v1.ScoredSubtitle
-	(*SearchItemSubtitlesRequest)(nil),      // 39: mavio.acquisition.v1.SearchItemSubtitlesRequest
-	(*SearchItemSubtitlesResponse)(nil),     // 40: mavio.acquisition.v1.SearchItemSubtitlesResponse
-	(*DownloadItemSubtitleRequest)(nil),     // 41: mavio.acquisition.v1.DownloadItemSubtitleRequest
-	(*DownloadItemSubtitleResponse)(nil),    // 42: mavio.acquisition.v1.DownloadItemSubtitleResponse
-	(*UploadSubtitleRequest)(nil),           // 43: mavio.acquisition.v1.UploadSubtitleRequest
-	(*UploadSubtitleResponse)(nil),          // 44: mavio.acquisition.v1.UploadSubtitleResponse
-	(*ExtractSubtitleRequest)(nil),          // 45: mavio.acquisition.v1.ExtractSubtitleRequest
-	(*ExtractSubtitleResponse)(nil),         // 46: mavio.acquisition.v1.ExtractSubtitleResponse
-	(*DeleteSubtitleRequest)(nil),           // 47: mavio.acquisition.v1.DeleteSubtitleRequest
-	(*DeleteSubtitleResponse)(nil),          // 48: mavio.acquisition.v1.DeleteSubtitleResponse
-	(*ModifySubtitleRequest)(nil),           // 49: mavio.acquisition.v1.ModifySubtitleRequest
-	(*ModifySubtitleResponse)(nil),          // 50: mavio.acquisition.v1.ModifySubtitleResponse
-	(*SyncSubtitleRequest)(nil),             // 51: mavio.acquisition.v1.SyncSubtitleRequest
-	(*SyncSubtitleResponse)(nil),            // 52: mavio.acquisition.v1.SyncSubtitleResponse
-	(*TranslateSubtitleRequest)(nil),        // 53: mavio.acquisition.v1.TranslateSubtitleRequest
-	(*TranslateSubtitleResponse)(nil),       // 54: mavio.acquisition.v1.TranslateSubtitleResponse
-	(*ListSubtitleTranslatorsRequest)(nil),  // 55: mavio.acquisition.v1.ListSubtitleTranslatorsRequest
-	(*SubtitleTranslatorState)(nil),         // 56: mavio.acquisition.v1.SubtitleTranslatorState
-	(*ListSubtitleTranslatorsResponse)(nil), // 57: mavio.acquisition.v1.ListSubtitleTranslatorsResponse
-	(*BlocklistSubtitleRequest)(nil),        // 58: mavio.acquisition.v1.BlocklistSubtitleRequest
-	(*BlocklistSubtitleResponse)(nil),       // 59: mavio.acquisition.v1.BlocklistSubtitleResponse
-	(*SubtitleHistoryEvent)(nil),            // 60: mavio.acquisition.v1.SubtitleHistoryEvent
-	(*ListSubtitleHistoryRequest)(nil),      // 61: mavio.acquisition.v1.ListSubtitleHistoryRequest
-	(*ListSubtitleHistoryResponse)(nil),     // 62: mavio.acquisition.v1.ListSubtitleHistoryResponse
-	(*SubtitleBlocklistEntry)(nil),          // 63: mavio.acquisition.v1.SubtitleBlocklistEntry
-	(*ListSubtitleBlocklistRequest)(nil),    // 64: mavio.acquisition.v1.ListSubtitleBlocklistRequest
-	(*ListSubtitleBlocklistResponse)(nil),   // 65: mavio.acquisition.v1.ListSubtitleBlocklistResponse
-	(*DeleteSubtitleBlocklistRequest)(nil),  // 66: mavio.acquisition.v1.DeleteSubtitleBlocklistRequest
-	(*DeleteSubtitleBlocklistResponse)(nil), // 67: mavio.acquisition.v1.DeleteSubtitleBlocklistResponse
-	(*timestamppb.Timestamp)(nil),           // 68: google.protobuf.Timestamp
+	(SubtitleHearingImpaired)(0),                     // 0: mavio.acquisition.v1.SubtitleHearingImpaired
+	(SubtitleFolder)(0),                              // 1: mavio.acquisition.v1.SubtitleFolder
+	(SubtitleItemKind)(0),                            // 2: mavio.acquisition.v1.SubtitleItemKind
+	(SubtitleAction)(0),                              // 3: mavio.acquisition.v1.SubtitleAction
+	(*SubtitleLanguageSpec)(nil),                     // 4: mavio.acquisition.v1.SubtitleLanguageSpec
+	(*SubtitleProfileItem)(nil),                      // 5: mavio.acquisition.v1.SubtitleProfileItem
+	(*SubtitleProfile)(nil),                          // 6: mavio.acquisition.v1.SubtitleProfile
+	(*ListSubtitleProfilesRequest)(nil),              // 7: mavio.acquisition.v1.ListSubtitleProfilesRequest
+	(*ListSubtitleProfilesResponse)(nil),             // 8: mavio.acquisition.v1.ListSubtitleProfilesResponse
+	(*CreateSubtitleProfileRequest)(nil),             // 9: mavio.acquisition.v1.CreateSubtitleProfileRequest
+	(*CreateSubtitleProfileResponse)(nil),            // 10: mavio.acquisition.v1.CreateSubtitleProfileResponse
+	(*UpdateSubtitleProfileRequest)(nil),             // 11: mavio.acquisition.v1.UpdateSubtitleProfileRequest
+	(*UpdateSubtitleProfileResponse)(nil),            // 12: mavio.acquisition.v1.UpdateSubtitleProfileResponse
+	(*DeleteSubtitleProfileRequest)(nil),             // 13: mavio.acquisition.v1.DeleteSubtitleProfileRequest
+	(*DeleteSubtitleProfileResponse)(nil),            // 14: mavio.acquisition.v1.DeleteSubtitleProfileResponse
+	(*AssignSubtitleProfileRequest)(nil),             // 15: mavio.acquisition.v1.AssignSubtitleProfileRequest
+	(*AssignSubtitleProfileResponse)(nil),            // 16: mavio.acquisition.v1.AssignSubtitleProfileResponse
+	(*SubtitleLanguageEquivalence)(nil),              // 17: mavio.acquisition.v1.SubtitleLanguageEquivalence
+	(*SubtitleSyncSettings)(nil),                     // 18: mavio.acquisition.v1.SubtitleSyncSettings
+	(*SubtitleSettings)(nil),                         // 19: mavio.acquisition.v1.SubtitleSettings
+	(*SubtitleTranslationSettings)(nil),              // 20: mavio.acquisition.v1.SubtitleTranslationSettings
+	(*SubtitleTranslationValidation)(nil),            // 21: mavio.acquisition.v1.SubtitleTranslationValidation
+	(*SubtitleTranslationAutomation)(nil),            // 22: mavio.acquisition.v1.SubtitleTranslationAutomation
+	(*GetSubtitleSettingsRequest)(nil),               // 23: mavio.acquisition.v1.GetSubtitleSettingsRequest
+	(*GetSubtitleSettingsResponse)(nil),              // 24: mavio.acquisition.v1.GetSubtitleSettingsResponse
+	(*UpdateSubtitleSettingsRequest)(nil),            // 25: mavio.acquisition.v1.UpdateSubtitleSettingsRequest
+	(*UpdateSubtitleSettingsResponse)(nil),           // 26: mavio.acquisition.v1.UpdateSubtitleSettingsResponse
+	(*ListSubtitleProvidersRequest)(nil),             // 27: mavio.acquisition.v1.ListSubtitleProvidersRequest
+	(*SubtitleProviderState)(nil),                    // 28: mavio.acquisition.v1.SubtitleProviderState
+	(*ListSubtitleProvidersResponse)(nil),            // 29: mavio.acquisition.v1.ListSubtitleProvidersResponse
+	(*WantedSubtitles)(nil),                          // 30: mavio.acquisition.v1.WantedSubtitles
+	(*ListWantedSubtitlesRequest)(nil),               // 31: mavio.acquisition.v1.ListWantedSubtitlesRequest
+	(*ListWantedSubtitlesResponse)(nil),              // 32: mavio.acquisition.v1.ListWantedSubtitlesResponse
+	(*SearchWantedSubtitlesRequest)(nil),             // 33: mavio.acquisition.v1.SearchWantedSubtitlesRequest
+	(*SearchWantedSubtitlesResponse)(nil),            // 34: mavio.acquisition.v1.SearchWantedSubtitlesResponse
+	(*UpgradeSubtitlesRequest)(nil),                  // 35: mavio.acquisition.v1.UpgradeSubtitlesRequest
+	(*UpgradeSubtitlesResponse)(nil),                 // 36: mavio.acquisition.v1.UpgradeSubtitlesResponse
+	(*ItemSubtitle)(nil),                             // 37: mavio.acquisition.v1.ItemSubtitle
+	(*GetItemSubtitlesRequest)(nil),                  // 38: mavio.acquisition.v1.GetItemSubtitlesRequest
+	(*GetItemSubtitlesResponse)(nil),                 // 39: mavio.acquisition.v1.GetItemSubtitlesResponse
+	(*ScoredSubtitle)(nil),                           // 40: mavio.acquisition.v1.ScoredSubtitle
+	(*SearchItemSubtitlesRequest)(nil),               // 41: mavio.acquisition.v1.SearchItemSubtitlesRequest
+	(*SearchItemSubtitlesResponse)(nil),              // 42: mavio.acquisition.v1.SearchItemSubtitlesResponse
+	(*DownloadItemSubtitleRequest)(nil),              // 43: mavio.acquisition.v1.DownloadItemSubtitleRequest
+	(*DownloadItemSubtitleResponse)(nil),             // 44: mavio.acquisition.v1.DownloadItemSubtitleResponse
+	(*UploadSubtitleRequest)(nil),                    // 45: mavio.acquisition.v1.UploadSubtitleRequest
+	(*UploadSubtitleResponse)(nil),                   // 46: mavio.acquisition.v1.UploadSubtitleResponse
+	(*ExtractSubtitleRequest)(nil),                   // 47: mavio.acquisition.v1.ExtractSubtitleRequest
+	(*ExtractSubtitleResponse)(nil),                  // 48: mavio.acquisition.v1.ExtractSubtitleResponse
+	(*DeleteSubtitleRequest)(nil),                    // 49: mavio.acquisition.v1.DeleteSubtitleRequest
+	(*DeleteSubtitleResponse)(nil),                   // 50: mavio.acquisition.v1.DeleteSubtitleResponse
+	(*ModifySubtitleRequest)(nil),                    // 51: mavio.acquisition.v1.ModifySubtitleRequest
+	(*ModifySubtitleResponse)(nil),                   // 52: mavio.acquisition.v1.ModifySubtitleResponse
+	(*SyncSubtitleRequest)(nil),                      // 53: mavio.acquisition.v1.SyncSubtitleRequest
+	(*SyncSubtitleResponse)(nil),                     // 54: mavio.acquisition.v1.SyncSubtitleResponse
+	(*TranslateSubtitleRequest)(nil),                 // 55: mavio.acquisition.v1.TranslateSubtitleRequest
+	(*TranslateSubtitleResponse)(nil),                // 56: mavio.acquisition.v1.TranslateSubtitleResponse
+	(*ProofreadSubtitleRequest)(nil),                 // 57: mavio.acquisition.v1.ProofreadSubtitleRequest
+	(*ProofreadSubtitleResponse)(nil),                // 58: mavio.acquisition.v1.ProofreadSubtitleResponse
+	(*GetSubtitleTranslationStatisticsRequest)(nil),  // 59: mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest
+	(*GetSubtitleTranslationStatisticsResponse)(nil), // 60: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse
+	(*SubtitleTranslationDay)(nil),                   // 61: mavio.acquisition.v1.SubtitleTranslationDay
+	(*ListSubtitleTranslatorsRequest)(nil),           // 62: mavio.acquisition.v1.ListSubtitleTranslatorsRequest
+	(*SubtitleTranslatorState)(nil),                  // 63: mavio.acquisition.v1.SubtitleTranslatorState
+	(*ListSubtitleTranslatorsResponse)(nil),          // 64: mavio.acquisition.v1.ListSubtitleTranslatorsResponse
+	(*BlocklistSubtitleRequest)(nil),                 // 65: mavio.acquisition.v1.BlocklistSubtitleRequest
+	(*BlocklistSubtitleResponse)(nil),                // 66: mavio.acquisition.v1.BlocklistSubtitleResponse
+	(*SubtitleHistoryEvent)(nil),                     // 67: mavio.acquisition.v1.SubtitleHistoryEvent
+	(*SubtitleTranslationRecord)(nil),                // 68: mavio.acquisition.v1.SubtitleTranslationRecord
+	(*ListSubtitleHistoryRequest)(nil),               // 69: mavio.acquisition.v1.ListSubtitleHistoryRequest
+	(*ListSubtitleHistoryResponse)(nil),              // 70: mavio.acquisition.v1.ListSubtitleHistoryResponse
+	(*SubtitleBlocklistEntry)(nil),                   // 71: mavio.acquisition.v1.SubtitleBlocklistEntry
+	(*ListSubtitleBlocklistRequest)(nil),             // 72: mavio.acquisition.v1.ListSubtitleBlocklistRequest
+	(*ListSubtitleBlocklistResponse)(nil),            // 73: mavio.acquisition.v1.ListSubtitleBlocklistResponse
+	(*DeleteSubtitleBlocklistRequest)(nil),           // 74: mavio.acquisition.v1.DeleteSubtitleBlocklistRequest
+	(*DeleteSubtitleBlocklistResponse)(nil),          // 75: mavio.acquisition.v1.DeleteSubtitleBlocklistResponse
+	nil,                                              // 76: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByTranslatorEntry
+	nil,                                              // 77: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByLanguagePairEntry
+	nil,                                              // 78: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByMediaEntry
+	(*timestamppb.Timestamp)(nil),                    // 79: google.protobuf.Timestamp
 }
 var file_mavio_acquisition_v1_subtitle_proto_depIdxs = []int32{
 	0,  // 0: mavio.acquisition.v1.SubtitleProfileItem.hearing_impaired:type_name -> mavio.acquisition.v1.SubtitleHearingImpaired
@@ -9574,90 +11844,101 @@ var file_mavio_acquisition_v1_subtitle_proto_depIdxs = []int32{
 	17, // 10: mavio.acquisition.v1.SubtitleSettings.language_equals:type_name -> mavio.acquisition.v1.SubtitleLanguageEquivalence
 	18, // 11: mavio.acquisition.v1.SubtitleSettings.sync:type_name -> mavio.acquisition.v1.SubtitleSyncSettings
 	20, // 12: mavio.acquisition.v1.SubtitleSettings.translation:type_name -> mavio.acquisition.v1.SubtitleTranslationSettings
-	19, // 13: mavio.acquisition.v1.GetSubtitleSettingsResponse.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
-	19, // 14: mavio.acquisition.v1.UpdateSubtitleSettingsRequest.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
-	19, // 15: mavio.acquisition.v1.UpdateSubtitleSettingsResponse.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
-	68, // 16: mavio.acquisition.v1.SubtitleProviderState.throttled_until:type_name -> google.protobuf.Timestamp
-	26, // 17: mavio.acquisition.v1.ListSubtitleProvidersResponse.providers:type_name -> mavio.acquisition.v1.SubtitleProviderState
-	4,  // 18: mavio.acquisition.v1.WantedSubtitles.missing:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	2,  // 19: mavio.acquisition.v1.ListWantedSubtitlesRequest.kind:type_name -> mavio.acquisition.v1.SubtitleItemKind
-	28, // 20: mavio.acquisition.v1.ListWantedSubtitlesResponse.items:type_name -> mavio.acquisition.v1.WantedSubtitles
-	2,  // 21: mavio.acquisition.v1.SearchWantedSubtitlesRequest.kind:type_name -> mavio.acquisition.v1.SubtitleItemKind
-	4,  // 22: mavio.acquisition.v1.ItemSubtitle.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	6,  // 23: mavio.acquisition.v1.GetItemSubtitlesResponse.profile:type_name -> mavio.acquisition.v1.SubtitleProfile
-	35, // 24: mavio.acquisition.v1.GetItemSubtitlesResponse.subtitles:type_name -> mavio.acquisition.v1.ItemSubtitle
-	4,  // 25: mavio.acquisition.v1.GetItemSubtitlesResponse.missing:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	4,  // 26: mavio.acquisition.v1.ScoredSubtitle.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	4,  // 27: mavio.acquisition.v1.SearchItemSubtitlesRequest.languages:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	38, // 28: mavio.acquisition.v1.SearchItemSubtitlesResponse.subtitles:type_name -> mavio.acquisition.v1.ScoredSubtitle
-	4,  // 29: mavio.acquisition.v1.DownloadItemSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	4,  // 30: mavio.acquisition.v1.UploadSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	4,  // 31: mavio.acquisition.v1.ExtractSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	4,  // 32: mavio.acquisition.v1.TranslateSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	56, // 33: mavio.acquisition.v1.ListSubtitleTranslatorsResponse.translators:type_name -> mavio.acquisition.v1.SubtitleTranslatorState
-	3,  // 34: mavio.acquisition.v1.SubtitleHistoryEvent.action:type_name -> mavio.acquisition.v1.SubtitleAction
-	68, // 35: mavio.acquisition.v1.SubtitleHistoryEvent.time:type_name -> google.protobuf.Timestamp
-	4,  // 36: mavio.acquisition.v1.SubtitleHistoryEvent.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	3,  // 37: mavio.acquisition.v1.ListSubtitleHistoryRequest.actions:type_name -> mavio.acquisition.v1.SubtitleAction
-	60, // 38: mavio.acquisition.v1.ListSubtitleHistoryResponse.events:type_name -> mavio.acquisition.v1.SubtitleHistoryEvent
-	4,  // 39: mavio.acquisition.v1.SubtitleBlocklistEntry.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
-	68, // 40: mavio.acquisition.v1.SubtitleBlocklistEntry.time:type_name -> google.protobuf.Timestamp
-	63, // 41: mavio.acquisition.v1.ListSubtitleBlocklistResponse.entries:type_name -> mavio.acquisition.v1.SubtitleBlocklistEntry
-	7,  // 42: mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles:input_type -> mavio.acquisition.v1.ListSubtitleProfilesRequest
-	9,  // 43: mavio.acquisition.v1.SubtitleService.CreateSubtitleProfile:input_type -> mavio.acquisition.v1.CreateSubtitleProfileRequest
-	11, // 44: mavio.acquisition.v1.SubtitleService.UpdateSubtitleProfile:input_type -> mavio.acquisition.v1.UpdateSubtitleProfileRequest
-	13, // 45: mavio.acquisition.v1.SubtitleService.DeleteSubtitleProfile:input_type -> mavio.acquisition.v1.DeleteSubtitleProfileRequest
-	15, // 46: mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile:input_type -> mavio.acquisition.v1.AssignSubtitleProfileRequest
-	21, // 47: mavio.acquisition.v1.SubtitleService.GetSubtitleSettings:input_type -> mavio.acquisition.v1.GetSubtitleSettingsRequest
-	23, // 48: mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings:input_type -> mavio.acquisition.v1.UpdateSubtitleSettingsRequest
-	25, // 49: mavio.acquisition.v1.SubtitleService.ListSubtitleProviders:input_type -> mavio.acquisition.v1.ListSubtitleProvidersRequest
-	29, // 50: mavio.acquisition.v1.SubtitleService.ListWantedSubtitles:input_type -> mavio.acquisition.v1.ListWantedSubtitlesRequest
-	31, // 51: mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles:input_type -> mavio.acquisition.v1.SearchWantedSubtitlesRequest
-	33, // 52: mavio.acquisition.v1.SubtitleService.UpgradeSubtitles:input_type -> mavio.acquisition.v1.UpgradeSubtitlesRequest
-	36, // 53: mavio.acquisition.v1.SubtitleService.GetItemSubtitles:input_type -> mavio.acquisition.v1.GetItemSubtitlesRequest
-	39, // 54: mavio.acquisition.v1.SubtitleService.SearchItemSubtitles:input_type -> mavio.acquisition.v1.SearchItemSubtitlesRequest
-	41, // 55: mavio.acquisition.v1.SubtitleService.DownloadItemSubtitle:input_type -> mavio.acquisition.v1.DownloadItemSubtitleRequest
-	43, // 56: mavio.acquisition.v1.SubtitleService.UploadSubtitle:input_type -> mavio.acquisition.v1.UploadSubtitleRequest
-	45, // 57: mavio.acquisition.v1.SubtitleService.ExtractSubtitle:input_type -> mavio.acquisition.v1.ExtractSubtitleRequest
-	47, // 58: mavio.acquisition.v1.SubtitleService.DeleteSubtitle:input_type -> mavio.acquisition.v1.DeleteSubtitleRequest
-	49, // 59: mavio.acquisition.v1.SubtitleService.ModifySubtitle:input_type -> mavio.acquisition.v1.ModifySubtitleRequest
-	51, // 60: mavio.acquisition.v1.SubtitleService.SyncSubtitle:input_type -> mavio.acquisition.v1.SyncSubtitleRequest
-	53, // 61: mavio.acquisition.v1.SubtitleService.TranslateSubtitle:input_type -> mavio.acquisition.v1.TranslateSubtitleRequest
-	55, // 62: mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators:input_type -> mavio.acquisition.v1.ListSubtitleTranslatorsRequest
-	58, // 63: mavio.acquisition.v1.SubtitleService.BlocklistSubtitle:input_type -> mavio.acquisition.v1.BlocklistSubtitleRequest
-	61, // 64: mavio.acquisition.v1.SubtitleService.ListSubtitleHistory:input_type -> mavio.acquisition.v1.ListSubtitleHistoryRequest
-	64, // 65: mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist:input_type -> mavio.acquisition.v1.ListSubtitleBlocklistRequest
-	66, // 66: mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist:input_type -> mavio.acquisition.v1.DeleteSubtitleBlocklistRequest
-	8,  // 67: mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles:output_type -> mavio.acquisition.v1.ListSubtitleProfilesResponse
-	10, // 68: mavio.acquisition.v1.SubtitleService.CreateSubtitleProfile:output_type -> mavio.acquisition.v1.CreateSubtitleProfileResponse
-	12, // 69: mavio.acquisition.v1.SubtitleService.UpdateSubtitleProfile:output_type -> mavio.acquisition.v1.UpdateSubtitleProfileResponse
-	14, // 70: mavio.acquisition.v1.SubtitleService.DeleteSubtitleProfile:output_type -> mavio.acquisition.v1.DeleteSubtitleProfileResponse
-	16, // 71: mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile:output_type -> mavio.acquisition.v1.AssignSubtitleProfileResponse
-	22, // 72: mavio.acquisition.v1.SubtitleService.GetSubtitleSettings:output_type -> mavio.acquisition.v1.GetSubtitleSettingsResponse
-	24, // 73: mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings:output_type -> mavio.acquisition.v1.UpdateSubtitleSettingsResponse
-	27, // 74: mavio.acquisition.v1.SubtitleService.ListSubtitleProviders:output_type -> mavio.acquisition.v1.ListSubtitleProvidersResponse
-	30, // 75: mavio.acquisition.v1.SubtitleService.ListWantedSubtitles:output_type -> mavio.acquisition.v1.ListWantedSubtitlesResponse
-	32, // 76: mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles:output_type -> mavio.acquisition.v1.SearchWantedSubtitlesResponse
-	34, // 77: mavio.acquisition.v1.SubtitleService.UpgradeSubtitles:output_type -> mavio.acquisition.v1.UpgradeSubtitlesResponse
-	37, // 78: mavio.acquisition.v1.SubtitleService.GetItemSubtitles:output_type -> mavio.acquisition.v1.GetItemSubtitlesResponse
-	40, // 79: mavio.acquisition.v1.SubtitleService.SearchItemSubtitles:output_type -> mavio.acquisition.v1.SearchItemSubtitlesResponse
-	42, // 80: mavio.acquisition.v1.SubtitleService.DownloadItemSubtitle:output_type -> mavio.acquisition.v1.DownloadItemSubtitleResponse
-	44, // 81: mavio.acquisition.v1.SubtitleService.UploadSubtitle:output_type -> mavio.acquisition.v1.UploadSubtitleResponse
-	46, // 82: mavio.acquisition.v1.SubtitleService.ExtractSubtitle:output_type -> mavio.acquisition.v1.ExtractSubtitleResponse
-	48, // 83: mavio.acquisition.v1.SubtitleService.DeleteSubtitle:output_type -> mavio.acquisition.v1.DeleteSubtitleResponse
-	50, // 84: mavio.acquisition.v1.SubtitleService.ModifySubtitle:output_type -> mavio.acquisition.v1.ModifySubtitleResponse
-	52, // 85: mavio.acquisition.v1.SubtitleService.SyncSubtitle:output_type -> mavio.acquisition.v1.SyncSubtitleResponse
-	54, // 86: mavio.acquisition.v1.SubtitleService.TranslateSubtitle:output_type -> mavio.acquisition.v1.TranslateSubtitleResponse
-	57, // 87: mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators:output_type -> mavio.acquisition.v1.ListSubtitleTranslatorsResponse
-	59, // 88: mavio.acquisition.v1.SubtitleService.BlocklistSubtitle:output_type -> mavio.acquisition.v1.BlocklistSubtitleResponse
-	62, // 89: mavio.acquisition.v1.SubtitleService.ListSubtitleHistory:output_type -> mavio.acquisition.v1.ListSubtitleHistoryResponse
-	65, // 90: mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist:output_type -> mavio.acquisition.v1.ListSubtitleBlocklistResponse
-	67, // 91: mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist:output_type -> mavio.acquisition.v1.DeleteSubtitleBlocklistResponse
-	67, // [67:92] is the sub-list for method output_type
-	42, // [42:67] is the sub-list for method input_type
-	42, // [42:42] is the sub-list for extension type_name
-	42, // [42:42] is the sub-list for extension extendee
-	0,  // [0:42] is the sub-list for field type_name
+	21, // 13: mavio.acquisition.v1.SubtitleTranslationSettings.validation:type_name -> mavio.acquisition.v1.SubtitleTranslationValidation
+	22, // 14: mavio.acquisition.v1.SubtitleTranslationSettings.automation:type_name -> mavio.acquisition.v1.SubtitleTranslationAutomation
+	19, // 15: mavio.acquisition.v1.GetSubtitleSettingsResponse.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
+	19, // 16: mavio.acquisition.v1.UpdateSubtitleSettingsRequest.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
+	19, // 17: mavio.acquisition.v1.UpdateSubtitleSettingsResponse.settings:type_name -> mavio.acquisition.v1.SubtitleSettings
+	79, // 18: mavio.acquisition.v1.SubtitleProviderState.throttled_until:type_name -> google.protobuf.Timestamp
+	28, // 19: mavio.acquisition.v1.ListSubtitleProvidersResponse.providers:type_name -> mavio.acquisition.v1.SubtitleProviderState
+	4,  // 20: mavio.acquisition.v1.WantedSubtitles.missing:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	2,  // 21: mavio.acquisition.v1.ListWantedSubtitlesRequest.kind:type_name -> mavio.acquisition.v1.SubtitleItemKind
+	30, // 22: mavio.acquisition.v1.ListWantedSubtitlesResponse.items:type_name -> mavio.acquisition.v1.WantedSubtitles
+	2,  // 23: mavio.acquisition.v1.SearchWantedSubtitlesRequest.kind:type_name -> mavio.acquisition.v1.SubtitleItemKind
+	4,  // 24: mavio.acquisition.v1.ItemSubtitle.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	6,  // 25: mavio.acquisition.v1.GetItemSubtitlesResponse.profile:type_name -> mavio.acquisition.v1.SubtitleProfile
+	37, // 26: mavio.acquisition.v1.GetItemSubtitlesResponse.subtitles:type_name -> mavio.acquisition.v1.ItemSubtitle
+	4,  // 27: mavio.acquisition.v1.GetItemSubtitlesResponse.missing:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	4,  // 28: mavio.acquisition.v1.ScoredSubtitle.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	4,  // 29: mavio.acquisition.v1.SearchItemSubtitlesRequest.languages:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	40, // 30: mavio.acquisition.v1.SearchItemSubtitlesResponse.subtitles:type_name -> mavio.acquisition.v1.ScoredSubtitle
+	4,  // 31: mavio.acquisition.v1.DownloadItemSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	4,  // 32: mavio.acquisition.v1.UploadSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	4,  // 33: mavio.acquisition.v1.ExtractSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	4,  // 34: mavio.acquisition.v1.TranslateSubtitleRequest.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	76, // 35: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.by_translator:type_name -> mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByTranslatorEntry
+	77, // 36: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.by_language_pair:type_name -> mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByLanguagePairEntry
+	78, // 37: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.by_media:type_name -> mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.ByMediaEntry
+	61, // 38: mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse.daily:type_name -> mavio.acquisition.v1.SubtitleTranslationDay
+	63, // 39: mavio.acquisition.v1.ListSubtitleTranslatorsResponse.translators:type_name -> mavio.acquisition.v1.SubtitleTranslatorState
+	3,  // 40: mavio.acquisition.v1.SubtitleHistoryEvent.action:type_name -> mavio.acquisition.v1.SubtitleAction
+	79, // 41: mavio.acquisition.v1.SubtitleHistoryEvent.time:type_name -> google.protobuf.Timestamp
+	4,  // 42: mavio.acquisition.v1.SubtitleHistoryEvent.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	68, // 43: mavio.acquisition.v1.SubtitleHistoryEvent.translation:type_name -> mavio.acquisition.v1.SubtitleTranslationRecord
+	3,  // 44: mavio.acquisition.v1.ListSubtitleHistoryRequest.actions:type_name -> mavio.acquisition.v1.SubtitleAction
+	67, // 45: mavio.acquisition.v1.ListSubtitleHistoryResponse.events:type_name -> mavio.acquisition.v1.SubtitleHistoryEvent
+	4,  // 46: mavio.acquisition.v1.SubtitleBlocklistEntry.language:type_name -> mavio.acquisition.v1.SubtitleLanguageSpec
+	79, // 47: mavio.acquisition.v1.SubtitleBlocklistEntry.time:type_name -> google.protobuf.Timestamp
+	71, // 48: mavio.acquisition.v1.ListSubtitleBlocklistResponse.entries:type_name -> mavio.acquisition.v1.SubtitleBlocklistEntry
+	7,  // 49: mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles:input_type -> mavio.acquisition.v1.ListSubtitleProfilesRequest
+	9,  // 50: mavio.acquisition.v1.SubtitleService.CreateSubtitleProfile:input_type -> mavio.acquisition.v1.CreateSubtitleProfileRequest
+	11, // 51: mavio.acquisition.v1.SubtitleService.UpdateSubtitleProfile:input_type -> mavio.acquisition.v1.UpdateSubtitleProfileRequest
+	13, // 52: mavio.acquisition.v1.SubtitleService.DeleteSubtitleProfile:input_type -> mavio.acquisition.v1.DeleteSubtitleProfileRequest
+	15, // 53: mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile:input_type -> mavio.acquisition.v1.AssignSubtitleProfileRequest
+	23, // 54: mavio.acquisition.v1.SubtitleService.GetSubtitleSettings:input_type -> mavio.acquisition.v1.GetSubtitleSettingsRequest
+	25, // 55: mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings:input_type -> mavio.acquisition.v1.UpdateSubtitleSettingsRequest
+	27, // 56: mavio.acquisition.v1.SubtitleService.ListSubtitleProviders:input_type -> mavio.acquisition.v1.ListSubtitleProvidersRequest
+	31, // 57: mavio.acquisition.v1.SubtitleService.ListWantedSubtitles:input_type -> mavio.acquisition.v1.ListWantedSubtitlesRequest
+	33, // 58: mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles:input_type -> mavio.acquisition.v1.SearchWantedSubtitlesRequest
+	35, // 59: mavio.acquisition.v1.SubtitleService.UpgradeSubtitles:input_type -> mavio.acquisition.v1.UpgradeSubtitlesRequest
+	38, // 60: mavio.acquisition.v1.SubtitleService.GetItemSubtitles:input_type -> mavio.acquisition.v1.GetItemSubtitlesRequest
+	41, // 61: mavio.acquisition.v1.SubtitleService.SearchItemSubtitles:input_type -> mavio.acquisition.v1.SearchItemSubtitlesRequest
+	43, // 62: mavio.acquisition.v1.SubtitleService.DownloadItemSubtitle:input_type -> mavio.acquisition.v1.DownloadItemSubtitleRequest
+	45, // 63: mavio.acquisition.v1.SubtitleService.UploadSubtitle:input_type -> mavio.acquisition.v1.UploadSubtitleRequest
+	47, // 64: mavio.acquisition.v1.SubtitleService.ExtractSubtitle:input_type -> mavio.acquisition.v1.ExtractSubtitleRequest
+	49, // 65: mavio.acquisition.v1.SubtitleService.DeleteSubtitle:input_type -> mavio.acquisition.v1.DeleteSubtitleRequest
+	51, // 66: mavio.acquisition.v1.SubtitleService.ModifySubtitle:input_type -> mavio.acquisition.v1.ModifySubtitleRequest
+	53, // 67: mavio.acquisition.v1.SubtitleService.SyncSubtitle:input_type -> mavio.acquisition.v1.SyncSubtitleRequest
+	55, // 68: mavio.acquisition.v1.SubtitleService.TranslateSubtitle:input_type -> mavio.acquisition.v1.TranslateSubtitleRequest
+	57, // 69: mavio.acquisition.v1.SubtitleService.ProofreadSubtitle:input_type -> mavio.acquisition.v1.ProofreadSubtitleRequest
+	59, // 70: mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics:input_type -> mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest
+	62, // 71: mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators:input_type -> mavio.acquisition.v1.ListSubtitleTranslatorsRequest
+	65, // 72: mavio.acquisition.v1.SubtitleService.BlocklistSubtitle:input_type -> mavio.acquisition.v1.BlocklistSubtitleRequest
+	69, // 73: mavio.acquisition.v1.SubtitleService.ListSubtitleHistory:input_type -> mavio.acquisition.v1.ListSubtitleHistoryRequest
+	72, // 74: mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist:input_type -> mavio.acquisition.v1.ListSubtitleBlocklistRequest
+	74, // 75: mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist:input_type -> mavio.acquisition.v1.DeleteSubtitleBlocklistRequest
+	8,  // 76: mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles:output_type -> mavio.acquisition.v1.ListSubtitleProfilesResponse
+	10, // 77: mavio.acquisition.v1.SubtitleService.CreateSubtitleProfile:output_type -> mavio.acquisition.v1.CreateSubtitleProfileResponse
+	12, // 78: mavio.acquisition.v1.SubtitleService.UpdateSubtitleProfile:output_type -> mavio.acquisition.v1.UpdateSubtitleProfileResponse
+	14, // 79: mavio.acquisition.v1.SubtitleService.DeleteSubtitleProfile:output_type -> mavio.acquisition.v1.DeleteSubtitleProfileResponse
+	16, // 80: mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile:output_type -> mavio.acquisition.v1.AssignSubtitleProfileResponse
+	24, // 81: mavio.acquisition.v1.SubtitleService.GetSubtitleSettings:output_type -> mavio.acquisition.v1.GetSubtitleSettingsResponse
+	26, // 82: mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings:output_type -> mavio.acquisition.v1.UpdateSubtitleSettingsResponse
+	29, // 83: mavio.acquisition.v1.SubtitleService.ListSubtitleProviders:output_type -> mavio.acquisition.v1.ListSubtitleProvidersResponse
+	32, // 84: mavio.acquisition.v1.SubtitleService.ListWantedSubtitles:output_type -> mavio.acquisition.v1.ListWantedSubtitlesResponse
+	34, // 85: mavio.acquisition.v1.SubtitleService.SearchWantedSubtitles:output_type -> mavio.acquisition.v1.SearchWantedSubtitlesResponse
+	36, // 86: mavio.acquisition.v1.SubtitleService.UpgradeSubtitles:output_type -> mavio.acquisition.v1.UpgradeSubtitlesResponse
+	39, // 87: mavio.acquisition.v1.SubtitleService.GetItemSubtitles:output_type -> mavio.acquisition.v1.GetItemSubtitlesResponse
+	42, // 88: mavio.acquisition.v1.SubtitleService.SearchItemSubtitles:output_type -> mavio.acquisition.v1.SearchItemSubtitlesResponse
+	44, // 89: mavio.acquisition.v1.SubtitleService.DownloadItemSubtitle:output_type -> mavio.acquisition.v1.DownloadItemSubtitleResponse
+	46, // 90: mavio.acquisition.v1.SubtitleService.UploadSubtitle:output_type -> mavio.acquisition.v1.UploadSubtitleResponse
+	48, // 91: mavio.acquisition.v1.SubtitleService.ExtractSubtitle:output_type -> mavio.acquisition.v1.ExtractSubtitleResponse
+	50, // 92: mavio.acquisition.v1.SubtitleService.DeleteSubtitle:output_type -> mavio.acquisition.v1.DeleteSubtitleResponse
+	52, // 93: mavio.acquisition.v1.SubtitleService.ModifySubtitle:output_type -> mavio.acquisition.v1.ModifySubtitleResponse
+	54, // 94: mavio.acquisition.v1.SubtitleService.SyncSubtitle:output_type -> mavio.acquisition.v1.SyncSubtitleResponse
+	56, // 95: mavio.acquisition.v1.SubtitleService.TranslateSubtitle:output_type -> mavio.acquisition.v1.TranslateSubtitleResponse
+	58, // 96: mavio.acquisition.v1.SubtitleService.ProofreadSubtitle:output_type -> mavio.acquisition.v1.ProofreadSubtitleResponse
+	60, // 97: mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics:output_type -> mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse
+	64, // 98: mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators:output_type -> mavio.acquisition.v1.ListSubtitleTranslatorsResponse
+	66, // 99: mavio.acquisition.v1.SubtitleService.BlocklistSubtitle:output_type -> mavio.acquisition.v1.BlocklistSubtitleResponse
+	70, // 100: mavio.acquisition.v1.SubtitleService.ListSubtitleHistory:output_type -> mavio.acquisition.v1.ListSubtitleHistoryResponse
+	73, // 101: mavio.acquisition.v1.SubtitleService.ListSubtitleBlocklist:output_type -> mavio.acquisition.v1.ListSubtitleBlocklistResponse
+	75, // 102: mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist:output_type -> mavio.acquisition.v1.DeleteSubtitleBlocklistResponse
+	76, // [76:103] is the sub-list for method output_type
+	49, // [49:76] is the sub-list for method input_type
+	49, // [49:49] is the sub-list for extension type_name
+	49, // [49:49] is the sub-list for extension extendee
+	0,  // [0:49] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_subtitle_proto_init() }
@@ -9665,7 +11946,7 @@ func file_mavio_acquisition_v1_subtitle_proto_init() {
 	if File_mavio_acquisition_v1_subtitle_proto != nil {
 		return
 	}
-	file_mavio_acquisition_v1_subtitle_proto_msgTypes[49].OneofWrappers = []any{
+	file_mavio_acquisition_v1_subtitle_proto_msgTypes[51].OneofWrappers = []any{
 		(*translateSubtitleRequest_Path)(nil),
 		(*translateSubtitleRequest_StreamIndex)(nil),
 	}
@@ -9675,7 +11956,7 @@ func file_mavio_acquisition_v1_subtitle_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_subtitle_proto_rawDesc), len(file_mavio_acquisition_v1_subtitle_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   64,
+			NumMessages:   75,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

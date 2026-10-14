@@ -718,6 +718,14 @@ pub use self::__buffa::view::SubtitleTranslationSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleTranslationSettingsOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationValidationView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationValidationOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationAutomationView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationAutomationOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::GetSubtitleSettingsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::GetSubtitleSettingsRequestOwnedView;
@@ -854,6 +862,26 @@ pub use self::__buffa::view::TranslateSubtitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::TranslateSubtitleResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ProofreadSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ProofreadSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ProofreadSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ProofreadSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleTranslationStatisticsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleTranslationStatisticsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleTranslationStatisticsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSubtitleTranslationStatisticsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationDayView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationDayOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListSubtitleTranslatorsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListSubtitleTranslatorsRequestOwnedView;
@@ -877,6 +905,10 @@ pub use self::__buffa::view::BlocklistSubtitleResponseOwnedView;
 pub use self::__buffa::view::SubtitleHistoryEventView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleHistoryEventOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationRecordView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationRecordOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListSubtitleHistoryRequestView;
 #[doc(inline)]

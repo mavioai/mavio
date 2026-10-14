@@ -90,11 +90,21 @@ service SubtitleService {
   // local and network storage.
   rpc SyncSubtitle(SyncSubtitleRequest) returns (SyncSubtitleResponse);
   // TranslateSubtitle queues the translation of a subtitle of a movie or
-  // episode into another language by a translator plugin, as Bazarr's
-  // translation: an external subtitle file, or an embedded text subtitle
-  // stream from playback's extraction cache (refused on cloud storage, as
-  // ExtractSubtitle). The translation is saved as a subtitle file.
+  // episode into another language, as Lingarr's: an external subtitle
+  // file, or an embedded text subtitle stream from playback's extraction
+  // cache (refused on cloud storage, as ExtractSubtitle), translated by an
+  // AI model or a translator plugin. The translation is saved as a
+  // subtitle file.
   rpc TranslateSubtitle(TranslateSubtitleRequest) returns (TranslateSubtitleResponse);
+  // ProofreadSubtitle queues the proofreading of a translation by an AI
+  // model, as Lingarr's: each cue's translation is compared with the
+  // subtitle it was translated from and corrected.
+  rpc ProofreadSubtitle(ProofreadSubtitleRequest) returns (ProofreadSubtitleResponse);
+  // GetSubtitleTranslationStatistics sums up the translations of the
+  // subtitle history, as Lingarr's statistics.
+  rpc GetSubtitleTranslationStatistics(GetSubtitleTranslationStatisticsRequest) returns (GetSubtitleTranslationStatisticsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListSubtitleTranslators lists the translators of the subtitle
   // translator plugins.
   rpc ListSubtitleTranslators(ListSubtitleTranslatorsRequest) returns (ListSubtitleTranslatorsResponse) {
@@ -350,10 +360,13 @@ message SubtitleSettings {
 }
 
 // SubtitleTranslationSettings are how subtitles are translated, as
-// Bazarr's translator settings.
+// Lingarr's translation settings and Bazarr's. Translators are named
+// "<plugin>/<translator>" for the translators of subtitle translator
+// plugins and "ai/<provider>/<model>" for the models of the AI gateway
+// (AiService.ListAiModels).
 message SubtitleTranslationSettings {
-  // The translator used when a translation names none, as
-  // "<plugin>/<translator>"; empty for the first enabled one.
+  // The translator used when a translation names none; empty for the
+  // first enabled translator of a plugin.
   string translator = 1;
   // The score translations are recorded with, as a percentage of the
   // maximum score.
@@ -363,6 +376,106 @@ message SubtitleTranslationSettings {
   }];
   // Adds a first cue to SubRip translations crediting the translator.
   bool credit = 3;
+  // Translators tried in order after the first when it fails or does not
+  // translate between the languages; those matching the languages
+  // exactly are tried before those matching them more loosely.
+  repeated string fallback_translators = 4;
+  // The instructions of AI models, and the message carrying each cue,
+  // with the placeholders {sourceLanguage}, {targetLanguage},
+  // {lineToTranslate}, {contextBefore} and {contextAfter}.
+  string prompt = 5 [(buf.validate.field).string.min_len = 1];
+  string user_prompt = 6 [(buf.validate.field).string.min_len = 1];
+  // The instructions and message of proofreading, with {sourceLine} and
+  // {translatedLine} besides the languages.
+  string proofread_prompt = 7 [(buf.validate.field).string.min_len = 1];
+  string proofread_user_prompt = 8 [(buf.validate.field).string.min_len = 1];
+  // The cues before and after each cue given to AI models as context.
+  int32 context_before = 9 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 50
+  }];
+  int32 context_after = 10 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 50
+  }];
+  // Gives the context as JSON objects with each cue's position and text,
+  // and the translations of those before.
+  bool translated_context = 11;
+  // Translates with AI models in batches of max_batch_size cues (every
+  // cue when 0) answered as JSON, rather than cue by cue.
+  bool batch = 12;
+  int32 max_batch_size = 13 [(buf.validate.field).int32.gte = 0];
+  // Names languages in prompts by their codes rather than their English
+  // names.
+  bool language_codes = 14;
+  // Retries of a translation failing for a reason worth retrying, such as
+  // a rate limit: max_retries attempts in all, the delay multiplied after
+  // each.
+  int32 max_retries = 15 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 20
+  }];
+  int32 retry_delay_seconds = 16 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 600
+  }];
+  int32 retry_multiplier = 17 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 10
+  }];
+  // How long one request to a translator may take.
+  int32 request_timeout_seconds = 18 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 3600
+  }];
+  // Translates the cues' plain text, and drops the styles of ASS files.
+  bool strip_formatting = 19;
+  // Translates a cue's lines keeping its line breaks; otherwise the lines
+  // are joined, and the translation split again at 42 characters when
+  // formatting is stripped.
+  bool preserve_line_breaks = 20;
+  // Trims the end of a cue overlapping the next.
+  bool fix_overlaps = 21;
+  SubtitleTranslationValidation validation = 22 [(buf.validate.field).required = true];
+  SubtitleTranslationAutomation automation = 23 [(buf.validate.field).required = true];
+}
+
+// SubtitleTranslationValidation refuses to translate subtitles that look
+// broken, as Lingarr's subtitle validation.
+message SubtitleTranslationValidation {
+  bool enabled = 1;
+  int64 max_file_size = 2 [(buf.validate.field).int64.gt = 0];
+  // The longest and shortest text of a cue, in characters.
+  int32 max_cue_length = 3 [(buf.validate.field).int32.gt = 0];
+  int32 min_cue_length = 4 [(buf.validate.field).int32.gte = 0];
+  // The shortest and longest a cue may last.
+  int32 min_duration_ms = 5 [(buf.validate.field).int32.gte = 0];
+  int32 max_duration_seconds = 6 [(buf.validate.field).int32.gt = 0];
+}
+
+// SubtitleTranslationAutomation translates subtitles movies and episodes
+// lack, as Lingarr's automation: a movie or episode still lacking
+// subtitles its profile wants, whose file is old enough, gets them
+// translated by the settings' translator from a subtitle it has in one of
+// the source languages.
+message SubtitleTranslationAutomation {
+  bool enabled = 1;
+  // How often it runs.
+  int32 interval_hours = 2 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 8760
+  }];
+  // The languages translated from, in order of preference.
+  repeated string source_languages = 3 [(buf.validate.field).repeated.items.string.min_len = 2];
+  // The most translations a run queues.
+  int32 max_per_run = 4 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 1000
+  }];
+  // How old a movie's or an episode's file must be, giving searches time
+  // to find subtitles first.
+  int32 movie_age_hours = 5 [(buf.validate.field).int32.gte = 0];
+  int32 episode_age_hours = 6 [(buf.validate.field).int32.gte = 0];
 }
 
 message GetSubtitleSettingsRequest {}
@@ -609,7 +722,8 @@ message TranslateSubtitleRequest {
   // The language translated into, with the forced and hearing-impaired
   // flags of the file saved.
   SubtitleLanguageSpec language = 4 [(buf.validate.field).required = true];
-  // "<plugin>/<translator>"; empty for the settings' translator.
+  // "<plugin>/<translator>" or "ai/<provider>/<model>"; empty for the
+  // settings' translators.
   string translator = 5;
 }
 
@@ -617,6 +731,52 @@ message TranslateSubtitleResponse {
   // The job translating it; the translation is recorded in the subtitle
   // history when it is saved.
   string job_id = 1;
+}
+
+message ProofreadSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // A subtitle file of the item translated by the server.
+  string path = 2 [(buf.validate.field).string.min_len = 1];
+  // "ai/<provider>/<model>"; empty for the first AI model that
+  // translated it, else the first among the settings' translators.
+  string translator = 3;
+}
+
+message ProofreadSubtitleResponse {
+  string job_id = 1;
+}
+
+message GetSubtitleTranslationStatisticsRequest {
+  // The days counted in daily, up to today.
+  int32 days = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 366
+  }];
+}
+
+message GetSubtitleTranslationStatisticsResponse {
+  // The files translated, and their cues and characters.
+  int64 files = 1;
+  int64 cues = 2;
+  int64 characters = 3;
+  // What AI models used and cost.
+  int64 input_tokens = 4;
+  int64 output_tokens = 5;
+  double cost = 6;
+  // Files by translator, by "<source>:<target>" language pair and by
+  // "movie" or "episode".
+  map<string, int64> by_translator = 7;
+  map<string, int64> by_language_pair = 8;
+  map<string, int64> by_media = 9;
+  // Files translated each day, oldest first, in the server's time zone.
+  repeated SubtitleTranslationDay daily = 10;
+}
+
+// SubtitleTranslationDay is the number of files translated on a day.
+message SubtitleTranslationDay {
+  // "YYYY-MM-DD".
+  string date = 1;
+  int64 files = 2;
 }
 
 message ListSubtitleTranslatorsRequest {}
@@ -679,6 +839,27 @@ message SubtitleHistoryEvent {
   repeated string not_matched = 15;
   // The event of the download an upgrade replaced.
   string upgraded_from = 16;
+  // What a translation translated.
+  SubtitleTranslationRecord translation = 17;
+}
+
+// SubtitleTranslationRecord is what a translation translated and what it
+// took.
+message SubtitleTranslationRecord {
+  // The subtitle translated: an external file, or an embedded stream.
+  string source_path = 1;
+  int32 source_stream_index = 2;
+  string source_language = 3;
+  // The translators that translated the cues, the first one's first.
+  repeated string translators = 4;
+  int32 cues = 5;
+  int64 characters = 6;
+  int64 input_tokens = 7;
+  int64 output_tokens = 8;
+  double cost = 9;
+  // Set once the translation was proofread, with the cues revised.
+  bool proofread = 10;
+  int32 revised = 11;
 }
 
 message ListSubtitleHistoryRequest {
