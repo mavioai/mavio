@@ -26,11 +26,19 @@ type Cue struct {
 	// markup: HTML-like tags for SRT and WebVTT, override blocks such as
 	// {\pos(400,570)} for SSA and ASS.
 	Text string
+
+	// event is the SSA or ASS event the cue was read from, from 1; 0 for
+	// cues of other formats.
+	event int
 }
 
 // Subtitle is a parsed subtitle track.
 type Subtitle struct {
 	Cues []Cue
+
+	// script is what an SSA or ASS file holds besides its cues, which
+	// writing it in its own format keeps.
+	script *ssaScript
 }
 
 // Format names, as file extensions without the dot.
@@ -81,11 +89,12 @@ func Parse(data []byte, format string) (*Subtitle, error) {
 	text := strings.TrimPrefix(string(data), "\ufeff")
 	lines := strings.Split(strings.ReplaceAll(strings.ReplaceAll(text, "\r\n", "\n"), "\r", "\n"), "\n")
 	var cues []Cue
+	var script *ssaScript
 	switch normalize(format) {
 	case SRT:
 		cues = parseSRT(lines)
 	case SSA, ASS:
-		cues = parseSSA(lines)
+		cues, script = parseSSA(lines, normalize(format) == ASS)
 	case VTT:
 		cues = parseVTT(lines)
 	default:
@@ -94,7 +103,7 @@ func Parse(data []byte, format string) (*Subtitle, error) {
 	if len(cues) == 0 {
 		return nil, fmt.Errorf("%s: %w", format, ErrNoCues)
 	}
-	return &Subtitle{Cues: cues}, nil
+	return &Subtitle{Cues: cues, script: script}, nil
 }
 
 // Write renders s in the given format.
