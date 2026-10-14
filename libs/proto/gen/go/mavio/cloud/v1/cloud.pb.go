@@ -22,12 +22,110 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// AccountKind is how an account signs in.
+type AccountKind int32
+
+const (
+	AccountKind_ACCOUNT_KIND_UNSPECIFIED AccountKind = 0
+	// Signs in with its own credentials.
+	AccountKind_ACCOUNT_KIND_FULL AccountKind = 1
+	// Reached only by switching within its Home.
+	AccountKind_ACCOUNT_KIND_MANAGED AccountKind = 2
+)
+
+// Enum value maps for AccountKind.
+var (
+	AccountKind_name = map[int32]string{
+		0: "ACCOUNT_KIND_UNSPECIFIED",
+		1: "ACCOUNT_KIND_FULL",
+		2: "ACCOUNT_KIND_MANAGED",
+	}
+	AccountKind_value = map[string]int32{
+		"ACCOUNT_KIND_UNSPECIFIED": 0,
+		"ACCOUNT_KIND_FULL":        1,
+		"ACCOUNT_KIND_MANAGED":     2,
+	}
+)
+
+func (x AccountKind) Enum() *AccountKind {
+	p := new(AccountKind)
+	*p = x
+	return p
+}
+
+func (x AccountKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AccountKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_cloud_v1_cloud_proto_enumTypes[0].Descriptor()
+}
+
+func (AccountKind) Type() protoreflect.EnumType {
+	return &file_mavio_cloud_v1_cloud_proto_enumTypes[0]
+}
+
+func (x AccountKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+type AccountRevoked_Reason int32
+
+const (
+	AccountRevoked_REASON_UNSPECIFIED AccountRevoked_Reason = 0
+	// Its sessions end.
+	AccountRevoked_REASON_SUSPENDED AccountRevoked_Reason = 1
+	// Its user and the user's data are deleted.
+	AccountRevoked_REASON_DELETED AccountRevoked_Reason = 2
+	// Its sessions end.
+	AccountRevoked_REASON_COMPROMISED AccountRevoked_Reason = 3
+)
+
+// Enum value maps for AccountRevoked_Reason.
+var (
+	AccountRevoked_Reason_name = map[int32]string{
+		0: "REASON_UNSPECIFIED",
+		1: "REASON_SUSPENDED",
+		2: "REASON_DELETED",
+		3: "REASON_COMPROMISED",
+	}
+	AccountRevoked_Reason_value = map[string]int32{
+		"REASON_UNSPECIFIED": 0,
+		"REASON_SUSPENDED":   1,
+		"REASON_DELETED":     2,
+		"REASON_COMPROMISED": 3,
+	}
+)
+
+func (x AccountRevoked_Reason) Enum() *AccountRevoked_Reason {
+	p := new(AccountRevoked_Reason)
+	*p = x
+	return p
+}
+
+func (x AccountRevoked_Reason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AccountRevoked_Reason) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_cloud_v1_cloud_proto_enumTypes[1].Descriptor()
+}
+
+func (AccountRevoked_Reason) Type() protoreflect.EnumType {
+	return &file_mavio_cloud_v1_cloud_proto_enumTypes[1]
+}
+
+func (x AccountRevoked_Reason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // Account is a Mavio account as a server sees it.
 type Account struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
 	xxx_hidden_UserName    *string                `protobuf:"bytes,2,opt,name=user_name,json=userName"`
 	xxx_hidden_DisplayName *string                `protobuf:"bytes,3,opt,name=display_name,json=displayName"`
+	xxx_hidden_Kind        AccountKind            `protobuf:"varint,4,opt,name=kind,enum=mavio.cloud.v1.AccountKind"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -89,19 +187,33 @@ func (x *Account) GetDisplayName() string {
 	return ""
 }
 
+func (x *Account) GetKind() AccountKind {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 3) {
+			return x.xxx_hidden_Kind
+		}
+	}
+	return AccountKind_ACCOUNT_KIND_UNSPECIFIED
+}
+
 func (x *Account) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *Account) SetUserName(v string) {
 	x.xxx_hidden_UserName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
 func (x *Account) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *Account) SetKind(v AccountKind) {
+	x.xxx_hidden_Kind = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *Account) HasId() bool {
@@ -125,6 +237,13 @@ func (x *Account) HasDisplayName() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *Account) HasKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *Account) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -140,13 +259,20 @@ func (x *Account) ClearDisplayName() {
 	x.xxx_hidden_DisplayName = nil
 }
 
+func (x *Account) ClearKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Kind = AccountKind_ACCOUNT_KIND_UNSPECIFIED
+}
+
 type Account_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// Stable and unique across mavio.dev.
-	Id          *string
+	Id *string
+	// Unique across mavio.dev, case-insensitively.
 	UserName    *string
 	DisplayName *string
+	Kind        *AccountKind
 }
 
 func (b0 Account_builder) Build() *Account {
@@ -154,16 +280,235 @@ func (b0 Account_builder) Build() *Account {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.UserName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_UserName = b.UserName
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
 		x.xxx_hidden_DisplayName = b.DisplayName
+	}
+	if b.Kind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Kind = *b.Kind
+	}
+	return m0
+}
+
+// Access is an account's library access record on a server.
+type Access struct {
+	state                        protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AllLibraries      bool                   `protobuf:"varint,1,opt,name=all_libraries,json=allLibraries"`
+	xxx_hidden_LibraryIds        []string               `protobuf:"bytes,2,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_MaxParentalRating int32                  `protobuf:"varint,3,opt,name=max_parental_rating,json=maxParentalRating"`
+	xxx_hidden_BlockUnrated      bool                   `protobuf:"varint,4,opt,name=block_unrated,json=blockUnrated"`
+	xxx_hidden_AllowedLabels     []string               `protobuf:"bytes,5,rep,name=allowed_labels,json=allowedLabels"`
+	xxx_hidden_BlockedLabels     []string               `protobuf:"bytes,6,rep,name=blocked_labels,json=blockedLabels"`
+	xxx_hidden_AllowDownload     bool                   `protobuf:"varint,7,opt,name=allow_download,json=allowDownload"`
+	XXX_raceDetectHookData       protoimpl.RaceDetectHookData
+	XXX_presence                 [1]uint32
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
+}
+
+func (x *Access) Reset() {
+	*x = Access{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Access) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Access) ProtoMessage() {}
+
+func (x *Access) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Access) GetAllLibraries() bool {
+	if x != nil {
+		return x.xxx_hidden_AllLibraries
+	}
+	return false
+}
+
+func (x *Access) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *Access) GetMaxParentalRating() int32 {
+	if x != nil {
+		return x.xxx_hidden_MaxParentalRating
+	}
+	return 0
+}
+
+func (x *Access) GetBlockUnrated() bool {
+	if x != nil {
+		return x.xxx_hidden_BlockUnrated
+	}
+	return false
+}
+
+func (x *Access) GetAllowedLabels() []string {
+	if x != nil {
+		return x.xxx_hidden_AllowedLabels
+	}
+	return nil
+}
+
+func (x *Access) GetBlockedLabels() []string {
+	if x != nil {
+		return x.xxx_hidden_BlockedLabels
+	}
+	return nil
+}
+
+func (x *Access) GetAllowDownload() bool {
+	if x != nil {
+		return x.xxx_hidden_AllowDownload
+	}
+	return false
+}
+
+func (x *Access) SetAllLibraries(v bool) {
+	x.xxx_hidden_AllLibraries = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+}
+
+func (x *Access) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *Access) SetMaxParentalRating(v int32) {
+	x.xxx_hidden_MaxParentalRating = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+}
+
+func (x *Access) SetBlockUnrated(v bool) {
+	x.xxx_hidden_BlockUnrated = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+}
+
+func (x *Access) SetAllowedLabels(v []string) {
+	x.xxx_hidden_AllowedLabels = v
+}
+
+func (x *Access) SetBlockedLabels(v []string) {
+	x.xxx_hidden_BlockedLabels = v
+}
+
+func (x *Access) SetAllowDownload(v bool) {
+	x.xxx_hidden_AllowDownload = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+}
+
+func (x *Access) HasAllLibraries() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Access) HasMaxParentalRating() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Access) HasBlockUnrated() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Access) HasAllowDownload() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *Access) ClearAllLibraries() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AllLibraries = false
+}
+
+func (x *Access) ClearMaxParentalRating() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MaxParentalRating = 0
+}
+
+func (x *Access) ClearBlockUnrated() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_BlockUnrated = false
+}
+
+func (x *Access) ClearAllowDownload() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_AllowDownload = false
+}
+
+type Access_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Every library; library_ids are then empty.
+	AllLibraries *bool
+	// The libraries the account reaches, by the IDs the server published.
+	LibraryIds []string
+	// The highest rating score shown; unset shows every rating, zero only
+	// content for all ages.
+	MaxParentalRating *int32
+	// Hides items without a rating under a maximum.
+	BlockUnrated *bool
+	// When set, only items with one of these labels are shown.
+	AllowedLabels []string
+	// Items with any of these labels are hidden.
+	BlockedLabels []string
+	AllowDownload *bool
+}
+
+func (b0 Access_builder) Build() *Access {
+	m0 := &Access{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AllLibraries != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		x.xxx_hidden_AllLibraries = *b.AllLibraries
+	}
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	if b.MaxParentalRating != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		x.xxx_hidden_MaxParentalRating = *b.MaxParentalRating
+	}
+	if b.BlockUnrated != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		x.xxx_hidden_BlockUnrated = *b.BlockUnrated
+	}
+	x.xxx_hidden_AllowedLabels = b.AllowedLabels
+	x.xxx_hidden_BlockedLabels = b.BlockedLabels
+	if b.AllowDownload != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		x.xxx_hidden_AllowDownload = *b.AllowDownload
 	}
 	return m0
 }
@@ -182,7 +527,7 @@ type ClaimServerRequest struct {
 
 func (x *ClaimServerRequest) Reset() {
 	*x = ClaimServerRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[1]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -194,7 +539,7 @@ func (x *ClaimServerRequest) String() string {
 func (*ClaimServerRequest) ProtoMessage() {}
 
 func (x *ClaimServerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[1]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -360,7 +705,7 @@ type ClaimServerResponse struct {
 
 func (x *ClaimServerResponse) Reset() {
 	*x = ClaimServerResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -372,7 +717,7 @@ func (x *ClaimServerResponse) String() string {
 func (*ClaimServerResponse) ProtoMessage() {}
 
 func (x *ClaimServerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +808,7 @@ type ListChangesRequest struct {
 
 func (x *ListChangesRequest) Reset() {
 	*x = ListChangesRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +820,7 @@ func (x *ListChangesRequest) String() string {
 func (*ListChangesRequest) ProtoMessage() {}
 
 func (x *ListChangesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -571,7 +916,7 @@ type ListChangesResponse struct {
 
 func (x *ListChangesResponse) Reset() {
 	*x = ListChangesResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -583,7 +928,7 @@ func (x *ListChangesResponse) String() string {
 func (*ListChangesResponse) ProtoMessage() {}
 
 func (x *ListChangesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -687,6 +1032,7 @@ type Change struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Cursor      int64                  `protobuf:"varint,1,opt,name=cursor"`
 	xxx_hidden_CreateTime  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=create_time,json=createTime"`
+	xxx_hidden_Kind        isChange_Kind          `protobuf_oneof:"kind"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -695,7 +1041,7 @@ type Change struct {
 
 func (x *Change) Reset() {
 	*x = Change{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -707,7 +1053,7 @@ func (x *Change) String() string {
 func (*Change) ProtoMessage() {}
 
 func (x *Change) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -732,13 +1078,81 @@ func (x *Change) GetCreateTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Change) GetAccessGranted() *AccessGranted {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*change_AccessGranted); ok {
+			return x.AccessGranted
+		}
+	}
+	return nil
+}
+
+func (x *Change) GetAccessRevoked() *AccessRevoked {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*change_AccessRevoked); ok {
+			return x.AccessRevoked
+		}
+	}
+	return nil
+}
+
+func (x *Change) GetAccountChanged() *Account {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*change_AccountChanged); ok {
+			return x.AccountChanged
+		}
+	}
+	return nil
+}
+
+func (x *Change) GetAccountRevoked() *AccountRevoked {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*change_AccountRevoked); ok {
+			return x.AccountRevoked
+		}
+	}
+	return nil
+}
+
 func (x *Change) SetCursor(v int64) {
 	x.xxx_hidden_Cursor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
 func (x *Change) SetCreateTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_CreateTime = v
+}
+
+func (x *Change) SetAccessGranted(v *AccessGranted) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &change_AccessGranted{v}
+}
+
+func (x *Change) SetAccessRevoked(v *AccessRevoked) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &change_AccessRevoked{v}
+}
+
+func (x *Change) SetAccountChanged(v *Account) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &change_AccountChanged{v}
+}
+
+func (x *Change) SetAccountRevoked(v *AccountRevoked) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &change_AccountRevoked{v}
 }
 
 func (x *Change) HasCursor() bool {
@@ -755,6 +1169,45 @@ func (x *Change) HasCreateTime() bool {
 	return x.xxx_hidden_CreateTime != nil
 }
 
+func (x *Change) HasKind() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Kind != nil
+}
+
+func (x *Change) HasAccessGranted() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*change_AccessGranted)
+	return ok
+}
+
+func (x *Change) HasAccessRevoked() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*change_AccessRevoked)
+	return ok
+}
+
+func (x *Change) HasAccountChanged() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*change_AccountChanged)
+	return ok
+}
+
+func (x *Change) HasAccountRevoked() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*change_AccountRevoked)
+	return ok
+}
+
 func (x *Change) ClearCursor() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Cursor = 0
@@ -764,12 +1217,74 @@ func (x *Change) ClearCreateTime() {
 	x.xxx_hidden_CreateTime = nil
 }
 
+func (x *Change) ClearKind() {
+	x.xxx_hidden_Kind = nil
+}
+
+func (x *Change) ClearAccessGranted() {
+	if _, ok := x.xxx_hidden_Kind.(*change_AccessGranted); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Change) ClearAccessRevoked() {
+	if _, ok := x.xxx_hidden_Kind.(*change_AccessRevoked); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Change) ClearAccountChanged() {
+	if _, ok := x.xxx_hidden_Kind.(*change_AccountChanged); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Change) ClearAccountRevoked() {
+	if _, ok := x.xxx_hidden_Kind.(*change_AccountRevoked); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+const Change_Kind_not_set_case case_Change_Kind = 0
+const Change_AccessGranted_case case_Change_Kind = 3
+const Change_AccessRevoked_case case_Change_Kind = 4
+const Change_AccountChanged_case case_Change_Kind = 5
+const Change_AccountRevoked_case case_Change_Kind = 6
+
+func (x *Change) WhichKind() case_Change_Kind {
+	if x == nil {
+		return Change_Kind_not_set_case
+	}
+	switch x.xxx_hidden_Kind.(type) {
+	case *change_AccessGranted:
+		return Change_AccessGranted_case
+	case *change_AccessRevoked:
+		return Change_AccessRevoked_case
+	case *change_AccountChanged:
+		return Change_AccountChanged_case
+	case *change_AccountRevoked:
+		return Change_AccountRevoked_case
+	default:
+		return Change_Kind_not_set_case
+	}
+}
+
 type Change_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// Increases with every change for the server.
 	Cursor     *int64
 	CreateTime *timestamppb.Timestamp
+	// Fields of oneof xxx_hidden_Kind:
+	// An account has access, or its record changed.
+	AccessGranted *AccessGranted
+	// An account's access was revoked.
+	AccessRevoked *AccessRevoked
+	// An account's names changed.
+	AccountChanged *Account
+	// An account was suspended, deleted or reported compromised.
+	AccountRevoked *AccountRevoked
+	// -- end of xxx_hidden_Kind
 }
 
 func (b0 Change_builder) Build() *Change {
@@ -777,10 +1292,593 @@ func (b0 Change_builder) Build() *Change {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Cursor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_Cursor = *b.Cursor
 	}
 	x.xxx_hidden_CreateTime = b.CreateTime
+	if b.AccessGranted != nil {
+		x.xxx_hidden_Kind = &change_AccessGranted{b.AccessGranted}
+	}
+	if b.AccessRevoked != nil {
+		x.xxx_hidden_Kind = &change_AccessRevoked{b.AccessRevoked}
+	}
+	if b.AccountChanged != nil {
+		x.xxx_hidden_Kind = &change_AccountChanged{b.AccountChanged}
+	}
+	if b.AccountRevoked != nil {
+		x.xxx_hidden_Kind = &change_AccountRevoked{b.AccountRevoked}
+	}
+	return m0
+}
+
+type case_Change_Kind protoreflect.FieldNumber
+
+func (x case_Change_Kind) String() string {
+	md := file_mavio_cloud_v1_cloud_proto_msgTypes[6].Descriptor()
+	if x == 0 {
+		return "not set"
+	}
+	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
+}
+
+type isChange_Kind interface {
+	isChange_Kind()
+}
+
+type change_AccessGranted struct {
+	// An account has access, or its record changed.
+	AccessGranted *AccessGranted `protobuf:"bytes,3,opt,name=access_granted,json=accessGranted,oneof"`
+}
+
+type change_AccessRevoked struct {
+	// An account's access was revoked.
+	AccessRevoked *AccessRevoked `protobuf:"bytes,4,opt,name=access_revoked,json=accessRevoked,oneof"`
+}
+
+type change_AccountChanged struct {
+	// An account's names changed.
+	AccountChanged *Account `protobuf:"bytes,5,opt,name=account_changed,json=accountChanged,oneof"`
+}
+
+type change_AccountRevoked struct {
+	// An account was suspended, deleted or reported compromised.
+	AccountRevoked *AccountRevoked `protobuf:"bytes,6,opt,name=account_revoked,json=accountRevoked,oneof"`
+}
+
+func (*change_AccessGranted) isChange_Kind() {}
+
+func (*change_AccessRevoked) isChange_Kind() {}
+
+func (*change_AccountChanged) isChange_Kind() {}
+
+func (*change_AccountRevoked) isChange_Kind() {}
+
+type AccessGranted struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Account *Account               `protobuf:"bytes,1,opt,name=account"`
+	xxx_hidden_Access  *Access                `protobuf:"bytes,2,opt,name=access"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AccessGranted) Reset() {
+	*x = AccessGranted{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessGranted) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessGranted) ProtoMessage() {}
+
+func (x *AccessGranted) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AccessGranted) GetAccount() *Account {
+	if x != nil {
+		return x.xxx_hidden_Account
+	}
+	return nil
+}
+
+func (x *AccessGranted) GetAccess() *Access {
+	if x != nil {
+		return x.xxx_hidden_Access
+	}
+	return nil
+}
+
+func (x *AccessGranted) SetAccount(v *Account) {
+	x.xxx_hidden_Account = v
+}
+
+func (x *AccessGranted) SetAccess(v *Access) {
+	x.xxx_hidden_Access = v
+}
+
+func (x *AccessGranted) HasAccount() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Account != nil
+}
+
+func (x *AccessGranted) HasAccess() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Access != nil
+}
+
+func (x *AccessGranted) ClearAccount() {
+	x.xxx_hidden_Account = nil
+}
+
+func (x *AccessGranted) ClearAccess() {
+	x.xxx_hidden_Access = nil
+}
+
+type AccessGranted_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Account *Account
+	Access  *Access
+}
+
+func (b0 AccessGranted_builder) Build() *AccessGranted {
+	m0 := &AccessGranted{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Account = b.Account
+	x.xxx_hidden_Access = b.Access
+	return m0
+}
+
+type AccessRevoked struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccountId   *string                `protobuf:"bytes,1,opt,name=account_id,json=accountId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AccessRevoked) Reset() {
+	*x = AccessRevoked{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessRevoked) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessRevoked) ProtoMessage() {}
+
+func (x *AccessRevoked) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AccessRevoked) GetAccountId() string {
+	if x != nil {
+		if x.xxx_hidden_AccountId != nil {
+			return *x.xxx_hidden_AccountId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AccessRevoked) SetAccountId(v string) {
+	x.xxx_hidden_AccountId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *AccessRevoked) HasAccountId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *AccessRevoked) ClearAccountId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AccountId = nil
+}
+
+type AccessRevoked_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	AccountId *string
+}
+
+func (b0 AccessRevoked_builder) Build() *AccessRevoked {
+	m0 := &AccessRevoked{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AccountId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_AccountId = b.AccountId
+	}
+	return m0
+}
+
+type AccountRevoked struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccountId   *string                `protobuf:"bytes,1,opt,name=account_id,json=accountId"`
+	xxx_hidden_Reason      AccountRevoked_Reason  `protobuf:"varint,2,opt,name=reason,enum=mavio.cloud.v1.AccountRevoked_Reason"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AccountRevoked) Reset() {
+	*x = AccountRevoked{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccountRevoked) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccountRevoked) ProtoMessage() {}
+
+func (x *AccountRevoked) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AccountRevoked) GetAccountId() string {
+	if x != nil {
+		if x.xxx_hidden_AccountId != nil {
+			return *x.xxx_hidden_AccountId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AccountRevoked) GetReason() AccountRevoked_Reason {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 1) {
+			return x.xxx_hidden_Reason
+		}
+	}
+	return AccountRevoked_REASON_UNSPECIFIED
+}
+
+func (x *AccountRevoked) SetAccountId(v string) {
+	x.xxx_hidden_AccountId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *AccountRevoked) SetReason(v AccountRevoked_Reason) {
+	x.xxx_hidden_Reason = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *AccountRevoked) HasAccountId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *AccountRevoked) HasReason() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *AccountRevoked) ClearAccountId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AccountId = nil
+}
+
+func (x *AccountRevoked) ClearReason() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Reason = AccountRevoked_REASON_UNSPECIFIED
+}
+
+type AccountRevoked_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	AccountId *string
+	Reason    *AccountRevoked_Reason
+}
+
+func (b0 AccountRevoked_builder) Build() *AccountRevoked {
+	m0 := &AccountRevoked{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AccountId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_AccountId = b.AccountId
+	}
+	if b.Reason != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Reason = *b.Reason
+	}
+	return m0
+}
+
+// Library is a library of the server as mavio.dev knows it.
+type Library struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Kind        *string                `protobuf:"bytes,3,opt,name=kind"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Library) Reset() {
+	*x = Library{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Library) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Library) ProtoMessage() {}
+
+func (x *Library) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Library) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Library) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Library) GetKind() string {
+	if x != nil {
+		if x.xxx_hidden_Kind != nil {
+			return *x.xxx_hidden_Kind
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Library) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *Library) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *Library) SetKind(v string) {
+	x.xxx_hidden_Kind = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *Library) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Library) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Library) HasKind() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Library) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *Library) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *Library) ClearKind() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Kind = nil
+}
+
+type Library_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id   *string
+	Name *string
+	// The library's kind, such as "movies" or "shows".
+	Kind *string
+}
+
+func (b0 Library_builder) Build() *Library {
+	m0 := &Library{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Kind != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Kind = b.Kind
+	}
+	return m0
+}
+
+type PublishLibrariesRequest struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Libraries *[]*Library            `protobuf:"bytes,1,rep,name=libraries"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *PublishLibrariesRequest) Reset() {
+	*x = PublishLibrariesRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishLibrariesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishLibrariesRequest) ProtoMessage() {}
+
+func (x *PublishLibrariesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PublishLibrariesRequest) GetLibraries() []*Library {
+	if x != nil {
+		if x.xxx_hidden_Libraries != nil {
+			return *x.xxx_hidden_Libraries
+		}
+	}
+	return nil
+}
+
+func (x *PublishLibrariesRequest) SetLibraries(v []*Library) {
+	x.xxx_hidden_Libraries = &v
+}
+
+type PublishLibrariesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Libraries []*Library
+}
+
+func (b0 PublishLibrariesRequest_builder) Build() *PublishLibrariesRequest {
+	m0 := &PublishLibrariesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Libraries = &b.Libraries
+	return m0
+}
+
+type PublishLibrariesResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishLibrariesResponse) Reset() {
+	*x = PublishLibrariesResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishLibrariesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishLibrariesResponse) ProtoMessage() {}
+
+func (x *PublishLibrariesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type PublishLibrariesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 PublishLibrariesResponse_builder) Build() *PublishLibrariesResponse {
+	m0 := &PublishLibrariesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
 	return m0
 }
 
@@ -799,7 +1897,7 @@ type Notice struct {
 
 func (x *Notice) Reset() {
 	*x = Notice{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -811,7 +1909,7 @@ func (x *Notice) String() string {
 func (*Notice) ProtoMessage() {}
 
 func (x *Notice) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -867,11 +1965,21 @@ var File_mavio_cloud_v1_cloud_proto protoreflect.FileDescriptor
 
 const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\n" +
-	"\x1amavio/cloud/v1/cloud.proto\x12\x0emavio.cloud.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"Y\n" +
+	"\x1amavio/cloud/v1/cloud.proto\x12\x0emavio.cloud.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8a\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tuser_name\x18\x02 \x01(\tR\buserName\x12!\n" +
-	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\"\xad\x01\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12/\n" +
+	"\x04kind\x18\x04 \x01(\x0e2\x1b.mavio.cloud.v1.AccountKindR\x04kind\"\x98\x02\n" +
+	"\x06Access\x12#\n" +
+	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12\x1f\n" +
+	"\vlibrary_ids\x18\x02 \x03(\tR\n" +
+	"libraryIds\x12.\n" +
+	"\x13max_parental_rating\x18\x03 \x01(\x05R\x11maxParentalRating\x12#\n" +
+	"\rblock_unrated\x18\x04 \x01(\bR\fblockUnrated\x12%\n" +
+	"\x0eallowed_labels\x18\x05 \x03(\tR\rallowedLabels\x12%\n" +
+	"\x0eblocked_labels\x18\x06 \x03(\tR\rblockedLabels\x12%\n" +
+	"\x0eallow_download\x18\a \x01(\bR\rallowDownload\"\xad\x01\n" +
 	"\x12ClaimServerRequest\x12+\n" +
 	"\n" +
 	"claim_code\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18@R\tclaimCode\x12)\n" +
@@ -890,43 +1998,96 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\x13ListChangesResponse\x120\n" +
 	"\achanges\x18\x01 \x03(\v2\x16.mavio.cloud.v1.ChangeR\achanges\x12\x12\n" +
 	"\x04more\x18\x02 \x01(\bR\x04more\x12\x16\n" +
-	"\x06cursor\x18\x03 \x01(\x03R\x06cursor\"]\n" +
+	"\x06cursor\x18\x03 \x01(\x03R\x06cursor\"\x84\x03\n" +
 	"\x06Change\x12\x16\n" +
 	"\x06cursor\x18\x01 \x01(\x03R\x06cursor\x12;\n" +
 	"\vcreate_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"createTime\" \n" +
+	"createTime\x12F\n" +
+	"\x0eaccess_granted\x18\x03 \x01(\v2\x1d.mavio.cloud.v1.AccessGrantedH\x00R\raccessGranted\x12F\n" +
+	"\x0eaccess_revoked\x18\x04 \x01(\v2\x1d.mavio.cloud.v1.AccessRevokedH\x00R\raccessRevoked\x12B\n" +
+	"\x0faccount_changed\x18\x05 \x01(\v2\x17.mavio.cloud.v1.AccountH\x00R\x0eaccountChanged\x12I\n" +
+	"\x0faccount_revoked\x18\x06 \x01(\v2\x1e.mavio.cloud.v1.AccountRevokedH\x00R\x0eaccountRevokedB\x06\n" +
+	"\x04kind\"r\n" +
+	"\rAccessGranted\x121\n" +
+	"\aaccount\x18\x01 \x01(\v2\x17.mavio.cloud.v1.AccountR\aaccount\x12.\n" +
+	"\x06access\x18\x02 \x01(\v2\x16.mavio.cloud.v1.AccessR\x06access\".\n" +
+	"\rAccessRevoked\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\tR\taccountId\"\xd2\x01\n" +
+	"\x0eAccountRevoked\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\tR\taccountId\x12=\n" +
+	"\x06reason\x18\x02 \x01(\x0e2%.mavio.cloud.v1.AccountRevoked.ReasonR\x06reason\"b\n" +
+	"\x06Reason\x12\x16\n" +
+	"\x12REASON_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10REASON_SUSPENDED\x10\x01\x12\x12\n" +
+	"\x0eREASON_DELETED\x10\x02\x12\x16\n" +
+	"\x12REASON_COMPROMISED\x10\x03\"^\n" +
+	"\aLibrary\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x02id\x12\x1c\n" +
+	"\x04name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x02R\x04name\x12\x1b\n" +
+	"\x04kind\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18 R\x04kind\"[\n" +
+	"\x17PublishLibrariesRequest\x12@\n" +
+	"\tlibraries\x18\x01 \x03(\v2\x17.mavio.cloud.v1.LibraryB\t\xbaH\x06\x92\x01\x03\x10\xe8\aR\tlibraries\"\x1a\n" +
+	"\x18PublishLibrariesResponse\" \n" +
 	"\x06Notice\x12\x16\n" +
-	"\x06cursor\x18\x01 \x01(\x03R\x06cursor2\xc4\x01\n" +
+	"\x06cursor\x18\x01 \x01(\x03R\x06cursor*\\\n" +
+	"\vAccountKind\x12\x1c\n" +
+	"\x18ACCOUNT_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11ACCOUNT_KIND_FULL\x10\x01\x12\x18\n" +
+	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xb0\x02\n" +
 	"\rServerService\x12V\n" +
 	"\vClaimServer\x12\".mavio.cloud.v1.ClaimServerRequest\x1a#.mavio.cloud.v1.ClaimServerResponse\x12[\n" +
-	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01B\xbd\x01\n" +
+	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01\x12j\n" +
+	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02B\xbd\x01\n" +
 	"\x12com.mavio.cloud.v1B\n" +
 	"CloudProtoP\x01ZAgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1;cloudv1\xa2\x02\x03MCX\xaa\x02\x0eMavio.Cloud.V1\xca\x02\x0eMavio\\Cloud\\V1\xe2\x02\x1aMavio\\Cloud\\V1\\GPBMetadata\xea\x02\x10Mavio::Cloud::V1b\beditionsp\xe8\a"
 
-var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_mavio_cloud_v1_cloud_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
-	(*Account)(nil),               // 0: mavio.cloud.v1.Account
-	(*ClaimServerRequest)(nil),    // 1: mavio.cloud.v1.ClaimServerRequest
-	(*ClaimServerResponse)(nil),   // 2: mavio.cloud.v1.ClaimServerResponse
-	(*ListChangesRequest)(nil),    // 3: mavio.cloud.v1.ListChangesRequest
-	(*ListChangesResponse)(nil),   // 4: mavio.cloud.v1.ListChangesResponse
-	(*Change)(nil),                // 5: mavio.cloud.v1.Change
-	(*Notice)(nil),                // 6: mavio.cloud.v1.Notice
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(AccountKind)(0),                 // 0: mavio.cloud.v1.AccountKind
+	(AccountRevoked_Reason)(0),       // 1: mavio.cloud.v1.AccountRevoked.Reason
+	(*Account)(nil),                  // 2: mavio.cloud.v1.Account
+	(*Access)(nil),                   // 3: mavio.cloud.v1.Access
+	(*ClaimServerRequest)(nil),       // 4: mavio.cloud.v1.ClaimServerRequest
+	(*ClaimServerResponse)(nil),      // 5: mavio.cloud.v1.ClaimServerResponse
+	(*ListChangesRequest)(nil),       // 6: mavio.cloud.v1.ListChangesRequest
+	(*ListChangesResponse)(nil),      // 7: mavio.cloud.v1.ListChangesResponse
+	(*Change)(nil),                   // 8: mavio.cloud.v1.Change
+	(*AccessGranted)(nil),            // 9: mavio.cloud.v1.AccessGranted
+	(*AccessRevoked)(nil),            // 10: mavio.cloud.v1.AccessRevoked
+	(*AccountRevoked)(nil),           // 11: mavio.cloud.v1.AccountRevoked
+	(*Library)(nil),                  // 12: mavio.cloud.v1.Library
+	(*PublishLibrariesRequest)(nil),  // 13: mavio.cloud.v1.PublishLibrariesRequest
+	(*PublishLibrariesResponse)(nil), // 14: mavio.cloud.v1.PublishLibrariesResponse
+	(*Notice)(nil),                   // 15: mavio.cloud.v1.Notice
+	(*timestamppb.Timestamp)(nil),    // 16: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
-	0, // 0: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
-	5, // 1: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
-	7, // 2: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
-	1, // 3: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
-	3, // 4: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
-	2, // 5: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
-	4, // 6: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
+	2,  // 1: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
+	8,  // 2: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
+	16, // 3: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 4: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
+	10, // 5: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
+	2,  // 6: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
+	11, // 7: mavio.cloud.v1.Change.account_revoked:type_name -> mavio.cloud.v1.AccountRevoked
+	2,  // 8: mavio.cloud.v1.AccessGranted.account:type_name -> mavio.cloud.v1.Account
+	3,  // 9: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
+	1,  // 10: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
+	12, // 11: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
+	4,  // 12: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
+	6,  // 13: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
+	13, // 14: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
+	5,  // 15: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
+	7,  // 16: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
+	14, // 17: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
+	15, // [15:18] is the sub-list for method output_type
+	12, // [12:15] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_mavio_cloud_v1_cloud_proto_init() }
@@ -934,18 +2095,25 @@ func file_mavio_cloud_v1_cloud_proto_init() {
 	if File_mavio_cloud_v1_cloud_proto != nil {
 		return
 	}
+	file_mavio_cloud_v1_cloud_proto_msgTypes[6].OneofWrappers = []any{
+		(*change_AccessGranted)(nil),
+		(*change_AccessRevoked)(nil),
+		(*change_AccountChanged)(nil),
+		(*change_AccountRevoked)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_cloud_v1_cloud_proto_rawDesc), len(file_mavio_cloud_v1_cloud_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   7,
+			NumEnums:      2,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_mavio_cloud_v1_cloud_proto_goTypes,
 		DependencyIndexes: file_mavio_cloud_v1_cloud_proto_depIdxs,
+		EnumInfos:         file_mavio_cloud_v1_cloud_proto_enumTypes,
 		MessageInfos:      file_mavio_cloud_v1_cloud_proto_msgTypes,
 	}.Build()
 	File_mavio_cloud_v1_cloud_proto = out.File

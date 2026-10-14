@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/apidocs"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/cloud"
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
@@ -84,6 +85,10 @@ type Options struct {
 	// Claim claims the server at mavio.dev with a claim code; nil claims
 	// nothing.
 	Claim func(ctx context.Context, code string) (core.User, error)
+	// Assertions checks mavio.dev's sign-in assertions, and MavioDevURL is
+	// mavio.dev's API; nil signs no one in with assertions.
+	Assertions  *cloud.Verifier
+	MavioDevURL string
 	// Refresher carries out metadata changes; nil uses one without
 	// providers.
 	Refresher *library.Refresher
@@ -180,6 +185,7 @@ func Handler(opts Options) (http.Handler, error) {
 	authService.Passkeys, authService.TOTP = passkeys, totp
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	authService.Info, authService.Claim = opts.ServerInfo, opts.Claim
+	authService.Assertions, authService.MavioDevURL = opts.Assertions, opts.MavioDevURL
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
 	tasks := rpc.NewTaskService(opts.Store)
 	if opts.Plugins != nil {

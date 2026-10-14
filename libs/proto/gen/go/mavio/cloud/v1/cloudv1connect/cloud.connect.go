@@ -39,6 +39,9 @@ const (
 	// ServerServiceListChangesProcedure is the fully-qualified name of the ServerService's ListChanges
 	// RPC.
 	ServerServiceListChangesProcedure = "/mavio.cloud.v1.ServerService/ListChanges"
+	// ServerServicePublishLibrariesProcedure is the fully-qualified name of the ServerService's
+	// PublishLibraries RPC.
+	ServerServicePublishLibrariesProcedure = "/mavio.cloud.v1.ServerService/PublishLibraries"
 )
 
 // ServerServiceClient is a client for the mavio.cloud.v1.ServerService service.
@@ -50,6 +53,10 @@ type ServerServiceClient interface {
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
 	// ListChanges gives the server's changes after a cursor, oldest first.
 	ListChanges(context.Context, *v1.ListChangesRequest) (*v1.ListChangesResponse, error)
+	// PublishLibraries replaces the libraries mavio.dev knows of the
+	// server, which access records name, so that administrators edit access
+	// from anywhere.
+	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
 }
 
 // NewServerServiceClient constructs a client for the mavio.cloud.v1.ServerService service. By
@@ -76,13 +83,21 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		publishLibraries: connect.NewClient[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse](
+			httpClient,
+			baseURL+ServerServicePublishLibrariesProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("PublishLibraries")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // serverServiceClient implements ServerServiceClient.
 type serverServiceClient struct {
-	claimServer *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
-	listChanges *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
+	claimServer      *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
+	listChanges      *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
+	publishLibraries *connect.Client[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse]
 }
 
 // ClaimServer calls mavio.cloud.v1.ServerService.ClaimServer.
@@ -103,6 +118,15 @@ func (c *serverServiceClient) ListChanges(ctx context.Context, req *v1.ListChang
 	return nil, err
 }
 
+// PublishLibraries calls mavio.cloud.v1.ServerService.PublishLibraries.
+func (c *serverServiceClient) PublishLibraries(ctx context.Context, req *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error) {
+	response, err := c.publishLibraries.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ServerServiceHandler is an implementation of the mavio.cloud.v1.ServerService service.
 type ServerServiceHandler interface {
 	// ClaimServer registers the server under the account that created the
@@ -112,6 +136,10 @@ type ServerServiceHandler interface {
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
 	// ListChanges gives the server's changes after a cursor, oldest first.
 	ListChanges(context.Context, *v1.ListChangesRequest) (*v1.ListChangesResponse, error)
+	// PublishLibraries replaces the libraries mavio.dev knows of the
+	// server, which access records name, so that administrators edit access
+	// from anywhere.
+	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
 }
 
 // NewServerServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -134,12 +162,21 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	serverServicePublishLibrariesHandler := connect.NewUnaryHandlerSimple(
+		ServerServicePublishLibrariesProcedure,
+		svc.PublishLibraries,
+		connect.WithSchema(serverServiceMethods.ByName("PublishLibraries")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.cloud.v1.ServerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServerServiceClaimServerProcedure:
 			serverServiceClaimServerHandler.ServeHTTP(w, r)
 		case ServerServiceListChangesProcedure:
 			serverServiceListChangesHandler.ServeHTTP(w, r)
+		case ServerServicePublishLibrariesProcedure:
+			serverServicePublishLibrariesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -155,4 +192,8 @@ func (UnimplementedServerServiceHandler) ClaimServer(context.Context, *v1.ClaimS
 
 func (UnimplementedServerServiceHandler) ListChanges(context.Context, *v1.ListChangesRequest) (*v1.ListChangesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.ListChanges is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.PublishLibraries is not implemented"))
 }

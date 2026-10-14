@@ -287,6 +287,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// link to it, which waits while the server is unclaimed.
 	mavioDev := cloud.NewClient(cfg.MavioDevURL, key, nil)
 	link := cloud.NewLink(db, mavioDev, log)
+	link.Apply = (&cloud.Applier{Requests: func() core.RequestSettings { return set.Get().Requests }}).Apply
+	assertions := cloud.NewVerifier(cfg.MavioDevURL, serverID, cloud.NewKeySet(cfg.MavioDevURL, nil))
 	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: link.Wake}
 	acq := newAcquisition(log, db, set, plugs, clients, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
 	reqs := &requests.Service{
@@ -326,7 +328,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			n := set.Get().Network
 			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
 		},
-		Claim:        claimer.Claim,
+		Claim: claimer.Claim, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
 		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})

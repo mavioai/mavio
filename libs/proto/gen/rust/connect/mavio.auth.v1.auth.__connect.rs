@@ -218,6 +218,16 @@ pub type OwnedClaimServerRequestView = ::buffa::view::OwnedView<
 pub type OwnedClaimServerResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::ClaimServerResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SignInWithAssertionRequestView<'static>>`.
+pub type OwnedSignInWithAssertionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SignInWithAssertionResponseView<'static>>`.
+pub type OwnedSignInWithAssertionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::GetAuthInfoResponse>
 for crate::proto::mavio::auth::v1::__buffa::view::GetAuthInfoResponseView<'_> {
     fn encode(
@@ -1094,6 +1104,42 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::SignInWithAssertionResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::SignInWithAssertionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const AUTH_SERVICE_SERVICE_NAME: &str = "mavio.auth.v1.AuthService";
 /// Static [`Spec`](::connectrpc::Spec) for the `GetAuthInfo` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -1246,11 +1292,21 @@ pub const AUTH_SERVICE_CLAIM_SERVER_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SignInWithAssertion` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_SIGN_IN_WITH_ASSERTION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/SignInWithAssertion",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
 /// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
 /// RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
 /// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,
-/// AcceptInvitation and ClaimServer are public; the other methods act on the calling user.
+/// AcceptInvitation, ClaimServer and SignInWithAssertion are public; the other methods act on the calling user.
+///
+/// In mavio.dev mode devices sign in with SignInWithAssertion: Login, the
+/// passkey sign-in, Quick Connect, password resets, invitations and
+/// switching fail with FAILED_PRECONDITION, as mavio.dev keeps them.
 ///
 /// A session belongs to a device's Ed25519 key. Its access token lasts an
 /// hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -1934,6 +1990,35 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::auth::v1::ClaimServerResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SignInWithAssertion signs a device in to a server in mavio.dev mode
+    /// with a sign-in assertion mavio.dev issued for the server and the
+    /// device's key, replacing the device's previous session. The device
+    /// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
+    /// assertion. A wrong, expired or used assertion, a wrong signature and
+    /// an account without access to the server fail with UNAUTHENTICATED; a
+    /// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn sign_in_with_assertion<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::SignInWithAssertionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2694,6 +2779,35 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_CLAIM_SERVER_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "SignInWithAssertion",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.sign_in_with_assertion(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::SignInWithAssertionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_SIGN_IN_WITH_ASSERTION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -2896,6 +3010,12 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AUTH_SERVICE_CLAIM_SERVER_SPEC),
+                )
+            }
+            "SignInWithAssertion" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_SIGN_IN_WITH_ASSERTION_SPEC),
                 )
             }
             _ => None,
@@ -3456,6 +3576,28 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::auth::v1::ClaimServerResponse,
+                        >(format)
+                })
+            }
+            "SignInWithAssertion" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+                    >::from_parts(&req, &body);
+                    svc.sign_in_with_assertion(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::SignInWithAssertionResponse,
                         >(format)
                 })
             }
@@ -4690,6 +4832,51 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_CLAIM_SERVER_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SignInWithAssertion RPC. Sends a request to /mavio.auth.v1.AuthService/SignInWithAssertion.
+    pub async fn sign_in_with_assertion(
+        &self,
+        request: crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.sign_in_with_assertion_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SignInWithAssertion RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn sign_in_with_assertion_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::SignInWithAssertionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::SignInWithAssertionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_SIGN_IN_WITH_ASSERTION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

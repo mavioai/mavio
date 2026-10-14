@@ -237,3 +237,11 @@ pub use self::__buffa::view::ClaimServerRequestOwnedView;
 pub use self::__buffa::view::ClaimServerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ClaimServerResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SignInWithAssertionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SignInWithAssertionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SignInWithAssertionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SignInWithAssertionResponseOwnedView;

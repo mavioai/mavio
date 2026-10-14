@@ -2,6 +2,8 @@ package cloud
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,6 +24,9 @@ const (
 	SyncInterval = 6 * time.Hour
 	// PingInterval is how often the server pings mavio.dev.
 	PingInterval = 30 * time.Second
+	// LibrariesInterval is how often the server checks whether its
+	// libraries changed since it published them.
+	LibrariesInterval = time.Minute
 	// changesPage is how many changes the server fetches at a time.
 	changesPage = 500
 )
@@ -41,8 +46,9 @@ type Link struct {
 	// doubled after every failure, with jitter; zero uses a second and
 	// five minutes.
 	MinBackoff, MaxBackoff time.Duration
-	// SyncInterval and PingInterval override the defaults when not zero.
-	SyncInterval, PingInterval time.Duration
+	// SyncInterval, PingInterval and LibrariesInterval override the
+	// defaults when not zero.
+	SyncInterval, PingInterval, LibrariesInterval time.Duration
 
 	wake chan struct{}
 }
@@ -121,8 +127,14 @@ func (l *Link) connect(ctx context.Context) (synced bool, err error) {
 		return false, err
 	}
 	l.Logger.InfoContext(ctx, "connected to mavio.dev", "cursor", cursor)
+	published, err := l.publish(ctx, "")
+	if err != nil {
+		return true, err
+	}
 	ticker := time.NewTicker(or(l.SyncInterval, SyncInterval))
 	defer ticker.Stop()
+	libraries := time.NewTicker(or(l.LibrariesInterval, LibrariesInterval))
+	defer libraries.Stop()
 	for {
 		select {
 		case <-ctx.Done():
@@ -132,6 +144,11 @@ func (l *Link) connect(ctx context.Context) (synced bool, err error) {
 				continue
 			}
 		case <-ticker.C:
+		case <-libraries.C:
+			if published, err = l.publish(ctx, published); err != nil {
+				return true, err
+			}
+			continue
 		}
 		if cursor, err = l.Sync(ctx); err != nil {
 			return true, err
@@ -222,6 +239,30 @@ func (l *Link) Sync(ctx context.Context) (int64, error) {
 			return max(after, resp.GetCursor()), nil
 		}
 	}
+}
+
+// publish publishes the server's libraries unless they are those last
+// published, whose fingerprint it is given and returns.
+func (l *Link) publish(ctx context.Context, last string) (string, error) {
+	libs, err := l.Store.Libraries().List(ctx)
+	if err != nil {
+		return last, err
+	}
+	out := make([]*cloudv1.Library, len(libs))
+	h := sha256.New()
+	for i, lib := range libs {
+		id, kind := lib.ID.String(), string(lib.Kind)
+		out[i] = cloudv1.Library_builder{Id: &id, Name: &lib.Name, Kind: &kind}.Build()
+		fmt.Fprintf(h, "%s\x00%s\x00%s\x00", id, lib.Name, kind)
+	}
+	fingerprint := hex.EncodeToString(h.Sum(nil))
+	if fingerprint == last {
+		return last, nil
+	}
+	if _, err := l.Client.PublishLibraries(ctx, cloudv1.PublishLibrariesRequest_builder{Libraries: out}.Build()); err != nil {
+		return last, fmt.Errorf("publish the libraries: %w", err)
+	}
+	return fingerprint, nil
 }
 
 func or(d, def time.Duration) time.Duration {

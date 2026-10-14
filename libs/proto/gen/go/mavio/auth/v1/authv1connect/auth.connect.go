@@ -102,6 +102,9 @@ const (
 	AuthServiceSwitchUserProcedure = "/mavio.auth.v1.AuthService/SwitchUser"
 	// AuthServiceClaimServerProcedure is the fully-qualified name of the AuthService's ClaimServer RPC.
 	AuthServiceClaimServerProcedure = "/mavio.auth.v1.AuthService/ClaimServer"
+	// AuthServiceSignInWithAssertionProcedure is the fully-qualified name of the AuthService's
+	// SignInWithAssertion RPC.
+	AuthServiceSignInWithAssertionProcedure = "/mavio.auth.v1.AuthService/SignInWithAssertion"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -212,6 +215,14 @@ type AuthServiceClient interface {
 	// INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
 	// mavio.dev cannot be reached.
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
+	// SignInWithAssertion signs a device in to a server in mavio.dev mode
+	// with a sign-in assertion mavio.dev issued for the server and the
+	// device's key, replacing the device's previous session. The device
+	// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
+	// assertion. A wrong, expired or used assertion, a wrong signature and
+	// an account without access to the server fail with UNAUTHENTICATED; a
+	// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+	SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -381,6 +392,12 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("ClaimServer")),
 			connect.WithClientOptions(opts...),
 		),
+		signInWithAssertion: connect.NewClient[v1.SignInWithAssertionRequest, v1.SignInWithAssertionResponse](
+			httpClient,
+			baseURL+AuthServiceSignInWithAssertionProcedure,
+			connect.WithSchema(authServiceMethods.ByName("SignInWithAssertion")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -411,6 +428,7 @@ type authServiceClient struct {
 	listSwitchableUsers    *connect.Client[v1.ListSwitchableUsersRequest, v1.ListSwitchableUsersResponse]
 	switchUser             *connect.Client[v1.SwitchUserRequest, v1.SwitchUserResponse]
 	claimServer            *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
+	signInWithAssertion    *connect.Client[v1.SignInWithAssertionRequest, v1.SignInWithAssertionResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -638,6 +656,15 @@ func (c *authServiceClient) ClaimServer(ctx context.Context, req *v1.ClaimServer
 	return nil, err
 }
 
+// SignInWithAssertion calls mavio.auth.v1.AuthService.SignInWithAssertion.
+func (c *authServiceClient) SignInWithAssertion(ctx context.Context, req *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error) {
+	response, err := c.signInWithAssertion.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -746,6 +773,14 @@ type AuthServiceHandler interface {
 	// INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
 	// mavio.dev cannot be reached.
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
+	// SignInWithAssertion signs a device in to a server in mavio.dev mode
+	// with a sign-in assertion mavio.dev issued for the server and the
+	// device's key, replacing the device's previous session. The device
+	// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
+	// assertion. A wrong, expired or used assertion, a wrong signature and
+	// an account without access to the server fail with UNAUTHENTICATED; a
+	// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+	SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -911,6 +946,12 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("ClaimServer")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceSignInWithAssertionHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceSignInWithAssertionProcedure,
+		svc.SignInWithAssertion,
+		connect.WithSchema(authServiceMethods.ByName("SignInWithAssertion")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -963,6 +1004,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceSwitchUserHandler.ServeHTTP(w, r)
 		case AuthServiceClaimServerProcedure:
 			authServiceClaimServerHandler.ServeHTTP(w, r)
+		case AuthServiceSignInWithAssertionProcedure:
+			authServiceSignInWithAssertionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1070,4 +1113,8 @@ func (UnimplementedAuthServiceHandler) SwitchUser(context.Context, *v1.SwitchUse
 
 func (UnimplementedAuthServiceHandler) ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ClaimServer is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.SignInWithAssertion is not implemented"))
 }

@@ -83,8 +83,8 @@ func TestClaim(t *testing.T) {
 
 	// Claimed again after the command line unclaimed it, the server keeps
 	// its cursor and alice becomes a member.
-	dev.AddChange(key.ID())
-	dev.AddChange(key.ID())
+	dev.AddChange(key.ID(), nil)
+	dev.AddChange(key.ID(), nil)
 	if _, err := recovery.Unclaim(ctx, st, time.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -143,8 +143,13 @@ func TestLink(t *testing.T) {
 		applied []int64
 	)
 	count := func() int { mu.Lock(); defer mu.Unlock(); return len(applied) }
+	movies := core.Library{Name: "Movies", Kind: core.LibraryMovies, Paths: []string{"/media/movies"}}
+	if err := st.Libraries().Create(ctx, &movies); err != nil {
+		t.Fatal(err)
+	}
 	link := cloud.NewLink(st, client, nil)
 	link.MinBackoff, link.MaxBackoff, link.PingInterval = 10*time.Millisecond, 50*time.Millisecond, 10*time.Millisecond
+	link.LibrariesInterval = 10 * time.Millisecond
 	link.Apply = func(_ context.Context, _ core.Store, c *cloudv1.Change) error {
 		mu.Lock()
 		defer mu.Unlock()
@@ -162,15 +167,25 @@ func TestLink(t *testing.T) {
 	}
 	eventually(t, "the link connects", func() bool { return dev.Connections(key.ID()) == 1 })
 
+	// The link publishes the libraries, and again when they change.
+	eventually(t, "the libraries are published", func() bool {
+		libs := dev.Libraries(key.ID())
+		return len(libs) == 1 && libs[0].GetId() == movies.ID.String() && libs[0].GetKind() == "movies"
+	})
+	if err := st.Libraries().Create(ctx, &core.Library{Name: "Shows", Kind: core.LibraryShows, Paths: []string{"/media/shows"}}); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "the new library is published", func() bool { return len(dev.Libraries(key.ID())) == 2 })
+
 	// A notice fetches the change it announces.
-	dev.AddChange(key.ID())
+	dev.AddChange(key.ID(), nil)
 	eventually(t, "the first change is applied", func() bool { return count() == 1 })
 
 	// Changes made while the server is disconnected are fetched when it
 	// reconnects.
 	dev.Disconnect(key.ID())
-	dev.AddChange(key.ID())
-	dev.AddChange(key.ID())
+	dev.AddChange(key.ID(), nil)
+	dev.AddChange(key.ID(), nil)
 	eventually(t, "the missed changes are applied", func() bool { return count() == 3 })
 	if a, _ := st.Settings().Accounts(ctx); a.Cursor != 3 {
 		t.Errorf("cursor = %d, want = 3", a.Cursor)

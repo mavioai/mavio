@@ -18,6 +18,9 @@ const totpIssuer = "Mavio"
 // StartPasskeyRegistration begins creating a passkey of the caller at the
 // request's origin.
 func (s *UserService) StartPasskeyRegistration(ctx context.Context, _ *userv1.StartPasskeyRegistrationRequest) (*userv1.StartPasskeyRegistrationResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.Passkeys == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
 	}
@@ -42,6 +45,9 @@ func (s *UserService) StartPasskeyRegistration(ctx context.Context, _ *userv1.St
 
 // FinishPasskeyRegistration stores the caller's new passkey.
 func (s *UserService) FinishPasskeyRegistration(ctx context.Context, req *userv1.FinishPasskeyRegistrationRequest) (*userv1.FinishPasskeyRegistrationResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.Passkeys == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
 	}
@@ -88,6 +94,9 @@ func (s *UserService) DeletePasskey(ctx context.Context, req *userv1.DeletePassk
 
 // StartTotp gives the caller a new TOTP secret to confirm.
 func (s *UserService) StartTotp(ctx context.Context, _ *userv1.StartTotpRequest) (*userv1.StartTotpResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.TOTP == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("TOTP is unavailable"))
 	}
@@ -103,6 +112,9 @@ func (s *UserService) StartTotp(ctx context.Context, _ *userv1.StartTotpRequest)
 
 // ConfirmTotp turns the caller's TOTP on with a code of its new secret.
 func (s *UserService) ConfirmTotp(ctx context.Context, req *userv1.ConfirmTotpRequest) (*userv1.ConfirmTotpResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.TOTP == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("TOTP is unavailable"))
 	}

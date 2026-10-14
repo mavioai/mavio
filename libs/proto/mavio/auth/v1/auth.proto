@@ -10,7 +10,11 @@ import "mavio/user/v1/user.proto";
 // Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
 // RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
 // ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,
-// AcceptInvitation and ClaimServer are public; the other methods act on the calling user.
+// AcceptInvitation, ClaimServer and SignInWithAssertion are public; the other methods act on the calling user.
+//
+// In mavio.dev mode devices sign in with SignInWithAssertion: Login, the
+// passkey sign-in, Quick Connect, password resets, invitations and
+// switching fail with FAILED_PRECONDITION, as mavio.dev keeps them.
 //
 // A session belongs to a device's Ed25519 key. Its access token lasts an
 // hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -135,6 +139,14 @@ service AuthService {
   // INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
   // mavio.dev cannot be reached.
   rpc ClaimServer(ClaimServerRequest) returns (ClaimServerResponse);
+  // SignInWithAssertion signs a device in to a server in mavio.dev mode
+  // with a sign-in assertion mavio.dev issued for the server and the
+  // device's key, replacing the device's previous session. The device
+  // signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
+  // assertion. A wrong, expired or used assertion, a wrong signature and
+  // an account without access to the server fail with UNAUTHENTICATED; a
+  // server not in mavio.dev mode fails with FAILED_PRECONDITION.
+  rpc SignInWithAssertion(SignInWithAssertionRequest) returns (SignInWithAssertionResponse);
 }
 
 // Device identifies a client installation.
@@ -192,6 +204,9 @@ message GetAuthInfoResponse {
   string version = 4;
   // How the server signs people in; unspecified until its setup chooses.
   AccountMode mode = 5;
+  // In mavio.dev mode, the base URL of mavio.dev's API, where clients get
+  // sign-in assertions for the server.
+  string mavio_dev_url = 6;
 }
 
 message CreateFirstUserRequest {
@@ -551,4 +566,29 @@ message ClaimServerRequest {
 message ClaimServerResponse {
   // The administrator.
   mavio.user.v1.User user = 1;
+}
+
+message SignInWithAssertionRequest {
+  // The JWT mavio.dev signed.
+  string assertion = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 4096
+  ];
+  // The device the assertion names by its public key.
+  Device device = 2 [(buf.validate.field).required = true];
+  // The device's Ed25519 signature of "mavio-sign-in-assertion-v1", a
+  // zero byte and the assertion.
+  bytes signature = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 64
+  ];
+}
+
+message SignInWithAssertionResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  mavio.user.v1.User user = 2;
+  Session session = 3;
+  // When the access token expires.
+  google.protobuf.Timestamp access_token_expire_time = 4;
 }

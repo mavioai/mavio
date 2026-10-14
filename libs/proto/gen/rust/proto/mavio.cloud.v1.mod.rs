@@ -19,12 +19,26 @@ pub mod __buffa {
         #[allow(unused_imports)]
         use super::*;
         include!("mavio.cloud.v1.cloud.__view.rs");
+        pub mod oneof {
+            #[allow(unused_imports)]
+            use super::*;
+            include!("mavio.cloud.v1.cloud.__view_oneof.rs");
+        }
+    }
+    pub mod oneof {
+        #[allow(unused_imports)]
+        use super::*;
+        include!("mavio.cloud.v1.cloud.__oneof.rs");
     }
 }
 #[doc(inline)]
 pub use self::__buffa::view::AccountView;
 #[doc(inline)]
 pub use self::__buffa::view::AccountOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ClaimServerRequestView;
 #[doc(inline)]
@@ -45,6 +59,30 @@ pub use self::__buffa::view::ListChangesResponseOwnedView;
 pub use self::__buffa::view::ChangeView;
 #[doc(inline)]
 pub use self::__buffa::view::ChangeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessGrantedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessGrantedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessRevokedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccessRevokedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountRevokedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountRevokedOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryView;
+#[doc(inline)]
+pub use self::__buffa::view::LibraryOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishLibrariesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishLibrariesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishLibrariesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishLibrariesResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::NoticeView;
 #[doc(inline)]

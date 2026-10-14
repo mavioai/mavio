@@ -160,7 +160,7 @@ Mavio Pass 为 mavio.dev 自身提供的服务付费，例如中转；服务端�
 * 不带前缀的相同路径改为接受 Connect API 的凭据，供 API 密钥和插件使用。
 
 ### 5.5 登录断言
-**登录断言**是 mavio.dev 为一台服务端签名的 JWT：受众是服务端 ID，载明账户、设备公钥和一个随机数，有效期两分钟。服务端用缓存的 mavio.dev 公钥检查它，核对账户的访问记录，每个断言只接受一次。
+**登录断言**是 mavio.dev 为一台服务端签名的 JWT：受众是服务端 ID，载明账户、设备公钥和一个随机数，有效期两分钟。客户端把它连同设备、以及设备密钥对断言的签名一起传给 `AuthService.SignInWithAssertion`，因此在传输中被截取的断言毫无用处。服务端用缓存的 mavio.dev 公钥检查它，核对设备就是断言所载的设备、账户有访问权限，每个断言只接受一次；无法取得 mavio.dev 的公钥时，登录返回 `unavailable`。
 
 访问被撤销，或账户被停用、删除、报告被盗时，mavio.dev 通过连接通知相关服务端，服务端结束该账户的会话。
 
@@ -201,9 +201,9 @@ sequenceDiagram
 * **两个端口。**`libs/core` 定义登录端口和用户目录端口。登录端口校验一次登录（凭据、Quick Connect 批准或登录断言）并返回用户 ID；用户目录端口列出用户、指明管理员，并给出每个用户的媒体库访问记录。`apps/server` 按模式为每个端口装配一个实现：独立模式基于服务端自己的表，mavio.dev 模式基于从 mavio.dev 同步来的记录副本。登录之后的一切由两种模式共用：会话、设备密钥、令牌、媒体 URL、媒体库访问的执行，以及用户的观看数据。
 * **用户。**`users` 表有 `kind`（管理员、成员或托管）、用户的媒体库访问记录，和一个可空且唯一的 `account_id`，即 mavio.dev 模式下 Mavio 账户的 ID。mavio.dev 模式下，账户的访问记录到达时创建其用户记录；管理员的用户记录在服务端被认领时创建。凭据（密码哈希、通行密钥、TOTP 密钥、PIN 哈希）保存在单独的表中，只在独立模式下使用。
 * **独立模式的凭据。**密码用 argon2id 哈希（[系统架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)）；TOTP（RFC 6238）用标准库的 HMAC 计算；通行密钥使用 `go-webauthn/webauthn`。通行密钥属于浏览器访问服务端时所用的主机名，即其依赖方，取自请求的来源，来源必须是 HTTPS，或 `localhost` 上的 HTTP；通行密钥只在该主机上可用，IP 地址不能有通行密钥。通行密钥单独即可登录；TOTP 是密码的第二因素。
-* **mavio.dev 模式下的管理。**客户端直接在 mavio.dev 上管理访问、好友和 Home；服务端管理用户和访问的 RPC 返回 `failed_precondition`。Home 内的用户切换发生在客户端与 mavio.dev 之间，服务端只看到一次带新断言的登录。
+* **mavio.dev 模式下的管理。**客户端直接在 mavio.dev 上管理访问、好友和 Home；服务端创建用户、设置凭据、邀请、切换用户或以服务端自己的凭据登录的 RPC 返回 `failed_precondition`。`UserService.UpdateUser` 只修改账户用户在服务端自己的策略，因为其名称、访问、限制档和是否停用都属于 mavio.dev；`DeleteUser` 只清除访问已被撤销的用户。Home 内的用户切换发生在客户端与 mavio.dev 之间，服务端只看到一次带新断言的登录。
 * **服务端信息。**无需登录的 `AuthService.GetAuthInfo` 给出服务端的模式及其 ID 和名称，客户端在登录前就知道该如何登录；在模式选定之前，以及 mavio.dev 模式的服务端未被认领时，它报告需要安装。
-* **与 mavio.dev 的连接。**`internal/cloud` 用身份密钥为服务端发往 mavio.dev 的 `mavio.cloud.v1.ServerService` 的请求签名、认领服务端，并为已认领的服务端保持到 mavio.dev 的 WebSocket（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)）。账户设置保存管理员的账户和服务端已应用的最后一项变更的游标；服务端用 `ListChanges` 取得其后的变更，并在推进游标的事务中应用它们。
+* **与 mavio.dev 的连接。**`internal/cloud` 用身份密钥为服务端发往 mavio.dev 的 `mavio.cloud.v1.ServerService` 的请求签名、认领服务端，并为已认领的服务端保持到 mavio.dev 的 WebSocket（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)）。账户设置保存管理员的账户和服务端已应用的最后一项变更的游标；服务端用 `ListChanges` 取得其后的变更，并在推进游标的事务中应用它们。访问记录创建或更新账户的用户并启用它；被撤销的记录停用该用户并结束其会话；账户变更为用户改名；被删除账户的用户连同其数据被删除，被停用或被盗账户的会话被结束。管理员的用户在任何变更中保持其类型和访问。服务端在连接时、以及媒体库每次变化时，用 `PublishLibraries` 发布其媒体库。
 
 ## 9. mavio.dev
 

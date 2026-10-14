@@ -977,6 +977,13 @@ pub const USER_SERVICE_DELETE_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc
 /// All methods except GetCurrentUser, UpdatePreferences, and managing one's
 /// own password, PIN, passkeys and TOTP require the administrator. Managed users have no
 /// passwords, passkeys or TOTP.
+/// In mavio.dev mode the users are Mavio accounts, which mavio.dev keeps:
+/// CreateUser, SetPassword, SetPin, StartPasskeyRegistration,
+/// FinishPasskeyRegistration, StartTotp, ConfirmTotp and CreateInvitation
+/// fail with FAILED_PRECONDITION; UpdateUser changes only the server's own
+/// policy, keeping the access record, and fails with FAILED_PRECONDITION
+/// for a change of name, disabling or restriction; and DeleteUser purges
+/// only accounts without access, which are disabled.
 ///
 /// # Implementing handlers
 ///

@@ -16,6 +16,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/apps/server/internal/cloud"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
@@ -48,6 +49,7 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceStartInvitationPasskeyProcedure,
 	authv1connect.AuthServiceAcceptInvitationProcedure,
 	authv1connect.AuthServiceClaimServerProcedure,
+	authv1connect.AuthServiceSignInWithAssertionProcedure,
 }
 
 // UserBoundProcedures act on the caller's own state, so a plugin calls them
@@ -121,8 +123,12 @@ type AuthService struct {
 	Requests func() core.RequestSettings
 	// Claim claims the server at mavio.dev with a claim code (cloud.Claimer);
 	// nil claims nothing.
-	Claim  func(ctx context.Context, code string) (core.User, error)
-	resets *auth.PasswordResets
+	Claim func(ctx context.Context, code string) (core.User, error)
+	// Assertions checks the sign-in assertions of mavio.dev, whose API is
+	// at MavioDevURL; nil signs no one in with them.
+	Assertions  *cloud.Verifier
+	MavioDevURL string
+	resets      *auth.PasswordResets
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
@@ -138,7 +144,10 @@ func NewAuthService(store core.Store, tokens *auth.AccessTokens) *AuthService {
 
 // StartQuickConnect registers a device waiting to be signed in from
 // another one.
-func (s *AuthService) StartQuickConnect(_ context.Context, req *authv1.StartQuickConnectRequest) (*authv1.StartQuickConnectResponse, error) {
+func (s *AuthService) StartQuickConnect(ctx context.Context, req *authv1.StartQuickConnectRequest) (*authv1.StartQuickConnectResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	d := req.GetDevice()
 	r := s.quick.Start(auth.Device{
 		ID: d.GetId(), Name: d.GetName(), Client: d.GetClient(), ClientVersion: d.GetClientVersion(), Key: d.GetPublicKey(),
@@ -160,6 +169,9 @@ func (s *AuthService) GetQuickConnectState(ctx context.Context, req *authv1.GetQ
 // AuthorizeQuickConnect signs the device waiting with a code in as the
 // calling user.
 func (s *AuthService) AuthorizeQuickConnect(ctx context.Context, req *authv1.AuthorizeQuickConnectRequest) (*authv1.AuthorizeQuickConnectResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := principal(ctx)
 	if err != nil {
 		return nil, err
@@ -175,6 +187,9 @@ func (s *AuthService) AuthorizeQuickConnect(ctx context.Context, req *authv1.Aut
 
 // LoginWithQuickConnect gives an authorized device its access token.
 func (s *AuthService) LoginWithQuickConnect(ctx context.Context, req *authv1.LoginWithQuickConnectRequest) (*authv1.LoginWithQuickConnectResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	r, err := s.quick.Claim(req.GetSecret())
 	if err != nil {
 		return nil, connectError(ctx, err)
@@ -278,6 +293,9 @@ func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequ
 		i := s.Info()
 		b.ServerId, b.ServerName, b.Version = &i.ID, &i.Name, &i.Version
 	}
+	if accounts.Mode == core.AccountModeMavioDev {
+		b.MavioDevUrl = &s.MavioDevURL
+	}
 	return b.Build(), nil
 }
 
@@ -336,6 +354,9 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 // Login checks a user's password and signs the device in. Failed
 // sign-ins slow down progressively per user name and per address.
 func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	keys := signInKeys(ctx, req.GetName())
 	if err := s.throttled(keys); err != nil {
 		return nil, err
@@ -468,6 +489,9 @@ func (s *AuthService) login(ctx context.Context, req *authv1.LoginRequest) (*aut
 // StartPasskeySignIn begins signing in with a passkey at the request's
 // origin.
 func (s *AuthService) StartPasskeySignIn(ctx context.Context, _ *authv1.StartPasskeySignInRequest) (*authv1.StartPasskeySignInResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.Passkeys == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
 	}
@@ -485,6 +509,9 @@ func (s *AuthService) StartPasskeySignIn(ctx context.Context, _ *authv1.StartPas
 // FinishPasskeySignIn signs a device in as the user whose passkey
 // answered. Failures slow down per address, as Login's.
 func (s *AuthService) FinishPasskeySignIn(ctx context.Context, req *authv1.FinishPasskeySignInRequest) (*authv1.FinishPasskeySignInResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.Passkeys == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
 	}
@@ -739,6 +766,9 @@ func apiKeyToProto(k *core.APIKey) *authv1.ApiKey {
 // who signs in with a password. It answers alike for every name, so that
 // it tells nothing about which users exist.
 func (s *AuthService) ForgotPassword(ctx context.Context, req *authv1.ForgotPasswordRequest) (*authv1.ForgotPasswordResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	pluginID := ""
 	if s.ResetPlugin != nil {
 		pluginID = s.ResetPlugin()
@@ -783,6 +813,9 @@ func (s *AuthService) ForgotPassword(ctx context.Context, req *authv1.ForgotPass
 // ResetPassword sets a new password with a PIN ForgotPassword delivered,
 // ending the user's sessions.
 func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswordRequest) (*authv1.ResetPasswordResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	failed := connect.NewError(connect.CodeUnauthenticated, errors.New("wrong user name or PIN"))
 	user, err := s.store.Users().GetByName(ctx, req.GetName())
 	if errors.Is(err, core.ErrNotFound) {

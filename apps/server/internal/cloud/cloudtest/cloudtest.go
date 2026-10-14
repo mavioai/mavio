@@ -1,11 +1,13 @@
 // Package cloudtest simulates mavio.dev's API for servers in tests: it
 // checks the JWTs servers sign, claims servers with claim codes, keeps
-// their changes and sends notices on their WebSockets.
+// their changes and libraries, sends notices on their WebSockets, and
+// signs sign-in assertions with the key it publishes.
 package cloudtest
 
 import (
 	"context"
 	"crypto/ed25519"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -32,23 +34,31 @@ type Server struct {
 	// URL is the API's base URL.
 	URL string
 
+	key ed25519.PrivateKey
+
 	mu      sync.Mutex
 	codes   map[string]*cloudv1.Account
 	servers map[string]*server
 }
 
 type server struct {
-	key     ed25519.PublicKey
-	changes []*cloudv1.Change
-	conns   map[*websocket.Conn]struct{}
+	key       ed25519.PublicKey
+	changes   []*cloudv1.Change
+	libraries []*cloudv1.Library
+	conns     map[*websocket.Conn]struct{}
 }
+
+// keyID is the ID of the key assertions are signed with.
+const keyID = "test-key"
 
 type tokenKey struct{}
 
 // New starts a simulated mavio.dev, stopped at the end of the test.
 func New(t testing.TB) *Server {
-	s := &Server{codes: map[string]*cloudv1.Account{}, servers: map[string]*server{}}
+	_, key, _ := ed25519.GenerateKey(rand.Reader)
+	s := &Server{key: key, codes: map[string]*cloudv1.Account{}, servers: map[string]*server{}}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api"+cloud.JWKSPath, s.jwks)
 	path, h := cloudv1connect.NewServerServiceHandler(s)
 	mux.Handle("/api"+path, http.StripPrefix("/api", h))
 	mux.Handle("/api"+cloud.NoticesPath, websocket.Server{Handshake: s.handshake, Handler: s.notices})
@@ -68,9 +78,9 @@ func (s *Server) AddClaimCode(code string, account *cloudv1.Account) {
 	s.codes[code] = account
 }
 
-// AddChange adds a change for the server with an ID and notices its
-// connections, returning its cursor.
-func (s *Server) AddChange(serverID string) int64 {
+// AddChange adds a change for the server with an ID, nil for one of no
+// kind, and notices its connections, returning its cursor.
+func (s *Server) AddChange(serverID string, change *cloudv1.Change) int64 {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	srv := s.servers[serverID]
@@ -78,12 +88,69 @@ func (s *Server) AddChange(serverID string) int64 {
 		return 0
 	}
 	cursor := int64(len(srv.changes) + 1)
-	srv.changes = append(srv.changes, cloudv1.Change_builder{Cursor: &cursor, CreateTime: timestamppb.Now()}.Build())
+	if change == nil {
+		change = &cloudv1.Change{}
+	} else {
+		change = proto.CloneOf(change)
+	}
+	change.SetCursor(cursor)
+	change.SetCreateTime(timestamppb.Now())
+	srv.changes = append(srv.changes, change)
 	frame, _ := proto.Marshal(cloudv1.Notice_builder{Cursor: &cursor}.Build())
 	for conn := range srv.conns {
 		_ = websocket.Message.Send(conn, frame)
 	}
 	return cursor
+}
+
+// Libraries returns the libraries the server with an ID published.
+func (s *Server) Libraries(serverID string) []*cloudv1.Library {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if srv := s.servers[serverID]; srv != nil {
+		return srv.libraries
+	}
+	return nil
+}
+
+// Assertion returns a sign-in assertion for an account on the server
+// with an ID, for a device's public key, valid for two minutes.
+func (s *Server) Assertion(serverID, accountID string, device ed25519.PublicKey) string {
+	now := time.Now()
+	return s.Sign(cloud.AssertionClaims{
+		Issuer: s.URL, Audience: serverID, Subject: accountID,
+		IssuedAt: now.Unix(), ExpiresAt: now.Add(cloud.AssertionLifetime).Unix(),
+		DeviceKey: base64.RawURLEncoding.EncodeToString(device), Nonce: rand.Text(),
+	})
+}
+
+// Sign signs claims as a JWT with the key mavio.dev publishes.
+func (s *Server) Sign(claims any) string {
+	header, _ := json.Marshal(cloud.Header{Algorithm: "EdDSA", Type: "JWT", KeyID: keyID})
+	body, _ := json.Marshal(claims)
+	enc := base64.RawURLEncoding
+	signed := enc.EncodeToString(header) + "." + enc.EncodeToString(body)
+	return signed + "." + enc.EncodeToString(ed25519.Sign(s.key, []byte(signed)))
+}
+
+func (s *Server) jwks(w http.ResponseWriter, _ *http.Request) {
+	x := base64.RawURLEncoding.EncodeToString(s.key.Public().(ed25519.PublicKey))
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"keys": []map[string]string{{"kty": "OKP", "crv": "Ed25519", "x": x, "kid": keyID, "alg": "EdDSA"}},
+	})
+}
+
+// PublishLibraries replaces a claimed server's libraries.
+func (s *Server) PublishLibraries(ctx context.Context, req *cloudv1.PublishLibrariesRequest) (*cloudv1.PublishLibrariesResponse, error) {
+	srv, err := s.claimed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	srv.libraries = req.GetLibraries()
+	return &cloudv1.PublishLibrariesResponse{}, nil
 }
 
 // Connections returns the number of WebSockets of the server with an ID.

@@ -802,6 +802,7 @@ flowchart TD
 - [x] 邀请链接、Quick Connect 与在管理员设备上的切换：以令牌散列保存的邀请，以密码或通行密钥创建成员或转换托管用户，使用次数原子计数，过期的每日清除；切换在验证目标的 PIN 后把会话转给目标，按用户限速
 - [x] 从命令行恢复管理员：`mavio admin reset-password`，在独立服务端的数据库中设置新密码、关闭 TOTP 并结束管理员的会话
 - [x] 服务端身份密钥、认领、重新认领，以及服务端到 mavio.dev 的连接：由身份密钥得出的服务端 ID、`AuthService.ClaimServer` 与 `claim-token`、`mavio admin unclaim`、以 JWT 签名调用 `mavio.cloud.v1.ServerService`，以及保持 WebSocket 并应用游标之后变更的连接，均以模拟的 mavio.dev 测试；变更的种类随访问记录一起实现
+- [x] 服务端的登录断言、访问记录与吊销：用缓存的 mavio.dev 密钥集检查的 `AuthService.SignInWithAssertion`，应用到用户和会话的各类变更，`PublishLibraries`，以及 mavio.dev 模式下拒绝服务端自身凭据和用户的 RPC
 - [ ] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销
 - [ ] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home
 - [ ] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更

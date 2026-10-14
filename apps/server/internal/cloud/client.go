@@ -60,6 +60,11 @@ func (c *Client) ListChanges(ctx context.Context, req *cloudv1.ListChangesReques
 	return c.api.ListChanges(ctx, req)
 }
 
+// PublishLibraries replaces the libraries mavio.dev knows of the server.
+func (c *Client) PublishLibraries(ctx context.Context, req *cloudv1.PublishLibrariesRequest) (*cloudv1.PublishLibrariesResponse, error) {
+	return c.api.PublishLibraries(ctx, req)
+}
+
 // Notices opens the WebSocket on which mavio.dev sends Notices.
 func (c *Client) Notices(ctx context.Context) (*websocket.Conn, error) {
 	u, err := url.Parse(c.base + NoticesPath)

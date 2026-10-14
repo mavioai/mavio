@@ -29,6 +29,9 @@ func switcher(ctx context.Context) (auth.Principal, error) {
 // ListSwitchableUsers lists the enabled users the calling session may
 // switch to.
 func (s *AuthService) ListSwitchableUsers(ctx context.Context, _ *authv1.ListSwitchableUsersRequest) (*authv1.ListSwitchableUsersResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := switcher(ctx)
 	if err != nil {
 		return nil, err
@@ -59,6 +62,9 @@ func (s *AuthService) ListSwitchableUsers(ctx context.Context, _ *authv1.ListSwi
 // SwitchUser makes the calling session another user's, checking that
 // user's PIN. Wrong PINs slow down progressively per user.
 func (s *AuthService) SwitchUser(ctx context.Context, req *authv1.SwitchUserRequest) (*authv1.SwitchUserResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := switcher(ctx)
 	if err != nil {
 		return nil, err

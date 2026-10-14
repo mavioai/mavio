@@ -106,6 +106,9 @@ func (s *UserService) GetCurrentUser(ctx context.Context, _ *userv1.GetCurrentUs
 // CreateUser creates a member or a managed user; the administrator is
 // created at setup.
 func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := admin(ctx)
 	if err != nil {
 		return nil, err
@@ -174,6 +177,16 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		if u, err = tx.Users().Get(ctx, core.MustParseID(req.GetId())); err != nil {
 			return err
 		}
+		mavioDev, err := inMavioDevMode(ctx, tx)
+		if err != nil {
+			return err
+		}
+		// In mavio.dev mode the account's names, access and restriction
+		// are mavio.dev's; the server's own policy stays the server's.
+		if mavioDev && (req.GetName() != u.Name || req.GetDisabled() != u.Disabled || restrictionFromProto(req.GetRestriction()) != u.Restriction) {
+			return errMavioDevMode
+		}
+		access := u.Access
 		switch {
 		case req.HasAdmin() && req.GetAdmin() != u.IsAdmin():
 			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the server has one administrator"))
@@ -186,6 +199,9 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		u.Restriction = restrictionFromProto(req.GetRestriction())
 		if req.HasPolicy() {
 			u.Policy, u.Access = policyFromProto(req.GetPolicy(), u.Policy.Requests)
+		}
+		if mavioDev {
+			u.Access = access
 		}
 		return tx.Users().Update(ctx, &u)
 	})
@@ -201,7 +217,8 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 }
 
 // DeleteUser removes an account with its state and sessions; the
-// administrator cannot be removed.
+// administrator cannot be removed, nor, in mavio.dev mode, an account
+// with access.
 func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequest) (*userv1.DeleteUserResponse, error) {
 	p, err := admin(ctx)
 	if err != nil {
@@ -215,6 +232,14 @@ func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 		}
 		if u.IsAdmin() {
 			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the administrator cannot be deleted"))
+		}
+		// In mavio.dev mode only accounts without access are purged.
+		mavioDev, err := inMavioDevMode(ctx, tx)
+		if err != nil {
+			return err
+		}
+		if mavioDev && !u.Disabled {
+			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the account has access to the server; revoke it at mavio.dev first"))
 		}
 		return tx.Users().Delete(ctx, u.ID)
 	})
@@ -230,6 +255,9 @@ func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 // password becomes a member, without its restriction profile. The user's
 // other sessions end.
 func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRequest) (*userv1.SetPasswordResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := principal(ctx)
 	if err != nil {
 		return nil, err
@@ -292,6 +320,9 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 // SetPin sets or clears a PIN: the administrator sets managed users',
 // other users their own.
 func (s *UserService) SetPin(ctx context.Context, req *userv1.SetPinRequest) (*userv1.SetPinResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := principal(ctx)
 	if err != nil {
 		return nil, err

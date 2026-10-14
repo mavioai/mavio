@@ -2,8 +2,8 @@
 // @generated from file mavio/cloud/v1/cloud.proto (package mavio.cloud.v1, edition 2023)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/cloud/v1/cloud.proto.
  */
 export const file_mavio_cloud_v1_cloud: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEiPgoHQWNjb3VudBIKCgJpZBgBIAEoCRIRCgl1c2VyX25hbWUYAiABKAkSFAoMZGlzcGxheV9uYW1lGAMgASgJIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyJJCgZDaGFuZ2USDgoGY3Vyc29yGAEgASgDEi8KC2NyZWF0ZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIYCgZOb3RpY2USDgoGY3Vyc29yGAEgASgDMsQBCg1TZXJ2ZXJTZXJ2aWNlElYKC0NsYWltU2VydmVyEiIubWF2aW8uY2xvdWQudjEuQ2xhaW1TZXJ2ZXJSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuQ2xhaW1TZXJ2ZXJSZXNwb25zZRJbCgtMaXN0Q2hhbmdlcxIiLm1hdmlvLmNsb3VkLnYxLkxpc3RDaGFuZ2VzUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkxpc3RDaGFuZ2VzUmVzcG9uc2UiA5ACAUK9AQoSY29tLm1hdmlvLmNsb3VkLnYxQgpDbG91ZFByb3RvUAFaQWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9jbG91ZC92MTtjbG91ZHYxogIDTUNYqgIOTWF2aW8uQ2xvdWQuVjHKAg5NYXZpb1xDbG91ZFxWMeICGk1hdmlvXENsb3VkXFYxXEdQQk1ldGFkYXRh6gIQTWF2aW86OkNsb3VkOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp]);
+  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEiaQoHQWNjb3VudBIKCgJpZBgBIAEoCRIRCgl1c2VyX25hbWUYAiABKAkSFAoMZGlzcGxheV9uYW1lGAMgASgJEikKBGtpbmQYBCABKA4yGy5tYXZpby5jbG91ZC52MS5BY2NvdW50S2luZCKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyKyAgoGQ2hhbmdlEg4KBmN1cnNvchgBIAEoAxIvCgtjcmVhdGVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASNwoOYWNjZXNzX2dyYW50ZWQYAyABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NHcmFudGVkSAASNwoOYWNjZXNzX3Jldm9rZWQYBCABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZXZva2VkSAASMgoPYWNjb3VudF9jaGFuZ2VkGAUgASgLMhcubWF2aW8uY2xvdWQudjEuQWNjb3VudEgAEjkKD2FjY291bnRfcmV2b2tlZBgGIAEoCzIeLm1hdmlvLmNsb3VkLnYxLkFjY291bnRSZXZva2VkSABCBgoEa2luZCJhCg1BY2Nlc3NHcmFudGVkEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgCIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcyIjCg1BY2Nlc3NSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkivwEKDkFjY291bnRSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkSNQoGcmVhc29uGAIgASgOMiUubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWQuUmVhc29uImIKBlJlYXNvbhIWChJSRUFTT05fVU5TUEVDSUZJRUQQABIUChBSRUFTT05fU1VTUEVOREVEEAESEgoOUkVBU09OX0RFTEVURUQQAhIWChJSRUFTT05fQ09NUFJPTUlTRUQQAyJOCgdMaWJyYXJ5EhQKAmlkGAEgASgJQgi6SAVyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxiAAhIVCgRraW5kGAMgASgJQge6SARyAhggIlAKF1B1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0EjUKCWxpYnJhcmllcxgBIAMoCzIXLm1hdmlvLmNsb3VkLnYxLkxpYnJhcnlCCbpIBpIBAxDoByIaChhQdWJsaXNoTGlicmFyaWVzUmVzcG9uc2UiGAoGTm90aWNlEg4KBmN1cnNvchgBIAEoAypcCgtBY2NvdW50S2luZBIcChhBQ0NPVU5UX0tJTkRfVU5TUEVDSUZJRUQQABIVChFBQ0NPVU5UX0tJTkRfRlVMTBABEhgKFEFDQ09VTlRfS0lORF9NQU5BR0VEEAIysAIKDVNlcnZlclNlcnZpY2USVgoLQ2xhaW1TZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlc3BvbnNlElsKC0xpc3RDaGFuZ2VzEiIubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXNwb25zZSIDkAIBEmoKEFB1Ymxpc2hMaWJyYXJpZXMSJy5tYXZpby5jbG91ZC52MS5QdWJsaXNoTGlicmFyaWVzUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSIDkAICQr0BChJjb20ubWF2aW8uY2xvdWQudjFCCkNsb3VkUHJvdG9QAVpBZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2Nsb3VkL3YxO2Nsb3VkdjGiAgNNQ1iqAg5NYXZpby5DbG91ZC5WMcoCDk1hdmlvXENsb3VkXFYx4gIaTWF2aW9cQ2xvdWRcVjFcR1BCTWV0YWRhdGHqAhBNYXZpbzo6Q2xvdWQ6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp]);
 
 /**
  * Account is a Mavio account as a server sees it.
@@ -29,6 +29,8 @@ export type Account = Message<"mavio.cloud.v1.Account"> & {
   id: string;
 
   /**
+   * Unique across mavio.dev, case-insensitively.
+   *
    * @generated from field: string user_name = 2;
    */
   userName: string;
@@ -37,6 +39,11 @@ export type Account = Message<"mavio.cloud.v1.Account"> & {
    * @generated from field: string display_name = 3;
    */
   displayName: string;
+
+  /**
+   * @generated from field: mavio.cloud.v1.AccountKind kind = 4;
+   */
+  kind: AccountKind;
 };
 
 /**
@@ -45,6 +52,68 @@ export type Account = Message<"mavio.cloud.v1.Account"> & {
  */
 export const AccountSchema: GenMessage<Account> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_cloud, 0);
+
+/**
+ * Access is an account's library access record on a server.
+ *
+ * @generated from message mavio.cloud.v1.Access
+ */
+export type Access = Message<"mavio.cloud.v1.Access"> & {
+  /**
+   * Every library; library_ids are then empty.
+   *
+   * @generated from field: bool all_libraries = 1;
+   */
+  allLibraries: boolean;
+
+  /**
+   * The libraries the account reaches, by the IDs the server published.
+   *
+   * @generated from field: repeated string library_ids = 2;
+   */
+  libraryIds: string[];
+
+  /**
+   * The highest rating score shown; unset shows every rating, zero only
+   * content for all ages.
+   *
+   * @generated from field: int32 max_parental_rating = 3;
+   */
+  maxParentalRating: number;
+
+  /**
+   * Hides items without a rating under a maximum.
+   *
+   * @generated from field: bool block_unrated = 4;
+   */
+  blockUnrated: boolean;
+
+  /**
+   * When set, only items with one of these labels are shown.
+   *
+   * @generated from field: repeated string allowed_labels = 5;
+   */
+  allowedLabels: string[];
+
+  /**
+   * Items with any of these labels are hidden.
+   *
+   * @generated from field: repeated string blocked_labels = 6;
+   */
+  blockedLabels: string[];
+
+  /**
+   * @generated from field: bool allow_download = 7;
+   */
+  allowDownload: boolean;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.Access.
+ * Use `create(AccessSchema)` to create a new message.
+ */
+export const AccessSchema: GenMessage<Access> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 1);
 
 /**
  * @generated from message mavio.cloud.v1.ClaimServerRequest
@@ -81,7 +150,7 @@ export type ClaimServerRequest = Message<"mavio.cloud.v1.ClaimServerRequest"> & 
  * Use `create(ClaimServerRequestSchema)` to create a new message.
  */
 export const ClaimServerRequestSchema: GenMessage<ClaimServerRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 1);
+  messageDesc(file_mavio_cloud_v1_cloud, 2);
 
 /**
  * @generated from message mavio.cloud.v1.ClaimServerResponse
@@ -108,7 +177,7 @@ export type ClaimServerResponse = Message<"mavio.cloud.v1.ClaimServerResponse"> 
  * Use `create(ClaimServerResponseSchema)` to create a new message.
  */
 export const ClaimServerResponseSchema: GenMessage<ClaimServerResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 2);
+  messageDesc(file_mavio_cloud_v1_cloud, 3);
 
 /**
  * @generated from message mavio.cloud.v1.ListChangesRequest
@@ -134,7 +203,7 @@ export type ListChangesRequest = Message<"mavio.cloud.v1.ListChangesRequest"> & 
  * Use `create(ListChangesRequestSchema)` to create a new message.
  */
 export const ListChangesRequestSchema: GenMessage<ListChangesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 3);
+  messageDesc(file_mavio_cloud_v1_cloud, 4);
 
 /**
  * @generated from message mavio.cloud.v1.ListChangesResponse
@@ -166,7 +235,7 @@ export type ListChangesResponse = Message<"mavio.cloud.v1.ListChangesResponse"> 
  * Use `create(ListChangesResponseSchema)` to create a new message.
  */
 export const ListChangesResponseSchema: GenMessage<ListChangesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 4);
+  messageDesc(file_mavio_cloud_v1_cloud, 5);
 
 /**
  * Change is one change to the server's records, applied in cursor order.
@@ -185,6 +254,43 @@ export type Change = Message<"mavio.cloud.v1.Change"> & {
    * @generated from field: google.protobuf.Timestamp create_time = 2;
    */
   createTime?: Timestamp | undefined;
+
+  /**
+   * @generated from oneof mavio.cloud.v1.Change.kind
+   */
+  kind: {
+    /**
+     * An account has access, or its record changed.
+     *
+     * @generated from field: mavio.cloud.v1.AccessGranted access_granted = 3;
+     */
+    value: AccessGranted;
+    case: "accessGranted";
+  } | {
+    /**
+     * An account's access was revoked.
+     *
+     * @generated from field: mavio.cloud.v1.AccessRevoked access_revoked = 4;
+     */
+    value: AccessRevoked;
+    case: "accessRevoked";
+  } | {
+    /**
+     * An account's names changed.
+     *
+     * @generated from field: mavio.cloud.v1.Account account_changed = 5;
+     */
+    value: Account;
+    case: "accountChanged";
+  } | {
+    /**
+     * An account was suspended, deleted or reported compromised.
+     *
+     * @generated from field: mavio.cloud.v1.AccountRevoked account_revoked = 6;
+     */
+    value: AccountRevoked;
+    case: "accountRevoked";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -192,7 +298,166 @@ export type Change = Message<"mavio.cloud.v1.Change"> & {
  * Use `create(ChangeSchema)` to create a new message.
  */
 export const ChangeSchema: GenMessage<Change> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 5);
+  messageDesc(file_mavio_cloud_v1_cloud, 6);
+
+/**
+ * @generated from message mavio.cloud.v1.AccessGranted
+ */
+export type AccessGranted = Message<"mavio.cloud.v1.AccessGranted"> & {
+  /**
+   * @generated from field: mavio.cloud.v1.Account account = 1;
+   */
+  account?: Account | undefined;
+
+  /**
+   * @generated from field: mavio.cloud.v1.Access access = 2;
+   */
+  access?: Access | undefined;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.AccessGranted.
+ * Use `create(AccessGrantedSchema)` to create a new message.
+ */
+export const AccessGrantedSchema: GenMessage<AccessGranted> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 7);
+
+/**
+ * @generated from message mavio.cloud.v1.AccessRevoked
+ */
+export type AccessRevoked = Message<"mavio.cloud.v1.AccessRevoked"> & {
+  /**
+   * @generated from field: string account_id = 1;
+   */
+  accountId: string;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.AccessRevoked.
+ * Use `create(AccessRevokedSchema)` to create a new message.
+ */
+export const AccessRevokedSchema: GenMessage<AccessRevoked> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 8);
+
+/**
+ * @generated from message mavio.cloud.v1.AccountRevoked
+ */
+export type AccountRevoked = Message<"mavio.cloud.v1.AccountRevoked"> & {
+  /**
+   * @generated from field: string account_id = 1;
+   */
+  accountId: string;
+
+  /**
+   * @generated from field: mavio.cloud.v1.AccountRevoked.Reason reason = 2;
+   */
+  reason: AccountRevoked_Reason;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.AccountRevoked.
+ * Use `create(AccountRevokedSchema)` to create a new message.
+ */
+export const AccountRevokedSchema: GenMessage<AccountRevoked> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 9);
+
+/**
+ * @generated from enum mavio.cloud.v1.AccountRevoked.Reason
+ */
+export enum AccountRevoked_Reason {
+  /**
+   * @generated from enum value: REASON_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Its sessions end.
+   *
+   * @generated from enum value: REASON_SUSPENDED = 1;
+   */
+  SUSPENDED = 1,
+
+  /**
+   * Its user and the user's data are deleted.
+   *
+   * @generated from enum value: REASON_DELETED = 2;
+   */
+  DELETED = 2,
+
+  /**
+   * Its sessions end.
+   *
+   * @generated from enum value: REASON_COMPROMISED = 3;
+   */
+  COMPROMISED = 3,
+}
+
+/**
+ * Describes the enum mavio.cloud.v1.AccountRevoked.Reason.
+ */
+export const AccountRevoked_ReasonSchema: GenEnum<AccountRevoked_Reason> = /*@__PURE__*/
+  enumDesc(file_mavio_cloud_v1_cloud, 9, 0);
+
+/**
+ * Library is a library of the server as mavio.dev knows it.
+ *
+ * @generated from message mavio.cloud.v1.Library
+ */
+export type Library = Message<"mavio.cloud.v1.Library"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * The library's kind, such as "movies" or "shows".
+   *
+   * @generated from field: string kind = 3;
+   */
+  kind: string;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.Library.
+ * Use `create(LibrarySchema)` to create a new message.
+ */
+export const LibrarySchema: GenMessage<Library> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 10);
+
+/**
+ * @generated from message mavio.cloud.v1.PublishLibrariesRequest
+ */
+export type PublishLibrariesRequest = Message<"mavio.cloud.v1.PublishLibrariesRequest"> & {
+  /**
+   * @generated from field: repeated mavio.cloud.v1.Library libraries = 1;
+   */
+  libraries: Library[];
+};
+
+/**
+ * Describes the message mavio.cloud.v1.PublishLibrariesRequest.
+ * Use `create(PublishLibrariesRequestSchema)` to create a new message.
+ */
+export const PublishLibrariesRequestSchema: GenMessage<PublishLibrariesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 11);
+
+/**
+ * @generated from message mavio.cloud.v1.PublishLibrariesResponse
+ */
+export type PublishLibrariesResponse = Message<"mavio.cloud.v1.PublishLibrariesResponse"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.PublishLibrariesResponse.
+ * Use `create(PublishLibrariesResponseSchema)` to create a new message.
+ */
+export const PublishLibrariesResponseSchema: GenMessage<PublishLibrariesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 12);
 
 /**
  * Notice tells a server, as a binary frame on its WebSocket connection
@@ -214,7 +479,39 @@ export type Notice = Message<"mavio.cloud.v1.Notice"> & {
  * Use `create(NoticeSchema)` to create a new message.
  */
 export const NoticeSchema: GenMessage<Notice> = /*@__PURE__*/
-  messageDesc(file_mavio_cloud_v1_cloud, 6);
+  messageDesc(file_mavio_cloud_v1_cloud, 13);
+
+/**
+ * AccountKind is how an account signs in.
+ *
+ * @generated from enum mavio.cloud.v1.AccountKind
+ */
+export enum AccountKind {
+  /**
+   * @generated from enum value: ACCOUNT_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Signs in with its own credentials.
+   *
+   * @generated from enum value: ACCOUNT_KIND_FULL = 1;
+   */
+  FULL = 1,
+
+  /**
+   * Reached only by switching within its Home.
+   *
+   * @generated from enum value: ACCOUNT_KIND_MANAGED = 2;
+   */
+  MANAGED = 2,
+}
+
+/**
+ * Describes the enum mavio.cloud.v1.AccountKind.
+ */
+export const AccountKindSchema: GenEnum<AccountKind> = /*@__PURE__*/
+  enumDesc(file_mavio_cloud_v1_cloud, 0);
 
 /**
  * ServerService is mavio.dev's API for servers in mavio.dev mode
@@ -250,6 +547,18 @@ export const ServerService: GenService<{
     methodKind: "unary";
     input: typeof ListChangesRequestSchema;
     output: typeof ListChangesResponseSchema;
+  },
+  /**
+   * PublishLibraries replaces the libraries mavio.dev knows of the
+   * server, which access records name, so that administrators edit access
+   * from anywhere.
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.PublishLibraries
+   */
+  publishLibraries: {
+    methodKind: "unary";
+    input: typeof PublishLibrariesRequestSchema;
+    output: typeof PublishLibrariesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_cloud_v1_cloud, 0);

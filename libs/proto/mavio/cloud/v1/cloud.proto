@@ -22,14 +22,49 @@ service ServerService {
   rpc ListChanges(ListChangesRequest) returns (ListChangesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // PublishLibraries replaces the libraries mavio.dev knows of the
+  // server, which access records name, so that administrators edit access
+  // from anywhere.
+  rpc PublishLibraries(PublishLibrariesRequest) returns (PublishLibrariesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
 }
 
 // Account is a Mavio account as a server sees it.
 message Account {
   // Stable and unique across mavio.dev.
   string id = 1;
+  // Unique across mavio.dev, case-insensitively.
   string user_name = 2;
   string display_name = 3;
+  AccountKind kind = 4;
+}
+
+// AccountKind is how an account signs in.
+enum AccountKind {
+  ACCOUNT_KIND_UNSPECIFIED = 0;
+  // Signs in with its own credentials.
+  ACCOUNT_KIND_FULL = 1;
+  // Reached only by switching within its Home.
+  ACCOUNT_KIND_MANAGED = 2;
+}
+
+// Access is an account's library access record on a server.
+message Access {
+  // Every library; library_ids are then empty.
+  bool all_libraries = 1;
+  // The libraries the account reaches, by the IDs the server published.
+  repeated string library_ids = 2;
+  // The highest rating score shown; unset shows every rating, zero only
+  // content for all ages.
+  int32 max_parental_rating = 3;
+  // Hides items without a rating under a maximum.
+  bool block_unrated = 4;
+  // When set, only items with one of these labels are shown.
+  repeated string allowed_labels = 5;
+  // Items with any of these labels are hidden.
+  repeated string blocked_labels = 6;
+  bool allow_download = 7;
 }
 
 message ClaimServerRequest {
@@ -83,7 +118,55 @@ message Change {
   // Increases with every change for the server.
   int64 cursor = 1;
   google.protobuf.Timestamp create_time = 2;
+  oneof kind {
+    // An account has access, or its record changed.
+    AccessGranted access_granted = 3;
+    // An account's access was revoked.
+    AccessRevoked access_revoked = 4;
+    // An account's names changed.
+    Account account_changed = 5;
+    // An account was suspended, deleted or reported compromised.
+    AccountRevoked account_revoked = 6;
+  }
 }
+
+message AccessGranted {
+  Account account = 1;
+  Access access = 2;
+}
+
+message AccessRevoked {
+  string account_id = 1;
+}
+
+message AccountRevoked {
+  string account_id = 1;
+  Reason reason = 2;
+
+  enum Reason {
+    REASON_UNSPECIFIED = 0;
+    // Its sessions end.
+    REASON_SUSPENDED = 1;
+    // Its user and the user's data are deleted.
+    REASON_DELETED = 2;
+    // Its sessions end.
+    REASON_COMPROMISED = 3;
+  }
+}
+
+// Library is a library of the server as mavio.dev knows it.
+message Library {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.max_len = 256];
+  // The library's kind, such as "movies" or "shows".
+  string kind = 3 [(buf.validate.field).string.max_len = 32];
+}
+
+message PublishLibrariesRequest {
+  repeated Library libraries = 1 [(buf.validate.field).repeated.max_items = 1000];
+}
+
+message PublishLibrariesResponse {}
 
 // Notice tells a server, as a binary frame on its WebSocket connection
 // at /servers/notices under mavio.dev's API base URL, that its changes

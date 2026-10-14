@@ -17,6 +17,9 @@ import (
 // CreateInvitation makes an invitation link creating members, or
 // converting a managed user into one.
 func (s *UserService) CreateInvitation(ctx context.Context, req *userv1.CreateInvitationRequest) (*userv1.CreateInvitationResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	p, err := admin(ctx)
 	if err != nil {
 		return nil, err
@@ -139,6 +142,9 @@ func (s *AuthService) invitation(ctx context.Context, token string) (core.Invita
 
 // GetInvitation describes an invitation before it is accepted.
 func (s *AuthService) GetInvitation(ctx context.Context, req *authv1.GetInvitationRequest) (*authv1.GetInvitationResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	inv, err := s.invitation(ctx, req.GetToken())
 	if err != nil {
 		return nil, err
@@ -157,6 +163,9 @@ func (s *AuthService) GetInvitation(ctx context.Context, req *authv1.GetInvitati
 // StartInvitationPasskey begins creating the passkey of the member an
 // invitation creates or converts.
 func (s *AuthService) StartInvitationPasskey(ctx context.Context, req *authv1.StartInvitationPasskeyRequest) (*authv1.StartInvitationPasskeyResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	if s.Passkeys == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("passkeys are unavailable"))
 	}
@@ -190,6 +199,9 @@ func (s *AuthService) StartInvitationPasskey(ctx context.Context, req *authv1.St
 // AcceptInvitation creates a member, or converts the invitation's managed
 // user into one, with a password or a passkey, and signs the device in.
 func (s *AuthService) AcceptInvitation(ctx context.Context, req *authv1.AcceptInvitationRequest) (*authv1.AcceptInvitationResponse, error) {
+	if err := standaloneOnly(ctx, s.store); err != nil {
+		return nil, err
+	}
 	passkey := req.HasCeremonyId() || req.HasCredentialJson()
 	switch {
 	case passkey && req.HasPassword(), !passkey && !req.HasPassword():
