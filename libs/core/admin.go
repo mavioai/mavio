@@ -377,12 +377,30 @@ func (m AccountMode) Valid() bool {
 // runs: the mode is chosen once, at setup.
 type AccountSettings struct {
 	Mode AccountMode
+	// Administrator is the Mavio account that claimed a server in
+	// mavio.dev mode; empty while it is unclaimed.
+	Administrator string `json:",omitempty"`
+	// Cursor is the position of the last change from mavio.dev the server
+	// applied.
+	Cursor int64 `json:",omitempty"`
 }
 
-// Validate checks the mode.
+// Claimed reports whether a server in mavio.dev mode has an
+// administrator.
+func (a *AccountSettings) Claimed() bool {
+	return a.Mode == AccountModeMavioDev && a.Administrator != ""
+}
+
+// Validate checks the mode and that only a server in mavio.dev mode is
+// claimed.
 func (a *AccountSettings) Validate() error {
-	if !a.Mode.Valid() {
+	switch {
+	case !a.Mode.Valid():
 		return fmt.Errorf("%w: unknown account mode %q", ErrInvalid, a.Mode)
+	case a.Mode != AccountModeMavioDev && (a.Administrator != "" || a.Cursor != 0):
+		return fmt.Errorf("%w: only a server in mavio.dev mode is claimed", ErrInvalid)
+	case a.Cursor < 0:
+		return fmt.Errorf("%w: negative change cursor", ErrInvalid)
 	}
 	return nil
 }

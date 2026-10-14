@@ -31,6 +31,8 @@ func (User) Fields() []ent.Field {
 		field.String("name_key").Unique(),
 		field.String("kind").GoType(core.UserKind("")),
 		field.String("auth_provider").Default(""),
+		// account_id is the Mavio account of a server in mavio.dev mode.
+		field.String("account_id").Optional().Nillable().Unique(),
 		field.String("restriction").GoType(core.RestrictionProfile("")).Default(""),
 		field.Bool("disabled").Default(false),
 		field.JSON("access", core.LibraryAccess{}).Optional(),

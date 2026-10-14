@@ -16,6 +16,9 @@ type User struct {
 	// AuthProvider names the plugin that authenticates the user, such as
 	// LDAP; empty means the server's own credentials.
 	AuthProvider string
+	// AccountID is the Mavio account of a user of a server in mavio.dev
+	// mode, unique; empty in standalone mode.
+	AccountID string
 	// Restriction is a managed user's restriction profile, applied on top
 	// of its library access.
 	Restriction RestrictionProfile
@@ -59,6 +62,8 @@ func (u *User) Validate() error {
 		return fmt.Errorf("%w: user %q has unknown kind %q", ErrInvalid, u.Name, u.Kind)
 	case u.Kind == UserManaged && u.AuthProvider != "":
 		return fmt.Errorf("%w: managed user %q has an auth provider", ErrInvalid, u.Name)
+	case u.AccountID != "" && u.AuthProvider != "":
+		return fmt.Errorf("%w: user %q of a Mavio account has an auth provider", ErrInvalid, u.Name)
 	case !u.Restriction.Valid():
 		return fmt.Errorf("%w: user %q has unknown restriction profile %q", ErrInvalid, u.Name, u.Restriction)
 	case u.Restriction != RestrictionNone && u.Kind != UserManaged:

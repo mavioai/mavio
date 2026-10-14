@@ -39,7 +39,7 @@ erDiagram
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
 | `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件、会话闲置多久后结束 |
-| `AccountSettings` | 服务端如何登录用户：安装时选择的模式 |
+| `AccountSettings` | 服务端如何登录用户：安装时选择的模式，以及 mavio.dev 模式下的认领 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
@@ -205,7 +205,7 @@ erDiagram
 
 ## 7. 用户
 
-* `User` 的 `Name` 唯一且不区分大小写，`Kind`（[账户 §4.1](accounts.zh-CN.md#41-用户)）为 `administrator`（每台服务器恰有一个，由唯一索引保证；`IsAdmin` 判断）、`member`，或 `managed`——没有凭据、只能通过切换进入的用户。用户用自己的凭据登录，或通过 `AuthProvider` 指定的插件认证；托管用户没有 `AuthProvider`。`Disabled` 禁止用户登录。
+* `User` 的 `Name` 唯一且不区分大小写，`Kind`（[账户 §4.1](accounts.zh-CN.md#41-用户)）为 `administrator`（每台服务器恰有一个，由唯一索引保证；`IsAdmin` 判断）、`member`，或 `managed`——没有凭据、只能通过切换进入的用户。用户用自己的凭据登录，或通过 `AuthProvider` 指定的插件认证；托管用户没有 `AuthProvider`。在 mavio.dev 模式下，`AccountID` 是用户的 Mavio 账户，唯一，且不与 `AuthProvider` 同时出现。`Disabled` 禁止用户登录。
 * 托管用户可以有 `RestrictionProfile`，其他用户不可以：`younger_child`、`older_child` 或 `teen`，分别允许分级分数不超过 6、12 和 16（G 与 TV-G；PG 与 TV-PG；PG-13 与 TV-14），且不允许未分级条目。`User.EffectiveAccess` 给出生效的访问记录：在 `Access` 上应用档案的限制（较低时），并设置 `BlockUnrated`。
 * `Credential` 是独立模式下用户登录或切换所用的凭据，与用户分开存放，带有 `CreatedAt` 与 `LastUsedAt`。其 `Data` 对 `password` 和四位数字的 `pin` 是 PHC 格式的哈希（如 `$argon2id$…`），对 `totp` 是密封的秘密，对 `passkey` 是公钥凭据；通行密钥还有 `Name`。除通行密钥外，每个用户每种凭据至多一个（`CredentialKind.Single`）；删除用户时一并删除其凭据。PIN 用于保护切换到该用户，从不用于登录。
 * `LibraryAccess` 是用户的媒体库访问记录（[账户 §3.3](accounts.zh-CN.md#33-媒体库访问)）：
@@ -250,7 +250,7 @@ erDiagram
 | `MediaSourceRepository` | 列出并 `Replace` 条目的媒体源 |
 | `ImageRepository` | `Get` 单张图片；列出一个所有者的图片，或一次列出多个所有者的图片（`ListForOwners`），并 `Replace` 它们 |
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（有署名的人员及其条目数，见 §9.2）、列出并 `Replace` 条目的署名 |
-| `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
+| `UserRepository` | 增删改查、不区分大小写的 `GetByName` 与 `GetByAccountID` |
 | `CredentialRepository` | 用户的凭据：`List`（按创建先后）、按单一种类 `Get`、`Put`（添加凭据，或更新同 ID 的凭据；单一种类的凭据替换该用户原有的那个）、按种类 `Delete`、`Remove` 单个凭据 |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
 | `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`Get`、`ListForUser`（按最近活动排序）、`Touch`、`Switch`（把会话转给另一个用户并记录切换者）、`Delete`、`PurgeIdle`（某一时间之前最后活动的会话） |
@@ -261,7 +261,7 @@ erDiagram
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
 | `StorageJobRepository` | 按类型与键 `Get` 存储任务（未保存时返回 `ErrNotFound`），`List` 某一类型的任务（最早在前），`Put`（替换类型与键相同的任务，保留其创建时间），`Delete` |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
-| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`ServerID` 在首次调用时创建，供客户端把该服务端与其他服务端区分开；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
+| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
@@ -350,7 +350,7 @@ erDiagram
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Validate` 检查已知取值与范围。
 
-`AccountSettings` 与它们分开保存，位于设置键 `accounts` 下：服务端登录用户的 `Mode`，即 `standalone` 或 `mavio.dev`（[账户 §2](accounts.zh-CN.md#2-服务端模式)），在服务端的安装向导选择之前为空。
+`AccountSettings` 与它们分开保存，位于设置键 `accounts` 下：服务端登录用户的 `Mode`，即 `standalone` 或 `mavio.dev`（[账户 §2](accounts.zh-CN.md#2-服务端模式)），在服务端的安装向导选择之前为空。在 mavio.dev 模式下，`Administrator` 是认领该服务端的 Mavio 账户，未认领时为空（由 `Claimed` 判断），`Cursor` 是服务端已应用的来自 mavio.dev 的最后一项变更；其他模式的服务端两者皆无。
 
 ### 12.2 API 密钥
 `APIKey` 让集成无需登录即可调用 API：它的令牌只显示一次，以创建它的管理员身份行事，前提是该用户仍是已启用的管理员。只保存令牌的 SHA-256 哈希（`TokenHash`），以及 `Name`、`CreatedAt` 与至多每分钟记录一次的 `LastUsedAt`。

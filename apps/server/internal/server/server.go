@@ -20,6 +20,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/cloud"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
@@ -102,6 +103,11 @@ type Config struct {
 	DiscoveryAddr string
 	// HTTPSHost is the host HTTPS listens on; empty means every interface.
 	HTTPSHost string
+	// MavioDevURL is the base URL of mavio.dev's API.
+	MavioDevURL string
+	// ClaimToken is a claim code from mavio.dev/claim, which claims the
+	// server when it starts unclaimed; empty claims nothing.
+	ClaimToken string
 	// Dev serves the development player at /dev/player.
 	Dev bool
 	// DevLibrary adds the Movies and Shows folders of the sample library
@@ -269,10 +275,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	if a, ok := ln.Addr().(*net.TCPAddr); ok {
 		port = a.Port
 	}
-	serverID, err := db.Settings().ServerID(ctx)
-	if err != nil {
-		return err
-	}
+	serverID := key.ID()
 	serverName := func() string {
 		if name := set.Get().Network.ServerName; name != "" {
 			return name
@@ -280,6 +283,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		name, _ := os.Hostname()
 		return name
 	}
+	// In mavio.dev mode the server is claimed at mavio.dev and keeps a
+	// link to it, which waits while the server is unclaimed.
+	mavioDev := cloud.NewClient(cfg.MavioDevURL, key, nil)
+	link := cloud.NewLink(db, mavioDev, log)
+	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: link.Wake}
 	acq := newAcquisition(log, db, set, plugs, clients, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
@@ -316,8 +324,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Settings: set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		ServerInfo: func() rpc.ServerInfo {
 			n := set.Get().Network
-			return rpc.ServerInfo{ID: serverID.String(), Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
+			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
 		},
+		Claim:        claimer.Claim,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
 		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})
@@ -330,7 +339,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	prefix := network.NewPrefix(h)
 	https := &network.HTTPS{Handler: prefix, Host: cfg.HTTPSHost, Logger: log}
 	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
-		return network.DiscoveryReply{ID: serverID.String(), Name: serverName(), Version: cfg.Version}
+		return network.DiscoveryReply{ID: serverID, Name: serverName(), Version: cfg.Version}
 	}}
 	defer func() {
 		closeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
@@ -358,6 +367,16 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		return nil
 	})
 	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
+	g.Go(func() error {
+		link.Run(ctx)
+		return nil
+	})
+	if cfg.ClaimToken != "" {
+		g.Go(func() error {
+			claimOnStart(ctx, log, db, claimer, cfg.ClaimToken)
+			return nil
+		})
+	}
 	g.Go(func() error {
 		if err := activityLog.Run(ctx); !errors.Is(err, context.Canceled) {
 			return err
@@ -427,6 +446,22 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		})
 	}
 	return g.Wait()
+}
+
+// claimOnStart claims an unclaimed server with the claim code of its
+// configuration, logging failures, as nobody waits for the answer.
+func claimOnStart(ctx context.Context, log *slog.Logger, db core.Store, claimer *cloud.Claimer, code string) {
+	settings, err := db.Settings().Accounts(ctx)
+	if err != nil {
+		log.ErrorContext(ctx, "read the account settings", "err", err)
+		return
+	}
+	if !cloud.Claimable(settings) {
+		return
+	}
+	if _, err := claimer.Claim(ctx, code); err != nil {
+		log.ErrorContext(ctx, "claim the server with claim-token", "err", err)
+	}
 }
 
 // addDevLibraries adds the Movies and Shows folders of dir as libraries,

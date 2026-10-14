@@ -140,20 +140,6 @@ func TestJobListAndPurge(t *testing.T) {
 	})
 }
 
-func TestServerID(t *testing.T) {
-	eachBackend(t, func(t *testing.T, s *store.Store) {
-		ctx := t.Context()
-		first, err := s.Settings().ServerID(ctx)
-		if err != nil || first.IsZero() {
-			t.Fatalf("ServerID = %v, %v", first, err)
-		}
-		again, err := s.Settings().ServerID(ctx)
-		if err != nil || again != first {
-			t.Errorf("ServerID again = %v, %v, want = %v", again, err, first)
-		}
-	})
-}
-
 func TestAccountSettings(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
@@ -172,6 +158,16 @@ func TestAccountSettings(t *testing.T) {
 		}
 		if err := s.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: "cloud"}); !errors.Is(err, core.ErrInvalid) {
 			t.Errorf("PutAccounts(cloud) = %v, want = ErrInvalid", err)
+		}
+		claimed := core.AccountSettings{Mode: core.AccountModeMavioDev, Administrator: "acct-1", Cursor: 42}
+		if err := s.Settings().PutAccounts(ctx, &claimed); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := s.Settings().Accounts(ctx); err != nil || got != claimed || !got.Claimed() {
+			t.Errorf("Accounts = %+v, %v, want = %+v", got, err, claimed)
+		}
+		if err := s.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: core.AccountModeStandalone, Administrator: "acct-1"}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("PutAccounts(claimed standalone) = %v, want = ErrInvalid", err)
 		}
 	})
 }

@@ -77,6 +77,11 @@ func AuthProvider(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAuthProvider, v))
 }
 
+// AccountID applies equality check predicate on the "account_id" field. It's identical to AccountIDEQ.
+func AccountID(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountID, v))
+}
+
 // Restriction applies equality check predicate on the "restriction" field. It's identical to RestrictionEQ.
 func Restriction(v core.RestrictionProfile) predicate.User {
 	vc := string(v)
@@ -375,6 +380,81 @@ func AuthProviderEqualFold(v string) predicate.User {
 // AuthProviderContainsFold applies the ContainsFold predicate on the "auth_provider" field.
 func AuthProviderContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldAuthProvider, v))
+}
+
+// AccountIDEQ applies the EQ predicate on the "account_id" field.
+func AccountIDEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAccountID, v))
+}
+
+// AccountIDNEQ applies the NEQ predicate on the "account_id" field.
+func AccountIDNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAccountID, v))
+}
+
+// AccountIDIn applies the In predicate on the "account_id" field.
+func AccountIDIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAccountID, vs...))
+}
+
+// AccountIDNotIn applies the NotIn predicate on the "account_id" field.
+func AccountIDNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAccountID, vs...))
+}
+
+// AccountIDGT applies the GT predicate on the "account_id" field.
+func AccountIDGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAccountID, v))
+}
+
+// AccountIDGTE applies the GTE predicate on the "account_id" field.
+func AccountIDGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAccountID, v))
+}
+
+// AccountIDLT applies the LT predicate on the "account_id" field.
+func AccountIDLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAccountID, v))
+}
+
+// AccountIDLTE applies the LTE predicate on the "account_id" field.
+func AccountIDLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAccountID, v))
+}
+
+// AccountIDContains applies the Contains predicate on the "account_id" field.
+func AccountIDContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldAccountID, v))
+}
+
+// AccountIDHasPrefix applies the HasPrefix predicate on the "account_id" field.
+func AccountIDHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldAccountID, v))
+}
+
+// AccountIDHasSuffix applies the HasSuffix predicate on the "account_id" field.
+func AccountIDHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldAccountID, v))
+}
+
+// AccountIDIsNil applies the IsNil predicate on the "account_id" field.
+func AccountIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAccountID))
+}
+
+// AccountIDNotNil applies the NotNil predicate on the "account_id" field.
+func AccountIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAccountID))
+}
+
+// AccountIDEqualFold applies the EqualFold predicate on the "account_id" field.
+func AccountIDEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldAccountID, v))
+}
+
+// AccountIDContainsFold applies the ContainsFold predicate on the "account_id" field.
+func AccountIDContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldAccountID, v))
 }
 
 // RestrictionEQ applies the EQ predicate on the "restriction" field.

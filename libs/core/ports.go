@@ -148,6 +148,8 @@ type UserRepository interface {
 	Get(ctx context.Context, id ID) (User, error)
 	// GetByName matches the name case-insensitively.
 	GetByName(ctx context.Context, name string) (User, error)
+	// GetByAccountID returns the user of a Mavio account.
+	GetByAccountID(ctx context.Context, accountID string) (User, error)
 	List(ctx context.Context) ([]User, error)
 	Create(ctx context.Context, u *User) error
 	Update(ctx context.Context, u *User) error
@@ -271,10 +273,6 @@ type SettingsRepository interface {
 	Get(ctx context.Context) (ServerSettings, error)
 	// Put validates and stores the settings, setting UpdatedAt.
 	Put(ctx context.Context, s *ServerSettings) error
-	// ServerID returns the ID that tells the server apart from others to
-	// clients, created on the first call; backups carry it with the
-	// database.
-	ServerID(ctx context.Context) (ID, error)
 	// Accounts returns the account settings, zero until stored.
 	Accounts(ctx context.Context) (AccountSettings, error)
 	// PutAccounts validates and stores the account settings.

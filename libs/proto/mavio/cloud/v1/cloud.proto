@@ -1,0 +1,94 @@
+edition = "2023";
+
+package mavio.cloud.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+// ServerService is mavio.dev's API for servers in mavio.dev mode
+// (docs/accounts.md §3.2, docs/mavio-dev.md §3). Every request is
+// authenticated by a JWT the server signs with its identity key
+// (private_key_jwt): EdDSA, with the server's ID as its kid, iss and sub,
+// mavio.dev's API base URL as its aud, a random jti, and an expiry at
+// most a minute after it was issued, carried as a bearer token. Claiming
+// registers the key; the other methods need a claimed server.
+service ServerService {
+  // ClaimServer registers the server under the account that created the
+  // claim code at mavio.dev/claim, which becomes its administrator. An
+  // unknown, used or expired code fails with INVALID_ARGUMENT. Claiming a
+  // server again, after its command line unclaimed it, keeps its changes.
+  rpc ClaimServer(ClaimServerRequest) returns (ClaimServerResponse);
+  // ListChanges gives the server's changes after a cursor, oldest first.
+  rpc ListChanges(ListChangesRequest) returns (ListChangesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+// Account is a Mavio account as a server sees it.
+message Account {
+  // Stable and unique across mavio.dev.
+  string id = 1;
+  string user_name = 2;
+  string display_name = 3;
+}
+
+message ClaimServerRequest {
+  string claim_code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+    }
+  ];
+  // The server's Ed25519 identity public key, whose fingerprint is the ID
+  // in the request's JWT.
+  bytes public_key = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+  // The name the server shows.
+  string name = 3 [(buf.validate.field).string.max_len = 128];
+  string version = 4 [(buf.validate.field).string.max_len = 64];
+}
+
+message ClaimServerResponse {
+  // The administrator.
+  Account administrator = 1;
+  // The cursor of the server's latest change; the server fetches the
+  // changes after it.
+  int64 cursor = 2;
+}
+
+message ListChangesRequest {
+  // The cursor of the last change the server applied; zero for all.
+  int64 after = 1 [(buf.validate.field).int64.gte = 0];
+  // At most this many changes; mavio.dev chooses when zero.
+  int32 page_size = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 1000
+  }];
+}
+
+message ListChangesResponse {
+  repeated Change changes = 1;
+  // Whether more changes follow the last one.
+  bool more = 2;
+  // The cursor to fetch after next, that of the last change; the request's
+  // after when there are none.
+  int64 cursor = 3;
+}
+
+// Change is one change to the server's records, applied in cursor order.
+message Change {
+  // Increases with every change for the server.
+  int64 cursor = 1;
+  google.protobuf.Timestamp create_time = 2;
+}
+
+// Notice tells a server, as a binary frame on its WebSocket connection
+// at /servers/notices under mavio.dev's API base URL, that its changes
+// reached a cursor. The server opens the connection with the same JWT as
+// its requests.
+message Notice {
+  int64 cursor = 1;
+}

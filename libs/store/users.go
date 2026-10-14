@@ -31,6 +31,14 @@ func (r users) GetByName(ctx context.Context, name string) (core.User, error) {
 	return toUser(u), nil
 }
 
+func (r users) GetByAccountID(ctx context.Context, accountID string) (core.User, error) {
+	u, err := r.s.read.User.Query().Where(user.AccountID(accountID)).Only(ctx)
+	if err != nil {
+		return core.User{}, mapErr(err, "get the user of account "+accountID)
+	}
+	return toUser(u), nil
+}
+
 func (r users) List(ctx context.Context) ([]core.User, error) {
 	list, err := r.s.read.User.Query().Order(ent.Asc(user.FieldNameKey)).All(ctx)
 	if err != nil {
@@ -56,6 +64,7 @@ func (r users) Create(ctx context.Context, u *core.User) error {
 		SetNameKey(strings.ToLower(u.Name)).
 		SetKind(u.Kind).
 		SetAuthProvider(u.AuthProvider).
+		SetNillableAccountID(accountID(u)).
 		SetRestriction(u.Restriction).
 		SetDisabled(u.Disabled).
 		SetAccess(u.Access).
@@ -85,6 +94,11 @@ func (r users) Update(ctx context.Context, u *core.User) error {
 		SetAccess(u.Access).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences)
+	if id := accountID(u); id != nil {
+		update.SetAccountID(*id)
+	} else {
+		update.ClearAccountID()
+	}
 	if u.LastLoginAt != nil {
 		update.SetLastLoginAt(*u.LastLoginAt)
 	} else {
@@ -102,8 +116,16 @@ func (r users) Delete(ctx context.Context, id core.ID) error {
 	return mapErr(r.s.write.User.DeleteOneID(id).Exec(ctx), "delete user "+id.String())
 }
 
+// accountID returns the user's Mavio account, nil when it has none.
+func accountID(u *core.User) *string {
+	if u.AccountID == "" {
+		return nil
+	}
+	return &u.AccountID
+}
+
 func toUser(u *ent.User) core.User {
-	return core.User{
+	out := core.User{
 		ID:           u.ID,
 		Name:         u.Name,
 		Kind:         u.Kind,
@@ -116,6 +138,10 @@ func toUser(u *ent.User) core.User {
 		CreatedAt:    u.CreatedAt.UTC(),
 		LastLoginAt:  utcPtr(u.LastLoginAt),
 	}
+	if u.AccountID != nil {
+		out.AccountID = *u.AccountID
+	}
+	return out
 }
 
 type credentials struct{ s *Store }

@@ -52,3 +52,29 @@ func TestSeverityAtLeast(t *testing.T) {
 		t.Error("AtLeast")
 	}
 }
+
+func TestAccountSettings(t *testing.T) {
+	tests := []struct {
+		name    string
+		a       AccountSettings
+		ok      bool
+		claimed bool
+	}{
+		{"unset", AccountSettings{}, true, false},
+		{"standalone", AccountSettings{Mode: AccountModeStandalone}, true, false},
+		{"unclaimed", AccountSettings{Mode: AccountModeMavioDev, Cursor: 3}, true, false},
+		{"claimed", AccountSettings{Mode: AccountModeMavioDev, Administrator: "acct", Cursor: 3}, true, true},
+		{"unknown mode", AccountSettings{Mode: "ldap"}, false, false},
+		{"claimed standalone", AccountSettings{Mode: AccountModeStandalone, Administrator: "acct"}, false, false},
+		{"standalone with a cursor", AccountSettings{Mode: AccountModeStandalone, Cursor: 1}, false, false},
+		{"negative cursor", AccountSettings{Mode: AccountModeMavioDev, Cursor: -1}, false, false},
+	}
+	for _, tt := range tests {
+		if err := tt.a.Validate(); (err == nil) != tt.ok || err != nil && !errors.Is(err, ErrInvalid) {
+			t.Errorf("%s: Validate = %v, want ok = %v", tt.name, err, tt.ok)
+		}
+		if got := tt.a.Claimed(); got != tt.claimed {
+			t.Errorf("%s: Claimed = %v, want = %v", tt.name, got, tt.claimed)
+		}
+	}
+}

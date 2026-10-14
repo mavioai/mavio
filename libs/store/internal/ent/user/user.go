@@ -23,6 +23,8 @@ const (
 	FieldKind = "kind"
 	// FieldAuthProvider holds the string denoting the auth_provider field in the database.
 	FieldAuthProvider = "auth_provider"
+	// FieldAccountID holds the string denoting the account_id field in the database.
+	FieldAccountID = "account_id"
 	// FieldRestriction holds the string denoting the restriction field in the database.
 	FieldRestriction = "restriction"
 	// FieldDisabled holds the string denoting the disabled field in the database.
@@ -147,6 +149,7 @@ var Columns = []string{
 	FieldNameKey,
 	FieldKind,
 	FieldAuthProvider,
+	FieldAccountID,
 	FieldRestriction,
 	FieldDisabled,
 	FieldAccess,
@@ -207,6 +210,11 @@ func ByKind(opts ...sql.OrderTermOption) OrderOption {
 // ByAuthProvider orders the results by the auth_provider field.
 func ByAuthProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuthProvider, opts...).ToFunc()
+}
+
+// ByAccountID orders the results by the account_id field.
+func ByAccountID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAccountID, opts...).ToFunc()
 }
 
 // ByRestriction orders the results by the restriction field.

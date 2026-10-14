@@ -229,3 +229,11 @@ pub use self::__buffa::view::SwitchUserRequestOwnedView;
 pub use self::__buffa::view::SwitchUserResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SwitchUserResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ClaimServerRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ClaimServerRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ClaimServerResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ClaimServerResponseOwnedView;

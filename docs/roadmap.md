@@ -801,7 +801,7 @@ flowchart TD
 - [x] Library access records and their enforcement: `LibraryAccess` apart from the user's policy, with allowed and blocked labels matched against the tags items inherit from their ancestors, in queries and single-item checks alike
 - [x] Invitation links, Quick Connect and switching on the administrator's devices: invitations stored as token hashes, creating members with a password or passkey or converting a managed user, their uses counted atomically and expired ones purged daily; switching that moves the session to the target after its PIN, throttled per user
 - [x] Recovery of the administrator from the command line: `mavio admin reset-password`, which sets a new password, turns off TOTP and ends the administrator's sessions in a standalone server's database
-- [ ] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev
+- [x] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev: the server's ID from its identity key, `AuthService.ClaimServer` and `claim-token`, `mavio admin unclaim`, JWT-signed calls to `mavio.cloud.v1.ServerService`, and the link that holds the WebSocket and applies changes after its cursor, tested against a simulated mavio.dev; the kinds of changes come with access records
 - [ ] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations
 - [ ] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes
 - [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor

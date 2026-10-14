@@ -67,6 +67,20 @@ func (_c *UserCreate) SetNillableAuthProvider(v *string) *UserCreate {
 	return _c
 }
 
+// SetAccountID sets the "account_id" field.
+func (_c *UserCreate) SetAccountID(v string) *UserCreate {
+	_c.mutation.SetAccountID(v)
+	return _c
+}
+
+// SetNillableAccountID sets the "account_id" field if the given value is not nil.
+func (_c *UserCreate) SetNillableAccountID(v *string) *UserCreate {
+	if v != nil {
+		_c.SetAccountID(*v)
+	}
+	return _c
+}
+
 // SetRestriction sets the "restriction" field.
 func (_c *UserCreate) SetRestriction(v core.RestrictionProfile) *UserCreate {
 	_c.mutation.SetRestriction(v)
@@ -476,6 +490,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
 		_node.AuthProvider = value
 	}
+	if value, ok := _c.mutation.AccountID(); ok {
+		_spec.SetField(user.FieldAccountID, field.TypeString, value)
+		_node.AccountID = &value
+	}
 	if value, ok := _c.mutation.Restriction(); ok {
 		_spec.SetField(user.FieldRestriction, field.TypeString, value)
 		_node.Restriction = value
@@ -780,6 +798,24 @@ func (u *UserUpsert) UpdateAuthProvider() *UserUpsert {
 	return u
 }
 
+// SetAccountID sets the "account_id" field.
+func (u *UserUpsert) SetAccountID(v string) *UserUpsert {
+	u.Set(user.FieldAccountID, v)
+	return u
+}
+
+// UpdateAccountID sets the "account_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateAccountID() *UserUpsert {
+	u.SetExcluded(user.FieldAccountID)
+	return u
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (u *UserUpsert) ClearAccountID() *UserUpsert {
+	u.SetNull(user.FieldAccountID)
+	return u
+}
+
 // SetRestriction sets the "restriction" field.
 func (u *UserUpsert) SetRestriction(v core.RestrictionProfile) *UserUpsert {
 	u.Set(user.FieldRestriction, v)
@@ -968,6 +1004,27 @@ func (u *UserUpsertOne) SetAuthProvider(v string) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateAuthProvider() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateAuthProvider()
+	})
+}
+
+// SetAccountID sets the "account_id" field.
+func (u *UserUpsertOne) SetAccountID(v string) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAccountID(v)
+	})
+}
+
+// UpdateAccountID sets the "account_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateAccountID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAccountID()
+	})
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (u *UserUpsertOne) ClearAccountID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAccountID()
 	})
 }
 
@@ -1340,6 +1397,27 @@ func (u *UserUpsertBulk) SetAuthProvider(v string) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateAuthProvider() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateAuthProvider()
+	})
+}
+
+// SetAccountID sets the "account_id" field.
+func (u *UserUpsertBulk) SetAccountID(v string) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAccountID(v)
+	})
+}
+
+// UpdateAccountID sets the "account_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateAccountID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAccountID()
+	})
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (u *UserUpsertBulk) ClearAccountID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAccountID()
 	})
 }
 

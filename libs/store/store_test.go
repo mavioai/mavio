@@ -1038,3 +1038,37 @@ func TestOpenRejectsUnknownDSN(t *testing.T) {
 		t.Errorf("Open(mysql) error = %v, want ErrInvalid", err)
 	}
 }
+
+func TestUserAccounts(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		u := core.User{Name: "alice", Kind: core.UserMember, AccountID: "acct-alice"}
+		if err := s.Users().Create(ctx, &u); err != nil {
+			t.Fatal(err)
+		}
+		got, err := s.Users().GetByAccountID(ctx, "acct-alice")
+		if err != nil || got.ID != u.ID || got.AccountID != "acct-alice" {
+			t.Errorf("GetByAccountID = %+v, %v", got, err)
+		}
+		if _, err := s.Users().GetByAccountID(ctx, "acct-other"); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("unknown account: %v, want ErrNotFound", err)
+		}
+		dup := core.User{Name: "bob", Kind: core.UserMember, AccountID: "acct-alice"}
+		if err := s.Users().Create(ctx, &dup); !errors.Is(err, core.ErrConflict) {
+			t.Errorf("duplicate account: %v, want ErrConflict", err)
+		}
+		// Users without accounts do not collide.
+		for _, name := range []string{"carol", "dave"} {
+			if err := s.Users().Create(ctx, &core.User{Name: name, Kind: core.UserMember}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		u.AccountID = ""
+		if err := s.Users().Update(ctx, &u); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := s.Users().GetByAccountID(ctx, "acct-alice"); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("cleared account: %v, want ErrNotFound", err)
+		}
+	})
+}

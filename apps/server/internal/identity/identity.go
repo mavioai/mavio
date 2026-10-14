@@ -6,12 +6,14 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base32"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Key is the server's identity key pair.
@@ -81,6 +83,20 @@ func create(file string) (*Key, error) {
 // Public returns the public key.
 func (k *Key) Public() ed25519.PublicKey {
 	return k.private.Public().(ed25519.PublicKey)
+}
+
+// ID returns the server's ID: the first 20 bytes of the SHA-256 of the
+// public key, in lowercase base32 without padding (32 characters), so
+// that the ID follows the key and a copy of the database does not carry
+// it (docs/accounts.md §5.1).
+func (k *Key) ID() string {
+	return IDOf(k.Public())
+}
+
+// IDOf returns the ID of the server whose identity public key is public.
+func IDOf(public ed25519.PublicKey) string {
+	sum := sha256.Sum256(public)
+	return strings.ToLower(base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(sum[:20]))
 }
 
 // Sign signs message.

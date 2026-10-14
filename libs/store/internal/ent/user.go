@@ -27,6 +27,8 @@ type User struct {
 	Kind core.UserKind `json:"kind,omitempty"`
 	// AuthProvider holds the value of the "auth_provider" field.
 	AuthProvider string `json:"auth_provider,omitempty"`
+	// AccountID holds the value of the "account_id" field.
+	AccountID *string `json:"account_id,omitempty"`
 	// Restriction holds the value of the "restriction" field.
 	Restriction core.RestrictionProfile `json:"restriction,omitempty"`
 	// Disabled holds the value of the "disabled" field.
@@ -186,7 +188,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(core.ID)
 		case user.FieldDisabled:
 			values[i] = new(sql.NullBool)
-		case user.FieldName, user.FieldNameKey, user.FieldKind, user.FieldAuthProvider, user.FieldRestriction:
+		case user.FieldName, user.FieldNameKey, user.FieldKind, user.FieldAuthProvider, user.FieldAccountID, user.FieldRestriction:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
@@ -234,6 +236,13 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field auth_provider", values[i])
 			} else if value.Valid {
 				_m.AuthProvider = value.String
+			}
+		case user.FieldAccountID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field account_id", values[i])
+			} else if value.Valid {
+				_m.AccountID = new(string)
+				*_m.AccountID = value.String
 			}
 		case user.FieldRestriction:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -386,6 +395,11 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("auth_provider=")
 	builder.WriteString(_m.AuthProvider)
+	builder.WriteString(", ")
+	if v := _m.AccountID; v != nil {
+		builder.WriteString("account_id=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("restriction=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Restriction))

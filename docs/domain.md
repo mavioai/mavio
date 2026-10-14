@@ -40,7 +40,7 @@ erDiagram
 | `PluginConfig` | The configuration an administrator gave a plugin |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
 | `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin, how long sessions last unused |
-| `AccountSettings` | How the server signs people in: its mode, chosen at setup |
+| `AccountSettings` | How the server signs people in: its mode, chosen at setup, and in mavio.dev mode its claim |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
 | `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
@@ -205,7 +205,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 
 ## 7. Users
 
-* A `User` has a unique, case-insensitive `Name` and a `Kind` ([Accounts §4.1](accounts.md#41-users)): `administrator` (exactly one per server, kept by a unique index; `IsAdmin` tells it), `member`, or `managed`, a user without credentials reached only by switching. A user signs in with its own credentials, or through a plugin named by `AuthProvider`; managed users have no `AuthProvider`. `Disabled` keeps a user from signing in.
+* A `User` has a unique, case-insensitive `Name` and a `Kind` ([Accounts §4.1](accounts.md#41-users)): `administrator` (exactly one per server, kept by a unique index; `IsAdmin` tells it), `member`, or `managed`, a user without credentials reached only by switching. A user signs in with its own credentials, or through a plugin named by `AuthProvider`; managed users have no `AuthProvider`. In mavio.dev mode `AccountID` is the user's Mavio account, unique and never together with an `AuthProvider`. `Disabled` keeps a user from signing in.
 * A managed user may have a `RestrictionProfile`, which other users may not: `younger_child`, `older_child` or `teen`, allowing rating scores up to 6, 12 and 16 (G and TV-G; PG and TV-PG; PG-13 and TV-14) and no unrated items. `User.EffectiveAccess` gives the effective access record: `Access` with the profile's limit applied when it is lower, and `BlockUnrated` set.
 * A `Credential` is what a user signs in or switches with in standalone mode, kept apart from the user, with `CreatedAt` and `LastUsedAt`. Its `Data` is a PHC-format hash such as `$argon2id$…` for a `password` and a four-digit `pin`, the sealed secret for `totp`, and the public key credential for a `passkey`, which also has a `Name`. A user has at most one credential of each kind but passkeys (`CredentialKind.Single`); deleting a user deletes its credentials. A PIN guards switching to the user and never signs in.
 * `LibraryAccess` is the user's library access record ([Accounts §3.3](accounts.md#33-library-access)):
@@ -250,7 +250,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `MediaSourceRepository` | List and `Replace` an item's media sources |
 | `ImageRepository` | `Get` an image; list an owner's images, or several owners' at once (`ListForOwners`), and `Replace` them |
 | `PersonRepository` | `Get`, case-insensitive `FindByName`, batch `Upsert`, `Search` (credited people with item counts, see §9.2), list and `Replace` an item's credits |
-| `UserRepository` | CRUD and case-insensitive `GetByName` |
+| `UserRepository` | CRUD, case-insensitive `GetByName` and `GetByAccountID` |
 | `CredentialRepository` | A user's credentials: `List` (oldest first), `Get` of a single kind, `Put` (adding a credential or updating the one with its ID; one of a single kind replaces the user's other), `Delete` of a kind, `Remove` of one |
 | `UserDataRepository` | `Get` (`ErrNotFound` when absent), `GetMany` for a list of items, `Put` |
 | `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `Get`, `ListForUser` (most recently seen first), `Touch`, `Switch` (moving a session to another user, recording the switcher), `Delete`, `PurgeIdle` (the sessions last seen before a time) |
@@ -261,7 +261,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
 | `StorageJobRepository` | `Get` a storage job by kind and key (`ErrNotFound` when not stored), `List` those of a kind (oldest first), `Put` (replacing the job of the same kind and key, keeping when it was created), `Delete` |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
-| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `ServerID`, created on the first call, tells the server apart from others to clients; `Accounts` (zero until stored) and `PutAccounts` the account settings |
+| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `Accounts` (zero until stored) and `PutAccounts` the account settings |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
@@ -350,7 +350,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Subtitles`: how subtitles are searched, chosen, saved and synchronized (§14.3).
 * `Validate` checks the known values and ranges.
 
-`AccountSettings` are kept apart from them, under the settings key `accounts`: the `Mode` the server signs people in with, `standalone` or `mavio.dev` ([Accounts §2](accounts.md#2-server-modes)), empty until the server's setup chooses it.
+`AccountSettings` are kept apart from them, under the settings key `accounts`: the `Mode` the server signs people in with, `standalone` or `mavio.dev` ([Accounts §2](accounts.md#2-server-modes)), empty until the server's setup chooses it. In mavio.dev mode `Administrator` is the Mavio account that claimed the server, empty while it is unclaimed (`Claimed` tells it), and `Cursor` the last change from mavio.dev the server applied; a server in another mode has neither.
 
 ### 12.2 API Keys
 An `APIKey` lets an integration call the API without signing in: its token, shown once, acts as the administrator who created it, while that user stays an enabled administrator. Only its SHA-256 hash (`TokenHash`) is stored, with a `Name`, `CreatedAt` and `LastUsedAt`, recorded at most once a minute.

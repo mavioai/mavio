@@ -1,4 +1,4 @@
-h1:yIZJtMP/mQRcfvHML9vXjEZ90utF5qWgsodOQx4L02U=
+h1:h2IdpGviU9d/htOHyfs7E5vXZWi9kfj3+hTk2gW5xq0=
 20261008102530_init.sql h1:o0uo+qhPer0X6agAd1aYP3daRTG8Oo9KvezhTIWItp8=
 20261008120157_search_keys.sql h1:EoCIoI2HBgPjwiuALF6Hb/zjV/v0+5QZvJccYQSz+mQ=
 20261008125130_item_metadata.sql h1:3z4FTt0Fsqm9IpGTKxu4QrJgFob3IBUHbhKEZTyUHzs=
@@ -34,3 +34,4 @@ h1:yIZJtMP/mQRcfvHML9vXjEZ90utF5qWgsodOQx4L02U=
 20261014091432_standalone_users.sql h1:XEUmWEp2QzC2L0nyJG07dvgM/DkCZ8skWehlzrhDqAY=
 20261014093509_library_access.sql h1:6LL5m1FMB/JH7zwk2Fs9/mKkUFCEB+eafdCiOT4hw2k=
 20261014095456_invitations.sql h1:+U9bdQwEzGkrPUFWgVBMTGj6v5h/yXJjBgJR6WRNBY0=
+20261014102340_user_accounts.sql h1:kMpPH4l0Czhz008eZptI/Rcx51dzXRBBSunkddt9zCU=

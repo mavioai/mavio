@@ -43603,6 +43603,7 @@ type UserMutation struct {
 	name_key                   *string
 	kind                       *core.UserKind
 	auth_provider              *string
+	account_id                 *string
 	restriction                *core.RestrictionProfile
 	disabled                   *bool
 	access                     *core.LibraryAccess
@@ -43895,6 +43896,55 @@ func (m *UserMutation) OldAuthProvider(ctx context.Context) (v string, err error
 // ResetAuthProvider resets all changes to the "auth_provider" field.
 func (m *UserMutation) ResetAuthProvider() {
 	m.auth_provider = nil
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *UserMutation) SetAccountID(s string) {
+	m.account_id = &s
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *UserMutation) AccountID() (r string, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAccountID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (m *UserMutation) ClearAccountID() {
+	m.account_id = nil
+	m.clearedFields[user.FieldAccountID] = struct{}{}
+}
+
+// AccountIDCleared returns if the "account_id" field was cleared in this mutation.
+func (m *UserMutation) AccountIDCleared() bool {
+	_, ok := m.clearedFields[user.FieldAccountID]
+	return ok
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *UserMutation) ResetAccountID() {
+	m.account_id = nil
+	delete(m.clearedFields, user.FieldAccountID)
 }
 
 // SetRestriction sets the "restriction" field.
@@ -44803,7 +44853,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -44815,6 +44865,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.auth_provider != nil {
 		fields = append(fields, user.FieldAuthProvider)
+	}
+	if m.account_id != nil {
+		fields = append(fields, user.FieldAccountID)
 	}
 	if m.restriction != nil {
 		fields = append(fields, user.FieldRestriction)
@@ -44853,6 +44906,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Kind()
 	case user.FieldAuthProvider:
 		return m.AuthProvider()
+	case user.FieldAccountID:
+		return m.AccountID()
 	case user.FieldRestriction:
 		return m.Restriction()
 	case user.FieldDisabled:
@@ -44884,6 +44939,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldKind(ctx)
 	case user.FieldAuthProvider:
 		return m.OldAuthProvider(ctx)
+	case user.FieldAccountID:
+		return m.OldAccountID(ctx)
 	case user.FieldRestriction:
 		return m.OldRestriction(ctx)
 	case user.FieldDisabled:
@@ -44934,6 +44991,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAuthProvider(v)
+		return nil
+	case user.FieldAccountID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
 		return nil
 	case user.FieldRestriction:
 		v, ok := value.(core.RestrictionProfile)
@@ -45014,6 +45078,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldAccountID) {
+		fields = append(fields, user.FieldAccountID)
+	}
 	if m.FieldCleared(user.FieldAccess) {
 		fields = append(fields, user.FieldAccess)
 	}
@@ -45034,6 +45101,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldAccountID:
+		m.ClearAccountID()
+		return nil
 	case user.FieldAccess:
 		m.ClearAccess()
 		return nil
@@ -45059,6 +45129,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldAuthProvider:
 		m.ResetAuthProvider()
+		return nil
+	case user.FieldAccountID:
+		m.ResetAccountID()
 		return nil
 	case user.FieldRestriction:
 		m.ResetRestriction()

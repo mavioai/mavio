@@ -17,7 +17,7 @@ import (
 )
 
 // newAdminCommand returns the admin command, which recovers the
-// administrator of a standalone server (docs/accounts.md §4.5).
+// administrator (docs/accounts.md §3.2, §4.5).
 func newAdminCommand() *cobra.Command {
 	admin := &cobra.Command{
 		Use:   "admin",
@@ -56,7 +56,39 @@ as the first line of standard input.`,
 		},
 	}
 	defineFlags(reset.Flags())
-	admin.AddCommand(reset)
+	unclaim := &cobra.Command{
+		Use:   "unclaim",
+		Short: "Return a server in mavio.dev mode to the unclaimed state",
+		Long: `unclaim returns a server in mavio.dev mode to the unclaimed state when its
+administrator's account is lost: the administrator becomes a member and is
+signed out everywhere, and users and their data stay. Another account then
+claims the server from its setup or with a claim code. It works on the
+database the server's settings name, whether or not the server runs.`,
+		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			o, err := load(cmd.Flags())
+			if err != nil {
+				return err
+			}
+			st, err := store.Open(cmd.Context(), o.Server.Database)
+			if err != nil {
+				return fmt.Errorf("open database: %w", err)
+			}
+			defer st.Close()
+			u, err := recovery.Unclaim(cmd.Context(), st, time.Now())
+			if err != nil {
+				return err
+			}
+			if u.Name != "" {
+				cmd.Printf("Unclaimed the server; %s is now a member.\n", u.Name)
+			} else {
+				cmd.Println("Unclaimed the server.")
+			}
+			return nil
+		},
+	}
+	defineFlags(unclaim.Flags())
+	admin.AddCommand(reset, unclaim)
 	return admin
 }
 

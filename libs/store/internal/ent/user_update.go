@@ -97,6 +97,26 @@ func (_u *UserUpdate) SetNillableAuthProvider(v *string) *UserUpdate {
 	return _u
 }
 
+// SetAccountID sets the "account_id" field.
+func (_u *UserUpdate) SetAccountID(v string) *UserUpdate {
+	_u.mutation.SetAccountID(v)
+	return _u
+}
+
+// SetNillableAccountID sets the "account_id" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAccountID(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetAccountID(*v)
+	}
+	return _u
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (_u *UserUpdate) ClearAccountID() *UserUpdate {
+	_u.mutation.ClearAccountID()
+	return _u
+}
+
 // SetRestriction sets the "restriction" field.
 func (_u *UserUpdate) SetRestriction(v core.RestrictionProfile) *UserUpdate {
 	_u.mutation.SetRestriction(v)
@@ -665,6 +685,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AuthProvider(); ok {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountID(); ok {
+		_spec.SetField(user.FieldAccountID, field.TypeString, value)
+	}
+	if _u.mutation.AccountIDCleared() {
+		_spec.ClearField(user.FieldAccountID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Restriction(); ok {
 		_spec.SetField(user.FieldRestriction, field.TypeString, value)
@@ -1260,6 +1286,26 @@ func (_u *UserUpdateOne) SetNillableAuthProvider(v *string) *UserUpdateOne {
 	if v != nil {
 		_u.SetAuthProvider(*v)
 	}
+	return _u
+}
+
+// SetAccountID sets the "account_id" field.
+func (_u *UserUpdateOne) SetAccountID(v string) *UserUpdateOne {
+	_u.mutation.SetAccountID(v)
+	return _u
+}
+
+// SetNillableAccountID sets the "account_id" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAccountID(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetAccountID(*v)
+	}
+	return _u
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (_u *UserUpdateOne) ClearAccountID() *UserUpdateOne {
+	_u.mutation.ClearAccountID()
 	return _u
 }
 
@@ -1861,6 +1907,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.AuthProvider(); ok {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AccountID(); ok {
+		_spec.SetField(user.FieldAccountID, field.TypeString, value)
+	}
+	if _u.mutation.AccountIDCleared() {
+		_spec.ClearField(user.FieldAccountID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Restriction(); ok {
 		_spec.SetField(user.FieldRestriction, field.TypeString, value)

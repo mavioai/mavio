@@ -47,6 +47,7 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetInvitationProcedure,
 	authv1connect.AuthServiceStartInvitationPasskeyProcedure,
 	authv1connect.AuthServiceAcceptInvitationProcedure,
+	authv1connect.AuthServiceClaimServerProcedure,
 }
 
 // UserBoundProcedures act on the caller's own state, so a plugin calls them
@@ -118,7 +119,10 @@ type AuthService struct {
 	// Requests returns the request settings, whose default permissions
 	// members joining through invitations get; nil uses the defaults.
 	Requests func() core.RequestSettings
-	resets   *auth.PasswordResets
+	// Claim claims the server at mavio.dev with a claim code (cloud.Claimer);
+	// nil claims nothing.
+	Claim  func(ctx context.Context, code string) (core.User, error)
+	resets *auth.PasswordResets
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
@@ -267,7 +271,7 @@ func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequ
 		return nil, connectError(ctx, err)
 	}
 	b := authv1.GetAuthInfoResponse_builder{
-		SetupRequired: new(accounts.Mode == core.AccountModeUnset),
+		SetupRequired: new(accounts.Mode == core.AccountModeUnset || accounts.Mode == core.AccountModeMavioDev && !accounts.Claimed()),
 		Mode:          new(accountModeToProto(accounts.Mode)),
 	}
 	if s.Info != nil {

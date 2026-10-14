@@ -9,8 +9,8 @@ import "mavio/user/v1/user.proto";
 // AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
 // Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
 // RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
-// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey and
-// AcceptInvitation are public; the other methods act on the calling user.
+// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,
+// AcceptInvitation and ClaimServer are public; the other methods act on the calling user.
 //
 // A session belongs to a device's Ed25519 key. Its access token lasts an
 // hour; before it expires, or when a call fails with UNAUTHENTICATED
@@ -128,6 +128,13 @@ service AuthService {
   // session opened before switching keep their user, so the client opens
   // them again.
   rpc SwitchUser(SwitchUserRequest) returns (SwitchUserResponse);
+  // ClaimServer sets up a server in mavio.dev mode, or claims it again
+  // after its command line unclaimed it, with a claim code from
+  // mavio.dev/claim, whose account becomes the administrator. It fails
+  // with FAILED_PRECONDITION when the server is standalone or claimed,
+  // INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
+  // mavio.dev cannot be reached.
+  rpc ClaimServer(ClaimServerRequest) returns (ClaimServerResponse);
 }
 
 // Device identifies a client installation.
@@ -174,15 +181,16 @@ enum AccountMode {
 message GetAuthInfoRequest {}
 
 message GetAuthInfoResponse {
-  // True until the server's setup has chosen its mode.
+  // True until the server's setup has chosen its mode, and while a server
+  // in mavio.dev mode is unclaimed.
   bool setup_required = 1;
-  // Tells the server apart from others whatever address reaches it; stable
-  // for the server's database.
+  // Tells the server apart from others whatever address reaches it: the
+  // fingerprint of its identity key.
   string server_id = 2;
   // The name the server shows, its host name unless administrators set one.
   string server_name = 3;
   string version = 4;
-  // How the server signs people in; unspecified while setup_required.
+  // How the server signs people in; unspecified until its setup chooses.
   AccountMode mode = 5;
 }
 
@@ -527,5 +535,20 @@ message SwitchUserRequest {
 
 message SwitchUserResponse {
   // The user the session now acts as.
+  mavio.user.v1.User user = 1;
+}
+
+message ClaimServerRequest {
+  string claim_code = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+    }
+  ];
+}
+
+message ClaimServerResponse {
+  // The administrator.
   mavio.user.v1.User user = 1;
 }

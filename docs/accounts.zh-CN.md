@@ -58,8 +58,8 @@
 
 ### 3.2 服务端与认领
 * 服务端的 **ID** 是其身份公钥（§5.1）的指纹，也是它在 mavio.dev 的 OpenID Connect `client_id`；它用身份密钥签名的 JWT 认证（`private_key_jwt`）。
-* **认领**通过用身份密钥签名的注册请求，把服务端注册到 mavio.dev。方式是在服务端的安装向导中登录 mavio.dev；手边没有浏览器的服务端，则把从 mavio.dev/claim 取得、几分钟内有效的认领码传入 `MAVIO_CLAIM_TOKEN`。认领的账户成为服务端的管理员。
-* 管理员管理服务端的设置和媒体库，授予、修改和撤销媒体库访问。管理员的账户丢失时，用服务端的命令行把服务端恢复为未认领状态，再由另一个账户认领；服务端仍处于 mavio.dev 模式，因此用户数据保留。
+* **认领**通过用身份密钥签名的注册请求，把服务端注册到 mavio.dev，请求携带几分钟内有效的认领码。服务端的安装向导通过登录 mavio.dev 取得认领码并传给 `AuthService.ClaimServer`；手边没有浏览器的服务端，则把从 mavio.dev/claim 取得的认领码传入 `MAVIO_CLAIM_TOKEN`，在未认领状态下启动时自行认领。认领让模式尚未设置的服务端进入 mavio.dev 模式。认领的账户成为服务端的管理员：创建其用户，服务端已有该用户时则将其提升，其他管理员降为成员。
+* 管理员管理服务端的设置和媒体库，授予、修改和撤销媒体库访问。管理员的账户丢失时，用 `mavio admin unclaim` 把服务端恢复为未认领状态，同时把管理员降为成员并在所有设备上登出，再由另一个账户认领；服务端仍处于 mavio.dev 模式，因此用户数据保留，已应用变更的位置也保留。
 * 服务端与 mavio.dev 保持一条连接（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)），通过它接收访问记录（§3.3）的变更和吊销（§5.5）。离线过的服务端重新连接时补取错过的变更。
 
 ### 3.3 媒体库访问
@@ -202,7 +202,8 @@ sequenceDiagram
 * **用户。**`users` 表有 `kind`（管理员、成员或托管）、用户的媒体库访问记录，和一个可空且唯一的 `account_id`，即 mavio.dev 模式下 Mavio 账户的 ID。mavio.dev 模式下，账户的访问记录到达时创建其用户记录；管理员的用户记录在服务端被认领时创建。凭据（密码哈希、通行密钥、TOTP 密钥、PIN 哈希）保存在单独的表中，只在独立模式下使用。
 * **独立模式的凭据。**密码用 argon2id 哈希（[系统架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)）；TOTP（RFC 6238）用标准库的 HMAC 计算；通行密钥使用 `go-webauthn/webauthn`。通行密钥属于浏览器访问服务端时所用的主机名，即其依赖方，取自请求的来源，来源必须是 HTTPS，或 `localhost` 上的 HTTP；通行密钥只在该主机上可用，IP 地址不能有通行密钥。通行密钥单独即可登录；TOTP 是密码的第二因素。
 * **mavio.dev 模式下的管理。**客户端直接在 mavio.dev 上管理访问、好友和 Home；服务端管理用户和访问的 RPC 返回 `failed_precondition`。Home 内的用户切换发生在客户端与 mavio.dev 之间，服务端只看到一次带新断言的登录。
-* **服务端信息。**无需登录的 `AuthService.GetAuthInfo` 给出服务端的模式及其 ID 和名称，客户端在登录前就知道该如何登录。
+* **服务端信息。**无需登录的 `AuthService.GetAuthInfo` 给出服务端的模式及其 ID 和名称，客户端在登录前就知道该如何登录；在模式选定之前，以及 mavio.dev 模式的服务端未被认领时，它报告需要安装。
+* **与 mavio.dev 的连接。**`internal/cloud` 用身份密钥为服务端发往 mavio.dev 的 `mavio.cloud.v1.ServerService` 的请求签名、认领服务端，并为已认领的服务端保持到 mavio.dev 的 WebSocket（[mavio.dev §3](mavio-dev.zh-CN.md#3-向服务端推送)）。账户设置保存管理员的账户和服务端已应用的最后一项变更的游标；服务端用 `ListChanges` 取得其后的变更，并在推进游标的事务中应用它们。
 
 ## 9. mavio.dev
 

@@ -1555,6 +1555,7 @@ var (
 		{Name: "name_key", Type: field.TypeString, Unique: true},
 		{Name: "kind", Type: field.TypeString},
 		{Name: "auth_provider", Type: field.TypeString, Default: ""},
+		{Name: "account_id", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "restriction", Type: field.TypeString, Default: ""},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
 		{Name: "access", Type: field.TypeJSON, Nullable: true},

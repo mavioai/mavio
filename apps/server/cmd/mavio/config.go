@@ -79,6 +79,8 @@ var settings = []setting{
 	{key: "metadata-dir", path: true, usage: "directory for the artwork chosen for items of libraries not saving metadata next to their media", def: under("metadata")},
 	{key: "backup-dir", path: true, usage: "directory for backups; empty makes none", def: under("backups")},
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
+	{key: "mavio-dev-url", usage: "base URL of mavio.dev's API, which servers in mavio.dev mode are claimed at and connect to", def: constant("https://mavio.dev/api")},
+	{key: "claim-token", usage: "claim code from mavio.dev/claim, which claims an unclaimed server when it starts", def: constant("")},
 	{key: "dev", usage: "serve the development player at /dev/player", def: constant("false")},
 	{key: "dev-library", path: true, usage: "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library", def: constant("")},
 }
@@ -227,7 +229,7 @@ func assign(o *options, key, value string) error {
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
 		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir,
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
-		"dev-library": &cfg.DevLibrary,
+		"mavio-dev-url": &cfg.MavioDevURL, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
 	}
 	if key == "rclone-cache-size" {
 		n, err := parseSize(value)

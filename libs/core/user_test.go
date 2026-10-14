@@ -20,6 +20,8 @@ func TestUserKinds(t *testing.T) {
 		{"managed through a plugin", User{ID: id, Name: "a", Kind: UserManaged, AuthProvider: "ldap"}, false},
 		{"restricted member", User{ID: id, Name: "a", Kind: UserMember, Restriction: RestrictionTeen}, false},
 		{"unknown profile", User{ID: id, Name: "a", Kind: UserManaged, Restriction: "toddler"}, false},
+		{"Mavio account", User{ID: id, Name: "a", Kind: UserMember, AccountID: "acct"}, true},
+		{"Mavio account through a plugin", User{ID: id, Name: "a", Kind: UserMember, AccountID: "acct", AuthProvider: "ldap"}, false},
 	}
 	for _, tt := range tests {
 		if err := tt.u.Validate(); (err == nil) != tt.ok || err != nil && !errors.Is(err, ErrInvalid) {

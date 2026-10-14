@@ -81,6 +81,9 @@ type Options struct {
 	// ServerInfo names the server to clients and tells plugins how it is
 	// reached.
 	ServerInfo func() rpc.ServerInfo
+	// Claim claims the server at mavio.dev with a claim code; nil claims
+	// nothing.
+	Claim func(ctx context.Context, code string) (core.User, error)
 	// Refresher carries out metadata changes; nil uses one without
 	// providers.
 	Refresher *library.Refresher
@@ -176,7 +179,7 @@ func Handler(opts Options) (http.Handler, error) {
 	authService.Activity, authService.Authenticate, authService.Requests = opts.Activity, opts.Authenticate, requestSettings
 	authService.Passkeys, authService.TOTP = passkeys, totp
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
-	authService.Info = opts.ServerInfo
+	authService.Info, authService.Claim = opts.ServerInfo, opts.Claim
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
 	tasks := rpc.NewTaskService(opts.Store)
 	if opts.Plugins != nil {

@@ -954,15 +954,15 @@ func init() {
 	// user.DefaultAuthProvider holds the default value on creation for the auth_provider field.
 	user.DefaultAuthProvider = userDescAuthProvider.Default.(string)
 	// userDescRestriction is the schema descriptor for restriction field.
-	userDescRestriction := userFields[5].Descriptor()
+	userDescRestriction := userFields[6].Descriptor()
 	// user.DefaultRestriction holds the default value on creation for the restriction field.
 	user.DefaultRestriction = core.RestrictionProfile(userDescRestriction.Default.(string))
 	// userDescDisabled is the schema descriptor for disabled field.
-	userDescDisabled := userFields[6].Descriptor()
+	userDescDisabled := userFields[7].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[10].Descriptor()
+	userDescCreatedAt := userFields[11].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.

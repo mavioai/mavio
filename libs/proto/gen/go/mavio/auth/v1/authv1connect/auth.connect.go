@@ -100,6 +100,8 @@ const (
 	AuthServiceListSwitchableUsersProcedure = "/mavio.auth.v1.AuthService/ListSwitchableUsers"
 	// AuthServiceSwitchUserProcedure is the fully-qualified name of the AuthService's SwitchUser RPC.
 	AuthServiceSwitchUserProcedure = "/mavio.auth.v1.AuthService/SwitchUser"
+	// AuthServiceClaimServerProcedure is the fully-qualified name of the AuthService's ClaimServer RPC.
+	AuthServiceClaimServerProcedure = "/mavio.auth.v1.AuthService/ClaimServer"
 )
 
 // AuthServiceClient is a client for the mavio.auth.v1.AuthService service.
@@ -203,6 +205,13 @@ type AuthServiceClient interface {
 	// session opened before switching keep their user, so the client opens
 	// them again.
 	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
+	// ClaimServer sets up a server in mavio.dev mode, or claims it again
+	// after its command line unclaimed it, with a claim code from
+	// mavio.dev/claim, whose account becomes the administrator. It fails
+	// with FAILED_PRECONDITION when the server is standalone or claimed,
+	// INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
+	// mavio.dev cannot be reached.
+	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
 }
 
 // NewAuthServiceClient constructs a client for the mavio.auth.v1.AuthService service. By default,
@@ -366,6 +375,12 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
 			connect.WithClientOptions(opts...),
 		),
+		claimServer: connect.NewClient[v1.ClaimServerRequest, v1.ClaimServerResponse](
+			httpClient,
+			baseURL+AuthServiceClaimServerProcedure,
+			connect.WithSchema(authServiceMethods.ByName("ClaimServer")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -395,6 +410,7 @@ type authServiceClient struct {
 	acceptInvitation       *connect.Client[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse]
 	listSwitchableUsers    *connect.Client[v1.ListSwitchableUsersRequest, v1.ListSwitchableUsersResponse]
 	switchUser             *connect.Client[v1.SwitchUserRequest, v1.SwitchUserResponse]
+	claimServer            *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
 }
 
 // GetAuthInfo calls mavio.auth.v1.AuthService.GetAuthInfo.
@@ -613,6 +629,15 @@ func (c *authServiceClient) SwitchUser(ctx context.Context, req *v1.SwitchUserRe
 	return nil, err
 }
 
+// ClaimServer calls mavio.auth.v1.AuthService.ClaimServer.
+func (c *authServiceClient) ClaimServer(ctx context.Context, req *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error) {
+	response, err := c.claimServer.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AuthServiceHandler is an implementation of the mavio.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
@@ -714,6 +739,13 @@ type AuthServiceHandler interface {
 	// session opened before switching keep their user, so the client opens
 	// them again.
 	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
+	// ClaimServer sets up a server in mavio.dev mode, or claims it again
+	// after its command line unclaimed it, with a claim code from
+	// mavio.dev/claim, whose account becomes the administrator. It fails
+	// with FAILED_PRECONDITION when the server is standalone or claimed,
+	// INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
+	// mavio.dev cannot be reached.
+	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -873,6 +905,12 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceClaimServerHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceClaimServerProcedure,
+		svc.ClaimServer,
+		connect.WithSchema(authServiceMethods.ByName("ClaimServer")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceGetAuthInfoProcedure:
@@ -923,6 +961,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceListSwitchableUsersHandler.ServeHTTP(w, r)
 		case AuthServiceSwitchUserProcedure:
 			authServiceSwitchUserHandler.ServeHTTP(w, r)
+		case AuthServiceClaimServerProcedure:
+			authServiceClaimServerHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1026,4 +1066,8 @@ func (UnimplementedAuthServiceHandler) ListSwitchableUsers(context.Context, *v1.
 
 func (UnimplementedAuthServiceHandler) SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.SwitchUser is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ClaimServer is not implemented"))
 }

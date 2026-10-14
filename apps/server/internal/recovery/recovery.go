@@ -76,3 +76,52 @@ func administrator(ctx context.Context, store core.Store) (core.User, error) {
 	}
 	return core.User{}, fmt.Errorf("%w: the server has no administrator", core.ErrNotFound)
 }
+
+// ErrNotClaimed means the server has no claim to undo: it is not in
+// mavio.dev mode, or no account claims it.
+var ErrNotClaimed = errors.New("the server is not claimed at mavio.dev")
+
+// Unclaim returns a server in mavio.dev mode to the unclaimed state, so
+// that another account claims it when the administrator's account is
+// lost: the administrator becomes a member and its sessions end, and the
+// users and their data stay. It returns the former administrator.
+func Unclaim(ctx context.Context, store core.Store, now time.Time) (core.User, error) {
+	var admin core.User
+	err := store.InTx(ctx, func(tx core.Store) error {
+		accounts, err := tx.Settings().Accounts(ctx)
+		if err != nil {
+			return err
+		}
+		if !accounts.Claimed() {
+			return ErrNotClaimed
+		}
+		accounts.Administrator = ""
+		if err := tx.Settings().PutAccounts(ctx, &accounts); err != nil {
+			return err
+		}
+		admin, err = administrator(ctx, tx)
+		if errors.Is(err, core.ErrNotFound) {
+			return nil
+		} else if err != nil {
+			return err
+		}
+		admin.Kind = core.UserMember
+		if err := tx.Users().Update(ctx, &admin); err != nil {
+			return err
+		}
+		sessions, err := tx.AuthSessions().ListForUser(ctx, admin.ID)
+		if err != nil {
+			return err
+		}
+		for _, s := range sessions {
+			if err := tx.AuthSessions().Delete(ctx, s.ID); err != nil {
+				return err
+			}
+		}
+		return tx.Activities().Add(ctx, &core.Activity{
+			Time: now, Type: "server.unclaimed", Severity: core.SeverityWarning, UserID: admin.ID,
+			Title: "The server was unclaimed from the command line; " + admin.Name + " is no longer its administrator",
+		})
+	})
+	return admin, err
+}

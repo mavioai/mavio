@@ -24,10 +24,12 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 * 密码通过 better-auth 的 `password.hash` 和 `password.verify`，用 `node:crypto` 的 scrypt（N = 16384、r = 16、p = 1、64 字节密钥）哈希，以 PHC 格式保存，参数变化时在登录时重新哈希。
 * 托管账户是通过服务端适配器创建的 better-auth 用户，邮箱值为 `managed:<id>`。只有公开路由要求有效的邮箱地址，因此任何登录都不接受这个值。转为完整账户时设置真实的邮箱地址和密码。
 * Mavio 自己实现的部分：认领与 `private_key_jwt`、登录断言、媒体库访问记录及其邀请、好友、Home、用 PIN 切换、Mavio Pass、向服务端的推送、§4.2 的 ACME 质询，以及中转票据（§5）。
+* 服务端调用 API 基础 URL 下的 Connect 服务 `mavio.cloud.v1.ServerService`（`libs/proto`），基础 URL 为 `https://mavio.dev/api`，除非服务端的 `mavio-dev-url` 指定了别的地址：`ClaimServer` 把服务端的身份公钥注册到认领码所属账户名下，返回该账户和服务端当前的游标；`ListChanges` 给出已认领服务端在某游标之后的变更。每个请求都以 bearer 令牌携带服务端用身份密钥签名的 JWT（`private_key_jwt`）：EdDSA，以服务端 ID（[账户 §5.1](accounts.zh-CN.md#51-服务端身份)）为 `kid`、`iss` 和 `sub`，以基础 URL 为 `aud`，带随机的 `jti`，签发一分钟后过期。
 
 ## 3. 向服务端推送
 * mavio.dev 模式的每台服务端对应一个 Durable Object，持有该服务端的 WebSocket 连接。连接在消息之间休眠，并用协议层的 ping 保活，ping 不会唤醒该对象。
 * 每项针对某台服务端的变更（[访问记录](accounts.zh-CN.md#33-媒体库访问)、吊销、Home 与账户的删除）都带一个递增的游标保存。Durable Object 只通知服务端它的变更已到游标 N；服务端随后通过 HTTPS，用身份密钥签名的请求，取回自己游标之后的变更。
+* 服务端用与请求相同的 JWT 打开 API 基础 URL 下 `/servers/notices` 的 WebSocket；每条通知是一个装有 `mavio.cloud.v1.Notice` 的二进制帧。服务端每 30 秒发一次 ping，ping 失败即结束连接。
 * 服务端每次重新连接时（按指数退避加随机抖动）以及每六小时也会取回变更，因此丢失的通知只会推迟变更，不会丢失变更。
 
 ## 4. 证书与子域名

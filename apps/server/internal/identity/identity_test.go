@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -37,5 +38,19 @@ func TestDerive(t *testing.T) {
 	}
 	if bytes.Equal(a, Generate().Derive("a")) {
 		t.Error("two keys derive the same secret")
+	}
+}
+
+func TestID(t *testing.T) {
+	k := Generate()
+	id := k.ID()
+	if len(id) != 32 || strings.ToLower(id) != id || strings.ContainsRune(id, '=') {
+		t.Errorf("ID = %q, want 32 lowercase base32 characters", id)
+	}
+	if k.ID() != id {
+		t.Errorf("ID is not stable")
+	}
+	if Generate().ID() == id {
+		t.Errorf("two keys share ID %q", id)
 	}
 }

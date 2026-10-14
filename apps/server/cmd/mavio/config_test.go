@@ -53,6 +53,8 @@ func TestLoadDefaults(t *testing.T) {
 		{"metadata-dir", cfg.MetadataDir, filepath.Join(home, "metadata")},
 		{"backup-dir", cfg.BackupDir, filepath.Join(home, "backups")},
 		{"discovery-addr", cfg.DiscoveryAddr, ":7359"},
+		{"mavio-dev-url", cfg.MavioDevURL, "https://mavio.dev/api"},
+		{"claim-token", cfg.ClaimToken, ""},
 		{"dev-library", cfg.DevLibrary, ""},
 	} {
 		if tc.got != tc.want {

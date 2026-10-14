@@ -77,3 +77,50 @@ func TestResetPassword(t *testing.T) {
 		t.Errorf("in mavio.dev mode: %v, want ErrNotStandalone", err)
 	}
 }
+
+func TestUnclaim(t *testing.T) {
+	ctx := t.Context()
+	st, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "mavio.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = st.Close() })
+	now := time.Date(2026, 10, 14, 12, 0, 0, 0, time.UTC)
+
+	for _, mode := range []core.AccountMode{core.AccountModeUnset, core.AccountModeStandalone} {
+		if err := st.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: mode}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := recovery.Unclaim(ctx, st, now); !errors.Is(err, recovery.ErrNotClaimed) {
+			t.Errorf("Unclaim in mode %q: %v, want ErrNotClaimed", mode, err)
+		}
+	}
+	claimed := core.AccountSettings{Mode: core.AccountModeMavioDev, Administrator: "acct-1", Cursor: 7}
+	if err := st.Settings().PutAccounts(ctx, &claimed); err != nil {
+		t.Fatal(err)
+	}
+	admin := core.User{Name: "alice", Kind: core.UserAdmin, AccountID: "acct-1"}
+	if err := st.Users().Create(ctx, &admin); err != nil {
+		t.Fatal(err)
+	}
+	if err := st.AuthSessions().Create(ctx, &core.AuthSession{UserID: admin.ID, DeviceKey: make([]byte, 32), DeviceID: "phone", LastSeenAt: now}); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := recovery.Unclaim(ctx, st, now)
+	if err != nil || got.ID != admin.ID {
+		t.Fatalf("Unclaim = %v, %v; want the administrator", got.Name, err)
+	}
+	if a, _ := st.Settings().Accounts(ctx); a.Claimed() || a.Mode != core.AccountModeMavioDev || a.Cursor != 7 {
+		t.Errorf("settings = %+v, want unclaimed in mavio.dev mode at cursor 7", a)
+	}
+	if u, _ := st.Users().Get(ctx, admin.ID); u.Kind != core.UserMember || u.AccountID != "acct-1" {
+		t.Errorf("former administrator = %+v, want a member of its account", u)
+	}
+	if list, _ := st.AuthSessions().ListForUser(ctx, admin.ID); len(list) != 0 {
+		t.Errorf("former administrator's sessions = %d, want = 0", len(list))
+	}
+	if _, err := recovery.Unclaim(ctx, st, now); !errors.Is(err, recovery.ErrNotClaimed) {
+		t.Errorf("second Unclaim: %v, want ErrNotClaimed", err)
+	}
+}
