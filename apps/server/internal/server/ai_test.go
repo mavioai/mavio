@@ -201,17 +201,31 @@ func TestAI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("StartAiLogin(anthropic): %v", err)
 	}
-	waitFor(t, "the login to ask", func() bool {
-		state, err := ai.GetAiLogin(ctx, systemv1.GetAiLoginRequest_builder{LoginId: new(login.GetLoginId())}.Build())
-		return err == nil && state.GetPrompt() != nil
-	})
+	watch, err := ai.WatchAiLogin(ctx, systemv1.WatchAiLoginRequest_builder{LoginId: new(login.GetLoginId())}.Build())
+	if err != nil {
+		t.Fatalf("WatchAiLogin: %v", err)
+	}
+	defer func() { _ = watch.Close() }()
+	var last *systemv1.WatchAiLoginResponse
+	for last.GetPrompt() == nil && watch.Receive() {
+		last = watch.Msg()
+	}
+	if last.GetPrompt() == nil {
+		t.Fatalf("WatchAiLogin ended without a prompt: %v", watch.Err())
+	}
 	if _, err := ai.CancelAiLogin(ctx, systemv1.CancelAiLoginRequest_builder{LoginId: new(login.GetLoginId())}.Build()); err != nil {
 		t.Fatalf("CancelAiLogin: %v", err)
 	}
-	waitFor(t, "the login canceled", func() bool {
-		state, err := ai.GetAiLogin(ctx, systemv1.GetAiLoginRequest_builder{LoginId: new(login.GetLoginId())}.Build())
-		return err == nil && state.GetState() == pluginv1.AiLoginState_AI_LOGIN_STATE_CANCELED
-	})
+	for watch.Receive() {
+		last = watch.Msg()
+	}
+	if err := watch.Err(); err != nil || last.GetState() != pluginv1.AiLoginState_AI_LOGIN_STATE_CANCELED {
+		t.Errorf("WatchAiLogin ended with %v, %v; want canceled", last.GetState(), err)
+	}
+	if state, err := ai.GetAiLogin(ctx, systemv1.GetAiLoginRequest_builder{LoginId: new(login.GetLoginId())}.Build()); err != nil ||
+		state.GetState() != pluginv1.AiLoginState_AI_LOGIN_STATE_CANCELED {
+		t.Errorf("GetAiLogin = %v, %v; want canceled", state.GetState(), err)
+	}
 
 	// Others may not.
 	users := userv1connect.NewUserServiceClient(http.DefaultClient, srv.url, token)

@@ -133,6 +133,31 @@ func (s *AiService) GetAiLogin(ctx context.Context, req *systemv1.GetAiLoginRequ
 	}.Build(), nil
 }
 
+// WatchAiLogin streams a login's state from the gateway until it ends.
+func (s *AiService) WatchAiLogin(ctx context.Context, req *systemv1.WatchAiLoginRequest, stream *connect.ServerStream[systemv1.WatchAiLoginResponse]) error {
+	_, g, err := s.gateway(ctx)
+	if err != nil {
+		return err
+	}
+	watch, err := g.WatchAiLogin(ctx, pluginv1.WatchAiLoginRequest_builder{LoginId: new(req.GetLoginId())}.Build())
+	if err != nil {
+		return gatewayError(ctx, err)
+	}
+	defer func() { _ = watch.Close() }()
+	for watch.Receive() {
+		m := watch.Msg()
+		if err := stream.Send(systemv1.WatchAiLoginResponse_builder{
+			State: m.GetState().Enum(), Events: m.GetEvents(), Prompt: m.GetPrompt(), Error: new(m.GetError()),
+		}.Build()); err != nil {
+			return err
+		}
+	}
+	if err := watch.Err(); err != nil {
+		return gatewayError(ctx, err)
+	}
+	return nil
+}
+
 // AnswerAiLogin answers a login's prompt.
 func (s *AiService) AnswerAiLogin(ctx context.Context, req *systemv1.AnswerAiLoginRequest) (*systemv1.AnswerAiLoginResponse, error) {
 	_, g, err := s.gateway(ctx)
