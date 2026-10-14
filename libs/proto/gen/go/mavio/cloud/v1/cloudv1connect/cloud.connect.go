@@ -51,6 +51,12 @@ const (
 	// ServerServiceCreateAcmeBindingProcedure is the fully-qualified name of the ServerService's
 	// CreateAcmeBinding RPC.
 	ServerServiceCreateAcmeBindingProcedure = "/mavio.cloud.v1.ServerService/CreateAcmeBinding"
+	// ServerServiceListRelaysProcedure is the fully-qualified name of the ServerService's ListRelays
+	// RPC.
+	ServerServiceListRelaysProcedure = "/mavio.cloud.v1.ServerService/ListRelays"
+	// ServerServiceSetRelayRegionProcedure is the fully-qualified name of the ServerService's
+	// SetRelayRegion RPC.
+	ServerServiceSetRelayRegionProcedure = "/mavio.cloud.v1.ServerService/SetRelayRegion"
 )
 
 // ServerServiceClient is a client for the mavio.cloud.v1.ServerService service.
@@ -77,6 +83,13 @@ type ServerServiceClient interface {
 	// certificate authority requiring one, such as Google Trust Services,
 	// needs to register the server's ACME account.
 	CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error)
+	// ListRelays gives mavio.dev's relays, one per region, for the server to
+	// keep a connection to the nearest (docs/mavio-dev.md §5).
+	ListRelays(context.Context, *v1.ListRelaysRequest) (*v1.ListRelaysResponse, error)
+	// SetRelayRegion records the region of the relay the server keeps a
+	// connection to; empty when it keeps none, and no tickets are given for
+	// it then.
+	SetRelayRegion(context.Context, *v1.SetRelayRegionRequest) (*v1.SetRelayRegionResponse, error)
 }
 
 // NewServerServiceClient constructs a client for the mavio.cloud.v1.ServerService service. By
@@ -130,6 +143,20 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(serverServiceMethods.ByName("CreateAcmeBinding")),
 			connect.WithClientOptions(opts...),
 		),
+		listRelays: connect.NewClient[v1.ListRelaysRequest, v1.ListRelaysResponse](
+			httpClient,
+			baseURL+ServerServiceListRelaysProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("ListRelays")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		setRelayRegion: connect.NewClient[v1.SetRelayRegionRequest, v1.SetRelayRegionResponse](
+			httpClient,
+			baseURL+ServerServiceSetRelayRegionProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("SetRelayRegion")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -141,6 +168,8 @@ type serverServiceClient struct {
 	setAcmeChallenge   *connect.Client[v1.SetAcmeChallengeRequest, v1.SetAcmeChallengeResponse]
 	clearAcmeChallenge *connect.Client[v1.ClearAcmeChallengeRequest, v1.ClearAcmeChallengeResponse]
 	createAcmeBinding  *connect.Client[v1.CreateAcmeBindingRequest, v1.CreateAcmeBindingResponse]
+	listRelays         *connect.Client[v1.ListRelaysRequest, v1.ListRelaysResponse]
+	setRelayRegion     *connect.Client[v1.SetRelayRegionRequest, v1.SetRelayRegionResponse]
 }
 
 // ClaimServer calls mavio.cloud.v1.ServerService.ClaimServer.
@@ -197,6 +226,24 @@ func (c *serverServiceClient) CreateAcmeBinding(ctx context.Context, req *v1.Cre
 	return nil, err
 }
 
+// ListRelays calls mavio.cloud.v1.ServerService.ListRelays.
+func (c *serverServiceClient) ListRelays(ctx context.Context, req *v1.ListRelaysRequest) (*v1.ListRelaysResponse, error) {
+	response, err := c.listRelays.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SetRelayRegion calls mavio.cloud.v1.ServerService.SetRelayRegion.
+func (c *serverServiceClient) SetRelayRegion(ctx context.Context, req *v1.SetRelayRegionRequest) (*v1.SetRelayRegionResponse, error) {
+	response, err := c.setRelayRegion.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ServerServiceHandler is an implementation of the mavio.cloud.v1.ServerService service.
 type ServerServiceHandler interface {
 	// ClaimServer registers the server under the account that created the
@@ -221,6 +268,13 @@ type ServerServiceHandler interface {
 	// certificate authority requiring one, such as Google Trust Services,
 	// needs to register the server's ACME account.
 	CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error)
+	// ListRelays gives mavio.dev's relays, one per region, for the server to
+	// keep a connection to the nearest (docs/mavio-dev.md §5).
+	ListRelays(context.Context, *v1.ListRelaysRequest) (*v1.ListRelaysResponse, error)
+	// SetRelayRegion records the region of the relay the server keeps a
+	// connection to; empty when it keeps none, and no tickets are given for
+	// it then.
+	SetRelayRegion(context.Context, *v1.SetRelayRegionRequest) (*v1.SetRelayRegionResponse, error)
 }
 
 // NewServerServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -270,6 +324,20 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(serverServiceMethods.ByName("CreateAcmeBinding")),
 		connect.WithHandlerOptions(opts...),
 	)
+	serverServiceListRelaysHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceListRelaysProcedure,
+		svc.ListRelays,
+		connect.WithSchema(serverServiceMethods.ByName("ListRelays")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	serverServiceSetRelayRegionHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceSetRelayRegionProcedure,
+		svc.SetRelayRegion,
+		connect.WithSchema(serverServiceMethods.ByName("SetRelayRegion")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.cloud.v1.ServerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServerServiceClaimServerProcedure:
@@ -284,6 +352,10 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 			serverServiceClearAcmeChallengeHandler.ServeHTTP(w, r)
 		case ServerServiceCreateAcmeBindingProcedure:
 			serverServiceCreateAcmeBindingHandler.ServeHTTP(w, r)
+		case ServerServiceListRelaysProcedure:
+			serverServiceListRelaysHandler.ServeHTTP(w, r)
+		case ServerServiceSetRelayRegionProcedure:
+			serverServiceSetRelayRegionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -315,4 +387,12 @@ func (UnimplementedServerServiceHandler) ClearAcmeChallenge(context.Context, *v1
 
 func (UnimplementedServerServiceHandler) CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.CreateAcmeBinding is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) ListRelays(context.Context, *v1.ListRelaysRequest) (*v1.ListRelaysResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.ListRelays is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) SetRelayRegion(context.Context, *v1.SetRelayRegionRequest) (*v1.SetRelayRegionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.SetRelayRegion is not implemented"))
 }

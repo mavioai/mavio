@@ -48,6 +48,22 @@ pub type OwnedCreateAcmeBindingRequestView = ::buffa::view::OwnedView<
 pub type OwnedCreateAcmeBindingResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ListRelaysRequestView<'static>>`.
+pub type OwnedListRelaysRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListRelaysResponseView<'static>>`.
+pub type OwnedListRelaysResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysResponseView<'static>,
+>;
+///Shorthand for `OwnedView<SetRelayRegionRequestView<'static>>`.
+pub type OwnedSetRelayRegionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SetRelayRegionResponseView<'static>>`.
+pub type OwnedSetRelayRegionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ClaimServerResponse>
 for crate::proto::mavio::cloud::v1::__buffa::view::ClaimServerResponseView<'_> {
     fn encode(
@@ -254,6 +270,74 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ListRelaysResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ListRelaysResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::SetRelayRegionResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::SetRelayRegionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const SERVER_SERVICE_SERVICE_NAME: &str = "mavio.cloud.v1.ServerService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ClaimServer` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -292,6 +376,18 @@ pub const SERVER_SERVICE_CREATE_ACME_BINDING_SPEC: ::connectrpc::Spec = ::connec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListRelays` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_LIST_RELAYS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/ListRelays",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetRelayRegion` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_SET_RELAY_REGION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/SetRelayRegion",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// ServerService is mavio.dev's API for servers in mavio.dev mode
 /// (docs/accounts.md §3.2, docs/mavio-dev.md §3). Every request is
 /// authenticated by a JWT the server signs with its identity key
@@ -494,6 +590,55 @@ pub trait ServerService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListRelays gives mavio.dev's relays, one per region, for the server to
+    /// keep a connection to the nearest (docs/mavio-dev.md §5).
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_relays<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::ListRelaysRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::ListRelaysResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetRelayRegion records the region of the relay the server keeps a
+    /// connection to; empty when it keeps none, and no tickets are given for
+    /// it then.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_relay_region<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::SetRelayRegionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -703,6 +848,64 @@ impl<S: ServerService> ServerServiceExt for S {
                 },
             )
             .with_spec(SERVER_SERVICE_CREATE_ACME_BINDING_SPEC)
+            .route_view_idempotent(
+                SERVER_SERVICE_SERVICE_NAME,
+                "ListRelays",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::ListRelaysRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_relays(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::ListRelaysResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_LIST_RELAYS_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
+                "SetRelayRegion",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_relay_region(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::SetRelayRegionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_SET_RELAY_REGION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -791,6 +994,18 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SERVER_SERVICE_CREATE_ACME_BINDING_SPEC),
+                )
+            }
+            "ListRelays" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(SERVER_SERVICE_LIST_RELAYS_SPEC),
+                )
+            }
+            "SetRelayRegion" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_SET_RELAY_REGION_SPEC),
                 )
             }
             _ => None,
@@ -937,6 +1152,50 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse,
+                        >(format)
+                })
+            }
+            "ListRelays" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::ListRelaysRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::ListRelaysRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_relays(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::ListRelaysResponse,
+                        >(format)
+                })
+            }
+            "SetRelayRegion" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_relay_region(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::SetRelayRegionResponse,
                         >(format)
                 })
             }
@@ -1332,6 +1591,96 @@ where
                 &self.transport,
                 &self.config,
                 SERVER_SERVICE_CREATE_ACME_BINDING_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListRelays RPC. Sends a request to /mavio.cloud.v1.ServerService/ListRelays.
+    pub async fn list_relays(
+        &self,
+        request: crate::proto::mavio::cloud::v1::ListRelaysRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_relays_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListRelays RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_relays_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::ListRelaysRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::ListRelaysResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_LIST_RELAYS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetRelayRegion RPC. Sends a request to /mavio.cloud.v1.ServerService/SetRelayRegion.
+    pub async fn set_relay_region(
+        &self,
+        request: crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_relay_region_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SetRelayRegion RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_relay_region_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::SetRelayRegionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_SET_RELAY_REGION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

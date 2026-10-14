@@ -11,7 +11,9 @@ import {
   ListChangesResponseSchema,
   PublishLibrariesResponseSchema,
   type ServerService,
+  ListRelaysResponseSchema,
   SetAcmeChallengeResponseSchema,
+  SetRelayRegionResponseSchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { and, asc, eq, gt } from "drizzle-orm";
 
@@ -20,6 +22,7 @@ import { accountOf, addChange } from "./changes.ts";
 import { claimCodeHash } from "./claim-codes.ts";
 import type { Database } from "./db/index.ts";
 import { schema } from "./db/index.ts";
+import type { Relays } from "./relay.ts";
 import { bearer, keyID, verifyServerToken } from "./server-token.ts";
 
 /** Deps are what mavio.dev's services use. */
@@ -30,6 +33,8 @@ export interface Deps {
   now?: () => Date;
   /** Servers' ACME challenges and bindings; undefined where certificates are not offered. */
   acme?: Acme;
+  /** The relays; undefined where there are none. */
+  relays?: Relays;
 }
 
 const defaultPageSize = 100;
@@ -137,11 +142,26 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
       const bindings = available(deps.acme?.bindings);
       return create(CreateAcmeBindingResponseSchema, await bindings.create());
     },
+
+    async listRelays(_req, ctx) {
+      await authenticate(ctx);
+      const urls = deps.relays?.urls ?? new Map<string, string>();
+      return create(ListRelaysResponseSchema, { relays: [...urls].map(([region, url]) => ({ region, url })) });
+    },
+
+    async setRelayRegion(req, ctx) {
+      const server = await authenticate(ctx);
+      if (req.region && !deps.relays?.urls.has(req.region)) {
+        throw new ConnectError(`no relay in region ${req.region}`, Code.InvalidArgument);
+      }
+      await db.update(schema.servers).set({ relayRegion: req.region }).where(eq(schema.servers.id, server.id));
+      return create(SetRelayRegionResponseSchema);
+    },
   };
 }
 
 /** available returns what a method needs, which a deployment may lack. */
-function available<T>(v: T | undefined): T {
-  if (!v) throw new ConnectError("certificates are not available here", Code.Unimplemented);
+export function available<T>(v: T | undefined, what = "certificates"): T {
+  if (!v) throw new ConnectError(`${what} are not available here`, Code.Unimplemented);
   return v;
 }

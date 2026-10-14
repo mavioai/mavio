@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/cloud/v1/cloud.proto.
  */
 export const file_mavio_cloud_v1_cloud: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyKyAgoGQ2hhbmdlEg4KBmN1cnNvchgBIAEoAxIvCgtjcmVhdGVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASNwoOYWNjZXNzX2dyYW50ZWQYAyABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NHcmFudGVkSAASNwoOYWNjZXNzX3Jldm9rZWQYBCABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZXZva2VkSAASMgoPYWNjb3VudF9jaGFuZ2VkGAUgASgLMhcubWF2aW8uY2xvdWQudjEuQWNjb3VudEgAEjkKD2FjY291bnRfcmV2b2tlZBgGIAEoCzIeLm1hdmlvLmNsb3VkLnYxLkFjY291bnRSZXZva2VkSABCBgoEa2luZCJhCg1BY2Nlc3NHcmFudGVkEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgCIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcyIjCg1BY2Nlc3NSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkivwEKDkFjY291bnRSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkSNQoGcmVhc29uGAIgASgOMiUubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWQuUmVhc29uImIKBlJlYXNvbhIWChJSRUFTT05fVU5TUEVDSUZJRUQQABIUChBSRUFTT05fU1VTUEVOREVEEAESEgoOUkVBU09OX0RFTEVURUQQAhIWChJSRUFTT05fQ09NUFJPTUlTRUQQAyJOCgdMaWJyYXJ5EhQKAmlkGAEgASgJQgi6SAVyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxiAAhIVCgRraW5kGAMgASgJQge6SARyAhggIlAKF1B1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0EjUKCWxpYnJhcmllcxgBIAMoCzIXLm1hdmlvLmNsb3VkLnYxLkxpYnJhcnlCCbpIBpIBAxDoByIaChhQdWJsaXNoTGlicmFyaWVzUmVzcG9uc2UiGAoGTm90aWNlEg4KBmN1cnNvchgBIAEoAyJOChdTZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBIzCgZ2YWx1ZXMYASADKAlCI7pIIJIBHQgBEAIiF3IVMhNeW0EtWmEtejAtOV8tXXs0M30kIhoKGFNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIbChlDbGVhckFjbWVDaGFsbGVuZ2VSZXF1ZXN0IhwKGkNsZWFyQWNtZUNoYWxsZW5nZVJlc3BvbnNlIhoKGENyZWF0ZUFjbWVCaW5kaW5nUmVxdWVzdCI9ChlDcmVhdGVBY21lQmluZGluZ1Jlc3BvbnNlEg4KBmtleV9pZBgBIAEoCRIQCghobWFjX2tleRgCIAEoDCpcCgtBY2NvdW50S2luZBIcChhBQ0NPVU5UX0tJTkRfVU5TUEVDSUZJRUQQABIVChFBQ0NPVU5UX0tJTkRfRlVMTBABEhgKFEFDQ09VTlRfS0lORF9NQU5BR0VEEAIy+AQKDVNlcnZlclNlcnZpY2USVgoLQ2xhaW1TZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlc3BvbnNlElsKC0xpc3RDaGFuZ2VzEiIubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXNwb25zZSIDkAIBEmoKEFB1Ymxpc2hMaWJyYXJpZXMSJy5tYXZpby5jbG91ZC52MS5QdWJsaXNoTGlicmFyaWVzUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSIDkAICEmoKEFNldEFjbWVDaGFsbGVuZ2USJy5tYXZpby5jbG91ZC52MS5TZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEnAKEkNsZWFyQWNtZUNoYWxsZW5nZRIpLm1hdmlvLmNsb3VkLnYxLkNsZWFyQWNtZUNoYWxsZW5nZVJlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5DbGVhckFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEmgKEUNyZWF0ZUFjbWVCaW5kaW5nEigubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXF1ZXN0GikubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXNwb25zZUK9AQoSY29tLm1hdmlvLmNsb3VkLnYxQgpDbG91ZFByb3RvUAFaQWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9jbG91ZC92MTtjbG91ZHYxogIDTUNYqgIOTWF2aW8uQ2xvdWQuVjHKAg5NYXZpb1xDbG91ZFxWMeICGk1hdmlvXENsb3VkXFYxXEdQQk1ldGFkYXRh6gIQTWF2aW86OkNsb3VkOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
+  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyKyAgoGQ2hhbmdlEg4KBmN1cnNvchgBIAEoAxIvCgtjcmVhdGVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASNwoOYWNjZXNzX2dyYW50ZWQYAyABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NHcmFudGVkSAASNwoOYWNjZXNzX3Jldm9rZWQYBCABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZXZva2VkSAASMgoPYWNjb3VudF9jaGFuZ2VkGAUgASgLMhcubWF2aW8uY2xvdWQudjEuQWNjb3VudEgAEjkKD2FjY291bnRfcmV2b2tlZBgGIAEoCzIeLm1hdmlvLmNsb3VkLnYxLkFjY291bnRSZXZva2VkSABCBgoEa2luZCJhCg1BY2Nlc3NHcmFudGVkEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgCIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcyIjCg1BY2Nlc3NSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkivwEKDkFjY291bnRSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkSNQoGcmVhc29uGAIgASgOMiUubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWQuUmVhc29uImIKBlJlYXNvbhIWChJSRUFTT05fVU5TUEVDSUZJRUQQABIUChBSRUFTT05fU1VTUEVOREVEEAESEgoOUkVBU09OX0RFTEVURUQQAhIWChJSRUFTT05fQ09NUFJPTUlTRUQQAyJOCgdMaWJyYXJ5EhQKAmlkGAEgASgJQgi6SAVyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxiAAhIVCgRraW5kGAMgASgJQge6SARyAhggIlAKF1B1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0EjUKCWxpYnJhcmllcxgBIAMoCzIXLm1hdmlvLmNsb3VkLnYxLkxpYnJhcnlCCbpIBpIBAxDoByIaChhQdWJsaXNoTGlicmFyaWVzUmVzcG9uc2UiGAoGTm90aWNlEg4KBmN1cnNvchgBIAEoAyJOChdTZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBIzCgZ2YWx1ZXMYASADKAlCI7pIIJIBHQgBEAIiF3IVMhNeW0EtWmEtejAtOV8tXXs0M30kIhoKGFNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIbChlDbGVhckFjbWVDaGFsbGVuZ2VSZXF1ZXN0IhwKGkNsZWFyQWNtZUNoYWxsZW5nZVJlc3BvbnNlIhoKGENyZWF0ZUFjbWVCaW5kaW5nUmVxdWVzdCI9ChlDcmVhdGVBY21lQmluZGluZ1Jlc3BvbnNlEg4KBmtleV9pZBgBIAEoCRIQCghobWFjX2tleRgCIAEoDCITChFMaXN0UmVsYXlzUmVxdWVzdCI7ChJMaXN0UmVsYXlzUmVzcG9uc2USJQoGcmVsYXlzGAEgAygLMhUubWF2aW8uY2xvdWQudjEuUmVsYXkiJAoFUmVsYXkSDgoGcmVnaW9uGAEgASgJEgsKA3VybBgCIAEoCSI9ChVTZXRSZWxheVJlZ2lvblJlcXVlc3QSJAoGcmVnaW9uGAEgASgJQhS6SBFyDxgQMgteW2EtejAtOV0qJCIYChZTZXRSZWxheVJlZ2lvblJlc3BvbnNlKlwKC0FjY291bnRLaW5kEhwKGEFDQ09VTlRfS0lORF9VTlNQRUNJRklFRBAAEhUKEUFDQ09VTlRfS0lORF9GVUxMEAESGAoUQUNDT1VOVF9LSU5EX01BTkFHRUQQAjK4BgoNU2VydmVyU2VydmljZRJWCgtDbGFpbVNlcnZlchIiLm1hdmlvLmNsb3VkLnYxLkNsYWltU2VydmVyUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkNsYWltU2VydmVyUmVzcG9uc2USWwoLTGlzdENoYW5nZXMSIi5tYXZpby5jbG91ZC52MS5MaXN0Q2hhbmdlc1JlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5MaXN0Q2hhbmdlc1Jlc3BvbnNlIgOQAgESagoQUHVibGlzaExpYnJhcmllcxInLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0GigubWF2aW8uY2xvdWQudjEuUHVibGlzaExpYnJhcmllc1Jlc3BvbnNlIgOQAgISagoQU2V0QWNtZUNoYWxsZW5nZRInLm1hdmlvLmNsb3VkLnYxLlNldEFjbWVDaGFsbGVuZ2VSZXF1ZXN0GigubWF2aW8uY2xvdWQudjEuU2V0QWNtZUNoYWxsZW5nZVJlc3BvbnNlIgOQAgIScAoSQ2xlYXJBY21lQ2hhbGxlbmdlEikubWF2aW8uY2xvdWQudjEuQ2xlYXJBY21lQ2hhbGxlbmdlUmVxdWVzdBoqLm1hdmlvLmNsb3VkLnYxLkNsZWFyQWNtZUNoYWxsZW5nZVJlc3BvbnNlIgOQAgISaAoRQ3JlYXRlQWNtZUJpbmRpbmcSKC5tYXZpby5jbG91ZC52MS5DcmVhdGVBY21lQmluZGluZ1JlcXVlc3QaKS5tYXZpby5jbG91ZC52MS5DcmVhdGVBY21lQmluZGluZ1Jlc3BvbnNlElgKCkxpc3RSZWxheXMSIS5tYXZpby5jbG91ZC52MS5MaXN0UmVsYXlzUmVxdWVzdBoiLm1hdmlvLmNsb3VkLnYxLkxpc3RSZWxheXNSZXNwb25zZSIDkAIBEmQKDlNldFJlbGF5UmVnaW9uEiUubWF2aW8uY2xvdWQudjEuU2V0UmVsYXlSZWdpb25SZXF1ZXN0GiYubWF2aW8uY2xvdWQudjEuU2V0UmVsYXlSZWdpb25SZXNwb25zZSIDkAICQr0BChJjb20ubWF2aW8uY2xvdWQudjFCCkNsb3VkUHJvdG9QAVpBZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2Nsb3VkL3YxO2Nsb3VkdjGiAgNNQ1iqAg5NYXZpby5DbG91ZC5WMcoCDk1hdmlvXENsb3VkXFYx4gIaTWF2aW9cQ2xvdWRcVjFcR1BCTWV0YWRhdGHqAhBNYXZpbzo6Q2xvdWQ6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
 
 /**
  * Account is a Mavio account as a server sees it.
@@ -587,6 +587,94 @@ export const CreateAcmeBindingResponseSchema: GenMessage<CreateAcmeBindingRespon
   messageDesc(file_mavio_cloud_v1_cloud, 19);
 
 /**
+ * @generated from message mavio.cloud.v1.ListRelaysRequest
+ */
+export type ListRelaysRequest = Message<"mavio.cloud.v1.ListRelaysRequest"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.ListRelaysRequest.
+ * Use `create(ListRelaysRequestSchema)` to create a new message.
+ */
+export const ListRelaysRequestSchema: GenMessage<ListRelaysRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 20);
+
+/**
+ * @generated from message mavio.cloud.v1.ListRelaysResponse
+ */
+export type ListRelaysResponse = Message<"mavio.cloud.v1.ListRelaysResponse"> & {
+  /**
+   * @generated from field: repeated mavio.cloud.v1.Relay relays = 1;
+   */
+  relays: Relay[];
+};
+
+/**
+ * Describes the message mavio.cloud.v1.ListRelaysResponse.
+ * Use `create(ListRelaysResponseSchema)` to create a new message.
+ */
+export const ListRelaysResponseSchema: GenMessage<ListRelaysResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 21);
+
+/**
+ * Relay is mavio.dev's relay in a region.
+ *
+ * @generated from message mavio.cloud.v1.Relay
+ */
+export type Relay = Message<"mavio.cloud.v1.Relay"> & {
+  /**
+   * A label without dashes, such as "eu".
+   *
+   * @generated from field: string region = 1;
+   */
+  region: string;
+
+  /**
+   * The base URL servers connect to, such as https://relay-eu.mavio.dev.
+   *
+   * @generated from field: string url = 2;
+   */
+  url: string;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.Relay.
+ * Use `create(RelaySchema)` to create a new message.
+ */
+export const RelaySchema: GenMessage<Relay> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 22);
+
+/**
+ * @generated from message mavio.cloud.v1.SetRelayRegionRequest
+ */
+export type SetRelayRegionRequest = Message<"mavio.cloud.v1.SetRelayRegionRequest"> & {
+  /**
+   * @generated from field: string region = 1;
+   */
+  region: string;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.SetRelayRegionRequest.
+ * Use `create(SetRelayRegionRequestSchema)` to create a new message.
+ */
+export const SetRelayRegionRequestSchema: GenMessage<SetRelayRegionRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 23);
+
+/**
+ * @generated from message mavio.cloud.v1.SetRelayRegionResponse
+ */
+export type SetRelayRegionResponse = Message<"mavio.cloud.v1.SetRelayRegionResponse"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.SetRelayRegionResponse.
+ * Use `create(SetRelayRegionResponseSchema)` to create a new message.
+ */
+export const SetRelayRegionResponseSchema: GenMessage<SetRelayRegionResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 24);
+
+/**
  * AccountKind is how an account signs in.
  *
  * @generated from enum mavio.cloud.v1.AccountKind
@@ -699,6 +787,29 @@ export const ServerService: GenService<{
     methodKind: "unary";
     input: typeof CreateAcmeBindingRequestSchema;
     output: typeof CreateAcmeBindingResponseSchema;
+  },
+  /**
+   * ListRelays gives mavio.dev's relays, one per region, for the server to
+   * keep a connection to the nearest (docs/mavio-dev.md §5).
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.ListRelays
+   */
+  listRelays: {
+    methodKind: "unary";
+    input: typeof ListRelaysRequestSchema;
+    output: typeof ListRelaysResponseSchema;
+  },
+  /**
+   * SetRelayRegion records the region of the relay the server keeps a
+   * connection to; empty when it keeps none, and no tickets are given for
+   * it then.
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.SetRelayRegion
+   */
+  setRelayRegion: {
+    methodKind: "unary";
+    input: typeof SetRelayRegionRequestSchema;
+    output: typeof SetRelayRegionResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_cloud_v1_cloud, 0);

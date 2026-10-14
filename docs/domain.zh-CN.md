@@ -340,7 +340,7 @@ erDiagram
 `ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，读取时以默认值（`DefaultServerSettings`）补全后来新增的设置。
 
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
-* `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书），以及 `LocalDiscovery`。
+* `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启）。
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
 * `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。

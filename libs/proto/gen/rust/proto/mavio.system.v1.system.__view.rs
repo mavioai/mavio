@@ -5449,8 +5449,9 @@ pub struct NetworkSettingsView<'a> {
     ///
     /// Field 2: `base_url`
     pub base_url: ::core::option::Option<&'a str>,
-    /// Serves HTTPS on this port with the PEM certificate and key; 0 serves
-    /// none.
+    /// Serves HTTPS on this port with the PEM certificate and key or,
+    /// without them, in mavio.dev mode with the server's mavio.site
+    /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`
     pub https_port: ::core::option::Option<i32>,
@@ -5462,6 +5463,11 @@ pub struct NetworkSettingsView<'a> {
     ///
     /// Field 6: `local_discovery`
     pub local_discovery: ::core::option::Option<bool>,
+    /// In mavio.dev mode, lets clients reach the server through mavio.dev's
+    /// relay when they cannot reach it directly.
+    ///
+    /// Field 7: `relay`
+    pub relay: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
@@ -5536,6 +5542,13 @@ impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
                 )?;
                 view.local_discovery = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.relay = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5564,6 +5577,7 @@ impl<'a> ::buffa::MessageView<'a> for NetworkSettingsView<'a> {
             certificate_path: self.certificate_path.map(|s| s.to_string()),
             key_path: self.key_path.map(|s| s.to_string()),
             local_discovery: self.local_discovery,
+            relay: self.relay,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5591,6 +5605,9 @@ impl<'a> ::buffa::ViewEncode<'a> for NetworkSettingsView<'a> {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if self.local_discovery.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.relay.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -5621,6 +5638,9 @@ impl<'a> ::buffa::ViewEncode<'a> for NetworkSettingsView<'a> {
         }
         if let Some(v) = self.local_discovery {
             ::buffa::types::put_bool_field(6u32, v, buf);
+        }
+        if let Some(v) = self.relay {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5729,8 +5749,9 @@ impl NetworkSettingsOwnedView {
     pub fn base_url(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().base_url
     }
-    /// Serves HTTPS on this port with the PEM certificate and key; 0 serves
-    /// none.
+    /// Serves HTTPS on this port with the PEM certificate and key or,
+    /// without them, in mavio.dev mode with the server's mavio.site
+    /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`
     #[must_use]
@@ -5753,6 +5774,14 @@ impl NetworkSettingsOwnedView {
     #[must_use]
     pub fn local_discovery(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().local_discovery
+    }
+    /// In mavio.dev mode, lets clients reach the server through mavio.dev's
+    /// relay when they cannot reach it directly.
+    ///
+    /// Field 7: `relay`
+    #[must_use]
+    pub fn relay(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().relay
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<NetworkSettingsView<'static>>>

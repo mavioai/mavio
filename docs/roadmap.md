@@ -813,7 +813,8 @@ flowchart TD
 - [x] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor: `NoticeHub` holding each server's hibernating WebSocket, notified after the requests that record changes; tested end to end with a server in workerd
 - [x] `apps/dns` and servers' certificates through ACME DNS-01 challenges: the zone computed from names with `miekg/dns`; `ServerService.SetAcmeChallenge`, `ClearAcmeChallenge` and `CreateAcmeBinding` over Cloudflare's DNS API and Google's Public CA API; the server's `internal/certs`, which obtains and renews `*.<ID>.mavio.site` from Let's Encrypt or Google Trust Services with ACME Renewal Information and serves it over HTTPS; tested against an ACME CA simulated in `certstest`
 - [ ] Running `apps/dns` on the two Hetzner VMs, delegating `mavio.site` to them with glue records, and adding `mavio.site` to the Public Suffix List
-- [ ] `apps/relay` and relay tickets
+- [x] `apps/relay` and relay tickets: the relay splicing clients' connections by the ClientHello's name to servers' connections back, servers authenticated by their identity keys; `AccountService.CreateRelayTicket`, `ServerService.ListRelays` and `SetRelayRegion`; the server's `internal/relay`, which keeps a connection to the nearest relay and serves TLS on the connections it relays; tested on each side against the other's protocol, with the tickets checked against a shared vector
+- [ ] Running `apps/relay` on Hetzner in Europe, the United States and Singapore, with the relays' A and AAAA records in `apps/dns`'s configuration and `RELAYS` and `RELAY_TICKET_SECRET` in the Worker's
 - [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
 
 ---

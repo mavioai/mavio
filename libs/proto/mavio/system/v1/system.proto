@@ -240,8 +240,9 @@ message NetworkSettings {
   string server_name = 1 [(buf.validate.field).string.max_len = 100];
   // The path a reverse proxy serves the server under, such as "/mavio".
   string base_url = 2;
-  // Serves HTTPS on this port with the PEM certificate and key; 0 serves
-  // none.
+  // Serves HTTPS on this port with the PEM certificate and key or,
+  // without them, in mavio.dev mode with the server's mavio.site
+  // certificate; 0 serves none.
   int32 https_port = 3 [(buf.validate.field).int32 = {
     gte: 0
     lte: 65535
@@ -250,6 +251,9 @@ message NetworkSettings {
   string key_path = 5;
   // Answers discovery requests from clients on the local network.
   bool local_discovery = 6;
+  // In mavio.dev mode, lets clients reach the server through mavio.dev's
+  // relay when they cannot reach it directly.
+  bool relay = 7;
 }
 
 // ServerSettings are what administrators change while the server runs.

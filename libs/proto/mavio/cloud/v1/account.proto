@@ -36,6 +36,13 @@ service AccountService {
   // server the account neither administers nor has access to is
   // PERMISSION_DENIED.
   rpc CreateAssertion(CreateAssertionRequest) returns (CreateAssertionResponse);
+  // CreateRelayTicket gives the name a client reaches one of the
+  // account's servers at through the relay of the server's region
+  // (docs/mavio-dev.md §5), valid for a few minutes. A server the account
+  // has no access to is PERMISSION_DENIED; one keeping no relay
+  // connection is FAILED_PRECONDITION, as is a viewer without an
+  // effective Mavio Pass whose server's administrator has none either.
+  rpc CreateRelayTicket(CreateRelayTicketRequest) returns (CreateRelayTicketResponse);
   // ListAccess gives the access records of a server the account
   // administers, invitations included.
   rpc ListAccess(ListAccessRequest) returns (ListAccessResponse) {
@@ -146,6 +153,18 @@ message CreateAssertionRequest {
 
 message CreateAssertionResponse {
   string assertion = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message CreateRelayTicketRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message CreateRelayTicketResponse {
+  // relay-<region>-<ticket>.<ID>.mavio.site, the TLS server name and DNS
+  // name of the connection.
+  string host = 1;
+  // The ticket admits new connections until then; open ones stay.
   google.protobuf.Timestamp expire_time = 2;
 }
 

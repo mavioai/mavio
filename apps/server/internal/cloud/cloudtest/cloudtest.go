@@ -39,6 +39,7 @@ type Server struct {
 	mu      sync.Mutex
 	codes   map[string]*cloudv1.Account
 	servers map[string]*server
+	relays  []*cloudv1.Relay
 }
 
 type server struct {
@@ -46,6 +47,7 @@ type server struct {
 	changes   []*cloudv1.Change
 	libraries []*cloudv1.Library
 	txt       []string
+	region    string
 	conns     map[*websocket.Conn]struct{}
 }
 
@@ -191,6 +193,48 @@ func (s *Server) CreateAcmeBinding(ctx context.Context, _ *cloudv1.CreateAcmeBin
 	resp.SetKeyId(BindingKeyID)
 	resp.SetHmacKey([]byte("binding mac key"))
 	return resp, nil
+}
+
+// SetRelays sets the relays ListRelays gives, base URLs by region.
+func (s *Server) SetRelays(urls map[string]string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.relays = nil
+	for region, url := range urls {
+		s.relays = append(s.relays, cloudv1.Relay_builder{Region: &region, Url: &url}.Build())
+	}
+}
+
+// ListRelays gives the relays SetRelays set.
+func (s *Server) ListRelays(ctx context.Context, _ *cloudv1.ListRelaysRequest) (*cloudv1.ListRelaysResponse, error) {
+	if _, err := s.claimed(ctx); err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return cloudv1.ListRelaysResponse_builder{Relays: s.relays}.Build(), nil
+}
+
+// SetRelayRegion records a claimed server's relay region.
+func (s *Server) SetRelayRegion(ctx context.Context, req *cloudv1.SetRelayRegionRequest) (*cloudv1.SetRelayRegionResponse, error) {
+	srv, err := s.claimed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	srv.region = req.GetRegion()
+	return &cloudv1.SetRelayRegionResponse{}, nil
+}
+
+// RelayRegion returns the relay region the server with an ID recorded.
+func (s *Server) RelayRegion(serverID string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if srv := s.servers[serverID]; srv != nil {
+		return srv.region
+	}
+	return ""
 }
 
 // TXT returns the TXT values at a name of mavio.site, as its name servers

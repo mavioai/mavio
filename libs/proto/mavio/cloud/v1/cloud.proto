@@ -44,6 +44,17 @@ service ServerService {
   // certificate authority requiring one, such as Google Trust Services,
   // needs to register the server's ACME account.
   rpc CreateAcmeBinding(CreateAcmeBindingRequest) returns (CreateAcmeBindingResponse);
+  // ListRelays gives mavio.dev's relays, one per region, for the server to
+  // keep a connection to the nearest (docs/mavio-dev.md §5).
+  rpc ListRelays(ListRelaysRequest) returns (ListRelaysResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetRelayRegion records the region of the relay the server keeps a
+  // connection to; empty when it keeps none, and no tickets are given for
+  // it then.
+  rpc SetRelayRegion(SetRelayRegionRequest) returns (SetRelayRegionResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
 }
 
 // Account is a Mavio account as a server sees it.
@@ -219,3 +230,26 @@ message CreateAcmeBindingResponse {
   string key_id = 1;
   bytes hmac_key = 2;
 }
+
+message ListRelaysRequest {}
+
+message ListRelaysResponse {
+  repeated Relay relays = 1;
+}
+
+// Relay is mavio.dev's relay in a region.
+message Relay {
+  // A label without dashes, such as "eu".
+  string region = 1;
+  // The base URL servers connect to, such as https://relay-eu.mavio.dev.
+  string url = 2;
+}
+
+message SetRelayRegionRequest {
+  string region = 1 [(buf.validate.field).string = {
+    max_len: 16
+    pattern: "^[a-z0-9]*$"
+  }];
+}
+
+message SetRelayRegionResponse {}

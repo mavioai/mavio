@@ -2338,6 +2338,343 @@ func (b0 CreateAcmeBindingResponse_builder) Build() *CreateAcmeBindingResponse {
 	return m0
 }
 
+type ListRelaysRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListRelaysRequest) Reset() {
+	*x = ListRelaysRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelaysRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelaysRequest) ProtoMessage() {}
+
+func (x *ListRelaysRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ListRelaysRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ListRelaysRequest_builder) Build() *ListRelaysRequest {
+	m0 := &ListRelaysRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ListRelaysResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Relays *[]*Relay              `protobuf:"bytes,1,rep,name=relays"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ListRelaysResponse) Reset() {
+	*x = ListRelaysResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListRelaysResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRelaysResponse) ProtoMessage() {}
+
+func (x *ListRelaysResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListRelaysResponse) GetRelays() []*Relay {
+	if x != nil {
+		if x.xxx_hidden_Relays != nil {
+			return *x.xxx_hidden_Relays
+		}
+	}
+	return nil
+}
+
+func (x *ListRelaysResponse) SetRelays(v []*Relay) {
+	x.xxx_hidden_Relays = &v
+}
+
+type ListRelaysResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Relays []*Relay
+}
+
+func (b0 ListRelaysResponse_builder) Build() *ListRelaysResponse {
+	m0 := &ListRelaysResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Relays = &b.Relays
+	return m0
+}
+
+// Relay is mavio.dev's relay in a region.
+type Relay struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Region      *string                `protobuf:"bytes,1,opt,name=region"`
+	xxx_hidden_Url         *string                `protobuf:"bytes,2,opt,name=url"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Relay) Reset() {
+	*x = Relay{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Relay) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Relay) ProtoMessage() {}
+
+func (x *Relay) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Relay) GetRegion() string {
+	if x != nil {
+		if x.xxx_hidden_Region != nil {
+			return *x.xxx_hidden_Region
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Relay) GetUrl() string {
+	if x != nil {
+		if x.xxx_hidden_Url != nil {
+			return *x.xxx_hidden_Url
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Relay) SetRegion(v string) {
+	x.xxx_hidden_Region = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *Relay) SetUrl(v string) {
+	x.xxx_hidden_Url = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *Relay) HasRegion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Relay) HasUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Relay) ClearRegion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Region = nil
+}
+
+func (x *Relay) ClearUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Url = nil
+}
+
+type Relay_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// A label without dashes, such as "eu".
+	Region *string
+	// The base URL servers connect to, such as https://relay-eu.mavio.dev.
+	Url *string
+}
+
+func (b0 Relay_builder) Build() *Relay {
+	m0 := &Relay{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Region != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Region = b.Region
+	}
+	if b.Url != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Url = b.Url
+	}
+	return m0
+}
+
+type SetRelayRegionRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Region      *string                `protobuf:"bytes,1,opt,name=region"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SetRelayRegionRequest) Reset() {
+	*x = SetRelayRegionRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetRelayRegionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetRelayRegionRequest) ProtoMessage() {}
+
+func (x *SetRelayRegionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetRelayRegionRequest) GetRegion() string {
+	if x != nil {
+		if x.xxx_hidden_Region != nil {
+			return *x.xxx_hidden_Region
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetRelayRegionRequest) SetRegion(v string) {
+	x.xxx_hidden_Region = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *SetRelayRegionRequest) HasRegion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetRelayRegionRequest) ClearRegion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Region = nil
+}
+
+type SetRelayRegionRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Region *string
+}
+
+func (b0 SetRelayRegionRequest_builder) Build() *SetRelayRegionRequest {
+	m0 := &SetRelayRegionRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Region != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Region = b.Region
+	}
+	return m0
+}
+
+type SetRelayRegionResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetRelayRegionResponse) Reset() {
+	*x = SetRelayRegionResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetRelayRegionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetRelayRegionResponse) ProtoMessage() {}
+
+func (x *SetRelayRegionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetRelayRegionResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetRelayRegionResponse_builder) Build() *SetRelayRegionResponse {
+	m0 := &SetRelayRegionResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_cloud_v1_cloud_proto protoreflect.FileDescriptor
 
 const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
@@ -2418,23 +2755,35 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\x18CreateAcmeBindingRequest\"M\n" +
 	"\x19CreateAcmeBindingResponse\x12\x15\n" +
 	"\x06key_id\x18\x01 \x01(\tR\x05keyId\x12\x19\n" +
-	"\bhmac_key\x18\x02 \x01(\fR\ahmacKey*\\\n" +
+	"\bhmac_key\x18\x02 \x01(\fR\ahmacKey\"\x13\n" +
+	"\x11ListRelaysRequest\"C\n" +
+	"\x12ListRelaysResponse\x12-\n" +
+	"\x06relays\x18\x01 \x03(\v2\x15.mavio.cloud.v1.RelayR\x06relays\"1\n" +
+	"\x05Relay\x12\x16\n" +
+	"\x06region\x18\x01 \x01(\tR\x06region\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\"E\n" +
+	"\x15SetRelayRegionRequest\x12,\n" +
+	"\x06region\x18\x01 \x01(\tB\x14\xbaH\x11r\x0f\x18\x102\v^[a-z0-9]*$R\x06region\"\x18\n" +
+	"\x16SetRelayRegionResponse*\\\n" +
 	"\vAccountKind\x12\x1c\n" +
 	"\x18ACCOUNT_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11ACCOUNT_KIND_FULL\x10\x01\x12\x18\n" +
-	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xf8\x04\n" +
+	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xb8\x06\n" +
 	"\rServerService\x12V\n" +
 	"\vClaimServer\x12\".mavio.cloud.v1.ClaimServerRequest\x1a#.mavio.cloud.v1.ClaimServerResponse\x12[\n" +
 	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01\x12j\n" +
 	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02\x12j\n" +
 	"\x10SetAcmeChallenge\x12'.mavio.cloud.v1.SetAcmeChallengeRequest\x1a(.mavio.cloud.v1.SetAcmeChallengeResponse\"\x03\x90\x02\x02\x12p\n" +
 	"\x12ClearAcmeChallenge\x12).mavio.cloud.v1.ClearAcmeChallengeRequest\x1a*.mavio.cloud.v1.ClearAcmeChallengeResponse\"\x03\x90\x02\x02\x12h\n" +
-	"\x11CreateAcmeBinding\x12(.mavio.cloud.v1.CreateAcmeBindingRequest\x1a).mavio.cloud.v1.CreateAcmeBindingResponseB\xbd\x01\n" +
+	"\x11CreateAcmeBinding\x12(.mavio.cloud.v1.CreateAcmeBindingRequest\x1a).mavio.cloud.v1.CreateAcmeBindingResponse\x12X\n" +
+	"\n" +
+	"ListRelays\x12!.mavio.cloud.v1.ListRelaysRequest\x1a\".mavio.cloud.v1.ListRelaysResponse\"\x03\x90\x02\x01\x12d\n" +
+	"\x0eSetRelayRegion\x12%.mavio.cloud.v1.SetRelayRegionRequest\x1a&.mavio.cloud.v1.SetRelayRegionResponse\"\x03\x90\x02\x02B\xbd\x01\n" +
 	"\x12com.mavio.cloud.v1B\n" +
 	"CloudProtoP\x01ZAgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1;cloudv1\xa2\x02\x03MCX\xaa\x02\x0eMavio.Cloud.V1\xca\x02\x0eMavio\\Cloud\\V1\xe2\x02\x1aMavio\\Cloud\\V1\\GPBMetadata\xea\x02\x10Mavio::Cloud::V1b\beditionsp\xe8\a"
 
 var file_mavio_cloud_v1_cloud_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
 	(AccountKind)(0),                   // 0: mavio.cloud.v1.AccountKind
 	(AccountRevoked_Reason)(0),         // 1: mavio.cloud.v1.AccountRevoked.Reason
@@ -2458,15 +2807,20 @@ var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
 	(*ClearAcmeChallengeResponse)(nil), // 19: mavio.cloud.v1.ClearAcmeChallengeResponse
 	(*CreateAcmeBindingRequest)(nil),   // 20: mavio.cloud.v1.CreateAcmeBindingRequest
 	(*CreateAcmeBindingResponse)(nil),  // 21: mavio.cloud.v1.CreateAcmeBindingResponse
-	(v1.RestrictionProfile)(0),         // 22: mavio.user.v1.RestrictionProfile
-	(*timestamppb.Timestamp)(nil),      // 23: google.protobuf.Timestamp
+	(*ListRelaysRequest)(nil),          // 22: mavio.cloud.v1.ListRelaysRequest
+	(*ListRelaysResponse)(nil),         // 23: mavio.cloud.v1.ListRelaysResponse
+	(*Relay)(nil),                      // 24: mavio.cloud.v1.Relay
+	(*SetRelayRegionRequest)(nil),      // 25: mavio.cloud.v1.SetRelayRegionRequest
+	(*SetRelayRegionResponse)(nil),     // 26: mavio.cloud.v1.SetRelayRegionResponse
+	(v1.RestrictionProfile)(0),         // 27: mavio.user.v1.RestrictionProfile
+	(*timestamppb.Timestamp)(nil),      // 28: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
-	22, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	27, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
 	2,  // 2: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
 	8,  // 3: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
-	23, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
+	28, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
 	9,  // 5: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
 	10, // 6: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
 	2,  // 7: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
@@ -2475,23 +2829,28 @@ var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	3,  // 10: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
 	1,  // 11: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
 	12, // 12: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
-	4,  // 13: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
-	6,  // 14: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
-	13, // 15: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
-	16, // 16: mavio.cloud.v1.ServerService.SetAcmeChallenge:input_type -> mavio.cloud.v1.SetAcmeChallengeRequest
-	18, // 17: mavio.cloud.v1.ServerService.ClearAcmeChallenge:input_type -> mavio.cloud.v1.ClearAcmeChallengeRequest
-	20, // 18: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
-	5,  // 19: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
-	7,  // 20: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
-	14, // 21: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
-	17, // 22: mavio.cloud.v1.ServerService.SetAcmeChallenge:output_type -> mavio.cloud.v1.SetAcmeChallengeResponse
-	19, // 23: mavio.cloud.v1.ServerService.ClearAcmeChallenge:output_type -> mavio.cloud.v1.ClearAcmeChallengeResponse
-	21, // 24: mavio.cloud.v1.ServerService.CreateAcmeBinding:output_type -> mavio.cloud.v1.CreateAcmeBindingResponse
-	19, // [19:25] is the sub-list for method output_type
-	13, // [13:19] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	24, // 13: mavio.cloud.v1.ListRelaysResponse.relays:type_name -> mavio.cloud.v1.Relay
+	4,  // 14: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
+	6,  // 15: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
+	13, // 16: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
+	16, // 17: mavio.cloud.v1.ServerService.SetAcmeChallenge:input_type -> mavio.cloud.v1.SetAcmeChallengeRequest
+	18, // 18: mavio.cloud.v1.ServerService.ClearAcmeChallenge:input_type -> mavio.cloud.v1.ClearAcmeChallengeRequest
+	20, // 19: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
+	22, // 20: mavio.cloud.v1.ServerService.ListRelays:input_type -> mavio.cloud.v1.ListRelaysRequest
+	25, // 21: mavio.cloud.v1.ServerService.SetRelayRegion:input_type -> mavio.cloud.v1.SetRelayRegionRequest
+	5,  // 22: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
+	7,  // 23: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
+	14, // 24: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
+	17, // 25: mavio.cloud.v1.ServerService.SetAcmeChallenge:output_type -> mavio.cloud.v1.SetAcmeChallengeResponse
+	19, // 26: mavio.cloud.v1.ServerService.ClearAcmeChallenge:output_type -> mavio.cloud.v1.ClearAcmeChallengeResponse
+	21, // 27: mavio.cloud.v1.ServerService.CreateAcmeBinding:output_type -> mavio.cloud.v1.CreateAcmeBindingResponse
+	23, // 28: mavio.cloud.v1.ServerService.ListRelays:output_type -> mavio.cloud.v1.ListRelaysResponse
+	26, // 29: mavio.cloud.v1.ServerService.SetRelayRegion:output_type -> mavio.cloud.v1.SetRelayRegionResponse
+	22, // [22:30] is the sub-list for method output_type
+	14, // [14:22] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_mavio_cloud_v1_cloud_proto_init() }
@@ -2511,7 +2870,7 @@ func file_mavio_cloud_v1_cloud_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_cloud_v1_cloud_proto_rawDesc), len(file_mavio_cloud_v1_cloud_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   20,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

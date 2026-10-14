@@ -3870,8 +3870,9 @@ pub struct NetworkSettings {
     ///
     /// Field 2: `base_url`
     pub base_url: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Serves HTTPS on this port with the PEM certificate and key; 0 serves
-    /// none.
+    /// Serves HTTPS on this port with the PEM certificate and key or,
+    /// without them, in mavio.dev mode with the server's mavio.site
+    /// certificate; 0 serves none.
     ///
     /// Field 3: `https_port`
     pub https_port: ::core::option::Option<i32>,
@@ -3883,6 +3884,11 @@ pub struct NetworkSettings {
     ///
     /// Field 6: `local_discovery`
     pub local_discovery: ::core::option::Option<bool>,
+    /// In mavio.dev mode, lets clients reach the server through mavio.dev's
+    /// relay when they cannot reach it directly.
+    ///
+    /// Field 7: `relay`
+    pub relay: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3895,6 +3901,7 @@ impl ::core::fmt::Debug for NetworkSettings {
             .field("certificate_path", &self.certificate_path)
             .field("key_path", &self.key_path)
             .field("local_discovery", &self.local_discovery)
+            .field("relay", &self.relay)
             .finish()
     }
 }
@@ -3960,6 +3967,13 @@ impl NetworkSettings {
         self.local_discovery = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::relay`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_relay(mut self, value: bool) -> Self {
+        self.relay = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(NetworkSettings);
 impl ::buffa::MessageName for NetworkSettings {
@@ -3999,6 +4013,9 @@ impl ::buffa::Message for NetworkSettings {
         if self.local_discovery.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.relay.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4026,6 +4043,9 @@ impl ::buffa::Message for NetworkSettings {
         }
         if let Some(v) = self.local_discovery {
             ::buffa::types::put_bool_field(6u32, v, buf);
+        }
+        if let Some(v) = self.relay {
+            ::buffa::types::put_bool_field(7u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4106,6 +4126,15 @@ impl ::buffa::Message for NetworkSettings {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.relay = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4120,6 +4149,7 @@ impl ::buffa::Message for NetworkSettings {
         self.certificate_path = ::core::option::Option::None;
         self.key_path = ::core::option::Option::None;
         self.local_discovery = ::core::option::Option::None;
+        self.relay = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

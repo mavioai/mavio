@@ -2846,6 +2846,7 @@ type NetworkSettings struct {
 	xxx_hidden_CertificatePath *string                `protobuf:"bytes,4,opt,name=certificate_path,json=certificatePath"`
 	xxx_hidden_KeyPath         *string                `protobuf:"bytes,5,opt,name=key_path,json=keyPath"`
 	xxx_hidden_LocalDiscovery  bool                   `protobuf:"varint,6,opt,name=local_discovery,json=localDiscovery"`
+	xxx_hidden_Relay           bool                   `protobuf:"varint,7,opt,name=relay"`
 	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
 	XXX_presence               [1]uint32
 	unknownFields              protoimpl.UnknownFields
@@ -2931,34 +2932,46 @@ func (x *NetworkSettings) GetLocalDiscovery() bool {
 	return false
 }
 
+func (x *NetworkSettings) GetRelay() bool {
+	if x != nil {
+		return x.xxx_hidden_Relay
+	}
+	return false
+}
+
 func (x *NetworkSettings) SetServerName(v string) {
 	x.xxx_hidden_ServerName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
 }
 
 func (x *NetworkSettings) SetBaseUrl(v string) {
 	x.xxx_hidden_BaseUrl = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
 }
 
 func (x *NetworkSettings) SetHttpsPort(v int32) {
 	x.xxx_hidden_HttpsPort = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
 }
 
 func (x *NetworkSettings) SetCertificatePath(v string) {
 	x.xxx_hidden_CertificatePath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
 }
 
 func (x *NetworkSettings) SetKeyPath(v string) {
 	x.xxx_hidden_KeyPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
 }
 
 func (x *NetworkSettings) SetLocalDiscovery(v bool) {
 	x.xxx_hidden_LocalDiscovery = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+}
+
+func (x *NetworkSettings) SetRelay(v bool) {
+	x.xxx_hidden_Relay = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
 }
 
 func (x *NetworkSettings) HasServerName() bool {
@@ -3003,6 +3016,13 @@ func (x *NetworkSettings) HasLocalDiscovery() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
+func (x *NetworkSettings) HasRelay() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
 func (x *NetworkSettings) ClearServerName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ServerName = nil
@@ -3033,6 +3053,11 @@ func (x *NetworkSettings) ClearLocalDiscovery() {
 	x.xxx_hidden_LocalDiscovery = false
 }
 
+func (x *NetworkSettings) ClearRelay() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Relay = false
+}
+
 type NetworkSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3040,13 +3065,17 @@ type NetworkSettings_builder struct {
 	ServerName *string
 	// The path a reverse proxy serves the server under, such as "/mavio".
 	BaseUrl *string
-	// Serves HTTPS on this port with the PEM certificate and key; 0 serves
-	// none.
+	// Serves HTTPS on this port with the PEM certificate and key or,
+	// without them, in mavio.dev mode with the server's mavio.site
+	// certificate; 0 serves none.
 	HttpsPort       *int32
 	CertificatePath *string
 	KeyPath         *string
 	// Answers discovery requests from clients on the local network.
 	LocalDiscovery *bool
+	// In mavio.dev mode, lets clients reach the server through mavio.dev's
+	// relay when they cannot reach it directly.
+	Relay *bool
 }
 
 func (b0 NetworkSettings_builder) Build() *NetworkSettings {
@@ -3054,28 +3083,32 @@ func (b0 NetworkSettings_builder) Build() *NetworkSettings {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ServerName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
 		x.xxx_hidden_ServerName = b.ServerName
 	}
 	if b.BaseUrl != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
 		x.xxx_hidden_BaseUrl = b.BaseUrl
 	}
 	if b.HttpsPort != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
 		x.xxx_hidden_HttpsPort = *b.HttpsPort
 	}
 	if b.CertificatePath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
 		x.xxx_hidden_CertificatePath = b.CertificatePath
 	}
 	if b.KeyPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
 		x.xxx_hidden_KeyPath = b.KeyPath
 	}
 	if b.LocalDiscovery != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
 		x.xxx_hidden_LocalDiscovery = *b.LocalDiscovery
+	}
+	if b.Relay != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		x.xxx_hidden_Relay = *b.Relay
 	}
 	return m0
 }
@@ -6445,7 +6478,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x17deinterlace_double_rate\x18\f \x01(\bR\x15deinterlaceDoubleRate\x12<\n" +
 	"\rdownmix_boost\x18\r \x01(\x01B\x17\xbaH\x14\x12\x12\x19\x00\x00\x00\x00\x00\x00\b@)\x00\x00\x00\x00\x00\x00\xe0?R\fdownmixBoost\x12,\n" +
 	"\x12crop_black_borders\x18\x0e \x01(\bR\x10cropBlackBorders\x12#\n" +
-	"\rtranscode_dir\x18\x0f \x01(\tR\ftranscodeDir\"\xf1\x01\n" +
+	"\rtranscode_dir\x18\x0f \x01(\tR\ftranscodeDir\"\x87\x02\n" +
 	"\x0fNetworkSettings\x12(\n" +
 	"\vserver_name\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x18dR\n" +
 	"serverName\x12\x19\n" +
@@ -6454,7 +6487,8 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"https_port\x18\x03 \x01(\x05B\v\xbaH\b\x1a\x06\x18\xff\xff\x03(\x00R\thttpsPort\x12)\n" +
 	"\x10certificate_path\x18\x04 \x01(\tR\x0fcertificatePath\x12\x19\n" +
 	"\bkey_path\x18\x05 \x01(\tR\akeyPath\x12'\n" +
-	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\xca\x04\n" +
+	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\x12\x14\n" +
+	"\x05relay\x18\a \x01(\bR\x05relay\"\xca\x04\n" +
 	"\x0eServerSettings\x12N\n" +
 	"\vtranscoding\x18\x01 \x01(\v2$.mavio.system.v1.TranscodingSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranscoding\x12B\n" +
 	"\anetwork\x18\x02 \x01(\v2 .mavio.system.v1.NetworkSettingsB\x06\xbaH\x03\xc8\x01\x01R\anetwork\x126\n" +

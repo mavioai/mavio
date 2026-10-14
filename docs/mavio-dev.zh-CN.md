@@ -60,6 +60,16 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 * 客户端通过 `relay-<区域>-<票据>.<ID>.mavio.site` 经中转访问服务端。票据由 mavio.dev 签发，几分钟内有效，只在观看者或服务端管理员拥有有效 Mavio Pass（[账户 §3.7](accounts.zh-CN.md#37-mavio-pass)）时签发。
 * 中转从 TLS ClientHello 中读取名称，检查票据，然后在不终止 TLS 的情况下把客户端的连接与服务端的连接拼接起来，因此加密保持端到端，中转只看到加密后的字节。
 
+### 5.1 票据
+* 客户端用 `AccountService.CreateRelayTicket` 请求票据，应答是要连接的主机名及其到期时间。只有当账户管理该服务端或持有已接受的访问记录、服务端已记录中转区域、并且观看者或管理员拥有有效 Mavio Pass 时，mavio.dev 才签发票据。
+* 票据是到期时间（五分钟后，以 Unix 秒表示的四个大端字节），后接以 mavio.dev 与各中转共享的机密计算的 HMAC-SHA256 的前 16 个字节，其输入是 `mavio relay ticket`、服务端 ID、区域和这四个字节，以零字节分隔；以不带填充的小写 base32 书写，共 32 个字符。中转用名称中的 ID 和自己的区域检查票据，因此一张票据只允许经一个中转连接一个服务端；到期前打开的连接保持打开。
+
+### 5.2 服务端的连接
+* 服务端在已被认领、已拥有证书且网络设置允许中转（默认开启）时与一个中转保持连接。它用 `ServerService.ListRelays` 列出中转，选择最先接受 TCP 连接的那个，用 `ServerService.SetRelayRegion` 记录其区域，并在停止时清除；mavio.dev 只为已记录的区域签发票据。
+* 中转在一个端口（443）上服务客户端，在另一个端口上以 HTTPS 服务服务端。服务端以升级到 `mavio-relay` 协议的 `GET /servers/connect` 打开控制连接，在 `Mavio-Identity-Key` 中携带其身份公钥，并携带一个像对 mavio.dev 那样（§2）为中转 URL 签名的 JWT；中转检查该公钥的哈希即为 ID 并验证 JWT，因此不需要数据库。同一服务端较新的控制连接会替换较旧的。
+* 中转在控制连接上写入 16 字节的帧：每个客户端一个随机的连接 ID，或每 30 秒一次的全零心跳；服务端 90 秒内未收到任何内容即重新连接。对每个 ID，服务端以 `GET /servers/accept` 并在 `Mavio-Relay-Connection` 中携带该 ID 打开连接，只有被通知的服务端才能取用；中转把客户端的 ClientHello 发给它，再双向复制字节，服务端在这条连接上用其证书提供 TLS 和它的 HTTP 处理器。
+* 中转是一个无状态的 Go 程序（`--region`；`--url`，即服务端 JWT 中写明的基础 URL；`--ticket-secret-file`；面向客户端的 `--addr`；面向服务端的 `--server-addr` 及 `--cert` 和 `--key`；`--zone`）。连接失败后在五秒后重试，间隔加倍直至十分钟。
+
 ## 6. 部署
 
 | 位置 | 内容 |
@@ -67,7 +77,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 | Cloudflare | Workers 上的 `apps/website`；§3 的 Durable Object；`mavio.dev` 的 DNS 区域；用于 Mavio 发布下载的 R2；用 Workers 的出站 TCP 连接检查服务端公布地址的可达性；通过 Cloudflare Email Service 发送邮件 |
 | Hetzner | PostgreSQL，带一个流复制副本，WAL 归档到 R2；`apps/relay`；`apps/dns` |
 
-Worker 的配置是 `apps/website/wrangler.jsonc`：`BASE_URL` 变量、Hyperdrive 绑定（其 ID 是为数据库创建的配置）、`NoticeHub` Durable Object 的 `NOTICES` 绑定及其以 SQLite 为后端的类迁移、`ACME_DOMAIN` 变量（`acme.mavio.dev`），以及机密 `BETTER_AUTH_SECRET`、`CLOUDFLARE_ZONE_ID` 与 `CLOUDFLARE_API_TOKEN`（可编辑该区域 DNS 记录的令牌）、`GOOGLE_CA_PROJECT` 与 `GOOGLE_CA_CREDENTIALS`（可创建外部账户密钥的服务账号的密钥文件）；缺少 Cloudflare 机密时，ACME 方法返回未实现。其入口是 `src/server.ts`。开发时，`pnpm --filter @mavio/website dev` 通过 Vite 在 workerd 中运行 Worker，连接绑定的 `localConnectionString` 所指的 PostgreSQL（用 `drizzle-kit migrate` 迁移），机密和值为 `http://localhost:5173` 的 `BASE_URL` 放在不提交的 `apps/website/.dev.vars` 中；服务端以 `--mavio-dev-url http://localhost:5173/api` 连接它。
+Worker 的配置是 `apps/website/wrangler.jsonc`：`BASE_URL` 变量、Hyperdrive 绑定（其 ID 是为数据库创建的配置）、`NoticeHub` Durable Object 的 `NOTICES` 绑定及其以 SQLite 为后端的类迁移、`ACME_DOMAIN` 变量（`acme.mavio.dev`），以及机密 `BETTER_AUTH_SECRET`、`CLOUDFLARE_ZONE_ID` 与 `CLOUDFLARE_API_TOKEN`（可编辑该区域 DNS 记录的令牌）、`GOOGLE_CA_PROJECT` 与 `GOOGLE_CA_CREDENTIALS`（可创建外部账户密钥的服务账号的密钥文件），以及 `RELAY_TICKET_SECRET`（中转的票据机密）；缺少 Cloudflare 机密时，ACME 方法返回未实现。`RELAYS` 变量是一个按区域列出各中转基础 URL 的 JSON 对象，每个 URL 即其中转的 `--url`；缺少它或票据机密时没有中转，票据方法返回未实现。其入口是 `src/server.ts`。开发时，`pnpm --filter @mavio/website dev` 通过 Vite 在 workerd 中运行 Worker，连接绑定的 `localConnectionString` 所指的 PostgreSQL（用 `drizzle-kit migrate` 迁移），机密和值为 `http://localhost:5173` 的 `BASE_URL` 放在不提交的 `apps/website/.dev.vars` 中；服务端以 `--mavio-dev-url http://localhost:5173/api` 连接它。
 
 ## 7. 安全说明
 

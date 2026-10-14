@@ -15,6 +15,7 @@ import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
 import { collectNotices } from "./notices.ts";
+import type { Relays } from "./relay.ts";
 import { authenticateServer, type Deps, serverService } from "./server-service.ts";
 
 /** ApiOptions are what the API serves from. */
@@ -28,6 +29,8 @@ export interface ApiOptions {
   notify?: (cursors: Map<string, number>) => void;
   /** acme answers servers' certificate requests. */
   acme?: Acme;
+  /** relays are the relays servers connect to and clients are given tickets for. */
+  relays?: Relays;
   /** connectNotices hands an authenticated server's WebSocket request to its Durable Object. */
   connectNotices?: (serverId: string, req: Request) => Promise<Response>;
 }
@@ -38,7 +41,7 @@ export const noticesPath = "/api/servers/notices";
 /** handleApi serves a request under /api, or returns undefined for other paths. */
 export async function handleApi(req: Request, options: ApiOptions): Promise<Response | undefined> {
   const { pathname } = new URL(req.url);
-  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now, acme: options.acme };
+  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now, acme: options.acme, relays: options.relays };
   if (pathname === noticesPath) {
     let server;
     try {

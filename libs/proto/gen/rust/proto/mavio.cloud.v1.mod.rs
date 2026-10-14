@@ -116,6 +116,26 @@ pub use self::__buffa::view::CreateAcmeBindingResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAcmeBindingResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListRelaysRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListRelaysRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListRelaysResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListRelaysResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RelayView;
+#[doc(inline)]
+pub use self::__buffa::view::RelayOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetRelayRegionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetRelayRegionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetRelayRegionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetRelayRegionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ServerView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerOwnedView;
@@ -175,6 +195,14 @@ pub use self::__buffa::view::CreateAssertionRequestOwnedView;
 pub use self::__buffa::view::CreateAssertionResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAssertionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateRelayTicketRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateRelayTicketRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateRelayTicketResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateRelayTicketResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAccessRequestView;
 #[doc(inline)]

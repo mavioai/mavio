@@ -30,6 +30,9 @@ export const servers = pgTable(
     // The cursor of the server's latest change.
     cursor: bigint("cursor", { mode: "number" }).notNull().default(0),
     claimedAt: time("claimed_at").notNull(),
+    // The region of the relay the server keeps a connection to; empty
+    // when it keeps none.
+    relayRegion: text("relay_region").notNull().default(""),
   },
   (t) => [index("servers_administrator_id_idx").on(t.administratorId)],
 );

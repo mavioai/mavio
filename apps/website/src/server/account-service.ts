@@ -9,6 +9,7 @@ import {
   AccessRecordSchema,
   CreateAssertionResponseSchema,
   CreateClaimCodeResponseSchema,
+  CreateRelayTicketResponseSchema,
   DeclineInvitationResponseSchema,
   GetAccountResponseSchema,
   GrantAccessResponseSchema,
@@ -37,7 +38,8 @@ import { claimCodeHash, claimCodeLifetime, newClaimCode } from "./claim-codes.ts
 import { schema, type Tx } from "./db/index.ts";
 import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { base64url } from "./ids.ts";
-import type { Deps } from "./server-service.ts";
+import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
+import { available, type Deps } from "./server-service.ts";
 
 /** AssertionLifetime is how long a sign-in assertion is valid, in seconds. */
 export const assertionLifetime = 120;
@@ -48,7 +50,7 @@ type Record = typeof schema.accessRecords.$inferSelect;
 const access = (r: Record): Access => fromJson(AccessSchema, r.access as never);
 
 /** accountService implements AccountService. */
-export function accountService({ db, apiURL, auth, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof AccountService> {
+export function accountService({ db, apiURL, auth, relays, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof AccountService> {
   // signedIn returns the account of the request's session.
   async function signedIn(ctx: HandlerContext): Promise<User> {
     const session = await auth.api.getSession({ headers: ctx.requestHeader });
@@ -198,6 +200,31 @@ export function accountService({ db, apiURL, auth, now = () => new Date() }: Dep
         },
       });
       return create(CreateAssertionResponseSchema, { assertion: token, expireTime: timestampFromDate(new Date(exp * 1000)) });
+    },
+
+    async createRelayTicket(req, ctx) {
+      const me = await signedIn(ctx);
+      const r = available(relays, "relays");
+      const server = await db.query.servers.findFirst({
+        where: eq(schema.servers.id, req.serverId),
+        with: { accessRecords: { where: and(eq(schema.accessRecords.accountId, me.id), eq(schema.accessRecords.invitation, false)) } },
+      });
+      if (!server || (server.administratorId !== me.id && server.accessRecords.length === 0)) {
+        throw new ConnectError("the account has no access to the server", Code.PermissionDenied);
+      }
+      if (!server.relayRegion || !r.urls.has(server.relayRegion)) {
+        throw new ConnectError("the server keeps no relay connection", Code.FailedPrecondition);
+      }
+      const at = now();
+      // The relay is a Mavio Pass feature, of the viewer or the administrator.
+      const pass = (await effectivePass(db, me.id, at)) || (await effectivePass(db, server.administratorId, at));
+      if (!pass) throw new ConnectError("the relay needs a Mavio Pass", Code.FailedPrecondition);
+      const exp = Math.floor(at.getTime() / 1000) + ticketLifetime;
+      const ticket = await relayTicket(r.secret, server.id, server.relayRegion, exp);
+      return create(CreateRelayTicketResponseSchema, {
+        host: relayHost(server.relayRegion, ticket, server.id, r.zone),
+        expireTime: timestampFromDate(new Date(exp * 1000)),
+      });
     },
 
     async listAccess(req, ctx) {

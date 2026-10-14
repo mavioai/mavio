@@ -127,6 +127,9 @@ type NetworkSettings struct {
 	// LocalDiscovery answers discovery requests from clients on the local
 	// network.
 	LocalDiscovery bool
+	// Relay, in mavio.dev mode, lets clients reach the server through
+	// mavio.dev's relay when they cannot reach it directly.
+	Relay bool
 }
 
 // DefaultServerSettings are the settings of a new server.
@@ -144,7 +147,7 @@ func DefaultServerSettings() ServerSettings {
 			DownmixBoost:         2,
 			CropBlackBorders:     true,
 		},
-		Network:         NetworkSettings{HTTPSPort: 8920, LocalDiscovery: true},
+		Network:         NetworkSettings{HTTPSPort: 8920, LocalDiscovery: true, Relay: true},
 		SessionIdleDays: 90,
 		Acquisition:     DefaultAcquisitionSettings(),
 		Requests:        DefaultRequestSettings(),

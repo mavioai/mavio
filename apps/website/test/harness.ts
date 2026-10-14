@@ -17,6 +17,8 @@ import { base64url, serverID } from "../src/server/ids.ts";
 
 export const baseURL = "http://localhost:3000";
 export const apiURL = `${baseURL}/api`;
+/** The relays' ticket secret, that of apps/relay's ticket test vector. */
+export const relaySecret = new TextEncoder().encode("0123456789abcdef0123456789abcdef");
 
 /** newSite returns a mavio.dev over an empty database. */
 export async function newSite() {
@@ -51,6 +53,7 @@ export async function newSite() {
           },
           bindings: { create: async () => ({ keyId: "kid-1", hmacKey: new Uint8Array([1, 2, 3]) }) },
         },
+        relays: { urls: new Map([["eu", "https://relay-eu.test"]]), secret: relaySecret, zone: "mavio.site" },
       })) ?? new Response("Not Found", { status: 404 }),
     /** client returns a Connect client of service sending headers. */
     client<T extends DescService>(service: T, headers: Record<string, string> = {}, interceptors: Interceptor[] = []): Client<T> {

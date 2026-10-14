@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -32,6 +33,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/providers"
+	"github.com/mavioai/mavio/apps/server/internal/relay"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
@@ -307,10 +309,20 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			certificates.CAs = cfg.ACMEDirectories
 		}
 	}
+	// With its certificate, a claimed server is reachable through the
+	// relay unless its settings turn that off.
+	var relays *relay.Client
+	if certificates != nil {
+		relays = relay.NewClient(key, mavioDev, func(ctx context.Context) (bool, error) {
+			s, err := db.Settings().Accounts(ctx)
+			return s.Claimed() && set.Get().Network.Relay && certificates.Ready(), err
+		}, log)
+	}
 	claimed := func() {
 		link.Wake()
 		if certificates != nil {
 			certificates.Wake()
+			relays.Wake()
 		}
 	}
 	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: claimed}
@@ -373,6 +385,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			if err := https.Apply(ctx, set.Get().Network); err != nil {
 				log.ErrorContext(ctx, "serve HTTPS with the mavio.site certificate", "err", err)
 			}
+			relays.Wake()
 		}
 	}
 	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
@@ -389,6 +402,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		}
 		prefix.Set(s.Network.BaseURL)
+		if relays != nil {
+			relays.Wake()
+		}
 		return discovery.Apply(ctx, s.Network)
 	}); err != nil {
 		log.ErrorContext(ctx, "stored network settings do not apply; change them", "err", err)
@@ -412,6 +428,15 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		g.Go(func() error {
 			certificates.Run(ctx)
 			return nil
+		})
+		g.Go(func() error {
+			relays.Run(ctx)
+			return nil
+		})
+		// Relayed connections carry TLS for the mavio.site certificate.
+		g.Go(func() error {
+			cfg := &tls.Config{MinVersion: tls.VersionTLS12, GetCertificate: certificates.Certificate, NextProtos: []string{"http/1.1"}}
+			return httpserver.Serve(ctx, tls.NewListener(relays.Listener(), cfg), prefix)
 		})
 	}
 	if cfg.ClaimToken != "" {

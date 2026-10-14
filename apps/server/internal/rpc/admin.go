@@ -123,7 +123,7 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 			CropBlackBorders: &t.CropBlackBorders, TranscodeDir: &t.TranscodeDir,
 		}.Build(),
 		Network: systemv1.NetworkSettings_builder{
-			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath,
+			ServerName: &n.ServerName, BaseUrl: &n.BaseURL, HttpsPort: new(int32(n.HTTPSPort)), CertificatePath: &n.CertificatePath, Relay: &n.Relay,
 			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
 		}.Build(),
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
@@ -180,7 +180,7 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		},
 		Network: core.NetworkSettings{
 			ServerName: n.GetServerName(), BaseURL: n.GetBaseUrl(), HTTPSPort: int(n.GetHttpsPort()),
-			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(),
+			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(), Relay: n.GetRelay(),
 		},
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
 		SessionIdleDays: idle,

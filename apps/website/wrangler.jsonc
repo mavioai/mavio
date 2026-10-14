@@ -1,6 +1,6 @@
 // mavio.dev's Worker (docs/mavio-dev.md §6). BETTER_AUTH_SECRET,
-// CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, GOOGLE_CA_PROJECT and
-// GOOGLE_CA_CREDENTIALS are secrets set with `wrangler secret put`;
+// CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, GOOGLE_CA_PROJECT,
+// GOOGLE_CA_CREDENTIALS and RELAY_TICKET_SECRET are secrets set with `wrangler secret put`;
 // .dev.vars holds development's.
 {
   "$schema": "node_modules/wrangler/config-schema.json",

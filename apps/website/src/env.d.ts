@@ -13,6 +13,10 @@ declare module "cloudflare:workers" {
     /** The Google Cloud project minting Google Trust Services' bindings, and its service account's key file. */
     GOOGLE_CA_PROJECT?: string;
     GOOGLE_CA_CREDENTIALS?: string;
+    /** The relays' base URLs by region as a JSON object, such as {"eu":"https://relay-eu.mavio.dev"}. */
+    RELAYS?: string;
+    /** The secret of relay tickets, shared with the relays. */
+    RELAY_TICKET_SECRET?: string;
     NOTICES: DurableObjectNamespace<import("./server/notice-hub.ts").NoticeHub>;
   };
 

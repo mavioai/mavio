@@ -116,3 +116,21 @@ func (c *Client) AcmeBinding(ctx context.Context) (*acme.ExternalAccountBinding,
 	}
 	return &acme.ExternalAccountBinding{KID: resp.GetKeyId(), Key: resp.GetHmacKey()}, nil
 }
+
+// ListRelays gives mavio.dev's relays, one per region.
+func (c *Client) ListRelays(ctx context.Context) ([]*cloudv1.Relay, error) {
+	resp, err := c.api.ListRelays(ctx, &cloudv1.ListRelaysRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.GetRelays(), nil
+}
+
+// SetRelayRegion records the region of the relay the server keeps a
+// connection to, empty for none.
+func (c *Client) SetRelayRegion(ctx context.Context, region string) error {
+	req := &cloudv1.SetRelayRegionRequest{}
+	req.SetRegion(region)
+	_, err := c.api.SetRelayRegion(ctx, req)
+	return err
+}

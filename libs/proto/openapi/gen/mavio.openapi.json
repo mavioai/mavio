@@ -17974,7 +17974,7 @@
             "maximum": 65535,
             "minimum": 0,
             "format": "int32",
-            "description": "Serves HTTPS on this port with the PEM certificate and key; 0 serves\n none."
+            "description": "Serves HTTPS on this port with the PEM certificate and key or,\n without them, in mavio.dev mode with the server's mavio.site\n certificate; 0 serves none."
           },
           "certificatePath": {
             "type": "string",
@@ -17988,6 +17988,11 @@
             "type": "boolean",
             "title": "local_discovery",
             "description": "Answers discovery requests from clients on the local network."
+          },
+          "relay": {
+            "type": "boolean",
+            "title": "relay",
+            "description": "In mavio.dev mode, lets clients reach the server through mavio.dev's\n relay when they cannot reach it directly."
           }
         },
         "title": "NetworkSettings",

@@ -51,6 +51,9 @@ const (
 	// AccountServiceCreateAssertionProcedure is the fully-qualified name of the AccountService's
 	// CreateAssertion RPC.
 	AccountServiceCreateAssertionProcedure = "/mavio.cloud.v1.AccountService/CreateAssertion"
+	// AccountServiceCreateRelayTicketProcedure is the fully-qualified name of the AccountService's
+	// CreateRelayTicket RPC.
+	AccountServiceCreateRelayTicketProcedure = "/mavio.cloud.v1.AccountService/CreateRelayTicket"
 	// AccountServiceListAccessProcedure is the fully-qualified name of the AccountService's ListAccess
 	// RPC.
 	AccountServiceListAccessProcedure = "/mavio.cloud.v1.AccountService/ListAccess"
@@ -96,6 +99,13 @@ type AccountServiceClient interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
+	// CreateRelayTicket gives the name a client reaches one of the
+	// account's servers at through the relay of the server's region
+	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
+	// has no access to is PERMISSION_DENIED; one keeping no relay
+	// connection is FAILED_PRECONDITION, as is a viewer without an
+	// effective Mavio Pass whose server's administrator has none either.
+	CreateRelayTicket(context.Context, *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error)
 	// ListAccess gives the access records of a server the account
 	// administers, invitations included.
 	ListAccess(context.Context, *v1.ListAccessRequest) (*v1.ListAccessResponse, error)
@@ -165,6 +175,12 @@ func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(accountServiceMethods.ByName("CreateAssertion")),
 			connect.WithClientOptions(opts...),
 		),
+		createRelayTicket: connect.NewClient[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse](
+			httpClient,
+			baseURL+AccountServiceCreateRelayTicketProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("CreateRelayTicket")),
+			connect.WithClientOptions(opts...),
+		),
 		listAccess: connect.NewClient[v1.ListAccessRequest, v1.ListAccessResponse](
 			httpClient,
 			baseURL+AccountServiceListAccessProcedure,
@@ -220,6 +236,7 @@ type accountServiceClient struct {
 	listServers       *connect.Client[v1.ListServersRequest, v1.ListServersResponse]
 	removeServer      *connect.Client[v1.RemoveServerRequest, v1.RemoveServerResponse]
 	createAssertion   *connect.Client[v1.CreateAssertionRequest, v1.CreateAssertionResponse]
+	createRelayTicket *connect.Client[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse]
 	listAccess        *connect.Client[v1.ListAccessRequest, v1.ListAccessResponse]
 	grantAccess       *connect.Client[v1.GrantAccessRequest, v1.GrantAccessResponse]
 	revokeAccess      *connect.Client[v1.RevokeAccessRequest, v1.RevokeAccessResponse]
@@ -277,6 +294,15 @@ func (c *accountServiceClient) RemoveServer(ctx context.Context, req *v1.RemoveS
 // CreateAssertion calls mavio.cloud.v1.AccountService.CreateAssertion.
 func (c *accountServiceClient) CreateAssertion(ctx context.Context, req *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error) {
 	response, err := c.createAssertion.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// CreateRelayTicket calls mavio.cloud.v1.AccountService.CreateRelayTicket.
+func (c *accountServiceClient) CreateRelayTicket(ctx context.Context, req *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error) {
+	response, err := c.createRelayTicket.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -368,6 +394,13 @@ type AccountServiceHandler interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
+	// CreateRelayTicket gives the name a client reaches one of the
+	// account's servers at through the relay of the server's region
+	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
+	// has no access to is PERMISSION_DENIED; one keeping no relay
+	// connection is FAILED_PRECONDITION, as is a viewer without an
+	// effective Mavio Pass whose server's administrator has none either.
+	CreateRelayTicket(context.Context, *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error)
 	// ListAccess gives the access records of a server the account
 	// administers, invitations included.
 	ListAccess(context.Context, *v1.ListAccessRequest) (*v1.ListAccessResponse, error)
@@ -433,6 +466,12 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 		connect.WithSchema(accountServiceMethods.ByName("CreateAssertion")),
 		connect.WithHandlerOptions(opts...),
 	)
+	accountServiceCreateRelayTicketHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceCreateRelayTicketProcedure,
+		svc.CreateRelayTicket,
+		connect.WithSchema(accountServiceMethods.ByName("CreateRelayTicket")),
+		connect.WithHandlerOptions(opts...),
+	)
 	accountServiceListAccessHandler := connect.NewUnaryHandlerSimple(
 		AccountServiceListAccessProcedure,
 		svc.ListAccess,
@@ -491,6 +530,8 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 			accountServiceRemoveServerHandler.ServeHTTP(w, r)
 		case AccountServiceCreateAssertionProcedure:
 			accountServiceCreateAssertionHandler.ServeHTTP(w, r)
+		case AccountServiceCreateRelayTicketProcedure:
+			accountServiceCreateRelayTicketHandler.ServeHTTP(w, r)
 		case AccountServiceListAccessProcedure:
 			accountServiceListAccessHandler.ServeHTTP(w, r)
 		case AccountServiceGrantAccessProcedure:
@@ -536,6 +577,10 @@ func (UnimplementedAccountServiceHandler) RemoveServer(context.Context, *v1.Remo
 
 func (UnimplementedAccountServiceHandler) CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.CreateAssertion is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) CreateRelayTicket(context.Context, *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.CreateRelayTicket is not implemented"))
 }
 
 func (UnimplementedAccountServiceHandler) ListAccess(context.Context, *v1.ListAccessRequest) (*v1.ListAccessResponse, error) {
