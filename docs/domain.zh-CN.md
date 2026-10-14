@@ -38,7 +38,7 @@ erDiagram
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
-| `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件 |
+| `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件、会话闲置多久后结束 |
 | `AccountSettings` | 服务端如何登录用户：安装时选择的模式 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
@@ -217,7 +217,7 @@ erDiagram
 * 播放条目时按 Jellyfin 的规则更新其 `UserData`（`RecordPosition`）：位于时长前 5% 的位置不保留；超过 90% 或距结尾不足一秒时标记为已播放并清除位置；短于五分钟的条目越过前 5% 即标记为已播放。有声书改用距开头与距结尾各五分钟。没有时长的条目任何一次播放都算播完。只有视频、有声书与书籍保留续播位置；音乐曲目只标记已播放；其他类型两者都不支持。每次播放到结束，`PlayCount` 加一。
 * **下一集**（`NextEpisode`），与 Jellyfin 相同：剧集的下一集是按季号与集号排在最后一个已播放单集之后的第一个未播放的常规单集（位于更后的季，或同一季中更后的位置即算在其后）；一集都没有播放过时是第一集。特别篇（第 0 季）不参与，除非用 `AirsBeforeSeasonNumber` 或 `AirsAfterSeasonNumber` 标明了位置；这些特别篇按播出顺序插入其间，播放后即被跳过。有续播位置的单集除非明确要求，否则不提供：它属于继续观看。
 * **播出顺序**（`CompareAiredOrder`），即 Jellyfin 的规则：常规单集按季号与集号排序，再按首播日期；特别篇按它在哪一季之前或之后播出以及在哪一集之前播出（`AirsBeforeEpisodeNumber`）排位，给出了集号时排在该集之前，否则排在该季之前；特别篇之间按这一位置及其自身编号排序；其他条目排在单集之后。
-* `AuthSession` 是一个已登录的客户端：签发给用户某一台设备（`DeviceID`、`DeviceName`、`Client`、`ClientVersion`）的访问令牌，带有 `CreatedAt` 与 `LastSeenAt`。只保存令牌的 SHA-256 哈希。从同一设备再次登录会替换该设备的会话；删除用户会删除其会话。
+* `AuthSession` 是一个已登录的客户端：用户某一台设备（`DeviceID`、`DeviceName`、`Client`、`ClientVersion`）的会话，绑定该设备 32 字节的 Ed25519 公钥（`DeviceKey`），带有 `CreatedAt` 与 `LastSeenAt`。其访问令牌不保存。从同一设备再次登录会替换该设备的会话；删除用户会删除其会话。
 
 ---
 
@@ -248,7 +248,7 @@ erDiagram
 | `PersonRepository` | `Get`、不区分大小写的 `FindByName`、批量 `Upsert`、`Search`（有署名的人员及其条目数，见 §9.2）、列出并 `Replace` 条目的署名 |
 | `UserRepository` | 增删改查，以及不区分大小写的 `GetByName` |
 | `UserDataRepository` | `Get`（不存在时返回 `ErrNotFound`）、按一组条目 `GetMany`、`Put` |
-| `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`GetByTokenHash`、`ListForUser`（按最近活动排序）、`Touch`、`Delete` |
+| `AuthSessionRepository` | `Create`（替换该用户在同一设备上的会话）、`Get`、`ListForUser`（按最近活动排序）、`Touch`、`Delete`、`PurgeIdle`（某一时间之前最后活动的会话） |
 | `JobQueue` | `Enqueue`（报告是否入队）、`Lease`、`Extend`、`Complete`、`Fail`、`List`（分页，见 §8）、`Purge` 清除某时间之前结束的任务 |
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
@@ -337,6 +337,7 @@ erDiagram
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort` 及其 PEM 格式的 `CertificatePath` 与 `KeyPath`，以及 `LocalDiscovery`。
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
+* `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
 * `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。

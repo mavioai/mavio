@@ -87,7 +87,7 @@ func newEnv(t *testing.T) *env {
 	if err := s.Users().Create(ctx, &e.user); err != nil {
 		t.Fatal(err)
 	}
-	e.sess = core.AuthSession{UserID: e.user.ID, TokenHash: make([]byte, 32), DeviceID: "browser"}
+	e.sess = core.AuthSession{UserID: e.user.ID, DeviceKey: make([]byte, 32), DeviceID: "browser"}
 	if err := s.AuthSessions().Create(ctx, &e.sess); err != nil {
 		t.Fatal(err)
 	}

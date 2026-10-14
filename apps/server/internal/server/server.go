@@ -19,10 +19,12 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/httpserver"
+	"github.com/mavioai/mavio/apps/server/internal/identity"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/network"
@@ -50,6 +52,10 @@ type Config struct {
 	Version string
 	// Database is "sqlite:<path>" or a PostgreSQL URL.
 	Database string
+	// IdentityKey is the file of the server's identity key, created when
+	// missing; empty uses a key of the run only, whose sessions end with
+	// it.
+	IdentityKey string
 	// FFmpeg and FFprobe are the binaries, names on PATH or paths; without
 	// ffmpeg media plays directly only, without ffprobe libraries are not
 	// scanned.
@@ -117,6 +123,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	metadataDir, err := filepath.Abs(cfg.MetadataDir)
 	if err != nil {
 		return err
+	}
+	key := identity.Generate()
+	if cfg.IdentityKey != "" {
+		if key, err = identity.Load(cfg.IdentityKey); err != nil {
+			return err
+		}
 	}
 	raw, err := store.Open(ctx, cfg.Database)
 	if err != nil {
@@ -297,7 +309,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// search for its subtitles once the files are probed.
 	acq.Imported = reqs.Imported
 	h, err := httpserver.Handler(httpserver.Options{
-		Version: cfg.Version, Store: db, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+		Version: cfg.Version, Store: db, Tokens: auth.NewAccessTokens(key.Derive(auth.TokenKeyPurpose)), Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,

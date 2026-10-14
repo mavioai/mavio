@@ -1,4 +1,4 @@
-h1:3kpPjbVfCBhp/Y8LWKy5z0aH2H53FETd4FVXL3d1h/Y=
+h1:F0V8XgImoHJPGX82WVDeZOOmlSYfovXt1jjErN21a4w=
 20261008102924_init.sql h1:G/Rj5DYvL8d2Ra0Bi/qkQWaGqYrPZ5mHqGRLhqN3KZQ=
 20261008120153_search_keys.sql h1:p3u6v+vWWMIOwjq0sPLNTzjUlcpjG8CnpiehBZkfPY0=
 20261008125127_item_metadata.sql h1:M0cTAm2BUR8dOVOZMyAmGvJC+Z+o+sMF5GNpixJhkbw=
@@ -29,4 +29,5 @@ h1:3kpPjbVfCBhp/Y8LWKy5z0aH2H53FETd4FVXL3d1h/Y=
 20261013145145_subtitle_acquisition.sql h1:SDs28CBIn4OOjQO1NktdCgrCTcwb+rqyJIBI3/+PSmg=
 20261013162653_media_source_file_hash.sql h1:2BqPRf9rysQacQs4NFaLgxB5VnnIkuMbj+Za4K1OP1A=
 20261014022639_subtitle_wanted.sql h1:dC6RF8cDen2A2kqEkrDsz8cc8cIzU+LdH68KM6GQLBE=
-20261014085811_subtitle_translation_record.sql h1:/zeJAy8nMtMk762k7yVC8HPXtnkg98D5p9FuWdPCYRs=
+20261014075226_device_bound_sessions.sql h1:aGDYNlhYhsvVD2fz3NDNiKR8c60djC2JZv36ROtfg3Q=
+20261014085811_subtitle_translation_record.sql h1:ETTphwDhOTKxcGPE4Pi1XqMgYZ0PQ6qB+BgN+ad46rw=

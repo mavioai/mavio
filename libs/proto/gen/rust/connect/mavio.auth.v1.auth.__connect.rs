@@ -22,6 +22,22 @@ pub type OwnedLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<StartRefreshRequestView<'static>>`.
+pub type OwnedStartRefreshRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartRefreshRequestView<'static>,
+>;
+///Shorthand for `OwnedView<StartRefreshResponseView<'static>>`.
+pub type OwnedStartRefreshResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartRefreshResponseView<'static>,
+>;
+///Shorthand for `OwnedView<RefreshSessionRequestView<'static>>`.
+pub type OwnedRefreshSessionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<RefreshSessionResponseView<'static>>`.
+pub type OwnedRefreshSessionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<LogoutRequestView<'static>>`.
 pub type OwnedLogoutRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::LogoutRequestView<'static>,
@@ -210,6 +226,74 @@ for crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'_> {
 impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::LoginResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::LoginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartRefreshResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::StartRefreshResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartRefreshResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartRefreshResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::RefreshSessionResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::RefreshSessionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -674,6 +758,18 @@ pub const AUTH_SERVICE_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::serv
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StartRefresh` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_START_REFRESH_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/StartRefresh",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `RefreshSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_REFRESH_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/RefreshSession",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `Logout` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AUTH_SERVICE_LOGOUT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.auth.v1.AuthService/Logout",
@@ -746,8 +842,14 @@ pub const AUTH_SERVICE_RESET_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::S
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser and
-/// Login are public; the other methods act on the calling user.
+/// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
+/// Login, StartRefresh and RefreshSession are public; the other methods act
+/// on the calling user.
+///
+/// A session belongs to a device's Ed25519 key. Its access token lasts an
+/// hour; before it expires, or when a call fails with UNAUTHENTICATED
+/// because it has, the device asks StartRefresh for a nonce and signs it
+/// with its key for a new token from RefreshSession.
 ///
 /// # Implementing handlers
 ///
@@ -867,6 +969,59 @@ pub trait AuthService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::auth::v1::LoginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StartRefresh gives a session's device a nonce to sign for
+    /// RefreshSession, valid for two minutes. Unknown sessions are
+    /// UNAUTHENTICATED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn start_refresh<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::StartRefreshRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::StartRefreshResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// RefreshSession issues a new access token for the device's signature of
+    /// the nonce: Ed25519 over "mavio-session-refresh-v1", a zero byte, the
+    /// session ID's 16 bytes and the nonce. A wrong signature, a used or
+    /// expired nonce, a disabled user and a session idle for longer than the
+    /// server's session_idle_days are UNAUTHENTICATED; the device then signs
+    /// in again.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn refresh_session<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::auth::v1::RefreshSessionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::auth::v1::RefreshSessionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1279,6 +1434,64 @@ impl<S: AuthService> AuthServiceExt for S {
                 },
             )
             .with_spec(AUTH_SERVICE_LOGIN_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "StartRefresh",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::StartRefreshRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::StartRefreshRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.start_refresh(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::StartRefreshResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_START_REFRESH_SPEC)
+            .route_view(
+                AUTH_SERVICE_SERVICE_NAME,
+                "RefreshSession",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::auth::v1::RefreshSessionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.refresh_session(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::auth::v1::RefreshSessionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AUTH_SERVICE_REFRESH_SESSION_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
                 "Logout",
@@ -1699,6 +1912,18 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_LOGIN_SPEC),
                 )
             }
+            "StartRefresh" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_START_REFRESH_SPEC),
+                )
+            }
+            "RefreshSession" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AUTH_SERVICE_REFRESH_SESSION_SPEC),
+                )
+            }
             "Logout" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1848,6 +2073,50 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                     svc.login(ctx, req)
                         .await?
                         .encode::<crate::proto::mavio::auth::v1::LoginResponse>(format)
+                })
+            }
+            "StartRefresh" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::StartRefreshRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::StartRefreshRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::StartRefreshRequest,
+                    >::from_parts(&req, &body);
+                    svc.start_refresh(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::StartRefreshResponse,
+                        >(format)
+                })
+            }
+            "RefreshSession" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::auth::v1::RefreshSessionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::auth::v1::RefreshSessionRequest,
+                    >::from_parts(&req, &body);
+                    svc.refresh_session(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::auth::v1::RefreshSessionResponse,
+                        >(format)
                 })
             }
             "Logout" => {
@@ -2362,6 +2631,96 @@ where
                 &self.transport,
                 &self.config,
                 AUTH_SERVICE_LOGIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StartRefresh RPC. Sends a request to /mavio.auth.v1.AuthService/StartRefresh.
+    pub async fn start_refresh(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartRefreshRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartRefreshResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.start_refresh_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StartRefresh RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_refresh_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::StartRefreshRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartRefreshResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_START_REFRESH_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RefreshSession RPC. Sends a request to /mavio.auth.v1.AuthService/RefreshSession.
+    pub async fn refresh_session(
+        &self,
+        request: crate::proto::mavio::auth::v1::RefreshSessionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.refresh_session_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RefreshSession RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn refresh_session_with_options(
+        &self,
+        request: crate::proto::mavio::auth::v1::RefreshSessionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::auth::v1::__buffa::view::RefreshSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AUTH_SERVICE_REFRESH_SESSION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

@@ -14,6 +14,7 @@ use mavio_api::connect::mavio::session::v1::EventServiceClient;
 use mavio_api::connect::mavio::user::v1::{UserDataServiceClient, UserServiceClient};
 
 use crate::error::{Error, Result};
+use crate::session::{Session, Transport};
 
 /// The port a Mavio server listens on unless configured otherwise.
 pub const DEFAULT_PORT: u16 = 8686;
@@ -71,13 +72,13 @@ fn tls_config() -> Arc<rustls::ClientConfig> {
     Arc::new(config)
 }
 
-/// The clients of one server, signed in when it has a token. Cloning is
+/// The clients of one server, signed in when it has a session. Cloning is
 /// cheap and shares the connections.
 #[derive(Clone)]
 pub struct Connection {
     base: Uri,
     http: HttpClient,
-    token: Option<Arc<str>>,
+    session: Option<Arc<Session>>,
 }
 
 impl Connection {
@@ -92,16 +93,21 @@ impl Connection {
         Ok(Connection {
             base,
             http,
-            token: None,
+            session: None,
         })
     }
 
-    /// The same server, calling with an access token.
-    pub fn with_token(&self, token: &str) -> Self {
+    /// The same server, calling as a session.
+    pub(crate) fn with_session(&self, session: Session) -> Self {
         Connection {
-            token: Some(token.into()),
+            session: Some(Arc::new(session)),
             ..self.clone()
         }
+    }
+
+    /// The signed-out client and configuration of a session's refreshes.
+    pub(crate) fn signed_out(&self) -> (HttpClient, ClientConfig) {
+        (self.http.clone(), self.unary())
     }
 
     /// The server's base URL, which media and image paths are relative to.
@@ -109,9 +115,30 @@ impl Connection {
         &self.base
     }
 
-    /// The access token, if signed in.
-    pub fn token(&self) -> Option<&str> {
-        self.token.as_deref()
+    /// The access token, refreshed first when it is about to expire; none
+    /// when signed out.
+    pub async fn token(&self) -> Result<Option<String>> {
+        match &self.session {
+            Some(s) => s.token().await.map(Some),
+            None => Ok(None),
+        }
+    }
+
+    /// Refreshes the session's access token now, as after a stream the
+    /// server rejected; a session the server no longer refreshes is
+    /// `Unauthenticated`.
+    pub async fn refresh(&self) -> Result<()> {
+        match &self.session {
+            Some(s) => s.refresh_now().await,
+            None => Err(Error::Unauthenticated("signed out".into())),
+        }
+    }
+
+    fn transport(&self) -> Transport {
+        Transport {
+            http: self.http.clone(),
+            session: self.session.clone(),
+        }
     }
 
     /// Resolves a path the server returned, such as a playback's URL,
@@ -133,9 +160,6 @@ impl Connection {
         if let Some(timeout) = timeout {
             config = config.with_default_timeout(timeout);
         }
-        if let Some(token) = &self.token {
-            config = config.with_default_header("authorization", format!("Bearer {token}"));
-        }
         config
     }
 
@@ -144,43 +168,43 @@ impl Connection {
     }
 
     /// `AuthService`.
-    pub fn auth(&self) -> AuthServiceClient<HttpClient> {
-        AuthServiceClient::new(self.http.clone(), self.unary())
+    pub fn auth(&self) -> AuthServiceClient<Transport> {
+        AuthServiceClient::new(self.transport(), self.unary())
     }
 
     /// `UserService`.
-    pub fn users(&self) -> UserServiceClient<HttpClient> {
-        UserServiceClient::new(self.http.clone(), self.unary())
+    pub fn users(&self) -> UserServiceClient<Transport> {
+        UserServiceClient::new(self.transport(), self.unary())
     }
 
     /// `UserDataService`.
-    pub fn user_data(&self) -> UserDataServiceClient<HttpClient> {
-        UserDataServiceClient::new(self.http.clone(), self.unary())
+    pub fn user_data(&self) -> UserDataServiceClient<Transport> {
+        UserDataServiceClient::new(self.transport(), self.unary())
     }
 
     /// `HomeService`.
-    pub fn home(&self) -> HomeServiceClient<HttpClient> {
-        HomeServiceClient::new(self.http.clone(), self.unary())
+    pub fn home(&self) -> HomeServiceClient<Transport> {
+        HomeServiceClient::new(self.transport(), self.unary())
     }
 
     /// `LibraryService`.
-    pub fn libraries(&self) -> LibraryServiceClient<HttpClient> {
-        LibraryServiceClient::new(self.http.clone(), self.unary())
+    pub fn libraries(&self) -> LibraryServiceClient<Transport> {
+        LibraryServiceClient::new(self.transport(), self.unary())
     }
 
     /// `ItemService`.
-    pub fn items(&self) -> ItemServiceClient<HttpClient> {
-        ItemServiceClient::new(self.http.clone(), self.unary())
+    pub fn items(&self) -> ItemServiceClient<Transport> {
+        ItemServiceClient::new(self.transport(), self.unary())
     }
 
     /// `PlaybackService`.
-    pub fn playback(&self) -> PlaybackServiceClient<HttpClient> {
-        PlaybackServiceClient::new(self.http.clone(), self.unary())
+    pub fn playback(&self) -> PlaybackServiceClient<Transport> {
+        PlaybackServiceClient::new(self.transport(), self.unary())
     }
 
     /// `EventService`, whose stream lasts as long as the device listens.
-    pub fn events(&self) -> EventServiceClient<HttpClient> {
-        EventServiceClient::new(self.http.clone(), self.config(None))
+    pub fn events(&self) -> EventServiceClient<Transport> {
+        EventServiceClient::new(self.transport(), self.config(None))
     }
 }
 

@@ -32,6 +32,8 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetAuthInfoProcedure,
 	authv1connect.AuthServiceCreateFirstUserProcedure,
 	authv1connect.AuthServiceLoginProcedure,
+	authv1connect.AuthServiceStartRefreshProcedure,
+	authv1connect.AuthServiceRefreshSessionProcedure,
 	authv1connect.AuthServiceStartQuickConnectProcedure,
 	authv1connect.AuthServiceGetQuickConnectStateProcedure,
 	authv1connect.AuthServiceLoginWithQuickConnectProcedure,
@@ -70,8 +72,10 @@ var SessionBoundProcedures = []string{
 
 // AuthService implements mavio.auth.v1.AuthService.
 type AuthService struct {
-	store core.Store
-	now   func() time.Time
+	store  core.Store
+	tokens *auth.AccessTokens
+	nonces *auth.Nonces
+	now    func() time.Time
 	// firstUser serializes CreateFirstUser, so that two concurrent calls
 	// cannot both see an empty user table.
 	firstUser sync.Mutex
@@ -94,16 +98,22 @@ type AuthService struct {
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
 
-// NewAuthService returns an AuthService backed by store.
-func NewAuthService(store core.Store) *AuthService {
-	return &AuthService{store: store, now: time.Now, quick: auth.NewQuickConnect(), resets: auth.NewPasswordResets()}
+// NewAuthService returns an AuthService backed by store, issuing access
+// tokens with tokens.
+func NewAuthService(store core.Store, tokens *auth.AccessTokens) *AuthService {
+	return &AuthService{
+		store: store, tokens: tokens, nonces: auth.NewNonces(), now: time.Now,
+		quick: auth.NewQuickConnect(), resets: auth.NewPasswordResets(),
+	}
 }
 
 // StartQuickConnect registers a device waiting to be signed in from
 // another one.
 func (s *AuthService) StartQuickConnect(_ context.Context, req *authv1.StartQuickConnectRequest) (*authv1.StartQuickConnectResponse, error) {
 	d := req.GetDevice()
-	r := s.quick.Start(auth.Device{ID: d.GetId(), Name: d.GetName(), Client: d.GetClient(), ClientVersion: d.GetClientVersion()})
+	r := s.quick.Start(auth.Device{
+		ID: d.GetId(), Name: d.GetName(), Client: d.GetClient(), ClientVersion: d.GetClientVersion(), Key: d.GetPublicKey(),
+	})
 	return authv1.StartQuickConnectResponse_builder{
 		Secret: &r.Secret, Code: &r.Code, ExpireTime: timestamppb.New(r.Expires),
 	}.Build(), nil
@@ -125,7 +135,7 @@ func (s *AuthService) AuthorizeQuickConnect(ctx context.Context, req *authv1.Aut
 	if err != nil {
 		return nil, err
 	}
-	d, err := s.quick.Authorize(req.GetCode(), func(d auth.Device) (core.AuthSession, string, error) {
+	d, err := s.quick.Authorize(req.GetCode(), func(d auth.Device) (core.AuthSession, error) {
 		return s.createSession(ctx, s.store, p.User.ID, deviceToProto(d))
 	})
 	if err != nil {
@@ -144,9 +154,69 @@ func (s *AuthService) LoginWithQuickConnect(ctx context.Context, req *authv1.Log
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	token, expires := s.tokens.Issue(r.Session.ID)
 	return authv1.LoginWithQuickConnectResponse_builder{
-		AccessToken: &r.Token, User: userToProto(&user), Session: sessionToProto(&r.Session, true),
+		AccessToken: &token, AccessTokenExpireTime: timestamppb.New(expires),
+		User: userToProto(&user), Session: sessionToProto(&r.Session, true),
 	}.Build(), nil
+}
+
+// StartRefresh gives a session's device a nonce to sign.
+func (s *AuthService) StartRefresh(ctx context.Context, req *authv1.StartRefreshRequest) (*authv1.StartRefreshResponse, error) {
+	id, err := core.ParseID(req.GetSessionId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	if _, err := s.store.AuthSessions().Get(ctx, id); errors.Is(err, core.ErrNotFound) {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("no such session"))
+	} else if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	nonce, expires := s.nonces.Start(id)
+	return authv1.StartRefreshResponse_builder{Nonce: nonce, ExpireTime: timestamppb.New(expires)}.Build(), nil
+}
+
+// RefreshSession issues a new access token for the device's signature of
+// its nonce, while the session's user is enabled and the session has not
+// been idle for too long.
+func (s *AuthService) RefreshSession(ctx context.Context, req *authv1.RefreshSessionRequest) (*authv1.RefreshSessionResponse, error) {
+	failed := connect.NewError(connect.CodeUnauthenticated, errors.New("the session cannot be refreshed; sign in again"))
+	id, err := core.ParseID(req.GetSessionId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+	if !s.nonces.Redeem(id, req.GetNonce()) {
+		return nil, failed
+	}
+	sess, err := s.store.AuthSessions().Get(ctx, id)
+	if errors.Is(err, core.ErrNotFound) {
+		return nil, failed
+	} else if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if !auth.VerifyRefresh(sess.DeviceKey, id, req.GetNonce(), req.GetSignature()) {
+		return nil, failed
+	}
+	settings, err := s.store.Settings().Get(ctx)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	now := s.now()
+	if now.After(sess.LastSeenAt.AddDate(0, 0, settings.SessionIdleDays)) {
+		return nil, failed
+	}
+	user, err := s.store.Users().Get(ctx, sess.UserID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if user.Disabled {
+		return nil, failed
+	}
+	if err := s.store.AuthSessions().Touch(ctx, id, now); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	token, expires := s.tokens.Issue(id)
+	return authv1.RefreshSessionResponse_builder{AccessToken: &token, AccessTokenExpireTime: timestamppb.New(expires)}.Build(), nil
 }
 
 func accountModeToProto(m core.AccountMode) authv1.AccountMode {
@@ -161,7 +231,7 @@ func accountModeToProto(m core.AccountMode) authv1.AccountMode {
 }
 
 func deviceToProto(d auth.Device) *authv1.Device {
-	return authv1.Device_builder{Id: &d.ID, Name: &d.Name, Client: &d.Client, ClientVersion: &d.ClientVersion}.Build()
+	return authv1.Device_builder{Id: &d.ID, Name: &d.Name, Client: &d.Client, ClientVersion: &d.ClientVersion, PublicKey: d.Key}.Build()
 }
 
 // GetAuthInfo reports the server's mode, and whether setup still has to
@@ -189,9 +259,8 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 	defer s.firstUser.Unlock()
 
 	var (
-		user  core.User
-		sess  core.AuthSession
-		token string
+		user core.User
+		sess core.AuthSession
 	)
 	err := s.store.InTx(ctx, func(tx core.Store) error {
 		accounts, err := tx.Settings().Accounts(ctx)
@@ -216,17 +285,19 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 		if err := tx.Users().Create(ctx, &user); err != nil {
 			return err
 		}
-		sess, token, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
+		sess, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
 		return err
 	})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	slog.InfoContext(ctx, "created first user", "user", user.Name)
+	token, expires := s.tokens.Issue(sess.ID)
 	return authv1.CreateFirstUserResponse_builder{
-		AccessToken: &token,
-		User:        userToProto(&user),
-		Session:     sessionToProto(&sess, true),
+		AccessToken:           &token,
+		AccessTokenExpireTime: timestamppb.New(expires),
+		User:                  userToProto(&user),
+		Session:               sessionToProto(&sess, true),
 	}.Build(), nil
 }
 
@@ -280,10 +351,7 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		return nil, loginFailed("disabled user")
 	}
 
-	var (
-		sess  core.AuthSession
-		token string
-	)
+	var sess core.AuthSession
 	err = s.store.InTx(ctx, func(tx core.Store) error {
 		now := s.now()
 		user.LastLoginAt = &now
@@ -294,7 +362,7 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 			return err
 		}
 		var err error
-		sess, token, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
+		sess, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
 		return err
 	})
 	if err != nil {
@@ -304,19 +372,20 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		Type: "user.login", UserID: user.ID, Title: user.Name + " signed in",
 		Attributes: map[string]string{"device": req.GetDevice().GetName(), "client": req.GetDevice().GetClient()},
 	})
+	token, expires := s.tokens.Issue(sess.ID)
 	return authv1.LoginResponse_builder{
-		AccessToken: &token,
-		User:        userToProto(&user),
-		Session:     sessionToProto(&sess, true),
+		AccessToken:           &token,
+		AccessTokenExpireTime: timestamppb.New(expires),
+		User:                  userToProto(&user),
+		Session:               sessionToProto(&sess, true),
 	}.Build(), nil
 }
 
-func (s *AuthService) createSession(ctx context.Context, tx core.Store, userID core.ID, d *authv1.Device) (core.AuthSession, string, error) {
-	token, hash := auth.NewToken()
+func (s *AuthService) createSession(ctx context.Context, tx core.Store, userID core.ID, d *authv1.Device) (core.AuthSession, error) {
 	now := s.now()
 	sess := core.AuthSession{
 		UserID:        userID,
-		TokenHash:     hash,
+		DeviceKey:     d.GetPublicKey(),
 		DeviceID:      d.GetId(),
 		DeviceName:    d.GetName(),
 		Client:        d.GetClient(),
@@ -325,9 +394,9 @@ func (s *AuthService) createSession(ctx context.Context, tx core.Store, userID c
 		LastSeenAt:    now,
 	}
 	if err := tx.AuthSessions().Create(ctx, &sess); err != nil {
-		return core.AuthSession{}, "", err
+		return core.AuthSession{}, err
 	}
-	return sess, token, nil
+	return sess, nil
 }
 
 // Logout ends the calling session.
@@ -401,6 +470,7 @@ func sessionToProto(s *core.AuthSession, current bool) *authv1.Session {
 			Name:          &s.DeviceName,
 			Client:        &s.Client,
 			ClientVersion: &s.ClientVersion,
+			PublicKey:     s.DeviceKey,
 		}.Build(),
 		CreateTime:   timestamppb.New(s.CreatedAt),
 		LastSeenTime: timestamppb.New(s.LastSeenAt),

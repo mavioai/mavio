@@ -445,7 +445,12 @@ mod tests {
     async fn unreachable_servers_keep_progress() {
         let store = Arc::new(Store::open_in_memory().unwrap());
         let tokens = Arc::new(MemoryTokens::default());
-        crate::TokenStore::set_token(tokens.as_ref(), "sa", "t");
+        crate::session::Credential {
+            session: "01890a5d-ac96-774b-bcce-b302099a8057".into(),
+            token: "t".into(),
+            expires: 0,
+        }
+        .save(tokens.as_ref(), "sa");
         store
             .put_server(&crate::ServerRecord {
                 id: "sa".into(),

@@ -620,8 +620,9 @@ pub struct OpenView<'a> {
     pub database_path: &'a str,
     /// Field 2: `device`
     pub device: ::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'a>>,
-    /// The access tokens the app keeps, by server ID; TokenChanged tells it of
-    /// new and forgotten ones.
+    /// The secrets the app keeps for the core: the credentials of each
+    /// server's session, by server ID, and the device key, under
+    /// "device-key". TokenChanged tells it of new and forgotten ones.
     ///
     /// Field 3: `tokens` (map)
     pub tokens: ::buffa::MapView<'a, &'a str, &'a str>,
@@ -937,8 +938,9 @@ impl OpenOwnedView {
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::DeviceView<'_>> {
         &self.0.reborrow().device
     }
-    /// The access tokens the app keeps, by server ID; TokenChanged tells it of
-    /// new and forgotten ones.
+    /// The secrets the app keeps for the core: the credentials of each
+    /// server's session, by server ID, and the device key, under
+    /// "device-key". TokenChanged tells it of new and forgotten ones.
     ///
     /// Field 3: `tokens` (map)
     #[must_use]
@@ -6063,8 +6065,9 @@ impl ::buffa::HasMessageView for super::super::SessionsChanged {
     type View<'a> = SessionsChangedView<'a>;
     type ViewHandle = SessionsChangedOwnedView;
 }
-/// The core has a new access token for the server, which the app keeps in
-/// the system's secure storage, or forgot it when the token is empty.
+/// The core has a new secret under the event's server ID, a session's
+/// credentials or the device key, which the app keeps as it is in the
+/// system's secure storage, or forgot it when the token is empty.
 #[derive(Clone, Debug, Default)]
 pub struct TokenChangedView<'a> {
     /// Field 1: `token`

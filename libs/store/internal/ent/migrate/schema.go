@@ -60,7 +60,7 @@ var (
 	// AuthSessionsColumns holds the columns for the "auth_sessions" table.
 	AuthSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "token_hash", Type: field.TypeBytes, Unique: true},
+		{Name: "device_key", Type: field.TypeBytes},
 		{Name: "device_id", Type: field.TypeString},
 		{Name: "device_name", Type: field.TypeString, Default: ""},
 		{Name: "client", Type: field.TypeString, Default: ""},

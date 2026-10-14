@@ -39,7 +39,7 @@ erDiagram
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
-| `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin |
+| `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin, how long sessions last unused |
 | `AccountSettings` | How the server signs people in: its mode, chosen at setup |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
@@ -217,7 +217,7 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 * Playing an item updates its `UserData` (`RecordPosition`) as Jellyfin does. A position in the first 5% of the runtime is not kept; past 90% or within a second of the end the item is played and its position cleared; items shorter than five minutes are played once past the first 5%. Audiobooks use five minutes from the start and from the end instead. Items without a runtime are played by any playback. Only videos, audiobooks and books keep a resume position; tracks are only marked played; other kinds neither. `PlayCount` grows once per playback played to completion.
 * **Next up** (`NextEpisode`), as in Jellyfin: the next episode of a series is its first unplayed regular episode after the last played one by season and episode number (an episode follows it when it is in a later season, or later in the same season), or the first of all when none was played. Specials (season 0) are left out unless placed with `AirsBeforeSeasonNumber` or `AirsAfterSeasonNumber`; those come in between in aired order and are skipped once played. An episode with a resume position is not offered unless asked: it belongs to continue watching.
 * **Aired order** (`CompareAiredOrder`), Jellyfin's: regular episodes by season and episode number, then premiere date; a special by the season it airs before or after and the episode it airs before (`AirsBeforeEpisodeNumber`), before that episode or before the season when no episode is given; specials among themselves by that placement and their own number; other items after episodes.
-* An `AuthSession` is a signed-in client: the access token issued to one device (`DeviceID`, `DeviceName`, `Client`, `ClientVersion`) of a user, with `CreatedAt` and `LastSeenAt`. Only the token's SHA-256 hash is stored. Signing in again from the same device replaces that device's session; deleting a user deletes its sessions.
+* An `AuthSession` is a signed-in client: the session of one device (`DeviceID`, `DeviceName`, `Client`, `ClientVersion`) of a user, bound to the device's 32-byte Ed25519 public key (`DeviceKey`), with `CreatedAt` and `LastSeenAt`. Its access tokens are not stored. Signing in again from the same device replaces that device's session; deleting a user deletes its sessions.
 
 ---
 
@@ -248,7 +248,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `PersonRepository` | `Get`, case-insensitive `FindByName`, batch `Upsert`, `Search` (credited people with item counts, see §9.2), list and `Replace` an item's credits |
 | `UserRepository` | CRUD and case-insensitive `GetByName` |
 | `UserDataRepository` | `Get` (`ErrNotFound` when absent), `GetMany` for a list of items, `Put` |
-| `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `GetByTokenHash`, `ListForUser` (most recently seen first), `Touch`, `Delete` |
+| `AuthSessionRepository` | `Create` (replacing the user's session on the same device), `Get`, `ListForUser` (most recently seen first), `Touch`, `Delete`, `PurgeIdle` (the sessions last seen before a time) |
 | `JobQueue` | `Enqueue` (reports whether added), `Lease`, `Extend`, `Complete`, `Fail`, `List` (paged, see §8), `Purge` of jobs finished before a time |
 | `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
 | `ItemRepository` (curated) | `Links` lists a collection's or playlist's entries in order; `ReplaceLinks` sets them, keeping the IDs given and assigning new ones |
@@ -337,6 +337,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` with its PEM `CertificatePath` and `KeyPath`, and `LocalDiscovery`.
 * `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
 * `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
+* `SessionIdleDays`: how many days a session lasts unused, 1–3650, 90 by default.
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).
 * `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; requests and discovery name titles in the language and rate them in the country. The defaults are `en` and `US`.

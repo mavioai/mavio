@@ -21,6 +21,7 @@ import (
 //
 //	config.toml   settings, optional
 //	mavio.db      the SQLite database
+//	identity.key  the server's identity key, which signs its sessions
 //	plugins/      one folder per plugin
 //	metadata/     artwork chosen for items
 //	backups/      backups
@@ -57,6 +58,7 @@ var settings = []setting{
 	{key: "database", usage: "database: sqlite:<path> or postgres://…", def: func(home string, _ *server.Config) string {
 		return "sqlite:" + filepath.Join(home, "mavio.db")
 	}},
+	{key: "identity-key", path: true, usage: "the server's identity key, created when missing; it signs the server's sessions", def: under("identity.key")},
 	{key: "ffmpeg", usage: "ffmpeg binary; without it media is only played directly", def: constant("ffmpeg")},
 	{key: "ffprobe", usage: "ffprobe binary; without it libraries are not scanned", def: constant("ffprobe")},
 	{key: "rclone", usage: "rclone binary run as an rcd for libraries on rclone remotes; empty runs none", def: constant("rclone")},
@@ -219,7 +221,7 @@ func load(flags *pflag.FlagSet) (options, error) {
 func assign(o *options, key, value string) error {
 	cfg := &o.Server
 	targets := map[string]*string{
-		"addr": &o.Addr, "database": &cfg.Database, "ffmpeg": &cfg.FFmpeg, "ffprobe": &cfg.FFprobe,
+		"addr": &o.Addr, "database": &cfg.Database, "identity-key": &cfg.IdentityKey, "ffmpeg": &cfg.FFmpeg, "ffprobe": &cfg.FFprobe,
 		"rclone": &cfg.Rclone, "rclone-config": &cfg.RcloneConfig, "rclone-url": &cfg.RcloneURL,
 		"rclone-user": &cfg.RcloneUser, "rclone-pass": &cfg.RclonePass,
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,

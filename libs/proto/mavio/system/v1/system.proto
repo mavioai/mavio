@@ -271,6 +271,12 @@ message ServerSettings {
   // The language and country of metadata beside libraries'; unset in an
   // update keeps the current ones.
   MetadataSettings metadata = 8;
+  // How many days a signed-in device stays signed in unused, 1–3650; 0 in
+  // an update keeps the current value.
+  int32 session_idle_days = 9 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 3650
+  }];
 }
 
 // RequestSettings are the defaults of users' requests and where approved

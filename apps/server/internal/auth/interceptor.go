@@ -46,6 +46,7 @@ func FromContext(ctx context.Context) (Principal, bool) {
 // Interceptor authenticates Connect requests by their bearer token.
 type Interceptor struct {
 	store        core.Store
+	tokens       *AccessTokens
 	public       map[string]bool
 	userBound    map[string]bool
 	sessionBound map[string]bool
@@ -56,10 +57,11 @@ var _ connect.Interceptor = (*Interceptor)(nil)
 
 // NewInterceptor returns an interceptor that requires a valid token for
 // every procedure except the public ones, given as Connect procedure names
-// such as "/mavio.auth.v1.AuthService/Login".
-func NewInterceptor(store core.Store, public ...string) *Interceptor {
+// such as "/mavio.auth.v1.AuthService/Login". Sessions' access tokens are
+// checked with tokens.
+func NewInterceptor(store core.Store, tokens *AccessTokens, public ...string) *Interceptor {
 	i := &Interceptor{
-		store: store, public: make(map[string]bool, len(public)),
+		store: store, tokens: tokens, public: make(map[string]bool, len(public)),
 		userBound: map[string]bool{}, sessionBound: map[string]bool{}, now: time.Now,
 	}
 	for _, p := range public {
@@ -121,13 +123,24 @@ func (i *Interceptor) authenticate(ctx context.Context, spec connect.Spec, h htt
 	return WithPrincipal(ctx, p), nil
 }
 
-// Resolve returns the principal of a token: a session's, or an API key's,
-// which acts as the administrator who created it while they still are one.
+// Resolve returns the principal of a token: a session's access token, or
+// an API key, which acts as the administrator who created it while they
+// still are one. An expired access token is unauthenticated with
+// ErrTokenExpired, telling the device to refresh its session.
 func (i *Interceptor) Resolve(ctx context.Context, token string) (Principal, error) {
 	invalid := connect.NewError(connect.CodeUnauthenticated, errors.New("invalid or revoked token"))
-	sess, err := i.store.AuthSessions().GetByTokenHash(ctx, HashToken(token))
-	if errors.Is(err, core.ErrNotFound) {
+	id, err := i.tokens.Verify(token)
+	switch {
+	case errors.Is(err, errNotAccessToken):
 		return i.resolveKey(ctx, token, invalid)
+	case errors.Is(err, ErrTokenExpired):
+		return Principal{}, connect.NewError(connect.CodeUnauthenticated, ErrTokenExpired)
+	case err != nil:
+		return Principal{}, invalid
+	}
+	sess, err := i.store.AuthSessions().Get(ctx, id)
+	if errors.Is(err, core.ErrNotFound) {
+		return Principal{}, invalid
 	} else if err != nil {
 		return Principal{}, fmt.Errorf("look up session: %w", err)
 	}

@@ -32,7 +32,7 @@ func (r authSessions) Create(ctx context.Context, sess *core.AuthSession) error 
 		created, err := tx.write.AuthSession.Create().
 			SetID(sess.ID).
 			SetUserID(sess.UserID).
-			SetTokenHash(sess.TokenHash).
+			SetDeviceKey(sess.DeviceKey).
 			SetDeviceID(sess.DeviceID).
 			SetDeviceName(sess.DeviceName).
 			SetClient(sess.Client).
@@ -55,8 +55,8 @@ func orTime(t, def time.Time) time.Time {
 	return t
 }
 
-func (r authSessions) GetByTokenHash(ctx context.Context, hash []byte) (core.AuthSession, error) {
-	s, err := r.s.read.AuthSession.Query().Where(authsession.TokenHash(hash)).Only(ctx)
+func (r authSessions) Get(ctx context.Context, id core.ID) (core.AuthSession, error) {
+	s, err := r.s.read.AuthSession.Get(ctx, id)
 	if err != nil {
 		return core.AuthSession{}, mapErr(err, "get auth session")
 	}
@@ -88,9 +88,14 @@ func (r authSessions) Delete(ctx context.Context, id core.ID) error {
 	return mapErr(err, "delete auth session "+id.String())
 }
 
+func (r authSessions) PurgeIdle(ctx context.Context, before time.Time) (int, error) {
+	n, err := r.s.write.AuthSession.Delete().Where(authsession.LastSeenAtLT(before)).Exec(ctx)
+	return n, mapErr(err, "purge idle auth sessions")
+}
+
 func toAuthSession(s *ent.AuthSession) core.AuthSession {
 	return core.AuthSession{
-		ID: s.ID, UserID: s.UserID, TokenHash: s.TokenHash,
+		ID: s.ID, UserID: s.UserID, DeviceKey: s.DeviceKey,
 		DeviceID: s.DeviceID, DeviceName: s.DeviceName, Client: s.Client, ClientVersion: s.ClientVersion,
 		CreatedAt: s.CreatedAt.UTC(), LastSeenAt: s.LastSeenAt.UTC(),
 	}

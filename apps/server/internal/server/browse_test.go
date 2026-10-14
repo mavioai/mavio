@@ -2,6 +2,8 @@ package server_test
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/sha256"
 	"fmt"
 	"log/slog"
 	"net"
@@ -254,8 +256,15 @@ func TestBrowsing(t *testing.T) {
 	}
 }
 
+// device returns a test device whose key is derived from its ID.
 func device(id string) *authv1.Device {
-	return authv1.Device_builder{Id: &id, Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build()
+	return authv1.Device_builder{Id: &id, Name: new("Test"), Client: new("Test"), ClientVersion: new("0"), PublicKey: deviceKey(id).Public().(ed25519.PublicKey)}.Build()
+}
+
+// deviceKey returns the private key of device(id).
+func deviceKey(id string) ed25519.PrivateKey {
+	seed := sha256.Sum256([]byte(id))
+	return ed25519.NewKeyFromSeed(seed[:])
 }
 
 func names(items []*libraryv1.Item) []string {

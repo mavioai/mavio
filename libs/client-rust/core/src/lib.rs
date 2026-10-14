@@ -14,6 +14,7 @@ mod fake;
 mod home;
 mod reporting;
 mod servers;
+mod session;
 mod store;
 mod view;
 
@@ -29,6 +30,7 @@ pub use events::{Backoff, EventSink, StreamState, spawn as stream_events};
 pub use home::{Content, Entry, Hubs, Section, ServerHubs, Trending, Version, merge as merge_home};
 pub use reporting::{Playback, PlaybackOptions, REPORT_INTERVAL, Reporter, Session};
 pub use servers::{DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
+pub use session::Transport;
 pub use store::{DownloadRecord, DownloadState, PendingProgress, ServerRecord, Store};
 pub use view::{Artwork, Card, CardKind, Row, RowContent, RowKind, TitleCard};
 

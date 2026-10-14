@@ -29,7 +29,7 @@ func TestPluginRequests(t *testing.T) {
 		}
 	}
 
-	i := NewInterceptor(s, "/test.v1.Public/Get").
+	i := NewInterceptor(s, NewAccessTokens(make([]byte, 32)), "/test.v1.Public/Get").
 		RequireUser("mavio.user.v1.UserDataService", "/mavio.user.v1.UserService/GetCurrentUser").
 		RequireSession("mavio.session.v1.EventService")
 	scopes := map[string]bool{

@@ -49,7 +49,8 @@ export {
   Playback,
   type PlayOptions,
 } from "./playback.ts";
-export { type Server, transport, urlOf } from "./server.ts";
+export { browserDeviceKey, type DeviceKey, memoryDeviceKey, refreshMessage } from "./device-key.ts";
+export { type Server, type Session, transport, urlOf } from "./server.ts";
 export {
   normalizeUrl,
   type QuickConnect,

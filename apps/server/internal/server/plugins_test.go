@@ -128,7 +128,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	})
 	first, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
 		Name: new("admin"), Password: new("secret"),
-		Device: authv1.Device_builder{Id: new("e2e"), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+		Device: device("e2e"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("CreateFirstUser: %v", err)
@@ -260,7 +260,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	setDevices("tv")
 	kidToken, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).Login(ctx, authv1.LoginRequest_builder{
 		Name: new("kid"), Password: new("secret"),
-		Device: authv1.Device_builder{Id: new("kid"), Name: new("Kid"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+		Device: device("kid"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("Login: %v", err)

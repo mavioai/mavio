@@ -145,15 +145,17 @@ impl From<mavio_core::Error> for CoreError {
 
 type Result<T, E = CoreError> = std::result::Result<T, E>;
 
-/// Keeps the access tokens in the platform's secure storage: the Keychain
-/// or the Android Keystore. The app implements it.
+/// Keeps the core's secrets in the platform's secure storage: the Keychain
+/// or the Android Keystore. They are the credentials of each server's
+/// session, under the server's ID, and the device key, under
+/// `device-key`, kept as they are. The app implements it.
 #[uniffi::export(with_foreign)]
 pub trait SecureTokens: Send + Sync {
-    /// The token of a server, if the device is signed in to it.
+    /// What is kept under an ID, if anything.
     fn token(&self, server_id: String) -> Option<String>;
-    /// Keeps the token of a server, replacing an earlier one.
+    /// Keeps a value under an ID, replacing an earlier one.
     fn set_token(&self, server_id: String, token: String);
-    /// Forgets the token of a server.
+    /// Forgets what is kept under an ID.
     fn delete_token(&self, server_id: String);
 }
 

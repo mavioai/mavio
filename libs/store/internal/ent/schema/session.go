@@ -26,7 +26,7 @@ func (AuthSession) Fields() []ent.Field {
 	return []ent.Field{
 		idField(),
 		field.UUID("user_id", core.ID{}),
-		field.Bytes("token_hash").Unique().Sensitive(),
+		field.Bytes("device_key"),
 		field.String("device_id"),
 		field.String("device_name").Default(""),
 		field.String("client").Default(""),

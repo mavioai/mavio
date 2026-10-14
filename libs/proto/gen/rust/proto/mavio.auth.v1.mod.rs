@@ -54,6 +54,22 @@ pub use self::__buffa::view::LoginResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LoginResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::StartRefreshRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartRefreshRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartRefreshResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartRefreshResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RefreshSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RefreshSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RefreshSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RefreshSessionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::LogoutRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::LogoutRequestOwnedView;

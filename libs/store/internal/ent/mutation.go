@@ -1514,7 +1514,7 @@ type AuthSessionMutation struct {
 	op             Op
 	typ            string
 	id             *core.ID
-	token_hash     *[]byte
+	device_key     *[]byte
 	device_id      *string
 	device_name    *string
 	client         *string
@@ -1669,40 +1669,40 @@ func (m *AuthSessionMutation) ResetUserID() {
 	m.user = nil
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (m *AuthSessionMutation) SetTokenHash(b []byte) {
-	m.token_hash = &b
+// SetDeviceKey sets the "device_key" field.
+func (m *AuthSessionMutation) SetDeviceKey(b []byte) {
+	m.device_key = &b
 }
 
-// TokenHash returns the value of the "token_hash" field in the mutation.
-func (m *AuthSessionMutation) TokenHash() (r []byte, exists bool) {
-	v := m.token_hash
+// DeviceKey returns the value of the "device_key" field in the mutation.
+func (m *AuthSessionMutation) DeviceKey() (r []byte, exists bool) {
+	v := m.device_key
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTokenHash returns the old "token_hash" field's value of the AuthSession entity.
+// OldDeviceKey returns the old "device_key" field's value of the AuthSession entity.
 // If the AuthSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthSessionMutation) OldTokenHash(ctx context.Context) (v []byte, err error) {
+func (m *AuthSessionMutation) OldDeviceKey(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTokenHash is only allowed on UpdateOne operations")
+		return v, errors.New("OldDeviceKey is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTokenHash requires an ID field in the mutation")
+		return v, errors.New("OldDeviceKey requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTokenHash: %w", err)
+		return v, fmt.Errorf("querying old value for OldDeviceKey: %w", err)
 	}
-	return oldValue.TokenHash, nil
+	return oldValue.DeviceKey, nil
 }
 
-// ResetTokenHash resets all changes to the "token_hash" field.
-func (m *AuthSessionMutation) ResetTokenHash() {
-	m.token_hash = nil
+// ResetDeviceKey resets all changes to the "device_key" field.
+func (m *AuthSessionMutation) ResetDeviceKey() {
+	m.device_key = nil
 }
 
 // SetDeviceID sets the "device_id" field.
@@ -1986,8 +1986,8 @@ func (m *AuthSessionMutation) Fields() []string {
 	if m.user != nil {
 		fields = append(fields, authsession.FieldUserID)
 	}
-	if m.token_hash != nil {
-		fields = append(fields, authsession.FieldTokenHash)
+	if m.device_key != nil {
+		fields = append(fields, authsession.FieldDeviceKey)
 	}
 	if m.device_id != nil {
 		fields = append(fields, authsession.FieldDeviceID)
@@ -2017,8 +2017,8 @@ func (m *AuthSessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case authsession.FieldUserID:
 		return m.UserID()
-	case authsession.FieldTokenHash:
-		return m.TokenHash()
+	case authsession.FieldDeviceKey:
+		return m.DeviceKey()
 	case authsession.FieldDeviceID:
 		return m.DeviceID()
 	case authsession.FieldDeviceName:
@@ -2042,8 +2042,8 @@ func (m *AuthSessionMutation) OldField(ctx context.Context, name string) (ent.Va
 	switch name {
 	case authsession.FieldUserID:
 		return m.OldUserID(ctx)
-	case authsession.FieldTokenHash:
-		return m.OldTokenHash(ctx)
+	case authsession.FieldDeviceKey:
+		return m.OldDeviceKey(ctx)
 	case authsession.FieldDeviceID:
 		return m.OldDeviceID(ctx)
 	case authsession.FieldDeviceName:
@@ -2072,12 +2072,12 @@ func (m *AuthSessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case authsession.FieldTokenHash:
+	case authsession.FieldDeviceKey:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTokenHash(v)
+		m.SetDeviceKey(v)
 		return nil
 	case authsession.FieldDeviceID:
 		v, ok := value.(string)
@@ -2173,8 +2173,8 @@ func (m *AuthSessionMutation) ResetField(name string) error {
 	case authsession.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case authsession.FieldTokenHash:
-		m.ResetTokenHash()
+	case authsession.FieldDeviceKey:
+		m.ResetDeviceKey()
 		return nil
 	case authsession.FieldDeviceID:
 		m.ResetDeviceID()

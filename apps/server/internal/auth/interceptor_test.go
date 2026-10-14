@@ -22,24 +22,30 @@ func TestInterceptor(t *testing.T) {
 	t.Cleanup(func() { _ = s.Close() })
 
 	t0 := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
-	newSession := func(name string, disabled bool) string {
+	newSession := func(name string, disabled bool) core.ID {
 		u := core.User{Name: name, PasswordHash: HashPassword("pw"), Disabled: disabled}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}
-		token, hash := NewToken()
-		sess := core.AuthSession{UserID: u.ID, TokenHash: hash, DeviceID: "d", LastSeenAt: t0}
+		sess := core.AuthSession{UserID: u.ID, DeviceKey: make([]byte, 32), DeviceID: "d", LastSeenAt: t0}
 		if err := s.AuthSessions().Create(ctx, &sess); err != nil {
 			t.Fatal(err)
 		}
-		return token
+		return sess.ID
 	}
-	alice := newSession("alice", false)
-	bob := newSession("bob", true)
+	tokens := NewAccessTokens(make([]byte, 32))
+	tokens.now = func() time.Time { return t0 }
+	aliceID := newSession("alice", false)
+	alice, _ := tokens.Issue(aliceID)
+	bob, _ := tokens.Issue(newSession("bob", true))
+	gone, _ := tokens.Issue(core.NewID())
+	tokens.now = func() time.Time { return t0.Add(-2 * AccessTokenTTL) }
+	expired, _ := tokens.Issue(aliceID)
 
-	i := NewInterceptor(s, "/test.v1.Service/Public")
+	i := NewInterceptor(s, tokens, "/test.v1.Service/Public")
 	call := func(procedure, header string, now time.Time) (Principal, bool, error) {
 		i.now = func() time.Time { return now }
+		tokens.now = func() time.Time { return now }
 		h := http.Header{}
 		if header != "" {
 			h.Set("Authorization", header)
@@ -58,6 +64,8 @@ func TestInterceptor(t *testing.T) {
 		{"public without token", "/test.v1.Service/Public", "", 0, ""},
 		{"private without token", private, "", connect.CodeUnauthenticated, ""},
 		{"unknown token", private, "Bearer nope", connect.CodeUnauthenticated, ""},
+		{"ended session", private, "Bearer " + gone, connect.CodeUnauthenticated, ""},
+		{"expired token", private, "Bearer " + expired, connect.CodeUnauthenticated, ""},
 		{"disabled user", private, "Bearer " + bob, connect.CodeUnauthenticated, ""},
 		{"valid", private, "Bearer " + alice, 0, "alice"},
 	}
@@ -73,7 +81,7 @@ func TestInterceptor(t *testing.T) {
 
 	// Activity is recorded at most once per touchInterval.
 	lastSeen := func() time.Time {
-		sess, err := s.AuthSessions().GetByTokenHash(context.WithoutCancel(ctx), HashToken(alice))
+		sess, err := s.AuthSessions().Get(context.WithoutCancel(ctx), aliceID)
 		if err != nil {
 			t.Fatal(err)
 		}

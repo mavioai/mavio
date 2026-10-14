@@ -29,7 +29,7 @@ func TestWarmer(t *testing.T) {
 	if err := s.Users().Create(ctx, &user); err != nil {
 		t.Fatal(err)
 	}
-	sess := core.AuthSession{UserID: user.ID, TokenHash: make([]byte, 32), DeviceID: "tv", LastSeenAt: clock}
+	sess := core.AuthSession{UserID: user.ID, DeviceKey: make([]byte, 32), DeviceID: "tv", LastSeenAt: clock}
 	if err := s.AuthSessions().Create(ctx, &sess); err != nil {
 		t.Fatal(err)
 	}

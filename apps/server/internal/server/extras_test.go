@@ -91,7 +91,7 @@ func TestMediaExtras(t *testing.T) {
 	})
 	first, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
 		Name: new("admin"), Password: new("secret"),
-		Device: authv1.Device_builder{Id: new("e2e"), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+		Device: device("e2e"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("CreateFirstUser: %v", err)

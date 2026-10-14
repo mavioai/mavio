@@ -32,6 +32,18 @@ type memStore struct {
 	clock func() time.Time
 }
 
+// memSettings serves the default settings; memSessions has no sessions.
+type (
+	memSettings struct{ core.SettingsRepository }
+	memSessions struct{ core.AuthSessionRepository }
+)
+
+func (memSettings) Get(context.Context) (core.ServerSettings, error) {
+	return core.DefaultServerSettings(), nil
+}
+
+func (memSessions) PurgeIdle(context.Context, time.Time) (int, error) { return 0, nil }
+
 // memHistory records the items whose history moves.
 type memHistory struct{ m *memStore }
 
@@ -70,10 +82,10 @@ func (m *memStore) Users() core.UserRepository                            { pani
 func (m *memStore) UserData() core.UserDataRepository                     { panic("unused") }
 func (m *memStore) Jobs() core.JobQueue                                   { return memJobs{m} }
 func (m *memStore) Scans() core.ScanRepository                            { return memScans{m} }
-func (m *memStore) AuthSessions() core.AuthSessionRepository              { panic("unused") }
+func (m *memStore) AuthSessions() core.AuthSessionRepository              { return memSessions{} }
 func (m *memStore) PluginConfigs() core.PluginConfigRepository            { panic("unused") }
 func (m *memStore) DisplayPreferences() core.DisplayPreferencesRepository { panic("unused") }
-func (m *memStore) Settings() core.SettingsRepository                     { panic("unused") }
+func (m *memStore) Settings() core.SettingsRepository                     { return memSettings{} }
 func (m *memStore) APIKeys() core.APIKeyRepository                        { panic("unused") }
 func (m *memStore) Activities() core.ActivityRepository                   { panic("unused") }
 func (m *memStore) Trickplay() core.TrickplayRepository                   { return memTricks{m} }

@@ -88,6 +88,11 @@ pub struct Device {
     pub client: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 4: `client_version`
     pub client_version: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The installation's Ed25519 public key, which signs the session's
+    /// refreshes. Required to sign in.
+    ///
+    /// Field 5: `public_key`
+    pub public_key: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -98,6 +103,7 @@ impl ::core::fmt::Debug for Device {
             .field("name", &self.name)
             .field("client", &self.client)
             .field("client_version", &self.client_version)
+            .field("public_key", &self.public_key)
             .finish()
     }
 }
@@ -146,6 +152,16 @@ impl Device {
         self.client_version = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::public_key`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_public_key(
+        mut self,
+        value: impl Into<::buffa::alloc::vec::Vec<u8>>,
+    ) -> Self {
+        self.public_key = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Device);
 impl ::buffa::MessageName for Device {
@@ -179,6 +195,9 @@ impl ::buffa::Message for Device {
         if let Some(ref v) = self.client_version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.public_key {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -200,6 +219,9 @@ impl ::buffa::Message for Device {
         }
         if let Some(ref v) = self.client_version {
             ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.public_key {
+            ::buffa::types::put_shared_bytes_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -256,6 +278,16 @@ impl ::buffa::Message for Device {
                     buf,
                 )?;
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(
+                    self.public_key.get_or_insert_with(::buffa::alloc::vec::Vec::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -268,6 +300,7 @@ impl ::buffa::Message for Device {
         self.name = ::core::option::Option::None;
         self.client = ::core::option::Option::None;
         self.client_version = ::core::option::Option::None;
+        self.public_key = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1028,6 +1061,13 @@ pub struct CreateFirstUserResponse {
     >,
     /// Field 3: `session`
     pub session: ::buffa::MessageField<Session, ::buffa::Inline<Session>>,
+    /// When the access token expires.
+    ///
+    /// Field 4: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1037,6 +1077,7 @@ impl ::core::fmt::Debug for CreateFirstUserResponse {
             .field("access_token", &self.access_token)
             .field("user", &self.user)
             .field("session", &self.session)
+            .field("access_token_expire_time", &self.access_token_expire_time)
             .finish()
     }
 }
@@ -1098,6 +1139,14 @@ impl ::buffa::Message for CreateFirstUserResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1126,6 +1175,14 @@ impl ::buffa::Message for CreateFirstUserResponse {
                 buf,
             );
             self.session.write_to(__cache, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1174,6 +1231,17 @@ impl ::buffa::Message for CreateFirstUserResponse {
                     ctx,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.access_token_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1185,6 +1253,7 @@ impl ::buffa::Message for CreateFirstUserResponse {
         self.access_token = ::core::option::Option::None;
         self.user = ::buffa::MessageField::none();
         self.session = ::buffa::MessageField::none();
+        self.access_token_expire_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1386,6 +1455,13 @@ pub struct LoginResponse {
     >,
     /// Field 3: `session`
     pub session: ::buffa::MessageField<Session, ::buffa::Inline<Session>>,
+    /// When the access token expires.
+    ///
+    /// Field 4: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1395,6 +1471,7 @@ impl ::core::fmt::Debug for LoginResponse {
             .field("access_token", &self.access_token)
             .field("user", &self.user)
             .field("session", &self.session)
+            .field("access_token_expire_time", &self.access_token_expire_time)
             .finish()
     }
 }
@@ -1456,6 +1533,14 @@ impl ::buffa::Message for LoginResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1484,6 +1569,14 @@ impl ::buffa::Message for LoginResponse {
                 buf,
             );
             self.session.write_to(__cache, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1532,6 +1625,17 @@ impl ::buffa::Message for LoginResponse {
                     ctx,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.access_token_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1543,11 +1647,594 @@ impl ::buffa::Message for LoginResponse {
         self.access_token = ::core::option::Option::None;
         self.user = ::buffa::MessageField::none();
         self.session = ::buffa::MessageField::none();
+        self.access_token_expire_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for LoginResponse {
     const PROTO_FQN: &'static str = "mavio.auth.v1.LoginResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartRefreshRequest {
+    /// Field 1: `session_id`
+    pub session_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartRefreshRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartRefreshRequest")
+            .field("session_id", &self.session_id)
+            .finish()
+    }
+}
+impl StartRefreshRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartRefreshRequest";
+}
+impl StartRefreshRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::session_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_session_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.session_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(StartRefreshRequest);
+impl ::buffa::MessageName for StartRefreshRequest {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartRefreshRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartRefreshRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartRefreshRequest";
+}
+impl ::buffa::Message for StartRefreshRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.session_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.session_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .session_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.session_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartRefreshRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartRefreshRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StartRefreshResponse {
+    /// Field 1: `nonce`
+    pub nonce: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    /// Field 2: `expire_time`
+    pub expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StartRefreshResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StartRefreshResponse")
+            .field("nonce", &self.nonce)
+            .field("expire_time", &self.expire_time)
+            .finish()
+    }
+}
+impl StartRefreshResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartRefreshResponse";
+}
+impl StartRefreshResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::nonce`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_nonce(mut self, value: impl Into<::buffa::alloc::vec::Vec<u8>>) -> Self {
+        self.nonce = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(StartRefreshResponse);
+impl ::buffa::MessageName for StartRefreshResponse {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "StartRefreshResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartRefreshResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartRefreshResponse";
+}
+impl ::buffa::Message for StartRefreshResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.nonce {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
+        }
+        if self.expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.nonce {
+            ::buffa::types::put_shared_bytes_field(1u32, v, buf);
+        }
+        if self.expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.expire_time.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(
+                    self.nonce.get_or_insert_with(::buffa::alloc::vec::Vec::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.nonce = ::core::option::Option::None;
+        self.expire_time = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StartRefreshResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartRefreshResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct RefreshSessionRequest {
+    /// Field 1: `session_id`
+    pub session_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `nonce`
+    pub nonce: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    /// Field 3: `signature`
+    pub signature: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RefreshSessionRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RefreshSessionRequest")
+            .field("session_id", &self.session_id)
+            .field("nonce", &self.nonce)
+            .field("signature", &self.signature)
+            .finish()
+    }
+}
+impl RefreshSessionRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.RefreshSessionRequest";
+}
+impl RefreshSessionRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::session_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_session_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.session_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::nonce`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_nonce(mut self, value: impl Into<::buffa::alloc::vec::Vec<u8>>) -> Self {
+        self.nonce = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::signature`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_signature(
+        mut self,
+        value: impl Into<::buffa::alloc::vec::Vec<u8>>,
+    ) -> Self {
+        self.signature = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(RefreshSessionRequest);
+impl ::buffa::MessageName for RefreshSessionRequest {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "RefreshSessionRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.RefreshSessionRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.RefreshSessionRequest";
+}
+impl ::buffa::Message for RefreshSessionRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.session_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.nonce {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.signature {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.session_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.nonce {
+            ::buffa::types::put_shared_bytes_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.signature {
+            ::buffa::types::put_shared_bytes_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .session_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(
+                    self.nonce.get_or_insert_with(::buffa::alloc::vec::Vec::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(
+                    self.signature.get_or_insert_with(::buffa::alloc::vec::Vec::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.session_id = ::core::option::Option::None;
+        self.nonce = ::core::option::Option::None;
+        self.signature = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RefreshSessionRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.RefreshSessionRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct RefreshSessionResponse {
+    /// Sent as "Authorization: Bearer \<access_token\>".
+    ///
+    /// Field 1: `access_token`
+    pub access_token: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RefreshSessionResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RefreshSessionResponse")
+            .field("access_token", &self.access_token)
+            .field("access_token_expire_time", &self.access_token_expire_time)
+            .finish()
+    }
+}
+impl RefreshSessionResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.RefreshSessionResponse";
+}
+impl RefreshSessionResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::access_token`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_access_token(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.access_token = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(RefreshSessionResponse);
+impl ::buffa::MessageName for RefreshSessionResponse {
+    const PACKAGE: &'static str = "mavio.auth.v1";
+    const NAME: &'static str = "RefreshSessionResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.RefreshSessionResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.RefreshSessionResponse";
+}
+impl ::buffa::Message for RefreshSessionResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.access_token {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.access_token {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .access_token
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.access_token_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.access_token = ::core::option::Option::None;
+        self.access_token_expire_time = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RefreshSessionResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.RefreshSessionResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -2991,6 +3678,11 @@ pub struct LoginWithQuickConnectResponse {
     >,
     /// Field 3: `session`
     pub session: ::buffa::MessageField<Session, ::buffa::Inline<Session>>,
+    /// Field 4: `access_token_expire_time`
+    pub access_token_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3000,6 +3692,7 @@ impl ::core::fmt::Debug for LoginWithQuickConnectResponse {
             .field("access_token", &self.access_token)
             .field("user", &self.user)
             .field("session", &self.session)
+            .field("access_token_expire_time", &self.access_token_expire_time)
             .finish()
     }
 }
@@ -3061,6 +3754,14 @@ impl ::buffa::Message for LoginWithQuickConnectResponse {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.access_token_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.access_token_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3089,6 +3790,14 @@ impl ::buffa::Message for LoginWithQuickConnectResponse {
                 buf,
             );
             self.session.write_to(__cache, buf);
+        }
+        if self.access_token_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.access_token_expire_time.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3137,6 +3846,17 @@ impl ::buffa::Message for LoginWithQuickConnectResponse {
                     ctx,
                 )?;
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.access_token_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3148,6 +3868,7 @@ impl ::buffa::Message for LoginWithQuickConnectResponse {
         self.access_token = ::core::option::Option::None;
         self.user = ::buffa::MessageField::none();
         self.session = ::buffa::MessageField::none();
+        self.access_token_expire_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -6,8 +6,14 @@ import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/user/v1/user.proto";
 
-// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser and
-// Login are public; the other methods act on the calling user.
+// AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,
+// Login, StartRefresh and RefreshSession are public; the other methods act
+// on the calling user.
+//
+// A session belongs to a device's Ed25519 key. Its access token lasts an
+// hour; before it expires, or when a call fails with UNAUTHENTICATED
+// because it has, the device asks StartRefresh for a nonce and signs it
+// with its key for a new token from RefreshSession.
 service AuthService {
   // GetAuthInfo tells clients how to sign in.
   rpc GetAuthInfo(GetAuthInfoRequest) returns (GetAuthInfoResponse) {
@@ -20,6 +26,17 @@ service AuthService {
   // Login signs a device in, replacing its previous session. Wrong
   // credentials and disabled users fail with UNAUTHENTICATED.
   rpc Login(LoginRequest) returns (LoginResponse);
+  // StartRefresh gives a session's device a nonce to sign for
+  // RefreshSession, valid for two minutes. Unknown sessions are
+  // UNAUTHENTICATED.
+  rpc StartRefresh(StartRefreshRequest) returns (StartRefreshResponse);
+  // RefreshSession issues a new access token for the device's signature of
+  // the nonce: Ed25519 over "mavio-session-refresh-v1", a zero byte, the
+  // session ID's 16 bytes and the nonce. A wrong signature, a used or
+  // expired nonce, a disabled user and a session idle for longer than the
+  // server's session_idle_days are UNAUTHENTICATED; the device then signs
+  // in again.
+  rpc RefreshSession(RefreshSessionRequest) returns (RefreshSessionResponse);
   // Logout ends the calling session.
   rpc Logout(LogoutRequest) returns (LogoutResponse);
   // ListSessions lists the calling user's signed-in devices, most recently
@@ -79,6 +96,12 @@ message Device {
   // The application, e.g. "Mavio Web".
   string client = 3 [(buf.validate.field).string.max_len = 64];
   string client_version = 4 [(buf.validate.field).string.max_len = 64];
+  // The installation's Ed25519 public key, which signs the session's
+  // refreshes. Required to sign in.
+  bytes public_key = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
 }
 
 // Session is a signed-in device.
@@ -139,6 +162,8 @@ message CreateFirstUserResponse {
   string access_token = 1;
   mavio.user.v1.User user = 2;
   Session session = 3;
+  // When the access token expires.
+  google.protobuf.Timestamp access_token_expire_time = 4;
 }
 
 message LoginRequest {
@@ -155,6 +180,41 @@ message LoginResponse {
   string access_token = 1;
   mavio.user.v1.User user = 2;
   Session session = 3;
+  // When the access token expires.
+  google.protobuf.Timestamp access_token_expire_time = 4;
+}
+
+message StartRefreshRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message StartRefreshResponse {
+  bytes nonce = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message RefreshSessionRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  bytes nonce = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+  bytes signature = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 64
+  ];
+}
+
+message RefreshSessionResponse {
+  // Sent as "Authorization: Bearer <access_token>".
+  string access_token = 1;
+  google.protobuf.Timestamp access_token_expire_time = 2;
 }
 
 message LogoutRequest {}
@@ -224,6 +284,7 @@ message LoginWithQuickConnectResponse {
   string access_token = 1;
   mavio.user.v1.User user = 2;
   Session session = 3;
+  google.protobuf.Timestamp access_token_expire_time = 4;
 }
 
 // ApiKey is an integration's key, without its token.

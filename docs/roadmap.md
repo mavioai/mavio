@@ -794,7 +794,7 @@ flowchart TD
 
 **Progress**:
 - [x] Choice of mode on first start: the account settings, the mode in `GetAuthInfo`, and standalone setup through `CreateFirstUser`; setting up in mavio.dev mode comes with claiming
-- [ ] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes
+- [x] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes: sessions bound to the device's Ed25519 key, hour-long access tokens authenticated with a key derived from the server's identity key in `identity.key`, `StartRefresh` and `RefreshSession`, `SessionIdleDays` with the daily cleanup, and the device keys and refreshes of the web UI, the dev player and the shared Rust core
 - [ ] Signed media URLs
 - [ ] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling
 - [ ] Library access records and their enforcement

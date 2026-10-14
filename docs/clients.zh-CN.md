@@ -81,7 +81,7 @@ flowchart LR
 | 进度 | 客户端上报，服务端记录 | 通过 `PlaybackService` 在播放时每 10 秒上报一次，并在暂停、跳转与停止时上报；服务端在最后一次上报五分钟后结束该播放 |
 | 实时更新 | 服务端推送 | 每台设备一条 `EventService` 流：条目与媒体库变更、用户数据、会话、远程控制命令与 SyncPlay。客户端以退避重连，不轮询 |
 | 媒体与图片 | 普通 HTTP | `/media/{playback}/…` 与 `/images/…`；ID 即凭据，播放器无需附加请求头 |
-| 登录 | 服务端 | Bearer 令牌；电视应用通过 Quick Connect 登录 |
+| 登录 | 服务端 | 绑定设备密钥的会话与短期 Bearer 令牌；电视应用通过 Quick Connect 登录 |
 | 首页 | 服务端生成，客户端合并 | 每台服务器用 `HomeService` 为用户生成其推荐行（[架构 §11](architecture.zh-CN.md#11-api-与认证appsserver)）；客户端合并它所登录的每台服务器的推荐行（§5.4） |
 | 发现服务器 | 客户端 | 局域网内 UDP 7359 端口的发现，或手动输入地址 |
 | 资源获取、发现与请求 | 服务端 | 服务端自己的服务；客户端不调用其他任何服务 |
@@ -93,7 +93,7 @@ flowchart LR
 ### 4.1 Web（`apps/web`）
 * **定位**：全部功能——浏览、播放、请求、管理与首次运行设置——无需安装。
 * **提供方式**：Vite 构建到 `apps/server/internal/webui/dist`，服务端以 `//go:embed` 内嵌并在 `/` 提供，SPA 的路由回退到 `index.html`。仓库中该目录只有一个 `.gitkeep`；未带 Web UI 构建的服务端会提供一个说明此情况的页面。Nx 让服务端的 `build` 依赖 Web 的 `build`。API 参考保留在 `/api`。
-* **服务器**：Web UI 登录到提供它的服务器，并像各应用一样添加其他服务器（§5.4），以跨域方式调用它们；服务器的所有路由允许任何来源，它们接受 Bearer 令牌与 ID 凭据，从不使用 Cookie。服务器列表（令牌除外）保存在提供它的服务器上用户的显示偏好中，从而跟随用户跨浏览器。
+* **服务器**：Web UI 登录到提供它的服务器，并像各应用一样添加其他服务器（§5.4），以跨域方式调用它们；服务器的所有路由允许任何来源，它们接受 Bearer 令牌与 ID 凭据，从不使用 Cookie。设备密钥是保存在 IndexedDB 中不可导出的 WebCrypto Ed25519 密钥，会话保存在浏览器的本地存储中；传输层在访问令牌过期前或被服务端拒绝后为其续期，服务端不再续期的会话会让用户退出该服务器。服务器列表（会话除外）保存在提供它的服务器上用户的显示偏好中，从而跟随用户跨浏览器。
 * **API**：`libs/client-ts`，基于 `connect-es` v2 与 `protobuf-es` v2 以及从 `libs/proto` 生成的代码，用 TanStack Query 做缓存与失效，由事件流驱动。
 * **播放**：支持 Media Source Extensions 的浏览器用 hls.js，Safari 用原生 HLS 播放器；能力来自 `MediaSource.isTypeSupported` 与 `canPlayType`。ASS 字幕借助 JASSUB（WebAssembly 版 libass）保留样式。对浏览器不转码就无法播放的内容，播放器提供在外部播放器（mpv、VLC、IINA）中打开播放 URL。
 
@@ -109,7 +109,7 @@ flowchart LR
   * **AirPlay**：使用 AirPlay 时，应用只声明 AVPlayer 的配置。
   * **AVPlayer** 是首选引擎，播放 AVFoundation 能播放的内容——H.264、HEVC、硬件可解码时的 AV1、杜比视界与 HDR10 的 MP4 与 MOV，AAC、AC-3 及带 Atmos 的 E-AC-3——以及服务端产生的所有 HLS 流。它带来系统画中画、AirPlay、iOS 与 tvOS 上的 `AVPlayerViewController`，以及 tvOS 上的帧率与动态范围匹配（`AVDisplayCriteria`）。
   * **[AetherEngine](https://github.com/superuser404notfound/AetherEngine)** 是第二引擎，以 Swift 包引入并固定到确切版本，直接播放 AVFoundation 不能播放的内容，如带样式 ASS 与 PGS 字幕的 Matroska、VP9、DTS 与 TrueHD，免去服务端转码。FFmpeg 解封装，VideoToolbox 解码（硬件不支持时用 dav1d 与 libavcodec），帧交给 Apple 自身的显示栈——原生路径上是 `AVPlayerLayer`，软件路径上是 `AVSampleBufferDisplayLayer`——没有自己的渲染器：HDR10、HDR10+、HLG 与杜比视界（配置 5、作为 8.1 的 7，以及 8）原样输出到显示器，在 Mac 与 iPad 上经由 EDR，在 tvOS 上配合显示条件。DTS 与 TrueHD 转换为 E-AC-3 5.1，带 Atmos 的 E-AC-3 直通。字幕以 cue 送达，由 `MavioPlayer` 绘制在画面之上：带样式的文本片段与位图；ASS 则是原始事件行、脚本头与内嵌字体，由为三个平台构建的 [libass](https://github.com/libass/libass) 按其原有样式渲染：`ASSRenderer` 接收服务端列为条目附件的字体，其余字体经 Core Text 查找，并把每一帧的字幕绘制为叠在画面上的图像。其 FFmpeg 以 LGPL 动态框架嵌入，是应用中唯一的 FFmpeg。
-* **账户与下载**：每个服务端的访问令牌保存在钥匙串中，其余内容由核心的数据库保存。下载是以后台 `URLSession` 获取的源文件，应用挂起时仍会继续；已下载的条目无需服务端即可从设备播放，离线产生的进度在服务端重新响应时补报给它（§5.1）。
+* **账户与下载**：设备密钥与每个服务端的会话保存在钥匙串中，其余内容由核心的数据库保存。下载是以后台 `URLSession` 获取的源文件，应用挂起时仍会继续；已下载的条目无需服务端即可从设备播放，离线产生的进度在服务端重新响应时补报给它（§5.1）。
 * **字幕**：HLS 流以 WebVTT rendition 承载文本字幕，由 AVPlayer 自行显示。使用 AetherEngine 时，`MavioPlayer` 在画面而不是屏幕的范围内排布 cue，使字幕在任何宽高比与方向下都位于视频之上。
 * **画中画**：只用公开且被 App Store 允许的 `AVPictureInPictureController`。AVPlayer 直接支持，AetherEngine 经由其 `AVPlayerLayer` 或 `AVSampleBufferDisplayLayer` 内容源接入。tvOS 不显示样本缓冲显示层的画中画，因此 AetherEngine 在软件路径上播放时进入画中画，改由 AVPlayer 重新开始播放，由服务端处理该源。
 
@@ -142,7 +142,7 @@ flowchart LR
 ## 5. 共享核心（`libs/client-rust`）
 
 ### 5.1 职责
-* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录；访问令牌由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service）。
+* **服务器与登录**：同时登录多台服务器（§5.4），支持发现、以密码或 Quick Connect 登录，以及会话（[账户 §5.2–§5.3](accounts.zh-CN.md#5-密钥与令牌)）：设备密钥与每个服务端的会话（其 ID、访问令牌与过期时间）由应用通过它实现的接口保存在平台的安全存储中（Keychain、Android Keystore、Windows 凭据管理器、Secret Service），核心的传输层在访问令牌过期前或被服务端拒绝后，以签名服务端的随机数为其续期。
 * **Connect 客户端**：[connect-rust](https://github.com/connectrpc/connect-rust)，基于 HTTP/1.1 与 HTTP/2，消息与客户端从 `libs/proto` 生成到 `libs/proto/gen/rust`，由 crate `mavio-api` 包含。
 * **事件流**：每台服务器一条 `EventService` 流，以退避重连，事件分发给应用。
 * **离线存储**：SQLite（`rusqlite`，内置 SQLite），保存最近浏览的条目以便应用以缓存内容启动、已下载的条目，以及离线时产生的进度上报，待服务器可达后发送。
@@ -156,13 +156,13 @@ flowchart LR
 * 目标平台：`aarch64-apple-ios`、`aarch64-apple-ios-sim`、`aarch64-apple-tvos`、`aarch64-apple-tvos-sim`、`aarch64-apple-darwin`、`x86_64-apple-darwin`、`aarch64-linux-android`、`armv7-linux-androideabi`（许多 Android TV 设备运行 32 位系统）、`x86_64-linux-android`、`x86_64-pc-windows-msvc`、`aarch64-pc-windows-msvc`、`x86_64-unknown-linux-gnu`、`aarch64-unknown-linux-gnu`。
 
 ### 5.3 绑定
-* **UniFFI API**（`mavio-uniffi`）：对象 `Client`，其异步函数运行在进程唯一的 Tokio 运行时上，应用丢弃其 future 时即被取消；应用实现的接口：保存令牌的 `SecureTokens`、接收流状态与事件的 `CoreListener`、接收首页的 `HomeListener`；客户端能力以类型化记录表示，转换为 `ClientCapabilities`。
+* **UniFFI API**（`mavio-uniffi`）：对象 `Client`，其异步函数运行在进程唯一的 Tokio 运行时上，应用丢弃其 future 时即被取消；应用实现的接口：保存设备密钥与会话的 `SecureTokens`、接收流状态与事件的 `CoreListener`、接收首页的 `HomeListener`；客户端能力以类型化记录表示，转换为 `ClientCapabilities`。
 * **Swift**：UniFFI 生成 Swift API，与共享库一起打包为 `MavioKit` 所依赖的、由动态 framework 组成的 XCFramework。
 * **Kotlin**：UniFFI 生成 Kotlin API，与共享库一起打包在 `libs/android` 的 `core` 模块中。
-* **Go**：一个由三个函数组成的 C ABI（`mavio-capi`，库名 `maviocore`）：`mavio_open` 以进程唯一的回调和应用自己的上下文打开一个客户端，`mavio_call` 以应用自选的调用编号向它发送请求，`mavio_close` 关闭它。请求与应答是 `mavio.capi.v1` 的 protobuf 消息（定义在 `libs/client-rust/proto`），放在字节缓冲区中；每个应答，以及调用编号为零的各服务器事件，都在核心的线程上经回调返回，因此 purego 在整个进程中只需创建一个回调。核心自己不保存令牌：应用打开核心时交给它保存在系统安全存储中的令牌，并按事件告知保存新令牌、删除被遗忘的令牌。Go 绑定是 `libs/client-rust/capi` 中与 C ABI 并列的 Go 模块：`capi` 包不经 cgo 加载该库——Linux 与 macOS 上用 purego，Windows 上用 `syscall` 包——并把每次调用变为返回其应答的函数；其消息的 Go 代码生成到 `capi/gen`。
+* **Go**：一个由三个函数组成的 C ABI（`mavio-capi`，库名 `maviocore`）：`mavio_open` 以进程唯一的回调和应用自己的上下文打开一个客户端，`mavio_call` 以应用自选的调用编号向它发送请求，`mavio_close` 关闭它。请求与应答是 `mavio.capi.v1` 的 protobuf 消息（定义在 `libs/client-rust/proto`），放在字节缓冲区中；每个应答，以及调用编号为零的各服务器事件，都在核心的线程上经回调返回，因此 purego 在整个进程中只需创建一个回调。核心自己不保存机密：应用打开核心时交给它保存在系统安全存储中的设备密钥与会话，并按事件告知保存新的、删除被遗忘的。Go 绑定是 `libs/client-rust/capi` 中与 C ABI 并列的 Go 模块：`capi` 包不经 cgo 加载该库——Linux 与 macOS 上用 purego，Windows 上用 `syscall` 包——并把每次调用变为返回其应答的函数；其消息的 Go 代码生成到 `capi/gen`。
 
 ### 5.4 多台服务器
-客户端同时登录用户添加的每台服务器——用户自己的以及亲友的——每台都有各自的用户与访问令牌。服务器彼此不知道对方；只有客户端按用户的服务器顺序把它们组合起来。
+客户端同时登录用户添加的每台服务器——用户自己的以及亲友的——每台都有各自的用户与会话。服务器彼此不知道对方；只有客户端按用户的服务器顺序把它们组合起来。
 * **跨服务器的部分**：首页、搜索与下载。媒体库、条目详情与播放器属于某一台服务器；登录多台服务器时，条目会显示其服务器名称。
 * **首页**，按 Plex 的方式构建：合并每台服务器的推荐行（§6.3）：
   * **继续观看**是跨服务器的一行：正在观看的条目与下一集，按最近活动排序；

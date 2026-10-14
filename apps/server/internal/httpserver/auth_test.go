@@ -1,19 +1,34 @@
 package httpserver_test
 
 import (
+	"crypto/ed25519"
+	"crypto/sha256"
 	"net/http"
 	"testing"
+	"time"
 
 	"connectrpc.com/connect"
 
+	"github.com/mavioai/mavio/apps/server/internal/auth"
+	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
 )
 
+// device returns a test device whose key is derived from its ID.
 func device(id string) *authv1.Device {
-	return authv1.Device_builder{Id: &id, Name: new("Test " + id), Client: new("Mavio Test"), ClientVersion: new("1.0")}.Build()
+	return authv1.Device_builder{
+		Id: &id, Name: new("Test " + id), Client: new("Mavio Test"), ClientVersion: new("1.0"),
+		PublicKey: deviceKey(id).Public().(ed25519.PublicKey),
+	}.Build()
+}
+
+// deviceKey returns the private key of device(id).
+func deviceKey(id string) ed25519.PrivateKey {
+	seed := sha256.Sum256([]byte(id))
+	return ed25519.NewKeyFromSeed(seed[:])
 }
 
 // signUp creates the first user, "admin" with password "secret", and
@@ -161,4 +176,90 @@ func TestQuickConnect(t *testing.T) {
 	}
 	_, err = anon.LoginWithQuickConnect(ctx, authv1.LoginWithQuickConnectRequest_builder{Secret: new(started.GetSecret())}.Build())
 	wantCode(t, "second login", err, connect.CodeNotFound)
+}
+
+func TestRefreshSession(t *testing.T) {
+	ctx := t.Context()
+	url, s := startServer(t, nil)
+	public := authv1connect.NewAuthServiceClient(http.DefaultClient, url)
+	first, err := public.CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
+		Name: new("admin"), Password: new("secret"), Device: device("setup"),
+	}.Build())
+	if err != nil {
+		t.Fatalf("CreateFirstUser: %v", err)
+	}
+	if exp := first.GetAccessTokenExpireTime().AsTime(); exp.Before(time.Now().Add(50*time.Minute)) || exp.After(time.Now().Add(time.Hour+time.Minute)) {
+		t.Errorf("access token expires at %v, want in an hour", exp)
+	}
+	id := first.GetSession().GetId()
+	refresh := func(key ed25519.PrivateKey) (*authv1.RefreshSessionResponse, error) {
+		start, err := public.StartRefresh(ctx, authv1.StartRefreshRequest_builder{SessionId: &id}.Build())
+		if err != nil {
+			return nil, err
+		}
+		sessionID := core.MustParseID(id)
+		sig := ed25519.Sign(key, auth.RefreshMessage(sessionID, start.GetNonce()))
+		return public.RefreshSession(ctx, authv1.RefreshSessionRequest_builder{
+			SessionId: &id, Nonce: start.GetNonce(), Signature: sig,
+		}.Build())
+	}
+
+	got, err := refresh(deviceKey("setup"))
+	if err != nil {
+		t.Fatalf("RefreshSession: %v", err)
+	}
+	asSetup := authv1connect.NewAuthServiceClient(http.DefaultClient, url, withToken(got.GetAccessToken()))
+	if _, err := asSetup.ListSessions(ctx, &authv1.ListSessionsRequest{}); err != nil {
+		t.Errorf("ListSessions with the refreshed token: %v", err)
+	}
+
+	tests := []struct {
+		name  string
+		setup func()
+		key   ed25519.PrivateKey
+	}{
+		{"another device's key", func() {}, deviceKey("phone")},
+		{"idle session", func() {
+			if err := s.AuthSessions().Touch(ctx, core.MustParseID(id), time.Now().AddDate(0, 0, -91)); err != nil {
+				t.Fatal(err)
+			}
+		}, deviceKey("setup")},
+		{"disabled user", func() {
+			if err := s.AuthSessions().Touch(ctx, core.MustParseID(id), time.Now()); err != nil {
+				t.Fatal(err)
+			}
+			u, err := s.Users().GetByName(ctx, "admin")
+			if err != nil {
+				t.Fatal(err)
+			}
+			u.Disabled = true
+			if err := s.Users().Update(ctx, &u); err != nil {
+				t.Fatal(err)
+			}
+		}, deviceKey("setup")},
+	}
+	for _, tt := range tests {
+		tt.setup()
+		if _, err := refresh(tt.key); connect.CodeOf(err) != connect.CodeUnauthenticated {
+			t.Errorf("%s: err = %v, want unauthenticated", tt.name, err)
+		}
+	}
+
+	// A nonce is used once.
+	start, err := public.StartRefresh(ctx, authv1.StartRefreshRequest_builder{SessionId: &id}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := authv1.RefreshSessionRequest_builder{
+		SessionId: &id, Nonce: start.GetNonce(), Signature: make([]byte, ed25519.SignatureSize),
+	}.Build()
+	_, _ = public.RefreshSession(ctx, req)
+	req.SetSignature(ed25519.Sign(deviceKey("setup"), auth.RefreshMessage(core.MustParseID(id), start.GetNonce())))
+	if _, err := public.RefreshSession(ctx, req); connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Errorf("reused nonce: err = %v, want unauthenticated", err)
+	}
+	_, err = public.StartRefresh(ctx, authv1.StartRefreshRequest_builder{SessionId: new(core.NewID().String())}.Build())
+	if connect.CodeOf(err) != connect.CodeUnauthenticated {
+		t.Errorf("StartRefresh of an unknown session: err = %v, want unauthenticated", err)
+	}
 }

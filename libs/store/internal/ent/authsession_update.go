@@ -45,9 +45,9 @@ func (_u *AuthSessionUpdate) SetNillableUserID(v *core.ID) *AuthSessionUpdate {
 	return _u
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (_u *AuthSessionUpdate) SetTokenHash(v []byte) *AuthSessionUpdate {
-	_u.mutation.SetTokenHash(v)
+// SetDeviceKey sets the "device_key" field.
+func (_u *AuthSessionUpdate) SetDeviceKey(v []byte) *AuthSessionUpdate {
+	_u.mutation.SetDeviceKey(v)
 	return _u
 }
 
@@ -190,8 +190,8 @@ func (_u *AuthSessionUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.TokenHash(); ok {
-		_spec.SetField(authsession.FieldTokenHash, field.TypeBytes, value)
+	if value, ok := _u.mutation.DeviceKey(); ok {
+		_spec.SetField(authsession.FieldDeviceKey, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.DeviceID(); ok {
 		_spec.SetField(authsession.FieldDeviceID, field.TypeString, value)
@@ -273,9 +273,9 @@ func (_u *AuthSessionUpdateOne) SetNillableUserID(v *core.ID) *AuthSessionUpdate
 	return _u
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (_u *AuthSessionUpdateOne) SetTokenHash(v []byte) *AuthSessionUpdateOne {
-	_u.mutation.SetTokenHash(v)
+// SetDeviceKey sets the "device_key" field.
+func (_u *AuthSessionUpdateOne) SetDeviceKey(v []byte) *AuthSessionUpdateOne {
+	_u.mutation.SetDeviceKey(v)
 	return _u
 }
 
@@ -448,8 +448,8 @@ func (_u *AuthSessionUpdateOne) sqlSave(ctx context.Context) (_node *AuthSession
 			}
 		}
 	}
-	if value, ok := _u.mutation.TokenHash(); ok {
-		_spec.SetField(authsession.FieldTokenHash, field.TypeBytes, value)
+	if value, ok := _u.mutation.DeviceKey(); ok {
+		_spec.SetField(authsession.FieldDeviceKey, field.TypeBytes, value)
 	}
 	if value, ok := _u.mutation.DeviceID(); ok {
 		_spec.SetField(authsession.FieldDeviceID, field.TypeString, value)

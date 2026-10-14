@@ -15,17 +15,20 @@ use mavio_api::proto::mavio::user::v1::User;
 
 use crate::connection::Connection;
 use crate::error::{Error, Result};
+use crate::session::{Credential, DeviceKey, Session, expiry};
 use crate::store::{ServerRecord, Store};
 
-/// Keeps the access tokens in the platform's secure storage: the Keychain,
-/// the Android Keystore, the Windows Credential Manager or the Secret
-/// Service. The app implements it.
+/// Keeps secrets in the platform's secure storage: the Keychain, the
+/// Android Keystore, the Windows Credential Manager or the Secret Service.
+/// The core keeps there the credentials of each server's session, under
+/// the server's ID, and the device key, under `device-key`; the app keeps
+/// what it is given as it is. The app implements it.
 pub trait TokenStore: Send + Sync {
-    /// The token of a server, if the device is signed in to it.
+    /// What is kept under an ID, if anything.
     fn token(&self, server_id: &str) -> Option<String>;
-    /// Keeps the token of a server, replacing an earlier one.
+    /// Keeps a value under an ID, replacing an earlier one.
     fn set_token(&self, server_id: &str, token: &str);
-    /// Forgets the token of a server.
+    /// Forgets what is kept under an ID.
     fn delete_token(&self, server_id: &str);
 }
 
@@ -43,12 +46,13 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
-    fn to_proto(&self) -> Device {
+    fn to_proto(&self, key: &DeviceKey) -> Device {
         Device {
             id: Some(self.id.clone()),
             name: Some(self.name.clone()),
             client: Some(self.client.clone()),
             client_version: Some(self.client_version.clone()),
+            public_key: Some(key.public_key()),
             ..Default::default()
         }
     }
@@ -90,16 +94,20 @@ pub struct Servers {
     store: Arc<Store>,
     tokens: Arc<dyn TokenStore>,
     device: DeviceInfo,
+    key: Arc<DeviceKey>,
     connections: RwLock<HashMap<String, Connection>>,
 }
 
 impl Servers {
-    /// The servers kept in store, signed in with the tokens of tokens.
+    /// The servers kept in store, signed in with the sessions kept in
+    /// tokens, with the device key kept there too.
     pub fn new(store: Arc<Store>, tokens: Arc<dyn TokenStore>, device: DeviceInfo) -> Self {
+        let key = Arc::new(DeviceKey::load(tokens.as_ref()));
         Servers {
             store,
             tokens,
             device,
+            key,
             connections: RwLock::default(),
         }
     }
@@ -122,10 +130,10 @@ impl Servers {
             .ok_or_else(|| Error::NotFound(format!("server {id}")))
     }
 
-    /// Whether the device holds a token of the server; without one the user
-    /// signs in again.
+    /// Whether the device holds a session of the server; without one the
+    /// user signs in again.
     pub fn signed_in(&self, id: &str) -> bool {
-        self.tokens.token(id).is_some()
+        Credential::load(self.tokens.as_ref(), id).is_some()
     }
 
     /// The connection of a signed-in server.
@@ -139,16 +147,27 @@ impl Servers {
             return Ok(c.clone());
         }
         let server = self.get(id)?;
-        let token = self
-            .tokens
-            .token(id)
+        let credential = Credential::load(self.tokens.as_ref(), id)
             .ok_or_else(|| Error::Unauthenticated(format!("signed out of {}", server.name)))?;
-        let conn = Connection::new(&server.address)?.with_token(&token);
+        let conn = Connection::new(&server.address)?;
+        let conn = conn.with_session(self.session(&conn, id, credential));
         self.connections
             .write()
             .unwrap_or_else(|e| e.into_inner())
             .insert(id.to_owned(), conn.clone());
         Ok(conn)
+    }
+
+    fn session(&self, conn: &Connection, id: &str, credential: Credential) -> Session {
+        let (http, config) = conn.signed_out();
+        Session::new(
+            id,
+            credential,
+            self.tokens.clone(),
+            self.key.clone(),
+            http,
+            config,
+        )
     }
 
     /// Asks the server at address who it is.
@@ -167,7 +186,7 @@ impl Servers {
             .login(LoginRequest {
                 name: Some(name.to_owned()),
                 password: Some(password.to_owned()),
-                device: self.device.to_proto().into(),
+                device: self.device.to_proto(&self.key).into(),
                 ..Default::default()
             })
             .await?
@@ -175,7 +194,15 @@ impl Servers {
         self.signed_in_as(
             &conn,
             &info,
-            resp.access_token.unwrap_or_default(),
+            Credential {
+                session: resp
+                    .session
+                    .into_option()
+                    .and_then(|s| s.id)
+                    .unwrap_or_default(),
+                token: resp.access_token.unwrap_or_default(),
+                expires: expiry(resp.access_token_expire_time.into_option()),
+            },
             resp.user.into_option(),
         )
     }
@@ -195,7 +222,7 @@ impl Servers {
             .create_first_user(CreateFirstUserRequest {
                 name: Some(name.to_owned()),
                 password: Some(password.to_owned()),
-                device: self.device.to_proto().into(),
+                device: self.device.to_proto(&self.key).into(),
                 ..Default::default()
             })
             .await?
@@ -203,7 +230,15 @@ impl Servers {
         self.signed_in_as(
             &conn,
             &info,
-            resp.access_token.unwrap_or_default(),
+            Credential {
+                session: resp
+                    .session
+                    .into_option()
+                    .and_then(|s| s.id)
+                    .unwrap_or_default(),
+                token: resp.access_token.unwrap_or_default(),
+                expires: expiry(resp.access_token_expire_time.into_option()),
+            },
             resp.user.into_option(),
         )
     }
@@ -215,7 +250,7 @@ impl Servers {
         let resp = conn
             .auth()
             .start_quick_connect(StartQuickConnectRequest {
-                device: self.device.to_proto().into(),
+                device: self.device.to_proto(&self.key).into(),
                 ..Default::default()
             })
             .await?
@@ -262,7 +297,15 @@ impl Servers {
         self.signed_in_as(
             &qc.conn,
             &qc.server,
-            resp.access_token.unwrap_or_default(),
+            Credential {
+                session: resp
+                    .session
+                    .into_option()
+                    .and_then(|s| s.id)
+                    .unwrap_or_default(),
+                token: resp.access_token.unwrap_or_default(),
+                expires: expiry(resp.access_token_expire_time.into_option()),
+            },
             resp.user.into_option(),
         )
         .map(Some)
@@ -293,7 +336,7 @@ impl Servers {
         self.store.remove_server(id)
     }
 
-    /// Forgets the token of a server the server rejected, so that the user
+    /// Forgets the session of a server that ended it, so that the user
     /// signs in again; the server stays with what is kept of it.
     pub fn forget_token(&self, id: &str) {
         self.tokens.delete_token(id);
@@ -312,11 +355,11 @@ impl Servers {
         &self,
         conn: &Connection,
         info: &ServerInfo,
-        token: String,
+        credential: Credential,
         user: Option<User>,
     ) -> Result<ServerRecord> {
-        if token.is_empty() {
-            return Err(Error::Server("no access token".into()));
+        if credential.token.is_empty() || credential.session.is_empty() {
+            return Err(Error::Server("no session".into()));
         }
         let user = user.unwrap_or_default();
         let record = ServerRecord {
@@ -328,11 +371,12 @@ impl Servers {
             user_name: user.name.unwrap_or_default(),
         };
         self.store.put_server(&record)?;
-        self.tokens.set_token(&record.id, &token);
+        credential.save(self.tokens.as_ref(), &record.id);
+        let conn = conn.with_session(self.session(conn, &record.id, credential));
         self.connections
             .write()
             .unwrap_or_else(|e| e.into_inner())
-            .insert(record.id.clone(), conn.with_token(&token));
+            .insert(record.id.clone(), conn);
         Ok(record)
     }
 }
@@ -363,10 +407,14 @@ async fn probe(conn: &Connection) -> Result<ServerInfo> {
 pub(crate) mod tests {
     use std::sync::Mutex;
 
+    use buffa_types::google::protobuf::Timestamp;
     use mavio_api::proto::mavio::auth::v1::{
         AuthorizeQuickConnectResponse, GetAuthInfoResponse, GetQuickConnectStateResponse,
-        LoginResponse, LoginWithQuickConnectResponse, LogoutResponse, StartQuickConnectResponse,
+        LoginResponse, LoginWithQuickConnectResponse, LogoutResponse, RefreshSessionRequest,
+        RefreshSessionResponse, Session as SessionProto, StartQuickConnectResponse,
+        StartRefreshRequest, StartRefreshResponse,
     };
+    use mavio_api::proto::mavio::user::v1::{GetCurrentUserRequest, GetCurrentUserResponse};
 
     use super::*;
     use crate::fake::{Fake, error};
@@ -387,6 +435,21 @@ pub(crate) mod tests {
         }
         fn delete_token(&self, server_id: &str) {
             self.0.lock().unwrap().remove(server_id);
+        }
+    }
+
+    /// The ID of the fake servers' sessions.
+    pub(crate) const SESSION: &str = "01890a5d-ac96-774b-bcce-b302099a8057";
+
+    /// The access token kept for a server.
+    fn token_of(tokens: &MemoryTokens, id: &str) -> Option<String> {
+        Credential::load(tokens, id).map(|c| c.token)
+    }
+
+    fn session() -> SessionProto {
+        SessionProto {
+            id: Some(SESSION.into()),
+            ..Default::default()
         }
     }
 
@@ -433,8 +496,14 @@ pub(crate) mod tests {
                     return Err(error("unauthenticated"));
                 }
                 assert_eq!(req.device.id.as_deref(), Some("dev"), "the device signs in");
+                assert_eq!(
+                    req.device.public_key.as_ref().map(Vec::len),
+                    Some(32),
+                    "with its key"
+                );
                 Ok(LoginResponse {
                     access_token: Some(format!("t-{id}")),
+                    session: session().into(),
                     user: User {
                         id: Some("u".into()),
                         name: Some("me".into()),
@@ -476,15 +545,24 @@ pub(crate) mod tests {
         servers.sign_in(&b, "me", "secret").await.unwrap();
         let ids: Vec<_> = servers.list().unwrap().into_iter().map(|s| s.id).collect();
         assert_eq!(ids, ["sa", "sb"]);
-        assert_eq!(tokens.token("sb").as_deref(), Some("t-sb"));
-        assert_eq!(servers.connection("sa").unwrap().token(), Some("t-sa"));
+        assert_eq!(token_of(&tokens, "sb").as_deref(), Some("t-sb"));
+        assert_eq!(
+            servers
+                .connection("sa")
+                .unwrap()
+                .token()
+                .await
+                .unwrap()
+                .as_deref(),
+            Some("t-sa")
+        );
 
         servers.order(&["sb".into()]).unwrap();
         let ids: Vec<_> = servers.list().unwrap().into_iter().map(|s| s.id).collect();
         assert_eq!(ids, ["sb", "sa"]);
 
         servers.remove("sb").await.unwrap();
-        assert!(tokens.token("sb").is_none());
+        assert!(token_of(&tokens, "sb").is_none());
         assert!(matches!(servers.connection("sb"), Err(Error::NotFound(_))));
     }
 
@@ -556,6 +634,7 @@ pub(crate) mod tests {
             |_, _: LoginWithQuickConnectRequest| {
                 Ok(LoginWithQuickConnectResponse {
                     access_token: Some("t-qc".into()),
+                    session: session().into(),
                     ..Default::default()
                 })
             },
@@ -576,11 +655,154 @@ pub(crate) mod tests {
         *authorized.lock().unwrap() = true;
         let got = servers.poll_quick_connect(&qc).await.unwrap().unwrap();
         assert_eq!(got.id, "sa");
-        assert_eq!(tokens.token("sa").as_deref(), Some("t-qc"));
+        assert_eq!(token_of(&tokens, "sa").as_deref(), Some("t-qc"));
 
         // A signed-in device authorizes another.
         let (other, _) = self::servers();
         other.sign_in(&addr, "me", "secret").await.unwrap();
         other.authorize_quick_connect("sa", "123456").await.unwrap();
+    }
+
+    /// A fake server whose sign-in token expires at once, and which
+    /// refreshes the session to "t-<n>" for the device key that signed in.
+    fn refreshing_server(refreshes: Arc<Mutex<u32>>) -> Fake {
+        let fake = fake_server("sa", "Home");
+        let public = Arc::new(Mutex::new(Vec::new()));
+        let nonce = [9u8; 32];
+        let key = public.clone();
+        fake.unary(
+            "/mavio.auth.v1.AuthService/Login",
+            move |_, req: LoginRequest| {
+                *key.lock().unwrap() = req.device.public_key.clone().unwrap_or_default();
+                Ok(LoginResponse {
+                    access_token: Some("t-0".into()),
+                    access_token_expire_time: Timestamp::from(SystemTime::now()).into(),
+                    session: session().into(),
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.auth.v1.AuthService/StartRefresh",
+            move |head, req: StartRefreshRequest| {
+                assert!(
+                    !head.headers().contains_key("authorization"),
+                    "refreshes are signed out"
+                );
+                assert_eq!(req.session_id.as_deref(), Some(SESSION));
+                Ok(StartRefreshResponse {
+                    nonce: Some(nonce.to_vec()),
+                    ..Default::default()
+                })
+            },
+        )
+        .unary(
+            "/mavio.auth.v1.AuthService/RefreshSession",
+            move |_, req: RefreshSessionRequest| {
+                let mut message = b"mavio-session-refresh-v1\0".to_vec();
+                message.extend_from_slice(&[
+                    0x01, 0x89, 0x0a, 0x5d, 0xac, 0x96, 0x77, 0x4b, 0xbc, 0xce, 0xb3, 0x02, 0x09,
+                    0x9a, 0x80, 0x57,
+                ]);
+                message.extend_from_slice(&nonce);
+                let key = public.lock().unwrap().clone();
+                let public = aws_lc_rs::signature::UnparsedPublicKey::new(
+                    &aws_lc_rs::signature::ED25519,
+                    key,
+                );
+                if public
+                    .verify(&message, req.signature.as_deref().unwrap_or_default())
+                    .is_err()
+                {
+                    return Err(error("unauthenticated"));
+                }
+                let mut n = refreshes.lock().unwrap();
+                *n += 1;
+                Ok(RefreshSessionResponse {
+                    access_token: Some(format!("t-{n}")),
+                    ..Default::default()
+                })
+            },
+        );
+        fake
+    }
+
+    #[tokio::test]
+    async fn expiring_tokens_are_refreshed_with_the_device_key() {
+        let (servers, tokens) = servers();
+        let refreshes = Arc::new(Mutex::new(0));
+        let fake = refreshing_server(refreshes.clone());
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let headers = seen.clone();
+        fake.unary(
+            "/mavio.user.v1.UserService/GetCurrentUser",
+            move |head, _: GetCurrentUserRequest| {
+                let auth = head.headers()["authorization"].to_str().unwrap().to_owned();
+                headers.lock().unwrap().push(auth);
+                Ok(GetCurrentUserResponse::default())
+            },
+        );
+        let addr = fake.serve().await;
+        servers.sign_in(&addr, "me", "secret").await.unwrap();
+        let conn = servers.connection("sa").unwrap();
+        for _ in 0..2 {
+            conn.users()
+                .get_current_user(GetCurrentUserRequest::default())
+                .await
+                .unwrap();
+        }
+        assert_eq!(*seen.lock().unwrap(), ["Bearer t-1", "Bearer t-1"]);
+        assert_eq!(
+            token_of(&tokens, "sa").as_deref(),
+            Some("t-1"),
+            "the new token is kept"
+        );
+    }
+
+    #[tokio::test]
+    async fn rejected_tokens_are_refreshed_once() {
+        let (servers, tokens) = servers();
+        let refreshes = Arc::new(Mutex::new(0));
+        let fake = refreshing_server(refreshes.clone());
+        let ended = Arc::new(Mutex::new(false));
+        let session_ended = ended.clone();
+        fake.unary(
+            "/mavio.user.v1.UserService/GetCurrentUser",
+            move |head, _: GetCurrentUserRequest| {
+                let auth = head.headers()["authorization"].to_str().unwrap();
+                if *session_ended.lock().unwrap() || auth != "Bearer t-2" {
+                    return Err(error("unauthenticated"));
+                }
+                Ok(GetCurrentUserResponse::default())
+            },
+        );
+        let addr = fake.serve().await;
+        servers.sign_in(&addr, "me", "secret").await.unwrap();
+        let conn = servers.connection("sa").unwrap();
+        conn.users()
+            .get_current_user(GetCurrentUserRequest::default())
+            .await
+            .unwrap();
+        assert_eq!(
+            *refreshes.lock().unwrap(),
+            2,
+            "refreshed as it expired, then as it was rejected"
+        );
+        assert_eq!(token_of(&tokens, "sa").as_deref(), Some("t-2"));
+
+        // Signing in on another device binds the session to its key, so
+        // this one's refreshes fail.
+        let (other, _) = self::servers();
+        other.sign_in(&addr, "me", "secret").await.unwrap();
+        *ended.lock().unwrap() = true;
+        let got = conn
+            .users()
+            .get_current_user(GetCurrentUserRequest::default())
+            .await
+            .map_err(Error::from);
+        assert!(
+            matches!(got, Err(Error::Unauthenticated(_))),
+            "got = {got:?}"
+        );
     }
 }

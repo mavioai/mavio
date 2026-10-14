@@ -165,7 +165,7 @@ func TestAdministration(t *testing.T) {
 	})
 	first, err := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url).CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
 		Name: new("admin"), Password: new("secret"),
-		Device: authv1.Device_builder{Id: new("e2e"), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+		Device: device("e2e"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("CreateFirstUser: %v", err)
@@ -349,7 +349,7 @@ func TestAdministration(t *testing.T) {
 	})
 	login, err := authv1connect.NewAuthServiceClient(http.DefaultClient, restored.url).Login(ctx, authv1.LoginRequest_builder{
 		Name: new("admin"), Password: new("secret"),
-		Device: authv1.Device_builder{Id: new("e2e-2"), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build(),
+		Device: device("e2e-2"),
 	}.Build())
 	if err != nil {
 		t.Fatalf("Login to the restored server: %v", err)

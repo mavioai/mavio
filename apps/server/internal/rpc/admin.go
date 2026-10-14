@@ -127,8 +127,9 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 			KeyPath: &n.KeyPath, LocalDiscovery: &n.LocalDiscovery,
 		}.Build(),
 		PluginCatalogs: s.PluginCatalogs, PasswordResetPlugin: &s.PasswordResetPlugin,
-		Acquisition: acquisitionSettingsToProto(&s.Acquisition),
-		Requests:    requestSettingsToProto(&s.Requests),
+		SessionIdleDays: new(int32(s.SessionIdleDays)),
+		Acquisition:     acquisitionSettingsToProto(&s.Acquisition),
+		Requests:        requestSettingsToProto(&s.Requests),
 		Metadata: systemv1.MetadataSettings_builder{
 			PreferredLanguage: &s.Metadata.PreferredLanguage, Country: &s.Metadata.Country,
 		}.Build(),
@@ -140,7 +141,8 @@ func settingsToProto(s *core.ServerSettings) *systemv1.ServerSettings {
 }
 
 // settingsFromProto returns the settings of p, keeping the current
-// acquisition, request and metadata settings when p has none.
+// acquisition, request and metadata settings and session idle days when p
+// has none.
 func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings) (core.ServerSettings, error) {
 	t, n := p.GetTranscoding(), p.GetNetwork()
 	acquisition := current.Acquisition
@@ -157,6 +159,10 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 	meta := current.Metadata
 	if p.HasMetadata() {
 		meta = core.MetadataSettings{PreferredLanguage: p.GetMetadata().GetPreferredLanguage(), Country: p.GetMetadata().GetCountry()}
+	}
+	idle := current.SessionIdleDays
+	if p.GetSessionIdleDays() != 0 {
+		idle = int(p.GetSessionIdleDays())
 	}
 	var hw core.HardwareAcceleration
 	for k, v := range hardwareAccelerations {
@@ -177,9 +183,10 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 			CertificatePath: n.GetCertificatePath(), KeyPath: n.GetKeyPath(), LocalDiscovery: n.GetLocalDiscovery(),
 		},
 		PluginCatalogs: p.GetPluginCatalogs(), PasswordResetPlugin: p.GetPasswordResetPlugin(),
-		Acquisition: acquisition,
-		Requests:    requests,
-		Metadata:    meta,
+		SessionIdleDays: idle,
+		Acquisition:     acquisition,
+		Requests:        requests,
+		Metadata:        meta,
 		// The subtitle settings are changed through SubtitleService.
 		Subtitles: current.Subtitles,
 	}, nil

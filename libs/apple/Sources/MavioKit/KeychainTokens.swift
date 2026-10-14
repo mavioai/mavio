@@ -2,12 +2,13 @@ import Foundation
 import MavioCore
 import Security
 
-/// Keeps the servers' access tokens in the Keychain, a generic password per
-/// server, readable only on this device after its first unlock.
+/// Keeps the core's secrets in the Keychain: the credentials of each
+/// server's session and the device key, a generic password per ID,
+/// readable only on this device after its first unlock.
 public final class KeychainTokens: SecureTokens {
     private let service: String
 
-    /// Tokens kept under service.
+    /// Secrets kept under service.
     public init(service: String = "dev.mavio.tokens") {
         self.service = service
     }
@@ -20,7 +21,7 @@ public final class KeychainTokens: SecureTokens {
         ]
     }
 
-    /// The token of a server, if the device is signed in to it.
+    /// What is kept under an ID, if anything.
     public func token(serverId: String) -> String? {
         var q = query(serverId)
         q[kSecReturnData as String] = true
@@ -32,7 +33,7 @@ public final class KeychainTokens: SecureTokens {
         return String(data: data, encoding: .utf8)
     }
 
-    /// Keeps the token of a server, replacing an earlier one.
+    /// Keeps a value under an ID, replacing an earlier one.
     public func setToken(serverId: String, token: String) {
         SecItemDelete(query(serverId) as CFDictionary)
         var q = query(serverId)
@@ -41,7 +42,7 @@ public final class KeychainTokens: SecureTokens {
         SecItemAdd(q as CFDictionary, nil)
     }
 
-    /// Forgets the token of a server.
+    /// Forgets what is kept under an ID.
     public func deleteToken(serverId: String) {
         SecItemDelete(query(serverId) as CFDictionary)
     }

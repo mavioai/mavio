@@ -74,8 +74,9 @@ impl Sender {
     }
 }
 
-/// The tokens the app keeps, given when it opens the core and kept up to
-/// date through `TokenChanged`.
+/// The secrets the app keeps, sessions' credentials and the device key,
+/// given when it opens the core and kept up to date through
+/// `TokenChanged`.
 struct Tokens {
     tokens: Mutex<HashMap<String, String>>,
     sender: Sender,

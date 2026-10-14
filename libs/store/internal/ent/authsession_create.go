@@ -31,9 +31,9 @@ func (_c *AuthSessionCreate) SetUserID(v core.ID) *AuthSessionCreate {
 	return _c
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (_c *AuthSessionCreate) SetTokenHash(v []byte) *AuthSessionCreate {
-	_c.mutation.SetTokenHash(v)
+// SetDeviceKey sets the "device_key" field.
+func (_c *AuthSessionCreate) SetDeviceKey(v []byte) *AuthSessionCreate {
+	_c.mutation.SetDeviceKey(v)
 	return _c
 }
 
@@ -198,8 +198,8 @@ func (_c *AuthSessionCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "AuthSession.user_id"`)}
 	}
-	if _, ok := _c.mutation.TokenHash(); !ok {
-		return &ValidationError{Name: "token_hash", err: errors.New(`ent: missing required field "AuthSession.token_hash"`)}
+	if _, ok := _c.mutation.DeviceKey(); !ok {
+		return &ValidationError{Name: "device_key", err: errors.New(`ent: missing required field "AuthSession.device_key"`)}
 	}
 	if _, ok := _c.mutation.DeviceID(); !ok {
 		return &ValidationError{Name: "device_id", err: errors.New(`ent: missing required field "AuthSession.device_id"`)}
@@ -258,9 +258,9 @@ func (_c *AuthSessionCreate) createSpec() (*AuthSession, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.TokenHash(); ok {
-		_spec.SetField(authsession.FieldTokenHash, field.TypeBytes, value)
-		_node.TokenHash = value
+	if value, ok := _c.mutation.DeviceKey(); ok {
+		_spec.SetField(authsession.FieldDeviceKey, field.TypeBytes, value)
+		_node.DeviceKey = value
 	}
 	if value, ok := _c.mutation.DeviceID(); ok {
 		_spec.SetField(authsession.FieldDeviceID, field.TypeString, value)
@@ -367,15 +367,15 @@ func (u *AuthSessionUpsert) UpdateUserID() *AuthSessionUpsert {
 	return u
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (u *AuthSessionUpsert) SetTokenHash(v []byte) *AuthSessionUpsert {
-	u.Set(authsession.FieldTokenHash, v)
+// SetDeviceKey sets the "device_key" field.
+func (u *AuthSessionUpsert) SetDeviceKey(v []byte) *AuthSessionUpsert {
+	u.Set(authsession.FieldDeviceKey, v)
 	return u
 }
 
-// UpdateTokenHash sets the "token_hash" field to the value that was provided on create.
-func (u *AuthSessionUpsert) UpdateTokenHash() *AuthSessionUpsert {
-	u.SetExcluded(authsession.FieldTokenHash)
+// UpdateDeviceKey sets the "device_key" field to the value that was provided on create.
+func (u *AuthSessionUpsert) UpdateDeviceKey() *AuthSessionUpsert {
+	u.SetExcluded(authsession.FieldDeviceKey)
 	return u
 }
 
@@ -504,17 +504,17 @@ func (u *AuthSessionUpsertOne) UpdateUserID() *AuthSessionUpsertOne {
 	})
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (u *AuthSessionUpsertOne) SetTokenHash(v []byte) *AuthSessionUpsertOne {
+// SetDeviceKey sets the "device_key" field.
+func (u *AuthSessionUpsertOne) SetDeviceKey(v []byte) *AuthSessionUpsertOne {
 	return u.Update(func(s *AuthSessionUpsert) {
-		s.SetTokenHash(v)
+		s.SetDeviceKey(v)
 	})
 }
 
-// UpdateTokenHash sets the "token_hash" field to the value that was provided on create.
-func (u *AuthSessionUpsertOne) UpdateTokenHash() *AuthSessionUpsertOne {
+// UpdateDeviceKey sets the "device_key" field to the value that was provided on create.
+func (u *AuthSessionUpsertOne) UpdateDeviceKey() *AuthSessionUpsertOne {
 	return u.Update(func(s *AuthSessionUpsert) {
-		s.UpdateTokenHash()
+		s.UpdateDeviceKey()
 	})
 }
 
@@ -820,17 +820,17 @@ func (u *AuthSessionUpsertBulk) UpdateUserID() *AuthSessionUpsertBulk {
 	})
 }
 
-// SetTokenHash sets the "token_hash" field.
-func (u *AuthSessionUpsertBulk) SetTokenHash(v []byte) *AuthSessionUpsertBulk {
+// SetDeviceKey sets the "device_key" field.
+func (u *AuthSessionUpsertBulk) SetDeviceKey(v []byte) *AuthSessionUpsertBulk {
 	return u.Update(func(s *AuthSessionUpsert) {
-		s.SetTokenHash(v)
+		s.SetDeviceKey(v)
 	})
 }
 
-// UpdateTokenHash sets the "token_hash" field to the value that was provided on create.
-func (u *AuthSessionUpsertBulk) UpdateTokenHash() *AuthSessionUpsertBulk {
+// UpdateDeviceKey sets the "device_key" field to the value that was provided on create.
+func (u *AuthSessionUpsertBulk) UpdateDeviceKey() *AuthSessionUpsertBulk {
 	return u.Update(func(s *AuthSessionUpsert) {
-		s.UpdateTokenHash()
+		s.UpdateDeviceKey()
 	})
 }
 

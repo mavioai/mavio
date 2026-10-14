@@ -4183,6 +4183,11 @@ pub struct ServerSettings {
         MetadataSettings,
         ::buffa::Inline<MetadataSettings>,
     >,
+    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
+    /// an update keeps the current value.
+    ///
+    /// Field 9: `session_idle_days`
+    pub session_idle_days: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4197,6 +4202,7 @@ impl ::core::fmt::Debug for ServerSettings {
             .field("acquisition", &self.acquisition)
             .field("requests", &self.requests)
             .field("metadata", &self.metadata)
+            .field("session_idle_days", &self.session_idle_days)
             .finish()
     }
 }
@@ -4216,6 +4222,13 @@ impl ServerSettings {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.password_reset_plugin = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::session_idle_days`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_session_idle_days(mut self, value: i32) -> Self {
+        self.session_idle_days = Some(value);
         self
     }
 }
@@ -4293,6 +4306,9 @@ impl ::buffa::Message for ServerSettings {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(v) = self.session_idle_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4356,6 +4372,9 @@ impl ::buffa::Message for ServerSettings {
                 buf,
             );
             self.metadata.write_to(__cache, buf);
+        }
+        if let Some(v) = self.session_idle_days {
+            ::buffa::types::put_int32_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4459,6 +4478,15 @@ impl ::buffa::Message for ServerSettings {
                     ctx,
                 )?;
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.session_idle_days = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4475,6 +4503,7 @@ impl ::buffa::Message for ServerSettings {
         self.acquisition = ::buffa::MessageField::none();
         self.requests = ::buffa::MessageField::none();
         self.metadata = ::buffa::MessageField::none();
+        self.session_idle_days = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -20,7 +20,9 @@ type ServerSettings struct {
 	// PasswordResetPlugin is the ID of the plugin that delivers the PINs
 	// resetting forgotten passwords; empty when users cannot reset them.
 	PasswordResetPlugin string
-	Acquisition         AcquisitionSettings
+	// SessionIdleDays is how long a session lasts unused, 1–3650 days.
+	SessionIdleDays int
+	Acquisition     AcquisitionSettings
 	// Requests are the defaults and destinations of users' requests.
 	Requests RequestSettings
 	// Metadata are the language and country of metadata beside
@@ -141,11 +143,12 @@ func DefaultServerSettings() ServerSettings {
 			DownmixBoost:         2,
 			CropBlackBorders:     true,
 		},
-		Network:     NetworkSettings{LocalDiscovery: true},
-		Acquisition: DefaultAcquisitionSettings(),
-		Requests:    DefaultRequestSettings(),
-		Metadata:    MetadataSettings{PreferredLanguage: "en", Country: "US"},
-		Subtitles:   DefaultSubtitleSettings(),
+		Network:         NetworkSettings{LocalDiscovery: true},
+		SessionIdleDays: 90,
+		Acquisition:     DefaultAcquisitionSettings(),
+		Requests:        DefaultRequestSettings(),
+		Metadata:        MetadataSettings{PreferredLanguage: "en", Country: "US"},
+		Subtitles:       DefaultSubtitleSettings(),
 	}
 }
 
@@ -179,6 +182,8 @@ func (s *ServerSettings) Validate() error {
 		return fmt.Errorf("%w: HTTPS port %d", ErrInvalid, n.HTTPSPort)
 	case n.HTTPSPort > 0 && (n.CertificatePath == "" || n.KeyPath == ""):
 		return fmt.Errorf("%w: HTTPS needs a certificate and a key", ErrInvalid)
+	case s.SessionIdleDays < 1 || s.SessionIdleDays > 3650:
+		return fmt.Errorf("%w: session idle days %d outside 1–3650", ErrInvalid, s.SessionIdleDays)
 	}
 	if err := s.Acquisition.Validate(); err != nil {
 		return err

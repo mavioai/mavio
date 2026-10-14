@@ -61,9 +61,9 @@ func UserID(v core.ID) predicate.AuthSession {
 	return predicate.AuthSession(sql.FieldEQ(FieldUserID, v))
 }
 
-// TokenHash applies equality check predicate on the "token_hash" field. It's identical to TokenHashEQ.
-func TokenHash(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldEQ(FieldTokenHash, v))
+// DeviceKey applies equality check predicate on the "device_key" field. It's identical to DeviceKeyEQ.
+func DeviceKey(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldEQ(FieldDeviceKey, v))
 }
 
 // DeviceID applies equality check predicate on the "device_id" field. It's identical to DeviceIDEQ.
@@ -116,44 +116,44 @@ func UserIDNotIn(vs ...core.ID) predicate.AuthSession {
 	return predicate.AuthSession(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// TokenHashEQ applies the EQ predicate on the "token_hash" field.
-func TokenHashEQ(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldEQ(FieldTokenHash, v))
+// DeviceKeyEQ applies the EQ predicate on the "device_key" field.
+func DeviceKeyEQ(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldEQ(FieldDeviceKey, v))
 }
 
-// TokenHashNEQ applies the NEQ predicate on the "token_hash" field.
-func TokenHashNEQ(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldNEQ(FieldTokenHash, v))
+// DeviceKeyNEQ applies the NEQ predicate on the "device_key" field.
+func DeviceKeyNEQ(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldNEQ(FieldDeviceKey, v))
 }
 
-// TokenHashIn applies the In predicate on the "token_hash" field.
-func TokenHashIn(vs ...[]byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldIn(FieldTokenHash, vs...))
+// DeviceKeyIn applies the In predicate on the "device_key" field.
+func DeviceKeyIn(vs ...[]byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldIn(FieldDeviceKey, vs...))
 }
 
-// TokenHashNotIn applies the NotIn predicate on the "token_hash" field.
-func TokenHashNotIn(vs ...[]byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldNotIn(FieldTokenHash, vs...))
+// DeviceKeyNotIn applies the NotIn predicate on the "device_key" field.
+func DeviceKeyNotIn(vs ...[]byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldNotIn(FieldDeviceKey, vs...))
 }
 
-// TokenHashGT applies the GT predicate on the "token_hash" field.
-func TokenHashGT(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldGT(FieldTokenHash, v))
+// DeviceKeyGT applies the GT predicate on the "device_key" field.
+func DeviceKeyGT(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldGT(FieldDeviceKey, v))
 }
 
-// TokenHashGTE applies the GTE predicate on the "token_hash" field.
-func TokenHashGTE(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldGTE(FieldTokenHash, v))
+// DeviceKeyGTE applies the GTE predicate on the "device_key" field.
+func DeviceKeyGTE(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldGTE(FieldDeviceKey, v))
 }
 
-// TokenHashLT applies the LT predicate on the "token_hash" field.
-func TokenHashLT(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldLT(FieldTokenHash, v))
+// DeviceKeyLT applies the LT predicate on the "device_key" field.
+func DeviceKeyLT(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldLT(FieldDeviceKey, v))
 }
 
-// TokenHashLTE applies the LTE predicate on the "token_hash" field.
-func TokenHashLTE(v []byte) predicate.AuthSession {
-	return predicate.AuthSession(sql.FieldLTE(FieldTokenHash, v))
+// DeviceKeyLTE applies the LTE predicate on the "device_key" field.
+func DeviceKeyLTE(v []byte) predicate.AuthSession {
+	return predicate.AuthSession(sql.FieldLTE(FieldDeviceKey, v))
 }
 
 // DeviceIDEQ applies the EQ predicate on the "device_id" field.

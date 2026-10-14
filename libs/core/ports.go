@@ -157,13 +157,16 @@ type AuthSessionRepository interface {
 	// Create adds a session, replacing the user's session on the same
 	// device.
 	Create(ctx context.Context, s *AuthSession) error
-	// GetByTokenHash returns ErrNotFound for unknown tokens.
-	GetByTokenHash(ctx context.Context, hash []byte) (AuthSession, error)
+	// Get returns ErrNotFound for unknown sessions.
+	Get(ctx context.Context, id ID) (AuthSession, error)
 	// ListForUser returns the user's sessions, most recently seen first.
 	ListForUser(ctx context.Context, userID ID) ([]AuthSession, error)
 	// Touch records activity.
 	Touch(ctx context.Context, id ID, at time.Time) error
 	Delete(ctx context.Context, id ID) error
+	// PurgeIdle deletes the sessions last seen before a time and returns
+	// how many it deleted.
+	PurgeIdle(ctx context.Context, before time.Time) (int, error)
 }
 
 // UserDataRepository stores per-user item state.

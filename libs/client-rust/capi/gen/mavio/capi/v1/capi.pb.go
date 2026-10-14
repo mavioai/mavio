@@ -101,7 +101,7 @@ const (
 	// Connecting, or waiting to reconnect.
 	StreamState_STATE_OFFLINE StreamState_State = 1
 	StreamState_STATE_ONLINE  StreamState_State = 2
-	// The server rejected the token; the user signs in again.
+	// The server ended the session; the user signs in again.
 	StreamState_STATE_SIGNED_OUT StreamState_State = 3
 )
 
@@ -620,8 +620,9 @@ type Open_builder struct {
 	// The offline store's database.
 	DatabasePath string
 	Device       *Device
-	// The access tokens the app keeps, by server ID; TokenChanged tells it of
-	// new and forgotten ones.
+	// The secrets the app keeps for the core: the credentials of each
+	// server's session, by server ID, and the device key, under
+	// "device-key". TokenChanged tells it of new and forgotten ones.
 	Tokens map[string]string
 }
 
@@ -2550,8 +2551,9 @@ func (b0 SessionsChanged_builder) Build() *SessionsChanged {
 	return m0
 }
 
-// The core has a new access token for the server, which the app keeps in
-// the system's secure storage, or forgot it when the token is empty.
+// The core has a new secret under the event's server ID, a session's
+// credentials or the device key, which the app keeps as it is in the
+// system's secure storage, or forgot it when the token is empty.
 type TokenChanged struct {
 	state            protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Token string                 `protobuf:"bytes,1,opt,name=token"`

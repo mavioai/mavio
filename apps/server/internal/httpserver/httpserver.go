@@ -21,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/home"
+	"github.com/mavioai/mavio/apps/server/internal/identity"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
@@ -54,6 +55,9 @@ type Options struct {
 	Store core.Store
 	// Hub keeps the devices' event streams.
 	Hub *events.Hub
+	// Tokens issues and checks the sessions' access tokens; nil uses a key
+	// of the run only.
+	Tokens *auth.AccessTokens
 	// Database is "sqlite" or "postgres".
 	Database string
 	// FFmpegVersion is the version of the ffmpeg in use, if any.
@@ -143,7 +147,10 @@ func Handler(opts Options) (http.Handler, error) {
 	public := append([]string{systemv1connect.SystemServiceGetHealthProcedure}, rpc.AuthPublicProcedures...)
 	// Authentication runs first, so that invalid requests from strangers
 	// learn nothing about the rules.
-	authn := auth.NewInterceptor(opts.Store, public...).
+	if opts.Tokens == nil {
+		opts.Tokens = auth.NewAccessTokens(identity.Generate().Derive(auth.TokenKeyPurpose))
+	}
+	authn := auth.NewInterceptor(opts.Store, opts.Tokens, public...).
 		RequireUser(rpc.UserBoundProcedures...).
 		RequireSession(rpc.SessionBoundProcedures...)
 	interceptors := connect.WithInterceptors(authn, validate)
@@ -154,7 +161,7 @@ func Handler(opts Options) (http.Handler, error) {
 		Plugins: opts.Plugins, Hub: opts.Hub, Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs,
 		Activity: opts.Activity,
 	}, interceptors))
-	authService := rpc.NewAuthService(opts.Store)
+	authService := rpc.NewAuthService(opts.Store, opts.Tokens)
 	authService.Activity, authService.Authenticate = opts.Activity, opts.Authenticate
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
 	authService.Info = opts.ServerInfo

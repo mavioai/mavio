@@ -149,9 +149,6 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 		TranscodeDir: t.TempDir(), CacheDir: t.TempDir(), MetadataDir: t.TempDir(), PluginDir: pluginDir, PluginDataDir: dataDir,
 	})
 	authClient := authv1connect.NewAuthServiceClient(http.DefaultClient, srv.url)
-	device := func(id string) *authv1.Device {
-		return authv1.Device_builder{Id: new(id), Name: new("Test"), Client: new("Test"), ClientVersion: new("0")}.Build()
-	}
 	first, err := authClient.CreateFirstUser(ctx, authv1.CreateFirstUserRequest_builder{
 		Name: new("admin"), Password: new("secret"), Device: device("e2e"),
 	}.Build())

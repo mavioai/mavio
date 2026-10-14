@@ -3,10 +3,12 @@
 // token, in the user's order.
 import type { DescService } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
-import { type Client, createClient, type Transport } from "@connectrpc/connect";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { type Client, Code, ConnectError, createClient, type Transport } from "@connectrpc/connect";
 import { AuthService, type GetAuthInfoResponse } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { DisplayPreferencesService } from "@mavio/proto/mavio/user/v1/display_preferences_pb";
 
+import { browserDeviceKey, type DeviceKey, refreshMessage } from "./device-key.ts";
 import { transport } from "./server.ts";
 
 /** A server the user added. */
@@ -19,8 +21,12 @@ export interface ServerEntry {
   url: string;
   userId: string;
   userName: string;
-  /** The token of this browser's session; unset when signed out. */
+  /** This browser's session; unset when signed out. */
+  sessionId?: string;
+  /** The session's access token; unset when signed out. */
   token?: string;
+  /** When the access token expires, in milliseconds since the epoch. */
+  expires?: number;
 }
 
 /** What a server tells before anyone signs in. */
@@ -53,8 +59,19 @@ const deviceKey = "mavio.device";
 const prefsClient = "mavio-web";
 const prefsView = "servers";
 
+/** How long before its expiry an access token is refreshed. */
+const refreshMargin = 5 * 60_000;
+
+/** A sign-in's answer. */
+interface SignedIn {
+  accessToken: string;
+  accessTokenExpireTime?: Timestamp;
+  session?: { id: string };
+  user?: { id: string; name: string };
+}
+
 /** The device as servers list it among the user's devices. */
-function device(storage: Storage) {
+async function device(storage: Storage, key: DeviceKey) {
   let id = storage.getItem(deviceKey);
   if (!id) {
     id = crypto.randomUUID();
@@ -70,7 +87,7 @@ function device(storage: Storage) {
         : /Safari\//.test(ua)
           ? "Safari"
           : "Browser";
-  return { id, name: browser, client: "Mavio Web", clientVersion: "0.0.0" };
+  return { id, name: browser, client: "Mavio Web", clientVersion: "0.0.0", publicKey: await key.publicKey() };
 }
 
 /** Normalizes an address the user typed into a base URL. */
@@ -85,25 +102,33 @@ export function normalizeUrl(input: string, defaultPort = 8686): string {
   return `${u.protocol}//${u.host}${u.pathname.replace(/\/+$/, "")}`;
 }
 
+function expiry(r: { accessTokenExpireTime?: Timestamp }): number | undefined {
+  return r.accessTokenExpireTime ? timestampDate(r.accessTokenExpireTime).getTime() : undefined;
+}
+
 function info(url: string, r: GetAuthInfoResponse): ServerInfo {
   if (!r.serverId) throw new Error(`${url} is not a Mavio server`);
   return { id: r.serverId, name: r.serverName, version: r.version, url, setupRequired: r.setupRequired };
 }
 
 /**
- * The servers, kept in the browser with their tokens, and their list
- * without tokens in the display preferences of the serving server, so that
- * it follows the user across browsers. Observed with useSyncExternalStore.
+ * The servers, kept in the browser with their sessions, and their list
+ * without sessions in the display preferences of the serving server, so
+ * that it follows the user across browsers. Each session belongs to the
+ * browser's device key, which signs its refreshes. Observed with
+ * useSyncExternalStore.
  */
 export class Servers {
   private list: ServerEntry[];
   private listeners = new Set<() => void>();
-  private transports = new Map<string, { token?: string; url: string; transport: Transport }>();
+  private transports = new Map<string, { sessionId?: string; url: string; transport: Transport }>();
+  private refreshing = new Map<string, Promise<string | undefined>>();
 
   constructor(
     private storage: Storage,
     /** The base URL of the server serving the web UI. */
     readonly home: string,
+    private key: DeviceKey = browserDeviceKey(),
   ) {
     try {
       this.list = JSON.parse(storage.getItem(serversKey) ?? "[]") as ServerEntry[];
@@ -130,18 +155,70 @@ export class Servers {
     return this.list.filter((s) => s.token);
   }
 
-  /** The Connect client of a service on a server; a rejected token signs the user out of it. */
+  /**
+   * The Connect client of a service on a server, whose access token is
+   * refreshed as it expires; a session the server ended signs the user out
+   * of it.
+   */
   client<T extends DescService>(service: T, server: ServerEntry): Client<T> {
     let t = this.transports.get(server.id);
-    if (!t || t.token !== server.token || t.url !== server.url) {
+    if (!t || t.sessionId !== server.sessionId || t.url !== server.url) {
+      const id = server.id;
       t = {
-        token: server.token,
+        sessionId: server.sessionId,
         url: server.url,
-        transport: transport(server, () => this.forgetToken(server.id)),
+        transport: transport(server, { token: () => this.token(id), refresh: () => this.refresh(id) }),
       };
-      this.transports.set(server.id, t);
+      this.transports.set(id, t);
     }
     return createClient(service, t.transport);
+  }
+
+  /** A server's access token, refreshed first when it is about to expire. */
+  async token(id: string): Promise<string | undefined> {
+    const s = this.get(id);
+    if (!s?.token) return undefined;
+    if (s.expires !== undefined && s.expires - Date.now() < refreshMargin) return this.refresh(id);
+    return s.token;
+  }
+
+  /**
+   * Refreshes a server's access token by signing its nonce with the device
+   * key; one refresh runs at a time. A session the server no longer
+   * refreshes signs the user out of it.
+   */
+  refresh(id: string): Promise<string | undefined> {
+    let p = this.refreshing.get(id);
+    if (!p) {
+      p = this.doRefresh(id).finally(() => this.refreshing.delete(id));
+      this.refreshing.set(id, p);
+    }
+    return p;
+  }
+
+  private async doRefresh(id: string): Promise<string | undefined> {
+    const s = this.get(id);
+    if (!s?.sessionId) {
+      this.forgetToken(id);
+      return undefined;
+    }
+    const sessionId = s.sessionId;
+    const auth = createClient(AuthService, transport({ url: s.url }));
+    try {
+      const { nonce } = await auth.startRefresh({ sessionId });
+      const signature = await this.key.sign(refreshMessage(sessionId, nonce));
+      const r = await auth.refreshSession({ sessionId, nonce, signature });
+      const at = this.list.findIndex((x) => x.id === id);
+      if (at < 0 || this.list[at].sessionId !== sessionId) return undefined;
+      this.set(this.list.with(at, { ...this.list[at], token: r.accessToken, expires: expiry(r) }), false);
+      return r.accessToken;
+    } catch (err) {
+      if (ConnectError.from(err).code === Code.Unauthenticated) {
+        this.forgetToken(id);
+        return undefined;
+      }
+      throw err;
+    }
   }
 
   /** The server serving the web UI, once added. */
@@ -156,11 +233,11 @@ export class Servers {
     if (sync) void this.save();
   }
 
-  /** Writes the list, without tokens, to the serving server's preferences. */
+  /** Writes the list, without sessions, to the serving server's preferences. */
   private async save() {
     const home = this.homeServer();
     if (!home?.token) return;
-    const list = this.list.map(({ token: _, ...s }) => s);
+    const list = this.list.map(({ sessionId: _, token: __, expires: ___, ...s }) => s);
     try {
       await this.client(DisplayPreferencesService, home).setDisplayPreferences({
         client: prefsClient,
@@ -188,7 +265,10 @@ export class Servers {
     } catch {
       return;
     }
-    const merged = kept.map((k) => ({ ...k, ...this.get(k.id), token: this.get(k.id)?.token }));
+    const merged = kept.map((k) => {
+      const here = this.get(k.id);
+      return { ...k, ...here, sessionId: here?.sessionId, token: here?.token, expires: here?.expires };
+    });
     const rest = this.list.filter((s) => !kept.some((k) => k.id === s.id));
     this.set([...merged, ...rest], false);
   }
@@ -199,15 +279,17 @@ export class Servers {
     return info(url, await createClient(AuthService, transport({ url })).getAuthInfo({}));
   }
 
-  private added(i: ServerInfo, token: string, user?: { id: string; name: string }): ServerEntry {
+  private added(i: ServerInfo, r: SignedIn): ServerEntry {
     const entry: ServerEntry = {
       id: i.id,
       name: i.name,
       version: i.version,
       url: i.url,
-      userId: user?.id ?? "",
-      userName: user?.name ?? "",
-      token,
+      userId: r.user?.id ?? "",
+      userName: r.user?.name ?? "",
+      sessionId: r.session?.id,
+      token: r.accessToken,
+      expires: expiry(r),
     };
     const at = this.list.findIndex((s) => s.id === i.id);
     this.set(at < 0 ? [...this.list, entry] : this.list.with(at, entry));
@@ -220,9 +302,9 @@ export class Servers {
     const r = await createClient(AuthService, transport({ url: i.url })).login({
       name,
       password,
-      device: device(this.storage),
+      device: await device(this.storage, this.key),
     });
-    return this.added(i, r.accessToken, r.user);
+    return this.added(i, r);
   }
 
   /** Creates the first user of a new server and signs in as them. */
@@ -231,16 +313,16 @@ export class Servers {
     const r = await createClient(AuthService, transport({ url: i.url })).createFirstUser({
       name,
       password,
-      device: device(this.storage),
+      device: await device(this.storage, this.key),
     });
-    return this.added(i, r.accessToken, r.user);
+    return this.added(i, r);
   }
 
   /** Starts signing in with Quick Connect. */
   async startQuickConnect(address: string): Promise<QuickConnect> {
     const i = await this.probe(address);
     const r = await createClient(AuthService, transport({ url: i.url })).startQuickConnect({
-      device: device(this.storage),
+      device: await device(this.storage, this.key),
     });
     return {
       code: r.code,
@@ -256,7 +338,7 @@ export class Servers {
     const state = await auth.getQuickConnectState({ secret: qc.secret });
     if (!state.authorized) return undefined;
     const r = await auth.loginWithQuickConnect({ secret: qc.secret });
-    return this.added(qc.server, r.accessToken, r.user);
+    return this.added(qc.server, r);
   }
 
   /** Signs in the device showing a Quick Connect code as the user of a server. */
@@ -264,10 +346,13 @@ export class Servers {
     await this.client(AuthService, server).authorizeQuickConnect({ code: code.trim() });
   }
 
-  /** Forgets the token of a server the token of which it rejected. */
+  /** Forgets the session of a server that ended it. */
   forgetToken(id: string) {
     const at = this.list.findIndex((s) => s.id === id);
-    if (at >= 0 && this.list[at].token) this.set(this.list.with(at, { ...this.list[at], token: undefined }), false);
+    if (at >= 0 && this.list[at].token) {
+      const { sessionId: _, token: __, expires: ___, ...rest } = this.list[at];
+      this.set(this.list.with(at, rest), false);
+    }
   }
 
   /** Signs out of a server and forgets it. */
@@ -277,7 +362,7 @@ export class Servers {
       try {
         await this.client(AuthService, s).logout({});
       } catch {
-        // Its session ends with its token unused.
+        // Its session ends once idle.
       }
     }
     this.set(this.list.filter((x) => x.id !== id));

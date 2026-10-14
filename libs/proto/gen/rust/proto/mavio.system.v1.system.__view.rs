@@ -5822,6 +5822,11 @@ pub struct ServerSettingsView<'a> {
     pub metadata: ::buffa::MessageFieldView<
         super::super::__buffa::view::MetadataSettingsView<'a>,
     >,
+    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
+    /// an update keeps the current value.
+    ///
+    /// Field 9: `session_idle_days`
+    pub session_idle_days: ::core::option::Option<i32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
@@ -5987,6 +5992,13 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                     }
                 }
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.session_idle_days = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -6080,6 +6092,7 @@ impl<'a> ::buffa::MessageView<'a> for ServerSettingsView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            session_idle_days: self.session_idle_days,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -6145,6 +6158,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(v) = self.session_idle_days {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6209,6 +6225,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ServerSettingsView<'a> {
                 buf,
             );
             self.metadata.write_to(__cache, buf);
+        }
+        if let Some(v) = self.session_idle_days {
+            ::buffa::types::put_int32_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -6380,6 +6399,14 @@ impl ServerSettingsOwnedView {
         super::super::__buffa::view::MetadataSettingsView<'_>,
     > {
         &self.0.reborrow().metadata
+    }
+    /// How many days a signed-in device stays signed in unused, 1–3650; 0 in
+    /// an update keeps the current value.
+    ///
+    /// Field 9: `session_idle_days`
+    #[must_use]
+    pub fn session_idle_days(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().session_idle_days
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ServerSettingsView<'static>>>

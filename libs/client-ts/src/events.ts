@@ -32,7 +32,7 @@ function sleep(ms: number, signal: AbortSignal) {
   });
 }
 
-/** Follows a server's events until signal aborts or the server rejects the token. */
+/** Follows a server's events until signal aborts or the server ends the session. */
 export async function follow(
   servers: Servers,
   server: ServerEntry,
@@ -56,11 +56,8 @@ export async function follow(
       }
     } catch (err) {
       if (signal.aborted) return;
-      const code = ConnectError.from(err).code;
-      if (code === Code.Unauthenticated) {
-        servers.forgetToken(server.id);
-        return;
-      }
+      // The transport refreshed the expired token, or signed the user out.
+      if (ConnectError.from(err).code === Code.Unauthenticated && !servers.get(server.id)?.token) return;
     }
     await sleep(backoff(attempt++), signal);
   }
@@ -75,11 +72,11 @@ export function useEvents() {
   const servers = useServersStore();
   const list = useSignedIn();
   const qc = useQueryClient();
-  const key = list.map((s) => `${s.id} ${s.url} ${s.token}`).join("\n");
+  const key = list.map((s) => `${s.id} ${s.url} ${s.sessionId}`).join("\n");
   useEffect(() => {
     const abort = new AbortController();
     for (const s of list) void follow(servers, s, (e) => refresh(qc, s.id, e), abort.signal);
     return () => abort.abort();
-    // The streams restart only when a server, its address or its token changes.
+    // The streams restart only when a server, its address or its session changes.
   }, [servers, qc, key]);
 }

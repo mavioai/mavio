@@ -9,7 +9,7 @@ use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind;
 use mavio_api::proto::mavio::session::v1::{Event, SubscribeRequest, SubscribeResponse};
 use tokio::task::JoinHandle;
 
-use crate::error::Error;
+use crate::error::{Error, Result};
 use crate::servers::Servers;
 
 /// The first wait before reconnecting, doubled after each failure.
@@ -68,17 +68,22 @@ impl Backoff {
 }
 
 /// Streams a server's events to sink until the task is aborted or the
-/// server rejects the token.
+/// server ends the session. A stream the server rejects is followed again
+/// once the session is refreshed.
 pub fn spawn(servers: Arc<Servers>, server_id: String, sink: Arc<dyn EventSink>) -> JoinHandle<()> {
     tokio::spawn(async move {
         let mut backoff = Backoff::default();
         loop {
             let reason = match subscribe(&servers, &server_id, sink.as_ref(), &mut backoff).await {
-                Err(Error::Unauthenticated(_)) => {
-                    servers.forget_token(&server_id);
-                    sink.state(&server_id, StreamState::SignedOut);
-                    return;
-                }
+                Err(Error::Unauthenticated(m)) => match refresh(&servers, &server_id).await {
+                    Ok(()) => m,
+                    Err(e) if e.is_transient() => e.to_string(),
+                    Err(_) => {
+                        servers.forget_token(&server_id);
+                        sink.state(&server_id, StreamState::SignedOut);
+                        return;
+                    }
+                },
                 Err(Error::NotFound(_)) if servers.get(&server_id).is_err() => return,
                 Err(e) => e.to_string(),
                 Ok(()) => "the stream ended".to_owned(),
@@ -87,6 +92,10 @@ pub fn spawn(servers: Arc<Servers>, server_id: String, sink: Arc<dyn EventSink>)
             tokio::time::sleep(backoff.next_delay()).await;
         }
     })
+}
+
+async fn refresh(servers: &Servers, server_id: &str) -> Result<()> {
+    servers.connection(server_id)?.refresh().await
 }
 
 /// Follows one stream until it ends or fails.
@@ -126,10 +135,12 @@ async fn subscribe(
 mod tests {
     use std::sync::Mutex;
 
+    use mavio_api::proto::mavio::auth::v1::{StartRefreshRequest, StartRefreshResponse};
     use mavio_api::proto::mavio::session::v1::{Connected, Heartbeat, LibraryChanged};
     use tokio::sync::mpsc;
 
     use super::*;
+    use crate::fake::error;
     use crate::servers::tests::{fake_server, servers};
 
     #[test]
@@ -244,12 +255,18 @@ mod tests {
         fake.stream_error(
             "/mavio.session.v1.EventService/Subscribe",
             "unauthenticated",
+        )
+        .unary(
+            "/mavio.auth.v1.AuthService/StartRefresh",
+            |_, _: StartRefreshRequest| -> Result<StartRefreshResponse, _> {
+                Err(error("unauthenticated"))
+            },
         );
         let rec = Arc::new(Recorder::default());
         spawn(Arc::new(servers), "sa".into(), rec.clone())
             .await
             .unwrap();
         assert_eq!(rec.0.lock().unwrap().as_slice(), ["sa signed out"]);
-        assert!(tokens.0.lock().unwrap().is_empty());
+        assert!(!tokens.0.lock().unwrap().contains_key("sa"));
     }
 }

@@ -27,8 +27,9 @@ message Open {
   // The offline store's database.
   string database_path = 1;
   Device device = 2;
-  // The access tokens the app keeps, by server ID; TokenChanged tells it of
-  // new and forgotten ones.
+  // The secrets the app keeps for the core: the credentials of each
+  // server's session, by server ID, and the device key, under
+  // "device-key". TokenChanged tells it of new and forgotten ones.
   map<string, string> tokens = 3;
 }
 
@@ -161,7 +162,7 @@ message StreamState {
     // Connecting, or waiting to reconnect.
     STATE_OFFLINE = 1;
     STATE_ONLINE = 2;
-    // The server rejected the token; the user signs in again.
+    // The server ended the session; the user signs in again.
     STATE_SIGNED_OUT = 3;
   }
 }
@@ -184,8 +185,9 @@ message UserDataChanged {
 // The sessions of the user's devices changed.
 message SessionsChanged {}
 
-// The core has a new access token for the server, which the app keeps in
-// the system's secure storage, or forgot it when the token is empty.
+// The core has a new secret under the event's server ID, a session's
+// credentials or the device key, which the app keeps as it is in the
+// system's secure storage, or forgot it when the token is empty.
 message TokenChanged {
   string token = 1;
 }

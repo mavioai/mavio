@@ -1,6 +1,7 @@
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { afterEach, expect, test, vi } from "vitest";
 
+import { memoryDeviceKey, refreshMessage } from "./device-key.ts";
 import { normalizeUrl, type ServerEntry, Servers, type Storage } from "./servers.ts";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -23,7 +24,7 @@ function serve(answers: Record<string, (body: unknown, init: RequestInit) => unk
     const method = url.slice(url.lastIndexOf("/") + 1);
     const answer = answers[method];
     if (!answer) return Response.json({ code: "unimplemented", message: method }, { status: 404 });
-    const out = answer(body(init), init);
+    const out = await answer(body(init), init);
     return out instanceof Response ? out : Response.json(out);
   });
   vi.stubGlobal("fetch", fetch);
@@ -131,4 +132,67 @@ test("orders servers and adds those of other browsers signed out", async () => {
   ]);
   servers.order(["b", "home"]);
   expect(servers.snapshot().map((s) => s.id)).toEqual(["b", "home", "c"]);
+});
+
+const base64 = (b: Uint8Array) => btoa(String.fromCharCode(...b));
+const unbase64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+test("refreshes the access token with the device key", async () => {
+  const key = memoryDeviceKey();
+  const publicKey = await crypto.subtle.importKey("raw", (await key.publicKey()) as BufferSource, "Ed25519", false, [
+    "verify",
+  ]);
+  const sessionId = "01890a5d-ac96-774b-bcce-b302099a8057";
+  const nonce = crypto.getRandomValues(new Uint8Array(32));
+  const storage = memory();
+  const soon = Date.now() + 60_000;
+  storage.setItem(
+    "mavio.servers",
+    JSON.stringify([
+      { id: "a", name: "a", version: "1", url: "https://a.example.com", userId: "u", userName: "ann", sessionId, token: "old", expires: soon },
+    ] satisfies ServerEntry[]),
+  );
+  const servers = new Servers(storage, "https://a.example.com", key);
+  const calls: string[] = [];
+  serve({
+    StartRefresh: (b) => (calls.push(`start ${(b as { sessionId: string }).sessionId}`), { nonce: base64(nonce) }),
+    RefreshSession: async (b) => {
+      const r = b as { nonce: string; signature: string };
+      const ok = await crypto.subtle.verify(
+        "Ed25519",
+        publicKey,
+        unbase64(r.signature) as BufferSource,
+        refreshMessage(sessionId, unbase64(r.nonce)) as BufferSource,
+      );
+      calls.push(`refresh ${ok}`);
+      return ok
+        ? { accessToken: "new", accessTokenExpireTime: new Date(Date.now() + 3_600_000).toISOString() }
+        : Response.json({ code: "unauthenticated" }, { status: 401 });
+    },
+    GetHealth: (_, init) => (calls.push(`health ${new Headers(init.headers).get("authorization")}`), {}),
+  });
+  await servers.client(SystemService, servers.get("a")!).getHealth({});
+  expect(calls).toEqual([`start ${sessionId}`, "refresh true", "health Bearer new"]);
+  expect(servers.get("a")?.expires).toBeGreaterThan(soon);
+});
+
+test("an expired token is refreshed and the call made again", async () => {
+  const storage = memory();
+  storage.setItem(
+    "mavio.servers",
+    JSON.stringify([
+      { id: "a", name: "a", version: "1", url: "https://a.example.com", userId: "u", userName: "ann", sessionId: "01890a5d-ac96-774b-bcce-b302099a8057", token: "old" },
+    ] satisfies ServerEntry[]),
+  );
+  const servers = new Servers(storage, "https://a.example.com", memoryDeviceKey());
+  serve({
+    StartRefresh: () => ({ nonce: base64(new Uint8Array(32)) }),
+    RefreshSession: () => ({ accessToken: "new" }),
+    GetHealth: (_, init) =>
+      new Headers(init.headers).get("authorization") === "Bearer new"
+        ? {}
+        : Response.json({ code: "unauthenticated", message: "access token expired" }, { status: 401 }),
+  });
+  await servers.client(SystemService, servers.get("a")!).getHealth({});
+  expect(servers.get("a")?.token).toBe("new");
 });

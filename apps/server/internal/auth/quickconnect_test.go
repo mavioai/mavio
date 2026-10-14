@@ -13,7 +13,7 @@ import (
 func TestQuickConnect(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		q := NewQuickConnect()
-		tv := Device{ID: "tv", Name: "Living room", Client: "Mavio TV", ClientVersion: "1.0"}
+		tv := Device{ID: "tv", Name: "Living room", Client: "Mavio TV", ClientVersion: "1.0", Key: []byte("key")}
 		r := q.Start(tv)
 		if !regexp.MustCompile(`^[0-9]{6}$`).MatchString(r.Code) || len(r.Secret) != 64 || time.Until(r.Expires) != QuickConnectTimeout {
 			t.Fatalf("request = %+v", r)
@@ -26,11 +26,11 @@ func TestQuickConnect(t *testing.T) {
 		}
 
 		signedIn := 0
-		signIn := func(d Device) (core.AuthSession, string, error) {
+		signIn := func(d Device) (core.AuthSession, error) {
 			signedIn++
-			return core.AuthSession{ID: core.NewID(), DeviceID: d.ID}, "token", nil
+			return core.AuthSession{ID: core.NewID(), DeviceID: d.ID, DeviceKey: d.Key}, nil
 		}
-		if d, err := q.Authorize(r.Code, signIn); err != nil || d != tv {
+		if d, err := q.Authorize(r.Code, signIn); err != nil || d.ID != tv.ID {
 			t.Fatalf("Authorize = %+v, %v", d, err)
 		}
 		if _, err := q.Authorize(r.Code, signIn); !errors.Is(err, core.ErrConflict) || signedIn != 1 {
@@ -39,9 +39,9 @@ func TestQuickConnect(t *testing.T) {
 		if st, err := q.State(r.Secret); err != nil || !st.Authorized {
 			t.Errorf("state = %+v, %v; want authorized", st, err)
 		}
-		// The device claims its token once.
+		// The device claims its session once.
 		got, err := q.Claim(r.Secret)
-		if err != nil || got.Token != "token" || got.Session.DeviceID != "tv" {
+		if err != nil || got.Session.DeviceID != "tv" || string(got.Session.DeviceKey) != "key" {
 			t.Errorf("Claim = %+v, %v", got, err)
 		}
 		if _, err := q.Claim(r.Secret); !errors.Is(err, core.ErrNotFound) {

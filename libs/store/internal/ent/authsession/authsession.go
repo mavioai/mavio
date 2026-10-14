@@ -17,8 +17,8 @@ const (
 	FieldID = "id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldTokenHash holds the string denoting the token_hash field in the database.
-	FieldTokenHash = "token_hash"
+	// FieldDeviceKey holds the string denoting the device_key field in the database.
+	FieldDeviceKey = "device_key"
 	// FieldDeviceID holds the string denoting the device_id field in the database.
 	FieldDeviceID = "device_id"
 	// FieldDeviceName holds the string denoting the device_name field in the database.
@@ -48,7 +48,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUserID,
-	FieldTokenHash,
+	FieldDeviceKey,
 	FieldDeviceID,
 	FieldDeviceName,
 	FieldClient,

@@ -23,11 +23,14 @@ const (
 // Device describes a client installation signing in.
 type Device struct {
 	ID, Name, Client, ClientVersion string
+	// Key is the device's Ed25519 public key, which its session is bound
+	// to.
+	Key []byte
 }
 
 // QuickConnect keeps the pending Quick Connect requests in memory: a new
 // device starts one and shows its code, a signed-in user authorizes the
-// code, and the device claims its access token with the request's secret.
+// code, and the device claims its session with the request's secret.
 type QuickConnect struct {
 	mu       sync.Mutex
 	byCode   map[string]*QuickConnectRequest
@@ -39,10 +42,9 @@ type QuickConnectRequest struct {
 	Secret, Code string
 	Device       Device
 	Expires      time.Time
-	// Authorized is set once a user signed the device in; Token is its
-	// access token, claimed once.
+	// Authorized is set once a user signed the device in; Session is its
+	// session, claimed once.
 	Authorized bool
-	Token      string
 	Session    core.AuthSession
 }
 
@@ -93,10 +95,9 @@ func (q *QuickConnect) State(secret string) (QuickConnectRequest, error) {
 }
 
 // Authorize signs the device waiting with code in through signIn, which
-// creates its session and returns its access token. The request then
-// waits a minute for its device to claim the token. An authorized code is
-// ErrConflict.
-func (q *QuickConnect) Authorize(code string, signIn func(Device) (core.AuthSession, string, error)) (Device, error) {
+// creates its session. The request then waits a minute for its device to
+// claim the session. An authorized code is ErrConflict.
+func (q *QuickConnect) Authorize(code string, signIn func(Device) (core.AuthSession, error)) (Device, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 	q.expire(time.Now())
@@ -107,16 +108,16 @@ func (q *QuickConnect) Authorize(code string, signIn func(Device) (core.AuthSess
 	case r.Authorized:
 		return Device{}, fmt.Errorf("quick connect code already authorized: %w", core.ErrConflict)
 	}
-	sess, token, err := signIn(r.Device)
+	sess, err := signIn(r.Device)
 	if err != nil {
 		return Device{}, err
 	}
-	r.Authorized, r.Token, r.Session = true, token, sess
+	r.Authorized, r.Session = true, sess
 	r.Expires = time.Now().Add(QuickConnectClaimTime)
 	return r.Device, nil
 }
 
-// Claim returns the access token of an authorized request, once.
+// Claim returns the session of an authorized request, once.
 func (q *QuickConnect) Claim(secret string) (QuickConnectRequest, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()

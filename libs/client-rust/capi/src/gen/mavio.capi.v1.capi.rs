@@ -361,8 +361,9 @@ pub struct Open {
     pub database_path: ::buffa::alloc::string::String,
     /// Field 2: `device`
     pub device: ::buffa::MessageField<Device, ::buffa::Inline<Device>>,
-    /// The access tokens the app keeps, by server ID; TokenChanged tells it of
-    /// new and forgotten ones.
+    /// The secrets the app keeps for the core: the credentials of each
+    /// server's session, by server ID, and the device key, under
+    /// "device-key". TokenChanged tells it of new and forgotten ones.
     ///
     /// Field 3: `tokens`
     pub tokens: ::buffa::__private::HashMap<
@@ -2852,7 +2853,7 @@ pub mod stream_state {
         /// Connecting, or waiting to reconnect.
         STATE_OFFLINE = 1i32,
         STATE_ONLINE = 2i32,
-        /// The server rejected the token; the user signs in again.
+        /// The server ended the session; the user signs in again.
         STATE_SIGNED_OUT = 3i32,
     }
     impl State {
@@ -3326,8 +3327,9 @@ impl ::buffa::ExtensionSet for SessionsChanged {
         &mut self.__buffa_unknown_fields
     }
 }
-/// The core has a new access token for the server, which the app keeps in
-/// the system's secure storage, or forgot it when the token is empty.
+/// The core has a new secret under the event's server ID, a session's
+/// credentials or the device key, which the app keeps as it is in the
+/// system's secure storage, or forgot it when the token is empty.
 #[derive(Clone, PartialEq, Default)]
 pub struct TokenChanged {
     /// Field 1: `token`

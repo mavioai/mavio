@@ -67,17 +67,40 @@
 <script>
 "use strict";
 const $ = (id) => document.getElementById(id);
-const device = (() => {
+const base64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
+const unbase64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+// The device's Ed25519 key, which signs the refreshes of its session; its
+// private half stays non-extractable in IndexedDB.
+const keys = (async () => {
+  const req = (r) => new Promise((ok, fail) => { r.onsuccess = () => ok(r.result); r.onerror = () => fail(r.error); });
+  const open = indexedDB.open("mavio-dev-player", 1);
+  open.onupgradeneeded = () => open.result.createObjectStore("keys");
+  const db = await req(open);
+  let pair = await req(db.transaction("keys").objectStore("keys").get("device"));
+  if (!pair) {
+    pair = await crypto.subtle.generateKey({ name: "Ed25519" }, false, ["sign", "verify"]);
+    await req(db.transaction("keys", "readwrite").objectStore("keys").put(pair, "device"));
+  }
+  return pair;
+})();
+async function device() {
   let id = localStorage.getItem("mavio.device");
   if (!id) { id = crypto.randomUUID(); localStorage.setItem("mavio.device", id); }
-  return { id, name: navigator.platform || "Browser", client: "Mavio Dev Player", clientVersion: "0" };
-})();
-let token = localStorage.getItem("mavio.token") || "";
+  const publicKey = base64(await crypto.subtle.exportKey("raw", (await keys).publicKey));
+  return { id, name: navigator.platform || "Browser", client: "Mavio Dev Player", clientVersion: "0", publicKey };
+}
+// The session: its ID, access token and the token's expiry.
+let session = JSON.parse(localStorage.getItem("mavio.session") || "null");
+function keep(s) {
+  session = s;
+  if (s) localStorage.setItem("mavio.session", JSON.stringify(s)); else localStorage.removeItem("mavio.session");
+}
+const token = () => (session ? session.token : "");
 
-async function rpc(method, body) {
+async function call(method, body) {
   const resp = await fetch("/" + method, {
     method: "POST",
-    headers: Object.assign({ "Content-Type": "application/json" }, token ? { Authorization: "Bearer " + token } : {}),
+    headers: Object.assign({ "Content-Type": "application/json" }, token() ? { Authorization: "Bearer " + token() } : {}),
     body: JSON.stringify(body || {}),
   });
   const data = await resp.json().catch(() => ({}));
@@ -85,12 +108,48 @@ async function rpc(method, body) {
   return data;
 }
 
+// refresh signs a nonce with the device key for a new access token; a
+// session the server no longer refreshes is forgotten.
+async function refresh() {
+  const id = session.id;
+  try {
+    const { nonce } = await call("mavio.auth.v1.AuthService/StartRefresh", { sessionId: id });
+    const hex = id.replaceAll("-", "");
+    const message = new Uint8Array([
+      ...new TextEncoder().encode("mavio-session-refresh-v1\0"),
+      ...hex.match(/../g).map((h) => parseInt(h, 16)),
+      ...unbase64(nonce),
+    ]);
+    const signature = base64(await crypto.subtle.sign("Ed25519", (await keys).privateKey, message));
+    const r = await call("mavio.auth.v1.AuthService/RefreshSession", { sessionId: id, nonce, signature });
+    keep({ id, token: r.accessToken, expires: Date.parse(r.accessTokenExpireTime) });
+  } catch (e) {
+    if (e.code === "unauthenticated") keep(null);
+    throw e;
+  }
+}
+
+async function rpc(method, body) {
+  if (session && session.expires - Date.now() < 5 * 60e3) await refresh();
+  try {
+    return await call(method, body);
+  } catch (e) {
+    if (e.code !== "unauthenticated" || !session) throw e;
+    await refresh();
+    return call(method, body);
+  }
+}
+
+function signedIn(resp) {
+  keep({ id: resp.session.id, token: resp.accessToken, expires: Date.parse(resp.accessTokenExpireTime) });
+}
+
 function show(view) { for (const v of ["login", "browse", "player"]) $(v).classList.toggle("hidden", v !== view); }
 
 async function start() {
-  if (token) {
+  if (session) {
     try { await rpc("mavio.user.v1.UserService/GetCurrentUser"); show("browse"); return list(); }
-    catch (e) { token = ""; localStorage.removeItem("mavio.token"); }
+    catch (e) { keep(null); }
   }
   const info = await rpc("mavio.auth.v1.AuthService/GetAuthInfo");
   $("loginButton").textContent = info.setupRequired ? "Create administrator" : "Sign in";
@@ -100,18 +159,18 @@ async function start() {
 
 $("login").onsubmit = async (e) => {
   e.preventDefault();
-  const body = { name: $("name").value, password: $("password").value, device };
+  const body = { name: $("name").value, password: $("password").value, device: await device() };
   const method = $("login").dataset.setup ? "CreateFirstUser" : "Login";
   try {
     const resp = await rpc("mavio.auth.v1.AuthService/" + method, body);
-    token = resp.accessToken; localStorage.setItem("mavio.token", token);
+    signedIn(resp);
     show("browse"); list();
   } catch (err) { alert(err.message); }
 };
 
 $("logout").onclick = async () => {
   try { await rpc("mavio.auth.v1.AuthService/Logout"); } catch (e) {}
-  token = ""; localStorage.removeItem("mavio.token"); start();
+  keep(null); start();
 };
 
 async function list() {
@@ -286,7 +345,7 @@ window.addEventListener("pagehide", () => {
   if (!current) return;
   fetch("/mavio.playback.v1.PlaybackService/StopPlayback", {
     method: "POST", keepalive: true,
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token() },
     body: JSON.stringify({ playbackId: current.playbackId, position: position() }),
   });
 });

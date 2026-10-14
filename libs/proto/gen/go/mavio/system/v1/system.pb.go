@@ -3091,6 +3091,7 @@ type ServerSettings struct {
 	xxx_hidden_Acquisition         *AcquisitionSettings   `protobuf:"bytes,6,opt,name=acquisition"`
 	xxx_hidden_Requests            *RequestSettings       `protobuf:"bytes,7,opt,name=requests"`
 	xxx_hidden_Metadata            *MetadataSettings      `protobuf:"bytes,8,opt,name=metadata"`
+	xxx_hidden_SessionIdleDays     int32                  `protobuf:"varint,9,opt,name=session_idle_days,json=sessionIdleDays"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -3181,6 +3182,13 @@ func (x *ServerSettings) GetMetadata() *MetadataSettings {
 	return nil
 }
 
+func (x *ServerSettings) GetSessionIdleDays() int32 {
+	if x != nil {
+		return x.xxx_hidden_SessionIdleDays
+	}
+	return 0
+}
+
 func (x *ServerSettings) SetTranscoding(v *TranscodingSettings) {
 	x.xxx_hidden_Transcoding = v
 }
@@ -3199,7 +3207,7 @@ func (x *ServerSettings) SetUpdateTime(v *timestamppb.Timestamp) {
 
 func (x *ServerSettings) SetPasswordResetPlugin(v string) {
 	x.xxx_hidden_PasswordResetPlugin = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
 }
 
 func (x *ServerSettings) SetAcquisition(v *AcquisitionSettings) {
@@ -3212,6 +3220,11 @@ func (x *ServerSettings) SetRequests(v *RequestSettings) {
 
 func (x *ServerSettings) SetMetadata(v *MetadataSettings) {
 	x.xxx_hidden_Metadata = v
+}
+
+func (x *ServerSettings) SetSessionIdleDays(v int32) {
+	x.xxx_hidden_SessionIdleDays = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
 }
 
 func (x *ServerSettings) HasTranscoding() bool {
@@ -3263,6 +3276,13 @@ func (x *ServerSettings) HasMetadata() bool {
 	return x.xxx_hidden_Metadata != nil
 }
 
+func (x *ServerSettings) HasSessionIdleDays() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *ServerSettings) ClearTranscoding() {
 	x.xxx_hidden_Transcoding = nil
 }
@@ -3292,6 +3312,11 @@ func (x *ServerSettings) ClearMetadata() {
 	x.xxx_hidden_Metadata = nil
 }
 
+func (x *ServerSettings) ClearSessionIdleDays() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_SessionIdleDays = 0
+}
+
 type ServerSettings_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -3312,6 +3337,9 @@ type ServerSettings_builder struct {
 	// The language and country of metadata beside libraries'; unset in an
 	// update keeps the current ones.
 	Metadata *MetadataSettings
+	// How many days a signed-in device stays signed in unused, 1–3650; 0 in
+	// an update keeps the current value.
+	SessionIdleDays *int32
 }
 
 func (b0 ServerSettings_builder) Build() *ServerSettings {
@@ -3323,12 +3351,16 @@ func (b0 ServerSettings_builder) Build() *ServerSettings {
 	x.xxx_hidden_PluginCatalogs = b.PluginCatalogs
 	x.xxx_hidden_UpdateTime = b.UpdateTime
 	if b.PasswordResetPlugin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
 		x.xxx_hidden_PasswordResetPlugin = b.PasswordResetPlugin
 	}
 	x.xxx_hidden_Acquisition = b.Acquisition
 	x.xxx_hidden_Requests = b.Requests
 	x.xxx_hidden_Metadata = b.Metadata
+	if b.SessionIdleDays != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		x.xxx_hidden_SessionIdleDays = *b.SessionIdleDays
+	}
 	return m0
 }
 
@@ -6422,7 +6454,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"https_port\x18\x03 \x01(\x05B\v\xbaH\b\x1a\x06\x18\xff\xff\x03(\x00R\thttpsPort\x12)\n" +
 	"\x10certificate_path\x18\x04 \x01(\tR\x0fcertificatePath\x12\x19\n" +
 	"\bkey_path\x18\x05 \x01(\tR\akeyPath\x12'\n" +
-	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\x92\x04\n" +
+	"\x0flocal_discovery\x18\x06 \x01(\bR\x0elocalDiscovery\"\xca\x04\n" +
 	"\x0eServerSettings\x12N\n" +
 	"\vtranscoding\x18\x01 \x01(\v2$.mavio.system.v1.TranscodingSettingsB\x06\xbaH\x03\xc8\x01\x01R\vtranscoding\x12B\n" +
 	"\anetwork\x18\x02 \x01(\v2 .mavio.system.v1.NetworkSettingsB\x06\xbaH\x03\xc8\x01\x01R\anetwork\x126\n" +
@@ -6433,7 +6465,9 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x15password_reset_plugin\x18\x05 \x01(\tR\x13passwordResetPlugin\x12F\n" +
 	"\vacquisition\x18\x06 \x01(\v2$.mavio.system.v1.AcquisitionSettingsR\vacquisition\x12<\n" +
 	"\brequests\x18\a \x01(\v2 .mavio.system.v1.RequestSettingsR\brequests\x12=\n" +
-	"\bmetadata\x18\b \x01(\v2!.mavio.system.v1.MetadataSettingsR\bmetadata\"\xba\t\n" +
+	"\bmetadata\x18\b \x01(\v2!.mavio.system.v1.MetadataSettingsR\bmetadata\x126\n" +
+	"\x11session_idle_days\x18\t \x01(\x05B\n" +
+	"\xbaH\a\x1a\x05\x18\xc2\x1c(\x00R\x0fsessionIdleDays\"\xba\t\n" +
 	"\x0fRequestSettings\x124\n" +
 	"\x16default_request_movies\x18\x01 \x01(\bR\x14defaultRequestMovies\x124\n" +
 	"\x16default_request_series\x18\x02 \x01(\bR\x14defaultRequestSeries\x12=\n" +

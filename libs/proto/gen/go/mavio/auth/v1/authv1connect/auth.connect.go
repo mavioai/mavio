@@ -40,6 +40,12 @@ const (
 	AuthServiceCreateFirstUserProcedure = "/mavio.auth.v1.AuthService/CreateFirstUser"
 	// AuthServiceLoginProcedure is the fully-qualified name of the AuthService's Login RPC.
 	AuthServiceLoginProcedure = "/mavio.auth.v1.AuthService/Login"
+	// AuthServiceStartRefreshProcedure is the fully-qualified name of the AuthService's StartRefresh
+	// RPC.
+	AuthServiceStartRefreshProcedure = "/mavio.auth.v1.AuthService/StartRefresh"
+	// AuthServiceRefreshSessionProcedure is the fully-qualified name of the AuthService's
+	// RefreshSession RPC.
+	AuthServiceRefreshSessionProcedure = "/mavio.auth.v1.AuthService/RefreshSession"
 	// AuthServiceLogoutProcedure is the fully-qualified name of the AuthService's Logout RPC.
 	AuthServiceLogoutProcedure = "/mavio.auth.v1.AuthService/Logout"
 	// AuthServiceListSessionsProcedure is the fully-qualified name of the AuthService's ListSessions
@@ -87,6 +93,17 @@ type AuthServiceClient interface {
 	// Login signs a device in, replacing its previous session. Wrong
 	// credentials and disabled users fail with UNAUTHENTICATED.
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// StartRefresh gives a session's device a nonce to sign for
+	// RefreshSession, valid for two minutes. Unknown sessions are
+	// UNAUTHENTICATED.
+	StartRefresh(context.Context, *v1.StartRefreshRequest) (*v1.StartRefreshResponse, error)
+	// RefreshSession issues a new access token for the device's signature of
+	// the nonce: Ed25519 over "mavio-session-refresh-v1", a zero byte, the
+	// session ID's 16 bytes and the nonce. A wrong signature, a used or
+	// expired nonce, a disabled user and a session idle for longer than the
+	// server's session_idle_days are UNAUTHENTICATED; the device then signs
+	// in again.
+	RefreshSession(context.Context, *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error)
 	// Logout ends the calling session.
 	Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error)
 	// ListSessions lists the calling user's signed-in devices, most recently
@@ -155,6 +172,18 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			httpClient,
 			baseURL+AuthServiceLoginProcedure,
 			connect.WithSchema(authServiceMethods.ByName("Login")),
+			connect.WithClientOptions(opts...),
+		),
+		startRefresh: connect.NewClient[v1.StartRefreshRequest, v1.StartRefreshResponse](
+			httpClient,
+			baseURL+AuthServiceStartRefreshProcedure,
+			connect.WithSchema(authServiceMethods.ByName("StartRefresh")),
+			connect.WithClientOptions(opts...),
+		),
+		refreshSession: connect.NewClient[v1.RefreshSessionRequest, v1.RefreshSessionResponse](
+			httpClient,
+			baseURL+AuthServiceRefreshSessionProcedure,
+			connect.WithSchema(authServiceMethods.ByName("RefreshSession")),
 			connect.WithClientOptions(opts...),
 		),
 		logout: connect.NewClient[v1.LogoutRequest, v1.LogoutResponse](
@@ -240,6 +269,8 @@ type authServiceClient struct {
 	getAuthInfo           *connect.Client[v1.GetAuthInfoRequest, v1.GetAuthInfoResponse]
 	createFirstUser       *connect.Client[v1.CreateFirstUserRequest, v1.CreateFirstUserResponse]
 	login                 *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	startRefresh          *connect.Client[v1.StartRefreshRequest, v1.StartRefreshResponse]
+	refreshSession        *connect.Client[v1.RefreshSessionRequest, v1.RefreshSessionResponse]
 	logout                *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
 	listSessions          *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
 	revokeSession         *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
@@ -275,6 +306,24 @@ func (c *authServiceClient) CreateFirstUser(ctx context.Context, req *v1.CreateF
 // Login calls mavio.auth.v1.AuthService.Login.
 func (c *authServiceClient) Login(ctx context.Context, req *v1.LoginRequest) (*v1.LoginResponse, error) {
 	response, err := c.login.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// StartRefresh calls mavio.auth.v1.AuthService.StartRefresh.
+func (c *authServiceClient) StartRefresh(ctx context.Context, req *v1.StartRefreshRequest) (*v1.StartRefreshResponse, error) {
+	response, err := c.startRefresh.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// RefreshSession calls mavio.auth.v1.AuthService.RefreshSession.
+func (c *authServiceClient) RefreshSession(ctx context.Context, req *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error) {
+	response, err := c.refreshSession.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -400,6 +449,17 @@ type AuthServiceHandler interface {
 	// Login signs a device in, replacing its previous session. Wrong
 	// credentials and disabled users fail with UNAUTHENTICATED.
 	Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error)
+	// StartRefresh gives a session's device a nonce to sign for
+	// RefreshSession, valid for two minutes. Unknown sessions are
+	// UNAUTHENTICATED.
+	StartRefresh(context.Context, *v1.StartRefreshRequest) (*v1.StartRefreshResponse, error)
+	// RefreshSession issues a new access token for the device's signature of
+	// the nonce: Ed25519 over "mavio-session-refresh-v1", a zero byte, the
+	// session ID's 16 bytes and the nonce. A wrong signature, a used or
+	// expired nonce, a disabled user and a session idle for longer than the
+	// server's session_idle_days are UNAUTHENTICATED; the device then signs
+	// in again.
+	RefreshSession(context.Context, *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error)
 	// Logout ends the calling session.
 	Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error)
 	// ListSessions lists the calling user's signed-in devices, most recently
@@ -464,6 +524,18 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		AuthServiceLoginProcedure,
 		svc.Login,
 		connect.WithSchema(authServiceMethods.ByName("Login")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceStartRefreshHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceStartRefreshProcedure,
+		svc.StartRefresh,
+		connect.WithSchema(authServiceMethods.ByName("StartRefresh")),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceRefreshSessionHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceRefreshSessionProcedure,
+		svc.RefreshSession,
+		connect.WithSchema(authServiceMethods.ByName("RefreshSession")),
 		connect.WithHandlerOptions(opts...),
 	)
 	authServiceLogoutHandler := connect.NewUnaryHandlerSimple(
@@ -549,6 +621,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceCreateFirstUserHandler.ServeHTTP(w, r)
 		case AuthServiceLoginProcedure:
 			authServiceLoginHandler.ServeHTTP(w, r)
+		case AuthServiceStartRefreshProcedure:
+			authServiceStartRefreshHandler.ServeHTTP(w, r)
+		case AuthServiceRefreshSessionProcedure:
+			authServiceRefreshSessionHandler.ServeHTTP(w, r)
 		case AuthServiceLogoutProcedure:
 			authServiceLogoutHandler.ServeHTTP(w, r)
 		case AuthServiceListSessionsProcedure:
@@ -592,6 +668,14 @@ func (UnimplementedAuthServiceHandler) CreateFirstUser(context.Context, *v1.Crea
 
 func (UnimplementedAuthServiceHandler) Login(context.Context, *v1.LoginRequest) (*v1.LoginResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.Login is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) StartRefresh(context.Context, *v1.StartRefreshRequest) (*v1.StartRefreshResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartRefresh is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) RefreshSession(context.Context, *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.RefreshSession is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error) {

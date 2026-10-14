@@ -21,8 +21,8 @@ type AuthSession struct {
 	ID core.ID `json:"id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID core.ID `json:"user_id,omitempty"`
-	// TokenHash holds the value of the "token_hash" field.
-	TokenHash []byte `json:"-"`
+	// DeviceKey holds the value of the "device_key" field.
+	DeviceKey []byte `json:"device_key,omitempty"`
 	// DeviceID holds the value of the "device_id" field.
 	DeviceID string `json:"device_id,omitempty"`
 	// DeviceName holds the value of the "device_name" field.
@@ -66,7 +66,7 @@ func (*AuthSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authsession.FieldTokenHash:
+		case authsession.FieldDeviceKey:
 			values[i] = new([]byte)
 		case authsession.FieldID, authsession.FieldUserID:
 			values[i] = new(core.ID)
@@ -101,11 +101,11 @@ func (_m *AuthSession) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.UserID = *value
 			}
-		case authsession.FieldTokenHash:
+		case authsession.FieldDeviceKey:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field token_hash", values[i])
+				return fmt.Errorf("unexpected type %T for field device_key", values[i])
 			} else if value != nil {
-				_m.TokenHash = *value
+				_m.DeviceKey = *value
 			}
 		case authsession.FieldDeviceID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -187,7 +187,8 @@ func (_m *AuthSession) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("token_hash=<sensitive>")
+	builder.WriteString("device_key=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DeviceKey))
 	builder.WriteString(", ")
 	builder.WriteString("device_id=")
 	builder.WriteString(_m.DeviceID)

@@ -17,21 +17,21 @@ func TestAuthSessions(t *testing.T) {
 		if err := s.Users().Create(ctx, &alice); err != nil {
 			t.Fatal(err)
 		}
-		hash := func(token string) []byte { h := sha256.Sum256([]byte(token)); return h[:] }
+		key := func(device string) []byte { h := sha256.Sum256([]byte(device)); return h[:] }
 		at := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
-		phone := core.AuthSession{UserID: alice.ID, TokenHash: hash("one"), DeviceID: "phone", DeviceName: "Pixel", Client: "Mavio Android", ClientVersion: "1.0", LastSeenAt: at}
-		tv := core.AuthSession{UserID: alice.ID, TokenHash: hash("two"), DeviceID: "tv", LastSeenAt: at.Add(time.Hour)}
+		phone := core.AuthSession{UserID: alice.ID, DeviceKey: key("phone"), DeviceID: "phone", DeviceName: "Pixel", Client: "Mavio Android", ClientVersion: "1.0", LastSeenAt: at}
+		tv := core.AuthSession{UserID: alice.ID, DeviceKey: key("tv"), DeviceID: "tv", LastSeenAt: at.Add(time.Hour)}
 		for _, sess := range []*core.AuthSession{&phone, &tv} {
 			if err := s.AuthSessions().Create(ctx, sess); err != nil {
 				t.Fatal(err)
 			}
 		}
-		got, err := s.AuthSessions().GetByTokenHash(ctx, hash("one"))
-		if err != nil || got.ID != phone.ID || got.DeviceName != "Pixel" || got.Client != "Mavio Android" || !got.LastSeenAt.Equal(at) {
-			t.Errorf("GetByTokenHash = %+v, %v", got, err)
+		got, err := s.AuthSessions().Get(ctx, phone.ID)
+		if err != nil || string(got.DeviceKey) != string(key("phone")) || got.DeviceName != "Pixel" || got.Client != "Mavio Android" || !got.LastSeenAt.Equal(at) {
+			t.Errorf("Get = %+v, %v", got, err)
 		}
-		if _, err := s.AuthSessions().GetByTokenHash(ctx, hash("unknown")); !errors.Is(err, core.ErrNotFound) {
-			t.Errorf("unknown token: %v, want ErrNotFound", err)
+		if _, err := s.AuthSessions().Get(ctx, core.NewID()); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("unknown session: %v, want ErrNotFound", err)
 		}
 		list, err := s.AuthSessions().ListForUser(ctx, alice.ID)
 		if err != nil || len(list) != 2 || list[0].ID != tv.ID {
@@ -39,12 +39,12 @@ func TestAuthSessions(t *testing.T) {
 		}
 
 		// Signing in again on the phone replaces its session.
-		again := core.AuthSession{UserID: alice.ID, TokenHash: hash("three"), DeviceID: "phone"}
+		again := core.AuthSession{UserID: alice.ID, DeviceKey: key("phone again"), DeviceID: "phone"}
 		if err := s.AuthSessions().Create(ctx, &again); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := s.AuthSessions().GetByTokenHash(ctx, hash("one")); !errors.Is(err, core.ErrNotFound) {
-			t.Errorf("replaced token: %v, want ErrNotFound", err)
+		if _, err := s.AuthSessions().Get(ctx, phone.ID); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("replaced session: %v, want ErrNotFound", err)
 		}
 		if err := s.AuthSessions().Touch(ctx, again.ID, at.Add(2*time.Hour)); err != nil {
 			t.Fatal(err)
@@ -59,15 +59,27 @@ func TestAuthSessions(t *testing.T) {
 		if err := s.AuthSessions().Delete(ctx, tv.ID); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("second Delete: %v, want ErrNotFound", err)
 		}
-		if err := s.AuthSessions().Create(ctx, &core.AuthSession{UserID: alice.ID, TokenHash: []byte("x"), DeviceID: "d"}); !errors.Is(err, core.ErrInvalid) {
+		if err := s.AuthSessions().Create(ctx, &core.AuthSession{UserID: alice.ID, DeviceKey: []byte("x"), DeviceID: "d"}); !errors.Is(err, core.ErrInvalid) {
 			t.Errorf("invalid session: %v, want ErrInvalid", err)
+		}
+
+		// Sessions unused since before the phone's activity are purged.
+		idle := core.AuthSession{UserID: alice.ID, DeviceKey: key("old"), DeviceID: "old", LastSeenAt: at.Add(-time.Hour)}
+		if err := s.AuthSessions().Create(ctx, &idle); err != nil {
+			t.Fatal(err)
+		}
+		if n, err := s.AuthSessions().PurgeIdle(ctx, at); err != nil || n != 1 {
+			t.Errorf("PurgeIdle = %d, %v, want = 1", n, err)
+		}
+		if _, err := s.AuthSessions().Get(ctx, idle.ID); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("idle session: %v, want ErrNotFound", err)
 		}
 
 		// Deleting the user signs it out everywhere.
 		if err := s.Users().Delete(ctx, alice.ID); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := s.AuthSessions().GetByTokenHash(ctx, hash("three")); !errors.Is(err, core.ErrNotFound) {
+		if _, err := s.AuthSessions().Get(ctx, again.ID); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("session of a deleted user: %v, want ErrNotFound", err)
 		}
 	})
