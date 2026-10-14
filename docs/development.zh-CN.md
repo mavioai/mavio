@@ -65,7 +65,7 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `tools/nx-cargo` 为每个 Cargo workspace 生成 `build`（`cargo build --locked --all-targets`）、`test`（`cargo test --locked`）、`bench`（`cargo bench --locked`，不缓存）与 `lint`（`cargo fmt --check` 与 `cargo clippy --locked --all-targets -- -D warnings`）。
 
-`package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。
+`package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。`libs/plugin` 也是如此：其 TypeScript SDK `@mavio/plugin` 有 `typecheck` 与 `test-ts`（Vitest），其 Go 的 `test` 依赖后者，因为名为 `test` 的脚本会取代推断出的目标。
 
 `libs/client-rust/capi` 既是 Cargo workspace 的 crate，又是 Go 模块，即 C ABI 的 Go 绑定；作为位于 Cargo workspace 目录中的 Go 项目，它是 Nx 项目 `capi`，Nx 把其中的文件算作它自己的，因此 `client-rust` 的 Cargo 目标在输入中列出它的 Rust 源码（`libs/client-rust/project.json`）。其 `test` 在 `client-rust:build` 之后以 `CGO_ENABLED=0` 运行（与应用的构建方式一致），从 `target/debug` 加载该库；`generate` 为 `libs/client-rust/proto` 中 C ABI 的消息运行 `buf generate`，把 Go 写入 `gen/`、Rust 写入 `src/gen/`（均提交入库），`buf-lint` 检查这些消息。
 

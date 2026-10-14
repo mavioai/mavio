@@ -65,7 +65,7 @@ A project overrides a default target with a `project.json` next to its `go.mod`;
 
 `tools/nx-cargo` gives every Cargo workspace `build` (`cargo build --locked --all-targets`), `test` (`cargo test --locked`), `bench` (`cargo bench --locked`, not cached) and `lint` (`cargo fmt --check` and `cargo clippy --locked --all-targets -- -D warnings`).
 
-The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both.
+The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both. `libs/plugin` is one too: its TypeScript SDK `@mavio/plugin` has `typecheck` and `test-ts` (Vitest), on which its Go `test` depends, since a script named `test` would replace the inferred one.
 
 `libs/client-rust/capi` is a crate of the Cargo workspace and a Go module, the C ABI's Go binding; as a Go project in the Cargo workspace's directory, it is the Nx project `capi`, whose files Nx counts as its own, so the Cargo targets of `client-rust` name its Rust sources among their inputs (`libs/client-rust/project.json`). Its `test` runs after `client-rust:build` with `CGO_ENABLED=0`, as the app builds, and loads the library from `target/debug`; `generate` runs `buf generate` for the C ABI's messages in `libs/client-rust/proto`, writing Go into `gen/` and Rust into `src/gen/` (both committed), and `buf-lint` checks them.
 

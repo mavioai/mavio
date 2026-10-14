@@ -87,7 +87,7 @@ mavio/
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] Contracts: *.proto sources, buf config, generated Go/TS code
-│   ├── plugin/                  # [Go] Plugin SDK and host runtimes (wasm + child process)
+│   ├── plugin/                  # [Go + TS] Plugin SDK and host runtimes (wasm + child process); TS SDK for process plugins
 │   ├── core/                    # [Go] Domain model and repository ports (see domain.md); no infrastructure dependencies
 │   ├── store/                   # [Go] ent schema, sqlc queries, Atlas migrations, repository implementations
 │   ├── naming/                  # [Go] File / directory name parsing
@@ -301,9 +301,10 @@ libs/plugin/
 │   ├── wasm/        # //go:build wasip1: module exports, HTTP through the host
 │   └── process/     # Serve: listen on the socket, authenticate, handshake, exit after Shutdown
 ├── internal/        # abi (WASM envelopes), proc (process protocol), clients, testplugin
-└── schema/          # (later) JSON Schema generation from Go structs for configuration forms
+├── schema/          # (later) JSON Schema generation from Go structs for configuration forms
+└── ts/              # @mavio/plugin: serve, hostTransport, dataDir, hostOS for TypeScript process plugins
 ```
-A plugin registers its handlers in `init` with `guest.Handle(pluginv1connect.New…ServiceHandler(impl))`; a `wasip1` build imports `guest/wasm`, a native build calls `process.Serve`. `internal/testplugin` is a complete example built for both runtimes.
+A plugin registers its handlers in `init` with `guest.Handle(pluginv1connect.New…ServiceHandler(impl))`; a `wasip1` build imports `guest/wasm`, a native build calls `process.Serve`. `internal/testplugin` is a complete example built for both runtimes. Process plugins in TypeScript (Node or Bun) use `@mavio/plugin`: `serve` registers their Connect services from `@mavio/proto`, listens on the socket (on Windows on loopback TCP), authenticates, prints the handshake and returns after `Shutdown`; `hostTransport` is a Connect transport to the host API.
 
 ### 7.5 Plugins in the Server
 * **Plugin folder**: the server starts every folder of its plugin folder (`--plugin-dir`) that holds a `manifest.json`, through `libs/plugin/host`. A folder that cannot be read, a duplicate plugin ID or a plugin that fails to start is reported as failed and left out; the server runs on without it. Before that, the plugins of the seed folder (`--plugin-seed-dir`, such as those a container image ships) are copied into the plugin folder, each once: a marker file in the plugin folder records each plugin seeded, so one uninstalled or upgraded stays so, and a plugin the folder already holds is not copied.

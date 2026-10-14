@@ -87,7 +87,7 @@ mavio/
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
-│   ├── plugin/                  # [Go] 插件 SDK 与宿主运行时（wasm + 子进程）
+│   ├── plugin/                  # [Go + TS] 插件 SDK 与宿主运行时（wasm + 子进程）；子进程插件的 TS SDK
 │   ├── core/                    # [Go] 领域模型与仓储端口（见 domain.zh-CN.md）；不依赖任何基础设施
 │   ├── store/                   # [Go] ent schema、sqlc 查询、Atlas 迁移、仓储实现
 │   ├── naming/                  # [Go] 文件名 / 目录名解析
@@ -301,9 +301,10 @@ libs/plugin/
 │   ├── wasm/        # //go:build wasip1：模块导出、经宿主访问 HTTP
 │   └── process/     # Serve：监听 socket、认证、握手、收到 Shutdown 后退出
 ├── internal/        # abi（WASM 信封）、proc（子进程协议）、clients、testplugin
-└── schema/          # （后期）由 Go 结构体生成配置表单用的 JSON Schema
+├── schema/          # （后期）由 Go 结构体生成配置表单用的 JSON Schema
+└── ts/              # @mavio/plugin：TypeScript 子进程插件的 serve、hostTransport、dataDir、hostOS
 ```
-插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。
+插件在 `init` 中用 `guest.Handle(pluginv1connect.New…ServiceHandler(impl))` 注册 handler；`wasip1` 构建导入 `guest/wasm`，原生构建调用 `process.Serve`。`internal/testplugin` 是同时为两种运行时构建的完整示例。TypeScript（Node 或 Bun）编写的子进程插件使用 `@mavio/plugin`：`serve` 注册来自 `@mavio/proto` 的 Connect 服务，监听 socket（Windows 上为回环 TCP），认证、打印握手行，收到 `Shutdown` 后返回；`hostTransport` 是访问宿主 API 的 Connect transport。
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
