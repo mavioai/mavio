@@ -40,7 +40,7 @@ type answer struct {
 func newFake(t *testing.T) *fakeSite {
 	f := &fakeSite{t: t, answers: map[string][]answer{}}
 	f.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "key" {
+		if r.Header.Get("Authorization") != "key" && !strings.HasPrefix(r.URL.Path, "/anime-list") {
 			t.Errorf("Authorization = %q, want = key", r.Header.Get("Authorization"))
 		}
 		key := r.URL.Path
@@ -79,6 +79,7 @@ func newProvider(t *testing.T, f *fakeSite, extra string) (*Provider, *[]time.Du
 	u, _ := url.Parse(f.srv.URL)
 	jp := p.(*Provider)
 	jp.SetBaseURL(u)
+	jp.AniDB().SetURLs(f.srv.URL+"/anime-list.xml", f.srv.URL+"/anime-list-mini.json", f.srv.URL+"/httpapi")
 	var slept []time.Duration
 	jp.sleep = func(_ context.Context, d time.Duration) error {
 		slept = append(slept, d)
@@ -238,6 +239,54 @@ func TestSearchEpisodeFallbacks(t *testing.T) {
 	}
 	if got := ids(subs); !slices.Equal(got, []string{"b"}) {
 		t.Errorf("subtitles got = %v, want = [b]", got)
+	}
+}
+
+func TestSearchAnimeIDs(t *testing.T) {
+	f := newFake(t)
+	f.set("/anime-list.xml", ok(`<anime-list>
+  <anime anidbid="300" tvdbid="700" defaulttvdbseason="a" episodeoffset="">
+    <mapping-list><mapping anidbseason="1" tvdbseason="2" offset="13"></mapping></mapping-list>
+  </anime>
+</anime-list>`))
+	f.set("/anime-list-mini.json", ok(`[{"anidb_id": 300, "anilist_id": 9}, {"imdb_id": "tt1", "anilist_id": 8}]`))
+	f.set("/api/entries/search?anilist_id=9", ok(`[{"id":9,"anilist_id":9,"flags":{}}]`))
+	f.set("/api/entries/9/files?episode=15", ok(`[{"url":"a","name":"Show - 15.srt"}]`))
+	f.set("/api/entries/search?anilist_id=8", ok(`[{"id":8,"anilist_id":8,"flags":{"movie":true}}]`))
+	f.set("/api/entries/8/files", ok(`[{"url":"m","name":"Movie.srt"}]`))
+	p, _ := newProvider(t, f, "")
+
+	// An episode's AniList ID is its AniDB anime's, and AniDB's offset of
+	// its season gives its number in the anime.
+	v := &provider.Video{Episode: true, Series: "Show", Season: 2, Number: 2, SeriesExternalIDs: map[string]string{"tvdb": "700"}}
+	subs, err := p.Search(t.Context(), v, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := ids(subs), []string{"a#episode=15"}; !slices.Equal(got, want) {
+		t.Errorf("episode subtitles got = %v, want = %v", got, want)
+	}
+
+	// A movie's is its IMDb ID's.
+	subs, err = p.Search(t.Context(), &provider.Video{Title: "Movie", ExternalIDs: map[string]string{"imdb": "tt1"}}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := ids(subs), []string{"m"}; !slices.Equal(got, want) {
+		t.Errorf("movie subtitles got = %v, want = %v", got, want)
+	}
+
+	// The lists failing leaves the name to search by.
+	f.set("/anime-list.xml")
+	f.set("/api/entries/search?query=other", ok(`[]`))
+	f.set("/api/entries/search?anime=false&query=other", ok(`[]`))
+	p, _ = newProvider(t, f, "")
+	v = &provider.Video{Episode: true, Series: "Other", Season: 1, Number: 1, SeriesExternalIDs: map[string]string{"tvdb": "701"}}
+	if subs, err := p.Search(t.Context(), v, nil); err != nil || len(subs) != 0 {
+		t.Errorf("search got = %v, %v, want none", subs, err)
+	}
+	if !slices.Contains(f.requests, "/api/entries/search?query=other") {
+		t.Errorf("requests got = %v, want a search by name", f.requests)
 	}
 }
 

@@ -1,5 +1,7 @@
 // Package jimaku is the provider of Jimaku.cc, ported from Bazarr's
 // jimaku: Japanese subtitles of anime found by AniList ID, or by name.
+// AniList IDs and AniDB's episode offsets come from internal/anidb, as
+// Bazarr's refiners give them.
 package jimaku
 
 import (
@@ -14,6 +16,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mavioai/mavio/plugins/subtitles/internal/anidb"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -78,7 +81,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	sess.Header.Set("User-Agent", userAgent)
 	sess.Check = func(*site.Response) error { return nil }
 	return &Provider{
-		env: env, s: s, sess: sess, api: "https://jimaku.cc/api", sleep: site.Sleep,
+		env: env, s: s, sess: sess, anidb: anidb.New(env, anidb.Config{}), api: "https://jimaku.cc/api", sleep: site.Sleep,
 		cache: map[string]cached{},
 	}, nil
 }
@@ -88,6 +91,7 @@ type Provider struct {
 	env   provider.Env
 	s     settings
 	sess  *site.Session
+	anidb *anidb.Client
 	api   string
 	sleep func(context.Context, time.Duration) error
 
@@ -99,6 +103,9 @@ type cached struct {
 	data  json.RawMessage
 	until time.Time
 }
+
+// AniDB returns the provider's AniDB client, for tests.
+func (p *Provider) AniDB() *anidb.Client { return p.anidb }
 
 // SetBaseURL points the provider at another server, for tests.
 func (p *Provider) SetBaseURL(u *url.URL) { p.api = strings.TrimSuffix(u.String(), "/") + "/api" }
@@ -133,6 +140,35 @@ func hasSuffix(name string, exts []string) bool {
 	return slices.ContainsFunc(exts, func(e string) bool { return strings.HasSuffix(name, e) })
 }
 
+// animeIDs returns the video's AniList ID and, for an episode, AniDB's
+// episode offset of its season, as Bazarr's AniDB and AniList refiners:
+// the AniList ID the video carries, else the one Fribb's anime-lists give
+// the AniDB anime its TVDB IDs map to, or its IMDb ID; zero when unknown.
+// The anime lists failing leaves the IDs unknown, as refiners failing
+// do.
+func (p *Provider) animeIDs(ctx context.Context, v *provider.Video) (anilist, offset int) {
+	anilist = aniListID(v)
+	series := 0
+	if v.Episode {
+		ids, err := p.anidb.Refine(ctx, v, false)
+		if err != nil {
+			p.env.Log.WarnContext(ctx, "AniDB refinement failed", "series", v.Series, "error", err)
+		}
+		series, offset = ids.Series, ids.Offset
+		if series == 0 {
+			return anilist, offset
+		}
+	}
+	if anilist == 0 {
+		id, err := p.anidb.AniListID(ctx, v, series)
+		if err != nil {
+			p.env.Log.WarnContext(ctx, "AniList refinement failed", "error", err)
+		}
+		anilist = id
+	}
+	return anilist, offset
+}
+
 // aniListID returns the video's AniList ID: the episode's, or the
 // series'; 0 for none.
 func aniListID(v *provider.Video) int {
@@ -159,7 +195,7 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, _ []provider.L
 			mediaName += " " + strconv.Itoa(v.Season)
 		}
 	}
-	anilist := aniListID(v)
+	anilist, offset := p.animeIDs(ctx, v)
 
 	var entries []entry
 	extra := url.Values{}
@@ -215,15 +251,25 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, _ []provider.L
 	if isEpisode {
 		params.Set("episode", strconv.Itoa(v.Number))
 	}
-	// The absolute number of an episode of a later season is tried first,
-	// as Bazarr's AniDB episode offsets.
-	hasOffset := isEpisode && v.Season > 1 && v.AbsoluteNumber > v.Number
+	// The episode's number in the anime of a later season is tried first,
+	// by AniDB's episode offset of the season as Bazarr's, else by its
+	// absolute number.
+	adjusted := 0
+	if isEpisode && v.Season > 1 {
+		switch o := max(offset, -offset); {
+		case o != 0 && v.Number < o:
+			adjusted = v.Number + o
+		case o == 0 && v.AbsoluteNumber > v.Number:
+			adjusted = v.AbsoluteNumber
+		}
+	}
+	hasOffset := adjusted != 0
 	episode := v.Number
 	onlyArchives := false
 	var files []file
 	for retry := 0; retry <= 1; retry++ {
 		if hasOffset && retry == 0 {
-			params.Set("episode", strconv.Itoa(v.AbsoluteNumber))
+			params.Set("episode", strconv.Itoa(adjusted))
 		}
 		data, err := p.request(ctx, "entries/"+strconv.Itoa(e.ID)+"/files", params, filesTTL)
 		if err != nil {
@@ -234,7 +280,7 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, _ []provider.L
 				return nil, provider.Errorf(provider.ParseResponseError, "files: %w", err)
 			}
 			if hasOffset && retry == 0 {
-				episode = v.AbsoluteNumber
+				episode = adjusted
 			}
 			break
 		}
