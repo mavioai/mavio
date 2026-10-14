@@ -36,6 +36,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 * 每项针对某台服务端的变更（[访问记录](accounts.zh-CN.md#33-媒体库访问)、吊销、Home 与账户的删除）都带一个递增的游标保存。Durable Object 只通知服务端它的变更已到游标 N；服务端随后通过 HTTPS，用身份密钥签名的请求，取回自己游标之后的变更。
 * 服务端用与请求相同的 JWT 打开 API 基础 URL 下 `/servers/notices` 的 WebSocket；每条通知是一个装有 `mavio.cloud.v1.Notice` 的二进制帧。服务端每 30 秒发一次 ping，ping 失败即结束连接。
 * 服务端每次重新连接时（按指数退避加随机抖动）以及每六小时也会取回变更，因此丢失的通知只会推迟变更，不会丢失变更。
+* Durable Object 是类 `NoticeHub`，由 Worker 的入口 `src/server.ts` 与 TanStack Start 的处理器一同导出，以服务端 ID 命名。Worker 先检查服务端的 JWT，再把 WebSocket 交给该对象，对象会替换同一服务端较旧的连接。请求记录的每项变更都会被记下，请求完成后 Worker 把每个服务端的最新游标告诉其对象（`waitUntil`），因此通知绝不会早于记录该变更的事务。
 
 ## 4. 证书与子域名
 
@@ -64,7 +65,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 | Cloudflare | Workers 上的 `apps/website`；§3 的 Durable Object；`mavio.dev` 的 DNS 区域；用于 Mavio 发布下载的 R2；用 Workers 的出站 TCP 连接检查服务端公布地址的可达性；通过 Cloudflare Email Service 发送邮件 |
 | Hetzner | PostgreSQL，带一个流复制副本，WAL 归档到 R2；`apps/relay`；`apps/dns` |
 
-Worker 的配置是 `apps/website/wrangler.jsonc`：`BASE_URL` 变量、Hyperdrive 绑定（其 ID 是为数据库创建的配置）以及 `BETTER_AUTH_SECRET` 机密。开发时，`pnpm --filter @mavio/website dev` 通过 Vite 在 workerd 中运行 Worker，连接绑定的 `localConnectionString` 所指的 PostgreSQL（用 `drizzle-kit migrate` 迁移），机密和值为 `http://localhost:5173` 的 `BASE_URL` 放在不提交的 `apps/website/.dev.vars` 中；服务端以 `--mavio-dev-url http://localhost:5173/api` 连接它。
+Worker 的配置是 `apps/website/wrangler.jsonc`：`BASE_URL` 变量、Hyperdrive 绑定（其 ID 是为数据库创建的配置）、`NoticeHub` Durable Object 的 `NOTICES` 绑定及其以 SQLite 为后端的类迁移，以及 `BETTER_AUTH_SECRET` 机密；其入口是 `src/server.ts`。开发时，`pnpm --filter @mavio/website dev` 通过 Vite 在 workerd 中运行 Worker，连接绑定的 `localConnectionString` 所指的 PostgreSQL（用 `drizzle-kit migrate` 迁移），机密和值为 `http://localhost:5173` 的 `BASE_URL` 放在不提交的 `apps/website/.dev.vars` 中；服务端以 `--mavio-dev-url http://localhost:5173/api` 连接它。
 
 ## 7. 安全说明
 

@@ -18,6 +18,7 @@ import { RestrictionProfile } from "@mavio/proto/mavio/user/v1/user_pb";
 import { and, eq, or, sql } from "drizzle-orm";
 
 import { type Database, schema, type Tx } from "./db/index.ts";
+import { noticeChange } from "./notices.ts";
 
 type Kind = Change["kind"];
 
@@ -31,6 +32,7 @@ export async function addChange(tx: Database | Tx, serverId: string, kind: Kind,
   if (!s) throw new Error(`no server ${serverId}`);
   const change = create(ChangeSchema, { cursor: BigInt(s.cursor), createTime: timestampFromDate(now), kind });
   await tx.insert(schema.changes).values({ serverId, cursor: s.cursor, change: toJson(ChangeSchema, change), createdAt: now });
+  noticeChange(serverId, s.cursor);
   return s.cursor;
 }
 

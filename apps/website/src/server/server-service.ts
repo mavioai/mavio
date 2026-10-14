@@ -28,16 +28,19 @@ export interface Deps {
 
 const defaultPageSize = 100;
 
+/** authenticateServer returns the claimed server whose JWT the request carries. */
+export async function authenticateServer({ db, apiURL, now = () => new Date() }: Deps, headers: Headers) {
+  const token = bearer(headers);
+  const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, keyID(token)) });
+  if (!server) throw new ConnectError("the server is not claimed", Code.Unauthenticated);
+  await verifyServerToken(db, token, server.publicKey, apiURL, now());
+  return server;
+}
+
 /** serverService implements ServerService. */
-export function serverService({ db, apiURL, now = () => new Date() }: Deps): ServiceImpl<typeof ServerService> {
-  // authenticate returns the claimed server that signed the request.
-  async function authenticate(ctx: HandlerContext) {
-    const token = bearer(ctx.requestHeader);
-    const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, keyID(token)) });
-    if (!server) throw new ConnectError("the server is not claimed", Code.Unauthenticated);
-    await verifyServerToken(db, token, server.publicKey, apiURL, now());
-    return server;
-  }
+export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
+  const { db, apiURL, now = () => new Date() } = deps;
+  const authenticate = (ctx: HandlerContext) => authenticateServer(deps, ctx.requestHeader);
 
   return {
     async claimServer(req, ctx) {

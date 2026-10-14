@@ -3,7 +3,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mavio-website",
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/server.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [{ "pattern": "mavio.dev", "custom_domain": true }],
@@ -15,5 +15,7 @@
       "localConnectionString": "postgres://mavio:mavio@localhost:5432/mavio"
     }
   ],
+  "durable_objects": { "bindings": [{ "name": "NOTICES", "class_name": "NoticeHub" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["NoticeHub"] }],
   "observability": { "enabled": true }
 }

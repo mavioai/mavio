@@ -810,7 +810,7 @@ flowchart TD
 - [ ] Translations of mavio.dev's pages, with their strings in `libs/design/strings` as the web UI's
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
 - [ ] Buying and renewing Mavio Pass
-- [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
+- [x] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor: `NoticeHub` holding each server's hibernating WebSocket, notified after the requests that record changes; tested end to end with a server in workerd
 - [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges
 - [ ] `apps/relay` and relay tickets
 - [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs

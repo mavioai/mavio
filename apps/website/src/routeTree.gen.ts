@@ -17,7 +17,6 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as LinkRouteImport } from './routes/link'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as ServersIdRouteImport } from './routes/servers/$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,11 +59,6 @@ const SignUpRoute = SignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ServersIdRoute = ServersIdRouteImport.update({
   id: '/servers/$id',
   path: '/servers/$id',
@@ -80,7 +74,6 @@ export interface FileRoutesByFullPath {
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/$': typeof ApiSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesByTo {
@@ -92,7 +85,6 @@ export interface FileRoutesByTo {
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/$': typeof ApiSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRoutesById {
@@ -105,7 +97,6 @@ export interface FileRoutesById {
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/$': typeof ApiSplatRoute
   '/servers/$id': typeof ServersIdRoute
 }
 export interface FileRouteTypes {
@@ -119,7 +110,6 @@ export interface FileRouteTypes {
     | '/link'
     | '/sign-in'
     | '/sign-up'
-    | '/api/$'
     | '/servers/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -131,7 +121,6 @@ export interface FileRouteTypes {
     | '/link'
     | '/sign-in'
     | '/sign-up'
-    | '/api/$'
     | '/servers/$id'
   id:
     | '__root__'
@@ -143,7 +132,6 @@ export interface FileRouteTypes {
     | '/link'
     | '/sign-in'
     | '/sign-up'
-    | '/api/$'
     | '/servers/$id'
   fileRoutesById: FileRoutesById
 }
@@ -156,7 +144,6 @@ export interface RootRouteChildren {
   LinkRoute: typeof LinkRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  ApiSplatRoute: typeof ApiSplatRoute
   ServersIdRoute: typeof ServersIdRoute
 }
 
@@ -218,13 +205,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/servers/$id': {
       id: '/servers/$id'
       path: '/servers/$id'
@@ -244,7 +224,6 @@ const rootRouteChildren: RootRouteChildren = {
   LinkRoute: LinkRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  ApiSplatRoute: ApiSplatRoute,
   ServersIdRoute: ServersIdRoute,
 }
 export const routeTree = rootRouteImport

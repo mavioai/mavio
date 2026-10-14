@@ -36,6 +36,7 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts ย
 * Every change for a server ([access records](accounts.md#33-library-access), revocations, Home and account deletions) is stored with an increasing cursor. The Durable Object only notifies the server that its changes reached cursor N; the server then fetches the changes after its own cursor over HTTPS, with a request signed by its identity key.
 * The server opens the WebSocket at `/servers/notices` under the API's base URL with the same JWT as its requests; each notice is a binary frame holding a `mavio.cloud.v1.Notice`. The server pings every 30 seconds, and a failed ping ends the connection.
 * The server also fetches its changes whenever it reconnects, with exponential backoff and jitter, and every six hours, so that a lost notice delays a change but never loses it.
+* The Durable Object is the class `NoticeHub`, exported by the Worker's entry `src/server.ts` beside TanStack Start's handler and named after the server's ID. The Worker checks the server's JWT before it hands the WebSocket to the object, which replaces an older connection of the same server. Every change a request records is noted, and once the request is done the Worker tells each server's object its latest cursor (`waitUntil`), so that a notice never runs ahead of the transaction that recorded the change.
 
 ## 4. Certificates and Subdomains
 
@@ -64,7 +65,7 @@ Browsers reach a server by its names through DNS. Native clients connect to an a
 | Cloudflare | `apps/website` on Workers; the Durable Objects of ยง3; the `mavio.dev` DNS zone; R2 for downloads of Mavio releases; reachability checks of servers' published addresses with Workers' outbound TCP connections; e-mail through Cloudflare Email Service |
 | Hetzner | PostgreSQL, with a streaming replica and its WAL archived to R2; `apps/relay`; `apps/dns` |
 
-The Worker's configuration is `apps/website/wrangler.jsonc`: the `BASE_URL` variable, the Hyperdrive binding, whose ID is the configuration created for the database, and the `BETTER_AUTH_SECRET` secret. In development, `pnpm --filter @mavio/website dev` runs the Worker in workerd through Vite against the PostgreSQL of the binding's `localConnectionString`, migrated with `drizzle-kit migrate`, with the secret and a `BASE_URL` of `http://localhost:5173` in `apps/website/.dev.vars`, which is not committed; a server reaches it with `--mavio-dev-url http://localhost:5173/api`.
+The Worker's configuration is `apps/website/wrangler.jsonc`: the `BASE_URL` variable, the Hyperdrive binding, whose ID is the configuration created for the database, the `NOTICES` binding of the `NoticeHub` Durable Object with its SQLite-backed class migration, and the `BETTER_AUTH_SECRET` secret; its entry is `src/server.ts`. In development, `pnpm --filter @mavio/website dev` runs the Worker in workerd through Vite against the PostgreSQL of the binding's `localConnectionString`, migrated with `drizzle-kit migrate`, with the secret and a `BASE_URL` of `http://localhost:5173` in `apps/website/.dev.vars`, which is not committed; a server reaches it with `--mavio-dev-url http://localhost:5173/api`.
 
 ## 7. Security Notes
 

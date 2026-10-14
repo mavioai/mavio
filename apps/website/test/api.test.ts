@@ -206,3 +206,25 @@ async function signIn(site: Awaited<ReturnType<typeof newSite>>, username: strin
   const res = await site.auth.api.signInUsername({ body: { username, password: `${username} password` } });
   return { headers: { authorization: `Bearer ${res?.token}` } };
 }
+
+describe("notices", () => {
+  test("tell a server its latest cursor after the request that changed it", async () => {
+    const { site, asAlice, server } = await claimed();
+    const bob = await site.signUp("bob");
+    await asAlice.grantAccess({ serverId: server.id, userName: "bob", access: create(AccessSchema, { allLibraries: true }) });
+    expect(site.notices).toEqual([]); // an invitation changes nothing yet
+    await site.client(AccountService, bob.headers).acceptInvitation({ serverId: server.id });
+    await asAlice.grantAccess({ serverId: server.id, userName: "bob", access: create(AccessSchema, { libraryIds: [libraryA] }) });
+    expect(site.notices).toEqual([new Map([[server.id, 1]]), new Map([[server.id, 2]])]);
+  });
+
+  test("hand an authenticated server's WebSocket to its Durable Object", async () => {
+    const { site, server } = await claimed();
+    const open = (headers: Record<string, string>) =>
+      site.fetch(new Request(`${apiURL}/servers/notices`, { headers: { upgrade: "websocket", ...headers } }));
+    expect((await open({})).status).toBe(401);
+    expect((await open({ authorization: `Bearer ${await (await newServer()).token()}` })).status).toBe(401);
+    expect((await open({ authorization: `Bearer ${await server.token()}` })).status).toBe(204);
+    expect(site.connected).toEqual([server.id]);
+  });
+});

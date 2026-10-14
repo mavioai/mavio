@@ -27,7 +27,21 @@ export async function newSite() {
   const site = {
     db,
     auth,
-    fetch: async (req: Request) => (await handleApi(req, { db, auth, baseURL })) ?? new Response("Not Found", { status: 404 }),
+    /** The cursors each request notified servers of. */
+    notices: [] as Map<string, number>[],
+    /** The servers whose WebSockets were handed to their Durable Objects. */
+    connected: [] as string[],
+    fetch: async (req: Request) =>
+      (await handleApi(req, {
+        db,
+        auth,
+        baseURL,
+        notify: (cursors) => site.notices.push(cursors),
+        connectNotices: async (id) => {
+          site.connected.push(id);
+          return new Response(null, { status: 204 });
+        },
+      })) ?? new Response("Not Found", { status: 404 }),
     /** client returns a Connect client of service sending headers. */
     client<T extends DescService>(service: T, headers: Record<string, string> = {}, interceptors: Interceptor[] = []): Client<T> {
       return createClient(
