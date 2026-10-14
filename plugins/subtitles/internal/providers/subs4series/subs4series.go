@@ -22,6 +22,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -59,7 +60,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	s.Header.Set("User-Agent", userAgent)
 	// Statuses are checked where Bazarr does.
 	s.Check = func(*site.Response) error { return nil }
-	return &Provider{env: env, base: base, sess: s, shows: map[string]shows{}}, nil
+	return &Provider{env: env, base: base, sess: s, cache: cache.New(env)}, nil
 }
 
 // Provider is Subs4Series.
@@ -67,17 +68,17 @@ type Provider struct {
 	env  provider.Env
 	base *url.URL
 	sess *site.Session
+	// cache keeps the shows of titles, as Bazarr's region cache.
+	cache *cache.Region
 
-	mu    sync.Mutex
-	shows map[string]shows
+	// mu serializes the provider's use of the site.
+	mu sync.Mutex
 }
 
-type shows struct {
-	list  []suggestion
-	until time.Time
+type suggestion struct {
+	Link  string `json:"link"`
+	Title string `json:"title"`
 }
-
-type suggestion struct{ link, title string }
 
 // SetBaseURL points the provider at another server, for tests.
 func (p *Provider) SetBaseURL(u *url.URL) { p.base = u }
@@ -125,9 +126,9 @@ func (p *Provider) showLinks(ctx context.Context, title string, year int) ([]str
 	}
 	var links []string
 	for _, s := range suggestions {
-		t := scrape.SanitizePatch(s.title, "")
+		t := scrape.SanitizePatch(s.Title, "")
 		if t == title || year != 0 && t == fmt.Sprintf("%s %d", title, year) {
-			parts := strings.Split(s.link, "/")
+			parts := strings.Split(s.Link, "/")
 			links = append(links, strings.Join(parts[max(len(parts)-2, 0):], "/"))
 		}
 	}
@@ -137,9 +138,9 @@ func (p *Provider) showLinks(ctx context.Context, title string, year int) ([]str
 // suggestions searches the shows of a title, kept a week when some are
 // found, as Bazarr's _get_suggestions.
 func (p *Provider) suggestions(ctx context.Context, title string) ([]suggestion, error) {
-	now := p.env.Now()
-	if c, ok := p.shows[title]; ok && now.Before(c.until) {
-		return c.list, nil
+	key := "suggestions:" + title
+	if list, ok := cache.Get[[]suggestion](ctx, p.cache, key); ok {
+		return list, nil
 	}
 	u := p.base.String() + "/search_report.php?search=" + strings.ReplaceAll(url.QueryEscape(title), "+", "%20") + "&searchType=1"
 	r, err := p.get(ctx, u, p.base.String())
@@ -158,10 +159,10 @@ func (p *Provider) suggestions(ctx context.Context, title string) ([]suggestion,
 	}
 	var list []suggestion
 	for _, o := range doc.All(`select[name="Mov_sel"] > option[value]`) {
-		list = append(list, suggestion{link: o.Attr("value"), title: o.Text()})
+		list = append(list, suggestion{Link: o.Attr("value"), Title: o.Text()})
 	}
 	if len(list) > 0 {
-		p.shows[title] = shows{list: list, until: now.Add(showExpiration)}
+		cache.Set(ctx, p.cache, key, list, showExpiration)
 	}
 	return list, nil
 }

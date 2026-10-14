@@ -21,6 +21,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
@@ -73,7 +74,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	s.FUsername, s.FPassword = cmp.Or(s.FUsername, s.Username), cmp.Or(s.FPassword, s.Password)
 	base, _ := url.Parse("https://karagarga.in")
 	forum, _ := url.Parse("https://forum.karagarga.in/index.php")
-	return &Provider{env: env, s: s, base: base, forum: forum, pages: map[string]page{}}, nil
+	return &Provider{env: env, s: s, base: base, forum: forum, cache: cache.New(env)}, nil
 }
 
 // Provider is Karagarga.
@@ -82,15 +83,11 @@ type Provider struct {
 	s     settings
 	base  *url.URL
 	forum *url.URL
+	// cache keeps the pages, as Bazarr's region cache.
+	cache *cache.Region
 
-	mu    sync.Mutex
-	sess  *site.Session
-	pages map[string]page
-}
-
-type page struct {
-	body  []byte
-	until time.Time
+	mu   sync.Mutex
+	sess *site.Session
 }
 
 // SetBaseURL points the provider, the tracker and its forum, at another
@@ -149,9 +146,8 @@ func hasCookies(jar http.CookieJar, u *url.URL, names ...string) bool {
 // get returns a page, kept a week, as Bazarr's _cached_get.
 func (p *Provider) get(ctx context.Context, u string, query url.Values) (site.Node, error) {
 	key := u + "?" + query.Encode()
-	now := p.env.Now()
-	pg, ok := p.pages[key]
-	if !ok || !now.Before(pg.until) {
+	body, ok := cache.Get[[]byte](ctx, p.cache, key)
+	if !ok {
 		s, err := p.session(ctx)
 		if err != nil {
 			return site.Node{}, err
@@ -164,10 +160,10 @@ func (p *Provider) get(ctx context.Context, u string, query url.Values) (site.No
 		if req, _ := url.Parse(u); req != nil && r.URL.Path != req.Path {
 			return site.Node{}, provider.Errorf(provider.AuthenticationError, "not logged in")
 		}
-		pg = page{body: r.Body, until: now.Add(expiration)}
-		p.pages[key] = pg
+		body = r.Body
+		cache.Set(ctx, p.cache, key, body, expiration)
 	}
-	doc, err := site.Parse(pg.body, "")
+	doc, err := site.Parse(body, "")
 	if err != nil {
 		return site.Node{}, provider.Errorf(provider.ParseResponseError, "%s: %w", u, err)
 	}

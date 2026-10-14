@@ -16,10 +16,10 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -49,7 +49,7 @@ func Definition() provider.Definition {
 // New makes the provider; Bazarr passes it no settings, so it does not
 // log in.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	return &Provider{env: env, s: site.New(env.HTTP), base: serverURL, titles: map[string]cached{}}, nil
+	return &Provider{env: env, s: site.New(env.HTTP), base: serverURL, cache: cache.New(env)}, nil
 }
 
 // Provider is SubsCenter.
@@ -57,16 +57,9 @@ type Provider struct {
 	env  provider.Env
 	s    *site.Session
 	base string
-
-	mu sync.Mutex
-	// titles caches the URL titles of titles by kind, as Bazarr's region
+	// cache keeps the URL titles of titles by kind, as Bazarr's region
 	// cache.
-	titles map[string]cached
-}
-
-type cached struct {
-	byKind map[string][]string
-	until  time.Time
+	cache *cache.Region
 }
 
 // SetBaseURL points the provider at another server, for tests.
@@ -75,12 +68,9 @@ func (p *Provider) SetBaseURL(u *url.URL) { p.base = strings.TrimSuffix(u.String
 // urlTitles returns the URL titles a title is found as, by kind ("movie",
 // "series"), as Bazarr's _search_url_titles.
 func (p *Provider) urlTitles(ctx context.Context, title string) (map[string][]string, error) {
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.titles[title]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.byKind, nil
+	key := "titles:" + title
+	if byKind, ok := cache.Get[map[string][]string](ctx, p.cache, key); ok {
+		return byKind, nil
 	}
 	searchURL := p.base + "subtitle/search/"
 	r, err := p.s.Get(ctx, searchURL, url.Values{"q": {title}})
@@ -109,9 +99,7 @@ func (p *Provider) urlTitles(ctx context.Context, title string) (map[string][]st
 		byKind[parts[len(parts)-3]] = append(byKind[parts[len(parts)-3]], parts[len(parts)-2])
 	}
 	if len(byKind) > 0 {
-		p.mu.Lock()
-		p.titles[title] = cached{byKind: byKind, until: now.Add(showExpiration)}
-		p.mu.Unlock()
+		cache.Set(ctx, p.cache, key, byKind, showExpiration)
 	}
 	return byKind, nil
 }

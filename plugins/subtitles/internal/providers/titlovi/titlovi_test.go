@@ -199,6 +199,10 @@ func TestToken(t *testing.T) {
 		t.Errorf("err = %v, want = AuthenticationError", err)
 	}
 	s.on(search, reply(http.StatusUnauthorized, nil))
+	// Searches kept across restarts would answer without the site.
+	if err := os.Remove(filepath.Join(dir, "cache.json")); err != nil {
+		t.Fatal(err)
+	}
 	p := newProvider(t, s, dir)
 	if _, err := p.Search(t.Context(), nikita(), sr); provider.KindOf(err) != provider.AuthenticationError {
 		t.Errorf("err = %v, want = AuthenticationError", err)

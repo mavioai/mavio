@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
 
@@ -228,6 +229,27 @@ func TestSearchMovieByTitle(t *testing.T) {
 	unknown := &provider.Video{Title: "Down", Year: 2009}
 	if subs, err := p.Search(t.Context(), unknown, []provider.Language{{Tag: "fr"}}); err != nil || len(subs) != 0 {
 		t.Errorf("search of an unknown title = %v, %v, want none", subs, err)
+	}
+}
+
+func TestKeptAcrossRestarts(t *testing.T) {
+	f := newFake(t)
+	f.results = `{"data":[{"attributes":{"language":"fr","release":"Up.2009","feature_details":{"year":2009},"files":[{"file_id":9}]}}]}`
+	dir := t.TempDir()
+	v := &provider.Video{Title: "Up", Year: 2009}
+	for range 2 {
+		p := newProvider(t, f, "")
+		p.cache = cache.New(provider.Env{Now: time.Now, Log: slog.New(slog.DiscardHandler), DataDir: dir})
+		if subs, err := p.Search(t.Context(), v, []provider.Language{{Tag: "fr"}}); err != nil || len(subs) != 1 {
+			t.Fatalf("search = %v, %v, want one subtitle", subs, err)
+		}
+	}
+	// The session and the title's ID outlive the provider.
+	if n := f.logins.Load(); n != 1 {
+		t.Errorf("logins = %d, want = 1", n)
+	}
+	if want := []string{"query=up"}; !slices.Equal(f.features, want) {
+		t.Errorf("features = %v, want = %v", f.features, want)
 	}
 }
 

@@ -13,11 +13,11 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/anidb"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
@@ -82,7 +82,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	sess.Check = func(*site.Response) error { return nil }
 	return &Provider{
 		env: env, s: s, sess: sess, anidb: anidb.New(env, anidb.Config{}), api: "https://jimaku.cc/api", sleep: site.Sleep,
-		cache: map[string]cached{},
+		cache: cache.New(env),
 	}, nil
 }
 
@@ -94,14 +94,8 @@ type Provider struct {
 	anidb *anidb.Client
 	api   string
 	sleep func(context.Context, time.Duration) error
-
-	mu    sync.Mutex
-	cache map[string]cached
-}
-
-type cached struct {
-	data  json.RawMessage
-	until time.Time
+	// cache keeps the API's answers, as Bazarr's region cache.
+	cache *cache.Region
 }
 
 // AniDB returns the provider's AniDB client, for tests.
@@ -430,20 +424,11 @@ func languages(filename string) []string {
 // _do_jimaku_request: nil when it answers nothing.
 func (p *Provider) request(ctx context.Context, path string, params url.Values, ttl time.Duration) (json.RawMessage, error) {
 	u := p.api + "/" + path + "?" + params.Encode()
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.cache[u]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.data, nil
-	}
-	data, err := p.fetch(ctx, u)
-	if err != nil {
+	// Answers are kept as bytes, so that none is kept as nil.
+	data, err := cache.Cached(ctx, p.cache, u, ttl, func() ([]byte, error) { return p.fetch(ctx, u) })
+	if err != nil || data == nil {
 		return nil, err
 	}
-	p.mu.Lock()
-	p.cache[u] = cached{data: data, until: now.Add(ttl)}
-	p.mu.Unlock()
 	return data, nil
 }
 

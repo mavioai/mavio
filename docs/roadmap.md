@@ -724,7 +724,7 @@ flowchart TD
   - [x] JSON APIs without accounts and other protocols: Gestdown, AnimeTosho (both), Tsukihime, Subtis, RegieLive, Bayflix, Vladoonmooo, Subsynchro, Wizdom, BSPlayer, NapiProjekt, Napisy24; AniDB and the anime lists for anime IDs
   - [x] Sites scraped without accounts: AnimeKalesi, AnimeSubInfo, GreekSubs, GreekSubtitles, Hosszupuska, Nekur, PrijevodiOnline, SousTitres.eu, SubClub, Subf2m, Subs4Free, SubsCenter, SubsSabbz, SubsUnacs, SubtitleCat, Subtitrari Noi, Subtitriid, SubtitulamosTV, SuperSubtitles, Titrari, TVSubtitles, YavkaNet, YIFY Subtitles
   - [x] Sites with logins, cookies or captchas: Addic7ed, AvistaZ, CinemaZ, Karagarga, LegendasDivx, Pipocas, Subs4Series, Titulky, TurkceAltyazi.org, XSubs, Zimuku
-  - [ ] Later: provider caches kept in the data folder across restarts
+  - [x] Provider caches (title and show IDs, search results, sessions) kept in the data folder across restarts by `internal/cache`, as Bazarr's region cache on its file backend; the archives of downloads stay in memory
   - [x] Jimaku's AniList IDs and AniDB episode offsets through `internal/anidb`, as Bazarr's refiners give them
   - [x] Release names read by `libs/release` where providers need guessit's properties other than season, episode, year and title (Tsukihime's streaming service, telling its releases apart); the seasons and episodes of names, as of files in archives, keep the guessit readings of `scrape` and `archivemix`
   - [x] The name sanitizing and release group helpers of the providers merged into `scrape`, with tests of `sitekit`

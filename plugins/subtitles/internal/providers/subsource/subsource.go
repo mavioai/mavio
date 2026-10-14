@@ -14,11 +14,11 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archivemix"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
@@ -98,12 +98,6 @@ func Definition() provider.Definition {
 	}
 }
 
-// entry is a cached value.
-type entry struct {
-	value   any
-	expires time.Time
-}
-
 // Provider searches SubSource.
 type Provider struct {
 	env    provider.Env
@@ -114,9 +108,9 @@ type Provider struct {
 	// out; tests make them instant.
 	sleep func(context.Context, time.Duration) error
 	wait  time.Duration
-
-	mu    sync.Mutex
-	cache map[string]entry
+	// cache keeps titles, searches and archives, as Bazarr's region
+	// cache.
+	cache *cache.Region
 }
 
 // New makes the provider from its settings; the API key is required, as
@@ -140,37 +134,12 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	sess.Check = func(*site.Response) error { return nil }
 	return &Provider{
 		env: env, s: sess, apiKey: s.APIKey, api: apiURL,
-		sleep: site.Sleep, wait: retryTimeout, cache: map[string]entry{},
+		sleep: site.Sleep, wait: retryTimeout, cache: cache.New(env),
 	}, nil
 }
 
 // SetBaseURL points the provider at another API, for tests.
 func (p *Provider) SetBaseURL(u *url.URL) { p.api = strings.TrimRight(u.String(), "/") + "/api/v1/" }
-
-// cached returns a value cached under key, or computes and caches it, as
-// Bazarr's region cache; failures are not cached.
-func cached[T any](p *Provider, key string, ttl time.Duration, f func() (T, error)) (T, error) {
-	now := p.env.Now()
-	p.mu.Lock()
-	if e, ok := p.cache[key]; ok && now.Before(e.expires) {
-		p.mu.Unlock()
-		return e.value.(T), nil
-	}
-	p.mu.Unlock()
-	v, err := f()
-	if err != nil {
-		return v, err
-	}
-	p.mu.Lock()
-	for k, e := range p.cache {
-		if !now.Before(e.expires) {
-			delete(p.cache, k)
-		}
-	}
-	p.cache[key] = entry{value: v, expires: now.Add(ttl)}
-	p.mu.Unlock()
-	return v, nil
-}
 
 // get fetches a path of the API, retrying network failures and waiting
 // out a short rate limit once, then mapping the status as Bazarr's
@@ -286,7 +255,7 @@ type title struct {
 // by its title, as Bazarr's search_titles; 0 when none matches.
 func (p *Provider) searchTitles(ctx context.Context, v *provider.Video, name, imdb string, season int) (int, error) {
 	key := fmt.Sprintf("titles\x00%s\x00%s\x00%d", name, imdb, season)
-	return cached(p, key, titlesExpiration, func() (int, error) {
+	return cache.Cached(ctx, p.cache, key, titlesExpiration, func() (int, error) {
 		text := url.Values{"searchType": {"text"}, "q": {strings.ToLower(name)}}
 		q := text
 		if imdb != "" {
@@ -397,7 +366,7 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 	l := langs[0]
 	key := fmt.Sprintf("query\x00%+v\x00%v\x00%s\x00%v\x00%v\x00%d\x00%d\x00%d\x00%v", l, v.Episode, v.Title, v.Series, v.AlternativeSeries,
 		v.Year, v.Season, v.Number, [2]string{v.IMDbID(), v.SeriesExternalIDs["imdb"]})
-	return cached(p, key, queriesExpiration, func() ([]provider.Subtitle, error) { return p.query(ctx, v, l) })
+	return cache.Cached(ctx, p.cache, key, queriesExpiration, func() ([]provider.Subtitle, error) { return p.query(ctx, v, l) })
 }
 
 func (p *Provider) query(ctx context.Context, v *provider.Video, l provider.Language) ([]provider.Subtitle, error) {
@@ -593,7 +562,7 @@ func (p *Provider) Download(ctx context.Context, v *provider.Video, id string) (
 		return provider.File{}, err
 	}
 	link := fmt.Sprintf("subtitles/%d/download", r.ID)
-	data, err := cached(p, "archive\x00"+link, archivesExpiration, func() ([]byte, error) {
+	data, err := cache.Cached(ctx, p.cache, "archive\x00"+link, archivesExpiration, func() ([]byte, error) {
 		resp, err := p.get(ctx, link, url.Values{})
 		if err != nil {
 			return nil, err

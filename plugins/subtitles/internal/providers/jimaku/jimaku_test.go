@@ -16,6 +16,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
 
@@ -148,6 +149,7 @@ func TestSearchCached(t *testing.T) {
 	p, _ := newProvider(t, f, "")
 	now := time.Date(2026, 10, 14, 12, 0, 0, 0, time.UTC)
 	p.env.Now = func() time.Time { return now }
+	p.cache = cache.New(p.env)
 	for range 2 {
 		if _, err := p.Search(t.Context(), episode(), nil); err != nil {
 			t.Fatal(err)

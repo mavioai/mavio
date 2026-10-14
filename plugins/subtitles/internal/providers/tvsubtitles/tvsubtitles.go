@@ -15,10 +15,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -58,7 +58,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	base, _ := url.Parse(serverURL)
 	return &Provider{
 		env: env, s: site.NewBrowser(env.HTTP), base: base,
-		shows: map[string]cached[int]{}, episodes: map[string]cached[map[int]int]{},
+		cache: cache.New(env),
 	}, nil
 }
 
@@ -67,17 +67,9 @@ type Provider struct {
 	env  provider.Env
 	s    *site.Session
 	base *url.URL
-
-	mu sync.Mutex
-	// shows and episodes cache the IDs of shows and of the episodes of a
-	// season, as Bazarr's region cache.
-	shows    map[string]cached[int]
-	episodes map[string]cached[map[int]int]
-}
-
-type cached[T any] struct {
-	v     T
-	until time.Time
+	// cache keeps the IDs of shows and of the episodes of a season, as
+	// Bazarr's region cache.
+	cache *cache.Region
 }
 
 // SetBaseURL points the provider at another server, for tests.
@@ -154,12 +146,9 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 // searchShowID returns the site's ID of a show of the series' name and
 // first year, if any; 0 for none.
 func (p *Provider) searchShowID(ctx context.Context, series string, year int) (int, error) {
-	key := fmt.Sprintf("%s\x00%d", series, year)
-	p.mu.Lock()
-	c, ok := p.shows[key]
-	p.mu.Unlock()
-	if ok && p.env.Now().Before(c.until) {
-		return c.v, nil
+	key := fmt.Sprintf("show:%s\x00%d", series, year)
+	if id, ok := cache.Get[int](ctx, p.cache, key); ok {
+		return id, nil
 	}
 	r, err := p.s.PostForm(ctx, p.link("search1.php"), url.Values{"qs": {series}})
 	if err != nil {
@@ -188,21 +177,16 @@ func (p *Provider) searchShowID(ctx context.Context, series string, year int) (i
 			break
 		}
 	}
-	p.mu.Lock()
-	p.shows[key] = cached[int]{id, p.env.Now().Add(showExpiration)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, id, showExpiration)
 	return id, nil
 }
 
 // episodeIDs returns the site's IDs of the episodes of a season by their
 // numbers.
 func (p *Provider) episodeIDs(ctx context.Context, showID, season int) (map[int]int, error) {
-	key := fmt.Sprintf("%d-%d", showID, season)
-	p.mu.Lock()
-	c, ok := p.episodes[key]
-	p.mu.Unlock()
-	if ok && p.env.Now().Before(c.until) {
-		return c.v, nil
+	key := fmt.Sprintf("episodes:%d-%d", showID, season)
+	if ids, ok := cache.Get[map[int]int](ctx, p.cache, key); ok {
+		return ids, nil
 	}
 	r, err := p.s.Get(ctx, p.link(fmt.Sprintf("tvshow-%d-%d.html", showID, season)), nil)
 	if err != nil {
@@ -236,9 +220,7 @@ func (p *Provider) episodeIDs(ctx context.Context, showID, season int) (map[int]
 	if len(ids) == 0 {
 		p.env.Log.WarnContext(ctx, "no episode ids found", "provider", Name, "show", showID, "season", season)
 	}
-	p.mu.Lock()
-	p.episodes[key] = cached[map[int]int]{ids, p.env.Now().Add(episodeExpiration)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, ids, episodeExpiration)
 	return ids, nil
 }
 

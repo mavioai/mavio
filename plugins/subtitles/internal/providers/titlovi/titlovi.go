@@ -22,6 +22,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archivemix"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -96,22 +97,17 @@ type token struct {
 	Expires  time.Time `json:"expires"`
 }
 
-// result is a search's answer, cached.
-type result struct {
-	body    []byte
-	expires time.Time
-}
-
 // Provider searches Titlovi.
 type Provider struct {
 	env                provider.Env
 	s                  *site.Session
 	username, password string
 	api                string
+	// cache keeps search answers, as Bazarr's region cache.
+	cache *cache.Region
 
-	mu      sync.Mutex
-	token   *token
-	results map[string]result
+	mu    sync.Mutex
+	token *token
 }
 
 // New makes the provider from its settings; the username and password
@@ -133,7 +129,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	}
 	sess := site.New(hc)
 	sess.Check = func(*site.Response) error { return nil }
-	return &Provider{env: env, s: sess, username: s.Username, password: s.Password, api: apiURL, results: map[string]result{}}, nil
+	return &Provider{env: env, s: sess, username: s.Username, password: s.Password, api: apiURL, cache: cache.New(env)}, nil
 }
 
 // SetBaseURL points the provider at another API, for tests.
@@ -265,14 +261,10 @@ func (p *Provider) dropToken(ctx context.Context) {
 
 // getResult searches, the answers cached, as Bazarr's get_result.
 func (p *Provider) getResult(ctx context.Context, q url.Values) ([]byte, error) {
-	key := q.Encode()
-	now := p.env.Now()
-	p.mu.Lock()
-	if r, ok := p.results[key]; ok && now.Before(r.expires) {
-		p.mu.Unlock()
-		return r.body, nil
+	key := "search:" + q.Encode()
+	if body, ok := cache.Get[[]byte](ctx, p.cache, key); ok {
+		return body, nil
 	}
-	p.mu.Unlock()
 	r, err := p.s.Get(ctx, p.api+"/search", q)
 	if err != nil {
 		return nil, err
@@ -283,14 +275,7 @@ func (p *Provider) getResult(ctx context.Context, q url.Values) ([]byte, error) 
 	case http.StatusUnauthorized:
 		return nil, provider.Errorf(provider.AuthenticationError, "API search returned 403 Forbidden. Account not verified/API disabled.")
 	}
-	p.mu.Lock()
-	for k, e := range p.results {
-		if !now.Before(e.expires) {
-			delete(p.results, k)
-		}
-	}
-	p.results[key] = result{body: r.Body, expires: now.Add(resultsExpiration)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, r.Body, resultsExpiration)
 	return r.Body, nil
 }
 

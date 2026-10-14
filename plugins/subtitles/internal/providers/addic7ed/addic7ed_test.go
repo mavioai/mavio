@@ -232,9 +232,9 @@ func TestSearchEpisode(t *testing.T) {
 	if slices.Contains(subs[0].Matches, "year") {
 		t.Errorf("matches got = %v, want no year", subs[0].Matches)
 	}
-	// The show IDs are fetched once.
-	if f.shows != 2 {
-		t.Errorf("show fetches got = %d, want = 2", f.shows)
+	// The show IDs are fetched once, and kept across restarts.
+	if f.shows != 1 {
+		t.Errorf("show fetches got = %d, want = 1", f.shows)
 	}
 
 	file, err := p2.Download(t.Context(), episode(), subs[0].ID)

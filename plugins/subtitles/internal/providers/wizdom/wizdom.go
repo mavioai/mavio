@@ -13,10 +13,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
@@ -51,7 +51,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	return &Provider{
 		env: env, s: s,
 		secure: "https://wizdom.xyz", plain: "http://wizdom.xyz", tmdb: "http://api.tmdb.org",
-		imdb: map[string]cachedID{},
+		cache: cache.New(env),
 	}, nil
 }
 
@@ -62,14 +62,8 @@ type Provider struct {
 	// secure and plain are the site's URLs over HTTPS and HTTP, as Bazarr
 	// reaches the API over the one and pages and files over the other.
 	secure, plain, tmdb string
-
-	mu   sync.Mutex
-	imdb map[string]cachedID
-}
-
-type cachedID struct {
-	id    string
-	until time.Time
+	// cache keeps the IMDb IDs of titles, as subliminal's region cache.
+	cache *cache.Region
 }
 
 // SetBaseURL points the provider, TMDB included, at another server, for
@@ -217,12 +211,8 @@ func idString(raw json.RawMessage) string {
 // none.
 func (p *Provider) searchIMDbID(ctx context.Context, title string, year int, movie bool) (string, error) {
 	key := fmt.Sprintf("%s|%d|%t", title, year, movie)
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.imdb[key]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.id, nil
+	if id, ok := cache.Get[string](ctx, p.cache, key); ok {
+		return id, nil
 	}
 	p.env.Log.InfoContext(ctx, "searching IMDb ID", "title", title, "year", year)
 	category := "tv"
@@ -267,9 +257,7 @@ func (p *Provider) searchIMDbID(ctx context.Context, title string, year int, mov
 			}
 		}
 	}
-	p.mu.Lock()
-	p.imdb[key] = cachedID{id: id, until: now.Add(imdbExpiry)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, id, imdbExpiry)
 	return id, nil
 }
 

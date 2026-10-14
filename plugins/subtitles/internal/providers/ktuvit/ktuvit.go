@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
@@ -54,12 +55,6 @@ func Definition() provider.Definition {
 	}
 }
 
-// imdbEntry is a cached IMDb ID.
-type imdbEntry struct {
-	id      string
-	expires time.Time
-}
-
 // Provider searches Ktuvit.
 type Provider struct {
 	env provider.Env
@@ -69,11 +64,12 @@ type Provider struct {
 	login                 *site.Session
 	email, hashedPassword string
 	server, tmdb          string
+	// cache keeps the IMDb IDs of titles, as Bazarr's region cache.
+	cache *cache.Region
 
 	mu sync.Mutex
 	// initialized and loggedIn are as Bazarr's initialize leaves them.
 	initialized, loggedIn bool
-	imdb                  map[string]imdbEntry
 }
 
 // New makes the provider from its settings: an email and a hashed
@@ -102,7 +98,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	login.Check = func(*site.Response) error { return nil }
 	return &Provider{
 		env: env, s: sess, login: login, email: s.Email, hashedPassword: s.HashedPassword,
-		server: serverURL, tmdb: tmdbURL, imdb: map[string]imdbEntry{},
+		server: serverURL, tmdb: tmdbURL, cache: cache.New(env),
 	}, nil
 }
 
@@ -211,13 +207,9 @@ func truthy(v any) bool {
 // _search_imdb_id; "" when none is found.
 func (p *Provider) searchIMDbID(ctx context.Context, title string, year int, movie bool) (string, error) {
 	key := fmt.Sprintf("%s\x00%d\x00%t", title, year, movie)
-	now := p.env.Now()
-	p.mu.Lock()
-	if e, ok := p.imdb[key]; ok && now.Before(e.expires) {
-		p.mu.Unlock()
-		return e.id, nil
+	if id, ok := cache.Get[string](ctx, p.cache, key); ok {
+		return id, nil
 	}
-	p.mu.Unlock()
 	p.env.Log.InfoContext(ctx, "Searching IMDB ID", "title", title, "year", year)
 	category := "tv"
 	if movie {
@@ -263,9 +255,7 @@ func (p *Provider) searchIMDbID(ctx context.Context, title string, year int, mov
 			id = fmt.Sprint(ids.IMDbID)
 		}
 	}
-	p.mu.Lock()
-	p.imdb[key] = imdbEntry{id: id, expires: now.Add(imdbCacheExpiration)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, id, imdbCacheExpiration)
 	return id, nil
 }
 

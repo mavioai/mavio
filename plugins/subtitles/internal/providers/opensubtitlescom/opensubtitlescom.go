@@ -19,6 +19,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
 
@@ -83,7 +84,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 	case s.APIKey == "":
 		return nil, provider.Errorf(provider.ConfigurationError, "API key must be specified")
 	}
-	return &Provider{env: env, s: s, scheme: "https", host: defaultHost, titles: map[string]titleID{}}, nil
+	return &Provider{env: env, s: s, scheme: "https", host: defaultHost, cache: cache.New(env)}, nil
 }
 
 // Provider is OpenSubtitles.com.
@@ -95,14 +96,25 @@ type Provider struct {
 	mu    sync.Mutex
 	token string
 	host  string
-	// titles caches the title IDs of names for a week, as Bazarr's
-	// search_titles.
-	titles map[string]titleID
+	// cache keeps the session for 12 hours and the title IDs of names for
+	// a week, as Bazarr's region cache.
+	cache *cache.Region
 }
 
-type titleID struct {
-	id    int
-	until time.Time
+// The lifetimes of the cached session and title IDs, as Bazarr's
+// TOKEN_EXPIRATION_TIME and SHOW_EXPIRATION_TIME.
+const (
+	sessionExpiration = 12 * time.Hour
+	titleExpiration   = 7 * 24 * time.Hour
+)
+
+// sessionKey is the cache key of the session.
+const sessionKey = "session"
+
+// session is the token of a login and the host serving the account.
+type session struct {
+	Token string `json:"token"`
+	Host  string `json:"host"`
 }
 
 // SetBaseURL points the provider at another server, for tests.
@@ -330,12 +342,8 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 // video's year, if it has one; 0 for none.
 func (p *Provider) searchTitle(ctx context.Context, v *provider.Video, title string) (int, error) {
 	key := strings.ToLower(title)
-	now := p.env.Now()
-	p.mu.Lock()
-	cached, ok := p.titles[key]
-	p.mu.Unlock()
-	if ok && now.Before(cached.until) {
-		return cached.id, nil
+	if id, ok := cache.Get[int](ctx, p.cache, "title:"+key); ok {
+		return id, nil
 	}
 	var res struct {
 		Data []struct {
@@ -359,9 +367,7 @@ func (p *Provider) searchTitle(ctx context.Context, v *provider.Video, title str
 			break
 		}
 	}
-	p.mu.Lock()
-	p.titles[key] = titleID{id: id, until: now.Add(7 * 24 * time.Hour)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, "title:"+key, id, titleExpiration)
 	return id, nil
 }
 
@@ -411,8 +417,26 @@ func (p *Provider) login(ctx context.Context) error {
 	if out.BaseURL != "" && p.scheme == "https" {
 		p.host = out.BaseURL
 	}
+	s := session{Token: p.token, Host: p.host}
 	p.mu.Unlock()
+	cache.Set(ctx, p.cache, sessionKey, s, sessionExpiration)
 	return nil
+}
+
+// resume takes up the session kept across restarts, as Bazarr's
+// initialize; false when there is none.
+func (p *Provider) resume(ctx context.Context) bool {
+	s, ok := cache.Get[session](ctx, p.cache, sessionKey)
+	if !ok || s.Token == "" {
+		return false
+	}
+	p.mu.Lock()
+	p.token = s.Token
+	if s.Host != "" && p.scheme == "https" {
+		p.host = s.Host
+	}
+	p.mu.Unlock()
+	return true
 }
 
 // call makes a request with a session, logging in first if there is none
@@ -421,7 +445,7 @@ func (p *Provider) call(ctx context.Context, method, path string, query url.Valu
 	p.mu.Lock()
 	token := p.token
 	p.mu.Unlock()
-	if token == "" {
+	if token == "" && !p.resume(ctx) {
 		if err := p.login(ctx); err != nil {
 			return err
 		}
@@ -433,6 +457,7 @@ func (p *Provider) call(ctx context.Context, method, path string, query url.Valu
 	p.mu.Lock()
 	p.token = ""
 	p.mu.Unlock()
+	cache.Delete(ctx, p.cache, sessionKey)
 	if err := p.login(ctx); err != nil {
 		return err
 	}

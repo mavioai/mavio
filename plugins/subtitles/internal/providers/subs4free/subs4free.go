@@ -14,10 +14,10 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -59,7 +59,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	return &Provider{env: env, s: site.NewBrowser(env.HTTP), u: defaultURLs, suggestions: map[string]cached{}}, nil
+	return &Provider{env: env, s: site.NewBrowser(env.HTTP), u: defaultURLs, cache: cache.New(env)}, nil
 }
 
 // Provider is Subs4Free.
@@ -67,19 +67,15 @@ type Provider struct {
 	env provider.Env
 	s   *site.Session
 	u   urls
-
-	mu sync.Mutex
-	// suggestions caches the site's suggestions of titles, as Bazarr's
-	// region cache.
-	suggestions map[string]cached
+	// cache keeps the site's suggestions of titles, as Bazarr's region
+	// cache.
+	cache *cache.Region
 }
 
-type cached struct {
-	list  []suggestion
-	until time.Time
+type suggestion struct {
+	Link  string `json:"link"`
+	Title string `json:"title"`
 }
-
-type suggestion struct{ link, title string }
 
 // SetBaseURL points the provider at another server, for tests.
 func (p *Provider) SetBaseURL(u *url.URL) {
@@ -118,12 +114,9 @@ func (p *Provider) page(ctx context.Context, u string, header http.Header) (*sit
 // getSuggestions returns the titles the site suggests for a title, as
 // Bazarr's _get_suggestions, cached while there are some.
 func (p *Provider) getSuggestions(ctx context.Context, title string) ([]suggestion, error) {
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.suggestions[title]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.list, nil
+	key := "suggestions:" + title
+	if list, ok := cache.Get[[]suggestion](ctx, p.cache, key); ok {
+		return list, nil
 	}
 	doc, err := p.page(ctx, p.searchURL(title), http.Header{"Referer": {p.u.server}})
 	if err != nil || doc == nil {
@@ -131,12 +124,10 @@ func (p *Provider) getSuggestions(ctx context.Context, title string) ([]suggesti
 	}
 	var out []suggestion
 	for _, o := range doc.All(`select[name="Mov_sel"] > option[value]`) {
-		out = append(out, suggestion{link: o.Attr("value"), title: o.Text()})
+		out = append(out, suggestion{Link: o.Attr("value"), Title: o.Text()})
 	}
 	if len(out) > 0 {
-		p.mu.Lock()
-		p.suggestions[title] = cached{list: out, until: now.Add(showExpiration)}
-		p.mu.Unlock()
+		cache.Set(ctx, p.cache, key, out, showExpiration)
 	}
 	return out, nil
 }
@@ -151,9 +142,9 @@ func (p *Provider) showLinks(ctx context.Context, title string, year int) ([]str
 	}
 	var out []string
 	for _, s := range suggestions {
-		show := scrape.Sanitize(s.title, "")
+		show := scrape.Sanitize(s.Title, "")
 		if show == title || year != 0 && show == title+" "+strconv.Itoa(year) {
-			parts := strings.Split(s.link, "?p=")
+			parts := strings.Split(s.Link, "?p=")
 			out = append(out, parts[len(parts)-1])
 		}
 	}

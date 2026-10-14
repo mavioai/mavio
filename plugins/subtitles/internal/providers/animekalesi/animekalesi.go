@@ -13,12 +13,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/net/html"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
@@ -45,7 +45,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	s := site.NewBrowser(env.HTTP)
 	s.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	s.Header.Set("Accept-Language", "tr,en-US;q=0.7,en;q=0.3")
-	p := &Provider{env: env, s: s, series: map[string]cached[*series]{}, episodes: map[string]cached[[]episode]{}}
+	p := &Provider{env: env, s: s, cache: cache.New(env)}
 	p.SetBaseURL(&url.URL{Scheme: "https", Host: "www.animekalesi.com"})
 	return p, nil
 }
@@ -55,20 +55,20 @@ type Provider struct {
 	env    provider.Env
 	s      *site.Session
 	server string
-
-	mu       sync.Mutex
-	series   map[string]cached[*series]
-	episodes map[string]cached[[]episode]
+	// cache keeps the site's series and their episodes, as Bazarr's
+	// region cache.
+	cache *cache.Region
 }
 
-type cached[T any] struct {
-	v     T
-	until time.Time
+type series struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
 }
 
-type series struct{ title, url string }
-
-type episode struct{ title, url string }
+type episode struct {
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
 
 // SetBaseURL points the provider at another server, for tests.
 func (p *Provider) SetBaseURL(u *url.URL) {
@@ -100,13 +100,13 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 	if err != nil || sr == nil {
 		return nil, err
 	}
-	eps, err := p.episodeList(ctx, sr.url)
+	eps, err := p.episodeList(ctx, sr.URL)
 	if err != nil {
 		return nil, err
 	}
 	var out []provider.Subtitle
 	for _, ep := range eps {
-		season, number, ok := seasonEpisode(ep.title)
+		season, number, ok := seasonEpisode(ep.Title)
 		if !ok || season != v.Season || number != v.Number {
 			continue
 		}
@@ -125,12 +125,9 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 // _search_anime_list: the one of the same normalized name, else the
 // first whose name contains the other's; nil for none.
 func (p *Provider) searchSeries(ctx context.Context, name string) (*series, error) {
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.series[name]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.v, nil
+	key := "series:" + name
+	if found, ok := cache.Get[*series](ctx, p.cache, key); ok {
+		return found, nil
 	}
 	r, err := p.s.Get(ctx, p.server+"/tum-anime-serileri.html", nil)
 	if err != nil {
@@ -160,21 +157,16 @@ func (p *Provider) searchSeries(ctx context.Context, name string) (*series, erro
 			found = &series{title, href}
 		}
 	}
-	p.mu.Lock()
-	p.series[name] = cached[*series]{found, now.Add(cacheFor)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, found, cacheFor)
 	return found, nil
 }
 
 // episodeList returns the episodes of a series with subtitles, as Bazarr's
 // _get_episode_list.
 func (p *Provider) episodeList(ctx context.Context, seriesURL string) ([]episode, error) {
-	now := p.env.Now()
-	p.mu.Lock()
-	c, ok := p.episodes[seriesURL]
-	p.mu.Unlock()
-	if ok && now.Before(c.until) {
-		return c.v, nil
+	key := "episodes:" + seriesURL
+	if eps, ok := cache.Get[[]episode](ctx, p.cache, key); ok {
+		return eps, nil
 	}
 	r, err := p.s.Get(ctx, p.server+"/"+strings.ReplaceAll(seriesURL, "bolumler-", "altyazib-"), nil)
 	if err != nil {
@@ -194,9 +186,7 @@ func (p *Provider) episodeList(ctx context.Context, seriesURL string) ([]episode
 			eps = append(eps, episode{a.Attr("title"), p.server + "/" + a.Attr("href")})
 		}
 	}
-	p.mu.Lock()
-	p.episodes[seriesURL] = cached[[]episode]{eps, now.Add(cacheFor)}
-	p.mu.Unlock()
+	cache.Set(ctx, p.cache, key, eps, cacheFor)
 	return eps, nil
 }
 
@@ -223,7 +213,7 @@ func seasonEpisode(title string) (season, number int, ok bool) {
 // subtitle reads an episode's page for its subtitle; nil when it has
 // none.
 func (p *Provider) subtitle(ctx context.Context, v *provider.Video, sr *series, ep episode, season, number int) (*provider.Subtitle, error) {
-	r, err := p.s.Get(ctx, ep.url, nil)
+	r, err := p.s.Get(ctx, ep.URL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -246,12 +236,12 @@ func (p *Provider) subtitle(ctx context.Context, v *provider.Video, sr *series, 
 		}
 		break
 	}
-	version := fmt.Sprintf("%s - S%02dE%02d", sr.title, season, number)
+	version := fmt.Sprintf("%s - S%02dE%02d", sr.Title, season, number)
 	if uploader != "" {
 		version += " by " + uploader
 	}
 	var matches []string
-	if seriesMatches(v, sr.title) {
+	if seriesMatches(v, sr.Title) {
 		matches = append(matches, "series")
 	}
 	matches = append(matches, "season", "episode")
@@ -260,7 +250,7 @@ func (p *Provider) subtitle(ctx context.Context, v *provider.Video, sr *series, 
 		Language:     provider.Language{Tag: "tr"},
 		ReleaseNames: []string{version},
 		Matches:      matches,
-		PageLink:     ep.url,
+		PageLink:     ep.URL,
 		Uploader:     uploader,
 	}, nil
 }

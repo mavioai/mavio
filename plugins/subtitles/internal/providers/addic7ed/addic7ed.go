@@ -22,6 +22,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -92,7 +93,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 		return nil, provider.Errorf(provider.ConfigurationError, "username and password or cookies must be specified")
 	}
 	base, _ := url.Parse("https://www.addic7ed.com/")
-	return &Provider{env: env, s: s, base: base, pause: time.Second, movieIDs: map[string]movieID{}}, nil
+	return &Provider{env: env, s: s, base: base, pause: time.Second, cache: cache.New(env)}, nil
 }
 
 // Provider is Addic7ed.
@@ -107,18 +108,19 @@ type Provider struct {
 	mu       sync.Mutex
 	sess     *site.Session
 	loggedIn bool
-	// showIDs caches the site's show IDs by sanitized name, as Bazarr's
-	// _get_show_ids.
-	showIDs      map[string]int
-	showIDsUntil time.Time
-	lastFetch    time.Time
-	movieIDs     map[string]movieID
-	downloads    *downloads
+	// lastFetch is when the show IDs were last fetched.
+	lastFetch time.Time
+	downloads *downloads
+	// cache keeps the site's show IDs and movie IDs, as Bazarr's region
+	// cache.
+	cache *cache.Region
 }
 
-type movieID struct {
-	id    string
-	until time.Time
+// showList is the site's show IDs by sanitized name and when they were
+// fetched.
+type showList struct {
+	IDs     map[string]int `json:"ids"`
+	Fetched time.Time      `json:"fetched"`
 }
 
 // SetBaseURL points the provider at another server, for tests.
@@ -377,8 +379,9 @@ var (
 // _get_show_ids, kept a week.
 func (p *Provider) shows(ctx context.Context, s *site.Session, refresh bool) (map[string]int, error) {
 	now := p.env.Now()
-	if !refresh && len(p.showIDs) > 0 && now.Before(p.showIDsUntil) {
-		return p.showIDs, nil
+	if l, ok := cache.Get[showList](ctx, p.cache, "shows"); !refresh && ok && len(l.IDs) > 0 {
+		p.lastFetch = l.Fetched
+		return l.IDs, nil
 	}
 	p.env.Log.InfoContext(ctx, "addic7ed: getting show ids")
 	p.lastFetch = now
@@ -412,7 +415,7 @@ func (p *Provider) shows(ctx context.Context, s *site.Session, refresh bool) (ma
 	if len(ids) == 0 {
 		return nil, provider.Errorf(provider.ProviderError, "no show IDs found")
 	}
-	p.showIDs, p.showIDsUntil = ids, now.Add(showExpiration)
+	cache.Set(ctx, p.cache, "shows", showList{IDs: ids, Fetched: now}, showExpiration)
 	return ids, nil
 }
 
@@ -535,10 +538,9 @@ var titleYear = regexp.MustCompile(`(.+)\s\((\d{4})\)$`)
 // movieID returns the site's ID of a movie of a year, as Bazarr's
 // get_movie_id, kept a week; "" for none.
 func (p *Provider) movieID(ctx context.Context, s *site.Session, movie string, year int) (string, error) {
-	key := fmt.Sprintf("%s|%d", movie, year)
-	now := p.env.Now()
-	if c, ok := p.movieIDs[key]; ok && now.Before(c.until) {
-		return c.id, nil
+	key := fmt.Sprintf("movie:%s|%d", movie, year)
+	if id, ok := cache.Get[string](ctx, p.cache, key); ok {
+		return id, nil
 	}
 	p.env.Log.InfoContext(ctx, "addic7ed: getting movie id", "movie", movie)
 	r, err := s.Get(ctx, p.url("search.php")+"?search="+url.QueryEscape(movie), nil)
@@ -568,7 +570,7 @@ func (p *Provider) movieID(ctx context.Context, s *site.Session, movie string, y
 	if id == "" {
 		p.env.Log.DebugContext(ctx, "addic7ed: cannot find this movie", "movie", movie, "year", year)
 	}
-	p.movieIDs[key] = movieID{id: id, until: now.Add(showExpiration)}
+	cache.Set(ctx, p.cache, key, id, showExpiration)
 	return id, nil
 }
 

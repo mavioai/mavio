@@ -20,6 +20,7 @@ import (
 	"golang.org/x/text/encoding/charmap"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/cache"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
@@ -72,7 +73,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 		return nil, provider.Errorf(provider.ConfigurationError, "username and password must be specified")
 	}
 	base, _ := url.Parse("http://xsubs.tv")
-	return &Provider{env: env, s: s, base: base, pages: map[string]string{}}, nil
+	return &Provider{env: env, s: s, base: base, cache: cache.New(env), pages: map[string]string{}}, nil
 }
 
 // Provider is XSubs.
@@ -81,10 +82,10 @@ type Provider struct {
 	s    settings
 	base *url.URL
 
-	mu        sync.Mutex
-	sess      *site.Session
-	shows     map[string]int
-	showsTill time.Time
+	mu   sync.Mutex
+	sess *site.Session
+	// cache keeps the show IDs, as Bazarr's region cache.
+	cache *cache.Region
 	// pages are the subtitles' pages, by ID.
 	pages map[string]string
 }
@@ -162,9 +163,8 @@ func retry[T any](ctx context.Context, p *Provider, f func(*site.Session) (T, er
 // showIDs returns the IDs of the shows by sanitized name, kept a week, as
 // Bazarr's _get_show_ids.
 func (p *Provider) showIDs(ctx context.Context, s *site.Session) (map[string]int, error) {
-	now := p.env.Now()
-	if p.shows != nil && now.Before(p.showsTill) {
-		return p.shows, nil
+	if ids, ok := cache.Get[map[string]int](ctx, p.cache, "shows"); ok {
+		return ids, nil
 	}
 	r, err := s.Get(ctx, p.server()+"/series/all.xml", nil)
 	if err != nil {
@@ -194,7 +194,7 @@ func (p *Provider) showIDs(ctx context.Context, s *site.Session) (map[string]int
 		break
 	}
 	if len(ids) > 0 {
-		p.shows, p.showsTill = ids, now.Add(showExpiration)
+		cache.Set(ctx, p.cache, "shows", ids, showExpiration)
 	}
 	return ids, nil
 }
