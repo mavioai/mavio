@@ -180,7 +180,7 @@ sequenceDiagram
     Note over C,S: Every later request goes to S alone
 ```
 
-* The server's web interface signs in through the OpenID Connect authorization code flow with PKCE, with the server's ID as `client_id`.
+* The server's web interface signs in through the authorization code flow with PKCE (RFC 7636), with the server's ID as `client_id`: mavio.dev's `/authorize` page names the origin of the redirect URI and warns when it is neither one of the server's `mavio.site` names nor on the local network, and the code, exchanged once at `/api/oauth/token` with the verifier from that origin, gives a sign-in assertion for the device key the request named. The web interface so reaches that server alone and holds no mavio.dev session, which another server's administrator could take from its pages.
 * A television signs in to mavio.dev with a code: it shows the code, and the person enters it at mavio.dev/link or approves it in a client signed in to mavio.dev, which names the device being signed in.
 * While mavio.dev is unreachable, open sessions keep refreshing against the server's synchronized access records; new sign-ins wait for mavio.dev.
 * A standalone server signs in with its own credentials and Quick Connect (§4.3) and never contacts mavio.dev.

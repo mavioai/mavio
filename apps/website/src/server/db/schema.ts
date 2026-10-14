@@ -46,6 +46,24 @@ export const claimCodes = pgTable("claim_codes", {
   expiresAt: time("expires_at").notNull(),
 });
 
+/**
+ * authorizationCodes are the codes that sign accounts in to servers' web
+ * interfaces (docs/accounts.md §6), by their SHA-256, exchanged once.
+ */
+export const authorizationCodes = pgTable("authorization_codes", {
+  codeHash: text("code_hash").primaryKey(),
+  accountId: text("account_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  serverId: text("server_id")
+    .notNull()
+    .references(() => servers.id, { onDelete: "cascade" }),
+  redirectUri: text("redirect_uri").notNull(),
+  codeChallenge: text("code_challenge").notNull(),
+  deviceKey: bytea("device_key").notNull(),
+  expiresAt: time("expires_at").notNull(),
+});
+
 /** serverTokens are the IDs of servers' JWTs, accepted once each until they expire. */
 export const serverTokens = pgTable(
   "server_tokens",

@@ -196,6 +196,14 @@ pub use self::__buffa::view::CreateAssertionResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAssertionResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::CreateAuthorizationCodeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAuthorizationCodeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAuthorizationCodeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAuthorizationCodeResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::CreateRelayTicketRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateRelayTicketRequestOwnedView;

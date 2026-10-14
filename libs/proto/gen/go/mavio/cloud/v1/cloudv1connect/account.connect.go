@@ -51,6 +51,9 @@ const (
 	// AccountServiceCreateAssertionProcedure is the fully-qualified name of the AccountService's
 	// CreateAssertion RPC.
 	AccountServiceCreateAssertionProcedure = "/mavio.cloud.v1.AccountService/CreateAssertion"
+	// AccountServiceCreateAuthorizationCodeProcedure is the fully-qualified name of the
+	// AccountService's CreateAuthorizationCode RPC.
+	AccountServiceCreateAuthorizationCodeProcedure = "/mavio.cloud.v1.AccountService/CreateAuthorizationCode"
 	// AccountServiceCreateRelayTicketProcedure is the fully-qualified name of the AccountService's
 	// CreateRelayTicket RPC.
 	AccountServiceCreateRelayTicketProcedure = "/mavio.cloud.v1.AccountService/CreateRelayTicket"
@@ -99,6 +102,12 @@ type AccountServiceClient interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
+	// CreateAuthorizationCode approves a server's web interface signing the
+	// account in (docs/accounts.md §6): the code it gives, sent back to the
+	// redirect URI, is exchanged within a minute at /api/oauth/token with
+	// the PKCE verifier for an assertion for the device key. A server the
+	// account neither administers nor has access to is PERMISSION_DENIED.
+	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
 	// CreateRelayTicket gives the name a client reaches one of the
 	// account's servers at through the relay of the server's region
 	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
@@ -175,6 +184,12 @@ func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(accountServiceMethods.ByName("CreateAssertion")),
 			connect.WithClientOptions(opts...),
 		),
+		createAuthorizationCode: connect.NewClient[v1.CreateAuthorizationCodeRequest, v1.CreateAuthorizationCodeResponse](
+			httpClient,
+			baseURL+AccountServiceCreateAuthorizationCodeProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("CreateAuthorizationCode")),
+			connect.WithClientOptions(opts...),
+		),
 		createRelayTicket: connect.NewClient[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse](
 			httpClient,
 			baseURL+AccountServiceCreateRelayTicketProcedure,
@@ -230,20 +245,21 @@ func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // accountServiceClient implements AccountServiceClient.
 type accountServiceClient struct {
-	getAccount        *connect.Client[v1.GetAccountRequest, v1.GetAccountResponse]
-	reportCompromised *connect.Client[v1.ReportCompromisedRequest, v1.ReportCompromisedResponse]
-	createClaimCode   *connect.Client[v1.CreateClaimCodeRequest, v1.CreateClaimCodeResponse]
-	listServers       *connect.Client[v1.ListServersRequest, v1.ListServersResponse]
-	removeServer      *connect.Client[v1.RemoveServerRequest, v1.RemoveServerResponse]
-	createAssertion   *connect.Client[v1.CreateAssertionRequest, v1.CreateAssertionResponse]
-	createRelayTicket *connect.Client[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse]
-	listAccess        *connect.Client[v1.ListAccessRequest, v1.ListAccessResponse]
-	grantAccess       *connect.Client[v1.GrantAccessRequest, v1.GrantAccessResponse]
-	revokeAccess      *connect.Client[v1.RevokeAccessRequest, v1.RevokeAccessResponse]
-	listInvitations   *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
-	acceptInvitation  *connect.Client[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse]
-	declineInvitation *connect.Client[v1.DeclineInvitationRequest, v1.DeclineInvitationResponse]
-	leaveServer       *connect.Client[v1.LeaveServerRequest, v1.LeaveServerResponse]
+	getAccount              *connect.Client[v1.GetAccountRequest, v1.GetAccountResponse]
+	reportCompromised       *connect.Client[v1.ReportCompromisedRequest, v1.ReportCompromisedResponse]
+	createClaimCode         *connect.Client[v1.CreateClaimCodeRequest, v1.CreateClaimCodeResponse]
+	listServers             *connect.Client[v1.ListServersRequest, v1.ListServersResponse]
+	removeServer            *connect.Client[v1.RemoveServerRequest, v1.RemoveServerResponse]
+	createAssertion         *connect.Client[v1.CreateAssertionRequest, v1.CreateAssertionResponse]
+	createAuthorizationCode *connect.Client[v1.CreateAuthorizationCodeRequest, v1.CreateAuthorizationCodeResponse]
+	createRelayTicket       *connect.Client[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse]
+	listAccess              *connect.Client[v1.ListAccessRequest, v1.ListAccessResponse]
+	grantAccess             *connect.Client[v1.GrantAccessRequest, v1.GrantAccessResponse]
+	revokeAccess            *connect.Client[v1.RevokeAccessRequest, v1.RevokeAccessResponse]
+	listInvitations         *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
+	acceptInvitation        *connect.Client[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse]
+	declineInvitation       *connect.Client[v1.DeclineInvitationRequest, v1.DeclineInvitationResponse]
+	leaveServer             *connect.Client[v1.LeaveServerRequest, v1.LeaveServerResponse]
 }
 
 // GetAccount calls mavio.cloud.v1.AccountService.GetAccount.
@@ -294,6 +310,15 @@ func (c *accountServiceClient) RemoveServer(ctx context.Context, req *v1.RemoveS
 // CreateAssertion calls mavio.cloud.v1.AccountService.CreateAssertion.
 func (c *accountServiceClient) CreateAssertion(ctx context.Context, req *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error) {
 	response, err := c.createAssertion.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// CreateAuthorizationCode calls mavio.cloud.v1.AccountService.CreateAuthorizationCode.
+func (c *accountServiceClient) CreateAuthorizationCode(ctx context.Context, req *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error) {
+	response, err := c.createAuthorizationCode.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -394,6 +419,12 @@ type AccountServiceHandler interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
+	// CreateAuthorizationCode approves a server's web interface signing the
+	// account in (docs/accounts.md §6): the code it gives, sent back to the
+	// redirect URI, is exchanged within a minute at /api/oauth/token with
+	// the PKCE verifier for an assertion for the device key. A server the
+	// account neither administers nor has access to is PERMISSION_DENIED.
+	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
 	// CreateRelayTicket gives the name a client reaches one of the
 	// account's servers at through the relay of the server's region
 	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
@@ -466,6 +497,12 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 		connect.WithSchema(accountServiceMethods.ByName("CreateAssertion")),
 		connect.WithHandlerOptions(opts...),
 	)
+	accountServiceCreateAuthorizationCodeHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceCreateAuthorizationCodeProcedure,
+		svc.CreateAuthorizationCode,
+		connect.WithSchema(accountServiceMethods.ByName("CreateAuthorizationCode")),
+		connect.WithHandlerOptions(opts...),
+	)
 	accountServiceCreateRelayTicketHandler := connect.NewUnaryHandlerSimple(
 		AccountServiceCreateRelayTicketProcedure,
 		svc.CreateRelayTicket,
@@ -530,6 +567,8 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 			accountServiceRemoveServerHandler.ServeHTTP(w, r)
 		case AccountServiceCreateAssertionProcedure:
 			accountServiceCreateAssertionHandler.ServeHTTP(w, r)
+		case AccountServiceCreateAuthorizationCodeProcedure:
+			accountServiceCreateAuthorizationCodeHandler.ServeHTTP(w, r)
 		case AccountServiceCreateRelayTicketProcedure:
 			accountServiceCreateRelayTicketHandler.ServeHTTP(w, r)
 		case AccountServiceListAccessProcedure:
@@ -577,6 +616,10 @@ func (UnimplementedAccountServiceHandler) RemoveServer(context.Context, *v1.Remo
 
 func (UnimplementedAccountServiceHandler) CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.CreateAssertion is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.CreateAuthorizationCode is not implemented"))
 }
 
 func (UnimplementedAccountServiceHandler) CreateRelayTicket(context.Context, *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error) {

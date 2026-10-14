@@ -8,6 +8,7 @@ import {
   type AccountService,
   AccessRecordSchema,
   CreateAssertionResponseSchema,
+  CreateAuthorizationCodeResponseSchema,
   CreateClaimCodeResponseSchema,
   CreateRelayTicketResponseSchema,
   DeclineInvitationResponseSchema,
@@ -33,6 +34,15 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { Auth } from "./auth.ts";
+import {
+  authorizationCodeLifetime,
+  deleteExpiredCodes,
+  hasAccess,
+  newAuthorizationCode,
+  redirectURI,
+  sha256Hex,
+  signAssertion,
+} from "./authorization.ts";
 import { AccountRevoked_Reason, accessJson, accountOf, accountRevoked, addChange, managed } from "./changes.ts";
 import { claimCodeHash, claimCodeLifetime, newClaimCode } from "./claim-codes.ts";
 import { schema, type Tx } from "./db/index.ts";
@@ -40,9 +50,6 @@ import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { base64url } from "./ids.ts";
 import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
 import { available, type Deps } from "./server-service.ts";
-
-/** AssertionLifetime is how long a sign-in assertion is valid, in seconds. */
-export const assertionLifetime = 120;
 
 type User = typeof schema.user.$inferSelect;
 type Record = typeof schema.accessRecords.$inferSelect;
@@ -184,22 +191,34 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
 
     async createAssertion(req, ctx) {
       const me = await signedIn(ctx);
-      const server = await db.query.servers.findFirst({
-        where: eq(schema.servers.id, req.serverId),
-        with: { accessRecords: { where: and(eq(schema.accessRecords.accountId, me.id), eq(schema.accessRecords.invitation, false)) } },
-      });
-      if (!server || (server.administratorId !== me.id && server.accessRecords.length === 0)) {
+      if (!(await hasAccess(db, req.serverId, me.id))) {
         throw new ConnectError("the account has no access to the server", Code.PermissionDenied);
       }
-      const iat = Math.floor(now().getTime() / 1000);
-      const exp = iat + assertionLifetime;
-      const nonce = base64url(crypto.getRandomValues(new Uint8Array(16)));
-      const { token } = await auth.api.signJWT({
-        body: {
-          payload: { iss: apiURL, aud: server.id, sub: me.id, iat, exp, device_key: base64url(req.deviceKey), nonce },
-        },
+      const { assertion, exp } = await signAssertion(auth, apiURL, req.serverId, me.id, req.deviceKey, now());
+      return create(CreateAssertionResponseSchema, { assertion, expireTime: timestampFromDate(new Date(exp * 1000)) });
+    },
+
+    async createAuthorizationCode(req, ctx) {
+      const me = await signedIn(ctx);
+      if (!redirectURI(req.redirectUri)) {
+        throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
+      }
+      if (!(await hasAccess(db, req.serverId, me.id))) {
+        throw new ConnectError("the account has no access to the server", Code.PermissionDenied);
+      }
+      const at = now();
+      await deleteExpiredCodes(db, me.id, at);
+      const code = newAuthorizationCode();
+      await db.insert(schema.authorizationCodes).values({
+        codeHash: await sha256Hex(code),
+        accountId: me.id,
+        serverId: req.serverId,
+        redirectUri: req.redirectUri,
+        codeChallenge: req.codeChallenge,
+        deviceKey: req.deviceKey,
+        expiresAt: new Date(at.getTime() + authorizationCodeLifetime),
       });
-      return create(CreateAssertionResponseSchema, { assertion: token, expireTime: timestampFromDate(new Date(exp * 1000)) });
+      return create(CreateAuthorizationCodeResponseSchema, { code });
     },
 
     async createRelayTicket(req, ctx) {

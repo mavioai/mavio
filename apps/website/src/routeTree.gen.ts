@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AuthorizeRouteImport } from './routes/authorize'
 import { Route as ClaimRouteImport } from './routes/claim'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as HomeRouteImport } from './routes/home'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthorizeRoute = AuthorizeRouteImport.update({
+  id: '/authorize',
+  path: '/authorize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClaimRoute = ClaimRouteImport.update({
@@ -68,6 +74,7 @@ const ServersIdRoute = ServersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/authorize': typeof AuthorizeRoute
   '/claim': typeof ClaimRoute
   '/friends': typeof FriendsRoute
   '/home': typeof HomeRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
+    | '/authorize'
     | '/claim'
     | '/friends'
     | '/home'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/account'
+    | '/authorize'
     | '/claim'
     | '/friends'
     | '/home'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/account'
+    | '/authorize'
     | '/claim'
     | '/friends'
     | '/home'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
+  AuthorizeRoute: typeof AuthorizeRoute
   ClaimRoute: typeof ClaimRoute
   FriendsRoute: typeof FriendsRoute
   HomeRoute: typeof HomeRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/authorize': {
+      id: '/authorize'
+      path: '/authorize'
+      fullPath: '/authorize'
+      preLoaderRoute: typeof AuthorizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/claim': {
@@ -218,6 +238,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
+  AuthorizeRoute: AuthorizeRoute,
   ClaimRoute: ClaimRoute,
   FriendsRoute: FriendsRoute,
   HomeRoute: HomeRoute,

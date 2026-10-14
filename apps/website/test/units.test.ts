@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { claimCodeHash, newClaimCode } from "../src/server/claim-codes.ts";
+import { expectedOrigin } from "../src/lib/origins.ts";
 import { base32, serverID } from "../src/server/ids.ts";
 import * as password from "../src/server/password.ts";
 
@@ -42,4 +43,27 @@ test("claim codes ignore case, spaces and dashes", async () => {
   const code = newClaimCode();
   expect(code).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   expect(await claimCodeHash(code.toLowerCase().replace("-", " "))).toBe(await claimCodeHash(code));
+});
+
+describe("expectedOrigin", () => {
+  const id = "abcdefghijklmnopqrstuvwxyz234567";
+  test.each([
+    [`https://relay-eu-ticket.${id}.mavio.site/sign-in`, true],
+    [`https://lan-192-168-1-2.${id}.mavio.site`, true],
+    [`https://evil.example/${id}.mavio.site`, false],
+    [`https://x.other.mavio.site`, false],
+    ["http://localhost:8686", true],
+    ["http://nas.local:8686", true],
+    ["http://192.168.1.20:8686", true],
+    ["http://10.0.0.2", true],
+    ["http://172.20.0.2", true],
+    ["http://172.32.0.2", false],
+    ["http://[::1]:8686", true],
+    ["http://[fd00::2]:8686", true],
+    ["http://[2001:db8::1]", false],
+    ["https://media.example.com", false],
+    ["not a url", false],
+  ])("%s is %s", (uri, want) => {
+    expect(expectedOrigin(uri, id)).toBe(want);
+  });
 });

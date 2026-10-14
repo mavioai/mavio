@@ -180,7 +180,7 @@ sequenceDiagram
     Note over C,S: 之后的请求只发往 S
 ```
 
-* 服务端的 Web 界面通过带 PKCE 的 OpenID Connect 授权码流程登录，以服务端 ID 作为 `client_id`。
+* 服务端的 Web 界面通过带 PKCE（RFC 7636）的授权码流程登录，以服务端 ID 作为 `client_id`：mavio.dev 的 `/authorize` 页面写明重定向 URI 的源，当它既不是服务端在 `mavio.site` 下的名称、也不在本地网络上时给出警告；授权码在 `/api/oauth/token` 凭来自该源的 PKCE 校验值换取一次，得到为请求中设备密钥签发的登录断言。Web 界面因此只能访问该服务端，也不持有 mavio.dev 会话，以免其他服务端的管理员从其页面取走它。
 * 电视用代码登录 mavio.dev：电视显示代码，用户在 mavio.dev/link 输入，或在已登录 mavio.dev 的客户端中批准，批准界面会写明被登录的设备。
 * mavio.dev 不可达时，已打开的会话按服务端同步来的访问记录照常续期；新的登录要等 mavio.dev 恢复。
 * 独立服务端用自己的凭据和 Quick Connect（§4.3）登录，从不联系 mavio.dev。

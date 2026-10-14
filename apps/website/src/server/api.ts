@@ -1,5 +1,6 @@
 // mavio.dev's API under /api (docs/mavio-dev.md §2, §3): better-auth at
-// /api/auth, the Connect services of mavio.cloud.v1, and servers'
+// /api/auth, the Connect services of mavio.cloud.v1, the token endpoint of
+// servers' web interfaces at /api/oauth/token, and servers'
 // WebSockets at /api/servers/notices.
 import { ConnectError, type ConnectRouter, createConnectRouter } from "@connectrpc/connect";
 import { createFetchHandler } from "@connectrpc/connect/protocol";
@@ -11,6 +12,7 @@ import { FriendService, HomeService } from "@mavio/proto/mavio/cloud/v1/home_pb"
 import { accountService } from "./account-service.ts";
 import type { Acme } from "./acme.ts";
 import { type Auth, apiURL } from "./auth.ts";
+import { handleToken, tokenPath } from "./authorization.ts";
 import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
@@ -59,6 +61,7 @@ export async function handleApi(req: Request, options: ApiOptions): Promise<Resp
 
 async function route(req: Request, pathname: string, options: ApiOptions, deps: Deps): Promise<Response | undefined> {
   if (pathname.startsWith("/api/auth/")) return options.auth.handler(req);
+  if (pathname === tokenPath) return handleToken(req, { db: options.db, auth: options.auth, apiURL: deps.apiURL, now: options.now ?? (() => new Date()) });
   if (!pathname.startsWith("/api/mavio.")) return undefined;
   const router: ConnectRouter = createConnectRouter({ interceptors: [createValidateInterceptor()] });
   router.service(ServerService, serverService(deps));
