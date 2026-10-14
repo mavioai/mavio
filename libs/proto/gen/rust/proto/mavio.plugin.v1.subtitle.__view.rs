@@ -4931,7 +4931,7 @@ impl ::buffa::HasMessageView for super::super::ListSubtitleTranslatorsResponse {
 /// SubtitleTranslatorInfo is a translator a plugin implements.
 #[derive(Clone, Debug, Default)]
 pub struct SubtitleTranslatorInfoView<'a> {
-    /// Stable within the plugin, such as "google_translate".
+    /// Stable within the plugin, such as "deepl".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
@@ -5296,7 +5296,7 @@ impl SubtitleTranslatorInfoOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Stable within the plugin, such as "google_translate".
+    /// Stable within the plugin, such as "deepl".
     ///
     /// Field 1: `name`
     #[must_use]
@@ -6243,8 +6243,8 @@ pub struct TranslateSubtitleLinesResponseView<'a> {
     ///
     /// Field 1: `lines`
     pub lines: ::buffa::RepeatedView<'a, &'a str>,
-    /// What translated them, as the subtitle may credit it: "Google
-    /// Translate", "gemini-2.0-flash".
+    /// What translated them, as the subtitle may credit it: "DeepL",
+    /// "Google Translate".
     ///
     /// Field 2: `credit`
     pub credit: ::core::option::Option<&'a str>,
@@ -6465,8 +6465,8 @@ impl TranslateSubtitleLinesResponseOwnedView {
     pub fn lines(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().lines
     }
-    /// What translated them, as the subtitle may credit it: "Google
-    /// Translate", "gemini-2.0-flash".
+    /// What translated them, as the subtitle may credit it: "DeepL",
+    /// "Google Translate".
     ///
     /// Field 2: `credit`
     #[must_use]

@@ -3358,7 +3358,7 @@ impl ::buffa::ExtensionSet for ListSubtitleTranslatorsResponse {
 /// SubtitleTranslatorInfo is a translator a plugin implements.
 #[derive(Clone, PartialEq, Default)]
 pub struct SubtitleTranslatorInfo {
-    /// Stable within the plugin, such as "google_translate".
+    /// Stable within the plugin, such as "deepl".
     ///
     /// Field 1: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
@@ -4299,8 +4299,8 @@ pub struct TranslateSubtitleLinesResponse {
     ///
     /// Field 1: `lines`
     pub lines: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
-    /// What translated them, as the subtitle may credit it: "Google
-    /// Translate", "gemini-2.0-flash".
+    /// What translated them, as the subtitle may credit it: "DeepL",
+    /// "Google Translate".
     ///
     /// Field 2: `credit`
     pub credit: ::core::option::Option<::buffa::alloc::string::String>,

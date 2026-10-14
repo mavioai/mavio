@@ -1,35 +1,40 @@
 package translator
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
-func TestCode(t *testing.T) {
-	convert := map[string]string{"he": "iw", "zh": "zh-CN", "zt": "zh-TW", "pb": "pt-BR"}
-	for _, c := range []struct{ tag, want string }{
-		{"fr", "fr"},
-		{"he", "iw"},
-		{"zh", "zh-CN"},
-		{"zh-Hans", "zh-CN"},
-		{"zh-Hant", "zh-TW"},
-		{"zh-TW", "zh-TW"},
-		{"pt-BR", "pt-BR"},
-		{"pt", "pt"},
-		{"pt-PT", "pt"},
-		{"fil", "fil"},
+func TestMatch(t *testing.T) {
+	langs := append(Codes("en", "fr", "zh-Hans", "zh-Hant", "pt-BR", "pt-PT", "nb", "sr-Cyrl", "sr-Latn"), Language{Code: "kazlat", Tag: "kk-Latn"})
+	for _, c := range []struct {
+		tag, want string
+		ok        bool
+	}{
+		{"fr", "fr", true},
+		{"FR", "fr", true},
+		{"en-GB", "en", true},
+		{"zh", "zh-Hans", true},
+		{"zh-CN", "zh-Hans", true},
+		{"zh-TW", "zh-Hant", true},
+		{"pt", "pt-BR", true},
+		{"pt-PT", "pt-PT", true},
+		{"no", "nb", true},
+		{"sr", "sr-Cyrl", true},
+		{"kk-Latn", "kazlat", true},
+		{"de", "", false},
+		{"tlh", "", false},
+		{"x-unknown", "", false},
 	} {
-		if got := Code(c.tag, convert); got != c.want {
-			t.Errorf("Code(%q) got = %q, want = %q", c.tag, got, c.want)
+		if got, ok := Match(c.tag, langs); got != c.want || ok != c.ok {
+			t.Errorf("Match(%q) got = %q, %v, want = %q, %v", c.tag, got, ok, c.want, c.ok)
 		}
 	}
 }
 
-func TestName(t *testing.T) {
-	for _, c := range []struct{ tag, want string }{
-		{"fr", "French"},
-		{"pt-BR", "Brazilian Portuguese"},
-		{"zh-Hant", "Traditional Chinese"},
-	} {
-		if got := Name(c.tag); got != c.want {
-			t.Errorf("Name(%q) got = %q, want = %q", c.tag, got, c.want)
-		}
+func TestTags(t *testing.T) {
+	got := Tags([]Language{{Code: "en"}, {Code: "kazlat", Tag: "kk-Latn"}, {Code: "uzbcyr"}})
+	if strings.Join(got, ",") != "en,kk-Latn" {
+		t.Errorf("Tags got = %v, want = en,kk-Latn", got)
 	}
 }

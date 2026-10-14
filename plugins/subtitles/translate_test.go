@@ -27,27 +27,30 @@ func TestTranslators(t *testing.T) {
 			t.Errorf("translator %s enabled before being configured", tr.GetName())
 		}
 	}
-	if strings.Join(names, ",") != "google_translate,gemini,lingarr" {
-		t.Errorf("translators = %v, want Bazarr's", names)
+	if strings.Join(names, ",") != "deepl,libretranslate,google,bing,microsoft,yandex" {
+		t.Errorf("translators = %v, want Lingarr's services", names)
 	}
 
 	h.configure(t, `{"translators":[
-		{"name":"google_translate","enabled":true},
-		{"name":"gemini","enabled":true,"settings":{"api_keys":"k","batch_size":50}},
-		{"name":"lingarr","enabled":false}]}`)
-	list, err = h.p.ListSubtitleTranslators(t.Context(), &pluginv1.ListSubtitleTranslatorsRequest{})
+		{"name":"google","enabled":true},
+		{"name":"deepl","enabled":true,"settings":{"api_key":"k"}},
+		{"name":"libretranslate","enabled":false}]}`)
+	// DeepL's languages are not listed without reaching it.
+	canceled, cancel := context.WithCancel(t.Context())
+	cancel()
+	list, err = h.p.ListSubtitleTranslators(canceled, &pluginv1.ListSubtitleTranslatorsRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	g, gem, l := list.GetTranslators()[0], list.GetTranslators()[1], list.GetTranslators()[2]
-	if !g.GetEnabled() || g.GetMarkup() || g.GetBatchSize() != 0 || !gem.GetEnabled() || !gem.GetMarkup() || gem.GetBatchSize() != 50 ||
-		l.GetEnabled() || len(gem.GetSettings()) != 3 || !gem.GetSettings()[0].GetSecret() {
-		t.Errorf("translators = %v, want Google and Gemini enabled", list.GetTranslators())
+	d, l, g := list.GetTranslators()[0], list.GetTranslators()[1], list.GetTranslators()[2]
+	if !g.GetEnabled() || g.GetMarkup() || g.GetBatchSize() != 20 || len(g.GetSourceLanguages()) < 100 ||
+		!d.GetEnabled() || d.GetBatchSize() != 50 || len(d.GetSourceLanguages()) != 0 || len(d.GetSettings()) != 1 || !d.GetSettings()[0].GetSecret() || l.GetEnabled() {
+		t.Errorf("translators = %v, want Google and DeepL enabled, Google's languages listed", list.GetTranslators())
 	}
 
 	// A translator not enabled, or whose settings are wrong, fails.
-	h.configure(t, `{"translators":[{"name":"gemini","enabled":true}]}`)
-	for _, name := range []string{"lingarr", "gemini"} {
+	h.configure(t, `{"translators":[{"name":"deepl","enabled":true}]}`)
+	for _, name := range []string{"libretranslate", "deepl"} {
 		_, err := h.p.TranslateSubtitleLines(t.Context(), pluginv1.TranslateSubtitleLinesRequest_builder{
 			Translator: proto.String(name), SourceLanguage: proto.String("en"), TargetLanguage: proto.String("fr"), Lines: []string{"a"},
 		}.Build())
@@ -55,7 +58,7 @@ func TestTranslators(t *testing.T) {
 			t.Errorf("TranslateSubtitleLines(%s): err = %v, want failed precondition", name, err)
 		}
 	}
-	for _, cfg := range []string{`{"translators":[{"name":"deepl"}]}`, `{"translators":[{"name":"gemini"},{"name":"gemini"}]}`} {
+	for _, cfg := range []string{`{"translators":[{"name":"gemini"}]}`, `{"translators":[{"name":"deepl"},{"name":"deepl"}]}`} {
 		if _, err := h.p.Configure(t.Context(), pluginv1.ConfigureRequest_builder{ConfigJson: proto.String(cfg)}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 			t.Errorf("Configure(%s): err = %v, want invalid argument", cfg, err)
 		}

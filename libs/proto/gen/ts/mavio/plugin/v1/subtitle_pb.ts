@@ -637,7 +637,7 @@ export const ListSubtitleTranslatorsResponseSchema: GenMessage<ListSubtitleTrans
  */
 export type SubtitleTranslatorInfo = Message<"mavio.plugin.v1.SubtitleTranslatorInfo"> & {
   /**
-   * Stable within the plugin, such as "google_translate".
+   * Stable within the plugin, such as "deepl".
    *
    * @generated from field: string name = 1;
    */
@@ -828,8 +828,8 @@ export type TranslateSubtitleLinesResponse = Message<"mavio.plugin.v1.TranslateS
   lines: string[];
 
   /**
-   * What translated them, as the subtitle may credit it: "Google
-   * Translate", "gemini-2.0-flash".
+   * What translated them, as the subtitle may credit it: "DeepL",
+   * "Google Translate".
    *
    * @generated from field: string credit = 2;
    */

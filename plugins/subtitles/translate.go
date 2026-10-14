@@ -10,32 +10,46 @@ import (
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/translator"
-	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/gemini"
-	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/google"
-	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/lingarr"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/deepl"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/gtranslate"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/translators/libre"
 )
 
-// translatorDefinitions are the translators the plugin implements, as
-// Bazarr's.
+// translatorDefinitions are the translators the plugin implements, the
+// translation services of Lingarr.
 func translatorDefinitions() []translator.Definition {
-	return []translator.Definition{google.Definition(), gemini.Definition(), lingarr.Definition()}
+	return append([]translator.Definition{deepl.Definition(), libre.Definition()}, gtranslate.Definitions()...)
 }
 
 // ListSubtitleTranslators implements SubtitleTranslatorService.
-func (p *plugin) ListSubtitleTranslators(context.Context, *pluginv1.ListSubtitleTranslatorsRequest) (*pluginv1.ListSubtitleTranslatorsResponse, error) {
+// The languages of enabled translators that list theirs are listed too;
+// none when listing them fails.
+func (p *plugin) ListSubtitleTranslators(ctx context.Context, _ *pluginv1.ListSubtitleTranslatorsRequest) (*pluginv1.ListSubtitleTranslatorsResponse, error) {
 	p.mu.RLock()
-	defer p.mu.RUnlock()
-	out := make([]*pluginv1.SubtitleTranslatorInfo, 0, len(p.translatorDefs))
-	for i := range p.translatorDefs {
-		def := &p.translatorDefs[i]
-		ct := p.translators[def.Name]
+	defs := p.translatorDefs
+	cts := make([]*configuredTranslator, len(defs))
+	for i := range defs {
+		cts[i] = p.translators[defs[i].Name]
+	}
+	p.mu.RUnlock()
+	out := make([]*pluginv1.SubtitleTranslatorInfo, 0, len(defs))
+	for i := range defs {
+		def, ct := &defs[i], cts[i]
 		batch := 0
+		var source, target []string
 		if ct != nil && ct.translator != nil {
 			batch = ct.translator.BatchSize()
+			if l, ok := ct.translator.(translator.Languages); ok {
+				var err error
+				if source, target, err = l.Languages(ctx); err != nil {
+					p.log.WarnContext(ctx, "list translator languages", "translator", def.Name, "err", err)
+				}
+			}
 		}
 		out = append(out, pluginv1.SubtitleTranslatorInfo_builder{
 			Name: proto.String(def.Name), DisplayName: proto.String(def.DisplayName), Settings: settingFields(def.Settings),
 			Enabled: proto.Bool(ct != nil), BatchSize: proto.Int32(int32(batch)), Markup: proto.Bool(def.Markup),
+			SourceLanguages: source, TargetLanguages: target,
 		}.Build())
 	}
 	return pluginv1.ListSubtitleTranslatorsResponse_builder{Translators: out}.Build(), nil
@@ -80,7 +94,7 @@ func translateCode(err error) connect.Code {
 	switch provider.KindOf(err) {
 	case provider.TooManyRequests, provider.APIThrottled:
 		return connect.CodeResourceExhausted
-	case provider.AuthenticationError, provider.PermissionError, provider.ConfigurationError:
+	case provider.AuthenticationError, provider.PermissionError, provider.ConfigurationError, provider.SearchLimitReached:
 		return connect.CodeFailedPrecondition
 	case provider.Timeout:
 		return connect.CodeDeadlineExceeded

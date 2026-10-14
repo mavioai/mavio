@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"golang.org/x/text/language"
-	"golang.org/x/text/language/display"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
@@ -54,7 +53,7 @@ type Translator interface {
 
 // Definition is a translator the plugin implements.
 type Definition struct {
-	// Name is stable: "google_translate".
+	// Name is stable: "deepl".
 	Name        string
 	DisplayName string
 	Settings    []provider.Setting
@@ -65,49 +64,74 @@ type Definition struct {
 	New func(env provider.Env, settings json.RawMessage) (Translator, error)
 }
 
-// Name returns a language's English name, such as "French" or
-// "Brazilian Portuguese", which services are told languages by.
-func Name(tag string) string {
-	t, err := language.Parse(tag)
-	if err != nil {
-		return tag
-	}
-	if n := display.English.Tags().Name(t); n != "" {
-		return n
-	}
-	return tag
+// Languages is implemented by translators that know the languages they
+// translate.
+type Languages interface {
+	// Languages returns the BCP 47 tags of the languages the translator
+	// translates from and to; none for any.
+	Languages(ctx context.Context) (source, target []string, err error)
 }
 
-// Code returns a language's code as services such as Google Translate take
-// it: the language's ISO 639-1 code, or its tag; Chinese and Brazilian
-// Portuguese with their regions, as Bazarr's language_code_convert_dict.
-func Code(tag string, convert map[string]string) string {
+// Language is a language as a service names it.
+type Language struct {
+	// Code is the service's code.
+	Code string
+	// Tag is the language's BCP 47 tag; "" when Code is one.
+	Tag string
+}
+
+// tag returns a language's BCP 47 tag.
+func (l Language) tag() string {
+	if l.Tag != "" {
+		return l.Tag
+	}
+	return l.Code
+}
+
+// Tags returns the BCP 47 tags of languages, those that are not left out.
+func Tags(langs []Language) []string {
+	out := make([]string, 0, len(langs))
+	for _, l := range langs {
+		if _, err := language.Parse(l.tag()); err == nil {
+			out = append(out, l.tag())
+		}
+	}
+	return out
+}
+
+// Match returns the code of the language among langs that a BCP 47 tag
+// names: the one of the same tag, else the closest of the same language,
+// such as "zh-Hans" for "zh" and "pt-BR" for "pt".
+func Match(tag string, langs []Language) (string, bool) {
+	var tags []language.Tag
+	var codes []string
+	for _, l := range langs {
+		if strings.EqualFold(l.Code, tag) || strings.EqualFold(l.tag(), tag) {
+			return l.Code, true
+		}
+		if t, err := language.Parse(l.tag()); err == nil {
+			tags, codes = append(tags, t), append(codes, l.Code)
+		}
+	}
 	t, err := language.Parse(tag)
-	if err != nil {
-		return tag
+	if err != nil || len(tags) == 0 {
+		return "", false
 	}
-	base, _ := t.Base()
-	switch base.String() {
-	case "zh":
-		if s, _ := t.Script(); s.String() == "Hant" {
-			return convert["zt"]
-		}
-		if r, _ := t.Region(); r.String() == "TW" || r.String() == "HK" || r.String() == "MO" {
-			return convert["zt"]
-		}
-		return convert["zh"]
-	case "pt":
-		if r, conf := t.Region(); r.String() == "BR" && conf == language.Exact {
-			if c, ok := convert["pb"]; ok {
-				return c
-			}
-		}
+	_, i, conf := language.NewMatcher(tags).Match(t)
+	// The matcher falls back on its first language with high confidence.
+	want, _ := t.Base()
+	got, _ := tags[i].Base()
+	if conf < language.High || conf < language.Exact && want != got {
+		return "", false
 	}
-	if c, ok := convert[base.String()]; ok {
-		return c
+	return codes[i], true
+}
+
+// Codes returns languages of the codes a service names them by.
+func Codes(codes ...string) []Language {
+	out := make([]Language, len(codes))
+	for i, c := range codes {
+		out[i] = Language{Code: c}
 	}
-	if a := provider.Alpha2(tag); a != "" {
-		return a
-	}
-	return strings.ToLower(base.String())
+	return out
 }

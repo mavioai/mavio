@@ -2869,7 +2869,7 @@ func (x *SubtitleTranslatorInfo) ClearMarkup() {
 type SubtitleTranslatorInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stable within the plugin, such as "google_translate".
+	// Stable within the plugin, such as "deepl".
 	Name        *string
 	DisplayName *string
 	// The translator's settings, under its name in the plugin's settings.
@@ -3536,8 +3536,8 @@ type TranslateSubtitleLinesResponse_builder struct {
 	// As many as the request's lines, in their order; an empty one keeps
 	// its cue's text, which had nothing to translate.
 	Lines []string
-	// What translated them, as the subtitle may credit it: "Google
-	// Translate", "gemini-2.0-flash".
+	// What translated them, as the subtitle may credit it: "DeepL",
+	// "Google Translate".
 	Credit *string
 }
 
