@@ -134,7 +134,7 @@ Every member and managed user has one library access record with the fields of ย
 On a device signed in as the administrator, a client lists all the server's enabled users and switches to one, entering the target's PIN when it has one. Switching changes the user of the device's session in place, so its token and refreshes act as the target from then on, and the session remembers the administrator who switched; the device keeps the ability to switch, so it can switch back to the administrator, with the administrator's PIN if set. This gives the administrator nothing new, since the administrator can reset any user's credentials anyway. Wrong PINs slow down progressively per target user, as failed sign-ins do (ยง4.3).
 
 ### 4.5 Recovery
-The server's command line resets the administrator's credentials (`mavio admin reset-password` and its kin), with the access to the server's files that this needs.
+The server's command line recovers the administrator, with the access to the server's files that this needs: `mavio admin reset-password` sets a new password, turns off the administrator's TOTP, ends its sessions and prints its name. It works on the server's database directly, whether or not the server runs, and is recorded in the activity log.
 
 ## 5. Keys and Tokens
 

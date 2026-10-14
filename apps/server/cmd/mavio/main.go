@@ -26,8 +26,9 @@ func main() {
 	}
 }
 
-// newCommand returns the mavio command: it serves, and its version
-// subcommand prints the version.
+// newCommand returns the mavio command: it serves, its version
+// subcommand prints the version, and its admin subcommand recovers the
+// administrator.
 func newCommand() *cobra.Command {
 	var restore string
 	cmd := &cobra.Command{
@@ -71,5 +72,6 @@ then variables, then config.toml. Paths in config.toml must be absolute.`,
 			cmd.Println(buildinfo.Version())
 		},
 	})
+	cmd.AddCommand(newAdminCommand())
 	return cmd
 }
