@@ -74,6 +74,11 @@ service SubtitleService {
   // UploadSubtitle saves a subtitle file beside a movie's or episode's
   // video.
   rpc UploadSubtitle(UploadSubtitleRequest) returns (UploadSubtitleResponse);
+  // ExtractSubtitle saves an embedded text subtitle stream of a movie's or
+  // episode's video as a subtitle file, from playback's extraction cache.
+  // Videos on cloud storage are refused (FAILED_PRECONDITION): their
+  // embedded subtitles are never extracted.
+  rpc ExtractSubtitle(ExtractSubtitleRequest) returns (ExtractSubtitleResponse);
   // DeleteSubtitle deletes a subtitle file of a movie or episode.
   rpc DeleteSubtitle(DeleteSubtitleRequest) returns (DeleteSubtitleResponse) {
     option idempotency_level = IDEMPOTENT;
@@ -516,6 +521,20 @@ message UploadSubtitleRequest {
 }
 
 message UploadSubtitleResponse {
+  string path = 1;
+}
+
+message ExtractSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // The index of the embedded subtitle stream in the video's streams.
+  int32 stream_index = 2 [(buf.validate.field).int32.gte = 0];
+  // The subtitle's language, forced and hearing-impaired flags; unset
+  // takes the stream's.
+  SubtitleLanguageSpec language = 3;
+}
+
+message ExtractSubtitleResponse {
+  // The subtitle file saved.
   string path = 1;
 }
 

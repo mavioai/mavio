@@ -201,10 +201,10 @@ func TrickplayDir(metadataDir string, itemID core.ID, width int) string {
 	return extrasFolder(metadataDir, itemID, "trickplay", strconv.Itoa(width))
 }
 
-// SubtitlesDir returns the folder of the embedded text subtitles extracted
-// from a media source of an item within the metadata folder.
-func SubtitlesDir(metadataDir string, itemID, sourceID core.ID) string {
-	return extrasFolder(metadataDir, itemID, "subtitles", sourceID.String())
+// ExtractedSubtitlesDir returns the folder of the embedded text subtitles
+// extracted from a media source of an item within the metadata folder.
+func ExtractedSubtitlesDir(metadataDir string, itemID, sourceID core.ID) string {
+	return extrasFolder(metadataDir, itemID, "extracted", sourceID.String())
 }
 
 // ChapterImagePath returns the file of a chapter's image of a media

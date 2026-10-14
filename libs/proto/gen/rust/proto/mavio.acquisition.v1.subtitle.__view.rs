@@ -12380,6 +12380,546 @@ impl ::buffa::HasMessageView for super::super::UploadSubtitleResponse {
     type ViewHandle = UploadSubtitleResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
+pub struct ExtractSubtitleRequestView<'a> {
+    /// Field 1: `item_id`
+    pub item_id: ::core::option::Option<&'a str>,
+    /// The index of the embedded subtitle stream in the video's streams.
+    ///
+    /// Field 2: `stream_index`
+    pub stream_index: ::core::option::Option<i32>,
+    /// The subtitle's language, forced and hearing-impaired flags; unset
+    /// takes the stream's.
+    ///
+    /// Field 3: `language`
+    pub language: ::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleLanguageSpecView<'a>,
+    >,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ExtractSubtitleRequestView<'a> {
+    type Owned = super::super::ExtractSubtitleRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.item_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.stream_index = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.language.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.language = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::SubtitleLanguageSpecView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::ExtractSubtitleRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::ExtractSubtitleRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ExtractSubtitleRequest {
+            item_id: self.item_id.map(|s| s.to_string()),
+            stream_index: self.stream_index,
+            language: match self.language.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::SubtitleLanguageSpec,
+                        ::buffa::Inline<super::super::SubtitleLanguageSpec>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ExtractSubtitleRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.item_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.stream_index {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.language.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.language.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.item_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.stream_index {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if self.language.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.language.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ExtractSubtitleRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ExtractSubtitleRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ExtractSubtitleRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ExtractSubtitleRequest";
+}
+::buffa::impl_default_view_instance!(ExtractSubtitleRequestView);
+::buffa::impl_view_reborrow!(ExtractSubtitleRequestView);
+/** Self-contained, `'static` owned view of a `ExtractSubtitleRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ExtractSubtitleRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ExtractSubtitleRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ExtractSubtitleRequestOwnedView(
+    ::buffa::OwnedView<ExtractSubtitleRequestView<'static>>,
+);
+impl ExtractSubtitleRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ExtractSubtitleRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ExtractSubtitleRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ExtractSubtitleRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ExtractSubtitleRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `item_id`
+    #[must_use]
+    pub fn item_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().item_id
+    }
+    /// The index of the embedded subtitle stream in the video's streams.
+    ///
+    /// Field 2: `stream_index`
+    #[must_use]
+    pub fn stream_index(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().stream_index
+    }
+    /// The subtitle's language, forced and hearing-impaired flags; unset
+    /// takes the stream's.
+    ///
+    /// Field 3: `language`
+    #[must_use]
+    pub fn language(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::__buffa::view::SubtitleLanguageSpecView<'_>,
+    > {
+        &self.0.reborrow().language
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ExtractSubtitleRequestView<'static>>>
+for ExtractSubtitleRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<ExtractSubtitleRequestView<'static>>) -> Self {
+        ExtractSubtitleRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ExtractSubtitleRequestOwnedView>
+for ::buffa::OwnedView<ExtractSubtitleRequestView<'static>> {
+    fn from(wrapper: ExtractSubtitleRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ExtractSubtitleRequestView<'static>>>
+for ExtractSubtitleRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ExtractSubtitleRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ExtractSubtitleRequest {
+    type View<'a> = ExtractSubtitleRequestView<'a>;
+    type ViewHandle = ExtractSubtitleRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct ExtractSubtitleResponseView<'a> {
+    /// The subtitle file saved.
+    ///
+    /// Field 1: `path`
+    pub path: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for ExtractSubtitleResponseView<'a> {
+    type Owned = super::super::ExtractSubtitleResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.path = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::ExtractSubtitleResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::ExtractSubtitleResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::ExtractSubtitleResponse {
+            path: self.path.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for ExtractSubtitleResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.path {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.path {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for ExtractSubtitleResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ExtractSubtitleResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ExtractSubtitleResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ExtractSubtitleResponse";
+}
+::buffa::impl_default_view_instance!(ExtractSubtitleResponseView);
+::buffa::impl_view_reborrow!(ExtractSubtitleResponseView);
+/** Self-contained, `'static` owned view of a `ExtractSubtitleResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`ExtractSubtitleResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`ExtractSubtitleResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct ExtractSubtitleResponseOwnedView(
+    ::buffa::OwnedView<ExtractSubtitleResponseView<'static>>,
+);
+impl ExtractSubtitleResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::ExtractSubtitleResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            ExtractSubtitleResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`ExtractSubtitleResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &ExtractSubtitleResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::ExtractSubtitleResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// The subtitle file saved.
+    ///
+    /// Field 1: `path`
+    #[must_use]
+    pub fn path(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().path
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<ExtractSubtitleResponseView<'static>>>
+for ExtractSubtitleResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<ExtractSubtitleResponseView<'static>>) -> Self {
+        ExtractSubtitleResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<ExtractSubtitleResponseOwnedView>
+for ::buffa::OwnedView<ExtractSubtitleResponseView<'static>> {
+    fn from(wrapper: ExtractSubtitleResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<ExtractSubtitleResponseView<'static>>>
+for ExtractSubtitleResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<ExtractSubtitleResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::ExtractSubtitleResponse {
+    type View<'a> = ExtractSubtitleResponseView<'a>;
+    type ViewHandle = ExtractSubtitleResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
 pub struct DeleteSubtitleRequestView<'a> {
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<&'a str>,

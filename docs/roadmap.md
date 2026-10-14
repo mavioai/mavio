@@ -730,7 +730,7 @@ flowchart TD
   - [ ] Wanted subtitles kept in a table, should listing them anew be too slow for large libraries
   - [ ] Items' folders in the metadata folder, with their artwork and subtitles, removed when the items are purged
 - [x] OpenSubtitles hashes kept per file until it changes: on its media source, which scans replace when the file changes
-- [ ] Embedded subtitles: counted as present where the settings say so; extracted to sidecars by hand on local and network storage from the playback cache, never on cloud storage
+- [x] Embedded subtitles: counted as present where the settings say so; extracted to sidecars by hand on local and network storage from the playback cache, never on cloud storage
   - [x] Counted as present where the settings say so, PGS, VobSub and ASS ignored as they say
   - [ ] Extracted to sidecars by hand on local and network storage from the playback cache
 - [ ] Subzero's mods (common, tags, HI removal, OCR fixes with its dictionaries, colors, emoji, RTL, upper case, offsets, frame rates, two-point fit) and UTF-8 in `libs/subtitle`; hearing-impaired detection from text; language detection of sidecars without a language, Chinese scripts told apart

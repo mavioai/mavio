@@ -77,6 +77,9 @@ type Runtime struct {
 	// FFmpeg is the ffmpeg synchronization reads audio with; "" does not
 	// synchronize against audio.
 	FFmpeg string
+	// Extracted returns an embedded text subtitle stream of a video's source
+	// and its format; nil extracts none.
+	Extracted func(ctx context.Context, itemID core.ID, src *core.MediaSource, st *core.MediaStream) ([]byte, string, error)
 	// Activity records downloads; nil records none.
 	Activity Activity
 	Now      func() time.Time

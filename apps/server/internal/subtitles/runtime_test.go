@@ -351,6 +351,54 @@ func TestSyncCloud(t *testing.T) {
 	}
 }
 
+func TestExtract(t *testing.T) {
+	e := newEnv(t)
+	if _, err := e.rt.Extract(e.ctx, e.movie.ID, 2, nil); !errors.Is(err, ErrUnavailable) {
+		t.Errorf("Extract without extraction: err = %v, want ErrUnavailable", err)
+	}
+	var calls int
+	e.rt.Extracted = func(_ context.Context, itemID core.ID, _ *core.MediaSource, st *core.MediaStream) ([]byte, string, error) {
+		calls++
+		if itemID != e.movie.ID || st.Index != 2 {
+			t.Errorf("Extracted(%s, stream %d), want stream 2 of the movie", itemID, st.Index)
+		}
+		return []byte("1\n00:00:01,000 --> 00:00:02,000\nHello\n"), "srt", nil
+	}
+	for _, c := range []struct {
+		index int
+		want  error
+	}{{1, core.ErrInvalid}, {9, core.ErrNotFound}} {
+		if _, err := e.rt.Extract(e.ctx, e.movie.ID, c.index, nil); !errors.Is(err, c.want) {
+			t.Errorf("Extract(stream %d): err = %v, want %v", c.index, err, c.want)
+		}
+	}
+	p, err := e.rt.Extract(e.ctx, e.movie.ID, 2, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := filepath.Base(p), "The Matrix (1999).en.srt"; got != want {
+		t.Errorf("Extract path = %s, want %s", got, want)
+	}
+	if got := e.file(filepath.Base(p)); !strings.Contains(got, "Hello") {
+		t.Errorf("extracted subtitle = %q, want the stream's cues", got)
+	}
+	if h := e.history(core.SubtitleExtracted); len(h) != 1 || h[0].Path != p || h[0].Language.Language != "en" {
+		t.Errorf("history = %+v, want one extraction of %s in en", h, p)
+	}
+	if _, err := e.rt.Extract(e.ctx, e.movie.ID, 2, &core.SubtitleLanguage{Language: "fr", Forced: true}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Videos on cloud drives are not read.
+	e.rt.Class = func(context.Context, string) core.StorageClass { return core.StorageCloud }
+	if _, err := e.rt.Extract(e.ctx, e.movie.ID, 2, nil); !errors.Is(err, ErrUnavailable) {
+		t.Errorf("Extract on a cloud drive: err = %v, want ErrUnavailable", err)
+	}
+	if calls != 2 {
+		t.Errorf("Extracted called %d times, want 2", calls)
+	}
+}
+
 func TestShouldSync(t *testing.T) {
 	s := core.DefaultSubtitleSettings()
 	s.Sync.Enabled, s.Sync.UseThreshold, s.Sync.Threshold = true, true, 90

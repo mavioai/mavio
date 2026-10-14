@@ -178,6 +178,18 @@ pub type OwnedUploadSubtitleResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<ExtractSubtitleRequestView<'static>>`.
+pub type OwnedExtractSubtitleRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ExtractSubtitleResponseView<'static>>`.
+pub type OwnedExtractSubtitleResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<DeleteSubtitleRequestView<'static>>`.
 pub type OwnedDeleteSubtitleRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::DeleteSubtitleRequestView<
@@ -889,6 +901,48 @@ for ::buffa::view::OwnedView<
     }
 }
 impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ExtractSubtitleResponse,
+>
+for crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::acquisition::v1::ExtractSubtitleResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
     crate::proto::mavio::acquisition::v1::DeleteSubtitleResponse,
 >
 for crate::proto::mavio::acquisition::v1::__buffa::view::DeleteSubtitleResponseView<'_> {
@@ -1261,6 +1315,12 @@ pub const SUBTITLE_SERVICE_DOWNLOAD_ITEM_SUBTITLE_SPEC: ::connectrpc::Spec = ::c
 /// Static [`Spec`](::connectrpc::Spec) for the `UploadSubtitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SUBTITLE_SERVICE_UPLOAD_SUBTITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.SubtitleService/UploadSubtitle",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ExtractSubtitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SUBTITLE_SERVICE_EXTRACT_SUBTITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.SubtitleService/ExtractSubtitle",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -1714,6 +1774,32 @@ pub trait SubtitleService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::UploadSubtitleResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ExtractSubtitle saves an embedded text subtitle stream of a movie's or
+    /// episode's video as a subtitle file, from playback's extraction cache.
+    /// Videos on cloud storage are refused (FAILED_PRECONDITION): their
+    /// embedded subtitles are never extracted.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn extract_subtitle<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::ExtractSubtitleResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2351,6 +2437,35 @@ impl<S: SubtitleService> SubtitleServiceExt for S {
             .with_spec(SUBTITLE_SERVICE_UPLOAD_SUBTITLE_SPEC)
             .route_view(
                 SUBTITLE_SERVICE_SERVICE_NAME,
+                "ExtractSubtitle",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.extract_subtitle(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::ExtractSubtitleResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SUBTITLE_SERVICE_EXTRACT_SUBTITLE_SPEC)
+            .route_view(
+                SUBTITLE_SERVICE_SERVICE_NAME,
                 "DeleteSubtitle",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -2694,6 +2809,12 @@ impl<T: SubtitleService> ::connectrpc::Dispatcher for SubtitleServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SUBTITLE_SERVICE_UPLOAD_SUBTITLE_SPEC),
+                )
+            }
+            "ExtractSubtitle" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SUBTITLE_SERVICE_EXTRACT_SUBTITLE_SPEC),
                 )
             }
             "DeleteSubtitle" => {
@@ -3081,6 +3202,28 @@ impl<T: SubtitleService> ::connectrpc::Dispatcher for SubtitleServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::UploadSubtitleResponse,
+                        >(format)
+                })
+            }
+            "ExtractSubtitle" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+                    >::from_parts(&req, &body);
+                    svc.extract_subtitle(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::ExtractSubtitleResponse,
                         >(format)
                 })
             }
@@ -4038,6 +4181,51 @@ where
                 &self.transport,
                 &self.config,
                 SUBTITLE_SERVICE_UPLOAD_SUBTITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ExtractSubtitle RPC. Sends a request to /mavio.acquisition.v1.SubtitleService/ExtractSubtitle.
+    pub async fn extract_subtitle(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.extract_subtitle_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ExtractSubtitle RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn extract_subtitle_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::ExtractSubtitleRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::ExtractSubtitleResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SUBTITLE_SERVICE_EXTRACT_SUBTITLE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

@@ -59,7 +59,7 @@ type Config struct {
 	// external subtitle files.
 	FFmpegPath string
 	// MetadataDir keeps the embedded text subtitles extracted from media
-	// sources, see [library.SubtitlesDir]; without it, embedded subtitles
+	// sources, see [library.ExtractedSubtitlesDir]; without it, embedded subtitles
 	// are streamed as on cloud storage.
 	MetadataDir string
 	// PauseKey says the ffmpeg build pauses on "p", see

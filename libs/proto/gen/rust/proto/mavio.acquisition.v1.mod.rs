@@ -800,6 +800,14 @@ pub use self::__buffa::view::UploadSubtitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::UploadSubtitleResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ExtractSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ExtractSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ExtractSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ExtractSubtitleResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::DeleteSubtitleRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteSubtitleRequestOwnedView;

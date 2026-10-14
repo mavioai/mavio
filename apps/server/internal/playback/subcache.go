@@ -70,7 +70,7 @@ func (m *Manager) extracted(ctx context.Context, itemID core.ID, ms *core.MediaS
 	if m.cfg.FFmpegPath == "" || m.cfg.MetadataDir == "" {
 		return nil, errNoSubtitle
 	}
-	dir := library.SubtitlesDir(m.cfg.MetadataDir, itemID, ms.ID)
+	dir := library.ExtractedSubtitlesDir(m.cfg.MetadataDir, itemID, ms.ID)
 	unlock, err := m.subLocks.lock(ctx, ms.ID)
 	if err != nil {
 		return nil, err
@@ -92,6 +92,19 @@ func (m *Manager) extracted(ctx context.Context, itemID core.ID, ms *core.MediaS
 		return nil, errNoSubtitle
 	}
 	return data, err
+}
+
+// ExtractedSubtitle returns an embedded text subtitle stream of a source
+// and its format, from the extraction cache playback reads it from.
+func (m *Manager) ExtractedSubtitle(ctx context.Context, itemID core.ID, ms *core.MediaSource, st *core.MediaStream) ([]byte, string, error) {
+	if st.ExternalPath != "" || !st.IsTextSubtitle() {
+		return nil, "", errNoSubtitle
+	}
+	data, err := m.extracted(ctx, itemID, ms, st)
+	if err != nil {
+		return nil, "", err
+	}
+	return data, sourceFormat(st), nil
 }
 
 // sourceStamp identifies the version of a source's file.

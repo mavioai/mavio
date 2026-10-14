@@ -285,7 +285,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
-		Activity: activityLog, Logger: log,
+		Extracted: playbacks.ExtractedSubtitle, Activity: activityLog, Logger: log,
 	}
 	// Imports complete the requests of what they import; their scans
 	// search for its subtitles once the files are probed.

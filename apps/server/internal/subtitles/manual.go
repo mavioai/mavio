@@ -339,3 +339,53 @@ func (r *Runtime) historyEvent(ctx context.Context, id core.ID) (core.SubtitleHi
 		}
 	}
 }
+
+// Extract saves an embedded text subtitle stream of an item's video as a
+// subtitle file, in l, else in the stream's language, from the extraction
+// cache playback reads it from. Videos on cloud drives are not read for
+// it.
+func (r *Runtime) Extract(ctx context.Context, itemID core.ID, index int, l *core.SubtitleLanguage) (string, error) {
+	s := r.settings()
+	t, err := r.load(ctx, itemID, &s)
+	if err != nil {
+		return "", err
+	}
+	src := t.source()
+	i := slices.IndexFunc(src.Streams, func(st core.MediaStream) bool { return st.Index == index })
+	if i < 0 {
+		return "", fmt.Errorf("%w: %s has no stream %d", core.ErrNotFound, t.item.Name, index)
+	}
+	st := &src.Streams[i]
+	if st.Kind != core.StreamSubtitle || st.ExternalPath != "" || !st.IsTextSubtitle() {
+		return "", fmt.Errorf("%w: stream %d of %s is not an embedded text subtitle", core.ErrInvalid, index, t.item.Name)
+	}
+	if r.Extracted == nil || !r.readable(ctx, src.Path) {
+		return "", fmt.Errorf("%w: embedded subtitles of %s cannot be extracted", ErrUnavailable, t.item.Name)
+	}
+	lang := core.SubtitleLanguage{Language: Tag(st.Language), Forced: st.Forced, HearingImpaired: st.HearingImpaired}
+	if l != nil {
+		lang = *l
+	}
+	if err := lang.Validate(); err != nil {
+		return "", err
+	}
+	data, format, err := r.Extracted(ctx, t.item.ID, src, st)
+	if err != nil {
+		return "", fmt.Errorf("extracting stream %d of %s: %w", index, t.item.Name, err)
+	}
+	p, err := r.save(ctx, t, lang, format, data, &s)
+	if err != nil {
+		return "", err
+	}
+	e := core.SubtitleHistoryEvent{
+		ID: core.NewID(), Action: core.SubtitleExtracted, ItemID: t.item.ID, Date: r.now(), Language: lang,
+		Path: p, VideoPath: src.Path, Description: fmt.Sprintf("%s subtitles extracted from stream %d.", lang, index),
+	}
+	if t.series != nil {
+		e.ParentID = t.series.ID
+	}
+	if err := r.record(ctx, t, &e); err != nil {
+		return "", err
+	}
+	return p, nil
+}

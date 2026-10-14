@@ -495,6 +495,23 @@ func (s *SubtitleService) UploadSubtitle(ctx context.Context, req *acquisitionv1
 	return acquisitionv1.UploadSubtitleResponse_builder{Path: new(p)}.Build(), nil
 }
 
+// ExtractSubtitle saves an embedded text subtitle stream of an item as a
+// subtitle file.
+func (s *SubtitleService) ExtractSubtitle(ctx context.Context, req *acquisitionv1.ExtractSubtitleRequest) (*acquisitionv1.ExtractSubtitleResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	var l *core.SubtitleLanguage
+	if req.HasLanguage() {
+		l = new(languageFromProto(req.GetLanguage()))
+	}
+	p, err := s.rt.Extract(ctx, core.MustParseID(req.GetItemId()), int(req.GetStreamIndex()), l)
+	if err != nil {
+		return nil, subtitleError(ctx, err)
+	}
+	return acquisitionv1.ExtractSubtitleResponse_builder{Path: new(p)}.Build(), nil
+}
+
 // DeleteSubtitle deletes a subtitle file of an item.
 func (s *SubtitleService) DeleteSubtitle(ctx context.Context, req *acquisitionv1.DeleteSubtitleRequest) (*acquisitionv1.DeleteSubtitleResponse, error) {
 	if _, err := admin(ctx); err != nil {

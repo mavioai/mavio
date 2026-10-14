@@ -78,6 +78,9 @@ const (
 	// SubtitleServiceUploadSubtitleProcedure is the fully-qualified name of the SubtitleService's
 	// UploadSubtitle RPC.
 	SubtitleServiceUploadSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/UploadSubtitle"
+	// SubtitleServiceExtractSubtitleProcedure is the fully-qualified name of the SubtitleService's
+	// ExtractSubtitle RPC.
+	SubtitleServiceExtractSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/ExtractSubtitle"
 	// SubtitleServiceDeleteSubtitleProcedure is the fully-qualified name of the SubtitleService's
 	// DeleteSubtitle RPC.
 	SubtitleServiceDeleteSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/DeleteSubtitle"
@@ -142,6 +145,11 @@ type SubtitleServiceClient interface {
 	// UploadSubtitle saves a subtitle file beside a movie's or episode's
 	// video.
 	UploadSubtitle(context.Context, *v1.UploadSubtitleRequest) (*v1.UploadSubtitleResponse, error)
+	// ExtractSubtitle saves an embedded text subtitle stream of a movie's or
+	// episode's video as a subtitle file, from playback's extraction cache.
+	// Videos on cloud storage are refused (FAILED_PRECONDITION): their
+	// embedded subtitles are never extracted.
+	ExtractSubtitle(context.Context, *v1.ExtractSubtitleRequest) (*v1.ExtractSubtitleResponse, error)
 	// DeleteSubtitle deletes a subtitle file of a movie or episode.
 	DeleteSubtitle(context.Context, *v1.DeleteSubtitleRequest) (*v1.DeleteSubtitleResponse, error)
 	// ModifySubtitle applies mods to a subtitle file of a movie or episode.
@@ -271,6 +279,12 @@ func NewSubtitleServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(subtitleServiceMethods.ByName("UploadSubtitle")),
 			connect.WithClientOptions(opts...),
 		),
+		extractSubtitle: connect.NewClient[v1.ExtractSubtitleRequest, v1.ExtractSubtitleResponse](
+			httpClient,
+			baseURL+SubtitleServiceExtractSubtitleProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("ExtractSubtitle")),
+			connect.WithClientOptions(opts...),
+		),
 		deleteSubtitle: connect.NewClient[v1.DeleteSubtitleRequest, v1.DeleteSubtitleResponse](
 			httpClient,
 			baseURL+SubtitleServiceDeleteSubtitleProcedure,
@@ -337,6 +351,7 @@ type subtitleServiceClient struct {
 	searchItemSubtitles     *connect.Client[v1.SearchItemSubtitlesRequest, v1.SearchItemSubtitlesResponse]
 	downloadItemSubtitle    *connect.Client[v1.DownloadItemSubtitleRequest, v1.DownloadItemSubtitleResponse]
 	uploadSubtitle          *connect.Client[v1.UploadSubtitleRequest, v1.UploadSubtitleResponse]
+	extractSubtitle         *connect.Client[v1.ExtractSubtitleRequest, v1.ExtractSubtitleResponse]
 	deleteSubtitle          *connect.Client[v1.DeleteSubtitleRequest, v1.DeleteSubtitleResponse]
 	modifySubtitle          *connect.Client[v1.ModifySubtitleRequest, v1.ModifySubtitleResponse]
 	syncSubtitle            *connect.Client[v1.SyncSubtitleRequest, v1.SyncSubtitleResponse]
@@ -481,6 +496,15 @@ func (c *subtitleServiceClient) UploadSubtitle(ctx context.Context, req *v1.Uplo
 	return nil, err
 }
 
+// ExtractSubtitle calls mavio.acquisition.v1.SubtitleService.ExtractSubtitle.
+func (c *subtitleServiceClient) ExtractSubtitle(ctx context.Context, req *v1.ExtractSubtitleRequest) (*v1.ExtractSubtitleResponse, error) {
+	response, err := c.extractSubtitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DeleteSubtitle calls mavio.acquisition.v1.SubtitleService.DeleteSubtitle.
 func (c *subtitleServiceClient) DeleteSubtitle(ctx context.Context, req *v1.DeleteSubtitleRequest) (*v1.DeleteSubtitleResponse, error) {
 	response, err := c.deleteSubtitle.CallUnary(ctx, connect.NewRequest(req))
@@ -585,6 +609,11 @@ type SubtitleServiceHandler interface {
 	// UploadSubtitle saves a subtitle file beside a movie's or episode's
 	// video.
 	UploadSubtitle(context.Context, *v1.UploadSubtitleRequest) (*v1.UploadSubtitleResponse, error)
+	// ExtractSubtitle saves an embedded text subtitle stream of a movie's or
+	// episode's video as a subtitle file, from playback's extraction cache.
+	// Videos on cloud storage are refused (FAILED_PRECONDITION): their
+	// embedded subtitles are never extracted.
+	ExtractSubtitle(context.Context, *v1.ExtractSubtitleRequest) (*v1.ExtractSubtitleResponse, error)
 	// DeleteSubtitle deletes a subtitle file of a movie or episode.
 	DeleteSubtitle(context.Context, *v1.DeleteSubtitleRequest) (*v1.DeleteSubtitleResponse, error)
 	// ModifySubtitle applies mods to a subtitle file of a movie or episode.
@@ -710,6 +739,12 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 		connect.WithSchema(subtitleServiceMethods.ByName("UploadSubtitle")),
 		connect.WithHandlerOptions(opts...),
 	)
+	subtitleServiceExtractSubtitleHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceExtractSubtitleProcedure,
+		svc.ExtractSubtitle,
+		connect.WithSchema(subtitleServiceMethods.ByName("ExtractSubtitle")),
+		connect.WithHandlerOptions(opts...),
+	)
 	subtitleServiceDeleteSubtitleHandler := connect.NewUnaryHandlerSimple(
 		SubtitleServiceDeleteSubtitleProcedure,
 		svc.DeleteSubtitle,
@@ -788,6 +823,8 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 			subtitleServiceDownloadItemSubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceUploadSubtitleProcedure:
 			subtitleServiceUploadSubtitleHandler.ServeHTTP(w, r)
+		case SubtitleServiceExtractSubtitleProcedure:
+			subtitleServiceExtractSubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceDeleteSubtitleProcedure:
 			subtitleServiceDeleteSubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceModifySubtitleProcedure:
@@ -869,6 +906,10 @@ func (UnimplementedSubtitleServiceHandler) DownloadItemSubtitle(context.Context,
 
 func (UnimplementedSubtitleServiceHandler) UploadSubtitle(context.Context, *v1.UploadSubtitleRequest) (*v1.UploadSubtitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.UploadSubtitle is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) ExtractSubtitle(context.Context, *v1.ExtractSubtitleRequest) (*v1.ExtractSubtitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.ExtractSubtitle is not implemented"))
 }
 
 func (UnimplementedSubtitleServiceHandler) DeleteSubtitle(context.Context, *v1.DeleteSubtitleRequest) (*v1.DeleteSubtitleResponse, error) {
