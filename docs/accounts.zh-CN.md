@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [客户端](clients.zh-CN.md) · [mavio.dev](mavio-dev.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> 谁可以使用一台 Mavio 服务端，以及如何登录。服务端以两种模式之一运行：**mavio.dev 模式**下，每个用户都是 Mavio 账户，由 mavio.dev 仿照 plex.tv 的模型保存账户、谁能访问哪些媒体库、好友与 Home；**独立模式**下，服务端保存自己的用户，模型相同，只是没有跨服务端的部分。本文描述设计；mavio.dev 本身见 [mavio.dev](mavio-dev.zh-CN.md)。在[路线图](roadmap.zh-CN.md)的 P27 阶段实现。
+> 谁可以使用一台 Mavio 服务端，以及如何登录。服务端以两种模式之一运行：**mavio.dev 模式**下，每个用户都是 Mavio 账户，由 mavio.dev 仿照 plex.tv 的模型保存账户、谁能访问哪些媒体库、好友与 Home；**独立模式**下，服务端保存自己的用户，模型相同，只是没有跨服务端的部分。本文描述设计；mavio.dev 本身见 [mavio.dev](mavio-dev.zh-CN.md)。在[路线图](roadmap.zh-CN.md)的 P28 阶段实现。
 
 ---
 

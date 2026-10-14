@@ -4,7 +4,7 @@
 
 > 相关文档：[账户](accounts.zh-CN.md) · [系统架构](architecture.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> mavio.dev 模式服务端的中心服务：它运行什么、如何触达服务端、服务端如何获得名称和证书、中转，以及各部分部署在哪里。它保存什么以及它所服务的账户模型，见[账户](accounts.zh-CN.md)。在[路线图](roadmap.zh-CN.md)的 P27 阶段实现。
+> mavio.dev 模式服务端的中心服务：它运行什么、如何触达服务端、服务端如何获得名称和证书、中转，以及各部分部署在哪里。它保存什么以及它所服务的账户模型，见[账户](accounts.zh-CN.md)。在[路线图](roadmap.zh-CN.md)的 P28 阶段实现。
 
 ---
 

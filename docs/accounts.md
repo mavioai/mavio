@@ -4,7 +4,7 @@
 
 > Related: [Architecture](architecture.md) · [Domain Model](domain.md) · [Clients](clients.md) · [mavio.dev](mavio-dev.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
-> Who may use a Mavio server and how they sign in. A server runs in one of two modes: in **mavio.dev mode** every user is a Mavio account and mavio.dev keeps the accounts, who may reach which libraries, friends and Homes, after the model of plex.tv; in **standalone mode** the server keeps its own users, with the same model minus everything that spans servers. This document describes the design; mavio.dev itself is described in [mavio.dev](mavio-dev.md). It is built in phase P27 of the [Roadmap](roadmap.md).
+> Who may use a Mavio server and how they sign in. A server runs in one of two modes: in **mavio.dev mode** every user is a Mavio account and mavio.dev keeps the accounts, who may reach which libraries, friends and Homes, after the model of plex.tv; in **standalone mode** the server keeps its own users, with the same model minus everything that spans servers. This document describes the design; mavio.dev itself is described in [mavio.dev](mavio-dev.md). It is built in phase P28 of the [Roadmap](roadmap.md).
 
 ---
 

@@ -119,7 +119,6 @@ flowchart TD
 | P25 | Storage backends and rclone | In progress |
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
-| P28 | Accounts | Not started |
 | P28 | Accounts | In progress |
 
 ---

@@ -4,7 +4,7 @@
 
 > Related: [Accounts](accounts.md) · [Architecture](architecture.md) · [Roadmap](roadmap.md) · [AGENTS.md](../AGENTS.md)
 
-> The central service of servers in mavio.dev mode: what it runs, how it reaches servers, how servers get names and certificates, the relay, and where each part is deployed. What it holds and the account model it serves are described in [Accounts](accounts.md). It is built in phase P27 of the [Roadmap](roadmap.md).
+> The central service of servers in mavio.dev mode: what it runs, how it reaches servers, how servers get names and certificates, the relay, and where each part is deployed. What it holds and the account model it serves are described in [Accounts](accounts.md). It is built in phase P28 of the [Roadmap](roadmap.md).
 
 ---
 

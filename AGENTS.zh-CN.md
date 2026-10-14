@@ -22,7 +22,7 @@
 
 Mavio 是以 Go 为服务端核心的自托管媒体服务器，借鉴 Jellyfin 的领域知识与测试资产，但不兼容 Jellyfin 生态。许可证为 **GPL-3.0**。
 
-当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**和 **P27 AI 网关与字幕翻译**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
+当前阶段：**P6 服务端装配与分发**、**P16 资源获取数据源**（只差 Mavio 自己的 TMDB key）、**P21 客户端与生态**、**P27 AI 网关与字幕翻译**和 **P28 账户**（见 [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md)）。[docs/clients.zh-CN.md](docs/clients.zh-CN.md) 中的客户端按路线图给出的顺序构建；客户端的目录（`apps/web`、`apps/ios`、`apps/tvos`、`apps/macos`、`apps/android`、`apps/android-tv`、`apps/desktop`、`libs/client-ts`、`libs/client-rust`、`libs/apple`、`libs/android`、`libs/design`）在其步骤开始时才创建。
 
 ## 目录结构
 
@@ -45,9 +45,9 @@ libs/rclone/          rclone rcd：rc 客户端、远端上的存储、媒体代
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
-apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P27 起）
-apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P27 起）
-apps/dns/             mavio.site 的名称服务器：由地址计算的名称、ACME 质询（自 P27 起）
+apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P28 起）
+apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P28 起）
+apps/dns/             mavio.site 的名称服务器：由地址计算的名称、ACME 质询（自 P28 起）
 libs/client-ts/       Web UI 的 Connect 客户端与 TanStack Query hooks
 apps/{ios,tvos,macos}/  Apple 各应用（SwiftUI）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
 libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioUI，以及核心的 XCFramework
