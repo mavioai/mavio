@@ -182,6 +182,15 @@ A plugin directory holds `manifest.json` and `plugin.wasm` or `plugin` (`plugin.
 * **Formatters**: `gofumpt` and `goimports`, with `github.com/mavioai/mavio` imports in their own group.
 * **depguard**: encodes the dependency direction from [Architecture §3.2](architecture.md#32-dependency-direction) as rules (`core` only on the standard library, pure libraries only on `core`, the plugin SDK only on `libs/proto`, no lib importing `apps/*` or `plugins/*`, …). To change the dependency direction, update the architecture document first, then the rules.
 
+### 5.1 Cross-platform Paths
+
+The server runs on Linux, macOS and Windows, and CI tests on all three (§6), so a path that only works with `/` as the separator fails only on Windows. The rules:
+* **Recorded paths are slash-separated.** Library folders, the paths of items and media sources, `ExternalPath`, image paths and everything else the server records or compares holds a local path as `filepath.ToSlash(filepath.Clean(p))`, and a remote path (`core.RemoteScheme`) as it is. Handle them with `path`, never with `path/filepath`. Names within a storage (`core.Storage`, `fs.FS`) are slash-separated and relative, as `io/fs` requires.
+* **Convert at the operating system's boundary only.** A path from the operating system (`t.TempDir`, `os.Executable`, `filepath.WalkDir`, a configuration file, a flag) goes through `filepath.ToSlash` before it is recorded or compared; a recorded path goes through `filepath.FromSlash` before an API that needs the native form, such as `os.OpenRoot` or a child process's arguments. `os` functions accept `/` on Windows as well.
+* **Relate paths with the core helpers.** `core.StorageName` finds a file's name within a library folder, matching `/` with `\`, and `core.StoragePath` gives the recorded path back; test whether a path is absolute with `filepath.IsAbs` (or `core`'s Windows check), because `path.IsAbs("C:/x")` is false.
+* **Never compare a recorded path with a `filepath.Join` result**: on Windows the two differ in separators. Compare recorded forms.
+* **Tests record paths as the scanner does**: `root := filepath.ToSlash(t.TempDir())`, then `path.Join` below it. A test that stores `filepath.Join(t.TempDir(), …)` as an item's or a source's path passes on Linux and macOS but not on Windows.
+
 ---
 
 ## 6. Continuous Integration

@@ -106,6 +106,7 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 - 错误用 `fmt.Errorf("...: %w", err)` 包装，用 `errors.Is` / `errors.As` 判断；不要吞掉错误。
 - 不使用包级可变全局状态；依赖通过构造函数显式注入。
 - 文件系统访问媒体库时使用 `os.Root` 限定在库根目录内。
+- 服务端记录或比较的路径以 `/` 分隔（`filepath.ToSlash`），用 `path` 处理；只在操作系统的边界用 `filepath.FromSlash` 转换，测试路径由 `filepath.ToSlash(t.TempDir())` 构造（开发指南 §5.1）。
 - 优先使用现代标准库特性：`iter.Seq` 流水线、`slices`/`maps`、`net/http` 路由模式、`http.Protocols`（h2c）。
 - 每个包都有包注释（`doc.go`）；导出标识符都要有文档注释。
 

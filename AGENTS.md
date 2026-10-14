@@ -106,6 +106,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 - Wrap errors with `fmt.Errorf("...: %w", err)` and inspect them with `errors.Is` / `errors.As`; never swallow errors.
 - No mutable package-level global state; inject dependencies explicitly through constructors.
 - Use `os.Root` to confine file system access to the library root when touching media libraries.
+- Paths the server records or compares are slash-separated (`filepath.ToSlash`) and handled with `path`; convert with `filepath.FromSlash` only at the operating system's boundary, and build test paths from `filepath.ToSlash(t.TempDir())` (development guide §5.1).
 - Prefer modern standard library features: `iter.Seq` pipelines, `slices`/`maps`, `net/http` routing patterns, `http.Protocols` (h2c).
 - Every package has a package comment (`doc.go`); every exported identifier has a doc comment.
 

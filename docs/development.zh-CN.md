@@ -182,6 +182,15 @@ go build -o plugin .                                                     # 子�
 * **格式化**：`gofumpt` 与 `goimports`，`github.com/mavioai/mavio` 的导入单独分组。
 * **depguard**：把[架构 §3.2](architecture.zh-CN.md#32-依赖方向) 的依赖方向写成规则（`core` 只依赖标准库、纯函数库只依赖 `core`、插件 SDK 只依赖 `libs/proto`、任何 lib 都不导入 `apps/*` 或 `plugins/*` 等）。调整依赖方向时，先修改架构文档，再修改规则。
 
+### 5.1 跨平台路径
+
+服务端运行于 Linux、macOS 与 Windows，CI 在三者上都运行测试（§6），因此只在 `/` 作分隔符时才成立的路径处理只会在 Windows 上失败。规则如下：
+* **记录的路径用 `/` 分隔。** 库文件夹、条目与媒体源的路径、`ExternalPath`、图片路径以及服务端记录或比较的其他一切，本地路径以 `filepath.ToSlash(filepath.Clean(p))` 的形式保存，远程路径（`core.RemoteScheme`）原样保存。处理它们用 `path`，不用 `path/filepath`。存储（`core.Storage`、`fs.FS`）中的名称按 `io/fs` 的要求，是以 `/` 分隔的相对名称。
+* **只在操作系统的边界转换。** 来自操作系统的路径（`t.TempDir`、`os.Executable`、`filepath.WalkDir`、配置文件、命令行参数）在记录或比较之前经过 `filepath.ToSlash`；记录的路径在传给需要原生形式的 API（如 `os.OpenRoot`、子进程的参数）之前经过 `filepath.FromSlash`。在 Windows 上 `os` 的函数同样接受 `/`。
+* **用 core 的辅助函数关联路径。** `core.StorageName` 求文件在库文件夹中的名称，`/` 与 `\` 视为相同；`core.StoragePath` 由名称还原记录的路径。判断绝对路径用 `filepath.IsAbs`（或 `core` 对 Windows 路径的判断），因为 `path.IsAbs("C:/x")` 为假。
+* **不要把记录的路径与 `filepath.Join` 的结果比较**：在 Windows 上二者的分隔符不同。只比较记录的形式。
+* **测试像扫描器一样记录路径**：`root := filepath.ToSlash(t.TempDir())`，其下的路径用 `path.Join` 拼接。把 `filepath.Join(t.TempDir(), …)` 存为条目或媒体源路径的测试，在 Linux 与 macOS 上通过，在 Windows 上失败。
+
 ---
 
 ## 6. 持续集成
