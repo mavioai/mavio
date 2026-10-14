@@ -14,6 +14,7 @@ require (
 
 require (
 	github.com/bbrks/go-blurhash v1.2.0 // indirect
+	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/gen2brain/vpx v0.2.1 // indirect
 	github.com/wlynxg/chardet v1.0.5 // indirect
 	go.n16f.net/thumbhash v1.1.0 // indirect

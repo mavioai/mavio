@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/mavioai/mavio/libs/subtitle v0.0.0 // indirect
 	github.com/wlynxg/chardet v1.0.5 // indirect
 	golang.org/x/sys v0.48.0 // indirect
