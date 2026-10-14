@@ -137,7 +137,7 @@ func TestPublish(t *testing.T) {
 	check("scan", "library.scanned Scan Films library="+l+" succeeded=true",
 		"task.completed Scan Films completed library="+l+" task=library.scan:"+l)
 	run(library.CleanupJob(time.Now(), false), errors.New("disk full"))
-	check("failed cleanup", "task.failed Clean up jobs failed task=jobs.cleanup")
+	check("failed cleanup", "task.failed Clean up jobs and metadata failed task=jobs.cleanup")
 	if !slices.Equal(pub.logged, []string{"task.failed"}) {
 		t.Errorf("logged = %q, want only the failure", pub.logged)
 	}

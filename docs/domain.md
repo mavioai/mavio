@@ -230,7 +230,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 * `Extend`, `Complete` and `Fail` require the lease owner; a worker whose lease has expired and been taken over gets `ErrConflict`.
 * A failed attempt is retried after `RetryDelay(attempts)` — 30 s, then doubling (1 min, 2 min, …) up to one hour — until `MaxAttempts` is reached; then the job is `failed`. A job queued with the same key while it ran stands for its retry, so it is `failed` at once.
 * States: `pending` → `running` → `succeeded` / back to `pending` for a retry / `failed`.
-* `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily.
+* `JobQuery` lists jobs by kind and state, most recently created first; finished jobs are purged after a week by the `jobs.cleanup` job, which runs daily and also removes the folders in the metadata folder of items that no longer exist (left a day after they last changed).
 
 ---
 

@@ -50,7 +50,7 @@ func (h *Hub) taskEnded(job core.Job, cause error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	id, name := job.Kind, "Clean up jobs"
+	id, name := job.Kind, "Clean up jobs and metadata"
 	attrs := map[string]string{}
 	if libID := libraryOfJob(job); !libID.IsZero() {
 		id += ":" + libID.String()

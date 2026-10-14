@@ -180,8 +180,8 @@ func (s *TaskService) tasks(ctx context.Context) ([]task, error) {
 	}
 	out = append(out, task{
 		proto: systemv1.Task_builder{
-			Id: new(library.JobCleanup), Name: new("Clean up jobs"), Kind: new(library.JobCleanup),
-			Description: new("Deletes the jobs that finished more than a week ago."), Interval: durationpb.New(library.CleanupInterval),
+			Id: new(library.JobCleanup), Name: new("Clean up jobs and metadata"), Kind: new(library.JobCleanup),
+			Description: new("Deletes the jobs that finished more than a week ago and the folders of deleted items in the metadata folder."), Interval: durationpb.New(library.CleanupInterval),
 		}.Build(),
 		matches: func(j *core.Job) bool { return j.Kind == library.JobCleanup },
 		run:     func(now time.Time) core.Job { return library.CleanupJob(now, false) },
