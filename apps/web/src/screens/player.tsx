@@ -1,26 +1,31 @@
 // The player (docs/clients.md §4.1, §6.5): the server decides how the
 // browser plays an item; hls.js plays HLS where Media Source Extensions
 // exist, Safari plays it natively. Progress is reported every 10 seconds
-// and on pause, seek and stop.
+// and on pause, seek and stop. A side panel picks the audio, subtitles and
+// quality and tells how the item plays; an episode's end starts the next.
 import {
+  capabilities,
   errorMessage,
   nativeHls,
   Playback,
   type ServerEntry,
   urlOf,
   useItem,
+  useNextEpisode,
   useServer,
   useServersStore,
 } from "@mavio/client-ts";
+import { ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { type MediaStream, StreamKind } from "@mavio/proto/mavio/library/v1/media_pb";
-import { SubtitleMethod } from "@mavio/proto/mavio/playback/v1/playback_pb";
+import { PlayMethod, SubtitleMethod } from "@mavio/proto/mavio/playback/v1/playback_pb";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type Hls from "hls.js";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { t } from "../i18n.ts";
-import { Icon } from "../icon.tsx";
+import { locale, t } from "../i18n.ts";
+import { Icon, type IconName } from "../icon.tsx";
+import { prefs, type Quality, qualities, qualityBitrates } from "../prefs.ts";
 import { StatusView } from "../ui.tsx";
 
 const route = getRouteApi("/s/$serverId/play/$itemId");
@@ -37,12 +42,27 @@ function clock(s: number): string {
   return `${h > 0 ? `${h}:` : ""}${mm}:${String(sec).padStart(2, "0")}`;
 }
 
-function trackLabel(s: MediaStream): string {
-  const lang = s.language ? (new Intl.DisplayNames([navigator.language], { type: "language" }).of(s.language) ?? s.language) : "";
-  const details = [s.codec.toUpperCase(), s.channels ? `${s.channels} ch` : "", s.forced ? "Forced" : "", s.hearingImpaired ? "SDH" : ""]
+const languageNames = new Intl.DisplayNames([locale], { type: "language" });
+
+function languageOf(code: string): string {
+  try {
+    return code && code !== "und" ? (languageNames.of(code) ?? code) : "";
+  } catch {
+    return code;
+  }
+}
+
+/** A track's name, and its codec and flags. */
+function trackLabel(s: MediaStream): [string, string] {
+  const details = [
+    s.codec.toUpperCase(),
+    s.channels ? (s.channels === 6 ? "5.1" : s.channels === 8 ? "7.1" : `${s.channels} ch`) : "",
+    s.forced ? "Forced" : "",
+    s.hearingImpaired ? "SDH" : "",
+  ]
     .filter(Boolean)
     .join(" · ");
-  return [s.title || lang || `#${s.index}`, details].filter(Boolean).join(" — ");
+  return [s.title || languageOf(s.language) || `#${s.index}`, details];
 }
 
 export function PlayerScreen() {
@@ -52,11 +72,14 @@ export function PlayerScreen() {
   return <Player key={itemId} server={server} itemId={itemId} />;
 }
 
-/** The streams the user picked, which restart playback when they change. */
+/** The streams and quality the user picked, which restart playback when they change. */
 interface Selection {
   audio?: number;
   subtitle?: number;
+  quality: Quality;
 }
+
+type Tab = "audio" | "subtitles" | "quality" | "info";
 
 function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const servers = useServersStore();
@@ -64,12 +87,13 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const qc = useQueryClient();
   const search = route.useSearch();
   const item = useItem(server, itemId);
+  const next = useNextEpisode(server, item.data?.item);
   const video = useRef<HTMLVideoElement>(null);
   const shell = useRef<HTMLDivElement>(null);
   const playback = useRef<Playback>(undefined);
   const [info, setInfo] = useState<Playback>();
   const [error, setError] = useState<string>();
-  const [selection, setSelection] = useState<Selection>({});
+  const [selection, setSelection] = useState<Selection>(() => ({ quality: prefs().quality }));
   // Where the next start begins, in milliseconds: the resume position, then where a track change happened.
   const startAt = useRef(search.start ?? 0);
   const [paused, setPaused] = useState(true);
@@ -77,13 +101,23 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const [duration, setDuration] = useState(0);
   const [muted, setMuted] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [full, setFull] = useState(false);
   const [controls, setControls] = useState(true);
-  const [menu, setMenu] = useState<"audio" | "subtitles" | "speed" | "external">();
+  const [panel, setPanel] = useState<Tab>();
 
   const back = useCallback(() => {
     if (router.history.length > 1) router.history.back();
     else void router.navigate({ to: "/s/$serverId/item/$itemId", params: { serverId: server.id, itemId } });
   }, [router, server.id, itemId]);
+
+  const playNext = useCallback(() => {
+    if (!next.data) return;
+    void router.navigate({
+      to: "/s/$serverId/play/$itemId",
+      params: { serverId: server.id, itemId: next.data.id },
+      replace: true,
+    });
+  }, [router, server.id, next.data]);
 
   // Starts playback, again whenever the user picks other streams.
   useEffect(() => {
@@ -103,6 +137,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
             audioStreamIndex: selection.audio,
             subtitleStreamIndex: selection.subtitle,
             startMs: startAt.current,
+            capabilities: capabilities(undefined, qualityBitrates[selection.quality]),
           },
           state,
         );
@@ -158,6 +193,12 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     return () => removeEventListener("pagehide", onHide);
   }, []);
 
+  useEffect(() => {
+    const onChange = () => setFull(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
   // The controls hide after 3 seconds without input while playing.
   const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const poke = useCallback(() => {
@@ -168,8 +209,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     }, 3000);
   }, []);
   useEffect(() => () => clearTimeout(hideTimer.current), []);
-  // An open menu keeps the controls up.
-  const shown = controls || menu !== undefined;
+  // An open panel keeps the controls up.
+  const shown = controls || panel !== undefined;
 
   // Subtitles rise above the controls while they show.
   useEffect(() => {
@@ -206,12 +247,13 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     else void shell.current?.requestFullscreen();
   }, []);
 
-  // Keyboard shortcuts: space and k, arrows and j/l, f, m.
+  // Keyboard shortcuts: space and k, arrows and j/l, f, m; Escape closes the panel, then leaves.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement && e.target.type !== "range") return;
       const v = video.current;
       if (!v) return;
+      if (panel !== undefined && e.key !== "Escape") return;
       const keys: Record<string, () => void> = {
         " ": toggle,
         k: toggle,
@@ -221,7 +263,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         l: () => seekBy(10),
         f: fullScreen,
         m: () => (v.muted = !v.muted),
-        Escape: () => (document.fullscreenElement ? undefined : back()),
+        Escape: () => (panel !== undefined ? setPanel(undefined) : document.fullscreenElement ? undefined : back()),
       };
       const f = keys[e.key];
       if (!f) return;
@@ -231,15 +273,21 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [toggle, seekBy, fullScreen, back, poke]);
+  }, [toggle, seekBy, fullScreen, back, poke, panel]);
 
+  const current = item.data?.item;
   const source = item.data?.mediaSources.find((m) => m.id === info?.info.mediaSourceId);
   const audioTracks = source?.streams.filter((s) => s.kind === StreamKind.AUDIO) ?? [];
   const subtitleTracks = info?.info.subtitles ?? [];
   const external = subtitleTracks.filter((s) => s.method === SubtitleMethod.EXTERNAL && s.url);
-  const total = duration || (item.data?.item?.runtime ? Number(item.data.item.runtime.seconds) : 0);
-  const name = item.data?.item?.name ?? "";
-  const series = item.data?.item?.seriesName;
+  const total = duration || (current?.runtime ? Number(current.runtime.seconds) : 0);
+  const episode =
+    current?.kind === ItemKind.EPISODE && current.indexNumber > 0
+      ? t("item.episodeNumber", { season: current.parentIndexNumber, episode: current.indexNumber })
+      : undefined;
+  const subtitlesOn = (info?.info.subtitleStreamIndex ?? -1) >= 0;
+  const pick = (s: Partial<Selection>) => setSelection({ ...selection, ...s });
+  const openPanel = (tab: Tab) => setPanel(panel === tab ? undefined : tab);
 
   return (
     <div
@@ -253,7 +301,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         className="h-full w-full"
         playsInline
         crossOrigin="anonymous"
-        onClick={toggle}
+        onClick={() => (panel !== undefined ? setPanel(undefined) : toggle())}
         onDoubleClick={fullScreen}
         onPlay={() => (setPaused(false), poke())}
         onPause={() => {
@@ -266,7 +314,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
         onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
         onRateChange={(e) => setSpeed(e.currentTarget.playbackRate)}
-        onEnded={back}
+        onEnded={() => (prefs().autoplayNext && next.data ? playNext() : back())}
       >
         {external.map((s) => (
           <track
@@ -285,7 +333,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           <div className="max-w-md p-6 text-center">
             <Icon name="error" size={48} className="mx-auto mb-3 opacity-70" />
             <p className="mb-4 type-body">{error}</p>
-            <button type="button" onClick={back} className="rounded-md bg-white/15 px-4 py-2 type-headline">
+            <button type="button" onClick={back} className="rounded-[10px] bg-white/15 px-4 py-2 type-headline hover:bg-white/25">
               {t("player.back")}
             </button>
           </div>
@@ -293,35 +341,28 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
       )}
 
       <div className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${shown ? "opacity-100" : "opacity-0"}`}>
-        <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center gap-3 bg-gradient-to-b from-black/70 to-transparent p-4">
+        <div className="pointer-events-auto absolute inset-x-0 top-0 flex items-center gap-3 bg-gradient-to-b from-black/75 to-transparent px-5 pt-4 pb-12">
           <PlayerButton label={t("player.back")} onClick={back}>
             <Icon name="back" />
           </PlayerButton>
           <div className="min-w-0">
-            {series && <div className="truncate type-footnote opacity-80">{series}</div>}
-            <div className="truncate type-headline">{name}</div>
+            {current?.seriesName && (
+              <div className="truncate type-footnote text-white/70">
+                {[current.seriesName, episode].filter(Boolean).join(" · ")}
+              </div>
+            )}
+            <div className="truncate type-title3 font-semibold">{current?.name ?? ""}</div>
           </div>
         </div>
 
-        <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pt-10 pb-4">
-          <input
-            type="range"
-            min={0}
-            max={total || 1}
-            step={1}
-            value={Math.min(time, total || 1)}
-            onChange={(e) => {
-              if (video.current) video.current.currentTime = Number(e.target.value);
-            }}
-            aria-label={clock(time)}
-            className="w-full accent-[var(--mavio-color-progress)]"
-          />
-          <div className="mt-1 flex items-center gap-1">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
+          <Scrubber time={time} total={total} onSeek={(s) => video.current && (video.current.currentTime = s)} />
+          <div className="mt-2 flex items-center gap-1">
+            <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle} large>
+              <Icon name={paused ? "play" : "pause"} fill size={30} />
+            </PlayerButton>
             <PlayerButton label={t("player.seekBack", { count: 10 })} onClick={() => seekBy(-10)}>
               <Icon name="seekBack" />
-            </PlayerButton>
-            <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle}>
-              <Icon name={paused ? "play" : "pause"} fill size={28} />
             </PlayerButton>
             <PlayerButton label={t("player.seekForward", { count: 10 })} onClick={() => seekBy(10)}>
               <Icon name="seekForward" />
@@ -332,25 +373,27 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
             >
               <Icon name={muted ? "mute" : "volume"} />
             </PlayerButton>
-            <span className="ml-2 type-footnote tabular-nums opacity-90">
+            <span className="ml-2 type-footnote text-white/85 tabular-nums">
               {clock(time)} / {clock(total)}
             </span>
-            <div className="relative ml-auto flex items-center gap-1">
-              {audioTracks.length > 1 && (
-                <PlayerButton label={t("player.audio")} onClick={() => setMenu(menu === "audio" ? undefined : "audio")}>
-                  <Icon name="audio" />
-                </PlayerButton>
+            <div className="ml-auto flex items-center gap-1">
+              {next.data && (
+                <button
+                  type="button"
+                  onClick={playNext}
+                  className="mr-1 flex h-9 items-center gap-1.5 rounded-full bg-white/15 px-3.5 type-footnote font-semibold backdrop-blur-xl hover:bg-white/25"
+                >
+                  <Icon name="next" fill size={16} />
+                  {t("player.nextEpisode")}
+                </button>
               )}
               {subtitleTracks.length > 0 && (
-                <PlayerButton
-                  label={t("player.subtitles")}
-                  onClick={() => setMenu(menu === "subtitles" ? undefined : "subtitles")}
-                >
-                  <Icon name="subtitles" fill={(info?.info.subtitleStreamIndex ?? -1) >= 0} />
+                <PlayerButton label={t("player.subtitles")} onClick={() => openPanel("subtitles")} active={panel === "subtitles"}>
+                  <Icon name="subtitles" fill={subtitlesOn} />
                 </PlayerButton>
               )}
-              <PlayerButton label={t("player.speed")} onClick={() => setMenu(menu === "speed" ? undefined : "speed")}>
-                <Icon name="speed" />
+              <PlayerButton label={t("player.options")} onClick={() => openPanel("audio")} active={panel !== undefined && panel !== "subtitles"}>
+                <Icon name="settings" />
               </PlayerButton>
               {document.pictureInPictureEnabled && (
                 <PlayerButton
@@ -364,105 +407,212 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                   <Icon name="pictureInPicture" />
                 </PlayerButton>
               )}
-              <PlayerButton label={t("player.openExternal")} onClick={() => setMenu(menu === "external" ? undefined : "external")}>
-                <Icon name="more" />
-              </PlayerButton>
               <PlayerButton label={t("player.fullScreen")} onClick={fullScreen}>
-                <Icon name="fullScreen" />
+                <Icon name={full ? "exitFullScreen" : "fullScreen"} />
               </PlayerButton>
-
-              {menu && (
-                <div className="absolute right-0 bottom-14 max-h-[60vh] w-72 overflow-y-auto rounded-lg bg-neutral-900/95 p-1 shadow-level3">
-                  {menu === "audio" &&
-                    audioTracks.map((s) => (
-                      <MenuItem
-                        key={s.index}
-                        checked={s.index === info?.info.audioStreamIndex}
-                        onClick={() => (setMenu(undefined), setSelection({ ...selection, audio: s.index }))}
-                      >
-                        {trackLabel(s)}
-                      </MenuItem>
-                    ))}
-                  {menu === "subtitles" && (
-                    <>
-                      <MenuItem
-                        checked={(info?.info.subtitleStreamIndex ?? -1) < 0}
-                        onClick={() => (setMenu(undefined), setSelection({ ...selection, subtitle: -1 }))}
-                      >
-                        {t("player.subtitlesOff")}
-                      </MenuItem>
-                      {subtitleTracks.map((s) => {
-                        const stream = source?.streams.find((x) => x.index === s.streamIndex);
-                        return (
-                          <MenuItem
-                            key={s.streamIndex}
-                            checked={s.streamIndex === info?.info.subtitleStreamIndex}
-                            onClick={() => (setMenu(undefined), setSelection({ ...selection, subtitle: s.streamIndex }))}
-                          >
-                            {stream ? trackLabel(stream) : s.title || s.language || `#${s.streamIndex}`}
-                          </MenuItem>
-                        );
-                      })}
-                    </>
-                  )}
-                  {menu === "speed" &&
-                    speeds.map((r) => (
-                      <MenuItem
-                        key={r}
-                        checked={r === speed}
-                        onClick={() => {
-                          setMenu(undefined);
-                          if (video.current) video.current.playbackRate = r;
-                        }}
-                      >
-                        {r}×
-                      </MenuItem>
-                    ))}
-                  {menu === "external" && info && (
-                    <>
-                      <MenuItem onClick={() => (setMenu(undefined), window.open(info.url, "_blank"))}>
-                        {t("player.openExternal")}
-                      </MenuItem>
-                      <MenuItem onClick={() => (setMenu(undefined), void navigator.clipboard?.writeText(info.url))}>
-                        {t("player.copyLink")}
-                      </MenuItem>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
+
+      {panel && (
+        <aside
+          aria-label={t("player.options")}
+          className="absolute right-4 bottom-24 flex max-h-[calc(100%-7rem)] w-[min(360px,calc(100vw-32px))] flex-col overflow-hidden rounded-[18px] border border-white/10 bg-neutral-900/75 shadow-level3 backdrop-blur-2xl"
+        >
+          <div role="tablist" className="m-3 flex rounded-[9px] bg-white/10 p-0.5">
+            {(
+              [
+                ["audio", t("player.audio")],
+                ["subtitles", t("player.subtitles")],
+                ["quality", t("player.quality")],
+                ["info", t("player.info")],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={panel === id}
+                onClick={() => setPanel(id)}
+                className={`flex-1 rounded-[7px] px-2 py-1 type-footnote font-semibold ${panel === id ? "bg-white/25" : "text-white/70 hover:text-white"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+            {panel === "audio" && (
+              <>
+                {audioTracks.map((s) => (
+                  <Choice
+                    key={s.index}
+                    checked={s.index === info?.info.audioStreamIndex}
+                    onClick={() => pick({ audio: s.index })}
+                    label={trackLabel(s)}
+                  />
+                ))}
+                <Heading>{t("player.speed")}</Heading>
+                <div className="flex flex-wrap gap-1.5 px-2.5">
+                  {speeds.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      aria-pressed={r === speed}
+                      onClick={() => video.current && (video.current.playbackRate = r)}
+                      className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums ${r === speed ? "bg-white text-black" : "bg-white/10 hover:bg-white/20"}`}
+                    >
+                      {r}×
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+            {panel === "subtitles" && (
+              <>
+                <Choice checked={!subtitlesOn} onClick={() => pick({ subtitle: -1 })} label={[t("player.subtitlesOff"), ""]} />
+                {subtitleTracks.map((s) => {
+                  const stream = source?.streams.find((x) => x.index === s.streamIndex);
+                  return (
+                    <Choice
+                      key={s.streamIndex}
+                      checked={s.streamIndex === info?.info.subtitleStreamIndex}
+                      onClick={() => pick({ subtitle: s.streamIndex })}
+                      label={stream ? trackLabel(stream) : [s.title || languageOf(s.language) || `#${s.streamIndex}`, s.format.toUpperCase()]}
+                    />
+                  );
+                })}
+              </>
+            )}
+            {panel === "quality" &&
+              qualities.map((q) => (
+                <Choice key={q.value} checked={q.value === selection.quality} onClick={() => pick({ quality: q.value })} label={[q.label(), ""]} />
+              ))}
+            {panel === "info" && info && (
+              <div className="flex flex-col gap-4 px-2.5 pt-1">
+                <Fact label={t("player.method")}>{methodText(info.info.method)}</Fact>
+                {source && (
+                  <Fact label={t("player.source")}>
+                    {[source.name, source.container.toUpperCase()].filter(Boolean).join(" · ")}
+                  </Fact>
+                )}
+                <div className="flex flex-col gap-1">
+                  <PanelAction icon="external" onClick={() => window.open(info.url, "_blank")}>
+                    {t("player.openExternal")}
+                  </PanelAction>
+                  <PanelAction onClick={() => void navigator.clipboard?.writeText(info.url)}>
+                    {t("player.copyLink")}
+                  </PanelAction>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+      )}
     </div>
   );
 }
 
-function PlayerButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function methodText(m: PlayMethod): string {
+  switch (m) {
+    case PlayMethod.DIRECT_PLAY:
+      return t("player.directPlay");
+    case PlayMethod.DIRECT_STREAM:
+      return t("player.directStream");
+    default:
+      return t("player.transcode");
+  }
+}
+
+/** The timeline: a slim bar that thickens under the pointer, with a range input over it. */
+function Scrubber({ time, total, onSeek }: { time: number; total: number; onSeek: (s: number) => void }) {
+  const at = total > 0 ? Math.min(1, time / total) : 0;
+  return (
+    <div className="group relative flex h-5 items-center">
+      <div className="h-1 w-full overflow-hidden rounded-full bg-white/30 transition-[height] group-hover:h-1.5">
+        <div className="h-full rounded-full bg-white" style={{ width: `${at * 100}%` }} />
+      </div>
+      <div
+        className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white opacity-0 shadow-level1 transition-opacity group-hover:opacity-100"
+        style={{ left: `${at * 100}%` }}
+      />
+      <input
+        type="range"
+        min={0}
+        max={total || 1}
+        step={1}
+        value={Math.min(time, total || 1)}
+        onChange={(e) => onSeek(Number(e.target.value))}
+        aria-label={clock(time)}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+      />
+    </div>
+  );
+}
+
+function PlayerButton({
+  label,
+  onClick,
+  children,
+  active,
+  large,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+  active?: boolean;
+  large?: boolean;
+}) {
   return (
     <button
       type="button"
       aria-label={label}
+      aria-pressed={active}
       title={label}
       onClick={onClick}
-      className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/15"
+      className={`flex items-center justify-center rounded-full hover:bg-white/15 ${large ? "h-12 w-12" : "h-11 w-11"} ${active ? "bg-white/20" : ""}`}
     >
       {children}
     </button>
   );
 }
 
-function MenuItem({ checked, onClick, children }: { checked?: boolean; onClick: () => void; children: ReactNode }) {
+function Heading({ children }: { children: ReactNode }) {
+  return <h3 className="px-2.5 pt-4 pb-2 type-footnote font-semibold text-white/60">{children}</h3>;
+}
+
+function Choice({ checked, onClick, label: [name, details] }: { checked?: boolean; onClick: () => void; label: [string, string] }) {
   return (
     <button
       type="button"
       role="menuitemradio"
       aria-checked={checked}
       onClick={onClick}
-      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left type-callout hover:bg-white/10"
+      className="flex w-full items-center gap-3 rounded-[10px] px-2.5 py-2 text-left hover:bg-white/10"
     >
-      <span className="w-4">{checked && <Icon name="played" fill size={16} />}</span>
-      <span className="min-w-0 flex-1">{children}</span>
+      <span className="w-4 shrink-0 text-accent">{checked && <Icon name="check" size={16} />}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate type-callout">{name}</span>
+        {details && <span className="block truncate type-caption text-white/60">{details}</span>}
+      </span>
+    </button>
+  );
+}
+
+function Fact({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <div className="type-footnote font-semibold text-white/60">{label}</div>
+      <div className="mt-0.5 type-callout">{children}</div>
+    </div>
+  );
+}
+
+function PanelAction({ icon, onClick, children }: { icon?: IconName; onClick: () => void; children: ReactNode }) {
+  return (
+    <button type="button" onClick={onClick} className="-mx-2.5 flex items-center gap-3 rounded-[10px] px-2.5 py-2 text-left type-callout hover:bg-white/10">
+      {icon ? <Icon name={icon} size={18} className="text-white/70" /> : <span className="w-[18px]" />}
+      {children}
     </button>
   );
 }

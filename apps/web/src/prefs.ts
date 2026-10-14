@@ -4,6 +4,8 @@
 import { breakpoints } from "@mavio/design/tokens";
 import { useSyncExternalStore } from "react";
 
+import { t } from "./i18n.ts";
+
 /** The color theme: the system's, or one chosen. */
 export type Appearance = "system" | "light" | "dark";
 
@@ -18,6 +20,15 @@ export const qualityBitrates: Record<Quality, number> = {
   "720p": 4_000_000,
   "480p": 1_500_000,
 };
+
+/** The qualities in the order they are offered, with their names. */
+export const qualities: { value: Quality; label: () => string }[] = [
+  { value: "original", label: () => t("player.qualityOriginal") },
+  { value: "auto", label: () => t("player.qualityAuto") },
+  { value: "1080p", label: () => "1080p" },
+  { value: "720p", label: () => "720p" },
+  { value: "480p", label: () => "480p" },
+];
 
 export interface Prefs {
   appearance: Appearance;

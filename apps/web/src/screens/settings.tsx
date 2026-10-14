@@ -22,7 +22,7 @@ import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { type Appearance, type Quality, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
+import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
 import { Security, SwitchUser } from "./security.tsx";
@@ -301,14 +301,6 @@ function ThemePreview({ theme, on }: { theme: Appearance; on: boolean }) {
     </div>
   );
 }
-
-const qualities: { value: Quality; label: () => string }[] = [
-  { value: "original", label: () => t("player.qualityOriginal") },
-  { value: "auto", label: () => t("player.qualityAuto") },
-  { value: "1080p", label: () => "1080p" },
-  { value: "720p", label: () => "720p" },
-  { value: "480p", label: () => "480p" },
-];
 
 function PlaybackSection() {
   const prefs = usePrefs();

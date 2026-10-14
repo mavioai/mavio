@@ -9,6 +9,7 @@ import { HomeService } from "@mavio/proto/mavio/home/v1/home_pb";
 import { ImageKind, ItemKind, ItemService, type ItemSchema } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind, LibraryKind, LibraryService } from "@mavio/proto/mavio/library/v1/library_pb";
 import { StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
+import { PlaybackService, PlayMethod, SubtitleMethod } from "@mavio/proto/mavio/playback/v1/playback_pb";
 import { EventService, SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
 import { DisplayPreferencesService } from "@mavio/proto/mavio/user/v1/display_preferences_pb";
 import { UserDataService, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
@@ -57,6 +58,7 @@ export const services: Services = Object.fromEntries(
     LibraryService,
     EventService,
     SessionService,
+    PlaybackService,
     DisplayPreferencesService,
     UserService,
     UserDataService,
@@ -170,6 +172,15 @@ export function fixtures(): Fixtures {
       });
       return { items: ids.map((id) => item(id, watched(id))), total: ids.length };
     })
+    .on(PlaybackService, "startPlayback", (r) => ({
+      playbackId: "playback",
+      mediaSourceId: `${r.itemId}-source`,
+      method: PlayMethod.DIRECT_PLAY,
+      url: `videos/${r.itemId}.mkv`,
+      audioStreamIndex: 1,
+      subtitleStreamIndex: -1,
+      subtitles: [{ streamIndex: 2, language: "eng", method: SubtitleMethod.EXTERNAL, format: "vtt", url: `subtitles/${r.itemId}.vtt` }],
+    }))
     .on(ItemService, "listSimilarItems", (r) => {
       const of = screens.items[r.id ?? ""];
       const ids = Object.keys(screens.items).filter((id) => id !== r.id && screens.items[id].kind === of?.kind);
