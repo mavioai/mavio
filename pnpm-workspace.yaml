@@ -10,3 +10,8 @@ allowBuilds:
   workerd: true
 minimumReleaseAgeExclude:
   - style-dictionary@5.6.1
+# unplugin's typings import "bun"; keep plugins/agent's Bun types out of the other packages.
+hoistPattern:
+  - '*'
+  - '!@types/bun'
+  - '!bun-types'
