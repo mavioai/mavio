@@ -102,7 +102,7 @@ export function SignInScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center p-margin">
       <div className="w-full max-w-sm rounded-xl bg-surface p-6 shadow-level2">
-        <div className="mb-1 type-title2 text-accent">Mavio</div>
+        <div className="mb-1 type-title2 text-on-background">Mavio</div>
         {!info ? (
           <form
             className="flex flex-col gap-4"
@@ -227,11 +227,11 @@ export function MavioDevCallbackScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center p-margin">
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-xl bg-surface p-6 shadow-level2">
-        <div className="type-title2 text-accent">Mavio</div>
+        <div className="type-title2 text-on-background">Mavio</div>
         {error ? (
           <>
             <p className="type-callout text-danger">{error}</p>
-            <Link to="/sign-in" className="type-headline text-accent hover:underline">
+            <Link to="/sign-in" className="type-headline text-accent-text hover:underline">
               {t("auth.tryAgain")}
             </Link>
           </>
@@ -310,7 +310,7 @@ function Claim({
       <ServerHeading info={info} title={t("auth.claim", { server: info.name })} onBack={onBack} />
       <p className="type-body text-text-secondary">{t("auth.claimMessage")}</p>
       {site && (
-        <a href={`${site}/claim`} target="_blank" rel="noopener" className="type-headline text-accent hover:underline">
+        <a href={`${site}/claim`} target="_blank" rel="noopener" className="type-headline text-accent-text hover:underline">
           {t("auth.getClaimCode")}
         </a>
       )}

@@ -269,8 +269,8 @@ export function Button({
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "plain" }) {
   const styles = {
-    primary: "bg-accent text-on-accent hover:bg-accent-pressed",
-    secondary: "bg-surface-raised text-on-background hover:bg-surface-overlay",
+    primary: "bg-button text-on-button hover:opacity-85",
+    secondary: "bg-fill text-on-background hover:bg-fill-selected",
     plain: "text-on-background hover:bg-surface-raised",
   }[variant];
   return (

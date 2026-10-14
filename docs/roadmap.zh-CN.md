@@ -644,6 +644,7 @@ flowchart TD
   - [ ] AetherEngine 暂停时跳转后重绘画面，以及拖动缩略图
   - [ ] 多播权限（entitlement），使真机而不只是模拟器能发现网络中的服务器
   - [ ] 首页以外页面的快照测试
+- [ ] 在每个客户端实现[客户端 §6.3](clients.zh-CN.md) 的导航，Web UI 优先：按窗口宽度选择的三种布局、桌面布局的侧边栏及其用户菜单、电视布局的顶部导航与遥控器焦点，以及两种模式的登录页面；Apple 与 Android 应用还要把主按钮改为以 `color.button` 填充，强调色只用于进度、选中、链接与开关
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）
 - [ ] Apple TV 与 Android TV 应用

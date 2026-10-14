@@ -45,7 +45,7 @@
 
 条目详情页的顶部。
 
-* **结构**：铺满宽度、渐隐到 `color.background` 的背景图；其下部叠加标志或标题（`typography.display`）、一行信息（`typography.callout`，`color.textSecondary`：年份、评分、时长、分辨率）、主操作（播放或继续播放，`color.accent`）与次要操作（收藏、标为已看、更多）。
+* **结构**：铺满宽度、渐隐到 `color.background` 的背景图；其下部叠加标志或标题（`typography.display`）、一行信息（`typography.callout`，`color.textSecondary`：年份、评分、时长、分辨率）、主操作（播放或继续播放，`color.button` 上的 `color.onButton`）与次要操作（收藏、标为已看、更多）。
 * **布局**：手机上海报叠在文字上方；平板、桌面与电视把文字放在背景图左侧。
 * **简介**：`typography.body`，手机上显示三行并带"更多"操作。
 

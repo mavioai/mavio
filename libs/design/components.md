@@ -45,7 +45,7 @@ A titled horizontal row of cards (Continue Watching, Next Up, Latest in a librar
 
 The top of an item's details screen.
 
-* **Anatomy**: the backdrop filling the width, fading into `color.background`; over its lower part the logo or title (`typography.display`), a line of facts (`typography.callout`, `color.textSecondary`: year, rating, runtime, resolution), the primary action (Play or Resume, `color.accent`), and secondary actions (favorite, mark played, more).
+* **Anatomy**: the backdrop filling the width, fading into `color.background`; over its lower part the logo or title (`typography.display`), a line of facts (`typography.callout`, `color.textSecondary`: year, rating, runtime, resolution), the primary action (Play or Resume, `color.button` with `color.onButton`), and secondary actions (favorite, mark played, more).
 * **Layout**: phones stack the poster above the text; tablets, desktops and television place the text at the left of the backdrop.
 * **Overview**: `typography.body`, three lines with a "more" action on phones.
 

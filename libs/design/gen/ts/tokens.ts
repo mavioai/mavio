@@ -2,43 +2,55 @@
 /** The semantic colors of each theme, as CSS colors. */
 export const themes = {
   "dark": {
-    "background": "#0E0F12",
-    "surface": "#17191E",
-    "surfaceRaised": "#20232A",
-    "surfaceOverlay": "#2A2E36",
-    "border": "#3D424C",
-    "textPrimary": "#F5F6F8",
-    "textSecondary": "#B2B8C2",
-    "textTertiary": "#8E95A2",
-    "textDisabled": "#545A66",
-    "accent": "#9581FF",
-    "accentPressed": "#B5A6FF",
-    "onAccent": "#0E0F12",
-    "focus": "#B5A6FF",
-    "progress": "#9581FF",
-    "danger": "#FF7A7A",
-    "success": "#5FD68B",
-    "warning": "#FFC15C",
+    "background": "#000000",
+    "surface": "#1C1C1E",
+    "surfaceRaised": "#2C2C2E",
+    "surfaceOverlay": "#3A3A3C",
+    "sidebar": "#161618",
+    "fill": "rgba(118, 118, 128, 0.24)",
+    "fillSelected": "rgba(118, 118, 128, 0.32)",
+    "border": "#3A3A3C",
+    "textPrimary": "#F5F5F7",
+    "textSecondary": "#AEAEB2",
+    "textTertiary": "#8E8E93",
+    "textDisabled": "#48484A",
+    "button": "#F5F5F7",
+    "onButton": "#000000",
+    "accent": "#FF9F0A",
+    "accentPressed": "#FFB340",
+    "accentText": "#FFB340",
+    "onAccent": "#000000",
+    "focus": "#FF9F0A",
+    "progress": "#FF9F0A",
+    "danger": "#FF453A",
+    "success": "#30D158",
+    "warning": "#FFD60A",
     "scrim": "rgba(0, 0, 0, 0.6)"
   },
   "light": {
-    "background": "#F5F6F8",
-    "surface": "#FFFFFF",
+    "background": "#FFFFFF",
+    "surface": "#F2F2F7",
     "surfaceRaised": "#FFFFFF",
     "surfaceOverlay": "#FFFFFF",
-    "border": "#D0D4DB",
-    "textPrimary": "#0E0F12",
-    "textSecondary": "#3D424C",
-    "textTertiary": "#545A66",
-    "textDisabled": "#8E95A2",
-    "accent": "#6447DB",
-    "accentPressed": "#5036B4",
-    "onAccent": "#FFFFFF",
-    "focus": "#7A60F5",
-    "progress": "#6447DB",
-    "danger": "#C93636",
-    "success": "#23904F",
-    "warning": "#C27E0C",
+    "sidebar": "#F5F5F7",
+    "fill": "rgba(118, 118, 128, 0.12)",
+    "fillSelected": "rgba(118, 118, 128, 0.18)",
+    "border": "#D1D1D6",
+    "textPrimary": "#1D1D1F",
+    "textSecondary": "#5E5E63",
+    "textTertiary": "#6E6E73",
+    "textDisabled": "#AEAEB2",
+    "button": "#1D1D1F",
+    "onButton": "#FFFFFF",
+    "accent": "#F57C00",
+    "accentPressed": "#D96D00",
+    "accentText": "#B35300",
+    "onAccent": "#000000",
+    "focus": "#F57C00",
+    "progress": "#F57C00",
+    "danger": "#D70015",
+    "success": "#248A3D",
+    "warning": "#A05A00",
     "scrim": "rgba(0, 0, 0, 0.4)"
   }
 } as const;
@@ -50,45 +62,47 @@ export type ColorName = keyof (typeof themes)['dark'];
 export const palette = {
   "neutral": {
     "0": "#FFFFFF",
-    "50": "#F5F6F8",
-    "100": "#E8EAEE",
-    "200": "#D0D4DB",
-    "300": "#B2B8C2",
-    "400": "#8E95A2",
-    "500": "#6E7582",
-    "600": "#545A66",
-    "700": "#3D424C",
-    "800": "#2A2E36",
-    "850": "#20232A",
-    "900": "#17191E",
-    "950": "#0E0F12",
+    "50": "#F5F5F7",
+    "100": "#F2F2F7",
+    "200": "#E5E5EA",
+    "300": "#D1D1D6",
+    "400": "#AEAEB2",
+    "500": "#8E8E93",
+    "600": "#6E6E73",
+    "650": "#5E5E63",
+    "700": "#48484A",
+    "750": "#3A3A3C",
+    "800": "#2C2C2E",
+    "850": "#1D1D1F",
+    "900": "#1C1C1E",
+    "950": "#161618",
     "1000": "#000000"
   },
   "accent": {
-    "100": "#EAE5FF",
-    "200": "#D3C9FF",
-    "300": "#B5A6FF",
-    "400": "#9581FF",
-    "500": "#7A60F5",
-    "600": "#6447DB",
-    "700": "#5036B4",
-    "800": "#3D298A",
-    "900": "#2B1D61"
+    "100": "#FFF1E0",
+    "200": "#FFD9A8",
+    "300": "#FFB340",
+    "400": "#FF9F0A",
+    "500": "#F57C00",
+    "600": "#D96D00",
+    "700": "#B35300",
+    "800": "#8A4000",
+    "900": "#5C2B00"
   },
   "red": {
-    "400": "#FF7A7A",
-    "500": "#F04F4F",
-    "600": "#C93636"
+    "400": "#FF453A",
+    "500": "#FF3B30",
+    "600": "#D70015"
   },
   "green": {
-    "400": "#5FD68B",
-    "500": "#34B868",
-    "600": "#23904F"
+    "400": "#30D158",
+    "500": "#34C759",
+    "600": "#248A3D"
   },
   "amber": {
-    "400": "#FFC15C",
-    "500": "#F5A524",
-    "600": "#C27E0C"
+    "400": "#FFD60A",
+    "500": "#FFCC00",
+    "600": "#A05A00"
   }
 } as const;
 
@@ -288,6 +302,8 @@ export const layout = {
     "poster": 112,
     "thumbnail": 248,
     "touchTarget": 44,
+    "sidebar": 0,
+    "rail": 0,
     "focusScale": 1
   },
   "tablet": {
@@ -296,6 +312,8 @@ export const layout = {
     "poster": 140,
     "thumbnail": 300,
     "touchTarget": 44,
+    "sidebar": 280,
+    "rail": 86,
     "focusScale": 1
   },
   "desktop": {
@@ -304,6 +322,8 @@ export const layout = {
     "poster": 160,
     "thumbnail": 320,
     "touchTarget": 28,
+    "sidebar": 262,
+    "rail": 86,
     "focusScale": 1
   },
   "tv": {
@@ -312,6 +332,8 @@ export const layout = {
     "poster": 240,
     "thumbnail": 480,
     "touchTarget": 0,
+    "sidebar": 0,
+    "rail": 0,
     "focusScale": 1.08
   }
 } as const;
@@ -319,5 +341,6 @@ export const layout = {
 /** The smallest viewport widths, in CSS px, of the tablet and desktop layouts. */
 export const breakpoints = {
   "tablet": 600,
+  "expanded": 840,
   "desktop": 1200
 } as const;

@@ -41,6 +41,22 @@
       },
       "$description": "Smallest size of a pointer or touch target (0 on television, which has none)."
     },
+    "sidebar": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      },
+      "$description": "Width of the column of the expanded sidebar of the desktop layout, its inset included (0 where the form factor has none)."
+    },
+    "rail": {
+      "$type": "dimension",
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      },
+      "$description": "Width of the column of the sidebar collapsed to a rail of icons, its inset included (0 where the form factor has none)."
+    },
     "focusScale": {
       "$type": "number",
       "$value": 1,

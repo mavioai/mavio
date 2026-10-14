@@ -31,7 +31,7 @@ export function ProfileScreen() {
           <Link
             to="/sign-in"
             search={{ add: true }}
-            className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-md px-3 type-headline text-accent hover:bg-surface-raised"
+            className="ml-auto inline-flex min-h-11 items-center gap-2 rounded-md px-3 type-headline text-accent-text hover:bg-surface-raised"
           >
             <Icon name="add" />
             {t("auth.addServer")}

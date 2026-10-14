@@ -7,13 +7,19 @@ public struct MavioColors: Sendable {
     public let surface: Color
     public let surfaceRaised: Color
     public let surfaceOverlay: Color
+    public let sidebar: Color
+    public let fill: Color
+    public let fillSelected: Color
     public let border: Color
     public let textPrimary: Color
     public let textSecondary: Color
     public let textTertiary: Color
     public let textDisabled: Color
+    public let button: Color
+    public let onButton: Color
     public let accent: Color
     public let accentPressed: Color
+    public let accentText: Color
     public let onAccent: Color
     public let focus: Color
     public let progress: Color
@@ -23,44 +29,56 @@ public struct MavioColors: Sendable {
     public let scrim: Color
 
     public static let dark = MavioColors(
-        background: Color(.sRGB, red: 0.0549, green: 0.0588, blue: 0.0706, opacity: 1),
-        surface: Color(.sRGB, red: 0.0902, green: 0.098, blue: 0.1176, opacity: 1),
-        surfaceRaised: Color(.sRGB, red: 0.1255, green: 0.1373, blue: 0.1647, opacity: 1),
-        surfaceOverlay: Color(.sRGB, red: 0.1647, green: 0.1804, blue: 0.2118, opacity: 1),
-        border: Color(.sRGB, red: 0.2392, green: 0.2588, blue: 0.298, opacity: 1),
-        textPrimary: Color(.sRGB, red: 0.9608, green: 0.9647, blue: 0.9725, opacity: 1),
-        textSecondary: Color(.sRGB, red: 0.698, green: 0.7216, blue: 0.7608, opacity: 1),
-        textTertiary: Color(.sRGB, red: 0.5569, green: 0.5843, blue: 0.6353, opacity: 1),
-        textDisabled: Color(.sRGB, red: 0.3294, green: 0.3529, blue: 0.4, opacity: 1),
-        accent: Color(.sRGB, red: 0.5843, green: 0.5059, blue: 1, opacity: 1),
-        accentPressed: Color(.sRGB, red: 0.7098, green: 0.651, blue: 1, opacity: 1),
-        onAccent: Color(.sRGB, red: 0.0549, green: 0.0588, blue: 0.0706, opacity: 1),
-        focus: Color(.sRGB, red: 0.7098, green: 0.651, blue: 1, opacity: 1),
-        progress: Color(.sRGB, red: 0.5843, green: 0.5059, blue: 1, opacity: 1),
-        danger: Color(.sRGB, red: 1, green: 0.4784, blue: 0.4784, opacity: 1),
-        success: Color(.sRGB, red: 0.3725, green: 0.8392, blue: 0.5451, opacity: 1),
-        warning: Color(.sRGB, red: 1, green: 0.7569, blue: 0.3608, opacity: 1),
+        background: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1),
+        surface: Color(.sRGB, red: 0.1098, green: 0.1098, blue: 0.1176, opacity: 1),
+        surfaceRaised: Color(.sRGB, red: 0.1725, green: 0.1725, blue: 0.1804, opacity: 1),
+        surfaceOverlay: Color(.sRGB, red: 0.2275, green: 0.2275, blue: 0.2353, opacity: 1),
+        sidebar: Color(.sRGB, red: 0.0863, green: 0.0863, blue: 0.0941, opacity: 1),
+        fill: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.24),
+        fillSelected: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.32),
+        border: Color(.sRGB, red: 0.2275, green: 0.2275, blue: 0.2353, opacity: 1),
+        textPrimary: Color(.sRGB, red: 0.9608, green: 0.9608, blue: 0.9686, opacity: 1),
+        textSecondary: Color(.sRGB, red: 0.6824, green: 0.6824, blue: 0.698, opacity: 1),
+        textTertiary: Color(.sRGB, red: 0.5569, green: 0.5569, blue: 0.5765, opacity: 1),
+        textDisabled: Color(.sRGB, red: 0.2824, green: 0.2824, blue: 0.2902, opacity: 1),
+        button: Color(.sRGB, red: 0.9608, green: 0.9608, blue: 0.9686, opacity: 1),
+        onButton: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1),
+        accent: Color(.sRGB, red: 1, green: 0.6235, blue: 0.0392, opacity: 1),
+        accentPressed: Color(.sRGB, red: 1, green: 0.702, blue: 0.251, opacity: 1),
+        accentText: Color(.sRGB, red: 1, green: 0.702, blue: 0.251, opacity: 1),
+        onAccent: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1),
+        focus: Color(.sRGB, red: 1, green: 0.6235, blue: 0.0392, opacity: 1),
+        progress: Color(.sRGB, red: 1, green: 0.6235, blue: 0.0392, opacity: 1),
+        danger: Color(.sRGB, red: 1, green: 0.2706, blue: 0.2275, opacity: 1),
+        success: Color(.sRGB, red: 0.1882, green: 0.8196, blue: 0.3451, opacity: 1),
+        warning: Color(.sRGB, red: 1, green: 0.8392, blue: 0.0392, opacity: 1),
         scrim: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.6)
     )
 
     public static let light = MavioColors(
-        background: Color(.sRGB, red: 0.9608, green: 0.9647, blue: 0.9725, opacity: 1),
-        surface: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
+        background: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
+        surface: Color(.sRGB, red: 0.949, green: 0.949, blue: 0.9686, opacity: 1),
         surfaceRaised: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
         surfaceOverlay: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
-        border: Color(.sRGB, red: 0.8157, green: 0.8314, blue: 0.8588, opacity: 1),
-        textPrimary: Color(.sRGB, red: 0.0549, green: 0.0588, blue: 0.0706, opacity: 1),
-        textSecondary: Color(.sRGB, red: 0.2392, green: 0.2588, blue: 0.298, opacity: 1),
-        textTertiary: Color(.sRGB, red: 0.3294, green: 0.3529, blue: 0.4, opacity: 1),
-        textDisabled: Color(.sRGB, red: 0.5569, green: 0.5843, blue: 0.6353, opacity: 1),
-        accent: Color(.sRGB, red: 0.3922, green: 0.2784, blue: 0.8588, opacity: 1),
-        accentPressed: Color(.sRGB, red: 0.3137, green: 0.2118, blue: 0.7059, opacity: 1),
-        onAccent: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
-        focus: Color(.sRGB, red: 0.4784, green: 0.3765, blue: 0.9608, opacity: 1),
-        progress: Color(.sRGB, red: 0.3922, green: 0.2784, blue: 0.8588, opacity: 1),
-        danger: Color(.sRGB, red: 0.7882, green: 0.2118, blue: 0.2118, opacity: 1),
-        success: Color(.sRGB, red: 0.1373, green: 0.5647, blue: 0.3098, opacity: 1),
-        warning: Color(.sRGB, red: 0.7608, green: 0.4941, blue: 0.0471, opacity: 1),
+        sidebar: Color(.sRGB, red: 0.9608, green: 0.9608, blue: 0.9686, opacity: 1),
+        fill: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.12),
+        fillSelected: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.18),
+        border: Color(.sRGB, red: 0.8196, green: 0.8196, blue: 0.8392, opacity: 1),
+        textPrimary: Color(.sRGB, red: 0.1137, green: 0.1137, blue: 0.1216, opacity: 1),
+        textSecondary: Color(.sRGB, red: 0.3686, green: 0.3686, blue: 0.3882, opacity: 1),
+        textTertiary: Color(.sRGB, red: 0.4314, green: 0.4314, blue: 0.451, opacity: 1),
+        textDisabled: Color(.sRGB, red: 0.6824, green: 0.6824, blue: 0.698, opacity: 1),
+        button: Color(.sRGB, red: 0.1137, green: 0.1137, blue: 0.1216, opacity: 1),
+        onButton: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
+        accent: Color(.sRGB, red: 0.9608, green: 0.4863, blue: 0, opacity: 1),
+        accentPressed: Color(.sRGB, red: 0.851, green: 0.4275, blue: 0, opacity: 1),
+        accentText: Color(.sRGB, red: 0.702, green: 0.3255, blue: 0, opacity: 1),
+        onAccent: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1),
+        focus: Color(.sRGB, red: 0.9608, green: 0.4863, blue: 0, opacity: 1),
+        progress: Color(.sRGB, red: 0.9608, green: 0.4863, blue: 0, opacity: 1),
+        danger: Color(.sRGB, red: 0.8431, green: 0, blue: 0.0824, opacity: 1),
+        success: Color(.sRGB, red: 0.1412, green: 0.5412, blue: 0.2392, opacity: 1),
+        warning: Color(.sRGB, red: 0.6275, green: 0.3529, blue: 0, opacity: 1),
         scrim: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0.4)
     )
 }
@@ -188,6 +206,8 @@ public struct MavioLayout: Sendable {
     public let poster: CGFloat
     public let thumbnail: CGFloat
     public let touchTarget: CGFloat
+    public let sidebar: CGFloat
+    public let rail: CGFloat
     public let focusScale: CGFloat
 
     public static let phone = MavioLayout(
@@ -196,6 +216,8 @@ public struct MavioLayout: Sendable {
         poster: 112,
         thumbnail: 248,
         touchTarget: 44,
+        sidebar: 0,
+        rail: 0,
         focusScale: 1
     )
 
@@ -205,6 +227,8 @@ public struct MavioLayout: Sendable {
         poster: 140,
         thumbnail: 300,
         touchTarget: 44,
+        sidebar: 280,
+        rail: 86,
         focusScale: 1
     )
 
@@ -214,6 +238,8 @@ public struct MavioLayout: Sendable {
         poster: 160,
         thumbnail: 320,
         touchTarget: 28,
+        sidebar: 262,
+        rail: 86,
         focusScale: 1
     )
 
@@ -223,6 +249,8 @@ public struct MavioLayout: Sendable {
         poster: 240,
         thumbnail: 480,
         touchTarget: 0,
+        sidebar: 0,
+        rail: 0,
         focusScale: 1.08
     )
 }

@@ -17,6 +17,9 @@ const CONTRAST_PAIRS = [
   ['textPrimary', 'surfaceOverlay'],
   ['onAccent', 'accent'],
   ['onAccent', 'accentPressed'],
+  ['onButton', 'button'],
+  ['accentText', 'background'],
+  ['accentText', 'surface'],
 ];
 
 async function resolve(names) {

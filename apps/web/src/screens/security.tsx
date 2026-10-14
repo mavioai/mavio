@@ -127,7 +127,7 @@ export function Security({ server }: { server: ServerEntry }) {
         <div className="flex items-center">
           <h3 className="type-headline">{t("auth.passkeys")}</h3>
           {passkeysHere(server.url) && (
-            <Button variant="plain" className="ml-auto text-accent" disabled={change.isPending} onClick={addPasskey}>
+            <Button variant="plain" className="ml-auto text-accent-text" disabled={change.isPending} onClick={addPasskey}>
               {t("auth.addPasskey")}
             </Button>
           )}
@@ -201,7 +201,7 @@ function Totp({
           </Button>
         ) : (
           !setup && (
-            <Button variant="plain" className="text-accent" disabled={busy} onClick={() => void start().then(setSetup, () => {})}>
+            <Button variant="plain" className="text-accent-text" disabled={busy} onClick={() => void start().then(setSetup, () => {})}>
               {t("auth.setUpTotp")}
             </Button>
           )
@@ -219,7 +219,7 @@ function Totp({
           }}
         >
           <p className="type-callout break-all text-text-secondary">{t("auth.totpSecret", { secret: setup.secret })}</p>
-          <a href={setup.uri} className="type-callout text-accent hover:underline">
+          <a href={setup.uri} className="type-callout text-accent-text hover:underline">
             {t("auth.openAuthenticator")}
           </a>
           <div className="flex flex-wrap items-end gap-3">
@@ -263,7 +263,7 @@ function Pin({ on, busy, save }: { on: boolean; busy: boolean; save: (pin: strin
           </Button>
         )}
         {!editing && (
-          <Button variant="plain" className="text-accent" disabled={busy} onClick={() => setEditing(true)}>
+          <Button variant="plain" className="text-accent-text" disabled={busy} onClick={() => setEditing(true)}>
             {t("auth.setPin")}
           </Button>
         )}

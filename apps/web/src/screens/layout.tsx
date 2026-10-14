@@ -48,7 +48,7 @@ function Sidebar() {
   const several = libraries.length > 1;
   return (
     <nav className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-border bg-surface p-3 md:flex">
-      <div className="px-3 pt-2 pb-4 type-title2 text-accent">Mavio</div>
+      <div className="px-3 pt-2 pb-4 type-title2 text-on-background">Mavio</div>
       {destinations.map((d) => (
         <Link
           key={d.to}
@@ -95,7 +95,7 @@ function TabBar() {
           key={d.to}
           to={d.to}
           activeOptions={{ exact: d.to === "/" }}
-          className="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 type-caption text-text-secondary data-[status=active]:text-accent"
+          className="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 type-caption text-text-secondary data-[status=active]:text-accent-text"
         >
           {({ isActive }) => (
             <>

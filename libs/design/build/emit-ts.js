@@ -2,7 +2,10 @@
 import { HEADER, hex, write } from './util.js';
 import { entriesFor } from './strings.js';
 
-const BREAKPOINTS = { tablet: 600, desktop: 1200 }; // CSS px; below tablet is phone
+// CSS px. Below tablet the phone layout applies; from tablet the desktop
+// layout, with its sidebar collapsed to a rail until expanded (the window size
+// classes of docs/clients.md §6.3); desktop switches to the desktop sizes.
+const BREAKPOINTS = { tablet: 600, expanded: 840, desktop: 1200 };
 
 const json = (v) => JSON.stringify(v, null, 2);
 

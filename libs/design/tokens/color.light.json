@@ -3,10 +3,10 @@
     "$description": "The semantic colors of the light theme.",
     "$type": "color",
     "background": {
-      "$value": "{palette.neutral.50}"
+      "$value": "{palette.neutral.0}"
     },
     "surface": {
-      "$value": "{palette.neutral.0}"
+      "$value": "{palette.neutral.100}"
     },
     "surfaceRaised": {
       "$value": "{palette.neutral.0}"
@@ -14,14 +14,44 @@
     "surfaceOverlay": {
       "$value": "{palette.neutral.0}"
     },
+    "sidebar": {
+      "$value": "{palette.neutral.50}",
+      "$description": "Background of the sidebar of the desktop layout."
+    },
+    "fill": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.4627,
+          0.4627,
+          0.502
+        ],
+        "alpha": 0.12,
+        "hex": "#767680"
+      },
+      "$description": "Translucent fill of secondary buttons, chips, search fields and segmented controls."
+    },
+    "fillSelected": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.4627,
+          0.4627,
+          0.502
+        ],
+        "alpha": 0.18,
+        "hex": "#767680"
+      },
+      "$description": "Translucent fill of the selected row of a sidebar or list."
+    },
     "border": {
-      "$value": "{palette.neutral.200}"
+      "$value": "{palette.neutral.300}"
     },
     "textPrimary": {
-      "$value": "{palette.neutral.950}"
+      "$value": "{palette.neutral.850}"
     },
     "textSecondary": {
-      "$value": "{palette.neutral.700}"
+      "$value": "{palette.neutral.650}"
     },
     "textTertiary": {
       "$value": "{palette.neutral.600}"
@@ -29,20 +59,32 @@
     "textDisabled": {
       "$value": "{palette.neutral.400}"
     },
+    "button": {
+      "$value": "{palette.neutral.850}",
+      "$description": "Fill of the primary button, the color of the text."
+    },
+    "onButton": {
+      "$value": "{palette.neutral.0}",
+      "$description": "Text and icons on the primary button."
+    },
     "accent": {
-      "$value": "{palette.accent.600}"
+      "$value": "{palette.accent.500}"
     },
     "accentPressed": {
-      "$value": "{palette.accent.700}"
+      "$value": "{palette.accent.600}"
+    },
+    "accentText": {
+      "$value": "{palette.accent.700}",
+      "$description": "The accent as text, such as links and the back button, legible on the background."
     },
     "onAccent": {
-      "$value": "{palette.neutral.0}"
+      "$value": "{palette.neutral.1000}"
     },
     "focus": {
       "$value": "{palette.accent.500}"
     },
     "progress": {
-      "$value": "{palette.accent.600}"
+      "$value": "{palette.accent.500}"
     },
     "danger": {
       "$value": "{palette.red.600}"
@@ -57,9 +99,9 @@
       "$value": {
         "colorSpace": "srgb",
         "components": [
-          0,
-          0,
-          0
+          0.0,
+          0.0,
+          0.0
         ],
         "alpha": 0.4,
         "hex": "#000000"

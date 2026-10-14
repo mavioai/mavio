@@ -644,6 +644,7 @@ flowchart TD
   - [ ] A redrawn frame when AetherEngine seeks while paused, and scrub thumbnails
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
   - [ ] Snapshot tests of the screens beyond Home
+- [ ] The navigation of [Clients §6.3](clients.md) in every client, the web UI first: the three layouts chosen by window width, the desktop layout's sidebar with its user menu, the television layout's top navigation and remote focus, and the sign-in screens of the two modes; the Apple and Android apps also take the primary button filled with `color.button` and the accent only on progress, selection, links and switches
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
 - [ ] Apple TV and Android TV apps

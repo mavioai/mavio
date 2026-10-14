@@ -13,13 +13,19 @@ type Colors struct {
 	Surface        Color
 	SurfaceRaised  Color
 	SurfaceOverlay Color
+	Sidebar        Color
+	Fill           Color
+	FillSelected   Color
 	Border         Color
 	TextPrimary    Color
 	TextSecondary  Color
 	TextTertiary   Color
 	TextDisabled   Color
+	Button         Color
+	OnButton       Color
 	Accent         Color
 	AccentPressed  Color
+	AccentText     Color
 	OnAccent       Color
 	Focus          Color
 	Progress       Color
@@ -32,43 +38,55 @@ type Colors struct {
 // The themes.
 var (
 	DarkColors = Colors{
-		Background:     Color{R: 14, G: 15, B: 18, A: 255},
-		Surface:        Color{R: 23, G: 25, B: 30, A: 255},
-		SurfaceRaised:  Color{R: 32, G: 35, B: 42, A: 255},
-		SurfaceOverlay: Color{R: 42, G: 46, B: 54, A: 255},
-		Border:         Color{R: 61, G: 66, B: 76, A: 255},
-		TextPrimary:    Color{R: 245, G: 246, B: 248, A: 255},
-		TextSecondary:  Color{R: 178, G: 184, B: 194, A: 255},
-		TextTertiary:   Color{R: 142, G: 149, B: 162, A: 255},
-		TextDisabled:   Color{R: 84, G: 90, B: 102, A: 255},
-		Accent:         Color{R: 149, G: 129, B: 255, A: 255},
-		AccentPressed:  Color{R: 181, G: 166, B: 255, A: 255},
-		OnAccent:       Color{R: 14, G: 15, B: 18, A: 255},
-		Focus:          Color{R: 181, G: 166, B: 255, A: 255},
-		Progress:       Color{R: 149, G: 129, B: 255, A: 255},
-		Danger:         Color{R: 255, G: 122, B: 122, A: 255},
-		Success:        Color{R: 95, G: 214, B: 139, A: 255},
-		Warning:        Color{R: 255, G: 193, B: 92, A: 255},
+		Background:     Color{R: 0, G: 0, B: 0, A: 255},
+		Surface:        Color{R: 28, G: 28, B: 30, A: 255},
+		SurfaceRaised:  Color{R: 44, G: 44, B: 46, A: 255},
+		SurfaceOverlay: Color{R: 58, G: 58, B: 60, A: 255},
+		Sidebar:        Color{R: 22, G: 22, B: 24, A: 255},
+		Fill:           Color{R: 118, G: 118, B: 128, A: 61},
+		FillSelected:   Color{R: 118, G: 118, B: 128, A: 82},
+		Border:         Color{R: 58, G: 58, B: 60, A: 255},
+		TextPrimary:    Color{R: 245, G: 245, B: 247, A: 255},
+		TextSecondary:  Color{R: 174, G: 174, B: 178, A: 255},
+		TextTertiary:   Color{R: 142, G: 142, B: 147, A: 255},
+		TextDisabled:   Color{R: 72, G: 72, B: 74, A: 255},
+		Button:         Color{R: 245, G: 245, B: 247, A: 255},
+		OnButton:       Color{R: 0, G: 0, B: 0, A: 255},
+		Accent:         Color{R: 255, G: 159, B: 10, A: 255},
+		AccentPressed:  Color{R: 255, G: 179, B: 64, A: 255},
+		AccentText:     Color{R: 255, G: 179, B: 64, A: 255},
+		OnAccent:       Color{R: 0, G: 0, B: 0, A: 255},
+		Focus:          Color{R: 255, G: 159, B: 10, A: 255},
+		Progress:       Color{R: 255, G: 159, B: 10, A: 255},
+		Danger:         Color{R: 255, G: 69, B: 58, A: 255},
+		Success:        Color{R: 48, G: 209, B: 88, A: 255},
+		Warning:        Color{R: 255, G: 214, B: 10, A: 255},
 		Scrim:          Color{R: 0, G: 0, B: 0, A: 153},
 	}
 	LightColors = Colors{
-		Background:     Color{R: 245, G: 246, B: 248, A: 255},
-		Surface:        Color{R: 255, G: 255, B: 255, A: 255},
+		Background:     Color{R: 255, G: 255, B: 255, A: 255},
+		Surface:        Color{R: 242, G: 242, B: 247, A: 255},
 		SurfaceRaised:  Color{R: 255, G: 255, B: 255, A: 255},
 		SurfaceOverlay: Color{R: 255, G: 255, B: 255, A: 255},
-		Border:         Color{R: 208, G: 212, B: 219, A: 255},
-		TextPrimary:    Color{R: 14, G: 15, B: 18, A: 255},
-		TextSecondary:  Color{R: 61, G: 66, B: 76, A: 255},
-		TextTertiary:   Color{R: 84, G: 90, B: 102, A: 255},
-		TextDisabled:   Color{R: 142, G: 149, B: 162, A: 255},
-		Accent:         Color{R: 100, G: 71, B: 219, A: 255},
-		AccentPressed:  Color{R: 80, G: 54, B: 180, A: 255},
-		OnAccent:       Color{R: 255, G: 255, B: 255, A: 255},
-		Focus:          Color{R: 122, G: 96, B: 245, A: 255},
-		Progress:       Color{R: 100, G: 71, B: 219, A: 255},
-		Danger:         Color{R: 201, G: 54, B: 54, A: 255},
-		Success:        Color{R: 35, G: 144, B: 79, A: 255},
-		Warning:        Color{R: 194, G: 126, B: 12, A: 255},
+		Sidebar:        Color{R: 245, G: 245, B: 247, A: 255},
+		Fill:           Color{R: 118, G: 118, B: 128, A: 31},
+		FillSelected:   Color{R: 118, G: 118, B: 128, A: 46},
+		Border:         Color{R: 209, G: 209, B: 214, A: 255},
+		TextPrimary:    Color{R: 29, G: 29, B: 31, A: 255},
+		TextSecondary:  Color{R: 94, G: 94, B: 99, A: 255},
+		TextTertiary:   Color{R: 110, G: 110, B: 115, A: 255},
+		TextDisabled:   Color{R: 174, G: 174, B: 178, A: 255},
+		Button:         Color{R: 29, G: 29, B: 31, A: 255},
+		OnButton:       Color{R: 255, G: 255, B: 255, A: 255},
+		Accent:         Color{R: 245, G: 124, B: 0, A: 255},
+		AccentPressed:  Color{R: 217, G: 109, B: 0, A: 255},
+		AccentText:     Color{R: 179, G: 83, B: 0, A: 255},
+		OnAccent:       Color{R: 0, G: 0, B: 0, A: 255},
+		Focus:          Color{R: 245, G: 124, B: 0, A: 255},
+		Progress:       Color{R: 245, G: 124, B: 0, A: 255},
+		Danger:         Color{R: 215, G: 0, B: 21, A: 255},
+		Success:        Color{R: 36, G: 138, B: 61, A: 255},
+		Warning:        Color{R: 160, G: 90, B: 0, A: 255},
 		Scrim:          Color{R: 0, G: 0, B: 0, A: 102},
 	}
 )
@@ -188,6 +206,8 @@ type Layout struct {
 	Poster      float32
 	Thumbnail   float32
 	TouchTarget float32
+	Sidebar     float32
+	Rail        float32
 	FocusScale  float32
 }
 
@@ -199,6 +219,8 @@ var (
 		Poster:      112,
 		Thumbnail:   248,
 		TouchTarget: 44,
+		Sidebar:     0,
+		Rail:        0,
 		FocusScale:  1,
 	}
 	TabletLayout = Layout{
@@ -207,6 +229,8 @@ var (
 		Poster:      140,
 		Thumbnail:   300,
 		TouchTarget: 44,
+		Sidebar:     280,
+		Rail:        86,
 		FocusScale:  1,
 	}
 	DesktopLayout = Layout{
@@ -215,6 +239,8 @@ var (
 		Poster:      160,
 		Thumbnail:   320,
 		TouchTarget: 28,
+		Sidebar:     262,
+		Rail:        86,
 		FocusScale:  1,
 	}
 	TvLayout = Layout{
@@ -223,6 +249,8 @@ var (
 		Poster:      240,
 		Thumbnail:   480,
 		TouchTarget: 0,
+		Sidebar:     0,
+		Rail:        0,
 		FocusScale:  1.08,
 	}
 )

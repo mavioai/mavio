@@ -163,7 +163,7 @@ function ItemDetails({
                   to="/s/$serverId/play/$itemId"
                   params={{ serverId: server.id, itemId: item.id }}
                   search={{ start: resumable ? position : undefined, source }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 type-headline text-on-accent hover:bg-accent-pressed"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-button px-5 type-headline text-on-button hover:opacity-85"
                 >
                   <Icon name="play" fill />
                   {resumable ? t("item.resume") : t("item.play")}
@@ -178,7 +178,7 @@ function ItemDetails({
                 <Link
                   to="/s/$serverId/play/$itemId"
                   params={{ serverId: server.id, itemId: firstUnplayed.id }}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-accent px-5 type-headline text-on-accent hover:bg-accent-pressed"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-md bg-button px-5 type-headline text-on-button hover:opacity-85"
                 >
                   <Icon name="play" fill />
                   {t("item.play")}
