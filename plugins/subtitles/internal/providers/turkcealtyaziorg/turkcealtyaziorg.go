@@ -5,6 +5,7 @@
 package turkcealtyaziorg
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -98,9 +99,7 @@ func (p *Provider) session(ctx context.Context) (*site.Session, error) {
 	}
 	s := site.New(p.env.HTTP)
 	s.Check = func(*site.Response) error { return nil }
-	if p.s.UserAgent != "" {
-		s.Header.Set("User-Agent", p.s.UserAgent)
-	}
+	s.Header.Set("User-Agent", cmp.Or(p.s.UserAgent, site.RandomUserAgent()))
 	s.Header.Set("Referer", p.server())
 	if p.s.Cookies != "" {
 		s.Jar().SetCookies(p.base, sitekit.ParseCookies(p.s.Cookies))

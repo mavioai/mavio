@@ -150,7 +150,7 @@ func (p *Provider) session(ctx context.Context) (*site.Session, error) {
 		return p.sess, nil
 	}
 	s := site.New(p.env.HTTP)
-	s.Header.Set("User-Agent", cmp.Or(p.s.UserAgent, site.UserAgent))
+	s.Header.Set("User-Agent", cmp.Or(p.s.UserAgent, site.RandomUserAgent()))
 	if p.s.Cookies != "" {
 		s.Jar().SetCookies(p.server, sitekit.ParseCookies(p.s.Cookies))
 		rules := p.server.JoinPath("rules")

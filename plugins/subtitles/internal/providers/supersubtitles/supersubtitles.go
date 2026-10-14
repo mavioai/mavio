@@ -45,7 +45,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	s := site.New(env.HTTP)
+	s := site.NewBrowser(env.HTTP)
 	// The site's answers are read whatever their status, as Bazarr does
 	// but for downloads: unreadable ones are no results.
 	s.Check = func(r *site.Response) error {

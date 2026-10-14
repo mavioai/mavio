@@ -42,7 +42,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	s := site.New(env.HTTP)
+	s := site.NewBrowser(env.HTTP)
 	s.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	s.Header.Set("Accept-Language", "tr,en-US;q=0.7,en;q=0.3")
 	p := &Provider{env: env, s: s, series: map[string]cached[*series]{}, episodes: map[string]cached[[]episode]{}}

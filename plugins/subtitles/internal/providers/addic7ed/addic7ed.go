@@ -142,7 +142,7 @@ func (p *Provider) session(ctx context.Context) (*site.Session, error) {
 	}
 	s := site.New(p.env.HTTP)
 	s.Check = check
-	s.Header.Set("User-Agent", cmp.Or(p.s.UserAgent, site.UserAgent))
+	s.Header.Set("User-Agent", cmp.Or(p.s.UserAgent, site.RandomUserAgent()))
 	s.Header.Set("Referer", p.base.String())
 	p.sess, p.loggedIn = s, false
 	if p.s.Cookies != "" {

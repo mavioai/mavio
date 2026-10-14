@@ -76,7 +76,7 @@ func New(env provider.Env, raw json.RawMessage) (provider.Provider, error) {
 			return nil, provider.Errorf(provider.ConfigurationError, "settings: %w", err)
 		}
 	}
-	sess := site.New(env.HTTP)
+	sess := site.NewBrowser(env.HTTP)
 	sess.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	sess.Header.Set("Accept-Language", "en-US,en;q=0.5")
 	// The downloads answer 404 for no subtitle.

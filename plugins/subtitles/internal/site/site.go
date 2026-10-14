@@ -45,6 +45,15 @@ func New(hc *http.Client) *Session {
 	return &Session{http: &c, Header: http.Header{}}
 }
 
+// NewBrowser returns a session as New does that passes for a browser
+// picked at random, as Bazarr's providers that pick a user agent at random
+// for their sessions.
+func NewBrowser(hc *http.Client) *Session {
+	s := New(hc)
+	s.Header.Set("User-Agent", RandomUserAgent())
+	return s
+}
+
 // Jar returns the session's cookies.
 func (s *Session) Jar() http.CookieJar { return s.http.Jar }
 

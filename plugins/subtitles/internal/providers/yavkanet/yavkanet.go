@@ -56,6 +56,7 @@ func Definition() provider.Definition {
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	header := http.Header{
+		"User-Agent":                {site.RandomUserAgent()},
 		"Accept":                    {"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
 		"Accept-Language":           {"en-US,en;q=0.5"},
 		"Dnt":                       {"1"},

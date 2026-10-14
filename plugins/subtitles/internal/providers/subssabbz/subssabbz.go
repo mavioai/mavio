@@ -59,7 +59,8 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	// The search is not redirected, as Bazarr's.
 	hc := *env.HTTP
 	hc.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	p := &Provider{env: env, search: site.New(&hc), s: site.New(env.HTTP), base: serverURL, archives: map[string][]byte{}}
+	p := &Provider{env: env, search: site.New(&hc), s: site.NewBrowser(env.HTTP), base: serverURL, archives: map[string][]byte{}}
+	p.search.Header.Set("User-Agent", p.s.Header.Get("User-Agent"))
 	p.search.Check = func(r *site.Response) error {
 		if r.Status >= 300 && r.Status < 400 {
 			return nil

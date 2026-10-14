@@ -59,7 +59,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	return &Provider{env: env, s: site.New(env.HTTP), u: defaultURLs, suggestions: map[string]cached{}}, nil
+	return &Provider{env: env, s: site.NewBrowser(env.HTTP), u: defaultURLs, suggestions: map[string]cached{}}, nil
 }
 
 // Provider is Subs4Free.

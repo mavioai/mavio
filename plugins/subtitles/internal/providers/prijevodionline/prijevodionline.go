@@ -55,7 +55,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	return &Provider{env: env, s: site.New(env.HTTP), server: "https://www.prijevodi-online.org"}, nil
+	return &Provider{env: env, s: site.NewBrowser(env.HTTP), server: "https://www.prijevodi-online.org"}, nil
 }
 
 // Provider is Prijevodi Online.

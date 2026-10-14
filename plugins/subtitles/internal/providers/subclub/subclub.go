@@ -49,7 +49,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	s := site.New(env.HTTP)
+	s := site.NewBrowser(env.HTTP)
 	s.Header.Set("Referer", serverURL+"/")
 	return &Provider{env: env, s: s, base: serverURL, contents: map[string][]byte{}}, nil
 }

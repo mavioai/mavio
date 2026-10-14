@@ -109,7 +109,7 @@ func (p *Provider) session(ctx context.Context) (*site.Session, error) {
 	}
 	hc := *p.env.HTTP
 	hc.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	s := site.New(&hc)
+	s := site.NewBrowser(&hc)
 	s.Check = func(*site.Response) error { return nil }
 	s.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	s.Header.Set("Accept-Language", "sk,cz,en;q=0.5")

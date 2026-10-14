@@ -38,7 +38,7 @@ func Definition() provider.Definition {
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	base, _ := url.Parse(serverURL)
-	p := &Provider{env: env, s: site.New(env.HTTP)}
+	p := &Provider{env: env, s: site.NewBrowser(env.HTTP)}
 	p.SetBaseURL(base)
 	return p, nil
 }

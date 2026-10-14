@@ -49,7 +49,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 		}
 		return nil
 	}
-	return &Provider{env: env, s: site.New(&hc), server: "https://greeksubs.net/"}, nil
+	return &Provider{env: env, s: site.NewBrowser(&hc), server: "https://greeksubs.net/"}, nil
 }
 
 // noRedirect marks the requests whose redirects are not followed.

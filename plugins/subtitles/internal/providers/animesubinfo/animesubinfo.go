@@ -39,7 +39,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	s := site.New(env.HTTP)
+	s := site.NewBrowser(env.HTTP)
 	s.Header.Set("Accept-Charset", "ISO-8859-2,utf-8;q=0.7,*;q=0.3")
 	return &Provider{env: env, s: s, base: "http://animesub.info"}, nil
 }

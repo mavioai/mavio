@@ -32,8 +32,6 @@ import (
 const Name = "zimuku"
 
 const (
-	// userAgent stands for Bazarr's random user agent.
-	userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 	// bypassTries bounds the verifications of a page, which Bazarr does
 	// not.
 	bypassTries = 5
@@ -55,8 +53,7 @@ func Definition() provider.Definition {
 // New makes the provider; it has no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	base, _ := url.Parse("https://srtku.com")
-	s := site.New(env.HTTP)
-	s.Header.Set("User-Agent", userAgent)
+	s := site.NewBrowser(env.HTTP)
 	// Statuses are checked where Bazarr does.
 	s.Check = func(*site.Response) error { return nil }
 	// The verification is sent without following its redirect.
@@ -316,7 +313,7 @@ func (p *Provider) verify(ctx context.Context, u string) error {
 	if err != nil {
 		return fmt.Errorf("%s: %w", u, err)
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", p.sess.Header.Get("User-Agent"))
 	resp, err := p.direct.Do(req)
 	if err != nil {
 		return provider.Errorf(provider.ServiceUnavailable, "verification: %w", err)

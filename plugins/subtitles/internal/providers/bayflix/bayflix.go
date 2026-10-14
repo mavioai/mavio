@@ -34,7 +34,7 @@ func Definition() provider.Definition {
 
 // New makes the provider; it takes no settings.
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
-	p := &Provider{env: env, s: site.New(env.HTTP)}
+	p := &Provider{env: env, s: site.NewBrowser(env.HTTP)}
 	p.SetBaseURL(&url.URL{Scheme: "https", Host: "bayflix.sb"})
 	return p, nil
 }

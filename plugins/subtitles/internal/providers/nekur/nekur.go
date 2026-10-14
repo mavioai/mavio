@@ -39,7 +39,7 @@ func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	if log == nil {
 		log = slog.New(slog.DiscardHandler)
 	}
-	p := &Provider{env: env, log: log, s: site.New(env.HTTP)}
+	p := &Provider{env: env, log: log, s: site.NewBrowser(env.HTTP)}
 	p.SetBaseURL(&url.URL{Scheme: "http", Host: "subtitri.nekur.net"})
 	return p, nil
 }

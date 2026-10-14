@@ -56,7 +56,7 @@ func Definition() provider.Definition {
 func New(env provider.Env, _ json.RawMessage) (provider.Provider, error) {
 	base, _ := url.Parse(serverURL)
 	return &Provider{
-		env: env, s: site.New(env.HTTP), base: base,
+		env: env, s: site.NewBrowser(env.HTTP), base: base,
 		shows: map[string]cached[int]{}, episodes: map[string]cached[map[int]int]{},
 	}, nil
 }

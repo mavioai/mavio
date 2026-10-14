@@ -14,9 +14,12 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/text/encoding/charmap"
+
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
 
 // Name is the provider's name.
@@ -185,7 +188,10 @@ func (p *Provider) Download(ctx context.Context, _ *provider.Video, id string) (
 		if !slices.Contains([]string{"srt", "ass", "ssa"}, format) {
 			format = archive.Detect(data)
 		}
-		return provider.File{Data: archive.FixLineEndings(data), Format: format, Language: provider.Language{Tag: q.Get("lang")}}, nil
+		// The site's subtitles are in Windows-1253 unless UTF-8, as
+		// Bazarr's encoding hint.
+		data = sitekit.Decode(archive.FixLineEndings(data), charmap.Windows1253)
+		return provider.File{Data: data, Format: format, Language: provider.Language{Tag: q.Get("lang")}}, nil
 	}
 	return provider.File{}, provider.Errorf(provider.BadSubtitle, "no subtitle in the archive")
 }
