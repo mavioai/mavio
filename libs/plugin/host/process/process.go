@@ -68,6 +68,7 @@ type Plugin struct {
 	log      *slog.Logger
 	dir      string
 	socket   string
+	hostAddr string // loopback TCP address of the host API, on Windows
 	token    string
 	host     *http.Server
 	routes   http.Handler
@@ -78,6 +79,7 @@ type Plugin struct {
 	ready  chan struct{} // closed when a process is serving; replaced on restart
 	// stopping tells the supervisor not to restart; closing rejects calls.
 	stopping, closing bool
+	addr              string // loopback TCP address the process serves on, if not the socket
 
 	stop     context.CancelFunc
 	done     chan struct{}
@@ -149,11 +151,21 @@ func Start(ctx context.Context, path string, m *pluginv1.Manifest, opts Options)
 	return p, nil
 }
 
-// serveHost serves the host API on host.sock, requiring the plugin's token.
+// serveHost serves the host API on host.sock, requiring the plugin's
+// token, and on Windows on a loopback TCP address as well, for runtimes
+// without Unix sockets there.
 func (p *Plugin) serveHost() error {
 	ln, err := net.Listen("unix", filepath.Join(p.dir, "host.sock"))
 	if err != nil {
 		return fmt.Errorf("host API socket: %w", err)
+	}
+	var tcp net.Listener
+	if runtime.GOOS == "windows" {
+		if tcp, err = net.Listen("tcp", "127.0.0.1:0"); err != nil {
+			_ = ln.Close()
+			return fmt.Errorf("host API address: %w", err)
+		}
+		p.hostAddr = tcp.Addr().String()
 	}
 	want := []byte(proc.AuthScheme + p.token)
 	var protocols http.Protocols
@@ -174,6 +186,9 @@ func (p *Plugin) serveHost() error {
 		ErrorLog:          slog.NewLogLogger(p.log.Handler(), slog.LevelWarn),
 	}
 	go func() { _ = p.host.Serve(ln) }()
+	if tcp != nil {
+		go func() { _ = p.host.Serve(tcp) }()
+	}
 	return nil
 }
 
@@ -194,17 +209,36 @@ func socketBase() string {
 	return os.TempDir()
 }
 
-// dialer is an HTTP/2 cleartext transport dialing the plugin's socket.
+// dialer is an HTTP/2 cleartext transport dialing the plugin's socket, or
+// the loopback address its handshake gave.
 func (p *Plugin) dialer() *http.Transport {
 	var protocols http.Protocols
 	protocols.SetUnencryptedHTTP2(true)
 	return &http.Transport{
 		Protocols: &protocols,
 		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			p.mu.Lock()
+			addr := p.addr
+			p.mu.Unlock()
 			var d net.Dialer
+			if addr != "" {
+				return d.DialContext(ctx, "tcp", addr)
+			}
 			return d.DialContext(ctx, "unix", p.socket)
 		},
 	}
+}
+
+// loopback checks that a plugin's address is a loopback TCP address.
+func loopback(addr string) error {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return fmt.Errorf("address %q: %w", addr, err)
+	}
+	if ip := net.ParseIP(host); ip == nil || !ip.IsLoopback() || port == "" || port == "0" {
+		return fmt.Errorf("address %q is not a loopback TCP address", addr)
+	}
+	return nil
 }
 
 // HTTP returns the handler of the plugin's HTTP routes, or nil; it
@@ -243,6 +277,9 @@ func (p *Plugin) launch(ctx context.Context) error {
 	cmd.Env = append(cmd.Env, proc.EnvSocket+"="+p.socket, proc.EnvToken+"="+p.token, proc.EnvHostOS+"="+osinfo.String())
 	if p.host != nil {
 		cmd.Env = append(cmd.Env, proc.EnvHostSocket+"="+filepath.Join(p.dir, "host.sock"))
+		if p.hostAddr != "" {
+			cmd.Env = append(cmd.Env, proc.EnvHostAddress+"="+p.hostAddr)
+		}
 	}
 	if p.opts.DataDir != "" {
 		cmd.Env = append(cmd.Env, proc.EnvData+"="+p.opts.DataDir)
@@ -263,23 +300,29 @@ func (p *Plugin) launch(ctx context.Context) error {
 	exited := make(chan struct{})
 	go p.forward(stderr, slog.LevelInfo)
 
-	handshake := make(chan error, 1)
+	type result struct {
+		addr string
+		err  error
+	}
+	handshake := make(chan result, 1)
 	go func() {
 		sc := bufio.NewScanner(stdout)
 		if !sc.Scan() {
-			handshake <- fmt.Errorf("plugin exited before the handshake")
+			handshake <- result{err: fmt.Errorf("plugin exited before the handshake")}
 			return
 		}
 		var hs proc.Handshake
 		switch err := json.Unmarshal(sc.Bytes(), &hs); {
 		case err != nil:
-			handshake <- fmt.Errorf("bad handshake %q: %w", sc.Text(), err)
+			handshake <- result{err: fmt.Errorf("bad handshake %q: %w", sc.Text(), err)}
 		case hs.Protocol != proc.ProtocolVersion:
-			handshake <- fmt.Errorf("unsupported handshake protocol %d", hs.Protocol)
+			handshake <- result{err: fmt.Errorf("unsupported handshake protocol %d", hs.Protocol)}
 		case hs.PluginID != p.manifest.GetId():
-			handshake <- fmt.Errorf("plugin reported id %q, manifest says %q", hs.PluginID, p.manifest.GetId())
+			handshake <- result{err: fmt.Errorf("plugin reported id %q, manifest says %q", hs.PluginID, p.manifest.GetId())}
+		case hs.Address != "":
+			handshake <- result{addr: hs.Address, err: loopback(hs.Address)}
 		default:
-			handshake <- nil
+			handshake <- result{}
 		}
 		p.forward(io.MultiReader(stdoutRest(sc)), slog.LevelDebug)
 	}()
@@ -290,13 +333,15 @@ func (p *Plugin) launch(ctx context.Context) error {
 
 	timer := time.NewTimer(p.opts.StartTimeout)
 	defer timer.Stop()
+	var addr string
 	select {
-	case err := <-handshake:
-		if err != nil {
+	case hs := <-handshake:
+		if hs.err != nil {
 			_ = cmd.Process.Kill()
 			<-exited
-			return fmt.Errorf("%s: %w", p.manifest.GetId(), err)
+			return fmt.Errorf("%s: %w", p.manifest.GetId(), hs.err)
 		}
+		addr = hs.addr
 	case <-exited:
 		return fmt.Errorf("%s exited during startup", p.manifest.GetId())
 	case <-timer.C:
@@ -310,7 +355,7 @@ func (p *Plugin) launch(ctx context.Context) error {
 	}
 
 	p.mu.Lock()
-	p.cmd, p.exited = cmd, exited
+	p.cmd, p.exited, p.addr = cmd, exited, addr
 	close(p.ready)
 	p.mu.Unlock()
 	p.log.Info("plugin started", "pid", cmd.Process.Pid)

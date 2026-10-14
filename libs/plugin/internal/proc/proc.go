@@ -7,6 +7,10 @@ package proc
 const (
 	EnvSocket = "MAVIO_PLUGIN_SOCKET"
 	EnvToken  = "MAVIO_PLUGIN_TOKEN"
+	// EnvHostAddress names a loopback TCP address also serving the host
+	// API on Windows, for plugins whose runtime has no Unix sockets there.
+	// Requests on it, as on EnvHostSocket, carry the token.
+	EnvHostAddress = "MAVIO_HOST_ADDRESS"
 	// EnvHostSocket names the socket serving the host API. Requests on it
 	// present the plugin's token, as the host's requests do.
 	EnvHostSocket = "MAVIO_HOST_SOCKET"
@@ -26,6 +30,10 @@ const ProtocolVersion = 1
 type Handshake struct {
 	Protocol int    `json:"mavio_plugin"`
 	PluginID string `json:"plugin_id"`
+	// Address is a loopback TCP address, host:port, the plugin serves on
+	// instead of the socket: runtimes such as Node's and Bun's have no
+	// Unix sockets on Windows.
+	Address string `json:"address,omitempty"`
 }
 
 // AuthScheme prefixes the token in the Authorization header.

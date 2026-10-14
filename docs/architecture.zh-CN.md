@@ -283,6 +283,7 @@ WAL 模式、`synchronous=NORMAL`、`busy_timeout`、外键开启。单连接的
 ### 7.3 子进程运行时
 * **统一使用 Unix Domain Socket**：Linux / macOS 原生支持，Windows 10 1803 起支持 `AF_UNIX`。socket 位于一个权限为 0700 的私有目录中，放在较短的基础路径下，因为 socket 路径长度限制在 100 字节左右。
 * **握手**：宿主通过 `MAVIO_PLUGIN_SOCKET` / `MAVIO_PLUGIN_TOKEN` 传入 socket 路径与一次性 token。插件开始监听后在 stdout 输出一行 JSON（`{"mavio_plugin":1,"plugin_id":…}`）；宿主检查协议版本与插件 ID。此后每个请求都以 `Authorization: Bearer …` 携带 token。宿主 API 在同一目录中的第二个 socket（`MAVIO_HOST_SOCKET`）上提供，要求相同的 token。
+* **Loopback TCP**：在 Windows 上没有 Unix socket 的运行时（如 Node 与 Bun）改为在 loopback TCP 地址上提供服务，并在握手的 `address`（`127.0.0.1:port`）中给出，宿主检查它是 loopback 地址后连接；在 Windows 上宿主也在 loopback 地址 `MAVIO_HOST_ADDRESS` 上提供宿主 API。那里的请求与 socket 上一样携带 token。
 * **通信**：在 socket 上跑 Connect（HTTP/2 h2c），直接复用 `libs/proto` 生成的 handler / client。
 * **监督**：stdout 与 stderr 转发到宿主日志；定期调用 `Health` RPC（连续三次失败即结束进程）；进程退出后，监督者以指数退避（1 秒起翻倍，最长一分钟）重启插件，期间的调用会等待插件恢复。
 * **关闭**：`Close` 先发送 `Shutdown` RPC（插件侧 SDK 随后退出），然后 SIGTERM，最后 SIGKILL。在 Linux 上，宿主进程意外退出时内核也会结束插件（`Pdeathsig`）。
