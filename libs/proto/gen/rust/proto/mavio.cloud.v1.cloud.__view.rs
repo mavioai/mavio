@@ -16,6 +16,13 @@ pub struct AccountView<'a> {
     pub display_name: ::core::option::Option<&'a str>,
     /// Field 4: `kind`
     pub kind: ::core::option::Option<::buffa::EnumValue<super::super::AccountKind>>,
+    /// A managed account's restriction profile, which applies on every server
+    /// on top of its access records; unspecified on full accounts.
+    ///
+    /// Field 5: `restriction`
+    pub restriction: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::user::v1::RestrictionProfile>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for AccountView<'a> {
@@ -78,6 +85,15 @@ impl<'a> ::buffa::MessageView<'a> for AccountView<'a> {
                     ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
                 );
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.restriction = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -104,6 +120,7 @@ impl<'a> ::buffa::MessageView<'a> for AccountView<'a> {
             user_name: self.user_name.map(|s| s.to_string()),
             display_name: self.display_name.map(|s| s.to_string()),
             kind: self.kind,
+            restriction: self.restriction,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -125,6 +142,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AccountView<'a> {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(ref v) = self.kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.restriction {
             size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -149,6 +169,9 @@ impl<'a> ::buffa::ViewEncode<'a> for AccountView<'a> {
         }
         if let Some(ref v) = self.kind {
             ::buffa::types::put_int32_field(4u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(5u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -264,6 +287,18 @@ impl AccountOwnedView {
         &self,
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::AccountKind>> {
         self.0.reborrow().kind
+    }
+    /// A managed account's restriction profile, which applies on every server
+    /// on top of its access records; unspecified on full accounts.
+    ///
+    /// Field 5: `restriction`
+    #[must_use]
+    pub fn restriction(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::user::v1::RestrictionProfile>,
+    > {
+        self.0.reborrow().restriction
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<AccountView<'static>>>

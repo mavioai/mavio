@@ -23,6 +23,8 @@ export const user = pgTable("user", {
   username: text("username").unique(),
   displayUsername: text("display_username"),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  kind: text("kind").default("full"),
+  restriction: integer("restriction").default(0),
 });
 
 export const session = pgTable(

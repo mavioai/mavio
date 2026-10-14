@@ -14,6 +14,7 @@ import {
   type Change,
   ChangeSchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
+import { RestrictionProfile } from "@mavio/proto/mavio/user/v1/user_pb";
 import { and, eq, or, sql } from "drizzle-orm";
 
 import { type Database, schema, type Tx } from "./db/index.ts";
@@ -33,13 +34,27 @@ export async function addChange(tx: Database | Tx, serverId: string, kind: Kind,
   return s.cursor;
 }
 
+/** AccountUser is what accountOf reads of a better-auth user. */
+export interface AccountUser {
+  id: string;
+  name: string;
+  username?: string | null;
+  displayUsername?: string | null;
+  kind?: string | null;
+  restriction?: number | null;
+}
+
+/** managed reports whether a user is a managed account. */
+export const managed = (u: AccountUser) => u.kind === "managed";
+
 /** accountOf returns the account of a better-auth user as servers see it. */
-export function accountOf(u: { id: string; name: string; username?: string | null; displayUsername?: string | null }): Account {
+export function accountOf(u: AccountUser): Account {
   return create(AccountSchema, {
     id: u.id,
     userName: u.displayUsername || u.username || "",
     displayName: u.name,
-    kind: AccountKind.FULL,
+    kind: managed(u) ? AccountKind.MANAGED : AccountKind.FULL,
+    restriction: managed(u) ? ((u.restriction ?? 0) as RestrictionProfile) : RestrictionProfile.UNSPECIFIED,
   });
 }
 
@@ -61,13 +76,15 @@ export async function reachedServers(tx: Database | Tx, accountId: string): Prom
   return rows.map((r) => r.id);
 }
 
-/** accountChanged tells an account's servers its names. */
-export async function accountChanged(db: Database, account: Account): Promise<void> {
-  await db.transaction(async (tx) => {
+/** accountChanged tells an account's servers its names, kind and restriction profile. */
+export async function accountChanged(db: Database | Tx, account: Account): Promise<void> {
+  const record = async (tx: Database | Tx) => {
     for (const id of await reachedServers(tx, account.id)) {
       await addChange(tx, id, { case: "accountChanged", value: account });
     }
-  });
+  };
+  if ("rollback" in db) await record(db);
+  else await db.transaction(record);
 }
 
 /** accountRevoked tells an account's servers that it was suspended, deleted or reported compromised. */

@@ -911,8 +911,26 @@ impl ::buffa::ExtensionSet for GetAccountRequest {
 pub struct GetAccountResponse {
     /// Field 1: `account`
     pub account: ::buffa::MessageField<Account, ::buffa::Inline<Account>>,
+    /// Empty on managed accounts.
+    ///
     /// Field 2: `email`
     pub email: ::core::option::Option<::buffa::alloc::string::String>,
+    /// When the account's own Mavio Pass ends; unset without one.
+    ///
+    /// Field 3: `pass_expire_time`
+    pub pass_expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    /// Whether the account has an effective Mavio Pass: its own, or its Home
+    /// administrator's while the Home is not frozen.
+    ///
+    /// Field 4: `effective_pass`
+    pub effective_pass: ::core::option::Option<bool>,
+    /// Whether switching to the account needs a PIN.
+    ///
+    /// Field 5: `has_pin`
+    pub has_pin: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -921,6 +939,9 @@ impl ::core::fmt::Debug for GetAccountResponse {
         f.debug_struct("GetAccountResponse")
             .field("account", &self.account)
             .field("email", &self.email)
+            .field("pass_expire_time", &self.pass_expire_time)
+            .field("effective_pass", &self.effective_pass)
+            .field("has_pin", &self.has_pin)
             .finish()
     }
 }
@@ -940,6 +961,20 @@ impl GetAccountResponse {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.email = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::effective_pass`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_effective_pass(mut self, value: bool) -> Self {
+        self.effective_pass = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::has_pin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_has_pin(mut self, value: bool) -> Self {
+        self.has_pin = Some(value);
         self
     }
 }
@@ -974,6 +1009,20 @@ impl ::buffa::Message for GetAccountResponse {
         if let Some(ref v) = self.email {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.pass_expire_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.pass_expire_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.effective_pass.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.has_pin.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -994,6 +1043,20 @@ impl ::buffa::Message for GetAccountResponse {
         }
         if let Some(ref v) = self.email {
             ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if self.pass_expire_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.pass_expire_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.effective_pass {
+            ::buffa::types::put_bool_field(4u32, v, buf);
+        }
+        if let Some(v) = self.has_pin {
+            ::buffa::types::put_bool_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1029,6 +1092,35 @@ impl ::buffa::Message for GetAccountResponse {
                     buf,
                 )?;
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.pass_expire_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.effective_pass = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.has_pin = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1039,6 +1131,9 @@ impl ::buffa::Message for GetAccountResponse {
     fn clear(&mut self) {
         self.account = ::buffa::MessageField::none();
         self.email = ::core::option::Option::None;
+        self.pass_expire_time = ::buffa::MessageField::none();
+        self.effective_pass = ::core::option::Option::None;
+        self.has_pin = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

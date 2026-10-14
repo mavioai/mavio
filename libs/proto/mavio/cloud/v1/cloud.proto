@@ -4,6 +4,7 @@ package mavio.cloud.v1;
 
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
+import "mavio/user/v1/user.proto";
 
 // ServerService is mavio.dev's API for servers in mavio.dev mode
 // (docs/accounts.md §3.2, docs/mavio-dev.md §3). Every request is
@@ -38,6 +39,9 @@ message Account {
   string user_name = 2;
   string display_name = 3;
   AccountKind kind = 4;
+  // A managed account's restriction profile, which applies on every server
+  // on top of its access records; unspecified on full accounts.
+  mavio.user.v1.RestrictionProfile restriction = 5;
 }
 
 // AccountKind is how an account signs in.

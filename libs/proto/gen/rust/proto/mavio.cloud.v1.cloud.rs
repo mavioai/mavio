@@ -82,6 +82,13 @@ pub struct Account {
     pub display_name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 4: `kind`
     pub kind: ::core::option::Option<::buffa::EnumValue<AccountKind>>,
+    /// A managed account's restriction profile, which applies on every server
+    /// on top of its access records; unspecified on full accounts.
+    ///
+    /// Field 5: `restriction`
+    pub restriction: ::core::option::Option<
+        ::buffa::EnumValue<super::super::user::v1::RestrictionProfile>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -92,6 +99,7 @@ impl ::core::fmt::Debug for Account {
             .field("user_name", &self.user_name)
             .field("display_name", &self.display_name)
             .field("kind", &self.kind)
+            .field("restriction", &self.restriction)
             .finish()
     }
 }
@@ -140,6 +148,16 @@ impl Account {
         self.kind = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::restriction`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_restriction(
+        mut self,
+        value: impl Into<::buffa::EnumValue<super::super::user::v1::RestrictionProfile>>,
+    ) -> Self {
+        self.restriction = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Account);
 impl ::buffa::MessageName for Account {
@@ -173,6 +191,9 @@ impl ::buffa::Message for Account {
         if let Some(ref v) = self.kind {
             size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -194,6 +215,9 @@ impl ::buffa::Message for Account {
         }
         if let Some(ref v) = self.kind {
             ::buffa::types::put_int32_field(4u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(5u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -251,6 +275,15 @@ impl ::buffa::Message for Account {
                     ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
                 );
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.restriction = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -263,6 +296,7 @@ impl ::buffa::Message for Account {
         self.user_name = ::core::option::Option::None;
         self.display_name = ::core::option::Option::None;
         self.kind = ::core::option::Option::None;
+        self.restriction = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

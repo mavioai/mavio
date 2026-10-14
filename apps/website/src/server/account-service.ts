@@ -32,9 +32,10 @@ import {
 import { and, eq, inArray } from "drizzle-orm";
 
 import type { Auth } from "./auth.ts";
-import { AccountRevoked_Reason, accessJson, accountOf, accountRevoked, addChange } from "./changes.ts";
+import { AccountRevoked_Reason, accessJson, accountOf, accountRevoked, addChange, managed } from "./changes.ts";
 import { claimCodeHash, claimCodeLifetime, newClaimCode } from "./claim-codes.ts";
 import { schema, type Tx } from "./db/index.ts";
+import { between, effectivePass, homeOf, ownPass } from "./home.ts";
 import { base64url } from "./ids.ts";
 import type { Deps } from "./server-service.ts";
 
@@ -55,6 +56,13 @@ export function accountService({ db, apiURL, auth, now = () => new Date() }: Dep
     const u = await db.query.user.findFirst({ where: eq(schema.user.id, session.user.id) });
     if (!u) throw new ConnectError("sign in to mavio.dev", Code.Unauthenticated);
     return u;
+  }
+
+  // full returns the account of the request's session, refusing managed accounts.
+  async function full(ctx: HandlerContext): Promise<User> {
+    const me = await signedIn(ctx);
+    if (managed(me)) throw new ConnectError("managed accounts cannot do this", Code.PermissionDenied);
+    return me;
   }
 
   // administered returns a server the account administers.
@@ -99,7 +107,19 @@ export function accountService({ db, apiURL, auth, now = () => new Date() }: Dep
   return {
     async getAccount(_, ctx) {
       const me = await signedIn(ctx);
-      return create(GetAccountResponseSchema, { account: accountOf(me), email: me.email });
+      const at = now();
+      const [pass, effective, pin] = await Promise.all([
+        ownPass(db, me.id, at),
+        effectivePass(db, me.id, at),
+        db.query.pins.findFirst({ where: eq(schema.pins.accountId, me.id) }),
+      ]);
+      return create(GetAccountResponseSchema, {
+        account: accountOf(me),
+        email: managed(me) ? "" : me.email,
+        passExpireTime: pass && timestampFromDate(pass),
+        effectivePass: effective,
+        hasPin: !!pin,
+      });
     },
 
     async reportCompromised(_, ctx) {
@@ -112,7 +132,7 @@ export function accountService({ db, apiURL, auth, now = () => new Date() }: Dep
     },
 
     async createClaimCode(_, ctx) {
-      const me = await signedIn(ctx);
+      const me = await full(ctx);
       const code = newClaimCode();
       const expiresAt = new Date(now().getTime() + claimCodeLifetime);
       await db.insert(schema.claimCodes).values({ codeHash: await claimCodeHash(code), accountId: me.id, expiresAt });
@@ -201,6 +221,28 @@ export function accountService({ db, apiURL, auth, now = () => new Date() }: Dep
         if (!u) throw new ConnectError(`no account ${req.userName}`, Code.NotFound);
         if (u.id === me.id) throw new ConnectError("the administrator needs no access record", Code.InvalidArgument);
         await checkAccess(tx, req.serverId, a);
+        if (managed(u)) {
+          // A managed account reaches only its Home administrator's servers,
+          // and its administrator's grants take effect at once.
+          const home = await homeOf(tx, u.id);
+          if (home?.administratorId !== me.id) {
+            throw new ConnectError("a managed account reaches only its Home administrator's servers", Code.PermissionDenied);
+          }
+          const [record] = await tx
+            .insert(schema.accessRecords)
+            .values({ serverId: req.serverId, accountId: u.id, access: accessJson(a), invitation: false, createdAt: at, updatedAt: at })
+            .onConflictDoUpdate({
+              target: [schema.accessRecords.serverId, schema.accessRecords.accountId],
+              set: { access: accessJson(a), invitation: false, updatedAt: at },
+            })
+            .returning();
+          await granted(tx, req.serverId, u, a, at);
+          return create(GrantAccessResponseSchema, { record: recordToProto(record, u) });
+        }
+        // Access to an account that is not yet a friend sends a friend request along.
+        if (!(await tx.query.friendships.findFirst({ where: between(me.id, u.id) }))) {
+          await tx.insert(schema.friendships).values({ requesterId: me.id, addresseeId: u.id, accepted: false, createdAt: at });
+        }
         const key = and(eq(schema.accessRecords.serverId, req.serverId), eq(schema.accessRecords.accountId, u.id));
         const existing = await tx.query.accessRecords.findFirst({ where: key });
         let record: Record;

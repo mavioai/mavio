@@ -2,6 +2,7 @@
 
 include!("mavio.cloud.v1.cloud.rs");
 include!("mavio.cloud.v1.account.rs");
+include!("mavio.cloud.v1.home.rs");
 #[allow(
     non_camel_case_types,
     dead_code,
@@ -21,6 +22,7 @@ pub mod __buffa {
         use super::*;
         include!("mavio.cloud.v1.cloud.__view.rs");
         include!("mavio.cloud.v1.account.__view.rs");
+        include!("mavio.cloud.v1.home.__view.rs");
         pub mod oneof {
             #[allow(unused_imports)]
             use super::*;
@@ -205,3 +207,163 @@ pub use self::__buffa::view::LeaveServerRequestOwnedView;
 pub use self::__buffa::view::LeaveServerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LeaveServerResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FriendView;
+#[doc(inline)]
+pub use self::__buffa::view::FriendOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeMemberView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeMemberOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerSummaryView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerSummaryOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeInvitationView;
+#[doc(inline)]
+pub use self::__buffa::view::HomeInvitationOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerAccessView;
+#[doc(inline)]
+pub use self::__buffa::view::ServerAccessOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListFriendsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListFriendsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListFriendsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListFriendsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AddFriendRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AddFriendRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AddFriendResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AddFriendResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptFriendRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptFriendRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptFriendResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptFriendResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFriendRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFriendRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFriendResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveFriendResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHomeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHomeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHomeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetHomeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateHomeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateHomeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateHomeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateHomeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DissolveHomeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DissolveHomeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DissolveHomeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DissolveHomeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::InviteToHomeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::InviteToHomeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::InviteToHomeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::InviteToHomeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelHomeInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelHomeInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelHomeInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelHomeInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptHomeInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptHomeInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptHomeInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AcceptHomeInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeclineHomeInvitationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeclineHomeInvitationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeclineHomeInvitationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeclineHomeInvitationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LeaveHomeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::LeaveHomeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LeaveHomeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::LeaveHomeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveMemberRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveMemberRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveMemberResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RemoveMemberResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateManagedAccountRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateManagedAccountRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateManagedAccountResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateManagedAccountResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateManagedAccountRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateManagedAccountRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateManagedAccountResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::UpdateManagedAccountResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ConvertManagedAccountRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ConvertManagedAccountRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ConvertManagedAccountResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ConvertManagedAccountResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinResponseOwnedView;

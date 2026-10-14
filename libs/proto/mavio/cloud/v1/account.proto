@@ -101,7 +101,15 @@ message GetAccountRequest {}
 
 message GetAccountResponse {
   Account account = 1;
+  // Empty on managed accounts.
   string email = 2;
+  // When the account's own Mavio Pass ends; unset without one.
+  google.protobuf.Timestamp pass_expire_time = 3;
+  // Whether the account has an effective Mavio Pass: its own, or its Home
+  // administrator's while the Home is not frozen.
+  bool effective_pass = 4;
+  // Whether switching to the account needs a PIN.
+  bool has_pin = 5;
 }
 
 message ReportCompromisedRequest {}

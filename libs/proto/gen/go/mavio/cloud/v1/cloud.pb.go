@@ -8,6 +8,7 @@ package cloudv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	v1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -126,6 +127,7 @@ type Account struct {
 	xxx_hidden_UserName    *string                `protobuf:"bytes,2,opt,name=user_name,json=userName"`
 	xxx_hidden_DisplayName *string                `protobuf:"bytes,3,opt,name=display_name,json=displayName"`
 	xxx_hidden_Kind        AccountKind            `protobuf:"varint,4,opt,name=kind,enum=mavio.cloud.v1.AccountKind"`
+	xxx_hidden_Restriction v1.RestrictionProfile  `protobuf:"varint,5,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -196,24 +198,38 @@ func (x *Account) GetKind() AccountKind {
 	return AccountKind_ACCOUNT_KIND_UNSPECIFIED
 }
 
+func (x *Account) GetRestriction() v1.RestrictionProfile {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 4) {
+			return x.xxx_hidden_Restriction
+		}
+	}
+	return v1.RestrictionProfile(0)
+}
+
 func (x *Account) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
 func (x *Account) SetUserName(v string) {
 	x.xxx_hidden_UserName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
 }
 
 func (x *Account) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
 }
 
 func (x *Account) SetKind(v AccountKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *Account) SetRestriction(v v1.RestrictionProfile) {
+	x.xxx_hidden_Restriction = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *Account) HasId() bool {
@@ -244,6 +260,13 @@ func (x *Account) HasKind() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
+func (x *Account) HasRestriction() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *Account) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -264,6 +287,11 @@ func (x *Account) ClearKind() {
 	x.xxx_hidden_Kind = AccountKind_ACCOUNT_KIND_UNSPECIFIED
 }
 
+func (x *Account) ClearRestriction() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Restriction = v1.RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
 type Account_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -273,6 +301,9 @@ type Account_builder struct {
 	UserName    *string
 	DisplayName *string
 	Kind        *AccountKind
+	// A managed account's restriction profile, which applies on every server
+	// on top of its access records; unspecified on full accounts.
+	Restriction *v1.RestrictionProfile
 }
 
 func (b0 Account_builder) Build() *Account {
@@ -280,20 +311,24 @@ func (b0 Account_builder) Build() *Account {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.UserName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
 		x.xxx_hidden_UserName = b.UserName
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
 		x.xxx_hidden_DisplayName = b.DisplayName
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_Kind = *b.Kind
+	}
+	if b.Restriction != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_Restriction = *b.Restriction
 	}
 	return m0
 }
@@ -1965,12 +2000,13 @@ var File_mavio_cloud_v1_cloud_proto protoreflect.FileDescriptor
 
 const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\n" +
-	"\x1amavio/cloud/v1/cloud.proto\x12\x0emavio.cloud.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8a\x01\n" +
+	"\x1amavio/cloud/v1/cloud.proto\x12\x0emavio.cloud.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18mavio/user/v1/user.proto\"\xcf\x01\n" +
 	"\aAccount\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tuser_name\x18\x02 \x01(\tR\buserName\x12!\n" +
 	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12/\n" +
-	"\x04kind\x18\x04 \x01(\x0e2\x1b.mavio.cloud.v1.AccountKindR\x04kind\"\x98\x02\n" +
+	"\x04kind\x18\x04 \x01(\x0e2\x1b.mavio.cloud.v1.AccountKindR\x04kind\x12C\n" +
+	"\vrestriction\x18\x05 \x01(\x0e2!.mavio.user.v1.RestrictionProfileR\vrestriction\"\x98\x02\n" +
 	"\x06Access\x12#\n" +
 	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12\x1f\n" +
 	"\vlibrary_ids\x18\x02 \x03(\tR\n" +
@@ -2062,32 +2098,34 @@ var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
 	(*PublishLibrariesRequest)(nil),  // 13: mavio.cloud.v1.PublishLibrariesRequest
 	(*PublishLibrariesResponse)(nil), // 14: mavio.cloud.v1.PublishLibrariesResponse
 	(*Notice)(nil),                   // 15: mavio.cloud.v1.Notice
-	(*timestamppb.Timestamp)(nil),    // 16: google.protobuf.Timestamp
+	(v1.RestrictionProfile)(0),       // 16: mavio.user.v1.RestrictionProfile
+	(*timestamppb.Timestamp)(nil),    // 17: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
-	2,  // 1: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
-	8,  // 2: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
-	16, // 3: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 4: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
-	10, // 5: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
-	2,  // 6: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
-	11, // 7: mavio.cloud.v1.Change.account_revoked:type_name -> mavio.cloud.v1.AccountRevoked
-	2,  // 8: mavio.cloud.v1.AccessGranted.account:type_name -> mavio.cloud.v1.Account
-	3,  // 9: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
-	1,  // 10: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
-	12, // 11: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
-	4,  // 12: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
-	6,  // 13: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
-	13, // 14: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
-	5,  // 15: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
-	7,  // 16: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
-	14, // 17: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	16, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	2,  // 2: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
+	8,  // 3: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
+	17, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
+	9,  // 5: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
+	10, // 6: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
+	2,  // 7: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
+	11, // 8: mavio.cloud.v1.Change.account_revoked:type_name -> mavio.cloud.v1.AccountRevoked
+	2,  // 9: mavio.cloud.v1.AccessGranted.account:type_name -> mavio.cloud.v1.Account
+	3,  // 10: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
+	1,  // 11: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
+	12, // 12: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
+	4,  // 13: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
+	6,  // 14: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
+	13, // 15: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
+	5,  // 16: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
+	7,  // 17: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
+	14, // 18: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
+	16, // [16:19] is the sub-list for method output_type
+	13, // [13:16] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_mavio_cloud_v1_cloud_proto_init() }

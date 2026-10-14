@@ -1,41 +1,11 @@
 import { create } from "@bufbuild/protobuf";
-import { Code, ConnectError } from "@connectrpc/connect";
+import { Code } from "@connectrpc/connect";
 import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 import { AccessSchema, AccountRevoked_Reason } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { describe, expect, test } from "vitest";
 
 import { fromBase64url } from "../src/server/ids.ts";
-import { apiURL, newServer, newSite } from "./harness.ts";
-
-const libraryA = "0193a5b0-0000-7000-8000-00000000000a";
-const libraryB = "0193a5b0-0000-7000-8000-00000000000b";
-
-async function code(err: Promise<unknown>): Promise<Code | undefined> {
-  try {
-    await err;
-  } catch (e) {
-    return ConnectError.from(e).code;
-  }
-  return undefined;
-}
-
-/** claimed returns a site with a server alice claimed and published two libraries to. */
-async function claimed() {
-  const site = await newSite();
-  const alice = await site.signUp("alice");
-  const asAlice = site.client(AccountService, alice.headers);
-  const server = await newServer();
-  const api = site.serverClient(server);
-  const { claimCode } = await asAlice.createClaimCode({});
-  const resp = await api.claimServer({ claimCode, publicKey: server.publicKey, name: "Home", version: "1.0" });
-  await api.publishLibraries({
-    libraries: [
-      { id: libraryA, name: "Movies", kind: "movies" },
-      { id: libraryB, name: "Shows", kind: "shows" },
-    ],
-  });
-  return { site, alice, asAlice, server, api, resp };
-}
+import { apiURL, claimed, code, libraryA, libraryB, newServer, newSite } from "./harness.ts";
 
 describe("ServerService", () => {
   test("claims a server for the code's account", async () => {

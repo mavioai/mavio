@@ -7,6 +7,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	cloudv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 )
 
 // Applier applies mavio.dev's changes to the server's users
@@ -34,6 +35,7 @@ func (a *Applier) Apply(ctx context.Context, tx core.Store, c *cloudv1.Change) e
 			return err
 		}
 		u.Name = account.GetUserName()
+		setKind(&u, account)
 		return tx.Users().Update(ctx, &u)
 	case cloudv1.Change_AccountRevoked_case:
 		r := c.GetAccountRevoked()
@@ -75,9 +77,7 @@ func (a *Applier) grant(ctx context.Context, tx core.Store, g *cloudv1.AccessGra
 			Policy:    core.UserPolicy{AllowTranscoding: true, Requests: requests.DefaultPermissions},
 			CreatedAt: time.Now(),
 		}
-		if account.GetKind() == cloudv1.AccountKind_ACCOUNT_KIND_MANAGED {
-			u.Kind = core.UserManaged
-		}
+		setKind(&u, account)
 		return tx.Users().Create(ctx, &u)
 	} else if err != nil {
 		return err
@@ -86,7 +86,28 @@ func (a *Applier) grant(ctx context.Context, tx core.Store, g *cloudv1.AccessGra
 		return nil // the administrator reaches everything
 	}
 	u.Name, u.Access, u.Disabled = account.GetUserName(), access, false
+	setKind(&u, account)
 	return tx.Users().Update(ctx, &u)
+}
+
+// restrictions maps the restriction profiles of accounts.
+var restrictions = map[userv1.RestrictionProfile]core.RestrictionProfile{
+	userv1.RestrictionProfile_RESTRICTION_PROFILE_YOUNGER_CHILD: core.RestrictionYoungerChild,
+	userv1.RestrictionProfile_RESTRICTION_PROFILE_OLDER_CHILD:   core.RestrictionOlderChild,
+	userv1.RestrictionProfile_RESTRICTION_PROFILE_TEEN:          core.RestrictionTeen,
+}
+
+// setKind makes a user managed with the account's restriction profile, or
+// a member once the account is converted; the administrator stays as it is.
+func setKind(u *core.User, account *cloudv1.Account) {
+	if u.IsAdmin() {
+		return
+	}
+	if account.GetKind() == cloudv1.AccountKind_ACCOUNT_KIND_MANAGED {
+		u.Kind, u.Restriction = core.UserManaged, restrictions[account.GetRestriction()]
+		return
+	}
+	u.Kind, u.Restriction = core.UserMember, core.RestrictionNone
 }
 
 // revoke takes an account's access away, keeping its user and data and

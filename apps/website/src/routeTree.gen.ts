@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as ClaimRouteImport } from './routes/claim'
+import { Route as FriendsRouteImport } from './routes/friends'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as LinkRouteImport } from './routes/link'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
@@ -31,6 +33,16 @@ const AccountRoute = AccountRouteImport.update({
 const ClaimRoute = ClaimRouteImport.update({
   id: '/claim',
   path: '/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FriendsRoute = FriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LinkRoute = LinkRouteImport.update({
@@ -63,6 +75,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/claim': typeof ClaimRoute
+  '/friends': typeof FriendsRoute
+  '/home': typeof HomeRoute
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -73,6 +87,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/claim': typeof ClaimRoute
+  '/friends': typeof FriendsRoute
+  '/home': typeof HomeRoute
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -84,6 +100,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/claim': typeof ClaimRoute
+  '/friends': typeof FriendsRoute
+  '/home': typeof HomeRoute
   '/link': typeof LinkRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
@@ -96,6 +114,8 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/claim'
+    | '/friends'
+    | '/home'
     | '/link'
     | '/sign-in'
     | '/sign-up'
@@ -106,6 +126,8 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/claim'
+    | '/friends'
+    | '/home'
     | '/link'
     | '/sign-in'
     | '/sign-up'
@@ -116,6 +138,8 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/claim'
+    | '/friends'
+    | '/home'
     | '/link'
     | '/sign-in'
     | '/sign-up'
@@ -127,6 +151,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ClaimRoute: typeof ClaimRoute
+  FriendsRoute: typeof FriendsRoute
+  HomeRoute: typeof HomeRoute
   LinkRoute: typeof LinkRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
@@ -155,6 +181,20 @@ declare module '@tanstack/react-router' {
       path: '/claim'
       fullPath: '/claim'
       preLoaderRoute: typeof ClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/friends': {
+      id: '/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof FriendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/link': {
@@ -199,6 +239,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ClaimRoute: ClaimRoute,
+  FriendsRoute: FriendsRoute,
+  HomeRoute: HomeRoute,
   LinkRoute: LinkRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,

@@ -3,8 +3,9 @@ import { fileURLToPath } from "node:url";
 
 import { PGlite } from "@electric-sql/pglite";
 import type { DescService } from "@bufbuild/protobuf";
-import { type Client, createClient, type Interceptor } from "@connectrpc/connect";
+import { type Client, Code, ConnectError, createClient, type Interceptor } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
+import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 import { ServerService } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
@@ -85,4 +86,36 @@ export async function newServer() {
       return `${signed}.${base64url(sig)}`;
     },
   };
+}
+
+/** The libraries claimed() publishes. */
+export const libraryA = "0193a5b0-0000-7000-8000-00000000000a";
+export const libraryB = "0193a5b0-0000-7000-8000-00000000000b";
+
+/** code returns the Connect code a call fails with, undefined when it succeeds. */
+export async function code(err: Promise<unknown>): Promise<Code | undefined> {
+  try {
+    await err;
+  } catch (e) {
+    return ConnectError.from(e).code;
+  }
+  return undefined;
+}
+
+/** claimed returns a site with a server alice claimed and published two libraries to. */
+export async function claimed() {
+  const site = await newSite();
+  const alice = await site.signUp("alice");
+  const asAlice = site.client(AccountService, alice.headers);
+  const server = await newServer();
+  const api = site.serverClient(server);
+  const { claimCode } = await asAlice.createClaimCode({});
+  const resp = await api.claimServer({ claimCode, publicKey: server.publicKey, name: "Home", version: "1.0" });
+  await api.publishLibraries({
+    libraries: [
+      { id: libraryA, name: "Movies", kind: "movies" },
+      { id: libraryB, name: "Shows", kind: "shows" },
+    ],
+  });
+  return { site, alice, asAlice, server, api, resp };
 }

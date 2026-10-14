@@ -808,7 +808,8 @@ flowchart TD
 - [ ] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端
 - [ ] 从 CI 部署 `apps/website`：Hyperdrive 配置、机密与迁移
 - [ ] 翻译 mavio.dev 的页面，其字符串与 Web UI 一样放在 `libs/design/strings` 中
-- [ ] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home
+- [x] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home：`FriendService` 与 `HomeService`，通过 Mavio 的 better-auth 插件以 PIN 切换，服务端应用托管账户的限制配置，以及 Home 与好友的页面
+- [ ] 购买与续订 Mavio Pass
 - [ ] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更
 - [ ] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书
 - [ ] `apps/relay` 与中转票据

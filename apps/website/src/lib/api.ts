@@ -1,12 +1,31 @@
-// The website's client of AccountService, with the session's cookie.
+// The website's clients of mavio.dev's services, with the session's cookie.
 import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
+import { FriendService, HomeService } from "@mavio/proto/mavio/cloud/v1/home_pb";
 
-export const accounts = createClient(
-  AccountService,
-  createConnectTransport({ baseUrl: "/api", fetch: (input, init) => fetch(input, { ...init, credentials: "same-origin" }) }),
-);
+const transport = createConnectTransport({
+  baseUrl: "/api",
+  fetch: (input, init) => fetch(input, { ...init, credentials: "same-origin" }),
+});
+
+export const accounts = createClient(AccountService, transport);
+export const friends = createClient(FriendService, transport);
+export const homes = createClient(HomeService, transport);
+
+/** switchTo switches the session to another member of the Home, throwing the refusal's message. */
+export async function switchTo(body: { accountId: string; pin?: string; password?: string }): Promise<void> {
+  const res = await fetch("/api/auth/home/switch", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(err.message || res.statusText);
+  }
+}
 
 /** message returns an error's message for the page. */
 export function message(err: unknown): string {

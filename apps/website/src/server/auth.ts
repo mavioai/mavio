@@ -13,6 +13,7 @@ import { eq } from "drizzle-orm";
 import { AccountRevoked_Reason, accountChanged, accountOf, accountRevoked } from "./changes.ts";
 import { type Database, schema } from "./db/index.ts";
 import * as password from "./password.ts";
+import { homes } from "./homes-plugin.ts";
 
 /** Config is the configuration of mavio.dev's accounts. */
 export interface Config {
@@ -40,7 +41,30 @@ export function createAuth(db: Database, config: Config) {
       enabled: true,
       password: { hash: password.hash, verify: password.verify },
     },
-    user: { deleteUser: { enabled: true } },
+    user: {
+      deleteUser: {
+        enabled: true,
+        // An account administering servers or a Home stays until they are given up.
+        beforeDelete: async (u) => {
+          const [administered] = await db
+            .select({ id: schema.servers.id })
+            .from(schema.servers)
+            .where(eq(schema.servers.administratorId, u.id))
+            .limit(1);
+          if (administered) {
+            throw new APIError("BAD_REQUEST", { message: "Remove your servers or have them claimed by another account first." });
+          }
+          const home = await db.query.homes.findFirst({ where: eq(schema.homes.administratorId, u.id) });
+          if (home) throw new APIError("BAD_REQUEST", { message: "Dissolve your Home first." });
+        },
+      },
+      additionalFields: {
+        // "full" or "managed" (docs/accounts.md §3.1).
+        kind: { type: "string", required: false, defaultValue: "full", input: false },
+        // A managed account's mavio.user.v1.RestrictionProfile.
+        restriction: { type: "number", required: false, defaultValue: 0, input: false },
+      },
+    },
     plugins: [
       username({ minUsernameLength: 3, maxUsernameLength: 32 }),
       twoFactor({ issuer: "Mavio" }),
@@ -57,6 +81,7 @@ export function createAuth(db: Database, config: Config) {
         validateClient: (id) => /^dev\.mavio\.[a-z0-9.-]+$/.test(id),
       }),
       bearer(),
+      homes(db),
       tanstackStartCookies(),
     ],
     hooks: {
@@ -80,14 +105,6 @@ export function createAuth(db: Database, config: Config) {
         },
         delete: {
           before: async (u) => {
-            const [administered] = await db
-              .select({ id: schema.servers.id })
-              .from(schema.servers)
-              .where(eq(schema.servers.administratorId, u.id))
-              .limit(1);
-            if (administered) {
-              throw new APIError("BAD_REQUEST", { message: "Remove your servers or have them claimed by another account first." });
-            }
             await accountRevoked(db, u.id, AccountRevoked_Reason.DELETED);
           },
         },

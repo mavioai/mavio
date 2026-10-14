@@ -9,6 +9,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/cloud"
 	"github.com/mavioai/mavio/libs/core"
 	cloudv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1"
+	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
 )
 
 func granted(a *cloudv1.Account, access *cloudv1.Access) *cloudv1.Change {
@@ -70,11 +71,24 @@ func TestApply(t *testing.T) {
 		t.Errorf("renamed user = %q, want robert", u.Name)
 	}
 
-	// A managed account's user is managed.
-	kid := cloudv1.Account_builder{Id: new("acct-kid"), UserName: new("kid"), Kind: cloudv1.AccountKind_ACCOUNT_KIND_MANAGED.Enum()}.Build()
+	// A managed account's user is managed, with its restriction profile.
+	kid := cloudv1.Account_builder{
+		Id: new("acct-kid"), UserName: new("kid"), Kind: cloudv1.AccountKind_ACCOUNT_KIND_MANAGED.Enum(),
+		Restriction: userv1.RestrictionProfile_RESTRICTION_PROFILE_OLDER_CHILD.Enum(),
+	}.Build()
 	run(granted(kid, cloudv1.Access_builder{AllLibraries: new(true)}.Build()))
-	if k, err := st.Users().GetByAccountID(ctx, "acct-kid"); err != nil || k.Kind != core.UserManaged {
-		t.Errorf("managed account's user = %+v, %v", k, err)
+	if k, err := st.Users().GetByAccountID(ctx, "acct-kid"); err != nil || k.Kind != core.UserManaged || k.Restriction != core.RestrictionOlderChild {
+		t.Errorf("managed account's user = %+v, %v; want managed, older_child", k, err)
+	}
+	kid.SetRestriction(userv1.RestrictionProfile_RESTRICTION_PROFILE_TEEN)
+	run(cloudv1.Change_builder{AccountChanged: kid}.Build())
+	if k, err := st.Users().GetByAccountID(ctx, "acct-kid"); err != nil || k.Restriction != core.RestrictionTeen {
+		t.Errorf("restricted user = %+v, %v; want teen", k, err)
+	}
+	// A converted account's user becomes a member without a restriction.
+	run(cloudv1.Change_builder{AccountChanged: account("acct-kid", "kid")}.Build())
+	if k, err := st.Users().GetByAccountID(ctx, "acct-kid"); err != nil || k.Kind != core.UserMember || k.Restriction != core.RestrictionNone {
+		t.Errorf("converted user = %+v, %v; want a member without a restriction", k, err)
 	}
 
 	// The administrator keeps its kind and access, and is never deleted.

@@ -33,6 +33,7 @@ function Header() {
   const { data } = authClient.useSession();
   const router = useRouter();
   const link = "type-callout text-text-secondary hover:text-on-background";
+  const managed = (data?.user as { kind?: string } | undefined)?.kind === "managed";
   return (
     <header className="flex items-center gap-6 border-b border-border px-6 py-3">
       <Link to="/" className="type-title3 font-bold">
@@ -43,9 +44,19 @@ function Header() {
           <Link to="/" className={link}>
             Servers
           </Link>
-          <Link to="/claim" className={link}>
-            Claim a server
+          <Link to="/home" className={link}>
+            Home
           </Link>
+          {!managed && (
+            <>
+              <Link to="/friends" className={link}>
+                Friends
+              </Link>
+              <Link to="/claim" className={link}>
+                Claim a server
+              </Link>
+            </>
+          )}
           <Link to="/account" className={link}>
             Account
           </Link>

@@ -1,8 +1,10 @@
+import { timestampDate } from "@bufbuild/protobuf/wkt";
+import { AccountKind } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 
-import { accounts, message } from "../lib/api.ts";
+import { accounts, homes, message } from "../lib/api.ts";
 import { authClient } from "../lib/auth-client.ts";
 import { useAccount } from "../lib/session.ts";
 import { Button, Card, ErrorText, Field, Muted, Page } from "../ui.tsx";
@@ -13,13 +15,74 @@ function AccountPage() {
   const me = useAccount();
   const account = useQuery({ queryKey: ["account"], queryFn: () => accounts.getAccount({}), enabled: !!me });
   if (!me || !account.data) return null;
+  const a = account.data;
+  if (a.account?.kind === AccountKind.MANAGED) {
+    return (
+      <Page title="Account">
+        <Card title={a.account.displayName}>
+          <Muted>@{a.account.userName} · a managed account, which your Home's administrator manages.</Muted>
+        </Card>
+        <Pass expires={a.passExpireTime && timestampDate(a.passExpireTime)} effective={a.effectivePass} />
+      </Page>
+    );
+  }
   return (
     <Page title="Account">
-      <Profile name={account.data.account?.displayName ?? ""} userName={account.data.account?.userName ?? ""} email={account.data.email} />
+      <Profile name={a.account?.displayName ?? ""} userName={a.account?.userName ?? ""} email={a.email} />
+      <Pass expires={a.passExpireTime && timestampDate(a.passExpireTime)} effective={a.effectivePass} />
+      <Pin id={me.id} has={a.hasPin} />
       <Passkeys />
       <TwoFactor enabled={!!(me as { twoFactorEnabled?: boolean | null }).twoFactorEnabled} />
       <Danger />
     </Page>
+  );
+}
+
+function Pass({ expires, effective }: { expires?: Date; effective: boolean }) {
+  return (
+    <Card title="Mavio Pass">
+      <Muted>
+        {expires
+          ? `Your Mavio Pass runs until ${expires.toLocaleDateString()}.`
+          : effective
+            ? "You share your Home administrator's Mavio Pass."
+            : "You have no Mavio Pass. It pays for what mavio.dev provides, such as the relay; nothing your servers do depends on it."}
+      </Muted>
+    </Card>
+  );
+}
+
+function Pin({ id, has }: { id: string; has: boolean }) {
+  const qc = useQueryClient();
+  const set = useMutation({
+    mutationFn: (pin: string) => homes.setPin({ accountId: id, pin }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["account"] }),
+  });
+  return (
+    <Card title="PIN">
+      <Muted>
+        {has
+          ? "Switching to you in your Home needs your PIN."
+          : "Without a PIN, anyone in your Home can switch to you on a shared device."}
+      </Muted>
+      <form
+        className="flex items-end gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const form = e.currentTarget;
+          set.mutate(String(new FormData(form).get("pin")), { onSuccess: () => form.reset() });
+        }}
+      >
+        <Field label={has ? "New PIN" : "PIN"} name="pin" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} required />
+        <Button type="submit">Set</Button>
+        {has && (
+          <Button kind="secondary" onClick={() => set.mutate("")}>
+            Remove
+          </Button>
+        )}
+      </form>
+      <ErrorText error={set.error ? message(set.error) : undefined} />
+    </Card>
   );
 }
 

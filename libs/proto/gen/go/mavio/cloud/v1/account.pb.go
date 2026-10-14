@@ -705,13 +705,16 @@ func (b0 GetAccountRequest_builder) Build() *GetAccountRequest {
 }
 
 type GetAccountResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Account     *Account               `protobuf:"bytes,1,opt,name=account"`
-	xxx_hidden_Email       *string                `protobuf:"bytes,2,opt,name=email"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Account        *Account               `protobuf:"bytes,1,opt,name=account"`
+	xxx_hidden_Email          *string                `protobuf:"bytes,2,opt,name=email"`
+	xxx_hidden_PassExpireTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=pass_expire_time,json=passExpireTime"`
+	xxx_hidden_EffectivePass  bool                   `protobuf:"varint,4,opt,name=effective_pass,json=effectivePass"`
+	xxx_hidden_HasPin         bool                   `protobuf:"varint,5,opt,name=has_pin,json=hasPin"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *GetAccountResponse) Reset() {
@@ -756,13 +759,48 @@ func (x *GetAccountResponse) GetEmail() string {
 	return ""
 }
 
+func (x *GetAccountResponse) GetPassExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_PassExpireTime
+	}
+	return nil
+}
+
+func (x *GetAccountResponse) GetEffectivePass() bool {
+	if x != nil {
+		return x.xxx_hidden_EffectivePass
+	}
+	return false
+}
+
+func (x *GetAccountResponse) GetHasPin() bool {
+	if x != nil {
+		return x.xxx_hidden_HasPin
+	}
+	return false
+}
+
 func (x *GetAccountResponse) SetAccount(v *Account) {
 	x.xxx_hidden_Account = v
 }
 
 func (x *GetAccountResponse) SetEmail(v string) {
 	x.xxx_hidden_Email = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *GetAccountResponse) SetPassExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_PassExpireTime = v
+}
+
+func (x *GetAccountResponse) SetEffectivePass(v bool) {
+	x.xxx_hidden_EffectivePass = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *GetAccountResponse) SetHasPin(v bool) {
+	x.xxx_hidden_HasPin = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *GetAccountResponse) HasAccount() bool {
@@ -779,6 +817,27 @@ func (x *GetAccountResponse) HasEmail() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
+func (x *GetAccountResponse) HasPassExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_PassExpireTime != nil
+}
+
+func (x *GetAccountResponse) HasEffectivePass() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *GetAccountResponse) HasHasPin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *GetAccountResponse) ClearAccount() {
 	x.xxx_hidden_Account = nil
 }
@@ -788,11 +847,33 @@ func (x *GetAccountResponse) ClearEmail() {
 	x.xxx_hidden_Email = nil
 }
 
+func (x *GetAccountResponse) ClearPassExpireTime() {
+	x.xxx_hidden_PassExpireTime = nil
+}
+
+func (x *GetAccountResponse) ClearEffectivePass() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_EffectivePass = false
+}
+
+func (x *GetAccountResponse) ClearHasPin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_HasPin = false
+}
+
 type GetAccountResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Account *Account
-	Email   *string
+	// Empty on managed accounts.
+	Email *string
+	// When the account's own Mavio Pass ends; unset without one.
+	PassExpireTime *timestamppb.Timestamp
+	// Whether the account has an effective Mavio Pass: its own, or its Home
+	// administrator's while the Home is not frozen.
+	EffectivePass *bool
+	// Whether switching to the account needs a PIN.
+	HasPin *bool
 }
 
 func (b0 GetAccountResponse_builder) Build() *GetAccountResponse {
@@ -801,8 +882,17 @@ func (b0 GetAccountResponse_builder) Build() *GetAccountResponse {
 	_, _ = b, x
 	x.xxx_hidden_Account = b.Account
 	if b.Email != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
 		x.xxx_hidden_Email = b.Email
+	}
+	x.xxx_hidden_PassExpireTime = b.PassExpireTime
+	if b.EffectivePass != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_EffectivePass = *b.EffectivePass
+	}
+	if b.HasPin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_HasPin = *b.HasPin
 	}
 	return m0
 }
@@ -2473,10 +2563,13 @@ const file_mavio_cloud_v1_account_proto_rawDesc = "" +
 	"\x06access\x18\x04 \x01(\v2\x16.mavio.cloud.v1.AccessR\x06access\x12;\n" +
 	"\vcreate_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\"\x13\n" +
-	"\x11GetAccountRequest\"]\n" +
+	"\x11GetAccountRequest\"\xe3\x01\n" +
 	"\x12GetAccountResponse\x121\n" +
 	"\aaccount\x18\x01 \x01(\v2\x17.mavio.cloud.v1.AccountR\aaccount\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\"\x1a\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12D\n" +
+	"\x10pass_expire_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x0epassExpireTime\x12%\n" +
+	"\x0eeffective_pass\x18\x04 \x01(\bR\reffectivePass\x12\x17\n" +
+	"\ahas_pin\x18\x05 \x01(\bR\x06hasPin\"\x1a\n" +
 	"\x18ReportCompromisedRequest\"\x1b\n" +
 	"\x19ReportCompromisedResponse\"\x18\n" +
 	"\x16CreateClaimCodeRequest\"u\n" +
@@ -2595,44 +2688,45 @@ var file_mavio_cloud_v1_account_proto_depIdxs = []int32{
 	30, // 9: mavio.cloud.v1.Invitation.access:type_name -> mavio.cloud.v1.Access
 	32, // 10: mavio.cloud.v1.Invitation.create_time:type_name -> google.protobuf.Timestamp
 	29, // 11: mavio.cloud.v1.GetAccountResponse.account:type_name -> mavio.cloud.v1.Account
-	32, // 12: mavio.cloud.v1.CreateClaimCodeResponse.expire_time:type_name -> google.protobuf.Timestamp
-	0,  // 13: mavio.cloud.v1.ListServersResponse.servers:type_name -> mavio.cloud.v1.Server
-	32, // 14: mavio.cloud.v1.CreateAssertionResponse.expire_time:type_name -> google.protobuf.Timestamp
-	1,  // 15: mavio.cloud.v1.ListAccessResponse.records:type_name -> mavio.cloud.v1.AccessRecord
-	30, // 16: mavio.cloud.v1.GrantAccessRequest.access:type_name -> mavio.cloud.v1.Access
-	1,  // 17: mavio.cloud.v1.GrantAccessResponse.record:type_name -> mavio.cloud.v1.AccessRecord
-	2,  // 18: mavio.cloud.v1.ListInvitationsResponse.invitations:type_name -> mavio.cloud.v1.Invitation
-	3,  // 19: mavio.cloud.v1.AccountService.GetAccount:input_type -> mavio.cloud.v1.GetAccountRequest
-	5,  // 20: mavio.cloud.v1.AccountService.ReportCompromised:input_type -> mavio.cloud.v1.ReportCompromisedRequest
-	7,  // 21: mavio.cloud.v1.AccountService.CreateClaimCode:input_type -> mavio.cloud.v1.CreateClaimCodeRequest
-	9,  // 22: mavio.cloud.v1.AccountService.ListServers:input_type -> mavio.cloud.v1.ListServersRequest
-	11, // 23: mavio.cloud.v1.AccountService.RemoveServer:input_type -> mavio.cloud.v1.RemoveServerRequest
-	13, // 24: mavio.cloud.v1.AccountService.CreateAssertion:input_type -> mavio.cloud.v1.CreateAssertionRequest
-	15, // 25: mavio.cloud.v1.AccountService.ListAccess:input_type -> mavio.cloud.v1.ListAccessRequest
-	17, // 26: mavio.cloud.v1.AccountService.GrantAccess:input_type -> mavio.cloud.v1.GrantAccessRequest
-	19, // 27: mavio.cloud.v1.AccountService.RevokeAccess:input_type -> mavio.cloud.v1.RevokeAccessRequest
-	21, // 28: mavio.cloud.v1.AccountService.ListInvitations:input_type -> mavio.cloud.v1.ListInvitationsRequest
-	23, // 29: mavio.cloud.v1.AccountService.AcceptInvitation:input_type -> mavio.cloud.v1.AcceptInvitationRequest
-	25, // 30: mavio.cloud.v1.AccountService.DeclineInvitation:input_type -> mavio.cloud.v1.DeclineInvitationRequest
-	27, // 31: mavio.cloud.v1.AccountService.LeaveServer:input_type -> mavio.cloud.v1.LeaveServerRequest
-	4,  // 32: mavio.cloud.v1.AccountService.GetAccount:output_type -> mavio.cloud.v1.GetAccountResponse
-	6,  // 33: mavio.cloud.v1.AccountService.ReportCompromised:output_type -> mavio.cloud.v1.ReportCompromisedResponse
-	8,  // 34: mavio.cloud.v1.AccountService.CreateClaimCode:output_type -> mavio.cloud.v1.CreateClaimCodeResponse
-	10, // 35: mavio.cloud.v1.AccountService.ListServers:output_type -> mavio.cloud.v1.ListServersResponse
-	12, // 36: mavio.cloud.v1.AccountService.RemoveServer:output_type -> mavio.cloud.v1.RemoveServerResponse
-	14, // 37: mavio.cloud.v1.AccountService.CreateAssertion:output_type -> mavio.cloud.v1.CreateAssertionResponse
-	16, // 38: mavio.cloud.v1.AccountService.ListAccess:output_type -> mavio.cloud.v1.ListAccessResponse
-	18, // 39: mavio.cloud.v1.AccountService.GrantAccess:output_type -> mavio.cloud.v1.GrantAccessResponse
-	20, // 40: mavio.cloud.v1.AccountService.RevokeAccess:output_type -> mavio.cloud.v1.RevokeAccessResponse
-	22, // 41: mavio.cloud.v1.AccountService.ListInvitations:output_type -> mavio.cloud.v1.ListInvitationsResponse
-	24, // 42: mavio.cloud.v1.AccountService.AcceptInvitation:output_type -> mavio.cloud.v1.AcceptInvitationResponse
-	26, // 43: mavio.cloud.v1.AccountService.DeclineInvitation:output_type -> mavio.cloud.v1.DeclineInvitationResponse
-	28, // 44: mavio.cloud.v1.AccountService.LeaveServer:output_type -> mavio.cloud.v1.LeaveServerResponse
-	32, // [32:45] is the sub-list for method output_type
-	19, // [19:32] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	32, // 12: mavio.cloud.v1.GetAccountResponse.pass_expire_time:type_name -> google.protobuf.Timestamp
+	32, // 13: mavio.cloud.v1.CreateClaimCodeResponse.expire_time:type_name -> google.protobuf.Timestamp
+	0,  // 14: mavio.cloud.v1.ListServersResponse.servers:type_name -> mavio.cloud.v1.Server
+	32, // 15: mavio.cloud.v1.CreateAssertionResponse.expire_time:type_name -> google.protobuf.Timestamp
+	1,  // 16: mavio.cloud.v1.ListAccessResponse.records:type_name -> mavio.cloud.v1.AccessRecord
+	30, // 17: mavio.cloud.v1.GrantAccessRequest.access:type_name -> mavio.cloud.v1.Access
+	1,  // 18: mavio.cloud.v1.GrantAccessResponse.record:type_name -> mavio.cloud.v1.AccessRecord
+	2,  // 19: mavio.cloud.v1.ListInvitationsResponse.invitations:type_name -> mavio.cloud.v1.Invitation
+	3,  // 20: mavio.cloud.v1.AccountService.GetAccount:input_type -> mavio.cloud.v1.GetAccountRequest
+	5,  // 21: mavio.cloud.v1.AccountService.ReportCompromised:input_type -> mavio.cloud.v1.ReportCompromisedRequest
+	7,  // 22: mavio.cloud.v1.AccountService.CreateClaimCode:input_type -> mavio.cloud.v1.CreateClaimCodeRequest
+	9,  // 23: mavio.cloud.v1.AccountService.ListServers:input_type -> mavio.cloud.v1.ListServersRequest
+	11, // 24: mavio.cloud.v1.AccountService.RemoveServer:input_type -> mavio.cloud.v1.RemoveServerRequest
+	13, // 25: mavio.cloud.v1.AccountService.CreateAssertion:input_type -> mavio.cloud.v1.CreateAssertionRequest
+	15, // 26: mavio.cloud.v1.AccountService.ListAccess:input_type -> mavio.cloud.v1.ListAccessRequest
+	17, // 27: mavio.cloud.v1.AccountService.GrantAccess:input_type -> mavio.cloud.v1.GrantAccessRequest
+	19, // 28: mavio.cloud.v1.AccountService.RevokeAccess:input_type -> mavio.cloud.v1.RevokeAccessRequest
+	21, // 29: mavio.cloud.v1.AccountService.ListInvitations:input_type -> mavio.cloud.v1.ListInvitationsRequest
+	23, // 30: mavio.cloud.v1.AccountService.AcceptInvitation:input_type -> mavio.cloud.v1.AcceptInvitationRequest
+	25, // 31: mavio.cloud.v1.AccountService.DeclineInvitation:input_type -> mavio.cloud.v1.DeclineInvitationRequest
+	27, // 32: mavio.cloud.v1.AccountService.LeaveServer:input_type -> mavio.cloud.v1.LeaveServerRequest
+	4,  // 33: mavio.cloud.v1.AccountService.GetAccount:output_type -> mavio.cloud.v1.GetAccountResponse
+	6,  // 34: mavio.cloud.v1.AccountService.ReportCompromised:output_type -> mavio.cloud.v1.ReportCompromisedResponse
+	8,  // 35: mavio.cloud.v1.AccountService.CreateClaimCode:output_type -> mavio.cloud.v1.CreateClaimCodeResponse
+	10, // 36: mavio.cloud.v1.AccountService.ListServers:output_type -> mavio.cloud.v1.ListServersResponse
+	12, // 37: mavio.cloud.v1.AccountService.RemoveServer:output_type -> mavio.cloud.v1.RemoveServerResponse
+	14, // 38: mavio.cloud.v1.AccountService.CreateAssertion:output_type -> mavio.cloud.v1.CreateAssertionResponse
+	16, // 39: mavio.cloud.v1.AccountService.ListAccess:output_type -> mavio.cloud.v1.ListAccessResponse
+	18, // 40: mavio.cloud.v1.AccountService.GrantAccess:output_type -> mavio.cloud.v1.GrantAccessResponse
+	20, // 41: mavio.cloud.v1.AccountService.RevokeAccess:output_type -> mavio.cloud.v1.RevokeAccessResponse
+	22, // 42: mavio.cloud.v1.AccountService.ListInvitations:output_type -> mavio.cloud.v1.ListInvitationsResponse
+	24, // 43: mavio.cloud.v1.AccountService.AcceptInvitation:output_type -> mavio.cloud.v1.AcceptInvitationResponse
+	26, // 44: mavio.cloud.v1.AccountService.DeclineInvitation:output_type -> mavio.cloud.v1.DeclineInvitationResponse
+	28, // 45: mavio.cloud.v1.AccountService.LeaveServer:output_type -> mavio.cloud.v1.LeaveServerResponse
+	33, // [33:46] is the sub-list for method output_type
+	20, // [20:33] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_mavio_cloud_v1_account_proto_init() }

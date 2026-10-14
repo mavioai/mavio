@@ -1,0 +1,297 @@
+edition = "2023";
+
+package mavio.cloud.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/cloud/v1/cloud.proto";
+import "mavio/user/v1/user.proto";
+
+// FriendService is mavio.dev's API for friends (docs/accounts.md §3.4):
+// relationships between two full accounts, which one requests and the
+// other accepts. Requests carry the account's mavio.dev session, and
+// managed accounts are refused.
+service FriendService {
+  // ListFriends lists the account's friends and the requests it sent and
+  // received.
+  rpc ListFriends(ListFriendsRequest) returns (ListFriendsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AddFriend sends a friend request to an account, or accepts the request
+  // the account sent.
+  rpc AddFriend(AddFriendRequest) returns (AddFriendResponse);
+  // AcceptFriend accepts a request the account received.
+  rpc AcceptFriend(AcceptFriendRequest) returns (AcceptFriendResponse);
+  // RemoveFriend ends a friendship, or declines or withdraws a request.
+  rpc RemoveFriend(RemoveFriendRequest) returns (RemoveFriendResponse);
+}
+
+// HomeService is mavio.dev's API for Homes (docs/accounts.md §3.5): the
+// accounts that share devices and the administrator's Mavio Pass, managed
+// accounts and PINs. Requests carry the account's mavio.dev session;
+// switching between the members is better-auth's endpoint
+// /api/auth/home/switch (docs/mavio-dev.md §2).
+service HomeService {
+  // GetHome gives the account's Home and the invitations it received.
+  rpc GetHome(GetHomeRequest) returns (GetHomeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateHome creates a Home the account administers; it must not belong
+  // to one.
+  rpc CreateHome(CreateHomeRequest) returns (CreateHomeResponse);
+  // DissolveHome dissolves the administrator's Home: full members become
+  // its friends and managed accounts are deleted.
+  rpc DissolveHome(DissolveHomeRequest) returns (DissolveHomeResponse);
+  // InviteToHome invites a full account, offering access records on the
+  // administrator's servers; it needs the administrator's Mavio Pass.
+  rpc InviteToHome(InviteToHomeRequest) returns (InviteToHomeResponse);
+  // CancelHomeInvitation withdraws an invitation.
+  rpc CancelHomeInvitation(CancelHomeInvitationRequest) returns (CancelHomeInvitationResponse);
+  // AcceptHomeInvitation joins a Home, leaving the account's current one,
+  // and puts the offered access records in effect.
+  rpc AcceptHomeInvitation(AcceptHomeInvitationRequest) returns (AcceptHomeInvitationResponse);
+  // DeclineHomeInvitation declines an invitation.
+  rpc DeclineHomeInvitation(DeclineHomeInvitationRequest) returns (DeclineHomeInvitationResponse);
+  // LeaveHome leaves the full member's Home; it becomes the
+  // administrator's friend.
+  rpc LeaveHome(LeaveHomeRequest) returns (LeaveHomeResponse);
+  // RemoveMember removes a member: a full member becomes the
+  // administrator's friend, a managed account is deleted with its data.
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
+  // CreateManagedAccount creates a managed account in the administrator's
+  // Home.
+  rpc CreateManagedAccount(CreateManagedAccountRequest) returns (CreateManagedAccountResponse);
+  // UpdateManagedAccount changes a managed account's display name and
+  // restriction profile.
+  rpc UpdateManagedAccount(UpdateManagedAccountRequest) returns (UpdateManagedAccountResponse);
+  // ConvertManagedAccount makes a managed account a full account with an
+  // e-mail address and a password; it keeps its ID, data, access and Home.
+  rpc ConvertManagedAccount(ConvertManagedAccountRequest) returns (ConvertManagedAccountResponse);
+  // SetPin sets or clears a PIN: a full account's own, or a managed
+  // account's by its Home's administrator.
+  rpc SetPin(SetPinRequest) returns (SetPinResponse);
+}
+
+// Friend is another account and where the friendship stands.
+message Friend {
+  Account account = 1;
+  State state = 2;
+  google.protobuf.Timestamp create_time = 3;
+
+  // State is where a friendship stands.
+  enum State {
+    STATE_UNSPECIFIED = 0;
+    // Friends.
+    STATE_FRIEND = 1;
+    // The other account sent a request.
+    STATE_RECEIVED = 2;
+    // The account sent a request.
+    STATE_SENT = 3;
+  }
+}
+
+// Home is a Home as its members see it.
+message Home {
+  string id = 1;
+  string name = 2;
+  Account administrator = 3;
+  // Every member, the administrator first.
+  repeated HomeMember members = 4;
+  // The invitations not yet answered; for the administrator only.
+  repeated HomeInvitation invitations = 5;
+  // Whether the administrator's Mavio Pass lapsed.
+  bool frozen = 6;
+  google.protobuf.Timestamp create_time = 7;
+}
+
+// HomeMember is an account in a Home.
+message HomeMember {
+  Account account = 1;
+  // Whether switching to the member needs a PIN.
+  bool has_pin = 2;
+  // A managed account's servers, whose data deleting it removes; for the
+  // administrator only.
+  repeated ServerSummary servers = 3;
+  google.protobuf.Timestamp join_time = 4;
+}
+
+// ServerSummary names a server.
+message ServerSummary {
+  string id = 1;
+  string name = 2;
+}
+
+// HomeInvitation is an invitation into a Home.
+message HomeInvitation {
+  string home_id = 1;
+  string home_name = 2;
+  Account administrator = 3;
+  // The account invited.
+  Account account = 4;
+  repeated ServerAccess offers = 5;
+  google.protobuf.Timestamp create_time = 6;
+}
+
+// ServerAccess is an access record offered on one server.
+message ServerAccess {
+  string server_id = 1 [(buf.validate.field).required = true];
+  // Output only.
+  string server_name = 2;
+  Access access = 3 [(buf.validate.field).required = true];
+}
+
+message ListFriendsRequest {}
+
+message ListFriendsResponse {
+  repeated Friend friends = 1;
+}
+
+message AddFriendRequest {
+  // The account's user name or e-mail address.
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 320
+  ];
+}
+
+message AddFriendResponse {
+  Friend friend = 1;
+}
+
+message AcceptFriendRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+}
+
+message AcceptFriendResponse {}
+
+message RemoveFriendRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+}
+
+message RemoveFriendResponse {}
+
+message GetHomeRequest {}
+
+message GetHomeResponse {
+  // Unset when the account belongs to no Home.
+  Home home = 1;
+  // The invitations the account received.
+  repeated HomeInvitation invitations = 2;
+}
+
+message CreateHomeRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+}
+
+message CreateHomeResponse {
+  Home home = 1;
+}
+
+message DissolveHomeRequest {}
+
+message DissolveHomeResponse {}
+
+message InviteToHomeRequest {
+  string user_name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  repeated ServerAccess offers = 2;
+}
+
+message InviteToHomeResponse {
+  HomeInvitation invitation = 1;
+}
+
+message CancelHomeInvitationRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+}
+
+message CancelHomeInvitationResponse {}
+
+message AcceptHomeInvitationRequest {
+  string home_id = 1 [(buf.validate.field).required = true];
+}
+
+message AcceptHomeInvitationResponse {}
+
+message DeclineHomeInvitationRequest {
+  string home_id = 1 [(buf.validate.field).required = true];
+}
+
+message DeclineHomeInvitationResponse {}
+
+message LeaveHomeRequest {}
+
+message LeaveHomeResponse {}
+
+message RemoveMemberRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+}
+
+message RemoveMemberResponse {}
+
+message CreateManagedAccountRequest {
+  string user_name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 32
+      pattern: "^[A-Za-z0-9_.]+$"
+    }
+  ];
+  string display_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  mavio.user.v1.RestrictionProfile restriction = 3 [(buf.validate.field).enum.defined_only = true];
+  // Four digits; unset leaves the account without a PIN.
+  string pin = 4 [(buf.validate.field).string.pattern = "^[0-9]{4}$"];
+}
+
+message CreateManagedAccountResponse {
+  HomeMember member = 1;
+}
+
+message UpdateManagedAccountRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+  string display_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  mavio.user.v1.RestrictionProfile restriction = 3 [(buf.validate.field).enum.defined_only = true];
+}
+
+message UpdateManagedAccountResponse {
+  HomeMember member = 1;
+}
+
+message ConvertManagedAccountRequest {
+  string account_id = 1 [(buf.validate.field).required = true];
+  string email = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.email = true
+  ];
+  string password = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 8
+      max_len: 128
+    }
+  ];
+}
+
+message ConvertManagedAccountResponse {}
+
+message SetPinRequest {
+  // The account whose PIN is set: the caller's own, or a managed account
+  // of the caller's Home.
+  string account_id = 1 [(buf.validate.field).required = true];
+  // Four digits; empty clears the PIN.
+  string pin = 2 [(buf.validate.field).string.pattern = "^([0-9]{4})?$"];
+}
+
+message SetPinResponse {}
