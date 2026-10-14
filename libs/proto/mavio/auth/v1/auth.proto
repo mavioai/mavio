@@ -13,8 +13,9 @@ service AuthService {
   rpc GetAuthInfo(GetAuthInfoRequest) returns (GetAuthInfoResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // CreateFirstUser creates an administrator and signs it in. It fails with
-  // FAILED_PRECONDITION once any user exists.
+  // CreateFirstUser sets up a server in standalone mode: it chooses the
+  // mode, creates the administrator and signs it in. It fails with
+  // FAILED_PRECONDITION once the server's mode is chosen.
   rpc CreateFirstUser(CreateFirstUserRequest) returns (CreateFirstUserResponse);
   // Login signs a device in, replacing its previous session. Wrong
   // credentials and disabled users fail with UNAUTHENTICATED.
@@ -90,10 +91,20 @@ message Session {
   bool current = 5;
 }
 
+// AccountMode is how a server signs people in, chosen when it is set up.
+enum AccountMode {
+  // The server's setup has not chosen a mode yet.
+  ACCOUNT_MODE_UNSPECIFIED = 0;
+  // The server keeps its own users.
+  ACCOUNT_MODE_STANDALONE = 1;
+  // Every user is a Mavio account, kept by mavio.dev.
+  ACCOUNT_MODE_MAVIO_DEV = 2;
+}
+
 message GetAuthInfoRequest {}
 
 message GetAuthInfoResponse {
-  // True until the first user is created.
+  // True until the server's setup has chosen its mode.
   bool setup_required = 1;
   // Tells the server apart from others whatever address reaches it; stable
   // for the server's database.
@@ -101,6 +112,8 @@ message GetAuthInfoResponse {
   // The name the server shows, its host name unless administrators set one.
   string server_name = 3;
   string version = 4;
+  // How the server signs people in; unspecified while setup_required.
+  AccountMode mode = 5;
 }
 
 message CreateFirstUserRequest {

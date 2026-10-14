@@ -250,6 +250,10 @@ type SettingsRepository interface {
 	// clients, created on the first call; backups carry it with the
 	// database.
 	ServerID(ctx context.Context) (ID, error)
+	// Accounts returns the account settings, zero until stored.
+	Accounts(ctx context.Context) (AccountSettings, error)
+	// PutAccounts validates and stores the account settings.
+	PutAccounts(ctx context.Context, a *AccountSettings) error
 }
 
 // APIKeyRepository stores API keys.

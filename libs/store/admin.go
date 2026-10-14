@@ -17,11 +17,12 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 )
 
-// serverSettingsKey keys the server settings among the settings rows, and
-// serverIDKey the server's ID.
+// serverSettingsKey keys the server settings among the settings rows,
+// serverIDKey the server's ID and accountsKey the account settings.
 const (
 	serverSettingsKey = "server"
 	serverIDKey       = "server-id"
+	accountsKey       = "accounts"
 )
 
 type settings struct{ s *Store }
@@ -88,6 +89,39 @@ func (r settings) ServerID(ctx context.Context) (core.ID, error) {
 		return core.ID{}, fmt.Errorf("get server ID: %w", err)
 	}
 	return id, nil
+}
+
+func (r settings) Accounts(ctx context.Context) (core.AccountSettings, error) {
+	row, err := r.s.read.Setting.Query().Where(setting.Key(accountsKey)).Only(ctx)
+	if ent.IsNotFound(err) {
+		return core.AccountSettings{}, nil
+	}
+	if err != nil {
+		return core.AccountSettings{}, mapErr(err, "get account settings")
+	}
+	var out core.AccountSettings
+	if err := json.Unmarshal([]byte(row.Value), &out); err != nil {
+		return core.AccountSettings{}, fmt.Errorf("get account settings: %w", err)
+	}
+	return out, nil
+}
+
+func (r settings) PutAccounts(ctx context.Context, a *core.AccountSettings) error {
+	if err := a.Validate(); err != nil {
+		return err
+	}
+	data, err := json.Marshal(a)
+	if err != nil {
+		return err
+	}
+	err = r.s.write.Setting.Create().
+		SetKey(accountsKey).
+		SetValue(string(data)).
+		SetUpdatedAt(time.Now().UTC()).
+		OnConflictColumns(setting.FieldKey).
+		UpdateNewValues().
+		Exec(ctx)
+	return mapErr(err, "put account settings")
 }
 
 type apiKeys struct{ s *Store }

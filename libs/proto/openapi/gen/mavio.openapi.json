@@ -7631,6 +7631,16 @@
         "additionalProperties": false,
         "description": "WantedSubtitles is a movie or episode lacking subtitles."
       },
+      "mavio.auth.v1.AccountMode": {
+        "type": "string",
+        "title": "AccountMode",
+        "enum": [
+          "ACCOUNT_MODE_UNSPECIFIED",
+          "ACCOUNT_MODE_STANDALONE",
+          "ACCOUNT_MODE_MAVIO_DEV"
+        ],
+        "description": "AccountMode is how a server signs people in, chosen when it is set up."
+      },
       "mavio.auth.v1.ApiKey": {
         "type": "object",
         "properties": {
@@ -7870,7 +7880,7 @@
           "setupRequired": {
             "type": "boolean",
             "title": "setup_required",
-            "description": "True until the first user is created."
+            "description": "True until the server's setup has chosen its mode."
           },
           "serverId": {
             "type": "string",
@@ -7885,6 +7895,15 @@
           "version": {
             "type": "string",
             "title": "version"
+          },
+          "mode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.auth.v1.AccountMode"
+              }
+            ],
+            "title": "mode",
+            "description": "How the server signs people in; unspecified while setup_required."
           }
         },
         "title": "GetAuthInfoResponse",
@@ -25285,7 +25304,7 @@
           "AuthService"
         ],
         "summary": "CreateFirstUser",
-        "description": "CreateFirstUser creates an administrator and signs it in. It fails with\n FAILED_PRECONDITION once any user exists.",
+        "description": "CreateFirstUser sets up a server in standalone mode: it chooses the\n mode, creates the administrator and signs it in. It fails with\n FAILED_PRECONDITION once the server's mode is chosen.",
         "operationId": "mavio.auth.v1.AuthService.CreateFirstUser",
         "parameters": [
           {

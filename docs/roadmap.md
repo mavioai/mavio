@@ -120,6 +120,7 @@ flowchart TD
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
 | P28 | Accounts | Not started |
+| P28 | Accounts | In progress |
 
 ---
 
@@ -792,7 +793,7 @@ flowchart TD
 **Done when**: an end-to-end test through the API: a standalone server signs in its administrator and a member with a password and a passkey, refreshes a session with the device key and refuses a replayed nonce, creates a member from an invitation link, hides a library and a rating the member's access record excludes, and switches from the administrator to a managed user with its PIN; a server claimed by a simulated mavio.dev signs in an account with an assertion only once its access is accepted, ends its sessions when the access is revoked while keeping its watch history, deletes a managed account's data when it is removed from its Home, and keeps refreshing open sessions with mavio.dev stopped.
 
 **Progress**:
-- [ ] Choice of mode on first start
+- [x] Choice of mode on first start: the account settings, the mode in `GetAuthInfo`, and standalone setup through `CreateFirstUser`; setting up in mavio.dev mode comes with claiming
 - [ ] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes
 - [ ] Signed media URLs
 - [ ] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling
@@ -805,7 +806,7 @@ flowchart TD
 - [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
 - [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges
 - [ ] `apps/relay` and relay tickets
-- [ ] Kept sign-ins, changing sign-ins and switching users in every client
+- [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users
 
 ---
 

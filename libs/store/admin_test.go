@@ -153,3 +153,25 @@ func TestServerID(t *testing.T) {
 		}
 	})
 }
+
+func TestAccountSettings(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		got, err := s.Settings().Accounts(ctx)
+		if err != nil || got.Mode != core.AccountModeUnset {
+			t.Fatalf("Accounts = %+v, %v, want = unset", got, err)
+		}
+		for _, mode := range []core.AccountMode{core.AccountModeStandalone, core.AccountModeMavioDev} {
+			if err := s.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: mode}); err != nil {
+				t.Fatalf("PutAccounts(%s) = %v", mode, err)
+			}
+			got, err = s.Settings().Accounts(ctx)
+			if err != nil || got.Mode != mode {
+				t.Errorf("Accounts = %+v, %v, want = %s", got, err, mode)
+			}
+		}
+		if err := s.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: "cloud"}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("PutAccounts(cloud) = %v, want = ErrInvalid", err)
+		}
+	})
+}

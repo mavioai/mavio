@@ -821,8 +821,9 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// CreateFirstUser creates an administrator and signs it in. It fails with
-    /// FAILED_PRECONDITION once any user exists.
+    /// CreateFirstUser sets up a server in standalone mode: it chooses the
+    /// mode, creates the administrator and signs it in. It fails with
+    /// FAILED_PRECONDITION once the server's mode is chosen.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

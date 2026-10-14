@@ -39,6 +39,7 @@ erDiagram
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
 | `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件 |
+| `AccountSettings` | 服务端如何登录用户：安装时选择的模式 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
@@ -254,7 +255,7 @@ erDiagram
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
 | `StorageJobRepository` | 按类型与键 `Get` 存储任务（未保存时返回 `ErrNotFound`），`List` 某一类型的任务（最早在前），`Put`（替换类型与键相同的任务，保留其创建时间），`Delete` |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
-| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`ServerID` 在首次调用时创建，供客户端把该服务端与其他服务端区分开 |
+| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`ServerID` 在首次调用时创建，供客户端把该服务端与其他服务端区分开；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
@@ -341,6 +342,8 @@ erDiagram
 * `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Validate` 检查已知取值与范围。
+
+`AccountSettings` 与它们分开保存，位于设置键 `accounts` 下：服务端登录用户的 `Mode`，即 `standalone` 或 `mavio.dev`（[账户 §2](accounts.zh-CN.md#2-服务端模式)），在服务端的安装向导选择之前为空。
 
 ### 12.2 API 密钥
 `APIKey` 让集成无需登录即可调用 API：它的令牌只显示一次，以创建它的管理员身份行事，前提是该用户仍是已启用的管理员。只保存令牌的 SHA-256 哈希（`TokenHash`），以及 `Name`、`CreatedAt` 与至多每分钟记录一次的 `LastUsedAt`。

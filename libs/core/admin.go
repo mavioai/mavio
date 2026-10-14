@@ -347,3 +347,37 @@ func (s Severity) AtLeast(min Severity) bool {
 	rank := map[Severity]int{SeverityInfo: 0, SeverityWarning: 1, SeverityError: 2}
 	return rank[s] >= rank[min]
 }
+
+// AccountMode is how a server signs people in, chosen on first start.
+type AccountMode string
+
+// Account modes.
+const (
+	// AccountModeUnset is a server whose setup has not chosen a mode.
+	AccountModeUnset AccountMode = ""
+	// AccountModeStandalone servers keep their own users.
+	AccountModeStandalone AccountMode = "standalone"
+	// AccountModeMavioDev servers sign in Mavio accounts kept by
+	// mavio.dev.
+	AccountModeMavioDev AccountMode = "mavio.dev"
+)
+
+// Valid reports whether m is a known mode.
+func (m AccountMode) Valid() bool {
+	return m == AccountModeUnset || m == AccountModeStandalone || m == AccountModeMavioDev
+}
+
+// AccountSettings are how the server signs people in. They are kept apart
+// from the ServerSettings, which administrators change while the server
+// runs: the mode is chosen once, at setup.
+type AccountSettings struct {
+	Mode AccountMode
+}
+
+// Validate checks the mode.
+func (a *AccountSettings) Validate() error {
+	if !a.Mode.Valid() {
+		return fmt.Errorf("%w: unknown account mode %q", ErrInvalid, a.Mode)
+	}
+	return nil
+}

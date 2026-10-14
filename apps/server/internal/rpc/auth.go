@@ -149,17 +149,32 @@ func (s *AuthService) LoginWithQuickConnect(ctx context.Context, req *authv1.Log
 	}.Build(), nil
 }
 
+func accountModeToProto(m core.AccountMode) authv1.AccountMode {
+	switch m {
+	case core.AccountModeStandalone:
+		return authv1.AccountMode_ACCOUNT_MODE_STANDALONE
+	case core.AccountModeMavioDev:
+		return authv1.AccountMode_ACCOUNT_MODE_MAVIO_DEV
+	default:
+		return authv1.AccountMode_ACCOUNT_MODE_UNSPECIFIED
+	}
+}
+
 func deviceToProto(d auth.Device) *authv1.Device {
 	return authv1.Device_builder{Id: &d.ID, Name: &d.Name, Client: &d.Client, ClientVersion: &d.ClientVersion}.Build()
 }
 
-// GetAuthInfo reports whether the first user still has to be created.
+// GetAuthInfo reports the server's mode, and whether setup still has to
+// choose it.
 func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequest) (*authv1.GetAuthInfoResponse, error) {
-	users, err := s.store.Users().List(ctx)
+	accounts, err := s.store.Settings().Accounts(ctx)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	b := authv1.GetAuthInfoResponse_builder{SetupRequired: new(len(users) == 0)}
+	b := authv1.GetAuthInfoResponse_builder{
+		SetupRequired: new(accounts.Mode == core.AccountModeUnset),
+		Mode:          new(accountModeToProto(accounts.Mode)),
+	}
 	if s.Info != nil {
 		i := s.Info()
 		b.ServerId, b.ServerName, b.Version = &i.ID, &i.Name, &i.Version
@@ -167,8 +182,8 @@ func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequ
 	return b.Build(), nil
 }
 
-// CreateFirstUser creates an administrator while no user exists and signs
-// it in.
+// CreateFirstUser sets up a server in standalone mode while its mode is
+// unset, creating the administrator and signing it in.
 func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFirstUserRequest) (*authv1.CreateFirstUserResponse, error) {
 	s.firstUser.Lock()
 	defer s.firstUser.Unlock()
@@ -179,12 +194,15 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 		token string
 	)
 	err := s.store.InTx(ctx, func(tx core.Store) error {
-		users, err := tx.Users().List(ctx)
+		accounts, err := tx.Settings().Accounts(ctx)
 		if err != nil {
 			return err
 		}
-		if len(users) > 0 {
-			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the server already has users"))
+		if accounts.Mode != core.AccountModeUnset {
+			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the server is already set up"))
+		}
+		if err := tx.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: core.AccountModeStandalone}); err != nil {
+			return err
 		}
 		now := s.now()
 		user = core.User{

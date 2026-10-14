@@ -894,7 +894,7 @@ impl ::buffa::HasMessageView for super::super::GetAuthInfoRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct GetAuthInfoResponseView<'a> {
-    /// True until the first user is created.
+    /// True until the server's setup has chosen its mode.
     ///
     /// Field 1: `setup_required`
     pub setup_required: ::core::option::Option<bool>,
@@ -909,6 +909,10 @@ pub struct GetAuthInfoResponseView<'a> {
     pub server_name: ::core::option::Option<&'a str>,
     /// Field 4: `version`
     pub version: ::core::option::Option<&'a str>,
+    /// How the server signs people in; unspecified while setup_required.
+    ///
+    /// Field 5: `mode`
+    pub mode: ::core::option::Option<::buffa::EnumValue<super::super::AccountMode>>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
@@ -969,6 +973,15 @@ impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
                 )?;
                 view.version = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.mode = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -1001,6 +1014,7 @@ impl<'a> ::buffa::MessageView<'a> for GetAuthInfoResponseView<'a> {
             server_id: self.server_id.map(|s| s.to_string()),
             server_name: self.server_name.map(|s| s.to_string()),
             version: self.version.map(|s| s.to_string()),
+            mode: self.mode,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1024,6 +1038,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetAuthInfoResponseView<'a> {
         if let Some(ref v) = self.version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.mode {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1046,6 +1063,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetAuthInfoResponseView<'a> {
         }
         if let Some(ref v) = self.version {
             ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.mode {
+            ::buffa::types::put_int32_field(5u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1142,7 +1162,7 @@ impl GetAuthInfoResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// True until the first user is created.
+    /// True until the server's setup has chosen its mode.
     ///
     /// Field 1: `setup_required`
     #[must_use]
@@ -1168,6 +1188,15 @@ impl GetAuthInfoResponseOwnedView {
     #[must_use]
     pub fn version(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().version
+    }
+    /// How the server signs people in; unspecified while setup_required.
+    ///
+    /// Field 5: `mode`
+    #[must_use]
+    pub fn mode(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::AccountMode>> {
+        self.0.reborrow().mode
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetAuthInfoResponseView<'static>>>

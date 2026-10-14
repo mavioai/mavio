@@ -40,6 +40,7 @@ erDiagram
 | `PluginConfig` | The configuration an administrator gave a plugin |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
 | `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin |
+| `AccountSettings` | How the server signs people in: its mode, chosen at setup |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
 | `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
@@ -254,7 +255,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
 | `StorageJobRepository` | `Get` a storage job by kind and key (`ErrNotFound` when not stored), `List` those of a kind (oldest first), `Put` (replacing the job of the same kind and key, keeping when it was created), `Delete` |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
-| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `ServerID`, created on the first call, tells the server apart from others to clients |
+| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `ServerID`, created on the first call, tells the server apart from others to clients; `Accounts` (zero until stored) and `PutAccounts` the account settings |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
@@ -341,6 +342,8 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Metadata` (`MetadataSettings`): the server's `PreferredLanguage` (ISO 639-1) and `Country` (ISO 3166-1) of metadata, as Jellyfin's `PreferredMetadataLanguage` and `MetadataCountryCode`; requests and discovery name titles in the language and rate them in the country. The defaults are `en` and `US`.
 * `Subtitles`: how subtitles are searched, chosen, saved and synchronized (§14.3).
 * `Validate` checks the known values and ranges.
+
+`AccountSettings` are kept apart from them, under the settings key `accounts`: the `Mode` the server signs people in with, `standalone` or `mavio.dev` ([Accounts §2](accounts.md#2-server-modes)), empty until the server's setup chooses it.
 
 ### 12.2 API Keys
 An `APIKey` lets an integration call the API without signing in: its token, shown once, acts as the administrator who created it, while that user stays an enabled administrator. Only its SHA-256 hash (`TokenHash`) is stored, with a `Name`, `CreatedAt` and `LastUsedAt`, recorded at most once a minute.

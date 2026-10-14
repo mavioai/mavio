@@ -80,8 +80,9 @@ const (
 type AuthServiceClient interface {
 	// GetAuthInfo tells clients how to sign in.
 	GetAuthInfo(context.Context, *v1.GetAuthInfoRequest) (*v1.GetAuthInfoResponse, error)
-	// CreateFirstUser creates an administrator and signs it in. It fails with
-	// FAILED_PRECONDITION once any user exists.
+	// CreateFirstUser sets up a server in standalone mode: it chooses the
+	// mode, creates the administrator and signs it in. It fails with
+	// FAILED_PRECONDITION once the server's mode is chosen.
 	CreateFirstUser(context.Context, *v1.CreateFirstUserRequest) (*v1.CreateFirstUserResponse, error)
 	// Login signs a device in, replacing its previous session. Wrong
 	// credentials and disabled users fail with UNAUTHENTICATED.
@@ -392,8 +393,9 @@ func (c *authServiceClient) ResetPassword(ctx context.Context, req *v1.ResetPass
 type AuthServiceHandler interface {
 	// GetAuthInfo tells clients how to sign in.
 	GetAuthInfo(context.Context, *v1.GetAuthInfoRequest) (*v1.GetAuthInfoResponse, error)
-	// CreateFirstUser creates an administrator and signs it in. It fails with
-	// FAILED_PRECONDITION once any user exists.
+	// CreateFirstUser sets up a server in standalone mode: it chooses the
+	// mode, creates the administrator and signs it in. It fails with
+	// FAILED_PRECONDITION once the server's mode is chosen.
 	CreateFirstUser(context.Context, *v1.CreateFirstUserRequest) (*v1.CreateFirstUserResponse, error)
 	// Login signs a device in, replacing its previous session. Wrong
 	// credentials and disabled users fail with UNAUTHENTICATED.

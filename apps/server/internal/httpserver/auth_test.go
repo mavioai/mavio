@@ -40,7 +40,7 @@ func TestAuthFlow(t *testing.T) {
 	}
 
 	info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{})
-	if err != nil || !info.GetSetupRequired() {
+	if err != nil || !info.GetSetupRequired() || info.GetMode() != authv1.AccountMode_ACCOUNT_MODE_UNSPECIFIED {
 		t.Fatalf("GetAuthInfo before setup = %v, %v; want setup required", info, err)
 	}
 
@@ -57,8 +57,8 @@ func TestAuthFlow(t *testing.T) {
 		Name: new("other"), Password: new("x"), Device: device("setup"),
 	}.Build())
 	wantCode("second CreateFirstUser", err, connect.CodeFailedPrecondition)
-	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetSetupRequired() {
-		t.Errorf("GetAuthInfo after setup = %v, %v; want no setup", info, err)
+	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetSetupRequired() || info.GetMode() != authv1.AccountMode_ACCOUNT_MODE_STANDALONE {
+		t.Errorf("GetAuthInfo after setup = %v, %v; want standalone", info, err)
 	}
 
 	login := func(name, password, deviceID string) (*authv1.LoginResponse, error) {
