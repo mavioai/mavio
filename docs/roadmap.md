@@ -796,7 +796,8 @@ flowchart TD
 - [x] Choice of mode on first start: the account settings, the mode in `GetAuthInfo`, and standalone setup through `CreateFirstUser`; setting up in mavio.dev mode comes with claiming
 - [x] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes: sessions bound to the device's Ed25519 key, hour-long access tokens authenticated with a key derived from the server's identity key in `identity.key`, `StartRefresh` and `RefreshSession`, `SessionIdleDays` with the daily cleanup, and the device keys and refreshes of the web UI, the dev player and the shared Rust core
 - [x] Signed media URLs: `signed/{token}/{path}` for one session and the first segments of a path, under a key derived from the identity key; playbacks' URLs expire with the playback and images' after 12 to 24 hours; the URLs of images, collages, trickplay sheets and chapter images in responses, used by the web UI, the dev player and the shared Rust core; the unsigned paths take bearer tokens and plugins
-- [ ] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling
+- [x] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling: user kinds with one administrator, credentials in a table of their own, `UserService.SetPin`, managed users made members by a password, and failed sign-ins throttled per name and address
+- [ ] Passkeys and TOTP for standalone sign-in
 - [ ] Library access records and their enforcement
 - [ ] Invitation links, Quick Connect and switching on the administrator's devices
 - [ ] Recovery of the administrator from the command line

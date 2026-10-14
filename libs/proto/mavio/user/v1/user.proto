@@ -6,8 +6,10 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 
-// UserService manages accounts. All methods except GetCurrentUser and
-// UpdatePreferences require an administrator.
+// UserService manages accounts: the server's one administrator, members
+// and managed users (docs/accounts.md §4.1). All methods except
+// GetCurrentUser, UpdatePreferences and changing one's own password or PIN
+// require the administrator.
 service UserService {
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
@@ -23,7 +25,11 @@ service UserService {
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   // SetPassword sets a user's password. Users may change their own password
   // by providing the current one.
+  // Giving a managed user a password makes it a member.
   rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
+  // SetPin sets or clears a user's PIN, which guards switching to it: the
+  // administrator sets managed users' PINs, other users set their own.
+  rpc SetPin(SetPinRequest) returns (SetPinResponse);
   // UpdatePreferences changes the calling user's playback preferences.
   rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
 }
@@ -46,6 +52,19 @@ enum SubtitleMode {
   SUBTITLE_MODE_SMART = 5;
 }
 
+// RestrictionProfile limits what a managed user sees by content rating, on
+// top of its policy; rated items within the profile alone are shown.
+enum RestrictionProfile {
+  // No restriction.
+  RESTRICTION_PROFILE_UNSPECIFIED = 0;
+  // Up to G and TV-G.
+  RESTRICTION_PROFILE_YOUNGER_CHILD = 1;
+  // Up to PG and TV-PG.
+  RESTRICTION_PROFILE_OLDER_CHILD = 2;
+  // Up to PG-13 and TV-14.
+  RESTRICTION_PROFILE_TEEN = 3;
+}
+
 // User is an account. Credentials are never returned.
 message User {
   string id = 1;
@@ -53,12 +72,20 @@ message User {
   // Empty for the built-in password check, otherwise the authenticating
   // plugin.
   string auth_provider = 3;
+  // Whether the user is the server's administrator; exactly one user is.
   bool admin = 4;
   bool disabled = 5;
   UserPolicy policy = 6;
   UserPreferences preferences = 7;
   google.protobuf.Timestamp create_time = 8;
   google.protobuf.Timestamp last_login_time = 9;
+  // A managed user has no credentials and is reached only by switching to
+  // it.
+  bool managed = 10;
+  // Whether switching to the user asks for its PIN.
+  bool has_pin = 11;
+  // A managed user's restriction profile.
+  RestrictionProfile restriction = 12;
 }
 
 message UserPolicy {
@@ -154,12 +181,19 @@ message CreateUserRequest {
       max_len: 100
     }
   ];
-  // Required unless auth_provider is set.
+  // Required unless auth_provider or managed is set.
   string password = 2 [(buf.validate.field).string.max_len = 1024];
   string auth_provider = 3;
+  // Must be false: the server's one administrator is created at setup.
   bool admin = 4;
   UserPolicy policy = 5;
   UserPreferences preferences = 6;
+  // Creates a managed user, without password or auth_provider.
+  bool managed = 7;
+  // The managed user's restriction profile.
+  RestrictionProfile restriction = 8 [(buf.validate.field).enum.defined_only = true];
+  // The managed user's PIN.
+  string pin = 9 [(buf.validate.field).string.pattern = "^[0-9]{4}$"];
 }
 
 message CreateUserResponse {
@@ -178,9 +212,15 @@ message UpdateUserRequest {
       max_len: 100
     }
   ];
+  // When set, must be the user's own: the administrator stays the
+  // administrator.
   bool admin = 3;
+  // The administrator cannot be disabled.
   bool disabled = 4;
   UserPolicy policy = 5;
+  // A managed user's restriction profile; for other users it must be
+  // unspecified.
+  RestrictionProfile restriction = 6 [(buf.validate.field).enum.defined_only = true];
 }
 
 message UpdateUserResponse {
@@ -213,6 +253,17 @@ message SetPasswordRequest {
 }
 
 message SetPasswordResponse {}
+
+message SetPinRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+  // Four digits; empty clears the PIN.
+  string pin = 2 [(buf.validate.field).string.pattern = "^([0-9]{4})?$"];
+}
+
+message SetPinResponse {}
 
 message UpdatePreferencesRequest {
   UserPreferences preferences = 1 [(buf.validate.field).required = true];

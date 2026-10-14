@@ -22,6 +22,8 @@ type Tx struct {
 	BlockedTitle *BlockedTitleClient
 	// BlocklistEntry is the client for interacting with the BlocklistEntry builders.
 	BlocklistEntry *BlocklistEntryClient
+	// Credential is the client for interacting with the Credential builders.
+	Credential *CredentialClient
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
 	// CustomFormat is the client for interacting with the CustomFormat builders.
@@ -236,6 +238,7 @@ func (tx *Tx) init() {
 	tx.AuthSession = NewAuthSessionClient(tx.config)
 	tx.BlockedTitle = NewBlockedTitleClient(tx.config)
 	tx.BlocklistEntry = NewBlocklistEntryClient(tx.config)
+	tx.Credential = NewCredentialClient(tx.config)
 	tx.Credit = NewCreditClient(tx.config)
 	tx.CustomFormat = NewCustomFormatClient(tx.config)
 	tx.DelayProfile = NewDelayProfileClient(tx.config)

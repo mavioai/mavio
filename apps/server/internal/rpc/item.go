@@ -163,7 +163,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := itemToProto(ctx, &item, images[item.ID], p.User.Admin)
+	out := itemToProto(ctx, &item, images[item.ID], p.User.IsAdmin())
 	switch d, err := s.store.UserData().Get(ctx, p.User.ID, item.ID); {
 	case err == nil:
 		out.SetUserData(events.UserDataToProto(&d))
@@ -177,7 +177,7 @@ func (s *ItemService) GetItem(ctx context.Context, req *libraryv1.GetItemRequest
 
 	resp := libraryv1.GetItemResponse_builder{Item: out}
 	for i := range sources {
-		resp.MediaSources = append(resp.MediaSources, mediaSourceToProto(ctx, &sources[i], p.User.Admin))
+		resp.MediaSources = append(resp.MediaSources, mediaSourceToProto(ctx, &sources[i], p.User.IsAdmin()))
 	}
 	for i, c := range credits {
 		resp.Credits = append(resp.Credits, libraryv1.Credit_builder{
@@ -362,7 +362,8 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, err
 	}
-	policy := &p.User.Policy
+	access := p.User.Access()
+	policy := &access
 	q := core.ItemQuery{
 		Recursive:     req.GetRecursive(),
 		TopLevel:      req.GetTopLevel(),
@@ -431,7 +432,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -460,7 +461,7 @@ func (s *ItemService) ListLatestItems(ctx context.Context, req *libraryv1.ListLa
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -492,7 +493,7 @@ func (s *ItemService) ListNextUp(ctx context.Context, req *libraryv1.ListNextUpR
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -518,7 +519,8 @@ func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListS
 			return nil, connectError(ctx, err)
 		}
 	}
-	policy := &p.User.Policy
+	access := p.User.Access()
+	policy := &access
 	ids, ok := libraryScope(policy, nil)
 	if !ok {
 		return &libraryv1.ListSimilarItemsResponse{}, nil
@@ -539,7 +541,7 @@ func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListS
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -553,8 +555,8 @@ func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {
 	return browse.Scope{
 		UserID:      u.ID,
 		LibraryIDs:  ids,
-		MaxRating:   u.Policy.MaxParentalRating,
-		SkipUnrated: u.Policy.BlockUnrated,
+		MaxRating:   u.Access().MaxParentalRating,
+		SkipUnrated: u.Access().BlockUnrated,
 	}, ok
 }
 
@@ -676,7 +678,8 @@ func (s *ItemService) ListValues(ctx context.Context, req *libraryv1.ListValuesR
 	if err != nil {
 		return nil, err
 	}
-	filter, ok := itemFilter(&p.User.Policy, req.GetLibraryIds(), req.GetItemKinds())
+	access := p.User.Access()
+	filter, ok := itemFilter(&access, req.GetLibraryIds(), req.GetItemKinds())
 	if !ok {
 		return &libraryv1.ListValuesResponse{}, nil
 	}
@@ -707,7 +710,8 @@ func (s *ItemService) ListPeople(ctx context.Context, req *libraryv1.ListPeopleR
 	if err != nil {
 		return nil, err
 	}
-	filter, ok := itemFilter(&p.User.Policy, req.GetLibraryIds(), req.GetItemKinds())
+	access := p.User.Access()
+	filter, ok := itemFilter(&access, req.GetLibraryIds(), req.GetItemKinds())
 	if !ok {
 		return &libraryv1.ListPeopleResponse{}, nil
 	}

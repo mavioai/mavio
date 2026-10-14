@@ -1,6 +1,9 @@
 package rpc
 
 import (
+	"context"
+	"slices"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -16,8 +19,34 @@ var subtitleModes = map[core.SubtitleMode]userv1.SubtitleMode{
 	core.SubtitlesSmart:      userv1.SubtitleMode_SUBTITLE_MODE_SMART,
 }
 
-// userToProto converts a user, leaving out its credentials.
-func userToProto(u *core.User) *userv1.User {
+var restrictions = map[core.RestrictionProfile]userv1.RestrictionProfile{
+	core.RestrictionNone:         userv1.RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED,
+	core.RestrictionYoungerChild: userv1.RestrictionProfile_RESTRICTION_PROFILE_YOUNGER_CHILD,
+	core.RestrictionOlderChild:   userv1.RestrictionProfile_RESTRICTION_PROFILE_OLDER_CHILD,
+	core.RestrictionTeen:         userv1.RestrictionProfile_RESTRICTION_PROFILE_TEEN,
+}
+
+func restrictionFromProto(r userv1.RestrictionProfile) core.RestrictionProfile {
+	for k, v := range restrictions {
+		if v == r {
+			return k
+		}
+	}
+	return core.RestrictionNone
+}
+
+// describeUser converts a user, telling which credentials it has.
+func describeUser(ctx context.Context, store core.Store, u *core.User) (*userv1.User, error) {
+	creds, err := store.Credentials().List(ctx, u.ID)
+	if err != nil {
+		return nil, err
+	}
+	return userToProto(u, creds), nil
+}
+
+// userToProto converts a user with its credentials, leaving out their
+// secrets.
+func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 	libraries := make([]string, len(u.Policy.Libraries))
 	for i, id := range u.Policy.Libraries {
 		libraries[i] = id.String()
@@ -30,8 +59,11 @@ func userToProto(u *core.User) *userv1.User {
 		Id:           new(u.ID.String()),
 		Name:         &u.Name,
 		AuthProvider: &u.AuthProvider,
-		Admin:        &u.Admin,
+		Admin:        new(u.IsAdmin()),
 		Disabled:     &u.Disabled,
+		Managed:      new(u.Kind == core.UserManaged),
+		HasPin:       new(slices.ContainsFunc(creds, func(c core.Credential) bool { return c.Kind == core.CredentialPIN })),
+		Restriction:  new(restrictions[u.Restriction]),
 		Policy: userv1.UserPolicy_builder{
 			AllLibraries:        new(u.Policy.Libraries == nil),
 			LibraryIds:          libraries,

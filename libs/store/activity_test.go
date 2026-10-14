@@ -12,7 +12,7 @@ import (
 func TestPlayActivity(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		u := core.User{Name: "viewer", PasswordHash: "x"}
+		u := core.User{Name: "viewer", Kind: core.UserMember}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}

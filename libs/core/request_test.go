@@ -67,7 +67,7 @@ func TestRequestValidate(t *testing.T) {
 		{"blocked episode", &BlockedTitle{Kind: KindEpisode, TmdbID: 603}, false},
 		{"blocked title without a TMDB ID", &BlockedTitle{Kind: KindSeries}, false},
 		{"blocked title query past a page", &BlockedTitleQuery{Limit: MaxPageSize + 1}, false},
-		{"user with a negative quota", &User{ID: id, Name: "u", PasswordHash: "x", Policy: UserPolicy{MovieQuota: &Quota{Limit: -1}}}, false},
+		{"user with a negative quota", &User{ID: id, Name: "u", Kind: UserMember, Policy: UserPolicy{MovieQuota: &Quota{Limit: -1}}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -21,6 +21,9 @@ type BlockedTitle func(*sql.Selector)
 // BlocklistEntry is the predicate function for blocklistentry builders.
 type BlocklistEntry func(*sql.Selector)
 
+// Credential is the predicate function for credential builders.
+type Credential func(*sql.Selector)
+
 // Credit is the predicate function for credit builders.
 type Credit func(*sql.Selector)
 

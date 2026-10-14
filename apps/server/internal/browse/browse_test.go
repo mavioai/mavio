@@ -32,7 +32,7 @@ func newEnv(t *testing.T) *env {
 	}
 	t.Cleanup(func() { s.Close() })
 	e := &env{store: s, b: New(s), items: map[string]core.Item{}, clock: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)}
-	u := core.User{Name: "viewer", PasswordHash: "x"}
+	u := core.User{Name: "viewer", Kind: core.UserMember}
 	if err := s.Users().Create(ctx, &u); err != nil {
 		t.Fatal(err)
 	}

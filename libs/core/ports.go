@@ -18,6 +18,7 @@ type Store interface {
 	Images() ImageRepository
 	People() PersonRepository
 	Users() UserRepository
+	Credentials() CredentialRepository
 	UserData() UserDataRepository
 	AuthSessions() AuthSessionRepository
 	Jobs() JobQueue
@@ -150,6 +151,20 @@ type UserRepository interface {
 	Create(ctx context.Context, u *User) error
 	Update(ctx context.Context, u *User) error
 	Delete(ctx context.Context, id ID) error
+}
+
+// CredentialRepository stores users' credentials. A user has at most one
+// credential of each kind.
+type CredentialRepository interface {
+	// List returns the user's credentials.
+	List(ctx context.Context, userID ID) ([]Credential, error)
+	// Get returns the user's credential of kind.
+	Get(ctx context.Context, userID ID, kind CredentialKind) (Credential, error)
+	// Put adds a credential, replacing the user's credential of its kind.
+	Put(ctx context.Context, c *Credential) error
+	// Delete removes the user's credential of kind; it is not an error when
+	// there is none.
+	Delete(ctx context.Context, userID ID, kind CredentialKind) error
 }
 
 // AuthSessionRepository stores signed-in clients.

@@ -21,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
@@ -77,6 +78,8 @@ type Client struct {
 	BlockedTitle *BlockedTitleClient
 	// BlocklistEntry is the client for interacting with the BlocklistEntry builders.
 	BlocklistEntry *BlocklistEntryClient
+	// Credential is the client for interacting with the Credential builders.
+	Credential *CredentialClient
 	// Credit is the client for interacting with the Credit builders.
 	Credit *CreditClient
 	// CustomFormat is the client for interacting with the CustomFormat builders.
@@ -171,6 +174,7 @@ func (c *Client) init() {
 	c.AuthSession = NewAuthSessionClient(c.config)
 	c.BlockedTitle = NewBlockedTitleClient(c.config)
 	c.BlocklistEntry = NewBlocklistEntryClient(c.config)
+	c.Credential = NewCredentialClient(c.config)
 	c.Credit = NewCreditClient(c.config)
 	c.CustomFormat = NewCustomFormatClient(c.config)
 	c.DelayProfile = NewDelayProfileClient(c.config)
@@ -307,6 +311,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AuthSession:               NewAuthSessionClient(cfg),
 		BlockedTitle:              NewBlockedTitleClient(cfg),
 		BlocklistEntry:            NewBlocklistEntryClient(cfg),
+		Credential:                NewCredentialClient(cfg),
 		Credit:                    NewCreditClient(cfg),
 		CustomFormat:              NewCustomFormatClient(cfg),
 		DelayProfile:              NewDelayProfileClient(cfg),
@@ -370,6 +375,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AuthSession:               NewAuthSessionClient(cfg),
 		BlockedTitle:              NewBlockedTitleClient(cfg),
 		BlocklistEntry:            NewBlocklistEntryClient(cfg),
+		Credential:                NewCredentialClient(cfg),
 		Credit:                    NewCreditClient(cfg),
 		CustomFormat:              NewCustomFormatClient(cfg),
 		DelayProfile:              NewDelayProfileClient(cfg),
@@ -438,16 +444,16 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
-		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
-		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
-		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
-		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
-		c.Wanted,
+		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
+		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
+		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
+		c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job,
+		c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person,
+		c.PluginConfig, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile,
+		c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
+		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
+		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
+		c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Use(hooks...)
 	}
@@ -457,16 +463,16 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry, c.Credit,
-		c.CustomFormat, c.DelayProfile, c.DisplayPreferences, c.Download,
-		c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent, c.Image, c.Issue,
-		c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job, c.Library,
-		c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person, c.PluginConfig,
-		c.QualityDefinition, c.QualityProfile, c.ReleaseProfile, c.RemotePathMapping,
-		c.Request, c.Setting, c.StorageJob, c.SubtitleBlocklistEntry,
-		c.SubtitleHistoryEvent, c.SubtitleProfile, c.SubtitleProfileAssignment,
-		c.SubtitleSearchAttempt, c.SubtitleWanted, c.Trickplay, c.User, c.UserData,
-		c.Wanted,
+		c.APIKey, c.Activity, c.AuthSession, c.BlockedTitle, c.BlocklistEntry,
+		c.Credential, c.Credit, c.CustomFormat, c.DelayProfile, c.DisplayPreferences,
+		c.Download, c.EpisodeState, c.ExtraFile, c.FolderState, c.HistoryEvent,
+		c.Image, c.Issue, c.IssueComment, c.Item, c.ItemLink, c.ItemValue, c.Job,
+		c.Library, c.MediaSegment, c.MediaSource, c.PendingRelease, c.Person,
+		c.PluginConfig, c.QualityDefinition, c.QualityProfile, c.ReleaseProfile,
+		c.RemotePathMapping, c.Request, c.Setting, c.StorageJob,
+		c.SubtitleBlocklistEntry, c.SubtitleHistoryEvent, c.SubtitleProfile,
+		c.SubtitleProfileAssignment, c.SubtitleSearchAttempt, c.SubtitleWanted,
+		c.Trickplay, c.User, c.UserData, c.Wanted,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -485,6 +491,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BlockedTitle.mutate(ctx, m)
 	case *BlocklistEntryMutation:
 		return c.BlocklistEntry.mutate(ctx, m)
+	case *CredentialMutation:
+		return c.Credential.mutate(ctx, m)
 	case *CreditMutation:
 		return c.Credit.mutate(ctx, m)
 	case *CustomFormatMutation:
@@ -1294,6 +1302,155 @@ func (c *BlocklistEntryClient) mutate(ctx context.Context, m *BlocklistEntryMuta
 		return (&BlocklistEntryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BlocklistEntry mutation op: %q", m.Op())
+	}
+}
+
+// CredentialClient is a client for the Credential schema.
+type CredentialClient struct {
+	config
+}
+
+// NewCredentialClient returns a client for the Credential from the given config.
+func NewCredentialClient(c config) *CredentialClient {
+	return &CredentialClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `credential.Hooks(f(g(h())))`.
+func (c *CredentialClient) Use(hooks ...Hook) {
+	c.hooks.Credential = append(c.hooks.Credential, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `credential.Intercept(f(g(h())))`.
+func (c *CredentialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Credential = append(c.inters.Credential, interceptors...)
+}
+
+// Create returns a builder for creating a Credential entity.
+func (c *CredentialClient) Create() *CredentialCreate {
+	mutation := newCredentialMutation(c.config, OpCreate)
+	return &CredentialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Credential entities.
+func (c *CredentialClient) CreateBulk(builders ...*CredentialCreate) *CredentialCreateBulk {
+	return &CredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CredentialClient) MapCreateBulk(slice any, setFunc func(*CredentialCreate, int)) *CredentialCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CredentialCreateBulk{err: fmt.Errorf("calling to CredentialClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CredentialCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CredentialCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Credential.
+func (c *CredentialClient) Update() *CredentialUpdate {
+	mutation := newCredentialMutation(c.config, OpUpdate)
+	return &CredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CredentialClient) UpdateOne(_m *Credential) *CredentialUpdateOne {
+	mutation := newCredentialMutation(c.config, OpUpdateOne, withCredential(_m))
+	return &CredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CredentialClient) UpdateOneID(id core.ID) *CredentialUpdateOne {
+	mutation := newCredentialMutation(c.config, OpUpdateOne, withCredentialID(id))
+	return &CredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Credential.
+func (c *CredentialClient) Delete() *CredentialDelete {
+	mutation := newCredentialMutation(c.config, OpDelete)
+	return &CredentialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CredentialClient) DeleteOne(_m *Credential) *CredentialDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CredentialClient) DeleteOneID(id core.ID) *CredentialDeleteOne {
+	builder := c.Delete().Where(credential.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CredentialDeleteOne{builder}
+}
+
+// Query returns a query builder for Credential.
+func (c *CredentialClient) Query() *CredentialQuery {
+	return &CredentialQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCredential},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Credential entity by its id.
+func (c *CredentialClient) Get(ctx context.Context, id core.ID) (*Credential, error) {
+	return c.Query().Where(credential.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CredentialClient) GetX(ctx context.Context, id core.ID) *Credential {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Credential.
+func (c *CredentialClient) QueryUser(_m *Credential) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(credential.Table, credential.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, credential.UserTable, credential.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CredentialClient) Hooks() []Hook {
+	return c.hooks.Credential
+}
+
+// Interceptors returns the client interceptors.
+func (c *CredentialClient) Interceptors() []Interceptor {
+	return c.inters.Credential
+}
+
+func (c *CredentialClient) mutate(ctx context.Context, m *CredentialMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CredentialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CredentialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CredentialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CredentialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Credential mutation op: %q", m.Op())
 	}
 }
 
@@ -7265,6 +7422,22 @@ func (c *UserClient) QueryAuthSessions(_m *User) *AuthSessionQuery {
 	return query
 }
 
+// QueryCredentials queries the credentials edge of a User.
+func (c *UserClient) QueryCredentials(_m *User) *CredentialQuery {
+	query := (&CredentialClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(credential.Table, credential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CredentialsTable, user.CredentialsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPlaylists queries the playlists edge of a User.
 func (c *UserClient) QueryPlaylists(_m *User) *ItemQuery {
 	query := (&ItemClient{config: c.config}).Query()
@@ -7735,7 +7908,7 @@ func (c *WantedClient) mutate(ctx context.Context, m *WantedMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
+		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,
@@ -7746,7 +7919,7 @@ type (
 		Wanted []ent.Hook
 	}
 	inters struct {
-		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credit,
+		APIKey, Activity, AuthSession, BlockedTitle, BlocklistEntry, Credential, Credit,
 		CustomFormat, DelayProfile, DisplayPreferences, Download, EpisodeState,
 		ExtraFile, FolderState, HistoryEvent, Image, Issue, IssueComment, Item,
 		ItemLink, ItemValue, Job, Library, MediaSegment, MediaSource, PendingRelease,

@@ -99,7 +99,7 @@ func TestPublish(t *testing.T) {
 	}
 	check("updated", "item.updated Film library="+l)
 
-	user := core.User{Name: "kid", PasswordHash: "x"}
+	user := core.User{Name: "kid", Kind: core.UserMember}
 	if err := s.Users().Create(ctx, &user); err != nil {
 		t.Fatal(err)
 	}

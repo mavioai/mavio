@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
@@ -121,6 +122,7 @@ func checkColumn(t, c string) error {
 			authsession.Table:               authsession.ValidColumn,
 			blockedtitle.Table:              blockedtitle.ValidColumn,
 			blocklistentry.Table:            blocklistentry.ValidColumn,
+			credential.Table:                credential.ValidColumn,
 			credit.Table:                    credit.ValidColumn,
 			customformat.Table:              customformat.ValidColumn,
 			delayprofile.Table:              delayprofile.ValidColumn,

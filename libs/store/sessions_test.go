@@ -13,7 +13,7 @@ import (
 func TestAuthSessions(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		alice := core.User{Name: "alice", PasswordHash: "$argon2id$x"}
+		alice := core.User{Name: "alice", Kind: core.UserMember}
 		if err := s.Users().Create(ctx, &alice); err != nil {
 			t.Fatal(err)
 		}

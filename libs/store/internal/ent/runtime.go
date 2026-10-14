@@ -11,6 +11,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
@@ -143,6 +144,16 @@ func init() {
 	blocklistentryDescID := blocklistentryFields[0].Descriptor()
 	// blocklistentry.DefaultID holds the default value on creation for the id field.
 	blocklistentry.DefaultID = blocklistentryDescID.Default.(func() core.ID)
+	credentialFields := schema.Credential{}.Fields()
+	_ = credentialFields
+	// credentialDescCreatedAt is the schema descriptor for created_at field.
+	credentialDescCreatedAt := credentialFields[4].Descriptor()
+	// credential.DefaultCreatedAt holds the default value on creation for the created_at field.
+	credential.DefaultCreatedAt = credentialDescCreatedAt.Default.(func() time.Time)
+	// credentialDescID is the schema descriptor for id field.
+	credentialDescID := credentialFields[0].Descriptor()
+	// credential.DefaultID holds the default value on creation for the id field.
+	credential.DefaultID = credentialDescID.Default.(func() core.ID)
 	creditFields := schema.Credit{}.Fields()
 	_ = creditFields
 	// creditDescRole is the schema descriptor for role field.
@@ -911,18 +922,14 @@ func init() {
 	userDescName := userFields[1].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
-	// userDescPasswordHash is the schema descriptor for password_hash field.
-	userDescPasswordHash := userFields[3].Descriptor()
-	// user.DefaultPasswordHash holds the default value on creation for the password_hash field.
-	user.DefaultPasswordHash = userDescPasswordHash.Default.(string)
 	// userDescAuthProvider is the schema descriptor for auth_provider field.
 	userDescAuthProvider := userFields[4].Descriptor()
 	// user.DefaultAuthProvider holds the default value on creation for the auth_provider field.
 	user.DefaultAuthProvider = userDescAuthProvider.Default.(string)
-	// userDescAdmin is the schema descriptor for admin field.
-	userDescAdmin := userFields[5].Descriptor()
-	// user.DefaultAdmin holds the default value on creation for the admin field.
-	user.DefaultAdmin = userDescAdmin.Default.(bool)
+	// userDescRestriction is the schema descriptor for restriction field.
+	userDescRestriction := userFields[5].Descriptor()
+	// user.DefaultRestriction holds the default value on creation for the restriction field.
+	user.DefaultRestriction = core.RestrictionProfile(userDescRestriction.Default.(string))
 	// userDescDisabled is the schema descriptor for disabled field.
 	userDescDisabled := userFields[6].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.

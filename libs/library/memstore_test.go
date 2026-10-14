@@ -79,6 +79,7 @@ func (m *memStore) MediaSources() core.MediaSourceRepository              { retu
 func (m *memStore) Images() core.ImageRepository                          { return memImages{m} }
 func (m *memStore) People() core.PersonRepository                         { return memPeople{m} }
 func (m *memStore) Users() core.UserRepository                            { panic("unused") }
+func (m *memStore) Credentials() core.CredentialRepository                { panic("unused") }
 func (m *memStore) UserData() core.UserDataRepository                     { panic("unused") }
 func (m *memStore) Jobs() core.JobQueue                                   { return memJobs{m} }
 func (m *memStore) Scans() core.ScanRepository                            { return memScans{m} }

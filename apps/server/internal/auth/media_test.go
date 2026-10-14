@@ -21,7 +21,7 @@ func TestMediaURLs(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = s.Close() })
 	newSession := func(name string, disabled bool) core.ID {
-		u := core.User{Name: name, PasswordHash: HashPassword("pw"), Disabled: disabled}
+		u := core.User{Name: name, Kind: core.UserMember, Disabled: disabled}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}
@@ -130,7 +130,7 @@ func TestRequireMedia(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = s.Close() })
-	u := core.User{Name: "alice", PasswordHash: HashPassword("pw")}
+	u := core.User{Name: "alice", Kind: core.UserMember}
 	if err := s.Users().Create(ctx, &u); err != nil {
 		t.Fatal(err)
 	}

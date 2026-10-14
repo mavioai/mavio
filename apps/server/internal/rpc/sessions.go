@@ -105,7 +105,7 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 	}
 	users := []core.User{p.User}
 	if req.GetAllUsers() {
-		if !p.User.Admin {
+		if !p.User.IsAdmin() {
 			return nil, connect.NewError(connect.CodePermissionDenied, errors.New("administrator required"))
 		}
 		if users, err = s.store.Users().List(ctx); err != nil {
@@ -119,7 +119,7 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 			return nil, connectError(ctx, err)
 		}
 		for _, as := range list {
-			sess, err := s.sessionToProto(ctx, &u, &as, p.User.Admin)
+			sess, err := s.sessionToProto(ctx, &u, &as, p.User.IsAdmin())
 			if err != nil {
 				return nil, connectError(ctx, err)
 			}
@@ -128,7 +128,7 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 	}
 	if s.Devices != nil {
 		for _, d := range s.Devices.Devices() {
-			sess, err := s.deviceToProto(ctx, &d, p.User.Admin)
+			sess, err := s.deviceToProto(ctx, &d, p.User.IsAdmin())
 			if err != nil {
 				return nil, connectError(ctx, err)
 			}
@@ -204,7 +204,7 @@ func (s *SessionService) SendCommand(ctx context.Context, req *sessionv1.SendCom
 	}
 	u, online := s.hub.SessionUser(target)
 	switch {
-	case online && u.ID != p.User.ID && !p.User.Admin:
+	case online && u.ID != p.User.ID && !p.User.IsAdmin():
 		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such session"))
 	case !online:
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the device is offline"))

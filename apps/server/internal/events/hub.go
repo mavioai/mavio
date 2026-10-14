@@ -217,7 +217,7 @@ func (h *Hub) ToSession(session core.ID, e *sessionv1.Event) bool {
 // session's changes reach every device.
 func (h *Hub) SessionsChanged(userID, session core.ID) {
 	shared := h.cfg.Shared != nil && h.cfg.Shared(session)
-	h.sessionsChanged(session, func(s *Subscriber) bool { return shared || s.User.ID == userID || s.User.Admin })
+	h.sessionsChanged(session, func(s *Subscriber) bool { return shared || s.User.ID == userID || s.User.IsAdmin() })
 }
 
 // SharedSessionsChanged tells every device that shared sessions appeared,
@@ -247,7 +247,7 @@ func (h *Hub) UserDataChanged(d core.UserData) {
 
 // ToAdmins sends an event to the administrators' devices.
 func (h *Hub) ToAdmins(e *sessionv1.Event) {
-	for _, s := range h.subscribers(func(s *Subscriber) bool { return s.User.Admin }) {
+	for _, s := range h.subscribers(func(s *Subscriber) bool { return s.User.IsAdmin() }) {
 		h.send(s, e)
 	}
 }

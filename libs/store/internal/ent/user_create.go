@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -45,17 +46,9 @@ func (_c *UserCreate) SetNameKey(v string) *UserCreate {
 	return _c
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (_c *UserCreate) SetPasswordHash(v string) *UserCreate {
-	_c.mutation.SetPasswordHash(v)
-	return _c
-}
-
-// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePasswordHash(v *string) *UserCreate {
-	if v != nil {
-		_c.SetPasswordHash(*v)
-	}
+// SetKind sets the "kind" field.
+func (_c *UserCreate) SetKind(v core.UserKind) *UserCreate {
+	_c.mutation.SetKind(v)
 	return _c
 }
 
@@ -73,16 +66,16 @@ func (_c *UserCreate) SetNillableAuthProvider(v *string) *UserCreate {
 	return _c
 }
 
-// SetAdmin sets the "admin" field.
-func (_c *UserCreate) SetAdmin(v bool) *UserCreate {
-	_c.mutation.SetAdmin(v)
+// SetRestriction sets the "restriction" field.
+func (_c *UserCreate) SetRestriction(v core.RestrictionProfile) *UserCreate {
+	_c.mutation.SetRestriction(v)
 	return _c
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAdmin(v *bool) *UserCreate {
+// SetNillableRestriction sets the "restriction" field if the given value is not nil.
+func (_c *UserCreate) SetNillableRestriction(v *core.RestrictionProfile) *UserCreate {
 	if v != nil {
-		_c.SetAdmin(*v)
+		_c.SetRestriction(*v)
 	}
 	return _c
 }
@@ -183,6 +176,21 @@ func (_c *UserCreate) AddAuthSessions(v ...*AuthSession) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAuthSessionIDs(ids...)
+}
+
+// AddCredentialIDs adds the "credentials" edge to the Credential entity by IDs.
+func (_c *UserCreate) AddCredentialIDs(ids ...core.ID) *UserCreate {
+	_c.mutation.AddCredentialIDs(ids...)
+	return _c
+}
+
+// AddCredentials adds the "credentials" edges to the Credential entity.
+func (_c *UserCreate) AddCredentials(v ...*Credential) *UserCreate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddCredentialIDs(ids...)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
@@ -325,17 +333,13 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.PasswordHash(); !ok {
-		v := user.DefaultPasswordHash
-		_c.mutation.SetPasswordHash(v)
-	}
 	if _, ok := _c.mutation.AuthProvider(); !ok {
 		v := user.DefaultAuthProvider
 		_c.mutation.SetAuthProvider(v)
 	}
-	if _, ok := _c.mutation.Admin(); !ok {
-		v := user.DefaultAdmin
-		_c.mutation.SetAdmin(v)
+	if _, ok := _c.mutation.Restriction(); !ok {
+		v := user.DefaultRestriction
+		_c.mutation.SetRestriction(v)
 	}
 	if _, ok := _c.mutation.Disabled(); !ok {
 		v := user.DefaultDisabled
@@ -364,14 +368,14 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.NameKey(); !ok {
 		return &ValidationError{Name: "name_key", err: errors.New(`ent: missing required field "User.name_key"`)}
 	}
-	if _, ok := _c.mutation.PasswordHash(); !ok {
-		return &ValidationError{Name: "password_hash", err: errors.New(`ent: missing required field "User.password_hash"`)}
+	if _, ok := _c.mutation.Kind(); !ok {
+		return &ValidationError{Name: "kind", err: errors.New(`ent: missing required field "User.kind"`)}
 	}
 	if _, ok := _c.mutation.AuthProvider(); !ok {
 		return &ValidationError{Name: "auth_provider", err: errors.New(`ent: missing required field "User.auth_provider"`)}
 	}
-	if _, ok := _c.mutation.Admin(); !ok {
-		return &ValidationError{Name: "admin", err: errors.New(`ent: missing required field "User.admin"`)}
+	if _, ok := _c.mutation.Restriction(); !ok {
+		return &ValidationError{Name: "restriction", err: errors.New(`ent: missing required field "User.restriction"`)}
 	}
 	if _, ok := _c.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "User.disabled"`)}
@@ -429,17 +433,17 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldNameKey, field.TypeString, value)
 		_node.NameKey = value
 	}
-	if value, ok := _c.mutation.PasswordHash(); ok {
-		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
-		_node.PasswordHash = value
+	if value, ok := _c.mutation.Kind(); ok {
+		_spec.SetField(user.FieldKind, field.TypeString, value)
+		_node.Kind = value
 	}
 	if value, ok := _c.mutation.AuthProvider(); ok {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
 		_node.AuthProvider = value
 	}
-	if value, ok := _c.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
-		_node.Admin = value
+	if value, ok := _c.mutation.Restriction(); ok {
+		_spec.SetField(user.FieldRestriction, field.TypeString, value)
+		_node.Restriction = value
 	}
 	if value, ok := _c.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
@@ -486,6 +490,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.CredentialsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -681,15 +701,15 @@ func (u *UserUpsert) UpdateNameKey() *UserUpsert {
 	return u
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (u *UserUpsert) SetPasswordHash(v string) *UserUpsert {
-	u.Set(user.FieldPasswordHash, v)
+// SetKind sets the "kind" field.
+func (u *UserUpsert) SetKind(v core.UserKind) *UserUpsert {
+	u.Set(user.FieldKind, v)
 	return u
 }
 
-// UpdatePasswordHash sets the "password_hash" field to the value that was provided on create.
-func (u *UserUpsert) UpdatePasswordHash() *UserUpsert {
-	u.SetExcluded(user.FieldPasswordHash)
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UserUpsert) UpdateKind() *UserUpsert {
+	u.SetExcluded(user.FieldKind)
 	return u
 }
 
@@ -705,15 +725,15 @@ func (u *UserUpsert) UpdateAuthProvider() *UserUpsert {
 	return u
 }
 
-// SetAdmin sets the "admin" field.
-func (u *UserUpsert) SetAdmin(v bool) *UserUpsert {
-	u.Set(user.FieldAdmin, v)
+// SetRestriction sets the "restriction" field.
+func (u *UserUpsert) SetRestriction(v core.RestrictionProfile) *UserUpsert {
+	u.Set(user.FieldRestriction, v)
 	return u
 }
 
-// UpdateAdmin sets the "admin" field to the value that was provided on create.
-func (u *UserUpsert) UpdateAdmin() *UserUpsert {
-	u.SetExcluded(user.FieldAdmin)
+// UpdateRestriction sets the "restriction" field to the value that was provided on create.
+func (u *UserUpsert) UpdateRestriction() *UserUpsert {
+	u.SetExcluded(user.FieldRestriction)
 	return u
 }
 
@@ -850,17 +870,17 @@ func (u *UserUpsertOne) UpdateNameKey() *UserUpsertOne {
 	})
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (u *UserUpsertOne) SetPasswordHash(v string) *UserUpsertOne {
+// SetKind sets the "kind" field.
+func (u *UserUpsertOne) SetKind(v core.UserKind) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetPasswordHash(v)
+		s.SetKind(v)
 	})
 }
 
-// UpdatePasswordHash sets the "password_hash" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdatePasswordHash() *UserUpsertOne {
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateKind() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdatePasswordHash()
+		s.UpdateKind()
 	})
 }
 
@@ -878,17 +898,17 @@ func (u *UserUpsertOne) UpdateAuthProvider() *UserUpsertOne {
 	})
 }
 
-// SetAdmin sets the "admin" field.
-func (u *UserUpsertOne) SetAdmin(v bool) *UserUpsertOne {
+// SetRestriction sets the "restriction" field.
+func (u *UserUpsertOne) SetRestriction(v core.RestrictionProfile) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.SetAdmin(v)
+		s.SetRestriction(v)
 	})
 }
 
-// UpdateAdmin sets the "admin" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateAdmin() *UserUpsertOne {
+// UpdateRestriction sets the "restriction" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateRestriction() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateAdmin()
+		s.UpdateRestriction()
 	})
 }
 
@@ -1201,17 +1221,17 @@ func (u *UserUpsertBulk) UpdateNameKey() *UserUpsertBulk {
 	})
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (u *UserUpsertBulk) SetPasswordHash(v string) *UserUpsertBulk {
+// SetKind sets the "kind" field.
+func (u *UserUpsertBulk) SetKind(v core.UserKind) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetPasswordHash(v)
+		s.SetKind(v)
 	})
 }
 
-// UpdatePasswordHash sets the "password_hash" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdatePasswordHash() *UserUpsertBulk {
+// UpdateKind sets the "kind" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateKind() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdatePasswordHash()
+		s.UpdateKind()
 	})
 }
 
@@ -1229,17 +1249,17 @@ func (u *UserUpsertBulk) UpdateAuthProvider() *UserUpsertBulk {
 	})
 }
 
-// SetAdmin sets the "admin" field.
-func (u *UserUpsertBulk) SetAdmin(v bool) *UserUpsertBulk {
+// SetRestriction sets the "restriction" field.
+func (u *UserUpsertBulk) SetRestriction(v core.RestrictionProfile) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.SetAdmin(v)
+		s.SetRestriction(v)
 	})
 }
 
-// UpdateAdmin sets the "admin" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateAdmin() *UserUpsertBulk {
+// UpdateRestriction sets the "restriction" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateRestriction() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
-		s.UpdateAdmin()
+		s.UpdateRestriction()
 	})
 }
 

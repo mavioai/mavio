@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
+	"net"
 	"slices"
 	"strings"
 	"sync"
@@ -75,7 +77,9 @@ type AuthService struct {
 	store  core.Store
 	tokens *auth.AccessTokens
 	nonces *auth.Nonces
-	now    func() time.Time
+	// throttle slows down failed sign-ins per user name and address.
+	throttle *auth.Throttle
+	now      func() time.Time
 	// firstUser serializes CreateFirstUser, so that two concurrent calls
 	// cannot both see an empty user table.
 	firstUser sync.Mutex
@@ -102,7 +106,7 @@ var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
 // tokens with tokens.
 func NewAuthService(store core.Store, tokens *auth.AccessTokens) *AuthService {
 	return &AuthService{
-		store: store, tokens: tokens, nonces: auth.NewNonces(), now: time.Now,
+		store: store, tokens: tokens, nonces: auth.NewNonces(), throttle: auth.NewThrottle(), now: time.Now,
 		quick: auth.NewQuickConnect(), resets: auth.NewPasswordResets(),
 	}
 }
@@ -157,7 +161,7 @@ func (s *AuthService) LoginWithQuickConnect(ctx context.Context, req *authv1.Log
 	token, expires := s.tokens.Issue(r.Session.ID)
 	return authv1.LoginWithQuickConnectResponse_builder{
 		AccessToken: &token, AccessTokenExpireTime: timestamppb.New(expires),
-		User: userToProto(&user), Session: sessionToProto(&r.Session, true),
+		User: userToProto(&user, nil), Session: sessionToProto(&r.Session, true),
 	}.Build(), nil
 }
 
@@ -275,14 +279,16 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 		}
 		now := s.now()
 		user = core.User{
-			Name:         req.GetName(),
-			PasswordHash: auth.HashPassword(req.GetPassword()),
-			Admin:        true,
-			Policy:       core.UserPolicy{AllowTranscoding: true, AllowDownload: true},
-			CreatedAt:    now,
-			LastLoginAt:  &now,
+			Name:        req.GetName(),
+			Kind:        core.UserAdmin,
+			Policy:      core.UserPolicy{AllowTranscoding: true, AllowDownload: true},
+			CreatedAt:   now,
+			LastLoginAt: &now,
 		}
 		if err := tx.Users().Create(ctx, &user); err != nil {
+			return err
+		}
+		if err := putSecret(ctx, tx, user.ID, core.CredentialPassword, req.GetPassword()); err != nil {
 			return err
 		}
 		sess, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
@@ -296,13 +302,50 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 	return authv1.CreateFirstUserResponse_builder{
 		AccessToken:           &token,
 		AccessTokenExpireTime: timestamppb.New(expires),
-		User:                  userToProto(&user),
+		User:                  userToProto(&user, nil),
 		Session:               sessionToProto(&sess, true),
 	}.Build(), nil
 }
 
-// Login checks a user's password and signs the device in.
+// Login checks a user's password and signs the device in. Failed
+// sign-ins slow down progressively per user name and per address.
 func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	keys := signInKeys(ctx, req.GetName())
+	if err := s.throttled(keys); err != nil {
+		return nil, err
+	}
+	resp, err := s.login(ctx, req)
+	switch {
+	case connect.CodeOf(err) == connect.CodeUnauthenticated:
+		s.throttle.Fail(keys...)
+	case err == nil:
+		s.throttle.Succeed(keys[0])
+	}
+	return resp, err
+}
+
+// signInKeys are the throttle's keys of a sign-in as name: the name,
+// whether or not a user has it, and the caller's address.
+func signInKeys(ctx context.Context, name string) []string {
+	keys := []string{"user:" + strings.ToLower(name)}
+	if info, ok := connect.CallInfoForHandlerContext(ctx); ok {
+		if host, _, err := net.SplitHostPort(info.Peer().Addr); err == nil {
+			keys = append(keys, "addr:"+host)
+		}
+	}
+	return keys
+}
+
+// throttled fails while any of keys is locked out.
+func (s *AuthService) throttled(keys []string) error {
+	if wait := s.throttle.Wait(keys...); wait > 0 {
+		return connect.NewError(connect.CodeResourceExhausted,
+			fmt.Errorf("too many failed sign-ins; try again in %s", wait.Round(time.Second)))
+	}
+	return nil
+}
+
+func (s *AuthService) login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
 	failed := connect.NewError(connect.CodeUnauthenticated, errors.New("wrong user name or password"))
 	user, err := s.store.Users().GetByName(ctx, req.GetName())
 	if errors.Is(err, core.ErrNotFound) {
@@ -334,11 +377,15 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		if !ok && res.Message != "" {
 			slog.InfoContext(ctx, "authentication plugin rejected a sign-in", "user", user.ID, "reason", res.Message)
 		}
-	case user.PasswordHash == "":
-		auth.SpendPasswordCheck(req.GetPassword())
-		return nil, loginFailed("no password")
 	default:
-		ok, rehash, err = auth.VerifyPassword(user.PasswordHash, req.GetPassword())
+		password, err := s.store.Credentials().Get(ctx, user.ID, core.CredentialPassword)
+		if errors.Is(err, core.ErrNotFound) {
+			auth.SpendPasswordCheck(req.GetPassword())
+			return nil, loginFailed("no password")
+		} else if err != nil {
+			return nil, connectError(ctx, err)
+		}
+		ok, rehash, err = auth.VerifyPassword(password.Secret, req.GetPassword())
 		if err != nil {
 			slog.ErrorContext(ctx, "unreadable password hash", "user", user.ID, "err", err)
 			return nil, loginFailed("unreadable password hash")
@@ -355,11 +402,13 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 	err = s.store.InTx(ctx, func(tx core.Store) error {
 		now := s.now()
 		user.LastLoginAt = &now
-		if rehash {
-			user.PasswordHash = auth.HashPassword(req.GetPassword())
-		}
 		if err := tx.Users().Update(ctx, &user); err != nil {
 			return err
+		}
+		if rehash {
+			if err := putSecret(ctx, tx, user.ID, core.CredentialPassword, req.GetPassword()); err != nil {
+				return err
+			}
 		}
 		var err error
 		sess, err = s.createSession(ctx, tx, user.ID, req.GetDevice())
@@ -372,11 +421,15 @@ func (s *AuthService) Login(ctx context.Context, req *authv1.LoginRequest) (*aut
 		Type: "user.login", UserID: user.ID, Title: user.Name + " signed in",
 		Attributes: map[string]string{"device": req.GetDevice().GetName(), "client": req.GetDevice().GetClient()},
 	})
+	described, err := describeUser(ctx, s.store, &user)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
 	token, expires := s.tokens.Issue(sess.ID)
 	return authv1.LoginResponse_builder{
 		AccessToken:           &token,
 		AccessTokenExpireTime: timestamppb.New(expires),
-		User:                  userToProto(&user),
+		User:                  described,
 		Session:               sessionToProto(&sess, true),
 	}.Build(), nil
 }
@@ -605,9 +658,14 @@ func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 		if u.Disabled || u.AuthProvider != "" {
 			return failed
 		}
-		u.PasswordHash = auth.HashPassword(req.GetNewPassword())
-		if err := tx.Users().Update(ctx, &u); err != nil {
+		if err := putSecret(ctx, tx, u.ID, core.CredentialPassword, req.GetNewPassword()); err != nil {
 			return err
+		}
+		if u.Kind == core.UserManaged {
+			u.Kind, u.Restriction = core.UserMember, core.RestrictionNone
+			if err := tx.Users().Update(ctx, &u); err != nil {
+				return err
+			}
 		}
 		sessions, err := tx.AuthSessions().ListForUser(ctx, u.ID)
 		if err != nil {
@@ -627,4 +685,9 @@ func (s *AuthService) ResetPassword(ctx context.Context, req *authv1.ResetPasswo
 		Type: "user.password_reset", UserID: user.ID, Title: "Password of " + user.Name + " reset",
 	})
 	return &authv1.ResetPasswordResponse{}, nil
+}
+
+// putSecret hashes secret and stores it as the user's credential of kind.
+func putSecret(ctx context.Context, tx core.Store, userID core.ID, kind core.CredentialKind, secret string) error {
+	return tx.Credentials().Put(ctx, &core.Credential{UserID: userID, Kind: kind, Secret: auth.HashPassword(secret)})
 }

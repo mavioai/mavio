@@ -37,7 +37,7 @@ func testHandlers(t *testing.T, mount func(opts connect.HandlerOption) (string, 
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			switch role := req.Header().Get(roleHeader); role {
 			case "admin", "user":
-				ctx = auth.WithPrincipal(ctx, auth.Principal{User: core.User{ID: core.NewID(), Name: role, Admin: role == "admin"}})
+				ctx = auth.WithPrincipal(ctx, auth.Principal{User: core.User{ID: core.NewID(), Name: role, Kind: map[bool]core.UserKind{true: core.UserAdmin, false: core.UserMember}[role == "admin"]}})
 			default:
 				return nil, connect.NewError(connect.CodeUnauthenticated, nil)
 			}

@@ -97,6 +97,89 @@ impl ::buffa::Enumeration for SubtitleMode {
         ]
     }
 }
+/// RestrictionProfile limits what a managed user sees by content rating, on
+/// top of its policy; rated items within the profile alone are shown.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum RestrictionProfile {
+    /// No restriction.
+    RESTRICTION_PROFILE_UNSPECIFIED = 0i32,
+    /// Up to G and TV-G.
+    RESTRICTION_PROFILE_YOUNGER_CHILD = 1i32,
+    /// Up to PG and TV-PG.
+    RESTRICTION_PROFILE_OLDER_CHILD = 2i32,
+    /// Up to PG-13 and TV-14.
+    RESTRICTION_PROFILE_TEEN = 3i32,
+}
+impl RestrictionProfile {
+    ///Idiomatic alias for [`Self::RESTRICTION_PROFILE_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::RESTRICTION_PROFILE_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::RESTRICTION_PROFILE_YOUNGER_CHILD`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const YoungerChild: Self = Self::RESTRICTION_PROFILE_YOUNGER_CHILD;
+    ///Idiomatic alias for [`Self::RESTRICTION_PROFILE_OLDER_CHILD`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const OlderChild: Self = Self::RESTRICTION_PROFILE_OLDER_CHILD;
+    ///Idiomatic alias for [`Self::RESTRICTION_PROFILE_TEEN`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Teen: Self = Self::RESTRICTION_PROFILE_TEEN;
+}
+impl ::core::default::Default for RestrictionProfile {
+    fn default() -> Self {
+        Self::RESTRICTION_PROFILE_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for RestrictionProfile {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::RESTRICTION_PROFILE_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::RESTRICTION_PROFILE_YOUNGER_CHILD),
+            2i32 => ::core::option::Option::Some(Self::RESTRICTION_PROFILE_OLDER_CHILD),
+            3i32 => ::core::option::Option::Some(Self::RESTRICTION_PROFILE_TEEN),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::RESTRICTION_PROFILE_UNSPECIFIED => "RESTRICTION_PROFILE_UNSPECIFIED",
+            Self::RESTRICTION_PROFILE_YOUNGER_CHILD => {
+                "RESTRICTION_PROFILE_YOUNGER_CHILD"
+            }
+            Self::RESTRICTION_PROFILE_OLDER_CHILD => "RESTRICTION_PROFILE_OLDER_CHILD",
+            Self::RESTRICTION_PROFILE_TEEN => "RESTRICTION_PROFILE_TEEN",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "RESTRICTION_PROFILE_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::RESTRICTION_PROFILE_UNSPECIFIED)
+            }
+            "RESTRICTION_PROFILE_YOUNGER_CHILD" => {
+                ::core::option::Option::Some(Self::RESTRICTION_PROFILE_YOUNGER_CHILD)
+            }
+            "RESTRICTION_PROFILE_OLDER_CHILD" => {
+                ::core::option::Option::Some(Self::RESTRICTION_PROFILE_OLDER_CHILD)
+            }
+            "RESTRICTION_PROFILE_TEEN" => {
+                ::core::option::Option::Some(Self::RESTRICTION_PROFILE_TEEN)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::RESTRICTION_PROFILE_UNSPECIFIED,
+            Self::RESTRICTION_PROFILE_YOUNGER_CHILD,
+            Self::RESTRICTION_PROFILE_OLDER_CHILD,
+            Self::RESTRICTION_PROFILE_TEEN,
+        ]
+    }
+}
 /// User is an account. Credentials are never returned.
 #[derive(Clone, PartialEq, Default)]
 pub struct User {
@@ -109,6 +192,8 @@ pub struct User {
     ///
     /// Field 3: `auth_provider`
     pub auth_provider: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Whether the user is the server's administrator; exactly one user is.
+    ///
     /// Field 4: `admin`
     pub admin: ::core::option::Option<bool>,
     /// Field 5: `disabled`
@@ -130,6 +215,19 @@ pub struct User {
         ::buffa_types::google::protobuf::Timestamp,
         ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
+    /// A managed user has no credentials and is reached only by switching to
+    /// it.
+    ///
+    /// Field 10: `managed`
+    pub managed: ::core::option::Option<bool>,
+    /// Whether switching to the user asks for its PIN.
+    ///
+    /// Field 11: `has_pin`
+    pub has_pin: ::core::option::Option<bool>,
+    /// A managed user's restriction profile.
+    ///
+    /// Field 12: `restriction`
+    pub restriction: ::core::option::Option<::buffa::EnumValue<RestrictionProfile>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -145,6 +243,9 @@ impl ::core::fmt::Debug for User {
             .field("preferences", &self.preferences)
             .field("create_time", &self.create_time)
             .field("last_login_time", &self.last_login_time)
+            .field("managed", &self.managed)
+            .field("has_pin", &self.has_pin)
+            .field("restriction", &self.restriction)
             .finish()
     }
 }
@@ -195,6 +296,30 @@ impl User {
     ///Sets [`Self::disabled`] to `Some(value)`, consuming and returning `self`.
     pub fn with_disabled(mut self, value: bool) -> Self {
         self.disabled = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::managed`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_managed(mut self, value: bool) -> Self {
+        self.managed = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::has_pin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_has_pin(mut self, value: bool) -> Self {
+        self.has_pin = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::restriction`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_restriction(
+        mut self,
+        value: impl Into<::buffa::EnumValue<RestrictionProfile>>,
+    ) -> Self {
+        self.restriction = Some(value.into());
         self
     }
 }
@@ -265,6 +390,15 @@ impl ::buffa::Message for User {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.managed.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.has_pin.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -321,6 +455,15 @@ impl ::buffa::Message for User {
                 buf,
             );
             self.last_login_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.managed {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.has_pin {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -429,6 +572,33 @@ impl ::buffa::Message for User {
                     ctx,
                 )?;
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.managed = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.has_pin = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.restriction = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -446,6 +616,9 @@ impl ::buffa::Message for User {
         self.preferences = ::buffa::MessageField::none();
         self.create_time = ::buffa::MessageField::none();
         self.last_login_time = ::buffa::MessageField::none();
+        self.managed = ::core::option::Option::None;
+        self.has_pin = ::core::option::Option::None;
+        self.restriction = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2224,12 +2397,14 @@ impl ::buffa::ExtensionSet for GetCurrentUserResponse {
 pub struct CreateUserRequest {
     /// Field 1: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Required unless auth_provider is set.
+    /// Required unless auth_provider or managed is set.
     ///
     /// Field 2: `password`
     pub password: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `auth_provider`
     pub auth_provider: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Must be false: the server's one administrator is created at setup.
+    ///
     /// Field 4: `admin`
     pub admin: ::core::option::Option<bool>,
     /// Field 5: `policy`
@@ -2239,6 +2414,18 @@ pub struct CreateUserRequest {
         UserPreferences,
         ::buffa::Inline<UserPreferences>,
     >,
+    /// Creates a managed user, without password or auth_provider.
+    ///
+    /// Field 7: `managed`
+    pub managed: ::core::option::Option<bool>,
+    /// The managed user's restriction profile.
+    ///
+    /// Field 8: `restriction`
+    pub restriction: ::core::option::Option<::buffa::EnumValue<RestrictionProfile>>,
+    /// The managed user's PIN.
+    ///
+    /// Field 9: `pin`
+    pub pin: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2251,6 +2438,9 @@ impl ::core::fmt::Debug for CreateUserRequest {
             .field("admin", &self.admin)
             .field("policy", &self.policy)
             .field("preferences", &self.preferences)
+            .field("managed", &self.managed)
+            .field("restriction", &self.restriction)
+            .field("pin", &self.pin)
             .finish()
     }
 }
@@ -2297,6 +2487,30 @@ impl CreateUserRequest {
     ///Sets [`Self::admin`] to `Some(value)`, consuming and returning `self`.
     pub fn with_admin(mut self, value: bool) -> Self {
         self.admin = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::managed`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_managed(mut self, value: bool) -> Self {
+        self.managed = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::restriction`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_restriction(
+        mut self,
+        value: impl Into<::buffa::EnumValue<RestrictionProfile>>,
+    ) -> Self {
+        self.restriction = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::pin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_pin(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.pin = Some(value.into());
         self
     }
 }
@@ -2348,6 +2562,15 @@ impl ::buffa::Message for CreateUserRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.managed.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.pin {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2385,6 +2608,15 @@ impl ::buffa::Message for CreateUserRequest {
                 buf,
             );
             self.preferences.write_to(__cache, buf);
+        }
+        if let Some(v) = self.managed {
+            ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(8u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.pin {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2464,6 +2696,34 @@ impl ::buffa::Message for CreateUserRequest {
                     ctx,
                 )?;
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.managed = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.restriction = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.pin.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2478,6 +2738,9 @@ impl ::buffa::Message for CreateUserRequest {
         self.admin = ::core::option::Option::None;
         self.policy = ::buffa::MessageField::none();
         self.preferences = ::buffa::MessageField::none();
+        self.managed = ::core::option::Option::None;
+        self.restriction = ::core::option::Option::None;
+        self.pin = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -2606,12 +2869,22 @@ pub struct UpdateUserRequest {
     pub id: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 2: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// When set, must be the user's own: the administrator stays the
+    /// administrator.
+    ///
     /// Field 3: `admin`
     pub admin: ::core::option::Option<bool>,
+    /// The administrator cannot be disabled.
+    ///
     /// Field 4: `disabled`
     pub disabled: ::core::option::Option<bool>,
     /// Field 5: `policy`
     pub policy: ::buffa::MessageField<UserPolicy, ::buffa::Inline<UserPolicy>>,
+    /// A managed user's restriction profile; for other users it must be
+    /// unspecified.
+    ///
+    /// Field 6: `restriction`
+    pub restriction: ::core::option::Option<::buffa::EnumValue<RestrictionProfile>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2623,6 +2896,7 @@ impl ::core::fmt::Debug for UpdateUserRequest {
             .field("admin", &self.admin)
             .field("disabled", &self.disabled)
             .field("policy", &self.policy)
+            .field("restriction", &self.restriction)
             .finish()
     }
 }
@@ -2663,6 +2937,16 @@ impl UpdateUserRequest {
     ///Sets [`Self::disabled`] to `Some(value)`, consuming and returning `self`.
     pub fn with_disabled(mut self, value: bool) -> Self {
         self.disabled = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::restriction`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_restriction(
+        mut self,
+        value: impl Into<::buffa::EnumValue<RestrictionProfile>>,
+    ) -> Self {
+        self.restriction = Some(value.into());
         self
     }
 }
@@ -2706,6 +2990,9 @@ impl ::buffa::Message for UpdateUserRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2735,6 +3022,9 @@ impl ::buffa::Message for UpdateUserRequest {
                 buf,
             );
             self.policy.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(6u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2798,6 +3088,15 @@ impl ::buffa::Message for UpdateUserRequest {
                     ctx,
                 )?;
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.restriction = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2811,6 +3110,7 @@ impl ::buffa::Message for UpdateUserRequest {
         self.admin = ::core::option::Option::None;
         self.disabled = ::core::option::Option::None;
         self.policy = ::buffa::MessageField::none();
+        self.restriction = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -3373,6 +3673,228 @@ impl ::buffa::Message for SetPasswordResponse {
 }
 impl ::buffa::ExtensionSet for SetPasswordResponse {
     const PROTO_FQN: &'static str = "mavio.user.v1.SetPasswordResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct SetPinRequest {
+    /// Field 1: `user_id`
+    pub user_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Four digits; empty clears the PIN.
+    ///
+    /// Field 2: `pin`
+    pub pin: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SetPinRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SetPinRequest")
+            .field("user_id", &self.user_id)
+            .field("pin", &self.pin)
+            .finish()
+    }
+}
+impl SetPinRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinRequest";
+}
+impl SetPinRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::user_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_user_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.user_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::pin`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_pin(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.pin = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(SetPinRequest);
+impl ::buffa::MessageName for SetPinRequest {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "SetPinRequest";
+    const FULL_NAME: &'static str = "mavio.user.v1.SetPinRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinRequest";
+}
+impl ::buffa::Message for SetPinRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.user_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.pin {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.user_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.pin {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.user_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.pin.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.user_id = ::core::option::Option::None;
+        self.pin = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SetPinRequest {
+    const PROTO_FQN: &'static str = "mavio.user.v1.SetPinRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct SetPinResponse {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SetPinResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SetPinResponse").finish()
+    }
+}
+impl SetPinResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinResponse";
+}
+::buffa::impl_default_instance!(SetPinResponse);
+impl ::buffa::MessageName for SetPinResponse {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "SetPinResponse";
+    const FULL_NAME: &'static str = "mavio.user.v1.SetPinResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinResponse";
+}
+impl ::buffa::Message for SetPinResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SetPinResponse {
+    const PROTO_FQN: &'static str = "mavio.user.v1.SetPinResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

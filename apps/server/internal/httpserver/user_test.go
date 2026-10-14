@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/types/known/durationpb"
 
+	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
@@ -95,22 +96,90 @@ func TestUserService(t *testing.T) {
 		t.Errorf("UpdatePreferences = %v, %v", prefs, err)
 	}
 
-	// The last enabled administrator stays.
+	// The server has one administrator, who stays.
 	adminID := mustCurrent(t, asAdmin).GetId()
+	bobID := created.GetUser().GetId()
 	_, err = asAdmin.UpdateUser(ctx, userv1.UpdateUserRequest_builder{Id: &adminID, Name: new("admin"), Admin: new(false)}.Build())
-	wantCode(t, "demote the last admin", err, connect.CodeFailedPrecondition)
+	wantCode(t, "demote the administrator", err, connect.CodeFailedPrecondition)
+	_, err = asAdmin.UpdateUser(ctx, userv1.UpdateUserRequest_builder{Id: &adminID, Name: new("admin"), Disabled: new(true)}.Build())
+	wantCode(t, "disable the administrator", err, connect.CodeFailedPrecondition)
 	_, err = asAdmin.DeleteUser(ctx, userv1.DeleteUserRequest_builder{Id: &adminID}.Build())
-	wantCode(t, "delete the last admin", err, connect.CodeFailedPrecondition)
+	wantCode(t, "delete the administrator", err, connect.CodeFailedPrecondition)
+	_, err = asAdmin.UpdateUser(ctx, userv1.UpdateUserRequest_builder{Id: &bobID, Name: new("bob"), Admin: new(true)}.Build())
+	wantCode(t, "promote a member", err, connect.CodeFailedPrecondition)
+	_, err = asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("frank"), Password: new("pw"), Admin: new(true)}.Build())
+	wantCode(t, "create an administrator", err, connect.CodeFailedPrecondition)
 	updated, err := asAdmin.UpdateUser(ctx, userv1.UpdateUserRequest_builder{
-		Id: new(created.GetUser().GetId()), Name: new("robert"), Admin: new(true),
-		Policy: userv1.UserPolicy_builder{AllLibraries: new(true)}.Build(),
+		Id: &bobID, Name: new("robert"), Policy: userv1.UserPolicy_builder{AllLibraries: new(true)}.Build(),
 	}.Build())
-	if err != nil || updated.GetUser().GetName() != "robert" || !updated.GetUser().GetAdmin() || !updated.GetUser().GetPolicy().GetAllLibraries() {
+	if err != nil || updated.GetUser().GetName() != "robert" || updated.GetUser().GetAdmin() || !updated.GetUser().GetPolicy().GetAllLibraries() {
 		t.Fatalf("UpdateUser = %v, %v", updated, err)
 	}
-	if _, err := asAdmin.DeleteUser(ctx, userv1.DeleteUserRequest_builder{Id: &adminID}.Build()); err != nil {
-		t.Errorf("delete an admin while another remains: %v", err)
+
+	// Managed users have no credentials, and a restriction profile.
+	teen := userv1.RestrictionProfile_RESTRICTION_PROFILE_TEEN
+	kid, err := asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("kid"), Managed: new(true), Restriction: &teen, Pin: new("1234")}.Build())
+	if u := kid.GetUser(); err != nil || !u.GetManaged() || !u.GetHasPin() || u.GetRestriction() != teen {
+		t.Fatalf("CreateUser managed = %v, %v", kid, err)
 	}
+	kidID := kid.GetUser().GetId()
+	_, err = asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("kid2"), Managed: new(true), Password: new("pw")}.Build())
+	wantCode(t, "managed user with a password", err, connect.CodeInvalidArgument)
+	_, err = asAdmin.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("grace"), Password: new("pw"), Restriction: &teen}.Build())
+	wantCode(t, "restricted member", err, connect.CodeInvalidArgument)
+	_, err = asAdmin.UpdateUser(ctx, userv1.UpdateUserRequest_builder{Id: &bobID, Name: new("robert"), Restriction: &teen}.Build())
+	wantCode(t, "restrict a member", err, connect.CodeInvalidArgument)
+	_, err = authv1connect.NewAuthServiceClient(http.DefaultClient, url).Login(ctx,
+		authv1.LoginRequest_builder{Name: new("kid"), Password: new(""), Device: device("kid")}.Build())
+	wantCode(t, "managed user signing in", err, connect.CodeUnauthenticated)
+
+	// The administrator sets managed users' PINs, users their own.
+	_, err = asBob.SetPin(ctx, userv1.SetPinRequest_builder{UserId: &bobID, Pin: new("4321")}.Build())
+	if err != nil {
+		t.Errorf("SetPin own: %v", err)
+	}
+	_, err = asBob.SetPin(ctx, userv1.SetPinRequest_builder{UserId: &kidID, Pin: new("0000")}.Build())
+	wantCode(t, "member setting a managed user's PIN", err, connect.CodePermissionDenied)
+	_, err = asAdmin.SetPin(ctx, userv1.SetPinRequest_builder{UserId: &bobID, Pin: new("0000")}.Build())
+	wantCode(t, "administrator setting a member's PIN", err, connect.CodePermissionDenied)
+	if _, err := asAdmin.SetPin(ctx, userv1.SetPinRequest_builder{UserId: &kidID, Pin: new("")}.Build()); err != nil {
+		t.Errorf("SetPin clearing the managed user's: %v", err)
+	}
+	if u, err := asAdmin.GetUser(ctx, userv1.GetUserRequest_builder{Id: &kidID}.Build()); err != nil || u.GetUser().GetHasPin() {
+		t.Errorf("managed user after clearing its PIN = %v, %v", u, err)
+	}
+	if u, err := asAdmin.GetUser(ctx, userv1.GetUserRequest_builder{Id: &bobID}.Build()); err != nil || !u.GetUser().GetHasPin() {
+		t.Errorf("member after setting its PIN = %v, %v", u, err)
+	}
+
+	// A password makes a managed user a member, keeping its data.
+	if _, err := asAdmin.SetPassword(ctx, userv1.SetPasswordRequest_builder{UserId: &kidID, NewPassword: new("grown")}.Build()); err != nil {
+		t.Fatalf("SetPassword of the managed user: %v", err)
+	}
+	if u, err := asAdmin.GetUser(ctx, userv1.GetUserRequest_builder{Id: &kidID}.Build()); err != nil || u.GetUser().GetManaged() || u.GetUser().GetRestriction() != userv1.RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED {
+		t.Errorf("converted user = %v, %v", u, err)
+	}
+	login(t, url, "kid", "grown", "kid")
+	if _, err := asAdmin.DeleteUser(ctx, userv1.DeleteUserRequest_builder{Id: &kidID}.Build()); err != nil {
+		t.Errorf("delete a member: %v", err)
+	}
+
+	// Failed sign-ins slow down, per name and per address.
+	authClient := authv1connect.NewAuthServiceClient(http.DefaultClient, url)
+	signIn := func(name, password string) error {
+		_, err := authClient.Login(ctx, authv1.LoginRequest_builder{Name: &name, Password: &password, Device: device("guess")}.Build())
+		return err
+	}
+	wantCode(t, "first wrong password", signIn("robert", "guess"), connect.CodeUnauthenticated)
+	for i := range auth.FreeFailures + 1 {
+		if err := signIn("robert", "guess"); connect.CodeOf(err) == connect.CodeResourceExhausted {
+			break
+		} else if connect.CodeOf(err) != connect.CodeUnauthenticated || i == auth.FreeFailures {
+			t.Fatalf("wrong password %d: err = %v, want a lockout after %d failures", i+2, err, auth.FreeFailures)
+		}
+	}
+	wantCode(t, "sign-in while locked out", signIn("robert", "pw2"), connect.CodeResourceExhausted)
+	wantCode(t, "another name from the address", signIn("admin", "x"), connect.CodeResourceExhausted)
 }
 
 func mustCurrent(t *testing.T, c userv1connect.UserServiceClient) *userv1.User {

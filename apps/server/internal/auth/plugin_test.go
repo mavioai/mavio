@@ -21,8 +21,8 @@ func TestPluginRequests(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = s.Close() })
 	for _, u := range []core.User{
-		{Name: "alice", PasswordHash: HashPassword("pw")},
-		{Name: "bob", PasswordHash: HashPassword("pw"), Disabled: true},
+		{Name: "alice", Kind: core.UserMember},
+		{Name: "bob", Kind: core.UserMember, Disabled: true},
 	} {
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
@@ -100,7 +100,7 @@ func TestPluginRequests(t *testing.T) {
 		if wantSession := tt.device != ""; p.User.Name != tt.wantUser || p.Plugin != g.ID || (p.Session.ID == tv.ID) != wantSession {
 			t.Errorf("%s: principal = %+v, want user %q of plugin %s", tt.name, p, tt.wantUser, g.ID)
 		}
-		if tt.user == "" && (!p.User.Admin || !p.User.ID.IsZero()) {
+		if tt.user == "" && (!p.User.IsAdmin() || !p.User.ID.IsZero()) {
 			t.Errorf("%s: plugin principal = %+v, want an administrator without ID", tt.name, p.User)
 		}
 	}

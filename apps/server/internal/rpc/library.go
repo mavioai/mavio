@@ -69,7 +69,7 @@ func (s *LibraryService) ListLibraries(ctx context.Context, _ *libraryv1.ListLib
 	var out []*libraryv1.Library
 	for i := range libs {
 		if canAccessLibrary(&p.User, &libs[i]) {
-			out = append(out, s.toProto(ctx, &libs[i], p.User.Admin))
+			out = append(out, s.toProto(ctx, &libs[i], p.User.IsAdmin()))
 		}
 	}
 	return libraryv1.ListLibrariesResponse_builder{Libraries: out}.Build(), nil
@@ -88,7 +88,7 @@ func (s *LibraryService) GetLibrary(ctx context.Context, req *libraryv1.GetLibra
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.GetLibraryResponse_builder{Library: s.toProto(ctx, &lib, p.User.Admin)}.Build(), nil
+	return libraryv1.GetLibraryResponse_builder{Library: s.toProto(ctx, &lib, p.User.IsAdmin())}.Build(), nil
 }
 
 // canAccessLibrary reports whether the user may see a library: every user

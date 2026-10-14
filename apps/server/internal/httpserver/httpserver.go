@@ -372,7 +372,7 @@ func backupDownload(authn *auth.Interceptor, backups *backup.Manager) http.Handl
 			http.Error(w, err.Error(), connectHTTPStatus(err))
 			return
 		}
-		if !p.User.Admin {
+		if !p.User.IsAdmin() {
 			http.Error(w, "administrators only", http.StatusForbidden)
 			return
 		}

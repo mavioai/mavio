@@ -63,7 +63,7 @@ func (s *PlaybackService) ListIntros(ctx context.Context, req *playbackv1.ListIn
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -83,7 +83,7 @@ func (s *PlaybackService) ListMediaSources(ctx context.Context, req *playbackv1.
 	}
 	out := make([]*libraryv1.MediaSource, len(sources))
 	for i := range sources {
-		out[i] = mediaSourceToProto(ctx, &sources[i], p.User.Admin)
+		out[i] = mediaSourceToProto(ctx, &sources[i], p.User.IsAdmin())
 		out[i].SetRemote(i >= local)
 	}
 	return playbackv1.ListMediaSourcesResponse_builder{MediaSources: out}.Build(), nil

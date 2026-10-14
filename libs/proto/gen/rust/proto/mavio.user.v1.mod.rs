@@ -100,6 +100,14 @@ pub use self::__buffa::view::SetPasswordResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPasswordResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SetPinRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPinResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::UpdatePreferencesRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::UpdatePreferencesRequestOwnedView;

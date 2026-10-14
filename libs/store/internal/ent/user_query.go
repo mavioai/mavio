@@ -16,6 +16,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -35,6 +36,7 @@ type UserQuery struct {
 	predicates             []predicate.User
 	withUserData           *UserDataQuery
 	withAuthSessions       *AuthSessionQuery
+	withCredentials        *CredentialQuery
 	withPlaylists          *ItemQuery
 	withDisplayPreferences *DisplayPreferencesQuery
 	withAPIKeys            *APIKeyQuery
@@ -116,6 +118,28 @@ func (_q *UserQuery) QueryAuthSessions() *AuthSessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(authsession.Table, authsession.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthSessionsTable, user.AuthSessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCredentials chains the current query on the "credentials" edge.
+func (_q *UserQuery) QueryCredentials() *CredentialQuery {
+	query := (&CredentialClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(credential.Table, credential.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CredentialsTable, user.CredentialsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -471,6 +495,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		predicates:             append([]predicate.User{}, _q.predicates...),
 		withUserData:           _q.withUserData.Clone(),
 		withAuthSessions:       _q.withAuthSessions.Clone(),
+		withCredentials:        _q.withCredentials.Clone(),
 		withPlaylists:          _q.withPlaylists.Clone(),
 		withDisplayPreferences: _q.withDisplayPreferences.Clone(),
 		withAPIKeys:            _q.withAPIKeys.Clone(),
@@ -504,6 +529,17 @@ func (_q *UserQuery) WithAuthSessions(opts ...func(*AuthSessionQuery)) *UserQuer
 		opt(query)
 	}
 	_q.withAuthSessions = query
+	return _q
+}
+
+// WithCredentials tells the query-builder to eager-load the nodes that are connected to
+// the "credentials" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithCredentials(opts ...func(*CredentialQuery)) *UserQuery {
+	query := (&CredentialClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withCredentials = query
 	return _q
 }
 
@@ -662,9 +698,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [10]bool{
 			_q.withUserData != nil,
 			_q.withAuthSessions != nil,
+			_q.withCredentials != nil,
 			_q.withPlaylists != nil,
 			_q.withDisplayPreferences != nil,
 			_q.withAPIKeys != nil,
@@ -706,6 +743,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadAuthSessions(ctx, query, nodes,
 			func(n *User) { n.Edges.AuthSessions = []*AuthSession{} },
 			func(n *User, e *AuthSession) { n.Edges.AuthSessions = append(n.Edges.AuthSessions, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withCredentials; query != nil {
+		if err := _q.loadCredentials(ctx, query, nodes,
+			func(n *User) { n.Edges.Credentials = []*Credential{} },
+			func(n *User, e *Credential) { n.Edges.Credentials = append(n.Edges.Credentials, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -808,6 +852,36 @@ func (_q *UserQuery) loadAuthSessions(ctx context.Context, query *AuthSessionQue
 	}
 	query.Where(predicate.AuthSession(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AuthSessionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadCredentials(ctx context.Context, query *CredentialQuery, nodes []*User, init func(*User), assign func(*User, *Credential)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[core.ID]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(credential.FieldUserID)
+	}
+	query.Where(predicate.Credential(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CredentialsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

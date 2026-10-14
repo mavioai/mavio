@@ -23,12 +23,12 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// NameKey holds the value of the "name_key" field.
 	NameKey string `json:"name_key,omitempty"`
-	// PasswordHash holds the value of the "password_hash" field.
-	PasswordHash string `json:"-"`
+	// Kind holds the value of the "kind" field.
+	Kind core.UserKind `json:"kind,omitempty"`
 	// AuthProvider holds the value of the "auth_provider" field.
 	AuthProvider string `json:"auth_provider,omitempty"`
-	// Admin holds the value of the "admin" field.
-	Admin bool `json:"admin,omitempty"`
+	// Restriction holds the value of the "restriction" field.
+	Restriction core.RestrictionProfile `json:"restriction,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// Policy holds the value of the "policy" field.
@@ -51,6 +51,8 @@ type UserEdges struct {
 	UserData []*UserData `json:"user_data,omitempty"`
 	// AuthSessions holds the value of the auth_sessions edge.
 	AuthSessions []*AuthSession `json:"auth_sessions,omitempty"`
+	// Credentials holds the value of the credentials edge.
+	Credentials []*Credential `json:"credentials,omitempty"`
 	// Playlists holds the value of the playlists edge.
 	Playlists []*Item `json:"playlists,omitempty"`
 	// DisplayPreferences holds the value of the display_preferences edge.
@@ -67,7 +69,7 @@ type UserEdges struct {
 	BlockedTitles []*BlockedTitle `json:"blocked_titles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // UserDataOrErr returns the UserData value or an error if the edge
@@ -88,10 +90,19 @@ func (e UserEdges) AuthSessionsOrErr() ([]*AuthSession, error) {
 	return nil, &NotLoadedError{edge: "auth_sessions"}
 }
 
+// CredentialsOrErr returns the Credentials value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CredentialsOrErr() ([]*Credential, error) {
+	if e.loadedTypes[2] {
+		return e.Credentials, nil
+	}
+	return nil, &NotLoadedError{edge: "credentials"}
+}
+
 // PlaylistsOrErr returns the Playlists value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PlaylistsOrErr() ([]*Item, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Playlists, nil
 	}
 	return nil, &NotLoadedError{edge: "playlists"}
@@ -100,7 +111,7 @@ func (e UserEdges) PlaylistsOrErr() ([]*Item, error) {
 // DisplayPreferencesOrErr returns the DisplayPreferences value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) DisplayPreferencesOrErr() ([]*DisplayPreferences, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.DisplayPreferences, nil
 	}
 	return nil, &NotLoadedError{edge: "display_preferences"}
@@ -109,7 +120,7 @@ func (e UserEdges) DisplayPreferencesOrErr() ([]*DisplayPreferences, error) {
 // APIKeysOrErr returns the APIKeys value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) APIKeysOrErr() ([]*APIKey, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.APIKeys, nil
 	}
 	return nil, &NotLoadedError{edge: "api_keys"}
@@ -118,7 +129,7 @@ func (e UserEdges) APIKeysOrErr() ([]*APIKey, error) {
 // RequestsOrErr returns the Requests value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RequestsOrErr() ([]*Request, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.Requests, nil
 	}
 	return nil, &NotLoadedError{edge: "requests"}
@@ -127,7 +138,7 @@ func (e UserEdges) RequestsOrErr() ([]*Request, error) {
 // IssuesOrErr returns the Issues value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.Issues, nil
 	}
 	return nil, &NotLoadedError{edge: "issues"}
@@ -136,7 +147,7 @@ func (e UserEdges) IssuesOrErr() ([]*Issue, error) {
 // IssueCommentsOrErr returns the IssueComments value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		return e.IssueComments, nil
 	}
 	return nil, &NotLoadedError{edge: "issue_comments"}
@@ -145,7 +156,7 @@ func (e UserEdges) IssueCommentsOrErr() ([]*IssueComment, error) {
 // BlockedTitlesOrErr returns the BlockedTitles value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) BlockedTitlesOrErr() ([]*BlockedTitle, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		return e.BlockedTitles, nil
 	}
 	return nil, &NotLoadedError{edge: "blocked_titles"}
@@ -160,9 +171,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(core.ID)
-		case user.FieldAdmin, user.FieldDisabled:
+		case user.FieldDisabled:
 			values[i] = new(sql.NullBool)
-		case user.FieldName, user.FieldNameKey, user.FieldPasswordHash, user.FieldAuthProvider:
+		case user.FieldName, user.FieldNameKey, user.FieldKind, user.FieldAuthProvider, user.FieldRestriction:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
@@ -199,11 +210,11 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.NameKey = value.String
 			}
-		case user.FieldPasswordHash:
+		case user.FieldKind:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field password_hash", values[i])
+				return fmt.Errorf("unexpected type %T for field kind", values[i])
 			} else if value.Valid {
-				_m.PasswordHash = value.String
+				_m.Kind = core.UserKind(value.String)
 			}
 		case user.FieldAuthProvider:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -211,11 +222,11 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.AuthProvider = value.String
 			}
-		case user.FieldAdmin:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field admin", values[i])
+		case user.FieldRestriction:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field restriction", values[i])
 			} else if value.Valid {
-				_m.Admin = value.Bool
+				_m.Restriction = core.RestrictionProfile(value.String)
 			}
 		case user.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -273,6 +284,11 @@ func (_m *User) QueryUserData() *UserDataQuery {
 // QueryAuthSessions queries the "auth_sessions" edge of the User entity.
 func (_m *User) QueryAuthSessions() *AuthSessionQuery {
 	return NewUserClient(_m.config).QueryAuthSessions(_m)
+}
+
+// QueryCredentials queries the "credentials" edge of the User entity.
+func (_m *User) QueryCredentials() *CredentialQuery {
+	return NewUserClient(_m.config).QueryCredentials(_m)
 }
 
 // QueryPlaylists queries the "playlists" edge of the User entity.
@@ -339,13 +355,14 @@ func (_m *User) String() string {
 	builder.WriteString("name_key=")
 	builder.WriteString(_m.NameKey)
 	builder.WriteString(", ")
-	builder.WriteString("password_hash=<sensitive>")
+	builder.WriteString("kind=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Kind))
 	builder.WriteString(", ")
 	builder.WriteString("auth_provider=")
 	builder.WriteString(_m.AuthProvider)
 	builder.WriteString(", ")
-	builder.WriteString("admin=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Admin))
+	builder.WriteString("restriction=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Restriction))
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Disabled))

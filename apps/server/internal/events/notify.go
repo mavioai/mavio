@@ -43,7 +43,7 @@ func ActivityToProto(a *core.Activity) *systemv1.Activity {
 func (h *Hub) Notify(a core.Activity, user, admins bool) {
 	e := sessionv1.Event_builder{Notification: sessionv1.NotificationReceived_builder{Activity: ActivityToProto(&a)}.Build()}.Build()
 	for _, s := range h.subscribers(func(s *Subscriber) bool {
-		return user && !a.UserID.IsZero() && s.User.ID == a.UserID || admins && s.User.Admin
+		return user && !a.UserID.IsZero() && s.User.ID == a.UserID || admins && s.User.IsAdmin()
 	}) {
 		h.send(s, e)
 	}

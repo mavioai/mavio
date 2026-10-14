@@ -77,6 +77,59 @@ func (x SubtitleMode) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// RestrictionProfile limits what a managed user sees by content rating, on
+// top of its policy; rated items within the profile alone are shown.
+type RestrictionProfile int32
+
+const (
+	// No restriction.
+	RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED RestrictionProfile = 0
+	// Up to G and TV-G.
+	RestrictionProfile_RESTRICTION_PROFILE_YOUNGER_CHILD RestrictionProfile = 1
+	// Up to PG and TV-PG.
+	RestrictionProfile_RESTRICTION_PROFILE_OLDER_CHILD RestrictionProfile = 2
+	// Up to PG-13 and TV-14.
+	RestrictionProfile_RESTRICTION_PROFILE_TEEN RestrictionProfile = 3
+)
+
+// Enum value maps for RestrictionProfile.
+var (
+	RestrictionProfile_name = map[int32]string{
+		0: "RESTRICTION_PROFILE_UNSPECIFIED",
+		1: "RESTRICTION_PROFILE_YOUNGER_CHILD",
+		2: "RESTRICTION_PROFILE_OLDER_CHILD",
+		3: "RESTRICTION_PROFILE_TEEN",
+	}
+	RestrictionProfile_value = map[string]int32{
+		"RESTRICTION_PROFILE_UNSPECIFIED":   0,
+		"RESTRICTION_PROFILE_YOUNGER_CHILD": 1,
+		"RESTRICTION_PROFILE_OLDER_CHILD":   2,
+		"RESTRICTION_PROFILE_TEEN":          3,
+	}
+)
+
+func (x RestrictionProfile) Enum() *RestrictionProfile {
+	p := new(RestrictionProfile)
+	*p = x
+	return p
+}
+
+func (x RestrictionProfile) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RestrictionProfile) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_user_v1_user_proto_enumTypes[1].Descriptor()
+}
+
+func (RestrictionProfile) Type() protoreflect.EnumType {
+	return &file_mavio_user_v1_user_proto_enumTypes[1]
+}
+
+func (x RestrictionProfile) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // User is an account. Credentials are never returned.
 type User struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
@@ -89,6 +142,9 @@ type User struct {
 	xxx_hidden_Preferences   *UserPreferences       `protobuf:"bytes,7,opt,name=preferences"`
 	xxx_hidden_CreateTime    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
 	xxx_hidden_LastLoginTime *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=last_login_time,json=lastLoginTime"`
+	xxx_hidden_Managed       bool                   `protobuf:"varint,10,opt,name=managed"`
+	xxx_hidden_HasPin        bool                   `protobuf:"varint,11,opt,name=has_pin,json=hasPin"`
+	xxx_hidden_Restriction   RestrictionProfile     `protobuf:"varint,12,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -192,29 +248,52 @@ func (x *User) GetLastLoginTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *User) GetManaged() bool {
+	if x != nil {
+		return x.xxx_hidden_Managed
+	}
+	return false
+}
+
+func (x *User) GetHasPin() bool {
+	if x != nil {
+		return x.xxx_hidden_HasPin
+	}
+	return false
+}
+
+func (x *User) GetRestriction() RestrictionProfile {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 11) {
+			return x.xxx_hidden_Restriction
+		}
+	}
+	return RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
 func (x *User) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
 }
 
 func (x *User) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
 }
 
 func (x *User) SetAuthProvider(v string) {
 	x.xxx_hidden_AuthProvider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
 }
 
 func (x *User) SetAdmin(v bool) {
 	x.xxx_hidden_Admin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
 }
 
 func (x *User) SetDisabled(v bool) {
 	x.xxx_hidden_Disabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 9)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
 }
 
 func (x *User) SetPolicy(v *UserPolicy) {
@@ -231,6 +310,21 @@ func (x *User) SetCreateTime(v *timestamppb.Timestamp) {
 
 func (x *User) SetLastLoginTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_LastLoginTime = v
+}
+
+func (x *User) SetManaged(v bool) {
+	x.xxx_hidden_Managed = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
+}
+
+func (x *User) SetHasPin(v bool) {
+	x.xxx_hidden_HasPin = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+}
+
+func (x *User) SetRestriction(v RestrictionProfile) {
+	x.xxx_hidden_Restriction = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
 }
 
 func (x *User) HasId() bool {
@@ -296,6 +390,27 @@ func (x *User) HasLastLoginTime() bool {
 	return x.xxx_hidden_LastLoginTime != nil
 }
 
+func (x *User) HasManaged() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
+}
+
+func (x *User) HasHasPin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
+func (x *User) HasRestriction() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
 func (x *User) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -337,6 +452,21 @@ func (x *User) ClearLastLoginTime() {
 	x.xxx_hidden_LastLoginTime = nil
 }
 
+func (x *User) ClearManaged() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
+	x.xxx_hidden_Managed = false
+}
+
+func (x *User) ClearHasPin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_HasPin = false
+}
+
+func (x *User) ClearRestriction() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Restriction = RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
 type User_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -344,13 +474,21 @@ type User_builder struct {
 	Name *string
 	// Empty for the built-in password check, otherwise the authenticating
 	// plugin.
-	AuthProvider  *string
+	AuthProvider *string
+	// Whether the user is the server's administrator; exactly one user is.
 	Admin         *bool
 	Disabled      *bool
 	Policy        *UserPolicy
 	Preferences   *UserPreferences
 	CreateTime    *timestamppb.Timestamp
 	LastLoginTime *timestamppb.Timestamp
+	// A managed user has no credentials and is reached only by switching to
+	// it.
+	Managed *bool
+	// Whether switching to the user asks for its PIN.
+	HasPin *bool
+	// A managed user's restriction profile.
+	Restriction *RestrictionProfile
 }
 
 func (b0 User_builder) Build() *User {
@@ -358,29 +496,41 @@ func (b0 User_builder) Build() *User {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.AuthProvider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
 		x.xxx_hidden_AuthProvider = b.AuthProvider
 	}
 	if b.Admin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
 		x.xxx_hidden_Admin = *b.Admin
 	}
 	if b.Disabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 9)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
 		x.xxx_hidden_Disabled = *b.Disabled
 	}
 	x.xxx_hidden_Policy = b.Policy
 	x.xxx_hidden_Preferences = b.Preferences
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_LastLoginTime = b.LastLoginTime
+	if b.Managed != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
+		x.xxx_hidden_Managed = *b.Managed
+	}
+	if b.HasPin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
+		x.xxx_hidden_HasPin = *b.HasPin
+	}
+	if b.Restriction != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_Restriction = *b.Restriction
+	}
 	return m0
 }
 
@@ -1788,6 +1938,9 @@ type CreateUserRequest struct {
 	xxx_hidden_Admin        bool                   `protobuf:"varint,4,opt,name=admin"`
 	xxx_hidden_Policy       *UserPolicy            `protobuf:"bytes,5,opt,name=policy"`
 	xxx_hidden_Preferences  *UserPreferences       `protobuf:"bytes,6,opt,name=preferences"`
+	xxx_hidden_Managed      bool                   `protobuf:"varint,7,opt,name=managed"`
+	xxx_hidden_Restriction  RestrictionProfile     `protobuf:"varint,8,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
+	xxx_hidden_Pin          *string                `protobuf:"bytes,9,opt,name=pin"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -1870,24 +2023,50 @@ func (x *CreateUserRequest) GetPreferences() *UserPreferences {
 	return nil
 }
 
+func (x *CreateUserRequest) GetManaged() bool {
+	if x != nil {
+		return x.xxx_hidden_Managed
+	}
+	return false
+}
+
+func (x *CreateUserRequest) GetRestriction() RestrictionProfile {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 7) {
+			return x.xxx_hidden_Restriction
+		}
+	}
+	return RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
+func (x *CreateUserRequest) GetPin() string {
+	if x != nil {
+		if x.xxx_hidden_Pin != nil {
+			return *x.xxx_hidden_Pin
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *CreateUserRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 9)
 }
 
 func (x *CreateUserRequest) SetPassword(v string) {
 	x.xxx_hidden_Password = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 9)
 }
 
 func (x *CreateUserRequest) SetAuthProvider(v string) {
 	x.xxx_hidden_AuthProvider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 9)
 }
 
 func (x *CreateUserRequest) SetAdmin(v bool) {
 	x.xxx_hidden_Admin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 9)
 }
 
 func (x *CreateUserRequest) SetPolicy(v *UserPolicy) {
@@ -1896,6 +2075,21 @@ func (x *CreateUserRequest) SetPolicy(v *UserPolicy) {
 
 func (x *CreateUserRequest) SetPreferences(v *UserPreferences) {
 	x.xxx_hidden_Preferences = v
+}
+
+func (x *CreateUserRequest) SetManaged(v bool) {
+	x.xxx_hidden_Managed = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 9)
+}
+
+func (x *CreateUserRequest) SetRestriction(v RestrictionProfile) {
+	x.xxx_hidden_Restriction = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 9)
+}
+
+func (x *CreateUserRequest) SetPin(v string) {
+	x.xxx_hidden_Pin = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 9)
 }
 
 func (x *CreateUserRequest) HasName() bool {
@@ -1940,6 +2134,27 @@ func (x *CreateUserRequest) HasPreferences() bool {
 	return x.xxx_hidden_Preferences != nil
 }
 
+func (x *CreateUserRequest) HasManaged() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *CreateUserRequest) HasRestriction() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *CreateUserRequest) HasPin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *CreateUserRequest) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1968,16 +2183,38 @@ func (x *CreateUserRequest) ClearPreferences() {
 	x.xxx_hidden_Preferences = nil
 }
 
+func (x *CreateUserRequest) ClearManaged() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_Managed = false
+}
+
+func (x *CreateUserRequest) ClearRestriction() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Restriction = RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
+func (x *CreateUserRequest) ClearPin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_Pin = nil
+}
+
 type CreateUserRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Name *string
-	// Required unless auth_provider is set.
+	// Required unless auth_provider or managed is set.
 	Password     *string
 	AuthProvider *string
-	Admin        *bool
-	Policy       *UserPolicy
-	Preferences  *UserPreferences
+	// Must be false: the server's one administrator is created at setup.
+	Admin       *bool
+	Policy      *UserPolicy
+	Preferences *UserPreferences
+	// Creates a managed user, without password or auth_provider.
+	Managed *bool
+	// The managed user's restriction profile.
+	Restriction *RestrictionProfile
+	// The managed user's PIN.
+	Pin *string
 }
 
 func (b0 CreateUserRequest_builder) Build() *CreateUserRequest {
@@ -1985,23 +2222,35 @@ func (b0 CreateUserRequest_builder) Build() *CreateUserRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 9)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Password != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 9)
 		x.xxx_hidden_Password = b.Password
 	}
 	if b.AuthProvider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 9)
 		x.xxx_hidden_AuthProvider = b.AuthProvider
 	}
 	if b.Admin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 9)
 		x.xxx_hidden_Admin = *b.Admin
 	}
 	x.xxx_hidden_Policy = b.Policy
 	x.xxx_hidden_Preferences = b.Preferences
+	if b.Managed != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
+		x.xxx_hidden_Managed = *b.Managed
+	}
+	if b.Restriction != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 9)
+		x.xxx_hidden_Restriction = *b.Restriction
+	}
+	if b.Pin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 9)
+		x.xxx_hidden_Pin = b.Pin
+	}
 	return m0
 }
 
@@ -2080,6 +2329,7 @@ type UpdateUserRequest struct {
 	xxx_hidden_Admin       bool                   `protobuf:"varint,3,opt,name=admin"`
 	xxx_hidden_Disabled    bool                   `protobuf:"varint,4,opt,name=disabled"`
 	xxx_hidden_Policy      *UserPolicy            `protobuf:"bytes,5,opt,name=policy"`
+	xxx_hidden_Restriction RestrictionProfile     `protobuf:"varint,6,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -2152,28 +2402,42 @@ func (x *UpdateUserRequest) GetPolicy() *UserPolicy {
 	return nil
 }
 
+func (x *UpdateUserRequest) GetRestriction() RestrictionProfile {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 5) {
+			return x.xxx_hidden_Restriction
+		}
+	}
+	return RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
 func (x *UpdateUserRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *UpdateUserRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
 func (x *UpdateUserRequest) SetAdmin(v bool) {
 	x.xxx_hidden_Admin = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
 func (x *UpdateUserRequest) SetDisabled(v bool) {
 	x.xxx_hidden_Disabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
 }
 
 func (x *UpdateUserRequest) SetPolicy(v *UserPolicy) {
 	x.xxx_hidden_Policy = v
+}
+
+func (x *UpdateUserRequest) SetRestriction(v RestrictionProfile) {
+	x.xxx_hidden_Restriction = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
 }
 
 func (x *UpdateUserRequest) HasId() bool {
@@ -2211,6 +2475,13 @@ func (x *UpdateUserRequest) HasPolicy() bool {
 	return x.xxx_hidden_Policy != nil
 }
 
+func (x *UpdateUserRequest) HasRestriction() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
 func (x *UpdateUserRequest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -2235,14 +2506,25 @@ func (x *UpdateUserRequest) ClearPolicy() {
 	x.xxx_hidden_Policy = nil
 }
 
+func (x *UpdateUserRequest) ClearRestriction() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_Restriction = RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED
+}
+
 type UpdateUserRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Id       *string
-	Name     *string
-	Admin    *bool
+	Id   *string
+	Name *string
+	// When set, must be the user's own: the administrator stays the
+	// administrator.
+	Admin *bool
+	// The administrator cannot be disabled.
 	Disabled *bool
 	Policy   *UserPolicy
+	// A managed user's restriction profile; for other users it must be
+	// unspecified.
+	Restriction *RestrictionProfile
 }
 
 func (b0 UpdateUserRequest_builder) Build() *UpdateUserRequest {
@@ -2250,22 +2532,26 @@ func (b0 UpdateUserRequest_builder) Build() *UpdateUserRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Admin != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_Admin = *b.Admin
 	}
 	if b.Disabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
 		x.xxx_hidden_Disabled = *b.Disabled
 	}
 	x.xxx_hidden_Policy = b.Policy
+	if b.Restriction != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_Restriction = *b.Restriction
+	}
 	return m0
 }
 
@@ -2646,6 +2932,161 @@ func (b0 SetPasswordResponse_builder) Build() *SetPasswordResponse {
 	return m0
 }
 
+type SetPinRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_UserId      *string                `protobuf:"bytes,1,opt,name=user_id,json=userId"`
+	xxx_hidden_Pin         *string                `protobuf:"bytes,2,opt,name=pin"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *SetPinRequest) Reset() {
+	*x = SetPinRequest{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPinRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPinRequest) ProtoMessage() {}
+
+func (x *SetPinRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetPinRequest) GetUserId() string {
+	if x != nil {
+		if x.xxx_hidden_UserId != nil {
+			return *x.xxx_hidden_UserId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetPinRequest) GetPin() string {
+	if x != nil {
+		if x.xxx_hidden_Pin != nil {
+			return *x.xxx_hidden_Pin
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SetPinRequest) SetUserId(v string) {
+	x.xxx_hidden_UserId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *SetPinRequest) SetPin(v string) {
+	x.xxx_hidden_Pin = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *SetPinRequest) HasUserId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SetPinRequest) HasPin() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SetPinRequest) ClearUserId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_UserId = nil
+}
+
+func (x *SetPinRequest) ClearPin() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Pin = nil
+}
+
+type SetPinRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	UserId *string
+	// Four digits; empty clears the PIN.
+	Pin *string
+}
+
+func (b0 SetPinRequest_builder) Build() *SetPinRequest {
+	m0 := &SetPinRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.UserId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_UserId = b.UserId
+	}
+	if b.Pin != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Pin = b.Pin
+	}
+	return m0
+}
+
+type SetPinResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetPinResponse) Reset() {
+	*x = SetPinResponse{}
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPinResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPinResponse) ProtoMessage() {}
+
+func (x *SetPinResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetPinResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetPinResponse_builder) Build() *SetPinResponse {
+	m0 := &SetPinResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 type UpdatePreferencesRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Preferences *UserPreferences       `protobuf:"bytes,1,opt,name=preferences"`
@@ -2655,7 +3096,7 @@ type UpdatePreferencesRequest struct {
 
 func (x *UpdatePreferencesRequest) Reset() {
 	*x = UpdatePreferencesRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2667,7 +3108,7 @@ func (x *UpdatePreferencesRequest) String() string {
 func (*UpdatePreferencesRequest) ProtoMessage() {}
 
 func (x *UpdatePreferencesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[19]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2723,7 +3164,7 @@ type UpdatePreferencesResponse struct {
 
 func (x *UpdatePreferencesResponse) Reset() {
 	*x = UpdatePreferencesResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2735,7 +3176,7 @@ func (x *UpdatePreferencesResponse) String() string {
 func (*UpdatePreferencesResponse) ProtoMessage() {}
 
 func (x *UpdatePreferencesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[20]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2791,7 +3232,7 @@ type GetUserDataRequest struct {
 
 func (x *GetUserDataRequest) Reset() {
 	*x = GetUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2803,7 +3244,7 @@ func (x *GetUserDataRequest) String() string {
 func (*GetUserDataRequest) ProtoMessage() {}
 
 func (x *GetUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[21]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2848,7 +3289,7 @@ type GetUserDataResponse struct {
 
 func (x *GetUserDataResponse) Reset() {
 	*x = GetUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2860,7 +3301,7 @@ func (x *GetUserDataResponse) String() string {
 func (*GetUserDataResponse) ProtoMessage() {}
 
 func (x *GetUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[22]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2915,7 +3356,7 @@ type UpdateUserDataRequest struct {
 
 func (x *UpdateUserDataRequest) Reset() {
 	*x = UpdateUserDataRequest{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2927,7 +3368,7 @@ func (x *UpdateUserDataRequest) String() string {
 func (*UpdateUserDataRequest) ProtoMessage() {}
 
 func (x *UpdateUserDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[23]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3102,7 +3543,7 @@ type UpdateUserDataResponse struct {
 
 func (x *UpdateUserDataResponse) Reset() {
 	*x = UpdateUserDataResponse{}
-	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3114,7 +3555,7 @@ func (x *UpdateUserDataResponse) String() string {
 func (*UpdateUserDataResponse) ProtoMessage() {}
 
 func (x *UpdateUserDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_user_v1_user_proto_msgTypes[24]
+	mi := &file_mavio_user_v1_user_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3165,7 +3606,7 @@ var File_mavio_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf7\x02\n" +
+	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xef\x03\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
@@ -3176,7 +3617,11 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\vpreferences\x18\a \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\x12;\n" +
 	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\x12B\n" +
-	"\x0flast_login_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rlastLoginTime\"\xcd\x05\n" +
+	"\x0flast_login_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rlastLoginTime\x12\x18\n" +
+	"\amanaged\x18\n" +
+	" \x01(\bR\amanaged\x12\x17\n" +
+	"\ahas_pin\x18\v \x01(\bR\x06hasPin\x12C\n" +
+	"\vrestriction\x18\f \x01(\x0e2!.mavio.user.v1.RestrictionProfileR\vrestriction\"\xcd\x05\n" +
 	"\n" +
 	"UserPolicy\x12#\n" +
 	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12.\n" +
@@ -3228,22 +3673,27 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x17\n" +
 	"\x15GetCurrentUserRequest\"A\n" +
 	"\x16GetCurrentUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x8b\x02\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x99\x03\n" +
 	"\x11CreateUserRequest\x12 \n" +
 	"\x04name\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18dR\x04name\x12$\n" +
 	"\bpassword\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\bR\bpassword\x12#\n" +
 	"\rauth_provider\x18\x03 \x01(\tR\fauthProvider\x12\x14\n" +
 	"\x05admin\x18\x04 \x01(\bR\x05admin\x121\n" +
 	"\x06policy\x18\x05 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12@\n" +
-	"\vpreferences\x18\x06 \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\"=\n" +
+	"\vpreferences\x18\x06 \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\x12\x18\n" +
+	"\amanaged\x18\a \x01(\bR\amanaged\x12M\n" +
+	"\vrestriction\x18\b \x01(\x0e2!.mavio.user.v1.RestrictionProfileB\b\xbaH\x05\x82\x01\x02\x10\x01R\vrestriction\x12#\n" +
+	"\x03pin\x18\t \x01(\tB\x11\xbaH\x0er\f2\n" +
+	"^[0-9]{4}$R\x03pin\"=\n" +
 	"\x12CreateUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\xb7\x01\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x86\x02\n" +
 	"\x11UpdateUserRequest\x12\x1b\n" +
 	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\x12 \n" +
 	"\x04name\x18\x02 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18dR\x04name\x12\x14\n" +
 	"\x05admin\x18\x03 \x01(\bR\x05admin\x12\x1a\n" +
 	"\bdisabled\x18\x04 \x01(\bR\bdisabled\x121\n" +
-	"\x06policy\x18\x05 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\"=\n" +
+	"\x06policy\x18\x05 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12M\n" +
+	"\vrestriction\x18\x06 \x01(\x0e2!.mavio.user.v1.RestrictionProfileB\b\xbaH\x05\x82\x01\x02\x10\x01R\vrestriction\"=\n" +
 	"\x12UpdateUserResponse\x12'\n" +
 	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"0\n" +
 	"\x11DeleteUserRequest\x12\x1b\n" +
@@ -3254,7 +3704,11 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x10current_password\x18\x02 \x01(\tR\x0fcurrentPassword\x120\n" +
 	"\fnew_password\x18\x03 \x01(\tB\r\xbaH\n" +
 	"\xc8\x01\x01r\x05\x10\x01\x18\x80\bR\vnewPassword\"\x15\n" +
-	"\x13SetPasswordResponse\"d\n" +
+	"\x13SetPasswordResponse\"]\n" +
+	"\rSetPinRequest\x12$\n" +
+	"\auser_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06userId\x12&\n" +
+	"\x03pin\x18\x02 \x01(\tB\x14\xbaH\x11r\x0f2\r^([0-9]{4})?$R\x03pin\"\x10\n" +
+	"\x0eSetPinResponse\"d\n" +
 	"\x18UpdatePreferencesRequest\x12H\n" +
 	"\vpreferences\x18\x01 \x01(\v2\x1e.mavio.user.v1.UserPreferencesB\x06\xbaH\x03\xc8\x01\x01R\vpreferences\"]\n" +
 	"\x19UpdatePreferencesResponse\x12@\n" +
@@ -3277,7 +3731,12 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x15SUBTITLE_MODE_FOREIGN\x10\x02\x12\x18\n" +
 	"\x14SUBTITLE_MODE_FORCED\x10\x03\x12\x16\n" +
 	"\x12SUBTITLE_MODE_NONE\x10\x04\x12\x17\n" +
-	"\x13SUBTITLE_MODE_SMART\x10\x052\xcc\x05\n" +
+	"\x13SUBTITLE_MODE_SMART\x10\x05*\xa3\x01\n" +
+	"\x12RestrictionProfile\x12#\n" +
+	"\x1fRESTRICTION_PROFILE_UNSPECIFIED\x10\x00\x12%\n" +
+	"!RESTRICTION_PROFILE_YOUNGER_CHILD\x10\x01\x12#\n" +
+	"\x1fRESTRICTION_PROFILE_OLDER_CHILD\x10\x02\x12\x1c\n" +
+	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\x93\x06\n" +
 	"\vUserService\x12S\n" +
 	"\tListUsers\x12\x1f.mavio.user.v1.ListUsersRequest\x1a .mavio.user.v1.ListUsersResponse\"\x03\x90\x02\x01\x12M\n" +
 	"\aGetUser\x12\x1d.mavio.user.v1.GetUserRequest\x1a\x1e.mavio.user.v1.GetUserResponse\"\x03\x90\x02\x01\x12b\n" +
@@ -3288,93 +3747,102 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"UpdateUser\x12 .mavio.user.v1.UpdateUserRequest\x1a!.mavio.user.v1.UpdateUserResponse\x12Q\n" +
 	"\n" +
 	"DeleteUser\x12 .mavio.user.v1.DeleteUserRequest\x1a!.mavio.user.v1.DeleteUserResponse\x12T\n" +
-	"\vSetPassword\x12!.mavio.user.v1.SetPasswordRequest\x1a\".mavio.user.v1.SetPasswordResponse\x12f\n" +
+	"\vSetPassword\x12!.mavio.user.v1.SetPasswordRequest\x1a\".mavio.user.v1.SetPasswordResponse\x12E\n" +
+	"\x06SetPin\x12\x1c.mavio.user.v1.SetPinRequest\x1a\x1d.mavio.user.v1.SetPinResponse\x12f\n" +
 	"\x11UpdatePreferences\x12'.mavio.user.v1.UpdatePreferencesRequest\x1a(.mavio.user.v1.UpdatePreferencesResponse2\xcb\x01\n" +
 	"\x0fUserDataService\x12Y\n" +
 	"\vGetUserData\x12!.mavio.user.v1.GetUserDataRequest\x1a\".mavio.user.v1.GetUserDataResponse\"\x03\x90\x02\x01\x12]\n" +
 	"\x0eUpdateUserData\x12$.mavio.user.v1.UpdateUserDataRequest\x1a%.mavio.user.v1.UpdateUserDataResponseB\xb5\x01\n" +
 	"\x11com.mavio.user.v1B\tUserProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1;userv1\xa2\x02\x03MUX\xaa\x02\rMavio.User.V1\xca\x02\rMavio\\User\\V1\xe2\x02\x19Mavio\\User\\V1\\GPBMetadata\xea\x02\x0fMavio::User::V1b\beditionsp\xe8\a"
 
-var file_mavio_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_mavio_user_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_mavio_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_mavio_user_v1_user_proto_goTypes = []any{
 	(SubtitleMode)(0),                 // 0: mavio.user.v1.SubtitleMode
-	(*User)(nil),                      // 1: mavio.user.v1.User
-	(*UserPolicy)(nil),                // 2: mavio.user.v1.UserPolicy
-	(*RequestQuota)(nil),              // 3: mavio.user.v1.RequestQuota
-	(*UserPreferences)(nil),           // 4: mavio.user.v1.UserPreferences
-	(*UserData)(nil),                  // 5: mavio.user.v1.UserData
-	(*ListUsersRequest)(nil),          // 6: mavio.user.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),         // 7: mavio.user.v1.ListUsersResponse
-	(*GetUserRequest)(nil),            // 8: mavio.user.v1.GetUserRequest
-	(*GetUserResponse)(nil),           // 9: mavio.user.v1.GetUserResponse
-	(*GetCurrentUserRequest)(nil),     // 10: mavio.user.v1.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil),    // 11: mavio.user.v1.GetCurrentUserResponse
-	(*CreateUserRequest)(nil),         // 12: mavio.user.v1.CreateUserRequest
-	(*CreateUserResponse)(nil),        // 13: mavio.user.v1.CreateUserResponse
-	(*UpdateUserRequest)(nil),         // 14: mavio.user.v1.UpdateUserRequest
-	(*UpdateUserResponse)(nil),        // 15: mavio.user.v1.UpdateUserResponse
-	(*DeleteUserRequest)(nil),         // 16: mavio.user.v1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),        // 17: mavio.user.v1.DeleteUserResponse
-	(*SetPasswordRequest)(nil),        // 18: mavio.user.v1.SetPasswordRequest
-	(*SetPasswordResponse)(nil),       // 19: mavio.user.v1.SetPasswordResponse
-	(*UpdatePreferencesRequest)(nil),  // 20: mavio.user.v1.UpdatePreferencesRequest
-	(*UpdatePreferencesResponse)(nil), // 21: mavio.user.v1.UpdatePreferencesResponse
-	(*GetUserDataRequest)(nil),        // 22: mavio.user.v1.GetUserDataRequest
-	(*GetUserDataResponse)(nil),       // 23: mavio.user.v1.GetUserDataResponse
-	(*UpdateUserDataRequest)(nil),     // 24: mavio.user.v1.UpdateUserDataRequest
-	(*UpdateUserDataResponse)(nil),    // 25: mavio.user.v1.UpdateUserDataResponse
-	(*timestamppb.Timestamp)(nil),     // 26: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),       // 27: google.protobuf.Duration
+	(RestrictionProfile)(0),           // 1: mavio.user.v1.RestrictionProfile
+	(*User)(nil),                      // 2: mavio.user.v1.User
+	(*UserPolicy)(nil),                // 3: mavio.user.v1.UserPolicy
+	(*RequestQuota)(nil),              // 4: mavio.user.v1.RequestQuota
+	(*UserPreferences)(nil),           // 5: mavio.user.v1.UserPreferences
+	(*UserData)(nil),                  // 6: mavio.user.v1.UserData
+	(*ListUsersRequest)(nil),          // 7: mavio.user.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 8: mavio.user.v1.ListUsersResponse
+	(*GetUserRequest)(nil),            // 9: mavio.user.v1.GetUserRequest
+	(*GetUserResponse)(nil),           // 10: mavio.user.v1.GetUserResponse
+	(*GetCurrentUserRequest)(nil),     // 11: mavio.user.v1.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil),    // 12: mavio.user.v1.GetCurrentUserResponse
+	(*CreateUserRequest)(nil),         // 13: mavio.user.v1.CreateUserRequest
+	(*CreateUserResponse)(nil),        // 14: mavio.user.v1.CreateUserResponse
+	(*UpdateUserRequest)(nil),         // 15: mavio.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),        // 16: mavio.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),         // 17: mavio.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),        // 18: mavio.user.v1.DeleteUserResponse
+	(*SetPasswordRequest)(nil),        // 19: mavio.user.v1.SetPasswordRequest
+	(*SetPasswordResponse)(nil),       // 20: mavio.user.v1.SetPasswordResponse
+	(*SetPinRequest)(nil),             // 21: mavio.user.v1.SetPinRequest
+	(*SetPinResponse)(nil),            // 22: mavio.user.v1.SetPinResponse
+	(*UpdatePreferencesRequest)(nil),  // 23: mavio.user.v1.UpdatePreferencesRequest
+	(*UpdatePreferencesResponse)(nil), // 24: mavio.user.v1.UpdatePreferencesResponse
+	(*GetUserDataRequest)(nil),        // 25: mavio.user.v1.GetUserDataRequest
+	(*GetUserDataResponse)(nil),       // 26: mavio.user.v1.GetUserDataResponse
+	(*UpdateUserDataRequest)(nil),     // 27: mavio.user.v1.UpdateUserDataRequest
+	(*UpdateUserDataResponse)(nil),    // 28: mavio.user.v1.UpdateUserDataResponse
+	(*timestamppb.Timestamp)(nil),     // 29: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),       // 30: google.protobuf.Duration
 }
 var file_mavio_user_v1_user_proto_depIdxs = []int32{
-	2,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
-	4,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
-	26, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
-	26, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
-	3,  // 4: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
-	3,  // 5: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
-	0,  // 6: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
-	27, // 7: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
-	26, // 8: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
-	1,  // 9: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
-	1,  // 10: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
-	1,  // 11: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
-	2,  // 12: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	4,  // 13: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	1,  // 14: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
-	2,  // 15: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	1,  // 16: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
-	4,  // 17: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	4,  // 18: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
-	5,  // 19: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	27, // 20: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
-	5,  // 21: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
-	6,  // 22: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
-	8,  // 23: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
-	10, // 24: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
-	12, // 25: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
-	14, // 26: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
-	16, // 27: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
-	18, // 28: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
-	20, // 29: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
-	22, // 30: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
-	24, // 31: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
-	7,  // 32: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
-	9,  // 33: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
-	11, // 34: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
-	13, // 35: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
-	15, // 36: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
-	17, // 37: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
-	19, // 38: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
-	21, // 39: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
-	23, // 40: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
-	25, // 41: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
-	32, // [32:42] is the sub-list for method output_type
-	22, // [22:32] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	3,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
+	5,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
+	29, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
+	29, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
+	1,  // 4: mavio.user.v1.User.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	4,  // 5: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
+	4,  // 6: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
+	0,  // 7: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
+	30, // 8: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
+	29, // 9: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
+	2,  // 10: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
+	2,  // 11: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
+	2,  // 12: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
+	3,  // 13: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	5,  // 14: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	1,  // 15: mavio.user.v1.CreateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	2,  // 16: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
+	3,  // 17: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
+	1,  // 18: mavio.user.v1.UpdateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	2,  // 19: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
+	5,  // 20: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	5,  // 21: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
+	6,  // 22: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	30, // 23: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
+	6,  // 24: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
+	7,  // 25: mavio.user.v1.UserService.ListUsers:input_type -> mavio.user.v1.ListUsersRequest
+	9,  // 26: mavio.user.v1.UserService.GetUser:input_type -> mavio.user.v1.GetUserRequest
+	11, // 27: mavio.user.v1.UserService.GetCurrentUser:input_type -> mavio.user.v1.GetCurrentUserRequest
+	13, // 28: mavio.user.v1.UserService.CreateUser:input_type -> mavio.user.v1.CreateUserRequest
+	15, // 29: mavio.user.v1.UserService.UpdateUser:input_type -> mavio.user.v1.UpdateUserRequest
+	17, // 30: mavio.user.v1.UserService.DeleteUser:input_type -> mavio.user.v1.DeleteUserRequest
+	19, // 31: mavio.user.v1.UserService.SetPassword:input_type -> mavio.user.v1.SetPasswordRequest
+	21, // 32: mavio.user.v1.UserService.SetPin:input_type -> mavio.user.v1.SetPinRequest
+	23, // 33: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
+	25, // 34: mavio.user.v1.UserDataService.GetUserData:input_type -> mavio.user.v1.GetUserDataRequest
+	27, // 35: mavio.user.v1.UserDataService.UpdateUserData:input_type -> mavio.user.v1.UpdateUserDataRequest
+	8,  // 36: mavio.user.v1.UserService.ListUsers:output_type -> mavio.user.v1.ListUsersResponse
+	10, // 37: mavio.user.v1.UserService.GetUser:output_type -> mavio.user.v1.GetUserResponse
+	12, // 38: mavio.user.v1.UserService.GetCurrentUser:output_type -> mavio.user.v1.GetCurrentUserResponse
+	14, // 39: mavio.user.v1.UserService.CreateUser:output_type -> mavio.user.v1.CreateUserResponse
+	16, // 40: mavio.user.v1.UserService.UpdateUser:output_type -> mavio.user.v1.UpdateUserResponse
+	18, // 41: mavio.user.v1.UserService.DeleteUser:output_type -> mavio.user.v1.DeleteUserResponse
+	20, // 42: mavio.user.v1.UserService.SetPassword:output_type -> mavio.user.v1.SetPasswordResponse
+	22, // 43: mavio.user.v1.UserService.SetPin:output_type -> mavio.user.v1.SetPinResponse
+	24, // 44: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
+	26, // 45: mavio.user.v1.UserDataService.GetUserData:output_type -> mavio.user.v1.GetUserDataResponse
+	28, // 46: mavio.user.v1.UserDataService.UpdateUserData:output_type -> mavio.user.v1.UpdateUserDataResponse
+	36, // [36:47] is the sub-list for method output_type
+	25, // [25:36] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_mavio_user_v1_user_proto_init() }
@@ -3387,8 +3855,8 @@ func file_mavio_user_v1_user_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_user_v1_user_proto_rawDesc), len(file_mavio_user_v1_user_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   25,
+			NumEnums:      2,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

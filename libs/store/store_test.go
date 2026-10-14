@@ -366,8 +366,8 @@ func TestUserScopedQueries(t *testing.T) {
 		lib := newLibrary(t, s, "/media")
 		a, b, c := newItem(lib, core.KindMovie, "A"), newItem(lib, core.KindMovie, "B"), newItem(lib, core.KindMovie, "C")
 		upsert(t, s, a, b, c)
-		alice := core.User{Name: "alice", PasswordHash: "$argon2id$x"}
-		bob := core.User{Name: "bob", PasswordHash: "$argon2id$y"}
+		alice := core.User{Name: "alice", Kind: core.UserMember}
+		bob := core.User{Name: "bob", Kind: core.UserMember}
 		for _, u := range []*core.User{&alice, &bob} {
 			if err := s.Users().Create(ctx, u); err != nil {
 				t.Fatal(err)
@@ -578,7 +578,7 @@ func TestUsers(t *testing.T) {
 		ctx := t.Context()
 		lib := newLibrary(t, s, "/media")
 		u := core.User{
-			Name: "Alice", PasswordHash: "$argon2id$x", Admin: true,
+			Name: "Alice", Kind: core.UserAdmin,
 			Policy:      core.UserPolicy{Libraries: []core.ID{lib.ID}, MaxParentalRating: ptr(13), AllowTranscoding: true},
 			Preferences: core.UserPreferences{AudioLanguages: []string{"jpn", "eng"}, SubtitleMode: core.SubtitlesSmart},
 		}
@@ -586,11 +586,11 @@ func TestUsers(t *testing.T) {
 			t.Fatal(err)
 		}
 		got, err := s.Users().GetByName(ctx, "ALICE")
-		if err != nil || got.ID != u.ID || !got.Admin || *got.Policy.MaxParentalRating != 13 ||
+		if err != nil || got.ID != u.ID || !got.IsAdmin() || *got.Policy.MaxParentalRating != 13 ||
 			!slices.Equal(got.Preferences.AudioLanguages, []string{"jpn", "eng"}) || !got.Policy.CanAccessLibrary(lib.ID) {
 			t.Errorf("GetByName = %+v, %v", got, err)
 		}
-		dup := core.User{Name: "alice", AuthProvider: "ldap"}
+		dup := core.User{Name: "alice", Kind: core.UserMember, AuthProvider: "ldap"}
 		if err := s.Users().Create(ctx, &dup); !errors.Is(err, core.ErrConflict) {
 			t.Errorf("duplicate name: %v, want ErrConflict", err)
 		}
@@ -601,6 +601,54 @@ func TestUsers(t *testing.T) {
 		}
 		if list, err := s.Users().List(ctx); err != nil || len(list) != 1 {
 			t.Errorf("List = %v, %v", list, err)
+		}
+		// A server has one administrator.
+		if err := s.Users().Create(ctx, &core.User{Name: "Bob", Kind: core.UserAdmin}); !errors.Is(err, core.ErrConflict) {
+			t.Errorf("second administrator: %v, want ErrConflict", err)
+		}
+		kid := core.User{Name: "Kid", Kind: core.UserManaged, Restriction: core.RestrictionOlderChild}
+		if err := s.Users().Create(ctx, &kid); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := s.Users().Get(ctx, kid.ID); err != nil || got.Kind != core.UserManaged || got.Restriction != core.RestrictionOlderChild {
+			t.Errorf("managed user = %+v, %v", got, err)
+		}
+
+		// Credentials: one of each kind, replaced, and deleted with the user.
+		creds := s.Credentials()
+		for _, c := range []core.Credential{
+			{UserID: u.ID, Kind: core.CredentialPassword, Secret: "$argon2id$a"},
+			{UserID: u.ID, Kind: core.CredentialPassword, Secret: "$argon2id$b"},
+			{UserID: u.ID, Kind: core.CredentialPIN, Secret: "$argon2id$pin"},
+			{UserID: kid.ID, Kind: core.CredentialPIN, Secret: "$argon2id$kid"},
+		} {
+			if err := creds.Put(ctx, &c); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := creds.Put(ctx, &core.Credential{UserID: u.ID, Kind: "magic", Secret: "x"}); !errors.Is(err, core.ErrInvalid) {
+			t.Errorf("unknown credential kind: %v, want ErrInvalid", err)
+		}
+		if got, err := creds.Get(ctx, u.ID, core.CredentialPassword); err != nil || got.Secret != "$argon2id$b" {
+			t.Errorf("replaced password = %+v, %v", got, err)
+		}
+		if list, err := creds.List(ctx, u.ID); err != nil || len(list) != 2 {
+			t.Errorf("List = %+v, %v", list, err)
+		}
+		if err := creds.Delete(ctx, u.ID, core.CredentialPIN); err != nil {
+			t.Fatal(err)
+		}
+		if err := creds.Delete(ctx, u.ID, core.CredentialPIN); err != nil {
+			t.Errorf("deleting a missing credential: %v", err)
+		}
+		if _, err := creds.Get(ctx, u.ID, core.CredentialPIN); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("deleted PIN: %v, want ErrNotFound", err)
+		}
+		if err := s.Users().Delete(ctx, kid.ID); err != nil {
+			t.Fatal(err)
+		}
+		if list, err := creds.List(ctx, kid.ID); err != nil || len(list) != 0 {
+			t.Errorf("credentials of a deleted user = %+v, %v", list, err)
 		}
 		if _, err := s.Users().Get(ctx, core.NewID()); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("unknown user: %v", err)

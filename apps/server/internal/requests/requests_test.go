@@ -273,13 +273,13 @@ func newEnv(t *testing.T) *env {
 		Episodes: func() []library.EpisodeLister { return []library.EpisodeLister{e.meta} },
 		Activity: e.acts, Now: func() time.Time { return e.clock },
 	}
-	e.admin = e.user("admin", func(u *core.User) { u.Admin = true })
+	e.admin = e.user("admin", func(u *core.User) { u.Kind = core.UserAdmin })
 	return e
 }
 
 func (e *env) user(name string, edit func(*core.User)) core.User {
 	e.t.Helper()
-	u := core.User{ID: core.NewID(), Name: name, AuthProvider: "test", Policy: core.UserPolicy{Requests: e.settings.DefaultPermissions}}
+	u := core.User{ID: core.NewID(), Name: name, Kind: core.UserMember, AuthProvider: "test", Policy: core.UserPolicy{Requests: e.settings.DefaultPermissions}}
 	if edit != nil {
 		edit(&u)
 	}

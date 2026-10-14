@@ -79,7 +79,7 @@ func TestRequestServices(t *testing.T) {
 	db := openStore(t)
 	users := map[string]core.User{}
 	for _, u := range []core.User{
-		{Name: "admin", Admin: true},
+		{Name: "admin", Kind: core.UserAdmin},
 		{Name: "pg", Policy: core.UserPolicy{
 			MaxParentalRating: new(func() int { s, _ := metadata.RatingScore("PG", "US"); return s }()),
 			Requests:          core.RequestPermissions{Movies: true, ReportIssues: true},
@@ -88,6 +88,9 @@ func TestRequestServices(t *testing.T) {
 		{Name: "none"},
 	} {
 		u.ID, u.AuthProvider = core.NewID(), "test"
+		if u.Kind == "" {
+			u.Kind = core.UserMember
+		}
 		if err := db.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}
@@ -362,7 +365,7 @@ func TestPolicyRequestPermissions(t *testing.T) {
 		t.Errorf("quotas = %v, %v", got.MovieQuota, got.SeriesQuota)
 	}
 	u := core.User{ID: core.NewID(), Name: "u", Policy: got}
-	back := userToProto(&u).GetPolicy()
+	back := userToProto(&u, nil).GetPolicy()
 	if !back.GetRequestMovies() || back.GetRequestSeries() || back.GetMovieQuota().GetLimit() != 2 || back.HasSeriesQuota() {
 		t.Errorf("userToProto() policy = %v", back)
 	}

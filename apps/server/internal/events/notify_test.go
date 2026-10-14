@@ -12,7 +12,7 @@ import (
 func TestNotify(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		hub := New(Config{})
-		admin := core.User{ID: core.NewID(), Name: "admin", Admin: true}
+		admin := core.User{ID: core.NewID(), Name: "admin", Kind: core.UserAdmin}
 		alice := core.User{ID: core.NewID(), Name: "alice"}
 		bob := core.User{ID: core.NewID(), Name: "bob"}
 		adminTV := hub.Subscribe(admin, core.NewID())

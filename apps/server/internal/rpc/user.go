@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	"connectrpc.com/connect"
@@ -47,7 +46,7 @@ func admin(ctx context.Context) (auth.Principal, error) {
 	if err != nil {
 		return p, err
 	}
-	if !p.User.Admin {
+	if !p.User.IsAdmin() {
 		return p, connect.NewError(connect.CodePermissionDenied, errors.New("administrator required"))
 	}
 	return p, nil
@@ -64,7 +63,9 @@ func (s *UserService) ListUsers(ctx context.Context, _ *userv1.ListUsersRequest)
 	}
 	out := make([]*userv1.User, len(users))
 	for i := range users {
-		out[i] = userToProto(&users[i])
+		if out[i], err = describeUser(ctx, s.store, &users[i]); err != nil {
+			return nil, connectError(ctx, err)
+		}
 	}
 	return userv1.ListUsersResponse_builder{Users: out}.Build(), nil
 }
@@ -78,7 +79,11 @@ func (s *UserService) GetUser(ctx context.Context, req *userv1.GetUserRequest) (
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return userv1.GetUserResponse_builder{User: userToProto(&u)}.Build(), nil
+	out, err := describeUser(ctx, s.store, &u)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return userv1.GetUserResponse_builder{User: out}.Build(), nil
 }
 
 // GetCurrentUser returns the caller.
@@ -87,26 +92,40 @@ func (s *UserService) GetCurrentUser(ctx context.Context, _ *userv1.GetCurrentUs
 	if err != nil {
 		return nil, err
 	}
-	return userv1.GetCurrentUserResponse_builder{User: userToProto(&p.User)}.Build(), nil
+	out, err := describeUser(ctx, s.store, &p.User)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return userv1.GetCurrentUserResponse_builder{User: out}.Build(), nil
 }
 
-// CreateUser creates an account.
+// CreateUser creates a member or a managed user; the administrator is
+// created at setup.
 func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequest) (*userv1.CreateUserResponse, error) {
 	p, err := admin(ctx)
 	if err != nil {
 		return nil, err
 	}
+	kind := core.UserMember
+	if req.GetManaged() {
+		kind = core.UserManaged
+	}
 	u := core.User{
 		Name:         req.GetName(),
+		Kind:         kind,
 		AuthProvider: req.GetAuthProvider(),
-		Admin:        req.GetAdmin(),
+		Restriction:  restrictionFromProto(req.GetRestriction()),
 		Policy:       core.UserPolicy{AllowTranscoding: true, AllowDownload: true, Requests: s.defaultRequestPermissions()},
 	}
 	switch {
-	case u.AuthProvider == "" && req.GetPassword() == "":
+	case req.GetAdmin():
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server has one administrator"))
+	case kind == core.UserManaged && (u.AuthProvider != "" || req.GetPassword() != ""):
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("managed users have no credentials"))
+	case kind != core.UserManaged && (req.GetRestriction() != userv1.RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED || req.HasPin()):
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("members set their own PINs and have no restriction profile"))
+	case kind == core.UserMember && u.AuthProvider == "" && req.GetPassword() == "":
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("a password is required"))
-	case u.AuthProvider == "":
-		u.PasswordHash = auth.HashPassword(req.GetPassword())
 	}
 	if req.HasPolicy() {
 		u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
@@ -114,14 +133,31 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 	if req.HasPreferences() {
 		u.Preferences = preferencesFromProto(req.GetPreferences())
 	}
-	if err := s.store.Users().Create(ctx, &u); err != nil {
+	var creds []core.Credential
+	err = s.store.InTx(ctx, func(tx core.Store) error {
+		if err := tx.Users().Create(ctx, &u); err != nil {
+			return err
+		}
+		for kind, secret := range map[core.CredentialKind]string{core.CredentialPassword: req.GetPassword(), core.CredentialPIN: req.GetPin()} {
+			if secret != "" && (kind != core.CredentialPassword || u.AuthProvider == "") {
+				if err := putSecret(ctx, tx, u.ID, kind, secret); err != nil {
+					return err
+				}
+			}
+		}
+		var err error
+		creds, err = tx.Credentials().List(ctx, u.ID)
+		return err
+	})
+	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	s.accountChanged(ctx, p, "user.created", "created", u)
-	return userv1.CreateUserResponse_builder{User: userToProto(&u)}.Build(), nil
+	return userv1.CreateUserResponse_builder{User: userToProto(&u, creds)}.Build(), nil
 }
 
-// UpdateUser changes a user's name, rights, state and policy.
+// UpdateUser changes a user's name, state, policy and restriction
+// profile; the administrator stays the administrator and enabled.
 func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequest) (*userv1.UpdateUserResponse, error) {
 	p, err := admin(ctx)
 	if err != nil {
@@ -133,23 +169,34 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		if u, err = tx.Users().Get(ctx, core.MustParseID(req.GetId())); err != nil {
 			return err
 		}
-		u.Name, u.Admin, u.Disabled = req.GetName(), req.GetAdmin(), req.GetDisabled()
+		switch {
+		case req.HasAdmin() && req.GetAdmin() != u.IsAdmin():
+			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the server has one administrator"))
+		case u.IsAdmin() && req.GetDisabled():
+			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the administrator cannot be disabled"))
+		case u.Kind != core.UserManaged && req.GetRestriction() != userv1.RestrictionProfile_RESTRICTION_PROFILE_UNSPECIFIED:
+			return connect.NewError(connect.CodeInvalidArgument, errors.New("only managed users have restriction profiles"))
+		}
+		u.Name, u.Disabled = req.GetName(), req.GetDisabled()
+		u.Restriction = restrictionFromProto(req.GetRestriction())
 		if req.HasPolicy() {
 			u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 		}
-		if err := tx.Users().Update(ctx, &u); err != nil {
-			return err
-		}
-		return adminRemains(ctx, tx)
+		return tx.Users().Update(ctx, &u)
 	})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	s.accountChanged(ctx, p, "user.updated", "changed", u)
-	return userv1.UpdateUserResponse_builder{User: userToProto(&u)}.Build(), nil
+	out, err := describeUser(ctx, s.store, &u)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return userv1.UpdateUserResponse_builder{User: out}.Build(), nil
 }
 
-// DeleteUser removes an account with its state and sessions.
+// DeleteUser removes an account with its state and sessions; the
+// administrator cannot be removed.
 func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequest) (*userv1.DeleteUserResponse, error) {
 	p, err := admin(ctx)
 	if err != nil {
@@ -161,10 +208,10 @@ func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 		if u, err = tx.Users().Get(ctx, core.MustParseID(req.GetId())); err != nil {
 			return err
 		}
-		if err := tx.Users().Delete(ctx, u.ID); err != nil {
-			return err
+		if u.IsAdmin() {
+			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the administrator cannot be deleted"))
 		}
-		return adminRemains(ctx, tx)
+		return tx.Users().Delete(ctx, u.ID)
 	})
 	if err != nil {
 		return nil, connectError(ctx, err)
@@ -173,20 +220,10 @@ func (s *UserService) DeleteUser(ctx context.Context, req *userv1.DeleteUserRequ
 	return &userv1.DeleteUserResponse{}, nil
 }
 
-// adminRemains fails when no enabled administrator is left.
-func adminRemains(ctx context.Context, tx core.Store) error {
-	users, err := tx.Users().List(ctx)
-	if err != nil {
-		return err
-	}
-	if !slices.ContainsFunc(users, func(u core.User) bool { return u.Admin && !u.Disabled }) {
-		return connect.NewError(connect.CodeFailedPrecondition, errors.New("the server needs an enabled administrator"))
-	}
-	return nil
-}
-
-// SetPassword sets a user's password: administrators set anyone's, users
-// change their own with the current one. The user's other sessions end.
+// SetPassword sets a user's password: the administrator sets anyone's,
+// users change their own with the current one. A managed user given a
+// password becomes a member, without its restriction profile. The user's
+// other sessions end.
 func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRequest) (*userv1.SetPasswordResponse, error) {
 	p, err := principal(ctx)
 	if err != nil {
@@ -194,7 +231,7 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 	}
 	id := core.MustParseID(req.GetUserId())
 	self := id == p.User.ID
-	if !self && !p.User.Admin {
+	if !self && !p.User.IsAdmin() {
 		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("administrator required"))
 	}
 	var u core.User
@@ -206,14 +243,26 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 		if u.AuthProvider != "" {
 			return connect.NewError(connect.CodeFailedPrecondition, errors.New("the user signs in through "+u.AuthProvider))
 		}
+		if u.Kind == core.UserManaged && self {
+			return connect.NewError(connect.CodePermissionDenied, errors.New("the administrator makes a managed user a member"))
+		}
 		if self {
-			if ok, _, err := auth.VerifyPassword(u.PasswordHash, req.GetCurrentPassword()); err != nil || !ok {
+			current, err := tx.Credentials().Get(ctx, id, core.CredentialPassword)
+			if err != nil && !errors.Is(err, core.ErrNotFound) {
+				return err
+			}
+			if ok, _, err := auth.VerifyPassword(current.Secret, req.GetCurrentPassword()); err != nil || !ok {
 				return connect.NewError(connect.CodePermissionDenied, errors.New("wrong current password"))
 			}
 		}
-		u.PasswordHash = auth.HashPassword(req.GetNewPassword())
-		if err := tx.Users().Update(ctx, &u); err != nil {
+		if err := putSecret(ctx, tx, id, core.CredentialPassword, req.GetNewPassword()); err != nil {
 			return err
+		}
+		if u.Kind == core.UserManaged {
+			u.Kind, u.Restriction = core.UserMember, core.RestrictionNone
+			if err := tx.Users().Update(ctx, &u); err != nil {
+				return err
+			}
 		}
 		sessions, err := tx.AuthSessions().ListForUser(ctx, id)
 		if err != nil {
@@ -233,6 +282,37 @@ func (s *UserService) SetPassword(ctx context.Context, req *userv1.SetPasswordRe
 	}
 	s.accountChanged(ctx, p, "user.password_changed", "changed the password of", u)
 	return &userv1.SetPasswordResponse{}, nil
+}
+
+// SetPin sets or clears a PIN: the administrator sets managed users',
+// other users their own.
+func (s *UserService) SetPin(ctx context.Context, req *userv1.SetPinRequest) (*userv1.SetPinResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	id := core.MustParseID(req.GetUserId())
+	var u core.User
+	err = s.store.InTx(ctx, func(tx core.Store) error {
+		var err error
+		if u, err = tx.Users().Get(ctx, id); err != nil {
+			return err
+		}
+		managed := u.Kind == core.UserManaged
+		switch {
+		case managed && !p.User.IsAdmin(), !managed && id != p.User.ID:
+			return connect.NewError(connect.CodePermissionDenied, errors.New("the administrator sets managed users' PINs, and users their own"))
+		case req.GetPin() == "":
+			return tx.Credentials().Delete(ctx, id, core.CredentialPIN)
+		default:
+			return putSecret(ctx, tx, id, core.CredentialPIN, req.GetPin())
+		}
+	})
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	s.accountChanged(ctx, p, "user.pin_changed", "changed the PIN of", u)
+	return &userv1.SetPinResponse{}, nil
 }
 
 // accountChanged records a change of u's account by p; the activity
@@ -262,7 +342,7 @@ func (s *UserService) UpdatePreferences(ctx context.Context, req *userv1.UpdateP
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return userv1.UpdatePreferencesResponse_builder{Preferences: userToProto(&u).GetPreferences()}.Build(), nil
+	return userv1.UpdatePreferencesResponse_builder{Preferences: userToProto(&u, nil).GetPreferences()}.Build(), nil
 }
 
 // UserDataService implements mavio.user.v1.UserDataService.

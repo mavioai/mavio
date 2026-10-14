@@ -111,7 +111,7 @@ func (i *Interceptor) authenticatePlugin(ctx context.Context, g Plugin, procedur
 			return Principal{}, connect.NewError(connect.CodeFailedPrecondition,
 				fmt.Errorf("%s acts on a user's own state; name the user in %s", procedure, UserHeader))
 		}
-		return Principal{User: core.User{Name: "plugin " + g.ID, Admin: true}, Plugin: g.ID}, nil
+		return Principal{User: core.User{Name: "plugin " + g.ID, Kind: core.UserAdmin}, Plugin: g.ID}, nil
 	}
 	if !g.ActAsUsers {
 		return Principal{}, connect.NewError(connect.CodePermissionDenied,

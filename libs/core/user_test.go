@@ -1,0 +1,62 @@
+package core
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestUserKinds(t *testing.T) {
+	id := NewID()
+	tests := []struct {
+		name string
+		u    User
+		ok   bool
+	}{
+		{"member", User{ID: id, Name: "a", Kind: UserMember}, true},
+		{"administrator", User{ID: id, Name: "a", Kind: UserAdmin}, true},
+		{"member through a plugin", User{ID: id, Name: "a", Kind: UserMember, AuthProvider: "ldap"}, true},
+		{"no kind", User{ID: id, Name: "a"}, false},
+		{"managed", User{ID: id, Name: "a", Kind: UserManaged, Restriction: RestrictionTeen}, true},
+		{"managed through a plugin", User{ID: id, Name: "a", Kind: UserManaged, AuthProvider: "ldap"}, false},
+		{"restricted member", User{ID: id, Name: "a", Kind: UserMember, Restriction: RestrictionTeen}, false},
+		{"unknown profile", User{ID: id, Name: "a", Kind: UserManaged, Restriction: "toddler"}, false},
+	}
+	for _, tt := range tests {
+		if err := tt.u.Validate(); (err == nil) != tt.ok || err != nil && !errors.Is(err, ErrInvalid) {
+			t.Errorf("%s: Validate = %v, want ok = %v", tt.name, err, tt.ok)
+		}
+	}
+}
+
+func TestRestrictionProfiles(t *testing.T) {
+	score := func(n int) *int { return &n }
+	item := func(rating *int) *Item { return &Item{Kind: KindMovie, ParentalRating: rating} }
+	tests := []struct {
+		name    string
+		profile RestrictionProfile
+		policy  UserPolicy
+		item    *Item
+		want    bool
+	}{
+		{"no profile, R", RestrictionNone, UserPolicy{}, item(score(17)), true},
+		{"no profile, unrated", RestrictionNone, UserPolicy{}, item(nil), true},
+		{"younger child, G", RestrictionYoungerChild, UserPolicy{}, item(score(0)), true},
+		{"younger child, TV-Y7", RestrictionYoungerChild, UserPolicy{}, item(score(7)), false},
+		{"older child, PG", RestrictionOlderChild, UserPolicy{}, item(score(10)), true},
+		{"older child, PG-13", RestrictionOlderChild, UserPolicy{}, item(score(13)), false},
+		{"teen, TV-14", RestrictionTeen, UserPolicy{}, item(score(14)), true},
+		{"teen, R", RestrictionTeen, UserPolicy{}, item(score(17)), false},
+		{"teen, unrated", RestrictionTeen, UserPolicy{}, item(nil), false},
+		{"teen under a lower limit", RestrictionTeen, UserPolicy{MaxParentalRating: score(10)}, item(score(13)), false},
+	}
+	for _, tt := range tests {
+		kind := UserMember
+		if tt.profile != RestrictionNone {
+			kind = UserManaged
+		}
+		u := User{ID: NewID(), Name: "kid", Kind: kind, Restriction: tt.profile, Policy: tt.policy}
+		if got := u.CanAccess(tt.item); got != tt.want {
+			t.Errorf("%s: CanAccess = %v, want = %v", tt.name, got, tt.want)
+		}
+	}
+}

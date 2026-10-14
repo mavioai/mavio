@@ -6,36 +6,110 @@ import (
 	"time"
 )
 
-// User is an account that can sign in and play media.
+// User is an account that can sign in and play media: the server's one
+// administrator, a member, or a managed user (docs/accounts.md §4.1). Its
+// credentials are kept apart, as Credentials.
 type User struct {
 	ID   ID
 	Name string // unique, case-insensitive
-	// PasswordHash is a PHC-format string (e.g. "$argon2id$v=19$…"); empty for
-	// accounts that authenticate through a plugin such as LDAP.
-	PasswordHash string
-	// AuthProvider names the plugin that authenticates the user; empty means
-	// the built-in password check.
+	Kind UserKind
+	// AuthProvider names the plugin that authenticates the user, such as
+	// LDAP; empty means the server's own credentials.
 	AuthProvider string
-	Admin        bool
-	Disabled     bool
-	Policy       UserPolicy
-	Preferences  UserPreferences
-	CreatedAt    time.Time
-	LastLoginAt  *time.Time
+	// Restriction is a managed user's restriction profile, applied on top
+	// of its policy.
+	Restriction RestrictionProfile
+	Disabled    bool
+	Policy      UserPolicy
+	Preferences UserPreferences
+	CreatedAt   time.Time
+	LastLoginAt *time.Time
 }
+
+// UserKind is what a user is to the server.
+type UserKind string
+
+// User kinds.
+const (
+	// UserMember signs in with its own credentials.
+	UserMember UserKind = "member"
+	// UserAdmin is the server's one administrator, a member that manages
+	// it.
+	UserAdmin UserKind = "administrator"
+	// UserManaged has no credentials and is reached only by switching to
+	// it; giving it a credential makes it a member that keeps its data.
+	UserManaged UserKind = "managed"
+)
+
+// Valid reports whether k is a known user kind.
+func (k UserKind) Valid() bool {
+	return slices.Contains([]UserKind{UserMember, UserAdmin, UserManaged}, k)
+}
+
+// IsAdmin reports whether u is the server's administrator.
+func (u *User) IsAdmin() bool { return u.Kind == UserAdmin }
 
 // Validate checks the user's invariants.
 func (u *User) Validate() error {
 	switch {
 	case u.ID.IsZero() || u.Name == "":
 		return fmt.Errorf("%w: user requires ID and name", ErrInvalid)
-	case u.PasswordHash == "" && u.AuthProvider == "":
-		return fmt.Errorf("%w: user %q has neither a password nor an auth provider", ErrInvalid, u.Name)
+	case !u.Kind.Valid():
+		return fmt.Errorf("%w: user %q has unknown kind %q", ErrInvalid, u.Name, u.Kind)
+	case u.Kind == UserManaged && u.AuthProvider != "":
+		return fmt.Errorf("%w: managed user %q has an auth provider", ErrInvalid, u.Name)
+	case !u.Restriction.Valid():
+		return fmt.Errorf("%w: user %q has unknown restriction profile %q", ErrInvalid, u.Name, u.Restriction)
+	case u.Restriction != RestrictionNone && u.Kind != UserManaged:
+		return fmt.Errorf("%w: user %q has a restriction profile but is not managed", ErrInvalid, u.Name)
 	case !u.Preferences.SubtitleMode.Valid():
 		return fmt.Errorf("%w: user %q has unknown subtitle mode %q", ErrInvalid, u.Name, u.Preferences.SubtitleMode)
 	case u.Policy.MovieQuota != nil && u.Policy.MovieQuota.Validate() != nil,
 		u.Policy.SeriesQuota != nil && u.Policy.SeriesQuota.Validate() != nil:
 		return fmt.Errorf("%w: user %q has a negative request quota", ErrInvalid, u.Name)
+	}
+	return nil
+}
+
+// Credential is a secret a user signs in or switches with, in standalone
+// mode. Secrets are stored as hashes or public keys.
+type Credential struct {
+	ID     ID
+	UserID ID
+	Kind   CredentialKind
+	// Secret is a PHC-format hash (e.g. "$argon2id$v=19$…") for passwords
+	// and PINs.
+	Secret     string
+	CreatedAt  time.Time
+	LastUsedAt *time.Time
+}
+
+// CredentialKind is the kind of a credential.
+type CredentialKind string
+
+// Credential kinds.
+const (
+	// CredentialPassword signs a member in.
+	CredentialPassword CredentialKind = "password"
+	// CredentialPIN is four digits guarding switching to the user; never a
+	// credential for signing in.
+	CredentialPIN CredentialKind = "pin"
+)
+
+// Valid reports whether k is a known credential kind.
+func (k CredentialKind) Valid() bool {
+	return slices.Contains([]CredentialKind{CredentialPassword, CredentialPIN}, k)
+}
+
+// Validate checks the credential's invariants.
+func (c *Credential) Validate() error {
+	switch {
+	case c.ID.IsZero() || c.UserID.IsZero():
+		return fmt.Errorf("%w: credential requires ID and user", ErrInvalid)
+	case !c.Kind.Valid():
+		return fmt.Errorf("%w: unknown credential kind %q", ErrInvalid, c.Kind)
+	case c.Secret == "":
+		return fmt.Errorf("%w: %s credential without a secret", ErrInvalid, c.Kind)
 	}
 	return nil
 }
@@ -93,12 +167,59 @@ func (p *UserPolicy) CanAccess(it *Item) bool {
 }
 
 // CanAccess reports whether the user may see the item: their own
-// playlists, and other items as their policy allows.
+// playlists, and other items as their access allows.
 func (u *User) CanAccess(it *Item) bool {
 	if it.Kind == KindPlaylist {
 		return it.UserID == u.ID
 	}
-	return u.Policy.CanAccess(it)
+	access := u.Access()
+	return access.CanAccess(it)
+}
+
+// Access returns the user's effective policy: its policy with its
+// restriction profile's rating limit applied.
+func (u *User) Access() UserPolicy {
+	p := u.Policy
+	if limit, ok := u.Restriction.MaxRating(); ok {
+		if p.MaxParentalRating == nil || *p.MaxParentalRating > limit {
+			p.MaxParentalRating = &limit
+		}
+		p.BlockUnrated = true
+	}
+	return p
+}
+
+// RestrictionProfile limits what a managed user sees by content rating,
+// after Plex's profiles.
+type RestrictionProfile string
+
+// Restriction profiles.
+const (
+	RestrictionNone         RestrictionProfile = ""
+	RestrictionYoungerChild RestrictionProfile = "younger_child"
+	RestrictionOlderChild   RestrictionProfile = "older_child"
+	RestrictionTeen         RestrictionProfile = "teen"
+)
+
+// Valid reports whether r is a known restriction profile.
+func (r RestrictionProfile) Valid() bool {
+	return slices.Contains([]RestrictionProfile{RestrictionNone, RestrictionYoungerChild, RestrictionOlderChild, RestrictionTeen}, r)
+}
+
+// MaxRating returns the highest rating score, an age, the profile allows;
+// false for none. Rated items within it alone are shown: up to G and TV-G
+// for younger children, PG and TV-PG for older children, PG-13 and TV-14
+// for teenagers.
+func (r RestrictionProfile) MaxRating() (int, bool) {
+	switch r {
+	case RestrictionYoungerChild:
+		return 6, true
+	case RestrictionOlderChild:
+		return 12, true
+	case RestrictionTeen:
+		return 16, true
+	}
+	return 0, false
 }
 
 // SubtitleMode controls automatic subtitle selection.

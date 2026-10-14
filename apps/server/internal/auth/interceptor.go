@@ -186,7 +186,7 @@ func (i *Interceptor) resolveKey(ctx context.Context, token string, invalid erro
 		return Principal{}, fmt.Errorf("look up API key: %w", err)
 	}
 	user, err := i.store.Users().Get(ctx, key.UserID)
-	if errors.Is(err, core.ErrNotFound) || err == nil && (user.Disabled || !user.Admin) {
+	if errors.Is(err, core.ErrNotFound) || err == nil && (user.Disabled || !user.IsAdmin()) {
 		return Principal{}, invalid
 	} else if err != nil {
 		return Principal{}, fmt.Errorf("look up user: %w", err)

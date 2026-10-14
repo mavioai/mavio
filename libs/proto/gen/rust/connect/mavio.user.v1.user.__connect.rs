@@ -54,6 +54,14 @@ pub type OwnedSetPasswordRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetPasswordResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::SetPasswordResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SetPinRequestView<'static>>`.
+pub type OwnedSetPinRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::SetPinRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SetPinResponseView<'static>>`.
+pub type OwnedSetPinResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<UpdatePreferencesRequestView<'static>>`.
 pub type OwnedUpdatePreferencesRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesRequestView<'static>,
@@ -316,6 +324,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::SetPinResponse>
+for crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::SetPinResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::UpdatePreferencesResponse>
 for crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'_> {
     fn encode(
@@ -462,14 +504,22 @@ pub const USER_SERVICE_SET_PASSWORD_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetPin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_SET_PIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/SetPin",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `UpdatePreferences` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const USER_SERVICE_UPDATE_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.user.v1.UserService/UpdatePreferences",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// UserService manages accounts. All methods except GetCurrentUser and
-/// UpdatePreferences require an administrator.
+/// UserService manages accounts: the server's one administrator, members
+/// and managed users (docs/accounts.md §4.1). All methods except
+/// GetCurrentUser, UpdatePreferences and changing one's own password or PIN
+/// require the administrator.
 ///
 /// # Implementing handlers
 ///
@@ -660,6 +710,7 @@ pub trait UserService: Send + Sync + 'static {
     > + Send;
     /// SetPassword sets a user's password. Users may change their own password
     /// by providing the current one.
+    /// Giving a managed user a password makes it a member.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -679,6 +730,30 @@ pub trait UserService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::user::v1::SetPasswordResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetPin sets or clears a user's PIN, which guards switching to it: the
+    /// administrator sets managed users' PINs, other users set their own.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_pin<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::user::v1::SetPinRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::user::v1::SetPinResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -942,6 +1017,35 @@ impl<S: UserService> UserServiceExt for S {
             .with_spec(USER_SERVICE_SET_PASSWORD_SPEC)
             .route_view(
                 USER_SERVICE_SERVICE_NAME,
+                "SetPin",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::user::v1::__buffa::view::SetPinRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::user::v1::SetPinRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_pin(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::user::v1::SetPinResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(USER_SERVICE_SET_PIN_SPEC)
+            .route_view(
+                USER_SERVICE_SERVICE_NAME,
                 "UpdatePreferences",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1063,6 +1167,12 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(USER_SERVICE_SET_PASSWORD_SPEC),
+                )
+            }
+            "SetPin" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(USER_SERVICE_SET_PIN_SPEC),
                 )
             }
             "UpdatePreferences" => {
@@ -1236,6 +1346,26 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                         .encode::<
                             crate::proto::mavio::user::v1::SetPasswordResponse,
                         >(format)
+                })
+            }
+            "SetPin" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::user::v1::SetPinRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::user::v1::__buffa::view::SetPinRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::user::v1::SetPinRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_pin(ctx, req)
+                        .await?
+                        .encode::<crate::proto::mavio::user::v1::SetPinResponse>(format)
                 })
             }
             "UpdatePreferences" => {
@@ -1694,6 +1824,43 @@ where
                 &self.config,
                 USER_SERVICE_SET_PASSWORD_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetPin RPC. Sends a request to /mavio.user.v1.UserService/SetPin.
+    pub async fn set_pin(
+        &self,
+        request: crate::proto::mavio::user::v1::SetPinRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_pin_with_options(request, ::connectrpc::client::CallOptions::default())
+            .await
+    }
+    /// Call the SetPin RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_pin_with_options(
+        &self,
+        request: crate::proto::mavio::user::v1::SetPinRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::user::v1::__buffa::view::SetPinResponseView<'static>,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                USER_SERVICE_SET_PIN_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

@@ -7,6 +7,7 @@ import (
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/store/internal/ent"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/user"
 	"github.com/mavioai/mavio/libs/store/internal/ent/userdata"
 )
@@ -52,9 +53,9 @@ func (r users) Create(ctx context.Context, u *core.User) error {
 		SetID(u.ID).
 		SetName(u.Name).
 		SetNameKey(strings.ToLower(u.Name)).
-		SetPasswordHash(u.PasswordHash).
+		SetKind(u.Kind).
 		SetAuthProvider(u.AuthProvider).
-		SetAdmin(u.Admin).
+		SetRestriction(u.Restriction).
 		SetDisabled(u.Disabled).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences).
@@ -75,9 +76,9 @@ func (r users) Update(ctx context.Context, u *core.User) error {
 	update := r.s.write.User.UpdateOneID(u.ID).
 		SetName(u.Name).
 		SetNameKey(strings.ToLower(u.Name)).
-		SetPasswordHash(u.PasswordHash).
+		SetKind(u.Kind).
 		SetAuthProvider(u.AuthProvider).
-		SetAdmin(u.Admin).
+		SetRestriction(u.Restriction).
 		SetDisabled(u.Disabled).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences)
@@ -102,14 +103,79 @@ func toUser(u *ent.User) core.User {
 	return core.User{
 		ID:           u.ID,
 		Name:         u.Name,
-		PasswordHash: u.PasswordHash,
+		Kind:         u.Kind,
 		AuthProvider: u.AuthProvider,
-		Admin:        u.Admin,
+		Restriction:  u.Restriction,
 		Disabled:     u.Disabled,
 		Policy:       u.Policy,
 		Preferences:  u.Preferences,
 		CreatedAt:    u.CreatedAt.UTC(),
 		LastLoginAt:  utcPtr(u.LastLoginAt),
+	}
+}
+
+type credentials struct{ s *Store }
+
+func (r credentials) List(ctx context.Context, userID core.ID) ([]core.Credential, error) {
+	list, err := r.s.read.Credential.Query().Where(credential.UserID(userID)).Order(ent.Asc(credential.FieldKind)).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "list credentials")
+	}
+	out := make([]core.Credential, len(list))
+	for i, c := range list {
+		out[i] = toCredential(c)
+	}
+	return out, nil
+}
+
+func (r credentials) Get(ctx context.Context, userID core.ID, kind core.CredentialKind) (core.Credential, error) {
+	c, err := r.s.read.Credential.Query().Where(credential.UserID(userID), credential.Kind(kind)).Only(ctx)
+	if err != nil {
+		return core.Credential{}, mapErr(err, "get "+string(kind)+" credential")
+	}
+	return toCredential(c), nil
+}
+
+func (r credentials) Put(ctx context.Context, c *core.Credential) error {
+	if c.ID.IsZero() {
+		c.ID = core.NewID()
+	}
+	if err := c.Validate(); err != nil {
+		return err
+	}
+	return r.s.writeTx(ctx, func(tx *Store) error {
+		if _, err := tx.write.Credential.Delete().Where(credential.UserID(c.UserID), credential.Kind(c.Kind)).Exec(ctx); err != nil {
+			return mapErr(err, "replace "+string(c.Kind)+" credential")
+		}
+		created, err := tx.write.Credential.Create().
+			SetID(c.ID).
+			SetUserID(c.UserID).
+			SetKind(c.Kind).
+			SetSecret(c.Secret).
+			SetCreatedAt(orNow(c.CreatedAt)).
+			SetNillableLastUsedAt(c.LastUsedAt).
+			Save(ctx)
+		if err != nil {
+			return mapErr(err, "put "+string(c.Kind)+" credential")
+		}
+		*c = toCredential(created)
+		return nil
+	})
+}
+
+func (r credentials) Delete(ctx context.Context, userID core.ID, kind core.CredentialKind) error {
+	_, err := r.s.write.Credential.Delete().Where(credential.UserID(userID), credential.Kind(kind)).Exec(ctx)
+	return mapErr(err, "delete "+string(kind)+" credential")
+}
+
+func toCredential(c *ent.Credential) core.Credential {
+	return core.Credential{
+		ID:         c.ID,
+		UserID:     c.UserID,
+		Kind:       c.Kind,
+		Secret:     c.Secret,
+		CreatedAt:  c.CreatedAt.UTC(),
+		LastUsedAt: utcPtr(c.LastUsedAt),
 	}
 }
 

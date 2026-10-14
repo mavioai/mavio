@@ -27,7 +27,7 @@ func TestCuratedItems(t *testing.T) {
 		alien, aliens, up := newItem(films, core.KindMovie, "Alien"), newItem(films, core.KindMovie, "Aliens"), newItem(films, core.KindMovie, "Up")
 		aliens.ParentalRating = ptr(17)
 		saga := newItem(collections, core.KindCollection, "Alien Collection")
-		u := core.User{Name: "listener", PasswordHash: "x"}
+		u := core.User{Name: "listener", Kind: core.UserMember}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}

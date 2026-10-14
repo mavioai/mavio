@@ -23,7 +23,7 @@ func TestInterceptor(t *testing.T) {
 
 	t0 := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
 	newSession := func(name string, disabled bool) core.ID {
-		u := core.User{Name: name, PasswordHash: HashPassword("pw"), Disabled: disabled}
+		u := core.User{Name: name, Kind: core.UserMember, Disabled: disabled}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}

@@ -76,7 +76,7 @@ func (s *CollectionService) CreateCollection(ctx context.Context, req *libraryv1
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, []core.Item{c}, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, []core.Item{c}, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -96,7 +96,7 @@ func (s *CollectionService) UpdateCollection(ctx context.Context, req *libraryv1
 	if err := rename(ctx, s.store, &c, req.GetName()); err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, []core.Item{c}, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, []core.Item{c}, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -233,7 +233,7 @@ func (s *PlaylistService) ListPlaylists(ctx context.Context, req *libraryv1.List
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, page.Items, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, page.Items, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -274,7 +274,7 @@ func (s *PlaylistService) ListPlaylistEntries(ctx context.Context, req *libraryv
 	for i, l := range links {
 		list[i] = items[l.ItemID]
 	}
-	described, err := itemsToProto(ctx, s.store, list, p.User.Admin, p.User.ID)
+	described, err := itemsToProto(ctx, s.store, list, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -312,7 +312,7 @@ func (s *PlaylistService) CreatePlaylist(ctx context.Context, req *libraryv1.Cre
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, []core.Item{pl}, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, []core.Item{pl}, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -332,7 +332,7 @@ func (s *PlaylistService) UpdatePlaylist(ctx context.Context, req *libraryv1.Upd
 	if err := rename(ctx, s.store, &pl, req.GetName()); err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out, err := itemsToProto(ctx, s.store, []core.Item{pl}, p.User.Admin, p.User.ID)
+	out, err := itemsToProto(ctx, s.store, []core.Item{pl}, p.User.IsAdmin(), p.User.ID)
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
@@ -491,8 +491,8 @@ func userItems(u *core.User) (core.ItemQuery, bool) {
 	libs, ok := libraryScope(&u.Policy, nil)
 	return core.ItemQuery{
 		LibraryIDs:  libs,
-		MaxRating:   u.Policy.MaxParentalRating,
-		SkipUnrated: u.Policy.BlockUnrated,
+		MaxRating:   u.Access().MaxParentalRating,
+		SkipUnrated: u.Access().BlockUnrated,
 		UserID:      u.ID,
 	}, ok
 }

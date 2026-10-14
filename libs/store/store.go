@@ -197,6 +197,9 @@ func (s *Store) People() core.PersonRepository { return people{s} }
 // Users returns the user repository.
 func (s *Store) Users() core.UserRepository { return users{s} }
 
+// Credentials returns the credential repository.
+func (s *Store) Credentials() core.CredentialRepository { return credentials{s} }
+
 // UserData returns the user data repository.
 func (s *Store) UserData() core.UserDataRepository { return userData{s} }
 

@@ -19,12 +19,12 @@ const (
 	FieldName = "name"
 	// FieldNameKey holds the string denoting the name_key field in the database.
 	FieldNameKey = "name_key"
-	// FieldPasswordHash holds the string denoting the password_hash field in the database.
-	FieldPasswordHash = "password_hash"
+	// FieldKind holds the string denoting the kind field in the database.
+	FieldKind = "kind"
 	// FieldAuthProvider holds the string denoting the auth_provider field in the database.
 	FieldAuthProvider = "auth_provider"
-	// FieldAdmin holds the string denoting the admin field in the database.
-	FieldAdmin = "admin"
+	// FieldRestriction holds the string denoting the restriction field in the database.
+	FieldRestriction = "restriction"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
 	// FieldPolicy holds the string denoting the policy field in the database.
@@ -39,6 +39,8 @@ const (
 	EdgeUserData = "user_data"
 	// EdgeAuthSessions holds the string denoting the auth_sessions edge name in mutations.
 	EdgeAuthSessions = "auth_sessions"
+	// EdgeCredentials holds the string denoting the credentials edge name in mutations.
+	EdgeCredentials = "credentials"
 	// EdgePlaylists holds the string denoting the playlists edge name in mutations.
 	EdgePlaylists = "playlists"
 	// EdgeDisplayPreferences holds the string denoting the display_preferences edge name in mutations.
@@ -69,6 +71,13 @@ const (
 	AuthSessionsInverseTable = "auth_sessions"
 	// AuthSessionsColumn is the table column denoting the auth_sessions relation/edge.
 	AuthSessionsColumn = "user_id"
+	// CredentialsTable is the table that holds the credentials relation/edge.
+	CredentialsTable = "credentials"
+	// CredentialsInverseTable is the table name for the Credential entity.
+	// It exists in this package in order to avoid circular dependency with the "credential" package.
+	CredentialsInverseTable = "credentials"
+	// CredentialsColumn is the table column denoting the credentials relation/edge.
+	CredentialsColumn = "user_id"
 	// PlaylistsTable is the table that holds the playlists relation/edge.
 	PlaylistsTable = "items"
 	// PlaylistsInverseTable is the table name for the Item entity.
@@ -125,9 +134,9 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldNameKey,
-	FieldPasswordHash,
+	FieldKind,
 	FieldAuthProvider,
-	FieldAdmin,
+	FieldRestriction,
 	FieldDisabled,
 	FieldPolicy,
 	FieldPreferences,
@@ -148,12 +157,10 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultPasswordHash holds the default value on creation for the "password_hash" field.
-	DefaultPasswordHash string
 	// DefaultAuthProvider holds the default value on creation for the "auth_provider" field.
 	DefaultAuthProvider string
-	// DefaultAdmin holds the default value on creation for the "admin" field.
-	DefaultAdmin bool
+	// DefaultRestriction holds the default value on creation for the "restriction" field.
+	DefaultRestriction core.RestrictionProfile
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -180,9 +187,9 @@ func ByNameKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNameKey, opts...).ToFunc()
 }
 
-// ByPasswordHash orders the results by the password_hash field.
-func ByPasswordHash(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPasswordHash, opts...).ToFunc()
+// ByKind orders the results by the kind field.
+func ByKind(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKind, opts...).ToFunc()
 }
 
 // ByAuthProvider orders the results by the auth_provider field.
@@ -190,9 +197,9 @@ func ByAuthProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAuthProvider, opts...).ToFunc()
 }
 
-// ByAdmin orders the results by the admin field.
-func ByAdmin(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAdmin, opts...).ToFunc()
+// ByRestriction orders the results by the restriction field.
+func ByRestriction(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRestriction, opts...).ToFunc()
 }
 
 // ByDisabled orders the results by the disabled field.
@@ -235,6 +242,20 @@ func ByAuthSessionsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByAuthSessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newAuthSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByCredentialsCount orders the results by credentials count.
+func ByCredentialsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newCredentialsStep(), opts...)
+	}
+}
+
+// ByCredentials orders the results by credentials terms.
+func ByCredentials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCredentialsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -347,6 +368,13 @@ func newAuthSessionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AuthSessionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthSessionsTable, AuthSessionsColumn),
+	)
+}
+func newCredentialsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CredentialsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CredentialsTable, CredentialsColumn),
 	)
 }
 func newPlaylistsStep() *sqlgraph.Step {

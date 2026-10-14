@@ -13,6 +13,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blocklistentry"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/credit"
 	"github.com/mavioai/mavio/libs/store/internal/ent/customformat"
 	"github.com/mavioai/mavio/libs/store/internal/ent/delayprofile"
@@ -244,6 +245,33 @@ func (f TraverseBlocklistEntry) Traverse(ctx context.Context, q ent.Query) error
 		return f(ctx, q)
 	}
 	return fmt.Errorf("unexpected query type %T. expect *ent.BlocklistEntryQuery", q)
+}
+
+// The CredentialFunc type is an adapter to allow the use of ordinary function as a Querier.
+type CredentialFunc func(context.Context, *ent.CredentialQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f CredentialFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.CredentialQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.CredentialQuery", q)
+}
+
+// The TraverseCredential type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseCredential func(context.Context, *ent.CredentialQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseCredential) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseCredential) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.CredentialQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.CredentialQuery", q)
 }
 
 // The CreditFunc type is an adapter to allow the use of ordinary function as a Querier.
@@ -1312,6 +1340,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.BlockedTitleQuery, predicate.BlockedTitle, blockedtitle.OrderOption]{typ: ent.TypeBlockedTitle, tq: q}, nil
 	case *ent.BlocklistEntryQuery:
 		return &query[*ent.BlocklistEntryQuery, predicate.BlocklistEntry, blocklistentry.OrderOption]{typ: ent.TypeBlocklistEntry, tq: q}, nil
+	case *ent.CredentialQuery:
+		return &query[*ent.CredentialQuery, predicate.Credential, credential.OrderOption]{typ: ent.TypeCredential, tq: q}, nil
 	case *ent.CreditQuery:
 		return &query[*ent.CreditQuery, predicate.Credit, credit.OrderOption]{typ: ent.TypeCredit, tq: q}, nil
 	case *ent.CustomFormatQuery:

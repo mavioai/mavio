@@ -69,6 +69,18 @@ func (f BlocklistEntryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlocklistEntryMutation", m)
 }
 
+// The CredentialFunc type is an adapter to allow the use of ordinary
+// function as Credential mutator.
+type CredentialFunc func(context.Context, *ent.CredentialMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CredentialFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CredentialMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CredentialMutation", m)
+}
+
 // The CreditFunc type is an adapter to allow the use of ordinary
 // function as Credit mutator.
 type CreditFunc func(context.Context, *ent.CreditMutation) (ent.Value, error)

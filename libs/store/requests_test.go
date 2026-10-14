@@ -12,7 +12,7 @@ import (
 
 func newUser(t *testing.T, s *store.Store, name string) core.User {
 	t.Helper()
-	u := core.User{ID: core.NewID(), Name: name, PasswordHash: "x"}
+	u := core.User{ID: core.NewID(), Name: name, Kind: core.UserMember}
 	if err := s.Users().Create(t.Context(), &u); err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func TestIssues(t *testing.T) {
 func TestUserRequestPolicy(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		u := core.User{ID: core.NewID(), Name: "kid", PasswordHash: "x", Policy: core.UserPolicy{
+		u := core.User{ID: core.NewID(), Name: "kid", Kind: core.UserMember, Policy: core.UserPolicy{
 			Requests:   core.RequestPermissions{Movies: true, AutoApproveMovies: true, ReportIssues: true},
 			MovieQuota: &core.Quota{Limit: 5, Days: 7},
 		}}

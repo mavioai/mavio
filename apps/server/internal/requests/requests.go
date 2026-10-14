@@ -34,14 +34,14 @@ func titleKey(kind core.ItemKind, tmdbID int) string {
 // mayRequest reports whether a user's policy allows requesting a kind.
 func mayRequest(u *core.User, kind core.ItemKind) bool {
 	p := u.Policy.Requests
-	return u.Admin || kind == core.KindMovie && p.Movies || kind == core.KindSeries && p.Series
+	return u.IsAdmin() || kind == core.KindMovie && p.Movies || kind == core.KindSeries && p.Series
 }
 
 // autoApproves reports whether a user's requests of a kind are approved at
 // once, as Seerr's AUTO_APPROVE permissions and MANAGE_REQUESTS.
 func autoApproves(u *core.User, kind core.ItemKind) bool {
 	p := u.Policy.Requests
-	return u.Admin || kind == core.KindMovie && p.AutoApproveMovies || kind == core.KindSeries && p.AutoApproveSeries
+	return u.IsAdmin() || kind == core.KindMovie && p.AutoApproveMovies || kind == core.KindSeries && p.AutoApproveSeries
 }
 
 // Create requests a movie or seasons of a series, as Seerr's
@@ -59,7 +59,7 @@ func (s *Service) Create(ctx context.Context, caller core.User, n NewRequest) (c
 	}
 	user := caller
 	if !n.For.IsZero() && n.For != caller.ID {
-		if !caller.Admin {
+		if !caller.IsAdmin() {
 			return core.Request{}, fmt.Errorf("%w: requesting for another user", ErrPermission)
 		}
 		u, err := s.Store.Users().Get(ctx, n.For)
@@ -68,7 +68,7 @@ func (s *Service) Create(ctx context.Context, caller core.User, n NewRequest) (c
 		}
 		user = u
 	}
-	if n.IgnoreQuota && !caller.Admin {
+	if n.IgnoreQuota && !caller.IsAdmin() {
 		return core.Request{}, fmt.Errorf("%w: ignoring quotas", ErrPermission)
 	}
 	if !mayRequest(&user, n.Kind) {
@@ -222,7 +222,7 @@ func (s *Service) Get(ctx context.Context, caller core.User, id core.ID) (core.R
 	if err != nil {
 		return core.Request{}, err
 	}
-	if !caller.Admin && r.RequestedBy != caller.ID {
+	if !caller.IsAdmin() && r.RequestedBy != caller.ID {
 		return core.Request{}, fmt.Errorf("%w: request of another user", ErrPermission)
 	}
 	return r, nil
@@ -231,7 +231,7 @@ func (s *Service) Get(ctx context.Context, caller core.User, id core.ID) (core.R
 // List lists the caller's requests, or anyone's for administrators, as
 // Seerr's GET /request.
 func (s *Service) List(ctx context.Context, caller core.User, q core.RequestQuery) (core.Page[core.Request], error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		if !q.RequestedBy.IsZero() && q.RequestedBy != caller.ID {
 			return core.Page[core.Request]{}, fmt.Errorf("%w: requests of another user", ErrPermission)
 		}
@@ -322,7 +322,7 @@ func (s *Service) Delete(ctx context.Context, caller core.User, id core.ID) erro
 	if err != nil {
 		return err
 	}
-	if !caller.Admin && r.Status != core.RequestPending {
+	if !caller.IsAdmin() && r.Status != core.RequestPending {
 		return fmt.Errorf("%w: only pending requests are deleted by their users", ErrPermission)
 	}
 	defer s.titles.lock(titleKey(r.Kind, r.TmdbID))()
@@ -349,7 +349,7 @@ func (s *Service) Retry(ctx context.Context, caller core.User, id core.ID) (core
 }
 
 func (s *Service) transition(ctx context.Context, caller core.User, id core.ID, from, to core.RequestStatus) (core.Request, error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return core.Request{}, fmt.Errorf("%w: only administrators manage requests", ErrPermission)
 	}
 	r, err := s.Store.Requests().Get(ctx, id)
@@ -430,7 +430,7 @@ func (s *Service) Quota(ctx context.Context, u core.User, kind core.ItemKind) (Q
 		q = *own
 	}
 	out := Quota{Limit: q.Limit, Days: q.Days}
-	if u.Admin {
+	if u.IsAdmin() {
 		out.Limit = 0
 	}
 	if out.Limit == 0 {

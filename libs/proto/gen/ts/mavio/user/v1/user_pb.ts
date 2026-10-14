@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/user/v1/user.proto.
  */
 export const file_mavio_user_v1_user: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYXZpby91c2VyL3YxL3VzZXIucHJvdG8SDW1hdmlvLnVzZXIudjEingIKBFVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIVCg1hdXRoX3Byb3ZpZGVyGAMgASgJEg0KBWFkbWluGAQgASgIEhAKCGRpc2FibGVkGAUgASgIEikKBnBvbGljeRgGIAEoCzIZLm1hdmlvLnVzZXIudjEuVXNlclBvbGljeRIzCgtwcmVmZXJlbmNlcxgHIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzEi8KC2NyZWF0ZV90aW1lGAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIzCg9sYXN0X2xvZ2luX3RpbWUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIuQDCgpVc2VyUG9saWN5EhUKDWFsbF9saWJyYXJpZXMYASABKAgSIgoLbGlicmFyeV9pZHMYAiADKAlCDbpICpIBByIFcgOwAQESJAoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBUIHukgEGgIoABIVCg1ibG9ja191bnJhdGVkGAQgASgIEhkKEWFsbG93X3RyYW5zY29kaW5nGAUgASgIEhYKDmFsbG93X2Rvd25sb2FkGAYgASgIEiYKFW1heF9zdHJlYW1pbmdfYml0cmF0ZRgHIAEoA0IHukgEIgIoABIdCgxtYXhfc2Vzc2lvbnMYCCABKAVCB7pIBBoCKAASFgoOcmVxdWVzdF9tb3ZpZXMYCSABKAgSFgoOcmVxdWVzdF9zZXJpZXMYCiABKAgSGwoTYXV0b19hcHByb3ZlX21vdmllcxgLIAEoCBIbChNhdXRvX2FwcHJvdmVfc2VyaWVzGAwgASgIEhUKDXJlcG9ydF9pc3N1ZXMYDSABKAgSMAoLbW92aWVfcXVvdGEYDiABKAsyGy5tYXZpby51c2VyLnYxLlJlcXVlc3RRdW90YRIxCgxzZXJpZXNfcXVvdGEYDyABKAsyGy5tYXZpby51c2VyLnYxLlJlcXVlc3RRdW90YSI9CgxSZXF1ZXN0UXVvdGESFgoFbGltaXQYASABKAVCB7pIBBoCKAASFQoEZGF5cxgCIAEoBUIHukgEGgIoACLWAQoPVXNlclByZWZlcmVuY2VzEi8KD2F1ZGlvX2xhbmd1YWdlcxgBIAMoCUIWukgTkgEQIg5yDDIKXlthLXpdezN9JBIyChJzdWJ0aXRsZV9sYW5ndWFnZXMYAiADKAlCFrpIE5IBECIOcgwyCl5bYS16XXszfSQSPAoNc3VidGl0bGVfbW9kZRgDIAEoDjIbLm1hdmlvLnVzZXIudjEuU3VidGl0bGVNb2RlQgi6SAWCAQIQARIgChhwbGF5X2RlZmF1bHRfYXVkaW9fdHJhY2sYBCABKAgi8wEKCFVzZXJEYXRhEg8KB2l0ZW1faWQYASABKAkSDgoGcGxheWVkGAIgASgIEhIKCnBsYXlfY291bnQYAyABKAUSKwoIcG9zaXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SFAoMYXVkaW9fc3RyZWFtGAUgASgFEhcKD3N1YnRpdGxlX3N0cmVhbRgGIAEoBRIQCghmYXZvcml0ZRgHIAEoCBIOCgZyYXRpbmcYCCABKAESNAoQbGFzdF9wbGF5ZWRfdGltZRgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiEgoQTGlzdFVzZXJzUmVxdWVzdCI3ChFMaXN0VXNlcnNSZXNwb25zZRIiCgV1c2VycxgBIAMoCzITLm1hdmlvLnVzZXIudjEuVXNlciIpCg5HZXRVc2VyUmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiNAoPR2V0VXNlclJlc3BvbnNlEiEKBHVzZXIYASABKAsyEy5tYXZpby51c2VyLnYxLlVzZXIiFwoVR2V0Q3VycmVudFVzZXJSZXF1ZXN0IjsKFkdldEN1cnJlbnRVc2VyUmVzcG9uc2USIQoEdXNlchgBIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlciLRAQoRQ3JlYXRlVXNlclJlcXVlc3QSGgoEbmFtZRgBIAEoCUIMukgJyAEBcgQQARhkEhoKCHBhc3N3b3JkGAIgASgJQgi6SAVyAxiACBIVCg1hdXRoX3Byb3ZpZGVyGAMgASgJEg0KBWFkbWluGAQgASgIEikKBnBvbGljeRgFIAEoCzIZLm1hdmlvLnVzZXIudjEuVXNlclBvbGljeRIzCgtwcmVmZXJlbmNlcxgGIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzIjcKEkNyZWF0ZVVzZXJSZXNwb25zZRIhCgR1c2VyGAEgASgLMhMubWF2aW8udXNlci52MS5Vc2VyIpQBChFVcGRhdGVVc2VyUmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQESGgoEbmFtZRgCIAEoCUIMukgJyAEBcgQQARhkEg0KBWFkbWluGAMgASgIEhAKCGRpc2FibGVkGAQgASgIEikKBnBvbGljeRgFIAEoCzIZLm1hdmlvLnVzZXIudjEuVXNlclBvbGljeSI3ChJVcGRhdGVVc2VyUmVzcG9uc2USIQoEdXNlchgBIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlciIsChFEZWxldGVVc2VyUmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiFAoSRGVsZXRlVXNlclJlc3BvbnNlInEKElNldFBhc3N3b3JkUmVxdWVzdBIcCgd1c2VyX2lkGAEgASgJQgu6SAjIAQFyA7ABARIYChBjdXJyZW50X3Bhc3N3b3JkGAIgASgJEiMKDG5ld19wYXNzd29yZBgDIAEoCUINukgKyAEBcgUQARiACCIVChNTZXRQYXNzd29yZFJlc3BvbnNlIlcKGFVwZGF0ZVByZWZlcmVuY2VzUmVxdWVzdBI7CgtwcmVmZXJlbmNlcxgBIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzQga6SAPIAQEiUAoZVXBkYXRlUHJlZmVyZW5jZXNSZXNwb25zZRIzCgtwcmVmZXJlbmNlcxgBIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzIjoKEkdldFVzZXJEYXRhUmVxdWVzdBIkCghpdGVtX2lkcxgBIAMoCUISukgPkgEMCAEQ6AciBXIDsAEBIkEKE0dldFVzZXJEYXRhUmVzcG9uc2USKgoJdXNlcl9kYXRhGAEgAygLMhcubWF2aW8udXNlci52MS5Vc2VyRGF0YSKtAQoVVXBkYXRlVXNlckRhdGFSZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBEg4KBnBsYXllZBgCIAEoCBIQCghmYXZvcml0ZRgDIAEoCBIrCghwb3NpdGlvbhgEIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhInCgZyYXRpbmcYBSABKAFCF7pIFBISGQAAAAAAACRAKQAAAAAAAAAAIkQKFlVwZGF0ZVVzZXJEYXRhUmVzcG9uc2USKgoJdXNlcl9kYXRhGAEgASgLMhcubWF2aW8udXNlci52MS5Vc2VyRGF0YSqtAQoMU3VidGl0bGVNb2RlEh0KGVNVQlRJVExFX01PREVfVU5TUEVDSUZJRUQQABIYChRTVUJUSVRMRV9NT0RFX0FMV0FZUxABEhkKFVNVQlRJVExFX01PREVfRk9SRUlHThACEhgKFFNVQlRJVExFX01PREVfRk9SQ0VEEAMSFgoSU1VCVElUTEVfTU9ERV9OT05FEAQSFwoTU1VCVElUTEVfTU9ERV9TTUFSVBAFMswFCgtVc2VyU2VydmljZRJTCglMaXN0VXNlcnMSHy5tYXZpby51c2VyLnYxLkxpc3RVc2Vyc1JlcXVlc3QaIC5tYXZpby51c2VyLnYxLkxpc3RVc2Vyc1Jlc3BvbnNlIgOQAgESTQoHR2V0VXNlchIdLm1hdmlvLnVzZXIudjEuR2V0VXNlclJlcXVlc3QaHi5tYXZpby51c2VyLnYxLkdldFVzZXJSZXNwb25zZSIDkAIBEmIKDkdldEN1cnJlbnRVc2VyEiQubWF2aW8udXNlci52MS5HZXRDdXJyZW50VXNlclJlcXVlc3QaJS5tYXZpby51c2VyLnYxLkdldEN1cnJlbnRVc2VyUmVzcG9uc2UiA5ACARJRCgpDcmVhdGVVc2VyEiAubWF2aW8udXNlci52MS5DcmVhdGVVc2VyUmVxdWVzdBohLm1hdmlvLnVzZXIudjEuQ3JlYXRlVXNlclJlc3BvbnNlElEKClVwZGF0ZVVzZXISIC5tYXZpby51c2VyLnYxLlVwZGF0ZVVzZXJSZXF1ZXN0GiEubWF2aW8udXNlci52MS5VcGRhdGVVc2VyUmVzcG9uc2USUQoKRGVsZXRlVXNlchIgLm1hdmlvLnVzZXIudjEuRGVsZXRlVXNlclJlcXVlc3QaIS5tYXZpby51c2VyLnYxLkRlbGV0ZVVzZXJSZXNwb25zZRJUCgtTZXRQYXNzd29yZBIhLm1hdmlvLnVzZXIudjEuU2V0UGFzc3dvcmRSZXF1ZXN0GiIubWF2aW8udXNlci52MS5TZXRQYXNzd29yZFJlc3BvbnNlEmYKEVVwZGF0ZVByZWZlcmVuY2VzEicubWF2aW8udXNlci52MS5VcGRhdGVQcmVmZXJlbmNlc1JlcXVlc3QaKC5tYXZpby51c2VyLnYxLlVwZGF0ZVByZWZlcmVuY2VzUmVzcG9uc2UyywEKD1VzZXJEYXRhU2VydmljZRJZCgtHZXRVc2VyRGF0YRIhLm1hdmlvLnVzZXIudjEuR2V0VXNlckRhdGFSZXF1ZXN0GiIubWF2aW8udXNlci52MS5HZXRVc2VyRGF0YVJlc3BvbnNlIgOQAgESXQoOVXBkYXRlVXNlckRhdGESJC5tYXZpby51c2VyLnYxLlVwZGF0ZVVzZXJEYXRhUmVxdWVzdBolLm1hdmlvLnVzZXIudjEuVXBkYXRlVXNlckRhdGFSZXNwb25zZUK1AQoRY29tLm1hdmlvLnVzZXIudjFCCVVzZXJQcm90b1ABWj9naXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vdXNlci92MTt1c2VydjGiAgNNVViqAg1NYXZpby5Vc2VyLlYxygINTWF2aW9cVXNlclxWMeICGU1hdmlvXFVzZXJcVjFcR1BCTWV0YWRhdGHqAg9NYXZpbzo6VXNlcjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp]);
+  fileDesc("ChhtYXZpby91c2VyL3YxL3VzZXIucHJvdG8SDW1hdmlvLnVzZXIudjEi+AIKBFVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIVCg1hdXRoX3Byb3ZpZGVyGAMgASgJEg0KBWFkbWluGAQgASgIEhAKCGRpc2FibGVkGAUgASgIEikKBnBvbGljeRgGIAEoCzIZLm1hdmlvLnVzZXIudjEuVXNlclBvbGljeRIzCgtwcmVmZXJlbmNlcxgHIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzEi8KC2NyZWF0ZV90aW1lGAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIzCg9sYXN0X2xvZ2luX3RpbWUYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg8KB21hbmFnZWQYCiABKAgSDwoHaGFzX3BpbhgLIAEoCBI2CgtyZXN0cmljdGlvbhgMIAEoDjIhLm1hdmlvLnVzZXIudjEuUmVzdHJpY3Rpb25Qcm9maWxlIuQDCgpVc2VyUG9saWN5EhUKDWFsbF9saWJyYXJpZXMYASABKAgSIgoLbGlicmFyeV9pZHMYAiADKAlCDbpICpIBByIFcgOwAQESJAoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBUIHukgEGgIoABIVCg1ibG9ja191bnJhdGVkGAQgASgIEhkKEWFsbG93X3RyYW5zY29kaW5nGAUgASgIEhYKDmFsbG93X2Rvd25sb2FkGAYgASgIEiYKFW1heF9zdHJlYW1pbmdfYml0cmF0ZRgHIAEoA0IHukgEIgIoABIdCgxtYXhfc2Vzc2lvbnMYCCABKAVCB7pIBBoCKAASFgoOcmVxdWVzdF9tb3ZpZXMYCSABKAgSFgoOcmVxdWVzdF9zZXJpZXMYCiABKAgSGwoTYXV0b19hcHByb3ZlX21vdmllcxgLIAEoCBIbChNhdXRvX2FwcHJvdmVfc2VyaWVzGAwgASgIEhUKDXJlcG9ydF9pc3N1ZXMYDSABKAgSMAoLbW92aWVfcXVvdGEYDiABKAsyGy5tYXZpby51c2VyLnYxLlJlcXVlc3RRdW90YRIxCgxzZXJpZXNfcXVvdGEYDyABKAsyGy5tYXZpby51c2VyLnYxLlJlcXVlc3RRdW90YSI9CgxSZXF1ZXN0UXVvdGESFgoFbGltaXQYASABKAVCB7pIBBoCKAASFQoEZGF5cxgCIAEoBUIHukgEGgIoACLWAQoPVXNlclByZWZlcmVuY2VzEi8KD2F1ZGlvX2xhbmd1YWdlcxgBIAMoCUIWukgTkgEQIg5yDDIKXlthLXpdezN9JBIyChJzdWJ0aXRsZV9sYW5ndWFnZXMYAiADKAlCFrpIE5IBECIOcgwyCl5bYS16XXszfSQSPAoNc3VidGl0bGVfbW9kZRgDIAEoDjIbLm1hdmlvLnVzZXIudjEuU3VidGl0bGVNb2RlQgi6SAWCAQIQARIgChhwbGF5X2RlZmF1bHRfYXVkaW9fdHJhY2sYBCABKAgi8wEKCFVzZXJEYXRhEg8KB2l0ZW1faWQYASABKAkSDgoGcGxheWVkGAIgASgIEhIKCnBsYXlfY291bnQYAyABKAUSKwoIcG9zaXRpb24YBCABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SFAoMYXVkaW9fc3RyZWFtGAUgASgFEhcKD3N1YnRpdGxlX3N0cmVhbRgGIAEoBRIQCghmYXZvcml0ZRgHIAEoCBIOCgZyYXRpbmcYCCABKAESNAoQbGFzdF9wbGF5ZWRfdGltZRgJIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiEgoQTGlzdFVzZXJzUmVxdWVzdCI3ChFMaXN0VXNlcnNSZXNwb25zZRIiCgV1c2VycxgBIAMoCzITLm1hdmlvLnVzZXIudjEuVXNlciIpCg5HZXRVc2VyUmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiNAoPR2V0VXNlclJlc3BvbnNlEiEKBHVzZXIYASABKAsyEy5tYXZpby51c2VyLnYxLlVzZXIiFwoVR2V0Q3VycmVudFVzZXJSZXF1ZXN0IjsKFkdldEN1cnJlbnRVc2VyUmVzcG9uc2USIQoEdXNlchgBIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlciLEAgoRQ3JlYXRlVXNlclJlcXVlc3QSGgoEbmFtZRgBIAEoCUIMukgJyAEBcgQQARhkEhoKCHBhc3N3b3JkGAIgASgJQgi6SAVyAxiACBIVCg1hdXRoX3Byb3ZpZGVyGAMgASgJEg0KBWFkbWluGAQgASgIEikKBnBvbGljeRgFIAEoCzIZLm1hdmlvLnVzZXIudjEuVXNlclBvbGljeRIzCgtwcmVmZXJlbmNlcxgGIAEoCzIeLm1hdmlvLnVzZXIudjEuVXNlclByZWZlcmVuY2VzEg8KB21hbmFnZWQYByABKAgSQAoLcmVzdHJpY3Rpb24YCCABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZUIIukgFggECEAESHgoDcGluGAkgASgJQhG6SA5yDDIKXlswLTldezR9JCI3ChJDcmVhdGVVc2VyUmVzcG9uc2USIQoEdXNlchgBIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlciLWAQoRVXBkYXRlVXNlclJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBEhoKBG5hbWUYAiABKAlCDLpICcgBAXIEEAEYZBINCgVhZG1pbhgDIAEoCBIQCghkaXNhYmxlZBgEIAEoCBIpCgZwb2xpY3kYBSABKAsyGS5tYXZpby51c2VyLnYxLlVzZXJQb2xpY3kSQAoLcmVzdHJpY3Rpb24YBiABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZUIIukgFggECEAEiNwoSVXBkYXRlVXNlclJlc3BvbnNlEiEKBHVzZXIYASABKAsyEy5tYXZpby51c2VyLnYxLlVzZXIiLAoRRGVsZXRlVXNlclJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIhQKEkRlbGV0ZVVzZXJSZXNwb25zZSJxChJTZXRQYXNzd29yZFJlcXVlc3QSHAoHdXNlcl9pZBgBIAEoCUILukgIyAEBcgOwAQESGAoQY3VycmVudF9wYXNzd29yZBgCIAEoCRIjCgxuZXdfcGFzc3dvcmQYAyABKAlCDbpICsgBAXIFEAEYgAgiFQoTU2V0UGFzc3dvcmRSZXNwb25zZSJQCg1TZXRQaW5SZXF1ZXN0EhwKB3VzZXJfaWQYASABKAlCC7pICMgBAXIDsAEBEiEKA3BpbhgCIAEoCUIUukgRcg8yDV4oWzAtOV17NH0pPyQiEAoOU2V0UGluUmVzcG9uc2UiVwoYVXBkYXRlUHJlZmVyZW5jZXNSZXF1ZXN0EjsKC3ByZWZlcmVuY2VzGAEgASgLMh4ubWF2aW8udXNlci52MS5Vc2VyUHJlZmVyZW5jZXNCBrpIA8gBASJQChlVcGRhdGVQcmVmZXJlbmNlc1Jlc3BvbnNlEjMKC3ByZWZlcmVuY2VzGAEgASgLMh4ubWF2aW8udXNlci52MS5Vc2VyUHJlZmVyZW5jZXMiOgoSR2V0VXNlckRhdGFSZXF1ZXN0EiQKCGl0ZW1faWRzGAEgAygJQhK6SA+SAQwIARDoByIFcgOwAQEiQQoTR2V0VXNlckRhdGFSZXNwb25zZRIqCgl1c2VyX2RhdGEYASADKAsyFy5tYXZpby51c2VyLnYxLlVzZXJEYXRhIq0BChVVcGRhdGVVc2VyRGF0YVJlcXVlc3QSHAoHaXRlbV9pZBgBIAEoCUILukgIyAEBcgOwAQESDgoGcGxheWVkGAIgASgIEhAKCGZhdm9yaXRlGAMgASgIEisKCHBvc2l0aW9uGAQgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEicKBnJhdGluZxgFIAEoAUIXukgUEhIZAAAAAAAAJEApAAAAAAAAAAAiRAoWVXBkYXRlVXNlckRhdGFSZXNwb25zZRIqCgl1c2VyX2RhdGEYASABKAsyFy5tYXZpby51c2VyLnYxLlVzZXJEYXRhKq0BCgxTdWJ0aXRsZU1vZGUSHQoZU1VCVElUTEVfTU9ERV9VTlNQRUNJRklFRBAAEhgKFFNVQlRJVExFX01PREVfQUxXQVlTEAESGQoVU1VCVElUTEVfTU9ERV9GT1JFSUdOEAISGAoUU1VCVElUTEVfTU9ERV9GT1JDRUQQAxIWChJTVUJUSVRMRV9NT0RFX05PTkUQBBIXChNTVUJUSVRMRV9NT0RFX1NNQVJUEAUqowEKElJlc3RyaWN0aW9uUHJvZmlsZRIjCh9SRVNUUklDVElPTl9QUk9GSUxFX1VOU1BFQ0lGSUVEEAASJQohUkVTVFJJQ1RJT05fUFJPRklMRV9ZT1VOR0VSX0NISUxEEAESIwofUkVTVFJJQ1RJT05fUFJPRklMRV9PTERFUl9DSElMRBACEhwKGFJFU1RSSUNUSU9OX1BST0ZJTEVfVEVFThADMpMGCgtVc2VyU2VydmljZRJTCglMaXN0VXNlcnMSHy5tYXZpby51c2VyLnYxLkxpc3RVc2Vyc1JlcXVlc3QaIC5tYXZpby51c2VyLnYxLkxpc3RVc2Vyc1Jlc3BvbnNlIgOQAgESTQoHR2V0VXNlchIdLm1hdmlvLnVzZXIudjEuR2V0VXNlclJlcXVlc3QaHi5tYXZpby51c2VyLnYxLkdldFVzZXJSZXNwb25zZSIDkAIBEmIKDkdldEN1cnJlbnRVc2VyEiQubWF2aW8udXNlci52MS5HZXRDdXJyZW50VXNlclJlcXVlc3QaJS5tYXZpby51c2VyLnYxLkdldEN1cnJlbnRVc2VyUmVzcG9uc2UiA5ACARJRCgpDcmVhdGVVc2VyEiAubWF2aW8udXNlci52MS5DcmVhdGVVc2VyUmVxdWVzdBohLm1hdmlvLnVzZXIudjEuQ3JlYXRlVXNlclJlc3BvbnNlElEKClVwZGF0ZVVzZXISIC5tYXZpby51c2VyLnYxLlVwZGF0ZVVzZXJSZXF1ZXN0GiEubWF2aW8udXNlci52MS5VcGRhdGVVc2VyUmVzcG9uc2USUQoKRGVsZXRlVXNlchIgLm1hdmlvLnVzZXIudjEuRGVsZXRlVXNlclJlcXVlc3QaIS5tYXZpby51c2VyLnYxLkRlbGV0ZVVzZXJSZXNwb25zZRJUCgtTZXRQYXNzd29yZBIhLm1hdmlvLnVzZXIudjEuU2V0UGFzc3dvcmRSZXF1ZXN0GiIubWF2aW8udXNlci52MS5TZXRQYXNzd29yZFJlc3BvbnNlEkUKBlNldFBpbhIcLm1hdmlvLnVzZXIudjEuU2V0UGluUmVxdWVzdBodLm1hdmlvLnVzZXIudjEuU2V0UGluUmVzcG9uc2USZgoRVXBkYXRlUHJlZmVyZW5jZXMSJy5tYXZpby51c2VyLnYxLlVwZGF0ZVByZWZlcmVuY2VzUmVxdWVzdBooLm1hdmlvLnVzZXIudjEuVXBkYXRlUHJlZmVyZW5jZXNSZXNwb25zZTLLAQoPVXNlckRhdGFTZXJ2aWNlElkKC0dldFVzZXJEYXRhEiEubWF2aW8udXNlci52MS5HZXRVc2VyRGF0YVJlcXVlc3QaIi5tYXZpby51c2VyLnYxLkdldFVzZXJEYXRhUmVzcG9uc2UiA5ACARJdCg5VcGRhdGVVc2VyRGF0YRIkLm1hdmlvLnVzZXIudjEuVXBkYXRlVXNlckRhdGFSZXF1ZXN0GiUubWF2aW8udXNlci52MS5VcGRhdGVVc2VyRGF0YVJlc3BvbnNlQrUBChFjb20ubWF2aW8udXNlci52MUIJVXNlclByb3RvUAFaP2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby91c2VyL3YxO3VzZXJ2MaICA01VWKoCDU1hdmlvLlVzZXIuVjHKAg1NYXZpb1xVc2VyXFYx4gIZTWF2aW9cVXNlclxWMVxHUEJNZXRhZGF0YeoCD01hdmlvOjpVc2VyOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp]);
 
 /**
  * User is an account. Credentials are never returned.
@@ -40,6 +40,8 @@ export type User = Message<"mavio.user.v1.User"> & {
   authProvider: string;
 
   /**
+   * Whether the user is the server's administrator; exactly one user is.
+   *
    * @generated from field: bool admin = 4;
    */
   admin: boolean;
@@ -68,6 +70,28 @@ export type User = Message<"mavio.user.v1.User"> & {
    * @generated from field: google.protobuf.Timestamp last_login_time = 9;
    */
   lastLoginTime?: Timestamp | undefined;
+
+  /**
+   * A managed user has no credentials and is reached only by switching to
+   * it.
+   *
+   * @generated from field: bool managed = 10;
+   */
+  managed: boolean;
+
+  /**
+   * Whether switching to the user asks for its PIN.
+   *
+   * @generated from field: bool has_pin = 11;
+   */
+  hasPin: boolean;
+
+  /**
+   * A managed user's restriction profile.
+   *
+   * @generated from field: mavio.user.v1.RestrictionProfile restriction = 12;
+   */
+  restriction: RestrictionProfile;
 };
 
 /**
@@ -414,7 +438,7 @@ export type CreateUserRequest = Message<"mavio.user.v1.CreateUserRequest"> & {
   name: string;
 
   /**
-   * Required unless auth_provider is set.
+   * Required unless auth_provider or managed is set.
    *
    * @generated from field: string password = 2;
    */
@@ -426,6 +450,8 @@ export type CreateUserRequest = Message<"mavio.user.v1.CreateUserRequest"> & {
   authProvider: string;
 
   /**
+   * Must be false: the server's one administrator is created at setup.
+   *
    * @generated from field: bool admin = 4;
    */
   admin: boolean;
@@ -439,6 +465,27 @@ export type CreateUserRequest = Message<"mavio.user.v1.CreateUserRequest"> & {
    * @generated from field: mavio.user.v1.UserPreferences preferences = 6;
    */
   preferences?: UserPreferences | undefined;
+
+  /**
+   * Creates a managed user, without password or auth_provider.
+   *
+   * @generated from field: bool managed = 7;
+   */
+  managed: boolean;
+
+  /**
+   * The managed user's restriction profile.
+   *
+   * @generated from field: mavio.user.v1.RestrictionProfile restriction = 8;
+   */
+  restriction: RestrictionProfile;
+
+  /**
+   * The managed user's PIN.
+   *
+   * @generated from field: string pin = 9;
+   */
+  pin: string;
 };
 
 /**
@@ -480,11 +527,16 @@ export type UpdateUserRequest = Message<"mavio.user.v1.UpdateUserRequest"> & {
   name: string;
 
   /**
+   * When set, must be the user's own: the administrator stays the
+   * administrator.
+   *
    * @generated from field: bool admin = 3;
    */
   admin: boolean;
 
   /**
+   * The administrator cannot be disabled.
+   *
    * @generated from field: bool disabled = 4;
    */
   disabled: boolean;
@@ -493,6 +545,14 @@ export type UpdateUserRequest = Message<"mavio.user.v1.UpdateUserRequest"> & {
    * @generated from field: mavio.user.v1.UserPolicy policy = 5;
    */
   policy?: UserPolicy | undefined;
+
+  /**
+   * A managed user's restriction profile; for other users it must be
+   * unspecified.
+   *
+   * @generated from field: mavio.user.v1.RestrictionProfile restriction = 6;
+   */
+  restriction: RestrictionProfile;
 };
 
 /**
@@ -592,6 +652,43 @@ export const SetPasswordResponseSchema: GenMessage<SetPasswordResponse> = /*@__P
   messageDesc(file_mavio_user_v1_user, 18);
 
 /**
+ * @generated from message mavio.user.v1.SetPinRequest
+ */
+export type SetPinRequest = Message<"mavio.user.v1.SetPinRequest"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * Four digits; empty clears the PIN.
+   *
+   * @generated from field: string pin = 2;
+   */
+  pin: string;
+};
+
+/**
+ * Describes the message mavio.user.v1.SetPinRequest.
+ * Use `create(SetPinRequestSchema)` to create a new message.
+ */
+export const SetPinRequestSchema: GenMessage<SetPinRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_user_v1_user, 19);
+
+/**
+ * @generated from message mavio.user.v1.SetPinResponse
+ */
+export type SetPinResponse = Message<"mavio.user.v1.SetPinResponse"> & {
+};
+
+/**
+ * Describes the message mavio.user.v1.SetPinResponse.
+ * Use `create(SetPinResponseSchema)` to create a new message.
+ */
+export const SetPinResponseSchema: GenMessage<SetPinResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_user_v1_user, 20);
+
+/**
  * @generated from message mavio.user.v1.UpdatePreferencesRequest
  */
 export type UpdatePreferencesRequest = Message<"mavio.user.v1.UpdatePreferencesRequest"> & {
@@ -606,7 +703,7 @@ export type UpdatePreferencesRequest = Message<"mavio.user.v1.UpdatePreferencesR
  * Use `create(UpdatePreferencesRequestSchema)` to create a new message.
  */
 export const UpdatePreferencesRequestSchema: GenMessage<UpdatePreferencesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 19);
+  messageDesc(file_mavio_user_v1_user, 21);
 
 /**
  * @generated from message mavio.user.v1.UpdatePreferencesResponse
@@ -623,7 +720,7 @@ export type UpdatePreferencesResponse = Message<"mavio.user.v1.UpdatePreferences
  * Use `create(UpdatePreferencesResponseSchema)` to create a new message.
  */
 export const UpdatePreferencesResponseSchema: GenMessage<UpdatePreferencesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 20);
+  messageDesc(file_mavio_user_v1_user, 22);
 
 /**
  * @generated from message mavio.user.v1.GetUserDataRequest
@@ -640,7 +737,7 @@ export type GetUserDataRequest = Message<"mavio.user.v1.GetUserDataRequest"> & {
  * Use `create(GetUserDataRequestSchema)` to create a new message.
  */
 export const GetUserDataRequestSchema: GenMessage<GetUserDataRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 21);
+  messageDesc(file_mavio_user_v1_user, 23);
 
 /**
  * @generated from message mavio.user.v1.GetUserDataResponse
@@ -659,7 +756,7 @@ export type GetUserDataResponse = Message<"mavio.user.v1.GetUserDataResponse"> &
  * Use `create(GetUserDataResponseSchema)` to create a new message.
  */
 export const GetUserDataResponseSchema: GenMessage<GetUserDataResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 22);
+  messageDesc(file_mavio_user_v1_user, 24);
 
 /**
  * UpdateUserDataRequest changes the set fields only.
@@ -698,7 +795,7 @@ export type UpdateUserDataRequest = Message<"mavio.user.v1.UpdateUserDataRequest
  * Use `create(UpdateUserDataRequestSchema)` to create a new message.
  */
 export const UpdateUserDataRequestSchema: GenMessage<UpdateUserDataRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 23);
+  messageDesc(file_mavio_user_v1_user, 25);
 
 /**
  * @generated from message mavio.user.v1.UpdateUserDataResponse
@@ -715,7 +812,7 @@ export type UpdateUserDataResponse = Message<"mavio.user.v1.UpdateUserDataRespon
  * Use `create(UpdateUserDataResponseSchema)` to create a new message.
  */
 export const UpdateUserDataResponseSchema: GenMessage<UpdateUserDataResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_user_v1_user, 24);
+  messageDesc(file_mavio_user_v1_user, 26);
 
 /**
  * @generated from enum mavio.user.v1.SubtitleMode
@@ -761,8 +858,52 @@ export const SubtitleModeSchema: GenEnum<SubtitleMode> = /*@__PURE__*/
   enumDesc(file_mavio_user_v1_user, 0);
 
 /**
- * UserService manages accounts. All methods except GetCurrentUser and
- * UpdatePreferences require an administrator.
+ * RestrictionProfile limits what a managed user sees by content rating, on
+ * top of its policy; rated items within the profile alone are shown.
+ *
+ * @generated from enum mavio.user.v1.RestrictionProfile
+ */
+export enum RestrictionProfile {
+  /**
+   * No restriction.
+   *
+   * @generated from enum value: RESTRICTION_PROFILE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * Up to G and TV-G.
+   *
+   * @generated from enum value: RESTRICTION_PROFILE_YOUNGER_CHILD = 1;
+   */
+  YOUNGER_CHILD = 1,
+
+  /**
+   * Up to PG and TV-PG.
+   *
+   * @generated from enum value: RESTRICTION_PROFILE_OLDER_CHILD = 2;
+   */
+  OLDER_CHILD = 2,
+
+  /**
+   * Up to PG-13 and TV-14.
+   *
+   * @generated from enum value: RESTRICTION_PROFILE_TEEN = 3;
+   */
+  TEEN = 3,
+}
+
+/**
+ * Describes the enum mavio.user.v1.RestrictionProfile.
+ */
+export const RestrictionProfileSchema: GenEnum<RestrictionProfile> = /*@__PURE__*/
+  enumDesc(file_mavio_user_v1_user, 1);
+
+/**
+ * UserService manages accounts: the server's one administrator, members
+ * and managed users (docs/accounts.md §4.1). All methods except
+ * GetCurrentUser, UpdatePreferences and changing one's own password or PIN
+ * require the administrator.
  *
  * @generated from service mavio.user.v1.UserService
  */
@@ -818,6 +959,7 @@ export const UserService: GenService<{
   /**
    * SetPassword sets a user's password. Users may change their own password
    * by providing the current one.
+   * Giving a managed user a password makes it a member.
    *
    * @generated from rpc mavio.user.v1.UserService.SetPassword
    */
@@ -825,6 +967,17 @@ export const UserService: GenService<{
     methodKind: "unary";
     input: typeof SetPasswordRequestSchema;
     output: typeof SetPasswordResponseSchema;
+  },
+  /**
+   * SetPin sets or clears a user's PIN, which guards switching to it: the
+   * administrator sets managed users' PINs, other users set their own.
+   *
+   * @generated from rpc mavio.user.v1.UserService.SetPin
+   */
+  setPin: {
+    methodKind: "unary";
+    input: typeof SetPinRequestSchema;
+    output: typeof SetPinResponseSchema;
   },
   /**
    * UpdatePreferences changes the calling user's playback preferences.

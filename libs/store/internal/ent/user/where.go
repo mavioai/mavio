@@ -66,9 +66,10 @@ func NameKey(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldNameKey, v))
 }
 
-// PasswordHash applies equality check predicate on the "password_hash" field. It's identical to PasswordHashEQ.
-func PasswordHash(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPasswordHash, v))
+// Kind applies equality check predicate on the "kind" field. It's identical to KindEQ.
+func Kind(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEQ(FieldKind, vc))
 }
 
 // AuthProvider applies equality check predicate on the "auth_provider" field. It's identical to AuthProviderEQ.
@@ -76,9 +77,10 @@ func AuthProvider(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldAuthProvider, v))
 }
 
-// Admin applies equality check predicate on the "admin" field. It's identical to AdminEQ.
-func Admin(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAdmin, v))
+// Restriction applies equality check predicate on the "restriction" field. It's identical to RestrictionEQ.
+func Restriction(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEQ(FieldRestriction, vc))
 }
 
 // Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
@@ -226,69 +228,88 @@ func NameKeyContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldNameKey, v))
 }
 
-// PasswordHashEQ applies the EQ predicate on the "password_hash" field.
-func PasswordHashEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPasswordHash, v))
+// KindEQ applies the EQ predicate on the "kind" field.
+func KindEQ(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEQ(FieldKind, vc))
 }
 
-// PasswordHashNEQ applies the NEQ predicate on the "password_hash" field.
-func PasswordHashNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldPasswordHash, v))
+// KindNEQ applies the NEQ predicate on the "kind" field.
+func KindNEQ(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldNEQ(FieldKind, vc))
 }
 
-// PasswordHashIn applies the In predicate on the "password_hash" field.
-func PasswordHashIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldPasswordHash, vs...))
+// KindIn applies the In predicate on the "kind" field.
+func KindIn(vs ...core.UserKind) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.User(sql.FieldIn(FieldKind, v...))
 }
 
-// PasswordHashNotIn applies the NotIn predicate on the "password_hash" field.
-func PasswordHashNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldPasswordHash, vs...))
+// KindNotIn applies the NotIn predicate on the "kind" field.
+func KindNotIn(vs ...core.UserKind) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.User(sql.FieldNotIn(FieldKind, v...))
 }
 
-// PasswordHashGT applies the GT predicate on the "password_hash" field.
-func PasswordHashGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldPasswordHash, v))
+// KindGT applies the GT predicate on the "kind" field.
+func KindGT(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldGT(FieldKind, vc))
 }
 
-// PasswordHashGTE applies the GTE predicate on the "password_hash" field.
-func PasswordHashGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldPasswordHash, v))
+// KindGTE applies the GTE predicate on the "kind" field.
+func KindGTE(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldGTE(FieldKind, vc))
 }
 
-// PasswordHashLT applies the LT predicate on the "password_hash" field.
-func PasswordHashLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldPasswordHash, v))
+// KindLT applies the LT predicate on the "kind" field.
+func KindLT(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldLT(FieldKind, vc))
 }
 
-// PasswordHashLTE applies the LTE predicate on the "password_hash" field.
-func PasswordHashLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldPasswordHash, v))
+// KindLTE applies the LTE predicate on the "kind" field.
+func KindLTE(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldLTE(FieldKind, vc))
 }
 
-// PasswordHashContains applies the Contains predicate on the "password_hash" field.
-func PasswordHashContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldPasswordHash, v))
+// KindContains applies the Contains predicate on the "kind" field.
+func KindContains(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldContains(FieldKind, vc))
 }
 
-// PasswordHashHasPrefix applies the HasPrefix predicate on the "password_hash" field.
-func PasswordHashHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldPasswordHash, v))
+// KindHasPrefix applies the HasPrefix predicate on the "kind" field.
+func KindHasPrefix(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldHasPrefix(FieldKind, vc))
 }
 
-// PasswordHashHasSuffix applies the HasSuffix predicate on the "password_hash" field.
-func PasswordHashHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldPasswordHash, v))
+// KindHasSuffix applies the HasSuffix predicate on the "kind" field.
+func KindHasSuffix(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldHasSuffix(FieldKind, vc))
 }
 
-// PasswordHashEqualFold applies the EqualFold predicate on the "password_hash" field.
-func PasswordHashEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldPasswordHash, v))
+// KindEqualFold applies the EqualFold predicate on the "kind" field.
+func KindEqualFold(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEqualFold(FieldKind, vc))
 }
 
-// PasswordHashContainsFold applies the ContainsFold predicate on the "password_hash" field.
-func PasswordHashContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldPasswordHash, v))
+// KindContainsFold applies the ContainsFold predicate on the "kind" field.
+func KindContainsFold(v core.UserKind) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldContainsFold(FieldKind, vc))
 }
 
 // AuthProviderEQ applies the EQ predicate on the "auth_provider" field.
@@ -356,14 +377,88 @@ func AuthProviderContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldAuthProvider, v))
 }
 
-// AdminEQ applies the EQ predicate on the "admin" field.
-func AdminEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAdmin, v))
+// RestrictionEQ applies the EQ predicate on the "restriction" field.
+func RestrictionEQ(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEQ(FieldRestriction, vc))
 }
 
-// AdminNEQ applies the NEQ predicate on the "admin" field.
-func AdminNEQ(v bool) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAdmin, v))
+// RestrictionNEQ applies the NEQ predicate on the "restriction" field.
+func RestrictionNEQ(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldNEQ(FieldRestriction, vc))
+}
+
+// RestrictionIn applies the In predicate on the "restriction" field.
+func RestrictionIn(vs ...core.RestrictionProfile) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.User(sql.FieldIn(FieldRestriction, v...))
+}
+
+// RestrictionNotIn applies the NotIn predicate on the "restriction" field.
+func RestrictionNotIn(vs ...core.RestrictionProfile) predicate.User {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = string(vs[i])
+	}
+	return predicate.User(sql.FieldNotIn(FieldRestriction, v...))
+}
+
+// RestrictionGT applies the GT predicate on the "restriction" field.
+func RestrictionGT(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldGT(FieldRestriction, vc))
+}
+
+// RestrictionGTE applies the GTE predicate on the "restriction" field.
+func RestrictionGTE(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldGTE(FieldRestriction, vc))
+}
+
+// RestrictionLT applies the LT predicate on the "restriction" field.
+func RestrictionLT(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldLT(FieldRestriction, vc))
+}
+
+// RestrictionLTE applies the LTE predicate on the "restriction" field.
+func RestrictionLTE(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldLTE(FieldRestriction, vc))
+}
+
+// RestrictionContains applies the Contains predicate on the "restriction" field.
+func RestrictionContains(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldContains(FieldRestriction, vc))
+}
+
+// RestrictionHasPrefix applies the HasPrefix predicate on the "restriction" field.
+func RestrictionHasPrefix(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldHasPrefix(FieldRestriction, vc))
+}
+
+// RestrictionHasSuffix applies the HasSuffix predicate on the "restriction" field.
+func RestrictionHasSuffix(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldHasSuffix(FieldRestriction, vc))
+}
+
+// RestrictionEqualFold applies the EqualFold predicate on the "restriction" field.
+func RestrictionEqualFold(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldEqualFold(FieldRestriction, vc))
+}
+
+// RestrictionContainsFold applies the ContainsFold predicate on the "restriction" field.
+func RestrictionContainsFold(v core.RestrictionProfile) predicate.User {
+	vc := string(v)
+	return predicate.User(sql.FieldContainsFold(FieldRestriction, vc))
 }
 
 // DisabledEQ applies the EQ predicate on the "disabled" field.
@@ -504,6 +599,29 @@ func HasAuthSessions() predicate.User {
 func HasAuthSessionsWith(preds ...predicate.AuthSession) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newAuthSessionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCredentials applies the HasEdge predicate on the "credentials" edge.
+func HasCredentials() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, CredentialsTable, CredentialsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCredentialsWith applies the HasEdge predicate on the "credentials" edge with a given conditions (other predicates).
+func HasCredentialsWith(preds ...predicate.Credential) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newCredentialsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

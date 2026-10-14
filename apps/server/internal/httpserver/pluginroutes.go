@@ -43,7 +43,7 @@ func pluginRoutes(authn *auth.Interceptor, routes func(id string) http.Handler) 
 				r.Header.Del("Authorization")
 				r.Header.Set(pluginUserID, p.User.ID.String())
 				r.Header.Set(pluginUserName, p.User.Name)
-				r.Header.Set(pluginUserAdmin, strconv.FormatBool(p.User.Admin))
+				r.Header.Set(pluginUserAdmin, strconv.FormatBool(p.User.IsAdmin()))
 			}
 		}
 		w.Header().Set("Content-Security-Policy", pluginCSP)

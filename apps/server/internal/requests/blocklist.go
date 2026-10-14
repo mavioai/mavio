@@ -29,7 +29,7 @@ func (s *Service) isBlocked(ctx context.Context, kind core.ItemKind, tmdbID int)
 // already fails with core.ErrConflict. The title is named as the
 // metadata providers name it, when they know it; its requests are kept.
 func (s *Service) Block(ctx context.Context, caller core.User, kind core.ItemKind, tmdbID int) (core.BlockedTitle, error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return core.BlockedTitle{}, fmt.Errorf("%w: only administrators manage the blocklist", ErrPermission)
 	}
 	b := core.BlockedTitle{Kind: kind, TmdbID: tmdbID, UserID: caller.ID, CreatedAt: s.now()}
@@ -55,7 +55,7 @@ func (s *Service) Block(ctx context.Context, caller core.User, kind core.ItemKin
 // /blocklist/:id: administrators only; a title not on it is left as it
 // is.
 func (s *Service) Unblock(ctx context.Context, caller core.User, kind core.ItemKind, tmdbID int) error {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return fmt.Errorf("%w: only administrators manage the blocklist", ErrPermission)
 	}
 	defer s.titles.lock(titleKey(kind, tmdbID))()
@@ -71,7 +71,7 @@ func (s *Service) Unblock(ctx context.Context, caller core.User, kind core.ItemK
 // discovery provider listing collections lists; it returns the titles
 // blocklisted.
 func (s *Service) BlockCollection(ctx context.Context, caller core.User, collectionID int) ([]core.BlockedTitle, error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return nil, fmt.Errorf("%w: only administrators manage the blocklist", ErrPermission)
 	}
 	parts, err := s.collection(ctx, collectionID)
@@ -99,7 +99,7 @@ func (s *Service) BlockCollection(ctx context.Context, caller core.User, collect
 // blocklist, as Seerr's DELETE /blocklist/collection/:id: administrators
 // only.
 func (s *Service) UnblockCollection(ctx context.Context, caller core.User, collectionID int) error {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return fmt.Errorf("%w: only administrators manage the blocklist", ErrPermission)
 	}
 	parts, err := s.collection(ctx, collectionID)
@@ -169,7 +169,7 @@ func (s *Service) collection(ctx context.Context, id int) ([]collectionPart, err
 // ListBlocked lists the blocklist, newest first, as Seerr's GET
 // /blocklist: administrators only.
 func (s *Service) ListBlocked(ctx context.Context, caller core.User, q core.BlockedTitleQuery) (core.Page[core.BlockedTitle], error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		return core.Page[core.BlockedTitle]{}, fmt.Errorf("%w: only administrators manage the blocklist", ErrPermission)
 	}
 	return s.Store.BlockedTitles().List(ctx, q)

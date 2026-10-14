@@ -102,7 +102,7 @@ func TestValidate(t *testing.T) {
 		{"virtual series", (&Item{ID: NewID(), LibraryID: NewID(), Kind: KindSeries, Name: "Show", Virtual: true}).Validate()},
 		{"valid library", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}}).Validate()},
 		{"library storage class", (&Library{Name: "Movies", Kind: LibraryMovies, Paths: []string{"/media"}, StorageClasses: map[string]StorageClass{"/media": StorageCloud}}).Validate()},
-		{"valid user", (&User{ID: NewID(), Name: "alice", PasswordHash: "$argon2id$x"}).Validate()},
+		{"valid user", (&User{ID: NewID(), Name: "alice", Kind: UserMember}).Validate()},
 		{"valid job", (&Job{ID: NewID(), Kind: "library.scan", MaxAttempts: 3}).Validate()},
 		{"valid session", (&AuthSession{ID: NewID(), UserID: NewID(), DeviceKey: make([]byte, 32), DeviceID: "d"}).Validate()},
 	}

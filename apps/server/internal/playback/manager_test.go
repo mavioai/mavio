@@ -83,7 +83,7 @@ func newEnv(t *testing.T) *env {
 		t.Fatal(err)
 	}
 	e.source = src.ID
-	e.user = core.User{Name: "alice", PasswordHash: "$argon2id$x", Policy: core.UserPolicy{AllowTranscoding: true}}
+	e.user = core.User{Name: "alice", Kind: core.UserMember, Policy: core.UserPolicy{AllowTranscoding: true}}
 	if err := s.Users().Create(ctx, &e.user); err != nil {
 		t.Fatal(err)
 	}

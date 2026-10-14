@@ -48,7 +48,7 @@ func TestCollages(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	u := core.User{Name: "viewer", PasswordHash: "x"}
+	u := core.User{Name: "viewer", Kind: core.UserMember}
 	if err := s.Users().Create(ctx, &u); err != nil {
 		t.Fatal(err)
 	}

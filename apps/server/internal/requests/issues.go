@@ -21,7 +21,7 @@ type NewIssue struct {
 // Seerr's POST /issue (server/routes/issue.ts): users who may report
 // issues, and administrators.
 func (s *Service) CreateIssue(ctx context.Context, caller core.User, n NewIssue) (core.Issue, error) {
-	if !caller.Admin && !caller.Policy.Requests.ReportIssues {
+	if !caller.IsAdmin() && !caller.Policy.Requests.ReportIssues {
 		return core.Issue{}, fmt.Errorf("%w: %s may not report issues", ErrPermission, caller.Name)
 	}
 	if strings.TrimSpace(n.Message) == "" {
@@ -58,7 +58,7 @@ func (s *Service) GetIssue(ctx context.Context, caller core.User, id core.ID) (c
 	if err != nil {
 		return core.Issue{}, err
 	}
-	if !caller.Admin && i.CreatedBy != caller.ID {
+	if !caller.IsAdmin() && i.CreatedBy != caller.ID {
 		return core.Issue{}, fmt.Errorf("%w: issue of another user", ErrPermission)
 	}
 	return i, nil
@@ -67,7 +67,7 @@ func (s *Service) GetIssue(ctx context.Context, caller core.User, id core.ID) (c
 // ListIssues lists the caller's issues, or anyone's for administrators,
 // as Seerr's GET /issue.
 func (s *Service) ListIssues(ctx context.Context, caller core.User, q core.IssueQuery) (core.Page[core.Issue], error) {
-	if !caller.Admin {
+	if !caller.IsAdmin() {
 		if !q.CreatedBy.IsZero() && q.CreatedBy != caller.ID {
 			return core.Page[core.Issue]{}, fmt.Errorf("%w: issues of another user", ErrPermission)
 		}
@@ -145,7 +145,7 @@ func (s *Service) DeleteIssue(ctx context.Context, caller core.User, id core.ID)
 	if err != nil {
 		return err
 	}
-	if !caller.Admin && len(i.Comments) > 1 {
+	if !caller.IsAdmin() && len(i.Comments) > 1 {
 		return fmt.Errorf("%w: the issue has comments", ErrPermission)
 	}
 	return s.Store.Issues().Delete(ctx, id)

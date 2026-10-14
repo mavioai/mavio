@@ -34,7 +34,7 @@ func write(t *testing.T, p, data string) {
 func TestBackupAndRestore(t *testing.T) {
 	ctx := t.Context()
 	src := open(t)
-	u := core.User{ID: core.NewID(), Name: "admin", PasswordHash: "x", Admin: true}
+	u := core.User{ID: core.NewID(), Name: "admin", Kind: core.UserAdmin}
 	if err := src.Users().Create(ctx, &u); err != nil {
 		t.Fatal(err)
 	}

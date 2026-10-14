@@ -25,7 +25,7 @@ func TestWarmer(t *testing.T) {
 	if err := s.Libraries().Create(ctx, &lib); err != nil {
 		t.Fatal(err)
 	}
-	user := core.User{Name: "alice", PasswordHash: "$argon2id$x"}
+	user := core.User{Name: "alice", Kind: core.UserMember}
 	if err := s.Users().Create(ctx, &user); err != nil {
 		t.Fatal(err)
 	}

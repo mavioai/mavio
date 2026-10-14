@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/apikey"
 	"github.com/mavioai/mavio/libs/store/internal/ent/authsession"
 	"github.com/mavioai/mavio/libs/store/internal/ent/blockedtitle"
+	"github.com/mavioai/mavio/libs/store/internal/ent/credential"
 	"github.com/mavioai/mavio/libs/store/internal/ent/displaypreferences"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issue"
 	"github.com/mavioai/mavio/libs/store/internal/ent/issuecomment"
@@ -67,16 +68,16 @@ func (_u *UserUpdate) SetNillableNameKey(v *string) *UserUpdate {
 	return _u
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (_u *UserUpdate) SetPasswordHash(v string) *UserUpdate {
-	_u.mutation.SetPasswordHash(v)
+// SetKind sets the "kind" field.
+func (_u *UserUpdate) SetKind(v core.UserKind) *UserUpdate {
+	_u.mutation.SetKind(v)
 	return _u
 }
 
-// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePasswordHash(v *string) *UserUpdate {
+// SetNillableKind sets the "kind" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableKind(v *core.UserKind) *UserUpdate {
 	if v != nil {
-		_u.SetPasswordHash(*v)
+		_u.SetKind(*v)
 	}
 	return _u
 }
@@ -95,16 +96,16 @@ func (_u *UserUpdate) SetNillableAuthProvider(v *string) *UserUpdate {
 	return _u
 }
 
-// SetAdmin sets the "admin" field.
-func (_u *UserUpdate) SetAdmin(v bool) *UserUpdate {
-	_u.mutation.SetAdmin(v)
+// SetRestriction sets the "restriction" field.
+func (_u *UserUpdate) SetRestriction(v core.RestrictionProfile) *UserUpdate {
+	_u.mutation.SetRestriction(v)
 	return _u
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAdmin(v *bool) *UserUpdate {
+// SetNillableRestriction sets the "restriction" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableRestriction(v *core.RestrictionProfile) *UserUpdate {
 	if v != nil {
-		_u.SetAdmin(*v)
+		_u.SetRestriction(*v)
 	}
 	return _u
 }
@@ -199,6 +200,21 @@ func (_u *UserUpdate) AddAuthSessions(v ...*AuthSession) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddAuthSessionIDs(ids...)
+}
+
+// AddCredentialIDs adds the "credentials" edge to the Credential entity by IDs.
+func (_u *UserUpdate) AddCredentialIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.AddCredentialIDs(ids...)
+	return _u
+}
+
+// AddCredentials adds the "credentials" edges to the Credential entity.
+func (_u *UserUpdate) AddCredentials(v ...*Credential) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCredentialIDs(ids...)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
@@ -351,6 +367,27 @@ func (_u *UserUpdate) RemoveAuthSessions(v ...*AuthSession) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthSessionIDs(ids...)
+}
+
+// ClearCredentials clears all "credentials" edges to the Credential entity.
+func (_u *UserUpdate) ClearCredentials() *UserUpdate {
+	_u.mutation.ClearCredentials()
+	return _u
+}
+
+// RemoveCredentialIDs removes the "credentials" edge to Credential entities by IDs.
+func (_u *UserUpdate) RemoveCredentialIDs(ids ...core.ID) *UserUpdate {
+	_u.mutation.RemoveCredentialIDs(ids...)
+	return _u
+}
+
+// RemoveCredentials removes "credentials" edges to Credential entities.
+func (_u *UserUpdate) RemoveCredentials(v ...*Credential) *UserUpdate {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCredentialIDs(ids...)
 }
 
 // ClearPlaylists clears all "playlists" edges to the Item entity.
@@ -561,14 +598,14 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.NameKey(); ok {
 		_spec.SetField(user.FieldNameKey, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.PasswordHash(); ok {
-		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
+	if value, ok := _u.mutation.Kind(); ok {
+		_spec.SetField(user.FieldKind, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.AuthProvider(); ok {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	if value, ok := _u.mutation.Restriction(); ok {
+		_spec.SetField(user.FieldRestriction, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
@@ -668,6 +705,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCredentialsIDs(); len(nodes) > 0 && !_u.mutation.CredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CredentialsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1040,16 +1122,16 @@ func (_u *UserUpdateOne) SetNillableNameKey(v *string) *UserUpdateOne {
 	return _u
 }
 
-// SetPasswordHash sets the "password_hash" field.
-func (_u *UserUpdateOne) SetPasswordHash(v string) *UserUpdateOne {
-	_u.mutation.SetPasswordHash(v)
+// SetKind sets the "kind" field.
+func (_u *UserUpdateOne) SetKind(v core.UserKind) *UserUpdateOne {
+	_u.mutation.SetKind(v)
 	return _u
 }
 
-// SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePasswordHash(v *string) *UserUpdateOne {
+// SetNillableKind sets the "kind" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableKind(v *core.UserKind) *UserUpdateOne {
 	if v != nil {
-		_u.SetPasswordHash(*v)
+		_u.SetKind(*v)
 	}
 	return _u
 }
@@ -1068,16 +1150,16 @@ func (_u *UserUpdateOne) SetNillableAuthProvider(v *string) *UserUpdateOne {
 	return _u
 }
 
-// SetAdmin sets the "admin" field.
-func (_u *UserUpdateOne) SetAdmin(v bool) *UserUpdateOne {
-	_u.mutation.SetAdmin(v)
+// SetRestriction sets the "restriction" field.
+func (_u *UserUpdateOne) SetRestriction(v core.RestrictionProfile) *UserUpdateOne {
+	_u.mutation.SetRestriction(v)
 	return _u
 }
 
-// SetNillableAdmin sets the "admin" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAdmin(v *bool) *UserUpdateOne {
+// SetNillableRestriction sets the "restriction" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableRestriction(v *core.RestrictionProfile) *UserUpdateOne {
 	if v != nil {
-		_u.SetAdmin(*v)
+		_u.SetRestriction(*v)
 	}
 	return _u
 }
@@ -1172,6 +1254,21 @@ func (_u *UserUpdateOne) AddAuthSessions(v ...*AuthSession) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddAuthSessionIDs(ids...)
+}
+
+// AddCredentialIDs adds the "credentials" edge to the Credential entity by IDs.
+func (_u *UserUpdateOne) AddCredentialIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.AddCredentialIDs(ids...)
+	return _u
+}
+
+// AddCredentials adds the "credentials" edges to the Credential entity.
+func (_u *UserUpdateOne) AddCredentials(v ...*Credential) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddCredentialIDs(ids...)
 }
 
 // AddPlaylistIDs adds the "playlists" edge to the Item entity by IDs.
@@ -1324,6 +1421,27 @@ func (_u *UserUpdateOne) RemoveAuthSessions(v ...*AuthSession) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthSessionIDs(ids...)
+}
+
+// ClearCredentials clears all "credentials" edges to the Credential entity.
+func (_u *UserUpdateOne) ClearCredentials() *UserUpdateOne {
+	_u.mutation.ClearCredentials()
+	return _u
+}
+
+// RemoveCredentialIDs removes the "credentials" edge to Credential entities by IDs.
+func (_u *UserUpdateOne) RemoveCredentialIDs(ids ...core.ID) *UserUpdateOne {
+	_u.mutation.RemoveCredentialIDs(ids...)
+	return _u
+}
+
+// RemoveCredentials removes "credentials" edges to Credential entities.
+func (_u *UserUpdateOne) RemoveCredentials(v ...*Credential) *UserUpdateOne {
+	ids := make([]core.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveCredentialIDs(ids...)
 }
 
 // ClearPlaylists clears all "playlists" edges to the Item entity.
@@ -1564,14 +1682,14 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if value, ok := _u.mutation.NameKey(); ok {
 		_spec.SetField(user.FieldNameKey, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.PasswordHash(); ok {
-		_spec.SetField(user.FieldPasswordHash, field.TypeString, value)
+	if value, ok := _u.mutation.Kind(); ok {
+		_spec.SetField(user.FieldKind, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.AuthProvider(); ok {
 		_spec.SetField(user.FieldAuthProvider, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Admin(); ok {
-		_spec.SetField(user.FieldAdmin, field.TypeBool, value)
+	if value, ok := _u.mutation.Restriction(); ok {
+		_spec.SetField(user.FieldRestriction, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
@@ -1671,6 +1789,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authsession.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.CredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedCredentialsIDs(); len(nodes) > 0 && !_u.mutation.CredentialsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.CredentialsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.CredentialsTable,
+			Columns: []string{user.CredentialsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(credential.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

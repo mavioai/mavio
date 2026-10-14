@@ -258,7 +258,7 @@ func (s *Service) fill(ctx context.Context, u *core.User, sp spec, limit, offset
 	now := s.now()
 	scope := browse.Scope{
 		UserID: u.ID, LibraryIDs: u.Policy.Libraries,
-		MaxRating: u.Policy.MaxParentalRating, SkipUnrated: u.Policy.BlockUnrated,
+		MaxRating: u.Access().MaxParentalRating, SkipUnrated: u.Access().BlockUnrated,
 	}
 	var kinds []core.ItemKind
 	if sp.lib != nil {

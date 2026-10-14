@@ -132,7 +132,7 @@ func (s *Service) Discover(ctx context.Context, caller core.User, catalogID stri
 	country, _ := s.region()
 	req.SetCatalog(c.GetId())
 	req.SetIncludeAdult(false)
-	restricted := caller.Policy.MaxParentalRating != nil
+	restricted := caller.Access().MaxParentalRating != nil
 	filtered := false
 	if slices.Contains(c.GetFilters(), pluginv1.DiscoverFilter_DISCOVER_FILTER_CERTIFICATION) {
 		certs := req.GetCertifications()
@@ -145,7 +145,7 @@ func (s *Service) Discover(ctx context.Context, caller core.User, catalogID stri
 					return DiscoverPage{Page: max(1, int(req.GetPage())), PluginID: p.ID}, nil
 				}
 				filtered = true
-			case caller.Policy.BlockUnrated:
+			case caller.Access().BlockUnrated:
 				certs, filtered = allowed, true
 			}
 		}
@@ -181,7 +181,7 @@ func (s *Service) Search(ctx context.Context, caller core.User, pluginID string,
 			return DiscoverPage{}, fmt.Errorf("search %s: %w", p.ID, err)
 		}
 		return s.page(ctx, &caller, p.ID, res.GetTitles(), int(res.GetPage()), int(res.GetTotalPages()), int(res.GetTotalResults()),
-			caller.Policy.MaxParentalRating != nil)
+			caller.Access().MaxParentalRating != nil)
 	}
 	return DiscoverPage{}, fmt.Errorf("discovery provider %q searching titles: %w", pluginID, core.ErrNotFound)
 }

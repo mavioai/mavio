@@ -229,7 +229,7 @@ func (s *RequestService) GetQuota(ctx context.Context, req *acquisitionv1.GetQuo
 	}
 	u := p.User
 	if req.GetUserId() != "" && req.GetUserId() != u.ID.String() {
-		if !u.Admin {
+		if !u.IsAdmin() {
 			return nil, connect.NewError(connect.CodePermissionDenied, errors.New("quotas of another user"))
 		}
 		id, err := core.ParseID(req.GetUserId())

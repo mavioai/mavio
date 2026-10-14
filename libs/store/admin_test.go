@@ -40,7 +40,7 @@ func TestSettings(t *testing.T) {
 func TestAPIKeys(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		u := core.User{ID: core.NewID(), Name: "admin", PasswordHash: "x", Admin: true}
+		u := core.User{ID: core.NewID(), Name: "admin", Kind: core.UserAdmin}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}

@@ -13,6 +13,8 @@ pub struct UserView<'a> {
     ///
     /// Field 3: `auth_provider`
     pub auth_provider: ::core::option::Option<&'a str>,
+    /// Whether the user is the server's administrator; exactly one user is.
+    ///
     /// Field 4: `admin`
     pub admin: ::core::option::Option<bool>,
     /// Field 5: `disabled`
@@ -32,6 +34,21 @@ pub struct UserView<'a> {
     /// Field 9: `last_login_time`
     pub last_login_time: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
+    /// A managed user has no credentials and is reached only by switching to
+    /// it.
+    ///
+    /// Field 10: `managed`
+    pub managed: ::core::option::Option<bool>,
+    /// Whether switching to the user asks for its PIN.
+    ///
+    /// Field 11: `has_pin`
+    pub has_pin: ::core::option::Option<bool>,
+    /// A managed user's restriction profile.
+    ///
+    /// Field 12: `restriction`
+    pub restriction: ::core::option::Option<
+        ::buffa::EnumValue<super::super::RestrictionProfile>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -184,6 +201,29 @@ impl<'a> ::buffa::MessageView<'a> for UserView<'a> {
                     }
                 }
             }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.managed = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.has_pin = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.restriction = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -247,6 +287,9 @@ impl<'a> ::buffa::MessageView<'a> for UserView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            managed: self.managed,
+            has_pin: self.has_pin,
+            restriction: self.restriction,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -305,6 +348,15 @@ impl<'a> ::buffa::ViewEncode<'a> for UserView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.managed.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.has_pin.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -362,6 +414,15 @@ impl<'a> ::buffa::ViewEncode<'a> for UserView<'a> {
                 buf,
             );
             self.last_login_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.managed {
+            ::buffa::types::put_bool_field(10u32, v, buf);
+        }
+        if let Some(v) = self.has_pin {
+            ::buffa::types::put_bool_field(11u32, v, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(12u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -468,6 +529,8 @@ impl UserOwnedView {
     pub fn auth_provider(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().auth_provider
     }
+    /// Whether the user is the server's administrator; exactly one user is.
+    ///
     /// Field 4: `admin`
     #[must_use]
     pub fn admin(&self) -> ::core::option::Option<bool> {
@@ -511,6 +574,30 @@ impl UserOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
     > {
         &self.0.reborrow().last_login_time
+    }
+    /// A managed user has no credentials and is reached only by switching to
+    /// it.
+    ///
+    /// Field 10: `managed`
+    #[must_use]
+    pub fn managed(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().managed
+    }
+    /// Whether switching to the user asks for its PIN.
+    ///
+    /// Field 11: `has_pin`
+    #[must_use]
+    pub fn has_pin(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().has_pin
+    }
+    /// A managed user's restriction profile.
+    ///
+    /// Field 12: `restriction`
+    #[must_use]
+    pub fn restriction(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::RestrictionProfile>> {
+        self.0.reborrow().restriction
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<UserView<'static>>> for UserOwnedView {
@@ -3536,12 +3623,14 @@ impl ::buffa::HasMessageView for super::super::GetCurrentUserResponse {
 pub struct CreateUserRequestView<'a> {
     /// Field 1: `name`
     pub name: ::core::option::Option<&'a str>,
-    /// Required unless auth_provider is set.
+    /// Required unless auth_provider or managed is set.
     ///
     /// Field 2: `password`
     pub password: ::core::option::Option<&'a str>,
     /// Field 3: `auth_provider`
     pub auth_provider: ::core::option::Option<&'a str>,
+    /// Must be false: the server's one administrator is created at setup.
+    ///
     /// Field 4: `admin`
     pub admin: ::core::option::Option<bool>,
     /// Field 5: `policy`
@@ -3552,6 +3641,20 @@ pub struct CreateUserRequestView<'a> {
     pub preferences: ::buffa::MessageFieldView<
         super::super::__buffa::view::UserPreferencesView<'a>,
     >,
+    /// Creates a managed user, without password or auth_provider.
+    ///
+    /// Field 7: `managed`
+    pub managed: ::core::option::Option<bool>,
+    /// The managed user's restriction profile.
+    ///
+    /// Field 8: `restriction`
+    pub restriction: ::core::option::Option<
+        ::buffa::EnumValue<super::super::RestrictionProfile>,
+    >,
+    /// The managed user's PIN.
+    ///
+    /// Field 9: `pin`
+    pub pin: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for CreateUserRequestView<'a> {
@@ -3654,6 +3757,29 @@ impl<'a> ::buffa::MessageView<'a> for CreateUserRequestView<'a> {
                     }
                 }
             }
+            7u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.managed = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.restriction = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.pin = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -3698,6 +3824,9 @@ impl<'a> ::buffa::MessageView<'a> for CreateUserRequestView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            managed: self.managed,
+            restriction: self.restriction,
+            pin: self.pin.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -3737,6 +3866,15 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateUserRequestView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.managed.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.pin {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3775,6 +3913,15 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateUserRequestView<'a> {
                 buf,
             );
             self.preferences.write_to(__cache, buf);
+        }
+        if let Some(v) = self.managed {
+            ::buffa::types::put_bool_field(7u32, v, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(8u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.pin {
+            ::buffa::types::put_string_field(9u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3876,7 +4023,7 @@ impl CreateUserRequestOwnedView {
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
-    /// Required unless auth_provider is set.
+    /// Required unless auth_provider or managed is set.
     ///
     /// Field 2: `password`
     #[must_use]
@@ -3888,6 +4035,8 @@ impl CreateUserRequestOwnedView {
     pub fn auth_provider(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().auth_provider
     }
+    /// Must be false: the server's one administrator is created at setup.
+    ///
     /// Field 4: `admin`
     #[must_use]
     pub fn admin(&self) -> ::core::option::Option<bool> {
@@ -3908,6 +4057,29 @@ impl CreateUserRequestOwnedView {
         super::super::__buffa::view::UserPreferencesView<'_>,
     > {
         &self.0.reborrow().preferences
+    }
+    /// Creates a managed user, without password or auth_provider.
+    ///
+    /// Field 7: `managed`
+    #[must_use]
+    pub fn managed(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().managed
+    }
+    /// The managed user's restriction profile.
+    ///
+    /// Field 8: `restriction`
+    #[must_use]
+    pub fn restriction(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::RestrictionProfile>> {
+        self.0.reborrow().restriction
+    }
+    /// The managed user's PIN.
+    ///
+    /// Field 9: `pin`
+    #[must_use]
+    pub fn pin(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().pin
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<CreateUserRequestView<'static>>>
@@ -4189,13 +4361,25 @@ pub struct UpdateUserRequestView<'a> {
     pub id: ::core::option::Option<&'a str>,
     /// Field 2: `name`
     pub name: ::core::option::Option<&'a str>,
+    /// When set, must be the user's own: the administrator stays the
+    /// administrator.
+    ///
     /// Field 3: `admin`
     pub admin: ::core::option::Option<bool>,
+    /// The administrator cannot be disabled.
+    ///
     /// Field 4: `disabled`
     pub disabled: ::core::option::Option<bool>,
     /// Field 5: `policy`
     pub policy: ::buffa::MessageFieldView<
         super::super::__buffa::view::UserPolicyView<'a>,
+    >,
+    /// A managed user's restriction profile; for other users it must be
+    /// unspecified.
+    ///
+    /// Field 6: `restriction`
+    pub restriction: ::core::option::Option<
+        ::buffa::EnumValue<super::super::RestrictionProfile>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
@@ -4278,6 +4462,15 @@ impl<'a> ::buffa::MessageView<'a> for UpdateUserRequestView<'a> {
                     }
                 }
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.restriction = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -4313,6 +4506,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdateUserRequestView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            restriction: self.restriction,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -4344,6 +4538,9 @@ impl<'a> ::buffa::ViewEncode<'a> for UpdateUserRequestView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.restriction {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4374,6 +4571,9 @@ impl<'a> ::buffa::ViewEncode<'a> for UpdateUserRequestView<'a> {
                 buf,
             );
             self.policy.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.restriction {
+            ::buffa::types::put_int32_field(6u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4480,11 +4680,16 @@ impl UpdateUserRequestOwnedView {
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
+    /// When set, must be the user's own: the administrator stays the
+    /// administrator.
+    ///
     /// Field 3: `admin`
     #[must_use]
     pub fn admin(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().admin
     }
+    /// The administrator cannot be disabled.
+    ///
     /// Field 4: `disabled`
     #[must_use]
     pub fn disabled(&self) -> ::core::option::Option<bool> {
@@ -4496,6 +4701,16 @@ impl UpdateUserRequestOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::UserPolicyView<'_>> {
         &self.0.reborrow().policy
+    }
+    /// A managed user's restriction profile; for other users it must be
+    /// unspecified.
+    ///
+    /// Field 6: `restriction`
+    #[must_use]
+    pub fn restriction(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::RestrictionProfile>> {
+        self.0.reborrow().restriction
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<UpdateUserRequestView<'static>>>
@@ -5648,6 +5863,438 @@ for SetPasswordResponseOwnedView {
 impl ::buffa::HasMessageView for super::super::SetPasswordResponse {
     type View<'a> = SetPasswordResponseView<'a>;
     type ViewHandle = SetPasswordResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct SetPinRequestView<'a> {
+    /// Field 1: `user_id`
+    pub user_id: ::core::option::Option<&'a str>,
+    /// Four digits; empty clears the PIN.
+    ///
+    /// Field 2: `pin`
+    pub pin: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SetPinRequestView<'a> {
+    type Owned = super::super::SetPinRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.user_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.pin = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::SetPinRequest, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::SetPinRequest, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SetPinRequest {
+            user_id: self.user_id.map(|s| s.to_string()),
+            pin: self.pin.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SetPinRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.user_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.pin {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.user_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.pin {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SetPinRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "SetPinRequest";
+    const FULL_NAME: &'static str = "mavio.user.v1.SetPinRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinRequest";
+}
+::buffa::impl_default_view_instance!(SetPinRequestView);
+::buffa::impl_view_reborrow!(SetPinRequestView);
+/** Self-contained, `'static` owned view of a `SetPinRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SetPinRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SetPinRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SetPinRequestOwnedView(::buffa::OwnedView<SetPinRequestView<'static>>);
+impl SetPinRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinRequestOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SetPinRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SetPinRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SetPinRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SetPinRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `user_id`
+    #[must_use]
+    pub fn user_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().user_id
+    }
+    /// Four digits; empty clears the PIN.
+    ///
+    /// Field 2: `pin`
+    #[must_use]
+    pub fn pin(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().pin
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<SetPinRequestView<'static>>>
+for SetPinRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<SetPinRequestView<'static>>) -> Self {
+        SetPinRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SetPinRequestOwnedView>
+for ::buffa::OwnedView<SetPinRequestView<'static>> {
+    fn from(wrapper: SetPinRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<SetPinRequestView<'static>>>
+for SetPinRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SetPinRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SetPinRequest {
+    type View<'a> = SetPinRequestView<'a>;
+    type ViewHandle = SetPinRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct SetPinResponseView<'a> {
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for SetPinResponseView<'a> {
+    type Owned = super::super::SetPinResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::SetPinResponse, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::SetPinResponse, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::SetPinResponse {
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for SetPinResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for SetPinResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.user.v1";
+    const NAME: &'static str = "SetPinResponse";
+    const FULL_NAME: &'static str = "mavio.user.v1.SetPinResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.SetPinResponse";
+}
+::buffa::impl_default_view_instance!(SetPinResponseView);
+::buffa::impl_view_reborrow!(SetPinResponseView);
+/** Self-contained, `'static` owned view of a `SetPinResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`SetPinResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SetPinResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct SetPinResponseOwnedView(::buffa::OwnedView<SetPinResponseView<'static>>);
+impl SetPinResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::SetPinResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            SetPinResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`SetPinResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &SetPinResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::SetPinResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<SetPinResponseView<'static>>>
+for SetPinResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<SetPinResponseView<'static>>) -> Self {
+        SetPinResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<SetPinResponseOwnedView>
+for ::buffa::OwnedView<SetPinResponseView<'static>> {
+    fn from(wrapper: SetPinResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<SetPinResponseView<'static>>>
+for SetPinResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SetPinResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::SetPinResponse {
+    type View<'a> = SetPinResponseView<'a>;
+    type ViewHandle = SetPinResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct UpdatePreferencesRequestView<'a> {

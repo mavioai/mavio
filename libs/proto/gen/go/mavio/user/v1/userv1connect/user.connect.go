@@ -50,6 +50,8 @@ const (
 	UserServiceDeleteUserProcedure = "/mavio.user.v1.UserService/DeleteUser"
 	// UserServiceSetPasswordProcedure is the fully-qualified name of the UserService's SetPassword RPC.
 	UserServiceSetPasswordProcedure = "/mavio.user.v1.UserService/SetPassword"
+	// UserServiceSetPinProcedure is the fully-qualified name of the UserService's SetPin RPC.
+	UserServiceSetPinProcedure = "/mavio.user.v1.UserService/SetPin"
 	// UserServiceUpdatePreferencesProcedure is the fully-qualified name of the UserService's
 	// UpdatePreferences RPC.
 	UserServiceUpdatePreferencesProcedure = "/mavio.user.v1.UserService/UpdatePreferences"
@@ -71,7 +73,11 @@ type UserServiceClient interface {
 	DeleteUser(context.Context, *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error)
 	// SetPassword sets a user's password. Users may change their own password
 	// by providing the current one.
+	// Giving a managed user a password makes it a member.
 	SetPassword(context.Context, *v1.SetPasswordRequest) (*v1.SetPasswordResponse, error)
+	// SetPin sets or clears a user's PIN, which guards switching to it: the
+	// administrator sets managed users' PINs, other users set their own.
+	SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
 }
@@ -132,6 +138,12 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("SetPassword")),
 			connect.WithClientOptions(opts...),
 		),
+		setPin: connect.NewClient[v1.SetPinRequest, v1.SetPinResponse](
+			httpClient,
+			baseURL+UserServiceSetPinProcedure,
+			connect.WithSchema(userServiceMethods.ByName("SetPin")),
+			connect.WithClientOptions(opts...),
+		),
 		updatePreferences: connect.NewClient[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse](
 			httpClient,
 			baseURL+UserServiceUpdatePreferencesProcedure,
@@ -150,6 +162,7 @@ type userServiceClient struct {
 	updateUser        *connect.Client[v1.UpdateUserRequest, v1.UpdateUserResponse]
 	deleteUser        *connect.Client[v1.DeleteUserRequest, v1.DeleteUserResponse]
 	setPassword       *connect.Client[v1.SetPasswordRequest, v1.SetPasswordResponse]
+	setPin            *connect.Client[v1.SetPinRequest, v1.SetPinResponse]
 	updatePreferences *connect.Client[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse]
 }
 
@@ -216,6 +229,15 @@ func (c *userServiceClient) SetPassword(ctx context.Context, req *v1.SetPassword
 	return nil, err
 }
 
+// SetPin calls mavio.user.v1.UserService.SetPin.
+func (c *userServiceClient) SetPin(ctx context.Context, req *v1.SetPinRequest) (*v1.SetPinResponse, error) {
+	response, err := c.setPin.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // UpdatePreferences calls mavio.user.v1.UserService.UpdatePreferences.
 func (c *userServiceClient) UpdatePreferences(ctx context.Context, req *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
 	response, err := c.updatePreferences.CallUnary(ctx, connect.NewRequest(req))
@@ -235,7 +257,11 @@ type UserServiceHandler interface {
 	DeleteUser(context.Context, *v1.DeleteUserRequest) (*v1.DeleteUserResponse, error)
 	// SetPassword sets a user's password. Users may change their own password
 	// by providing the current one.
+	// Giving a managed user a password makes it a member.
 	SetPassword(context.Context, *v1.SetPasswordRequest) (*v1.SetPasswordResponse, error)
+	// SetPin sets or clears a user's PIN, which guards switching to it: the
+	// administrator sets managed users' PINs, other users set their own.
+	SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error)
 	// UpdatePreferences changes the calling user's playback preferences.
 	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
 }
@@ -292,6 +318,12 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("SetPassword")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceSetPinHandler := connect.NewUnaryHandlerSimple(
+		UserServiceSetPinProcedure,
+		svc.SetPin,
+		connect.WithSchema(userServiceMethods.ByName("SetPin")),
+		connect.WithHandlerOptions(opts...),
+	)
 	userServiceUpdatePreferencesHandler := connect.NewUnaryHandlerSimple(
 		UserServiceUpdatePreferencesProcedure,
 		svc.UpdatePreferences,
@@ -314,6 +346,8 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceDeleteUserHandler.ServeHTTP(w, r)
 		case UserServiceSetPasswordProcedure:
 			userServiceSetPasswordHandler.ServeHTTP(w, r)
+		case UserServiceSetPinProcedure:
+			userServiceSetPinHandler.ServeHTTP(w, r)
 		case UserServiceUpdatePreferencesProcedure:
 			userServiceUpdatePreferencesHandler.ServeHTTP(w, r)
 		default:
@@ -351,6 +385,10 @@ func (UnimplementedUserServiceHandler) DeleteUser(context.Context, *v1.DeleteUse
 
 func (UnimplementedUserServiceHandler) SetPassword(context.Context, *v1.SetPasswordRequest) (*v1.SetPasswordResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.SetPassword is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) SetPin(context.Context, *v1.SetPinRequest) (*v1.SetPinResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.SetPin is not implemented"))
 }
 
 func (UnimplementedUserServiceHandler) UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
