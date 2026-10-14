@@ -776,7 +776,7 @@ flowchart TD
 - [x] `AiGatewayService` and `AgentSessionService` in `libs/proto`
 - [x] The TypeScript SDK of process plugins (`libs/plugin/ts`): handshake, token checks, HTTP routes, the host's transport
 - [x] `plugins/agent`: every provider of pi-ai, API keys and OAuth logins relayed as events and prompts, credentials in its data folder, custom OpenAI-compatible providers, completions with output schemas, sessions in SQLite surviving restarts; built by Bun for every platform and seeded in the container image
-- [ ] The server: the AI gateway reached through the plugin registry, an integration test with the built plugin, the administration API
+- [x] The server's AI administration (`AiService`): providers, models, keys and logins forwarded to the AI gateway plugin; an end-to-end test with the plugin built by Bun and a provider served by a fake OpenAI-compatible API
 - [ ] Lingarr's translation in the server, and the translation services in `plugins/subtitles`; the translators of P26 removed
 - [ ] Later: the clients' warning of the risk of subscription logins, left to the administrator to accept; logins and completions streamed rather than polled; the plugin verified on Windows; deleting the entries of deleted sessions, which pi-durable keeps
 

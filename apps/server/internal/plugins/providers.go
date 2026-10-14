@@ -3,6 +3,7 @@ package plugins
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -519,4 +520,17 @@ func (m *Manager) DownloadClientProviders() []downloads.Provider {
 		}
 	}
 	return out
+}
+
+// AIGateway returns the ready AI gateway plugin, the first by ID when
+// several are, or false when none is.
+func (m *Manager) AIGateway() (string, pluginv1connect.AiGatewayServiceClient, bool) {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_AI_GATEWAY)
+	slices.Sort(ids)
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.AI() != nil {
+			return id, pl.AI(), true
+		}
+	}
+	return "", nil, false
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -51,6 +52,8 @@ type PluginManager interface {
 	Catalog(ctx context.Context) ([]plugins.CatalogPlugin, error)
 	Install(ctx context.Context, id, version string) (plugins.Info, error)
 	Uninstall(ctx context.Context, id string) error
+	// AIGateway returns the ready AI gateway plugin.
+	AIGateway() (string, pluginv1connect.AiGatewayServiceClient, bool)
 	Tasks() []plugins.Task
 }
 

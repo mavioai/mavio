@@ -77,6 +77,7 @@ Events are `mavio.plugin.v1.Event`: ID, type, time, title, message, item, user a
 | `user.created`, `user.updated`, `user.deleted`, `user.password_changed` | Account changes; the event's user is the account, the `by` attribute the user who changed it | Yes |
 | `apikey.created`, `apikey.revoked` | API keys | Yes |
 | `settings.updated`, `backup.created` | Administration | Yes |
+| `ai.credential_changed`, `ai.login_started` | AI provider credentials (§8.15); `provider` attribute | Yes |
 | `plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed` | Plugins; `plugin.failed` when a plugin fails to start | Yes |
 | `task.completed`, `task.failed` | A task's run ends; `task` attribute (the task's ID in `TaskService`), and `plugin` for plugin tasks, whose message is the run's | Failures only |
 | `playback.started`, `playback.stopped` | A playback starts or stops, also when it expires or its sign-in ends; `playback`, `session` and `position` attributes, and `played` when it stops | Yes |

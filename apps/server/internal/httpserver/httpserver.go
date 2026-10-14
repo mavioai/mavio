@@ -171,6 +171,11 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
+	aiService := &rpc.AiService{Activity: opts.Activity}
+	if opts.Plugins != nil {
+		aiService.Gateway = opts.Plugins.AIGateway
+	}
+	mux.Handle(systemv1connect.NewAiServiceHandler(aiService, interceptors))
 	remotes := opts.Remotes
 	if remotes == nil {
 		remotes = &rpc.StorageService{}
@@ -304,7 +309,7 @@ var services = []string{
 	sessionv1connect.EventServiceName, sessionv1connect.SessionServiceName, sessionv1connect.SyncPlayServiceName,
 	storagev1connect.StorageServiceName,
 	systemv1connect.SystemServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
-	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName,
+	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName, systemv1connect.AiServiceName,
 	userv1connect.UserServiceName, userv1connect.UserDataServiceName, userv1connect.DisplayPreferencesServiceName,
 }
 
