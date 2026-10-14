@@ -43,7 +43,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 ### 4.1 名称
 * 服务端的名称位于 `mavio.site` 下。该域名列入公共后缀列表，使浏览器把不同服务端的 Cookie 和存储隔开。
 * mavio.dev 模式的服务端为它的每个地址拥有一个名称 `<地址>.<ID>.mavio.site`：IPv4 地址用短横线书写（`192-168-1-10`），IPv6 地址用短横线代替冒号（`2001-db8--1`）。
-* `apps/dns` 是基于 `miekg/dns` 的无状态 Go 服务，在两台 Hetzner 虚拟机上作为 `mavio.site` 的名称服务器。它从名称计算 A 和 AAAA 应答，用对应区域的中转地址应答中转名称（§5），并提供静态的 SOA 和 NS、`_psl` TXT 记录，以及允许 Let's Encrypt 和 Google Trust Services 的 CAA 记录。对 `_acme-challenge.<ID>.mavio.site`，它应答指向 `<ID>.acme.mavio.dev` 的 CNAME。
+* `apps/dns` 是基于 `miekg/dns` 的无状态 Go 服务，在两台虚拟机上作为 `mavio.site` 的名称服务器。它从名称计算 A 和 AAAA 应答，用对应区域的中转地址应答中转名称（§5），并提供静态的 SOA 和 NS、`_psl` TXT 记录，以及允许 Let's Encrypt 和 Google Trust Services 的 CAA 记录。对 `_acme-challenge.<ID>.mavio.site`，它应答指向 `<ID>.acme.mavio.dev` 的 CNAME。
 * ID 是由 32 个小写 base32 字符组成的标签；在它之下，既不是用短横线书写的 IPv4 地址、也不是用短横线代替冒号的 IPv6 地址的地址标签，未知区域的中转名称，以及其他所有名称，都应答为不存在，并附上 SOA。该服务通过 UDP 和 TCP 监听（`--addr`，默认 `:53`），从 JSON 文件读取配置（`--config`）：区域、名称服务器及其地址、SOA 的邮箱和序列号、ACME 域名、`_psl` 的值、CAA 记录的 CA、按区域划分的中转地址，以及 TTL：计算出的记录和静态记录为一小时，中转名称为五分钟。
 
 ### 4.2 证书
@@ -56,7 +56,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 浏览器通过 DNS 用名称访问服务端。原生客户端直接连接地址，以该地址的名称作为 TLS 服务器名，因此在过滤私有地址 DNS 应答的网络中也能工作，并且还会检查服务端的身份密钥（[账户 §5.1](accounts.zh-CN.md#51-服务端身份)）。
 
 ## 5. 中转（`apps/relay`）
-* 一个运行在 Hetzner 上的 Go 服务，部署在欧洲、美国和新加坡，供无法直接访问的服务端使用。允许使用中转的服务端与其所在区域的中转保持一条连接。
+* 一个运行在虚拟机上的 Go 服务，部署在欧洲、美国和新加坡，供无法直接访问的服务端使用。允许使用中转的服务端与其所在区域的中转保持一条连接。
 * 客户端通过 `relay-<区域>-<票据>.<ID>.mavio.site` 经中转访问服务端。票据由 mavio.dev 签发，几分钟内有效，只在观看者或服务端管理员拥有有效 Mavio Pass（[账户 §3.7](accounts.zh-CN.md#37-mavio-pass)）时签发。
 * 中转从 TLS ClientHello 中读取名称，检查票据，然后在不终止 TLS 的情况下把客户端的连接与服务端的连接拼接起来，因此加密保持端到端，中转只看到加密后的字节。
 
@@ -75,7 +75,7 @@ mavio.dev 是 mavio.dev 模式服务端的 OpenID Connect 签发方（[账户 §
 | 位置 | 内容 |
 | :--- | :--- |
 | Cloudflare | Workers 上的 `apps/website`；§3 的 Durable Object；`mavio.dev` 的 DNS 区域；用于 Mavio 发布下载的 R2；用 Workers 的出站 TCP 连接检查服务端公布地址的可达性；通过 Cloudflare Email Service 发送邮件 |
-| Hetzner | PostgreSQL，带一个流复制副本，WAL 归档到 R2；`apps/relay`；`apps/dns` |
+| 虚拟机 | PostgreSQL，带一个流复制副本，WAL 归档到 R2；`apps/relay`；`apps/dns` |
 
 Worker 的配置是 `apps/website/wrangler.jsonc`：`BASE_URL` 变量、Hyperdrive 绑定（其 ID 是为数据库创建的配置）、`NoticeHub` Durable Object 的 `NOTICES` 绑定及其以 SQLite 为后端的类迁移、`ACME_DOMAIN` 变量（`acme.mavio.dev`），以及机密 `BETTER_AUTH_SECRET`、`CLOUDFLARE_ZONE_ID` 与 `CLOUDFLARE_API_TOKEN`（可编辑该区域 DNS 记录的令牌）、`GOOGLE_CA_PROJECT` 与 `GOOGLE_CA_CREDENTIALS`（可创建外部账户密钥的服务账号的密钥文件），以及 `RELAY_TICKET_SECRET`（中转的票据机密）；缺少 Cloudflare 机密时，ACME 方法返回未实现。`RELAYS` 变量是一个按区域列出各中转基础 URL 的 JSON 对象，每个 URL 即其中转的 `--url`；缺少它或票据机密时没有中转，票据方法返回未实现。其入口是 `src/server.ts`。开发时，`pnpm --filter @mavio/website dev` 通过 Vite 在 workerd 中运行 Worker，连接绑定的 `localConnectionString` 所指的 PostgreSQL（用 `drizzle-kit migrate` 迁移），机密和值为 `http://localhost:5173` 的 `BASE_URL` 放在不提交的 `apps/website/.dev.vars` 中；服务端以 `--mavio-dev-url http://localhost:5173/api` 连接它。
 

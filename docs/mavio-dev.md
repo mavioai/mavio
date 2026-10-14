@@ -43,7 +43,7 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts �
 ### 4.1 Names
 * Servers' names are under `mavio.site`, which is on the Public Suffix List, so that browsers keep the cookies and storage of different servers apart.
 * A server in mavio.dev mode has the names `<address>.<ID>.mavio.site`, one for each of its addresses: IPv4 addresses are written with dashes (`192-168-1-10`), IPv6 addresses with dashes for colons (`2001-db8--1`).
-* `apps/dns` is a stateless Go service built on `miekg/dns` that serves `mavio.site` from two Hetzner VMs, its name servers. It computes A and AAAA answers from the name, answers relay names with their region's relay addresses (§5), and serves a static SOA and NS, the `_psl` TXT record and CAA records allowing Let's Encrypt and Google Trust Services. It answers `_acme-challenge.<ID>.mavio.site` with a CNAME to `<ID>.acme.mavio.dev`.
+* `apps/dns` is a stateless Go service built on `miekg/dns` that serves `mavio.site` from two VMs, its name servers. It computes A and AAAA answers from the name, answers relay names with their region's relay addresses (§5), and serves a static SOA and NS, the `_psl` TXT record and CAA records allowing Let's Encrypt and Google Trust Services. It answers `_acme-challenge.<ID>.mavio.site` with a CNAME to `<ID>.acme.mavio.dev`.
 * An ID is a label of 32 lowercase base32 characters; under it, an address label that is not an IPv4 address with dashes or an IPv6 address with dashes for colons, a relay name of an unknown region, and every other name are answered as not existing, with the SOA. The service listens over UDP and TCP (`--addr`, `:53` by default) and reads its configuration from a JSON file (`--config`): the zone, its name servers with their addresses, the SOA's mailbox and serial, the ACME domain, the `_psl` value, the CAs of the CAA records, the relays' addresses by region and the TTLs, an hour for computed and static records and five minutes for relay names.
 
 ### 4.2 Certificates
@@ -56,7 +56,7 @@ mavio.dev is the OpenID Connect issuer of servers in mavio.dev mode ([Accounts �
 Browsers reach a server by its names through DNS. Native clients connect to an address directly, with the address's name as the TLS server name, so that they also work where DNS answers with private addresses are filtered, and they check the server's identity key as well ([Accounts §5.1](accounts.md#51-server-identity)).
 
 ## 5. Relay (`apps/relay`)
-* A Go service on Hetzner, in Europe, the United States and Singapore, for servers that cannot be reached directly. A server whose relay use is allowed keeps a connection to the relay of its region.
+* A Go service on VMs in Europe, the United States and Singapore, for servers that cannot be reached directly. A server whose relay use is allowed keeps a connection to the relay of its region.
 * A client reaches the server through the relay at `relay-<region>-<ticket>.<ID>.mavio.site`. The ticket is issued by mavio.dev, valid for a few minutes, and only when the viewer or the server's administrator has an effective Mavio Pass ([Accounts §3.7](accounts.md#37-mavio-pass)).
 * The relay reads the name from the TLS ClientHello, checks the ticket and splices the client's connection to the server's without terminating TLS, so encryption stays end to end and the relay sees only encrypted bytes.
 
@@ -75,7 +75,7 @@ Browsers reach a server by its names through DNS. Native clients connect to an a
 | Where | What |
 | :--- | :--- |
 | Cloudflare | `apps/website` on Workers; the Durable Objects of §3; the `mavio.dev` DNS zone; R2 for downloads of Mavio releases; reachability checks of servers' published addresses with Workers' outbound TCP connections; e-mail through Cloudflare Email Service |
-| Hetzner | PostgreSQL, with a streaming replica and its WAL archived to R2; `apps/relay`; `apps/dns` |
+| VMs | PostgreSQL, with a streaming replica and its WAL archived to R2; `apps/relay`; `apps/dns` |
 
 The Worker's configuration is `apps/website/wrangler.jsonc`: the `BASE_URL` variable, the Hyperdrive binding, whose ID is the configuration created for the database, the `NOTICES` binding of the `NoticeHub` Durable Object with its SQLite-backed class migration, the `ACME_DOMAIN` variable (`acme.mavio.dev`), and the secrets `BETTER_AUTH_SECRET`, `CLOUDFLARE_ZONE_ID` and `CLOUDFLARE_API_TOKEN`, a token allowed to edit the zone's DNS records, `GOOGLE_CA_PROJECT` and `GOOGLE_CA_CREDENTIALS`, the key file of a service account allowed to create external account keys, and `RELAY_TICKET_SECRET`, the relays' ticket secret; without the Cloudflare secrets the ACME methods are unimplemented. The `RELAYS` variable is a JSON object of the relays' base URLs by region, each the `--url` of its relay; without it or the ticket secret there are no relays and tickets are unimplemented. Its entry is `src/server.ts`. In development, `pnpm --filter @mavio/website dev` runs the Worker in workerd through Vite against the PostgreSQL of the binding's `localConnectionString`, migrated with `drizzle-kit migrate`, with the secret and a `BASE_URL` of `http://localhost:5173` in `apps/website/.dev.vars`, which is not committed; a server reaches it with `--mavio-dev-url http://localhost:5173/api`.
 

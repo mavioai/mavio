@@ -812,9 +812,9 @@ flowchart TD
 - [ ] 购买与续订 Mavio Pass
 - [x] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更：`NoticeHub` 保持每个服务端可休眠的 WebSocket，在记录变更的请求之后收到通知；在 workerd 中与服务端端到端测试
 - [x] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书：用 `miekg/dns` 从名称计算区域应答；基于 Cloudflare DNS API 与 Google Public CA API 的 `ServerService.SetAcmeChallenge`、`ClearAcmeChallenge` 和 `CreateAcmeBinding`；服务端的 `internal/certs` 从 Let's Encrypt 或 Google Trust Services 获取并按 ACME 续期信息续期 `*.<ID>.mavio.site`，并用它提供 HTTPS；以 `certstest` 中模拟的 ACME CA 测试
-- [ ] 在两台 Hetzner 虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表
+- [ ] 在两台虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表
 - [x] `apps/relay` 与中转票据：中转按 ClientHello 中的名称把客户端的连接拼接到服务端回连的连接上，服务端以身份密钥认证；`AccountService.CreateRelayTicket`、`ServerService.ListRelays` 与 `SetRelayRegion`；服务端的 `internal/relay` 与最近的中转保持连接，并在中转来的连接上提供 TLS；两侧分别按对方的协议测试，票据以共享的测试向量核对
-- [ ] 在 Hetzner 的欧洲、美国和新加坡运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
+- [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
 - [ ] 每个客户端：安装时选择模式、保留的登录、更换登录与用户切换；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
 
 ---
