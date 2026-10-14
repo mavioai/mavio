@@ -361,3 +361,25 @@ func TestValidateSubtitle(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceCues(t *testing.T) {
+	cue := func(start, end int, text string) subtitle.Cue {
+		return subtitle.Cue{Start: time.Duration(start) * time.Second, End: time.Duration(end) * time.Second, Text: text}
+	}
+	source := []subtitle.Cue{cue(1, 3, "<i>One</i>"), cue(4, 6, "Two\nlines"), cue(7, 9, "Three")}
+	for _, c := range []struct {
+		name       string
+		translated []subtitle.Cue
+		want       []string
+	}{
+		{"synchronized since", []subtitle.Cue{cue(11, 13, "Un"), cue(14, 16, "Deux"), cue(17, 19, "Trois")}, []string{"One", "Two lines", "Three"}},
+		{"credited", []subtitle.Cue{cue(0, 1, creditPrefix+"M # "), cue(1, 3, "Un"), cue(4, 6, "Deux"), cue(7, 9, "Trois")}, []string{"", "One", "Two lines", "Three"}},
+		{"a cue removed, one trimmed", []subtitle.Cue{cue(1, 3, "Un"), cue(7, 8, "Trois")}, []string{"One", "Three"}},
+		{"cues merged", []subtitle.Cue{cue(1, 6, "Un deux")}, []string{"One Two lines"}},
+		{"nothing overlapping", []subtitle.Cue{cue(20, 21, "Vingt")}, []string{""}},
+	} {
+		if got := sourceCues(source, c.translated); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("%s: sourceCues = %q, want = %q", c.name, got, c.want)
+		}
+	}
+}

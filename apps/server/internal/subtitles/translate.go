@@ -317,7 +317,7 @@ func creditCue(cues []subtitle.Cue, credit string) []subtitle.Cue {
 	if end == 5*time.Second {
 		start = time.Second
 	}
-	out := append([]subtitle.Cue{{Start: start, End: end, Text: "# Subtitles translated with " + credit + " # "}}, cues...)
+	out := append([]subtitle.Cue{{Start: start, End: end, Text: creditPrefix + credit + " # "}}, cues...)
 	for i := range out {
 		out[i].Index = i + 1
 	}

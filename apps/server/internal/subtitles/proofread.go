@@ -121,8 +121,8 @@ func readCues(ctx context.Context, name string, read func(context.Context) ([]by
 }
 
 // Proofread proofreads a translation with an AI model, as Lingarr's: each
-// cue's translation is given with the cue of the same timing in the
-// subtitle it was translated from, and replaced by the model's answer
+// cue's translation is given with its cue in the subtitle it was
+// translated from (see sourceCues), and replaced by the model's answer
 // when that differs. The translation is saved again and its record notes
 // the cues revised.
 func (r *Runtime) Proofread(ctx context.Context, p ProofreadPayload) (int, error) {
@@ -165,13 +165,7 @@ func (r *Runtime) Proofread(ctx context.Context, p ProofreadPayload) (int, error
 	if err != nil {
 		return 0, err
 	}
-	type timing struct{ start, end time.Duration }
-	sources := map[timing]string{}
-	for _, c := range source.Cues {
-		if text := strings.TrimSpace(subtitle.PlainText(c.Text)); text != "" {
-			sources[timing{c.Start, c.End}] = strings.Join(strings.Split(text, "\n"), " ")
-		}
-	}
+	sources := sourceCues(source.Cues, translated.Cues)
 	c := chained{translator: model, source: rec.SourceLanguage, target: e.Language.Language}
 	values := map[string]string{
 		"sourceLanguage": languageName(c.source, ts.LanguageCodes), "targetLanguage": languageName(c.target, ts.LanguageCodes),
@@ -179,13 +173,13 @@ func (r *Runtime) Proofread(ctx context.Context, p ProofreadPayload) (int, error
 	}
 	revised := 0
 	for i, cue := range translated.Cues {
-		sourceLine, ok := sources[timing{cue.Start, cue.End}]
+		sourceLine := sources[i]
 		lines := strings.Split(cue.Text, "\n")
 		line := strings.Join(lines, " ")
 		if ts.PreserveLineBreaks {
 			line = cue.Text
 		}
-		if !ok || strings.TrimSpace(line) == "" {
+		if sourceLine == "" || strings.TrimSpace(line) == "" {
 			continue
 		}
 		values["sourceLine"], values["translatedLine"] = sourceLine, line
@@ -218,4 +212,57 @@ func (r *Runtime) Proofread(ctx context.Context, p ProofreadPayload) (int, error
 	}
 	r.logger().InfoContext(ctx, "subtitle proofread", "item", t.item.ID, "path", p.Path, "revised", revised)
 	return revised, nil
+}
+
+// creditPrefix begins the cue crediting the translator (creditCue).
+const creditPrefix = "# Subtitles translated with "
+
+// sourceCues returns the source text of each cue of a translation, "" for
+// none. A translation keeps its source's cues in their order, so when
+// both have as many (the credit left out) they pair by order, whatever
+// timing synchronization or overlap fixing changed since; otherwise a
+// cue pairs with the source cue of the same timing, or else with those it
+// overlaps by at least half of the shorter of the two.
+func sourceCues(source, translated []subtitle.Cue) []string {
+	text := func(c subtitle.Cue) string {
+		return strings.Join(strings.Fields(subtitle.PlainText(c.Text)), " ")
+	}
+	out := make([]string, len(translated))
+	var cues []int
+	for i, c := range translated {
+		if !strings.HasPrefix(c.Text, creditPrefix) {
+			cues = append(cues, i)
+		}
+	}
+	if len(cues) == len(source) {
+		for k, i := range cues {
+			out[i] = text(source[k])
+		}
+		return out
+	}
+	type timing struct{ start, end time.Duration }
+	exact := map[timing]int{}
+	for k, c := range source {
+		if _, ok := exact[timing{c.Start, c.End}]; !ok {
+			exact[timing{c.Start, c.End}] = k
+		}
+	}
+	for _, i := range cues {
+		c := translated[i]
+		if k, ok := exact[timing{c.Start, c.End}]; ok {
+			out[i] = text(source[k])
+			continue
+		}
+		var texts []string
+		for _, sc := range source {
+			overlap := min(c.End, sc.End) - max(c.Start, sc.Start)
+			if overlap > 0 && 2*overlap >= min(c.End-c.Start, sc.End-sc.Start) {
+				if t := text(sc); t != "" {
+					texts = append(texts, t)
+				}
+			}
+		}
+		out[i] = strings.Join(texts, " ")
+	}
+	return out
 }
