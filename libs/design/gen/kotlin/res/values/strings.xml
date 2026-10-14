@@ -200,6 +200,10 @@
     <string name="action_cancel">Cancel</string>
     <!-- Closes a sheet or dialog, keeping its changes. -->
     <string name="action_done">Done</string>
+    <!-- Deletes the item it is next to. -->
+    <string name="action_delete">Delete</string>
+    <!-- Saves what was entered. -->
+    <string name="action_save">Save</string>
     <!-- Signs in to a server. -->
     <string name="auth_sign_in">Sign In</string>
     <!-- Field of the server's address on the sign-in screen. -->
@@ -246,6 +250,56 @@
     <string name="auth_move_down">Move Down</string>
     <!-- Section of the sign-in screen listing the servers found on the local network. -->
     <string name="auth_nearby">On This Network</string>
+    <!-- Signs in to a server with a passkey of this device or browser. -->
+    <string name="auth_sign_in_with_passkey">Sign In with a Passkey</string>
+    <!-- Field of the six-digit code of the user's authenticator app. -->
+    <string name="auth_totp_code">Verification Code</string>
+    <!-- Explanation when signing in needs the code of the user's authenticator app. -->
+    <string name="auth_totp_message">Enter the six-digit code from your authenticator app.</string>
+    <!-- Error when a verification code or PIN is wrong. -->
+    <string name="auth_wrong_code">The code is incorrect.</string>
+    <!-- Switches the signed-in user of a server, or the section listing whom to switch to. -->
+    <string name="auth_switch_user">Switch User</string>
+    <!-- Marks the user currently signed in among those to switch to. -->
+    <string name="auth_current">Current</string>
+    <!-- Field of a user's four-digit PIN. -->
+    <string name="auth_pin">PIN</string>
+    <!-- Asks for the PIN of the user to switch to; name is the user's. -->
+    <string name="auth_enter_pin">Enter %s\'s PIN</string>
+    <!-- Section of the profile with the user's passkeys, authenticator app and PIN. -->
+    <string name="auth_security">Sign-In and Security</string>
+    <!-- Heading of the user's passkeys. -->
+    <string name="auth_passkeys">Passkeys</string>
+    <!-- Shown when the user has no passkeys. -->
+    <string name="auth_no_passkeys">No passkeys yet.</string>
+    <!-- Creates a passkey for signing in to the server at this address. -->
+    <string name="auth_add_passkey">Add Passkey</string>
+    <!-- Where a passkey can be used; host is the host name. -->
+    <string name="auth_passkey_host">Works at %s</string>
+    <!-- Why passkeys cannot be added at this address. -->
+    <string name="auth_passkeys_unavailable">Passkeys need a host name over HTTPS.</string>
+    <!-- Heading of the user's TOTP, the second factor of a password. -->
+    <string name="auth_totp">Authenticator App</string>
+    <!-- State of a user who has TOTP. -->
+    <string name="auth_totp_on">Sign-ins with a password ask for a code.</string>
+    <!-- State of a user without TOTP. -->
+    <string name="auth_totp_off">Off</string>
+    <!-- Begins setting up TOTP. -->
+    <string name="auth_set_up_totp">Set Up</string>
+    <!-- Instruction when setting up TOTP; secret is the key in base32. -->
+    <string name="auth_totp_secret">Add this key to your authenticator app, then enter its code: %s</string>
+    <!-- Opens the TOTP key in an authenticator app on this device. -->
+    <string name="auth_open_authenticator">Open in Authenticator</string>
+    <!-- Turns off the user's TOTP. -->
+    <string name="auth_turn_off">Turn Off</string>
+    <!-- Explanation of the user's PIN. -->
+    <string name="auth_pin_message">A PIN guards switching to you.</string>
+    <!-- Sets or changes the user's PIN. -->
+    <string name="auth_set_pin">Set PIN</string>
+    <!-- Removes the user's PIN. -->
+    <string name="auth_remove_pin">Remove PIN</string>
+    <!-- State of a user who has a PIN. -->
+    <string name="auth_pin_on">On</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->

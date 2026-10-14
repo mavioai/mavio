@@ -322,6 +322,12 @@ public enum MavioStrings {
     /// Closes a sheet or dialog, keeping its changes.
     public static var actionDone: String { NSLocalizedString("action.done", bundle: .module, comment: "") }
 
+    /// Deletes the item it is next to.
+    public static var actionDelete: String { NSLocalizedString("action.delete", bundle: .module, comment: "") }
+
+    /// Saves what was entered.
+    public static var actionSave: String { NSLocalizedString("action.save", bundle: .module, comment: "") }
+
     /// Signs in to a server.
     public static var authSignIn: String { NSLocalizedString("auth.signIn", bundle: .module, comment: "") }
 
@@ -396,6 +402,87 @@ public enum MavioStrings {
 
     /// Section of the sign-in screen listing the servers found on the local network.
     public static var authNearby: String { NSLocalizedString("auth.nearby", bundle: .module, comment: "") }
+
+    /// Signs in to a server with a passkey of this device or browser.
+    public static var authSignInWithPasskey: String { NSLocalizedString("auth.signInWithPasskey", bundle: .module, comment: "") }
+
+    /// Field of the six-digit code of the user's authenticator app.
+    public static var authTotpCode: String { NSLocalizedString("auth.totpCode", bundle: .module, comment: "") }
+
+    /// Explanation when signing in needs the code of the user's authenticator app.
+    public static var authTotpMessage: String { NSLocalizedString("auth.totpMessage", bundle: .module, comment: "") }
+
+    /// Error when a verification code or PIN is wrong.
+    public static var authWrongCode: String { NSLocalizedString("auth.wrongCode", bundle: .module, comment: "") }
+
+    /// Switches the signed-in user of a server, or the section listing whom to switch to.
+    public static var authSwitchUser: String { NSLocalizedString("auth.switchUser", bundle: .module, comment: "") }
+
+    /// Marks the user currently signed in among those to switch to.
+    public static var authCurrent: String { NSLocalizedString("auth.current", bundle: .module, comment: "") }
+
+    /// Field of a user's four-digit PIN.
+    public static var authPin: String { NSLocalizedString("auth.pin", bundle: .module, comment: "") }
+
+    /// Asks for the PIN of the user to switch to; name is the user's.
+    public static func authEnterPin(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.enterPin", bundle: .module, comment: ""), name)
+    }
+
+    /// Section of the profile with the user's passkeys, authenticator app and PIN.
+    public static var authSecurity: String { NSLocalizedString("auth.security", bundle: .module, comment: "") }
+
+    /// Heading of the user's passkeys.
+    public static var authPasskeys: String { NSLocalizedString("auth.passkeys", bundle: .module, comment: "") }
+
+    /// Shown when the user has no passkeys.
+    public static var authNoPasskeys: String { NSLocalizedString("auth.noPasskeys", bundle: .module, comment: "") }
+
+    /// Creates a passkey for signing in to the server at this address.
+    public static var authAddPasskey: String { NSLocalizedString("auth.addPasskey", bundle: .module, comment: "") }
+
+    /// Where a passkey can be used; host is the host name.
+    public static func authPasskeyHost(host: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.passkeyHost", bundle: .module, comment: ""), host)
+    }
+
+    /// Why passkeys cannot be added at this address.
+    public static var authPasskeysUnavailable: String { NSLocalizedString("auth.passkeysUnavailable", bundle: .module, comment: "") }
+
+    /// Heading of the user's TOTP, the second factor of a password.
+    public static var authTotp: String { NSLocalizedString("auth.totp", bundle: .module, comment: "") }
+
+    /// State of a user who has TOTP.
+    public static var authTotpOn: String { NSLocalizedString("auth.totpOn", bundle: .module, comment: "") }
+
+    /// State of a user without TOTP.
+    public static var authTotpOff: String { NSLocalizedString("auth.totpOff", bundle: .module, comment: "") }
+
+    /// Begins setting up TOTP.
+    public static var authSetUpTotp: String { NSLocalizedString("auth.setUpTotp", bundle: .module, comment: "") }
+
+    /// Instruction when setting up TOTP; secret is the key in base32.
+    public static func authTotpSecret(secret: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.totpSecret", bundle: .module, comment: ""), secret)
+    }
+
+    /// Opens the TOTP key in an authenticator app on this device.
+    public static var authOpenAuthenticator: String { NSLocalizedString("auth.openAuthenticator", bundle: .module, comment: "") }
+
+    /// Turns off the user's TOTP.
+    public static var authTurnOff: String { NSLocalizedString("auth.turnOff", bundle: .module, comment: "") }
+
+    /// Explanation of the user's PIN.
+    public static var authPinMessage: String { NSLocalizedString("auth.pinMessage", bundle: .module, comment: "") }
+
+    /// Sets or changes the user's PIN.
+    public static var authSetPin: String { NSLocalizedString("auth.setPin", bundle: .module, comment: "") }
+
+    /// Removes the user's PIN.
+    public static var authRemovePin: String { NSLocalizedString("auth.removePin", bundle: .module, comment: "") }
+
+    /// State of a user who has a PIN.
+    public static var authPinOn: String { NSLocalizedString("auth.pinOn", bundle: .module, comment: "") }
 
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }

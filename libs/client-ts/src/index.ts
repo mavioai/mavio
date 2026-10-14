@@ -15,6 +15,7 @@ export {
 export {
   type Copy,
   errorMessage,
+  isTotpRequired,
   isUnauthenticated,
   type Filter,
   libraryItemsRequest,

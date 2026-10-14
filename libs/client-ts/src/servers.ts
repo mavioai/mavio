@@ -5,7 +5,7 @@ import type { DescService } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { type Client, Code, ConnectError, createClient, type Transport } from "@connectrpc/connect";
-import { AuthService, type GetAuthInfoResponse } from "@mavio/proto/mavio/auth/v1/auth_pb";
+import { AccountMode, AuthService, type GetAuthInfoResponse, type SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { DisplayPreferencesService } from "@mavio/proto/mavio/user/v1/display_preferences_pb";
 
 import { browserDeviceKey, type DeviceKey, refreshMessage } from "./device-key.ts";
@@ -21,6 +21,8 @@ export interface ServerEntry {
   url: string;
   userId: string;
   userName: string;
+  /** How the server signs people in, as it told at sign-in. */
+  mode?: "standalone" | "mavioDev";
   /** This browser's session; unset when signed out. */
   sessionId?: string;
   /** The session's access token; unset when signed out. */
@@ -36,6 +38,8 @@ export interface ServerInfo {
   version: string;
   url: string;
   setupRequired: boolean;
+  /** How the server signs people in; unset until its setup chooses. */
+  mode?: "standalone" | "mavioDev";
 }
 
 /** A Quick Connect request: the user enters the code on a signed-in device. */
@@ -108,7 +112,8 @@ function expiry(r: { accessTokenExpireTime?: Timestamp }): number | undefined {
 
 function info(url: string, r: GetAuthInfoResponse): ServerInfo {
   if (!r.serverId) throw new Error(`${url} is not a Mavio server`);
-  return { id: r.serverId, name: r.serverName, version: r.version, url, setupRequired: r.setupRequired };
+  const mode = r.mode === AccountMode.STANDALONE ? "standalone" : r.mode === AccountMode.MAVIO_DEV ? "mavioDev" : undefined;
+  return { id: r.serverId, name: r.serverName, version: r.version, url, setupRequired: r.setupRequired, mode };
 }
 
 /**
@@ -285,6 +290,7 @@ export class Servers {
       name: i.name,
       version: i.version,
       url: i.url,
+      mode: i.mode,
       userId: r.user?.id ?? "",
       userName: r.user?.name ?? "",
       sessionId: r.session?.id,
@@ -296,15 +302,54 @@ export class Servers {
     return entry;
   }
 
-  /** Signs in to the server at an address with a name and password. */
-  async signIn(address: string, name: string, password: string): Promise<ServerEntry> {
+  /**
+   * Signs in to the server at an address with a name and password, and the
+   * current code of the user's TOTP when it has one; without the code
+   * such a user's sign-in fails as isTotpRequired tells.
+   */
+  async signIn(address: string, name: string, password: string, totpCode?: string): Promise<ServerEntry> {
     const i = await this.probe(address);
     const r = await createClient(AuthService, transport({ url: i.url })).login({
       name,
       password,
+      totpCode,
       device: await device(this.storage, this.key),
     });
     return this.added(i, r);
+  }
+
+  /** Signs in to the server at an address with a passkey of the browser's choosing. */
+  async signInWithPasskey(address: string): Promise<ServerEntry> {
+    const i = await this.probe(address);
+    const auth = createClient(AuthService, transport({ url: i.url }));
+    const start = await auth.startPasskeySignIn({});
+    const publicKey = PublicKeyCredential.parseRequestOptionsFromJSON(JSON.parse(start.optionsJson));
+    const credential = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential | null;
+    if (!credential) throw new Error("no passkey was chosen");
+    const r = await auth.finishPasskeySignIn({
+      ceremonyId: start.ceremonyId,
+      credentialJson: JSON.stringify(credential.toJSON()),
+      device: await device(this.storage, this.key),
+    });
+    return this.added(i, r);
+  }
+
+  /** The users a server's session may switch to (docs/accounts.md §4.4). */
+  async switchableUsers(server: ServerEntry): Promise<SwitchableUser[]> {
+    return (await this.client(AuthService, server).listSwitchableUsers({})).users;
+  }
+
+  /**
+   * Switches a server's session to another user, with its PIN when it has
+   * one; the session's token acts as that user from then on.
+   */
+  async switchUser(server: ServerEntry, userId: string, pin?: string): Promise<ServerEntry> {
+    const r = await this.client(AuthService, server).switchUser({ userId, pin });
+    const at = this.list.findIndex((s) => s.id === server.id);
+    if (at < 0) throw new Error(`${server.name} was removed`);
+    const entry = { ...this.list[at], userId: r.user?.id ?? userId, userName: r.user?.name ?? "" };
+    this.set(this.list.with(at, entry), false);
+    return entry;
   }
 
   /** Creates the first user of a new server and signs in as them. */

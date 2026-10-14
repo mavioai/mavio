@@ -93,6 +93,8 @@ export type MessageKey =
   | 'action.retry'
   | 'action.cancel'
   | 'action.done'
+  | 'action.delete'
+  | 'action.save'
   | 'auth.signIn'
   | 'auth.server'
   | 'auth.username'
@@ -115,6 +117,31 @@ export type MessageKey =
   | 'auth.wrongPassword'
   | 'auth.moveUp'
   | 'auth.moveDown'
+  | 'auth.signInWithPasskey'
+  | 'auth.totpCode'
+  | 'auth.totpMessage'
+  | 'auth.wrongCode'
+  | 'auth.switchUser'
+  | 'auth.current'
+  | 'auth.pin'
+  | 'auth.enterPin'
+  | 'auth.security'
+  | 'auth.passkeys'
+  | 'auth.noPasskeys'
+  | 'auth.addPasskey'
+  | 'auth.passkeyHost'
+  | 'auth.passkeysUnavailable'
+  | 'auth.totp'
+  | 'auth.totpOn'
+  | 'auth.totpOff'
+  | 'auth.setUpTotp'
+  | 'auth.totpSecret'
+  | 'auth.openAuthenticator'
+  | 'auth.turnOff'
+  | 'auth.pinMessage'
+  | 'auth.setPin'
+  | 'auth.removePin'
+  | 'auth.pinOn'
   | 'search.placeholder'
   | 'search.noResults';
 
@@ -202,6 +229,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.retry": "Try Again",
     "action.cancel": "Cancel",
     "action.done": "Done",
+    "action.delete": "Delete",
+    "action.save": "Save",
     "auth.signIn": "Sign In",
     "auth.server": "Server",
     "auth.username": "Username",
@@ -224,6 +253,31 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.wrongPassword": "The username or password is incorrect.",
     "auth.moveUp": "Move Up",
     "auth.moveDown": "Move Down",
+    "auth.signInWithPasskey": "Sign In with a Passkey",
+    "auth.totpCode": "Verification Code",
+    "auth.totpMessage": "Enter the six-digit code from your authenticator app.",
+    "auth.wrongCode": "The code is incorrect.",
+    "auth.switchUser": "Switch User",
+    "auth.current": "Current",
+    "auth.pin": "PIN",
+    "auth.enterPin": "Enter {name}'s PIN",
+    "auth.security": "Sign-In and Security",
+    "auth.passkeys": "Passkeys",
+    "auth.noPasskeys": "No passkeys yet.",
+    "auth.addPasskey": "Add Passkey",
+    "auth.passkeyHost": "Works at {host}",
+    "auth.passkeysUnavailable": "Passkeys need a host name over HTTPS.",
+    "auth.totp": "Authenticator App",
+    "auth.totpOn": "Sign-ins with a password ask for a code.",
+    "auth.totpOff": "Off",
+    "auth.setUpTotp": "Set Up",
+    "auth.totpSecret": "Add this key to your authenticator app, then enter its code: {secret}",
+    "auth.openAuthenticator": "Open in Authenticator",
+    "auth.turnOff": "Turn Off",
+    "auth.pinMessage": "A PIN guards switching to you.",
+    "auth.setPin": "Set PIN",
+    "auth.removePin": "Remove PIN",
+    "auth.pinOn": "On",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results"
   },
@@ -309,6 +363,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.retry": "重试",
     "action.cancel": "取消",
     "action.done": "完成",
+    "action.delete": "删除",
+    "action.save": "保存",
     "auth.signIn": "登录",
     "auth.server": "服务器",
     "auth.username": "用户名",
@@ -331,6 +387,31 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.wrongPassword": "用户名或密码不正确。",
     "auth.moveUp": "上移",
     "auth.moveDown": "下移",
+    "auth.signInWithPasskey": "用通行密钥登录",
+    "auth.totpCode": "验证码",
+    "auth.totpMessage": "输入身份验证器应用中的六位验证码。",
+    "auth.wrongCode": "验证码不正确。",
+    "auth.switchUser": "切换用户",
+    "auth.current": "当前",
+    "auth.pin": "PIN",
+    "auth.enterPin": "输入 {name} 的 PIN",
+    "auth.security": "登录与安全",
+    "auth.passkeys": "通行密钥",
+    "auth.noPasskeys": "尚无通行密钥。",
+    "auth.addPasskey": "添加通行密钥",
+    "auth.passkeyHost": "适用于 {host}",
+    "auth.passkeysUnavailable": "通行密钥需要通过 HTTPS 访问主机名。",
+    "auth.totp": "身份验证器应用",
+    "auth.totpOn": "用密码登录时需要验证码。",
+    "auth.totpOff": "未开启",
+    "auth.setUpTotp": "设置",
+    "auth.totpSecret": "将此密钥添加到身份验证器应用，然后输入其验证码：{secret}",
+    "auth.openAuthenticator": "在身份验证器中打开",
+    "auth.turnOff": "关闭",
+    "auth.pinMessage": "PIN 用于保护切换到你的账户。",
+    "auth.setPin": "设置 PIN",
+    "auth.removePin": "移除 PIN",
+    "auth.pinOn": "已开启",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果"
   }

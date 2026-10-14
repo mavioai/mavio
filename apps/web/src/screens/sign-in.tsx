@@ -1,6 +1,14 @@
 // Sign-in to the serving server or another one: the address, then a
-// password, the first user of a new server, or Quick Connect.
-import { errorMessage, isUnauthenticated, type QuickConnect, type ServerInfo, useServersStore } from "@mavio/client-ts";
+// password with the code of the user's authenticator app when it has one,
+// a passkey, the first user of a new server, or Quick Connect.
+import {
+  errorMessage,
+  isTotpRequired,
+  isUnauthenticated,
+  type QuickConnect,
+  type ServerInfo,
+  useServersStore,
+} from "@mavio/client-ts";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useEffect, useState } from "react";
 
@@ -20,6 +28,7 @@ export function SignInScreen() {
   const [qc, setQc] = useState<QuickConnect>();
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [needsCode, setNeedsCode] = useState(false);
 
   const done = () => navigate({ to: adding ? "/profile" : "/" });
 
@@ -132,15 +141,26 @@ export function SignInScreen() {
             info={info}
             busy={busy}
             error={error}
-            onBack={() => (setInfo(undefined), setError(undefined))}
-            onSubmit={(name, password) =>
+            onBack={() => (setInfo(undefined), setError(undefined), setNeedsCode(false))}
+            onSubmit={(name, password, code) =>
               run(async () => {
                 try {
                   if (info.setupRequired) await servers.createFirstUser(info.url, name, password);
-                  else await servers.signIn(info.url, name, password);
+                  else await servers.signIn(info.url, name, password, code);
                 } catch (err) {
-                  throw isUnauthenticated(err) ? new Error(t("auth.wrongPassword")) : err;
+                  if (!code && isTotpRequired(err)) {
+                    setNeedsCode(true);
+                    return;
+                  }
+                  throw isUnauthenticated(err) ? new Error(t(code ? "auth.wrongCode" : "auth.wrongPassword")) : err;
                 }
+                done();
+              })
+            }
+            needsCode={needsCode}
+            onPasskey={() =>
+              run(async () => {
+                await servers.signInWithPasskey(info.url);
                 done();
               })
             }
@@ -152,29 +172,45 @@ export function SignInScreen() {
   );
 }
 
+/**
+ * Whether this page can use passkeys of the server at a URL: a passkey
+ * belongs to the host the browser reached the server at, so only the
+ * serving server's, at a host name over HTTPS or on localhost.
+ */
+export function passkeysHere(url: string): boolean {
+  if (typeof PublicKeyCredential === "undefined" || !window.isSecureContext) return false;
+  const u = new URL(url);
+  return u.origin === location.origin && !/^[\d.]+$|^\[/.test(u.hostname);
+}
+
 function Credentials({
   info,
   busy,
   error,
+  needsCode,
   onBack,
   onSubmit,
+  onPasskey,
   onQuickConnect,
 }: {
   info: ServerInfo;
   busy: boolean;
   error?: string;
+  needsCode: boolean;
   onBack: () => void;
-  onSubmit: (name: string, password: string) => void;
+  onSubmit: (name: string, password: string, code?: string) => void;
+  onPasskey: () => void;
   onQuickConnect: () => void;
 }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   return (
     <form
       className="flex flex-col gap-4"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(name.trim(), password);
+        onSubmit(name.trim(), password, needsCode ? code : undefined);
       }}
     >
       <div>
@@ -201,10 +237,29 @@ function Credentials({
         autoComplete={info.setupRequired ? "new-password" : "current-password"}
         required={info.setupRequired}
       />
+      {needsCode && (
+        <>
+          <p className="type-body text-text-secondary">{t("auth.totpMessage")}</p>
+          <Field
+            label={t("auth.totpCode")}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            autoFocus
+            required
+          />
+        </>
+      )}
       {error && <p className="type-callout text-danger">{error}</p>}
-      <Button type="submit" disabled={busy || !name.trim()}>
+      <Button type="submit" disabled={busy || !name.trim() || (needsCode && code.length !== 6)}>
         {info.setupRequired ? t("auth.createAccount") : t("auth.signIn")}
       </Button>
+      {!info.setupRequired && passkeysHere(info.url) && (
+        <Button variant="secondary" onClick={onPasskey} disabled={busy}>
+          {t("auth.signInWithPasskey")}
+        </Button>
+      )}
       {!info.setupRequired && (
         <Button variant="plain" onClick={onQuickConnect} disabled={busy}>
           {t("auth.quickConnect")}

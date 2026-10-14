@@ -2,6 +2,7 @@ import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { afterEach, expect, test, vi } from "vitest";
 
 import { memoryDeviceKey, refreshMessage } from "./device-key.ts";
+import { isTotpRequired } from "./hooks.ts";
 import { normalizeUrl, type ServerEntry, Servers, type Storage } from "./servers.ts";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -195,4 +196,29 @@ test("an expired token is refreshed and the call made again", async () => {
   });
   await servers.client(SystemService, servers.get("a")!).getHealth({});
   expect(servers.get("a")?.token).toBe("new");
+});
+
+test("signs in with a TOTP code and switches users in place", async () => {
+  const logins: unknown[] = [];
+  serve({
+    GetAuthInfo: () => ({ serverId: "den", serverName: "Den", version: "1.0", mode: "ACCOUNT_MODE_STANDALONE" }),
+    Login: (b) => {
+      logins.push(b);
+      if (!(b as { totpCode?: string }).totpCode) {
+        return Response.json({ code: "failed_precondition", message: "a TOTP code is needed" }, { status: 400 });
+      }
+      return { accessToken: "t", session: { id: "s" }, user: { id: "ann", name: "ann" } };
+    },
+    SwitchUser: (b) => ({ user: { id: (b as { userId: string }).userId, name: "kid" } }),
+  });
+  const servers = new Servers(memory(), "http://den:8686", memoryDeviceKey());
+  const err = await servers.signIn("den", "ann", "pw").catch((e: unknown) => e);
+  expect(isTotpRequired(err)).toBe(true);
+  const entry = await servers.signIn("den", "ann", "pw", "123456");
+  expect(logins.map((b) => (b as { totpCode?: string }).totpCode)).toEqual([undefined, "123456"]);
+  expect(entry.mode).toBe("standalone");
+
+  const kid = "0193a5b0-0000-7000-8000-00000000000c";
+  await servers.switchUser(entry, kid, "1234");
+  expect(servers.get("den")).toMatchObject({ userId: kid, userName: "kid", token: "t", sessionId: "s" });
 });

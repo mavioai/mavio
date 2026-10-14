@@ -67,6 +67,11 @@ export function errorMessage(err: unknown): string {
   return err instanceof ConnectError ? err.rawMessage : err instanceof Error ? err.message : String(err);
 }
 
+/** Whether a password sign-in failed for want of the user's TOTP code. */
+export function isTotpRequired(err: unknown): boolean {
+  return err instanceof ConnectError && err.code === Code.FailedPrecondition;
+}
+
 /** Whether a call failed for lack of a valid sign-in, such as a wrong password. */
 export function isUnauthenticated(err: unknown): boolean {
   return err instanceof ConnectError && err.code === Code.Unauthenticated;

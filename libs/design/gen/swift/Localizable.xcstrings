@@ -1747,6 +1747,42 @@
         }
       }
     },
+    "action.delete": {
+      "comment": "Deletes the item it is next to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "action.save": {
+      "comment": "Saves what was entered.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
     "auth.signIn": {
       "comment": "Signs in to a server.",
       "extractionState": "manual",
@@ -2157,6 +2193,456 @@
           "stringUnit": {
             "state": "translated",
             "value": "此网络上的服务器"
+          }
+        }
+      }
+    },
+    "auth.signInWithPasskey": {
+      "comment": "Signs in to a server with a passkey of this device or browser.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign In with a Passkey"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用通行密钥登录"
+          }
+        }
+      }
+    },
+    "auth.totpCode": {
+      "comment": "Field of the six-digit code of the user's authenticator app.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verification Code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "验证码"
+          }
+        }
+      }
+    },
+    "auth.totpMessage": {
+      "comment": "Explanation when signing in needs the code of the user's authenticator app.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the six-digit code from your authenticator app."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入身份验证器应用中的六位验证码。"
+          }
+        }
+      }
+    },
+    "auth.wrongCode": {
+      "comment": "Error when a verification code or PIN is wrong.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The code is incorrect."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "验证码不正确。"
+          }
+        }
+      }
+    },
+    "auth.switchUser": {
+      "comment": "Switches the signed-in user of a server, or the section listing whom to switch to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch User"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换用户"
+          }
+        }
+      }
+    },
+    "auth.current": {
+      "comment": "Marks the user currently signed in among those to switch to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前"
+          }
+        }
+      }
+    },
+    "auth.pin": {
+      "comment": "Field of a user's four-digit PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN"
+          }
+        }
+      }
+    },
+    "auth.enterPin": {
+      "comment": "Asks for the PIN of the user to switch to; name is the user's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter %@'s PIN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入 %@ 的 PIN"
+          }
+        }
+      }
+    },
+    "auth.security": {
+      "comment": "Section of the profile with the user's passkeys, authenticator app and PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-In and Security"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录与安全"
+          }
+        }
+      }
+    },
+    "auth.passkeys": {
+      "comment": "Heading of the user's passkeys.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkeys"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通行密钥"
+          }
+        }
+      }
+    },
+    "auth.noPasskeys": {
+      "comment": "Shown when the user has no passkeys.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No passkeys yet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚无通行密钥。"
+          }
+        }
+      }
+    },
+    "auth.addPasskey": {
+      "comment": "Creates a passkey for signing in to the server at this address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Passkey"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加通行密钥"
+          }
+        }
+      }
+    },
+    "auth.passkeyHost": {
+      "comment": "Where a passkey can be used; host is the host name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Works at %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适用于 %@"
+          }
+        }
+      }
+    },
+    "auth.passkeysUnavailable": {
+      "comment": "Why passkeys cannot be added at this address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkeys need a host name over HTTPS."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通行密钥需要通过 HTTPS 访问主机名。"
+          }
+        }
+      }
+    },
+    "auth.totp": {
+      "comment": "Heading of the user's TOTP, the second factor of a password.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authenticator App"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "身份验证器应用"
+          }
+        }
+      }
+    },
+    "auth.totpOn": {
+      "comment": "State of a user who has TOTP.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-ins with a password ask for a code."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用密码登录时需要验证码。"
+          }
+        }
+      }
+    },
+    "auth.totpOff": {
+      "comment": "State of a user without TOTP.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未开启"
+          }
+        }
+      }
+    },
+    "auth.setUpTotp": {
+      "comment": "Begins setting up TOTP.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set Up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "auth.totpSecret": {
+      "comment": "Instruction when setting up TOTP; secret is the key in base32.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add this key to your authenticator app, then enter its code: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将此密钥添加到身份验证器应用，然后输入其验证码：%@"
+          }
+        }
+      }
+    },
+    "auth.openAuthenticator": {
+      "comment": "Opens the TOTP key in an authenticator app on this device.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Authenticator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在身份验证器中打开"
+          }
+        }
+      }
+    },
+    "auth.turnOff": {
+      "comment": "Turns off the user's TOTP.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "auth.pinMessage": {
+      "comment": "Explanation of the user's PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A PIN guards switching to you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PIN 用于保护切换到你的账户。"
+          }
+        }
+      }
+    },
+    "auth.setPin": {
+      "comment": "Sets or changes the user's PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set PIN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置 PIN"
+          }
+        }
+      }
+    },
+    "auth.removePin": {
+      "comment": "Removes the user's PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove PIN"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 PIN"
+          }
+        }
+      }
+    },
+    "auth.pinOn": {
+      "comment": "State of a user who has a PIN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已开启"
           }
         }
       }

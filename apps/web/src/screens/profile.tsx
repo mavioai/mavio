@@ -1,6 +1,7 @@
 // The profile: the servers the user signed in to, in their order, which
-// orders Home; adding, signing out and signing in again; and authorizing
-// a device with Quick Connect.
+// orders Home; adding, signing out and signing in again; switching users
+// and the user's passkeys, authenticator app and PIN; and authorizing a
+// device with Quick Connect.
 import { errorMessage, type ServerEntry, useServers, useServersStore, useSignedIn } from "@mavio/client-ts";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import { useState } from "react";
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { Button, Field, ScreenTitle } from "../ui.tsx";
+import { Security, SwitchUser } from "./security.tsx";
 
 export function ProfileScreen() {
   const servers = useServersStore();
@@ -73,9 +75,25 @@ export function ProfileScreen() {
           ))}
         </ul>
       </section>
+      <Accounts />
       <AuthorizeDevice />
     </div>
   );
+}
+
+/** Each standalone server's users to switch to and the signed-in user's credentials. */
+function Accounts() {
+  const signedIn = useSignedIn().filter((s) => s.mode !== "mavioDev");
+  return signedIn.map((s) => (
+    <section key={s.id} className="flex flex-col gap-3 px-margin py-4">
+      <h2 className="type-title3">
+        {t("auth.security")}
+        {signedIn.length > 1 && <span className="text-text-secondary"> · {s.name}</span>}
+      </h2>
+      <SwitchUser server={s} />
+      <Security server={s} />
+    </section>
+  ));
 }
 
 /** Signs in another device showing a Quick Connect code, as the user of one of the servers. */
