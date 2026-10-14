@@ -10,7 +10,7 @@
 
 | Layer | Scope | Where | Runs in |
 | :--- | :--- | :--- | :--- |
-| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin, Sonarr, Radarr, Prowlarr and Bazarr | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
+| Unit tests | Pure logic; no network, no real ffmpeg, no hardware. Table-driven, many ported from Jellyfin, Sonarr, Radarr, Prowlarr, Bazarr and Lingarr | `*_test.go` next to the code, data in `testdata/` | Every CI run, all platforms |
 | Conformance tests | The same repository test suite on SQLite (temporary file) and PostgreSQL (a container started by `libs/store/pgtest`, or the server in `MAVIO_TEST_POSTGRES_DSN`; skipped without Docker or with `-short`); both must pass | `libs/store` | Every CI run (PostgreSQL on Linux) |
 | Integration tests | Real ffmpeg / ffprobe, generated test media, real hardware encoders; call `t.Skip` with a reason when prerequisites are missing | Next to the code, behind prerequisites | CI where prerequisites exist; vendor paths only on the hardware available (maintainers' machines, GitHub-hosted runners) |
 | Snapshot tests | The clients' screens drawn with fixed data and compared with committed references ([Clients §6.8](clients.md#68-galleries-and-visual-review)) | `apps/web/snapshots`, `libs/apple/Tests/MavioUITests`, `libs/android/ui/src/test` | CI jobs of the clients |
@@ -23,7 +23,7 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 ## 2. Porting Test Cases
 
 ### 2.1 Method
-`tools/testport` performs the extraction; `tools/testport/mapping.json` lists the source repositories (Jellyfin with xUnit tests; Sonarr, Radarr and Prowlarr with NUnit tests; Bazarr with pytest tests) and maps their test projects and test data directories to Mavio targets (the table in §2.2).
+`tools/testport` performs the extraction; `tools/testport/mapping.json` lists the source repositories (Jellyfin and Lingarr with xUnit tests; Sonarr, Radarr and Prowlarr with NUnit tests; Bazarr with pytest tests) and maps their test projects and test data directories to Mavio targets (the table in §2.2).
 
 1. **Parameterized cases**: xUnit `[InlineData]` cases and NUnit `[TestCase]` cases, and `[MemberData]` / `[TestCaseSource]` cases backed by `TheoryData.Add(…)`, `yield return` or collection initializers, are written as one JSON file per C# test class under the target's `testdata/cases/`, named in snake_case without the `Tests` or `Fixture` suffix (e.g. `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`). Arguments are keyed by parameter name, with declared defaults filled in; an NUnit `ExpectedResult` is stored under `$result`. Constants become JSON values; enum members and other symbols become `{"$symbol": …}`, flag combinations `{"$flags": […]}`, constructor calls `{"$new": …}`, and anything that is not a constant keeps its source text as `{"$expr": …}`.
    pytest modules are read the same way: each `test_*.py` module becomes one case file named after the module without its `test_` prefix (e.g. `test_score.py` → `testdata/cases/score.json`), functions and methods of `Test*` classes named `test*` are its tests, `@pytest.mark.parametrize` cases are keyed by argument name (stacked marks give their product), tuples, lists and sets become arrays, and module-level names assigned literal values are resolved.
@@ -65,7 +65,10 @@ Concurrency logic involving timeouts, timers or idle reaping is tested determini
 | Bazarr `tests/subliminal_patch/test_score.py`, `test_core.py`, `tests/bazarr/test_app_get_providers.py` | Subtitle scores, choosing subtitles, provider pools and throttling | `libs/acquire/subtitles` |
 | Bazarr `tests/subliminal_patch/test_mods.py` and the subtitles of `data` | Subtitle modifications (removing hearing-impaired text and others) | `libs/subtitle` (`testdata/cases/mods.json`, `testdata/mods`) |
 | Bazarr `test_embeddedsubtitles.py`, `tests/bazarr/test_download_blacklist_on_failure.py`, `test_get_providers_blacklist.py`, `test_subtitles_manual.py`, `test_subtitles_pool.py`, `test_subtitles_sync.py`, `test_utilities_video_analyzer.py` | Embedded subtitles, blocklisting failed downloads, provider throttling, release information of manual search results, the provider pool, synchronization decisions, video analysis | `apps/server/internal/subtitles` |
-| Bazarr `tests/bazarr` (other modules: configuration, Jellyfin, notifier, logging, UI, translation, Sonarr episode sync, post-processing, sync performance paths) | Features Mavio does not have or has deferred (translation) | Not ported |
+| Bazarr `tests/bazarr` (other modules: configuration, Jellyfin, notifier, logging, UI, translation, Sonarr episode sync, post-processing, sync performance paths) | Features Mavio does not have, or has as Lingarr's (translation) | Not ported |
+| Lingarr `Lingarr.Server.Tests/Services/SubtitleTranslationServiceTests.cs`, `LanguageCodeServiceTests.cs`, `Services/Translation`, `Services/MediaSubtitleProcessor`, `Jobs`, `Controllers` | Subtitle translation: lines, stacked cues, context, batches, the translators' chain by language match, retries, language codes, the automation's choice of source and its deduplication | `apps/server/internal/subtitles` |
+| Lingarr `Services/Subtitle/SsaParserTests.cs`, `SsaWriterTests.cs`, `SubtitleFormatterServiceTests.cs` | SSA/ASS reading and writing, drawings and markup removed from the text translated | `libs/subtitle` (`testdata/cases/ssa`) |
+| Lingarr `Lingarr.Migrations.Tests`, other classes of `Lingarr.Server.Tests` (configuration, media, startup, telemetry, logs, string and date utilities) | Lingarr's database, media library and service | Not ported |
 
 ---
 

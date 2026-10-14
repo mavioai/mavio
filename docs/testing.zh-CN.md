@@ -10,7 +10,7 @@
 
 | 层次 | 范围 | 位置 | 运行时机 |
 | :--- | :--- | :--- | :--- |
-| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr、Radarr、Prowlarr 与 Bazarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
+| 单元测试 | 纯逻辑；不访问网络、不依赖真实 ffmpeg 或硬件。表驱动，很多用例移植自 Jellyfin、Sonarr、Radarr、Prowlarr、Bazarr 与 Lingarr | 代码旁的 `*_test.go`，数据放在 `testdata/` | 每次 CI，全部平台 |
 | 一致性测试 | 同一套仓储测试分别跑在 SQLite（临时文件）与 PostgreSQL（由 `libs/store/pgtest` 启动的容器，或 `MAVIO_TEST_POSTGRES_DSN` 指定的服务器；没有 Docker 或使用 `-short` 时跳过）上，两者都必须通过 | `libs/store` | 每次 CI（PostgreSQL 在 Linux 上运行） |
 | 集成测试 | 真实 ffmpeg / ffprobe、生成的测试媒体、真实硬件编码器；条件不满足时 `t.Skip` 并写明原因 | 代码旁，依赖前置条件 | 具备条件的 CI；厂商路径只在现有硬件（维护者的机器、GitHub 托管 runner）上运行 |
 | 快照测试 | 以固定数据绘制客户端的页面，与入库的参考图比对（[客户端 §6.8](clients.zh-CN.md#68-组件画廊与视觉评审)） | `apps/web/snapshots`、`libs/apple/Tests/MavioUITests`、`libs/android/ui/src/test` | 各客户端的 CI 任务 |
@@ -23,7 +23,7 @@
 ## 2. 移植测试用例
 
 ### 2.1 方法
-提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin；使用 NUnit 测试的 Sonarr、Radarr 与 Prowlarr；使用 pytest 测试的 Bazarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
+提取由 `tools/testport` 完成；`tools/testport/mapping.json` 列出来源仓库（使用 xUnit 测试的 Jellyfin 与 Lingarr；使用 NUnit 测试的 Sonarr、Radarr 与 Prowlarr；使用 pytest 测试的 Bazarr），并把它们的测试工程与测试数据目录映射到 Mavio 的目标位置（即 §2.2 的映射表）。
 
 1. **参数化用例**：xUnit 的 `[InlineData]` 与 NUnit 的 `[TestCase]` 用例，以及由 `TheoryData.Add(…)`、`yield return` 或集合初始化器提供数据的 `[MemberData]` / `[TestCaseSource]` 用例，按 C# 测试类各输出一个 JSON 文件，放在目标的 `testdata/cases/` 下，文件名为去掉 `Tests` 或 `Fixture` 后缀的 snake_case（如 `TV/EpisodeNumberTests.cs` → `testdata/cases/tv/episode_number.json`）。参数按形参名记录，并补全声明的默认值；NUnit 的 `ExpectedResult` 记录在 `$result` 下。常量转为 JSON 值；枚举成员等符号转为 `{"$symbol": …}`，标志组合转为 `{"$flags": […]}`，构造调用转为 `{"$new": …}`，其余非常量表达式以源码原文保留为 `{"$expr": …}`。
    pytest 模块按同样方式读取：每个 `test_*.py` 模块输出一个用例文件，文件名为去掉 `test_` 前缀的模块名（如 `test_score.py` → `testdata/cases/score.json`）；以 `test` 开头的函数及 `Test*` 类中以 `test` 开头的方法为其测试；`@pytest.mark.parametrize` 的用例按参数名记录（叠加的标记取其笛卡尔积），元组、列表与集合转为数组，模块级赋以字面量的名字会被解析为其值。
@@ -65,7 +65,10 @@
 | Bazarr `tests/subliminal_patch/test_score.py`、`test_core.py`、`tests/bazarr/test_app_get_providers.py` | 字幕评分、字幕选择、提供者池与限流 | `libs/acquire/subtitles` |
 | Bazarr `tests/subliminal_patch/test_mods.py` 与 `data` 中的字幕 | 字幕修改（去除听障文本等） | `libs/subtitle`（`testdata/cases/mods.json`、`testdata/mods`） |
 | Bazarr `test_embeddedsubtitles.py`、`tests/bazarr/test_download_blacklist_on_failure.py`、`test_get_providers_blacklist.py`、`test_subtitles_manual.py`、`test_subtitles_pool.py`、`test_subtitles_sync.py`、`test_utilities_video_analyzer.py` | 内嵌字幕、下载失败加入黑名单、提供者限流、手动搜索结果的发布信息、提供者池、同步决策、视频分析 | `apps/server/internal/subtitles` |
-| Bazarr `tests/bazarr`（其他模块：配置、Jellyfin、通知、日志、UI、翻译、Sonarr 单集同步、后处理、同步性能路径） | Mavio 没有或已延后（翻译）的功能 | 不移植 |
+| Bazarr `tests/bazarr`（其他模块：配置、Jellyfin、通知、日志、UI、翻译、Sonarr 单集同步、后处理、同步性能路径） | Mavio 没有，或以 Lingarr 的方式提供（翻译）的功能 | 不移植 |
+| Lingarr `Lingarr.Server.Tests/Services/SubtitleTranslationServiceTests.cs`、`LanguageCodeServiceTests.cs`、`Services/Translation`、`Services/MediaSubtitleProcessor`、`Jobs`、`Controllers` | 字幕翻译：行、叠放的字幕条、上下文、批次、按语言匹配的翻译器链、重试、语言代码、自动化对来源的选择与去重 | `apps/server/internal/subtitles` |
+| Lingarr `Services/Subtitle/SsaParserTests.cs`、`SsaWriterTests.cs`、`SubtitleFormatterServiceTests.cs` | SSA/ASS 的读写，从待翻译文本中去除绘图与标记 | `libs/subtitle`（`testdata/cases/ssa`） |
+| Lingarr `Lingarr.Migrations.Tests`、`Lingarr.Server.Tests` 的其他类（配置、媒体、启动、遥测、日志、字符串与日期工具） | Lingarr 的数据库、媒体库与服务 | 不移植 |
 
 ---
 

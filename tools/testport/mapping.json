@@ -94,6 +94,21 @@
         { "source": "tests/subliminal_patch/cassettes", "target": "plugins/subtitles/testdata/responses/cassettes", "recursive": true },
         { "source": "tests/subliminal_patch/data", "target": "libs/subtitle/testdata/mods", "include": "subs*" }
       ]
+    },
+    {
+      "name": "Lingarr",
+      "repository": "https://github.com/lingarr-translate/lingarr",
+      "cases": [
+        { "source": "Lingarr.Server.Tests/Services/SubtitleTranslationServiceTests.cs", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Services/Subtitle/SubtitleFormatterServiceTests.cs", "target": "libs/subtitle/testdata/cases/ssa" },
+        { "source": "Lingarr.Server.Tests/Services/LanguageCodeServiceTests.cs", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Services/Translation", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Controllers", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Jobs", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Services/MediaSubtitleProcessor", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "Lingarr.Server.Tests/Services/Subtitle/SsaParserTests.cs", "target": "libs/subtitle/testdata/cases/ssa" },
+        { "source": "Lingarr.Server.Tests/Services/Subtitle/SsaWriterTests.cs", "target": "libs/subtitle/testdata/cases/ssa" }
+      ]
     }
   ]
 }
