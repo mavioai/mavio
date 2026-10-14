@@ -518,15 +518,12 @@ func (s *SubtitleService) ModifySubtitle(ctx context.Context, req *acquisitionv1
 }
 
 // SyncSubtitle synchronizes a subtitle file of an item against its
-// video's audio.
+// video's audio or another subtitle file of the item.
 func (s *SubtitleService) SyncSubtitle(ctx context.Context, req *acquisitionv1.SyncSubtitleRequest) (*acquisitionv1.SyncSubtitleResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	if req.GetReferencePath() != "" {
-		return nil, connect.NewError(connect.CodeUnimplemented, errors.New("subtitles are synchronized against the audio only"))
-	}
-	res, err := s.rt.Sync(ctx, core.MustParseID(req.GetItemId()), req.GetPath())
+	res, err := s.rt.Sync(ctx, core.MustParseID(req.GetItemId()), req.GetPath(), req.GetReferencePath())
 	if err != nil {
 		return nil, subtitleError(ctx, err)
 	}

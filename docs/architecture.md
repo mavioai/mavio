@@ -561,7 +561,7 @@ Subtitle acquisition reads media under the policy of [Optimization §2.3](optimi
 * The OpenSubtitles hash, two range reads, is computed once per file and kept until the file changes, so that repeated searches read nothing.
 * The probe's media information is used; nothing is probed again for subtitles.
 * Embedded text subtitles are extracted to sidecars only by hand and only on local and network storage, from the extraction cache of playback ([Optimization §2.6](optimization.md#26-embedded-subtitles)), filled by its single ffmpeg run when empty; on cloud storage they are never extracted.
-* Synchronization against the audio reads the whole audio track, so it runs only on local and network storage; on cloud storage a subtitle is synchronized only against another subtitle file beside the video.
+* Synchronization against the audio reads the whole audio track, so it runs only on local and network storage; on cloud storage a subtitle is synchronized only by hand against another subtitle file of the video, whose cues stand for the speech, which reads no video on any storage.
 * Language detection and mods read only the subtitle files.
 
 ### 14.4 Subtitle Providers (`plugins/subtitles`)

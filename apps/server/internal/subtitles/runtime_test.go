@@ -3,9 +3,11 @@ package subtitles
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -303,8 +305,49 @@ func TestSyncCloud(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := e.rt.Sync(e.ctx, e.movie.ID, p); !errors.Is(err, ErrUnavailable) {
+	if _, err := e.rt.Sync(e.ctx, e.movie.ID, p, ""); !errors.Is(err, ErrUnavailable) {
 		t.Errorf("Sync on a cloud drive: err = %v, want ErrUnavailable", err)
+	}
+
+	// Against another subtitle, no video is read: a copy of the English
+	// cues 2.5 seconds late is moved back.
+	srt := func(shift time.Duration) []byte {
+		var b strings.Builder
+		at := 5 * time.Second
+		for i := range 120 {
+			d := time.Duration(1200+(i*7919)%2300) * time.Millisecond
+			start, end := at+shift, at+shift+d
+			ts := func(t time.Duration) string {
+				return fmt.Sprintf("%02d:%02d:%02d,%03d", int(t.Hours()), int(t.Minutes())%60, int(t.Seconds())%60, t.Milliseconds()%1000)
+			}
+			fmt.Fprintf(&b, "%d\n%s --> %s\nLine %d\n\n", i+1, ts(start), ts(end), i)
+			at += d + time.Duration(300+(i*104729)%4100)*time.Millisecond
+		}
+		return []byte(b.String())
+	}
+	en, err := e.rt.Upload(e.ctx, e.movie.ID, srt(0), "srt", core.SubtitleLanguage{Language: "en"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fr, err := e.rt.Upload(e.ctx, e.movie.ID, srt(2500*time.Millisecond), "srt", core.SubtitleLanguage{Language: "fr"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := e.rt.Sync(e.ctx, e.movie.ID, fr, en)
+	if err != nil {
+		t.Fatalf("Sync against a subtitle: %v", err)
+	}
+	if d := res.Offset + 2500*time.Millisecond; d < -20*time.Millisecond || d > 20*time.Millisecond || res.Scale != 1 {
+		t.Errorf("Sync = %+v, want an offset of -2.5 s", res)
+	}
+	if data, err := os.ReadFile(fr); err != nil || !strings.Contains(string(data), "00:00:05,000 --> ") {
+		t.Errorf("synchronized subtitle = %.80q, %v", data, err)
+	}
+	if _, err := e.rt.Sync(e.ctx, e.movie.ID, fr, fr); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Sync against itself: err = %v, want ErrInvalid", err)
+	}
+	if _, err := e.rt.Sync(e.ctx, e.movie.ID, fr, "/elsewhere/x.srt"); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Sync against an unknown file: err = %v, want ErrNotFound", err)
 	}
 }
 

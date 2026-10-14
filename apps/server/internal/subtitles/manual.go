@@ -237,30 +237,42 @@ func (r *Runtime) Modify(ctx context.Context, itemID core.ID, p string, mods []s
 	if err != nil {
 		return err
 	}
-	data, err := r.Subtitles.ReadFile(ctx, itemID, p)
+	parsed, format, err := r.parse(ctx, itemID, p)
 	if err != nil {
 		return err
 	}
-	format := strings.TrimPrefix(strings.ToLower(path.Ext(p)), ".")
-	if !subtitle.CanParse(format) {
-		return fmt.Errorf("%w: %s subtitles are not modified", ErrUnavailable, format)
-	}
-	text, _, err := subtitle.ToUTF8(data)
+	data, err := applyMods(parsed, format, sub.language.Language, mods)
 	if err != nil {
-		return err
-	}
-	parsed, err := subtitle.Parse(text, format)
-	if err != nil {
-		return err
-	}
-	if data, err = applyMods(parsed, format, sub.language.Language, mods); err != nil {
 		return err
 	}
 	return r.Subtitles.WriteFile(ctx, itemID, p, data)
 }
 
-// Sync synchronizes a subtitle file of an item against its video's audio.
-func (r *Runtime) Sync(ctx context.Context, itemID core.ID, p string) (SyncResult, error) {
+// parse reads and parses a subtitle file of an item, returning it and
+// its format; formats that are not parsed are ErrUnavailable.
+func (r *Runtime) parse(ctx context.Context, itemID core.ID, p string) (*subtitle.Subtitle, string, error) {
+	format := strings.TrimPrefix(strings.ToLower(path.Ext(p)), ".")
+	if !subtitle.CanParse(format) {
+		return nil, "", fmt.Errorf("%w: %s subtitles are not parsed", ErrUnavailable, format)
+	}
+	data, err := r.Subtitles.ReadFile(ctx, itemID, p)
+	if err != nil {
+		return nil, "", err
+	}
+	text, _, err := subtitle.ToUTF8(data)
+	if err != nil {
+		return nil, "", err
+	}
+	sub, err := subtitle.Parse(text, format)
+	if err != nil {
+		return nil, "", err
+	}
+	return sub, format, nil
+}
+
+// Sync synchronizes a subtitle file of an item against its video's audio,
+// or against reference, another subtitle file of the item, when set.
+func (r *Runtime) Sync(ctx context.Context, itemID core.ID, p, reference string) (SyncResult, error) {
 	s := r.settings()
 	t, err := r.load(ctx, itemID, &s)
 	if err != nil {
@@ -270,7 +282,15 @@ func (r *Runtime) Sync(ctx context.Context, itemID core.ID, p string) (SyncResul
 	if err != nil {
 		return SyncResult{}, err
 	}
-	return r.sync(ctx, t, p, sub.language, &s)
+	if reference != "" {
+		if reference == p {
+			return SyncResult{}, fmt.Errorf("%w: a subtitle is synchronized against another", core.ErrInvalid)
+		}
+		if _, err := t.fileOf(reference); err != nil {
+			return SyncResult{}, err
+		}
+	}
+	return r.sync(ctx, t, p, reference, sub.language, &s)
 }
 
 // BlocklistEvent blocklists the subtitle a history event downloaded,

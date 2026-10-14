@@ -81,7 +81,7 @@ func (r *Runtime) syncDownloaded(ctx context.Context, t *target, e *core.Subtitl
 	if !shouldSync(s, e, t.episode()) || !r.readable(ctx, t.source().Path) || r.FFmpeg == "" {
 		return
 	}
-	if _, err := r.sync(ctx, t, e.Path, e.Language, s); err != nil {
+	if _, err := r.sync(ctx, t, e.Path, "", e.Language, s); err != nil {
 		r.logger().WarnContext(ctx, "subtitle synchronization failed", "item", t.item.ID, "path", e.Path, "err", err)
 	}
 }
@@ -97,51 +97,34 @@ type SyncResult struct {
 var errNotLocal = fmt.Errorf("%w: the video is on a cloud drive; its audio is not read to synchronize subtitles", ErrUnavailable)
 
 // sync aligns a subtitle file of the target to its video's audio, as
-// Bazarr's subsync with ffsubsync, rewrites it and records it.
-func (r *Runtime) sync(ctx context.Context, t *target, file string, l core.SubtitleLanguage, s *core.SubtitleSettings) (SyncResult, error) {
+// Bazarr's subsync with ffsubsync, or to the cues of reference, another
+// subtitle file of the target, when set; it rewrites the file and records
+// it. Against a reference, no video is read, on any storage.
+func (r *Runtime) sync(ctx context.Context, t *target, file, reference string, l core.SubtitleLanguage, s *core.SubtitleSettings) (SyncResult, error) {
 	src := t.source()
-	if !r.readable(ctx, src.Path) {
-		return SyncResult{}, errNotLocal
+	var ref subsync.Speech
+	if reference != "" {
+		refSub, _, err := r.parse(ctx, t.item.ID, reference)
+		if err != nil {
+			return SyncResult{}, fmt.Errorf("reference subtitle: %w", err)
+		}
+		ref = subsync.FromCues(refSub.Cues, 1)
+	} else {
+		if !r.readable(ctx, src.Path) {
+			return SyncResult{}, errNotLocal
+		}
+		if r.FFmpeg == "" {
+			return SyncResult{}, fmt.Errorf("%w: synchronizing subtitles needs ffmpeg", ErrUnavailable)
+		}
 	}
-	if r.FFmpeg == "" {
-		return SyncResult{}, fmt.Errorf("%w: synchronizing subtitles needs ffmpeg", ErrUnavailable)
-	}
-	format := strings.TrimPrefix(strings.ToLower(path.Ext(file)), ".")
-	if !subtitle.CanParse(format) {
-		return SyncResult{}, fmt.Errorf("%w: %s subtitles are not synchronized", ErrUnavailable, format)
-	}
-	data, err := r.Subtitles.ReadFile(ctx, t.item.ID, file)
+	sub, format, err := r.parse(ctx, t.item.ID, file)
 	if err != nil {
 		return SyncResult{}, err
 	}
-	text, _, err := subtitle.ToUTF8(data)
-	if err != nil {
-		return SyncResult{}, err
-	}
-	sub, err := subtitle.Parse(text, format)
-	if err != nil {
-		return SyncResult{}, err
-	}
-	root, name, ok := library.RootOf(t.lib.Paths, src.Path)
-	if !ok {
-		return SyncResult{}, fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, src.Path)
-	}
-	st, err := r.Storages.Open(ctx, root)
-	if err != nil {
-		return SyncResult{}, err
-	}
-	defer st.Close()
-	input, err := st.MediaURL(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), name)
-	if err != nil {
-		return SyncResult{}, err
-	}
-	model, err := r.vad()
-	if err != nil {
-		return SyncResult{}, err
-	}
-	ref, err := subsync.AudioSpeech(ctx, r.FFmpeg, input, audioStream(src.Streams, t.owner.OriginalLanguage, s), model, runtime.GOMAXPROCS(0))
-	if err != nil {
-		return SyncResult{}, err
+	if ref == nil {
+		if ref, err = r.audioSpeech(ctx, t, s); err != nil {
+			return SyncResult{}, err
+		}
 	}
 	y := &s.Sync
 	res, err := subsync.Align(ctx, ref, sub.Cues, subsync.Options{MaxOffset: y.MaxOffset, FixFramerate: y.FixFramerate, GoldenSection: y.GoldenSection})
@@ -166,6 +149,10 @@ func (r *Runtime) sync(ctx context.Context, t *target, file string, l core.Subti
 		Path: file, VideoPath: src.Path,
 		Description: fmt.Sprintf("%s subtitles synchronized with an offset of %.3f seconds and a framerate scale of %.4f.", l, res.Offset.Seconds(), res.Scale),
 	}
+	if reference != "" {
+		e.Description = fmt.Sprintf("%s subtitles synchronized with %s, with an offset of %.3f seconds and a framerate scale of %.4f.",
+			l, path.Base(reference), res.Offset.Seconds(), res.Scale)
+	}
 	if t.series != nil {
 		e.ParentID = t.series.ID
 	}
@@ -173,6 +160,30 @@ func (r *Runtime) sync(ctx context.Context, t *target, file string, l core.Subti
 		return SyncResult{}, err
 	}
 	return SyncResult{Offset: res.Offset, Scale: res.Scale}, nil
+}
+
+// audioSpeech returns the speech of the target's video's audio, by Silero
+// VAD.
+func (r *Runtime) audioSpeech(ctx context.Context, t *target, s *core.SubtitleSettings) (subsync.Speech, error) {
+	src := t.source()
+	root, name, ok := library.RootOf(t.lib.Paths, src.Path)
+	if !ok {
+		return nil, fmt.Errorf("%w: %s is outside the library's folders", core.ErrInvalid, src.Path)
+	}
+	st, err := r.Storages.Open(ctx, root)
+	if err != nil {
+		return nil, err
+	}
+	defer st.Close()
+	input, err := st.MediaURL(core.WithReadIntent(ctx, core.ReadIntent{Kind: core.ReadBackground}), name)
+	if err != nil {
+		return nil, err
+	}
+	model, err := r.vad()
+	if err != nil {
+		return nil, err
+	}
+	return subsync.AudioSpeech(ctx, r.FFmpeg, input, audioStream(src.Streams, t.owner.OriginalLanguage, s), model, runtime.GOMAXPROCS(0))
 }
 
 // audioStream returns which audio stream to synchronize against, among
