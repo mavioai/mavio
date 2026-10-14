@@ -253,6 +253,28 @@ export function useChildren(server: ServerEntry, item: Item | undefined) {
   });
 }
 
+/** The episode after an episode in its series, by season and number. */
+export function useNextEpisode(server: ServerEntry, item: Item | undefined) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "next", item?.id),
+    queryFn: async () => {
+      const { items } = await servers
+        .client(ItemService, server)
+        .listItems({ parentId: item!.seriesId, recursive: true, kinds: [ItemKind.EPISODE] });
+      return nextEpisode(items, item!.id) ?? null;
+    },
+    enabled: item?.kind === ItemKind.EPISODE && !!item.seriesId,
+  });
+}
+
+/** Of a series' episodes in any order, the one after id by season and number. */
+export function nextEpisode(episodes: Item[], id: string): Item | undefined {
+  const order = episodes.toSorted((a, b) => a.parentIndexNumber - b.parentIndexNumber || a.indexNumber - b.indexNumber);
+  const at = order.findIndex((i) => i.id === id);
+  return at >= 0 ? order[at + 1] : undefined;
+}
+
 /** Items like an item. */
 export function useSimilar(server: ServerEntry, itemId: string) {
   const servers = useServersStore();

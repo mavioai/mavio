@@ -31,6 +31,7 @@ export {
   useLibraries,
   useLibrary,
   useLibraryItems,
+  useNextEpisode,
   useOtherCopies,
   useRecommended,
   useSearch,
