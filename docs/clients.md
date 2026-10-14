@@ -188,8 +188,8 @@ The clients share one identity and one structure, and each looks native on its p
 
 ### 6.1 Design Tokens
 Colors, typography, spacing, radii, elevation and motion are defined once in `libs/design/tokens` in the W3C Design Tokens (DTCG) format. Style Dictionary resolves them and `pnpm nx run design:generate` compiles them, with the icons and strings, into `libs/design/gen/{ts,swift,kotlin,go}`. The generated code is committed and CI checks that it is current, as with `libs/proto/gen`.
-* **Color**: a dark theme first, which suits artwork and dim rooms, and a light theme; both meet WCAG AA contrast, which the generator checks for every pair of text and background.
-* **Typography**: the type scale (sizes, weights, line heights) is shared; the family is the platform's system font — SF Pro on Apple platforms, Roboto on Android, Segoe UI Variable on Windows, and Inter, shipped with the app, on Linux and the web — so that Dynamic Type and font scaling apply. A brand typeface appears only in display titles; the logo is drawn rather than set (§6.2.1).
+* **Color**: a dark theme, which suits artwork and dim rooms, and a light theme, both after Apple's system colors; both meet WCAG AA contrast, which the generator checks for every pair of text and background. The appearance follows the system unless the user chooses light or dark in settings; television starts dark, and the player is always dark. The primary button is filled with the label color; the accent, an orange taken from the logo, marks only progress, selection, links and switches.
+* **Typography**: the type scale (sizes, weights, line heights) is shared; the family is the platform's system font — SF Pro on Apple platforms, Roboto on Android, Segoe UI Variable on Windows, and Inter, shipped with the app, on Linux and the web — so that Dynamic Type and font scaling apply. There is no brand typeface: titles, including those over artwork, are the system font in bold, white over a dark scrim on artwork; the logo is drawn rather than set (§6.2.1).
 * **Sizes per form factor**: the tokens have phone, tablet, desktop and television values (television sized for 10-foot viewing and overscan-safe margins).
 
 ### 6.2 Icons
@@ -205,7 +205,10 @@ The logo has two forms, kept as SVG sources in `libs/design/brand`, and the two 
 Every client has the same screens with the same names, reached the same way:
 * **Top-level destinations**: Home (§6.3.1), the libraries, Search, Downloads (the apps), and the profile with settings.
 * **Screens below them**: a library (grid with sort and filters), an item's details (movie, series, season, person, collection), the player, and settings.
-* **Navigation container**, mapped per platform: a tab bar on iPhone, a sidebar on iPad, Mac, desktops and wide web windows, a navigation bar or rail on Android by window size class, a top tab bar on Apple TV, and a side menu on Android TV.
+* **Navigation container**: three layouts, chosen by the form factor rather than the platform, so that each is the same on every platform that uses it:
+  * **Phone**: on iPhone, Android phones, and tablets in compact width (split screen), a tab bar at the bottom with Home, the libraries, Search and Downloads; the avatar at the top right opens the profile and settings.
+  * **Desktop**: on the web, the Mac, desktops, and iPad and Android tablets in regular width, a sidebar on the left with Search, Home, Downloads and the libraries, which collapses to a rail of icons; on a tablet in portrait it starts collapsed and opens over the content. Its foot holds the signed-in user's avatar and name, which open a menu: switching users ([Accounts](accounts.md) §3.6, §4.4), settings, sign-ins, managing the account on mavio.dev or the server, and signing out.
+  * **Television**: on Apple TV, Android TV and Google TV, and in the television mode of the web UI, the Mac and the desktop app (a setting under Appearance, for a computer connected to a TV), a navigation bar at the top with Home, the libraries and Search, and the avatar at the right for switching users and settings. It is driven by the remote alone: the D-pad moves focus, which enlarges and lifts the focused element, select activates it, and back returns.
 
 #### 6.3.1 Home
 Home is a column of hubs, after Plex's: rows of items, each a reason to watch something.
