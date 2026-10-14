@@ -1,0 +1,19 @@
+// mavio.dev's Worker (docs/mavio-dev.md §6). BETTER_AUTH_SECRET is a
+// secret set with `wrangler secret put`; .dev.vars holds development's.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mavio-website",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [{ "pattern": "mavio.dev", "custom_domain": true }],
+  "vars": { "BASE_URL": "https://mavio.dev" },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "mavio-website",
+      "localConnectionString": "postgres://mavio:mavio@localhost:5432/mavio"
+    }
+  ],
+  "observability": { "enabled": true }
+}

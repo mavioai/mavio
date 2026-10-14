@@ -1,0 +1,195 @@
+edition = "2023";
+
+package mavio.cloud.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/cloud/v1/cloud.proto";
+
+// AccountService is mavio.dev's API for signed-in accounts
+// (docs/accounts.md §3, docs/mavio-dev.md §2): their servers, sign-in
+// assertions, claim codes, and the library access records an
+// administrator grants and an account accepts. Requests carry the
+// account's mavio.dev session, as its cookie or as a bearer token.
+service AccountService {
+  // GetAccount gives the signed-in account.
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ReportCompromised ends every mavio.dev session of the account and has
+  // its servers end its sessions too.
+  rpc ReportCompromised(ReportCompromisedRequest) returns (ReportCompromisedResponse);
+  // CreateClaimCode gives a code that claims a server for the account
+  // (ServerService.ClaimServer), valid for ten minutes.
+  rpc CreateClaimCode(CreateClaimCodeRequest) returns (CreateClaimCodeResponse);
+  // ListServers gives the servers the account administers or has access
+  // to.
+  rpc ListServers(ListServersRequest) returns (ListServersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RemoveServer removes a server the account administers from mavio.dev,
+  // with its access records; the server itself is unchanged
+  // (docs/accounts.md §2.1).
+  rpc RemoveServer(RemoveServerRequest) returns (RemoveServerResponse);
+  // CreateAssertion gives a sign-in assertion of the account for one of
+  // its servers and the device that signs in (docs/accounts.md §5.5). A
+  // server the account neither administers nor has access to is
+  // PERMISSION_DENIED.
+  rpc CreateAssertion(CreateAssertionRequest) returns (CreateAssertionResponse);
+  // ListAccess gives the access records of a server the account
+  // administers, invitations included.
+  rpc ListAccess(ListAccessRequest) returns (ListAccessResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GrantAccess gives an account access to a server the caller
+  // administers, or changes its record. A new record is an invitation
+  // until the account accepts it.
+  rpc GrantAccess(GrantAccessRequest) returns (GrantAccessResponse);
+  // RevokeAccess removes an account's record from a server the caller
+  // administers, or withdraws its invitation.
+  rpc RevokeAccess(RevokeAccessRequest) returns (RevokeAccessResponse);
+  // ListInvitations gives the account's invitations.
+  rpc ListInvitations(ListInvitationsRequest) returns (ListInvitationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AcceptInvitation makes an invitation's record take effect.
+  rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse);
+  // DeclineInvitation removes an invitation.
+  rpc DeclineInvitation(DeclineInvitationRequest) returns (DeclineInvitationResponse);
+  // LeaveServer removes the account's own record from a server.
+  rpc LeaveServer(LeaveServerRequest) returns (LeaveServerResponse);
+}
+
+// Server is a claimed server as its administrator and members see it.
+message Server {
+  // The fingerprint of the identity key (docs/accounts.md §5.1).
+  string id = 1;
+  // The Ed25519 identity public key, which clients check when they
+  // connect.
+  bytes public_key = 2;
+  string name = 3;
+  string version = 4;
+  // The administrator.
+  Account administrator = 5;
+  // The account's access; unset for the administrator.
+  Access access = 6;
+  // The libraries the server published.
+  repeated Library libraries = 7;
+  google.protobuf.Timestamp claim_time = 8;
+}
+
+// AccessRecord is an account's library access record on a server.
+message AccessRecord {
+  Account account = 1;
+  Access access = 2;
+  // Whether the account has not accepted it yet.
+  bool invitation = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+}
+
+// Invitation is a server's access record the account has not accepted.
+message Invitation {
+  string server_id = 1;
+  string server_name = 2;
+  Account administrator = 3;
+  Access access = 4;
+  google.protobuf.Timestamp create_time = 5;
+}
+
+message GetAccountRequest {}
+
+message GetAccountResponse {
+  Account account = 1;
+  string email = 2;
+}
+
+message ReportCompromisedRequest {}
+
+message ReportCompromisedResponse {}
+
+message CreateClaimCodeRequest {}
+
+message CreateClaimCodeResponse {
+  string claim_code = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message ListServersRequest {}
+
+message ListServersResponse {
+  repeated Server servers = 1;
+}
+
+message RemoveServerRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message RemoveServerResponse {}
+
+message CreateAssertionRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+  // The Ed25519 public key of the device that signs in.
+  bytes device_key = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+}
+
+message CreateAssertionResponse {
+  string assertion = 1;
+  google.protobuf.Timestamp expire_time = 2;
+}
+
+message ListAccessRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message ListAccessResponse {
+  repeated AccessRecord records = 1;
+}
+
+message GrantAccessRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+  // The account, by user name.
+  string user_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+  Access access = 3 [(buf.validate.field).required = true];
+}
+
+message GrantAccessResponse {
+  AccessRecord record = 1;
+}
+
+message RevokeAccessRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+  string account_id = 2 [(buf.validate.field).required = true];
+}
+
+message RevokeAccessResponse {}
+
+message ListInvitationsRequest {}
+
+message ListInvitationsResponse {
+  repeated Invitation invitations = 1;
+}
+
+message AcceptInvitationRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message AcceptInvitationResponse {}
+
+message DeclineInvitationRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message DeclineInvitationResponse {}
+
+message LeaveServerRequest {
+  string server_id = 1 [(buf.validate.field).required = true];
+}
+
+message LeaveServerResponse {}

@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "@mavio/design/tokens.css";
+
+/* Inter, the family the tokens name, as in the web UI (docs/clients.md §6.1). */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Tailwind's theme draws on the design tokens (libs/design), so utilities
+   such as bg-surface follow the dark and light themes. */
+@theme inline {
+  --font-sans: var(--mavio-font-family);
+  --color-background: var(--mavio-color-background);
+  --color-surface: var(--mavio-color-surface);
+  --color-surface-raised: var(--mavio-color-surface-raised);
+  --color-surface-overlay: var(--mavio-color-surface-overlay);
+  --color-border: var(--mavio-color-border);
+  --color-on-background: var(--mavio-color-text-primary);
+  --color-text-secondary: var(--mavio-color-text-secondary);
+  --color-text-tertiary: var(--mavio-color-text-tertiary);
+  --color-text-disabled: var(--mavio-color-text-disabled);
+  --color-accent: var(--mavio-color-accent);
+  --color-accent-pressed: var(--mavio-color-accent-pressed);
+  --color-on-accent: var(--mavio-color-on-accent);
+  --color-focus: var(--mavio-color-focus);
+  --color-danger: var(--mavio-color-danger);
+  --color-progress: var(--mavio-color-progress);
+  --color-scrim: var(--mavio-color-scrim);
+  --radius-xs: var(--mavio-radius-xs);
+  --radius-sm: var(--mavio-radius-sm);
+  --radius-md: var(--mavio-radius-md);
+  --radius-lg: var(--mavio-radius-lg);
+  --radius-xl: var(--mavio-radius-xl);
+  --shadow-level1: var(--mavio-elevation-level1);
+  --shadow-level2: var(--mavio-elevation-level2);
+  --shadow-level3: var(--mavio-elevation-level3);
+  --spacing-margin: var(--mavio-layout-margin);
+  --spacing-gutter: var(--mavio-layout-gutter);
+  --spacing-poster: var(--mavio-layout-poster);
+  --spacing-thumbnail: var(--mavio-layout-thumbnail);
+}
+
+/* The type scale of the design tokens. */
+@utility type-display {
+  font-size: var(--mavio-type-display-size);
+  font-weight: var(--mavio-type-display-weight);
+  line-height: var(--mavio-type-display-line-height);
+}
+@utility type-title1 {
+  font-size: var(--mavio-type-title1-size);
+  font-weight: var(--mavio-type-title1-weight);
+  line-height: var(--mavio-type-title1-line-height);
+}
+@utility type-title2 {
+  font-size: var(--mavio-type-title2-size);
+  font-weight: var(--mavio-type-title2-weight);
+  line-height: var(--mavio-type-title2-line-height);
+}
+@utility type-title3 {
+  font-size: var(--mavio-type-title3-size);
+  font-weight: var(--mavio-type-title3-weight);
+  line-height: var(--mavio-type-title3-line-height);
+}
+@utility type-headline {
+  font-size: var(--mavio-type-headline-size);
+  font-weight: var(--mavio-type-headline-weight);
+  line-height: var(--mavio-type-headline-line-height);
+}
+@utility type-body {
+  font-size: var(--mavio-type-body-size);
+  font-weight: var(--mavio-type-body-weight);
+  line-height: var(--mavio-type-body-line-height);
+}
+@utility type-callout {
+  font-size: var(--mavio-type-callout-size);
+  font-weight: var(--mavio-type-callout-weight);
+  line-height: var(--mavio-type-callout-line-height);
+}
+@utility type-footnote {
+  font-size: var(--mavio-type-footnote-size);
+  font-weight: var(--mavio-type-footnote-weight);
+  line-height: var(--mavio-type-footnote-line-height);
+}
+@utility type-caption {
+  font-size: var(--mavio-type-caption-size);
+  font-weight: var(--mavio-type-caption-weight);
+  line-height: var(--mavio-type-caption-line-height);
+}
+
+body {
+  font-size: var(--mavio-type-body-size);
+  font-weight: var(--mavio-type-body-weight);
+  line-height: var(--mavio-type-body-line-height);
+}
+@utility type-callout {
+  font-size: var(--mavio-type-callout-size);
+  font-weight: var(--mavio-type-callout-weight);
+  line-height: var(--mavio-type-callout-line-height);
+}
+@utility type-footnote {
+  font-size: var(--mavio-type-footnote-size);
+  font-weight: var(--mavio-type-footnote-weight);
+  line-height: var(--mavio-type-footnote-line-height);
+}
+@utility type-caption {
+  font-size: var(--mavio-type-caption-size);
+  font-weight: var(--mavio-type-caption-weight);
+  line-height: var(--mavio-type-caption-line-height);
+}
+
+/* A row that scrolls sideways without a visible scroll bar. */
+@utility scroll-row {
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  /* Snapping keeps the row's margin before the first card. */
+  scroll-padding-inline: var(--spacing-margin);
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+body {
+  background: var(--mavio-color-background);
+  color: var(--mavio-color-text-primary);
+  font-family: var(--mavio-font-family);
+}
+
+:focus-visible {
+  outline: 2px solid var(--mavio-color-focus);
+  outline-offset: 2px;
+}

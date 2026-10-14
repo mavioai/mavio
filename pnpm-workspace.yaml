@@ -4,7 +4,9 @@ packages:
   - plugins/*
 allowBuilds:
   '@google/genai': false
+  esbuild: true
   nx: true
   protobufjs: false
+  workerd: true
 minimumReleaseAgeExclude:
   - style-dictionary@5.6.1

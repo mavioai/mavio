@@ -803,7 +803,11 @@ flowchart TD
 - [x] Recovery of the administrator from the command line: `mavio admin reset-password`, which sets a new password, turns off TOTP and ends the administrator's sessions in a standalone server's database
 - [x] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev: the server's ID from its identity key, `AuthService.ClaimServer` and `claim-token`, `mavio admin unclaim`, JWT-signed calls to `mavio.cloud.v1.ServerService`, and the link that holds the WebSocket and applies changes after its cursor, tested against a simulated mavio.dev; the kinds of changes come with access records
 - [x] Sign-in assertions, access records and revocations on the server: `AuthService.SignInWithAssertion` against mavio.dev's cached key set, the kinds of changes applied to users and sessions, `PublishLibraries`, and the RPCs of the server's own credentials and users refused in mavio.dev mode
-- [ ] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations
+- [x] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations: `apps/website` on TanStack Start and better-auth with passwords, passkeys, TOTP and device codes, `ServerService` and `AccountService` over PostgreSQL with their changes, and pages for claiming, servers, access records, invitations and the account; tested against PGlite, and end to end with a server claiming and signing in through the Worker in workerd (the server fetches changes once the push exists)
+- [ ] mavio.dev's e-mail through Cloudflare Email Service: verifying addresses, resetting passwords, and telling accounts of invitations
+- [ ] Suspending accounts by mavio.dev's staff, which sends the suspension to the account's servers
+- [ ] Deploying `apps/website` from CI: the Hyperdrive configuration, the secret and the migrations
+- [ ] Translations of mavio.dev's pages with Lingui
 - [ ] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes
 - [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
 - [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges

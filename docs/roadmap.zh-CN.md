@@ -803,7 +803,11 @@ flowchart TD
 - [x] 从命令行恢复管理员：`mavio admin reset-password`，在独立服务端的数据库中设置新密码、关闭 TOTP 并结束管理员的会话
 - [x] 服务端身份密钥、认领、重新认领，以及服务端到 mavio.dev 的连接：由身份密钥得出的服务端 ID、`AuthService.ClaimServer` 与 `claim-token`、`mavio admin unclaim`、以 JWT 签名调用 `mavio.cloud.v1.ServerService`，以及保持 WebSocket 并应用游标之后变更的连接，均以模拟的 mavio.dev 测试；变更的种类随访问记录一起实现
 - [x] 服务端的登录断言、访问记录与吊销：用缓存的 mavio.dev 密钥集检查的 `AuthService.SignInWithAssertion`，应用到用户和会话的各类变更，`PublishLibraries`，以及 mavio.dev 模式下拒绝服务端自身凭据和用户的 RPC
-- [ ] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销
+- [x] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销：基于 TanStack Start 与 better-auth 的 `apps/website`，支持密码、通行密钥、TOTP 和设备代码；基于 PostgreSQL 的 `ServerService` 与 `AccountService` 及其变更；认领、服务端、访问记录、邀请与账户的页面；针对 PGlite 测试，并端到端测试了服务端通过 workerd 中的 Worker 认领和登录（推送完成后服务端才取回变更）
+- [ ] 通过 Cloudflare Email Service 发送 mavio.dev 的邮件：验证邮箱地址、重置密码、通知账户收到邀请
+- [ ] mavio.dev 工作人员停用账户，并把停用发送给账户能访问的服务端
+- [ ] 从 CI 部署 `apps/website`：Hyperdrive 配置、机密与迁移
+- [ ] 用 Lingui 翻译 mavio.dev 的页面
 - [ ] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home
 - [ ] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更
 - [ ] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书
