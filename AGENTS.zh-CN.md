@@ -14,6 +14,8 @@
 | [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热、按存储类别访问存储、通过 rclone 读取远端存储 |
 | [docs/plugins.zh-CN.md](docs/plugins.zh-CN.md) | 插件平台：宿主 API、事件、HTTP 路由、任务、远程设备、提供者类型；DLNA 插件 |
 | [docs/clients.zh-CN.md](docs/clients.zh-CN.md) | 客户端：内嵌 Web UI，Apple、Android 与桌面应用，共享 Rust 核心，设计系统 |
+| [docs/accounts.zh-CN.md](docs/accounts.zh-CN.md) | 账户：mavio.dev 模式与独立模式、媒体库访问、托管用户与切换、Home、好友、令牌 |
+| [docs/mavio-dev.zh-CN.md](docs/mavio-dev.zh-CN.md) | mavio.dev：网站与 API、向服务端推送、证书与子域名、中转、部署 |
 | [docs/jellyfin-compat.zh-CN.md](docs/jellyfin-compat.zh-CN.md) | Jellyfin API 兼容垫片评估（未采用） |
 
 ## 项目概览
@@ -43,6 +45,9 @@ libs/rclone/          rclone rcd：rc 客户端、远端上的存储、媒体代
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
+apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P27 起）
+apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P27 起）
+apps/dns/             mavio.site 的名称服务器：由地址计算的名称、ACME 质询（自 P27 起）
 libs/client-ts/       Web UI 的 Connect 客户端与 TanStack Query hooks
 apps/{ios,tvos,macos}/  Apple 各应用（SwiftUI）；其 Xcode 工程由 libs/apple/scripts/gen-project.py 生成
 libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlayer、MavioUI，以及核心的 XCFramework

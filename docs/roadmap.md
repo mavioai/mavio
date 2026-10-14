@@ -47,6 +47,7 @@ flowchart TD
     P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
     P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
     P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
+    P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
 
     P0 --> P1
     P1 --> P2
@@ -85,6 +86,7 @@ flowchart TD
     P24 --> P26
     P13 --> P27
     P26 --> P27
+    P21 --> P28
 ```
 
 | Phase | Theme | Status |
@@ -117,6 +119,7 @@ flowchart TD
 | P25 | Storage backends and rclone | In progress |
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
+| P28 | Accounts | Not started |
 
 ---
 
@@ -783,6 +786,26 @@ flowchart TD
 - [x] The end-to-end test also translating the episode's subtitles with LibreTranslate through `plugins/subtitles`, its server a fake on the loopback interface; the unofficial endpoints of Google, Bing, Microsoft and Yandex checked against the real services by hand (2026-10-14)
 - [x] Proofreading cues whose timing changed since the translation, paired with their sources by order, exact timing or overlap; logins (`WatchAiLogin`), completions (`StreamAi`) and agent answers (`StreamAgentMessage`) streamed; the conversations of deleted sessions purged from pi-durable's database when the plugin next starts
 - [ ] Later: the clients' warning of the risk of subscription logins, left to the administrator to accept; the plugin verified on Windows
+### P28 Accounts
+**Scope**: the account design of [Accounts](accounts.md): the choice of mode on first start; device keys and short-lived access tokens refreshed by signed nonces, signed media URLs, API keys; in standalone mode, the administrator, members and managed users, library access records, PINs and switching on the administrator's devices, invitation links, Quick Connect and recovery from the command line; in mavio.dev mode, claiming, sign-in assertions, access records synchronized from mavio.dev with revocations, code sign-in for televisions, Homes with managed accounts and switching, friends and Mavio Pass; [mavio.dev](mavio-dev.md) itself (`apps/website`) with its push to servers, the relay (`apps/relay`), the name servers of `mavio.site` (`apps/dns`) and servers' certificates.
+
+**Done when**: an end-to-end test through the API: a standalone server signs in its administrator and a member with a password and a passkey, refreshes a session with the device key and refuses a replayed nonce, creates a member from an invitation link, hides a library and a rating the member's access record excludes, and switches from the administrator to a managed user with its PIN; a server claimed by a simulated mavio.dev signs in an account with an assertion only once its access is accepted, ends its sessions when the access is revoked while keeping its watch history, deletes a managed account's data when it is removed from its Home, and keeps refreshing open sessions with mavio.dev stopped.
+
+**Progress**:
+- [ ] Choice of mode on first start
+- [ ] Sessions and device keys; access tokens refreshed by signed nonces; API keys stored as hashes
+- [ ] Signed media URLs
+- [ ] Standalone users: the administrator, members, managed users, PINs, restriction profiles, sign-in throttling
+- [ ] Library access records and their enforcement
+- [ ] Invitation links, Quick Connect and switching on the administrator's devices
+- [ ] Recovery of the administrator from the command line
+- [ ] Server identity keys, claiming, reclaiming and the server's connection to mavio.dev
+- [ ] mavio.dev: accounts, sign-in assertions, code sign-in for televisions, access records, invitations and revocations
+- [ ] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes
+- [ ] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor
+- [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges
+- [ ] `apps/relay` and relay tickets
+- [ ] Kept sign-ins, changing sign-ins and switching users in every client
 
 ---
 

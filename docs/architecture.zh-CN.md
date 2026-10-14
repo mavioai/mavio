@@ -83,7 +83,10 @@ mavio/
 │   ├── web/                     # [TS] Web UI，内嵌于服务端（见 clients.zh-CN.md）
 │   ├── ios/ tvos/ macos/        # [Swift] iPhone 与 iPad、Apple TV、Mac（见 clients.zh-CN.md）
 │   ├── android/ android-tv/     # [Kotlin] 手机与平板、Android TV（见 clients.zh-CN.md）
-│   └── desktop/                 # (后期) [Go] macOS、Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
+│   ├── desktop/                 # (后期) [Go] macOS、Windows 与 Linux：MyGo、libmpv（见 clients.zh-CN.md）
+│   ├── website/                 # (P27) [TS] Cloudflare Workers 上的 mavio.dev（见 mavio-dev.zh-CN.md）
+│   ├── relay/                   # (P27) [Go] 中转：按 SNI 透传 TLS（见 mavio-dev.zh-CN.md）
+│   └── dns/                     # (P27) [Go] mavio.site 的名称服务器（见 mavio-dev.zh-CN.md）
 │
 ├── libs/
 │   ├── proto/                   # [Go + TS] 契约：*.proto 源文件、buf 配置、生成的 Go/TS 代码
@@ -430,7 +433,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **主目录与设置**：服务端保存的一切都在其主目录中，默认为 `~/.mavio`，可由 `--home` 或 `MAVIO_HOME` 另行指定：`config.toml`（可选）、SQLite 数据库 `mavio.db`、`plugins/`、`plugin-data/`（插件的数据目录）、`metadata/`（选定的图片）、`backups/` 与 `cache/`（下载与缩放后的图片、编译后的插件，位于 `cache/transcodes/` 的进行中转码，以及位于 `cache/rclone/blocks/` 的 rclone 远端块缓存），缺失时自动创建。约定无需配置；确实存在的设置（`addr`、`database`、`ffmpeg`、`ffprobe`、`cache-dir`、`transcode-dir`、`plugin-dir`、`plugin-seed-dir`、`plugin-data-dir`、`metadata-dir`、`backup-dir`、`discovery-addr`、`rclone`、`rclone-config`、`rclone-url`、`rclone-user`、`rclone-pass`、`rclone-cache-size`、`dev`、`dev-library`）由 Viper 依次从命令的参数（`--cache-dir`）、环境变量（`MAVIO_CACHE_DIR`）与 `config.toml`（`cache-dir = "/srv/cache"`）读取，默认取上述布局；转码目录跟随缓存目录。`config.toml` 中的路径必须是绝对路径，填相对路径时服务端拒绝启动；参数与环境变量中的相对路径相对于工作目录；`plugin-dir`、`backup-dir` 或 `discovery-addr` 为空时分别关闭插件、备份或局域网发现，`rclone-cache-size` 为 0 时关闭块缓存。`config.toml` 中有未知的键时服务端拒绝启动。`mavio version` 打印版本，`--restore <备份>` 在提供服务前把备份恢复到空数据库中。
 * **单一处理器树**：`apps/server/internal/httpserver` 把 Connect 服务（实现位于 `internal/rpc`）与普通 HTTP 媒体端点挂载在同一个 `http.ServeMux` 上。每个 Connect 请求在到达服务之前先按其 protovalidate 规则校验，违反规则返回 `invalid_argument`。
 * **跨域请求**（`httpserver.cors`）：每个路由都响应来自任何来源的请求（CORS，包括预检请求与私有网络请求），使一台服务器提供的 Web UI 能登录其他服务器（[客户端 §5.4](clients.zh-CN.md#54-多台服务器)）。它们的凭据是 Bearer 令牌与不可猜测的 ID，从不是 Cookie，因此其他来源得不到它自己发出请求所得不到的东西。
-* **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。
+* **账户**：密码以 argon2id（19 MiB、2 轮、1 条并行通道）散列为 PHC 字符串；使用其他参数的散列仍被接受，并在下一次成功登录时替换。以不存在的用户名登录与密码错误的耗时相同。通过插件认证的用户没有密码散列。P27 阶段实现[账户](accounts.zh-CN.md)中的账户设计：服务端的两种模式、绑定设备的会话和媒体库访问记录。
 * **Quick Connect**：与 Jellyfin 一样，可以用已登录的设备让新设备登录。新设备无需凭据即可发起请求并显示六位数字代码；已登录用户输入该代码，即以该用户身份为设备登录；设备用请求的密钥（32 个随机字节，从不显示）轮询请求，随后领取一次访问令牌。请求保存在内存中，十分钟后过期，或在获得授权一分钟后过期。代码在待处理的请求中唯一。
 * **首次运行**：在还没有任何用户时，`AuthService.CreateFirstUser` 无需凭据即可创建一个管理员并使其登录；此后该调用返回 `failed_precondition`。客户端通过 `AuthService.GetAuthInfo` 得知这一步是否尚未完成，并得到服务端的标识：保存在数据库中的 ID（同时登录多个服务端的客户端据此认出从另一个地址访问到的同一服务端）、名称与版本。
 * **会话**：登录为一台设备签发由 32 个随机字节组成（base64url）的访问令牌；服务端只把它的 SHA-256 散列作为 `AuthSession` 保存（见[领域模型](domain.zh-CN.md)）。客户端以 `Authorization: Bearer <token>` 发送令牌。令牌不会过期；在客户端退出登录、用户吊销该会话或删除账户，或同一设备再次登录时失效。会话的最近活动时间最多每分钟记录一次。

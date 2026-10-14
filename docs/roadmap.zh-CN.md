@@ -47,6 +47,7 @@ flowchart TD
     P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
     P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
     P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
+    P28["P28 账户<br/>mavio.dev 模式与独立模式、媒体库访问、托管用户、用户切换、Home、好友、绑定设备的令牌；mavio.dev、中转、DNS 与证书"]
 
     P0 --> P1
     P1 --> P2
@@ -85,6 +86,7 @@ flowchart TD
     P24 --> P26
     P13 --> P27
     P26 --> P27
+    P21 --> P28
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -117,6 +119,7 @@ flowchart TD
 | P25 | 存储后端与 rclone | 进行中 |
 | P26 | 字幕获取 | ✅ 完成 |
 | P27 | AI 网关与字幕翻译 | 进行中 |
+| P28 | 账户 | 未开始 |
 
 ---
 
@@ -783,6 +786,26 @@ flowchart TD
 - [x] 端到端测试也经由 `plugins/subtitles` 用 LibreTranslate 翻译这一集的字幕，其服务器是回环接口上的伪造服务；Google、Bing、Microsoft 与 Yandex 的非官方端点已手动对照真实服务检查（2026-10-14）
 - [x] 校对自翻译后时间轴变化的字幕条，按顺序、精确时间或重叠与来源配对；登录（`WatchAiLogin`）、补全（`StreamAi`）与智能体回答（`StreamAgentMessage`）以流式传送；已删除会话的对话在插件下次启动时从 pi-durable 的数据库中清除
 - [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；在 Windows 上验证该插件
+### P28 账户
+**范围**：[账户](accounts.zh-CN.md)中的账户设计：首次启动时选择模式；设备密钥与以签名随机数续期的短期访问令牌，签名的媒体 URL，API 密钥；独立模式下的管理员、成员与托管用户，媒体库访问记录，PIN 与在管理员设备上的切换，邀请链接，Quick Connect，从命令行恢复；mavio.dev 模式下的认领、登录断言、从 mavio.dev 同步的访问记录与吊销、电视代码登录、带托管账户与切换的 Home、好友和 Mavio Pass；[mavio.dev](mavio-dev.zh-CN.md) 本身（`apps/website`）及其向服务端的推送、中转（`apps/relay`）、`mavio.site` 的名称服务器（`apps/dns`）和服务端的证书。
+
+**完成标准**：一个经由 API 的端到端测试：独立服务端用密码和通行密钥让管理员和成员登录，用设备密钥续期会话并拒绝重放的随机数，从邀请链接创建成员，隐藏成员访问记录所排除的媒体库和分级，并从管理员切换到带 PIN 的托管用户；由模拟的 mavio.dev 认领的服务端只在账户接受访问后用断言让它登录，在访问被撤销时结束其会话并保留其观看记录，在托管账户被移出 Home 时删除其数据，并在 mavio.dev 停止后继续为已打开的会话续期。
+
+**进度**：
+- [ ] 首次启动时选择模式
+- [ ] 会话与设备密钥；以签名随机数续期的访问令牌；只保存哈希的 API 密钥
+- [ ] 签名的媒体 URL
+- [ ] 独立模式的用户：管理员、成员、托管用户、PIN、限制档、登录限速
+- [ ] 媒体库访问记录及其执行
+- [ ] 邀请链接、Quick Connect 与在管理员设备上的切换
+- [ ] 从命令行恢复管理员
+- [ ] 服务端身份密钥、认领、重新认领，以及服务端到 mavio.dev 的连接
+- [ ] mavio.dev：账户、登录断言、电视代码登录、访问记录、邀请与吊销
+- [ ] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home
+- [ ] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更
+- [ ] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书
+- [ ] `apps/relay` 与中转票据
+- [ ] 每个客户端中保留的登录、更换登录与用户切换
 
 ---
 
