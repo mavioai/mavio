@@ -190,6 +190,7 @@ The server runs on Linux, macOS and Windows, and CI tests on all three (§6), so
 * **Relate paths with the core helpers.** `core.StorageName` finds a file's name within a library folder, matching `/` with `\`, and `core.StoragePath` gives the recorded path back; test whether a path is absolute with `filepath.IsAbs` (or `core`'s Windows check), because `path.IsAbs("C:/x")` is false.
 * **Never compare a recorded path with a `filepath.Join` result**: on Windows the two differ in separators. Compare recorded forms.
 * **Tests record paths as the scanner does**: `root := filepath.ToSlash(t.TempDir())`, then `path.Join` below it. A test that stores `filepath.Join(t.TempDir(), …)` as an item's or a source's path passes on Linux and macOS but not on Windows.
+* **Do not make folders read-only to make writes fail**: Windows ignores a folder's permission bits. A test that needs a write to fail puts a file where a folder must be made, which fails everywhere.
 
 ---
 

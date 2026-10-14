@@ -3,10 +3,13 @@ package subtitles
 import (
 	"encoding/json"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"testing"
 
+	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -100,12 +103,16 @@ func TestPortedDownloadBlocklist(t *testing.T) {
 			"test_environmental_failure_is_not_blacklisted": func(t *testing.T, _ map[string]json.RawMessage) {
 				e := newEnv(t)
 				e.plugin.found = []*pluginv1.RemoteSubtitle{candidate("fine", "fr", release, "title", "year")}
-				if err := os.Chmod(e.dir, 0o555); err != nil {
+				// The subtitle folder is a file, which fails on every
+				// platform; a read-only folder does not on Windows.
+				e.rt.Subtitles.Folder = func() library.SubtitleFolder {
+					return library.SubtitleFolder{Kind: core.SubtitleFolderRelative, Relative: "Subs"}
+				}
+				if err := os.WriteFile(path.Join(e.dir, "Subs"), nil, 0o644); err != nil {
 					t.Fatal(err)
 				}
-				t.Cleanup(func() { _ = os.Chmod(e.dir, 0o755) })
 				if _, err := e.rt.SearchItem(e.ctx, e.movie.ID); err == nil {
-					t.Error("SearchItem into a read-only folder: no error")
+					t.Error("SearchItem into a folder that cannot be made: no error")
 				}
 				page, err := e.db.SubtitleBlocklist().List(e.ctx, e.movie.ID, 0, 0)
 				if err != nil || len(page.Items) != 0 {

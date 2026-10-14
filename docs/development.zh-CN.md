@@ -190,6 +190,7 @@ go build -o plugin .                                                     # 子�
 * **用 core 的辅助函数关联路径。** `core.StorageName` 求文件在库文件夹中的名称，`/` 与 `\` 视为相同；`core.StoragePath` 由名称还原记录的路径。判断绝对路径用 `filepath.IsAbs`（或 `core` 对 Windows 路径的判断），因为 `path.IsAbs("C:/x")` 为假。
 * **不要把记录的路径与 `filepath.Join` 的结果比较**：在 Windows 上二者的分隔符不同。只比较记录的形式。
 * **测试像扫描器一样记录路径**：`root := filepath.ToSlash(t.TempDir())`，其下的路径用 `path.Join` 拼接。把 `filepath.Join(t.TempDir(), …)` 存为条目或媒体源路径的测试，在 Linux 与 macOS 上通过，在 Windows 上失败。
+* **不要靠把文件夹设为只读来让写入失败**：Windows 忽略文件夹的权限位。需要写入失败的测试，在必须创建文件夹的位置放一个文件，这在所有平台上都会失败。
 
 ---
 
