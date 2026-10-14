@@ -866,6 +866,16 @@ func UpgradedFromNotNil() predicate.SubtitleHistoryEvent {
 	return predicate.SubtitleHistoryEvent(sql.FieldNotNull(FieldUpgradedFrom))
 }
 
+// TranslationIsNil applies the IsNil predicate on the "translation" field.
+func TranslationIsNil() predicate.SubtitleHistoryEvent {
+	return predicate.SubtitleHistoryEvent(sql.FieldIsNull(FieldTranslation))
+}
+
+// TranslationNotNil applies the NotNil predicate on the "translation" field.
+func TranslationNotNil() predicate.SubtitleHistoryEvent {
+	return predicate.SubtitleHistoryEvent(sql.FieldNotNull(FieldTranslation))
+}
+
 // HasItem applies the HasEdge predicate on the "item" edge.
 func HasItem() predicate.SubtitleHistoryEvent {
 	return predicate.SubtitleHistoryEvent(func(s *sql.Selector) {

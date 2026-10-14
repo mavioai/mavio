@@ -304,6 +304,18 @@ func (_u *SubtitleHistoryEventUpdate) ClearUpgradedFrom() *SubtitleHistoryEventU
 	return _u
 }
 
+// SetTranslation sets the "translation" field.
+func (_u *SubtitleHistoryEventUpdate) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventUpdate {
+	_u.mutation.SetTranslation(v)
+	return _u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (_u *SubtitleHistoryEventUpdate) ClearTranslation() *SubtitleHistoryEventUpdate {
+	_u.mutation.ClearTranslation()
+	return _u
+}
+
 // SetItem sets the "item" edge to the Item entity.
 func (_u *SubtitleHistoryEventUpdate) SetItem(v *Item) *SubtitleHistoryEventUpdate {
 	return _u.SetItemID(v.ID)
@@ -448,6 +460,12 @@ func (_u *SubtitleHistoryEventUpdate) sqlSave(ctx context.Context) (_node int, e
 	}
 	if _u.mutation.UpgradedFromCleared() {
 		_spec.ClearField(subtitlehistoryevent.FieldUpgradedFrom, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.Translation(); ok {
+		_spec.SetField(subtitlehistoryevent.FieldTranslation, field.TypeJSON, value)
+	}
+	if _u.mutation.TranslationCleared() {
+		_spec.ClearField(subtitlehistoryevent.FieldTranslation, field.TypeJSON)
 	}
 	if _u.mutation.ItemCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -772,6 +790,18 @@ func (_u *SubtitleHistoryEventUpdateOne) ClearUpgradedFrom() *SubtitleHistoryEve
 	return _u
 }
 
+// SetTranslation sets the "translation" field.
+func (_u *SubtitleHistoryEventUpdateOne) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventUpdateOne {
+	_u.mutation.SetTranslation(v)
+	return _u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (_u *SubtitleHistoryEventUpdateOne) ClearTranslation() *SubtitleHistoryEventUpdateOne {
+	_u.mutation.ClearTranslation()
+	return _u
+}
+
 // SetItem sets the "item" edge to the Item entity.
 func (_u *SubtitleHistoryEventUpdateOne) SetItem(v *Item) *SubtitleHistoryEventUpdateOne {
 	return _u.SetItemID(v.ID)
@@ -946,6 +976,12 @@ func (_u *SubtitleHistoryEventUpdateOne) sqlSave(ctx context.Context) (_node *Su
 	}
 	if _u.mutation.UpgradedFromCleared() {
 		_spec.ClearField(subtitlehistoryevent.FieldUpgradedFrom, field.TypeUUID)
+	}
+	if value, ok := _u.mutation.Translation(); ok {
+		_spec.SetField(subtitlehistoryevent.FieldTranslation, field.TypeJSON, value)
+	}
+	if _u.mutation.TranslationCleared() {
+		_spec.ClearField(subtitlehistoryevent.FieldTranslation, field.TypeJSON)
 	}
 	if _u.mutation.ItemCleared() {
 		edge := &sqlgraph.EdgeSpec{

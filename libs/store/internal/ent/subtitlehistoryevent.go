@@ -54,6 +54,8 @@ type SubtitleHistoryEvent struct {
 	NotMatched []string `json:"not_matched,omitempty"`
 	// UpgradedFrom holds the value of the "upgraded_from" field.
 	UpgradedFrom *core.ID `json:"upgraded_from,omitempty"`
+	// Translation holds the value of the "translation" field.
+	Translation *core.SubtitleTranslationRecord `json:"translation,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SubtitleHistoryEventQuery when eager-loading is set.
 	Edges        SubtitleHistoryEventEdges `json:"edges"`
@@ -87,7 +89,7 @@ func (*SubtitleHistoryEvent) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case subtitlehistoryevent.FieldParentID, subtitlehistoryevent.FieldUpgradedFrom:
 			values[i] = &sql.NullScanner{S: new(core.ID)}
-		case subtitlehistoryevent.FieldMatched, subtitlehistoryevent.FieldNotMatched:
+		case subtitlehistoryevent.FieldMatched, subtitlehistoryevent.FieldNotMatched, subtitlehistoryevent.FieldTranslation:
 			values[i] = new([]byte)
 		case subtitlehistoryevent.FieldID, subtitlehistoryevent.FieldItemID:
 			values[i] = new(core.ID)
@@ -228,6 +230,14 @@ func (_m *SubtitleHistoryEvent) assignValues(columns []string, values []any) err
 				_m.UpgradedFrom = new(core.ID)
 				*_m.UpgradedFrom = *value.S.(*core.ID)
 			}
+		case subtitlehistoryevent.FieldTranslation:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field translation", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Translation); err != nil {
+					return fmt.Errorf("unmarshal field translation: %w", err)
+				}
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -323,6 +333,9 @@ func (_m *SubtitleHistoryEvent) String() string {
 		builder.WriteString("upgraded_from=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("translation=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Translation))
 	builder.WriteByte(')')
 	return builder.String()
 }

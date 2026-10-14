@@ -252,10 +252,56 @@ func subtitleSettingsToProto(s *core.SubtitleSettings) *acquisitionv1.SubtitleSe
 			MaxOffsetSeconds: seconds(y.MaxOffset), FixFramerate: new(y.FixFramerate), GoldenSection: new(y.GoldenSection),
 			MinScore: new(y.MinScore), MaxQualityOffsetSeconds: seconds(y.MaxQualityOffset), MaxScaleDeviation: new(y.MaxScaleDeviation),
 		}.Build(),
-		Translation: acquisitionv1.SubtitleTranslationSettings_builder{
-			Translator: new(s.Translation.Translator), DefaultScore: new(int32(s.Translation.DefaultScore)), Credit: new(s.Translation.Credit),
+		Translation: translationSettingsToProto(&s.Translation),
+	}.Build()
+}
+
+func translationSettingsToProto(t *core.SubtitleTranslationSettings) *acquisitionv1.SubtitleTranslationSettings {
+	v, a := &t.Validation, &t.Automation
+	return acquisitionv1.SubtitleTranslationSettings_builder{
+		Translator: new(t.Translator), DefaultScore: new(int32(t.DefaultScore)), Credit: new(t.Credit),
+		FallbackTranslators: t.FallbackTranslators, Prompt: new(t.Prompt), UserPrompt: new(t.UserPrompt),
+		ProofreadPrompt: new(t.ProofreadPrompt), ProofreadUserPrompt: new(t.ProofreadUserPrompt),
+		ContextBefore: new(int32(t.ContextBefore)), ContextAfter: new(int32(t.ContextAfter)), TranslatedContext: new(t.TranslatedContext),
+		Batch: new(t.Batch), MaxBatchSize: new(int32(t.MaxBatchSize)), LanguageCodes: new(t.LanguageCodes),
+		MaxRetries: new(int32(t.MaxRetries)), RetryDelaySeconds: new(int32(t.RetryDelay / time.Second)),
+		RetryMultiplier: new(int32(t.RetryMultiplier)), RequestTimeoutSeconds: new(int32(t.RequestTimeout / time.Second)),
+		StripFormatting: new(t.StripFormatting), PreserveLineBreaks: new(t.PreserveLineBreaks), FixOverlaps: new(t.FixOverlaps),
+		Validation: acquisitionv1.SubtitleTranslationValidation_builder{
+			Enabled: new(v.Enabled), MaxFileSize: new(v.MaxFileSize), MaxCueLength: new(int32(v.MaxCueLength)),
+			MinCueLength: new(int32(v.MinCueLength)), MinDurationMs: new(int32(v.MinDuration / time.Millisecond)),
+			MaxDurationSeconds: new(int32(v.MaxDuration / time.Second)),
+		}.Build(),
+		Automation: acquisitionv1.SubtitleTranslationAutomation_builder{
+			Enabled: new(a.Enabled), IntervalHours: new(int32(a.Interval / time.Hour)), SourceLanguages: a.SourceLanguages,
+			MaxPerRun: new(int32(a.MaxPerRun)), MovieAgeHours: new(int32(a.MovieAge / time.Hour)), EpisodeAgeHours: new(int32(a.EpisodeAge / time.Hour)),
 		}.Build(),
 	}.Build()
+}
+
+func translationSettingsFromProto(p *acquisitionv1.SubtitleTranslationSettings) core.SubtitleTranslationSettings {
+	v, a := p.GetValidation(), p.GetAutomation()
+	hours := func(v int32) time.Duration { return time.Duration(v) * time.Hour }
+	seconds := func(v int32) time.Duration { return time.Duration(v) * time.Second }
+	return core.SubtitleTranslationSettings{
+		Translator: p.GetTranslator(), DefaultScore: int(p.GetDefaultScore()), Credit: p.GetCredit(),
+		FallbackTranslators: p.GetFallbackTranslators(), Prompt: p.GetPrompt(), UserPrompt: p.GetUserPrompt(),
+		ProofreadPrompt: p.GetProofreadPrompt(), ProofreadUserPrompt: p.GetProofreadUserPrompt(),
+		ContextBefore: int(p.GetContextBefore()), ContextAfter: int(p.GetContextAfter()), TranslatedContext: p.GetTranslatedContext(),
+		Batch: p.GetBatch(), MaxBatchSize: int(p.GetMaxBatchSize()), LanguageCodes: p.GetLanguageCodes(),
+		MaxRetries: int(p.GetMaxRetries()), RetryDelay: seconds(p.GetRetryDelaySeconds()), RetryMultiplier: int(p.GetRetryMultiplier()),
+		RequestTimeout: seconds(p.GetRequestTimeoutSeconds()), StripFormatting: p.GetStripFormatting(),
+		PreserveLineBreaks: p.GetPreserveLineBreaks(), FixOverlaps: p.GetFixOverlaps(),
+		Validation: core.SubtitleTranslationValidation{
+			Enabled: v.GetEnabled(), MaxFileSize: v.GetMaxFileSize(), MaxCueLength: int(v.GetMaxCueLength()),
+			MinCueLength: int(v.GetMinCueLength()), MinDuration: time.Duration(v.GetMinDurationMs()) * time.Millisecond,
+			MaxDuration: seconds(v.GetMaxDurationSeconds()),
+		},
+		Automation: core.SubtitleTranslationAutomation{
+			Enabled: a.GetEnabled(), Interval: hours(a.GetIntervalHours()), SourceLanguages: a.GetSourceLanguages(),
+			MaxPerRun: int(a.GetMaxPerRun()), MovieAge: hours(a.GetMovieAgeHours()), EpisodeAge: hours(a.GetEpisodeAgeHours()),
+		},
+	}
 }
 
 func subtitleSettingsFromProto(p *acquisitionv1.SubtitleSettings) core.SubtitleSettings {
@@ -287,10 +333,7 @@ func subtitleSettingsFromProto(p *acquisitionv1.SubtitleSettings) core.SubtitleS
 			MaxOffset: seconds(y.GetMaxOffsetSeconds()), FixFramerate: y.GetFixFramerate(), GoldenSection: y.GetGoldenSection(),
 			MinScore: y.GetMinScore(), MaxQualityOffset: seconds(y.GetMaxQualityOffsetSeconds()), MaxScaleDeviation: y.GetMaxScaleDeviation(),
 		},
-		Translation: core.SubtitleTranslationSettings{
-			Translator: p.GetTranslation().GetTranslator(), DefaultScore: int(p.GetTranslation().GetDefaultScore()),
-			Credit: p.GetTranslation().GetCredit(),
-		},
+		Translation: translationSettingsFromProto(p.GetTranslation()),
 	}
 }
 
@@ -553,6 +596,40 @@ func (s *SubtitleService) TranslateSubtitle(ctx context.Context, req *acquisitio
 	return acquisitionv1.TranslateSubtitleResponse_builder{JobId: new(id.String())}.Build(), nil
 }
 
+// ProofreadSubtitle queues the proofreading of a translation.
+func (s *SubtitleService) ProofreadSubtitle(ctx context.Context, req *acquisitionv1.ProofreadSubtitleRequest) (*acquisitionv1.ProofreadSubtitleResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	id, err := s.rt.QueueProofread(ctx, subtitles.ProofreadPayload{
+		ItemID: core.MustParseID(req.GetItemId()), Path: req.GetPath(), Translator: req.GetTranslator(),
+	})
+	if err != nil {
+		return nil, subtitleError(ctx, err)
+	}
+	return acquisitionv1.ProofreadSubtitleResponse_builder{JobId: new(id.String())}.Build(), nil
+}
+
+// GetSubtitleTranslationStatistics sums up the translations.
+func (s *SubtitleService) GetSubtitleTranslationStatistics(ctx context.Context, req *acquisitionv1.GetSubtitleTranslationStatisticsRequest) (*acquisitionv1.GetSubtitleTranslationStatisticsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	st, err := s.rt.TranslationStatistics(ctx, int(req.GetDays()))
+	if err != nil {
+		return nil, subtitleError(ctx, err)
+	}
+	daily := make([]*acquisitionv1.SubtitleTranslationDay, len(st.Daily))
+	for i, d := range st.Daily {
+		daily[i] = acquisitionv1.SubtitleTranslationDay_builder{Date: new(d.Date), Files: new(d.Files)}.Build()
+	}
+	return acquisitionv1.GetSubtitleTranslationStatisticsResponse_builder{
+		Files: new(st.Files), Cues: new(st.Cues), Characters: new(st.Characters),
+		InputTokens: new(st.InputTokens), OutputTokens: new(st.OutputTokens), Cost: new(st.Cost),
+		ByTranslator: st.ByTranslator, ByLanguagePair: st.ByLanguagePair, ByMedia: st.ByMedia, Daily: daily,
+	}.Build(), nil
+}
+
 // ListSubtitleTranslators lists the translators of the translator
 // plugins.
 func (s *SubtitleService) ListSubtitleTranslators(ctx context.Context, _ *acquisitionv1.ListSubtitleTranslatorsRequest) (*acquisitionv1.ListSubtitleTranslatorsResponse, error) {
@@ -645,6 +722,14 @@ func subtitleEventToProto(e *core.SubtitleHistoryEvent) *acquisitionv1.SubtitleH
 	}
 	if !e.UpgradedFrom.IsZero() {
 		b.UpgradedFrom = new(e.UpgradedFrom.String())
+	}
+	if r := e.Translation; r != nil {
+		b.Translation = acquisitionv1.SubtitleTranslationRecord_builder{
+			SourcePath: new(r.SourcePath), SourceStreamIndex: new(int32(r.SourceStreamIndex)), SourceLanguage: new(r.SourceLanguage),
+			Translators: r.Translators, Cues: new(int32(r.Cues)), Characters: new(r.Characters),
+			InputTokens: new(r.InputTokens), OutputTokens: new(r.OutputTokens), Cost: new(r.Cost),
+			Proofread: new(r.Proofread), Revised: new(int32(r.Revised)),
+		}.Build()
 	}
 	return b.Build()
 }

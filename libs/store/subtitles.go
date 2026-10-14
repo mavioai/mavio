@@ -210,7 +210,8 @@ func (r subtitleHistory) Add(ctx context.Context, events ...core.SubtitleHistory
 			SetDescription(h.Description).
 			SetMatched(h.Matched).
 			SetNotMatched(h.NotMatched).
-			SetNillableUpgradedFrom(nonZeroID(h.UpgradedFrom))
+			SetNillableUpgradedFrom(nonZeroID(h.UpgradedFrom)).
+			SetTranslation(h.Translation)
 	}
 	return mapErr(r.s.write.SubtitleHistoryEvent.CreateBulk(creates...).Exec(ctx), "add subtitle history")
 }
@@ -252,10 +253,14 @@ func (r subtitleHistory) List(ctx context.Context, q core.SubtitleHistoryQuery) 
 			Date: h.Date.UTC(), Language: subtitleLanguage(h.Language, h.Forced, h.HearingImpaired),
 			Provider: h.Provider, SubtitleID: h.SubtitleID, Score: h.Score, MaxScore: h.MaxScore,
 			Path: h.Path, VideoPath: h.VideoPath, Description: h.Description, Matched: h.Matched,
-			NotMatched: h.NotMatched, UpgradedFrom: zeroIDIfNil(h.UpgradedFrom),
+			NotMatched: h.NotMatched, UpgradedFrom: zeroIDIfNil(h.UpgradedFrom), Translation: h.Translation,
 		}
 	}
 	return out, nil
+}
+
+func (r subtitleHistory) SetTranslation(ctx context.Context, id core.ID, t core.SubtitleTranslationRecord) error {
+	return mapErr(r.s.write.SubtitleHistoryEvent.UpdateOneID(id).SetTranslation(&t).Exec(ctx), "set subtitle translation record")
 }
 
 func (r subtitleHistory) Purge(ctx context.Context, before time.Time) (int, error) {

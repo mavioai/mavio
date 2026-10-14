@@ -1,7 +1,6 @@
 package subtitles
 
 import (
-	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -24,8 +23,9 @@ const JobTranslate = "subtitles.translate"
 
 // TranslatePayload is the payload of JobTranslate jobs: the subtitle
 // translated, an external file at Path or the embedded stream at
-// StreamIndex, the language translated into and the translator,
-// "<plugin>/<translator>" or empty for the settings'.
+// StreamIndex, the language translated into and the first translator,
+// "<plugin>/<translator>" or "ai/<provider>/<model>", or empty for the
+// settings'.
 type TranslatePayload struct {
 	ItemID      core.ID               `json:"item_id"`
 	Path        string                `json:"path,omitempty"`
@@ -70,33 +70,6 @@ func (r *Runtime) ListTranslators(ctx context.Context) ([]TranslatorState, []str
 	return out, failed
 }
 
-// translator returns the translator a translation names, else the
-// settings', else the first enabled one, with its description.
-func (r *Runtime) translator(ctx context.Context, name string, s *core.SubtitleSettings) (Translator, *pluginv1.SubtitleTranslatorInfo, error) {
-	name = cmp.Or(name, s.Translation.Translator)
-	for _, p := range r.translators() {
-		resp, err := p.Client.ListSubtitleTranslators(ctx, &pluginv1.ListSubtitleTranslatorsRequest{})
-		if err != nil {
-			if strings.HasPrefix(name, p.ID+"/") {
-				return Translator{}, nil, fmt.Errorf("%w: subtitle translator plugin %s: %w", ErrUnavailable, p.ID, err)
-			}
-			continue
-		}
-		for _, t := range resp.GetTranslators() {
-			if name == "" && t.GetEnabled() || name == providerName(p.ID, t.GetName()) {
-				if !t.GetEnabled() {
-					return Translator{}, nil, fmt.Errorf("%w: subtitle translator %s is not enabled", ErrUnavailable, name)
-				}
-				return p, t, nil
-			}
-		}
-	}
-	if name == "" {
-		return Translator{}, nil, fmt.Errorf("%w: no subtitle translator is enabled", ErrUnavailable)
-	}
-	return Translator{}, nil, fmt.Errorf("subtitle translator %s: %w", name, core.ErrNotFound)
-}
-
 // QueueTranslate checks a translation and queues it, returning its job's
 // ID.
 func (r *Runtime) QueueTranslate(ctx context.Context, p TranslatePayload) (core.ID, error) {
@@ -108,10 +81,11 @@ func (r *Runtime) QueueTranslate(ctx context.Context, p TranslatePayload) (core.
 	if err := p.Language.Validate(); err != nil {
 		return core.ID{}, err
 	}
-	if _, err := r.translationSource(ctx, t, p); err != nil {
+	src, err := r.translationSource(ctx, t, p)
+	if err != nil {
 		return core.ID{}, err
 	}
-	if _, _, err := r.translator(ctx, p.Translator, &s); err != nil {
+	if _, err := r.chain(ctx, p.Translator, &s.Translation, src.language.Language, p.Language.Language); err != nil {
 		return core.ID{}, err
 	}
 	payload, err := json.Marshal(p)
@@ -187,15 +161,17 @@ func (r *Runtime) translationSource(ctx context.Context, t *target, p TranslateP
 var translateFormats = []string{"srt", "ass", "ssa", "vtt"}
 
 // Translate translates a subtitle of a movie or episode into another
-// language, as Bazarr's translation: the cues' text, plain or with
-// SubRip's markup as the translator takes it, in its batches; timing and
-// styles are kept. The translation keeps the subtitle's format when the
-// profile keeps original formats and the translator takes plain text,
-// else it is SubRip, with a first cue crediting the translator when the
-// settings say so. It is saved as subtitles are and recorded with the
-// settings' score.
+// language, as Lingarr's translation: each cue's text, plain, with
+// SubRip's markup or as the subtitle holds it, as the translators take it,
+// by the first of the translators that does not fail; timing and styles
+// are kept. The translation keeps the subtitle's format when the profile
+// keeps original formats and the cues need not become SubRip's, else it is
+// SubRip, with a first cue crediting the translator when the settings say
+// so. It is saved as subtitles are and recorded with the settings' score
+// and what it translated.
 func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.SubtitleHistoryEvent, error) {
 	s := r.settings()
+	ts := &s.Translation
 	t, err := r.load(ctx, p.ItemID, &s)
 	if err != nil {
 		return core.SubtitleHistoryEvent{}, err
@@ -204,7 +180,7 @@ func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.Subti
 	if err != nil {
 		return core.SubtitleHistoryEvent{}, err
 	}
-	tr, info, err := r.translator(ctx, p.Translator, &s)
+	candidates, err := r.chain(ctx, p.Translator, ts, src.language.Language, p.Language.Language)
 	if err != nil {
 		return core.SubtitleHistoryEvent{}, err
 	}
@@ -220,13 +196,30 @@ func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.Subti
 	if err != nil {
 		return core.SubtitleHistoryEvent{}, fmt.Errorf("%w: %s: %w", core.ErrInvalid, src.name, err)
 	}
-	markup := info.GetMarkup()
+	if ts.Validation.Enabled {
+		if err := validateSubtitle(len(data), sub.Cues, &ts.Validation); err != nil {
+			return core.SubtitleHistoryEvent{}, fmt.Errorf("%s: %w", src.name, err)
+		}
+	}
+
+	// The cues go as the subtitle holds them to AI models, with SubRip's
+	// markup when a translator keeps it, else as plain text.
 	out := format
-	if markup || t.profile == nil || !t.profile.OriginalFormat || !slices.Contains(translateFormats, format) {
+	if ts.StripFormatting || t.profile == nil || !t.profile.OriginalFormat || !slices.Contains(translateFormats, format) {
 		out = subtitle.SRT
 	}
-	if markup && format != subtitle.SRT {
-		// The cues take SubRip's markup.
+	mode := textPlain
+	if !ts.StripFormatting {
+		allAI := !slices.ContainsFunc(candidates, func(c chained) bool { return !c.isAI() })
+		markup := !slices.ContainsFunc(candidates, func(c chained) bool { return !c.isAI() && !c.info.GetMarkup() })
+		switch {
+		case allAI && out == format:
+			mode = textAsIs
+		case markup:
+			mode, out = textSubRip, subtitle.SRT
+		}
+	}
+	if mode == textSubRip && format != subtitle.SRT {
 		if text, err = subtitle.Write(sub, subtitle.SRT); err == nil {
 			sub, err = subtitle.Parse(text, subtitle.SRT)
 		}
@@ -234,48 +227,34 @@ func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.Subti
 			return core.SubtitleHistoryEvent{}, fmt.Errorf("%w: %s: %w", core.ErrInvalid, src.name, err)
 		}
 	}
-	// Cues without text have nothing to translate.
-	var cues []int
-	var lines []string
-	for i, c := range sub.Cues {
-		line := c.Text
-		if !markup {
-			line = subtitle.PlainText(line)
-		}
-		if strings.TrimSpace(line) != "" {
-			cues, lines = append(cues, i), append(lines, line)
-		}
-	}
 	stem := strings.TrimSuffix(path.Base(t.source().Path), path.Ext(t.source().Path))
-	media := r.translationMedia(t, src.name, fileName(stem, p.Language, out, &s))
-	batch := int(info.GetBatchSize())
-	if batch <= 0 {
-		batch = max(len(lines), 1)
+	tr := &translation{
+		r: r, s: ts, source: src.language.Language, target: p.Language.Language, candidates: candidates,
+		media:  r.translationMedia(t, src.name, fileName(stem, p.Language, out, &s)),
+		logger: r.logger().With("item", t.item.ID, "source", src.name), record: &core.SubtitleTranslationRecord{SourceLanguage: src.language.Language},
 	}
-	credit := info.GetDisplayName()
-	for start := 0; start < len(lines); start += batch {
-		end := min(start+batch, len(lines))
-		resp, err := tr.Client.TranslateSubtitleLines(ctx, pluginv1.TranslateSubtitleLinesRequest_builder{
-			Translator: proto.String(info.GetName()), SourceLanguage: proto.String(src.language.Language),
-			TargetLanguage: proto.String(p.Language.Language), Lines: lines[start:end], Media: media,
-		}.Build())
-		if err != nil {
-			return core.SubtitleHistoryEvent{}, fmt.Errorf("translate %s with %s: %w", src.name, providerName(tr.ID, info.GetName()), err)
+	for i, c := range sub.Cues {
+		content := c.Text
+		if mode == textPlain {
+			content = subtitle.PlainText(content)
 		}
-		if n := len(resp.GetLines()); n != end-start {
-			return core.SubtitleHistoryEvent{}, fmt.Errorf("translate %s with %s: %d lines translated instead of %d",
-				src.name, providerName(tr.ID, info.GetName()), n, end-start)
+		if strings.TrimSpace(content) != "" {
+			tr.items = append(tr.items, &cueItem{cue: i, position: len(tr.items) + 1, start: c.Start, end: c.End, lines: strings.Split(content, "\n")})
 		}
-		for i, line := range resp.GetLines() {
-			if line != "" {
-				sub.Cues[cues[start+i]].Text = line
-			}
-		}
-		credit = cmp.Or(resp.GetCredit(), credit)
-		r.logger().DebugContext(ctx, "translating subtitle", "item", t.item.ID, "source", src.name, "done", end, "of", len(lines))
 	}
-	if s.Translation.Credit && out == subtitle.SRT {
-		sub.Cues = creditCue(sub.Cues, credit)
+	if err := tr.run(ctx); err != nil {
+		return core.SubtitleHistoryEvent{}, fmt.Errorf("translate %s: %w", src.name, err)
+	}
+	for _, it := range tr.items {
+		if it.translated != nil {
+			sub.Cues[it.cue].Text = strings.Join(it.translated, "\n")
+		}
+	}
+	if ts.FixOverlaps {
+		fixOverlaps(sub.Cues)
+	}
+	if ts.Credit && out == subtitle.SRT {
+		sub.Cues = creditCue(sub.Cues, tr.credit)
 	}
 	result, err := subtitle.Write(sub, out)
 	if err != nil {
@@ -285,11 +264,17 @@ func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.Subti
 	if err != nil {
 		return core.SubtitleHistoryEvent{}, err
 	}
+	if p.Path != "" {
+		tr.record.SourcePath = p.Path
+	} else {
+		tr.record.SourceStreamIndex = *p.StreamIndex
+	}
 	maxScore := subtitles.MaxScore(t.episode())
 	e := core.SubtitleHistoryEvent{
 		ID: core.NewID(), Action: core.SubtitleTranslated, ItemID: t.item.ID, Date: r.now(), Language: p.Language,
-		Score: s.Translation.DefaultScore * maxScore / 100, MaxScore: maxScore, Path: saved, VideoPath: t.source().Path,
-		Description: fmt.Sprintf("%s subtitles translated to %s with %s.", src.language, p.Language, credit),
+		Score: ts.DefaultScore * maxScore / 100, MaxScore: maxScore, Path: saved, VideoPath: t.source().Path,
+		Description: fmt.Sprintf("%s subtitles translated to %s with %s.", src.language, p.Language, tr.credit),
+		Translation: tr.record,
 	}
 	if t.series != nil {
 		e.ParentID = t.series.ID

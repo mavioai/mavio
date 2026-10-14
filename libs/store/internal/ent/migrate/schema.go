@@ -1306,6 +1306,7 @@ var (
 		{Name: "matched", Type: field.TypeJSON, Nullable: true},
 		{Name: "not_matched", Type: field.TypeJSON, Nullable: true},
 		{Name: "upgraded_from", Type: field.TypeUUID, Nullable: true},
+		{Name: "translation", Type: field.TypeJSON, Nullable: true},
 		{Name: "item_id", Type: field.TypeUUID},
 	}
 	// SubtitleHistoryTable holds the schema information for the "subtitle_history" table.
@@ -1316,7 +1317,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "subtitle_history_items_subtitle_history",
-				Columns:    []*schema.Column{SubtitleHistoryColumns[17]},
+				Columns:    []*schema.Column{SubtitleHistoryColumns[18]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -1325,7 +1326,7 @@ var (
 			{
 				Name:    "subtitlehistoryevent_item_id_date",
 				Unique:  false,
-				Columns: []*schema.Column{SubtitleHistoryColumns[17], SubtitleHistoryColumns[3]},
+				Columns: []*schema.Column{SubtitleHistoryColumns[18], SubtitleHistoryColumns[3]},
 			},
 			{
 				Name:    "subtitlehistoryevent_parent_id_date",

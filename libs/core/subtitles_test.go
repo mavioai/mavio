@@ -119,6 +119,19 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 		{"translation score", func(s *SubtitleSettings) { s.Translation.DefaultScore = 101 }, false},
 		{"translator", func(s *SubtitleSettings) { s.Translation.Translator = "org.mavio.subtitles/gemini" }, true},
 		{"translator without plugin", func(s *SubtitleSettings) { s.Translation.Translator = "gemini" }, false},
+		{"AI translator", func(s *SubtitleSettings) { s.Translation.Translator = "ai/openrouter/anthropic/claude" }, true},
+		{"AI translator without model", func(s *SubtitleSettings) { s.Translation.Translator = "ai/openai" }, false},
+		{"empty fallback", func(s *SubtitleSettings) { s.Translation.FallbackTranslators = []string{""} }, false},
+		{"empty prompt", func(s *SubtitleSettings) { s.Translation.Prompt = "" }, false},
+		{"context", func(s *SubtitleSettings) { s.Translation.ContextAfter = 51 }, false},
+		{"retries", func(s *SubtitleSettings) { s.Translation.MaxRetries = 0 }, false},
+		{"timeout", func(s *SubtitleSettings) { s.Translation.RequestTimeout = 0 }, false},
+		{"validation lengths", func(s *SubtitleSettings) { s.Translation.Validation.MinCueLength = 501 }, false},
+		{"automation without languages", func(s *SubtitleSettings) { s.Translation.Automation.Enabled = true }, false},
+		{"automation", func(s *SubtitleSettings) {
+			s.Translation.Automation.Enabled, s.Translation.Automation.SourceLanguages = true, []string{"en", "pt-BR"}
+		}, true},
+		{"automation interval", func(s *SubtitleSettings) { s.Translation.Automation.Interval = time.Minute }, false},
 	} {
 		s := DefaultSubtitleSettings()
 		tc.change(&s)

@@ -41,6 +41,7 @@ import (
 	"github.com/mavioai/mavio/libs/media/keyframes"
 	"github.com/mavioai/mavio/libs/media/probe"
 	"github.com/mavioai/mavio/libs/media/thumbnails"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/store"
 )
 
@@ -285,7 +286,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
 		Translators: plugs.SubtitleTranslators,
-		Subtitles:   subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
+		AI: func() (pluginv1connect.AiGatewayServiceClient, bool) {
+			_, c, ok := plugs.AIGateway()
+			return c, ok
+		},
+		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
 		Extracted: playbacks.ExtractedSubtitle, Activity: activityLog, Logger: log,
 	}
 	// Imports complete the requests of what they import; their scans

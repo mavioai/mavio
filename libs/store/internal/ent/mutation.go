@@ -36523,6 +36523,7 @@ type SubtitleHistoryEventMutation struct {
 	not_matched       *[]string
 	appendnot_matched []string
 	upgraded_from     *core.ID
+	translation       **core.SubtitleTranslationRecord
 	clearedFields     map[string]struct{}
 	item              *core.ID
 	cleareditem       bool
@@ -37371,6 +37372,55 @@ func (m *SubtitleHistoryEventMutation) ResetUpgradedFrom() {
 	delete(m.clearedFields, subtitlehistoryevent.FieldUpgradedFrom)
 }
 
+// SetTranslation sets the "translation" field.
+func (m *SubtitleHistoryEventMutation) SetTranslation(ctr *core.SubtitleTranslationRecord) {
+	m.translation = &ctr
+}
+
+// Translation returns the value of the "translation" field in the mutation.
+func (m *SubtitleHistoryEventMutation) Translation() (r *core.SubtitleTranslationRecord, exists bool) {
+	v := m.translation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTranslation returns the old "translation" field's value of the SubtitleHistoryEvent entity.
+// If the SubtitleHistoryEvent object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SubtitleHistoryEventMutation) OldTranslation(ctx context.Context) (v *core.SubtitleTranslationRecord, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTranslation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTranslation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTranslation: %w", err)
+	}
+	return oldValue.Translation, nil
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (m *SubtitleHistoryEventMutation) ClearTranslation() {
+	m.translation = nil
+	m.clearedFields[subtitlehistoryevent.FieldTranslation] = struct{}{}
+}
+
+// TranslationCleared returns if the "translation" field was cleared in this mutation.
+func (m *SubtitleHistoryEventMutation) TranslationCleared() bool {
+	_, ok := m.clearedFields[subtitlehistoryevent.FieldTranslation]
+	return ok
+}
+
+// ResetTranslation resets all changes to the "translation" field.
+func (m *SubtitleHistoryEventMutation) ResetTranslation() {
+	m.translation = nil
+	delete(m.clearedFields, subtitlehistoryevent.FieldTranslation)
+}
+
 // ClearItem clears the "item" edge to the Item entity.
 func (m *SubtitleHistoryEventMutation) ClearItem() {
 	m.cleareditem = true
@@ -37432,7 +37482,7 @@ func (m *SubtitleHistoryEventMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SubtitleHistoryEventMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.action != nil {
 		fields = append(fields, subtitlehistoryevent.FieldAction)
 	}
@@ -37484,6 +37534,9 @@ func (m *SubtitleHistoryEventMutation) Fields() []string {
 	if m.upgraded_from != nil {
 		fields = append(fields, subtitlehistoryevent.FieldUpgradedFrom)
 	}
+	if m.translation != nil {
+		fields = append(fields, subtitlehistoryevent.FieldTranslation)
+	}
 	return fields
 }
 
@@ -37526,6 +37579,8 @@ func (m *SubtitleHistoryEventMutation) Field(name string) (ent.Value, bool) {
 		return m.NotMatched()
 	case subtitlehistoryevent.FieldUpgradedFrom:
 		return m.UpgradedFrom()
+	case subtitlehistoryevent.FieldTranslation:
+		return m.Translation()
 	}
 	return nil, false
 }
@@ -37569,6 +37624,8 @@ func (m *SubtitleHistoryEventMutation) OldField(ctx context.Context, name string
 		return m.OldNotMatched(ctx)
 	case subtitlehistoryevent.FieldUpgradedFrom:
 		return m.OldUpgradedFrom(ctx)
+	case subtitlehistoryevent.FieldTranslation:
+		return m.OldTranslation(ctx)
 	}
 	return nil, fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)
 }
@@ -37697,6 +37754,13 @@ func (m *SubtitleHistoryEventMutation) SetField(name string, value ent.Value) er
 		}
 		m.SetUpgradedFrom(v)
 		return nil
+	case subtitlehistoryevent.FieldTranslation:
+		v, ok := value.(*core.SubtitleTranslationRecord)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTranslation(v)
+		return nil
 	}
 	return fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)
 }
@@ -37766,6 +37830,9 @@ func (m *SubtitleHistoryEventMutation) ClearedFields() []string {
 	if m.FieldCleared(subtitlehistoryevent.FieldUpgradedFrom) {
 		fields = append(fields, subtitlehistoryevent.FieldUpgradedFrom)
 	}
+	if m.FieldCleared(subtitlehistoryevent.FieldTranslation) {
+		fields = append(fields, subtitlehistoryevent.FieldTranslation)
+	}
 	return fields
 }
 
@@ -37791,6 +37858,9 @@ func (m *SubtitleHistoryEventMutation) ClearField(name string) error {
 		return nil
 	case subtitlehistoryevent.FieldUpgradedFrom:
 		m.ClearUpgradedFrom()
+		return nil
+	case subtitlehistoryevent.FieldTranslation:
+		m.ClearTranslation()
 		return nil
 	}
 	return fmt.Errorf("unknown SubtitleHistoryEvent nullable field %s", name)
@@ -37850,6 +37920,9 @@ func (m *SubtitleHistoryEventMutation) ResetField(name string) error {
 		return nil
 	case subtitlehistoryevent.FieldUpgradedFrom:
 		m.ResetUpgradedFrom()
+		return nil
+	case subtitlehistoryevent.FieldTranslation:
+		m.ResetTranslation()
 		return nil
 	}
 	return fmt.Errorf("unknown SubtitleHistoryEvent field %s", name)

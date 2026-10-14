@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -27,6 +28,8 @@ type fakeTranslator struct {
 	enabled bool
 	markup  bool
 	batch   int32
+	// fail fails translations while set.
+	fail *bool
 
 	mu       sync.Mutex
 	requests []*pluginv1.TranslateSubtitleLinesRequest
@@ -45,6 +48,9 @@ func (f *fakeTranslator) TranslateSubtitleLines(_ context.Context, req *pluginv1
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.requests = append(f.requests, req)
+	if f.fail != nil && *f.fail {
+		return nil, connect.NewError(connect.CodeInternal, errors.New("translator broken"))
+	}
 	var out []string
 	for _, l := range req.GetLines() {
 		if l == "♪" {
@@ -59,6 +65,7 @@ func (f *fakeTranslator) TranslateSubtitleLines(_ context.Context, req *pluginv1
 
 func TestTranslate(t *testing.T) {
 	e := newEnv(t)
+	e.s.Translation.PreserveLineBreaks = true
 	tr := &fakeTranslator{batch: 2}
 	e.rt.Translators = func() []Translator { return []Translator{{ID: "plug", Client: tr}} }
 	en, err := e.rt.Upload(e.ctx, e.movie.ID, []byte("1\n00:00:00,500 --> 00:00:02,000\n<i>Hello</i>\nthere\n\n"+

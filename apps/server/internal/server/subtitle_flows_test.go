@@ -1,15 +1,16 @@
 package server_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -92,29 +93,6 @@ func (f *fakeSubsarr) serve(w http.ResponseWriter, r *http.Request) {
 // speechCues times cues as a subtitler might from the speech of a
 // recording: runs above one half, pauses under 0.4 s bridged, rounded to
 // 100 ms and shifted by shift.
-// fakeLingarr is a Lingarr translating by upper-casing.
-func fakeLingarr(t *testing.T) *httptest.Server {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			TargetLanguage string `json:"targetLanguage"`
-			Lines          []struct {
-				Position int    `json:"position"`
-				Line     string `json:"line"`
-			} `json:"lines"`
-		}
-		if r.URL.Path != "/api/translate/content" || json.NewDecoder(r.Body).Decode(&req) != nil || req.TargetLanguage != "es" {
-			http.Error(w, "bad request", http.StatusBadRequest)
-			return
-		}
-		for i := range req.Lines {
-			req.Lines[i].Line = strings.ToUpper(req.Lines[i].Line)
-		}
-		_ = json.NewEncoder(w).Encode(req.Lines)
-	}))
-	t.Cleanup(srv.Close)
-	return srv
-}
-
 // fakeWhisper is a whisper-asr-webservice detecting French and
 // transcribing to a cue, recording the sizes of the audio it is sent.
 type fakeWhisper struct {
@@ -193,7 +171,10 @@ func speechCues(s subsync.Speech, shift time.Duration) []subtitle.Cue {
 func TestSubtitleFlows(t *testing.T) {
 	t.Parallel()
 	speechWAV := fixtures.Require(t, "speech.wav")
-	s := startAcquisition(t, seriesRoutes(t), true, subtitlesPlugin)
+	if _, err := exec.LookPath("bun"); err != nil {
+		t.Skip("integration test: bun not found on PATH")
+	}
+	s := startAcquisition(t, seriesRoutes(t), true, subtitlesPlugin, processPlugin{name: "agent", source: agentSource, build: agentBuild})
 	ctx := t.Context()
 	subs := s.subtitles
 
@@ -222,12 +203,11 @@ func TestSubtitleFlows(t *testing.T) {
 	// Subsarr is enabled in the plugin; subtitles are downloaded whatever
 	// their scores, those of movies synchronized whatever theirs, those of
 	// episodes never.
-	subsarr, lingarr, whisper := newFakeSubsarr(t), fakeLingarr(t), newFakeWhisper(t)
+	subsarr, whisper := newFakeSubsarr(t), newFakeWhisper(t)
 	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("org.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}},
-			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}],
-			"translators": [{"name": "lingarr", "enabled": true, "settings": {"url": "` + lingarr.URL + `"}}]}`),
+			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -393,20 +373,61 @@ func TestSubtitleFlows(t *testing.T) {
 		t.Errorf("upgrades of the film = %v, want none", h)
 	}
 
-	// 4. The episode's French subtitles are translated to Spanish with
-	// Lingarr, credited.
-	if _, err := subs.TranslateSubtitle(ctx, acquisitionv1.TranslateSubtitleRequest_builder{
-		ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("org.mavio.subtitles/lingarr"),
-		Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new("es")}.Build(),
+	// 4. The episode's French subtitles are translated to Spanish by a
+	// model of the agent plugin, which answers through an OpenAI
+	// compatible API, rate limited at first; the translation is credited
+	// and recorded, then proofread.
+	var limited atomic.Bool
+	openai, _ := fakeOpenAI(t, func(messages []string) string {
+		if !limited.Swap(true) {
+			return ""
+		}
+		last := messages[len(messages)-1]
+		if strings.HasPrefix(last, "[SOURCE] ") {
+			return "¡Hola, Walter!"
+		}
+		return strings.ToUpper(last)
+	})
+	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+		PluginId: new("org.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
 	}.Build()); err != nil {
-		t.Fatalf("TranslateSubtitle: %v", err)
+		t.Fatalf("SetPluginConfig: %v", err)
 	}
+	translate := func() error {
+		_, err := subs.TranslateSubtitle(ctx, acquisitionv1.TranslateSubtitleRequest_builder{
+			ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("ai/local/translator"),
+			Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new("es")}.Build(),
+		}.Build())
+		return err
+	}
+	waitFor(t, "the agent plugin's model usable", func() bool { return translate() == nil })
 	waitFor(t, "the episode's subtitles translated", func() bool {
 		return len(history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)) == 1
 	}, describe(pilot.GetId()))
-	spanish, err := os.ReadFile(strings.TrimSuffix(episodeFile, filepath.Ext(episodeFile)) + ".es.srt")
-	if err != nil || !strings.Contains(string(spanish), "BONJOUR, WALTER.") || !strings.Contains(string(spanish), "# Subtitles translated with Lingarr #") {
-		t.Errorf("translation = %q, %v; want the cue upper-cased and Lingarr credited", spanish, err)
+	spanishFile := strings.TrimSuffix(episodeFile, filepath.Ext(episodeFile)) + ".es.srt"
+	spanish, err := os.ReadFile(spanishFile)
+	if err != nil || !strings.Contains(string(spanish), "BONJOUR, WALTER.") || !strings.Contains(string(spanish), "# Subtitles translated with Translator #") {
+		t.Errorf("translation = %q, %v; want the cue upper-cased and the model credited", spanish, err)
+	}
+	translated := history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)[0]
+	if r := translated.GetTranslation(); r.GetSourcePath() != pilotFrench || r.GetSourceLanguage() != "fr" ||
+		strings.Join(r.GetTranslators(), ",") != "ai/local/translator" || r.GetCues() != 1 || r.GetInputTokens() != 10 {
+		t.Errorf("translation record = %v", r)
+	}
+	if _, err := subs.ProofreadSubtitle(ctx, acquisitionv1.ProofreadSubtitleRequest_builder{
+		ItemId: new(pilot.GetId()), Path: new(translated.GetPath()),
+	}.Build()); err != nil {
+		t.Fatalf("ProofreadSubtitle: %v", err)
+	}
+	waitFor(t, "the translation proofread", func() bool {
+		return history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)[0].GetTranslation().GetProofread()
+	}, describe(pilot.GetId()))
+	if data, err := os.ReadFile(spanishFile); err != nil || !strings.Contains(string(data), "¡Hola, Walter!") {
+		t.Errorf("proofread translation = %q, %v", data, err)
+	}
+	stats, err := subs.GetSubtitleTranslationStatistics(ctx, acquisitionv1.GetSubtitleTranslationStatisticsRequest_builder{Days: new(int32(1))}.Build())
+	if err != nil || stats.GetFiles() != 1 || stats.GetByLanguagePair()["fr:es"] != 1 || stats.GetByMedia()["episode"] != 1 || stats.GetDaily()[0].GetFiles() != 1 {
+		t.Errorf("GetSubtitleTranslationStatistics = %v, %v", stats, err)
 	}
 
 	// 5. Whisper detected the audio of the film and of the episode is

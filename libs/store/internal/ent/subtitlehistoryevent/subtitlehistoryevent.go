@@ -47,6 +47,8 @@ const (
 	FieldNotMatched = "not_matched"
 	// FieldUpgradedFrom holds the string denoting the upgraded_from field in the database.
 	FieldUpgradedFrom = "upgraded_from"
+	// FieldTranslation holds the string denoting the translation field in the database.
+	FieldTranslation = "translation"
 	// EdgeItem holds the string denoting the item edge name in mutations.
 	EdgeItem = "item"
 	// Table holds the table name of the subtitlehistoryevent in the database.
@@ -80,6 +82,7 @@ var Columns = []string{
 	FieldMatched,
 	FieldNotMatched,
 	FieldUpgradedFrom,
+	FieldTranslation,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

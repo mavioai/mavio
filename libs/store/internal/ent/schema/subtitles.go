@@ -101,6 +101,7 @@ func (SubtitleHistoryEvent) Fields() []ent.Field {
 		field.JSON("matched", []string{}).Optional(),
 		field.JSON("not_matched", []string{}).Optional(),
 		field.UUID("upgraded_from", core.ID{}).Optional().Nillable(),
+		field.JSON("translation", &core.SubtitleTranslationRecord{}).Optional(),
 	}
 }
 

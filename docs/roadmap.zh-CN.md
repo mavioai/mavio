@@ -777,8 +777,9 @@ flowchart TD
 - [x] 子进程插件的 TypeScript SDK（`libs/plugin/ts`）：握手、令牌校验、HTTP 路由、宿主的传输
 - [x] `plugins/agent`：pi-ai 的所有提供者，API key 与 OAuth 登录（以事件与提示转发），凭据存于其数据目录，自定义 OpenAI 兼容提供者，带输出 schema 的补全，存于 SQLite 且跨重启保留的会话；由 Bun 为所有平台构建并预置在容器镜像中
 - [x] 服务端的 AI 管理（`AiService`）：提供者、模型、key 与登录转发给 AI 网关插件；使用 Bun 构建出的插件与伪造的 OpenAI 兼容 API 所提供的提供者的端到端测试
-- [ ] 服务端中 Lingarr 的翻译，以及 `plugins/subtitles` 中的翻译服务；移除 P26 的翻译器
-- [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；登录与补全改为流式而非轮询；在 Windows 上验证该插件；删除已删除会话的条目（pi-durable 仍保留它们）
+- [x] 服务端中 Lingarr 的翻译：AI 模型（`ai/<提供商>/<模型>`）经由网关，逐条附带上下文或以 JSON 回答的批次翻译，以及插件翻译器，按语言匹配排成带后备的链；重试、断行、重叠修正、校验、校对（`ProofreadSubtitle`）、自动化（`subtitles.translate_wanted`）与基于译文记录的统计（`GetSubtitleTranslationStatistics`）；端到端测试通过构建的 `plugins/agent` 与假的 OpenAI 兼容 API 翻译一集的字幕，重试一次被限速的请求，然后校对
+- [ ] `plugins/subtitles` 中的翻译服务（DeepL、LibreTranslate、Google、Bing、Microsoft、Yandex）；移除 P26 的翻译器
+- [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；自动化也对正在运行的翻译去重，而不只是待处理的；校对自翻译后时间轴变化的字幕条（目前按精确时间匹配）；登录与补全改为流式而非轮询；在 Windows 上验证该插件；删除已删除会话的条目（pi-durable 仍保留它们）
 
 ---
 

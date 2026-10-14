@@ -777,8 +777,9 @@ flowchart TD
 - [x] The TypeScript SDK of process plugins (`libs/plugin/ts`): handshake, token checks, HTTP routes, the host's transport
 - [x] `plugins/agent`: every provider of pi-ai, API keys and OAuth logins relayed as events and prompts, credentials in its data folder, custom OpenAI-compatible providers, completions with output schemas, sessions in SQLite surviving restarts; built by Bun for every platform and seeded in the container image
 - [x] The server's AI administration (`AiService`): providers, models, keys and logins forwarded to the AI gateway plugin; an end-to-end test with the plugin built by Bun and a provider served by a fake OpenAI-compatible API
-- [ ] Lingarr's translation in the server, and the translation services in `plugins/subtitles`; the translators of P26 removed
-- [ ] Later: the clients' warning of the risk of subscription logins, left to the administrator to accept; logins and completions streamed rather than polled; the plugin verified on Windows; deleting the entries of deleted sessions, which pi-durable keeps
+- [x] Lingarr's translation in the server: AI models (`ai/<provider>/<model>`) through the gateway, a cue at a time with context or in batches answered as JSON, and plugin translators, chained by language match with fallbacks; retries, line splitting, overlap fixing, validation, proofreading (`ProofreadSubtitle`), automation (`subtitles.translate_wanted`) and statistics (`GetSubtitleTranslationStatistics`) from the translations' records; the end-to-end test translates an episode's subtitles through the built `plugins/agent` with a fake OpenAI-compatible API, retrying a rate-limited request, then proofreads it
+- [ ] The translation services in `plugins/subtitles` (DeepL, LibreTranslate, Google, Bing, Microsoft, Yandex); the translators of P26 removed
+- [ ] Later: the clients' warning of the risk of subscription logins, left to the administrator to accept; the automation deduplicating against translations running, not only pending; proofreading cues whose timing changed since the translation (matched by exact timing now); logins and completions streamed rather than polled; the plugin verified on Windows; deleting the entries of deleted sessions, which pi-durable keeps
 
 ---
 

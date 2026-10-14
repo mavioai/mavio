@@ -215,6 +215,12 @@ func (_c *SubtitleHistoryEventCreate) SetNillableUpgradedFrom(v *core.ID) *Subti
 	return _c
 }
 
+// SetTranslation sets the "translation" field.
+func (_c *SubtitleHistoryEventCreate) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventCreate {
+	_c.mutation.SetTranslation(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SubtitleHistoryEventCreate) SetID(v core.ID) *SubtitleHistoryEventCreate {
 	_c.mutation.SetID(v)
@@ -454,6 +460,10 @@ func (_c *SubtitleHistoryEventCreate) createSpec() (*SubtitleHistoryEvent, *sqlg
 	if value, ok := _c.mutation.UpgradedFrom(); ok {
 		_spec.SetField(subtitlehistoryevent.FieldUpgradedFrom, field.TypeUUID, value)
 		_node.UpgradedFrom = &value
+	}
+	if value, ok := _c.mutation.Translation(); ok {
+		_spec.SetField(subtitlehistoryevent.FieldTranslation, field.TypeJSON, value)
+		_node.Translation = value
 	}
 	if nodes := _c.mutation.ItemIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -761,6 +771,24 @@ func (u *SubtitleHistoryEventUpsert) UpdateUpgradedFrom() *SubtitleHistoryEventU
 // ClearUpgradedFrom clears the value of the "upgraded_from" field.
 func (u *SubtitleHistoryEventUpsert) ClearUpgradedFrom() *SubtitleHistoryEventUpsert {
 	u.SetNull(subtitlehistoryevent.FieldUpgradedFrom)
+	return u
+}
+
+// SetTranslation sets the "translation" field.
+func (u *SubtitleHistoryEventUpsert) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventUpsert {
+	u.Set(subtitlehistoryevent.FieldTranslation, v)
+	return u
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *SubtitleHistoryEventUpsert) UpdateTranslation() *SubtitleHistoryEventUpsert {
+	u.SetExcluded(subtitlehistoryevent.FieldTranslation)
+	return u
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *SubtitleHistoryEventUpsert) ClearTranslation() *SubtitleHistoryEventUpsert {
+	u.SetNull(subtitlehistoryevent.FieldTranslation)
 	return u
 }
 
@@ -1089,6 +1117,27 @@ func (u *SubtitleHistoryEventUpsertOne) UpdateUpgradedFrom() *SubtitleHistoryEve
 func (u *SubtitleHistoryEventUpsertOne) ClearUpgradedFrom() *SubtitleHistoryEventUpsertOne {
 	return u.Update(func(s *SubtitleHistoryEventUpsert) {
 		s.ClearUpgradedFrom()
+	})
+}
+
+// SetTranslation sets the "translation" field.
+func (u *SubtitleHistoryEventUpsertOne) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventUpsertOne {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.SetTranslation(v)
+	})
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *SubtitleHistoryEventUpsertOne) UpdateTranslation() *SubtitleHistoryEventUpsertOne {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.UpdateTranslation()
+	})
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *SubtitleHistoryEventUpsertOne) ClearTranslation() *SubtitleHistoryEventUpsertOne {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.ClearTranslation()
 	})
 }
 
@@ -1584,6 +1633,27 @@ func (u *SubtitleHistoryEventUpsertBulk) UpdateUpgradedFrom() *SubtitleHistoryEv
 func (u *SubtitleHistoryEventUpsertBulk) ClearUpgradedFrom() *SubtitleHistoryEventUpsertBulk {
 	return u.Update(func(s *SubtitleHistoryEventUpsert) {
 		s.ClearUpgradedFrom()
+	})
+}
+
+// SetTranslation sets the "translation" field.
+func (u *SubtitleHistoryEventUpsertBulk) SetTranslation(v *core.SubtitleTranslationRecord) *SubtitleHistoryEventUpsertBulk {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.SetTranslation(v)
+	})
+}
+
+// UpdateTranslation sets the "translation" field to the value that was provided on create.
+func (u *SubtitleHistoryEventUpsertBulk) UpdateTranslation() *SubtitleHistoryEventUpsertBulk {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.UpdateTranslation()
+	})
+}
+
+// ClearTranslation clears the value of the "translation" field.
+func (u *SubtitleHistoryEventUpsertBulk) ClearTranslation() *SubtitleHistoryEventUpsertBulk {
+	return u.Update(func(s *SubtitleHistoryEventUpsert) {
+		s.ClearTranslation()
 	})
 }
 

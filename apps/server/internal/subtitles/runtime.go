@@ -92,6 +92,9 @@ type Runtime struct {
 	// Translators returns the ready subtitle translator plugins; nil
 	// returns none.
 	Translators func() []Translator
+	// AI returns the AI gateway plugin's client, whose models translate
+	// as "ai/<provider>/<model>"; nil returns none.
+	AI func() (pluginv1connect.AiGatewayServiceClient, bool)
 	// Activity records downloads; nil records none.
 	Activity Activity
 	Now      func() time.Time
@@ -106,6 +109,11 @@ type Runtime struct {
 	audioMu     sync.Mutex
 	audioGrants map[string]*audioGrant
 	audioTokens map[string]string
+
+	// autoCursor is where the translation automation's next run starts
+	// among what is wanted.
+	autoMu     sync.Mutex
+	autoCursor int
 }
 
 func (r *Runtime) now() time.Time {
@@ -168,6 +176,15 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 			_, err := r.Translate(ctx, p)
 			return nil, err
 		},
+		JobProofread: func(ctx context.Context, job core.Job) ([]core.Job, error) {
+			var p ProofreadPayload
+			if err := json.Unmarshal(job.Payload, &p); err != nil {
+				return nil, fmt.Errorf("subtitle proofreading payload: %w", err)
+			}
+			_, err := r.Proofread(ctx, p)
+			return nil, err
+		},
+		JobTranslateWanted: r.recurring(JobTranslateWanted, automationInterval, r.TranslateWanted),
 		JobWantedMovies: r.recurring(JobWantedMovies, func(s core.SubtitleSettings) time.Duration { return s.WantedSearchIntervalMovie },
 			func(ctx context.Context) error { return r.SearchWanted(ctx, core.KindMovie) }),
 		JobWantedEpisodes: r.recurring(JobWantedEpisodes, func(s core.SubtitleSettings) time.Duration { return s.WantedSearchInterval },
@@ -244,6 +261,9 @@ func (r *Runtime) Schedule(ctx context.Context, s core.SubtitleSettings) error {
 	if s.Upgrade && s.UpgradeInterval > 0 {
 		jobs = append(jobs, scheduledJob(JobUpgrade, now.Add(s.UpgradeInterval), true))
 	}
+	if d := automationInterval(s); d > 0 {
+		jobs = append(jobs, scheduledJob(JobTranslateWanted, now.Add(d), true))
+	}
 	for i := range jobs {
 		if _, err := r.Store.Jobs().Enqueue(ctx, &jobs[i]); err != nil {
 			return fmt.Errorf("schedule %s: %w", jobs[i].Kind, err)
@@ -316,6 +336,10 @@ func (r *Runtime) Tasks() []Task {
 		{
 			Kind: JobUpgrade, Name: "Upgrade previously downloaded subtitles", Interval: upgrade,
 			Description: "Searches for better subtitles than those downloaded lately below the best score.",
+		},
+		{
+			Kind: JobTranslateWanted, Name: "Translate missing subtitles", Interval: automationInterval(s),
+			Description: "Translates the subtitles movies and episodes are missing from those they have in the source languages.",
 		},
 	}
 }

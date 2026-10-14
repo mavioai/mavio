@@ -220,6 +220,31 @@ type SubtitleHistoryEvent struct {
 	Matched, NotMatched []string
 	// UpgradedFrom is the event of the download an upgrade replaced.
 	UpgradedFrom ID
+	// Translation is what a translation translated; nil for other
+	// events.
+	Translation *SubtitleTranslationRecord
+}
+
+// SubtitleTranslationRecord is what a translation translated and what it
+// took.
+type SubtitleTranslationRecord struct {
+	// SourcePath is the external subtitle file translated; empty for the
+	// embedded stream SourceStreamIndex.
+	SourcePath        string
+	SourceStreamIndex int
+	SourceLanguage    string
+	// Translators are those that translated the cues, the first one's
+	// first.
+	Translators []string
+	Cues        int
+	Characters  int64
+	// InputTokens, OutputTokens and Cost are what AI models used.
+	InputTokens, OutputTokens int64
+	Cost                      float64
+	// Proofread is set once the translation was proofread, with Revised
+	// cues revised.
+	Proofread bool
+	Revised   int
 }
 
 // Validate checks the event's invariants.
@@ -403,10 +428,12 @@ type SubtitleSettings struct {
 }
 
 // SubtitleTranslationSettings are how subtitles are translated, as
-// Bazarr's translator settings.
+// Lingarr's translation settings and Bazarr's. Translators are named
+// "<plugin>/<translator>" for the translators of subtitle translator
+// plugins and "ai/<provider>/<model>" for the models of the AI gateway.
 type SubtitleTranslationSettings struct {
-	// Translator is the translator used when a translation names none,
-	// as "<plugin>/<translator>"; empty for the first enabled one.
+	// Translator is the translator used when a translation names none;
+	// empty for the first enabled translator of a plugin.
 	Translator string
 	// DefaultScore is the score translations are recorded with, as a
 	// percentage of the maximum score.
@@ -414,7 +441,87 @@ type SubtitleTranslationSettings struct {
 	// Credit adds a first cue to SubRip translations crediting the
 	// translator.
 	Credit bool
+	// FallbackTranslators are tried in order after the first when it
+	// fails or does not translate between the languages; those matching
+	// the languages exactly before those matching them more loosely.
+	FallbackTranslators []string
+	// Prompt and UserPrompt are the instructions of AI models and the
+	// message carrying each cue, with the placeholders {sourceLanguage},
+	// {targetLanguage}, {lineToTranslate}, {contextBefore} and
+	// {contextAfter}.
+	Prompt, UserPrompt string
+	// ProofreadPrompt and ProofreadUserPrompt are those of proofreading,
+	// with {sourceLine} and {translatedLine} besides the languages.
+	ProofreadPrompt, ProofreadUserPrompt string
+	// ContextBefore and ContextAfter are the cues around each cue given
+	// to AI models as context; TranslatedContext gives them as JSON
+	// objects with the translations of those before.
+	ContextBefore, ContextAfter int
+	TranslatedContext           bool
+	// Batch translates with AI models in batches of MaxBatchSize cues
+	// (every cue when 0) answered as JSON, rather than cue by cue.
+	Batch        bool
+	MaxBatchSize int
+	// LanguageCodes names languages in prompts by their codes rather than
+	// their English names.
+	LanguageCodes bool
+	// MaxRetries is how many attempts a translation failing for a reason
+	// worth retrying gets, waiting RetryDelay, multiplied by
+	// RetryMultiplier after each, in between.
+	MaxRetries      int
+	RetryDelay      time.Duration
+	RetryMultiplier int
+	// RequestTimeout bounds one request to a translator.
+	RequestTimeout time.Duration
+	// StripFormatting translates the cues' plain text, dropping the
+	// styles of ASS files.
+	StripFormatting bool
+	// PreserveLineBreaks translates a cue's lines keeping its line
+	// breaks; otherwise the lines are joined, and the translation split
+	// again at 42 characters when formatting is stripped.
+	PreserveLineBreaks bool
+	// FixOverlaps trims the end of a cue overlapping the next.
+	FixOverlaps bool
+	Validation  SubtitleTranslationValidation
+	Automation  SubtitleTranslationAutomation
 }
+
+// SubtitleTranslationValidation refuses to translate subtitles that look
+// broken, as Lingarr's subtitle validation.
+type SubtitleTranslationValidation struct {
+	Enabled     bool
+	MaxFileSize int64
+	// MaxCueLength and MinCueLength bound a cue's text, in characters.
+	MaxCueLength, MinCueLength int
+	// MinDuration and MaxDuration bound how long a cue lasts.
+	MinDuration, MaxDuration time.Duration
+}
+
+// SubtitleTranslationAutomation translates subtitles movies and episodes
+// lack, as Lingarr's automation: every Interval, up to MaxPerRun movies
+// and episodes still lacking subtitles their profile wants, whose file is
+// older than MovieAge or EpisodeAge, get them translated by the
+// settings' translator from a subtitle they have in one of
+// SourceLanguages, in order of preference.
+type SubtitleTranslationAutomation struct {
+	Enabled              bool
+	Interval             time.Duration
+	SourceLanguages      []string
+	MaxPerRun            int
+	MovieAge, EpisodeAge time.Duration
+}
+
+// The default prompts of AI translation and proofreading, Lingarr's.
+const (
+	DefaultTranslationPrompt = "Translate from {sourceLanguage} to {targetLanguage}, preserving the tone and meaning without censoring the content. " +
+		"Adjust punctuation as needed to make the translation sound natural. Provide only the translated text as output, with no additional comments."
+	DefaultTranslationUserPrompt = "{lineToTranslate}"
+	DefaultProofreadPrompt       = "You are proofreading a subtitle translated from {sourceLanguage} to {targetLanguage}. " +
+		"Compare the translation against the source and correct mistranslations, wrong names, grammar and punctuation, " +
+		"preserving the tone and meaning without censoring the content. Keep the length close to the original so it still fits on screen. " +
+		"If the translation is already correct, repeat it unchanged. Provide only the corrected translation as output, with no additional comments."
+	DefaultProofreadUserPrompt = "[SOURCE] {sourceLine}\n[TRANSLATION] {translatedLine}"
+)
 
 // SubtitleSyncSettings are how downloaded subtitles are synchronized, as
 // Bazarr's subsync settings.
@@ -473,8 +580,32 @@ func DefaultSubtitleSettings() SubtitleSettings {
 			MaxQualityOffset:  30 * time.Second,
 			MaxScaleDeviation: 0.1,
 		},
-		Translation: SubtitleTranslationSettings{DefaultScore: 50, Credit: true},
+		Translation: SubtitleTranslationSettings{
+			DefaultScore: 50, Credit: true,
+			Prompt: DefaultTranslationPrompt, UserPrompt: DefaultTranslationUserPrompt,
+			ProofreadPrompt: DefaultProofreadPrompt, ProofreadUserPrompt: DefaultProofreadUserPrompt,
+			ContextBefore: 2, ContextAfter: 2,
+			MaxRetries: 5, RetryDelay: time.Second, RetryMultiplier: 2, RequestTimeout: 5 * time.Minute,
+			Validation: SubtitleTranslationValidation{
+				MaxFileSize: 1 << 20, MaxCueLength: 500, MinCueLength: 2,
+				MinDuration: 500 * time.Millisecond, MaxDuration: 10 * time.Second,
+			},
+			Automation: SubtitleTranslationAutomation{Interval: 24 * time.Hour, MaxPerRun: 10},
+		},
 	}
+}
+
+// ValidTranslatorName reports whether name is "<plugin>/<translator>" or
+// "ai/<provider>/<model>".
+func ValidTranslatorName(name string) bool {
+	parts := strings.Split(name, "/")
+	if slices.Contains(parts, "") {
+		return false
+	}
+	if parts[0] == "ai" {
+		return len(parts) >= 3
+	}
+	return len(parts) == 2
 }
 
 // Validate checks the settings' values and ranges.
@@ -524,11 +655,39 @@ func (s *SubtitleSettings) Validate() error {
 	case y.MinScore < 0 || y.MaxScaleDeviation < 0:
 		return fmt.Errorf("%w: negative synchronization quality bound", ErrInvalid)
 	}
-	switch tr := &s.Translation; {
+	tr := &s.Translation
+	if tr.Translator != "" && !ValidTranslatorName(tr.Translator) {
+		return fmt.Errorf("%w: translator %q is not \"<plugin>/<translator>\" or \"ai/<provider>/<model>\"", ErrInvalid, tr.Translator)
+	}
+	for _, t := range tr.FallbackTranslators {
+		if !ValidTranslatorName(t) {
+			return fmt.Errorf("%w: fallback translator %q is not \"<plugin>/<translator>\" or \"ai/<provider>/<model>\"", ErrInvalid, t)
+		}
+	}
+	v, a := &tr.Validation, &tr.Automation
+	switch {
 	case !percent(tr.DefaultScore):
 		return fmt.Errorf("%w: translation score outside 0–100", ErrInvalid)
-	case tr.Translator != "" && !strings.Contains(strings.Trim(tr.Translator, "/"), "/"):
-		return fmt.Errorf("%w: translator %q is not \"<plugin>/<translator>\"", ErrInvalid, tr.Translator)
+	case tr.Prompt == "" || tr.UserPrompt == "" || tr.ProofreadPrompt == "" || tr.ProofreadUserPrompt == "":
+		return fmt.Errorf("%w: empty translation prompt", ErrInvalid)
+	case tr.ContextBefore < 0 || tr.ContextBefore > 50 || tr.ContextAfter < 0 || tr.ContextAfter > 50:
+		return fmt.Errorf("%w: translation context outside 0–50 cues", ErrInvalid)
+	case tr.MaxBatchSize < 0:
+		return fmt.Errorf("%w: negative translation batch size", ErrInvalid)
+	case tr.MaxRetries < 1 || tr.MaxRetries > 20 || tr.RetryMultiplier < 1 || tr.RetryMultiplier > 10 ||
+		tr.RetryDelay < 0 || tr.RetryDelay > 10*time.Minute:
+		return fmt.Errorf("%w: translation retries outside 1–20 attempts, 0–600 seconds and ×1–10", ErrInvalid)
+	case tr.RequestTimeout < time.Second || tr.RequestTimeout > time.Hour:
+		return fmt.Errorf("%w: translation request timeout outside a second to an hour", ErrInvalid)
+	case v.MaxFileSize <= 0 || v.MaxCueLength <= 0 || v.MinCueLength < 0 || v.MinCueLength > v.MaxCueLength ||
+		v.MinDuration < 0 || v.MaxDuration <= v.MinDuration:
+		return fmt.Errorf("%w: translation validation bounds", ErrInvalid)
+	case a.Interval < time.Hour || a.MaxPerRun < 1 || a.MaxPerRun > 1000 || a.MovieAge < 0 || a.EpisodeAge < 0:
+		return fmt.Errorf("%w: translation automation runs at most hourly, up to 1–1000 translations", ErrInvalid)
+	case a.Enabled && len(a.SourceLanguages) == 0:
+		return fmt.Errorf("%w: translation automation without source languages", ErrInvalid)
+	case slices.ContainsFunc(a.SourceLanguages, func(l string) bool { return !validLanguageTag(l) }):
+		return fmt.Errorf("%w: translation source language is not a language tag", ErrInvalid)
 	}
 	return nil
 }
@@ -567,6 +726,9 @@ type (
 		List(ctx context.Context, q SubtitleHistoryQuery) (Page[SubtitleHistoryEvent], error)
 		// Purge deletes the events before a time and reports how many.
 		Purge(ctx context.Context, before time.Time) (int, error)
+		// SetTranslation replaces the translation record of an event, as
+		// proofreading does; ErrNotFound for an unknown event.
+		SetTranslation(ctx context.Context, id ID, r SubtitleTranslationRecord) error
 	}
 
 	// SubtitleBlocklistRepository stores blocklisted subtitles; deleting

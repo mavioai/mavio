@@ -198,7 +198,7 @@ func (s *TaskService) ListTasks(ctx context.Context, _ *systemv1.ListTasksReques
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags, subtitles.JobWantedMovies, subtitles.JobWantedEpisodes, subtitles.JobUpgrade}
+	kinds := []string{library.JobScan, library.JobCleanup, library.JobExtras, plugins.JobTask, acquisition.JobRSS, acquisition.JobQueue, acquisition.JobRecycleBin, acquisition.JobRefreshMovies, acquisition.JobSceneMappings, requests.JobAvailability, requests.JobBlocklistedTags, subtitles.JobWantedMovies, subtitles.JobWantedEpisodes, subtitles.JobUpgrade, subtitles.JobTranslateWanted}
 	active, err := s.store.Jobs().List(ctx, core.JobQuery{Kinds: kinds, States: []core.JobState{core.JobPending}})
 	if err != nil {
 		return nil, connectError(ctx, err)

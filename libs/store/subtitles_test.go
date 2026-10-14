@@ -170,6 +170,10 @@ func TestSubtitleHistory(t *testing.T) {
 		synced := core.SubtitleHistoryEvent{
 			ID: core.NewID(), Action: core.SubtitleSynced, ItemID: episodes[0].ID, ParentID: series.ID, Date: base.Add(2 * time.Hour),
 			Language: core.SubtitleLanguage{Language: "zh-Hant", Forced: true},
+			Translation: &core.SubtitleTranslationRecord{
+				SourcePath: "/media/Show/S01E01.en.srt", SourceLanguage: "en", Translators: []string{"ai/openai/gpt", "subtitles/deepl"},
+				Cues: 400, Characters: 12000, InputTokens: 9000, OutputTokens: 7000, Cost: 0.25,
+			},
 		}
 		if err := repo.Add(ctx, upgrade, synced); err != nil {
 			t.Fatal(err)
@@ -203,6 +207,17 @@ func TestSubtitleHistory(t *testing.T) {
 		if err != nil || !reflect.DeepEqual(page.Items[2], download) || !reflect.DeepEqual(page.Items[1], upgrade) ||
 			!reflect.DeepEqual(page.Items[0], synced) {
 			t.Errorf("List = %+v, %v; want = %+v, %+v, %+v", page.Items, err, synced, upgrade, download)
+		}
+		proofread := *synced.Translation
+		proofread.Proofread, proofread.Revised = true, 12
+		if err := repo.SetTranslation(ctx, synced.ID, proofread); err != nil {
+			t.Fatal(err)
+		}
+		if page, err := repo.List(ctx, core.SubtitleHistoryQuery{Limit: 1}); err != nil || !reflect.DeepEqual(page.Items[0].Translation, &proofread) {
+			t.Errorf("translation after SetTranslation = %+v, %v; want = %+v", page.Items[0].Translation, err, proofread)
+		}
+		if err := repo.SetTranslation(ctx, core.NewID(), proofread); !errors.Is(err, core.ErrNotFound) {
+			t.Errorf("SetTranslation(unknown) = %v, want ErrNotFound", err)
 		}
 		for _, bad := range []core.SubtitleHistoryEvent{
 			{ID: core.NewID(), Action: "bogus", ItemID: movie.ID, Date: base, Language: core.SubtitleLanguage{Language: "en"}},
