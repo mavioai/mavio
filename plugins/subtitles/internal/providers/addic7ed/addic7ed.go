@@ -23,6 +23,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
@@ -345,7 +346,7 @@ func (p *Provider) showID(ctx context.Context, s *site.Session, series string, y
 	}
 	var names []string
 	for _, n := range []string{series, strings.ReplaceAll(series, ".", ""), strings.ReplaceAll(series, "&", "and"), strings.ReplaceAll(series, "and", "&")} {
-		if n = sitekit.Sanitize(n); !slices.Contains(names, n) {
+		if n = scrape.SanitizePatch(n, ""); !slices.Contains(names, n) {
 			names = append(names, n)
 		}
 	}
@@ -400,7 +401,7 @@ func (p *Provider) shows(ctx context.Context, s *site.Session, refresh bool) (ma
 		if err != nil {
 			continue
 		}
-		name := sitekit.SanitizeChars(a.Text(), "-:()./")
+		name := scrape.SanitizeChars(a.Text(), "-:()./")
 		ids[name] = id
 		if m := seriesYear.FindStringSubmatch(name); m != nil && m[2] != "" {
 			if _, ok := ids[m[1]]; !ok {
@@ -471,7 +472,7 @@ func (p *Provider) query(ctx context.Context, s *site.Session, v *provider.Video
 		if v.Year != 0 || v.OriginalSeries {
 			matches = append(matches, "year")
 		}
-		if v.Title != "" && sitekit.Sanitize(title) == sitekit.Sanitize(v.Title) {
+		if v.Title != "" && scrape.SanitizePatch(title, "") == scrape.SanitizePatch(v.Title, "") {
 			matches = append(matches, "title")
 		}
 		out = append(out, p.subtitle(lang, page[1:], dl[1:], version, "", matches))
@@ -560,7 +561,7 @@ func (p *Provider) movieID(ctx context.Context, s *site.Session, movie string, y
 			continue
 		}
 		if m := titleYear.FindStringSubmatch(link.Text()); m != nil &&
-			sitekit.Sanitize(strings.ToLower(m[1])) == sitekit.Sanitize(strings.ToLower(movie)) && m[2] == strconv.Itoa(year) {
+			scrape.SanitizePatch(strings.ToLower(m[1]), "") == scrape.SanitizePatch(strings.ToLower(movie), "") && m[2] == strconv.Itoa(year) {
 			id = parts[1]
 		}
 	}
@@ -663,7 +664,7 @@ func (p *Provider) movieSubtitle(v *provider.Video, langs []provider.Language, t
 	if v.Year != 0 {
 		matches = append(matches, "year")
 	}
-	if v.Title != "" && sitekit.Sanitize(title) == sitekit.Sanitize(v.Title) {
+	if v.Title != "" && scrape.SanitizePatch(title, "") == scrape.SanitizePatch(v.Title, "") {
 		matches = append(matches, "title")
 	}
 	return p.subtitle(lang, "movie/"+id, dl[1:], version, uploader, matches), true

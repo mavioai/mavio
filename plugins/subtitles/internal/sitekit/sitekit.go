@@ -1,6 +1,6 @@
 // Package sitekit is what the providers of sites with logins, cookies and
-// captchas share, as Bazarr's subliminal utilities and pitchers: names
-// sanitized for comparison, cookies pasted from a browser, logins kept
+// captchas share, as Bazarr's subliminal utilities and pitchers: subtitles
+// decoded from a site's encoding, cookies pasted from a browser, logins kept
 // across restarts in the provider's data folder, reCAPTCHA site keys found
 // on pages, and the requested languages a site's language matches.
 package sitekit
@@ -15,7 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -24,51 +23,6 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 )
-
-// DefaultCharacters are those Sanitize replaces with spaces, as
-// subliminal_patch's sanitize.
-const DefaultCharacters = "-:()."
-
-var spaces = regexp.MustCompile(`\s+`)
-
-// Sanitize returns a string for comparison, as subliminal_patch's
-// sanitize: "-:()." replaced with spaces, quotes removed, spaces
-// collapsed, trimmed and lower case.
-func Sanitize(s string) string { return SanitizeChars(s, DefaultCharacters) }
-
-// SanitizeChars is Sanitize replacing other characters with spaces.
-func SanitizeChars(s, chars string) string {
-	s = strings.Map(func(r rune) rune {
-		switch {
-		case strings.ContainsRune(chars, r):
-			return ' '
-		case strings.ContainsRune("'´`’", r):
-			return -1
-		}
-		return r
-	}, s)
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(s, " ")))
-}
-
-var bracketed = regexp.MustCompile(`\[[\w|.]+\]`)
-
-// SanitizeReleaseGroup returns a release group for comparison, as
-// subliminal's sanitize_release_group: bracketed parts removed, trimmed
-// and upper case.
-func SanitizeReleaseGroup(s string) string {
-	return strings.ToUpper(strings.TrimSpace(bracketed.ReplaceAllString(s, "")))
-}
-
-// EquivalentReleaseGroups returns the release groups that are the same
-// as a sanitized one, as subliminal's get_equivalent_release_groups.
-func EquivalentReleaseGroups(group string) []string {
-	for _, g := range [][]string{{"FRAMESTOR", "W4NK3R", "BHDSTUDIO"}, {"LOL", "DIMENSION"}, {"ASAP", "IMMERSE", "FLEET"}, {"AVS", "SVA"}} {
-		if slices.Contains(g, group) {
-			return g
-		}
-	}
-	return []string{group}
-}
 
 // Decode returns a subtitle in UTF-8, read in a site's encoding unless it
 // is UTF-8 already, as Bazarr's subtitles' encoding hints.

@@ -21,6 +21,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
@@ -187,7 +188,7 @@ func (p *Provider) showIDs(ctx context.Context, s *site.Session) (map[string]int
 				name = m[1]
 			}
 			if id, err := strconv.Atoi(show.Attr("srsid")); err == nil {
-				ids[sitekit.Sanitize(name)] = id
+				ids[scrape.SanitizePatch(name, "")] = id
 			}
 		}
 		break
@@ -203,7 +204,7 @@ func (p *Provider) showIDs(ctx context.Context, s *site.Session) (map[string]int
 func showID(ids map[string]int, names []string, year int) int {
 	var sanitized []string
 	for _, n := range names {
-		n = sitekit.Sanitize(n)
+		n = scrape.SanitizePatch(n, "")
 		sanitized = append(sanitized, n)
 		// With the article at the end.
 		if m := articleRe.FindStringSubmatch(n); m != nil {
@@ -362,7 +363,7 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 func matches(v *provider.Video, s sub) []string {
 	var out []string
 	if v.Series != "" && slices.ContainsFunc(append([]string{v.Series}, v.AlternativeSeries...), func(n string) bool {
-		return sitekit.Sanitize(n) == sitekit.Sanitize(s.series)
+		return scrape.SanitizePatch(n, "") == scrape.SanitizePatch(s.series, "")
 	}) {
 		out = append(out, "series")
 	}
@@ -372,16 +373,14 @@ func matches(v *provider.Video, s sub) []string {
 	if v.Number != 0 && s.episode == v.Number {
 		out = append(out, "episode")
 	}
-	if v.Title != "" && sitekit.Sanitize(s.title) == sitekit.Sanitize(v.Title) {
+	if v.Title != "" && scrape.SanitizePatch(s.title, "") == scrape.SanitizePatch(v.Title, "") {
 		out = append(out, "title")
 	}
 	// The subtitle's year is the video's, as Bazarr's query is given.
 	if v.OriginalSeries && v.Year == 0 || v.Year != 0 {
 		out = append(out, "year")
 	}
-	if v.ReleaseGroup != "" && s.version != "" && slices.ContainsFunc(sitekit.EquivalentReleaseGroups(sitekit.SanitizeReleaseGroup(v.ReleaseGroup)), func(g string) bool {
-		return strings.Contains(sitekit.SanitizeReleaseGroup(s.version), g)
-	}) {
+	if v.ReleaseGroup != "" && s.version != "" && scrape.ReleaseGroupMatches(s.version, v.ReleaseGroup) {
 		out = append(out, "release_group")
 	}
 	return out

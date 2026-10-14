@@ -23,6 +23,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
 
@@ -289,7 +290,7 @@ func matches(v *provider.Video, title, imdbID, comments string, year int) []stri
 		out = append(out, "release_group")
 	}
 	if !v.Episode {
-		if v.Title != "" && sanitize(title) == fixNaming(v.Title) {
+		if v.Title != "" && scrape.SanitizePatch(title, "") == fixNaming(v.Title) {
 			out = append(out, "title")
 		}
 		if id := v.ExternalIDs["imdb"]; id != "" && imdbID == id {
@@ -297,7 +298,7 @@ func matches(v *provider.Video, title, imdbID, comments string, year int) []stri
 		}
 		return out
 	}
-	if v.Series != "" && fixNaming(v.Series) == sanitize(seasonSuffix.ReplaceAllString(strings.TrimRight(title, " \t\r\n"), "")) {
+	if v.Series != "" && fixNaming(v.Series) == scrape.SanitizePatch(seasonSuffix.ReplaceAllString(strings.TrimRight(title, " \t\r\n"), ""), "") {
 		out = append(out, "series")
 	}
 	if id := v.SeriesExternalIDs["imdb"]; id != "" && imdbID == id {
@@ -374,24 +375,12 @@ func isArchive(data []byte) bool {
 	return err == nil
 }
 
-var (
-	replaced = regexp.MustCompile(`[-:().]`)
-	removed  = regexp.MustCompile("['´`’]")
-	spaces   = regexp.MustCompile(`\s+`)
-	// inconsistent are the titles the site names otherwise.
-	inconsistent = strings.NewReplacer("DC's Legends of Tomorrow", "Legends of Tomorrow", "Marvel's Jessica Jones", "Jessica Jones")
-)
-
-// sanitize strips a title's special characters, as Bazarr's sanitize.
-func sanitize(s string) string {
-	s = replaced.ReplaceAllString(s, " ")
-	s = removed.ReplaceAllString(s, "")
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(s, " ")))
-}
+// inconsistent are the titles the site names otherwise.
+var inconsistent = strings.NewReplacer("DC's Legends of Tomorrow", "Legends of Tomorrow", "Marvel's Jessica Jones", "Jessica Jones")
 
 // fixNaming renames the titles the site names otherwise and sanitizes
 // them, as Bazarr's fix_inconsistent_naming.
-func fixNaming(title string) string { return sanitize(inconsistent.Replace(title)) }
+func fixNaming(title string) string { return scrape.SanitizePatch(inconsistent.Replace(title), "") }
 
 // String names the provider in logs.
 func (p *Provider) String() string { return fmt.Sprintf("%s(%s)", Name, p.base.Host) }

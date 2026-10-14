@@ -23,6 +23,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
@@ -117,14 +118,14 @@ func (p *Provider) Search(ctx context.Context, v *provider.Video, langs []provid
 // showLinks returns the links of the shows of a title and year, as
 // Bazarr's get_show_links.
 func (p *Provider) showLinks(ctx context.Context, title string, year int) ([]string, error) {
-	title = sitekit.Sanitize(title)
+	title = scrape.SanitizePatch(title, "")
 	suggestions, err := p.suggestions(ctx, title)
 	if err != nil {
 		return nil, err
 	}
 	var links []string
 	for _, s := range suggestions {
-		t := sitekit.Sanitize(s.title)
+		t := scrape.SanitizePatch(s.title, "")
 		if t == title || year != 0 && t == fmt.Sprintf("%s %d", title, year) {
 			parts := strings.Split(s.link, "/")
 			links = append(links, strings.Join(parts[max(len(parts)-2, 0):], "/"))
@@ -256,16 +257,14 @@ func content(n site.Node, i int) string {
 func matches(v *provider.Video, show string, year int, version string) []string {
 	var out []string
 	if slices.ContainsFunc(append([]string{v.Series}, v.AlternativeSeries...), func(s string) bool {
-		return sitekit.Sanitize(s) == sitekit.Sanitize(show)
+		return scrape.SanitizePatch(s, "") == scrape.SanitizePatch(show, "")
 	}) {
 		out = append(out, "series")
 	}
 	if v.OriginalSeries && year == 0 || v.Year != 0 && v.Year == year {
 		out = append(out, "year")
 	}
-	if v.ReleaseGroup != "" && version != "" && slices.ContainsFunc(sitekit.EquivalentReleaseGroups(sitekit.SanitizeReleaseGroup(v.ReleaseGroup)), func(g string) bool {
-		return strings.Contains(sitekit.SanitizeReleaseGroup(version), g)
-	}) {
+	if v.ReleaseGroup != "" && version != "" && scrape.ReleaseGroupMatches(version, v.ReleaseGroup) {
 		out = append(out, "release_group")
 	}
 	return out

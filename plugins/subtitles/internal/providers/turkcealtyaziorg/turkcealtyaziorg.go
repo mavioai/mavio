@@ -18,6 +18,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
@@ -266,9 +267,9 @@ func matches(v *provider.Video, releases []string) []string {
 	} else {
 		out = []string{"imdb_id"}
 	}
-	info := sitekit.SanitizeReleaseGroup(strings.Join(releases, ","))
+	info := scrape.SanitizeReleaseGroup(strings.Join(releases, ","))
 	if v.ReleaseGroup != "" && info != "" {
-		for _, g := range sitekit.EquivalentReleaseGroups(sitekit.SanitizeReleaseGroup(v.ReleaseGroup)) {
+		for _, g := range scrape.EquivalentReleaseGroups(scrape.SanitizeReleaseGroup(v.ReleaseGroup)) {
 			if strings.Contains(info, g) {
 				out = append(out, "release_group")
 				break

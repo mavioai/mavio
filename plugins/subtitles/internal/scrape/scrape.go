@@ -1,8 +1,8 @@
-// Package scrape is what the providers of sites scraped without accounts
-// share: subliminal's title sanitizing and naming fixes, difflib's
-// similarity ratio, the text of pages as BeautifulSoup joins it, and
-// the season, episode, year and title of release names as guessit reads
-// them.
+// Package scrape is what the providers of scraped sites share:
+// subliminal's title and release group sanitizing and naming fixes,
+// difflib's similarity ratio, the text of pages as BeautifulSoup joins
+// it, and the season, episode, year and title of release names as
+// guessit reads them.
 package scrape
 
 import (
@@ -39,22 +39,32 @@ var spaces = regexp.MustCompile(`\s+`)
 // subliminal's sanitize: "-", ":", "(", ")" and "." become spaces and "'"
 // is removed, but for the characters of ignore.
 func Sanitize(s, ignore string) string {
-	return sanitize(s, ignore, "'")
+	return sanitize(s, ignore, "-:().", "'")
 }
 
 // SanitizePatch is subliminal_patch's sanitize, which also removes "´",
 // "`" and "’".
 func SanitizePatch(s, ignore string) string {
-	return sanitize(s, ignore, "'´`’")
+	return sanitize(s, ignore, "-:().", patchRemoved)
 }
 
-func sanitize(s, ignore, removed string) string {
+// SanitizeChars is SanitizePatch replacing the characters of chars with
+// spaces in place of "-:().", as subliminal_patch's sanitize with
+// default_characters.
+func SanitizeChars(s, chars string) string {
+	return sanitize(s, "", chars, patchRemoved)
+}
+
+// patchRemoved are the characters subliminal_patch's sanitize removes.
+const patchRemoved = "'´`’"
+
+func sanitize(s, ignore, replaced, removed string) string {
 	var b strings.Builder
 	for _, r := range s {
 		switch {
 		case strings.ContainsRune(ignore, r):
 			b.WriteRune(r)
-		case strings.ContainsRune("-:().", r):
+		case strings.ContainsRune(replaced, r):
 			b.WriteByte(' ')
 		case strings.ContainsRune(removed, r):
 		default:
@@ -62,6 +72,40 @@ func sanitize(s, ignore, removed string) string {
 		}
 	}
 	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(b.String(), " ")))
+}
+
+var bracketed = regexp.MustCompile(`\[[\w|.]+\]`)
+
+// SanitizeReleaseGroup returns a release group for comparison, as
+// subliminal's sanitize_release_group: bracketed parts removed, trimmed
+// and upper case.
+func SanitizeReleaseGroup(s string) string {
+	return strings.ToUpper(strings.TrimSpace(bracketed.ReplaceAllString(s, "")))
+}
+
+// equivalentGroups are subliminal's groups of release groups of the same
+// releases.
+var equivalentGroups = [][]string{{"FRAMESTOR", "W4NK3R", "BHDSTUDIO"}, {"LOL", "DIMENSION"}, {"ASAP", "IMMERSE", "FLEET"}, {"AVS", "SVA"}}
+
+// EquivalentReleaseGroups returns the release groups that are the same
+// as a sanitized one, as subliminal's get_equivalent_release_groups.
+func EquivalentReleaseGroups(group string) []string {
+	for _, g := range equivalentGroups {
+		if slices.Contains(g, group) {
+			return g
+		}
+	}
+	return []string{group}
+}
+
+// ReleaseGroupMatches reports whether a release name holds a release
+// group of the same releases as the video's, both sanitized, as Bazarr's
+// providers compare them.
+func ReleaseGroupMatches(release, group string) bool {
+	release = SanitizeReleaseGroup(release)
+	return slices.ContainsFunc(EquivalentReleaseGroups(SanitizeReleaseGroup(group)), func(g string) bool {
+		return strings.Contains(release, g)
+	})
 }
 
 // FixNaming replaces the names sites spell differently, as

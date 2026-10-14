@@ -9,13 +9,13 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
 
@@ -140,7 +140,7 @@ func (p *Provider) page(ctx context.Context, v *provider.Video, pageLink string)
 	}
 
 	var matches []string
-	if v.Title != "" && sanitize(title) == sanitize(v.Title) {
+	if v.Title != "" && scrape.Sanitize(title, "") == scrape.Sanitize(v.Title, "") {
 		matches = append(matches, "title")
 	}
 	if v.Year != 0 && year == v.Year {
@@ -174,20 +174,6 @@ func (p *Provider) Download(ctx context.Context, v *provider.Video, id string) (
 		return provider.File{}, provider.Errorf(provider.ProviderError, "unidentified archive type")
 	}
 	return archive.Extract(r.Body, archive.WantFor(v, lang), lang)
-}
-
-var (
-	replaced = regexp.MustCompile(`[-:().]`)
-	removed  = regexp.MustCompile(`'`)
-	spaces   = regexp.MustCompile(`\s+`)
-)
-
-// sanitize strips a title's special characters, as subliminal's
-// sanitize.
-func sanitize(s string) string {
-	s = replaced.ReplaceAllString(s, " ")
-	s = removed.ReplaceAllString(s, "")
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(s, " ")))
 }
 
 // String names the provider in logs.

@@ -107,3 +107,33 @@ func TestText(t *testing.T) {
 		t.Errorf("ASCII got = %q, want = Shogun", got)
 	}
 }
+
+func TestSanitizeChars(t *testing.T) {
+	if got, want := SanitizeChars("Law & Order: SVU/Special", "-:()./"), "law & order svu special"; got != want {
+		t.Errorf("SanitizeChars got = %q, want = %q", got, want)
+	}
+}
+
+func TestReleaseGroup(t *testing.T) {
+	if got, want := SanitizeReleaseGroup(" [eztv]lol "), "LOL"; got != want {
+		t.Errorf("SanitizeReleaseGroup got = %q, want = %q", got, want)
+	}
+	if got := EquivalentReleaseGroups("LOL"); !slices.Equal(got, []string{"LOL", "DIMENSION"}) {
+		t.Errorf("EquivalentReleaseGroups(LOL) got = %q, want = [LOL DIMENSION]", got)
+	}
+	if got := EquivalentReleaseGroups("NTB"); !slices.Equal(got, []string{"NTB"}) {
+		t.Errorf("EquivalentReleaseGroups(NTB) got = %q, want = [NTB]", got)
+	}
+	for _, c := range []struct {
+		release, group string
+		want           bool
+	}{
+		{"Show.S01E01.720p.HDTV.x264-DIMENSION", "lol", true},
+		{"Show.S01E01.720p.HDTV.x264-KILLERS", "lol", false},
+		{"Show.S01E01.WEB-DL-NTb[rarbg]", "NTb", true},
+	} {
+		if got := ReleaseGroupMatches(c.release, c.group); got != c.want {
+			t.Errorf("ReleaseGroupMatches(%q, %q) got = %v, want = %v", c.release, c.group, got, c.want)
+		}
+	}
+}

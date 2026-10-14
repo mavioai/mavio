@@ -23,6 +23,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/sitekit"
 )
@@ -457,11 +458,11 @@ func (p *Provider) matches(ctx context.Context, v *provider.Video, description, 
 			return nil
 		}
 	}
-	desc := sitekit.Sanitize(description)
+	desc := scrape.SanitizePatch(description, "")
 	set := map[string]bool{}
 	name := path.Base(strings.ReplaceAll(v.FileName, `\`, "/"))
 	name = strings.TrimSuffix(name, path.Ext(name))
-	if f := sitekit.Sanitize(sitekit.SanitizeReleaseGroup(name)); v.FileName != "" && strings.Contains(desc, f) {
+	if f := scrape.SanitizePatch(scrape.SanitizeReleaseGroup(name), ""); v.FileName != "" && strings.Contains(desc, f) {
 		set["title"] = true
 		if v.Episode {
 			set["series"], set["season"], set["episode"] = true, true, true
@@ -472,16 +473,16 @@ func (p *Provider) matches(ctx context.Context, v *provider.Video, description, 
 	}
 	if !v.Episode {
 		for _, t := range append([]string{v.Title}, v.AlternativeTitles...) {
-			if t != "" && strings.Contains(desc, sitekit.Sanitize(t)) {
+			if t != "" && strings.Contains(desc, scrape.SanitizePatch(t, "")) {
 				set["title"] = true
 			}
 		}
 	} else {
-		if v.Title != "" && strings.Contains(desc, sitekit.Sanitize(v.Title)) {
+		if v.Title != "" && strings.Contains(desc, scrape.SanitizePatch(v.Title, "")) {
 			set["title"] = true
 		}
 		for _, s := range append([]string{v.Series}, v.AlternativeSeries...) {
-			if s != "" && strings.Contains(desc, sitekit.Sanitize(s)) {
+			if s != "" && strings.Contains(desc, scrape.SanitizePatch(s, "")) {
 				set["series"] = true
 			}
 		}
@@ -497,7 +498,7 @@ func (p *Provider) matches(ctx context.Context, v *provider.Video, description, 
 			set["series"], set["series_imdb_id"], set["season"], set["episode"] = true, true, true, true
 		}
 	}
-	if v.ReleaseGroup != "" && strings.Contains(sitekit.SanitizeReleaseGroup(description), sitekit.SanitizeReleaseGroup(v.ReleaseGroup)) {
+	if v.ReleaseGroup != "" && strings.Contains(scrape.SanitizeReleaseGroup(description), scrape.SanitizeReleaseGroup(v.ReleaseGroup)) {
 		set["release_group"] = true
 	}
 	var out []string

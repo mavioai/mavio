@@ -18,6 +18,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/titles"
 )
@@ -68,9 +69,6 @@ var (
 	// fix_inconsistent_naming.
 	inconsistent = strings.NewReplacer("Stargate Origins", "Stargate: Origins",
 		"Marvel's Agents of S.H.I.E.L.D.", "Marvels+Agents+of+S.H.I.E.L.D", "Mayans M.C.", "Mayans MC")
-	// equivalentGroups are subliminal's equivalent release groups.
-	equivalentGroups = [][]string{{"FRAMESTOR", "W4NK3R", "BHDSTUDIO"}, {"LOL", "DIMENSION"}, {"ASAP", "IMMERSE", "FLEET"}, {"AVS", "SVA"}}
-	bracketed        = regexp.MustCompile(`\[[\w|.]+\]`)
 )
 
 // Search implements provider.Provider. As Bazarr's, only the series'
@@ -231,30 +229,10 @@ func matches(v *provider.Video, name, year, version string) []string {
 	if y, _ := strconv.Atoi(year); series && v.OriginalSeries && year == "" || v.Year != 0 && v.Year == y {
 		out = append(out, "year")
 	}
-	if v.ReleaseGroup != "" && version != "" {
-		sanitized := releaseGroup(version)
-		if slices.ContainsFunc(equivalents(releaseGroup(v.ReleaseGroup)), func(g string) bool { return strings.Contains(sanitized, g) }) {
-			out = append(out, "release_group")
-		}
+	if v.ReleaseGroup != "" && version != "" && scrape.ReleaseGroupMatches(version, v.ReleaseGroup) {
+		out = append(out, "release_group")
 	}
 	return out
-}
-
-// releaseGroup sanitizes a release group, as subliminal's
-// sanitize_release_group.
-func releaseGroup(s string) string {
-	return strings.ToUpper(strings.TrimSpace(bracketed.ReplaceAllString(s, "")))
-}
-
-// equivalents returns a release group's equivalents, as subliminal's
-// get_equivalent_release_groups.
-func equivalents(group string) []string {
-	for _, g := range equivalentGroups {
-		if slices.Contains(g, group) {
-			return g
-		}
-	}
-	return []string{group}
 }
 
 // Download implements provider.Provider: the episode's subtitle of the

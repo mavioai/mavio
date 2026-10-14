@@ -23,6 +23,7 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archivemix"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
 
@@ -358,27 +359,11 @@ var (
 	// renames are the titles Titlovi names differently, as Bazarr's
 	// fix_inconsistent_naming.
 	renames = strings.NewReplacer("DC's Legends of Tomorrow", "Legends of Tomorrow", "Marvel's Jessica Jones", "Jessica Jones")
-	spaces  = regexp.MustCompile(`\s+`)
 )
-
-// sanitize is subliminal_patch's sanitize.
-func sanitize(s string) string {
-	var b strings.Builder
-	for _, r := range s {
-		switch {
-		case strings.ContainsRune("-:().", r):
-			b.WriteByte(' ')
-		case strings.ContainsRune("'´`’", r):
-		default:
-			b.WriteRune(r)
-		}
-	}
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(b.String(), " ")))
-}
 
 // fixNaming is Bazarr's fix_inconsistent_naming of Titlovi: renamed and
 // sanitized.
-func fixNaming(title string) string { return sanitize(renames.Replace(title)) }
+func fixNaming(title string) string { return scrape.SanitizePatch(renames.Replace(title), "") }
 
 // splitTitle returns a title and its alternative, split at the last
 // " aka ", as Bazarr's title_re.
@@ -493,7 +478,7 @@ func language(name string, langs []provider.Language) (provider.Language, bool) 
 func matches(v *provider.Video, title, alt string, s sub, episode bool) []string {
 	var m []string
 	if episode {
-		if v.Series != "" && sanitize(title) == fixNaming(v.Series) || alt != "" && sanitize(alt) == fixNaming(v.Series) {
+		if v.Series != "" && scrape.SanitizePatch(title, "") == fixNaming(v.Series) || alt != "" && scrape.SanitizePatch(alt, "") == fixNaming(v.Series) {
 			m = append(m, "series")
 		}
 		if v.OriginalSeries && s.Year == nil || v.Year != 0 && s.Year != nil && *s.Year == v.Year {
@@ -508,7 +493,7 @@ func matches(v *provider.Video, title, alt string, s sub, episode bool) []string
 		}
 		return m
 	}
-	if v.Title != "" && sanitize(title) == fixNaming(v.Title) || alt != "" && sanitize(alt) == fixNaming(v.Title) {
+	if v.Title != "" && scrape.SanitizePatch(title, "") == fixNaming(v.Title) || alt != "" && scrape.SanitizePatch(alt, "") == fixNaming(v.Title) {
 		m = append(m, "title")
 	}
 	if v.Year != 0 && s.Year != nil && *s.Year == v.Year {

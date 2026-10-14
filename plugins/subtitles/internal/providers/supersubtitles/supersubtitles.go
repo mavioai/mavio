@@ -21,6 +21,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
 
@@ -119,7 +120,7 @@ func (r *result) matches(v *provider.Video) []string {
 		}
 	}
 	if v.Episode {
-		if v.Series != "" && sanitize(r.series) == sanitize(v.Series) {
+		if v.Series != "" && scrape.SanitizePatch(r.series, "") == scrape.SanitizePatch(v.Series, "") {
 			add("series")
 		}
 		if id := v.SeriesExternalIDs["imdb"]; id != "" && r.imdbID != "" && r.imdbID == id {
@@ -129,7 +130,7 @@ func (r *result) matches(v *provider.Video) []string {
 			add("year")
 		}
 	} else {
-		if v.Title != "" && slices.ContainsFunc(append([]string{v.Title}, v.AlternativeTitles...), func(t string) bool { return sanitize(t) == sanitize(r.series) }) {
+		if v.Title != "" && slices.ContainsFunc(append([]string{v.Title}, v.AlternativeTitles...), func(t string) bool { return scrape.SanitizePatch(t, "") == scrape.SanitizePatch(r.series, "") }) {
 			add("title")
 		}
 		if id := v.ExternalIDs["imdb"]; id != "" && r.imdbID == id {
@@ -140,9 +141,8 @@ func (r *result) matches(v *provider.Video) []string {
 		}
 	}
 	if v.ReleaseGroup != "" && len(r.releases) > 0 {
-		groups := equivalentReleaseGroups(sanitizeReleaseGroup(v.ReleaseGroup))
 		for _, release := range r.releases {
-			if slices.ContainsFunc(groups, func(g string) bool { return strings.Contains(sanitizeReleaseGroup(release), g) }) {
+			if scrape.ReleaseGroupMatches(release, v.ReleaseGroup) {
 				add("release_group")
 				if v.Resolution != "" && strings.Contains(strings.ToLower(release), v.Resolution) {
 					add("resolution")
@@ -266,10 +266,6 @@ var (
 	seasonName  = regexp.MustCompile(`^(.*)\s(?:-\s\d+x\d+|(\(Season\s\d+\)))?\s\((.*)\)$`)
 	movieYear   = regexp.MustCompile(`\(((?:19|20)\d{2})\)`)
 	imdbInLink  = regexp.MustCompile(`www\.imdb\.com/title/(.*)/"`)
-	replaced    = regexp.MustCompile(`[-:().]`)
-	removed     = regexp.MustCompile("['´`’]")
-	spaces      = regexp.MustCompile(`\s+`)
-	bracketed   = regexp.MustCompile(`\[[\w|.]+\]`)
 	titleSpaces = strings.NewReplacer("�", "", "& ", "", " ", ".")
 )
 
@@ -289,7 +285,7 @@ func (p *Provider) findID(ctx context.Context, term string, year int, original s
 		p.env.Log.ErrorContext(ctx, "unable to parse returned JSON", "provider", Name, "url", r.URL.String())
 		return "", nil
 	}
-	want := sanitize(strings.ReplaceAll(original, "& ", ""))
+	want := scrape.SanitizePatch(strings.ReplaceAll(original, "& ", ""), "")
 	for _, res := range results {
 		resultYear := ""
 		if m := yearInName.FindStringSubmatch(res.Name); m != nil {
@@ -306,7 +302,7 @@ func (p *Provider) findID(ctx context.Context, term string, year int, original s
 			}
 			// guessit reads the title of "Title.s01e01.year" as the
 			// words before the episode.
-			guessTitle := sanitize(strings.ReplaceAll(t, ".", " "))
+			guessTitle := scrape.SanitizePatch(strings.ReplaceAll(t, ".", " "), "")
 			guessYear, _ := strconv.Atoi(resultYear)
 			if want == guessTitle && (year == 0 || guessYear != 0 && year == guessYear) {
 				return strings.Trim(string(res.ID), `"`), nil
@@ -617,30 +613,6 @@ func (p *Provider) Download(ctx context.Context, v *provider.Video, id string) (
 		return provider.File{}, err
 	}
 	return archive.Extract(r.Body, archive.WantFor(v, provider.Language{}), provider.Language{})
-}
-
-// sanitize strips a title's special characters, as Bazarr's sanitize.
-func sanitize(s string) string {
-	s = replaced.ReplaceAllString(s, " ")
-	s = removed.ReplaceAllString(s, "")
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(s, " ")))
-}
-
-// sanitizeReleaseGroup strips what is in square brackets, as subliminal's
-// sanitize_release_group.
-func sanitizeReleaseGroup(s string) string {
-	return strings.ToUpper(strings.TrimSpace(bracketed.ReplaceAllString(s, "")))
-}
-
-// equivalentReleaseGroups returns the release groups of the same
-// releases, as subliminal's get_equivalent_release_groups.
-func equivalentReleaseGroups(group string) []string {
-	for _, g := range [][]string{{"FRAMESTOR", "W4NK3R", "BHDSTUDIO"}, {"LOL", "DIMENSION"}, {"ASAP", "IMMERSE", "FLEET"}, {"AVS", "SVA"}} {
-		if slices.Contains(g, group) {
-			return g
-		}
-	}
-	return []string{group}
 }
 
 // String names the provider in logs.

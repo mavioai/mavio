@@ -20,6 +20,7 @@ import (
 
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/scrape"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/site"
 )
 
@@ -175,7 +176,7 @@ func (p *Provider) searchShowID(ctx context.Context, series string, year int) (i
 			p.env.Log.ErrorContext(ctx, "failed to match a show", "provider", Name, "text", a.Text())
 			continue
 		}
-		if sanitize(m[1]) != strings.ToLower(series) {
+		if scrape.Sanitize(m[1], "") != strings.ToLower(series) {
 			continue
 		}
 		if first, _ := strconv.Atoi(m[2]); year != 0 && first != year {
@@ -289,7 +290,7 @@ func (p *Provider) query(ctx context.Context, v *provider.Video, showID int, ser
 // season and episode searched, and of the video's year.
 func matches(v *provider.Video, series, release string) []string {
 	var out []string
-	if v.Series != "" && slices.Contains(sanitizeAll(append([]string{v.Series}, v.AlternativeSeries...)), sanitize(series)) {
+	if v.Series != "" && slices.Contains(sanitizeAll(append([]string{v.Series}, v.AlternativeSeries...)), scrape.Sanitize(series, "")) {
 		out = append(out, "series")
 	}
 	if v.Season != 0 {
@@ -301,14 +302,8 @@ func matches(v *provider.Video, series, release string) []string {
 	if v.OriginalSeries && v.Year == 0 || v.Year != 0 {
 		out = append(out, "year")
 	}
-	if v.ReleaseGroup != "" && release != "" {
-		sanitized := sanitizeReleaseGroup(release)
-		for _, g := range equivalentReleaseGroups(sanitizeReleaseGroup(v.ReleaseGroup)) {
-			if strings.Contains(sanitized, g) {
-				out = append(out, "release_group")
-				break
-			}
-		}
+	if v.ReleaseGroup != "" && release != "" && scrape.ReleaseGroupMatches(release, v.ReleaseGroup) {
+		out = append(out, "release_group")
 	}
 	return out
 }
@@ -372,42 +367,12 @@ func (p *Provider) Download(ctx context.Context, _ *provider.Video, id string) (
 	return provider.File{Data: data, Format: archive.Detect(data)}, nil
 }
 
-var (
-	replaced  = regexp.MustCompile(`[-:().]`)
-	spaces    = regexp.MustCompile(`\s+`)
-	bracketed = regexp.MustCompile(`\[[\w|.]+\]`)
-)
-
-// sanitize strips a name's special characters, as subliminal's sanitize.
-func sanitize(s string) string {
-	s = replaced.ReplaceAllString(s, " ")
-	s = strings.ReplaceAll(s, "'", "")
-	return strings.ToLower(strings.TrimSpace(spaces.ReplaceAllString(s, " ")))
-}
-
 func sanitizeAll(ss []string) []string {
 	out := make([]string, len(ss))
 	for i, s := range ss {
-		out[i] = sanitize(s)
+		out[i] = scrape.Sanitize(s, "")
 	}
 	return out
-}
-
-// sanitizeReleaseGroup strips what is in square brackets, as subliminal's
-// sanitize_release_group.
-func sanitizeReleaseGroup(s string) string {
-	return strings.ToUpper(strings.TrimSpace(bracketed.ReplaceAllString(s, "")))
-}
-
-// equivalentReleaseGroups returns the release groups of the same
-// releases, as subliminal's get_equivalent_release_groups.
-func equivalentReleaseGroups(group string) []string {
-	for _, g := range [][]string{{"FRAMESTOR", "W4NK3R", "BHDSTUDIO"}, {"LOL", "DIMENSION"}, {"ASAP", "IMMERSE", "FLEET"}, {"AVS", "SVA"}} {
-		if slices.Contains(g, group) {
-			return g
-		}
-	}
-	return []string{group}
 }
 
 // String names the provider in logs.
