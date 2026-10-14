@@ -24,3 +24,32 @@ pub mod ai_login_event {
         Progress(&'a str),
     }
 }
+pub mod stream_ai_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum Event<'a> {
+        Text(&'a str),
+        Thinking(&'a str),
+        Done(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CompleteAiResponseView<'a>,
+            >,
+        ),
+    }
+}
+pub mod stream_agent_message_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, Debug)]
+    pub enum Event<'a> {
+        Text(&'a str),
+        Done(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SendAgentMessageResponseView<
+                    'a,
+                >,
+            >,
+        ),
+    }
+}

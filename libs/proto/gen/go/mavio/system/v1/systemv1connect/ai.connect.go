@@ -44,6 +44,8 @@ const (
 	AiServiceStartAiLoginProcedure = "/mavio.system.v1.AiService/StartAiLogin"
 	// AiServiceGetAiLoginProcedure is the fully-qualified name of the AiService's GetAiLogin RPC.
 	AiServiceGetAiLoginProcedure = "/mavio.system.v1.AiService/GetAiLogin"
+	// AiServiceWatchAiLoginProcedure is the fully-qualified name of the AiService's WatchAiLogin RPC.
+	AiServiceWatchAiLoginProcedure = "/mavio.system.v1.AiService/WatchAiLogin"
 	// AiServiceAnswerAiLoginProcedure is the fully-qualified name of the AiService's AnswerAiLogin RPC.
 	AiServiceAnswerAiLoginProcedure = "/mavio.system.v1.AiService/AnswerAiLogin"
 	// AiServiceCancelAiLoginProcedure is the fully-qualified name of the AiService's CancelAiLogin RPC.
@@ -66,8 +68,11 @@ type AiServiceClient interface {
 	// warn of it and leave the choice to the administrator.
 	StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error)
 	// GetAiLogin returns a login's state: what to show, what it asks and
-	// whether it ended. Clients poll it while the login runs.
+	// whether it ended.
 	GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error)
+	// WatchAiLogin streams a login's state: as it is, then each time it
+	// changes, until the login ends. Clients follow a login with it.
+	WatchAiLogin(context.Context, *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error)
 	// AnswerAiLogin answers a login's prompt.
 	AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error)
 	// CancelAiLogin abandons a login.
@@ -120,6 +125,13 @@ func NewAiServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...c
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		watchAiLogin: connect.NewClient[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse](
+			httpClient,
+			baseURL+AiServiceWatchAiLoginProcedure,
+			connect.WithSchema(aiServiceMethods.ByName("WatchAiLogin")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		answerAiLogin: connect.NewClient[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse](
 			httpClient,
 			baseURL+AiServiceAnswerAiLoginProcedure,
@@ -148,6 +160,7 @@ type aiServiceClient struct {
 	setAiApiKey     *connect.Client[v1.SetAiApiKeyRequest, v1.SetAiApiKeyResponse]
 	startAiLogin    *connect.Client[v1.StartAiLoginRequest, v1.StartAiLoginResponse]
 	getAiLogin      *connect.Client[v1.GetAiLoginRequest, v1.GetAiLoginResponse]
+	watchAiLogin    *connect.Client[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse]
 	answerAiLogin   *connect.Client[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse]
 	cancelAiLogin   *connect.Client[v1.CancelAiLoginRequest, v1.CancelAiLoginResponse]
 	logoutAi        *connect.Client[v1.LogoutAiRequest, v1.LogoutAiResponse]
@@ -198,6 +211,11 @@ func (c *aiServiceClient) GetAiLogin(ctx context.Context, req *v1.GetAiLoginRequ
 	return nil, err
 }
 
+// WatchAiLogin calls mavio.system.v1.AiService.WatchAiLogin.
+func (c *aiServiceClient) WatchAiLogin(ctx context.Context, req *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error) {
+	return c.watchAiLogin.CallServerStream(ctx, connect.NewRequest(req))
+}
+
 // AnswerAiLogin calls mavio.system.v1.AiService.AnswerAiLogin.
 func (c *aiServiceClient) AnswerAiLogin(ctx context.Context, req *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
 	response, err := c.answerAiLogin.CallUnary(ctx, connect.NewRequest(req))
@@ -239,8 +257,11 @@ type AiServiceHandler interface {
 	// warn of it and leave the choice to the administrator.
 	StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error)
 	// GetAiLogin returns a login's state: what to show, what it asks and
-	// whether it ended. Clients poll it while the login runs.
+	// whether it ended.
 	GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error)
+	// WatchAiLogin streams a login's state: as it is, then each time it
+	// changes, until the login ends. Clients follow a login with it.
+	WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error
 	// AnswerAiLogin answers a login's prompt.
 	AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error)
 	// CancelAiLogin abandons a login.
@@ -289,6 +310,13 @@ func NewAiServiceHandler(svc AiServiceHandler, opts ...connect.HandlerOption) (s
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	aiServiceWatchAiLoginHandler := connect.NewServerStreamHandlerSimple(
+		AiServiceWatchAiLoginProcedure,
+		svc.WatchAiLogin,
+		connect.WithSchema(aiServiceMethods.ByName("WatchAiLogin")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	aiServiceAnswerAiLoginHandler := connect.NewUnaryHandlerSimple(
 		AiServiceAnswerAiLoginProcedure,
 		svc.AnswerAiLogin,
@@ -319,6 +347,8 @@ func NewAiServiceHandler(svc AiServiceHandler, opts ...connect.HandlerOption) (s
 			aiServiceStartAiLoginHandler.ServeHTTP(w, r)
 		case AiServiceGetAiLoginProcedure:
 			aiServiceGetAiLoginHandler.ServeHTTP(w, r)
+		case AiServiceWatchAiLoginProcedure:
+			aiServiceWatchAiLoginHandler.ServeHTTP(w, r)
 		case AiServiceAnswerAiLoginProcedure:
 			aiServiceAnswerAiLoginHandler.ServeHTTP(w, r)
 		case AiServiceCancelAiLoginProcedure:
@@ -352,6 +382,10 @@ func (UnimplementedAiServiceHandler) StartAiLogin(context.Context, *v1.StartAiLo
 
 func (UnimplementedAiServiceHandler) GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.GetAiLogin is not implemented"))
+}
+
+func (UnimplementedAiServiceHandler) WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.WatchAiLogin is not implemented"))
 }
 
 func (UnimplementedAiServiceHandler) AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {

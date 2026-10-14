@@ -50,6 +50,9 @@ const (
 	// AiGatewayServiceGetAiLoginProcedure is the fully-qualified name of the AiGatewayService's
 	// GetAiLogin RPC.
 	AiGatewayServiceGetAiLoginProcedure = "/mavio.plugin.v1.AiGatewayService/GetAiLogin"
+	// AiGatewayServiceWatchAiLoginProcedure is the fully-qualified name of the AiGatewayService's
+	// WatchAiLogin RPC.
+	AiGatewayServiceWatchAiLoginProcedure = "/mavio.plugin.v1.AiGatewayService/WatchAiLogin"
 	// AiGatewayServiceAnswerAiLoginProcedure is the fully-qualified name of the AiGatewayService's
 	// AnswerAiLogin RPC.
 	AiGatewayServiceAnswerAiLoginProcedure = "/mavio.plugin.v1.AiGatewayService/AnswerAiLogin"
@@ -62,6 +65,9 @@ const (
 	// AiGatewayServiceCompleteAiProcedure is the fully-qualified name of the AiGatewayService's
 	// CompleteAi RPC.
 	AiGatewayServiceCompleteAiProcedure = "/mavio.plugin.v1.AiGatewayService/CompleteAi"
+	// AiGatewayServiceStreamAiProcedure is the fully-qualified name of the AiGatewayService's StreamAi
+	// RPC.
+	AiGatewayServiceStreamAiProcedure = "/mavio.plugin.v1.AiGatewayService/StreamAi"
 	// AgentSessionServiceCreateAgentSessionProcedure is the fully-qualified name of the
 	// AgentSessionService's CreateAgentSession RPC.
 	AgentSessionServiceCreateAgentSessionProcedure = "/mavio.plugin.v1.AgentSessionService/CreateAgentSession"
@@ -74,6 +80,9 @@ const (
 	// AgentSessionServiceSendAgentMessageProcedure is the fully-qualified name of the
 	// AgentSessionService's SendAgentMessage RPC.
 	AgentSessionServiceSendAgentMessageProcedure = "/mavio.plugin.v1.AgentSessionService/SendAgentMessage"
+	// AgentSessionServiceStreamAgentMessageProcedure is the fully-qualified name of the
+	// AgentSessionService's StreamAgentMessage RPC.
+	AgentSessionServiceStreamAgentMessageProcedure = "/mavio.plugin.v1.AgentSessionService/StreamAgentMessage"
 	// AgentSessionServiceDeleteAgentSessionProcedure is the fully-qualified name of the
 	// AgentSessionService's DeleteAgentSession RPC.
 	AgentSessionServiceDeleteAgentSessionProcedure = "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession"
@@ -89,12 +98,15 @@ type AiGatewayServiceClient interface {
 	// SetAiApiKey stores a provider's API key, or removes it.
 	SetAiApiKey(context.Context, *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error)
 	// StartAiLogin starts a provider's OAuth login, such as a subscription's
-	// sign in. The login runs in the plugin; GetAiLogin follows it and
+	// sign in. The login runs in the plugin; WatchAiLogin follows it and
 	// AnswerAiLogin answers what it asks.
 	StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error)
 	// GetAiLogin returns a login's state: what to show the user, what it
 	// asks and whether it ended.
 	GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error)
+	// WatchAiLogin streams a login's state: as it is, then each time it
+	// changes, until the login ends.
+	WatchAiLogin(context.Context, *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error)
 	// AnswerAiLogin answers a login's prompt.
 	AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error)
 	// CancelAiLogin abandons a login.
@@ -103,6 +115,9 @@ type AiGatewayServiceClient interface {
 	LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error)
 	// CompleteAi asks a model for one answer.
 	CompleteAi(context.Context, *v1.CompleteAiRequest) (*v1.CompleteAiResponse, error)
+	// StreamAi asks a model for one answer, streamed as the model writes it,
+	// ending with the answer as CompleteAi returns it.
+	StreamAi(context.Context, *v1.StreamAiRequest) (*connect.ServerStreamForClient[v1.StreamAiResponse], error)
 }
 
 // NewAiGatewayServiceClient constructs a client for the mavio.plugin.v1.AiGatewayService service.
@@ -149,6 +164,13 @@ func NewAiGatewayServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		watchAiLogin: connect.NewClient[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse](
+			httpClient,
+			baseURL+AiGatewayServiceWatchAiLoginProcedure,
+			connect.WithSchema(aiGatewayServiceMethods.ByName("WatchAiLogin")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		answerAiLogin: connect.NewClient[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse](
 			httpClient,
 			baseURL+AiGatewayServiceAnswerAiLoginProcedure,
@@ -173,6 +195,12 @@ func NewAiGatewayServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(aiGatewayServiceMethods.ByName("CompleteAi")),
 			connect.WithClientOptions(opts...),
 		),
+		streamAi: connect.NewClient[v1.StreamAiRequest, v1.StreamAiResponse](
+			httpClient,
+			baseURL+AiGatewayServiceStreamAiProcedure,
+			connect.WithSchema(aiGatewayServiceMethods.ByName("StreamAi")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -183,10 +211,12 @@ type aiGatewayServiceClient struct {
 	setAiApiKey     *connect.Client[v1.SetAiApiKeyRequest, v1.SetAiApiKeyResponse]
 	startAiLogin    *connect.Client[v1.StartAiLoginRequest, v1.StartAiLoginResponse]
 	getAiLogin      *connect.Client[v1.GetAiLoginRequest, v1.GetAiLoginResponse]
+	watchAiLogin    *connect.Client[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse]
 	answerAiLogin   *connect.Client[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse]
 	cancelAiLogin   *connect.Client[v1.CancelAiLoginRequest, v1.CancelAiLoginResponse]
 	logoutAi        *connect.Client[v1.LogoutAiRequest, v1.LogoutAiResponse]
 	completeAi      *connect.Client[v1.CompleteAiRequest, v1.CompleteAiResponse]
+	streamAi        *connect.Client[v1.StreamAiRequest, v1.StreamAiResponse]
 }
 
 // ListAiProviders calls mavio.plugin.v1.AiGatewayService.ListAiProviders.
@@ -234,6 +264,11 @@ func (c *aiGatewayServiceClient) GetAiLogin(ctx context.Context, req *v1.GetAiLo
 	return nil, err
 }
 
+// WatchAiLogin calls mavio.plugin.v1.AiGatewayService.WatchAiLogin.
+func (c *aiGatewayServiceClient) WatchAiLogin(ctx context.Context, req *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error) {
+	return c.watchAiLogin.CallServerStream(ctx, connect.NewRequest(req))
+}
+
 // AnswerAiLogin calls mavio.plugin.v1.AiGatewayService.AnswerAiLogin.
 func (c *aiGatewayServiceClient) AnswerAiLogin(ctx context.Context, req *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
 	response, err := c.answerAiLogin.CallUnary(ctx, connect.NewRequest(req))
@@ -270,6 +305,11 @@ func (c *aiGatewayServiceClient) CompleteAi(ctx context.Context, req *v1.Complet
 	return nil, err
 }
 
+// StreamAi calls mavio.plugin.v1.AiGatewayService.StreamAi.
+func (c *aiGatewayServiceClient) StreamAi(ctx context.Context, req *v1.StreamAiRequest) (*connect.ServerStreamForClient[v1.StreamAiResponse], error) {
+	return c.streamAi.CallServerStream(ctx, connect.NewRequest(req))
+}
+
 // AiGatewayServiceHandler is an implementation of the mavio.plugin.v1.AiGatewayService service.
 type AiGatewayServiceHandler interface {
 	// ListAiProviders lists the providers with how they authenticate and
@@ -280,12 +320,15 @@ type AiGatewayServiceHandler interface {
 	// SetAiApiKey stores a provider's API key, or removes it.
 	SetAiApiKey(context.Context, *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error)
 	// StartAiLogin starts a provider's OAuth login, such as a subscription's
-	// sign in. The login runs in the plugin; GetAiLogin follows it and
+	// sign in. The login runs in the plugin; WatchAiLogin follows it and
 	// AnswerAiLogin answers what it asks.
 	StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error)
 	// GetAiLogin returns a login's state: what to show the user, what it
 	// asks and whether it ended.
 	GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error)
+	// WatchAiLogin streams a login's state: as it is, then each time it
+	// changes, until the login ends.
+	WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error
 	// AnswerAiLogin answers a login's prompt.
 	AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error)
 	// CancelAiLogin abandons a login.
@@ -294,6 +337,9 @@ type AiGatewayServiceHandler interface {
 	LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error)
 	// CompleteAi asks a model for one answer.
 	CompleteAi(context.Context, *v1.CompleteAiRequest) (*v1.CompleteAiResponse, error)
+	// StreamAi asks a model for one answer, streamed as the model writes it,
+	// ending with the answer as CompleteAi returns it.
+	StreamAi(context.Context, *v1.StreamAiRequest, *connect.ServerStream[v1.StreamAiResponse]) error
 }
 
 // NewAiGatewayServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -336,6 +382,13 @@ func NewAiGatewayServiceHandler(svc AiGatewayServiceHandler, opts ...connect.Han
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	aiGatewayServiceWatchAiLoginHandler := connect.NewServerStreamHandlerSimple(
+		AiGatewayServiceWatchAiLoginProcedure,
+		svc.WatchAiLogin,
+		connect.WithSchema(aiGatewayServiceMethods.ByName("WatchAiLogin")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	aiGatewayServiceAnswerAiLoginHandler := connect.NewUnaryHandlerSimple(
 		AiGatewayServiceAnswerAiLoginProcedure,
 		svc.AnswerAiLogin,
@@ -360,6 +413,12 @@ func NewAiGatewayServiceHandler(svc AiGatewayServiceHandler, opts ...connect.Han
 		connect.WithSchema(aiGatewayServiceMethods.ByName("CompleteAi")),
 		connect.WithHandlerOptions(opts...),
 	)
+	aiGatewayServiceStreamAiHandler := connect.NewServerStreamHandlerSimple(
+		AiGatewayServiceStreamAiProcedure,
+		svc.StreamAi,
+		connect.WithSchema(aiGatewayServiceMethods.ByName("StreamAi")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.AiGatewayService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AiGatewayServiceListAiProvidersProcedure:
@@ -372,6 +431,8 @@ func NewAiGatewayServiceHandler(svc AiGatewayServiceHandler, opts ...connect.Han
 			aiGatewayServiceStartAiLoginHandler.ServeHTTP(w, r)
 		case AiGatewayServiceGetAiLoginProcedure:
 			aiGatewayServiceGetAiLoginHandler.ServeHTTP(w, r)
+		case AiGatewayServiceWatchAiLoginProcedure:
+			aiGatewayServiceWatchAiLoginHandler.ServeHTTP(w, r)
 		case AiGatewayServiceAnswerAiLoginProcedure:
 			aiGatewayServiceAnswerAiLoginHandler.ServeHTTP(w, r)
 		case AiGatewayServiceCancelAiLoginProcedure:
@@ -380,6 +441,8 @@ func NewAiGatewayServiceHandler(svc AiGatewayServiceHandler, opts ...connect.Han
 			aiGatewayServiceLogoutAiHandler.ServeHTTP(w, r)
 		case AiGatewayServiceCompleteAiProcedure:
 			aiGatewayServiceCompleteAiHandler.ServeHTTP(w, r)
+		case AiGatewayServiceStreamAiProcedure:
+			aiGatewayServiceStreamAiHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -409,6 +472,10 @@ func (UnimplementedAiGatewayServiceHandler) GetAiLogin(context.Context, *v1.GetA
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AiGatewayService.GetAiLogin is not implemented"))
 }
 
+func (UnimplementedAiGatewayServiceHandler) WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AiGatewayService.WatchAiLogin is not implemented"))
+}
+
 func (UnimplementedAiGatewayServiceHandler) AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AiGatewayService.AnswerAiLogin is not implemented"))
 }
@@ -425,6 +492,10 @@ func (UnimplementedAiGatewayServiceHandler) CompleteAi(context.Context, *v1.Comp
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AiGatewayService.CompleteAi is not implemented"))
 }
 
+func (UnimplementedAiGatewayServiceHandler) StreamAi(context.Context, *v1.StreamAiRequest, *connect.ServerStream[v1.StreamAiResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AiGatewayService.StreamAi is not implemented"))
+}
+
 // AgentSessionServiceClient is a client for the mavio.plugin.v1.AgentSessionService service.
 type AgentSessionServiceClient interface {
 	// CreateAgentSession starts a conversation.
@@ -435,6 +506,9 @@ type AgentSessionServiceClient interface {
 	GetAgentSession(context.Context, *v1.GetAgentSessionRequest) (*v1.GetAgentSessionResponse, error)
 	// SendAgentMessage sends a message and returns the answer.
 	SendAgentMessage(context.Context, *v1.SendAgentMessageRequest) (*v1.SendAgentMessageResponse, error)
+	// StreamAgentMessage sends a message and streams the answer as the model
+	// writes it, ending with the answer as SendAgentMessage returns it.
+	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest) (*connect.ServerStreamForClient[v1.StreamAgentMessageResponse], error)
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
 }
@@ -476,6 +550,12 @@ func NewAgentSessionServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(agentSessionServiceMethods.ByName("SendAgentMessage")),
 			connect.WithClientOptions(opts...),
 		),
+		streamAgentMessage: connect.NewClient[v1.StreamAgentMessageRequest, v1.StreamAgentMessageResponse](
+			httpClient,
+			baseURL+AgentSessionServiceStreamAgentMessageProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("StreamAgentMessage")),
+			connect.WithClientOptions(opts...),
+		),
 		deleteAgentSession: connect.NewClient[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse](
 			httpClient,
 			baseURL+AgentSessionServiceDeleteAgentSessionProcedure,
@@ -491,6 +571,7 @@ type agentSessionServiceClient struct {
 	listAgentSessions  *connect.Client[v1.ListAgentSessionsRequest, v1.ListAgentSessionsResponse]
 	getAgentSession    *connect.Client[v1.GetAgentSessionRequest, v1.GetAgentSessionResponse]
 	sendAgentMessage   *connect.Client[v1.SendAgentMessageRequest, v1.SendAgentMessageResponse]
+	streamAgentMessage *connect.Client[v1.StreamAgentMessageRequest, v1.StreamAgentMessageResponse]
 	deleteAgentSession *connect.Client[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse]
 }
 
@@ -530,6 +611,11 @@ func (c *agentSessionServiceClient) SendAgentMessage(ctx context.Context, req *v
 	return nil, err
 }
 
+// StreamAgentMessage calls mavio.plugin.v1.AgentSessionService.StreamAgentMessage.
+func (c *agentSessionServiceClient) StreamAgentMessage(ctx context.Context, req *v1.StreamAgentMessageRequest) (*connect.ServerStreamForClient[v1.StreamAgentMessageResponse], error) {
+	return c.streamAgentMessage.CallServerStream(ctx, connect.NewRequest(req))
+}
+
 // DeleteAgentSession calls mavio.plugin.v1.AgentSessionService.DeleteAgentSession.
 func (c *agentSessionServiceClient) DeleteAgentSession(ctx context.Context, req *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error) {
 	response, err := c.deleteAgentSession.CallUnary(ctx, connect.NewRequest(req))
@@ -550,6 +636,9 @@ type AgentSessionServiceHandler interface {
 	GetAgentSession(context.Context, *v1.GetAgentSessionRequest) (*v1.GetAgentSessionResponse, error)
 	// SendAgentMessage sends a message and returns the answer.
 	SendAgentMessage(context.Context, *v1.SendAgentMessageRequest) (*v1.SendAgentMessageResponse, error)
+	// StreamAgentMessage sends a message and streams the answer as the model
+	// writes it, ending with the answer as SendAgentMessage returns it.
+	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest, *connect.ServerStream[v1.StreamAgentMessageResponse]) error
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
 }
@@ -587,6 +676,12 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 		connect.WithSchema(agentSessionServiceMethods.ByName("SendAgentMessage")),
 		connect.WithHandlerOptions(opts...),
 	)
+	agentSessionServiceStreamAgentMessageHandler := connect.NewServerStreamHandlerSimple(
+		AgentSessionServiceStreamAgentMessageProcedure,
+		svc.StreamAgentMessage,
+		connect.WithSchema(agentSessionServiceMethods.ByName("StreamAgentMessage")),
+		connect.WithHandlerOptions(opts...),
+	)
 	agentSessionServiceDeleteAgentSessionHandler := connect.NewUnaryHandlerSimple(
 		AgentSessionServiceDeleteAgentSessionProcedure,
 		svc.DeleteAgentSession,
@@ -603,6 +698,8 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 			agentSessionServiceGetAgentSessionHandler.ServeHTTP(w, r)
 		case AgentSessionServiceSendAgentMessageProcedure:
 			agentSessionServiceSendAgentMessageHandler.ServeHTTP(w, r)
+		case AgentSessionServiceStreamAgentMessageProcedure:
+			agentSessionServiceStreamAgentMessageHandler.ServeHTTP(w, r)
 		case AgentSessionServiceDeleteAgentSessionProcedure:
 			agentSessionServiceDeleteAgentSessionHandler.ServeHTTP(w, r)
 		default:
@@ -628,6 +725,10 @@ func (UnimplementedAgentSessionServiceHandler) GetAgentSession(context.Context, 
 
 func (UnimplementedAgentSessionServiceHandler) SendAgentMessage(context.Context, *v1.SendAgentMessageRequest) (*v1.SendAgentMessageResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.SendAgentMessage is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest, *connect.ServerStream[v1.StreamAgentMessageResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.StreamAgentMessage is not implemented"))
 }
 
 func (UnimplementedAgentSessionServiceHandler) DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error) {

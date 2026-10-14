@@ -17988,6 +17988,57 @@
         "title": "UpdateServerSettingsResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.WatchAiLoginRequest": {
+        "type": "object",
+        "properties": {
+          "loginId": {
+            "type": "string",
+            "title": "login_id"
+          }
+        },
+        "title": "WatchAiLoginRequest",
+        "required": [
+          "loginId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.WatchAiLoginResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.AiLoginState"
+              }
+            ],
+            "title": "state"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.AiLoginEvent"
+            },
+            "title": "events",
+            "description": "What the login showed so far, oldest first."
+          },
+          "prompt": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.AiLoginPrompt"
+              }
+            ],
+            "title": "prompt",
+            "description": "What the login asks now, if anything."
+          },
+          "error": {
+            "type": "string",
+            "title": "error",
+            "description": "Why it failed."
+          }
+        },
+        "title": "WatchAiLoginResponse",
+        "additionalProperties": false
+      },
       "mavio.user.v1.CreateUserRequest": {
         "type": "object",
         "properties": {
@@ -19298,14 +19349,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+    "/mavio.system.v1.TaskService/RunTask": {
       "post": {
         "tags": [
-          "IssueService"
+          "TaskService"
         ],
-        "summary": "ReopenIssue",
-        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
-        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "summary": "RunTask",
+        "description": "RunTask queues a task to run now; a run already queued is not queued\n again. One asked for while a run is running is queued, and runs after\n it.",
+        "operationId": "mavio.system.v1.TaskService.RunTask",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19330,7 +19381,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.RunTaskRequest"
               }
             }
           },
@@ -19352,7 +19403,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.RunTaskResponse"
                 }
               }
             }
@@ -19360,14 +19411,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/ListFilterValues": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "CollectionService"
         ],
-        "summary": "ListFilterValues",
-        "description": "ListFilterValues lists the values a catalog's filter takes, such as\n genres, or the keywords and studios matching a query.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.ListFilterValues",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -19392,7 +19442,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -19414,7 +19464,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -20411,13 +20461,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
       "post": {
         "tags": [
-          "CollectionService"
+          "IssueService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "ReopenIssue",
+        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20442,7 +20493,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
               }
             }
           },
@@ -20464,7 +20515,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
                 }
               }
             }
@@ -21394,14 +21445,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.ProfileService/ListReleaseProfiles": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "ListReleaseProfiles",
+        "operationId": "mavio.acquisition.v1.ProfileService.ListReleaseProfiles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21426,7 +21476,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesRequest"
               }
             }
           },
@@ -21448,7 +21498,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesResponse"
                 }
               }
             }
@@ -26159,13 +26209,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListReleaseProfiles": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "ProfileService"
+          "CollectionService"
         ],
-        "summary": "ListReleaseProfiles",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListReleaseProfiles",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26190,7 +26241,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -26212,7 +26263,130 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListReleaseProfilesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/CreateCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DiscoverService/ListFilterValues": {
+      "post": {
+        "tags": [
+          "DiscoverService"
+        ],
+        "summary": "ListFilterValues",
+        "description": "ListFilterValues lists the values a catalog's filter takes, such as\n genres, or the keywords and studios matching a query.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.ListFilterValues",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListFilterValuesResponse"
                 }
               }
             }
@@ -26282,14 +26456,14 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/UpdateServerSettings": {
+    "/mavio.system.v1.SystemService/ListCatalogPlugins": {
       "post": {
         "tags": [
           "SystemService"
         ],
-        "summary": "UpdateServerSettings",
-        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
+        "summary": "ListCatalogPlugins",
+        "description": "ListCatalogPlugins lists the plugins of the configured plugin\n catalogs, with the versions the server can run. Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.ListCatalogPlugins",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26314,7 +26488,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.ListCatalogPluginsRequest"
               }
             }
           },
@@ -26336,129 +26510,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.ListCatalogPluginsResponse"
                 }
               }
             }
@@ -30794,7 +30846,7 @@
           "AiService"
         ],
         "summary": "GetAiLogin",
-        "description": "GetAiLogin returns a login's state: what to show, what it asks and\n whether it ended. Clients poll it while the login runs.",
+        "description": "GetAiLogin returns a login's state: what to show, what it asks and\n whether it ended.",
         "operationId": "mavio.system.v1.AiService.GetAiLogin",
         "parameters": [
           {
@@ -31160,6 +31212,7 @@
         }
       }
     },
+    "/mavio.system.v1.AiService/WatchAiLogin": {},
     "/mavio.system.v1.BackupService/CreateBackup": {
       "post": {
         "tags": [
@@ -31836,14 +31889,13 @@
         }
       }
     },
-    "/mavio.system.v1.SystemService/ListCatalogPlugins": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "SystemService"
+          "CollectionService"
         ],
-        "summary": "ListCatalogPlugins",
-        "description": "ListCatalogPlugins lists the plugins of the configured plugin\n catalogs, with the versions the server can run. Administrators only.",
-        "operationId": "mavio.system.v1.SystemService.ListCatalogPlugins",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31868,7 +31920,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.ListCatalogPluginsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -31890,7 +31942,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.ListCatalogPluginsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -32208,13 +32260,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.system.v1.SystemService/UpdateServerSettings": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SystemService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "UpdateServerSettings",
+        "description": "UpdateServerSettings replaces the settings and applies them at once.\n Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.UpdateServerSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32239,7 +32292,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsRequest"
               }
             }
           },
@@ -32261,7 +32314,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.UpdateServerSettingsResponse"
                 }
               }
             }
@@ -32393,14 +32446,13 @@
         }
       }
     },
-    "/mavio.system.v1.TaskService/RunTask": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "TaskService"
+          "CollectionService"
         ],
-        "summary": "RunTask",
-        "description": "RunTask queues a task to run now; a run already queued is not queued\n again. One asked for while a run is running is queued, and runs after\n it.",
-        "operationId": "mavio.system.v1.TaskService.RunTask",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32425,7 +32477,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.RunTaskRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -32447,7 +32499,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.RunTaskResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }

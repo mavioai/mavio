@@ -31,12 +31,17 @@ service AiGatewayService {
   // SetAiApiKey stores a provider's API key, or removes it.
   rpc SetAiApiKey(SetAiApiKeyRequest) returns (SetAiApiKeyResponse);
   // StartAiLogin starts a provider's OAuth login, such as a subscription's
-  // sign in. The login runs in the plugin; GetAiLogin follows it and
+  // sign in. The login runs in the plugin; WatchAiLogin follows it and
   // AnswerAiLogin answers what it asks.
   rpc StartAiLogin(StartAiLoginRequest) returns (StartAiLoginResponse);
   // GetAiLogin returns a login's state: what to show the user, what it
   // asks and whether it ended.
   rpc GetAiLogin(GetAiLoginRequest) returns (GetAiLoginResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // WatchAiLogin streams a login's state: as it is, then each time it
+  // changes, until the login ends.
+  rpc WatchAiLogin(WatchAiLoginRequest) returns (stream WatchAiLoginResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // AnswerAiLogin answers a login's prompt.
@@ -47,6 +52,9 @@ service AiGatewayService {
   rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
   // CompleteAi asks a model for one answer.
   rpc CompleteAi(CompleteAiRequest) returns (CompleteAiResponse);
+  // StreamAi asks a model for one answer, streamed as the model writes it,
+  // ending with the answer as CompleteAi returns it.
+  rpc StreamAi(StreamAiRequest) returns (stream StreamAiResponse);
 }
 
 message ListAiProvidersRequest {}
@@ -230,6 +238,20 @@ message AiLoginOption {
   string description = 3;
 }
 
+message WatchAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message WatchAiLoginResponse {
+  AiLoginState state = 1;
+  // What the login showed so far, oldest first.
+  repeated AiLoginEvent events = 2;
+  // What the login asks now, if anything.
+  AiLoginPrompt prompt = 3;
+  // Why it failed.
+  string error = 4;
+}
+
 message AnswerAiLoginRequest {
   string login_id = 1 [(buf.validate.field).required = true];
   string prompt_id = 2 [(buf.validate.field).required = true];
@@ -302,6 +324,21 @@ message CompleteAiResponse {
   string stop_reason = 4;
 }
 
+message StreamAiRequest {
+  CompleteAiRequest completion = 1 [(buf.validate.field).required = true];
+}
+
+message StreamAiResponse {
+  oneof event {
+    // More of the answer's text.
+    string text = 1;
+    // More of the model's reasoning, when it shows it.
+    string thinking = 2;
+    // The answer, last.
+    CompleteAiResponse done = 3;
+  }
+}
+
 // AiUsage is what a request used.
 message AiUsage {
   int64 input_tokens = 1;
@@ -328,6 +365,9 @@ service AgentSessionService {
   }
   // SendAgentMessage sends a message and returns the answer.
   rpc SendAgentMessage(SendAgentMessageRequest) returns (SendAgentMessageResponse);
+  // StreamAgentMessage sends a message and streams the answer as the model
+  // writes it, ending with the answer as SendAgentMessage returns it.
+  rpc StreamAgentMessage(StreamAgentMessageRequest) returns (stream StreamAgentMessageResponse);
   // DeleteAgentSession deletes a conversation.
   rpc DeleteAgentSession(DeleteAgentSessionRequest) returns (DeleteAgentSessionResponse);
 }
@@ -388,6 +428,19 @@ message SendAgentMessageRequest {
 message SendAgentMessageResponse {
   AgentMessage answer = 1;
   AiUsage usage = 2;
+}
+
+message StreamAgentMessageRequest {
+  SendAgentMessageRequest message = 1 [(buf.validate.field).required = true];
+}
+
+message StreamAgentMessageResponse {
+  oneof event {
+    // The answer so far; a retried attempt starts it again.
+    string text = 1;
+    // The answer, last.
+    SendAgentMessageResponse done = 2;
+  }
 }
 
 message DeleteAgentSessionRequest {

@@ -27,8 +27,13 @@ service AiService {
   // warn of it and leave the choice to the administrator.
   rpc StartAiLogin(StartAiLoginRequest) returns (StartAiLoginResponse);
   // GetAiLogin returns a login's state: what to show, what it asks and
-  // whether it ended. Clients poll it while the login runs.
+  // whether it ended.
   rpc GetAiLogin(GetAiLoginRequest) returns (GetAiLoginResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // WatchAiLogin streams a login's state: as it is, then each time it
+  // changes, until the login ends. Clients follow a login with it.
+  rpc WatchAiLogin(WatchAiLoginRequest) returns (stream WatchAiLoginResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // AnswerAiLogin answers a login's prompt.
@@ -79,6 +84,20 @@ message GetAiLoginRequest {
 }
 
 message GetAiLoginResponse {
+  mavio.plugin.v1.AiLoginState state = 1;
+  // What the login showed so far, oldest first.
+  repeated mavio.plugin.v1.AiLoginEvent events = 2;
+  // What the login asks now, if anything.
+  mavio.plugin.v1.AiLoginPrompt prompt = 3;
+  // Why it failed.
+  string error = 4;
+}
+
+message WatchAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message WatchAiLoginResponse {
   mavio.plugin.v1.AiLoginState state = 1;
   // What the login showed so far, oldest first.
   repeated mavio.plugin.v1.AiLoginEvent events = 2;

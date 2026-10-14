@@ -38,6 +38,14 @@ pub type OwnedGetAiLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetAiLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetAiLoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<WatchAiLoginRequestView<'static>>`.
+pub type OwnedWatchAiLoginRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginRequestView<'static>,
+>;
+///Shorthand for `OwnedView<WatchAiLoginResponseView<'static>>`.
+pub type OwnedWatchAiLoginResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<AnswerAiLoginRequestView<'static>>`.
 pub type OwnedAnswerAiLoginRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::AnswerAiLoginRequestView<'static>,
@@ -232,6 +240,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::WatchAiLoginResponse>
+for crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::WatchAiLoginResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::AnswerAiLoginResponse>
 for crate::proto::mavio::system::v1::__buffa::view::AnswerAiLoginResponseView<'_> {
     fn encode(
@@ -364,6 +406,12 @@ pub const AI_SERVICE_START_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
 pub const AI_SERVICE_GET_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.AiService/GetAiLogin",
         ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `WatchAiLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_WATCH_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/WatchAiLogin",
+        ::connectrpc::StreamType::ServerStream,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `AnswerAiLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -535,7 +583,7 @@ pub trait AiService: Send + Sync + 'static {
         >,
     > + Send;
     /// GetAiLogin returns a login's state: what to show, what it asks and
-    /// whether it ended. Clients poll it while the login runs.
+    /// whether it ended.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -556,6 +604,30 @@ pub trait AiService: Send + Sync + 'static {
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::GetAiLoginResponse,
             > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// WatchAiLogin streams a login's state: as it is, then each time it
+    /// changes, until the login ends. Clients follow a login with it.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn watch_ai_login(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::WatchAiLoginRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::system::v1::WatchAiLoginResponse,
+                > + Send + use<Self>,
+            >,
         >,
     > + Send;
     /// AnswerAiLogin answers a login's prompt.
@@ -804,6 +876,34 @@ impl<S: AiService> AiServiceExt for S {
                 },
             )
             .with_spec(AI_SERVICE_GET_AI_LOGIN_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::system::v1::WatchAiLoginResponse,
+            >(
+                AI_SERVICE_SERVICE_NAME,
+                "WatchAiLogin",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::WatchAiLoginRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.watch_ai_login(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AI_SERVICE_WATCH_AI_LOGIN_SPEC)
             .route_view(
                 AI_SERVICE_SERVICE_NAME,
                 "AnswerAiLogin",
@@ -973,6 +1073,12 @@ impl<T: AiService> ::connectrpc::Dispatcher for AiServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(AI_SERVICE_GET_AI_LOGIN_SPEC),
+                )
+            }
+            "WatchAiLogin" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AI_SERVICE_WATCH_AI_LOGIN_SPEC),
                 )
             }
             "AnswerAiLogin" => {
@@ -1199,6 +1305,32 @@ impl<T: AiService> ::connectrpc::Dispatcher for AiServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "WatchAiLogin" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::WatchAiLoginRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::WatchAiLoginRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.watch_ai_login(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::system::v1::WatchAiLoginResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_streaming(path),
         }
     }
@@ -1531,6 +1663,49 @@ where
                 &self.transport,
                 &self.config,
                 AI_SERVICE_GET_AI_LOGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the WatchAiLogin RPC. Sends a request to /mavio.system.v1.AiService/WatchAiLogin.
+    pub async fn watch_ai_login(
+        &self,
+        request: crate::proto::mavio::system::v1::WatchAiLoginRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.watch_ai_login_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the WatchAiLogin RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn watch_ai_login_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::WatchAiLoginRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::system::v1::__buffa::view::WatchAiLoginResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_WATCH_AI_LOGIN_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

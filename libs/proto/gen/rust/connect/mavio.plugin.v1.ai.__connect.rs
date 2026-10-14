@@ -38,6 +38,14 @@ pub type OwnedGetAiLoginRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetAiLoginResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::GetAiLoginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<WatchAiLoginRequestView<'static>>`.
+pub type OwnedWatchAiLoginRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginRequestView<'static>,
+>;
+///Shorthand for `OwnedView<WatchAiLoginResponseView<'static>>`.
+pub type OwnedWatchAiLoginResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<AnswerAiLoginRequestView<'static>>`.
 pub type OwnedAnswerAiLoginRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::AnswerAiLoginRequestView<'static>,
@@ -69,6 +77,14 @@ pub type OwnedCompleteAiRequestView = ::buffa::view::OwnedView<
 ///Shorthand for `OwnedView<CompleteAiResponseView<'static>>`.
 pub type OwnedCompleteAiResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::CompleteAiResponseView<'static>,
+>;
+///Shorthand for `OwnedView<StreamAiRequestView<'static>>`.
+pub type OwnedStreamAiRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAiRequestView<'static>,
+>;
+///Shorthand for `OwnedView<StreamAiResponseView<'static>>`.
+pub type OwnedStreamAiResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAiResponseView<'static>,
 >;
 ///Shorthand for `OwnedView<CreateAgentSessionRequestView<'static>>`.
 pub type OwnedCreateAgentSessionRequestView = ::buffa::view::OwnedView<
@@ -107,6 +123,18 @@ pub type OwnedSendAgentMessageRequestView = ::buffa::view::OwnedView<
 ///Shorthand for `OwnedView<SendAgentMessageResponseView<'static>>`.
 pub type OwnedSendAgentMessageResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::SendAgentMessageResponseView<'static>,
+>;
+///Shorthand for `OwnedView<StreamAgentMessageRequestView<'static>>`.
+pub type OwnedStreamAgentMessageRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<StreamAgentMessageResponseView<'static>>`.
+pub type OwnedStreamAgentMessageResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<
+        'static,
+    >,
 >;
 ///Shorthand for `OwnedView<DeleteAgentSessionRequestView<'static>>`.
 pub type OwnedDeleteAgentSessionRequestView = ::buffa::view::OwnedView<
@@ -290,6 +318,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::WatchAiLoginResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::WatchAiLoginResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::AnswerAiLoginResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::AnswerAiLoginResponseView<'_> {
     fn encode(
@@ -404,6 +466,40 @@ for crate::proto::mavio::plugin::v1::__buffa::view::CompleteAiResponseView<'_> {
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::CompleteAiResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::CompleteAiResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::StreamAiResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::StreamAiResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::StreamAiResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAiResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -566,6 +662,42 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::StreamAgentMessageResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::StreamAgentMessageResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::DeleteAgentSessionResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentSessionResponseView<'_> {
     fn encode(
@@ -634,6 +766,12 @@ pub const AI_GATEWAY_SERVICE_GET_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrp
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `WatchAiLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_GATEWAY_SERVICE_WATCH_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AiGatewayService/WatchAiLogin",
+        ::connectrpc::StreamType::ServerStream,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `AnswerAiLogin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const AI_GATEWAY_SERVICE_ANSWER_AI_LOGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.AiGatewayService/AnswerAiLogin",
@@ -656,6 +794,12 @@ pub const AI_GATEWAY_SERVICE_LOGOUT_AI_SPEC: ::connectrpc::Spec = ::connectrpc::
 pub const AI_GATEWAY_SERVICE_COMPLETE_AI_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.AiGatewayService/CompleteAi",
         ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StreamAi` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_GATEWAY_SERVICE_STREAM_AI_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AiGatewayService/StreamAi",
+        ::connectrpc::StreamType::ServerStream,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AiGatewayService reaches AI model providers on the server's behalf. The
@@ -792,7 +936,7 @@ pub trait AiGatewayService: Send + Sync + 'static {
         >,
     > + Send;
     /// StartAiLogin starts a provider's OAuth login, such as a subscription's
-    /// sign in. The login runs in the plugin; GetAiLogin follows it and
+    /// sign in. The login runs in the plugin; WatchAiLogin follows it and
     /// AnswerAiLogin answers what it asks.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
@@ -838,6 +982,30 @@ pub trait AiGatewayService: Send + Sync + 'static {
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::GetAiLoginResponse,
             > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// WatchAiLogin streams a login's state: as it is, then each time it
+    /// changes, until the login ends.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn watch_ai_login(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::plugin::v1::WatchAiLoginResponse,
+                > + Send + use<Self>,
+            >,
         >,
     > + Send;
     /// AnswerAiLogin answers a login's prompt.
@@ -930,6 +1098,30 @@ pub trait AiGatewayService: Send + Sync + 'static {
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::CompleteAiResponse,
             > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StreamAi asks a model for one answer, streamed as the model writes it,
+    /// ending with the answer as CompleteAi returns it.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn stream_ai(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::StreamAiRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::plugin::v1::StreamAiResponse,
+                > + Send + use<Self>,
+            >,
         >,
     > + Send;
 }
@@ -1109,6 +1301,34 @@ impl<S: AiGatewayService> AiGatewayServiceExt for S {
                 },
             )
             .with_spec(AI_GATEWAY_SERVICE_GET_AI_LOGIN_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::plugin::v1::WatchAiLoginResponse,
+            >(
+                AI_GATEWAY_SERVICE_SERVICE_NAME,
+                "WatchAiLogin",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.watch_ai_login(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AI_GATEWAY_SERVICE_WATCH_AI_LOGIN_SPEC)
             .route_view(
                 AI_GATEWAY_SERVICE_SERVICE_NAME,
                 "AnswerAiLogin",
@@ -1225,6 +1445,34 @@ impl<S: AiGatewayService> AiGatewayServiceExt for S {
                 },
             )
             .with_spec(AI_GATEWAY_SERVICE_COMPLETE_AI_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::plugin::v1::StreamAiResponse,
+            >(
+                AI_GATEWAY_SERVICE_SERVICE_NAME,
+                "StreamAi",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::StreamAiRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::StreamAiRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.stream_ai(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AI_GATEWAY_SERVICE_STREAM_AI_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1309,6 +1557,12 @@ impl<T: AiGatewayService> ::connectrpc::Dispatcher for AiGatewayServiceServer<T>
                         .with_spec(AI_GATEWAY_SERVICE_GET_AI_LOGIN_SPEC),
                 )
             }
+            "WatchAiLogin" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AI_GATEWAY_SERVICE_WATCH_AI_LOGIN_SPEC),
+                )
+            }
             "AnswerAiLogin" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1331,6 +1585,12 @@ impl<T: AiGatewayService> ::connectrpc::Dispatcher for AiGatewayServiceServer<T>
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AI_GATEWAY_SERVICE_COMPLETE_AI_SPEC),
+                )
+            }
+            "StreamAi" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AI_GATEWAY_SERVICE_STREAM_AI_SPEC),
                 )
             }
             _ => None,
@@ -1561,6 +1821,58 @@ impl<T: AiGatewayService> ::connectrpc::Dispatcher for AiGatewayServiceServer<T>
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "WatchAiLogin" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.watch_ai_login(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::plugin::v1::WatchAiLoginResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
+            "StreamAi" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::StreamAiRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::StreamAiRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::StreamAiRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.stream_ai(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::plugin::v1::StreamAiResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_streaming(path),
         }
     }
@@ -1899,6 +2211,49 @@ where
             )
             .await
     }
+    /// Call the WatchAiLogin RPC. Sends a request to /mavio.plugin.v1.AiGatewayService/WatchAiLogin.
+    pub async fn watch_ai_login(
+        &self,
+        request: crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.watch_ai_login_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the WatchAiLogin RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn watch_ai_login_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::WatchAiLoginRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::WatchAiLoginResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AI_GATEWAY_SERVICE_WATCH_AI_LOGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
     /// Call the AnswerAiLogin RPC. Sends a request to /mavio.plugin.v1.AiGatewayService/AnswerAiLogin.
     pub async fn answer_ai_login(
         &self,
@@ -2079,6 +2434,45 @@ where
             )
             .await
     }
+    /// Call the StreamAi RPC. Sends a request to /mavio.plugin.v1.AiGatewayService/StreamAi.
+    pub async fn stream_ai(
+        &self,
+        request: crate::proto::mavio::plugin::v1::StreamAiRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::StreamAiResponseView<'static>,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.stream_ai_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StreamAi RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn stream_ai_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::StreamAiRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::StreamAiResponseView<'static>,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AI_GATEWAY_SERVICE_STREAM_AI_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
 }
 /// Full service name for this service.
 pub const AGENT_SESSION_SERVICE_SERVICE_NAME: &str = "mavio.plugin.v1.AgentSessionService";
@@ -2104,6 +2498,12 @@ pub const AGENT_SESSION_SERVICE_GET_AGENT_SESSION_SPEC: ::connectrpc::Spec = ::c
 pub const AGENT_SESSION_SERVICE_SEND_AGENT_MESSAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.AgentSessionService/SendAgentMessage",
         ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `StreamAgentMessage` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/StreamAgentMessage",
+        ::connectrpc::StreamType::ServerStream,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `DeleteAgentSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -2255,6 +2655,30 @@ pub trait AgentSessionService: Send + Sync + 'static {
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::SendAgentMessageResponse,
             > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// StreamAgentMessage sends a message and streams the answer as the model
+    /// writes it, ending with the answer as SendAgentMessage returns it.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn stream_agent_message(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::plugin::v1::StreamAgentMessageResponse,
+                > + Send + use<Self>,
+            >,
         >,
     > + Send;
     /// DeleteAgentSession deletes a conversation.
@@ -2428,6 +2852,34 @@ impl<S: AgentSessionService> AgentSessionServiceExt for S {
                 },
             )
             .with_spec(AGENT_SESSION_SERVICE_SEND_AGENT_MESSAGE_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::plugin::v1::StreamAgentMessageResponse,
+            >(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "StreamAgentMessage",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.stream_agent_message(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC)
             .route_view(
                 AGENT_SESSION_SERVICE_SERVICE_NAME,
                 "DeleteAgentSession",
@@ -2535,6 +2987,12 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AGENT_SESSION_SERVICE_SEND_AGENT_MESSAGE_SPEC),
+                )
+            }
+            "StreamAgentMessage" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC),
                 )
             }
             "DeleteAgentSession" => {
@@ -2685,6 +3143,32 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "StreamAgentMessage" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.stream_agent_message(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::plugin::v1::StreamAgentMessageResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_streaming(path),
         }
     }
@@ -2974,6 +3458,49 @@ where
                 &self.transport,
                 &self.config,
                 AGENT_SESSION_SERVICE_SEND_AGENT_MESSAGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the StreamAgentMessage RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/StreamAgentMessage.
+    pub async fn stream_agent_message(
+        &self,
+        request: crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.stream_agent_message_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the StreamAgentMessage RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn stream_agent_message_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::StreamAgentMessageRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::StreamAgentMessageResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_STREAM_AGENT_MESSAGE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

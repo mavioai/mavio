@@ -240,6 +240,14 @@ pub use self::__buffa::view::AiLoginOptionView;
 #[doc(inline)]
 pub use self::__buffa::view::AiLoginOptionOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AnswerAiLoginRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::AnswerAiLoginRequestOwnedView;
@@ -275,6 +283,14 @@ pub use self::__buffa::view::AiMessageOwnedView;
 pub use self::__buffa::view::CompleteAiResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CompleteAiResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAiRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAiRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAiResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAiResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::AiUsageView;
 #[doc(inline)]
@@ -319,6 +335,14 @@ pub use self::__buffa::view::SendAgentMessageRequestOwnedView;
 pub use self::__buffa::view::SendAgentMessageResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SendAgentMessageResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAgentMessageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAgentMessageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAgentMessageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StreamAgentMessageResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteAgentSessionRequestView;
 #[doc(inline)]

@@ -232,6 +232,14 @@ pub use self::__buffa::view::GetAiLoginResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetAiLoginResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchAiLoginResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::AnswerAiLoginRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::AnswerAiLoginRequestOwnedView;

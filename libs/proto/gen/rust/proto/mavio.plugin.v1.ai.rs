@@ -3742,6 +3742,330 @@ impl ::buffa::ExtensionSet for AiLoginOption {
     }
 }
 #[derive(Clone, PartialEq, Default)]
+pub struct WatchAiLoginRequest {
+    /// Field 1: `login_id`
+    pub login_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for WatchAiLoginRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("WatchAiLoginRequest").field("login_id", &self.login_id).finish()
+    }
+}
+impl WatchAiLoginRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.WatchAiLoginRequest";
+}
+impl WatchAiLoginRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::login_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_login_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.login_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(WatchAiLoginRequest);
+impl ::buffa::MessageName for WatchAiLoginRequest {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "WatchAiLoginRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.WatchAiLoginRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.WatchAiLoginRequest";
+}
+impl ::buffa::Message for WatchAiLoginRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.login_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.login_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .login_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.login_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for WatchAiLoginRequest {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.WatchAiLoginRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct WatchAiLoginResponse {
+    /// Field 1: `state`
+    pub state: ::core::option::Option<::buffa::EnumValue<AiLoginState>>,
+    /// What the login showed so far, oldest first.
+    ///
+    /// Field 2: `events`
+    pub events: ::buffa::alloc::vec::Vec<AiLoginEvent>,
+    /// What the login asks now, if anything.
+    ///
+    /// Field 3: `prompt`
+    pub prompt: ::buffa::MessageField<AiLoginPrompt, ::buffa::Inline<AiLoginPrompt>>,
+    /// Why it failed.
+    ///
+    /// Field 4: `error`
+    pub error: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for WatchAiLoginResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("WatchAiLoginResponse")
+            .field("state", &self.state)
+            .field("events", &self.events)
+            .field("prompt", &self.prompt)
+            .field("error", &self.error)
+            .finish()
+    }
+}
+impl WatchAiLoginResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.WatchAiLoginResponse";
+}
+impl WatchAiLoginResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::state`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_state(
+        mut self,
+        value: impl Into<::buffa::EnumValue<AiLoginState>>,
+    ) -> Self {
+        self.state = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::error`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_error(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.error = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(WatchAiLoginResponse);
+impl ::buffa::MessageName for WatchAiLoginResponse {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "WatchAiLoginResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.WatchAiLoginResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.WatchAiLoginResponse";
+}
+impl ::buffa::Message for WatchAiLoginResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.state {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        for v in &self.events {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.prompt.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.prompt.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(ref v) = self.error {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.state {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        for v in &self.events {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if self.prompt.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.prompt.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.error {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.state = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.events.push(elem);
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.prompt.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.error.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.state = ::core::option::Option::None;
+        self.events.clear();
+        self.prompt = ::buffa::MessageField::none();
+        self.error = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for WatchAiLoginResponse {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.WatchAiLoginResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
 pub struct AnswerAiLoginRequest {
     /// Field 1: `login_id`
     pub login_id: ::core::option::Option<::buffa::alloc::string::String>,
@@ -5069,6 +5393,287 @@ impl ::buffa::ExtensionSet for CompleteAiResponse {
     fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
         &mut self.__buffa_unknown_fields
     }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StreamAiRequest {
+    /// Field 1: `completion`
+    pub completion: ::buffa::MessageField<
+        CompleteAiRequest,
+        ::buffa::Inline<CompleteAiRequest>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StreamAiRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StreamAiRequest").field("completion", &self.completion).finish()
+    }
+}
+impl StreamAiRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAiRequest";
+}
+::buffa::impl_default_instance!(StreamAiRequest);
+impl ::buffa::MessageName for StreamAiRequest {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StreamAiRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StreamAiRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAiRequest";
+}
+impl ::buffa::Message for StreamAiRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.completion.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.completion.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.completion.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.completion.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.completion.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.completion = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StreamAiRequest {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StreamAiRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StreamAiResponse {
+    pub event: ::core::option::Option<__buffa::oneof::stream_ai_response::Event>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StreamAiResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StreamAiResponse").field("event", &self.event).finish()
+    }
+}
+impl StreamAiResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAiResponse";
+}
+::buffa::impl_default_instance!(StreamAiResponse);
+impl ::buffa::MessageName for StreamAiResponse {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StreamAiResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StreamAiResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAiResponse";
+}
+impl ::buffa::Message for StreamAiResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let ::core::option::Option::Some(ref v) = self.event {
+            match v {
+                __buffa::oneof::stream_ai_response::Event::Text(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+                __buffa::oneof::stream_ai_response::Event::Thinking(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+                __buffa::oneof::stream_ai_response::Event::Done(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 1u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
+            }
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let ::core::option::Option::Some(ref v) = self.event {
+            match v {
+                __buffa::oneof::stream_ai_response::Event::Text(x) => {
+                    ::buffa::types::put_string_field(1u32, x, buf);
+                }
+                __buffa::oneof::stream_ai_response::Event::Thinking(x) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+                __buffa::oneof::stream_ai_response::Event::Done(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        3u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.event = ::core::option::Option::Some(
+                    __buffa::oneof::stream_ai_response::Event::Text(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.event = ::core::option::Option::Some(
+                    __buffa::oneof::stream_ai_response::Event::Thinking(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::stream_ai_response::Event::Done(ref mut existing),
+                ) = self.event
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.event = ::core::option::Option::Some(
+                        __buffa::oneof::stream_ai_response::Event::Done(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.event = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StreamAiResponse {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StreamAiResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+pub mod stream_ai_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::stream_ai_response::Event;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::stream_ai_response::Event as EventView;
 }
 /// AiUsage is what a request used.
 #[derive(Clone, PartialEq, Default)]
@@ -6851,6 +7456,276 @@ impl ::buffa::ExtensionSet for SendAgentMessageResponse {
     fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
         &mut self.__buffa_unknown_fields
     }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StreamAgentMessageRequest {
+    /// Field 1: `message`
+    pub message: ::buffa::MessageField<
+        SendAgentMessageRequest,
+        ::buffa::Inline<SendAgentMessageRequest>,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StreamAgentMessageRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StreamAgentMessageRequest")
+            .field("message", &self.message)
+            .finish()
+    }
+}
+impl StreamAgentMessageRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAgentMessageRequest";
+}
+::buffa::impl_default_instance!(StreamAgentMessageRequest);
+impl ::buffa::MessageName for StreamAgentMessageRequest {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StreamAgentMessageRequest";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StreamAgentMessageRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAgentMessageRequest";
+}
+impl ::buffa::Message for StreamAgentMessageRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.message.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.message.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.message.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.message.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.message.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.message = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StreamAgentMessageRequest {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StreamAgentMessageRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct StreamAgentMessageResponse {
+    pub event: ::core::option::Option<
+        __buffa::oneof::stream_agent_message_response::Event,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for StreamAgentMessageResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("StreamAgentMessageResponse").field("event", &self.event).finish()
+    }
+}
+impl StreamAgentMessageResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAgentMessageResponse";
+}
+::buffa::impl_default_instance!(StreamAgentMessageResponse);
+impl ::buffa::MessageName for StreamAgentMessageResponse {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "StreamAgentMessageResponse";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.StreamAgentMessageResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.StreamAgentMessageResponse";
+}
+impl ::buffa::Message for StreamAgentMessageResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let ::core::option::Option::Some(ref v) = self.event {
+            match v {
+                __buffa::oneof::stream_agent_message_response::Event::Text(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+                __buffa::oneof::stream_agent_message_response::Event::Done(x) => {
+                    let __slot = __cache.reserve();
+                    let inner = x.compute_size(__cache);
+                    __cache.set(__slot, inner);
+                    size
+                        += 1u64 + ::buffa::encoding::varint_len(inner as u64) as u64
+                            + inner as u64;
+                }
+            }
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let ::core::option::Option::Some(ref v) = self.event {
+            match v {
+                __buffa::oneof::stream_agent_message_response::Event::Text(x) => {
+                    ::buffa::types::put_string_field(1u32, x, buf);
+                }
+                __buffa::oneof::stream_agent_message_response::Event::Done(x) => {
+                    ::buffa::types::put_len_delimited_header(
+                        2u32,
+                        u64::from(__cache.consume_next()),
+                        buf,
+                    );
+                    x.write_to(__cache, buf);
+                }
+            }
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.event = ::core::option::Option::Some(
+                    __buffa::oneof::stream_agent_message_response::Event::Text(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                if let ::core::option::Option::Some(
+                    __buffa::oneof::stream_agent_message_response::Event::Done(
+                        ref mut existing,
+                    ),
+                ) = self.event
+                {
+                    ::buffa::Message::merge_length_delimited(&mut **existing, buf, ctx)?;
+                } else {
+                    let mut val = ::core::default::Default::default();
+                    ::buffa::Message::merge_length_delimited(&mut val, buf, ctx)?;
+                    self.event = ::core::option::Option::Some(
+                        __buffa::oneof::stream_agent_message_response::Event::Done(
+                            ::buffa::alloc::boxed::Box::new(val),
+                        ),
+                    );
+                }
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.event = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for StreamAgentMessageResponse {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.StreamAgentMessageResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+pub mod stream_agent_message_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::stream_agent_message_response::Event;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::stream_agent_message_response::Event as EventView;
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct DeleteAgentSessionRequest {

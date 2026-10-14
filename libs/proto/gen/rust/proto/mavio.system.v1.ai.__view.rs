@@ -2479,6 +2479,610 @@ impl ::buffa::HasMessageView for super::super::GetAiLoginResponse {
     type ViewHandle = GetAiLoginResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
+pub struct WatchAiLoginRequestView<'a> {
+    /// Field 1: `login_id`
+    pub login_id: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for WatchAiLoginRequestView<'a> {
+    type Owned = super::super::WatchAiLoginRequest;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.login_id = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::WatchAiLoginRequest,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::WatchAiLoginRequest,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::WatchAiLoginRequest {
+            login_id: self.login_id.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for WatchAiLoginRequestView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.login_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.login_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for WatchAiLoginRequestView<'a> {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "WatchAiLoginRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.WatchAiLoginRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.WatchAiLoginRequest";
+}
+::buffa::impl_default_view_instance!(WatchAiLoginRequestView);
+::buffa::impl_view_reborrow!(WatchAiLoginRequestView);
+/** Self-contained, `'static` owned view of a `WatchAiLoginRequest` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`WatchAiLoginRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`WatchAiLoginRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct WatchAiLoginRequestOwnedView(
+    ::buffa::OwnedView<WatchAiLoginRequestView<'static>>,
+);
+impl WatchAiLoginRequestOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginRequestOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::WatchAiLoginRequest,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`WatchAiLoginRequestView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &WatchAiLoginRequestView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::WatchAiLoginRequest {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `login_id`
+    #[must_use]
+    pub fn login_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().login_id
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<WatchAiLoginRequestView<'static>>>
+for WatchAiLoginRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<WatchAiLoginRequestView<'static>>) -> Self {
+        WatchAiLoginRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<WatchAiLoginRequestOwnedView>
+for ::buffa::OwnedView<WatchAiLoginRequestView<'static>> {
+    fn from(wrapper: WatchAiLoginRequestOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<WatchAiLoginRequestView<'static>>>
+for WatchAiLoginRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<WatchAiLoginRequestView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::WatchAiLoginRequest {
+    type View<'a> = WatchAiLoginRequestView<'a>;
+    type ViewHandle = WatchAiLoginRequestOwnedView;
+}
+#[derive(Clone, Debug, Default)]
+pub struct WatchAiLoginResponseView<'a> {
+    /// Field 1: `state`
+    pub state: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::plugin::v1::AiLoginState>,
+    >,
+    /// What the login showed so far, oldest first.
+    ///
+    /// Field 2: `events`
+    pub events: ::buffa::RepeatedView<
+        'a,
+        super::super::super::super::plugin::v1::__buffa::view::AiLoginEventView<'a>,
+    >,
+    /// What the login asks now, if anything.
+    ///
+    /// Field 3: `prompt`
+    pub prompt: ::buffa::MessageFieldView<
+        super::super::super::super::plugin::v1::__buffa::view::AiLoginPromptView<'a>,
+    >,
+    /// Why it failed.
+    ///
+    /// Field 4: `error`
+    pub error: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for WatchAiLoginResponseView<'a> {
+    type Owned = super::super::WatchAiLoginResponse;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.state = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.prompt.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.prompt = ::buffa::MessageFieldView::set(
+                            <super::super::super::super::plugin::v1::__buffa::view::AiLoginPromptView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.error = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::super::super::plugin::v1::__buffa::view::AiLoginEventView,
+                    >(),
+                )?;
+                view.events
+                    .push(
+                        <super::super::super::super::plugin::v1::__buffa::view::AiLoginEventView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<
+        super::super::WatchAiLoginResponse,
+        ::buffa::DecodeError,
+    > {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<
+        super::super::WatchAiLoginResponse,
+        ::buffa::DecodeError,
+    > {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::WatchAiLoginResponse {
+            state: self.state,
+            events: self
+                .events
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            prompt: match self.prompt.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        super::super::super::super::plugin::v1::AiLoginPrompt,
+                        ::buffa::Inline<
+                            super::super::super::super::plugin::v1::AiLoginPrompt,
+                        >,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            error: self.error.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for WatchAiLoginResponseView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.state {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        for v in &self.events {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.prompt.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.prompt.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(ref v) = self.error {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.state {
+            ::buffa::types::put_int32_field(1u32, v.to_i32(), buf);
+        }
+        for v in &self.events {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if self.prompt.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.prompt.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.error {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for WatchAiLoginResponseView<'a> {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "WatchAiLoginResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.WatchAiLoginResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.WatchAiLoginResponse";
+}
+::buffa::impl_default_view_instance!(WatchAiLoginResponseView);
+::buffa::impl_view_reborrow!(WatchAiLoginResponseView);
+/** Self-contained, `'static` owned view of a `WatchAiLoginResponse` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`WatchAiLoginResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`WatchAiLoginResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct WatchAiLoginResponseOwnedView(
+    ::buffa::OwnedView<WatchAiLoginResponseView<'static>>,
+);
+impl WatchAiLoginResponseOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginResponseOwnedView(
+                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
+            ),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::WatchAiLoginResponse,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            WatchAiLoginResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`WatchAiLoginResponseView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &WatchAiLoginResponseView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::WatchAiLoginResponse {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `state`
+    #[must_use]
+    pub fn state(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::plugin::v1::AiLoginState>,
+    > {
+        self.0.reborrow().state
+    }
+    /// What the login showed so far, oldest first.
+    ///
+    /// Field 2: `events`
+    #[must_use]
+    pub fn events(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::super::super::plugin::v1::__buffa::view::AiLoginEventView<'_>,
+    > {
+        &self.0.reborrow().events
+    }
+    /// What the login asks now, if anything.
+    ///
+    /// Field 3: `prompt`
+    #[must_use]
+    pub fn prompt(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        super::super::super::super::plugin::v1::__buffa::view::AiLoginPromptView<'_>,
+    > {
+        &self.0.reborrow().prompt
+    }
+    /// Why it failed.
+    ///
+    /// Field 4: `error`
+    #[must_use]
+    pub fn error(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().error
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<WatchAiLoginResponseView<'static>>>
+for WatchAiLoginResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<WatchAiLoginResponseView<'static>>) -> Self {
+        WatchAiLoginResponseOwnedView(inner)
+    }
+}
+impl ::core::convert::From<WatchAiLoginResponseOwnedView>
+for ::buffa::OwnedView<WatchAiLoginResponseView<'static>> {
+    fn from(wrapper: WatchAiLoginResponseOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<WatchAiLoginResponseView<'static>>>
+for WatchAiLoginResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<WatchAiLoginResponseView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::WatchAiLoginResponse {
+    type View<'a> = WatchAiLoginResponseView<'a>;
+    type ViewHandle = WatchAiLoginResponseOwnedView;
+}
+#[derive(Clone, Debug, Default)]
 pub struct AnswerAiLoginRequestView<'a> {
     /// Field 1: `login_id`
     pub login_id: ::core::option::Option<&'a str>,

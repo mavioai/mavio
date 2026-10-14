@@ -43,3 +43,46 @@ pub mod ai_login_event {
         }
     }
 }
+pub mod stream_ai_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    pub enum Event {
+        Text(::buffa::alloc::string::String),
+        Thinking(::buffa::alloc::string::String),
+        Done(::buffa::alloc::boxed::Box<super::super::super::CompleteAiResponse>),
+    }
+    impl ::buffa::Oneof for Event {}
+    impl From<super::super::super::CompleteAiResponse> for Event {
+        fn from(v: super::super::super::CompleteAiResponse) -> Self {
+            Self::Done(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CompleteAiResponse>
+    for ::core::option::Option<Event> {
+        fn from(v: super::super::super::CompleteAiResponse) -> Self {
+            Self::Some(Event::from(v))
+        }
+    }
+}
+pub mod stream_agent_message_response {
+    #[allow(unused_imports)]
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    pub enum Event {
+        Text(::buffa::alloc::string::String),
+        Done(::buffa::alloc::boxed::Box<super::super::super::SendAgentMessageResponse>),
+    }
+    impl ::buffa::Oneof for Event {}
+    impl From<super::super::super::SendAgentMessageResponse> for Event {
+        fn from(v: super::super::super::SendAgentMessageResponse) -> Self {
+            Self::Done(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SendAgentMessageResponse>
+    for ::core::option::Option<Event> {
+        fn from(v: super::super::super::SendAgentMessageResponse) -> Self {
+            Self::Some(Event::from(v))
+        }
+    }
+}
