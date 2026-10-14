@@ -89,6 +89,17 @@ service SubtitleService {
   // its audio, or with another subtitle file; against the audio only on
   // local and network storage.
   rpc SyncSubtitle(SyncSubtitleRequest) returns (SyncSubtitleResponse);
+  // TranslateSubtitle queues the translation of a subtitle of a movie or
+  // episode into another language by a translator plugin, as Bazarr's
+  // translation: an external subtitle file, or an embedded text subtitle
+  // stream from playback's extraction cache (refused on cloud storage, as
+  // ExtractSubtitle). The translation is saved as a subtitle file.
+  rpc TranslateSubtitle(TranslateSubtitleRequest) returns (TranslateSubtitleResponse);
+  // ListSubtitleTranslators lists the translators of the subtitle
+  // translator plugins.
+  rpc ListSubtitleTranslators(ListSubtitleTranslatorsRequest) returns (ListSubtitleTranslatorsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // BlocklistSubtitle blocklists the subtitle a history event downloaded,
   // deletes its file and searches for another.
   rpc BlocklistSubtitle(BlocklistSubtitleRequest) returns (BlocklistSubtitleResponse);
@@ -335,6 +346,23 @@ message SubtitleSettings {
   bool series_profile_tags = 28;
   repeated string no_profile_tags = 29;
   SubtitleSyncSettings sync = 30 [(buf.validate.field).required = true];
+  SubtitleTranslationSettings translation = 31 [(buf.validate.field).required = true];
+}
+
+// SubtitleTranslationSettings are how subtitles are translated, as
+// Bazarr's translator settings.
+message SubtitleTranslationSettings {
+  // The translator used when a translation names none, as
+  // "<plugin>/<translator>"; empty for the first enabled one.
+  string translator = 1;
+  // The score translations are recorded with, as a percentage of the
+  // maximum score.
+  int32 default_score = 2 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 100
+  }];
+  // Adds a first cue to SubRip translations crediting the translator.
+  bool credit = 3;
 }
 
 message GetSubtitleSettingsRequest {}
@@ -569,6 +597,47 @@ message SyncSubtitleResponse {
   double ratio = 2;
 }
 
+message TranslateSubtitleRequest {
+  string item_id = 1 [(buf.validate.field).string.uuid = true];
+  // The subtitle translated: an external subtitle file of the item, or
+  // the index of an embedded text subtitle stream in the video's streams.
+  oneof source {
+    option (buf.validate.oneof).required = true;
+    string path = 2 [(buf.validate.field).string.min_len = 1];
+    int32 stream_index = 3 [(buf.validate.field).int32.gte = 0];
+  }
+  // The language translated into, with the forced and hearing-impaired
+  // flags of the file saved.
+  SubtitleLanguageSpec language = 4 [(buf.validate.field).required = true];
+  // "<plugin>/<translator>"; empty for the settings' translator.
+  string translator = 5;
+}
+
+message TranslateSubtitleResponse {
+  // The job translating it; the translation is recorded in the subtitle
+  // history when it is saved.
+  string job_id = 1;
+}
+
+message ListSubtitleTranslatorsRequest {}
+
+// SubtitleTranslatorState is a translator of a subtitle translator
+// plugin.
+message SubtitleTranslatorState {
+  // "<plugin>/<translator>".
+  string id = 1;
+  string plugin_id = 2;
+  string name = 3;
+  string display_name = 4;
+  bool enabled = 5;
+}
+
+message ListSubtitleTranslatorsResponse {
+  repeated SubtitleTranslatorState translators = 1;
+  // The plugins that failed to list theirs.
+  repeated string failed_plugins = 2;
+}
+
 message BlocklistSubtitleRequest {
   // A history event that downloaded a subtitle.
   string history_event_id = 1 [(buf.validate.field).string.uuid = true];
@@ -587,6 +656,7 @@ enum SubtitleAction {
   SUBTITLE_ACTION_UPLOADED = 5;
   SUBTITLE_ACTION_SYNCED = 6;
   SUBTITLE_ACTION_EXTRACTED = 7;
+  SUBTITLE_ACTION_TRANSLATED = 8;
 }
 
 // SubtitleHistoryEvent is something that happened to a subtitle.

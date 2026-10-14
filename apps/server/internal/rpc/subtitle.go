@@ -252,6 +252,9 @@ func subtitleSettingsToProto(s *core.SubtitleSettings) *acquisitionv1.SubtitleSe
 			MaxOffsetSeconds: seconds(y.MaxOffset), FixFramerate: new(y.FixFramerate), GoldenSection: new(y.GoldenSection),
 			MinScore: new(y.MinScore), MaxQualityOffsetSeconds: seconds(y.MaxQualityOffset), MaxScaleDeviation: new(y.MaxScaleDeviation),
 		}.Build(),
+		Translation: acquisitionv1.SubtitleTranslationSettings_builder{
+			Translator: new(s.Translation.Translator), DefaultScore: new(int32(s.Translation.DefaultScore)), Credit: new(s.Translation.Credit),
+		}.Build(),
 	}.Build()
 }
 
@@ -283,6 +286,10 @@ func subtitleSettingsFromProto(p *acquisitionv1.SubtitleSettings) core.SubtitleS
 			OriginalLanguage: y.GetOriginalLanguage(), ExcludedProviders: y.GetExcludedProviders(), ExcludedLanguages: y.GetExcludedLanguages(),
 			MaxOffset: seconds(y.GetMaxOffsetSeconds()), FixFramerate: y.GetFixFramerate(), GoldenSection: y.GetGoldenSection(),
 			MinScore: y.GetMinScore(), MaxQualityOffset: seconds(y.GetMaxQualityOffsetSeconds()), MaxScaleDeviation: y.GetMaxScaleDeviation(),
+		},
+		Translation: core.SubtitleTranslationSettings{
+			Translator: p.GetTranslation().GetTranslator(), DefaultScore: int(p.GetTranslation().GetDefaultScore()),
+			Credit: p.GetTranslation().GetCredit(),
 		},
 	}
 }
@@ -527,6 +534,41 @@ func (s *SubtitleService) ExtractSubtitle(ctx context.Context, req *acquisitionv
 	return acquisitionv1.ExtractSubtitleResponse_builder{Path: new(p)}.Build(), nil
 }
 
+// TranslateSubtitle queues the translation of a subtitle of an item.
+func (s *SubtitleService) TranslateSubtitle(ctx context.Context, req *acquisitionv1.TranslateSubtitleRequest) (*acquisitionv1.TranslateSubtitleResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	p := subtitles.TranslatePayload{
+		ItemID: core.MustParseID(req.GetItemId()), Path: req.GetPath(),
+		Language: languageFromProto(req.GetLanguage()), Translator: req.GetTranslator(),
+	}
+	if req.HasStreamIndex() {
+		p.StreamIndex = new(int(req.GetStreamIndex()))
+	}
+	id, err := s.rt.QueueTranslate(ctx, p)
+	if err != nil {
+		return nil, subtitleError(ctx, err)
+	}
+	return acquisitionv1.TranslateSubtitleResponse_builder{JobId: new(id.String())}.Build(), nil
+}
+
+// ListSubtitleTranslators lists the translators of the translator
+// plugins.
+func (s *SubtitleService) ListSubtitleTranslators(ctx context.Context, _ *acquisitionv1.ListSubtitleTranslatorsRequest) (*acquisitionv1.ListSubtitleTranslatorsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	list, failed := s.rt.ListTranslators(ctx)
+	out := make([]*acquisitionv1.SubtitleTranslatorState, 0, len(list))
+	for _, t := range list {
+		out = append(out, acquisitionv1.SubtitleTranslatorState_builder{
+			Id: new(t.ID), PluginId: new(t.PluginID), Name: new(t.Name), DisplayName: new(t.DisplayName), Enabled: new(t.Enabled),
+		}.Build())
+	}
+	return acquisitionv1.ListSubtitleTranslatorsResponse_builder{Translators: out, FailedPlugins: failed}.Build(), nil
+}
+
 // DeleteSubtitle deletes a subtitle file of an item.
 func (s *SubtitleService) DeleteSubtitle(ctx context.Context, req *acquisitionv1.DeleteSubtitleRequest) (*acquisitionv1.DeleteSubtitleResponse, error) {
 	if _, err := admin(ctx); err != nil {
@@ -582,6 +624,7 @@ var subtitleActions = map[acquisitionv1.SubtitleAction]core.SubtitleAction{
 	acquisitionv1.SubtitleAction_SUBTITLE_ACTION_UPLOADED:   core.SubtitleUploaded,
 	acquisitionv1.SubtitleAction_SUBTITLE_ACTION_SYNCED:     core.SubtitleSynced,
 	acquisitionv1.SubtitleAction_SUBTITLE_ACTION_EXTRACTED:  core.SubtitleExtracted,
+	acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED: core.SubtitleTranslated,
 }
 
 func subtitleEventToProto(e *core.SubtitleHistoryEvent) *acquisitionv1.SubtitleHistoryEvent {

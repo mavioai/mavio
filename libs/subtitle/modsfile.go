@@ -40,6 +40,11 @@ func removeTags(text string) string {
 	return plaintext(htmlTags.ReplaceAllString(text, ""))
 }
 
+// PlainText returns a cue's text without its markup, as pysubs2's
+// plaintext of a subtitle read by Subzero: SubRip's and WebVTT's tags and
+// SSA's override blocks removed, hard spaces made spaces.
+func PlainText(text string) string { return removeTags(text) }
+
 // uppercaseSplit is Subzero's split_upper_re, with Python's Unicode \s.
 var uppercaseSplit = regexp.MustCompile(`[\t\n\v\f\r\x1c-\x1f\p{Z}\x{85}]*[.!?♪\-][\t\n\v\f\r\x1c-\x1f\p{Z}\x{85}]*`)
 

@@ -54,6 +54,12 @@ type Provider struct {
 	Client pluginv1connect.SubtitleProviderServiceClient
 }
 
+// Translator is a subtitle translator plugin.
+type Translator struct {
+	ID     string
+	Client pluginv1connect.SubtitleTranslatorServiceClient
+}
+
 // Activity records what happened.
 type Activity interface {
 	Publish(a core.Activity)
@@ -83,6 +89,9 @@ type Runtime struct {
 	// Extracted returns an embedded text subtitle stream of a video's source
 	// and its format; nil extracts none.
 	Extracted func(ctx context.Context, itemID core.ID, src *core.MediaSource, st *core.MediaStream) ([]byte, string, error)
+	// Translators returns the ready subtitle translator plugins; nil
+	// returns none.
+	Translators func() []Translator
 	// Activity records downloads; nil records none.
 	Activity Activity
 	Now      func() time.Time
@@ -91,6 +100,12 @@ type Runtime struct {
 	vadOnce  sync.Once
 	vadModel *vad.Model
 	vadErr   error
+
+	// audioGrants are the videos audio URLs serve, by token, and
+	// audioTokens the tokens by video path.
+	audioMu     sync.Mutex
+	audioGrants map[string]*audioGrant
+	audioTokens map[string]string
 }
 
 func (r *Runtime) now() time.Time {
@@ -143,6 +158,14 @@ func (r *Runtime) Handlers() map[string]library.Handler {
 				return nil, fmt.Errorf("subtitle search payload: %w", err)
 			}
 			_, err := r.SearchItem(ctx, p.ItemID)
+			return nil, err
+		},
+		JobTranslate: func(ctx context.Context, job core.Job) ([]core.Job, error) {
+			var p TranslatePayload
+			if err := json.Unmarshal(job.Payload, &p); err != nil {
+				return nil, fmt.Errorf("subtitle translation payload: %w", err)
+			}
+			_, err := r.Translate(ctx, p)
 			return nil, err
 		},
 		JobWantedMovies: r.recurring(JobWantedMovies, func(s core.SubtitleSettings) time.Duration { return s.WantedSearchIntervalMovie },

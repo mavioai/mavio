@@ -111,6 +111,24 @@ message SubtitleVideo {
   repeated string audio_languages = 26;
   // The original language of the movie or series.
   string original_language = 27;
+  // The video's audio, which speech recognition providers such as
+  // Whisper transcribe, at a URL of the host API ("http://mavio.host/…")
+  // serving an audio stream as 16 kHz mono 16-bit little-endian PCM
+  // aligned to the start of the video: the query parameter "stream" picks
+  // the stream among audio_streams by its index (else the first), and
+  // "seconds" serves only the first seconds. Empty when the server does
+  // not read the video's audio: on cloud drives or without ffmpeg.
+  string audio_url = 28;
+  repeated SubtitleAudioStream audio_streams = 29;
+}
+
+// SubtitleAudioStream is an audio stream of a video.
+message SubtitleAudioStream {
+  // The stream's position among the video's audio streams, from 0.
+  int32 index = 1;
+  // The language the file tags the stream with, as it does: an ISO 639
+  // code such as "eng" or "und", or a BCP 47 tag; empty when untagged.
+  string language = 2;
 }
 
 message SearchSubtitlesRequest {
@@ -170,6 +188,89 @@ message DownloadSubtitleResponse {
   SubtitleLanguage language = 3;
   // Set when the download failed.
   SubtitleProviderFailure failure = 4;
+}
+
+// SubtitleTranslatorService translates subtitles' cues with the
+// translation services a plugin implements, as Bazarr's translators do.
+// The server reads, times and writes the subtitles; translators take the
+// cues' text.
+service SubtitleTranslatorService {
+  // ListSubtitleTranslators lists the translators the plugin implements,
+  // with their settings and state.
+  rpc ListSubtitleTranslators(ListSubtitleTranslatorsRequest) returns (ListSubtitleTranslatorsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // TranslateSubtitleLines translates the text of cues of a subtitle.
+  rpc TranslateSubtitleLines(TranslateSubtitleLinesRequest) returns (TranslateSubtitleLinesResponse);
+}
+
+message ListSubtitleTranslatorsRequest {}
+
+message ListSubtitleTranslatorsResponse {
+  repeated SubtitleTranslatorInfo translators = 1;
+}
+
+// SubtitleTranslatorInfo is a translator a plugin implements.
+message SubtitleTranslatorInfo {
+  // Stable within the plugin, such as "google_translate".
+  string name = 1;
+  string display_name = 2;
+  // The translator's settings, under its name in the plugin's settings.
+  repeated SettingField settings = 3;
+  bool enabled = 4;
+  // How many cues TranslateSubtitleLines takes at once; 0 for every cue
+  // of a subtitle.
+  int32 batch_size = 5;
+  // Whether the translator keeps SubRip's markup (<i>, <b>, <u>, <s>,
+  // <font>): the server then sends cues as SubRip holds them and saves
+  // SubRip; otherwise it sends their plain text and keeps the format.
+  bool markup = 6;
+}
+
+// SubtitleTranslationMedia describes what a subtitle being translated is
+// of, which translators may give their services as context.
+message SubtitleTranslationMedia {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_EPISODE.
+  MediaKind kind = 1;
+  // The movie's title, or the series' name.
+  string title = 2;
+  int32 year = 3;
+  // "imdb", "tmdb", "tvdb" and others, of the movie or series.
+  map<string, string> external_ids = 4;
+  string overview = 5;
+  // An episode's season, number and title.
+  int32 season = 6;
+  int32 episode = 7;
+  string episode_title = 8;
+  // The file names of the subtitle translated and of the translation.
+  string source_file_name = 9;
+  string file_name = 10;
+}
+
+message TranslateSubtitleLinesRequest {
+  string translator = 1 [(buf.validate.field).string.min_len = 1];
+  // The languages, as BCP 47 tags.
+  string source_language = 2 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 35
+  }];
+  string target_language = 3 [(buf.validate.field).string = {
+    min_len: 2
+    max_len: 35
+  }];
+  // The cues' text, lines separated by "\n", plain or as SubRip holds it
+  // (see SubtitleTranslatorInfo.markup).
+  repeated string lines = 4;
+  SubtitleTranslationMedia media = 5;
+}
+
+message TranslateSubtitleLinesResponse {
+  // As many as the request's lines, in their order; an empty one keeps
+  // its cue's text, which had nothing to translate.
+  repeated string lines = 1;
+  // What translated them, as the subtitle may credit it: "Google
+  // Translate", "gemini-2.0-flash".
+  string credit = 2;
 }
 
 // SubtitleProviderFailure is a provider that failed a search or download.

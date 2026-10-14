@@ -233,6 +233,7 @@ pub enum SubtitleAction {
     SUBTITLE_ACTION_UPLOADED = 5i32,
     SUBTITLE_ACTION_SYNCED = 6i32,
     SUBTITLE_ACTION_EXTRACTED = 7i32,
+    SUBTITLE_ACTION_TRANSLATED = 8i32,
 }
 impl SubtitleAction {
     ///Idiomatic alias for [`Self::SUBTITLE_ACTION_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -259,6 +260,9 @@ impl SubtitleAction {
     ///Idiomatic alias for [`Self::SUBTITLE_ACTION_EXTRACTED`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const Extracted: Self = Self::SUBTITLE_ACTION_EXTRACTED;
+    ///Idiomatic alias for [`Self::SUBTITLE_ACTION_TRANSLATED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Translated: Self = Self::SUBTITLE_ACTION_TRANSLATED;
 }
 impl ::core::default::Default for SubtitleAction {
     fn default() -> Self {
@@ -276,6 +280,7 @@ impl ::buffa::Enumeration for SubtitleAction {
             5i32 => ::core::option::Option::Some(Self::SUBTITLE_ACTION_UPLOADED),
             6i32 => ::core::option::Option::Some(Self::SUBTITLE_ACTION_SYNCED),
             7i32 => ::core::option::Option::Some(Self::SUBTITLE_ACTION_EXTRACTED),
+            8i32 => ::core::option::Option::Some(Self::SUBTITLE_ACTION_TRANSLATED),
             _ => ::core::option::Option::None,
         }
     }
@@ -292,6 +297,7 @@ impl ::buffa::Enumeration for SubtitleAction {
             Self::SUBTITLE_ACTION_UPLOADED => "SUBTITLE_ACTION_UPLOADED",
             Self::SUBTITLE_ACTION_SYNCED => "SUBTITLE_ACTION_SYNCED",
             Self::SUBTITLE_ACTION_EXTRACTED => "SUBTITLE_ACTION_EXTRACTED",
+            Self::SUBTITLE_ACTION_TRANSLATED => "SUBTITLE_ACTION_TRANSLATED",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -320,6 +326,9 @@ impl ::buffa::Enumeration for SubtitleAction {
             "SUBTITLE_ACTION_EXTRACTED" => {
                 ::core::option::Option::Some(Self::SUBTITLE_ACTION_EXTRACTED)
             }
+            "SUBTITLE_ACTION_TRANSLATED" => {
+                ::core::option::Option::Some(Self::SUBTITLE_ACTION_TRANSLATED)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -333,6 +342,7 @@ impl ::buffa::Enumeration for SubtitleAction {
             Self::SUBTITLE_ACTION_UPLOADED,
             Self::SUBTITLE_ACTION_SYNCED,
             Self::SUBTITLE_ACTION_EXTRACTED,
+            Self::SUBTITLE_ACTION_TRANSLATED,
         ]
     }
 }
@@ -2883,6 +2893,11 @@ pub struct SubtitleSettings {
         SubtitleSyncSettings,
         ::buffa::Inline<SubtitleSyncSettings>,
     >,
+    /// Field 31: `translation`
+    pub translation: ::buffa::MessageField<
+        SubtitleTranslationSettings,
+        ::buffa::Inline<SubtitleTranslationSettings>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2922,6 +2937,7 @@ impl ::core::fmt::Debug for SubtitleSettings {
             .field("series_profile_tags", &self.series_profile_tags)
             .field("no_profile_tags", &self.no_profile_tags)
             .field("sync", &self.sync)
+            .field("translation", &self.translation)
             .finish()
     }
 }
@@ -3251,6 +3267,14 @@ impl ::buffa::Message for SubtitleSettings {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.translation.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.translation.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3360,6 +3384,14 @@ impl ::buffa::Message for SubtitleSettings {
                 buf,
             );
             self.sync.write_to(__cache, buf);
+        }
+        if self.translation.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                31u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.translation.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3665,6 +3697,17 @@ impl ::buffa::Message for SubtitleSettings {
                     ctx,
                 )?;
             }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.translation.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3703,11 +3746,189 @@ impl ::buffa::Message for SubtitleSettings {
         self.series_profile_tags = ::core::option::Option::None;
         self.no_profile_tags.clear();
         self.sync = ::buffa::MessageField::none();
+        self.translation = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for SubtitleSettings {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleSettings";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslationSettings are how subtitles are translated, as
+/// Bazarr's translator settings.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslationSettings {
+    /// The translator used when a translation names none, as
+    /// "\<plugin\>/\<translator\>"; empty for the first enabled one.
+    ///
+    /// Field 1: `translator`
+    pub translator: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The score translations are recorded with, as a percentage of the
+    /// maximum score.
+    ///
+    /// Field 2: `default_score`
+    pub default_score: ::core::option::Option<i32>,
+    /// Adds a first cue to SubRip translations crediting the translator.
+    ///
+    /// Field 3: `credit`
+    pub credit: ::core::option::Option<bool>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslationSettings {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslationSettings")
+            .field("translator", &self.translator)
+            .field("default_score", &self.default_score)
+            .field("credit", &self.credit)
+            .finish()
+    }
+}
+impl SubtitleTranslationSettings {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationSettings";
+}
+impl SubtitleTranslationSettings {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::translator`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_translator(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.translator = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::default_score`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_default_score(mut self, value: i32) -> Self {
+        self.default_score = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::credit`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_credit(mut self, value: bool) -> Self {
+        self.credit = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslationSettings);
+impl ::buffa::MessageName for SubtitleTranslationSettings {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslationSettings";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslationSettings";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslationSettings";
+}
+impl ::buffa::Message for SubtitleTranslationSettings {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.translator {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.default_score {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if self.credit.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.translator {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(v) = self.default_score {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(v) = self.credit {
+            ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .translator
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.default_score = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.credit = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.translator = ::core::option::Option::None;
+        self.default_score = ::core::option::Option::None;
+        self.credit = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslationSettings {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslationSettings";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -8785,6 +9006,811 @@ impl ::buffa::Message for SyncSubtitleResponse {
 }
 impl ::buffa::ExtensionSet for SyncSubtitleResponse {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.SyncSubtitleResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct TranslateSubtitleRequest {
+    /// Field 1: `item_id`
+    pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The language translated into, with the forced and hearing-impaired
+    /// flags of the file saved.
+    ///
+    /// Field 4: `language`
+    pub language: ::buffa::MessageField<
+        SubtitleLanguageSpec,
+        ::buffa::Inline<SubtitleLanguageSpec>,
+    >,
+    /// "\<plugin\>/\<translator\>"; empty for the settings' translator.
+    ///
+    /// Field 5: `translator`
+    pub translator: ::core::option::Option<::buffa::alloc::string::String>,
+    pub source: ::core::option::Option<
+        __buffa::oneof::translate_subtitle_request::Source,
+    >,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for TranslateSubtitleRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("TranslateSubtitleRequest")
+            .field("item_id", &self.item_id)
+            .field("language", &self.language)
+            .field("translator", &self.translator)
+            .field("source", &self.source)
+            .finish()
+    }
+}
+impl TranslateSubtitleRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TranslateSubtitleRequest";
+}
+impl TranslateSubtitleRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::item_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_item_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.item_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::translator`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_translator(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.translator = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(TranslateSubtitleRequest);
+impl ::buffa::MessageName for TranslateSubtitleRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "TranslateSubtitleRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.TranslateSubtitleRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TranslateSubtitleRequest";
+}
+impl ::buffa::Message for TranslateSubtitleRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.item_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let ::core::option::Option::Some(ref v) = self.source {
+            match v {
+                __buffa::oneof::translate_subtitle_request::Source::Path(x) => {
+                    size += 1u64 + ::buffa::types::string_encoded_len(x) as u64;
+                }
+                __buffa::oneof::translate_subtitle_request::Source::StreamIndex(v) => {
+                    size += 1u64 + ::buffa::types::int32_encoded_len(*v) as u64;
+                }
+            }
+        }
+        if self.language.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.language.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(ref v) = self.translator {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.item_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let ::core::option::Option::Some(ref v) = self.source {
+            match v {
+                __buffa::oneof::translate_subtitle_request::Source::Path(x) => {
+                    ::buffa::types::put_string_field(2u32, x, buf);
+                }
+                __buffa::oneof::translate_subtitle_request::Source::StreamIndex(x) => {
+                    ::buffa::types::put_int32_field(3u32, *x, buf);
+                }
+            }
+        }
+        if self.language.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.language.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.translator {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.item_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                self.source = ::core::option::Option::Some(
+                    __buffa::oneof::translate_subtitle_request::Source::Path(
+                        ::buffa::types::decode_string(buf)?,
+                    ),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.source = ::core::option::Option::Some(
+                    __buffa::oneof::translate_subtitle_request::Source::StreamIndex(
+                        ::buffa::types::decode_int32(buf)?,
+                    ),
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.language.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .translator
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.item_id = ::core::option::Option::None;
+        self.source = ::core::option::Option::None;
+        self.language = ::buffa::MessageField::none();
+        self.translator = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for TranslateSubtitleRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.TranslateSubtitleRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+pub mod translate_subtitle_request {
+    #[allow(unused_imports)]
+    use super::*;
+    #[doc(inline)]
+    pub use super::__buffa::oneof::translate_subtitle_request::Source;
+    #[doc(inline)]
+    pub use super::__buffa::view::oneof::translate_subtitle_request::Source as SourceView;
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct TranslateSubtitleResponse {
+    /// The job translating it; the translation is recorded in the subtitle
+    /// history when it is saved.
+    ///
+    /// Field 1: `job_id`
+    pub job_id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for TranslateSubtitleResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("TranslateSubtitleResponse")
+            .field("job_id", &self.job_id)
+            .finish()
+    }
+}
+impl TranslateSubtitleResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TranslateSubtitleResponse";
+}
+impl TranslateSubtitleResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::job_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_job_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.job_id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(TranslateSubtitleResponse);
+impl ::buffa::MessageName for TranslateSubtitleResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "TranslateSubtitleResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.TranslateSubtitleResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TranslateSubtitleResponse";
+}
+impl ::buffa::Message for TranslateSubtitleResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.job_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.job_id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.job_id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.job_id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for TranslateSubtitleResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.TranslateSubtitleResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ListSubtitleTranslatorsRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListSubtitleTranslatorsRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListSubtitleTranslatorsRequest").finish()
+    }
+}
+impl ListSubtitleTranslatorsRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ListSubtitleTranslatorsRequest";
+}
+::buffa::impl_default_instance!(ListSubtitleTranslatorsRequest);
+impl ::buffa::MessageName for ListSubtitleTranslatorsRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ListSubtitleTranslatorsRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ListSubtitleTranslatorsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ListSubtitleTranslatorsRequest";
+}
+impl ::buffa::Message for ListSubtitleTranslatorsRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListSubtitleTranslatorsRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.ListSubtitleTranslatorsRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SubtitleTranslatorState is a translator of a subtitle translator
+/// plugin.
+#[derive(Clone, PartialEq, Default)]
+pub struct SubtitleTranslatorState {
+    /// "\<plugin\>/\<translator\>".
+    ///
+    /// Field 1: `id`
+    pub id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `plugin_id`
+    pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `display_name`
+    pub display_name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 5: `enabled`
+    pub enabled: ::core::option::Option<bool>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SubtitleTranslatorState {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SubtitleTranslatorState")
+            .field("id", &self.id)
+            .field("plugin_id", &self.plugin_id)
+            .field("name", &self.name)
+            .field("display_name", &self.display_name)
+            .field("enabled", &self.enabled)
+            .finish()
+    }
+}
+impl SubtitleTranslatorState {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslatorState";
+}
+impl SubtitleTranslatorState {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::plugin_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_plugin_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.plugin_id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::display_name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_display_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.display_name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::enabled`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_enabled(mut self, value: bool) -> Self {
+        self.enabled = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(SubtitleTranslatorState);
+impl ::buffa::MessageName for SubtitleTranslatorState {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SubtitleTranslatorState";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SubtitleTranslatorState";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SubtitleTranslatorState";
+}
+impl ::buffa::Message for SubtitleTranslatorState {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.plugin_id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.display_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.enabled.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.plugin_id {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.display_name {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(v) = self.enabled {
+            ::buffa::types::put_bool_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .plugin_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .display_name
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.enabled = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.id = ::core::option::Option::None;
+        self.plugin_id = ::core::option::Option::None;
+        self.name = ::core::option::Option::None;
+        self.display_name = ::core::option::Option::None;
+        self.enabled = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SubtitleTranslatorState {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SubtitleTranslatorState";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct ListSubtitleTranslatorsResponse {
+    /// Field 1: `translators`
+    pub translators: ::buffa::alloc::vec::Vec<SubtitleTranslatorState>,
+    /// The plugins that failed to list theirs.
+    ///
+    /// Field 2: `failed_plugins`
+    pub failed_plugins: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ListSubtitleTranslatorsResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ListSubtitleTranslatorsResponse")
+            .field("translators", &self.translators)
+            .field("failed_plugins", &self.failed_plugins)
+            .finish()
+    }
+}
+impl ListSubtitleTranslatorsResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ListSubtitleTranslatorsResponse";
+}
+::buffa::impl_default_instance!(ListSubtitleTranslatorsResponse);
+impl ::buffa::MessageName for ListSubtitleTranslatorsResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "ListSubtitleTranslatorsResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.ListSubtitleTranslatorsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.ListSubtitleTranslatorsResponse";
+}
+impl ::buffa::Message for ListSubtitleTranslatorsResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.translators {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.failed_plugins {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.translators {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.failed_plugins {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.translators.push(elem);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.failed_plugins.push(__elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.translators.clear();
+        self.failed_plugins.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ListSubtitleTranslatorsResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.ListSubtitleTranslatorsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

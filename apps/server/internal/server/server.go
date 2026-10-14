@@ -284,7 +284,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Folder: subtitleFolder(set, metadataDir), Logger: log}
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
-		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
+		Translators: plugs.SubtitleTranslators,
+		Subtitles:   subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
 		Extracted: playbacks.ExtractedSubtitle, Activity: activityLog, Logger: log,
 	}
 	// Imports complete the requests of what they import; their scans

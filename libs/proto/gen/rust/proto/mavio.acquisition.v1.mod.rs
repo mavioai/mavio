@@ -33,6 +33,16 @@ pub mod __buffa {
         include!("mavio.acquisition.v1.issue.__view.rs");
         include!("mavio.acquisition.v1.subtitle.__view.rs");
         include!("mavio.acquisition.v1.wanted.__view.rs");
+        pub mod oneof {
+            #[allow(unused_imports)]
+            use super::*;
+            include!("mavio.acquisition.v1.subtitle.__view_oneof.rs");
+        }
+    }
+    pub mod oneof {
+        #[allow(unused_imports)]
+        use super::*;
+        include!("mavio.acquisition.v1.subtitle.__oneof.rs");
     }
 }
 #[doc(inline)]
@@ -704,6 +714,10 @@ pub use self::__buffa::view::SubtitleSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleSettingsOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationSettingsView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationSettingsOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::GetSubtitleSettingsRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::GetSubtitleSettingsRequestOwnedView;
@@ -831,6 +845,26 @@ pub use self::__buffa::view::SyncSubtitleRequestOwnedView;
 pub use self::__buffa::view::SyncSubtitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SyncSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslatorStateView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslatorStateOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::BlocklistSubtitleRequestView;
 #[doc(inline)]

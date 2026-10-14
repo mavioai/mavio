@@ -117,6 +117,8 @@ pub enum Capability {
     CAPABILITY_INDEXER_PROVIDER = 23i32,
     /// Implements DownloadClientProviderService.
     CAPABILITY_DOWNLOAD_CLIENT_PROVIDER = 24i32,
+    /// Implements SubtitleTranslatorService.
+    CAPABILITY_SUBTITLE_TRANSLATOR = 25i32,
 }
 impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -194,6 +196,9 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const DownloadClientProvider: Self = Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER;
+    ///Idiomatic alias for [`Self::CAPABILITY_SUBTITLE_TRANSLATOR`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const SubtitleTranslator: Self = Self::CAPABILITY_SUBTITLE_TRANSLATOR;
 }
 impl ::core::default::Default for Capability {
     fn default() -> Self {
@@ -232,6 +237,7 @@ impl ::buffa::Enumeration for Capability {
             24i32 => {
                 ::core::option::Option::Some(Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER)
             }
+            25i32 => ::core::option::Option::Some(Self::CAPABILITY_SUBTITLE_TRANSLATOR),
             _ => ::core::option::Option::None,
         }
     }
@@ -269,6 +275,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER => {
                 "CAPABILITY_DOWNLOAD_CLIENT_PROVIDER"
             }
+            Self::CAPABILITY_SUBTITLE_TRANSLATOR => "CAPABILITY_SUBTITLE_TRANSLATOR",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -348,6 +355,9 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_DOWNLOAD_CLIENT_PROVIDER" => {
                 ::core::option::Option::Some(Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER)
             }
+            "CAPABILITY_SUBTITLE_TRANSLATOR" => {
+                ::core::option::Option::Some(Self::CAPABILITY_SUBTITLE_TRANSLATOR)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -378,6 +388,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_SCENE_MAPPING_PROVIDER,
             Self::CAPABILITY_INDEXER_PROVIDER,
             Self::CAPABILITY_DOWNLOAD_CLIENT_PROVIDER,
+            Self::CAPABILITY_SUBTITLE_TRANSLATOR,
         ]
     }
 }

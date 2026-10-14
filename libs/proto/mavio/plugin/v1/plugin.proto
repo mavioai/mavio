@@ -90,6 +90,8 @@ enum Capability {
   CAPABILITY_INDEXER_PROVIDER = 23;
   // Implements DownloadClientProviderService.
   CAPABILITY_DOWNLOAD_CLIENT_PROVIDER = 24;
+  // Implements SubtitleTranslatorService.
+  CAPABILITY_SUBTITLE_TRANSLATOR = 25;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

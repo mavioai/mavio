@@ -668,6 +668,10 @@ pub use self::__buffa::view::SubtitleVideoView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleVideoOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SubtitleAudioStreamView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleAudioStreamOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SearchSubtitlesRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchSubtitlesRequestOwnedView;
@@ -687,6 +691,30 @@ pub use self::__buffa::view::DownloadSubtitleRequestOwnedView;
 pub use self::__buffa::view::DownloadSubtitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DownloadSubtitleResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleTranslatorsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslatorInfoView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslatorInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationMediaView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleTranslationMediaOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleLinesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleLinesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleLinesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::TranslateSubtitleLinesResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleProviderFailureView;
 #[doc(inline)]

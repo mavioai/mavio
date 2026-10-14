@@ -286,6 +286,17 @@ func (m *Manager) SubtitlePlugins() []subtitles.Provider {
 	return out
 }
 
+// SubtitleTranslators returns the started subtitle translator plugins.
+func (m *Manager) SubtitleTranslators() []subtitles.Translator {
+	var out []subtitles.Translator
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SUBTITLE_TRANSLATOR) {
+		if pl, ok := m.running(id); ok && pl.Translators() != nil {
+			out = append(out, subtitles.Translator{ID: id, Client: pl.Translators()})
+		}
+	}
+	return out
+}
+
 type subtitleProvider struct {
 	m  *Manager
 	id string

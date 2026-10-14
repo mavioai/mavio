@@ -58,6 +58,7 @@ func (r *Runtime) pluginVideo(ctx context.Context, t *target, s *core.SubtitleSe
 		Edition: proto.String(v.Edition), StreamingService: proto.String(v.StreamingService),
 		FileName: proto.String(path.Base(src.Path)), FileSize: proto.Int64(src.Size), FileHash: proto.String(src.FileHash),
 		AudioLanguages: t.audio, OriginalLanguage: proto.String(Tag(t.owner.OriginalLanguage)),
+		AudioUrl: proto.String(r.audioURL(ctx, t)), AudioStreams: audioStreams(src.Streams),
 	}
 	if v.Episode {
 		b.Series, b.AlternativeSeries, b.OriginalSeries = proto.String(v.Series), v.AlternativeSeries, proto.Bool(v.OriginalSeries)

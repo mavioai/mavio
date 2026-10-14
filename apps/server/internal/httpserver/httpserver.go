@@ -238,6 +238,8 @@ func Handler(opts Options) (http.Handler, error) {
 		subService.Activity = opts.Activity
 	}
 	mux.Handle(acquisitionv1connect.NewSubtitleServiceHandler(subService, interceptors))
+	// Subtitle provider plugins read videos' audio through the host API.
+	mux.Handle(subtitles.AudioPath, auth.PluginOnly(subRuntime.AudioHandler()))
 	reqs := opts.Requests
 	if reqs == nil {
 		reqs = &requests.Service{Store: opts.Store, Acquisition: acq, Settings: requestSettings}

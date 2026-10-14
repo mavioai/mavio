@@ -23,6 +23,9 @@ const _ = connect.IsAtLeastVersion1_13_0
 const (
 	// SubtitleProviderServiceName is the fully-qualified name of the SubtitleProviderService service.
 	SubtitleProviderServiceName = "mavio.plugin.v1.SubtitleProviderService"
+	// SubtitleTranslatorServiceName is the fully-qualified name of the SubtitleTranslatorService
+	// service.
+	SubtitleTranslatorServiceName = "mavio.plugin.v1.SubtitleTranslatorService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -42,6 +45,12 @@ const (
 	// SubtitleProviderServiceDownloadSubtitleProcedure is the fully-qualified name of the
 	// SubtitleProviderService's DownloadSubtitle RPC.
 	SubtitleProviderServiceDownloadSubtitleProcedure = "/mavio.plugin.v1.SubtitleProviderService/DownloadSubtitle"
+	// SubtitleTranslatorServiceListSubtitleTranslatorsProcedure is the fully-qualified name of the
+	// SubtitleTranslatorService's ListSubtitleTranslators RPC.
+	SubtitleTranslatorServiceListSubtitleTranslatorsProcedure = "/mavio.plugin.v1.SubtitleTranslatorService/ListSubtitleTranslators"
+	// SubtitleTranslatorServiceTranslateSubtitleLinesProcedure is the fully-qualified name of the
+	// SubtitleTranslatorService's TranslateSubtitleLines RPC.
+	SubtitleTranslatorServiceTranslateSubtitleLinesProcedure = "/mavio.plugin.v1.SubtitleTranslatorService/TranslateSubtitleLines"
 )
 
 // SubtitleProviderServiceClient is a client for the mavio.plugin.v1.SubtitleProviderService
@@ -194,4 +203,118 @@ func (UnimplementedSubtitleProviderServiceHandler) SearchSubtitles(context.Conte
 
 func (UnimplementedSubtitleProviderServiceHandler) DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SubtitleProviderService.DownloadSubtitle is not implemented"))
+}
+
+// SubtitleTranslatorServiceClient is a client for the mavio.plugin.v1.SubtitleTranslatorService
+// service.
+type SubtitleTranslatorServiceClient interface {
+	// ListSubtitleTranslators lists the translators the plugin implements,
+	// with their settings and state.
+	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
+	// TranslateSubtitleLines translates the text of cues of a subtitle.
+	TranslateSubtitleLines(context.Context, *v1.TranslateSubtitleLinesRequest) (*v1.TranslateSubtitleLinesResponse, error)
+}
+
+// NewSubtitleTranslatorServiceClient constructs a client for the
+// mavio.plugin.v1.SubtitleTranslatorService service. By default, it uses the Connect protocol with
+// the binary Protobuf Codec, asks for gzipped responses, and sends uncompressed requests. To use
+// the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewSubtitleTranslatorServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) SubtitleTranslatorServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	subtitleTranslatorServiceMethods := v1.File_mavio_plugin_v1_subtitle_proto.Services().ByName("SubtitleTranslatorService").Methods()
+	return &subtitleTranslatorServiceClient{
+		listSubtitleTranslators: connect.NewClient[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse](
+			httpClient,
+			baseURL+SubtitleTranslatorServiceListSubtitleTranslatorsProcedure,
+			connect.WithSchema(subtitleTranslatorServiceMethods.ByName("ListSubtitleTranslators")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		translateSubtitleLines: connect.NewClient[v1.TranslateSubtitleLinesRequest, v1.TranslateSubtitleLinesResponse](
+			httpClient,
+			baseURL+SubtitleTranslatorServiceTranslateSubtitleLinesProcedure,
+			connect.WithSchema(subtitleTranslatorServiceMethods.ByName("TranslateSubtitleLines")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// subtitleTranslatorServiceClient implements SubtitleTranslatorServiceClient.
+type subtitleTranslatorServiceClient struct {
+	listSubtitleTranslators *connect.Client[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse]
+	translateSubtitleLines  *connect.Client[v1.TranslateSubtitleLinesRequest, v1.TranslateSubtitleLinesResponse]
+}
+
+// ListSubtitleTranslators calls mavio.plugin.v1.SubtitleTranslatorService.ListSubtitleTranslators.
+func (c *subtitleTranslatorServiceClient) ListSubtitleTranslators(ctx context.Context, req *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {
+	response, err := c.listSubtitleTranslators.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// TranslateSubtitleLines calls mavio.plugin.v1.SubtitleTranslatorService.TranslateSubtitleLines.
+func (c *subtitleTranslatorServiceClient) TranslateSubtitleLines(ctx context.Context, req *v1.TranslateSubtitleLinesRequest) (*v1.TranslateSubtitleLinesResponse, error) {
+	response, err := c.translateSubtitleLines.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SubtitleTranslatorServiceHandler is an implementation of the
+// mavio.plugin.v1.SubtitleTranslatorService service.
+type SubtitleTranslatorServiceHandler interface {
+	// ListSubtitleTranslators lists the translators the plugin implements,
+	// with their settings and state.
+	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
+	// TranslateSubtitleLines translates the text of cues of a subtitle.
+	TranslateSubtitleLines(context.Context, *v1.TranslateSubtitleLinesRequest) (*v1.TranslateSubtitleLinesResponse, error)
+}
+
+// NewSubtitleTranslatorServiceHandler builds an HTTP handler from the service implementation. It
+// returns the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewSubtitleTranslatorServiceHandler(svc SubtitleTranslatorServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	subtitleTranslatorServiceMethods := v1.File_mavio_plugin_v1_subtitle_proto.Services().ByName("SubtitleTranslatorService").Methods()
+	subtitleTranslatorServiceListSubtitleTranslatorsHandler := connect.NewUnaryHandlerSimple(
+		SubtitleTranslatorServiceListSubtitleTranslatorsProcedure,
+		svc.ListSubtitleTranslators,
+		connect.WithSchema(subtitleTranslatorServiceMethods.ByName("ListSubtitleTranslators")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	subtitleTranslatorServiceTranslateSubtitleLinesHandler := connect.NewUnaryHandlerSimple(
+		SubtitleTranslatorServiceTranslateSubtitleLinesProcedure,
+		svc.TranslateSubtitleLines,
+		connect.WithSchema(subtitleTranslatorServiceMethods.ByName("TranslateSubtitleLines")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/mavio.plugin.v1.SubtitleTranslatorService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case SubtitleTranslatorServiceListSubtitleTranslatorsProcedure:
+			subtitleTranslatorServiceListSubtitleTranslatorsHandler.ServeHTTP(w, r)
+		case SubtitleTranslatorServiceTranslateSubtitleLinesProcedure:
+			subtitleTranslatorServiceTranslateSubtitleLinesHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedSubtitleTranslatorServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedSubtitleTranslatorServiceHandler struct{}
+
+func (UnimplementedSubtitleTranslatorServiceHandler) ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SubtitleTranslatorService.ListSubtitleTranslators is not implemented"))
+}
+
+func (UnimplementedSubtitleTranslatorServiceHandler) TranslateSubtitleLines(context.Context, *v1.TranslateSubtitleLinesRequest) (*v1.TranslateSubtitleLinesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.SubtitleTranslatorService.TranslateSubtitleLines is not implemented"))
 }

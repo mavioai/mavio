@@ -38,6 +38,7 @@ type Set struct {
 	scene     pluginv1connect.SceneMappingProviderServiceClient
 	indexers  pluginv1connect.IndexerProviderServiceClient
 	downloads pluginv1connect.DownloadClientProviderServiceClient
+	translate pluginv1connect.SubtitleTranslatorServiceClient
 }
 
 // New builds the clients for m over c.
@@ -111,6 +112,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_DOWNLOAD_CLIENT_PROVIDER) {
 		s.downloads = pluginv1connect.NewDownloadClientProviderServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_SUBTITLE_TRANSLATOR) {
+		s.translate = pluginv1connect.NewSubtitleTranslatorServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -191,3 +195,6 @@ func (s Set) Indexers() pluginv1connect.IndexerProviderServiceClient { return s.
 func (s Set) DownloadClients() pluginv1connect.DownloadClientProviderServiceClient {
 	return s.downloads
 }
+
+// Translators returns the SubtitleTranslatorService client, or nil.
+func (s Set) Translators() pluginv1connect.SubtitleTranslatorServiceClient { return s.translate }

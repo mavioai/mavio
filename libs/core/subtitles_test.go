@@ -116,6 +116,9 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 		{"sync threshold", func(s *SubtitleSettings) { s.Sync.Threshold = -1 }, false},
 		{"sync offset", func(s *SubtitleSettings) { s.Sync.MaxOffset = 0 }, false},
 		{"sync deviation", func(s *SubtitleSettings) { s.Sync.MaxScaleDeviation = -0.1 }, false},
+		{"translation score", func(s *SubtitleSettings) { s.Translation.DefaultScore = 101 }, false},
+		{"translator", func(s *SubtitleSettings) { s.Translation.Translator = "org.mavio.subtitles/gemini" }, true},
+		{"translator without plugin", func(s *SubtitleSettings) { s.Translation.Translator = "gemini" }, false},
 	} {
 		s := DefaultSubtitleSettings()
 		tc.change(&s)

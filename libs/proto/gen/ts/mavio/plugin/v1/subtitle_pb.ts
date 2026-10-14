@@ -17,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/subtitle.proto.
  */
 export const file_mavio_plugin_v1_subtitle: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvc3VidGl0bGUucHJvdG8SD21hdmlvLnBsdWdpbi52MSIeChxMaXN0U3VidGl0bGVQcm92aWRlcnNSZXF1ZXN0IlkKHUxpc3RTdWJ0aXRsZVByb3ZpZGVyc1Jlc3BvbnNlEjgKCXByb3ZpZGVycxgBIAMoCzIlLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVySW5mbyK9AgoUU3VidGl0bGVQcm92aWRlckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSMwoPdGhyb3R0bGVkX3VudGlsGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIXCg90aHJvdHRsZV9yZWFzb24YBiABKAkSEQoJbGFuZ3VhZ2VzGAcgAygJEhcKD2hhc2hfdmVyaWZpYWJsZRgIIAEoCBIjChtoZWFyaW5nX2ltcGFpcmVkX3ZlcmlmaWFibGUYCSABKAgSDgoGbW92aWVzGAogASgIEhAKCGVwaXNvZGVzGAsgASgIIlkKEFN1YnRpdGxlTGFuZ3VhZ2USGwoIbGFuZ3VhZ2UYASABKAlCCbpIBnIEEAIYIxIOCgZmb3JjZWQYAiABKAgSGAoQaGVhcmluZ19pbXBhaXJlZBgDIAEoCCK0BgoNU3VidGl0bGVWaWRlbxIoCgRraW5kGAEgASgOMhoubWF2aW8ucGx1Z2luLnYxLk1lZGlhS2luZBINCgV0aXRsZRgCIAEoCRIaChJhbHRlcm5hdGl2ZV90aXRsZXMYAyADKAkSDAoEeWVhchgEIAEoBRJFCgxleHRlcm5hbF9pZHMYBSADKAsyLy5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlby5FeHRlcm5hbElkc0VudHJ5Eg4KBnNlcmllcxgGIAEoCRIaChJhbHRlcm5hdGl2ZV9zZXJpZXMYByADKAkSUgoTc2VyaWVzX2V4dGVybmFsX2lkcxgIIAMoCzI1Lm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVZpZGVvLlNlcmllc0V4dGVybmFsSWRzRW50cnkSDgoGc2Vhc29uGAkgASgFEg8KB2VwaXNvZGUYCiABKAUSGAoQYWJzb2x1dGVfZXBpc29kZRgLIAEoBRIXCg9vcmlnaW5hbF9zZXJpZXMYDCABKAgSDwoHc3BlY2lhbBgNIAEoCBIUCgxyZWxlYXNlX25hbWUYDiABKAkSDgoGc291cmNlGA8gASgJEhUKDXJlbGVhc2VfZ3JvdXAYECABKAkSEgoKcmVzb2x1dGlvbhgRIAEoCRITCgt2aWRlb19jb2RlYxgSIAEoCRITCgthdWRpb19jb2RlYxgTIAEoCRIPCgdlZGl0aW9uGBQgASgJEhkKEXN0cmVhbWluZ19zZXJ2aWNlGBUgASgJEhIKCmZyYW1lX3JhdGUYFiABKAESEQoJZmlsZV9uYW1lGBcgASgJEhEKCWZpbGVfc2l6ZRgYIAEoAxIRCglmaWxlX2hhc2gYGSABKAkSFwoPYXVkaW9fbGFuZ3VhZ2VzGBogAygJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGBsgASgJGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ARo4ChZTZXJpZXNFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiogEKFlNlYXJjaFN1YnRpdGxlc1JlcXVlc3QSNQoFdmlkZW8YASABKAsyHi5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlb0IGukgDyAEBEj4KCWxhbmd1YWdlcxgCIAMoCzIhLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZUxhbmd1YWdlQgi6SAWSAQIIARIRCglwcm92aWRlcnMYAyADKAkiiQEKF1NlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlEjIKCXN1YnRpdGxlcxgBIAMoCzIfLm1hdmlvLnBsdWdpbi52MS5SZW1vdGVTdWJ0aXRsZRI6CghmYWlsdXJlcxgCIAMoCzIoLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVyRmFpbHVyZSKnAgoOUmVtb3RlU3VidGl0bGUSEAoIcHJvdmlkZXIYASABKAkSCgoCaWQYAiABKAkSMwoIbGFuZ3VhZ2UYAyABKAsyIS5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVMYW5ndWFnZRIVCg1yZWxlYXNlX25hbWVzGAQgAygJEg8KB21hdGNoZXMYBSADKAkSFwoPaGFzaF92ZXJpZmlhYmxlGAYgASgIEiMKG2hlYXJpbmdfaW1wYWlyZWRfdmVyaWZpYWJsZRgHIAEoCBIOCgZmb3JtYXQYCCABKAkSEQoJcGFnZV9saW5rGAkgASgJEhAKCHVwbG9hZGVyGAogASgJEg8KB2NvbW1lbnQYCyABKAkSFgoOZG93bmxvYWRfY291bnQYDCABKAUieAoXRG93bmxvYWRTdWJ0aXRsZVJlcXVlc3QSGQoIcHJvdmlkZXIYASABKAlCB7pIBHICEAESEwoCaWQYAiABKAlCB7pIBHICEAESLQoFdmlkZW8YAyABKAsyHi5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlbyKoAQoYRG93bmxvYWRTdWJ0aXRsZVJlc3BvbnNlEgwKBGRhdGEYASABKAwSDgoGZm9ybWF0GAIgASgJEjMKCGxhbmd1YWdlGAMgASgLMiEubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlTGFuZ3VhZ2USOQoHZmFpbHVyZRgEIAEoCzIoLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVyRmFpbHVyZSKlAQoXU3VidGl0bGVQcm92aWRlckZhaWx1cmUSEAoIcHJvdmlkZXIYASABKAkSMgoEa2luZBgCIAEoDjIkLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZUZhaWx1cmVLaW5kEg8KB21lc3NhZ2UYAyABKAkSMwoPdGhyb3R0bGVkX3VudGlsGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCreAgoTU3VidGl0bGVGYWlsdXJlS2luZBIlCiFTVUJUSVRMRV9GQUlMVVJFX0tJTkRfVU5TUEVDSUZJRUQQABIrCidTVUJUSVRMRV9GQUlMVVJFX0tJTkRfVE9PX01BTllfUkVRVUVTVFMQARIoCiRTVUJUSVRMRV9GQUlMVVJFX0tJTkRfRE9XTkxPQURfTElNSVQQAhItCilTVUJUSVRMRV9GQUlMVVJFX0tJTkRfU0VSVklDRV9VTkFWQUlMQUJMRRADEigKJFNVQlRJVExFX0ZBSUxVUkVfS0lORF9BVVRIRU5USUNBVElPThAEEicKI1NVQlRJVExFX0ZBSUxVUkVfS0lORF9DT05GSUdVUkFUSU9OEAUSJgoiU1VCVElUTEVfRkFJTFVSRV9LSU5EX0JBRF9TVUJUSVRMRRAGEh8KG1NVQlRJVExFX0ZBSUxVUkVfS0lORF9PVEhFUhAHMuoCChdTdWJ0aXRsZVByb3ZpZGVyU2VydmljZRJ7ChVMaXN0U3VidGl0bGVQcm92aWRlcnMSLS5tYXZpby5wbHVnaW4udjEuTGlzdFN1YnRpdGxlUHJvdmlkZXJzUmVxdWVzdBouLm1hdmlvLnBsdWdpbi52MS5MaXN0U3VidGl0bGVQcm92aWRlcnNSZXNwb25zZSIDkAIBEmkKD1NlYXJjaFN1YnRpdGxlcxInLm1hdmlvLnBsdWdpbi52MS5TZWFyY2hTdWJ0aXRsZXNSZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlIgOQAgESZwoQRG93bmxvYWRTdWJ0aXRsZRIoLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFN1YnRpdGxlUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5Eb3dubG9hZFN1YnRpdGxlUmVzcG9uc2VCxwEKE2NvbS5tYXZpby5wbHVnaW4udjFCDVN1YnRpdGxlUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_metadata, file_mavio_plugin_v1_settings]);
+  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvc3VidGl0bGUucHJvdG8SD21hdmlvLnBsdWdpbi52MSIeChxMaXN0U3VidGl0bGVQcm92aWRlcnNSZXF1ZXN0IlkKHUxpc3RTdWJ0aXRsZVByb3ZpZGVyc1Jlc3BvbnNlEjgKCXByb3ZpZGVycxgBIAMoCzIlLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVByb3ZpZGVySW5mbyK9AgoUU3VidGl0bGVQcm92aWRlckluZm8SDAoEbmFtZRgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSLwoIc2V0dGluZ3MYAyADKAsyHS5tYXZpby5wbHVnaW4udjEuU2V0dGluZ0ZpZWxkEg8KB2VuYWJsZWQYBCABKAgSMwoPdGhyb3R0bGVkX3VudGlsGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIXCg90aHJvdHRsZV9yZWFzb24YBiABKAkSEQoJbGFuZ3VhZ2VzGAcgAygJEhcKD2hhc2hfdmVyaWZpYWJsZRgIIAEoCBIjChtoZWFyaW5nX2ltcGFpcmVkX3ZlcmlmaWFibGUYCSABKAgSDgoGbW92aWVzGAogASgIEhAKCGVwaXNvZGVzGAsgASgIIlkKEFN1YnRpdGxlTGFuZ3VhZ2USGwoIbGFuZ3VhZ2UYASABKAlCCbpIBnIEEAIYIxIOCgZmb3JjZWQYAiABKAgSGAoQaGVhcmluZ19pbXBhaXJlZBgDIAEoCCKEBwoNU3VidGl0bGVWaWRlbxIoCgRraW5kGAEgASgOMhoubWF2aW8ucGx1Z2luLnYxLk1lZGlhS2luZBINCgV0aXRsZRgCIAEoCRIaChJhbHRlcm5hdGl2ZV90aXRsZXMYAyADKAkSDAoEeWVhchgEIAEoBRJFCgxleHRlcm5hbF9pZHMYBSADKAsyLy5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVWaWRlby5FeHRlcm5hbElkc0VudHJ5Eg4KBnNlcmllcxgGIAEoCRIaChJhbHRlcm5hdGl2ZV9zZXJpZXMYByADKAkSUgoTc2VyaWVzX2V4dGVybmFsX2lkcxgIIAMoCzI1Lm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZVZpZGVvLlNlcmllc0V4dGVybmFsSWRzRW50cnkSDgoGc2Vhc29uGAkgASgFEg8KB2VwaXNvZGUYCiABKAUSGAoQYWJzb2x1dGVfZXBpc29kZRgLIAEoBRIXCg9vcmlnaW5hbF9zZXJpZXMYDCABKAgSDwoHc3BlY2lhbBgNIAEoCBIUCgxyZWxlYXNlX25hbWUYDiABKAkSDgoGc291cmNlGA8gASgJEhUKDXJlbGVhc2VfZ3JvdXAYECABKAkSEgoKcmVzb2x1dGlvbhgRIAEoCRITCgt2aWRlb19jb2RlYxgSIAEoCRITCgthdWRpb19jb2RlYxgTIAEoCRIPCgdlZGl0aW9uGBQgASgJEhkKEXN0cmVhbWluZ19zZXJ2aWNlGBUgASgJEhIKCmZyYW1lX3JhdGUYFiABKAESEQoJZmlsZV9uYW1lGBcgASgJEhEKCWZpbGVfc2l6ZRgYIAEoAxIRCglmaWxlX2hhc2gYGSABKAkSFwoPYXVkaW9fbGFuZ3VhZ2VzGBogAygJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGBsgASgJEhEKCWF1ZGlvX3VybBgcIAEoCRI7Cg1hdWRpb19zdHJlYW1zGB0gAygLMiQubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlQXVkaW9TdHJlYW0aMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGjgKFlNlcmllc0V4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASI2ChNTdWJ0aXRsZUF1ZGlvU3RyZWFtEg0KBWluZGV4GAEgASgFEhAKCGxhbmd1YWdlGAIgASgJIqIBChZTZWFyY2hTdWJ0aXRsZXNSZXF1ZXN0EjUKBXZpZGVvGAEgASgLMh4ubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlVmlkZW9CBrpIA8gBARI+CglsYW5ndWFnZXMYAiADKAsyIS5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVMYW5ndWFnZUIIukgFkgECCAESEQoJcHJvdmlkZXJzGAMgAygJIokBChdTZWFyY2hTdWJ0aXRsZXNSZXNwb25zZRIyCglzdWJ0aXRsZXMYASADKAsyHy5tYXZpby5wbHVnaW4udjEuUmVtb3RlU3VidGl0bGUSOgoIZmFpbHVyZXMYAiADKAsyKC5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVQcm92aWRlckZhaWx1cmUipwIKDlJlbW90ZVN1YnRpdGxlEhAKCHByb3ZpZGVyGAEgASgJEgoKAmlkGAIgASgJEjMKCGxhbmd1YWdlGAMgASgLMiEubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlTGFuZ3VhZ2USFQoNcmVsZWFzZV9uYW1lcxgEIAMoCRIPCgdtYXRjaGVzGAUgAygJEhcKD2hhc2hfdmVyaWZpYWJsZRgGIAEoCBIjChtoZWFyaW5nX2ltcGFpcmVkX3ZlcmlmaWFibGUYByABKAgSDgoGZm9ybWF0GAggASgJEhEKCXBhZ2VfbGluaxgJIAEoCRIQCgh1cGxvYWRlchgKIAEoCRIPCgdjb21tZW50GAsgASgJEhYKDmRvd25sb2FkX2NvdW50GAwgASgFIngKF0Rvd25sb2FkU3VidGl0bGVSZXF1ZXN0EhkKCHByb3ZpZGVyGAEgASgJQge6SARyAhABEhMKAmlkGAIgASgJQge6SARyAhABEi0KBXZpZGVvGAMgASgLMh4ubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlVmlkZW8iqAEKGERvd25sb2FkU3VidGl0bGVSZXNwb25zZRIMCgRkYXRhGAEgASgMEg4KBmZvcm1hdBgCIAEoCRIzCghsYW5ndWFnZRgDIAEoCzIhLm1hdmlvLnBsdWdpbi52MS5TdWJ0aXRsZUxhbmd1YWdlEjkKB2ZhaWx1cmUYBCABKAsyKC5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVQcm92aWRlckZhaWx1cmUiIAoeTGlzdFN1YnRpdGxlVHJhbnNsYXRvcnNSZXF1ZXN0Il8KH0xpc3RTdWJ0aXRsZVRyYW5zbGF0b3JzUmVzcG9uc2USPAoLdHJhbnNsYXRvcnMYASADKAsyJy5tYXZpby5wbHVnaW4udjEuU3VidGl0bGVUcmFuc2xhdG9ySW5mbyKiAQoWU3VidGl0bGVUcmFuc2xhdG9ySW5mbxIMCgRuYW1lGAEgASgJEhQKDGRpc3BsYXlfbmFtZRgCIAEoCRIvCghzZXR0aW5ncxgDIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5TZXR0aW5nRmllbGQSDwoHZW5hYmxlZBgEIAEoCBISCgpiYXRjaF9zaXplGAUgASgFEg4KBm1hcmt1cBgGIAEoCCLeAgoYU3VidGl0bGVUcmFuc2xhdGlvbk1lZGlhEigKBGtpbmQYASABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEg0KBXRpdGxlGAIgASgJEgwKBHllYXIYAyABKAUSUAoMZXh0ZXJuYWxfaWRzGAQgAygLMjoubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlVHJhbnNsYXRpb25NZWRpYS5FeHRlcm5hbElkc0VudHJ5EhAKCG92ZXJ2aWV3GAUgASgJEg4KBnNlYXNvbhgGIAEoBRIPCgdlcGlzb2RlGAcgASgFEhUKDWVwaXNvZGVfdGl0bGUYCCABKAkSGAoQc291cmNlX2ZpbGVfbmFtZRgJIAEoCRIRCglmaWxlX25hbWUYCiABKAkaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIs0BCh1UcmFuc2xhdGVTdWJ0aXRsZUxpbmVzUmVxdWVzdBIbCgp0cmFuc2xhdG9yGAEgASgJQge6SARyAhABEiIKD3NvdXJjZV9sYW5ndWFnZRgCIAEoCUIJukgGcgQQAhgjEiIKD3RhcmdldF9sYW5ndWFnZRgDIAEoCUIJukgGcgQQAhgjEg0KBWxpbmVzGAQgAygJEjgKBW1lZGlhGAUgASgLMikubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlVHJhbnNsYXRpb25NZWRpYSI/Ch5UcmFuc2xhdGVTdWJ0aXRsZUxpbmVzUmVzcG9uc2USDQoFbGluZXMYASADKAkSDgoGY3JlZGl0GAIgASgJIqUBChdTdWJ0aXRsZVByb3ZpZGVyRmFpbHVyZRIQCghwcm92aWRlchgBIAEoCRIyCgRraW5kGAIgASgOMiQubWF2aW8ucGx1Z2luLnYxLlN1YnRpdGxlRmFpbHVyZUtpbmQSDwoHbWVzc2FnZRgDIAEoCRIzCg90aHJvdHRsZWRfdW50aWwYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wKt4CChNTdWJ0aXRsZUZhaWx1cmVLaW5kEiUKIVNVQlRJVExFX0ZBSUxVUkVfS0lORF9VTlNQRUNJRklFRBAAEisKJ1NVQlRJVExFX0ZBSUxVUkVfS0lORF9UT09fTUFOWV9SRVFVRVNUUxABEigKJFNVQlRJVExFX0ZBSUxVUkVfS0lORF9ET1dOTE9BRF9MSU1JVBACEi0KKVNVQlRJVExFX0ZBSUxVUkVfS0lORF9TRVJWSUNFX1VOQVZBSUxBQkxFEAMSKAokU1VCVElUTEVfRkFJTFVSRV9LSU5EX0FVVEhFTlRJQ0FUSU9OEAQSJwojU1VCVElUTEVfRkFJTFVSRV9LSU5EX0NPTkZJR1VSQVRJT04QBRImCiJTVUJUSVRMRV9GQUlMVVJFX0tJTkRfQkFEX1NVQlRJVExFEAYSHwobU1VCVElUTEVfRkFJTFVSRV9LSU5EX09USEVSEAcy6gIKF1N1YnRpdGxlUHJvdmlkZXJTZXJ2aWNlEnsKFUxpc3RTdWJ0aXRsZVByb3ZpZGVycxItLm1hdmlvLnBsdWdpbi52MS5MaXN0U3VidGl0bGVQcm92aWRlcnNSZXF1ZXN0Gi4ubWF2aW8ucGx1Z2luLnYxLkxpc3RTdWJ0aXRsZVByb3ZpZGVyc1Jlc3BvbnNlIgOQAgESaQoPU2VhcmNoU3VidGl0bGVzEicubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFN1YnRpdGxlc1JlcXVlc3QaKC5tYXZpby5wbHVnaW4udjEuU2VhcmNoU3VidGl0bGVzUmVzcG9uc2UiA5ACARJnChBEb3dubG9hZFN1YnRpdGxlEigubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkU3VidGl0bGVSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLkRvd25sb2FkU3VidGl0bGVSZXNwb25zZTKaAgoZU3VidGl0bGVUcmFuc2xhdG9yU2VydmljZRKBAQoXTGlzdFN1YnRpdGxlVHJhbnNsYXRvcnMSLy5tYXZpby5wbHVnaW4udjEuTGlzdFN1YnRpdGxlVHJhbnNsYXRvcnNSZXF1ZXN0GjAubWF2aW8ucGx1Z2luLnYxLkxpc3RTdWJ0aXRsZVRyYW5zbGF0b3JzUmVzcG9uc2UiA5ACARJ5ChZUcmFuc2xhdGVTdWJ0aXRsZUxpbmVzEi4ubWF2aW8ucGx1Z2luLnYxLlRyYW5zbGF0ZVN1YnRpdGxlTGluZXNSZXF1ZXN0Gi8ubWF2aW8ucGx1Z2luLnYxLlRyYW5zbGF0ZVN1YnRpdGxlTGluZXNSZXNwb25zZULHAQoTY29tLm1hdmlvLnBsdWdpbi52MUINU3VidGl0bGVQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_metadata, file_mavio_plugin_v1_settings]);
 
 /**
  * @generated from message mavio.plugin.v1.ListSubtitleProvidersRequest
@@ -331,6 +331,24 @@ export type SubtitleVideo = Message<"mavio.plugin.v1.SubtitleVideo"> & {
    * @generated from field: string original_language = 27;
    */
   originalLanguage: string;
+
+  /**
+   * The video's audio, which speech recognition providers such as
+   * Whisper transcribe, at a URL of the host API ("http://mavio.host/…")
+   * serving an audio stream as 16 kHz mono 16-bit little-endian PCM
+   * aligned to the start of the video: the query parameter "stream" picks
+   * the stream among audio_streams by its index (else the first), and
+   * "seconds" serves only the first seconds. Empty when the server does
+   * not read the video's audio: on cloud drives or without ffmpeg.
+   *
+   * @generated from field: string audio_url = 28;
+   */
+  audioUrl: string;
+
+  /**
+   * @generated from field: repeated mavio.plugin.v1.SubtitleAudioStream audio_streams = 29;
+   */
+  audioStreams: SubtitleAudioStream[];
 };
 
 /**
@@ -339,6 +357,35 @@ export type SubtitleVideo = Message<"mavio.plugin.v1.SubtitleVideo"> & {
  */
 export const SubtitleVideoSchema: GenMessage<SubtitleVideo> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_subtitle, 4);
+
+/**
+ * SubtitleAudioStream is an audio stream of a video.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleAudioStream
+ */
+export type SubtitleAudioStream = Message<"mavio.plugin.v1.SubtitleAudioStream"> & {
+  /**
+   * The stream's position among the video's audio streams, from 0.
+   *
+   * @generated from field: int32 index = 1;
+   */
+  index: number;
+
+  /**
+   * The language the file tags the stream with, as it does: an ISO 639
+   * code such as "eng" or "und", or a BCP 47 tag; empty when untagged.
+   *
+   * @generated from field: string language = 2;
+   */
+  language: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleAudioStream.
+ * Use `create(SubtitleAudioStreamSchema)` to create a new message.
+ */
+export const SubtitleAudioStreamSchema: GenMessage<SubtitleAudioStream> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 5);
 
 /**
  * @generated from message mavio.plugin.v1.SearchSubtitlesRequest
@@ -367,7 +414,7 @@ export type SearchSubtitlesRequest = Message<"mavio.plugin.v1.SearchSubtitlesReq
  * Use `create(SearchSubtitlesRequestSchema)` to create a new message.
  */
 export const SearchSubtitlesRequestSchema: GenMessage<SearchSubtitlesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 5);
+  messageDesc(file_mavio_plugin_v1_subtitle, 6);
 
 /**
  * @generated from message mavio.plugin.v1.SearchSubtitlesResponse
@@ -391,7 +438,7 @@ export type SearchSubtitlesResponse = Message<"mavio.plugin.v1.SearchSubtitlesRe
  * Use `create(SearchSubtitlesResponseSchema)` to create a new message.
  */
 export const SearchSubtitlesResponseSchema: GenMessage<SearchSubtitlesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 6);
+  messageDesc(file_mavio_plugin_v1_subtitle, 7);
 
 /**
  * RemoteSubtitle is a subtitle a provider offers.
@@ -483,7 +530,7 @@ export type RemoteSubtitle = Message<"mavio.plugin.v1.RemoteSubtitle"> & {
  * Use `create(RemoteSubtitleSchema)` to create a new message.
  */
 export const RemoteSubtitleSchema: GenMessage<RemoteSubtitle> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 7);
+  messageDesc(file_mavio_plugin_v1_subtitle, 8);
 
 /**
  * @generated from message mavio.plugin.v1.DownloadSubtitleRequest
@@ -513,7 +560,7 @@ export type DownloadSubtitleRequest = Message<"mavio.plugin.v1.DownloadSubtitleR
  * Use `create(DownloadSubtitleRequestSchema)` to create a new message.
  */
 export const DownloadSubtitleRequestSchema: GenMessage<DownloadSubtitleRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 8);
+  messageDesc(file_mavio_plugin_v1_subtitle, 9);
 
 /**
  * @generated from message mavio.plugin.v1.DownloadSubtitleResponse
@@ -551,7 +598,237 @@ export type DownloadSubtitleResponse = Message<"mavio.plugin.v1.DownloadSubtitle
  * Use `create(DownloadSubtitleResponseSchema)` to create a new message.
  */
 export const DownloadSubtitleResponseSchema: GenMessage<DownloadSubtitleResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 9);
+  messageDesc(file_mavio_plugin_v1_subtitle, 10);
+
+/**
+ * @generated from message mavio.plugin.v1.ListSubtitleTranslatorsRequest
+ */
+export type ListSubtitleTranslatorsRequest = Message<"mavio.plugin.v1.ListSubtitleTranslatorsRequest"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListSubtitleTranslatorsRequest.
+ * Use `create(ListSubtitleTranslatorsRequestSchema)` to create a new message.
+ */
+export const ListSubtitleTranslatorsRequestSchema: GenMessage<ListSubtitleTranslatorsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 11);
+
+/**
+ * @generated from message mavio.plugin.v1.ListSubtitleTranslatorsResponse
+ */
+export type ListSubtitleTranslatorsResponse = Message<"mavio.plugin.v1.ListSubtitleTranslatorsResponse"> & {
+  /**
+   * @generated from field: repeated mavio.plugin.v1.SubtitleTranslatorInfo translators = 1;
+   */
+  translators: SubtitleTranslatorInfo[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListSubtitleTranslatorsResponse.
+ * Use `create(ListSubtitleTranslatorsResponseSchema)` to create a new message.
+ */
+export const ListSubtitleTranslatorsResponseSchema: GenMessage<ListSubtitleTranslatorsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 12);
+
+/**
+ * SubtitleTranslatorInfo is a translator a plugin implements.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleTranslatorInfo
+ */
+export type SubtitleTranslatorInfo = Message<"mavio.plugin.v1.SubtitleTranslatorInfo"> & {
+  /**
+   * Stable within the plugin, such as "google_translate".
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName: string;
+
+  /**
+   * The translator's settings, under its name in the plugin's settings.
+   *
+   * @generated from field: repeated mavio.plugin.v1.SettingField settings = 3;
+   */
+  settings: SettingField[];
+
+  /**
+   * @generated from field: bool enabled = 4;
+   */
+  enabled: boolean;
+
+  /**
+   * How many cues TranslateSubtitleLines takes at once; 0 for every cue
+   * of a subtitle.
+   *
+   * @generated from field: int32 batch_size = 5;
+   */
+  batchSize: number;
+
+  /**
+   * Whether the translator keeps SubRip's markup (<i>, <b>, <u>, <s>,
+   * <font>): the server then sends cues as SubRip holds them and saves
+   * SubRip; otherwise it sends their plain text and keeps the format.
+   *
+   * @generated from field: bool markup = 6;
+   */
+  markup: boolean;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleTranslatorInfo.
+ * Use `create(SubtitleTranslatorInfoSchema)` to create a new message.
+ */
+export const SubtitleTranslatorInfoSchema: GenMessage<SubtitleTranslatorInfo> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 13);
+
+/**
+ * SubtitleTranslationMedia describes what a subtitle being translated is
+ * of, which translators may give their services as context.
+ *
+ * @generated from message mavio.plugin.v1.SubtitleTranslationMedia
+ */
+export type SubtitleTranslationMedia = Message<"mavio.plugin.v1.SubtitleTranslationMedia"> & {
+  /**
+   * MEDIA_KIND_MOVIE or MEDIA_KIND_EPISODE.
+   *
+   * @generated from field: mavio.plugin.v1.MediaKind kind = 1;
+   */
+  kind: MediaKind;
+
+  /**
+   * The movie's title, or the series' name.
+   *
+   * @generated from field: string title = 2;
+   */
+  title: string;
+
+  /**
+   * @generated from field: int32 year = 3;
+   */
+  year: number;
+
+  /**
+   * "imdb", "tmdb", "tvdb" and others, of the movie or series.
+   *
+   * @generated from field: map<string, string> external_ids = 4;
+   */
+  externalIds: { [key: string]: string };
+
+  /**
+   * @generated from field: string overview = 5;
+   */
+  overview: string;
+
+  /**
+   * An episode's season, number and title.
+   *
+   * @generated from field: int32 season = 6;
+   */
+  season: number;
+
+  /**
+   * @generated from field: int32 episode = 7;
+   */
+  episode: number;
+
+  /**
+   * @generated from field: string episode_title = 8;
+   */
+  episodeTitle: string;
+
+  /**
+   * The file names of the subtitle translated and of the translation.
+   *
+   * @generated from field: string source_file_name = 9;
+   */
+  sourceFileName: string;
+
+  /**
+   * @generated from field: string file_name = 10;
+   */
+  fileName: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubtitleTranslationMedia.
+ * Use `create(SubtitleTranslationMediaSchema)` to create a new message.
+ */
+export const SubtitleTranslationMediaSchema: GenMessage<SubtitleTranslationMedia> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 14);
+
+/**
+ * @generated from message mavio.plugin.v1.TranslateSubtitleLinesRequest
+ */
+export type TranslateSubtitleLinesRequest = Message<"mavio.plugin.v1.TranslateSubtitleLinesRequest"> & {
+  /**
+   * @generated from field: string translator = 1;
+   */
+  translator: string;
+
+  /**
+   * The languages, as BCP 47 tags.
+   *
+   * @generated from field: string source_language = 2;
+   */
+  sourceLanguage: string;
+
+  /**
+   * @generated from field: string target_language = 3;
+   */
+  targetLanguage: string;
+
+  /**
+   * The cues' text, lines separated by "\n", plain or as SubRip holds it
+   * (see SubtitleTranslatorInfo.markup).
+   *
+   * @generated from field: repeated string lines = 4;
+   */
+  lines: string[];
+
+  /**
+   * @generated from field: mavio.plugin.v1.SubtitleTranslationMedia media = 5;
+   */
+  media?: SubtitleTranslationMedia | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.TranslateSubtitleLinesRequest.
+ * Use `create(TranslateSubtitleLinesRequestSchema)` to create a new message.
+ */
+export const TranslateSubtitleLinesRequestSchema: GenMessage<TranslateSubtitleLinesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 15);
+
+/**
+ * @generated from message mavio.plugin.v1.TranslateSubtitleLinesResponse
+ */
+export type TranslateSubtitleLinesResponse = Message<"mavio.plugin.v1.TranslateSubtitleLinesResponse"> & {
+  /**
+   * As many as the request's lines, in their order; an empty one keeps
+   * its cue's text, which had nothing to translate.
+   *
+   * @generated from field: repeated string lines = 1;
+   */
+  lines: string[];
+
+  /**
+   * What translated them, as the subtitle may credit it: "Google
+   * Translate", "gemini-2.0-flash".
+   *
+   * @generated from field: string credit = 2;
+   */
+  credit: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.TranslateSubtitleLinesResponse.
+ * Use `create(TranslateSubtitleLinesResponseSchema)` to create a new message.
+ */
+export const TranslateSubtitleLinesResponseSchema: GenMessage<TranslateSubtitleLinesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_subtitle, 16);
 
 /**
  * SubtitleProviderFailure is a provider that failed a search or download.
@@ -587,7 +864,7 @@ export type SubtitleProviderFailure = Message<"mavio.plugin.v1.SubtitleProviderF
  * Use `create(SubtitleProviderFailureSchema)` to create a new message.
  */
 export const SubtitleProviderFailureSchema: GenMessage<SubtitleProviderFailure> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_subtitle, 10);
+  messageDesc(file_mavio_plugin_v1_subtitle, 17);
 
 /**
  * SubtitleFailureKind is why a provider failed.
@@ -689,4 +966,37 @@ export const SubtitleProviderService: GenService<{
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_plugin_v1_subtitle, 0);
+
+/**
+ * SubtitleTranslatorService translates subtitles' cues with the
+ * translation services a plugin implements, as Bazarr's translators do.
+ * The server reads, times and writes the subtitles; translators take the
+ * cues' text.
+ *
+ * @generated from service mavio.plugin.v1.SubtitleTranslatorService
+ */
+export const SubtitleTranslatorService: GenService<{
+  /**
+   * ListSubtitleTranslators lists the translators the plugin implements,
+   * with their settings and state.
+   *
+   * @generated from rpc mavio.plugin.v1.SubtitleTranslatorService.ListSubtitleTranslators
+   */
+  listSubtitleTranslators: {
+    methodKind: "unary";
+    input: typeof ListSubtitleTranslatorsRequestSchema;
+    output: typeof ListSubtitleTranslatorsResponseSchema;
+  },
+  /**
+   * TranslateSubtitleLines translates the text of cues of a subtitle.
+   *
+   * @generated from rpc mavio.plugin.v1.SubtitleTranslatorService.TranslateSubtitleLines
+   */
+  translateSubtitleLines: {
+    methodKind: "unary";
+    input: typeof TranslateSubtitleLinesRequestSchema;
+    output: typeof TranslateSubtitleLinesResponseSchema;
+  },
+}> = /*@__PURE__*/
+  serviceDesc(file_mavio_plugin_v1_subtitle, 1);
 

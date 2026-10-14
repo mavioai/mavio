@@ -90,6 +90,12 @@ const (
 	// SubtitleServiceSyncSubtitleProcedure is the fully-qualified name of the SubtitleService's
 	// SyncSubtitle RPC.
 	SubtitleServiceSyncSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/SyncSubtitle"
+	// SubtitleServiceTranslateSubtitleProcedure is the fully-qualified name of the SubtitleService's
+	// TranslateSubtitle RPC.
+	SubtitleServiceTranslateSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/TranslateSubtitle"
+	// SubtitleServiceListSubtitleTranslatorsProcedure is the fully-qualified name of the
+	// SubtitleService's ListSubtitleTranslators RPC.
+	SubtitleServiceListSubtitleTranslatorsProcedure = "/mavio.acquisition.v1.SubtitleService/ListSubtitleTranslators"
 	// SubtitleServiceBlocklistSubtitleProcedure is the fully-qualified name of the SubtitleService's
 	// BlocklistSubtitle RPC.
 	SubtitleServiceBlocklistSubtitleProcedure = "/mavio.acquisition.v1.SubtitleService/BlocklistSubtitle"
@@ -158,6 +164,15 @@ type SubtitleServiceClient interface {
 	// its audio, or with another subtitle file; against the audio only on
 	// local and network storage.
 	SyncSubtitle(context.Context, *v1.SyncSubtitleRequest) (*v1.SyncSubtitleResponse, error)
+	// TranslateSubtitle queues the translation of a subtitle of a movie or
+	// episode into another language by a translator plugin, as Bazarr's
+	// translation: an external subtitle file, or an embedded text subtitle
+	// stream from playback's extraction cache (refused on cloud storage, as
+	// ExtractSubtitle). The translation is saved as a subtitle file.
+	TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error)
+	// ListSubtitleTranslators lists the translators of the subtitle
+	// translator plugins.
+	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
 	// BlocklistSubtitle blocklists the subtitle a history event downloaded,
 	// deletes its file and searches for another.
 	BlocklistSubtitle(context.Context, *v1.BlocklistSubtitleRequest) (*v1.BlocklistSubtitleResponse, error)
@@ -304,6 +319,19 @@ func NewSubtitleServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(subtitleServiceMethods.ByName("SyncSubtitle")),
 			connect.WithClientOptions(opts...),
 		),
+		translateSubtitle: connect.NewClient[v1.TranslateSubtitleRequest, v1.TranslateSubtitleResponse](
+			httpClient,
+			baseURL+SubtitleServiceTranslateSubtitleProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("TranslateSubtitle")),
+			connect.WithClientOptions(opts...),
+		),
+		listSubtitleTranslators: connect.NewClient[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse](
+			httpClient,
+			baseURL+SubtitleServiceListSubtitleTranslatorsProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("ListSubtitleTranslators")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		blocklistSubtitle: connect.NewClient[v1.BlocklistSubtitleRequest, v1.BlocklistSubtitleResponse](
 			httpClient,
 			baseURL+SubtitleServiceBlocklistSubtitleProcedure,
@@ -355,6 +383,8 @@ type subtitleServiceClient struct {
 	deleteSubtitle          *connect.Client[v1.DeleteSubtitleRequest, v1.DeleteSubtitleResponse]
 	modifySubtitle          *connect.Client[v1.ModifySubtitleRequest, v1.ModifySubtitleResponse]
 	syncSubtitle            *connect.Client[v1.SyncSubtitleRequest, v1.SyncSubtitleResponse]
+	translateSubtitle       *connect.Client[v1.TranslateSubtitleRequest, v1.TranslateSubtitleResponse]
+	listSubtitleTranslators *connect.Client[v1.ListSubtitleTranslatorsRequest, v1.ListSubtitleTranslatorsResponse]
 	blocklistSubtitle       *connect.Client[v1.BlocklistSubtitleRequest, v1.BlocklistSubtitleResponse]
 	listSubtitleHistory     *connect.Client[v1.ListSubtitleHistoryRequest, v1.ListSubtitleHistoryResponse]
 	listSubtitleBlocklist   *connect.Client[v1.ListSubtitleBlocklistRequest, v1.ListSubtitleBlocklistResponse]
@@ -532,6 +562,24 @@ func (c *subtitleServiceClient) SyncSubtitle(ctx context.Context, req *v1.SyncSu
 	return nil, err
 }
 
+// TranslateSubtitle calls mavio.acquisition.v1.SubtitleService.TranslateSubtitle.
+func (c *subtitleServiceClient) TranslateSubtitle(ctx context.Context, req *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error) {
+	response, err := c.translateSubtitle.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListSubtitleTranslators calls mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators.
+func (c *subtitleServiceClient) ListSubtitleTranslators(ctx context.Context, req *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {
+	response, err := c.listSubtitleTranslators.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // BlocklistSubtitle calls mavio.acquisition.v1.SubtitleService.BlocklistSubtitle.
 func (c *subtitleServiceClient) BlocklistSubtitle(ctx context.Context, req *v1.BlocklistSubtitleRequest) (*v1.BlocklistSubtitleResponse, error) {
 	response, err := c.blocklistSubtitle.CallUnary(ctx, connect.NewRequest(req))
@@ -622,6 +670,15 @@ type SubtitleServiceHandler interface {
 	// its audio, or with another subtitle file; against the audio only on
 	// local and network storage.
 	SyncSubtitle(context.Context, *v1.SyncSubtitleRequest) (*v1.SyncSubtitleResponse, error)
+	// TranslateSubtitle queues the translation of a subtitle of a movie or
+	// episode into another language by a translator plugin, as Bazarr's
+	// translation: an external subtitle file, or an embedded text subtitle
+	// stream from playback's extraction cache (refused on cloud storage, as
+	// ExtractSubtitle). The translation is saved as a subtitle file.
+	TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error)
+	// ListSubtitleTranslators lists the translators of the subtitle
+	// translator plugins.
+	ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error)
 	// BlocklistSubtitle blocklists the subtitle a history event downloaded,
 	// deletes its file and searches for another.
 	BlocklistSubtitle(context.Context, *v1.BlocklistSubtitleRequest) (*v1.BlocklistSubtitleResponse, error)
@@ -764,6 +821,19 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 		connect.WithSchema(subtitleServiceMethods.ByName("SyncSubtitle")),
 		connect.WithHandlerOptions(opts...),
 	)
+	subtitleServiceTranslateSubtitleHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceTranslateSubtitleProcedure,
+		svc.TranslateSubtitle,
+		connect.WithSchema(subtitleServiceMethods.ByName("TranslateSubtitle")),
+		connect.WithHandlerOptions(opts...),
+	)
+	subtitleServiceListSubtitleTranslatorsHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceListSubtitleTranslatorsProcedure,
+		svc.ListSubtitleTranslators,
+		connect.WithSchema(subtitleServiceMethods.ByName("ListSubtitleTranslators")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	subtitleServiceBlocklistSubtitleHandler := connect.NewUnaryHandlerSimple(
 		SubtitleServiceBlocklistSubtitleProcedure,
 		svc.BlocklistSubtitle,
@@ -831,6 +901,10 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 			subtitleServiceModifySubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceSyncSubtitleProcedure:
 			subtitleServiceSyncSubtitleHandler.ServeHTTP(w, r)
+		case SubtitleServiceTranslateSubtitleProcedure:
+			subtitleServiceTranslateSubtitleHandler.ServeHTTP(w, r)
+		case SubtitleServiceListSubtitleTranslatorsProcedure:
+			subtitleServiceListSubtitleTranslatorsHandler.ServeHTTP(w, r)
 		case SubtitleServiceBlocklistSubtitleProcedure:
 			subtitleServiceBlocklistSubtitleHandler.ServeHTTP(w, r)
 		case SubtitleServiceListSubtitleHistoryProcedure:
@@ -922,6 +996,14 @@ func (UnimplementedSubtitleServiceHandler) ModifySubtitle(context.Context, *v1.M
 
 func (UnimplementedSubtitleServiceHandler) SyncSubtitle(context.Context, *v1.SyncSubtitleRequest) (*v1.SyncSubtitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.SyncSubtitle is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) TranslateSubtitle(context.Context, *v1.TranslateSubtitleRequest) (*v1.TranslateSubtitleResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.TranslateSubtitle is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) ListSubtitleTranslators(context.Context, *v1.ListSubtitleTranslatorsRequest) (*v1.ListSubtitleTranslatorsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.ListSubtitleTranslators is not implemented"))
 }
 
 func (UnimplementedSubtitleServiceHandler) BlocklistSubtitle(context.Context, *v1.BlocklistSubtitleRequest) (*v1.BlocklistSubtitleResponse, error) {

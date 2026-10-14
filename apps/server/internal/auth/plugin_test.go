@@ -121,3 +121,21 @@ func TestPluginHandlerDropsCredentials(t *testing.T) {
 		t.Errorf("plugin in context = %+v, %v", got, ok)
 	}
 }
+
+func TestPluginOnly(t *testing.T) {
+	h := PluginOnly(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(http.StatusNoContent) }))
+	for _, tc := range []struct {
+		name    string
+		handler http.Handler
+		want    int
+	}{
+		{"outside", h, http.StatusNotFound},
+		{"host API", PluginHandler(Plugin{ID: "org.example.p"}, h), http.StatusNoContent},
+	} {
+		rec := httptest.NewRecorder()
+		tc.handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/x", nil))
+		if rec.Code != tc.want {
+			t.Errorf("%s: status = %d, want = %d", tc.name, rec.Code, tc.want)
+		}
+	}
+}

@@ -47,6 +47,18 @@ func PluginHandler(p Plugin, next http.Handler) http.Handler {
 	})
 }
 
+// PluginOnly serves the requests of plugins' host API with next, and
+// answers others not found.
+func PluginOnly(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := r.Context().Value(pluginKey{}).(Plugin); !ok {
+			http.NotFound(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // RequireUser names the procedures that act on the caller's own state and
 // so need a user; entries are procedures or whole services
 // ("mavio.user.v1.UserDataService"). A plugin calling them without acting

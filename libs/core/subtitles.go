@@ -181,11 +181,14 @@ const (
 	SubtitleUploaded  SubtitleAction = "uploaded"
 	SubtitleSynced    SubtitleAction = "synced"
 	SubtitleExtracted SubtitleAction = "extracted"
+	// SubtitleTranslated is a subtitle translated from another.
+	SubtitleTranslated SubtitleAction = "translated"
 )
 
 // SubtitleActions lists the subtitle actions.
 var SubtitleActions = []SubtitleAction{
 	SubtitleDeleted, SubtitleDownloaded, SubtitleManual, SubtitleUpgraded, SubtitleUploaded, SubtitleSynced, SubtitleExtracted,
+	SubtitleTranslated,
 }
 
 // Valid reports whether the action is known.
@@ -396,6 +399,21 @@ type SubtitleSettings struct {
 	MovieProfileTags, SeriesProfileTags bool
 	NoProfileTags                       []string
 	Sync                                SubtitleSyncSettings
+	Translation                         SubtitleTranslationSettings
+}
+
+// SubtitleTranslationSettings are how subtitles are translated, as
+// Bazarr's translator settings.
+type SubtitleTranslationSettings struct {
+	// Translator is the translator used when a translation names none,
+	// as "<plugin>/<translator>"; empty for the first enabled one.
+	Translator string
+	// DefaultScore is the score translations are recorded with, as a
+	// percentage of the maximum score.
+	DefaultScore int
+	// Credit adds a first cue to SubRip translations crediting the
+	// translator.
+	Credit bool
 }
 
 // SubtitleSyncSettings are how downloaded subtitles are synchronized, as
@@ -455,6 +473,7 @@ func DefaultSubtitleSettings() SubtitleSettings {
 			MaxQualityOffset:  30 * time.Second,
 			MaxScaleDeviation: 0.1,
 		},
+		Translation: SubtitleTranslationSettings{DefaultScore: 50, Credit: true},
 	}
 }
 
@@ -504,6 +523,12 @@ func (s *SubtitleSettings) Validate() error {
 		return fmt.Errorf("%w: synchronization offsets must be positive", ErrInvalid)
 	case y.MinScore < 0 || y.MaxScaleDeviation < 0:
 		return fmt.Errorf("%w: negative synchronization quality bound", ErrInvalid)
+	}
+	switch tr := &s.Translation; {
+	case !percent(tr.DefaultScore):
+		return fmt.Errorf("%w: translation score outside 0–100", ErrInvalid)
+	case tr.Translator != "" && !strings.Contains(strings.Trim(tr.Translator, "/"), "/"):
+		return fmt.Errorf("%w: translator %q is not \"<plugin>/<translator>\"", ErrInvalid, tr.Translator)
 	}
 	return nil
 }
