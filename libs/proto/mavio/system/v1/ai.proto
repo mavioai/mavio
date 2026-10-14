@@ -1,0 +1,109 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/plugin/v1/ai.proto";
+
+// AiService administers the AI model providers the server's features use,
+// through the plugin with the AI_GATEWAY capability, which keeps their
+// credentials: API keys, and OAuth logins relayed to the administrator.
+// Every RPC requires an administrator; without a started AI gateway
+// plugin they fail with failed precondition.
+service AiService {
+  // ListAiProviders lists the providers with how they authenticate and
+  // whether they can be used.
+  rpc ListAiProviders(ListAiProvidersRequest) returns (ListAiProvidersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // ListAiModels lists the providers' models.
+  rpc ListAiModels(ListAiModelsRequest) returns (ListAiModelsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SetAiApiKey stores a provider's API key, or removes it.
+  rpc SetAiApiKey(SetAiApiKeyRequest) returns (SetAiApiKeyResponse);
+  // StartAiLogin starts a provider's OAuth login. Logins to subscriptions
+  // (AiProvider.subscription) may break the provider's terms; clients
+  // warn of it and leave the choice to the administrator.
+  rpc StartAiLogin(StartAiLoginRequest) returns (StartAiLoginResponse);
+  // GetAiLogin returns a login's state: what to show, what it asks and
+  // whether it ended. Clients poll it while the login runs.
+  rpc GetAiLogin(GetAiLoginRequest) returns (GetAiLoginResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AnswerAiLogin answers a login's prompt.
+  rpc AnswerAiLogin(AnswerAiLoginRequest) returns (AnswerAiLoginResponse);
+  // CancelAiLogin abandons a login.
+  rpc CancelAiLogin(CancelAiLoginRequest) returns (CancelAiLoginResponse);
+  // LogoutAi removes a provider's stored credential.
+  rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
+}
+
+message ListAiProvidersRequest {}
+
+message ListAiProvidersResponse {
+  // The AI gateway plugin.
+  string plugin_id = 1;
+  repeated mavio.plugin.v1.AiProvider providers = 2;
+}
+
+message ListAiModelsRequest {
+  // The provider whose models are listed; every provider's when empty.
+  string provider = 1;
+  // Only models of providers that can be used.
+  bool available = 2;
+}
+
+message ListAiModelsResponse {
+  repeated mavio.plugin.v1.AiModel models = 1;
+}
+
+message SetAiApiKeyRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+  // The key; empty removes the stored one.
+  string key = 2;
+}
+
+message SetAiApiKeyResponse {}
+
+message StartAiLoginRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+}
+
+message StartAiLoginResponse {
+  string login_id = 1;
+}
+
+message GetAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message GetAiLoginResponse {
+  mavio.plugin.v1.AiLoginState state = 1;
+  // What the login showed so far, oldest first.
+  repeated mavio.plugin.v1.AiLoginEvent events = 2;
+  // What the login asks now, if anything.
+  mavio.plugin.v1.AiLoginPrompt prompt = 3;
+  // Why it failed.
+  string error = 4;
+}
+
+message AnswerAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+  string prompt_id = 2 [(buf.validate.field).required = true];
+  string value = 3;
+}
+
+message AnswerAiLoginResponse {}
+
+message CancelAiLoginRequest {
+  string login_id = 1 [(buf.validate.field).required = true];
+}
+
+message CancelAiLoginResponse {}
+
+message LogoutAiRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+}
+
+message LogoutAiResponse {}

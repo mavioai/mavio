@@ -2,6 +2,7 @@
 
 include!("mavio.system.v1.activity.rs");
 include!("mavio.system.v1.system.rs");
+include!("mavio.system.v1.ai.rs");
 include!("mavio.system.v1.backup.rs");
 include!("mavio.system.v1.localization.rs");
 include!("mavio.system.v1.task.rs");
@@ -24,6 +25,7 @@ pub mod __buffa {
         use super::*;
         include!("mavio.system.v1.activity.__view.rs");
         include!("mavio.system.v1.system.__view.rs");
+        include!("mavio.system.v1.ai.__view.rs");
         include!("mavio.system.v1.backup.__view.rs");
         include!("mavio.system.v1.localization.__view.rs");
         include!("mavio.system.v1.task.__view.rs");
@@ -189,6 +191,70 @@ pub use self::__buffa::view::ListLogsRequestOwnedView;
 pub use self::__buffa::view::ListLogsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListLogsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiProvidersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiModelsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAiApiKeyResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAiLoginResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::LogoutAiResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::BackupView;
 #[doc(inline)]

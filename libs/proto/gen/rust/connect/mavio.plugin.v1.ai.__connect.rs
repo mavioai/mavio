@@ -663,11 +663,14 @@ pub const AI_GATEWAY_SERVICE_COMPLETE_AI_SPEC: ::connectrpc::Spec = ::connectrpc
 /// logins, lists their models and runs completions; the server and its
 /// features (subtitle translation, assistants) never hold a credential.
 ///
-/// Failures carry Connect codes: resource exhausted when the provider rate
-/// limits, unauthenticated when a provider has no usable credential or its
-/// login expired, failed precondition for an unknown provider or model,
-/// invalid argument for a request the model cannot take, unavailable when
-/// the provider fails.
+/// Failures carry Connect codes: unavailable for failures worth retrying
+/// (rate limits, overload, the network), unauthenticated when a provider
+/// has no usable credential or its login expired, not found for an unknown
+/// provider, model or login, failed precondition for a request the
+/// provider cannot take (an API key for a provider without one, an OAuth
+/// login for one without, a stale prompt), invalid argument when the
+/// context overflows or the output schema is not JSON, canceled when the
+/// request is.
 ///
 /// # Implementing handlers
 ///
