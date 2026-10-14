@@ -724,7 +724,8 @@ flowchart TD
   - [x] 无需账号的 JSON API 与其他协议：Gestdown、AnimeTosho（两者）、Tsukihime、Subtis、RegieLive、Bayflix、Vladoonmooo、Subsynchro、Wizdom、BSPlayer、NapiProjekt、Napisy24；用于动漫 ID 的 AniDB 与 anime lists
   - [x] 无需账号的抓取站点：AnimeKalesi、AnimeSubInfo、GreekSubs、GreekSubtitles、Hosszupuska、Nekur、PrijevodiOnline、SousTitres.eu、SubClub、Subf2m、Subs4Free、SubsCenter、SubsSabbz、SubsUnacs、SubtitleCat、Subtitrari Noi、Subtitriid、SubtitulamosTV、SuperSubtitles、Titrari、TVSubtitles、YavkaNet、YIFY Subtitles
   - [x] 需要登录、cookie 或验证码的站点：Addic7ed、AvistaZ、CinemaZ、Karagarga、LegendasDivx、Pipocas、Subs4Series、Titulky、TurkceAltyazi.org、XSubs、Zimuku
-  - [ ] 后续：Jimaku 通过 `internal/anidb` 获取动漫 ID；以统一的发布名解析器替代 `scrape` 与 `archivemix` 中对 guessit 的近似（季、集、年份与标题之外的属性）；提供者缓存在重启之间保存在数据目录中；Tsukihime 的流媒体服务猜测
+  - [ ] 后续：Jimaku 通过 `internal/anidb` 获取动漫 ID；提供者缓存在重启之间保存在数据目录中
+  - [x] 提供者需要 guessit 在季、集、年份与标题之外的属性时，用 `libs/release` 解析发布名（Tsukihime 的流媒体服务，用以区分其发布）；名称中的季与集（如压缩包内的文件）仍用 `scrape` 与 `archivemix` 对 guessit 的解读
   - [x] 各提供者的名称清理与发布组辅助函数合并到 `scrape`，并为 `sitekit` 补充测试
   - [x] Bazarr 随机挑选 user agent 之处也从 Bazarr 的列表中随机挑选；GreekSubtitles 的文件按 Windows-1253 解码
 - [ ] `SubtitleService` 与作业：字幕配置及其分配与字幕设置、缺少的字幕、缺字幕搜索、升级、入库与扫描时的搜索、手动搜索、下载、上传、删除、历史、阻止列表；`subtitle.downloaded` 活动；下载后按设置的分数阈值同步时间轴，以及手动同步，本地和网络存储上按音频，所有存储类别上按另一个字幕文件

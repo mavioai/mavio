@@ -8,6 +8,7 @@ require (
 	github.com/bodgit/sevenzip v1.6.5
 	github.com/mavioai/mavio/libs/plugin v0.0.0
 	github.com/mavioai/mavio/libs/proto v0.0.0
+	github.com/mavioai/mavio/libs/release v0.0.0
 	github.com/nwaples/rardecode/v2 v2.4.5
 	github.com/ulikunitz/xz v0.5.15
 	go.yaml.in/yaml/v3 v3.0.5
@@ -21,6 +22,7 @@ require (
 	github.com/andybalholm/brotli v1.2.2 // indirect
 	github.com/bodgit/plumbing v1.3.0 // indirect
 	github.com/bodgit/windows v1.0.1 // indirect
+	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/klauspost/compress v1.19.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
@@ -32,3 +34,5 @@ require (
 replace github.com/mavioai/mavio/libs/plugin => ../../libs/plugin
 
 replace github.com/mavioai/mavio/libs/proto => ../../libs/proto
+
+replace github.com/mavioai/mavio/libs/release => ../../libs/release

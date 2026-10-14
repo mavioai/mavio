@@ -173,7 +173,7 @@ func TestEpisode(t *testing.T) {
 	}
 	s := subs[0]
 	link := f.srv.URL + "/attach/0002086A/133226.xz"
-	if s.Language != (provider.Language{Tag: "ar"}) || s.Format != "srt" || s.PageLink != link || s.ID != "301:"+link || s.Comment != "" {
+	if s.Language != (provider.Language{Tag: "ar"}) || s.Format != "srt" || s.PageLink != link || s.ID != "301:"+link || s.Comment != "Netflix" {
 		t.Errorf("subtitle got = %+v", s)
 	}
 	if want := []string{"series", "season", "episode", "year"}; !slices.Equal(s.Matches, want) {
@@ -311,6 +311,24 @@ func TestTrackLabels(t *testing.T) {
 	}
 	if want := []string{"[Sonomama]", "Crunchyroll", ""}; !slices.Equal(got, want) {
 		t.Errorf("comments got = %q, want = %q", got, want)
+	}
+}
+
+func TestStreamingService(t *testing.T) {
+	for name, want := range map[string]string{
+		"One.Piece.S01E1171.1080p.AMZN.WEB-DL.DDP2.0.H.264-VARYG": "Amazon Prime",
+		"One.Piece.S01E1171.1080p.WEB-DL.H.264-VARYG":             "Crunchyroll",
+	} {
+		f := newFake(t)
+		f.episodeRelease(name, attachment(1, "en", "ass", "Crunchyroll", 0, 1))
+		subs, err := newProvider(t, f).Search(t.Context(), episode(), []provider.Language{{Tag: "en"}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		// The service a release name names comes before its track's name.
+		if len(subs) != 1 || subs[0].Comment != want {
+			t.Errorf("%s: subtitles got = %+v, want one with comment %q", name, subs, want)
+		}
 	}
 }
 

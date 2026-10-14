@@ -23,6 +23,7 @@ import (
 	"github.com/ulikunitz/xz"
 	"golang.org/x/text/language"
 
+	"github.com/mavioai/mavio/libs/release"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/anidb"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/archive"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
@@ -367,17 +368,19 @@ func (p *Provider) subtitle(ctx context.Context, v *provider.Video, a *anime, e 
 	if v.Year != 0 && a.ReleaseYear == v.Year {
 		matches = append(matches, "year")
 	}
+	name := cmp.Or(e.Name, f.Filename)
 	return provider.Subtitle{
 		// Releases share attachments: the release keeps them apart.
 		ID:           fmt.Sprintf("%d:%s", e.ID, link),
 		Language:     lang,
-		ReleaseNames: []string{cmp.Or(e.Name, f.Filename)},
+		ReleaseNames: []string{name},
 		Matches:      matches,
 		Format:       codec,
 		PageLink:     link,
-		// Several tracks of a language in a release are told apart by
-		// their names.
-		Comment: trackLabel(info.Name),
+		// Releases of a name from several streaming services, and several
+		// tracks of a language in a release, are told apart by the
+		// service or the track's name, as Bazarr's.
+		Comment: cmp.Or(release.ParseStreamingService(name), trackLabel(info.Name)),
 	}, true
 }
 

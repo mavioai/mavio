@@ -142,6 +142,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
 plugins/* ──▶ plugin ──▶ proto
 ```
 * `core` 不依赖任何其他库；`naming`、`subtitle`、`release` 是纯函数库。
+* 第一方插件也可以使用纯函数库：字幕插件用 `release` 解析发布名。
 * `acquire` 与 `library` 一样，只通过 `core` 中的端口访问存储、扫描与插件，这些端口由 `apps/server` 实现。
 * `media` 只依赖 `core`，不感知数据库与插件。
 * `rclone` 只依赖 `core`：它基于 rcd 的 HTTP API 实现 `core.Storage`，不链接 rclone 的任何代码。

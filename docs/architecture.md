@@ -142,6 +142,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
 plugins/* ──▶ plugin ──▶ proto
 ```
 * `core` depends on no other library; `naming`, `subtitle` and `release` are pure-function libraries.
+* First-party plugins may also use the pure-function libraries: the subtitles plugin reads release names with `release`.
 * `acquire`, like `library`, reaches storage, scans and plugins only through ports in `core`, which `apps/server` implements.
 * `media` depends only on `core` and knows nothing about databases or plugins.
 * `rclone` depends only on `core`: it implements `core.Storage` over an rcd's HTTP API and links none of rclone's code.
