@@ -293,7 +293,8 @@ func (s *AuthService) CreateFirstUser(ctx context.Context, req *authv1.CreateFir
 		user = core.User{
 			Name:        req.GetName(),
 			Kind:        core.UserAdmin,
-			Policy:      core.UserPolicy{AllowTranscoding: true, AllowDownload: true},
+			Access:      core.LibraryAccess{AllowDownload: true},
+			Policy:      core.UserPolicy{AllowTranscoding: true},
 			CreatedAt:   now,
 			LastLoginAt: &now,
 		}

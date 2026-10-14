@@ -70,6 +70,10 @@ type Item struct {
 	ParentalRating *int `json:"parental_rating,omitempty"`
 	// InheritedRating holds the value of the "inherited_rating" field.
 	InheritedRating *int `json:"inherited_rating,omitempty"`
+	// TagKeys holds the value of the "tag_keys" field.
+	TagKeys string `json:"tag_keys,omitempty"`
+	// InheritedTags holds the value of the "inherited_tags" field.
+	InheritedTags string `json:"inherited_tags,omitempty"`
 	// CommunityRating holds the value of the "community_rating" field.
 	CommunityRating float64 `json:"community_rating,omitempty"`
 	// CriticRating holds the value of the "critic_rating" field.
@@ -500,7 +504,7 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case item.FieldIndexNumber, item.FieldParentIndexNumber, item.FieldIndexNumberEnd, item.FieldProductionYear, item.FieldRuntime, item.FieldParentalRating, item.FieldInheritedRating, item.FieldAirsBeforeSeasonNumber, item.FieldAirsAfterSeasonNumber, item.FieldAirsBeforeEpisodeNumber, item.FieldScanGeneration, item.FieldAbsoluteNumber, item.FieldSecondaryYear:
 			values[i] = new(sql.NullInt64)
-		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra, item.FieldSeriesType, item.FieldOriginalLanguage:
+		case item.FieldKind, item.FieldName, item.FieldSortName, item.FieldSortKey, item.FieldOriginalTitle, item.FieldSearchKey, item.FieldOriginalKey, item.FieldOverview, item.FieldTagline, item.FieldPath, item.FieldOfficialRating, item.FieldCustomRating, item.FieldTagKeys, item.FieldInheritedTags, item.FieldCollectionName, item.FieldAspectRatio, item.FieldVideo3dFormat, item.FieldAlbum, item.FieldSeriesStatus, item.FieldAirTime, item.FieldDisplayOrder, item.FieldMetadataLanguage, item.FieldMetadataCountry, item.FieldExtra, item.FieldSeriesType, item.FieldOriginalLanguage:
 			values[i] = new(sql.NullString)
 		case item.FieldPremiereDate, item.FieldEndDate, item.FieldDateAdded, item.FieldFileModified, item.FieldMetadataRefreshedAt, item.FieldMissingSince, item.FieldDigitalReleaseDate, item.FieldPhysicalReleaseDate:
 			values[i] = new(sql.NullTime)
@@ -670,6 +674,18 @@ func (_m *Item) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.InheritedRating = new(int)
 				*_m.InheritedRating = int(value.Int64)
+			}
+		case item.FieldTagKeys:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tag_keys", values[i])
+			} else if value.Valid {
+				_m.TagKeys = value.String
+			}
+		case item.FieldInheritedTags:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field inherited_tags", values[i])
+			} else if value.Valid {
+				_m.InheritedTags = value.String
 			}
 		case item.FieldCommunityRating:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -1191,6 +1207,12 @@ func (_m *Item) String() string {
 		builder.WriteString("inherited_rating=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("tag_keys=")
+	builder.WriteString(_m.TagKeys)
+	builder.WriteString(", ")
+	builder.WriteString("inherited_tags=")
+	builder.WriteString(_m.InheritedTags)
 	builder.WriteString(", ")
 	builder.WriteString("community_rating=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CommunityRating))

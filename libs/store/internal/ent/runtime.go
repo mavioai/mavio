@@ -400,80 +400,88 @@ func init() {
 	itemDescCustomRating := itemFields[21].Descriptor()
 	// item.DefaultCustomRating holds the default value on creation for the custom_rating field.
 	item.DefaultCustomRating = itemDescCustomRating.Default.(string)
+	// itemDescTagKeys is the schema descriptor for tag_keys field.
+	itemDescTagKeys := itemFields[24].Descriptor()
+	// item.DefaultTagKeys holds the default value on creation for the tag_keys field.
+	item.DefaultTagKeys = itemDescTagKeys.Default.(string)
+	// itemDescInheritedTags is the schema descriptor for inherited_tags field.
+	itemDescInheritedTags := itemFields[25].Descriptor()
+	// item.DefaultInheritedTags holds the default value on creation for the inherited_tags field.
+	item.DefaultInheritedTags = itemDescInheritedTags.Default.(string)
 	// itemDescCommunityRating is the schema descriptor for community_rating field.
-	itemDescCommunityRating := itemFields[24].Descriptor()
+	itemDescCommunityRating := itemFields[26].Descriptor()
 	// item.DefaultCommunityRating holds the default value on creation for the community_rating field.
 	item.DefaultCommunityRating = itemDescCommunityRating.Default.(float64)
 	// itemDescCriticRating is the schema descriptor for critic_rating field.
-	itemDescCriticRating := itemFields[25].Descriptor()
+	itemDescCriticRating := itemFields[27].Descriptor()
 	// item.DefaultCriticRating holds the default value on creation for the critic_rating field.
 	item.DefaultCriticRating = itemDescCriticRating.Default.(float64)
 	// itemDescCollectionName is the schema descriptor for collection_name field.
-	itemDescCollectionName := itemFields[29].Descriptor()
+	itemDescCollectionName := itemFields[31].Descriptor()
 	// item.DefaultCollectionName holds the default value on creation for the collection_name field.
 	item.DefaultCollectionName = itemDescCollectionName.Default.(string)
 	// itemDescAspectRatio is the schema descriptor for aspect_ratio field.
-	itemDescAspectRatio := itemFields[30].Descriptor()
+	itemDescAspectRatio := itemFields[32].Descriptor()
 	// item.DefaultAspectRatio holds the default value on creation for the aspect_ratio field.
 	item.DefaultAspectRatio = itemDescAspectRatio.Default.(string)
 	// itemDescVideo3dFormat is the schema descriptor for video_3d_format field.
-	itemDescVideo3dFormat := itemFields[31].Descriptor()
+	itemDescVideo3dFormat := itemFields[33].Descriptor()
 	// item.DefaultVideo3dFormat holds the default value on creation for the video_3d_format field.
 	item.DefaultVideo3dFormat = itemDescVideo3dFormat.Default.(string)
 	// itemDescAlbum is the schema descriptor for album field.
-	itemDescAlbum := itemFields[32].Descriptor()
+	itemDescAlbum := itemFields[34].Descriptor()
 	// item.DefaultAlbum holds the default value on creation for the album field.
 	item.DefaultAlbum = itemDescAlbum.Default.(string)
 	// itemDescSeriesStatus is the schema descriptor for series_status field.
-	itemDescSeriesStatus := itemFields[33].Descriptor()
+	itemDescSeriesStatus := itemFields[35].Descriptor()
 	// item.DefaultSeriesStatus holds the default value on creation for the series_status field.
 	item.DefaultSeriesStatus = itemDescSeriesStatus.Default.(string)
 	// itemDescAirTime is the schema descriptor for air_time field.
-	itemDescAirTime := itemFields[35].Descriptor()
+	itemDescAirTime := itemFields[37].Descriptor()
 	// item.DefaultAirTime holds the default value on creation for the air_time field.
 	item.DefaultAirTime = itemDescAirTime.Default.(string)
 	// itemDescDisplayOrder is the schema descriptor for display_order field.
-	itemDescDisplayOrder := itemFields[36].Descriptor()
+	itemDescDisplayOrder := itemFields[38].Descriptor()
 	// item.DefaultDisplayOrder holds the default value on creation for the display_order field.
 	item.DefaultDisplayOrder = itemDescDisplayOrder.Default.(string)
 	// itemDescMetadataLanguage is the schema descriptor for metadata_language field.
-	itemDescMetadataLanguage := itemFields[40].Descriptor()
+	itemDescMetadataLanguage := itemFields[42].Descriptor()
 	// item.DefaultMetadataLanguage holds the default value on creation for the metadata_language field.
 	item.DefaultMetadataLanguage = itemDescMetadataLanguage.Default.(string)
 	// itemDescMetadataCountry is the schema descriptor for metadata_country field.
-	itemDescMetadataCountry := itemFields[41].Descriptor()
+	itemDescMetadataCountry := itemFields[43].Descriptor()
 	// item.DefaultMetadataCountry holds the default value on creation for the metadata_country field.
 	item.DefaultMetadataCountry = itemDescMetadataCountry.Default.(string)
 	// itemDescLocked is the schema descriptor for locked field.
-	itemDescLocked := itemFields[42].Descriptor()
+	itemDescLocked := itemFields[44].Descriptor()
 	// item.DefaultLocked holds the default value on creation for the locked field.
 	item.DefaultLocked = itemDescLocked.Default.(bool)
 	// itemDescExtra is the schema descriptor for extra field.
-	itemDescExtra := itemFields[45].Descriptor()
+	itemDescExtra := itemFields[47].Descriptor()
 	// item.DefaultExtra holds the default value on creation for the extra field.
 	item.DefaultExtra = itemDescExtra.Default.(string)
 	// itemDescScanGeneration is the schema descriptor for scan_generation field.
-	itemDescScanGeneration := itemFields[51].Descriptor()
+	itemDescScanGeneration := itemFields[53].Descriptor()
 	// item.DefaultScanGeneration holds the default value on creation for the scan_generation field.
 	item.DefaultScanGeneration = itemDescScanGeneration.Default.(int64)
 	// itemDescVirtual is the schema descriptor for virtual field.
-	itemDescVirtual := itemFields[53].Descriptor()
+	itemDescVirtual := itemFields[55].Descriptor()
 	// item.DefaultVirtual holds the default value on creation for the virtual field.
 	item.DefaultVirtual = itemDescVirtual.Default.(bool)
 	// itemDescMonitored is the schema descriptor for monitored field.
-	itemDescMonitored := itemFields[54].Descriptor()
+	itemDescMonitored := itemFields[56].Descriptor()
 	// item.DefaultMonitored holds the default value on creation for the monitored field.
 	item.DefaultMonitored = itemDescMonitored.Default.(bool)
 	// itemDescSeriesType is the schema descriptor for series_type field.
-	itemDescSeriesType := itemFields[55].Descriptor()
+	itemDescSeriesType := itemFields[57].Descriptor()
 	// item.DefaultSeriesType holds the default value on creation for the series_type field.
 	item.DefaultSeriesType = itemDescSeriesType.Default.(string)
 	// itemDescOriginalLanguage is the schema descriptor for original_language field.
-	itemDescOriginalLanguage := itemFields[57].Descriptor()
+	itemDescOriginalLanguage := itemFields[59].Descriptor()
 	// item.DefaultOriginalLanguage holds the default value on creation for the original_language field.
 	item.DefaultOriginalLanguage = itemDescOriginalLanguage.Default.(string)
 	// itemDescSecondaryYear is the schema descriptor for secondary_year field.
-	itemDescSecondaryYear := itemFields[62].Descriptor()
+	itemDescSecondaryYear := itemFields[64].Descriptor()
 	// item.DefaultSecondaryYear holds the default value on creation for the secondary_year field.
 	item.DefaultSecondaryYear = itemDescSecondaryYear.Default.(int)
 	// itemDescID is the schema descriptor for id field.
@@ -939,7 +947,7 @@ func init() {
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[9].Descriptor()
+	userDescCreatedAt := userFields[10].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.

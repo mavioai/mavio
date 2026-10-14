@@ -289,10 +289,14 @@ type Item struct {
 	CommunityRating float64 // 0–10
 	CriticRating    float64 // 0–100
 
-	Genres      []string
-	Tags        []string
-	Studios     []string
-	ExternalIDs map[Provider]string
+	Genres []string
+	Tags   []string
+	// InheritedTags are the LabelKeys of the item's tags and its
+	// ancestors', which access records' labels match. The store computes
+	// them on every write; values given to Upsert are ignored.
+	InheritedTags []string
+	Studios       []string
+	ExternalIDs   map[Provider]string
 	// ProductionLocations are the countries the item was produced in.
 	ProductionLocations []string
 	// RemoteTrailers are URLs of trailers hosted elsewhere, such as

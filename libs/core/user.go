@@ -17,9 +17,10 @@ type User struct {
 	// LDAP; empty means the server's own credentials.
 	AuthProvider string
 	// Restriction is a managed user's restriction profile, applied on top
-	// of its policy.
+	// of its library access.
 	Restriction RestrictionProfile
 	Disabled    bool
+	Access      LibraryAccess
 	Policy      UserPolicy
 	Preferences UserPreferences
 	CreatedAt   time.Time
@@ -68,7 +69,7 @@ func (u *User) Validate() error {
 		u.Policy.SeriesQuota != nil && u.Policy.SeriesQuota.Validate() != nil:
 		return fmt.Errorf("%w: user %q has a negative request quota", ErrInvalid, u.Name)
 	}
-	return nil
+	return u.Access.Validate()
 }
 
 // Credential is what a user signs in or switches with in standalone mode:
@@ -129,19 +130,10 @@ func (c *Credential) Validate() error {
 	return nil
 }
 
-// UserPolicy restricts what a user may access and do.
+// UserPolicy is what a user may do on the server beyond its library
+// access: transcoding, streaming and requests.
 type UserPolicy struct {
-	// Libraries limits access to these libraries; nil means all libraries.
-	Libraries []ID
-	// MaxParentalRating is the highest allowed rating score; content ratings
-	// such as "PG-13" are mapped to scores per country rating system. Nil
-	// means unrestricted; zero allows only content for all ages.
-	MaxParentalRating *int
-	// BlockUnrated hides items without an official rating when a maximum
-	// rating is set.
-	BlockUnrated     bool
 	AllowTranscoding bool
-	AllowDownload    bool
 	// MaxStreamingBitrate caps remote streaming, in bits per second; zero
 	// means unlimited.
 	MaxStreamingBitrate int64
@@ -155,53 +147,27 @@ type UserPolicy struct {
 	MovieQuota, SeriesQuota *Quota
 }
 
-// CanAccessLibrary reports whether the policy allows the library.
-func (p *UserPolicy) CanAccessLibrary(id ID) bool {
-	return p.Libraries == nil || slices.Contains(p.Libraries, id)
-}
-
-// CanAccess reports whether the policy allows the item: its library is
-// allowed and, under a maximum rating, its rating score is within it,
-// unrated items only when BlockUnrated is off. The score is the item's own
-// ParentalRating, or its InheritedRating when it has none.
-func (p *UserPolicy) CanAccess(it *Item) bool {
-	if !p.CanAccessLibrary(it.LibraryID) {
-		return false
-	}
-	if p.MaxParentalRating != nil {
-		score := it.ParentalRating
-		if score == nil {
-			score = it.InheritedRating
-		}
-		if score == nil {
-			return !p.BlockUnrated
-		}
-		return *score <= *p.MaxParentalRating
-	}
-	return true
-}
-
 // CanAccess reports whether the user may see the item: their own
 // playlists, and other items as their access allows.
 func (u *User) CanAccess(it *Item) bool {
 	if it.Kind == KindPlaylist {
 		return it.UserID == u.ID
 	}
-	access := u.Access()
+	access := u.EffectiveAccess()
 	return access.CanAccess(it)
 }
 
-// Access returns the user's effective policy: its policy with its
+// EffectiveAccess returns the user's library access record with its
 // restriction profile's rating limit applied.
-func (u *User) Access() UserPolicy {
-	p := u.Policy
+func (u *User) EffectiveAccess() LibraryAccess {
+	a := u.Access
 	if limit, ok := u.Restriction.MaxRating(); ok {
-		if p.MaxParentalRating == nil || *p.MaxParentalRating > limit {
-			p.MaxParentalRating = &limit
+		if a.MaxParentalRating == nil || *a.MaxParentalRating > limit {
+			a.MaxParentalRating = &limit
 		}
-		p.BlockUnrated = true
+		a.BlockUnrated = true
 	}
-	return p
+	return a
 }
 
 // RestrictionProfile limits what a managed user sees by content rating,

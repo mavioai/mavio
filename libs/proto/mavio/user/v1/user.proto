@@ -75,7 +75,7 @@ enum SubtitleMode {
 }
 
 // RestrictionProfile limits what a managed user sees by content rating, on
-// top of its policy; rated items within the profile alone are shown.
+// top of its library access; rated items within the profile alone are shown.
 enum RestrictionProfile {
   // No restriction.
   RESTRICTION_PROFILE_UNSPECIFIED = 0;
@@ -123,6 +123,10 @@ message Passkey {
   google.protobuf.Timestamp last_use_time = 5;
 }
 
+// UserPolicy is what a user may reach and do. Its library and content
+// fields (all_libraries, library_ids, max_parental_rating, block_unrated,
+// allowed_labels, blocked_labels, allow_download) are the user's library
+// access record (docs/accounts.md §3.3).
 message UserPolicy {
   // Accessible libraries; when all_libraries is true this list is ignored.
   bool all_libraries = 1;
@@ -150,6 +154,28 @@ message UserPolicy {
   // The user's quotas; unset uses the server's.
   RequestQuota movie_quota = 14;
   RequestQuota series_quota = 15;
+  // When any, only items with one of these labels are shown. Labels are
+  // tags, of the item or of an ancestor such as its series, matched
+  // case-insensitively.
+  repeated string allowed_labels = 16 [(buf.validate.field).repeated = {
+    max_items: 100
+    items: {
+      string: {
+        min_len: 1
+        max_len: 100
+      }
+    }
+  }];
+  // Items with any of these labels are hidden.
+  repeated string blocked_labels = 17 [(buf.validate.field).repeated = {
+    max_items: 100
+    items: {
+      string: {
+        min_len: 1
+        max_len: 100
+      }
+    }
+  }];
 }
 
 // RequestQuota bounds a user's requests: limit requests of movies, or

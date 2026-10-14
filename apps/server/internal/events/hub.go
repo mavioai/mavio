@@ -350,7 +350,7 @@ func (h *Hub) flush() {
 	}
 	// Every user has the playlists library, holding their own playlists.
 	canSeeLibrary := func(u *core.User, lib core.ID) bool {
-		return kinds[lib] == core.LibraryPlaylists || u.Policy.CanAccessLibrary(lib)
+		return kinds[lib] == core.LibraryPlaylists || u.Access.CanAccessLibrary(lib)
 	}
 	for _, s := range h.subscribers(func(*Subscriber) bool { return true }) {
 		b := sessionv1.LibraryChanged_builder{}

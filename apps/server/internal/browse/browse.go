@@ -17,23 +17,22 @@ import (
 const pageSize = 100
 
 // Scope is what a user may see: their libraries (nil means all) and
-// rating limit.
+// content limits.
 type Scope struct {
-	UserID      core.ID
-	LibraryIDs  []core.ID
-	MaxRating   *int
-	SkipUnrated bool
+	UserID     core.ID
+	LibraryIDs []core.ID
+	Limits     core.ContentLimits
 }
 
-// allows reports whether an item is in the scope's libraries and rating.
+// allows reports whether an item is in the scope's libraries and limits.
 func (s Scope) allows(it *core.Item) bool {
-	policy := core.UserPolicy{Libraries: s.LibraryIDs, MaxParentalRating: s.MaxRating, BlockUnrated: s.SkipUnrated}
-	return policy.CanAccess(it)
+	access := core.LibraryAccess{Libraries: s.LibraryIDs, ContentLimits: s.Limits}
+	return access.CanAccess(it)
 }
 
 // query returns an item query limited to the scope.
 func (s Scope) query() core.ItemQuery {
-	return core.ItemQuery{LibraryIDs: s.LibraryIDs, MaxRating: s.MaxRating, SkipUnrated: s.SkipUnrated, UserID: s.UserID}
+	return core.ItemQuery{LibraryIDs: s.LibraryIDs, Limits: s.Limits, UserID: s.UserID}
 }
 
 // Browser builds the lists.

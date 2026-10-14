@@ -158,7 +158,7 @@ func TestLatest(t *testing.T) {
 	lost.ParentalRating = new(17)
 	e.put(t, lost)
 	limited := shows
-	limited.MaxRating = new(12)
+	limited.Limits.MaxParentalRating = new(12)
 	// Fargo's older episodes belong to the same entry.
 	if got, want := latest(limited, grouped), []string{"Fargo E4"}; !slices.Equal(got, want) {
 		t.Errorf("rating limit: got = %q, want = %q", got, want)
@@ -207,7 +207,7 @@ func TestNextUp(t *testing.T) {
 	lost := e.series[0]
 	lost.ParentalRating = new(17)
 	e.put(t, lost)
-	if got := nextUp(Scope{UserID: e.user, MaxRating: new(12)}, NextUpQuery{Limit: 10, IncludeResumable: true}); !slices.Equal(got, []string{"Fargo E2"}) {
+	if got := nextUp(Scope{UserID: e.user, Limits: core.ContentLimits{MaxParentalRating: new(12)}}, NextUpQuery{Limit: 10, IncludeResumable: true}); !slices.Equal(got, []string{"Fargo E2"}) {
 		t.Errorf("rating limit: got = %q", got)
 	}
 }

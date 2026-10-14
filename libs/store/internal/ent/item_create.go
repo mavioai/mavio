@@ -329,6 +329,34 @@ func (_c *ItemCreate) SetNillableInheritedRating(v *int) *ItemCreate {
 	return _c
 }
 
+// SetTagKeys sets the "tag_keys" field.
+func (_c *ItemCreate) SetTagKeys(v string) *ItemCreate {
+	_c.mutation.SetTagKeys(v)
+	return _c
+}
+
+// SetNillableTagKeys sets the "tag_keys" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableTagKeys(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetTagKeys(*v)
+	}
+	return _c
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (_c *ItemCreate) SetInheritedTags(v string) *ItemCreate {
+	_c.mutation.SetInheritedTags(v)
+	return _c
+}
+
+// SetNillableInheritedTags sets the "inherited_tags" field if the given value is not nil.
+func (_c *ItemCreate) SetNillableInheritedTags(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetInheritedTags(*v)
+	}
+	return _c
+}
+
 // SetCommunityRating sets the "community_rating" field.
 func (_c *ItemCreate) SetCommunityRating(v float64) *ItemCreate {
 	_c.mutation.SetCommunityRating(v)
@@ -1292,6 +1320,14 @@ func (_c *ItemCreate) defaults() {
 		v := item.DefaultCustomRating
 		_c.mutation.SetCustomRating(v)
 	}
+	if _, ok := _c.mutation.TagKeys(); !ok {
+		v := item.DefaultTagKeys
+		_c.mutation.SetTagKeys(v)
+	}
+	if _, ok := _c.mutation.InheritedTags(); !ok {
+		v := item.DefaultInheritedTags
+		_c.mutation.SetInheritedTags(v)
+	}
 	if _, ok := _c.mutation.CommunityRating(); !ok {
 		v := item.DefaultCommunityRating
 		_c.mutation.SetCommunityRating(v)
@@ -1420,6 +1456,12 @@ func (_c *ItemCreate) check() error {
 	}
 	if _, ok := _c.mutation.CustomRating(); !ok {
 		return &ValidationError{Name: "custom_rating", err: errors.New(`ent: missing required field "Item.custom_rating"`)}
+	}
+	if _, ok := _c.mutation.TagKeys(); !ok {
+		return &ValidationError{Name: "tag_keys", err: errors.New(`ent: missing required field "Item.tag_keys"`)}
+	}
+	if _, ok := _c.mutation.InheritedTags(); !ok {
+		return &ValidationError{Name: "inherited_tags", err: errors.New(`ent: missing required field "Item.inherited_tags"`)}
 	}
 	if _, ok := _c.mutation.CommunityRating(); !ok {
 		return &ValidationError{Name: "community_rating", err: errors.New(`ent: missing required field "Item.community_rating"`)}
@@ -1603,6 +1645,14 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.InheritedRating(); ok {
 		_spec.SetField(item.FieldInheritedRating, field.TypeInt, value)
 		_node.InheritedRating = &value
+	}
+	if value, ok := _c.mutation.TagKeys(); ok {
+		_spec.SetField(item.FieldTagKeys, field.TypeString, value)
+		_node.TagKeys = value
+	}
+	if value, ok := _c.mutation.InheritedTags(); ok {
+		_spec.SetField(item.FieldInheritedTags, field.TypeString, value)
+		_node.InheritedTags = value
 	}
 	if value, ok := _c.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)
@@ -2619,6 +2669,30 @@ func (u *ItemUpsert) AddInheritedRating(v int) *ItemUpsert {
 // ClearInheritedRating clears the value of the "inherited_rating" field.
 func (u *ItemUpsert) ClearInheritedRating() *ItemUpsert {
 	u.SetNull(item.FieldInheritedRating)
+	return u
+}
+
+// SetTagKeys sets the "tag_keys" field.
+func (u *ItemUpsert) SetTagKeys(v string) *ItemUpsert {
+	u.Set(item.FieldTagKeys, v)
+	return u
+}
+
+// UpdateTagKeys sets the "tag_keys" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateTagKeys() *ItemUpsert {
+	u.SetExcluded(item.FieldTagKeys)
+	return u
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (u *ItemUpsert) SetInheritedTags(v string) *ItemUpsert {
+	u.Set(item.FieldInheritedTags, v)
+	return u
+}
+
+// UpdateInheritedTags sets the "inherited_tags" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateInheritedTags() *ItemUpsert {
+	u.SetExcluded(item.FieldInheritedTags)
 	return u
 }
 
@@ -3730,6 +3804,34 @@ func (u *ItemUpsertOne) UpdateInheritedRating() *ItemUpsertOne {
 func (u *ItemUpsertOne) ClearInheritedRating() *ItemUpsertOne {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearInheritedRating()
+	})
+}
+
+// SetTagKeys sets the "tag_keys" field.
+func (u *ItemUpsertOne) SetTagKeys(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetTagKeys(v)
+	})
+}
+
+// UpdateTagKeys sets the "tag_keys" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateTagKeys() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateTagKeys()
+	})
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (u *ItemUpsertOne) SetInheritedTags(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetInheritedTags(v)
+	})
+}
+
+// UpdateInheritedTags sets the "inherited_tags" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateInheritedTags() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateInheritedTags()
 	})
 }
 
@@ -5114,6 +5216,34 @@ func (u *ItemUpsertBulk) UpdateInheritedRating() *ItemUpsertBulk {
 func (u *ItemUpsertBulk) ClearInheritedRating() *ItemUpsertBulk {
 	return u.Update(func(s *ItemUpsert) {
 		s.ClearInheritedRating()
+	})
+}
+
+// SetTagKeys sets the "tag_keys" field.
+func (u *ItemUpsertBulk) SetTagKeys(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetTagKeys(v)
+	})
+}
+
+// UpdateTagKeys sets the "tag_keys" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateTagKeys() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateTagKeys()
+	})
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (u *ItemUpsertBulk) SetInheritedTags(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetInheritedTags(v)
+	})
+}
+
+// UpdateInheritedTags sets the "inherited_tags" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateInheritedTags() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateInheritedTags()
 	})
 }
 

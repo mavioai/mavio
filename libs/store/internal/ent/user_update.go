@@ -124,6 +124,26 @@ func (_u *UserUpdate) SetNillableDisabled(v *bool) *UserUpdate {
 	return _u
 }
 
+// SetAccess sets the "access" field.
+func (_u *UserUpdate) SetAccess(v core.LibraryAccess) *UserUpdate {
+	_u.mutation.SetAccess(v)
+	return _u
+}
+
+// SetNillableAccess sets the "access" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableAccess(v *core.LibraryAccess) *UserUpdate {
+	if v != nil {
+		_u.SetAccess(*v)
+	}
+	return _u
+}
+
+// ClearAccess clears the value of the "access" field.
+func (_u *UserUpdate) ClearAccess() *UserUpdate {
+	_u.mutation.ClearAccess()
+	return _u
+}
+
 // SetPolicy sets the "policy" field.
 func (_u *UserUpdate) SetPolicy(v core.UserPolicy) *UserUpdate {
 	_u.mutation.SetPolicy(v)
@@ -571,6 +591,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Access(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "access", err: fmt.Errorf(`ent: validator failed for field "User.access": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -609,6 +634,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Access(); ok {
+		_spec.SetField(user.FieldAccess, field.TypeJSON, value)
+	}
+	if _u.mutation.AccessCleared() {
+		_spec.ClearField(user.FieldAccess, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Policy(); ok {
 		_spec.SetField(user.FieldPolicy, field.TypeJSON, value)
@@ -1178,6 +1209,26 @@ func (_u *UserUpdateOne) SetNillableDisabled(v *bool) *UserUpdateOne {
 	return _u
 }
 
+// SetAccess sets the "access" field.
+func (_u *UserUpdateOne) SetAccess(v core.LibraryAccess) *UserUpdateOne {
+	_u.mutation.SetAccess(v)
+	return _u
+}
+
+// SetNillableAccess sets the "access" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableAccess(v *core.LibraryAccess) *UserUpdateOne {
+	if v != nil {
+		_u.SetAccess(*v)
+	}
+	return _u
+}
+
+// ClearAccess clears the value of the "access" field.
+func (_u *UserUpdateOne) ClearAccess() *UserUpdateOne {
+	_u.mutation.ClearAccess()
+	return _u
+}
+
 // SetPolicy sets the "policy" field.
 func (_u *UserUpdateOne) SetPolicy(v core.UserPolicy) *UserUpdateOne {
 	_u.mutation.SetPolicy(v)
@@ -1638,6 +1689,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "User.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Access(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "access", err: fmt.Errorf(`ent: validator failed for field "User.access": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1693,6 +1749,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Access(); ok {
+		_spec.SetField(user.FieldAccess, field.TypeJSON, value)
+	}
+	if _u.mutation.AccessCleared() {
+		_spec.ClearField(user.FieldAccess, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Policy(); ok {
 		_spec.SetField(user.FieldPolicy, field.TypeJSON, value)

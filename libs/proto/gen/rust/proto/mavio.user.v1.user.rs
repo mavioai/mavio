@@ -98,7 +98,7 @@ impl ::buffa::Enumeration for SubtitleMode {
     }
 }
 /// RestrictionProfile limits what a managed user sees by content rating, on
-/// top of its policy; rated items within the profile alone are shown.
+/// top of its library access; rated items within the profile alone are shown.
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
@@ -932,6 +932,10 @@ impl ::buffa::ExtensionSet for Passkey {
         &mut self.__buffa_unknown_fields
     }
 }
+/// UserPolicy is what a user may reach and do. Its library and content
+/// fields (all_libraries, library_ids, max_parental_rating, block_unrated,
+/// allowed_labels, blocked_labels, allow_download) are the user's library
+/// access record (docs/accounts.md §3.3).
 #[derive(Clone, PartialEq, Default)]
 pub struct UserPolicy {
     /// Accessible libraries; when all_libraries is true this list is ignored.
@@ -982,6 +986,16 @@ pub struct UserPolicy {
     pub movie_quota: ::buffa::MessageField<RequestQuota, ::buffa::Inline<RequestQuota>>,
     /// Field 15: `series_quota`
     pub series_quota: ::buffa::MessageField<RequestQuota, ::buffa::Inline<RequestQuota>>,
+    /// When any, only items with one of these labels are shown. Labels are
+    /// tags, of the item or of an ancestor such as its series, matched
+    /// case-insensitively.
+    ///
+    /// Field 16: `allowed_labels`
+    pub allowed_labels: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Items with any of these labels are hidden.
+    ///
+    /// Field 17: `blocked_labels`
+    pub blocked_labels: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1003,6 +1017,8 @@ impl ::core::fmt::Debug for UserPolicy {
             .field("report_issues", &self.report_issues)
             .field("movie_quota", &self.movie_quota)
             .field("series_quota", &self.series_quota)
+            .field("allowed_labels", &self.allowed_labels)
+            .field("blocked_labels", &self.blocked_labels)
             .finish()
     }
 }
@@ -1174,6 +1190,12 @@ impl ::buffa::Message for UserPolicy {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.allowed_labels {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.blocked_labels {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1238,6 +1260,12 @@ impl ::buffa::Message for UserPolicy {
                 buf,
             );
             self.series_quota.write_to(__cache, buf);
+        }
+        for v in &self.allowed_labels {
+            ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        for v in &self.blocked_labels {
+            ::buffa::types::put_string_field(17u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1393,6 +1421,28 @@ impl ::buffa::Message for UserPolicy {
                     ctx,
                 )?;
             }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.allowed_labels.push(__elem);
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.blocked_labels.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1416,6 +1466,8 @@ impl ::buffa::Message for UserPolicy {
         self.report_issues = ::core::option::Option::None;
         self.movie_quota = ::buffa::MessageField::none();
         self.series_quota = ::buffa::MessageField::none();
+        self.allowed_labels.clear();
+        self.blocked_labels.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

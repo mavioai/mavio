@@ -80,10 +80,11 @@ func TestRequestServices(t *testing.T) {
 	users := map[string]core.User{}
 	for _, u := range []core.User{
 		{Name: "admin", Kind: core.UserAdmin},
-		{Name: "pg", Policy: core.UserPolicy{
+		{Name: "pg", Access: core.LibraryAccess{ContentLimits: core.ContentLimits{
 			MaxParentalRating: new(func() int { s, _ := metadata.RatingScore("PG", "US"); return s }()),
-			Requests:          core.RequestPermissions{Movies: true, ReportIssues: true},
-			MovieQuota:        &core.Quota{Limit: 1},
+		}}, Policy: core.UserPolicy{
+			Requests:   core.RequestPermissions{Movies: true, ReportIssues: true},
+			MovieQuota: &core.Quota{Limit: 1},
 		}},
 		{Name: "none"},
 	} {
@@ -357,7 +358,7 @@ func TestPolicyRequestPermissions(t *testing.T) {
 		RequestSeries: new(false), ReportIssues: new(true),
 		MovieQuota: userv1.RequestQuota_builder{Limit: new(int32(2)), Days: new(int32(7))}.Build(),
 	}.Build()
-	got := policyFromProto(p, base)
+	got, _ := policyFromProto(p, base)
 	if want := (core.RequestPermissions{Movies: true, ReportIssues: true}); got.Requests != want {
 		t.Errorf("Requests = %+v, want %+v", got.Requests, want)
 	}

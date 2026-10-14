@@ -58,6 +58,11 @@ func (Item) Fields() []ent.Field {
 		// inherited_rating is parental_rating, or for an unrated item its
 		// nearest rated ancestor's; rating filters compare it.
 		field.Int("inherited_rating").Optional().Nillable(),
+		// tag_keys are the label keys of the item's own tags, and
+		// inherited_tags those of the item and its ancestors, each enclosed
+		// in tagSep; label filters match the latter.
+		field.Text("tag_keys").Default(""),
+		field.Text("inherited_tags").Default(""),
 		field.Float("community_rating").Default(0),
 		field.Float("critic_rating").Default(0),
 		field.JSON("external_ids", map[string]string{}).Optional(),

@@ -375,9 +375,9 @@ func TestCreatePermissions(t *testing.T) {
 
 func TestCreateRatingLimit(t *testing.T) {
 	e := newEnv(t)
-	pg := e.user("pg", func(u *core.User) { u.Policy.MaxParentalRating = score(t, "PG") })
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
 	strict := e.user("strict", func(u *core.User) {
-		u.Policy.MaxParentalRating, u.Policy.BlockUnrated = score(t, "PG"), true
+		u.Access.MaxParentalRating, u.Access.BlockUnrated = score(t, "PG"), true
 	})
 	tests := []struct {
 		name string
@@ -787,7 +787,7 @@ func TestDiscover(t *testing.T) {
 		t.Errorf("Discover of an unknown provider: error = %v, want ErrNotFound", err)
 	}
 
-	pg := e.user("pg", func(u *core.User) { u.Policy.MaxParentalRating = score(t, "PG") })
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
 	// Title 1 is requested, 4 wanted with its file, the series wanted in
 	// part.
 	e.must(e.movie(pg, 1))
@@ -800,7 +800,7 @@ func TestDiscover(t *testing.T) {
 	// the limit when the user's policy blocks unrated titles, or of those
 	// the caller asks for; else its titles are rated by the server, which
 	// keeps the unrated ones.
-	strict := e.user("strict", func(u *core.User) { u.Policy.MaxParentalRating, u.Policy.BlockUnrated = score(t, "PG"), true })
+	strict := e.user("strict", func(u *core.User) { u.Access.MaxParentalRating, u.Access.BlockUnrated = score(t, "PG"), true })
 	if _, err := e.svc.Discover(e.ctx, strict, "tmdb/popular", pluginv1.DiscoverRequest_builder{MediaKind: new(movie)}.Build()); err != nil {
 		t.Fatal(err)
 	}

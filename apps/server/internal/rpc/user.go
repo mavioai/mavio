@@ -119,7 +119,8 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		Kind:         kind,
 		AuthProvider: req.GetAuthProvider(),
 		Restriction:  restrictionFromProto(req.GetRestriction()),
-		Policy:       core.UserPolicy{AllowTranscoding: true, AllowDownload: true, Requests: s.defaultRequestPermissions()},
+		Access:       core.LibraryAccess{AllowDownload: true},
+		Policy:       core.UserPolicy{AllowTranscoding: true, Requests: s.defaultRequestPermissions()},
 	}
 	switch {
 	case req.GetAdmin():
@@ -132,7 +133,7 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("a password is required"))
 	}
 	if req.HasPolicy() {
-		u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
+		u.Policy, u.Access = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 	}
 	if req.HasPreferences() {
 		u.Preferences = preferencesFromProto(req.GetPreferences())
@@ -184,7 +185,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *userv1.UpdateUserRequ
 		u.Name, u.Disabled = req.GetName(), req.GetDisabled()
 		u.Restriction = restrictionFromProto(req.GetRestriction())
 		if req.HasPolicy() {
-			u.Policy = policyFromProto(req.GetPolicy(), u.Policy.Requests)
+			u.Policy, u.Access = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 		}
 		return tx.Users().Update(ctx, &u)
 	})
@@ -468,13 +469,20 @@ func (s *UserDataService) setPlayed(d *core.UserData, played bool) {
 	d.Played, d.Position, d.PlayCount, d.LastPlayedAt = false, 0, 0, nil
 }
 
-// policyFromProto converts a policy; request permissions it leaves unset
-// are those of requests.
-func policyFromProto(p *userv1.UserPolicy, requests core.RequestPermissions) core.UserPolicy {
+// policyFromProto converts a policy into the user's policy and library
+// access record; request permissions it leaves unset are those of
+// requests.
+func policyFromProto(p *userv1.UserPolicy, requests core.RequestPermissions) (core.UserPolicy, core.LibraryAccess) {
+	access := core.LibraryAccess{
+		ContentLimits: core.ContentLimits{
+			BlockUnrated:  p.GetBlockUnrated(),
+			AllowedLabels: p.GetAllowedLabels(),
+			BlockedLabels: p.GetBlockedLabels(),
+		},
+		AllowDownload: p.GetAllowDownload(),
+	}
 	out := core.UserPolicy{
-		BlockUnrated:        p.GetBlockUnrated(),
 		AllowTranscoding:    p.GetAllowTranscoding(),
-		AllowDownload:       p.GetAllowDownload(),
 		MaxStreamingBitrate: p.GetMaxStreamingBitrate(),
 		MaxSessions:         int(p.GetMaxSessions()),
 		Requests:            requests,
@@ -502,16 +510,16 @@ func policyFromProto(p *userv1.UserPolicy, requests core.RequestPermissions) cor
 		out.SeriesQuota = &core.Quota{Limit: int(p.GetSeriesQuota().GetLimit()), Days: int(p.GetSeriesQuota().GetDays())}
 	}
 	if p.HasMaxParentalRating() {
-		out.MaxParentalRating = new(int(p.GetMaxParentalRating()))
+		access.MaxParentalRating = new(int(p.GetMaxParentalRating()))
 	}
 	if !p.GetAllLibraries() {
 		// Non-nil: only the listed libraries, possibly none.
-		out.Libraries = make([]core.ID, 0, len(p.GetLibraryIds()))
+		access.Libraries = make([]core.ID, 0, len(p.GetLibraryIds()))
 		for _, id := range p.GetLibraryIds() {
-			out.Libraries = append(out.Libraries, core.MustParseID(id))
+			access.Libraries = append(access.Libraries, core.MustParseID(id))
 		}
 	}
-	return out
+	return out, access
 }
 
 func preferencesFromProto(p *userv1.UserPreferences) core.UserPreferences {

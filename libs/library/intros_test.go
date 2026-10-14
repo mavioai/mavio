@@ -43,7 +43,7 @@ func TestIntros(t *testing.T) {
 		t.Errorf("List() = %v, %v, want [%s %s]", ids, err, alien.ID, up.ID)
 	}
 
-	other := &core.User{ID: core.NewID(), Policy: core.UserPolicy{Libraries: []core.ID{core.NewID()}}}
+	other := &core.User{ID: core.NewID(), Access: core.LibraryAccess{Libraries: []core.ID{core.NewID()}}}
 	if _, err := in.List(ctx, other, heat.ID); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("List() for a user without the library = %v, want ErrNotFound", err)
 	}

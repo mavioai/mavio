@@ -30,12 +30,11 @@ func (k ValueKind) Valid() bool { return slices.Contains(ValueKinds, k) }
 // within a rating. Zero-valued fields do not filter.
 type ItemFilter struct {
 	// LibraryIDs restricts to items of these libraries; callers apply the
-	// user's library policy here.
+	// user's library access here.
 	LibraryIDs []ID
 	Kinds      []ItemKind
-	// MaxRating and SkipUnrated filter like the ItemQuery fields.
-	MaxRating   *int
-	SkipUnrated bool
+	// Limits filters like the ItemQuery field.
+	Limits ContentLimits
 }
 
 func (f *ItemFilter) validate() error {

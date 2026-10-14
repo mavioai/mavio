@@ -68,7 +68,7 @@ func TestCuratedItems(t *testing.T) {
 		}{
 			{"members in list order", core.ItemQuery{MemberOf: saga.ID, Sort: listOrder}, []string{"Aliens", "Alien"}},
 			{"members by name", core.ItemQuery{MemberOf: saga.ID, Sort: []core.SortSpec{{Field: core.SortName}}}, []string{"Alien", "Aliens"}},
-			{"members within a rating", core.ItemQuery{MemberOf: saga.ID, MaxRating: ptr(12)}, []string{"Alien"}},
+			{"members within a rating", core.ItemQuery{MemberOf: saga.ID, Limits: core.ContentLimits{MaxParentalRating: ptr(12)}}, []string{"Alien"}},
 			{"playlist items once, by first entry", core.ItemQuery{MemberOf: mix.ID, Sort: []core.SortSpec{{Field: core.SortListOrder, Desc: true}}}, []string{"Up", "Alien"}},
 			{"members are not children", core.ItemQuery{ParentID: saga.ID}, []string{}},
 		}

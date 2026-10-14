@@ -15384,6 +15384,8 @@ type ItemMutation struct {
 	addparental_rating              *int
 	inherited_rating                *int
 	addinherited_rating             *int
+	tag_keys                        *string
+	inherited_tags                  *string
 	community_rating                *float64
 	addcommunity_rating             *float64
 	critic_rating                   *float64
@@ -16698,6 +16700,78 @@ func (m *ItemMutation) ResetInheritedRating() {
 	m.inherited_rating = nil
 	m.addinherited_rating = nil
 	delete(m.clearedFields, item.FieldInheritedRating)
+}
+
+// SetTagKeys sets the "tag_keys" field.
+func (m *ItemMutation) SetTagKeys(s string) {
+	m.tag_keys = &s
+}
+
+// TagKeys returns the value of the "tag_keys" field in the mutation.
+func (m *ItemMutation) TagKeys() (r string, exists bool) {
+	v := m.tag_keys
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTagKeys returns the old "tag_keys" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldTagKeys(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTagKeys is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTagKeys requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTagKeys: %w", err)
+	}
+	return oldValue.TagKeys, nil
+}
+
+// ResetTagKeys resets all changes to the "tag_keys" field.
+func (m *ItemMutation) ResetTagKeys() {
+	m.tag_keys = nil
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (m *ItemMutation) SetInheritedTags(s string) {
+	m.inherited_tags = &s
+}
+
+// InheritedTags returns the value of the "inherited_tags" field in the mutation.
+func (m *ItemMutation) InheritedTags() (r string, exists bool) {
+	v := m.inherited_tags
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInheritedTags returns the old "inherited_tags" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldInheritedTags(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldInheritedTags is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldInheritedTags requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInheritedTags: %w", err)
+	}
+	return oldValue.InheritedTags, nil
+}
+
+// ResetInheritedTags resets all changes to the "inherited_tags" field.
+func (m *ItemMutation) ResetInheritedTags() {
+	m.inherited_tags = nil
 }
 
 // SetCommunityRating sets the "community_rating" field.
@@ -20025,7 +20099,7 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 62)
+	fields := make([]string, 0, 64)
 	if m.library != nil {
 		fields = append(fields, item.FieldLibraryID)
 	}
@@ -20094,6 +20168,12 @@ func (m *ItemMutation) Fields() []string {
 	}
 	if m.inherited_rating != nil {
 		fields = append(fields, item.FieldInheritedRating)
+	}
+	if m.tag_keys != nil {
+		fields = append(fields, item.FieldTagKeys)
+	}
+	if m.inherited_tags != nil {
+		fields = append(fields, item.FieldInheritedTags)
 	}
 	if m.community_rating != nil {
 		fields = append(fields, item.FieldCommunityRating)
@@ -20266,6 +20346,10 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentalRating()
 	case item.FieldInheritedRating:
 		return m.InheritedRating()
+	case item.FieldTagKeys:
+		return m.TagKeys()
+	case item.FieldInheritedTags:
+		return m.InheritedTags()
 	case item.FieldCommunityRating:
 		return m.CommunityRating()
 	case item.FieldCriticRating:
@@ -20399,6 +20483,10 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldParentalRating(ctx)
 	case item.FieldInheritedRating:
 		return m.OldInheritedRating(ctx)
+	case item.FieldTagKeys:
+		return m.OldTagKeys(ctx)
+	case item.FieldInheritedTags:
+		return m.OldInheritedTags(ctx)
 	case item.FieldCommunityRating:
 		return m.OldCommunityRating(ctx)
 	case item.FieldCriticRating:
@@ -20646,6 +20734,20 @@ func (m *ItemMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetInheritedRating(v)
+		return nil
+	case item.FieldTagKeys:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTagKeys(v)
+		return nil
+	case item.FieldInheritedTags:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInheritedTags(v)
 		return nil
 	case item.FieldCommunityRating:
 		v, ok := value.(float64)
@@ -21397,6 +21499,12 @@ func (m *ItemMutation) ResetField(name string) error {
 		return nil
 	case item.FieldInheritedRating:
 		m.ResetInheritedRating()
+		return nil
+	case item.FieldTagKeys:
+		m.ResetTagKeys()
+		return nil
+	case item.FieldInheritedTags:
+		m.ResetInheritedTags()
 		return nil
 	case item.FieldCommunityRating:
 		m.ResetCommunityRating()
@@ -42618,6 +42726,7 @@ type UserMutation struct {
 	auth_provider              *string
 	restriction                *core.RestrictionProfile
 	disabled                   *bool
+	access                     *core.LibraryAccess
 	policy                     *core.UserPolicy
 	preferences                *core.UserPreferences
 	created_at                 *time.Time
@@ -42976,6 +43085,55 @@ func (m *UserMutation) OldDisabled(ctx context.Context) (v bool, err error) {
 // ResetDisabled resets all changes to the "disabled" field.
 func (m *UserMutation) ResetDisabled() {
 	m.disabled = nil
+}
+
+// SetAccess sets the "access" field.
+func (m *UserMutation) SetAccess(ca core.LibraryAccess) {
+	m.access = &ca
+}
+
+// Access returns the value of the "access" field in the mutation.
+func (m *UserMutation) Access() (r core.LibraryAccess, exists bool) {
+	v := m.access
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccess returns the old "access" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldAccess(ctx context.Context) (v core.LibraryAccess, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccess is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccess requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccess: %w", err)
+	}
+	return oldValue.Access, nil
+}
+
+// ClearAccess clears the value of the "access" field.
+func (m *UserMutation) ClearAccess() {
+	m.access = nil
+	m.clearedFields[user.FieldAccess] = struct{}{}
+}
+
+// AccessCleared returns if the "access" field was cleared in this mutation.
+func (m *UserMutation) AccessCleared() bool {
+	_, ok := m.clearedFields[user.FieldAccess]
+	return ok
+}
+
+// ResetAccess resets all changes to the "access" field.
+func (m *UserMutation) ResetAccess() {
+	m.access = nil
+	delete(m.clearedFields, user.FieldAccess)
 }
 
 // SetPolicy sets the "policy" field.
@@ -43709,7 +43867,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -43727,6 +43885,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.disabled != nil {
 		fields = append(fields, user.FieldDisabled)
+	}
+	if m.access != nil {
+		fields = append(fields, user.FieldAccess)
 	}
 	if m.policy != nil {
 		fields = append(fields, user.FieldPolicy)
@@ -43760,6 +43921,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Restriction()
 	case user.FieldDisabled:
 		return m.Disabled()
+	case user.FieldAccess:
+		return m.Access()
 	case user.FieldPolicy:
 		return m.Policy()
 	case user.FieldPreferences:
@@ -43789,6 +43952,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldRestriction(ctx)
 	case user.FieldDisabled:
 		return m.OldDisabled(ctx)
+	case user.FieldAccess:
+		return m.OldAccess(ctx)
 	case user.FieldPolicy:
 		return m.OldPolicy(ctx)
 	case user.FieldPreferences:
@@ -43848,6 +44013,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisabled(v)
 		return nil
+	case user.FieldAccess:
+		v, ok := value.(core.LibraryAccess)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccess(v)
+		return nil
 	case user.FieldPolicy:
 		v, ok := value.(core.UserPolicy)
 		if !ok {
@@ -43906,6 +44078,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldAccess) {
+		fields = append(fields, user.FieldAccess)
+	}
 	if m.FieldCleared(user.FieldLastLoginAt) {
 		fields = append(fields, user.FieldLastLoginAt)
 	}
@@ -43923,6 +44098,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldAccess:
+		m.ClearAccess()
+		return nil
 	case user.FieldLastLoginAt:
 		m.ClearLastLoginAt()
 		return nil
@@ -43951,6 +44129,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldDisabled:
 		m.ResetDisabled()
+		return nil
+	case user.FieldAccess:
+		m.ResetAccess()
 		return nil
 	case user.FieldPolicy:
 		m.ResetPolicy()

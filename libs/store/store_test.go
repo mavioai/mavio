@@ -266,8 +266,8 @@ func TestItemQuery(t *testing.T) {
 			{"external IDs any of", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "68", core.ProviderIMDb: "tt0211915"}, Sort: byName}, []string{"amélie", "Brazil"}},
 			{"external ID of another provider", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTVDB: "194"}}, nil},
 			{"year range", core.ItemQuery{Kinds: moviesOnly, YearFrom: 2000, YearTo: 2010, Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
-			{"max rating includes unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
-			{"max rating skips unrated", core.ItemQuery{Kinds: moviesOnly, MaxRating: ptr(12), SkipUnrated: true}, []string{"amélie"}},
+			{"max rating includes unrated", core.ItemQuery{Kinds: moviesOnly, Limits: core.ContentLimits{MaxParentalRating: ptr(12)}, Sort: byName}, []string{"amélie", "千と千尋の神隠し"}},
+			{"max rating skips unrated", core.ItemQuery{Kinds: moviesOnly, Limits: core.ContentLimits{MaxParentalRating: ptr(12), BlockUnrated: true}}, []string{"amélie"}},
 			{"year then name", core.ItemQuery{Kinds: moviesOnly, Sort: []core.SortSpec{{Field: core.SortProductionYear, Desc: true}, {Field: core.SortName}}}, []string{"Ｃａｒｏｌ", "amélie", "千と千尋の神隠し", "Brazil"}},
 		}
 		for _, tt := range tests {
@@ -321,7 +321,7 @@ func TestInheritedRatings(t *testing.T) {
 		series, episodes := showTree(t, s, lib)
 		allowed := func() []string {
 			t.Helper()
-			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode}, MaxRating: ptr(12), Sort: []core.SortSpec{{Field: core.SortName}}})
+			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode}, Limits: core.ContentLimits{MaxParentalRating: ptr(12)}, Sort: []core.SortSpec{{Field: core.SortName}}})
 		}
 		if got := allowed(); len(got) != 4 {
 			t.Fatalf("unrated series: got %q, want all episodes", got)
@@ -356,6 +356,54 @@ func TestInheritedRatings(t *testing.T) {
 		upsert(t, s, series)
 		if got := allowed(); len(got) != 5 {
 			t.Errorf("unrated again: got %q, want all episodes", got)
+		}
+	})
+}
+
+func TestInheritedLabels(t *testing.T) {
+	eachBackend(t, func(t *testing.T, s *store.Store) {
+		ctx := t.Context()
+		lib := newLibrary(t, s, "/media")
+		series, episodes := showTree(t, s, lib)
+		owner := core.NewID()
+		if err := s.Users().Create(ctx, &core.User{ID: owner, Name: "kid", Kind: core.UserMember}); err != nil {
+			t.Fatal(err)
+		}
+		playlist := newItem(lib, core.KindPlaylist, "Mine")
+		playlist.UserID = owner
+		upsert(t, s, playlist)
+		labelled := func(l core.ContentLimits) []string {
+			t.Helper()
+			return query(t, s, core.ItemQuery{Kinds: []core.ItemKind{core.KindEpisode, core.KindPlaylist}, Limits: l, UserID: owner, Sort: []core.SortSpec{{Field: core.SortName}}})
+		}
+		kids := core.ContentLimits{AllowedLabels: []string{"Kids"}}
+		if got := labelled(kids); !slices.Equal(got, []string{"Mine"}) {
+			t.Errorf("no labels: got %q, want only the user's playlist", got)
+		}
+
+		// Labelling the series labels its episodes.
+		series.Tags = []string{"KIDS", "Cartoon"}
+		upsert(t, s, series)
+		if got := labelled(kids); len(got) != 5 {
+			t.Errorf("labelled series: got %q, want all episodes and the playlist", got)
+		}
+		got, err := s.Items().Get(ctx, episodes[0].ID)
+		if err != nil || !slices.Equal(got.InheritedTags, []string{"kids", "cartoon"}) {
+			t.Errorf("episode inherited tags = %q, %v; want kids and cartoon", got.InheritedTags, err)
+		}
+
+		// A label of one episode blocks it alone.
+		episodes[0].Tags = []string{"scary"}
+		upsert(t, s, episodes[0])
+		if got := labelled(core.ContentLimits{AllowedLabels: []string{"kids"}, BlockedLabels: []string{"Scary"}}); len(got) != 4 || slices.Contains(got, episodes[0].Name) {
+			t.Errorf("blocked episode: got %q, want the others", got)
+		}
+
+		// Unlabelling the series clears what its episodes inherited.
+		series.Tags = nil
+		upsert(t, s, series)
+		if got := labelled(core.ContentLimits{AllowedLabels: []string{"scary"}}); !slices.Equal(got, []string{"Mine", episodes[0].Name}) {
+			t.Errorf("unlabelled series: got %q, want the scary episode and the playlist", got)
 		}
 	})
 }
@@ -579,15 +627,16 @@ func TestUsers(t *testing.T) {
 		lib := newLibrary(t, s, "/media")
 		u := core.User{
 			Name: "Alice", Kind: core.UserAdmin,
-			Policy:      core.UserPolicy{Libraries: []core.ID{lib.ID}, MaxParentalRating: ptr(13), AllowTranscoding: true},
+			Access:      core.LibraryAccess{Libraries: []core.ID{lib.ID}, ContentLimits: core.ContentLimits{MaxParentalRating: ptr(13)}},
+			Policy:      core.UserPolicy{AllowTranscoding: true},
 			Preferences: core.UserPreferences{AudioLanguages: []string{"jpn", "eng"}, SubtitleMode: core.SubtitlesSmart},
 		}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)
 		}
 		got, err := s.Users().GetByName(ctx, "ALICE")
-		if err != nil || got.ID != u.ID || !got.IsAdmin() || *got.Policy.MaxParentalRating != 13 ||
-			!slices.Equal(got.Preferences.AudioLanguages, []string{"jpn", "eng"}) || !got.Policy.CanAccessLibrary(lib.ID) {
+		if err != nil || got.ID != u.ID || !got.IsAdmin() || *got.Access.MaxParentalRating != 13 ||
+			!slices.Equal(got.Preferences.AudioLanguages, []string{"jpn", "eng"}) || !got.Access.CanAccessLibrary(lib.ID) {
 			t.Errorf("GetByName = %+v, %v", got, err)
 		}
 		dup := core.User{Name: "alice", Kind: core.UserMember, AuthProvider: "ldap"}
@@ -596,8 +645,12 @@ func TestUsers(t *testing.T) {
 		}
 		login := time.Now()
 		u.Disabled, u.LastLoginAt = true, &login
+		u.Access.BlockedLabels = []string{"Horror"}
 		if err := s.Users().Update(ctx, &u); err != nil || !u.Disabled || u.LastLoginAt == nil {
 			t.Errorf("Update = %+v, %v", u, err)
+		}
+		if got, err := s.Users().Get(ctx, u.ID); err != nil || !slices.Equal(got.Access.BlockedLabels, []string{"Horror"}) {
+			t.Errorf("updated access = %+v, %v", got.Access, err)
 		}
 		if list, err := s.Users().List(ctx); err != nil || len(list) != 1 {
 			t.Errorf("List = %v, %v", list, err)

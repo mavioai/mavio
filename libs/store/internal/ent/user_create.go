@@ -94,6 +94,20 @@ func (_c *UserCreate) SetNillableDisabled(v *bool) *UserCreate {
 	return _c
 }
 
+// SetAccess sets the "access" field.
+func (_c *UserCreate) SetAccess(v core.LibraryAccess) *UserCreate {
+	_c.mutation.SetAccess(v)
+	return _c
+}
+
+// SetNillableAccess sets the "access" field if the given value is not nil.
+func (_c *UserCreate) SetNillableAccess(v *core.LibraryAccess) *UserCreate {
+	if v != nil {
+		_c.SetAccess(*v)
+	}
+	return _c
+}
+
 // SetPolicy sets the "policy" field.
 func (_c *UserCreate) SetPolicy(v core.UserPolicy) *UserCreate {
 	_c.mutation.SetPolicy(v)
@@ -380,6 +394,11 @@ func (_c *UserCreate) check() error {
 	if _, ok := _c.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "User.disabled"`)}
 	}
+	if v, ok := _c.mutation.Access(); ok {
+		if err := v.Validate(); err != nil {
+			return &ValidationError{Name: "access", err: fmt.Errorf(`ent: validator failed for field "User.access": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Policy(); !ok {
 		return &ValidationError{Name: "policy", err: errors.New(`ent: missing required field "User.policy"`)}
 	}
@@ -448,6 +467,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 		_node.Disabled = value
+	}
+	if value, ok := _c.mutation.Access(); ok {
+		_spec.SetField(user.FieldAccess, field.TypeJSON, value)
+		_node.Access = value
 	}
 	if value, ok := _c.mutation.Policy(); ok {
 		_spec.SetField(user.FieldPolicy, field.TypeJSON, value)
@@ -749,6 +772,24 @@ func (u *UserUpsert) UpdateDisabled() *UserUpsert {
 	return u
 }
 
+// SetAccess sets the "access" field.
+func (u *UserUpsert) SetAccess(v core.LibraryAccess) *UserUpsert {
+	u.Set(user.FieldAccess, v)
+	return u
+}
+
+// UpdateAccess sets the "access" field to the value that was provided on create.
+func (u *UserUpsert) UpdateAccess() *UserUpsert {
+	u.SetExcluded(user.FieldAccess)
+	return u
+}
+
+// ClearAccess clears the value of the "access" field.
+func (u *UserUpsert) ClearAccess() *UserUpsert {
+	u.SetNull(user.FieldAccess)
+	return u
+}
+
 // SetPolicy sets the "policy" field.
 func (u *UserUpsert) SetPolicy(v core.UserPolicy) *UserUpsert {
 	u.Set(user.FieldPolicy, v)
@@ -923,6 +964,27 @@ func (u *UserUpsertOne) SetDisabled(v bool) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateDisabled() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateDisabled()
+	})
+}
+
+// SetAccess sets the "access" field.
+func (u *UserUpsertOne) SetAccess(v core.LibraryAccess) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAccess(v)
+	})
+}
+
+// UpdateAccess sets the "access" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateAccess() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAccess()
+	})
+}
+
+// ClearAccess clears the value of the "access" field.
+func (u *UserUpsertOne) ClearAccess() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAccess()
 	})
 }
 
@@ -1274,6 +1336,27 @@ func (u *UserUpsertBulk) SetDisabled(v bool) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateDisabled() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateDisabled()
+	})
+}
+
+// SetAccess sets the "access" field.
+func (u *UserUpsertBulk) SetAccess(v core.LibraryAccess) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetAccess(v)
+	})
+}
+
+// UpdateAccess sets the "access" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateAccess() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateAccess()
+	})
+}
+
+// ClearAccess clears the value of the "access" field.
+func (u *UserUpsertBulk) ClearAccess() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearAccess()
 	})
 }
 

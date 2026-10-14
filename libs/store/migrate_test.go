@@ -15,7 +15,8 @@ import (
 
 // TestSQLiteUpgradeKeepsReferencingRows upgrades a database holding data
 // in the initial schema: table rebuilds must not cascade-delete referencing
-// rows, and the derived keys and inherited ratings must be backfilled.
+// rows, the derived keys and inherited ratings and tags must be
+// backfilled, and users' library access must move out of their policies.
 func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	ctx := t.Context()
 	file := filepath.Join(t.TempDir(), "mavio.db")
@@ -39,7 +40,7 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	}
 
 	now := time.Now()
-	libID, itemID, personID, trailerID := core.NewID(), core.NewID(), core.NewID(), core.NewID()
+	libID, itemID, personID, trailerID, userID := core.NewID(), core.NewID(), core.NewID(), core.NewID(), core.NewID()
 	for _, stmt := range []struct {
 		query string
 		args  []any
@@ -49,6 +50,8 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 		{`UPDATE items SET parental_rating = 13 WHERE id = ?`, []any{itemID}},
 		{`INSERT INTO items (id, kind, name, sort_name, sort_key, date_added, library_id, parent_id) VALUES (?, 'video', 'Trailer', 'Trailer', 'trailer', ?, ?, ?)`, []any{trailerID, now, libID, itemID}},
 		{`INSERT INTO item_values (kind, value, ord, item_id) VALUES ('genre', 'Comédie', 0, ?)`, []any{itemID}},
+		{`INSERT INTO item_values (kind, value, ord, item_id) VALUES ('tag', 'Kids', 0, ?)`, []any{itemID}},
+		{`INSERT INTO users (id, name, name_key, admin, policy, preferences, created_at) VALUES (?, 'Ann', 'ann', true, ?, '{}', ?)`, []any{userID, `{"Libraries":["` + libID.String() + `"],"MaxParentalRating":13,"AllowDownload":true,"AllowTranscoding":true}`, now}},
 		{`INSERT INTO people (id, name, name_key) VALUES (?, 'Zoë Kravitz', 'zoë kravitz')`, []any{personID}},
 		{`INSERT INTO credits (kind, item_id, person_id) VALUES ('actor', ?, ?)`, []any{itemID, personID}},
 	} {
@@ -82,6 +85,13 @@ func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
 	}
 	if child, err := s.Items().Get(ctx, trailerID); err != nil || child.InheritedRating == nil || *child.InheritedRating != 13 {
 		t.Errorf("inherited rating after upgrade = %v, %v; want 13", child.InheritedRating, err)
+	}
+	if child, err := s.Items().Get(ctx, trailerID); err != nil || !slices.Equal(child.InheritedTags, []string{"kids"}) {
+		t.Errorf("inherited tags after upgrade = %q, %v; want kids", child.InheritedTags, err)
+	}
+	if u, err := s.Users().Get(ctx, userID); err != nil || !slices.Equal(u.Access.Libraries, []core.ID{libID}) ||
+		u.Access.MaxParentalRating == nil || *u.Access.MaxParentalRating != 13 || !u.Access.AllowDownload || !u.Policy.AllowTranscoding {
+		t.Errorf("user after upgrade = %+v, %v; want its access moved", u, err)
 	}
 	people, err := s.People().Search(ctx, core.PersonQuery{Search: "zoe"})
 	if err != nil || len(people) != 1 {

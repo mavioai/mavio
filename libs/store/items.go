@@ -97,8 +97,8 @@ func (r items) Upsert(ctx context.Context, list ...core.Item) error {
 				}
 			}
 		}
-		// Recompute the inherited ratings below every item whose parent was
-		// not written with it.
+		// Recompute the inherited ratings and tags below every item whose
+		// parent was not written with it.
 		written := make(map[core.ID]bool, len(list))
 		for _, it := range list {
 			written[it.ID] = true
@@ -110,7 +110,7 @@ func (r items) Upsert(ctx context.Context, list ...core.Item) error {
 			}
 		}
 		for chunk := range slices.Chunk(roots, upsertBatch) {
-			if err := tx.inheritRatings(ctx, "c.id IN ("+tx.placeholders(len(chunk))+")", chunk...); err != nil {
+			if err := tx.inherit(ctx, "c.id IN ("+tx.placeholders(len(chunk))+")", chunk...); err != nil {
 				return err
 			}
 		}
@@ -165,22 +165,57 @@ func clearUnset(ctx context.Context, c *ent.Client, list []core.Item) error {
 	return nil
 }
 
-// inheritRatings recomputes inherited_rating for the items matching seed,
-// a condition on the items table aliased c, and all their descendants: an
-// item's own parental rating, or when unrated its parent's inherited one.
-func (s *Store) inheritRatings(ctx context.Context, seed string, args ...any) error {
+// inherit recomputes inherited_rating and inherited_tags for the items
+// matching seed, a condition on the items table aliased c, and all their
+// descendants: an item's own parental rating, or when unrated its parent's
+// inherited one, and its own tags followed by its parent's inherited ones.
+func (s *Store) inherit(ctx context.Context, seed string, args ...any) error {
 	// Ratings are never negative, so -1 stands for NULL in the comparison.
-	query := `WITH RECURSIVE r(id, rating) AS (
-	SELECT c.id, COALESCE(c.parental_rating, p.inherited_rating)
+	query := `WITH RECURSIVE r(id, rating, tags) AS (
+	SELECT c.id, COALESCE(c.parental_rating, p.inherited_rating), c.tag_keys || COALESCE(p.inherited_tags, '')
 	FROM items c LEFT JOIN items p ON p.id = c.parent_id WHERE ` + seed + `
 	UNION ALL
-	SELECT i.id, COALESCE(i.parental_rating, r.rating)
+	SELECT i.id, COALESCE(i.parental_rating, r.rating), i.tag_keys || r.tags
 	FROM items i JOIN r ON i.parent_id = r.id
 )
-UPDATE items SET inherited_rating = r.rating FROM r
-WHERE items.id = r.id AND COALESCE(items.inherited_rating, -1) <> COALESCE(r.rating, -1)`
+UPDATE items SET inherited_rating = r.rating, inherited_tags = r.tags FROM r
+WHERE items.id = r.id AND (COALESCE(items.inherited_rating, -1) <> COALESCE(r.rating, -1) OR items.inherited_tags <> r.tags)`
 	_, err := s.tx.ExecContext(ctx, query, args...)
-	return mapErr(err, "inherit ratings")
+	return mapErr(err, "inherit ratings and tags")
+}
+
+// tagSep encloses each key in tag_keys and inherited_tags.
+const tagSep = "\x1f"
+
+// tagKeys returns the tag_keys of tags.
+func tagKeys(tags []string) string {
+	var b strings.Builder
+	for _, t := range tags {
+		if k := core.LabelKey(t); k != "" {
+			b.WriteString(tagSep + k + tagSep)
+		}
+	}
+	return b.String()
+}
+
+// splitTags returns the distinct keys of inherited_tags.
+func splitTags(s string) []string {
+	var out []string
+	for k := range strings.SplitSeq(s, tagSep) {
+		if k != "" && !slices.Contains(out, k) {
+			out = append(out, k)
+		}
+	}
+	return out
+}
+
+// labelled matches the items whose inherited tags include any of labels.
+func labelled(labels []string) predicate.Item {
+	ps := make([]predicate.Item, len(labels))
+	for i, l := range labels {
+		ps[i] = item.InheritedTagsContains(tagSep + core.LabelKey(l) + tagSep)
+	}
+	return item.Or(ps...)
 }
 
 // placeholders returns n comma-separated bind parameters of the dialect.
@@ -441,7 +476,7 @@ func (r items) years(ctx context.Context, matching []predicate.Item, limit, offs
 
 // filter translates an item filter of value and person lists.
 func (r items) filter(f core.ItemFilter) []predicate.Item {
-	return r.predicates(core.ItemQuery{LibraryIDs: f.LibraryIDs, Kinds: f.Kinds, MaxRating: f.MaxRating, SkipUnrated: f.SkipUnrated})
+	return r.predicates(core.ItemQuery{LibraryIDs: f.LibraryIDs, Kinds: f.Kinds, Limits: f.Limits})
 }
 
 // predicates translates the filters of q.
@@ -525,12 +560,27 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 			s.Where(entsql.ExprP(similarity(s.C(item.FieldID), q.SimilarTo) + " > 0"))
 		}))
 	}
-	if q.MaxRating != nil {
-		within := item.InheritedRatingLTE(*q.MaxRating)
-		if !q.SkipUnrated {
-			within = item.Or(within, item.InheritedRatingIsNil())
+	if l := q.Limits; l.MaxParentalRating != nil || len(l.AllowedLabels) > 0 || len(l.BlockedLabels) > 0 {
+		var within []predicate.Item
+		if l.MaxParentalRating != nil {
+			rated := item.InheritedRatingLTE(*l.MaxParentalRating)
+			if !l.BlockUnrated {
+				rated = item.Or(rated, item.InheritedRatingIsNil())
+			}
+			within = append(within, rated)
 		}
-		ps = append(ps, within)
+		if len(l.AllowedLabels) > 0 {
+			within = append(within, labelled(l.AllowedLabels))
+		}
+		if len(l.BlockedLabels) > 0 {
+			within = append(within, item.Not(labelled(l.BlockedLabels)))
+		}
+		limited := item.And(within...)
+		if !q.UserID.IsZero() {
+			// The user's own playlists are not limited.
+			limited = item.Or(limited, item.And(item.Kind(string(core.KindPlaylist)), item.UserID(q.UserID)))
+		}
+		ps = append(ps, limited)
 	}
 	if !q.UserID.IsZero() {
 		// Other users' playlists are theirs alone.
@@ -724,6 +774,8 @@ func itemCreate(c *ent.Client, it core.Item) *ent.ItemCreate {
 		SetNillableParentalRating(it.ParentalRating).
 		// Upsert then derives it from the ancestors when unrated.
 		SetNillableInheritedRating(it.ParentalRating).
+		SetTagKeys(tagKeys(it.Tags)).
+		SetInheritedTags(tagKeys(it.Tags)).
 		SetCommunityRating(it.CommunityRating).
 		SetCriticRating(it.CriticRating).
 		SetExternalIds(fromProviderMap(it.ExternalIDs)).
@@ -845,6 +897,7 @@ func toItem(e *ent.Item) core.Item {
 		MetadataRefreshedAt:     zeroIfNil(e.MetadataRefreshedAt),
 		ScanGeneration:          e.ScanGeneration,
 		MissingSince:            utcPtr(e.MissingSince),
+		InheritedTags:           splitTags(e.InheritedTags),
 	}
 	if e.ParentID != nil {
 		it.ParentID = *e.ParentID

@@ -197,7 +197,7 @@ func (s *Service) parse(ctx context.Context, u *core.User, id string) (spec, err
 
 // library returns a library the user may access.
 func (s *Service) library(ctx context.Context, u *core.User, id core.ID) (*core.Library, error) {
-	if !u.Policy.CanAccessLibrary(id) {
+	if !u.Access.CanAccessLibrary(id) {
 		return nil, fmt.Errorf("%w: library %s", core.ErrNotFound, id)
 	}
 	lib, err := s.store.Libraries().Get(ctx, id)
@@ -215,7 +215,7 @@ func (s *Service) libraries(ctx context.Context, u *core.User, prefs map[string]
 	if err != nil {
 		return nil, fmt.Errorf("list libraries: %w", err)
 	}
-	all = slices.DeleteFunc(all, func(l core.Library) bool { return !u.Policy.CanAccessLibrary(l.ID) })
+	all = slices.DeleteFunc(all, func(l core.Library) bool { return !u.Access.CanAccessLibrary(l.ID) })
 	var out []*core.Library
 	if pinned, ok := prefs[Pinned]; ok {
 		for _, id := range split(pinned) {
@@ -257,15 +257,15 @@ func (s *Service) fill(ctx context.Context, u *core.User, sp spec, limit, offset
 	n := limit + 1 // one more tells whether there are more
 	now := s.now()
 	scope := browse.Scope{
-		UserID: u.ID, LibraryIDs: u.Policy.Libraries,
-		MaxRating: u.Access().MaxParentalRating, SkipUnrated: u.Access().BlockUnrated,
+		UserID: u.ID, LibraryIDs: u.Access.Libraries,
+		Limits: u.EffectiveAccess().ContentLimits,
 	}
 	var kinds []core.ItemKind
 	if sp.lib != nil {
 		scope.LibraryIDs, kinds = []core.ID{sp.lib.ID}, titleKinds(sp.lib.Kind)
 	}
 	q := core.ItemQuery{
-		LibraryIDs: scope.LibraryIDs, MaxRating: scope.MaxRating, SkipUnrated: scope.SkipUnrated, UserID: u.ID,
+		LibraryIDs: scope.LibraryIDs, Limits: scope.Limits, UserID: u.ID,
 		Kinds: kinds, Limit: n, Offset: offset,
 	}
 	var items []core.Item

@@ -94,7 +94,7 @@ func (s *LibraryService) GetLibrary(ctx context.Context, req *libraryv1.GetLibra
 // canAccessLibrary reports whether the user may see a library: every user
 // has the playlists library, where they find their own playlists.
 func canAccessLibrary(u *core.User, lib *core.Library) bool {
-	return lib.Kind == core.LibraryPlaylists || u.Policy.CanAccessLibrary(lib.ID)
+	return lib.Kind == core.LibraryPlaylists || u.Access.CanAccessLibrary(lib.ID)
 }
 
 // CreateLibrary creates a library and queues its first scan.

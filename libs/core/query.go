@@ -12,7 +12,7 @@ const MaxPageSize = 1000
 // ItemQuery selects and orders items. Zero-valued fields do not filter.
 type ItemQuery struct {
 	// LibraryIDs restricts results to these libraries; callers apply the
-	// user's library policy here.
+	// user's library access here.
 	LibraryIDs []ID
 	// ParentID restricts results to children of an item; with Recursive, to
 	// all descendants.
@@ -54,11 +54,9 @@ type ItemQuery struct {
 	ExternalIDs map[Provider]string
 	YearFrom    int
 	YearTo      int
-	// MaxRating is the maximum parental rating score, compared with
-	// InheritedRating; nil means unrestricted. Under a maximum, SkipUnrated
-	// also excludes items without a rating.
-	MaxRating   *int
-	SkipUnrated bool
+	// Limits hides items by rating and label, as a user's library access
+	// does.
+	Limits ContentLimits
 	// SimilarTo restricts results to the items sharing genres, tags,
 	// studios or people with an item, the item excepted, ordered by
 	// similarity before Sort; see docs/domain.md.

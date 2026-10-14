@@ -471,6 +471,16 @@ func DisabledNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldDisabled, v))
 }
 
+// AccessIsNil applies the IsNil predicate on the "access" field.
+func AccessIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAccess))
+}
+
+// AccessNotNil applies the NotNil predicate on the "access" field.
+func AccessNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAccess))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))

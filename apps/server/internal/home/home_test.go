@@ -181,7 +181,7 @@ func TestRecommended(t *testing.T) {
 	}
 
 	limited := e.user
-	limited.Policy.Libraries = []core.ID{e.films.ID}
+	limited.Access.Libraries = []core.ID{e.films.ID}
 	if _, err := e.svc.Recommended(ctx, &limited, e.shows.ID, 10); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("another library: got = %v, want not found", err)
 	}

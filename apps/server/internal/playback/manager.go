@@ -314,7 +314,7 @@ func (m *Manager) Sources(ctx context.Context, user *core.User, itemID core.ID) 
 	if err != nil {
 		return nil, 0, err
 	}
-	if access := user.Access(); !access.CanAccess(&item) {
+	if access := user.EffectiveAccess(); !access.CanAccess(&item) {
 		return nil, 0, fmt.Errorf("item %s: %w", item.ID, core.ErrNotFound)
 	}
 	return m.sources(ctx, item)
@@ -327,7 +327,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	if err != nil {
 		return nil, err
 	}
-	if access := r.User.Access(); !access.CanAccess(&item) {
+	if access := r.User.EffectiveAccess(); !access.CanAccess(&item) {
 		return nil, fmt.Errorf("item %s: %w", item.ID, core.ErrNotFound)
 	}
 	var video bool
@@ -338,7 +338,7 @@ func (m *Manager) Start(ctx context.Context, r Request) (*Playback, error) {
 	default:
 		return nil, fmt.Errorf("%w: %s is a %s", ErrNotPlayable, item.ID, item.Kind)
 	}
-	if r.Download && !r.User.Policy.AllowDownload {
+	if r.Download && !r.User.EffectiveAccess().AllowDownload {
 		return nil, ErrNotAllowed
 	}
 	if limit := r.User.Policy.MaxSessions; limit > 0 && m.countFor(r.User.ID) >= limit {

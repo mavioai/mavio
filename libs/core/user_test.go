@@ -34,27 +34,27 @@ func TestRestrictionProfiles(t *testing.T) {
 	tests := []struct {
 		name    string
 		profile RestrictionProfile
-		policy  UserPolicy
+		access  LibraryAccess
 		item    *Item
 		want    bool
 	}{
-		{"no profile, R", RestrictionNone, UserPolicy{}, item(score(17)), true},
-		{"no profile, unrated", RestrictionNone, UserPolicy{}, item(nil), true},
-		{"younger child, G", RestrictionYoungerChild, UserPolicy{}, item(score(0)), true},
-		{"younger child, TV-Y7", RestrictionYoungerChild, UserPolicy{}, item(score(7)), false},
-		{"older child, PG", RestrictionOlderChild, UserPolicy{}, item(score(10)), true},
-		{"older child, PG-13", RestrictionOlderChild, UserPolicy{}, item(score(13)), false},
-		{"teen, TV-14", RestrictionTeen, UserPolicy{}, item(score(14)), true},
-		{"teen, R", RestrictionTeen, UserPolicy{}, item(score(17)), false},
-		{"teen, unrated", RestrictionTeen, UserPolicy{}, item(nil), false},
-		{"teen under a lower limit", RestrictionTeen, UserPolicy{MaxParentalRating: score(10)}, item(score(13)), false},
+		{"no profile, R", RestrictionNone, LibraryAccess{}, item(score(17)), true},
+		{"no profile, unrated", RestrictionNone, LibraryAccess{}, item(nil), true},
+		{"younger child, G", RestrictionYoungerChild, LibraryAccess{}, item(score(0)), true},
+		{"younger child, TV-Y7", RestrictionYoungerChild, LibraryAccess{}, item(score(7)), false},
+		{"older child, PG", RestrictionOlderChild, LibraryAccess{}, item(score(10)), true},
+		{"older child, PG-13", RestrictionOlderChild, LibraryAccess{}, item(score(13)), false},
+		{"teen, TV-14", RestrictionTeen, LibraryAccess{}, item(score(14)), true},
+		{"teen, R", RestrictionTeen, LibraryAccess{}, item(score(17)), false},
+		{"teen, unrated", RestrictionTeen, LibraryAccess{}, item(nil), false},
+		{"teen under a lower limit", RestrictionTeen, LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: score(10)}}, item(score(13)), false},
 	}
 	for _, tt := range tests {
 		kind := UserMember
 		if tt.profile != RestrictionNone {
 			kind = UserManaged
 		}
-		u := User{ID: NewID(), Name: "kid", Kind: kind, Restriction: tt.profile, Policy: tt.policy}
+		u := User{ID: NewID(), Name: "kid", Kind: kind, Restriction: tt.profile, Access: tt.access}
 		if got := u.CanAccess(tt.item); got != tt.want {
 			t.Errorf("%s: CanAccess = %v, want = %v", tt.name, got, tt.want)
 		}

@@ -488,11 +488,10 @@ func (s *PlaylistService) playable(ctx context.Context, u *core.User, ids []stri
 // userItems returns a query for the items the user may access; it
 // reports false when the user may access no library.
 func userItems(u *core.User) (core.ItemQuery, bool) {
-	libs, ok := libraryScope(&u.Policy, nil)
+	libs, ok := libraryScope(&u.Access, nil)
 	return core.ItemQuery{
-		LibraryIDs:  libs,
-		MaxRating:   u.Access().MaxParentalRating,
-		SkipUnrated: u.Access().BlockUnrated,
-		UserID:      u.ID,
+		LibraryIDs: libs,
+		Limits:     u.EffectiveAccess().ContentLimits,
+		UserID:     u.ID,
 	}, ok
 }

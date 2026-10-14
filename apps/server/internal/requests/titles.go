@@ -266,7 +266,7 @@ func (s *Service) seasonInfos(ctx context.Context, t Title) ([]seasonInfo, error
 // rating of a country, as the user's policy allows items: unrated
 // content passes unless the policy blocks it.
 func RatingAllowed(u *core.User, rating, country string) bool {
-	access := u.Access()
+	access := u.EffectiveAccess()
 	limit := access.MaxParentalRating
 	if limit == nil {
 		return true
@@ -282,7 +282,7 @@ func RatingAllowed(u *core.User, rating, country string) bool {
 // limit allows, for discovery providers filtering by certification; nil
 // when the user has no limit.
 func Certifications(u *core.User, country string) []string {
-	limit := u.Access().MaxParentalRating
+	limit := u.EffectiveAccess().MaxParentalRating
 	if limit == nil {
 		return nil
 	}

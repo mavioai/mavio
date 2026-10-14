@@ -31,6 +31,8 @@ type User struct {
 	Restriction core.RestrictionProfile `json:"restriction,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
+	// Access holds the value of the "access" field.
+	Access core.LibraryAccess `json:"access,omitempty"`
 	// Policy holds the value of the "policy" field.
 	Policy core.UserPolicy `json:"policy,omitempty"`
 	// Preferences holds the value of the "preferences" field.
@@ -167,7 +169,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldPolicy, user.FieldPreferences:
+		case user.FieldAccess, user.FieldPolicy, user.FieldPreferences:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(core.ID)
@@ -233,6 +235,14 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field disabled", values[i])
 			} else if value.Valid {
 				_m.Disabled = value.Bool
+			}
+		case user.FieldAccess:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field access", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Access); err != nil {
+					return fmt.Errorf("unmarshal field access: %w", err)
+				}
 			}
 		case user.FieldPolicy:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -366,6 +376,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Disabled))
+	builder.WriteString(", ")
+	builder.WriteString("access=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Access))
 	builder.WriteString(", ")
 	builder.WriteString("policy=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Policy))

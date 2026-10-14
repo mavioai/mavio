@@ -47,7 +47,7 @@ func TestHub(t *testing.T) {
 		}
 	}
 	admin := core.User{ID: core.NewID(), Name: "admin", Kind: core.UserAdmin}
-	kid := core.User{ID: core.NewID(), Name: "kid", Kind: core.UserMember, Policy: core.UserPolicy{Libraries: []core.ID{shows.ID}, MaxParentalRating: new(10)}}
+	kid := core.User{ID: core.NewID(), Name: "kid", Kind: core.UserMember, Access: core.LibraryAccess{Libraries: []core.ID{shows.ID}, ContentLimits: core.ContentLimits{MaxParentalRating: new(10)}}}
 
 	synctest.Test(t, func(t *testing.T) {
 		hub := New(Config{Store: s})

@@ -1071,6 +1071,10 @@ impl ::buffa::HasMessageView for super::super::Passkey {
     type View<'a> = PasskeyView<'a>;
     type ViewHandle = PasskeyOwnedView;
 }
+/// UserPolicy is what a user may reach and do. Its library and content
+/// fields (all_libraries, library_ids, max_parental_rating, block_unrated,
+/// allowed_labels, blocked_labels, allow_download) are the user's library
+/// access record (docs/accounts.md §3.3).
 #[derive(Clone, Debug, Default)]
 pub struct UserPolicyView<'a> {
     /// Accessible libraries; when all_libraries is true this list is ignored.
@@ -1125,6 +1129,16 @@ pub struct UserPolicyView<'a> {
     pub series_quota: ::buffa::MessageFieldView<
         super::super::__buffa::view::RequestQuotaView<'a>,
     >,
+    /// When any, only items with one of these labels are shown. Labels are
+    /// tags, of the item or of an ancestor such as its series, matched
+    /// case-insensitively.
+    ///
+    /// Field 16: `allowed_labels`
+    pub allowed_labels: ::buffa::RepeatedView<'a, &'a str>,
+    /// Items with any of these labels are hidden.
+    ///
+    /// Field 17: `blocked_labels`
+    pub blocked_labels: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
@@ -1296,6 +1310,28 @@ impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
                 )?;
                 view.library_ids.push(__elem);
             }
+            16u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.allowed_labels.push(__elem);
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.blocked_labels.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -1349,6 +1385,8 @@ impl<'a> ::buffa::MessageView<'a> for UserPolicyView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            allowed_labels: self.allowed_labels.iter().map(|s| s.to_string()).collect(),
+            blocked_labels: self.blocked_labels.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1415,6 +1453,12 @@ impl<'a> ::buffa::ViewEncode<'a> for UserPolicyView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.allowed_labels {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.blocked_labels {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1480,6 +1524,12 @@ impl<'a> ::buffa::ViewEncode<'a> for UserPolicyView<'a> {
                 buf,
             );
             self.series_quota.write_to(__cache, buf);
+        }
+        for v in &self.allowed_labels {
+            ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        for v in &self.blocked_labels {
+            ::buffa::types::put_string_field(17u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1668,6 +1718,22 @@ impl UserPolicyOwnedView {
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::RequestQuotaView<'_>> {
         &self.0.reborrow().series_quota
+    }
+    /// When any, only items with one of these labels are shown. Labels are
+    /// tags, of the item or of an ancestor such as its series, matched
+    /// case-insensitively.
+    ///
+    /// Field 16: `allowed_labels`
+    #[must_use]
+    pub fn allowed_labels(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().allowed_labels
+    }
+    /// Items with any of these labels are hidden.
+    ///
+    /// Field 17: `blocked_labels`
+    #[must_use]
+    pub fn blocked_labels(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().blocked_labels
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<UserPolicyView<'static>>>

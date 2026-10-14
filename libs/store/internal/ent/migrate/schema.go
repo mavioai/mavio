@@ -687,6 +687,8 @@ var (
 		{Name: "custom_rating", Type: field.TypeString, Default: ""},
 		{Name: "parental_rating", Type: field.TypeInt, Nullable: true},
 		{Name: "inherited_rating", Type: field.TypeInt, Nullable: true},
+		{Name: "tag_keys", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "inherited_tags", Type: field.TypeString, Size: 2147483647, Default: ""},
 		{Name: "community_rating", Type: field.TypeFloat64, Default: 0},
 		{Name: "critic_rating", Type: field.TypeFloat64, Default: 0},
 		{Name: "external_ids", Type: field.TypeJSON, Nullable: true},
@@ -737,25 +739,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "items_items_children",
-				Columns:    []*schema.Column{ItemsColumns[59]},
+				Columns:    []*schema.Column{ItemsColumns[61]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_items_extras",
-				Columns:    []*schema.Column{ItemsColumns[60]},
+				Columns:    []*schema.Column{ItemsColumns[62]},
 				RefColumns: []*schema.Column{ItemsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_libraries_items",
-				Columns:    []*schema.Column{ItemsColumns[61]},
+				Columns:    []*schema.Column{ItemsColumns[63]},
 				RefColumns: []*schema.Column{LibrariesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "items_users_playlists",
-				Columns:    []*schema.Column{ItemsColumns[62]},
+				Columns:    []*schema.Column{ItemsColumns[64]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -764,7 +766,7 @@ var (
 			{
 				Name:    "item_library_id_path",
 				Unique:  true,
-				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[10]},
+				Columns: []*schema.Column{ItemsColumns[63], ItemsColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "path <> ''",
 				},
@@ -772,27 +774,27 @@ var (
 			{
 				Name:    "item_parent_id_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[59], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_library_id_kind_sort_key",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[1], ItemsColumns[4]},
+				Columns: []*schema.Column{ItemsColumns[63], ItemsColumns[1], ItemsColumns[4]},
 			},
 			{
 				Name:    "item_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[60]},
+				Columns: []*schema.Column{ItemsColumns[62]},
 			},
 			{
 				Name:    "item_date_added",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[44]},
+				Columns: []*schema.Column{ItemsColumns[46]},
 			},
 			{
 				Name:    "item_library_id_scan_generation",
 				Unique:  false,
-				Columns: []*schema.Column{ItemsColumns[61], ItemsColumns[47]},
+				Columns: []*schema.Column{ItemsColumns[63], ItemsColumns[49]},
 			},
 		},
 	}
@@ -1529,6 +1531,7 @@ var (
 		{Name: "auth_provider", Type: field.TypeString, Default: ""},
 		{Name: "restriction", Type: field.TypeString, Default: ""},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "access", Type: field.TypeJSON, Nullable: true},
 		{Name: "policy", Type: field.TypeJSON},
 		{Name: "preferences", Type: field.TypeJSON},
 		{Name: "created_at", Type: field.TypeTime},

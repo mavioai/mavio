@@ -44,11 +44,11 @@ func seedCatalog(t *testing.T, s *store.Store) catalog {
 	c.alien.ProductionYear, c.alien.OfficialRating, c.alien.ParentalRating, c.alien.Runtime = 1979, "R", new(17), 117*time.Minute
 	c.alien.Genres, c.alien.ExternalIDs = []string{"Horror"}, map[core.Provider]string{core.ProviderTMDB: "348"}
 	c.up = item(c.films, core.NilID, core.KindMovie, "Up")
-	c.up.ProductionYear = 2009
+	c.up.ProductionYear, c.up.Tags = 2009, []string{"Family"}
 	c.trailer = item(c.films, core.NilID, core.KindVideo, "Alien Trailer")
 	c.trailer.Extra, c.trailer.OwnerID = core.ExtraTrailer, c.alien.ID
 	c.series = item(c.shows, core.NilID, core.KindSeries, "Show")
-	c.series.OfficialRating, c.series.ParentalRating = "TV-MA", new(17)
+	c.series.OfficialRating, c.series.ParentalRating, c.series.Tags = "TV-MA", new(17), []string{"Sitcom"}
 	c.season = item(c.shows, c.series.ID, core.KindSeason, "Season 1")
 	c.pilot = item(c.shows, c.season.ID, core.KindEpisode, "Pilot")
 	c.pilot.IndexNumber, c.pilot.ParentIndexNumber, c.pilot.OfficialRating, c.pilot.ParentalRating = new(1), new(1), "TV-Y7", new(7)
@@ -255,6 +255,27 @@ func TestItemService(t *testing.T) {
 	latest, err = asKid.ListLatestItems(ctx, libraryv1.ListLatestItemsRequest_builder{}.Build())
 	if got := names(latest.GetItems()); err != nil || !slices.Equal(got, []string{"Pilot"}) {
 		t.Errorf("kid's latest = %q, %v", got, err)
+	}
+
+	// Labels: blocking the series' label hides its episodes too, and
+	// allowing a label shows only what carries it.
+	for name, policy := range map[string]*userv1.UserPolicy{
+		"nositcoms": userv1.UserPolicy_builder{AllLibraries: new(true), BlockedLabels: []string{"sitcom"}}.Build(),
+		"family":    userv1.UserPolicy_builder{AllLibraries: new(true), AllowedLabels: []string{"FAMILY"}}.Build(),
+	} {
+		if _, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new(name), Password: new("pw"), Policy: policy}.Build()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	asNoSitcoms := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(login(t, url, "nositcoms", "pw", "tablet")))
+	if got := names(list(asNoSitcoms, libraryv1.ListItemsRequest_builder{Kinds: episodes}).GetItems()); len(got) != 0 {
+		t.Errorf("episodes without sitcoms = %q", got)
+	}
+	_, err = asNoSitcoms.GetItem(ctx, libraryv1.GetItemRequest_builder{Id: new(c.pilot.ID.String())}.Build())
+	wantCode(t, "get an episode of a blocked series", err, connect.CodeNotFound)
+	asFamily := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(login(t, url, "family", "pw", "tablet")))
+	if got := names(list(asFamily, libraryv1.ListItemsRequest_builder{TopLevel: new(true), Sort: byName}).GetItems()); !slices.Equal(got, []string{"Up"}) {
+		t.Errorf("family's items = %q, want Up", got)
 	}
 
 	// Value and person lists count only what the caller may access.

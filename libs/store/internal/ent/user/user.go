@@ -27,6 +27,8 @@ const (
 	FieldRestriction = "restriction"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
+	// FieldAccess holds the string denoting the access field in the database.
+	FieldAccess = "access"
 	// FieldPolicy holds the string denoting the policy field in the database.
 	FieldPolicy = "policy"
 	// FieldPreferences holds the string denoting the preferences field in the database.
@@ -138,6 +140,7 @@ var Columns = []string{
 	FieldAuthProvider,
 	FieldRestriction,
 	FieldDisabled,
+	FieldAccess,
 	FieldPolicy,
 	FieldPreferences,
 	FieldCreatedAt,

@@ -76,7 +76,7 @@ func TestItemValues(t *testing.T) {
 			{"substring", core.ValueQuery{Kind: core.ValueGenre, Search: "fiction"}, []string{"Science Fiction 1"}},
 			{"sort form", core.ValueQuery{Kind: core.ValueGenre, Search: "scifi"}, []string{"Sci-Fi 1"}},
 			{"punctuation matches spaces", core.ValueQuery{Kind: core.ValueGenre, Search: "sci fi"}, []string{"Sci-Fi 1"}},
-			{"rating", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{LibraryIDs: []core.ID{films.ID}, MaxRating: ptr(12)}}, []string{"Comédie 1", "Documentary 1", "drama 1"}},
+			{"rating", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{LibraryIDs: []core.ID{films.ID}, Limits: core.ContentLimits{MaxParentalRating: ptr(12)}}}, []string{"Comédie 1", "Documentary 1", "drama 1"}},
 			{"item kinds", core.ValueQuery{Kind: core.ValueGenre, Items: core.ItemFilter{Kinds: []core.ItemKind{core.KindTrack}}, Search: "dra"}, []string{"Melodrama 1"}},
 			{"artists include album artists", core.ValueQuery{Kind: core.ValueArtist}, []string{"Beach House 1", "Various Artists 1"}},
 			{"studios", core.ValueQuery{Kind: core.ValueStudio}, []string{"A24 1"}},
@@ -160,7 +160,7 @@ func TestPersonSearch(t *testing.T) {
 			{"sort name", core.PersonQuery{Search: "hanks tom"}, []string{"Tom Hanks 2"}},
 			{"pinyin", core.PersonQuery{Search: "zhang guo"}, []string{"张国荣 1"}},
 			{"library", core.PersonQuery{Items: core.ItemFilter{LibraryIDs: []core.ID{shows.ID}}}, []string{"Thomas Newman 1"}},
-			{"rating", core.PersonQuery{Items: core.ItemFilter{MaxRating: ptr(12)}, Search: "hanks"}, []string{"Tom Hanks 1"}},
+			{"rating", core.PersonQuery{Items: core.ItemFilter{Limits: core.ContentLimits{MaxParentalRating: ptr(12)}}, Search: "hanks"}, []string{"Tom Hanks 1"}},
 			{"credit kinds", core.PersonQuery{CreditKinds: []core.CreditKind{core.CreditDirector, core.CreditComposer}}, []string{"Tom Hanks 1", "Thomas Newman 1"}},
 		}
 		for _, tt := range tests {

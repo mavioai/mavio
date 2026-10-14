@@ -239,40 +239,44 @@ func TestMediaSourceHelpers(t *testing.T) {
 	}
 }
 
-func TestUserPolicyLibraries(t *testing.T) {
+func TestLibraryAccessLibraries(t *testing.T) {
 	a, b := NewID(), NewID()
-	if !(&UserPolicy{}).CanAccessLibrary(a) {
+	if !(&LibraryAccess{}).CanAccessLibrary(a) {
 		t.Error("nil Libraries should allow all")
 	}
-	p := UserPolicy{Libraries: []ID{a}}
+	p := LibraryAccess{Libraries: []ID{a}}
 	if !p.CanAccessLibrary(a) || p.CanAccessLibrary(b) {
 		t.Error("explicit Libraries not enforced")
 	}
 }
 
-func TestUserPolicyCanAccess(t *testing.T) {
+func TestLibraryAccessCanAccess(t *testing.T) {
 	lib, other := NewID(), NewID()
 	tests := []struct {
 		name   string
-		policy UserPolicy
+		access LibraryAccess
 		item   Item
 		want   bool
 	}{
-		{"unrestricted", UserPolicy{}, Item{LibraryID: lib, ParentalRating: new(18)}, true},
-		{"other library", UserPolicy{Libraries: []ID{lib}}, Item{LibraryID: other}, false},
-		{"within rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(12)}, true},
-		{"above rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(13)}, false},
-		{"unrated", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib}, true},
-		{"unrated blocked", UserPolicy{MaxParentalRating: new(12), BlockUnrated: true}, Item{LibraryID: lib}, false},
-		{"block without maximum", UserPolicy{BlockUnrated: true}, Item{LibraryID: lib}, true},
-		{"inherited above rating", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, InheritedRating: new(17)}, false},
-		{"inherited within rating", UserPolicy{MaxParentalRating: new(12), BlockUnrated: true}, Item{LibraryID: lib, InheritedRating: new(7)}, true},
-		{"own rating over inherited", UserPolicy{MaxParentalRating: new(12)}, Item{LibraryID: lib, ParentalRating: new(7), InheritedRating: new(17)}, true},
-		{"all ages only", UserPolicy{MaxParentalRating: new(0), BlockUnrated: true}, Item{LibraryID: lib, ParentalRating: new(0)}, true},
-		{"rated for all ages is rated", UserPolicy{MaxParentalRating: new(0), BlockUnrated: true}, Item{LibraryID: lib, ParentalRating: new(7)}, false},
+		{"unrestricted", LibraryAccess{}, Item{LibraryID: lib, ParentalRating: new(18)}, true},
+		{"other library", LibraryAccess{Libraries: []ID{lib}}, Item{LibraryID: other}, false},
+		{"within rating", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12)}}, Item{LibraryID: lib, ParentalRating: new(12)}, true},
+		{"above rating", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12)}}, Item{LibraryID: lib, ParentalRating: new(13)}, false},
+		{"unrated", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12)}}, Item{LibraryID: lib}, true},
+		{"unrated blocked", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12), BlockUnrated: true}}, Item{LibraryID: lib}, false},
+		{"block without maximum", LibraryAccess{ContentLimits: ContentLimits{BlockUnrated: true}}, Item{LibraryID: lib}, true},
+		{"inherited above rating", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12)}}, Item{LibraryID: lib, InheritedRating: new(17)}, false},
+		{"inherited within rating", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12), BlockUnrated: true}}, Item{LibraryID: lib, InheritedRating: new(7)}, true},
+		{"own rating over inherited", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(12)}}, Item{LibraryID: lib, ParentalRating: new(7), InheritedRating: new(17)}, true},
+		{"all ages only", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(0), BlockUnrated: true}}, Item{LibraryID: lib, ParentalRating: new(0)}, true},
+		{"rated for all ages is rated", LibraryAccess{ContentLimits: ContentLimits{MaxParentalRating: new(0), BlockUnrated: true}}, Item{LibraryID: lib, ParentalRating: new(7)}, false},
+		{"allowed label", LibraryAccess{ContentLimits: ContentLimits{AllowedLabels: []string{"Kids"}}}, Item{LibraryID: lib, InheritedTags: []string{"kids"}}, true},
+		{"without an allowed label", LibraryAccess{ContentLimits: ContentLimits{AllowedLabels: []string{"kids"}}}, Item{LibraryID: lib, InheritedTags: []string{"family"}}, false},
+		{"blocked label", LibraryAccess{ContentLimits: ContentLimits{BlockedLabels: []string{" Horror"}}}, Item{LibraryID: lib, InheritedTags: []string{"kids", "horror"}}, false},
+		{"other label blocked", LibraryAccess{ContentLimits: ContentLimits{BlockedLabels: []string{"horror"}}}, Item{LibraryID: lib, InheritedTags: []string{"kids"}}, true},
 	}
 	for _, tt := range tests {
-		if got := tt.policy.CanAccess(&tt.item); got != tt.want {
+		if got := tt.access.CanAccess(&tt.item); got != tt.want {
 			t.Errorf("%s: CanAccess = %v, want %v", tt.name, got, tt.want)
 		}
 	}
@@ -384,7 +388,7 @@ func TestSubtitleCodecs(t *testing.T) {
 }
 
 func TestCuratedItems(t *testing.T) {
-	user := User{ID: NewID(), Policy: UserPolicy{Libraries: []ID{}}}
+	user := User{ID: NewID(), Access: LibraryAccess{Libraries: []ID{}}}
 	lib := NewID()
 	playlist := Item{ID: NewID(), LibraryID: lib, Kind: KindPlaylist, Name: "Road trip", UserID: user.ID}
 	tests := []struct {

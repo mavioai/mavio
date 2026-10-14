@@ -22,15 +22,20 @@ import (
 const keysVersion = "keys-1"
 
 // ratingsVersion identifies how ratings are stored and inherited
-// (inheritRatings). Bump it whenever that changes: Open then recomputes
+// (inherit). Bump it whenever that changes: Open then recomputes
 // the inherited ratings of every item once. Version 2 made unrated NULL
 // instead of zero, in items and in policies' maximum ratings.
 const ratingsVersion = "ratings-2"
 
+// labelsVersion identifies how tags are kept for label filters (tagKeys,
+// inherit). Bump it whenever that changes: Open then recomputes the tag
+// keys and inherited tags of every item once.
+const labelsVersion = "labels-1"
+
 // backfillBatch is the number of rows read per backfill query.
 const backfillBatch = 500
 
-// backfillKeys recomputes the derived keys and inherited ratings of all
+// backfillKeys recomputes the derived keys, inherited ratings and tags of all
 // rows unless their current versions have been applied already.
 func (s *Store) backfillKeys(ctx context.Context) error {
 	err := s.backfill(ctx, keysVersion, func(tx *Store) error {
@@ -45,7 +50,7 @@ func (s *Store) backfillKeys(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return s.backfill(ctx, ratingsVersion, func(tx *Store) error {
+	err = s.backfill(ctx, ratingsVersion, func(tx *Store) error {
 		if _, err := tx.write.Item.Update().Where(item.ParentalRating(0)).ClearParentalRating().Save(ctx); err != nil {
 			return err
 		}
@@ -54,15 +59,50 @@ func (s *Store) backfillKeys(ctx context.Context) error {
 			return err
 		}
 		for _, u := range users {
-			if p := u.Policy; p.MaxParentalRating != nil && *p.MaxParentalRating == 0 {
-				p.MaxParentalRating = nil
-				if err := tx.write.User.UpdateOneID(u.ID).SetPolicy(p).Exec(ctx); err != nil {
+			if a := u.Access; a.MaxParentalRating != nil && *a.MaxParentalRating == 0 {
+				a.MaxParentalRating = nil
+				if err := tx.write.User.UpdateOneID(u.ID).SetAccess(a).Exec(ctx); err != nil {
 					return err
 				}
 			}
 		}
-		return tx.inheritRatings(ctx, "c.parent_id IS NULL")
+		return tx.inherit(ctx, "c.parent_id IS NULL")
 	})
+	if err != nil {
+		return err
+	}
+	return s.backfill(ctx, labelsVersion, func(tx *Store) error {
+		if err := backfillTagKeys(ctx, tx.write); err != nil {
+			return err
+		}
+		return tx.inherit(ctx, "c.parent_id IS NULL")
+	})
+}
+
+// backfillTagKeys sets the tag_keys of every item from its tags.
+func backfillTagKeys(ctx context.Context, c *ent.Client) error {
+	var after core.ID
+	for {
+		list, err := c.Item.Query().Where(item.IDGT(after)).Order(ent.Asc(item.FieldID)).Limit(backfillBatch).
+			WithValues(func(q *ent.ItemValueQuery) { q.Where(itemvalue.Kind(valueTag)).Order(ent.Asc(itemvalue.FieldOrd)) }).
+			Select(item.FieldID).All(ctx)
+		if err != nil {
+			return err
+		}
+		for _, it := range list {
+			tags := make([]string, len(it.Edges.Values))
+			for i, v := range it.Edges.Values {
+				tags[i] = v.Value
+			}
+			if err := c.Item.UpdateOneID(it.ID).SetTagKeys(tagKeys(tags)).Exec(ctx); err != nil {
+				return err
+			}
+		}
+		if len(list) < backfillBatch {
+			return nil
+		}
+		after = list[len(list)-1].ID
+	}
 }
 
 // backfill runs fn in a transaction that records version in

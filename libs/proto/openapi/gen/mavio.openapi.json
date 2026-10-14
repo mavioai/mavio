@@ -18754,7 +18754,7 @@
           "RESTRICTION_PROFILE_OLDER_CHILD",
           "RESTRICTION_PROFILE_TEEN"
         ],
-        "description": "RestrictionProfile limits what a managed user sees by content rating, on\n top of its policy; rated items within the profile alone are shown."
+        "description": "RestrictionProfile limits what a managed user sees by content rating, on\n top of its library access; rated items within the profile alone are shown."
       },
       "mavio.user.v1.SetDisplayPreferencesRequest": {
         "type": "object",
@@ -19308,10 +19308,33 @@
               }
             ],
             "title": "series_quota"
+          },
+          "allowedLabels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "title": "allowed_labels",
+            "maxItems": 100,
+            "description": "When any, only items with one of these labels are shown. Labels are\n tags, of the item or of an ancestor such as its series, matched\n case-insensitively."
+          },
+          "blockedLabels": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 1
+            },
+            "title": "blocked_labels",
+            "maxItems": 100,
+            "description": "Items with any of these labels are hidden."
           }
         },
         "title": "UserPolicy",
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "UserPolicy is what a user may reach and do. Its library and content\n fields (all_libraries, library_ids, max_parental_rating, block_unrated,\n allowed_labels, blocked_labels, allow_download) are the user's library\n access record (docs/accounts.md §3.3)."
       },
       "mavio.user.v1.UserPreferences": {
         "type": "object",

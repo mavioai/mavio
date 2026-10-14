@@ -54,8 +54,8 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 			passkeys = append(passkeys, passkeyToProto(&creds[i]))
 		}
 	}
-	libraries := make([]string, len(u.Policy.Libraries))
-	for i, id := range u.Policy.Libraries {
+	libraries := make([]string, len(u.Access.Libraries))
+	for i, id := range u.Access.Libraries {
 		libraries[i] = id.String()
 	}
 	var lastLogin *timestamppb.Timestamp
@@ -74,12 +74,14 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 		Passkeys:     passkeys,
 		Restriction:  new(restrictions[u.Restriction]),
 		Policy: userv1.UserPolicy_builder{
-			AllLibraries:        new(u.Policy.Libraries == nil),
+			AllLibraries:        new(u.Access.Libraries == nil),
 			LibraryIds:          libraries,
-			MaxParentalRating:   int32Ptr(u.Policy.MaxParentalRating),
-			BlockUnrated:        &u.Policy.BlockUnrated,
+			MaxParentalRating:   int32Ptr(u.Access.MaxParentalRating),
+			BlockUnrated:        &u.Access.BlockUnrated,
+			AllowedLabels:       u.Access.AllowedLabels,
+			BlockedLabels:       u.Access.BlockedLabels,
 			AllowTranscoding:    &u.Policy.AllowTranscoding,
-			AllowDownload:       &u.Policy.AllowDownload,
+			AllowDownload:       &u.Access.AllowDownload,
 			MaxStreamingBitrate: &u.Policy.MaxStreamingBitrate,
 			MaxSessions:         new(int32(u.Policy.MaxSessions)),
 			RequestMovies:       &u.Policy.Requests.Movies,

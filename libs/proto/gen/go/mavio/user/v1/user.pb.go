@@ -78,7 +78,7 @@ func (x SubtitleMode) Number() protoreflect.EnumNumber {
 }
 
 // RestrictionProfile limits what a managed user sees by content rating, on
-// top of its policy; rated items within the profile alone are shown.
+// top of its library access; rated items within the profile alone are shown.
 type RestrictionProfile int32
 
 const (
@@ -777,6 +777,10 @@ func (b0 Passkey_builder) Build() *Passkey {
 	return m0
 }
 
+// UserPolicy is what a user may reach and do. Its library and content
+// fields (all_libraries, library_ids, max_parental_rating, block_unrated,
+// allowed_labels, blocked_labels, allow_download) are the user's library
+// access record (docs/accounts.md §3.3).
 type UserPolicy struct {
 	state                          protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_AllLibraries        bool                   `protobuf:"varint,1,opt,name=all_libraries,json=allLibraries"`
@@ -794,6 +798,8 @@ type UserPolicy struct {
 	xxx_hidden_ReportIssues        bool                   `protobuf:"varint,13,opt,name=report_issues,json=reportIssues"`
 	xxx_hidden_MovieQuota          *RequestQuota          `protobuf:"bytes,14,opt,name=movie_quota,json=movieQuota"`
 	xxx_hidden_SeriesQuota         *RequestQuota          `protobuf:"bytes,15,opt,name=series_quota,json=seriesQuota"`
+	xxx_hidden_AllowedLabels       []string               `protobuf:"bytes,16,rep,name=allowed_labels,json=allowedLabels"`
+	xxx_hidden_BlockedLabels       []string               `protobuf:"bytes,17,rep,name=blocked_labels,json=blockedLabels"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
 	XXX_presence                   [1]uint32
 	unknownFields                  protoimpl.UnknownFields
@@ -930,9 +936,23 @@ func (x *UserPolicy) GetSeriesQuota() *RequestQuota {
 	return nil
 }
 
+func (x *UserPolicy) GetAllowedLabels() []string {
+	if x != nil {
+		return x.xxx_hidden_AllowedLabels
+	}
+	return nil
+}
+
+func (x *UserPolicy) GetBlockedLabels() []string {
+	if x != nil {
+		return x.xxx_hidden_BlockedLabels
+	}
+	return nil
+}
+
 func (x *UserPolicy) SetAllLibraries(v bool) {
 	x.xxx_hidden_AllLibraries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
 }
 
 func (x *UserPolicy) SetLibraryIds(v []string) {
@@ -941,57 +961,57 @@ func (x *UserPolicy) SetLibraryIds(v []string) {
 
 func (x *UserPolicy) SetMaxParentalRating(v int32) {
 	x.xxx_hidden_MaxParentalRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
 }
 
 func (x *UserPolicy) SetBlockUnrated(v bool) {
 	x.xxx_hidden_BlockUnrated = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 17)
 }
 
 func (x *UserPolicy) SetAllowTranscoding(v bool) {
 	x.xxx_hidden_AllowTranscoding = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 17)
 }
 
 func (x *UserPolicy) SetAllowDownload(v bool) {
 	x.xxx_hidden_AllowDownload = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 17)
 }
 
 func (x *UserPolicy) SetMaxStreamingBitrate(v int64) {
 	x.xxx_hidden_MaxStreamingBitrate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
 }
 
 func (x *UserPolicy) SetMaxSessions(v int32) {
 	x.xxx_hidden_MaxSessions = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 17)
 }
 
 func (x *UserPolicy) SetRequestMovies(v bool) {
 	x.xxx_hidden_RequestMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 17)
 }
 
 func (x *UserPolicy) SetRequestSeries(v bool) {
 	x.xxx_hidden_RequestSeries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 17)
 }
 
 func (x *UserPolicy) SetAutoApproveMovies(v bool) {
 	x.xxx_hidden_AutoApproveMovies = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 17)
 }
 
 func (x *UserPolicy) SetAutoApproveSeries(v bool) {
 	x.xxx_hidden_AutoApproveSeries = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 17)
 }
 
 func (x *UserPolicy) SetReportIssues(v bool) {
 	x.xxx_hidden_ReportIssues = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 15)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 17)
 }
 
 func (x *UserPolicy) SetMovieQuota(v *RequestQuota) {
@@ -1000,6 +1020,14 @@ func (x *UserPolicy) SetMovieQuota(v *RequestQuota) {
 
 func (x *UserPolicy) SetSeriesQuota(v *RequestQuota) {
 	x.xxx_hidden_SeriesQuota = v
+}
+
+func (x *UserPolicy) SetAllowedLabels(v []string) {
+	x.xxx_hidden_AllowedLabels = v
+}
+
+func (x *UserPolicy) SetBlockedLabels(v []string) {
+	x.xxx_hidden_BlockedLabels = v
 }
 
 func (x *UserPolicy) HasAllLibraries() bool {
@@ -1197,6 +1225,12 @@ type UserPolicy_builder struct {
 	// The user's quotas; unset uses the server's.
 	MovieQuota  *RequestQuota
 	SeriesQuota *RequestQuota
+	// When any, only items with one of these labels are shown. Labels are
+	// tags, of the item or of an ancestor such as its series, matched
+	// case-insensitively.
+	AllowedLabels []string
+	// Items with any of these labels are hidden.
+	BlockedLabels []string
 }
 
 func (b0 UserPolicy_builder) Build() *UserPolicy {
@@ -1204,56 +1238,58 @@ func (b0 UserPolicy_builder) Build() *UserPolicy {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.AllLibraries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
 		x.xxx_hidden_AllLibraries = *b.AllLibraries
 	}
 	x.xxx_hidden_LibraryIds = b.LibraryIds
 	if b.MaxParentalRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
 		x.xxx_hidden_MaxParentalRating = *b.MaxParentalRating
 	}
 	if b.BlockUnrated != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 17)
 		x.xxx_hidden_BlockUnrated = *b.BlockUnrated
 	}
 	if b.AllowTranscoding != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 17)
 		x.xxx_hidden_AllowTranscoding = *b.AllowTranscoding
 	}
 	if b.AllowDownload != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 17)
 		x.xxx_hidden_AllowDownload = *b.AllowDownload
 	}
 	if b.MaxStreamingBitrate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
 		x.xxx_hidden_MaxStreamingBitrate = *b.MaxStreamingBitrate
 	}
 	if b.MaxSessions != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 17)
 		x.xxx_hidden_MaxSessions = *b.MaxSessions
 	}
 	if b.RequestMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 17)
 		x.xxx_hidden_RequestMovies = *b.RequestMovies
 	}
 	if b.RequestSeries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 17)
 		x.xxx_hidden_RequestSeries = *b.RequestSeries
 	}
 	if b.AutoApproveMovies != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 17)
 		x.xxx_hidden_AutoApproveMovies = *b.AutoApproveMovies
 	}
 	if b.AutoApproveSeries != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 17)
 		x.xxx_hidden_AutoApproveSeries = *b.AutoApproveSeries
 	}
 	if b.ReportIssues != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 15)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 17)
 		x.xxx_hidden_ReportIssues = *b.ReportIssues
 	}
 	x.xxx_hidden_MovieQuota = b.MovieQuota
 	x.xxx_hidden_SeriesQuota = b.SeriesQuota
+	x.xxx_hidden_AllowedLabels = b.AllowedLabels
+	x.xxx_hidden_BlockedLabels = b.BlockedLabels
 	return m0
 }
 
@@ -4795,7 +4831,7 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x05rp_id\x18\x03 \x01(\tR\x04rpId\x12;\n" +
 	"\vcreate_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\x12>\n" +
-	"\rlast_use_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vlastUseTime\"\xcd\x05\n" +
+	"\rlast_use_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vlastUseTime\"\xbf\x06\n" +
 	"\n" +
 	"UserPolicy\x12#\n" +
 	"\rall_libraries\x18\x01 \x01(\bR\fallLibraries\x12.\n" +
@@ -4816,7 +4852,11 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\rreport_issues\x18\r \x01(\bR\freportIssues\x12<\n" +
 	"\vmovie_quota\x18\x0e \x01(\v2\x1b.mavio.user.v1.RequestQuotaR\n" +
 	"movieQuota\x12>\n" +
-	"\fseries_quota\x18\x0f \x01(\v2\x1b.mavio.user.v1.RequestQuotaR\vseriesQuota\"J\n" +
+	"\fseries_quota\x18\x0f \x01(\v2\x1b.mavio.user.v1.RequestQuotaR\vseriesQuota\x127\n" +
+	"\x0eallowed_labels\x18\x10 \x03(\tB\x10\xbaH\r\x92\x01\n" +
+	"\x10d\"\x06r\x04\x10\x01\x18dR\rallowedLabels\x127\n" +
+	"\x0eblocked_labels\x18\x11 \x03(\tB\x10\xbaH\r\x92\x01\n" +
+	"\x10d\"\x06r\x04\x10\x01\x18dR\rblockedLabels\"J\n" +
 	"\fRequestQuota\x12\x1d\n" +
 	"\x05limit\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x05limit\x12\x1b\n" +
 	"\x04days\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x04days\"\x9e\x02\n" +

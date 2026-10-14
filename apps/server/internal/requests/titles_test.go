@@ -19,7 +19,7 @@ func TestSearch(t *testing.T) {
 	e.svc.Discovery = func() []DiscoveryProvider {
 		return []DiscoveryProvider{{ID: "servarr", Client: &fakeDiscovery{noSearch: true}}, {ID: "tmdb", Client: d}}
 	}
-	pg := e.user("pg", func(u *core.User) { u.Policy.MaxParentalRating = score(t, "PG") })
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
 	req := pluginv1.SearchTitlesRequest_builder{Query: new("film"), IncludeAdult: new(true)}.Build()
 	page, err := e.svc.Search(e.ctx, pg, "", req)
 	if err != nil {
@@ -48,7 +48,7 @@ func TestSearch(t *testing.T) {
 
 func TestGetTitle(t *testing.T) {
 	e := newEnv(t)
-	pg := e.user("pg", func(u *core.User) { u.Policy.MaxParentalRating = score(t, "PG") })
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
 	if _, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 2); !errors.Is(err, ErrRating) {
 		t.Errorf("GetTitle() above the limit: error = %v, want ErrRating", err)
 	}

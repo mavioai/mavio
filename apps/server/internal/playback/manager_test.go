@@ -268,8 +268,8 @@ func TestStartErrors(t *testing.T) {
 		want error
 	}{
 		{"unknown item", Request{ItemID: core.NewID()}, core.ErrNotFound},
-		{"other library", Request{User: core.User{ID: e.user.ID, Policy: core.UserPolicy{Libraries: []core.ID{core.NewID()}}}}, core.ErrNotFound},
-		{"rating", Request{User: core.User{ID: e.user.ID, Policy: core.UserPolicy{MaxParentalRating: new(1), BlockUnrated: true}}}, core.ErrNotFound},
+		{"other library", Request{User: core.User{ID: e.user.ID, Access: core.LibraryAccess{Libraries: []core.ID{core.NewID()}}}}, core.ErrNotFound},
+		{"rating", Request{User: core.User{ID: e.user.ID, Access: core.LibraryAccess{ContentLimits: core.ContentLimits{MaxParentalRating: new(1), BlockUnrated: true}}}}, core.ErrNotFound},
 		{"no ffmpeg", Request{Client: hevcOnly}, ErrNoSource},
 		{"stream without source", Request{AudioStream: new(1), SourceID: core.NilID}, core.ErrInvalid},
 	}
@@ -313,7 +313,7 @@ func TestStartErrors(t *testing.T) {
 	}
 	_ = e.m.Stop(ctx, e.user.ID, p.ID, nil)
 	noDownloads := e.user
-	noDownloads.Policy.AllowDownload = false
+	noDownloads.Access.AllowDownload = false
 	if _, err := e.m.Start(ctx, Request{User: noDownloads, ItemID: e.movie.ID, Client: mp4Client, Download: true}); !errors.Is(err, ErrNotAllowed) {
 		t.Errorf("download without permission: Start = %v, want ErrNotAllowed", err)
 	}

@@ -58,6 +58,7 @@ func (r users) Create(ctx context.Context, u *core.User) error {
 		SetAuthProvider(u.AuthProvider).
 		SetRestriction(u.Restriction).
 		SetDisabled(u.Disabled).
+		SetAccess(u.Access).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences).
 		SetCreatedAt(orNow(u.CreatedAt)).
@@ -81,6 +82,7 @@ func (r users) Update(ctx context.Context, u *core.User) error {
 		SetAuthProvider(u.AuthProvider).
 		SetRestriction(u.Restriction).
 		SetDisabled(u.Disabled).
+		SetAccess(u.Access).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences)
 	if u.LastLoginAt != nil {
@@ -108,6 +110,7 @@ func toUser(u *ent.User) core.User {
 		AuthProvider: u.AuthProvider,
 		Restriction:  u.Restriction,
 		Disabled:     u.Disabled,
+		Access:       u.Access,
 		Policy:       u.Policy,
 		Preferences:  u.Preferences,
 		CreatedAt:    u.CreatedAt.UTC(),

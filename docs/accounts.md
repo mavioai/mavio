@@ -68,10 +68,9 @@ A server's administrator gives another account access with one **library access 
 | Field | Meaning |
 | :--- | :--- |
 | Libraries | Which of the server's libraries the account reaches |
-| Content rating limit | Per library type, the highest rating shown |
-| Labels | Labels whose items alone are shown, or which are hidden |
+| Content rating limit | The highest rating shown, and whether unrated items are hidden |
+| Labels | Labels whose items alone are shown, and labels whose items are hidden; an item has the tags of its ancestors too, so labelling a series covers its episodes |
 | Downloads | Whether the account may download items for offline playback |
-| Live TV and DVR | Whether the account may use them |
 
 Granting access to an account sends it an invitation, and the record takes effect when the account accepts it. The administrator edits or revokes a record at any time.
 
@@ -200,7 +199,7 @@ Changing sign-ins is the client's own and differs from switching users: switchin
 ## 8. Server Implementation
 
 * **Two ports.** `libs/core` defines a sign-in port, which verifies a sign-in (credentials, a Quick Connect approval or a sign-in assertion) and returns the user's ID, and a user directory port, which lists the users, names the administrator and gives each user's library access record. `apps/server` wires one implementation of each from the mode: in standalone mode over the server's own tables, in mavio.dev mode over its synchronized copy of mavio.dev's records. Everything after signing in is shared by both modes: sessions, device keys, tokens, media URLs, the enforcement of library access and the users' watch data.
-* **Users.** The `users` table has a `kind` (administrator, member or managed) and a nullable, unique `account_id`, the Mavio account's ID in mavio.dev mode. In mavio.dev mode a user record is created when an access record for the account arrives, and for the administrator when the server is claimed. Credentials (password hashes, passkeys, TOTP secrets, PIN hashes) are kept in a table of their own, used in standalone mode only.
+* **Users.** The `users` table has a `kind` (administrator, member or managed), the user's library access record, and a nullable, unique `account_id`, the Mavio account's ID in mavio.dev mode. In mavio.dev mode a user record is created when an access record for the account arrives, and for the administrator when the server is claimed. Credentials (password hashes, passkeys, TOTP secrets, PIN hashes) are kept in a table of their own, used in standalone mode only.
 * **Standalone credentials.** Passwords are hashed with argon2id ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)); TOTP (RFC 6238) is computed with the standard library's HMAC; passkeys use `go-webauthn/webauthn`. A passkey belongs to the host name a browser reached the server at, its relying party, taken from the request's origin, which must be HTTPS, or HTTP on `localhost`; it works at that host only, and IP addresses cannot have passkeys. A passkey signs in alone; TOTP is the second factor of a password.
 * **Management in mavio.dev mode.** Clients manage access, friends and Homes at mavio.dev itself; the server's RPCs that manage users and access answer `failed_precondition`. Switching users within a Home happens between the client and mavio.dev, and the server only sees a sign-in with a new assertion.
 * **Server information.** `AuthService.GetAuthInfo`, which needs no sign-in, gives the server's mode with its ID and name, so that a client knows how to sign in before it does.

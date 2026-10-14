@@ -61,6 +61,10 @@ const (
 	FieldParentalRating = "parental_rating"
 	// FieldInheritedRating holds the string denoting the inherited_rating field in the database.
 	FieldInheritedRating = "inherited_rating"
+	// FieldTagKeys holds the string denoting the tag_keys field in the database.
+	FieldTagKeys = "tag_keys"
+	// FieldInheritedTags holds the string denoting the inherited_tags field in the database.
+	FieldInheritedTags = "inherited_tags"
 	// FieldCommunityRating holds the string denoting the community_rating field in the database.
 	FieldCommunityRating = "community_rating"
 	// FieldCriticRating holds the string denoting the critic_rating field in the database.
@@ -409,6 +413,8 @@ var Columns = []string{
 	FieldCustomRating,
 	FieldParentalRating,
 	FieldInheritedRating,
+	FieldTagKeys,
+	FieldInheritedTags,
 	FieldCommunityRating,
 	FieldCriticRating,
 	FieldExternalIds,
@@ -481,6 +487,10 @@ var (
 	DefaultOfficialRating string
 	// DefaultCustomRating holds the default value on creation for the "custom_rating" field.
 	DefaultCustomRating string
+	// DefaultTagKeys holds the default value on creation for the "tag_keys" field.
+	DefaultTagKeys string
+	// DefaultInheritedTags holds the default value on creation for the "inherited_tags" field.
+	DefaultInheritedTags string
 	// DefaultCommunityRating holds the default value on creation for the "community_rating" field.
 	DefaultCommunityRating float64
 	// DefaultCriticRating holds the default value on creation for the "critic_rating" field.
@@ -644,6 +654,16 @@ func ByParentalRating(opts ...sql.OrderTermOption) OrderOption {
 // ByInheritedRating orders the results by the inherited_rating field.
 func ByInheritedRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInheritedRating, opts...).ToFunc()
+}
+
+// ByTagKeys orders the results by the tag_keys field.
+func ByTagKeys(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTagKeys, opts...).ToFunc()
+}
+
+// ByInheritedTags orders the results by the inherited_tags field.
+func ByInheritedTags(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInheritedTags, opts...).ToFunc()
 }
 
 // ByCommunityRating orders the results by the community_rating field.

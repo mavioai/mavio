@@ -473,6 +473,34 @@ func (_u *ItemUpdate) ClearInheritedRating() *ItemUpdate {
 	return _u
 }
 
+// SetTagKeys sets the "tag_keys" field.
+func (_u *ItemUpdate) SetTagKeys(v string) *ItemUpdate {
+	_u.mutation.SetTagKeys(v)
+	return _u
+}
+
+// SetNillableTagKeys sets the "tag_keys" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableTagKeys(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetTagKeys(*v)
+	}
+	return _u
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (_u *ItemUpdate) SetInheritedTags(v string) *ItemUpdate {
+	_u.mutation.SetInheritedTags(v)
+	return _u
+}
+
+// SetNillableInheritedTags sets the "inherited_tags" field if the given value is not nil.
+func (_u *ItemUpdate) SetNillableInheritedTags(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetInheritedTags(*v)
+	}
+	return _u
+}
+
 // SetCommunityRating sets the "community_rating" field.
 func (_u *ItemUpdate) SetCommunityRating(v float64) *ItemUpdate {
 	_u.mutation.ResetCommunityRating()
@@ -2213,6 +2241,12 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.InheritedRatingCleared() {
 		_spec.ClearField(item.FieldInheritedRating, field.TypeInt)
+	}
+	if value, ok := _u.mutation.TagKeys(); ok {
+		_spec.SetField(item.FieldTagKeys, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.InheritedTags(); ok {
+		_spec.SetField(item.FieldInheritedTags, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)
@@ -4022,6 +4056,34 @@ func (_u *ItemUpdateOne) ClearInheritedRating() *ItemUpdateOne {
 	return _u
 }
 
+// SetTagKeys sets the "tag_keys" field.
+func (_u *ItemUpdateOne) SetTagKeys(v string) *ItemUpdateOne {
+	_u.mutation.SetTagKeys(v)
+	return _u
+}
+
+// SetNillableTagKeys sets the "tag_keys" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableTagKeys(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetTagKeys(*v)
+	}
+	return _u
+}
+
+// SetInheritedTags sets the "inherited_tags" field.
+func (_u *ItemUpdateOne) SetInheritedTags(v string) *ItemUpdateOne {
+	_u.mutation.SetInheritedTags(v)
+	return _u
+}
+
+// SetNillableInheritedTags sets the "inherited_tags" field if the given value is not nil.
+func (_u *ItemUpdateOne) SetNillableInheritedTags(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetInheritedTags(*v)
+	}
+	return _u
+}
+
 // SetCommunityRating sets the "community_rating" field.
 func (_u *ItemUpdateOne) SetCommunityRating(v float64) *ItemUpdateOne {
 	_u.mutation.ResetCommunityRating()
@@ -5792,6 +5854,12 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	}
 	if _u.mutation.InheritedRatingCleared() {
 		_spec.ClearField(item.FieldInheritedRating, field.TypeInt)
+	}
+	if value, ok := _u.mutation.TagKeys(); ok {
+		_spec.SetField(item.FieldTagKeys, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.InheritedTags(); ok {
+		_spec.SetField(item.FieldInheritedTags, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CommunityRating(); ok {
 		_spec.SetField(item.FieldCommunityRating, field.TypeFloat64, value)

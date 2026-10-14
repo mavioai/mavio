@@ -172,6 +172,16 @@ func InheritedRating(v int) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldInheritedRating, v))
 }
 
+// TagKeys applies equality check predicate on the "tag_keys" field. It's identical to TagKeysEQ.
+func TagKeys(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldTagKeys, v))
+}
+
+// InheritedTags applies equality check predicate on the "inherited_tags" field. It's identical to InheritedTagsEQ.
+func InheritedTags(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldInheritedTags, v))
+}
+
 // CommunityRating applies equality check predicate on the "community_rating" field. It's identical to CommunityRatingEQ.
 func CommunityRating(v float64) predicate.Item {
 	return predicate.Item(sql.FieldEQ(FieldCommunityRating, v))
@@ -1604,6 +1614,136 @@ func InheritedRatingIsNil() predicate.Item {
 // InheritedRatingNotNil applies the NotNil predicate on the "inherited_rating" field.
 func InheritedRatingNotNil() predicate.Item {
 	return predicate.Item(sql.FieldNotNull(FieldInheritedRating))
+}
+
+// TagKeysEQ applies the EQ predicate on the "tag_keys" field.
+func TagKeysEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldTagKeys, v))
+}
+
+// TagKeysNEQ applies the NEQ predicate on the "tag_keys" field.
+func TagKeysNEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldTagKeys, v))
+}
+
+// TagKeysIn applies the In predicate on the "tag_keys" field.
+func TagKeysIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldTagKeys, vs...))
+}
+
+// TagKeysNotIn applies the NotIn predicate on the "tag_keys" field.
+func TagKeysNotIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldTagKeys, vs...))
+}
+
+// TagKeysGT applies the GT predicate on the "tag_keys" field.
+func TagKeysGT(v string) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldTagKeys, v))
+}
+
+// TagKeysGTE applies the GTE predicate on the "tag_keys" field.
+func TagKeysGTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldTagKeys, v))
+}
+
+// TagKeysLT applies the LT predicate on the "tag_keys" field.
+func TagKeysLT(v string) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldTagKeys, v))
+}
+
+// TagKeysLTE applies the LTE predicate on the "tag_keys" field.
+func TagKeysLTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldTagKeys, v))
+}
+
+// TagKeysContains applies the Contains predicate on the "tag_keys" field.
+func TagKeysContains(v string) predicate.Item {
+	return predicate.Item(sql.FieldContains(FieldTagKeys, v))
+}
+
+// TagKeysHasPrefix applies the HasPrefix predicate on the "tag_keys" field.
+func TagKeysHasPrefix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasPrefix(FieldTagKeys, v))
+}
+
+// TagKeysHasSuffix applies the HasSuffix predicate on the "tag_keys" field.
+func TagKeysHasSuffix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasSuffix(FieldTagKeys, v))
+}
+
+// TagKeysEqualFold applies the EqualFold predicate on the "tag_keys" field.
+func TagKeysEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldTagKeys, v))
+}
+
+// TagKeysContainsFold applies the ContainsFold predicate on the "tag_keys" field.
+func TagKeysContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldTagKeys, v))
+}
+
+// InheritedTagsEQ applies the EQ predicate on the "inherited_tags" field.
+func InheritedTagsEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldEQ(FieldInheritedTags, v))
+}
+
+// InheritedTagsNEQ applies the NEQ predicate on the "inherited_tags" field.
+func InheritedTagsNEQ(v string) predicate.Item {
+	return predicate.Item(sql.FieldNEQ(FieldInheritedTags, v))
+}
+
+// InheritedTagsIn applies the In predicate on the "inherited_tags" field.
+func InheritedTagsIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldIn(FieldInheritedTags, vs...))
+}
+
+// InheritedTagsNotIn applies the NotIn predicate on the "inherited_tags" field.
+func InheritedTagsNotIn(vs ...string) predicate.Item {
+	return predicate.Item(sql.FieldNotIn(FieldInheritedTags, vs...))
+}
+
+// InheritedTagsGT applies the GT predicate on the "inherited_tags" field.
+func InheritedTagsGT(v string) predicate.Item {
+	return predicate.Item(sql.FieldGT(FieldInheritedTags, v))
+}
+
+// InheritedTagsGTE applies the GTE predicate on the "inherited_tags" field.
+func InheritedTagsGTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldGTE(FieldInheritedTags, v))
+}
+
+// InheritedTagsLT applies the LT predicate on the "inherited_tags" field.
+func InheritedTagsLT(v string) predicate.Item {
+	return predicate.Item(sql.FieldLT(FieldInheritedTags, v))
+}
+
+// InheritedTagsLTE applies the LTE predicate on the "inherited_tags" field.
+func InheritedTagsLTE(v string) predicate.Item {
+	return predicate.Item(sql.FieldLTE(FieldInheritedTags, v))
+}
+
+// InheritedTagsContains applies the Contains predicate on the "inherited_tags" field.
+func InheritedTagsContains(v string) predicate.Item {
+	return predicate.Item(sql.FieldContains(FieldInheritedTags, v))
+}
+
+// InheritedTagsHasPrefix applies the HasPrefix predicate on the "inherited_tags" field.
+func InheritedTagsHasPrefix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasPrefix(FieldInheritedTags, v))
+}
+
+// InheritedTagsHasSuffix applies the HasSuffix predicate on the "inherited_tags" field.
+func InheritedTagsHasSuffix(v string) predicate.Item {
+	return predicate.Item(sql.FieldHasSuffix(FieldInheritedTags, v))
+}
+
+// InheritedTagsEqualFold applies the EqualFold predicate on the "inherited_tags" field.
+func InheritedTagsEqualFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldEqualFold(FieldInheritedTags, v))
+}
+
+// InheritedTagsContainsFold applies the ContainsFold predicate on the "inherited_tags" field.
+func InheritedTagsContainsFold(v string) predicate.Item {
+	return predicate.Item(sql.FieldContainsFold(FieldInheritedTags, v))
 }
 
 // CommunityRatingEQ applies the EQ predicate on the "community_rating" field.

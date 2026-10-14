@@ -362,7 +362,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if err != nil {
 		return nil, err
 	}
-	access := p.User.Access()
+	access := p.User.EffectiveAccess()
 	policy := &access
 	q := core.ItemQuery{
 		Recursive:     req.GetRecursive(),
@@ -374,8 +374,7 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 		Studios:       req.GetStudios(),
 		YearFrom:      int(req.GetYearFrom()),
 		YearTo:        int(req.GetYearTo()),
-		MaxRating:     policy.MaxParentalRating,
-		SkipUnrated:   policy.BlockUnrated,
+		Limits:        policy.ContentLimits,
 		UserID:        p.User.ID,
 		Resumable:     req.GetResumable(),
 		Limit:         int(req.GetLimit()),
@@ -519,20 +518,19 @@ func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListS
 			return nil, connectError(ctx, err)
 		}
 	}
-	access := p.User.Access()
+	access := p.User.EffectiveAccess()
 	policy := &access
 	ids, ok := libraryScope(policy, nil)
 	if !ok {
 		return &libraryv1.ListSimilarItemsResponse{}, nil
 	}
 	q := core.ItemQuery{
-		LibraryIDs:  ids,
-		Kinds:       []core.ItemKind{it.Kind},
-		SimilarTo:   it.ID,
-		MaxRating:   policy.MaxParentalRating,
-		SkipUnrated: policy.BlockUnrated,
-		UserID:      p.User.ID,
-		Limit:       cmp.Or(int(req.GetLimit()), defaultListLimit),
+		LibraryIDs: ids,
+		Kinds:      []core.ItemKind{it.Kind},
+		SimilarTo:  it.ID,
+		Limits:     policy.ContentLimits,
+		UserID:     p.User.ID,
+		Limit:      cmp.Or(int(req.GetLimit()), defaultListLimit),
 	}
 	if req.HasPlayed() {
 		q.Played = new(req.GetPlayed())
@@ -551,12 +549,11 @@ func (s *ItemService) ListSimilarItems(ctx context.Context, req *libraryv1.ListS
 // browseScope limits browsing to the requested libraries and the rating
 // the user may see; it reports false when no library remains.
 func browseScope(u *core.User, libraries []string) (browse.Scope, bool) {
-	ids, ok := libraryScope(&u.Policy, libraries)
+	ids, ok := libraryScope(&u.Access, libraries)
 	return browse.Scope{
-		UserID:      u.ID,
-		LibraryIDs:  ids,
-		MaxRating:   u.Access().MaxParentalRating,
-		SkipUnrated: u.Access().BlockUnrated,
+		UserID:     u.ID,
+		LibraryIDs: ids,
+		Limits:     u.EffectiveAccess().ContentLimits,
 	}, ok
 }
 
@@ -678,7 +675,7 @@ func (s *ItemService) ListValues(ctx context.Context, req *libraryv1.ListValuesR
 	if err != nil {
 		return nil, err
 	}
-	access := p.User.Access()
+	access := p.User.EffectiveAccess()
 	filter, ok := itemFilter(&access, req.GetLibraryIds(), req.GetItemKinds())
 	if !ok {
 		return &libraryv1.ListValuesResponse{}, nil
@@ -710,7 +707,7 @@ func (s *ItemService) ListPeople(ctx context.Context, req *libraryv1.ListPeopleR
 	if err != nil {
 		return nil, err
 	}
-	access := p.User.Access()
+	access := p.User.EffectiveAccess()
 	filter, ok := itemFilter(&access, req.GetLibraryIds(), req.GetItemKinds())
 	if !ok {
 		return &libraryv1.ListPeopleResponse{}, nil
@@ -747,9 +744,9 @@ func (s *ItemService) ListPeople(ctx context.Context, req *libraryv1.ListPeopleR
 }
 
 // libraryScope restricts the requested libraries, or all when none are
-// requested, to those the policy allows: nil means every library. It
+// requested, to those the access allows: nil means every library. It
 // reports false when no library remains.
-func libraryScope(policy *core.UserPolicy, requested []string) ([]core.ID, bool) {
+func libraryScope(policy *core.LibraryAccess, requested []string) ([]core.ID, bool) {
 	if len(requested) == 0 {
 		return policy.Libraries, policy.Libraries == nil || len(policy.Libraries) > 0
 	}
@@ -763,14 +760,13 @@ func libraryScope(policy *core.UserPolicy, requested []string) ([]core.ID, bool)
 }
 
 // itemFilter selects the items of the requested libraries and kinds that
-// the policy allows; it reports false when no library remains.
-func itemFilter(policy *core.UserPolicy, libraries []string, kinds []libraryv1.ItemKind) (core.ItemFilter, bool) {
+// the access allows; it reports false when no library remains.
+func itemFilter(policy *core.LibraryAccess, libraries []string, kinds []libraryv1.ItemKind) (core.ItemFilter, bool) {
 	ids, ok := libraryScope(policy, libraries)
 	return core.ItemFilter{
-		LibraryIDs:  ids,
-		Kinds:       itemKindsFromProto(kinds),
-		MaxRating:   policy.MaxParentalRating,
-		SkipUnrated: policy.BlockUnrated,
+		LibraryIDs: ids,
+		Kinds:      itemKindsFromProto(kinds),
+		Limits:     policy.ContentLimits,
 	}, ok
 }
 
