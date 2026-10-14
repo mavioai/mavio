@@ -81,3 +81,21 @@ func TestStreamSubtitlesLastSegment(t *testing.T) {
 		t.Errorf("segment 2 = %q", got)
 	}
 }
+
+func TestVTTTime(t *testing.T) {
+	for _, tc := range []struct {
+		in   string
+		want time.Duration
+		ok   bool
+	}{
+		{"00:34.000", 34 * time.Second, true},
+		{"01:02:03.450", time.Hour + 2*time.Minute + 3450*time.Millisecond, true},
+		{"34.000", 0, false},
+		{"00:34", 0, false},
+		{"00:3x.000", 0, false},
+	} {
+		if got, ok := vttTime(tc.in); got != tc.want || ok != tc.ok {
+			t.Errorf("vttTime(%q) = %v, %v, want = %v, %v", tc.in, got, ok, tc.want, tc.ok)
+		}
+	}
+}
