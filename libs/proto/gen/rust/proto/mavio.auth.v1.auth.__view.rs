@@ -941,7 +941,8 @@ pub struct GetAuthInfoResponseView<'a> {
     ///
     /// Field 5: `mode`
     pub mode: ::core::option::Option<::buffa::EnumValue<super::super::AccountMode>>,
-    /// In mavio.dev mode, the base URL of mavio.dev's API, where clients get
+    /// In mavio.dev mode, and while setup has not chosen a mode, the base URL
+    /// of mavio.dev's API, where setup gets claim codes and clients get
     /// sign-in assertions for the server.
     ///
     /// Field 6: `mavio_dev_url`
@@ -1246,7 +1247,8 @@ impl GetAuthInfoResponseOwnedView {
     ) -> ::core::option::Option<::buffa::EnumValue<super::super::AccountMode>> {
         self.0.reborrow().mode
     }
-    /// In mavio.dev mode, the base URL of mavio.dev's API, where clients get
+    /// In mavio.dev mode, and while setup has not chosen a mode, the base URL
+    /// of mavio.dev's API, where setup gets claim codes and clients get
     /// sign-in assertions for the server.
     ///
     /// Field 6: `mavio_dev_url`

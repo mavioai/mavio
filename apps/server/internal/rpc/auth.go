@@ -279,7 +279,8 @@ func deviceToProto(d auth.Device) *authv1.Device {
 }
 
 // GetAuthInfo reports the server's mode, and whether setup still has to
-// choose it.
+// choose it; mavio.dev's URL is told while setup may still claim the
+// server.
 func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequest) (*authv1.GetAuthInfoResponse, error) {
 	accounts, err := s.store.Settings().Accounts(ctx)
 	if err != nil {
@@ -293,7 +294,7 @@ func (s *AuthService) GetAuthInfo(ctx context.Context, _ *authv1.GetAuthInfoRequ
 		i := s.Info()
 		b.ServerId, b.ServerName, b.Version = &i.ID, &i.Name, &i.Version
 	}
-	if accounts.Mode == core.AccountModeMavioDev {
+	if accounts.Mode != core.AccountModeStandalone {
 		b.MavioDevUrl = &s.MavioDevURL
 	}
 	return b.Build(), nil

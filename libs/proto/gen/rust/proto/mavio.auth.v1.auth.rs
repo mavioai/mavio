@@ -653,7 +653,8 @@ pub struct GetAuthInfoResponse {
     ///
     /// Field 5: `mode`
     pub mode: ::core::option::Option<::buffa::EnumValue<AccountMode>>,
-    /// In mavio.dev mode, the base URL of mavio.dev's API, where clients get
+    /// In mavio.dev mode, and while setup has not chosen a mode, the base URL
+    /// of mavio.dev's API, where setup gets claim codes and clients get
     /// sign-in assertions for the server.
     ///
     /// Field 6: `mavio_dev_url`

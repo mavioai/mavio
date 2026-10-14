@@ -40,11 +40,12 @@ func TestMavioDevMode(t *testing.T) {
 		}.Build())
 	}
 
-	// A standalone server signs in with its own credentials only.
+	// A server whose setup has not chosen a mode takes no assertions, and
+	// tells where its setup gets claim codes.
 	_, err := signIn("acct-1", "phone")
-	wantCode(t, "assertion on a standalone server", err, connect.CodeFailedPrecondition)
-	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.HasMavioDevUrl() {
-		t.Errorf("GetAuthInfo of a standalone server = %v, %v; want no mavio.dev URL", info, err)
+	wantCode(t, "assertion before setup", err, connect.CodeFailedPrecondition)
+	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetMavioDevUrl() != dev.URL {
+		t.Errorf("GetAuthInfo before setup = %v, %v; want the mavio.dev URL", info, err)
 	}
 
 	dev.AddClaimCode("code", cloudv1.Account_builder{Id: new("acct-1"), UserName: new("alice")}.Build())

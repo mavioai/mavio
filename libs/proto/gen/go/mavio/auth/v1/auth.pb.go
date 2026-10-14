@@ -727,7 +727,8 @@ type GetAuthInfoResponse_builder struct {
 	Version    *string
 	// How the server signs people in; unspecified until its setup chooses.
 	Mode *AccountMode
-	// In mavio.dev mode, the base URL of mavio.dev's API, where clients get
+	// In mavio.dev mode, and while setup has not chosen a mode, the base URL
+	// of mavio.dev's API, where setup gets claim codes and clients get
 	// sign-in assertions for the server.
 	MavioDevUrl *string
 }

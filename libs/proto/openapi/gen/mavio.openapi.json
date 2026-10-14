@@ -8118,7 +8118,7 @@
           "mavioDevUrl": {
             "type": "string",
             "title": "mavio_dev_url",
-            "description": "In mavio.dev mode, the base URL of mavio.dev's API, where clients get\n sign-in assertions for the server."
+            "description": "In mavio.dev mode, and while setup has not chosen a mode, the base URL\n of mavio.dev's API, where setup gets claim codes and clients get\n sign-in assertions for the server."
           }
         },
         "title": "GetAuthInfoResponse",
