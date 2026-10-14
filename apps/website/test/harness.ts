@@ -31,6 +31,8 @@ export async function newSite() {
     notices: [] as Map<string, number>[],
     /** The servers whose WebSockets were handed to their Durable Objects. */
     connected: [] as string[],
+    /** The TXT records of servers' ACME challenges, by name. */
+    txt: new Map<string, string[]>(),
     fetch: async (req: Request) =>
       (await handleApi(req, {
         db,
@@ -40,6 +42,14 @@ export async function newSite() {
         connectNotices: async (id) => {
           site.connected.push(id);
           return new Response(null, { status: 204 });
+        },
+        acme: {
+          domain: "acme.mavio.dev",
+          dns: {
+            set: async (name, values) => void site.txt.set(name, values),
+            clear: async (name) => void site.txt.delete(name),
+          },
+          bindings: { create: async () => ({ keyId: "kid-1", hmacKey: new Uint8Array([1, 2, 3]) }) },
         },
       })) ?? new Response("Not Found", { status: 404 }),
     /** client returns a Connect client of service sending headers. */

@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/mavioai/mavio/apps/server/internal/certs"
 	"github.com/mavioai/mavio/apps/server/internal/server"
 )
 
@@ -22,6 +23,8 @@ import (
 //	config.toml   settings, optional
 //	mavio.db      the SQLite database
 //	identity.key  the server's identity key, which signs its sessions
+//	certificates/ the *.<ID>.mavio.site certificate of a server in
+//	              mavio.dev mode, with its key and ACME account keys
 //	plugins/      one folder per plugin
 //	metadata/     artwork chosen for items
 //	backups/      backups
@@ -80,6 +83,8 @@ var settings = []setting{
 	{key: "backup-dir", path: true, usage: "directory for backups; empty makes none", def: under("backups")},
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
 	{key: "mavio-dev-url", usage: "base URL of mavio.dev's API, which servers in mavio.dev mode are claimed at and connect to", def: constant("https://mavio.dev/api")},
+	{key: "certificate-dir", path: true, usage: "directory of the server's mavio.site certificate in mavio.dev mode; empty obtains none", def: under("certificates")},
+	{key: "acme-directories", usage: "comma-separated ACME directory URLs the mavio.site certificate is obtained from, tried in order", def: constant(certs.LetsEncrypt + "," + certs.GoogleTrustServices)},
 	{key: "claim-token", usage: "claim code from mavio.dev/claim, which claims an unclaimed server when it starts", def: constant("")},
 	{key: "dev", usage: "serve the development player at /dev/player", def: constant("false")},
 	{key: "dev-library", path: true, usage: "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library", def: constant("")},
@@ -229,7 +234,7 @@ func assign(o *options, key, value string) error {
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
 		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir,
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
-		"mavio-dev-url": &cfg.MavioDevURL, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
+		"mavio-dev-url": &cfg.MavioDevURL, "certificate-dir": &cfg.CertificateDir, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
 	}
 	if key == "rclone-cache-size" {
 		n, err := parseSize(value)
@@ -237,6 +242,15 @@ func assign(o *options, key, value string) error {
 			return fmt.Errorf("rclone-cache-size: %w", err)
 		}
 		cfg.RcloneCacheSize = n
+		return nil
+	}
+	if key == "acme-directories" {
+		cfg.ACMEDirectories = nil
+		for u := range strings.SplitSeq(value, ",") {
+			if u = strings.TrimSpace(u); u != "" {
+				cfg.ACMEDirectories = append(cfg.ACMEDirectories, u)
+			}
+		}
 		return nil
 	}
 	if key == "dev" {

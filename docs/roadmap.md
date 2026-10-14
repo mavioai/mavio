@@ -811,7 +811,8 @@ flowchart TD
 - [x] mavio.dev: friends, Homes, managed accounts and their conversion, switching, Mavio Pass and frozen Homes: `FriendService` and `HomeService`, switching with PINs through Mavio's better-auth plugin, managed accounts' restriction profiles applied by servers, and the pages of the Home and friends
 - [ ] Buying and renewing Mavio Pass
 - [x] mavio.dev: the push to servers through Durable Objects, with changes fetched after a cursor: `NoticeHub` holding each server's hibernating WebSocket, notified after the requests that record changes; tested end to end with a server in workerd
-- [ ] `apps/dns` and servers' certificates through ACME DNS-01 challenges
+- [x] `apps/dns` and servers' certificates through ACME DNS-01 challenges: the zone computed from names with `miekg/dns`; `ServerService.SetAcmeChallenge`, `ClearAcmeChallenge` and `CreateAcmeBinding` over Cloudflare's DNS API and Google's Public CA API; the server's `internal/certs`, which obtains and renews `*.<ID>.mavio.site` from Let's Encrypt or Google Trust Services with ACME Renewal Information and serves it over HTTPS; tested against an ACME CA simulated in `certstest`
+- [ ] Running `apps/dns` on the two Hetzner VMs, delegating `mavio.site` to them with glue records, and adding `mavio.site` to the Public Suffix List
 - [ ] `apps/relay` and relay tickets
 - [ ] Every client: the choice of mode at setup, kept sign-ins, changing sign-ins and switching users; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
 

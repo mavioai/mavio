@@ -20,6 +20,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
+	"github.com/mavioai/mavio/apps/server/internal/certs"
 	"github.com/mavioai/mavio/apps/server/internal/cloud"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
@@ -105,6 +106,12 @@ type Config struct {
 	HTTPSHost string
 	// MavioDevURL is the base URL of mavio.dev's API.
 	MavioDevURL string
+	// CertificateDir holds the *.<ID>.mavio.site certificate a claimed
+	// server obtains; empty obtains none.
+	CertificateDir string
+	// ACMEDirectories are the ACME CAs the certificate is obtained from,
+	// in order; empty uses Let's Encrypt, then Google Trust Services.
+	ACMEDirectories []string
 	// ClaimToken is a claim code from mavio.dev/claim, which claims the
 	// server when it starts unclaimed; empty claims nothing.
 	ClaimToken string
@@ -289,7 +296,24 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	link := cloud.NewLink(db, mavioDev, log)
 	link.Apply = (&cloud.Applier{Requests: func() core.RequestSettings { return set.Get().Requests }}).Apply
 	assertions := cloud.NewVerifier(cfg.MavioDevURL, serverID, cloud.NewKeySet(cfg.MavioDevURL, nil))
-	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: link.Wake}
+	// A claimed server obtains its mavio.site certificate.
+	var certificates *certs.Manager
+	if cfg.CertificateDir != "" {
+		certificates = certs.NewManager(cfg.CertificateDir, certs.Name(serverID), mavioDev, func(ctx context.Context) (bool, error) {
+			s, err := db.Settings().Accounts(ctx)
+			return s.Claimed(), err
+		}, log)
+		if len(cfg.ACMEDirectories) > 0 {
+			certificates.CAs = cfg.ACMEDirectories
+		}
+	}
+	claimed := func() {
+		link.Wake()
+		if certificates != nil {
+			certificates.Wake()
+		}
+	}
+	claimer := &cloud.Claimer{Store: db, Client: mavioDev, Name: serverName, Version: cfg.Version, Activity: activityLog, Claimed: claimed}
 	acq := newAcquisition(log, db, set, plugs, clients, refresher, cfg.FFprobe, quietGate, volumeLedger, devices)
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
@@ -317,6 +341,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// Imports complete the requests of what they import; their scans
 	// search for its subtitles once the files are probed.
 	acq.Imported = reqs.Imported
+	// The network settings decide the base URL, HTTPS and discovery.
+	https := &network.HTTPS{Host: cfg.HTTPSHost, Logger: log}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
@@ -326,7 +352,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Settings: set, Accelerations: playbacks.Accelerations, Logs: ring, Activity: activityLog, Backups: backups,
 		ServerInfo: func() rpc.ServerInfo {
 			n := set.Get().Network
-			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: n.HTTPSPort}
+			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: https.Port()}
 		},
 		Claim: claimer.Claim, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
@@ -337,9 +363,18 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	hostAPI.set(h)
 
-	// The network settings decide the base URL, HTTPS and discovery.
 	prefix := network.NewPrefix(h)
-	https := &network.HTTPS{Handler: prefix, Host: cfg.HTTPSHost, Logger: log}
+	https.Handler = prefix
+	if certificates != nil {
+		https.Managed = certificates
+		// The first certificate starts HTTPS; later ones are served as
+		// they come.
+		certificates.Changed = func() {
+			if err := https.Apply(ctx, set.Get().Network); err != nil {
+				log.ErrorContext(ctx, "serve HTTPS with the mavio.site certificate", "err", err)
+			}
+		}
+	}
 	discovery := &network.Discovery{Addr: cfg.DiscoveryAddr, Port: port, Logger: log, Reply: func() network.DiscoveryReply {
 		return network.DiscoveryReply{ID: serverID, Name: serverName(), Version: cfg.Version}
 	}}
@@ -373,6 +408,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		link.Run(ctx)
 		return nil
 	})
+	if certificates != nil {
+		g.Go(func() error {
+			certificates.Run(ctx)
+			return nil
+		})
+	}
 	if cfg.ClaimToken != "" {
 		g.Go(func() error {
 			claimOnStart(ctx, log, db, claimer, cfg.ClaimToken)

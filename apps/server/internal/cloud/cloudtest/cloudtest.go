@@ -45,8 +45,13 @@ type server struct {
 	key       ed25519.PublicKey
 	changes   []*cloudv1.Change
 	libraries []*cloudv1.Library
+	txt       []string
 	conns     map[*websocket.Conn]struct{}
 }
+
+// BindingKeyID is the key ID of the external account bindings the
+// simulated mavio.dev gives.
+const BindingKeyID = "test-binding"
 
 // keyID is the ID of the key assertions are signed with.
 const keyID = "test-key"
@@ -151,6 +156,53 @@ func (s *Server) PublishLibraries(ctx context.Context, req *cloudv1.PublishLibra
 	defer s.mu.Unlock()
 	srv.libraries = req.GetLibraries()
 	return &cloudv1.PublishLibrariesResponse{}, nil
+}
+
+// SetAcmeChallenge keeps a claimed server's TXT values.
+func (s *Server) SetAcmeChallenge(ctx context.Context, req *cloudv1.SetAcmeChallengeRequest) (*cloudv1.SetAcmeChallengeResponse, error) {
+	srv, err := s.claimed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	srv.txt = req.GetValues()
+	return &cloudv1.SetAcmeChallengeResponse{}, nil
+}
+
+// ClearAcmeChallenge removes a claimed server's TXT values.
+func (s *Server) ClearAcmeChallenge(ctx context.Context, _ *cloudv1.ClearAcmeChallengeRequest) (*cloudv1.ClearAcmeChallengeResponse, error) {
+	srv, err := s.claimed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	srv.txt = nil
+	return &cloudv1.ClearAcmeChallengeResponse{}, nil
+}
+
+// CreateAcmeBinding gives a binding with BindingKeyID.
+func (s *Server) CreateAcmeBinding(ctx context.Context, _ *cloudv1.CreateAcmeBindingRequest) (*cloudv1.CreateAcmeBindingResponse, error) {
+	if _, err := s.claimed(ctx); err != nil {
+		return nil, err
+	}
+	resp := &cloudv1.CreateAcmeBindingResponse{}
+	resp.SetKeyId(BindingKeyID)
+	resp.SetHmacKey([]byte("binding mac key"))
+	return resp, nil
+}
+
+// TXT returns the TXT values at a name of mavio.site, as its name servers
+// answer them through mavio.dev: _acme-challenge.<ID>.mavio.site.
+func (s *Server) TXT(name string) []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	id, ok := strings.CutPrefix(strings.TrimSuffix(name, ".mavio.site"), "_acme-challenge.")
+	if srv := s.servers[id]; ok && srv != nil {
+		return srv.txt
+	}
+	return nil
 }
 
 // Connections returns the number of WebSockets of the server with an ID.

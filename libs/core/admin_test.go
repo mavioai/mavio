@@ -18,7 +18,8 @@ func TestServerSettingsValidate(t *testing.T) {
 		{"relative base URL", func(s *ServerSettings) { s.Network.BaseURL = "mavio" }, false},
 		{"base URL with a query", func(s *ServerSettings) { s.Network.BaseURL = "/mavio?x" }, false},
 		{"root base URL", func(s *ServerSettings) { s.Network.BaseURL = "/" }, false},
-		{"HTTPS without a certificate", func(s *ServerSettings) { s.Network.HTTPSPort = 8920 }, false},
+		{"HTTPS without a certificate", func(s *ServerSettings) { s.Network.HTTPSPort = 8920 }, true},
+		{"HTTPS without a key", func(s *ServerSettings) { s.Network.CertificatePath = "/c.pem" }, false},
 		{"HTTPS", func(s *ServerSettings) {
 			s.Network.HTTPSPort, s.Network.CertificatePath, s.Network.KeyPath = 8920, "/c.pem", "/k.pem"
 		}, true},

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"golang.org/x/crypto/acme"
 	"golang.org/x/net/websocket"
 
 	"github.com/mavioai/mavio/apps/server/internal/identity"
@@ -90,4 +91,28 @@ func (c *Client) Notices(ctx context.Context) (*websocket.Conn, error) {
 		return nil, fmt.Errorf("connect to mavio.dev: %w", err)
 	}
 	return conn, nil
+}
+
+// SetAcmeChallenge has mavio.dev publish the TXT values of the server's
+// DNS-01 challenge.
+func (c *Client) SetAcmeChallenge(ctx context.Context, values []string) error {
+	req := &cloudv1.SetAcmeChallengeRequest{}
+	req.SetValues(values)
+	_, err := c.api.SetAcmeChallenge(ctx, req)
+	return err
+}
+
+// ClearAcmeChallenge has mavio.dev remove the challenge's TXT values.
+func (c *Client) ClearAcmeChallenge(ctx context.Context) error {
+	_, err := c.api.ClearAcmeChallenge(ctx, &cloudv1.ClearAcmeChallengeRequest{})
+	return err
+}
+
+// AcmeBinding gets an external account binding from mavio.dev.
+func (c *Client) AcmeBinding(ctx context.Context) (*acme.ExternalAccountBinding, error) {
+	resp, err := c.api.CreateAcmeBinding(ctx, &cloudv1.CreateAcmeBindingRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return &acme.ExternalAccountBinding{KID: resp.GetKeyId(), Key: resp.GetHmacKey()}, nil
 }

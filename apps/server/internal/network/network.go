@@ -60,35 +60,56 @@ func (p *Prefix) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // HTTPS runs an HTTPS server on the port and with the certificate the
-// settings name.
+// settings name or, without one, the managed certificate.
 type HTTPS struct {
 	// Handler serves the requests.
 	Handler http.Handler
 	// Host is the host listened on; empty means all interfaces.
-	Host   string
-	Logger *slog.Logger
+	Host string
+	// Managed, when set, is the certificate served when the settings name
+	// none, as soon as it is ready: the server's mavio.site certificate.
+	Managed Managed
+	Logger  *slog.Logger
 
 	mu      sync.Mutex
 	current core.NetworkSettings
+	managed bool
 	srv     *http.Server
 	addr    string
 }
 
+// Managed is a certificate kept up to date by something else.
+type Managed interface {
+	Certificate(*tls.ClientHelloInfo) (*tls.Certificate, error)
+	Ready() bool
+}
+
 // Apply serves HTTPS as the settings ask: starts, restarts or stops it.
-// An unreadable certificate or a busy port reject the settings.
+// An unreadable certificate or a busy port reject the settings. Without
+// a certificate in the settings, it serves the managed one once ready;
+// apply the settings again when it becomes ready.
 func (h *HTTPS) Apply(ctx context.Context, n core.NetworkSettings) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	if h.srv != nil && n.HTTPSPort == h.current.HTTPSPort && n.CertificatePath == h.current.CertificatePath && n.KeyPath == h.current.KeyPath {
+	managed := n.CertificatePath == "" && h.Managed != nil && h.Managed.Ready()
+	serve := n.HTTPSPort != 0 && (n.CertificatePath != "" || managed)
+	same := n.HTTPSPort == h.current.HTTPSPort && n.CertificatePath == h.current.CertificatePath && n.KeyPath == h.current.KeyPath && managed == h.managed
+	if same && (h.srv != nil) == serve {
 		return nil
 	}
-	if n.HTTPSPort == 0 {
-		h.current = n
+	cfg := &tls.Config{MinVersion: tls.VersionTLS12}
+	switch {
+	case !serve:
+		h.current, h.managed = n, managed
 		return h.stop(ctx)
-	}
-	cert, err := tls.LoadX509KeyPair(n.CertificatePath, n.KeyPath)
-	if err != nil {
-		return fmt.Errorf("%w: HTTPS certificate: %w", core.ErrInvalid, err)
+	case managed:
+		cfg.GetCertificate = h.Managed.Certificate
+	default:
+		cert, err := tls.LoadX509KeyPair(n.CertificatePath, n.KeyPath)
+		if err != nil {
+			return fmt.Errorf("%w: HTTPS certificate: %w", core.ErrInvalid, err)
+		}
+		cfg.Certificates = []tls.Certificate{cert}
 	}
 	// The old server frees the port first when it is the same one.
 	if err := h.stop(ctx); err != nil {
@@ -101,7 +122,7 @@ func (h *HTTPS) Apply(ctx context.Context, n core.NetworkSettings) error {
 	}
 	srv := &http.Server{
 		Handler:           h.Handler,
-		TLSConfig:         &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12},
+		TLSConfig:         cfg,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	go func() {
@@ -109,11 +130,21 @@ func (h *HTTPS) Apply(ctx context.Context, n core.NetworkSettings) error {
 			h.Logger.Error("HTTPS server stopped", "err", err)
 		}
 	}()
-	h.srv, h.addr, h.current = srv, ln.Addr().String(), n
+	h.srv, h.addr, h.current, h.managed = srv, ln.Addr().String(), n, managed
 	if h.Logger != nil {
 		h.Logger.InfoContext(ctx, "serving HTTPS", "addr", h.addr)
 	}
 	return nil
+}
+
+// Port returns the port HTTPS is served on, zero when it is not.
+func (h *HTTPS) Port() int {
+	_, port, err := net.SplitHostPort(h.Addr())
+	if err != nil {
+		return 0
+	}
+	n, _ := strconv.Atoi(port)
+	return n
 }
 
 // Addr returns the address HTTPS is served on, empty when it is not.

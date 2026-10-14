@@ -6,12 +6,16 @@ import {
   AccessRevokedSchema,
   ChangeSchema,
   ClaimServerResponseSchema,
+  ClearAcmeChallengeResponseSchema,
+  CreateAcmeBindingResponseSchema,
   ListChangesResponseSchema,
   PublishLibrariesResponseSchema,
   type ServerService,
+  SetAcmeChallengeResponseSchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { and, asc, eq, gt } from "drizzle-orm";
 
+import type { Acme } from "./acme.ts";
 import { accountOf, addChange } from "./changes.ts";
 import { claimCodeHash } from "./claim-codes.ts";
 import type { Database } from "./db/index.ts";
@@ -24,6 +28,8 @@ export interface Deps {
   /** The API's base URL, servers' audience and assertions' issuer. */
   apiURL: string;
   now?: () => Date;
+  /** Servers' ACME challenges and bindings; undefined where certificates are not offered. */
+  acme?: Acme;
 }
 
 const defaultPageSize = 100;
@@ -111,5 +117,31 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
       });
       return create(PublishLibrariesResponseSchema);
     },
+
+    async setAcmeChallenge(req, ctx) {
+      const server = await authenticate(ctx);
+      const acme = available(deps.acme);
+      await acme.dns.set(`${server.id}.${acme.domain}`, req.values);
+      return create(SetAcmeChallengeResponseSchema);
+    },
+
+    async clearAcmeChallenge(_req, ctx) {
+      const server = await authenticate(ctx);
+      const acme = available(deps.acme);
+      await acme.dns.clear(`${server.id}.${acme.domain}`);
+      return create(ClearAcmeChallengeResponseSchema);
+    },
+
+    async createAcmeBinding(_req, ctx) {
+      await authenticate(ctx);
+      const bindings = available(deps.acme?.bindings);
+      return create(CreateAcmeBindingResponseSchema, await bindings.create());
+    },
   };
+}
+
+/** available returns what a method needs, which a deployment may lack. */
+function available<T>(v: T | undefined): T {
+  if (!v) throw new ConnectError("certificates are not available here", Code.Unimplemented);
+  return v;
 }

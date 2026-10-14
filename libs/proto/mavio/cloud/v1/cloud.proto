@@ -29,6 +29,21 @@ service ServerService {
   rpc PublishLibraries(PublishLibrariesRequest) returns (PublishLibrariesResponse) {
     option idempotency_level = IDEMPOTENT;
   }
+  // SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
+  // challenge at <ID>.acme.mavio.dev, the target of
+  // _acme-challenge.<ID>.mavio.site, replacing earlier ones
+  // (docs/mavio-dev.md §4.2).
+  rpc SetAcmeChallenge(SetAcmeChallengeRequest) returns (SetAcmeChallengeResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // ClearAcmeChallenge removes the TXT values once the challenge is done.
+  rpc ClearAcmeChallenge(ClearAcmeChallengeRequest) returns (ClearAcmeChallengeResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // CreateAcmeBinding gives an external account binding, which a
+  // certificate authority requiring one, such as Google Trust Services,
+  // needs to register the server's ACME account.
+  rpc CreateAcmeBinding(CreateAcmeBindingRequest) returns (CreateAcmeBindingResponse);
 }
 
 // Account is a Mavio account as a server sees it.
@@ -178,4 +193,29 @@ message PublishLibrariesResponse {}
 // its requests.
 message Notice {
   int64 cursor = 1;
+}
+
+message SetAcmeChallengeRequest {
+  // The key authorizations' digests, as DNS-01 puts them in TXT records.
+  repeated string values = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 2
+    items: {
+      string: {pattern: "^[A-Za-z0-9_-]{43}$"}
+    }
+  }];
+}
+
+message SetAcmeChallengeResponse {}
+
+message ClearAcmeChallengeRequest {}
+
+message ClearAcmeChallengeResponse {}
+
+message CreateAcmeBindingRequest {}
+
+message CreateAcmeBindingResponse {
+  // The key ID and MAC key of RFC 8555's externalAccountBinding.
+  string key_id = 1;
+  bytes hmac_key = 2;
 }

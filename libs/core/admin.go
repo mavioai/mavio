@@ -120,7 +120,8 @@ type NetworkSettings struct {
 	// "/mavio"; empty serves it at the root.
 	BaseURL string
 	// HTTPSPort, when set, serves HTTPS on that port with the certificate
-	// and key in CertificatePath and KeyPath (PEM files).
+	// and key in CertificatePath and KeyPath (PEM files) or, without them,
+	// in mavio.dev mode with the server's *.<ID>.mavio.site certificate.
 	HTTPSPort                int
 	CertificatePath, KeyPath string
 	// LocalDiscovery answers discovery requests from clients on the local
@@ -143,7 +144,7 @@ func DefaultServerSettings() ServerSettings {
 			DownmixBoost:         2,
 			CropBlackBorders:     true,
 		},
-		Network:         NetworkSettings{LocalDiscovery: true},
+		Network:         NetworkSettings{HTTPSPort: 8920, LocalDiscovery: true},
 		SessionIdleDays: 90,
 		Acquisition:     DefaultAcquisitionSettings(),
 		Requests:        DefaultRequestSettings(),
@@ -180,8 +181,8 @@ func (s *ServerSettings) Validate() error {
 		return fmt.Errorf("%w: base URL %q is not a path such as /mavio", ErrInvalid, n.BaseURL)
 	case n.HTTPSPort < 0 || n.HTTPSPort > 65535:
 		return fmt.Errorf("%w: HTTPS port %d", ErrInvalid, n.HTTPSPort)
-	case n.HTTPSPort > 0 && (n.CertificatePath == "" || n.KeyPath == ""):
-		return fmt.Errorf("%w: HTTPS needs a certificate and a key", ErrInvalid)
+	case (n.CertificatePath == "") != (n.KeyPath == ""):
+		return fmt.Errorf("%w: HTTPS needs both a certificate and a key", ErrInvalid)
 	case s.SessionIdleDays < 1 || s.SessionIdleDays > 3650:
 		return fmt.Errorf("%w: session idle days %d outside 1–3650", ErrInvalid, s.SessionIdleDays)
 	}

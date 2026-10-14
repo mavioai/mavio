@@ -1,6 +1,7 @@
 go 1.27.0
 
 use (
+	./apps/dns
 	./apps/server
 	./libs/acquire
 	./libs/client-rust/capi

@@ -5,6 +5,14 @@ declare module "cloudflare:workers" {
     HYPERDRIVE: { connectionString: string };
     BASE_URL: string;
     BETTER_AUTH_SECRET: string;
+    /** The domain of servers' ACME challenges' TXT records, such as acme.mavio.dev. */
+    ACME_DOMAIN?: string;
+    /** The Cloudflare zone holding ACME_DOMAIN, and a token allowed to edit its DNS. */
+    CLOUDFLARE_ZONE_ID?: string;
+    CLOUDFLARE_API_TOKEN?: string;
+    /** The Google Cloud project minting Google Trust Services' bindings, and its service account's key file. */
+    GOOGLE_CA_PROJECT?: string;
+    GOOGLE_CA_CREDENTIALS?: string;
     NOTICES: DurableObjectNamespace<import("./server/notice-hub.ts").NoticeHub>;
   };
 

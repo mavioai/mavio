@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/cloud/v1/cloud.proto.
  */
 export const file_mavio_cloud_v1_cloud: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyKyAgoGQ2hhbmdlEg4KBmN1cnNvchgBIAEoAxIvCgtjcmVhdGVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASNwoOYWNjZXNzX2dyYW50ZWQYAyABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NHcmFudGVkSAASNwoOYWNjZXNzX3Jldm9rZWQYBCABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZXZva2VkSAASMgoPYWNjb3VudF9jaGFuZ2VkGAUgASgLMhcubWF2aW8uY2xvdWQudjEuQWNjb3VudEgAEjkKD2FjY291bnRfcmV2b2tlZBgGIAEoCzIeLm1hdmlvLmNsb3VkLnYxLkFjY291bnRSZXZva2VkSABCBgoEa2luZCJhCg1BY2Nlc3NHcmFudGVkEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgCIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcyIjCg1BY2Nlc3NSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkivwEKDkFjY291bnRSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkSNQoGcmVhc29uGAIgASgOMiUubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWQuUmVhc29uImIKBlJlYXNvbhIWChJSRUFTT05fVU5TUEVDSUZJRUQQABIUChBSRUFTT05fU1VTUEVOREVEEAESEgoOUkVBU09OX0RFTEVURUQQAhIWChJSRUFTT05fQ09NUFJPTUlTRUQQAyJOCgdMaWJyYXJ5EhQKAmlkGAEgASgJQgi6SAVyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxiAAhIVCgRraW5kGAMgASgJQge6SARyAhggIlAKF1B1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0EjUKCWxpYnJhcmllcxgBIAMoCzIXLm1hdmlvLmNsb3VkLnYxLkxpYnJhcnlCCbpIBpIBAxDoByIaChhQdWJsaXNoTGlicmFyaWVzUmVzcG9uc2UiGAoGTm90aWNlEg4KBmN1cnNvchgBIAEoAypcCgtBY2NvdW50S2luZBIcChhBQ0NPVU5UX0tJTkRfVU5TUEVDSUZJRUQQABIVChFBQ0NPVU5UX0tJTkRfRlVMTBABEhgKFEFDQ09VTlRfS0lORF9NQU5BR0VEEAIysAIKDVNlcnZlclNlcnZpY2USVgoLQ2xhaW1TZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlc3BvbnNlElsKC0xpc3RDaGFuZ2VzEiIubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXNwb25zZSIDkAIBEmoKEFB1Ymxpc2hMaWJyYXJpZXMSJy5tYXZpby5jbG91ZC52MS5QdWJsaXNoTGlicmFyaWVzUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSIDkAICQr0BChJjb20ubWF2aW8uY2xvdWQudjFCCkNsb3VkUHJvdG9QAVpBZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2Nsb3VkL3YxO2Nsb3VkdjGiAgNNQ1iqAg5NYXZpby5DbG91ZC5WMcoCDk1hdmlvXENsb3VkXFYx4gIaTWF2aW9cQ2xvdWRcVjFcR1BCTWV0YWRhdGHqAhBNYXZpbzo6Q2xvdWQ6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
+  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogBChJDbGFpbVNlcnZlclJlcXVlc3QSIAoKY2xhaW1fY29kZRgBIAEoCUIMukgJyAEBcgQQARhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQCJVChNDbGFpbVNlcnZlclJlc3BvbnNlEi4KDWFkbWluaXN0cmF0b3IYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg4KBmN1cnNvchgCIAEoAyJLChJMaXN0Q2hhbmdlc1JlcXVlc3QSFgoFYWZ0ZXIYASABKANCB7pIBCICKAASHQoJcGFnZV9zaXplGAIgASgFQgq6SAcaBRjoBygAIlwKE0xpc3RDaGFuZ2VzUmVzcG9uc2USJwoHY2hhbmdlcxgBIAMoCzIWLm1hdmlvLmNsb3VkLnYxLkNoYW5nZRIMCgRtb3JlGAIgASgIEg4KBmN1cnNvchgDIAEoAyKyAgoGQ2hhbmdlEg4KBmN1cnNvchgBIAEoAxIvCgtjcmVhdGVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASNwoOYWNjZXNzX2dyYW50ZWQYAyABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NHcmFudGVkSAASNwoOYWNjZXNzX3Jldm9rZWQYBCABKAsyHS5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZXZva2VkSAASMgoPYWNjb3VudF9jaGFuZ2VkGAUgASgLMhcubWF2aW8uY2xvdWQudjEuQWNjb3VudEgAEjkKD2FjY291bnRfcmV2b2tlZBgGIAEoCzIeLm1hdmlvLmNsb3VkLnYxLkFjY291bnRSZXZva2VkSABCBgoEa2luZCJhCg1BY2Nlc3NHcmFudGVkEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgCIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcyIjCg1BY2Nlc3NSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkivwEKDkFjY291bnRSZXZva2VkEhIKCmFjY291bnRfaWQYASABKAkSNQoGcmVhc29uGAIgASgOMiUubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWQuUmVhc29uImIKBlJlYXNvbhIWChJSRUFTT05fVU5TUEVDSUZJRUQQABIUChBSRUFTT05fU1VTUEVOREVEEAESEgoOUkVBU09OX0RFTEVURUQQAhIWChJSRUFTT05fQ09NUFJPTUlTRUQQAyJOCgdMaWJyYXJ5EhQKAmlkGAEgASgJQgi6SAVyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxiAAhIVCgRraW5kGAMgASgJQge6SARyAhggIlAKF1B1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0EjUKCWxpYnJhcmllcxgBIAMoCzIXLm1hdmlvLmNsb3VkLnYxLkxpYnJhcnlCCbpIBpIBAxDoByIaChhQdWJsaXNoTGlicmFyaWVzUmVzcG9uc2UiGAoGTm90aWNlEg4KBmN1cnNvchgBIAEoAyJOChdTZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBIzCgZ2YWx1ZXMYASADKAlCI7pIIJIBHQgBEAIiF3IVMhNeW0EtWmEtejAtOV8tXXs0M30kIhoKGFNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIbChlDbGVhckFjbWVDaGFsbGVuZ2VSZXF1ZXN0IhwKGkNsZWFyQWNtZUNoYWxsZW5nZVJlc3BvbnNlIhoKGENyZWF0ZUFjbWVCaW5kaW5nUmVxdWVzdCI9ChlDcmVhdGVBY21lQmluZGluZ1Jlc3BvbnNlEg4KBmtleV9pZBgBIAEoCRIQCghobWFjX2tleRgCIAEoDCpcCgtBY2NvdW50S2luZBIcChhBQ0NPVU5UX0tJTkRfVU5TUEVDSUZJRUQQABIVChFBQ0NPVU5UX0tJTkRfRlVMTBABEhgKFEFDQ09VTlRfS0lORF9NQU5BR0VEEAIy+AQKDVNlcnZlclNlcnZpY2USVgoLQ2xhaW1TZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlc3BvbnNlElsKC0xpc3RDaGFuZ2VzEiIubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXNwb25zZSIDkAIBEmoKEFB1Ymxpc2hMaWJyYXJpZXMSJy5tYXZpby5jbG91ZC52MS5QdWJsaXNoTGlicmFyaWVzUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSIDkAICEmoKEFNldEFjbWVDaGFsbGVuZ2USJy5tYXZpby5jbG91ZC52MS5TZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEnAKEkNsZWFyQWNtZUNoYWxsZW5nZRIpLm1hdmlvLmNsb3VkLnYxLkNsZWFyQWNtZUNoYWxsZW5nZVJlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5DbGVhckFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEmgKEUNyZWF0ZUFjbWVCaW5kaW5nEigubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXF1ZXN0GikubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXNwb25zZUK9AQoSY29tLm1hdmlvLmNsb3VkLnYxQgpDbG91ZFByb3RvUAFaQWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9jbG91ZC92MTtjbG91ZHYxogIDTUNYqgIOTWF2aW8uQ2xvdWQuVjHKAg5NYXZpb1xDbG91ZFxWMeICGk1hdmlvXENsb3VkXFYxXEdQQk1ldGFkYXRh6gIQTWF2aW86OkNsb3VkOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
 
 /**
  * Account is a Mavio account as a server sees it.
@@ -492,6 +492,101 @@ export const NoticeSchema: GenMessage<Notice> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_cloud, 13);
 
 /**
+ * @generated from message mavio.cloud.v1.SetAcmeChallengeRequest
+ */
+export type SetAcmeChallengeRequest = Message<"mavio.cloud.v1.SetAcmeChallengeRequest"> & {
+  /**
+   * The key authorizations' digests, as DNS-01 puts them in TXT records.
+   *
+   * @generated from field: repeated string values = 1;
+   */
+  values: string[];
+};
+
+/**
+ * Describes the message mavio.cloud.v1.SetAcmeChallengeRequest.
+ * Use `create(SetAcmeChallengeRequestSchema)` to create a new message.
+ */
+export const SetAcmeChallengeRequestSchema: GenMessage<SetAcmeChallengeRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 14);
+
+/**
+ * @generated from message mavio.cloud.v1.SetAcmeChallengeResponse
+ */
+export type SetAcmeChallengeResponse = Message<"mavio.cloud.v1.SetAcmeChallengeResponse"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.SetAcmeChallengeResponse.
+ * Use `create(SetAcmeChallengeResponseSchema)` to create a new message.
+ */
+export const SetAcmeChallengeResponseSchema: GenMessage<SetAcmeChallengeResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 15);
+
+/**
+ * @generated from message mavio.cloud.v1.ClearAcmeChallengeRequest
+ */
+export type ClearAcmeChallengeRequest = Message<"mavio.cloud.v1.ClearAcmeChallengeRequest"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.ClearAcmeChallengeRequest.
+ * Use `create(ClearAcmeChallengeRequestSchema)` to create a new message.
+ */
+export const ClearAcmeChallengeRequestSchema: GenMessage<ClearAcmeChallengeRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 16);
+
+/**
+ * @generated from message mavio.cloud.v1.ClearAcmeChallengeResponse
+ */
+export type ClearAcmeChallengeResponse = Message<"mavio.cloud.v1.ClearAcmeChallengeResponse"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.ClearAcmeChallengeResponse.
+ * Use `create(ClearAcmeChallengeResponseSchema)` to create a new message.
+ */
+export const ClearAcmeChallengeResponseSchema: GenMessage<ClearAcmeChallengeResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 17);
+
+/**
+ * @generated from message mavio.cloud.v1.CreateAcmeBindingRequest
+ */
+export type CreateAcmeBindingRequest = Message<"mavio.cloud.v1.CreateAcmeBindingRequest"> & {
+};
+
+/**
+ * Describes the message mavio.cloud.v1.CreateAcmeBindingRequest.
+ * Use `create(CreateAcmeBindingRequestSchema)` to create a new message.
+ */
+export const CreateAcmeBindingRequestSchema: GenMessage<CreateAcmeBindingRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 18);
+
+/**
+ * @generated from message mavio.cloud.v1.CreateAcmeBindingResponse
+ */
+export type CreateAcmeBindingResponse = Message<"mavio.cloud.v1.CreateAcmeBindingResponse"> & {
+  /**
+   * The key ID and MAC key of RFC 8555's externalAccountBinding.
+   *
+   * @generated from field: string key_id = 1;
+   */
+  keyId: string;
+
+  /**
+   * @generated from field: bytes hmac_key = 2;
+   */
+  hmacKey: Uint8Array;
+};
+
+/**
+ * Describes the message mavio.cloud.v1.CreateAcmeBindingResponse.
+ * Use `create(CreateAcmeBindingResponseSchema)` to create a new message.
+ */
+export const CreateAcmeBindingResponseSchema: GenMessage<CreateAcmeBindingResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_cloud_v1_cloud, 19);
+
+/**
  * AccountKind is how an account signs in.
  *
  * @generated from enum mavio.cloud.v1.AccountKind
@@ -569,6 +664,41 @@ export const ServerService: GenService<{
     methodKind: "unary";
     input: typeof PublishLibrariesRequestSchema;
     output: typeof PublishLibrariesResponseSchema;
+  },
+  /**
+   * SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
+   * challenge at <ID>.acme.mavio.dev, the target of
+   * _acme-challenge.<ID>.mavio.site, replacing earlier ones
+   * (docs/mavio-dev.md §4.2).
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.SetAcmeChallenge
+   */
+  setAcmeChallenge: {
+    methodKind: "unary";
+    input: typeof SetAcmeChallengeRequestSchema;
+    output: typeof SetAcmeChallengeResponseSchema;
+  },
+  /**
+   * ClearAcmeChallenge removes the TXT values once the challenge is done.
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.ClearAcmeChallenge
+   */
+  clearAcmeChallenge: {
+    methodKind: "unary";
+    input: typeof ClearAcmeChallengeRequestSchema;
+    output: typeof ClearAcmeChallengeResponseSchema;
+  },
+  /**
+   * CreateAcmeBinding gives an external account binding, which a
+   * certificate authority requiring one, such as Google Trust Services,
+   * needs to register the server's ACME account.
+   *
+   * @generated from rpc mavio.cloud.v1.ServerService.CreateAcmeBinding
+   */
+  createAcmeBinding: {
+    methodKind: "unary";
+    input: typeof CreateAcmeBindingRequestSchema;
+    output: typeof CreateAcmeBindingResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_cloud_v1_cloud, 0);

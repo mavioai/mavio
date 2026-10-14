@@ -1996,6 +1996,348 @@ func (b0 Notice_builder) Build() *Notice {
 	return m0
 }
 
+type SetAcmeChallengeRequest struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Values []string               `protobuf:"bytes,1,rep,name=values"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *SetAcmeChallengeRequest) Reset() {
+	*x = SetAcmeChallengeRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAcmeChallengeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAcmeChallengeRequest) ProtoMessage() {}
+
+func (x *SetAcmeChallengeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetAcmeChallengeRequest) GetValues() []string {
+	if x != nil {
+		return x.xxx_hidden_Values
+	}
+	return nil
+}
+
+func (x *SetAcmeChallengeRequest) SetValues(v []string) {
+	x.xxx_hidden_Values = v
+}
+
+type SetAcmeChallengeRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The key authorizations' digests, as DNS-01 puts them in TXT records.
+	Values []string
+}
+
+func (b0 SetAcmeChallengeRequest_builder) Build() *SetAcmeChallengeRequest {
+	m0 := &SetAcmeChallengeRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Values = b.Values
+	return m0
+}
+
+type SetAcmeChallengeResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetAcmeChallengeResponse) Reset() {
+	*x = SetAcmeChallengeResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAcmeChallengeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAcmeChallengeResponse) ProtoMessage() {}
+
+func (x *SetAcmeChallengeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetAcmeChallengeResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetAcmeChallengeResponse_builder) Build() *SetAcmeChallengeResponse {
+	m0 := &SetAcmeChallengeResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ClearAcmeChallengeRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearAcmeChallengeRequest) Reset() {
+	*x = ClearAcmeChallengeRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearAcmeChallengeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearAcmeChallengeRequest) ProtoMessage() {}
+
+func (x *ClearAcmeChallengeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ClearAcmeChallengeRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ClearAcmeChallengeRequest_builder) Build() *ClearAcmeChallengeRequest {
+	m0 := &ClearAcmeChallengeRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ClearAcmeChallengeResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearAcmeChallengeResponse) Reset() {
+	*x = ClearAcmeChallengeResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearAcmeChallengeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearAcmeChallengeResponse) ProtoMessage() {}
+
+func (x *ClearAcmeChallengeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ClearAcmeChallengeResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ClearAcmeChallengeResponse_builder) Build() *ClearAcmeChallengeResponse {
+	m0 := &ClearAcmeChallengeResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type CreateAcmeBindingRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAcmeBindingRequest) Reset() {
+	*x = CreateAcmeBindingRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAcmeBindingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAcmeBindingRequest) ProtoMessage() {}
+
+func (x *CreateAcmeBindingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type CreateAcmeBindingRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 CreateAcmeBindingRequest_builder) Build() *CreateAcmeBindingRequest {
+	m0 := &CreateAcmeBindingRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type CreateAcmeBindingResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_KeyId       *string                `protobuf:"bytes,1,opt,name=key_id,json=keyId"`
+	xxx_hidden_HmacKey     []byte                 `protobuf:"bytes,2,opt,name=hmac_key,json=hmacKey"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *CreateAcmeBindingResponse) Reset() {
+	*x = CreateAcmeBindingResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAcmeBindingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAcmeBindingResponse) ProtoMessage() {}
+
+func (x *CreateAcmeBindingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateAcmeBindingResponse) GetKeyId() string {
+	if x != nil {
+		if x.xxx_hidden_KeyId != nil {
+			return *x.xxx_hidden_KeyId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateAcmeBindingResponse) GetHmacKey() []byte {
+	if x != nil {
+		return x.xxx_hidden_HmacKey
+	}
+	return nil
+}
+
+func (x *CreateAcmeBindingResponse) SetKeyId(v string) {
+	x.xxx_hidden_KeyId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *CreateAcmeBindingResponse) SetHmacKey(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_HmacKey = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *CreateAcmeBindingResponse) HasKeyId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CreateAcmeBindingResponse) HasHmacKey() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CreateAcmeBindingResponse) ClearKeyId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_KeyId = nil
+}
+
+func (x *CreateAcmeBindingResponse) ClearHmacKey() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_HmacKey = nil
+}
+
+type CreateAcmeBindingResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The key ID and MAC key of RFC 8555's externalAccountBinding.
+	KeyId   *string
+	HmacKey []byte
+}
+
+func (b0 CreateAcmeBindingResponse_builder) Build() *CreateAcmeBindingResponse {
+	m0 := &CreateAcmeBindingResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.KeyId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_KeyId = b.KeyId
+	}
+	if b.HmacKey != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_HmacKey = b.HmacKey
+	}
+	return m0
+}
+
 var File_mavio_cloud_v1_cloud_proto protoreflect.FileDescriptor
 
 const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
@@ -2067,46 +2409,64 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\tlibraries\x18\x01 \x03(\v2\x17.mavio.cloud.v1.LibraryB\t\xbaH\x06\x92\x01\x03\x10\xe8\aR\tlibraries\"\x1a\n" +
 	"\x18PublishLibrariesResponse\" \n" +
 	"\x06Notice\x12\x16\n" +
-	"\x06cursor\x18\x01 \x01(\x03R\x06cursor*\\\n" +
+	"\x06cursor\x18\x01 \x01(\x03R\x06cursor\"V\n" +
+	"\x17SetAcmeChallengeRequest\x12;\n" +
+	"\x06values\x18\x01 \x03(\tB#\xbaH \x92\x01\x1d\b\x01\x10\x02\"\x17r\x152\x13^[A-Za-z0-9_-]{43}$R\x06values\"\x1a\n" +
+	"\x18SetAcmeChallengeResponse\"\x1b\n" +
+	"\x19ClearAcmeChallengeRequest\"\x1c\n" +
+	"\x1aClearAcmeChallengeResponse\"\x1a\n" +
+	"\x18CreateAcmeBindingRequest\"M\n" +
+	"\x19CreateAcmeBindingResponse\x12\x15\n" +
+	"\x06key_id\x18\x01 \x01(\tR\x05keyId\x12\x19\n" +
+	"\bhmac_key\x18\x02 \x01(\fR\ahmacKey*\\\n" +
 	"\vAccountKind\x12\x1c\n" +
 	"\x18ACCOUNT_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11ACCOUNT_KIND_FULL\x10\x01\x12\x18\n" +
-	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xb0\x02\n" +
+	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xf8\x04\n" +
 	"\rServerService\x12V\n" +
 	"\vClaimServer\x12\".mavio.cloud.v1.ClaimServerRequest\x1a#.mavio.cloud.v1.ClaimServerResponse\x12[\n" +
 	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01\x12j\n" +
-	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02B\xbd\x01\n" +
+	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02\x12j\n" +
+	"\x10SetAcmeChallenge\x12'.mavio.cloud.v1.SetAcmeChallengeRequest\x1a(.mavio.cloud.v1.SetAcmeChallengeResponse\"\x03\x90\x02\x02\x12p\n" +
+	"\x12ClearAcmeChallenge\x12).mavio.cloud.v1.ClearAcmeChallengeRequest\x1a*.mavio.cloud.v1.ClearAcmeChallengeResponse\"\x03\x90\x02\x02\x12h\n" +
+	"\x11CreateAcmeBinding\x12(.mavio.cloud.v1.CreateAcmeBindingRequest\x1a).mavio.cloud.v1.CreateAcmeBindingResponseB\xbd\x01\n" +
 	"\x12com.mavio.cloud.v1B\n" +
 	"CloudProtoP\x01ZAgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1;cloudv1\xa2\x02\x03MCX\xaa\x02\x0eMavio.Cloud.V1\xca\x02\x0eMavio\\Cloud\\V1\xe2\x02\x1aMavio\\Cloud\\V1\\GPBMetadata\xea\x02\x10Mavio::Cloud::V1b\beditionsp\xe8\a"
 
 var file_mavio_cloud_v1_cloud_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
-	(AccountKind)(0),                 // 0: mavio.cloud.v1.AccountKind
-	(AccountRevoked_Reason)(0),       // 1: mavio.cloud.v1.AccountRevoked.Reason
-	(*Account)(nil),                  // 2: mavio.cloud.v1.Account
-	(*Access)(nil),                   // 3: mavio.cloud.v1.Access
-	(*ClaimServerRequest)(nil),       // 4: mavio.cloud.v1.ClaimServerRequest
-	(*ClaimServerResponse)(nil),      // 5: mavio.cloud.v1.ClaimServerResponse
-	(*ListChangesRequest)(nil),       // 6: mavio.cloud.v1.ListChangesRequest
-	(*ListChangesResponse)(nil),      // 7: mavio.cloud.v1.ListChangesResponse
-	(*Change)(nil),                   // 8: mavio.cloud.v1.Change
-	(*AccessGranted)(nil),            // 9: mavio.cloud.v1.AccessGranted
-	(*AccessRevoked)(nil),            // 10: mavio.cloud.v1.AccessRevoked
-	(*AccountRevoked)(nil),           // 11: mavio.cloud.v1.AccountRevoked
-	(*Library)(nil),                  // 12: mavio.cloud.v1.Library
-	(*PublishLibrariesRequest)(nil),  // 13: mavio.cloud.v1.PublishLibrariesRequest
-	(*PublishLibrariesResponse)(nil), // 14: mavio.cloud.v1.PublishLibrariesResponse
-	(*Notice)(nil),                   // 15: mavio.cloud.v1.Notice
-	(v1.RestrictionProfile)(0),       // 16: mavio.user.v1.RestrictionProfile
-	(*timestamppb.Timestamp)(nil),    // 17: google.protobuf.Timestamp
+	(AccountKind)(0),                   // 0: mavio.cloud.v1.AccountKind
+	(AccountRevoked_Reason)(0),         // 1: mavio.cloud.v1.AccountRevoked.Reason
+	(*Account)(nil),                    // 2: mavio.cloud.v1.Account
+	(*Access)(nil),                     // 3: mavio.cloud.v1.Access
+	(*ClaimServerRequest)(nil),         // 4: mavio.cloud.v1.ClaimServerRequest
+	(*ClaimServerResponse)(nil),        // 5: mavio.cloud.v1.ClaimServerResponse
+	(*ListChangesRequest)(nil),         // 6: mavio.cloud.v1.ListChangesRequest
+	(*ListChangesResponse)(nil),        // 7: mavio.cloud.v1.ListChangesResponse
+	(*Change)(nil),                     // 8: mavio.cloud.v1.Change
+	(*AccessGranted)(nil),              // 9: mavio.cloud.v1.AccessGranted
+	(*AccessRevoked)(nil),              // 10: mavio.cloud.v1.AccessRevoked
+	(*AccountRevoked)(nil),             // 11: mavio.cloud.v1.AccountRevoked
+	(*Library)(nil),                    // 12: mavio.cloud.v1.Library
+	(*PublishLibrariesRequest)(nil),    // 13: mavio.cloud.v1.PublishLibrariesRequest
+	(*PublishLibrariesResponse)(nil),   // 14: mavio.cloud.v1.PublishLibrariesResponse
+	(*Notice)(nil),                     // 15: mavio.cloud.v1.Notice
+	(*SetAcmeChallengeRequest)(nil),    // 16: mavio.cloud.v1.SetAcmeChallengeRequest
+	(*SetAcmeChallengeResponse)(nil),   // 17: mavio.cloud.v1.SetAcmeChallengeResponse
+	(*ClearAcmeChallengeRequest)(nil),  // 18: mavio.cloud.v1.ClearAcmeChallengeRequest
+	(*ClearAcmeChallengeResponse)(nil), // 19: mavio.cloud.v1.ClearAcmeChallengeResponse
+	(*CreateAcmeBindingRequest)(nil),   // 20: mavio.cloud.v1.CreateAcmeBindingRequest
+	(*CreateAcmeBindingResponse)(nil),  // 21: mavio.cloud.v1.CreateAcmeBindingResponse
+	(v1.RestrictionProfile)(0),         // 22: mavio.user.v1.RestrictionProfile
+	(*timestamppb.Timestamp)(nil),      // 23: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
-	16, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	22, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
 	2,  // 2: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
 	8,  // 3: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
-	17, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
+	23, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
 	9,  // 5: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
 	10, // 6: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
 	2,  // 7: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
@@ -2118,11 +2478,17 @@ var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	4,  // 13: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
 	6,  // 14: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
 	13, // 15: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
-	5,  // 16: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
-	7,  // 17: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
-	14, // 18: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
-	16, // [16:19] is the sub-list for method output_type
-	13, // [13:16] is the sub-list for method input_type
+	16, // 16: mavio.cloud.v1.ServerService.SetAcmeChallenge:input_type -> mavio.cloud.v1.SetAcmeChallengeRequest
+	18, // 17: mavio.cloud.v1.ServerService.ClearAcmeChallenge:input_type -> mavio.cloud.v1.ClearAcmeChallengeRequest
+	20, // 18: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
+	5,  // 19: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
+	7,  // 20: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
+	14, // 21: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
+	17, // 22: mavio.cloud.v1.ServerService.SetAcmeChallenge:output_type -> mavio.cloud.v1.SetAcmeChallengeResponse
+	19, // 23: mavio.cloud.v1.ServerService.ClearAcmeChallenge:output_type -> mavio.cloud.v1.ClearAcmeChallengeResponse
+	21, // 24: mavio.cloud.v1.ServerService.CreateAcmeBinding:output_type -> mavio.cloud.v1.CreateAcmeBindingResponse
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
 	13, // [13:13] is the sub-list for extension type_name
 	13, // [13:13] is the sub-list for extension extendee
 	0,  // [0:13] is the sub-list for field type_name
@@ -2145,7 +2511,7 @@ func file_mavio_cloud_v1_cloud_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_cloud_v1_cloud_proto_rawDesc), len(file_mavio_cloud_v1_cloud_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   14,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -811,7 +811,8 @@ flowchart TD
 - [x] mavio.dev：好友、Home、托管账户及其转换、切换、Mavio Pass 与冻结的 Home：`FriendService` 与 `HomeService`，通过 Mavio 的 better-auth 插件以 PIN 切换，服务端应用托管账户的限制配置，以及 Home 与好友的页面
 - [ ] 购买与续订 Mavio Pass
 - [x] mavio.dev：通过 Durable Object 向服务端推送，按游标取回变更：`NoticeHub` 保持每个服务端可休眠的 WebSocket，在记录变更的请求之后收到通知；在 workerd 中与服务端端到端测试
-- [ ] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书
+- [x] `apps/dns` 与通过 ACME DNS-01 质询获取的服务端证书：用 `miekg/dns` 从名称计算区域应答；基于 Cloudflare DNS API 与 Google Public CA API 的 `ServerService.SetAcmeChallenge`、`ClearAcmeChallenge` 和 `CreateAcmeBinding`；服务端的 `internal/certs` 从 Let's Encrypt 或 Google Trust Services 获取并按 ACME 续期信息续期 `*.<ID>.mavio.site`，并用它提供 HTTPS；以 `certstest` 中模拟的 ACME CA 测试
+- [ ] 在两台 Hetzner 虚拟机上运行 `apps/dns`，用胶水记录把 `mavio.site` 委派给它们，并把 `mavio.site` 加入公共后缀列表
 - [ ] `apps/relay` 与中转票据
 - [ ] 每个客户端：安装时选择模式、保留的登录、更换登录与用户切换；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
 

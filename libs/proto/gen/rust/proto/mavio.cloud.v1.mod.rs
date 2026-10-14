@@ -92,6 +92,30 @@ pub use self::__buffa::view::NoticeView;
 #[doc(inline)]
 pub use self::__buffa::view::NoticeOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SetAcmeChallengeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAcmeChallengeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAcmeChallengeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetAcmeChallengeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ClearAcmeChallengeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ClearAcmeChallengeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ClearAcmeChallengeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ClearAcmeChallengeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAcmeBindingRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAcmeBindingRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAcmeBindingResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAcmeBindingResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ServerView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerOwnedView;

@@ -22,6 +22,32 @@ pub type OwnedPublishLibrariesRequestView = ::buffa::view::OwnedView<
 pub type OwnedPublishLibrariesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::PublishLibrariesResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SetAcmeChallengeRequestView<'static>>`.
+pub type OwnedSetAcmeChallengeRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SetAcmeChallengeResponseView<'static>>`.
+pub type OwnedSetAcmeChallengeResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeResponseView<'static>,
+>;
+///Shorthand for `OwnedView<ClearAcmeChallengeRequestView<'static>>`.
+pub type OwnedClearAcmeChallengeRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ClearAcmeChallengeResponseView<'static>>`.
+pub type OwnedClearAcmeChallengeResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<CreateAcmeBindingRequestView<'static>>`.
+pub type OwnedCreateAcmeBindingRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingRequestView<'static>,
+>;
+///Shorthand for `OwnedView<CreateAcmeBindingResponseView<'static>>`.
+pub type OwnedCreateAcmeBindingResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ClaimServerResponse>
 for crate::proto::mavio::cloud::v1::__buffa::view::ClaimServerResponseView<'_> {
     fn encode(
@@ -124,6 +150,110 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::SetAcmeChallengeResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::SetAcmeChallengeResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ClearAcmeChallengeResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ClearAcmeChallengeResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const SERVER_SERVICE_SERVICE_NAME: &str = "mavio.cloud.v1.ServerService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ClaimServer` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -144,6 +274,24 @@ pub const SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC: ::connectrpc::Spec = ::connectr
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetAcmeChallenge` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_SET_ACME_CHALLENGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/SetAcmeChallenge",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `ClearAcmeChallenge` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_CLEAR_ACME_CHALLENGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/ClearAcmeChallenge",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateAcmeBinding` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_CREATE_ACME_BINDING_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/CreateAcmeBinding",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// ServerService is mavio.dev's API for servers in mavio.dev mode
 /// (docs/accounts.md §3.2, docs/mavio-dev.md §3). Every request is
 /// authenticated by a JWT the server signs with its identity key
@@ -275,6 +423,80 @@ pub trait ServerService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
+    /// challenge at \<ID\>.acme.mavio.dev, the target of
+    /// _acme-challenge.\<ID\>.mavio.site, replacing earlier ones
+    /// (docs/mavio-dev.md §4.2).
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_acme_challenge<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::SetAcmeChallengeResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ClearAcmeChallenge removes the TXT values once the challenge is done.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn clear_acme_challenge<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::ClearAcmeChallengeResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// CreateAcmeBinding gives an external account binding, which a
+    /// certificate authority requiring one, such as Google Trust Services,
+    /// needs to register the server's ACME account.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn create_acme_binding<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
 }
 /// Extension trait for registering a service implementation with a Router.
 ///
@@ -394,6 +616,93 @@ impl<S: ServerService> ServerServiceExt for S {
                 },
             )
             .with_spec(SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
+                "SetAcmeChallenge",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_acme_challenge(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::SetAcmeChallengeResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_SET_ACME_CHALLENGE_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
+                "ClearAcmeChallenge",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.clear_acme_challenge(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::ClearAcmeChallengeResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_CLEAR_ACME_CHALLENGE_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
+                "CreateAcmeBinding",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.create_acme_binding(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_CREATE_ACME_BINDING_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -464,6 +773,24 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC),
+                )
+            }
+            "SetAcmeChallenge" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_SET_ACME_CHALLENGE_SPEC),
+                )
+            }
+            "ClearAcmeChallenge" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_CLEAR_ACME_CHALLENGE_SPEC),
+                )
+            }
+            "CreateAcmeBinding" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_CREATE_ACME_BINDING_SPEC),
                 )
             }
             _ => None,
@@ -544,6 +871,72 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::cloud::v1::PublishLibrariesResponse,
+                        >(format)
+                })
+            }
+            "SetAcmeChallenge" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_acme_challenge(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::SetAcmeChallengeResponse,
+                        >(format)
+                })
+            }
+            "ClearAcmeChallenge" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+                    >::from_parts(&req, &body);
+                    svc.clear_acme_challenge(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::ClearAcmeChallengeResponse,
+                        >(format)
+                })
+            }
+            "CreateAcmeBinding" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+                    >::from_parts(&req, &body);
+                    svc.create_acme_binding(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::CreateAcmeBindingResponse,
                         >(format)
                 })
             }
@@ -804,6 +1197,141 @@ where
                 &self.transport,
                 &self.config,
                 SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetAcmeChallenge RPC. Sends a request to /mavio.cloud.v1.ServerService/SetAcmeChallenge.
+    pub async fn set_acme_challenge(
+        &self,
+        request: crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_acme_challenge_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SetAcmeChallenge RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_acme_challenge_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::SetAcmeChallengeRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::SetAcmeChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_SET_ACME_CHALLENGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ClearAcmeChallenge RPC. Sends a request to /mavio.cloud.v1.ServerService/ClearAcmeChallenge.
+    pub async fn clear_acme_challenge(
+        &self,
+        request: crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.clear_acme_challenge_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ClearAcmeChallenge RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn clear_acme_challenge_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::ClearAcmeChallengeRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::ClearAcmeChallengeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_CLEAR_ACME_CHALLENGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the CreateAcmeBinding RPC. Sends a request to /mavio.cloud.v1.ServerService/CreateAcmeBinding.
+    pub async fn create_acme_binding(
+        &self,
+        request: crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.create_acme_binding_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the CreateAcmeBinding RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_acme_binding_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::CreateAcmeBindingRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateAcmeBindingResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_CREATE_ACME_BINDING_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

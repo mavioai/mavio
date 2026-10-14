@@ -1,5 +1,7 @@
-// mavio.dev's Worker (docs/mavio-dev.md §6). BETTER_AUTH_SECRET is a
-// secret set with `wrangler secret put`; .dev.vars holds development's.
+// mavio.dev's Worker (docs/mavio-dev.md §6). BETTER_AUTH_SECRET,
+// CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN, GOOGLE_CA_PROJECT and
+// GOOGLE_CA_CREDENTIALS are secrets set with `wrangler secret put`;
+// .dev.vars holds development's.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "mavio-website",
@@ -7,7 +9,7 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [{ "pattern": "mavio.dev", "custom_domain": true }],
-  "vars": { "BASE_URL": "https://mavio.dev" },
+  "vars": { "BASE_URL": "https://mavio.dev", "ACME_DOMAIN": "acme.mavio.dev" },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",

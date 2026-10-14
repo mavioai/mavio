@@ -9,6 +9,7 @@ import { ServerService } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
 import { FriendService, HomeService } from "@mavio/proto/mavio/cloud/v1/home_pb";
 
 import { accountService } from "./account-service.ts";
+import type { Acme } from "./acme.ts";
 import { type Auth, apiURL } from "./auth.ts";
 import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
@@ -25,6 +26,8 @@ export interface ApiOptions {
   now?: () => Date;
   /** notify tells servers that their changes reached cursors, once a request recorded changes. */
   notify?: (cursors: Map<string, number>) => void;
+  /** acme answers servers' certificate requests. */
+  acme?: Acme;
   /** connectNotices hands an authenticated server's WebSocket request to its Durable Object. */
   connectNotices?: (serverId: string, req: Request) => Promise<Response>;
 }
@@ -35,7 +38,7 @@ export const noticesPath = "/api/servers/notices";
 /** handleApi serves a request under /api, or returns undefined for other paths. */
 export async function handleApi(req: Request, options: ApiOptions): Promise<Response | undefined> {
   const { pathname } = new URL(req.url);
-  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now };
+  const deps = { db: options.db, apiURL: apiURL(options.baseURL), now: options.now, acme: options.acme };
   if (pathname === noticesPath) {
     let server;
     try {

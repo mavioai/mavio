@@ -116,6 +116,45 @@ func TestHTTPS(t *testing.T) {
 	}
 }
 
+// managed is a managed certificate that becomes ready.
+type managed struct {
+	cert  *tls.Certificate
+	ready bool
+}
+
+func (m *managed) Certificate(*tls.ClientHelloInfo) (*tls.Certificate, error) { return m.cert, nil }
+func (m *managed) Ready() bool                                                { return m.ready }
+
+func TestHTTPSManaged(t *testing.T) {
+	ctx := t.Context()
+	certFile, keyFile := certificate(t)
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := &managed{cert: &cert}
+	h := &HTTPS{Handler: echoPath(), Host: "127.0.0.1", Managed: m}
+	t.Cleanup(func() { _ = h.Close(ctx) })
+	n := core.NetworkSettings{HTTPSPort: freePort(t)}
+	if err := h.Apply(ctx, n); err != nil || h.Addr() != "" {
+		t.Fatalf("before the certificate: %v, addr %q", err, h.Addr())
+	}
+	m.ready = true
+	if err := h.Apply(ctx, n); err != nil || h.Addr() == "" {
+		t.Fatalf("with the certificate: %v, addr %q", err, h.Addr())
+	}
+	client := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}} //nolint:gosec // self-signed test certificate
+	resp, err := client.Get("https://" + h.Addr() + "/hello")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	addr := h.Addr()
+	if err := h.Apply(ctx, n); err != nil || h.Addr() != addr {
+		t.Errorf("applying again: %v, addr %q, want = %q", err, h.Addr(), addr)
+	}
+}
+
 func TestDiscovery(t *testing.T) {
 	ctx := t.Context()
 	d := &Discovery{Addr: "127.0.0.1:0", Port: 8686, Reply: func() DiscoveryReply { return DiscoveryReply{ID: "id", Name: "Home", Version: "v1"} }}

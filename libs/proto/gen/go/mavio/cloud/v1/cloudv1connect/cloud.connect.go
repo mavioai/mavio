@@ -42,6 +42,15 @@ const (
 	// ServerServicePublishLibrariesProcedure is the fully-qualified name of the ServerService's
 	// PublishLibraries RPC.
 	ServerServicePublishLibrariesProcedure = "/mavio.cloud.v1.ServerService/PublishLibraries"
+	// ServerServiceSetAcmeChallengeProcedure is the fully-qualified name of the ServerService's
+	// SetAcmeChallenge RPC.
+	ServerServiceSetAcmeChallengeProcedure = "/mavio.cloud.v1.ServerService/SetAcmeChallenge"
+	// ServerServiceClearAcmeChallengeProcedure is the fully-qualified name of the ServerService's
+	// ClearAcmeChallenge RPC.
+	ServerServiceClearAcmeChallengeProcedure = "/mavio.cloud.v1.ServerService/ClearAcmeChallenge"
+	// ServerServiceCreateAcmeBindingProcedure is the fully-qualified name of the ServerService's
+	// CreateAcmeBinding RPC.
+	ServerServiceCreateAcmeBindingProcedure = "/mavio.cloud.v1.ServerService/CreateAcmeBinding"
 )
 
 // ServerServiceClient is a client for the mavio.cloud.v1.ServerService service.
@@ -57,6 +66,17 @@ type ServerServiceClient interface {
 	// server, which access records name, so that administrators edit access
 	// from anywhere.
 	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
+	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
+	// challenge at <ID>.acme.mavio.dev, the target of
+	// _acme-challenge.<ID>.mavio.site, replacing earlier ones
+	// (docs/mavio-dev.md §4.2).
+	SetAcmeChallenge(context.Context, *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error)
+	// ClearAcmeChallenge removes the TXT values once the challenge is done.
+	ClearAcmeChallenge(context.Context, *v1.ClearAcmeChallengeRequest) (*v1.ClearAcmeChallengeResponse, error)
+	// CreateAcmeBinding gives an external account binding, which a
+	// certificate authority requiring one, such as Google Trust Services,
+	// needs to register the server's ACME account.
+	CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error)
 }
 
 // NewServerServiceClient constructs a client for the mavio.cloud.v1.ServerService service. By
@@ -90,14 +110,37 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
+		setAcmeChallenge: connect.NewClient[v1.SetAcmeChallengeRequest, v1.SetAcmeChallengeResponse](
+			httpClient,
+			baseURL+ServerServiceSetAcmeChallengeProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("SetAcmeChallenge")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
+		clearAcmeChallenge: connect.NewClient[v1.ClearAcmeChallengeRequest, v1.ClearAcmeChallengeResponse](
+			httpClient,
+			baseURL+ServerServiceClearAcmeChallengeProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("ClearAcmeChallenge")),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
+		createAcmeBinding: connect.NewClient[v1.CreateAcmeBindingRequest, v1.CreateAcmeBindingResponse](
+			httpClient,
+			baseURL+ServerServiceCreateAcmeBindingProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("CreateAcmeBinding")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // serverServiceClient implements ServerServiceClient.
 type serverServiceClient struct {
-	claimServer      *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
-	listChanges      *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
-	publishLibraries *connect.Client[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse]
+	claimServer        *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
+	listChanges        *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
+	publishLibraries   *connect.Client[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse]
+	setAcmeChallenge   *connect.Client[v1.SetAcmeChallengeRequest, v1.SetAcmeChallengeResponse]
+	clearAcmeChallenge *connect.Client[v1.ClearAcmeChallengeRequest, v1.ClearAcmeChallengeResponse]
+	createAcmeBinding  *connect.Client[v1.CreateAcmeBindingRequest, v1.CreateAcmeBindingResponse]
 }
 
 // ClaimServer calls mavio.cloud.v1.ServerService.ClaimServer.
@@ -127,6 +170,33 @@ func (c *serverServiceClient) PublishLibraries(ctx context.Context, req *v1.Publ
 	return nil, err
 }
 
+// SetAcmeChallenge calls mavio.cloud.v1.ServerService.SetAcmeChallenge.
+func (c *serverServiceClient) SetAcmeChallenge(ctx context.Context, req *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error) {
+	response, err := c.setAcmeChallenge.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ClearAcmeChallenge calls mavio.cloud.v1.ServerService.ClearAcmeChallenge.
+func (c *serverServiceClient) ClearAcmeChallenge(ctx context.Context, req *v1.ClearAcmeChallengeRequest) (*v1.ClearAcmeChallengeResponse, error) {
+	response, err := c.clearAcmeChallenge.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// CreateAcmeBinding calls mavio.cloud.v1.ServerService.CreateAcmeBinding.
+func (c *serverServiceClient) CreateAcmeBinding(ctx context.Context, req *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error) {
+	response, err := c.createAcmeBinding.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ServerServiceHandler is an implementation of the mavio.cloud.v1.ServerService service.
 type ServerServiceHandler interface {
 	// ClaimServer registers the server under the account that created the
@@ -140,6 +210,17 @@ type ServerServiceHandler interface {
 	// server, which access records name, so that administrators edit access
 	// from anywhere.
 	PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error)
+	// SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
+	// challenge at <ID>.acme.mavio.dev, the target of
+	// _acme-challenge.<ID>.mavio.site, replacing earlier ones
+	// (docs/mavio-dev.md §4.2).
+	SetAcmeChallenge(context.Context, *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error)
+	// ClearAcmeChallenge removes the TXT values once the challenge is done.
+	ClearAcmeChallenge(context.Context, *v1.ClearAcmeChallengeRequest) (*v1.ClearAcmeChallengeResponse, error)
+	// CreateAcmeBinding gives an external account binding, which a
+	// certificate authority requiring one, such as Google Trust Services,
+	// needs to register the server's ACME account.
+	CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error)
 }
 
 // NewServerServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -169,6 +250,26 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
+	serverServiceSetAcmeChallengeHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceSetAcmeChallengeProcedure,
+		svc.SetAcmeChallenge,
+		connect.WithSchema(serverServiceMethods.ByName("SetAcmeChallenge")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
+	serverServiceClearAcmeChallengeHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceClearAcmeChallengeProcedure,
+		svc.ClearAcmeChallenge,
+		connect.WithSchema(serverServiceMethods.ByName("ClearAcmeChallenge")),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
+	serverServiceCreateAcmeBindingHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceCreateAcmeBindingProcedure,
+		svc.CreateAcmeBinding,
+		connect.WithSchema(serverServiceMethods.ByName("CreateAcmeBinding")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.cloud.v1.ServerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ServerServiceClaimServerProcedure:
@@ -177,6 +278,12 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 			serverServiceListChangesHandler.ServeHTTP(w, r)
 		case ServerServicePublishLibrariesProcedure:
 			serverServicePublishLibrariesHandler.ServeHTTP(w, r)
+		case ServerServiceSetAcmeChallengeProcedure:
+			serverServiceSetAcmeChallengeHandler.ServeHTTP(w, r)
+		case ServerServiceClearAcmeChallengeProcedure:
+			serverServiceClearAcmeChallengeHandler.ServeHTTP(w, r)
+		case ServerServiceCreateAcmeBindingProcedure:
+			serverServiceCreateAcmeBindingHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -196,4 +303,16 @@ func (UnimplementedServerServiceHandler) ListChanges(context.Context, *v1.ListCh
 
 func (UnimplementedServerServiceHandler) PublishLibraries(context.Context, *v1.PublishLibrariesRequest) (*v1.PublishLibrariesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.PublishLibraries is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) SetAcmeChallenge(context.Context, *v1.SetAcmeChallengeRequest) (*v1.SetAcmeChallengeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.SetAcmeChallenge is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) ClearAcmeChallenge(context.Context, *v1.ClearAcmeChallengeRequest) (*v1.ClearAcmeChallengeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.ClearAcmeChallenge is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) CreateAcmeBinding(context.Context, *v1.CreateAcmeBindingRequest) (*v1.CreateAcmeBindingResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.CreateAcmeBinding is not implemented"))
 }

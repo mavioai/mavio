@@ -5,6 +5,7 @@ import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 
+import { type Acme, cloudflareDns, googleBindings } from "./acme.ts";
 import { handleApi } from "./api.ts";
 import { createAuth } from "./auth.ts";
 import { type Database, schema } from "./db/index.ts";
@@ -23,9 +24,21 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
       baseURL: env.BASE_URL,
       notify: (cursors) => ctx.waitUntil(Promise.all([...cursors].map(([id, cursor]) => hub(id).notify(cursor)))),
       connectNotices: (id, r) => hub(id).fetch(r),
+      acme: acme(),
     });
     return res ?? new Response("Not Found", { status: 404 });
   } finally {
     await client.end();
   }
+}
+
+/** acme returns how servers' certificate requests are answered, undefined when not configured. */
+function acme(): Acme | undefined {
+  if (!env.ACME_DOMAIN || !env.CLOUDFLARE_ZONE_ID || !env.CLOUDFLARE_API_TOKEN) return undefined;
+  return {
+    domain: env.ACME_DOMAIN,
+    dns: cloudflareDns(env.CLOUDFLARE_API_TOKEN, env.CLOUDFLARE_ZONE_ID),
+    bindings:
+      env.GOOGLE_CA_PROJECT && env.GOOGLE_CA_CREDENTIALS ? googleBindings(env.GOOGLE_CA_CREDENTIALS, env.GOOGLE_CA_PROJECT) : undefined,
+  };
 }
