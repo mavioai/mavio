@@ -90,8 +90,8 @@ function Authorize() {
         ) : (
           <>
             <Muted>
-              The web interface at <span className="font-mono text-text-primary">{origin}</span> signs you in to{" "}
-              {server.name} as {me.name}. It reaches this server only.
+              Sign in to {server.name} as {me.name} in the web interface at{" "}
+              <span className="font-mono text-text-primary">{origin}</span>? It reaches this server only.
             </Muted>
             {!expected && (
               <ErrorText error="This address is neither one of the server's mavio.site names nor on your local network. Continue only if you reach the server there." />
