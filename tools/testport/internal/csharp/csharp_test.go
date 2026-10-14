@@ -17,6 +17,7 @@ func TestLexLiterals(t *testing.T) {
 		{`'x'`, Char, "x"},
 		{"\"\"\"\n    line1\n      line2\n    \"\"\"", String, "line1\n  line2"},
 		{`"""inline "quoted" raw"""`, String, `inline "quoted" raw`},
+		{"$$\"\"\"\n    a: {{x}}\n    \"\"\"", Interpolated, ""},
 		{`1_000UL`, Number, "1_000UL"},
 		{`1.5e-3f`, Number, "1.5e-3f"},
 		{`0x1F`, Number, "0x1F"},

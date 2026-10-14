@@ -144,6 +144,15 @@ func (l *lexer) next() error {
 			return err
 		}
 		l.emit(String, start, line, v)
+	case c == '$' && strings.HasPrefix(strings.TrimLeft(l.src[l.pos:], "$"), `"""`):
+		// An interpolated raw string literal ($$"""…""").
+		for l.src[l.pos] == '$' {
+			l.advance(1)
+		}
+		if _, err := l.rawString(); err != nil {
+			return err
+		}
+		l.emit(Interpolated, start, line, "")
 	case c == '$' && l.peek(1) == '"':
 		l.advance(1)
 		if _, err := l.regularString(); err != nil {
