@@ -201,6 +201,8 @@
   "auth.or": { "message": "or", "description": "Separates the password from the other ways of signing in." },
   "auth.quickConnectTitle": { "message": "Quick Connect", "description": "Title of signing in by entering a code on a signed-in device." },
   "auth.waiting": { "message": "Waiting for authorization…", "description": "Shown while a Quick Connect code waits to be entered." },
+  "auth.passkey": { "message": "Passkey", "description": "Button that signs in to a server with a passkey, beside Quick Connect." },
+  "auth.noMavioServer": { "message": "This server keeps its own users: connect to it to sign in.", "description": "Shown under Sign In with Mavio when no server here signs in Mavio accounts." },
   "search.placeholder": { "message": "Search movies, shows and more", "description": "Placeholder of the search field." },
   "search.noResults": { "message": "No results", "description": "Shown when a search finds nothing on any server." },
   "menu.manageAccount": { "message": "Manage Account at mavio.dev", "description": "User menu item opening the Mavio account's page at mavio.dev." },

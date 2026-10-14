@@ -200,6 +200,8 @@
   "auth.or": "或",
   "auth.quickConnectTitle": "Quick Connect",
   "auth.waiting": "等待授权…",
+  "auth.passkey": "通行密钥",
+  "auth.noMavioServer": "这台服务器有自己的用户，请连接到服务器登录。",
   "search.placeholder": "搜索电影、剧集等",
   "search.noResults": "没有结果",
   "menu.manageAccount": "在 mavio.dev 管理账户",

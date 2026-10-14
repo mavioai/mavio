@@ -422,6 +422,10 @@
     <string name="auth_quick_connect_title">Quick Connect</string>
     <!-- Shown while a Quick Connect code waits to be entered. -->
     <string name="auth_waiting">Waiting for authorization…</string>
+    <!-- Button that signs in to a server with a passkey, beside Quick Connect. -->
+    <string name="auth_passkey">Passkey</string>
+    <!-- Shown under Sign In with Mavio when no server here signs in Mavio accounts. -->
+    <string name="auth_no_mavio_server">This server keeps its own users: connect to it to sign in.</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->

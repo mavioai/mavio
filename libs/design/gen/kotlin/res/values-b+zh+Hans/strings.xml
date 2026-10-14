@@ -215,6 +215,8 @@
     <string name="auth_or">或</string>
     <string name="auth_quick_connect_title">Quick Connect</string>
     <string name="auth_waiting">等待授权…</string>
+    <string name="auth_passkey">通行密钥</string>
+    <string name="auth_no_mavio_server">这台服务器有自己的用户，请连接到服务器登录。</string>
     <string name="search_placeholder">搜索电影、剧集等</string>
     <string name="search_no_results">没有结果</string>
     <string name="menu_manage_account">在 mavio.dev 管理账户</string>

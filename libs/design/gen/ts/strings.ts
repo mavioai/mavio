@@ -203,6 +203,8 @@ export type MessageKey =
   | 'auth.or'
   | 'auth.quickConnectTitle'
   | 'auth.waiting'
+  | 'auth.passkey'
+  | 'auth.noMavioServer'
   | 'search.placeholder'
   | 'search.noResults'
   | 'menu.manageAccount'
@@ -441,6 +443,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.or": "or",
     "auth.quickConnectTitle": "Quick Connect",
     "auth.waiting": "Waiting for authorization…",
+    "auth.passkey": "Passkey",
+    "auth.noMavioServer": "This server keeps its own users: connect to it to sign in.",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results",
     "menu.manageAccount": "Manage Account at mavio.dev",
@@ -677,6 +681,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.or": "或",
     "auth.quickConnectTitle": "Quick Connect",
     "auth.waiting": "等待授权…",
+    "auth.passkey": "通行密钥",
+    "auth.noMavioServer": "这台服务器有自己的用户，请连接到服务器登录。",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果",
     "menu.manageAccount": "在 mavio.dev 管理账户",

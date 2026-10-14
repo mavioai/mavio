@@ -3745,6 +3745,42 @@
         }
       }
     },
+    "auth.passkey": {
+      "comment": "Button that signs in to a server with a passkey, beside Quick Connect.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passkey"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通行密钥"
+          }
+        }
+      }
+    },
+    "auth.noMavioServer": {
+      "comment": "Shown under Sign In with Mavio when no server here signs in Mavio accounts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This server keeps its own users: connect to it to sign in."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台服务器有自己的用户，请连接到服务器登录。"
+          }
+        }
+      }
+    },
     "search.placeholder": {
       "comment": "Placeholder of the search field.",
       "extractionState": "manual",

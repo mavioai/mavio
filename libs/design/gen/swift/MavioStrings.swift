@@ -683,6 +683,12 @@ public enum MavioStrings {
     /// Shown while a Quick Connect code waits to be entered.
     public static var authWaiting: String { NSLocalizedString("auth.waiting", bundle: .module, comment: "") }
 
+    /// Button that signs in to a server with a passkey, beside Quick Connect.
+    public static var authPasskey: String { NSLocalizedString("auth.passkey", bundle: .module, comment: "") }
+
+    /// Shown under Sign In with Mavio when no server here signs in Mavio accounts.
+    public static var authNoMavioServer: String { NSLocalizedString("auth.noMavioServer", bundle: .module, comment: "") }
+
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }
 
