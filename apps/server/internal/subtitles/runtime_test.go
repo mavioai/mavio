@@ -187,7 +187,8 @@ func TestSearchItem(t *testing.T) {
 	if langs := e.plugin.searches[0].GetLanguages(); len(langs) != 1 || langs[0].GetLanguage() != "fr" {
 		t.Errorf("searched languages = %v, want [fr]", langs)
 	}
-	if got, want := e.file("The Matrix (1999).fr.srt"), "1\r\n00:00:01,000 --> 00:00:02,000\r\nBonjour strong\r\n"; got != want {
+	// Repaired as ftfy does, which leaves only "\n" line breaks.
+	if got, want := e.file("The Matrix (1999).fr.srt"), "1\n00:00:01,000 --> 00:00:02,000\nBonjour strong\n"; got != want {
 		t.Errorf("subtitle = %q, want = %q", got, want)
 	}
 	if h := e.history(core.SubtitleDownloaded); len(h) != 1 || h[0].Path != filepath.Join(e.dir, "The Matrix (1999).fr.srt") {
@@ -203,6 +204,27 @@ func TestSearchItem(t *testing.T) {
 	// Nothing is missing any more.
 	if wanted, total, err := e.rt.Wanted(e.ctx, core.KindMovie, 0, 0); err != nil || total != 0 || len(wanted) != 0 {
 		t.Errorf("Wanted = %v, %d, %v, want none", wanted, total, err)
+	}
+}
+
+func TestPrepareFixText(t *testing.T) {
+	rt := &Runtime{}
+	s := core.DefaultSubtitleSettings()
+	s.UTF8 = false
+	tests := []struct {
+		name, data, want string
+	}{
+		{"mojibake", "1\n00:00:01,000 --> 00:00:02,000\nCafÃ© &amp; crÃ¨me\n", "1\n00:00:01,000 --> 00:00:02,000\nCafé & crème\n"},
+		// Kept as the provider encoded it when there is nothing to repair.
+		{"latin-1", "1\n00:00:01,000 --> 00:00:02,000\nCaf\xe9\n", "1\n00:00:01,000 --> 00:00:02,000\nCaf\xe9\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, format, err := rt.prepare([]byte(tt.data), "srt", "fr", false, &s)
+			if err != nil || string(got) != tt.want || format != "srt" {
+				t.Errorf("prepare got = %q, %q, %v, want = %q, srt, nil", got, format, err, tt.want)
+			}
+		})
 	}
 }
 

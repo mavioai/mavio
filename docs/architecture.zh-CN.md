@@ -92,7 +92,7 @@ mavio/
 │   ├── store/                   # [Go] ent schema、sqlc 查询、Atlas 迁移、仓储实现
 │   ├── naming/                  # [Go] 文件名 / 目录名解析
 │   ├── metadata/                # [Go] NFO 读写、外部 ID、分级体系、元数据合并策略
-│   ├── subtitle/                # [Go] SRT / ASS / SSA / WebVTT 字幕解析、转换与字符集检测；Subzero 的修正、语言与听障字幕识别
+│   ├── subtitle/                # [Go] SRT / ASS / SSA / WebVTT 字幕解析、转换与字符集检测；Subzero 的修正、语言与听障字幕识别；ftfy 的文本修复
 │   ├── imaging/                 # [Go] 图片处理、拼贴、blurhash / thumbhash
 │   ├── media/                   # [Go] 探测、关键帧、硬件加速、播放决策、转码规划、ffmpeg 进程守护
 │   ├── library/                 # [Go] 扫描器、解析器链、任务调度
@@ -545,14 +545,14 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 * **以服务端自己的数据代替 Bazarr 的同步。** 电影、剧集与单集是服务端的条目；文件来自的 release 是其入库所记录的抓取（Bazarr 的 `sceneName` 与历史 refiner），否则是文件名；release 名称由 `libs/release` 解析，代替 guessit；编码、分辨率与音轨语言来自已保存的 probe 结果。Bazarr 的 Sonarr 与 Radarr 同步、路径映射、Plex 与 Jellyfin 刷新、Apprise、调度器、备份与公告，分别对应入库与扫描、条目的流、活动日志与通知插件、`TaskService` 以及 P11。
 * **规则与网络分开**，如资源获取（§13）：配置、决策、历史与阻止列表属于服务端；与字幕站点通信、随站点变化的部分在插件中，从插件目录升级，无需发布服务端。
-* **修正与识别**（`libs/subtitle`）：`Subtitle.ApplyMods` 按 Bazarr 的标识符（`common`、`remove_tags`、`remove_HI`、`OCR_fixes`、`color(name=…)`、`emoji`、`reverse_rtl`、`fix_uppercase`、`shift_offset(…)`、`change_FPS(…)`、`two_point_fit(…)`）对解析出的字幕条目应用 Subzero 的修正，做法与 Subzero 相同：整个文件的修正在逐行修正之前或之后进行，逐行修正按 Subzero 的顺序逐行应用，互斥修正取最后一次出现，时间偏移相加，其他语言的修正以及并非以大写为主的字幕的大写修正不予应用，变空的字幕条目被丢弃；它按 Subzero 的方式返回所用的修正。SSA 与 ASS 文件如 pysubs2 为 Subzero 保留的那样，保留其脚本信息、样式、注释、其他段落以及每个事件的其他字段：以原格式写出时，只重写有变化的字幕条目的时间和文本，并移除被丢弃的条目。修正的正则表达式是 Subzero 的，由 regexp2 执行。`DetectHearingImpaired` 对文件文本应用 Bazarr 的表达式，阿拉伯语与波斯语中圆括号不计。`DetectLanguage` 如 guess_language 那样，按 Unicode 区块与三元组模型识别没有语言的外挂字幕的语言，不使用拼写词典；中文按 hanzidentifier 的字符集区分为 `zh-Hans` 或 `zh-Hant`，只出现简繁共用字符时为 `zh`。OCR 修正词典（Subtitle Edit 的列表加上 Subzero 的补充）、emoji、常规修正据以保留域名的公共后缀列表、guess_language 的模型与 CC-CEDICT 的字符集，由 `internal/cmd/subzerogen` 从各自来源生成，并记录每份数据的来源与许可证。测试将结果与 Bazarr 自身代码的结果比较（`testdata/mods/golden.py`）。
+* **修正与识别**（`libs/subtitle`）：`Subtitle.ApplyMods` 按 Bazarr 的标识符（`common`、`remove_tags`、`remove_HI`、`OCR_fixes`、`color(name=…)`、`emoji`、`reverse_rtl`、`fix_uppercase`、`shift_offset(…)`、`change_FPS(…)`、`two_point_fit(…)`）对解析出的字幕条目应用 Subzero 的修正，做法与 Subzero 相同：整个文件的修正在逐行修正之前或之后进行，逐行修正按 Subzero 的顺序逐行应用，互斥修正取最后一次出现，时间偏移相加，其他语言的修正以及并非以大写为主的字幕的大写修正不予应用，变空的字幕条目被丢弃；它按 Subzero 的方式返回所用的修正。SSA 与 ASS 文件如 pysubs2 为 Subzero 保留的那样，保留其脚本信息、样式、注释、其他段落以及每个事件的其他字段：以原格式写出时，只重写有变化的字幕条目的时间和文本，并移除被丢弃的条目。修正的正则表达式是 Subzero 的，由 regexp2 执行。`DetectHearingImpaired` 对文件文本应用 Bazarr 的表达式，阿拉伯语与波斯语中圆括号不计。`DetectLanguage` 如 guess_language 那样，按 Unicode 区块与三元组模型识别没有语言的外挂字幕的语言，不使用拼写词典；中文按 hanzidentifier 的字符集区分为 `zh-Hans` 或 `zh-Hant`，只出现简繁共用字符时为 `zh`。OCR 修正词典（Subtitle Edit 的列表加上 Subzero 的补充）、emoji、常规修正据以保留域名的公共后缀列表、guess_language 的模型与 CC-CEDICT 的字符集，由 `internal/cmd/subzerogen` 从各自来源生成，并记录每份数据的来源与许可证。测试将结果与 Bazarr 自身代码的结果比较（`testdata/mods/golden.py`）。`FixText` 以 Bazarr 的选项如 ftfy 的 `fix_text` 那样修复文本，Bazarr 对保存的每个字幕都会执行：文本不含 `<` 时解码 HTML 实体，按 ftfy 的 badness 启发式还原乱码，修复 C1 控制字符、拉丁连字、换行、代理项、终端转义与控制字符，并做 NFC 规范化，保留弯引号与全角字符；其字符表由 `internal/cmd/ftfygen` 从 Bazarr 附带的 ftfy 与 CPython 的编解码器生成，测试将其与 ftfy 比较（`testdata/fixtext/golden.py`）。
 
 ### 14.2 流程
 1. **缺少的字幕**：电影或单集的文件入库、被扫描发现或 probe 时，或其字幕配置变化时，把配置想要的字幕与文件的字幕流比较：外挂的，以及设置要求计入时内嵌的，如 Bazarr 的 `list_missing_subtitles`：音轨已是该语言时排除、或仅在音轨是该语言时才要的语言，cutoff，听障字幕可代替普通字幕（配置排除时除外），以及 Bazarr 的语言等价关系。每部电影和每一集缺少的字幕会保存下来（`core.SubtitleWanted`，每个条目一行），使缺字幕列表与搜索不必读取条目的流：搜索、下载、上传、删除与提取会更新其条目的行，扫描会更新只有字幕文件变化的条目的行（`library.Scanner.OnSidecars`），而全部行的刷新（`subtitles.wanted_refresh`）在启动时以及字幕配置、其分配或设置变化后运行；文件缺失的条目的行在文件重新找到之前不出现在列表中。
 2. **搜索**：电影或单集新增或变化的文件（入库的或扫描发现的）经 probe 且条目刷新后（`library.Jobs.Probed`），搜索缺少的字幕，使搜索知道其流与 ID；电影与单集的缺字幕搜索作业也会搜索；首次失败后，自适应搜索在一段延迟之后每个间隔只搜一次该语言，如 Bazarr 的 `is_search_active`。
 3. **查询**：视频由其条目的名称、别名、ID、编号（季、集、绝对集数）、年份、release 名称及解析出的来源、发布组、分辨率、编码、版本与流媒体服务、帧率与 OpenSubtitles 哈希描述；按媒体库的顺序询问其字幕提供者（[插件 §8.11](plugins.zh-CN.md#811-按媒体库的提供者顺序)），一次询问所有缺少的语言。
 4. **评分**：每个候选带有其提供者判定匹配的属性；服务端按 Bazarr 的权重评分（单集满分 360，哈希 359；电影满分 180，哈希 179；哈希仅在其他属性也吻合时计入，IMDb 与 TVDB ID 代表其蕴含的属性），取不低于最低分的最佳者，遵守配置的听障模式、必须包含与不得包含的词，单集还要求剧集、季与集匹配。
-5. **保存**：字幕解码为 UTF-8，经设置所列的修正处理，文本显示为听障字幕时加上听障标记，经 `core.Storage` 写在视频旁、视频所在目录下的某个目录中（`relative` 设置，单个目录名，如 `Subs`），或元数据目录中该条目的目录里（`metadata` 设置，`<id[:2]>/<id>/subtitles/`，取代 Bazarr 的绝对目录，适合无法或不宜写入的媒体库，如云盘），命名为 `<视频>.<语言>[.forced|.hi|.cc|.sdh].<扩展名>`，先写到旁边再改名；它成为条目的外挂流，无需重新 probe 视频。
+5. **保存**：字幕解码为 UTF-8，经设置所列的修正处理，经 `subtitle.FixText` 修复（有改动时以 UTF-8 保存），文本显示为听障字幕时加上听障标记，经 `core.Storage` 写在视频旁、视频所在目录下的某个目录中（`relative` 设置，单个目录名，如 `Subs`），或元数据目录中该条目的目录里（`metadata` 设置，`<id[:2]>/<id>/subtitles/`，取代 Bazarr 的绝对目录，适合无法或不宜写入的媒体库，如云盘），命名为 `<视频>.<语言>[.forced|.hi|.cc|.sdh].<扩展名>`，先写到旁边再改名；它成为条目的外挂流，无需重新 probe 视频。
 6. **历史与通知**：下载连同提供者、分数与匹配项被记录，并记录一条 `subtitle.downloaded` 活动；解码失败或被管理员否决的字幕进入阻止列表，并搜索另一个。
 7. **升级**：升级作业在设置给出的天数内，为低于满分下载的字幕再次搜索，只接受更好的，如 Bazarr 的 `upgrade_subtitles`；被替换的文件删除，历史把两者关联起来。
 8. **手动**：管理员搜索视频的字幕并查看分数与匹配项，下载、上传、删除、修正与同步字幕，并在 §14.3 允许时提取内嵌字幕。

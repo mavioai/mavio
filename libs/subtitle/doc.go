@@ -14,6 +14,8 @@
 // subtitles from their text as Bazarr does, DetectLanguage guesses the
 // language of subtitles without one as Bazarr's guess_language does, and
 // DetectChineseScript tells Simplified from Traditional Chinese by their
-// characters. The data these use is generated from its sources by
-// internal/cmd/subzerogen into data/, which records each origin.
+// characters. FixText repairs text as ftfy's fix_text does for Bazarr:
+// mojibake, HTML entities, control characters and line breaks. The data
+// these use is generated from its sources by internal/cmd/subzerogen and
+// internal/cmd/ftfygen into data/, which records each origin.
 package subtitle

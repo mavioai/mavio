@@ -181,7 +181,8 @@ var errBadSubtitle = errors.New("unusable subtitle")
 
 // fetch downloads a subtitle and prepares it for saving: decoded to
 // UTF-8, converted to SubRip unless the profile keeps the original format,
-// and modified by the settings' mods. Subtitles that cannot be used fail
+// modified by the settings' mods and repaired as ftfy's fix_text (Bazarr's
+// options). Subtitles that cannot be used fail
 // with errBadSubtitle.
 func (r *Runtime) fetch(ctx context.Context, t *target, f *found, video *pluginv1.SubtitleVideo, s *core.SubtitleSettings) ([]byte, string, error) {
 	resp, err := f.plugin.Client.DownloadSubtitle(ctx, pluginv1.DownloadSubtitleRequest_builder{
@@ -245,6 +246,11 @@ func (r *Runtime) prepare(data []byte, format, lang string, original bool, s *co
 			return nil, "", err
 		}
 		changed = true
+	}
+	// Every subtitle saved is repaired as Bazarr's ftfy does; a repaired
+	// one is saved as UTF-8, which holds whatever the repair produced.
+	if fixed := subtitle.FixText(string(text)); fixed != string(text) {
+		text, changed = []byte(fixed), true
 	}
 	if !s.UTF8 && !changed {
 		// Kept as the provider encoded it.

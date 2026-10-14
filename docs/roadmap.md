@@ -743,7 +743,7 @@ flowchart TD
   - [x] Hearing-impaired detection from text (`DetectHearingImpaired`), as Bazarr's `parse_for_hi_regex`
   - [x] Language detection (`DetectLanguage`), as guess_language without spelling dictionaries; Chinese told apart by the character sets of hanzidentifier (`zh-Hans`, `zh-Hant`, `zh` when only shared characters appear; `DetectChineseScript`)
   - [x] Applied to downloads by the settings' mods and to sidecars by hand (`ModifySubtitle`); mods the settings name are checked
-  - [ ] ftfy's text fixes, which Bazarr applies to every subtitle it saves (mojibake, HTML entities, control characters)
+  - [x] ftfy's text fixes, which Bazarr applies to every subtitle it saves (mojibake, HTML entities, control characters): `subtitle.FixText`, a port of ftfy 6.3.1 compared with it
   - [x] Styles and comments of ASS and SSA files kept through the mods, which work on the cues: the script as read, with only the changed cues rewritten
 - [x] Silero VAD (`libs/media/vad`): the 16 kHz model's inference in Go, its weights read from Silero's ONNX file by `internal/cmd/silerogen` and embedded, probabilities within 1e-5 of onnxruntime's on generated noise and on Silero's test recording (the `speech.wav` fixture); a minute of audio takes 0.16 s on ten cores of an M1 Max, 0.5 s on one
 - [x] Synchronization (`libs/media/subsync`, ffsubsync's algorithm over Silero's speech): the speech of cues and of audio read by ffmpeg, alignment by FFT cross-correlation with the frame rate ratios, the golden-section search and the inferred ratio, ffsubsync's quality gate; offsets, ratios and scores the same as ffsubsync's on generated subtitle pairs (`testdata/golden.py`); two hours of subtitles aligned in 0.25 s
