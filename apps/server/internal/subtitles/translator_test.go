@@ -289,7 +289,9 @@ func TestMatchLanguage(t *testing.T) {
 		{"pt-BR", []string{"pt", "pt-br"}, "pt-br", matchExact},
 		{"he", []string{"iw"}, "iw", matchAlias},
 		{"zh-TW", []string{"zh-Hans", "zh-Hant"}, "zh-Hant", matchScript},
-		{"pt-BR", []string{"pt-PT"}, "pt-PT", matchNeutral},
+		{"pt-BR", []string{"pt-PT", "pt"}, "pt", matchNeutral},
+		{"pt-BR", []string{"pt-PT"}, "", matchNone},
+		{"en", []string{"en-GB", "en-US"}, "en-GB", matchVariant},
 		{"fr", []string{"de"}, "", matchNone},
 	} {
 		if m, tier := matchLanguage(c.want, c.languages); m != c.match || tier != c.tier {

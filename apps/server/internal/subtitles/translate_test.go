@@ -28,6 +28,8 @@ type fakeTranslator struct {
 	enabled bool
 	markup  bool
 	batch   int32
+	// sources and targets are its languages; none for any.
+	sources, targets []string
 	// fail fails translations while set.
 	fail *bool
 
@@ -40,6 +42,7 @@ func (f *fakeTranslator) ListSubtitleTranslators(context.Context, *pluginv1.List
 		pluginv1.SubtitleTranslatorInfo_builder{
 			Name: proto.String("upper"), DisplayName: proto.String("Upper"), Enabled: proto.Bool(f.enabled),
 			BatchSize: proto.Int32(f.batch), Markup: proto.Bool(f.markup),
+			SourceLanguages: f.sources, TargetLanguages: f.targets,
 		}.Build(),
 	}}.Build(), nil
 }

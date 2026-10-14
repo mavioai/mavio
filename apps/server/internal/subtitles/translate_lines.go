@@ -3,6 +3,7 @@ package subtitles
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -52,13 +53,17 @@ type matchTier int
 const (
 	matchExact matchTier = iota
 	// matchAlias is the same language under another code, such as "iw"
-	// for "he".
+	// for "he", or "zh-Hant-TW" for "zh-TW".
 	matchAlias
-	// matchScript is the same language in the script one of them names,
-	// such as "zh-Hant" for "zh-TW".
+	// matchScript is a parent of the language naming its script, such as
+	// "zh-Hant" for "zh-TW".
 	matchScript
-	// matchNeutral is the same language, such as "pt" for "pt-BR".
+	// matchNeutral is another parent of the language, such as "pt" for
+	// "pt-BR"; a sibling such as "pt-PT" is not one.
 	matchNeutral
+	// matchVariant is a variant of the language, such as "en-US" for
+	// "en", for translators that know no language without its region.
+	matchVariant
 	matchNone
 )
 
@@ -68,40 +73,63 @@ func matchLanguage(want string, languages []string) (string, matchTier) {
 	if len(languages) == 0 {
 		return want, matchExact
 	}
+	for _, l := range languages {
+		if strings.EqualFold(l, want) {
+			return l, matchExact
+		}
+	}
 	wt, err := language.Parse(want)
 	if err != nil {
-		for _, l := range languages {
-			if strings.EqualFold(l, want) {
-				return l, matchExact
-			}
-		}
 		return "", matchNone
 	}
-	wc := canonical(wt)
+	wantParents := parents(wt)
 	best, tier := "", matchNone
 	for _, l := range languages {
 		lt, err := language.Parse(l)
 		if err != nil {
 			continue
 		}
-		var t matchTier
+		t := matchNone
 		switch {
-		case strings.EqualFold(l, want):
-			return l, matchExact
-		case canonical(lt) == wc:
+		case alias(lt, wt):
 			t = matchAlias
-		case base(lt) == base(wt) && script(lt) == script(wt) && (explicitScript(lt) || explicitScript(wt)):
-			t = matchScript
-		case base(lt) == base(wt):
+		case slices.ContainsFunc(wantParents, func(p language.Tag) bool { return alias(lt, p) }):
 			t = matchNeutral
-		default:
-			continue
+			if explicitScript(lt) {
+				t = matchScript
+			}
+		case slices.ContainsFunc(parents(lt), func(p language.Tag) bool { return alias(p, wt) }):
+			t = matchVariant
 		}
 		if t < tier {
 			best, tier = l, t
 		}
 	}
 	return best, tier
+}
+
+// alias reports whether two tags name the same language: the same tag
+// canonicalized, or with the same region and script, one implied.
+func alias(a, b language.Tag) bool {
+	if canonical(a) == canonical(b) {
+		return true
+	}
+	ar, aok := explicitRegion(a)
+	br, bok := explicitRegion(b)
+	return aok && bok && ar == br && base(a) == base(b) && script(a) == script(b)
+}
+
+// parents returns a tag's parents, closest first, as CLDR's, ending with
+// its language alone: "zh-Hant" and "zh" for "zh-TW".
+func parents(t language.Tag) []language.Tag {
+	var out []language.Tag
+	for p := t.Parent(); !p.IsRoot(); p = p.Parent() {
+		out = append(out, p)
+	}
+	if b, err := language.Compose(base(t)); err == nil && b != t && !slices.Contains(out, b) {
+		out = append(out, b)
+	}
+	return out
 }
 
 func canonical(t language.Tag) language.Tag {
@@ -113,7 +141,7 @@ func canonical(t language.Tag) language.Tag {
 }
 
 func base(t language.Tag) language.Base {
-	b, _ := t.Base()
+	b, _ := canonical(t).Base()
 	return b
 }
 
@@ -122,6 +150,12 @@ func base(t language.Tag) language.Base {
 func explicitScript(t language.Tag) bool {
 	_, s, _ := t.Raw()
 	return s != language.Script{}
+}
+
+// explicitRegion returns the region a tag names.
+func explicitRegion(t language.Tag) (language.Region, bool) {
+	_, _, r := t.Raw()
+	return r, r != language.Region{}
 }
 
 func script(t language.Tag) language.Script {

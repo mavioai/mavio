@@ -234,11 +234,13 @@ func (r *Runtime) Translate(ctx context.Context, p TranslatePayload) (core.Subti
 		logger: r.logger().With("item", t.item.ID, "source", src.name), record: &core.SubtitleTranslationRecord{SourceLanguage: src.language.Language},
 	}
 	for i, c := range sub.Cues {
+		// Cues without spoken text, such as SSA drawings, keep theirs.
+		spoken := subtitle.SpokenText(c.Text)
 		content := c.Text
 		if mode == textPlain {
-			content = subtitle.PlainText(content)
+			content = spoken
 		}
-		if strings.TrimSpace(content) != "" {
+		if strings.TrimSpace(spoken) != "" {
 			tr.items = append(tr.items, &cueItem{cue: i, position: len(tr.items) + 1, start: c.Start, end: c.End, lines: strings.Split(content, "\n")})
 		}
 	}

@@ -213,6 +213,9 @@ type cueItem struct {
 	lines         []string
 	// translated is its translation's lines; nil until translated.
 	translated []string
+	// kept is set when the translator answered nothing and the cue kept
+	// its text.
+	kept bool
 }
 
 // text is the cue's text as translators get it: its lines, joined with
@@ -345,7 +348,7 @@ func (tr *translation) finish(it *cueItem, translated string) {
 		translated = subtitle.PlainText(translated)
 	}
 	if strings.TrimSpace(translated) == "" {
-		it.translated = it.lines
+		it.translated, it.kept = it.lines, true
 		return
 	}
 	it.translated = subtitleLines(translated, len(it.lines), tr.s.PreserveLineBreaks, tr.s.StripFormatting)
@@ -384,7 +387,8 @@ func (tr *translation) context(it *cueItem, before bool) string {
 			continue
 		}
 		cl := contextLine{Position: c.position, Line: line}
-		if before && c.translated != nil {
+		// A cue kept untranslated is no example of a translation.
+		if before && c.translated != nil && !c.kept {
 			cl.Translation = strings.TrimSpace(strings.Join(c.translated, " "))
 		}
 		lines = append(lines, marshalJSON(cl))
@@ -453,19 +457,28 @@ func (tr *translation) translateBatch(ctx context.Context, c chained, items []*c
 	for i, it := range items {
 		batch[i] = batchItem{Position: it.position, Line: it.text(tr.s.PreserveLineBreaks)}
 	}
-	resp, err := tr.r.complete(ctx, tr.s, tr.record, c.translator, pluginv1.CompleteAiRequest_builder{
+	req := pluginv1.CompleteAiRequest_builder{
 		System:       proto.String(fillPrompt(tr.s.Prompt, tr.values(c))),
 		Messages:     []*pluginv1.AiMessage{userMessage(marshalJSON(batch))},
 		OutputSchema: proto.String(batchSchema),
-	}.Build())
-	if err != nil {
-		return err
-	}
+	}.Build()
 	var answer struct {
 		Translations []batchItem `json:"translations"`
 	}
-	if err := json.Unmarshal([]byte(resp.GetOutputJson()), &answer); err != nil {
-		return fmt.Errorf("the model's translations: %w", err)
+	// A malformed answer is asked again, as a service unavailable.
+	err := tr.r.retry(ctx, tr.s, func(ctx context.Context) error {
+		resp, err := tr.r.completeOnce(ctx, tr.record, c.translator, req)
+		if err != nil {
+			return err
+		}
+		answer.Translations = nil
+		if err := json.Unmarshal([]byte(resp.GetOutputJson()), &answer); err != nil {
+			return connect.NewError(connect.CodeUnavailable, fmt.Errorf("the model's translations: %w", err))
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	byPosition := map[int][]string{}
 	for _, a := range answer.Translations {
@@ -477,7 +490,7 @@ func (tr *translation) translateBatch(ctx context.Context, c chained, items []*c
 		lines, ok := byPosition[it.position]
 		if !ok {
 			tr.logger.WarnContext(ctx, "cue missing from the translations", "position", it.position)
-			it.translated = it.lines
+			it.translated, it.kept = it.lines, true
 			continue
 		}
 		tr.finish(it, strings.Join(lines, "\n"))
@@ -522,14 +535,20 @@ func userMessage(text string) *pluginv1.AiMessage {
 // complete asks an AI model, retrying as the settings say, and adds what
 // it used to a record.
 func (r *Runtime) complete(ctx context.Context, s *core.SubtitleTranslationSettings, rec *core.SubtitleTranslationRecord, t *translator, req *pluginv1.CompleteAiRequest) (*pluginv1.CompleteAiResponse, error) {
-	req.SetProvider(t.provider)
-	req.SetModel(t.model)
 	var resp *pluginv1.CompleteAiResponse
 	err := r.retry(ctx, s, func(ctx context.Context) error {
 		var err error
-		resp, err = t.ai.CompleteAi(ctx, req)
+		resp, err = r.completeOnce(ctx, rec, t, req)
 		return err
 	})
+	return resp, err
+}
+
+// completeOnce asks an AI model once, and adds what it used to a record.
+func (r *Runtime) completeOnce(ctx context.Context, rec *core.SubtitleTranslationRecord, t *translator, req *pluginv1.CompleteAiRequest) (*pluginv1.CompleteAiResponse, error) {
+	req.SetProvider(t.provider)
+	req.SetModel(t.model)
+	resp, err := t.ai.CompleteAi(ctx, req)
 	if err != nil {
 		return nil, err
 	}

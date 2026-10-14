@@ -23,7 +23,7 @@ const JobTranslateWanted = "subtitles.translate_wanted"
 // episodes, taken in turns and starting after those of the run before,
 // whose file is old enough get the languages they lack translated from a
 // subtitle they have in one of the source languages. A translation
-// pending for the same language is not queued again.
+// pending or running for the same language is not queued again.
 func (r *Runtime) TranslateWanted(ctx context.Context) error {
 	s := r.settings()
 	a := &s.Translation.Automation
@@ -51,6 +51,10 @@ func (r *Runtime) TranslateWanted(ctx context.Context) error {
 	if len(ids) == 0 {
 		return nil
 	}
+	running, err := r.runningTranslations(ctx)
+	if err != nil {
+		return err
+	}
 	r.autoMu.Lock()
 	cursor := r.autoCursor % len(ids)
 	r.autoMu.Unlock()
@@ -58,7 +62,7 @@ func (r *Runtime) TranslateWanted(ctx context.Context) error {
 	queued, looked := 0, 0
 	for ; looked < len(ids) && queued < a.MaxPerRun; looked++ {
 		id := ids[(cursor+looked)%len(ids)]
-		n, err := r.translateMissing(ctx, id, &s, now)
+		n, err := r.translateMissing(ctx, id, &s, now, running)
 		if err != nil {
 			r.logger().WarnContext(ctx, "translate wanted subtitles", "item", id, "err", err)
 			continue
@@ -72,9 +76,29 @@ func (r *Runtime) TranslateWanted(ctx context.Context) error {
 	return nil
 }
 
+// runningTranslations returns the unique keys of the translations
+// running.
+func (r *Runtime) runningTranslations(ctx context.Context) (map[string]bool, error) {
+	out := map[string]bool{}
+	q := core.JobQuery{Kinds: []string{JobTranslate}, States: []core.JobState{core.JobRunning}}
+	for {
+		page, err := r.Store.Jobs().List(ctx, q)
+		if err != nil {
+			return nil, fmt.Errorf("list subtitle translations running: %w", err)
+		}
+		for _, j := range page.Items {
+			out[j.UniqueKey] = true
+		}
+		q.Offset += len(page.Items)
+		if len(page.Items) == 0 || q.Offset >= page.Total {
+			return out, nil
+		}
+	}
+}
+
 // translateMissing queues translations of what a movie or an episode
-// lacks, reporting how many were queued.
-func (r *Runtime) translateMissing(ctx context.Context, id core.ID, s *core.SubtitleSettings, now time.Time) (int, error) {
+// lacks but those running, reporting how many were queued.
+func (r *Runtime) translateMissing(ctx context.Context, id core.ID, s *core.SubtitleSettings, now time.Time, running map[string]bool) (int, error) {
 	t, err := r.load(ctx, id, s)
 	if err != nil {
 		return 0, err
@@ -97,7 +121,8 @@ func (r *Runtime) translateMissing(ctx context.Context, id core.ID, s *core.Subt
 	}
 	n := 0
 	for _, l := range missing {
-		if sameLanguage(l.Language, src.language.Language) {
+		key := fmt.Sprintf("%s:%s:%s", JobTranslate, id, l)
+		if sameLanguage(l.Language, src.language.Language) || running[key] {
 			continue
 		}
 		p := TranslatePayload{ItemID: id, Path: src.path, Language: l}
@@ -110,7 +135,7 @@ func (r *Runtime) translateMissing(ctx context.Context, id core.ID, s *core.Subt
 		}
 		job := core.Job{
 			ID: core.NewID(), Kind: JobTranslate, Payload: payload, MaxAttempts: 1, RunAt: now,
-			UniqueKey: fmt.Sprintf("%s:%s:%s", JobTranslate, id, l),
+			UniqueKey: key,
 		}
 		added, err := r.Store.Jobs().Enqueue(ctx, &job)
 		if err != nil {
@@ -131,29 +156,32 @@ type automationSourceSubtitle struct {
 }
 
 // automationSource returns the subtitle of a target the automation
-// translates from: one in the first of the languages it has, a file
-// before an embedded stream, and not forced.
+// translates from: one in the first of the languages it has, not forced,
+// preferably not for the hearing impaired, as Lingarr's with captions
+// ignored, and a file before an embedded stream.
 func (r *Runtime) automationSource(ctx context.Context, t *target, languages []string) (automationSourceSubtitle, bool) {
 	extractable := r.Extracted != nil && r.readable(ctx, t.source().Path)
 	for _, l := range languages {
-		var embedded *subtitleStream
-		for i := range t.subs {
-			sub := &t.subs[i]
-			if sub.language.Forced || !sameLanguage(sub.language.Language, l) {
-				continue
-			}
-			if p := sub.stream.ExternalPath; p != "" {
-				if subtitle.CanParse(strings.TrimPrefix(strings.ToLower(path.Ext(p)), ".")) {
-					return automationSourceSubtitle{language: sub.language, path: p}, true
+		for _, hi := range []bool{false, true} {
+			var embedded *subtitleStream
+			for i := range t.subs {
+				sub := &t.subs[i]
+				if sub.language.Forced || sub.language.HearingImpaired != hi || !sameLanguage(sub.language.Language, l) {
+					continue
 				}
-				continue
+				if p := sub.stream.ExternalPath; p != "" {
+					if subtitle.CanParse(strings.TrimPrefix(strings.ToLower(path.Ext(p)), ".")) {
+						return automationSourceSubtitle{language: sub.language, path: p}, true
+					}
+					continue
+				}
+				if embedded == nil && extractable && sub.stream.IsTextSubtitle() {
+					embedded = sub
+				}
 			}
-			if embedded == nil && extractable && sub.stream.IsTextSubtitle() {
-				embedded = sub
+			if embedded != nil {
+				return automationSourceSubtitle{language: embedded.language, stream: embedded.stream.Index}, true
 			}
-		}
-		if embedded != nil {
-			return automationSourceSubtitle{language: embedded.language, stream: embedded.stream.Index}, true
 		}
 	}
 	return automationSourceSubtitle{}, false
