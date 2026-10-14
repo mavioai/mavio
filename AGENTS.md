@@ -54,7 +54,7 @@ libs/apple/           Swift packages the Apple apps share: MavioKit, MavioPlayer
 apps/android{,-tv}/   Android apps (Compose, Compose for TV), Gradle builds that include libs/android
 libs/android/         Gradle modules the Android apps share: core, player, ui
 libs/client-rust/     Shared Rust core of the clients (Cargo workspace; api = generated messages and clients; capi = C ABI and its Go binding)
-libs/design/          Design system of the clients: tokens, icons, strings, component specifications; gen/ for every client
+libs/design/          Design system of the clients: tokens, icons, the logo, strings, component specifications; gen/ for every client
 tools/nx-go/          Local Nx plugin: infers an Nx project from every go.mod and builds the dependency graph
 tools/nx-cargo/       Local Nx plugin: infers an Nx project from every Cargo workspace
 tools/{fixtures,testport}/  Test media generation, test case porting

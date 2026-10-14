@@ -54,7 +54,7 @@ libs/apple/           Apple 各应用共享的 Swift 包：MavioKit、MavioPlaye
 apps/android{,-tv}/   Android 各应用（Compose、Compose for TV），引入 libs/android 的 Gradle 构建
 libs/android/         Android 各应用共享的 Gradle 模块：core、player、ui
 libs/client-rust/     客户端的 Rust 共享核心（Cargo workspace；api 为生成的消息与客户端；capi 为 C ABI 及其 Go 绑定）
-libs/design/          客户端的设计系统：tokens、图标、字符串、组件规范；gen/ 为每个客户端生成
+libs/design/          客户端的设计系统：tokens、图标、标志、字符串、组件规范；gen/ 为每个客户端生成
 tools/nx-go/          本地 Nx 插件：把每个 go.mod 推断为 Nx 项目并生成依赖图
 tools/nx-cargo/       本地 Nx 插件：把每个 Cargo workspace 推断为 Nx 项目
 tools/{fixtures,testport}/  测试媒体生成、测试用例移植

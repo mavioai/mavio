@@ -28,7 +28,7 @@ Each app is built for one interaction model — touch, the television remote, th
 | `libs/client-rust` | Rust: servers, sign-in, events, offline store, playback reporting, downloads | Every native app: through UniFFI from Swift and Kotlin, through a C ABI from Go |
 | `libs/apple` | Swift packages: the core's Swift API and app services, the player, shared SwiftUI components | `apps/ios`, `apps/tvos`, `apps/macos` |
 | `libs/android` | Kotlin modules: the core's Kotlin API and app services, the player, shared Compose components | `apps/android`, `apps/android-tv` |
-| `libs/design` | Design tokens (DTCG JSON), icons, component specifications and strings, compiled for every client | Every client |
+| `libs/design` | Design tokens (DTCG JSON), icons, the logo, component specifications and strings, compiled for every client | Every client |
 
 ---
 
@@ -189,11 +189,17 @@ The clients share one identity and one structure, and each looks native on its p
 ### 6.1 Design Tokens
 Colors, typography, spacing, radii, elevation and motion are defined once in `libs/design/tokens` in the W3C Design Tokens (DTCG) format. Style Dictionary resolves them and `pnpm nx run design:generate` compiles them, with the icons and strings, into `libs/design/gen/{ts,swift,kotlin,go}`. The generated code is committed and CI checks that it is current, as with `libs/proto/gen`.
 * **Color**: a dark theme first, which suits artwork and dim rooms, and a light theme; both meet WCAG AA contrast, which the generator checks for every pair of text and background.
-* **Typography**: the type scale (sizes, weights, line heights) is shared; the family is the platform's system font — SF Pro on Apple platforms, Roboto on Android, Segoe UI Variable on Windows, and Inter, shipped with the app, on Linux and the web — so that Dynamic Type and font scaling apply. The brand typeface appears only in the logo and display titles.
+* **Typography**: the type scale (sizes, weights, line heights) is shared; the family is the platform's system font — SF Pro on Apple platforms, Roboto on Android, Segoe UI Variable on Windows, and Inter, shipped with the app, on Linux and the web — so that Dynamic Type and font scaling apply. A brand typeface appears only in display titles; the logo is drawn rather than set (§6.2.1).
 * **Sizes per form factor**: the tokens have phone, tablet, desktop and television values (television sized for 10-foot viewing and overscan-safe margins).
 
 ### 6.2 Icons
 Content and brand icons are [Phosphor](https://phosphoricons.com/) (MIT), pinned in `libs/design/icons/icons.json`, which maps semantic names to Phosphor names; the generator copies their SVG sources into `libs/design/icons/svg` and compiles them into path data for the web UI and for MyGo, which draws them itself, asset catalog images and Android vector drawables. Regular and Fill weights mark inactive and active states (favorite, mute, loop, subtitles) without shifting the layout. System controls use the platform's icons — SF Symbols on Apple platforms (share, AirPlay, Picture in Picture, menus) and Material Symbols on Android — where users expect them.
+
+#### 6.2.1 Logo
+The logo has two forms, kept as SVG sources in `libs/design/brand`, and the two never appear together:
+* **Mark**: an uppercase M folded like a ribbon — two stems behind, and two diagonals in front that shade the stems where they cross them — drawn on a grid of 64 units with stems and diagonals 16 wide (`mark.svg`). It is the app icon, on a white background (`app-icon-light.svg`) or a black one (`app-icon-dark.svg`), and replaces the wordmark where that would be narrower than 64 px.
+* **Wordmark**: "Mavio" drawn from straight strokes 12 wide and 45° cuts, with a cap height of 64 and an x-height of 44 (`wordmark.svg`); in a single color, white or black, only where a gradient cannot be drawn (`wordmark-white.svg`, `wordmark-black.svg`).
+* **Color**: a gradient from yellow `#FFD34E` through orange `#FF9A2E` to red `#F0412F`, running from the top left to the bottom right.
 
 ### 6.3 Information Architecture
 Every client has the same screens with the same names, reached the same way:

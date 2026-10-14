@@ -28,7 +28,7 @@
 | `libs/client-rust` | Rust：服务器、登录、事件、离线存储、播放上报、下载 | 所有原生应用：Swift 与 Kotlin 经 UniFFI，Go 经 C ABI |
 | `libs/apple` | Swift 包：核心的 Swift API 与应用服务、播放器、共享的 SwiftUI 组件 | `apps/ios`、`apps/tvos`、`apps/macos` |
 | `libs/android` | Kotlin 模块：核心的 Kotlin API 与应用服务、播放器、共享的 Compose 组件 | `apps/android`、`apps/android-tv` |
-| `libs/design` | 设计 tokens（DTCG JSON）、图标、组件规范与字符串，为每个客户端编译 | 所有客户端 |
+| `libs/design` | 设计 tokens（DTCG JSON）、图标、标志、组件规范与字符串，为每个客户端编译 | 所有客户端 |
 
 ---
 
@@ -189,11 +189,17 @@ flowchart LR
 ### 6.1 设计 tokens
 颜色、字体、间距、圆角、层级与动效在 `libs/design/tokens` 中以 W3C Design Tokens（DTCG）格式一次定义。由 Style Dictionary 解析，`pnpm nx run design:generate` 将其与图标、字符串一起编译到 `libs/design/gen/{ts,swift,kotlin,go}`。生成的代码提交入库，CI 检查其是否最新，与 `libs/proto/gen` 相同。
 * **颜色**：深色主题优先，适合海报图与暗光环境，另有浅色主题；两者对比度均达到 WCAG AA，由生成器检查每一组文字与背景。
-* **字体**：字号层级（字号、字重、行高）共享；字体族用平台的系统字体——Apple 平台用 SF Pro，Android 用 Roboto，Windows 用 Segoe UI Variable，Linux 与 Web 用随应用附带的 Inter——以便 Dynamic Type 与字体缩放生效。品牌字体只用于标志与展示性标题。
+* **字体**：字号层级（字号、字重、行高）共享；字体族用平台的系统字体——Apple 平台用 SF Pro，Android 用 Roboto，Windows 用 Segoe UI Variable，Linux 与 Web 用随应用附带的 Inter——以便 Dynamic Type 与字体缩放生效。品牌字体只用于展示性标题；标志是画出来的，不用字体排出（§6.2.1）。
 * **按设备形态取值**：tokens 有手机、平板、桌面与电视四档取值（电视按 3 米观看距离设计，并留出防过扫描边距）。
 
 ### 6.2 图标
 内容与品牌图标使用 [Phosphor](https://phosphoricons.com/)（MIT），固定版本，`libs/design/icons/icons.json` 将语义名称映射到 Phosphor 名称；生成器把其 SVG 源复制到 `libs/design/icons/svg`，并编译为供 Web UI 与 MyGo（自行绘制）使用的路径数据、资源目录图像与 Android 矢量图。Regular 与 Fill 两种字重标示未激活与激活状态（收藏、静音、循环、字幕），不引起布局偏移。用户期待系统图标之处，系统控件使用平台图标——Apple 平台用 SF Symbols（分享、AirPlay、画中画、菜单），Android 用 Material Symbols。
+
+#### 6.2.1 标志
+标志有两种形态，以 SVG 源文件保存在 `libs/design/brand`，两者从不同时出现：
+* **符号**：一个像缎带一样折叠的大写 M——两根立柱在后，两道斜笔在前，压过立柱处在立柱上投下阴影——画在 64 单位的方格上，立柱与斜笔宽 16（`mark.svg`）。它就是应用图标，放在白底（`app-icon-light.svg`）或黑底（`app-icon-dark.svg`）上；字标宽度不足 64 px 之处改用符号。
+* **字标**：“Mavio”由 12 宽的直线笔画与 45° 切角画成，大写高 64，x 高度 44（`wordmark.svg`）；只在无法绘制渐变之处使用白色或黑色单色版（`wordmark-white.svg`、`wordmark-black.svg`）。
+* **颜色**：从黄 `#FFD34E` 经橙 `#FF9A2E` 到红 `#F0412F` 的渐变，由左上到右下。
 
 ### 6.3 信息架构
 所有客户端拥有相同的页面、相同的名称与相同的到达路径：
