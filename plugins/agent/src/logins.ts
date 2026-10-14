@@ -1,5 +1,5 @@
 // Logins relayed to an administrator: a provider's login flow runs in the
-// plugin while the server polls it for the links, codes and prompts to
+// plugin while the server follows it for the links, codes and prompts to
 // show and answers its prompts.
 
 import { randomUUID } from "node:crypto";
@@ -29,6 +29,14 @@ interface Login {
 	error?: string;
 	abort: AbortController;
 	ended?: number;
+	/** Wakes the watches of the login when it changes. */
+	waiters: Set<() => void>;
+}
+
+/** changed wakes a login's watches. */
+function changed(login: Login): void {
+	for (const wake of login.waiters) wake();
+	login.waiters.clear();
 }
 
 /** How long a finished login stays readable. */
@@ -52,7 +60,7 @@ export class Logins {
 	start(providerId: string, type: AuthType): string {
 		this.#expire();
 		const id = randomUUID();
-		const login: Login = { state: "running", events: [], abort: new AbortController() };
+		const login: Login = { state: "running", events: [], abort: new AbortController(), waiters: new Set() };
 		this.#logins.set(id, login);
 		const interaction = {
 			signal: login.abort.signal,
@@ -64,8 +72,12 @@ export class Logins {
 					}
 					const pending = { id: randomUUID(), prompt, resolve, reject };
 					login.prompt = pending;
+					changed(login);
 					const settle = () => {
-						if (login.prompt === pending) login.prompt = undefined;
+						if (login.prompt === pending) {
+							login.prompt = undefined;
+							changed(login);
+						}
 					};
 					const abort = () => {
 						settle();
@@ -86,6 +98,7 @@ export class Logins {
 			notify: (event: AuthEvent) => {
 				login.events.push(event);
 				if (login.events.length > maxEvents) login.events.splice(0, login.events.length - maxEvents);
+				changed(login);
 			},
 		};
 		this.#models.login(providerId, type, interaction).then(
@@ -104,13 +117,33 @@ export class Logins {
 	get(id: string): LoginView | undefined {
 		this.#expire();
 		const login = this.#logins.get(id);
-		if (!login) return undefined;
-		return {
-			state: login.state,
-			events: [...login.events],
-			...(login.prompt ? { prompt: { id: login.prompt.id, prompt: login.prompt.prompt } } : {}),
-			...(login.error !== undefined ? { error: login.error } : {}),
-		};
+		return login && view(login);
+	}
+
+	/**
+	 * Yields a login's view, then again each time it changes, until it ends
+	 * or signal aborts; nothing for an unknown login.
+	 */
+	async *watch(id: string, signal?: AbortSignal): AsyncGenerator<LoginView> {
+		this.#expire();
+		const login = this.#logins.get(id);
+		if (!login) return;
+		for (;;) {
+			let wake = () => {};
+			const changes = new Promise<void>((resolve) => {
+				wake = resolve;
+			});
+			// Changes while the view is consumed are not missed.
+			login.waiters.add(wake);
+			const v = view(login);
+			yield v;
+			if (v.state !== "running") return;
+			signal?.addEventListener("abort", wake, { once: true });
+			await changes;
+			signal?.removeEventListener("abort", wake);
+			login.waiters.delete(wake);
+			if (signal?.aborted) return;
+		}
 	}
 
 	/**
@@ -145,6 +178,7 @@ export class Logins {
 		login.prompt = undefined;
 		if (error !== undefined && state === "failed") login.error = error;
 		login.ended = this.#now();
+		changed(login);
 	}
 
 	#expire(): void {
@@ -153,4 +187,14 @@ export class Logins {
 			if (login.ended !== undefined && now - login.ended > keep) this.#logins.delete(id);
 		}
 	}
+}
+
+/** view returns what a login has shown. */
+function view(login: Login): LoginView {
+	return {
+		state: login.state,
+		events: [...login.events],
+		...(login.prompt ? { prompt: { id: login.prompt.id, prompt: login.prompt.prompt } } : {}),
+		...(login.error !== undefined ? { error: login.error } : {}),
+	};
 }

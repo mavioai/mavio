@@ -17,6 +17,7 @@ import { customProvider, parseConfig } from "./config.ts";
 import { FileCredentialStore } from "./credentials.ts";
 import { gateway } from "./gateway.ts";
 import { Logins } from "./logins.ts";
+import { Deleted } from "./purge.ts";
 import { sessions } from "./sessions.ts";
 
 /** The plugin's ID and version, as its manifest gives them. */
@@ -53,7 +54,13 @@ export async function openPlugin(o: PluginOptions = {}): Promise<Plugin> {
 	const builtIn = new Set(models.getProviders().map((p) => p.id));
 	let custom = new Set<string>();
 	const logins = new Logins(models);
-	const storage: Storage = o.dataDir ? await openNodeSqliteStorage(join(o.dataDir, "agent.db")) : new MemoryStorage();
+	const deleted = new Deleted(o.dataDir ? join(o.dataDir, "deleted-sessions.json") : undefined);
+	let storage: Storage = new MemoryStorage();
+	if (o.dataDir) {
+		const db = join(o.dataDir, "agent.db");
+		await deleted.purge(db);
+		storage = await openNodeSqliteStorage(db);
+	}
 	const harness = await Harness.open(storage, { models, registry: createRegistry() }, BACKGROUND_CONTEXT);
 	// Answers the last process left unfinished go on.
 	harness.resume();
@@ -80,7 +87,7 @@ export async function openPlugin(o: PluginOptions = {}): Promise<Plugin> {
 				shutdown: () => ({}),
 			});
 			router.service(AiGatewayService, gateway({ models, credentials, logins, custom: () => custom }));
-			router.service(AgentSessionService, sessions(harness));
+			router.service(AgentSessionService, sessions(harness, deleted));
 		},
 		async close() {
 			logins.close();

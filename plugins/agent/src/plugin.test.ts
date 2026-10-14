@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { create } from "@bufbuild/protobuf";
 import { Code, ConnectError, createClient, createRouterTransport } from "@connectrpc/connect";
 import { createProvider, type OAuthAuth, type Provider } from "@earendil-works/pi-ai";
@@ -103,6 +104,24 @@ describe("gateway", () => {
 		expect(res.usage).toBeDefined();
 	});
 
+	test("streams completions", async () => {
+		const faux = fauxProvider({ tokenSize: { min: 2, max: 2 } });
+		faux.setResponses([fauxAssistantMessage("Bonjour tout le monde"), fauxAssistantMessage("", { stopReason: "error", errorMessage: "429 Too Many Requests" })]);
+		const { ai } = await start([faux.provider]);
+		const completion = { provider: "faux", model: "faux-1", messages: [{ role: AiRole.USER, text: "Hello everyone" }] };
+		const texts: string[] = [];
+		let done;
+		for await (const r of ai.streamAi({ completion })) {
+			if (r.event.case === "text") texts.push(r.event.value);
+			else if (r.event.case === "done") done = r.event.value;
+		}
+		expect(texts.length).toBeGreaterThan(1);
+		expect(texts.join("")).toBe("Bonjour tout le monde");
+		expect(done?.text).toBe("Bonjour tout le monde");
+		expect(done?.usage).toBeDefined();
+		expect(await code(Array.fromAsync(ai.streamAi({ completion })))).toBe(Code.Unavailable);
+	});
+
 	test("answers with the output schema", async () => {
 		const faux = fauxProvider();
 		const translations = { translations: [{ position: 1, line: "Hello" }] };
@@ -155,24 +174,21 @@ describe("gateway", () => {
 	test("relays OAuth logins", async () => {
 		const { ai } = await start([oauthProvider()]);
 		const { loginId } = await ai.startAiLogin({ provider: "example" });
-		let login = await ai.getAiLogin({ loginId });
-		for (let i = 0; i < 100 && !login.prompt; i++) {
-			await Bun.sleep(5);
-			login = await ai.getAiLogin({ loginId });
-		}
+		const watch = ai.watchAiLogin({ loginId })[Symbol.asyncIterator]();
+		let login = (await watch.next()).value!;
+		while (!login.prompt) login = (await watch.next()).value!;
 		expect(login.state).toBe(AiLoginState.RUNNING);
+		expect((await ai.getAiLogin({ loginId })).prompt?.id).toBe(login.prompt.id);
 		expect(login.events[0]?.event).toEqual({
 			case: "url",
 			value: expect.objectContaining({ url: "https://example.com/authorize", instructions: "Open the link" }),
 		});
 		expect(login.prompt?.kind).toBe(AiLoginPromptKind.MANUAL_CODE);
 		expect(await code(ai.answerAiLogin({ loginId, promptId: "stale", value: "x" }))).toBe(Code.FailedPrecondition);
-		await ai.answerAiLogin({ loginId, promptId: login.prompt!.id, value: "42" });
-		for (let i = 0; i < 100 && login.state === AiLoginState.RUNNING; i++) {
-			await Bun.sleep(5);
-			login = await ai.getAiLogin({ loginId });
-		}
+		await ai.answerAiLogin({ loginId, promptId: login.prompt.id, value: "42" });
+		for (let r = await watch.next(); !r.done; r = await watch.next()) login = r.value;
 		expect(login.state).toBe(AiLoginState.SUCCEEDED);
+		expect(await code(ai.watchAiLogin({ loginId: "missing" })[Symbol.asyncIterator]().next())).toBe(Code.NotFound);
 		const example = (await ai.listAiProviders({})).providers.find((p) => p.id === "example");
 		expect(example?.credential).toBe(AiCredential.OAUTH);
 		expect(example?.available).toBe(true);
@@ -184,12 +200,9 @@ describe("gateway", () => {
 		const { ai } = await start([oauthProvider()]);
 		const { loginId } = await ai.startAiLogin({ provider: "example" });
 		await ai.cancelAiLogin({ loginId });
-		let login = await ai.getAiLogin({ loginId });
-		for (let i = 0; i < 100 && login.state === AiLoginState.RUNNING; i++) {
-			await Bun.sleep(5);
-			login = await ai.getAiLogin({ loginId });
-		}
-		expect(login.state).toBe(AiLoginState.CANCELED);
+		let state = AiLoginState.UNSPECIFIED;
+		for await (const login of ai.watchAiLogin({ loginId })) state = login.state;
+		expect(state).toBe(AiLoginState.CANCELED);
 		expect(await code(ai.startAiLogin({ provider: "keyed" }))).toBe(Code.NotFound);
 	});
 });
@@ -281,5 +294,54 @@ describe("sessions", () => {
 		expect((await agents.listAgentSessions({})).sessions).toEqual([]);
 		expect(await code(agents.getAgentSession({ id }))).toBe(Code.NotFound);
 		expect(await code(agents.sendAgentMessage({ sessionId: "nope", text: "Hi" }))).toBe(Code.NotFound);
+	});
+
+	test("stream answers", async () => {
+		const faux = fauxProvider({ tokenSize: { min: 1, max: 1 }, tokensPerSecond: 50 });
+		faux.setResponses([fauxAssistantMessage("The capital of France is Paris.")]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1" });
+		const texts: string[] = [];
+		let done;
+		for await (const r of agents.streamAgentMessage({ message: { sessionId: session!.id, text: "Capital of France?" } })) {
+			if (r.event.case === "text") texts.push(r.event.value);
+			else if (r.event.case === "done") done = r.event.value;
+		}
+		expect(done?.answer?.text).toBe("The capital of France is Paris.");
+		expect(texts.length).toBeGreaterThan(0);
+		for (const t of texts) expect("The capital of France is Paris.".startsWith(t)).toBe(true);
+		expect(await code(Array.fromAsync(agents.streamAgentMessage({ message: { sessionId: "nope", text: "Hi" } })))).toBe(Code.NotFound);
+	});
+
+	test("are purged once deleted", async () => {
+		const dir = mkdtempSync(join(tmpdir(), "mavio-agent-"));
+		const faux = fauxProvider();
+		faux.setResponses([fauxAssistantMessage("Paris."), fauxAssistantMessage("Rome.")]);
+		let { plugin, agents } = await start([faux.provider], dir);
+		const ids: string[] = [];
+		for (const q of ["Capital of France?", "Capital of Italy?"]) {
+			const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1" });
+			await agents.sendAgentMessage({ sessionId: session!.id, text: q });
+			ids.push(session!.id);
+		}
+		await agents.deleteAgentSession({ id: ids[0]! });
+		await plugin.close();
+		open.splice(open.indexOf(plugin), 1);
+
+		const rows = (id: string) => {
+			const db = new DatabaseSync(join(dir, "agent.db"));
+			try {
+				return (db.prepare("SELECT count(*) AS n FROM entries WHERE conversation_id = ?").get(Number(id)) as { n: number }).n;
+			} finally {
+				db.close();
+			}
+		};
+		expect(rows(ids[0]!)).toBeGreaterThan(0);
+		({ agents } = await start([faux.provider], dir));
+		expect(rows(ids[0]!)).toBe(0);
+		expect(rows(ids[1]!)).toBeGreaterThan(0);
+		const kept = await agents.getAgentSession({ id: ids[1]! });
+		expect(kept.messages.map((m) => m.text)).toEqual(["Capital of Italy?", "Rome."]);
+		expect(readFileSync(join(dir, "deleted-sessions.json"), "utf8")).toBe("[]");
 	});
 });

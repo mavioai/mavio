@@ -37,9 +37,11 @@ import {
 	AiThinking,
 	type AiUsage,
 	AiUsageSchema,
+	type CompleteAiRequest,
 	CompleteAiRequestSchema,
+	CompleteAiResponseSchema,
 } from "@mavio/proto/mavio/plugin/v1/ai_pb";
-import type { Logins, LoginState } from "./logins.ts";
+import type { Logins, LoginState, LoginView } from "./logins.ts";
 
 /** The tool a model answers through when the request has an output schema. */
 export const outputTool = "respond";
@@ -201,23 +203,12 @@ export function gateway(o: GatewayOptions): Partial<ServiceImpl<typeof AiGateway
 		async getAiLogin(req) {
 			const login = o.logins.get(req.loginId);
 			if (!login) throw new ConnectError(`no login ${req.loginId}`, Code.NotFound);
-			const p = login.prompt?.prompt;
-			return {
-				state: loginStates[login.state],
-				events: login.events.map(event),
-				...(login.prompt && p
-					? {
-							prompt: create(AiLoginPromptSchema, {
-								id: login.prompt.id,
-								kind: promptKinds[p.type],
-								message: p.message,
-								placeholder: "placeholder" in p ? (p.placeholder ?? "") : "",
-								options: p.type === "select" ? p.options.map((x) => ({ id: x.id, label: x.label, description: x.description ?? "" })) : [],
-							}),
-						}
-					: {}),
-				error: login.error ?? "",
-			};
+			return loginState(login);
+		},
+
+		async *watchAiLogin(req, ctx) {
+			if (!o.logins.get(req.loginId)) throw new ConnectError(`no login ${req.loginId}`, Code.NotFound);
+			for await (const login of o.logins.watch(req.loginId, ctx.signal)) yield loginState(login);
 		},
 
 		async answerAiLogin(req) {
@@ -239,75 +230,136 @@ export function gateway(o: GatewayOptions): Partial<ServiceImpl<typeof AiGateway
 		},
 
 		async completeAi(req, ctx) {
-			const m = o.models.getModel(req.provider, req.model);
-			if (!m) throw new ConnectError(`no model ${req.provider}/${req.model}`, Code.NotFound);
-			const now = Date.now();
-			const messages: Message[] = req.messages.map((x) =>
-				x.role === AiRole.ASSISTANT
-					? {
-							role: "assistant",
-							content: [{ type: "text", text: x.text }],
-							api: m.api,
-							provider: m.provider,
-							model: m.id,
-							usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
-							stopReason: "stop",
-							timestamp: now,
-						}
-					: { role: "user", content: x.text, timestamp: now },
-			);
-			const context: Context = { messages };
-			let system = req.system;
-			if (req.outputSchema !== "") {
-				let parameters: TSchema;
-				try {
-					parameters = JSON.parse(req.outputSchema) as TSchema;
-				} catch (e) {
-					throw new ConnectError(`output_schema: ${e instanceof Error ? e.message : e}`, Code.InvalidArgument);
-				}
-				const tool: Tool = {
-					name: outputTool,
-					description: "Respond with the result.",
-					parameters,
-					constrainedSampling: { type: "json_schema", strict: "prefer" },
-				};
-				context.tools = [tool];
-				system = [system, `Respond only by calling the ${outputTool} tool once with the result.`].filter((s) => s !== "").join("\n\n");
-			}
-			if (system !== "") context.systemPrompt = system;
-			if (!(await o.models.checkAuth(m.provider, { signal: ctx.signal }))) {
-				throw new ConnectError(`no credential for ${m.provider}`, Code.Unauthenticated);
-			}
-			const reasoning = thinkingLevels[req.thinking];
+			const c = await completion(o.models, req, ctx.signal);
 			let answer: AssistantMessage;
 			try {
-				answer = await o.models.completeSimple(m, context, {
-					signal: ctx.signal,
-					...(reasoning ? { reasoning } : {}),
-					...(req.maxTokens > 0 ? { maxTokens: req.maxTokens } : {}),
-					...(isFieldSet(req, CompleteAiRequestSchema.field.temperature) ? { temperature: req.temperature } : {}),
-				});
+				answer = await o.models.completeSimple(c.model, c.context, c.options);
 			} catch (e) {
 				throw ConnectError.from(e);
 			}
-			if (answer.stopReason === "error" || answer.stopReason === "aborted") throw failure(answer);
-			const response = { text: text(answer), outputJson: "", usage: usage(answer.usage), stopReason: answer.stopReason };
-			if (req.outputSchema !== "") {
-				const call = answer.content.find((c) => c.type === "toolCall" && c.name === outputTool);
-				if (call?.type === "toolCall") {
-					response.outputJson = JSON.stringify(call.arguments);
-				} else {
-					// Models that ignore the tool often answer with the JSON itself.
-					const json = response.text.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, "");
-					try {
-						response.outputJson = JSON.stringify(JSON.parse(json));
-					} catch {
-						throw new ConnectError("the model did not answer with the output schema", Code.Unknown);
-					}
+			return response(req, answer);
+		},
+
+		async *streamAi(req, ctx) {
+			if (!req.completion) throw new ConnectError("completion is required", Code.InvalidArgument);
+			const c = await completion(o.models, req.completion, ctx.signal);
+			let answer: AssistantMessage | undefined;
+			try {
+				for await (const e of o.models.streamSimple(c.model, c.context, c.options)) {
+					if (e.type === "text_delta") yield { event: { case: "text", value: e.delta } };
+					else if (e.type === "thinking_delta") yield { event: { case: "thinking", value: e.delta } };
+					else if (e.type === "done") answer = e.message;
+					else if (e.type === "error") answer = e.error;
 				}
+			} catch (e) {
+				throw ConnectError.from(e);
 			}
-			return response;
+			if (!answer) throw new ConnectError("the model's answer ended early", Code.Unavailable);
+			yield { event: { case: "done", value: create(CompleteAiResponseSchema, response(req.completion, answer)) } };
 		},
 	};
 }
 
+
+/** loginState converts what a login has shown. */
+function loginState(login: LoginView) {
+	const p = login.prompt?.prompt;
+	return {
+		state: loginStates[login.state],
+		events: login.events.map(event),
+		...(login.prompt && p
+			? {
+					prompt: create(AiLoginPromptSchema, {
+						id: login.prompt.id,
+						kind: promptKinds[p.type],
+						message: p.message,
+						placeholder: "placeholder" in p ? (p.placeholder ?? "") : "",
+						options: p.type === "select" ? p.options.map((x) => ({ id: x.id, label: x.label, description: x.description ?? "" })) : [],
+					}),
+				}
+			: {}),
+		error: login.error ?? "",
+	};
+}
+
+/** A completion pi-ai is asked for. */
+interface Completion {
+	model: Model<Api>;
+	context: Context;
+	options: Parameters<MutableModels["completeSimple"]>[2];
+}
+
+/** completion converts a request into what pi-ai is asked, checking the model and its credential. */
+async function completion(models: MutableModels, req: CompleteAiRequest, signal: AbortSignal): Promise<Completion> {
+	const m = models.getModel(req.provider, req.model);
+	if (!m) throw new ConnectError(`no model ${req.provider}/${req.model}`, Code.NotFound);
+	const now = Date.now();
+	const messages: Message[] = req.messages.map((x) =>
+		x.role === AiRole.ASSISTANT
+			? {
+					role: "assistant",
+					content: [{ type: "text", text: x.text }],
+					api: m.api,
+					provider: m.provider,
+					model: m.id,
+					usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, totalTokens: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } },
+					stopReason: "stop",
+					timestamp: now,
+				}
+			: { role: "user", content: x.text, timestamp: now },
+	);
+	const context: Context = { messages };
+	let system = req.system;
+	if (req.outputSchema !== "") {
+		let parameters: TSchema;
+		try {
+			parameters = JSON.parse(req.outputSchema) as TSchema;
+		} catch (e) {
+			throw new ConnectError(`output_schema: ${e instanceof Error ? e.message : e}`, Code.InvalidArgument);
+		}
+		const tool: Tool = {
+			name: outputTool,
+			description: "Respond with the result.",
+			parameters,
+			constrainedSampling: { type: "json_schema", strict: "prefer" },
+		};
+		context.tools = [tool];
+		system = [system, `Respond only by calling the ${outputTool} tool once with the result.`].filter((s) => s !== "").join("\n\n");
+	}
+	if (system !== "") context.systemPrompt = system;
+	if (!(await models.checkAuth(m.provider, { signal }))) {
+		throw new ConnectError(`no credential for ${m.provider}`, Code.Unauthenticated);
+	}
+	const reasoning = thinkingLevels[req.thinking];
+	return {
+		model: m,
+		context,
+		options: {
+			signal,
+			...(reasoning ? { reasoning } : {}),
+			...(req.maxTokens > 0 ? { maxTokens: req.maxTokens } : {}),
+			...(isFieldSet(req, CompleteAiRequestSchema.field.temperature) ? { temperature: req.temperature } : {}),
+		},
+	};
+}
+
+/** response converts a model's answer, failing for a failed one. */
+function response(req: CompleteAiRequest, answer: AssistantMessage) {
+	if (answer.stopReason === "error" || answer.stopReason === "aborted") throw failure(answer);
+	const r = { text: text(answer), outputJson: "", usage: usage(answer.usage), stopReason: answer.stopReason };
+	if (req.outputSchema !== "") {
+		const call = answer.content.find((c) => c.type === "toolCall" && c.name === outputTool);
+		if (call?.type === "toolCall") {
+			r.outputJson = JSON.stringify(call.arguments);
+		} else {
+			// Models that ignore the tool often answer with the JSON itself.
+			const json = r.text.replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, "");
+			try {
+				r.outputJson = JSON.stringify(JSON.parse(json));
+			} catch {
+				throw new ConnectError("the model did not answer with the output schema", Code.Unknown);
+			}
+		}
+	}
+	return r;
+}

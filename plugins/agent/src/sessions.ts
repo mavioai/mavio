@@ -3,10 +3,21 @@
 
 import { create } from "@bufbuild/protobuf";
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
-import { BACKGROUND_CONTEXT, withAbortSignal } from "@earendil-works/chord/context";
+import { BACKGROUND_CONTEXT, type Context, withAbortSignal } from "@earendil-works/chord/context";
 import { Code, ConnectError, type ServiceImpl } from "@connectrpc/connect";
 import type { AssistantMessage, Usage, UserMessage } from "@earendil-works/pi-ai";
-import { AssistantEntry, type Conversation, type ConversationId, defineDoc, type Harness, UsageDoc, UserEntry } from "@earendil-works/pi-durable";
+import {
+	AssistantEntry,
+	type Conversation,
+	type ConversationId,
+	defineDoc,
+	type Harness,
+	LiveDoc,
+	type LiveState,
+	type SettledSubmissionRecord,
+	UsageDoc,
+	UserEntry,
+} from "@earendil-works/pi-durable";
 import {
 	type AgentMessage,
 	AgentMessageSchema,
@@ -14,8 +25,12 @@ import {
 	AgentSessionSchema,
 	type AgentSessionService,
 	AiRole,
+	type SendAgentMessageRequest,
+	type SendAgentMessageResponse,
+	SendAgentMessageResponseSchema,
 } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { text, usage } from "./gateway.ts";
+import type { Deleted } from "./purge.ts";
 
 /** What the plugin keeps of a session besides its conversation. */
 interface SessionInfo {
@@ -29,7 +44,7 @@ interface SessionInfo {
 
 /**
  * The sessions, by conversation ID. Deleting a session removes it here;
- * pi-durable keeps its entries.
+ * its conversation is purged when the plugin next starts (purge.ts).
  */
 const SessionIndex = defineDoc<{ sessions: Record<string, SessionInfo> }>({
 	kind: "mavio.sessions",
@@ -82,7 +97,7 @@ function conversationId(id: string): ConversationId {
 }
 
 /** sessions implements AgentSessionService over a harness. */
-export function sessions(harness: Harness, now: () => number = Date.now): Partial<ServiceImpl<typeof AgentSessionService>> {
+export function sessions(harness: Harness, deleted: Deleted, now: () => number = Date.now): Partial<ServiceImpl<typeof AgentSessionService>> {
 	const index = async () => (await harness.snapshot(SessionIndex, BACKGROUND_CONTEXT))?.sessions ?? {};
 
 	const find = async (id: string): Promise<{ info: SessionInfo; conversation: Conversation }> => {
@@ -103,6 +118,31 @@ export function sessions(harness: Harness, now: () => number = Date.now): Partia
 			created: timestampFromMs(info.created),
 			updated: timestampFromMs(info.updated),
 			usage: usage(total),
+		});
+	};
+
+	const submit = async (req: SendAgentMessageRequest, context: Context) => {
+		const { conversation } = await find(req.sessionId);
+		const submission = await conversation.submit(
+			{ type: "input", content: req.text, ...(req.requestId !== "" ? { requestId: req.requestId } : {}) },
+			context,
+		);
+		return { conversation, submission };
+	};
+
+	/** answer returns the answer a submission settled with. */
+	const answer = async (id: string, conversation: Conversation, settled: SettledSubmissionRecord): Promise<SendAgentMessageResponse> => {
+		await touch(id);
+		if (settled.type !== "input" || settled.status !== "done") {
+			throw new ConnectError(`the model did not answer: ${settled.reason ?? settled.status}`, Code.Unavailable);
+		}
+		const entry = await conversation.commit((tx) => tx.entry(AssistantEntry, settled.answer), BACKGROUND_CONTEXT);
+		const m = entry?.model?.[0];
+		if (m?.role !== "assistant") throw new ConnectError("the answer is missing", Code.Internal);
+		const a = m as AssistantMessage;
+		return create(SendAgentMessageResponseSchema, {
+			answer: create(AgentMessageSchema, { role: AiRole.ASSISTANT, text: text(a), time: timestampFromMs(a.timestamp) }),
+			usage: usage(a.usage),
 		});
 	};
 
@@ -160,25 +200,66 @@ export function sessions(harness: Harness, now: () => number = Date.now): Partia
 		},
 
 		async sendAgentMessage(req, ctx) {
-			const { conversation } = await find(req.sessionId);
 			const context = withAbortSignal(ctx.signal, BACKGROUND_CONTEXT);
-			const submission = await conversation.submit(
-				{ type: "input", content: req.text, ...(req.requestId !== "" ? { requestId: req.requestId } : {}) },
-				context,
-			);
-			const settled = await submission.wait(context);
-			await touch(req.sessionId);
-			if (settled.type !== "input" || settled.status !== "done") {
-				throw new ConnectError(`the model did not answer: ${settled.reason ?? settled.status}`, Code.Unavailable);
-			}
-			const entry = await conversation.commit((tx) => tx.entry(AssistantEntry, settled.answer), BACKGROUND_CONTEXT);
-			const m = entry?.model?.[0];
-			if (m?.role !== "assistant") throw new ConnectError("the answer is missing", Code.Internal);
-			const answer = m as AssistantMessage;
-			return {
-				answer: create(AgentMessageSchema, { role: AiRole.ASSISTANT, text: text(answer), time: timestampFromMs(answer.timestamp) }),
-				usage: usage(answer.usage),
+			const { conversation, submission } = await submit(req, context);
+			return answer(req.sessionId, conversation, await submission.wait(context));
+		},
+
+		async *streamAgentMessage(req, ctx) {
+			const message = req.message;
+			if (!message) throw new ConnectError("message is required", Code.InvalidArgument);
+			const context = withAbortSignal(ctx.signal, BACKGROUND_CONTEXT);
+			const { conversation, submission } = await submit(message, context);
+			// The run the submission started presents its answer in progress.
+			const watch = await harness.watchDoc(LiveDoc, conversationId(message.sessionId), context);
+			let shown = "";
+			let pending: string | undefined;
+			let wake = () => {};
+			const show = (live: Readonly<LiveState> | null) => {
+				const partial = live?.generation?.message;
+				const t = partial ? text(partial as AssistantMessage) : "";
+				if (t !== "" && t !== shown) {
+					shown = pending = t;
+					wake();
+				}
 			};
+			if (watch) {
+				show(watch.value);
+				watch.start(async (live) => show(live));
+			}
+			let settled: { value: SendAgentMessageResponse } | { error: unknown } | undefined;
+			submission.wait(context).then(
+				async (s) => {
+					try {
+						settled = { value: await answer(message.sessionId, conversation, s) };
+					} catch (error) {
+						settled = { error };
+					}
+					wake();
+				},
+				(error: unknown) => {
+					settled = { error };
+					wake();
+				},
+			);
+			try {
+				for (;;) {
+					if (pending !== undefined) {
+						const t = pending;
+						pending = undefined;
+						yield { event: { case: "text", value: t } };
+						continue;
+					}
+					if (settled) break;
+					await new Promise<void>((resolve) => {
+						wake = resolve;
+					});
+				}
+			} finally {
+				await watch?.stop();
+			}
+			if ("error" in settled) throw settled.error;
+			yield { event: { case: "done", value: settled.value } };
 		},
 
 		async deleteAgentSession(req) {
@@ -187,6 +268,7 @@ export function sessions(harness: Harness, now: () => number = Date.now): Partia
 			await harness.commit(async (tx) => {
 				delete (await tx.doc(SessionIndex)).sessions[req.id];
 			}, BACKGROUND_CONTEXT);
+			await deleted.add(req.id);
 			return {};
 		},
 	};
