@@ -750,7 +750,11 @@ flowchart TD
 - [x] End-to-end tests (`apps/server/internal/server/subtitles_test.go`, `subtitle_flows_test.go`)
   - [x] A scanned film gets the French subtitles its library's profile wants from the subtitles plugin against a fake Subsarr on the loopback interface; deletion, upload, mods by hand and the settings' checks through `SubtitleService`
   - [x] A film and an episode grabbed from a fake Newznab indexer through a fake SABnzbd and imported get their French subtitles at once; the film's best subtitle, failing to decode, is blocklisted and replaced by the next, 2.5 s late on the speech recording that is the film's audio and synchronized against it; the upgrade task replaces the episode's with a better one once Subsarr has it
-- [ ] Later: translation (Google, Gemini, Lingarr) and Whisper transcription, as provider types of their own
+  - [x] The episode's French subtitles translated to Spanish by hand with a fake Lingarr, credited; Whisper, a fake whisper-asr-webservice, detects the film's audio is French from its first 30 seconds and translates it all to English, the plugin reading the audio through the host API
+- [x] Translation and transcription, as in Bazarr ([Architecture §14.5](architecture.md#145-translation-and-transcription)): by hand only, through `SUBTITLE_TRANSLATOR`; Whisper transcribing to the audio's language or translating to English only, as a provider
+  - [x] `SUBTITLE_TRANSLATOR` and `SubtitleService.TranslateSubtitle` and `ListSubtitleTranslators`: external files and, on local and network storage, embedded text streams translated as `subtitles.translate` jobs, in the translators' batches, with or without SubRip's markup, the format kept or SubRip, credited, recorded as `translated` at the settings' default score
+  - [x] Google Translate (its free page for phones, as deep_translator), Gemini (key rotation and rest, batches split, right-to-left lines embedded) and Lingarr in `plugins/subtitles`
+  - [x] Whisper as a provider of `plugins/subtitles`: the audio streamed from the host API (`/subtitles/audio/{token}`, 16 kHz PCM aligned with the video, only on local and network storage), the language from the streams' tags or detected, Bazarr's mappings and ambiguous codes
 
 ---
 

@@ -45,6 +45,21 @@ type Video struct {
 	FileHash          string
 	AudioLanguages    []string
 	OriginalLanguage  string
+	// AudioURL serves the video's audio through the host API (see
+	// Env.Host); "" when the server does not read it, as on cloud drives.
+	AudioURL string
+	// AudioStreams are the video's audio streams.
+	AudioStreams []AudioStream
+}
+
+// AudioStream is an audio stream of a video.
+type AudioStream struct {
+	// Index is the stream's among the audio streams, from 0, which the
+	// audio URL's "stream" parameter takes.
+	Index int
+	// Language is the stream's tag as the file holds it, such as "eng",
+	// "ger" or "und"; "" when it has none.
+	Language string
 }
 
 // IMDbID returns the IMDb ID of the movie, or of the series of an episode.
@@ -103,6 +118,8 @@ type Env struct {
 	Captcha CaptchaSolver
 	// RetryWait is how long providers wait before retrying a request.
 	RetryWait time.Duration
+	// Host reaches the server's host API, such as videos' audio URLs.
+	Host *http.Client
 }
 
 // CaptchaSolver solves the captchas of sites with a captcha solving

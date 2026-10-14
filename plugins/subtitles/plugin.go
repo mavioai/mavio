@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/captcha"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/provider"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/throttle"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/translator"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/web"
 )
 
@@ -29,6 +30,8 @@ const retryWait = 10 * time.Second
 // config is the plugin's configuration.
 type config struct {
 	Providers []providerConfig `json:"providers"`
+	// Translators are the subtitle translators and their settings.
+	Translators []providerConfig `json:"translators"`
 	// Proxy is the proxy the sites are reached through; nil for none.
 	Proxy *web.Proxy `json:"proxy,omitempty"`
 	// FlareSolverr solves Cloudflare's challenges; nil for none.
@@ -52,7 +55,7 @@ func (c *config) validate() error {
 	return nil
 }
 
-// providerConfig is a provider's configuration.
+// providerConfig is a provider's or translator's configuration.
 type providerConfig struct {
 	Name    string `json:"name"`
 	Enabled bool   `json:"enabled"`
@@ -69,23 +72,38 @@ type configured struct {
 	err error
 }
 
+// configuredTranslator is an enabled translator.
+type configuredTranslator struct {
+	def        *translator.Definition
+	translator translator.Translator
+	// err is why the translator could not be made from its settings.
+	err error
+}
+
 // plugin implements the plugin's services.
 type plugin struct {
 	log     *slog.Logger
 	version string
 	// client returns the client the sites are reached with.
-	client   func(web.Config) *http.Client
+	client func(web.Config) *http.Client
+	// host returns the client reaching the server's host API, which the
+	// runtime sets once serving; nil for none.
+	host     func() *http.Client
 	dataDir  string
 	throttle *throttle.Throttle
 	defs     []provider.Definition
 	byName   map[string]*provider.Definition
+	// translatorDefs are the translators, by name in translatorByName.
+	translatorDefs   []translator.Definition
+	translatorByName map[string]*translator.Definition
 	// now is the clock; time.Now when nil.
 	now func() time.Time
 	// retryWait is how long providers wait before retrying.
 	retryWait time.Duration
 
-	mu      sync.RWMutex
-	enabled map[string]*configured
+	mu          sync.RWMutex
+	enabled     map[string]*configured
+	translators map[string]*configuredTranslator
 }
 
 // clientTimeout is how long requests to the sites take at most, as
@@ -93,15 +111,18 @@ type plugin struct {
 const clientTimeout = 30 * time.Second
 
 // newPlugin returns the plugin keeping the throttled providers and the
-// providers' data in dataDir, and reaching the sites with the clients
-// client returns; web.NewClient's when nil.
-func newPlugin(log *slog.Logger, version, dataDir string, client func(web.Config) *http.Client) (*plugin, error) {
+// providers' data in dataDir, reaching the sites with the clients client
+// returns, web.NewClient's when nil, and the host API with the client host
+// returns.
+func newPlugin(log *slog.Logger, version, dataDir string, client func(web.Config) *http.Client, host func() *http.Client) (*plugin, error) {
 	if client == nil {
 		client = func(c web.Config) *http.Client { return web.NewClient(c, clientTimeout) }
 	}
 	p := &plugin{
-		log: log, version: version, client: client, dataDir: dataDir, defs: definitions(),
+		log: log, version: version, client: client, host: host, dataDir: dataDir, defs: definitions(),
 		byName: map[string]*provider.Definition{}, enabled: map[string]*configured{}, retryWait: retryWait,
+		translatorDefs: translatorDefinitions(), translatorByName: map[string]*translator.Definition{},
+		translators: map[string]*configuredTranslator{},
 	}
 	file := ""
 	if dataDir != "" {
@@ -115,6 +136,9 @@ func newPlugin(log *slog.Logger, version, dataDir string, client func(web.Config
 	for i := range p.defs {
 		p.byName[p.defs[i].Name] = &p.defs[i]
 	}
+	for i := range p.translatorDefs {
+		p.translatorByName[p.translatorDefs[i].Name] = &p.translatorDefs[i]
+	}
 	return p, nil
 }
 
@@ -125,9 +149,16 @@ func (p *plugin) clock() time.Time {
 	return time.Now()
 }
 
+func (p *plugin) hostClient() *http.Client {
+	if p.host == nil {
+		return nil
+	}
+	return p.host()
+}
+
 // env is what a provider is made with.
 func (p *plugin) env(name string, hc *http.Client, solver provider.CaptchaSolver) provider.Env {
-	env := provider.Env{HTTP: hc, Now: p.clock, Log: p.log.With("provider", name), Captcha: solver, RetryWait: p.retryWait}
+	env := provider.Env{HTTP: hc, Now: p.clock, Log: p.log.With("provider", name), Captcha: solver, RetryWait: p.retryWait, Host: p.hostClient()}
 	if p.dataDir != "" {
 		env.DataDir = filepath.Join(p.dataDir, "providers", name)
 	}
@@ -140,9 +171,10 @@ func (p *plugin) Describe(context.Context, *pluginv1.DescribeRequest) (*pluginv1
 	return pluginv1.DescribeResponse_builder{Manifest: m}.Build(), nil
 }
 
-// Configure takes a configuration, whose providers replace those
-// enabled, reaching the sites through its proxy and FlareSolverr and
-// solving captchas with its service. As Bazarr's, changing a provider's
+// Configure takes a configuration, whose providers and translators
+// replace those enabled, reaching the sites through its proxy and
+// FlareSolverr and solving captchas with its service; translators are
+// reached through the proxy only. As Bazarr's, changing a provider's
 // settings forgets its throttling for authentication and configuration
 // failures, and the throttling of providers no longer enabled is
 // forgotten.
@@ -184,9 +216,13 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 		}
 		enabled[pc.Name] = cp
 	}
+	translators, err := p.configureTranslators(c)
+	if err != nil {
+		return nil, err
+	}
 	p.mu.Lock()
 	old := p.enabled
-	p.enabled = enabled
+	p.enabled, p.translators = enabled, translators
 	p.mu.Unlock()
 	for name, cp := range enabled {
 		if prev := old[name]; prev == nil || prev.settings != cp.settings {
@@ -195,6 +231,36 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 	}
 	p.throttle.Retain(func(name string) bool { return enabled[name] != nil })
 	return &pluginv1.ConfigureResponse{}, nil
+}
+
+// configureTranslators makes the enabled translators of a configuration.
+// Translations take minutes, bounded by the translators themselves
+// rather than the sites' timeout.
+func (p *plugin) configureTranslators(c config) (map[string]*configuredTranslator, error) {
+	hc := *p.client(web.Config{Proxy: c.Proxy})
+	hc.Timeout = 0
+	out, seen := map[string]*configuredTranslator{}, map[string]bool{}
+	for i, tc := range c.Translators {
+		def, ok := p.translatorByName[tc.Name]
+		switch {
+		case !ok:
+			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("translators[%d]: unknown translator %q", i, tc.Name))
+		case seen[tc.Name]:
+			return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("translators[%d]: translator %q is repeated", i, tc.Name))
+		}
+		seen[tc.Name] = true
+		if !tc.Enabled {
+			continue
+		}
+		ct := &configuredTranslator{def: def}
+		env := provider.Env{HTTP: &hc, Now: p.clock, Log: p.log.With("translator", def.Name), RetryWait: p.retryWait, Host: p.hostClient()}
+		ct.translator, ct.err = def.New(env, tc.Settings)
+		if ct.err != nil {
+			p.log.Warn("configure subtitle translator", "translator", def.Name, "err", ct.err)
+		}
+		out[tc.Name] = ct
+	}
+	return out, nil
 }
 
 // resetAuth forgets a provider's throttling for failures its settings
@@ -215,10 +281,10 @@ func (p *plugin) Shutdown(context.Context, *pluginv1.ShutdownRequest) (*pluginv1
 	return &pluginv1.ShutdownResponse{}, nil
 }
 
-// settingFields describes a provider's settings.
-func settingFields(def *provider.Definition) []*pluginv1.SettingField {
+// settingFields describes a provider's or translator's settings.
+func settingFields(settings []provider.Setting) []*pluginv1.SettingField {
 	var out []*pluginv1.SettingField
-	for _, s := range def.Settings {
+	for _, s := range settings {
 		f := pluginv1.SettingField_builder{
 			Name: proto.String(s.Name), Label: proto.String(s.Label), HelpText: proto.String(s.Help),
 			Advanced: proto.Bool(s.Advanced), Secret: proto.Bool(s.Type == provider.Password),

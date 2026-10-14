@@ -57,6 +57,7 @@ import (
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/turkcealtyaziorg"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/tvsubtitles"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/vladoonmooo"
+	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/whisperai"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/wizdom"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/xsubs"
 	"github.com/mavioai/mavio/plugins/subtitles/internal/providers/yavkanet"
@@ -123,6 +124,7 @@ func definitions() []provider.Definition {
 		turkcealtyaziorg.Definition(),
 		tvsubtitles.Definition(),
 		vladoonmooo.Definition(),
+		whisperai.Definition(),
 		wizdom.Definition(),
 		xsubs.Definition(),
 		yavkanet.Definition(),

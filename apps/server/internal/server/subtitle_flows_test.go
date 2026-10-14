@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -91,6 +92,72 @@ func (f *fakeSubsarr) serve(w http.ResponseWriter, r *http.Request) {
 // speechCues times cues as a subtitler might from the speech of a
 // recording: runs above one half, pauses under 0.4 s bridged, rounded to
 // 100 ms and shifted by shift.
+// fakeLingarr is a Lingarr translating by upper-casing.
+func fakeLingarr(t *testing.T) *httptest.Server {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			TargetLanguage string `json:"targetLanguage"`
+			Lines          []struct {
+				Position int    `json:"position"`
+				Line     string `json:"line"`
+			} `json:"lines"`
+		}
+		if r.URL.Path != "/api/translate/content" || json.NewDecoder(r.Body).Decode(&req) != nil || req.TargetLanguage != "es" {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		for i := range req.Lines {
+			req.Lines[i].Line = strings.ToUpper(req.Lines[i].Line)
+		}
+		_ = json.NewEncoder(w).Encode(req.Lines)
+	}))
+	t.Cleanup(srv.Close)
+	return srv
+}
+
+// fakeWhisper is a whisper-asr-webservice detecting French and
+// transcribing to a cue, recording the sizes of the audio it is sent.
+type fakeWhisper struct {
+	*httptest.Server
+
+	mu     sync.Mutex
+	detect []int
+	asr    []whisperTask
+}
+
+// whisperTask is a transcription Whisper was asked for.
+type whisperTask struct {
+	task, language string
+	size           int64
+}
+
+func newFakeWhisper(t *testing.T) *fakeWhisper {
+	f := &fakeWhisper{}
+	f.Server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		file, _, err := r.FormFile("audio_file")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		n, _ := io.Copy(io.Discard, file)
+		f.mu.Lock()
+		defer f.mu.Unlock()
+		switch r.URL.Path {
+		case "/detect-language":
+			f.detect = append(f.detect, int(n))
+			_, _ = io.WriteString(w, `{"language_code":"fr","detected_language":"french"}`)
+		case "/asr":
+			q := r.URL.Query()
+			f.asr = append(f.asr, whisperTask{q.Get("task"), q.Get("language"), n})
+			_, _ = io.WriteString(w, "1\n00:00:01,000 --> 00:00:02,000\nHello.\n")
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(f.Close)
+	return f
+}
+
 func speechCues(s subsync.Speech, shift time.Duration) []subtitle.Cue {
 	var cues []subtitle.Cue
 	at := func(i int) time.Duration {
@@ -155,10 +222,12 @@ func TestSubtitleFlows(t *testing.T) {
 	// Subsarr is enabled in the plugin; subtitles are downloaded whatever
 	// their scores, those of movies synchronized whatever theirs, those of
 	// episodes never.
-	subsarr := newFakeSubsarr(t)
+	subsarr, lingarr, whisper := newFakeSubsarr(t), fakeLingarr(t), newFakeWhisper(t)
 	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId:   new("org.mavio.subtitles"),
-		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}}]}`),
+		PluginId: new("org.mavio.subtitles"),
+		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}},
+			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}],
+			"translators": [{"name": "lingarr", "enabled": true, "settings": {"url": "` + lingarr.URL + `"}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -322,5 +391,57 @@ func TestSubtitleFlows(t *testing.T) {
 	// The film's subtitles have no better: they stay.
 	if h := history(movieID, acquisitionv1.SubtitleAction_SUBTITLE_ACTION_UPGRADED); len(h) != 0 {
 		t.Errorf("upgrades of the film = %v, want none", h)
+	}
+
+	// 4. The episode's French subtitles are translated to Spanish with
+	// Lingarr, credited.
+	if _, err := subs.TranslateSubtitle(ctx, acquisitionv1.TranslateSubtitleRequest_builder{
+		ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("org.mavio.subtitles/lingarr"),
+		Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new("es")}.Build(),
+	}.Build()); err != nil {
+		t.Fatalf("TranslateSubtitle: %v", err)
+	}
+	waitFor(t, "the episode's subtitles translated", func() bool {
+		return len(history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)) == 1
+	}, describe(pilot.GetId()))
+	spanish, err := os.ReadFile(strings.TrimSuffix(episodeFile, filepath.Ext(episodeFile)) + ".es.srt")
+	if err != nil || !strings.Contains(string(spanish), "BONJOUR, WALTER.") || !strings.Contains(string(spanish), "# Subtitles translated with Lingarr #") {
+		t.Errorf("translation = %q, %v; want the cue upper-cased and Lingarr credited", spanish, err)
+	}
+
+	// 5. Whisper detected the audio of the film and of the episode is
+	// French when they were searched, from their first 30 seconds the
+	// plugin gets through the host API; it translates all of the film's
+	// to English.
+	found, err := subs.SearchItemSubtitles(ctx, acquisitionv1.SearchItemSubtitlesRequest_builder{
+		ItemId: new(movieID), Languages: []*acquisitionv1.SubtitleLanguageSpec{acquisitionv1.SubtitleLanguageSpec_builder{Language: new("en")}.Build()},
+	}.Build())
+	if err != nil {
+		t.Fatalf("SearchItemSubtitles: %v", err)
+	}
+	var transcribed *acquisitionv1.ScoredSubtitle
+	for _, sub := range found.GetSubtitles() {
+		if sub.GetProvider() == "org.mavio.subtitles/whisperai" {
+			transcribed = sub
+		}
+	}
+	if transcribed == nil || strings.Join(transcribed.GetReleaseNames(), ",") != "translate French audio -> English SRT" {
+		t.Fatalf("subtitles found = %v, want Whisper's translation of the French audio", found.GetSubtitles())
+	}
+	if _, err := subs.DownloadItemSubtitle(ctx, acquisitionv1.DownloadItemSubtitleRequest_builder{
+		ItemId: new(movieID), Provider: new(transcribed.GetProvider()), SubtitleId: new(transcribed.GetSubtitleId()),
+		Language: transcribed.GetLanguage(),
+	}.Build()); err != nil {
+		t.Fatalf("DownloadItemSubtitle: %v", err)
+	}
+	const bytesPerSecond = 16000 * 2
+	whisper.mu.Lock()
+	if len(whisper.detect) != 2 || whisper.detect[0] != 30*bytesPerSecond || whisper.detect[1] != 30*bytesPerSecond || len(whisper.asr) != 1 ||
+		whisper.asr[0].task != "translate" || whisper.asr[0].language != "fr" || whisper.asr[0].size/bytesPerSecond != 610 {
+		t.Errorf("whisper was sent %v to detect and %+v to transcribe, want 30 seconds of two videos and the film's 610", whisper.detect, whisper.asr)
+	}
+	whisper.mu.Unlock()
+	if data, err := os.ReadFile(filepath.Join(movies, "The Matrix (1999)", "The Matrix (1999) HDTV-720p.en.srt")); err != nil || !strings.Contains(string(data), "Hello.") {
+		t.Errorf("transcription = %q, %v; want Whisper's", data, err)
 	}
 }

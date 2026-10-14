@@ -162,6 +162,11 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.13 字幕提供者
 `SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
 
+对于读取视频本身的提供者（如 Whisper），视频的描述还带有其各音频流及文件中记录的语言标签，以及 `audio_url`：宿主 API 的一个 URL（`/subtitles/audio/{token}`），以 16 kHz 单声道 16 位 PCM 提供一条音频流，其起点与视频对齐；参数 `stream` 选择音频流，`seconds` 只取开头若干秒。服务端只在读取音频的地方给出它，即装有 ffmpeg 时的本地与网络存储；该路由只经宿主 API 应答，其不可猜测的令牌在最后一次给出它的搜索或下载之后一天内有效。
+
+### 8.14 字幕翻译器
+`SUBTITLE_TRANSLATOR` 如 Bazarr 的翻译服务一样翻译字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SubtitleTranslatorService.ListSubtitleTranslators` 列出插件实现的翻译器及其设置、是否启用、每次接受多少字幕条以及是否保留 SubRip 标记；`TranslateSubtitleLines` 接受翻译器、源语言与目标语言、字幕条的文字（纯文本，或对保留标记的翻译器为 SubRip 中的形式）以及电影或剧集的描述，返回同样数量的译文（空译文保留原字幕条）及署名。服务端解析字幕、分批发送字幕条并写出译文。`plugins/subtitles` 实现了 Google 翻译（如 deep_translator 一样访问其免费的手机页面：每次一条、同时十条、失败重试，任何一条失败则整个翻译失败）、Gemini（以 JSON 分批发送，附带描述电影或剧集的指令；失败的批次对半拆分，被限速的 API 密钥轮换）与 Lingarr（把字幕的全部字幕条一次发往 Lingarr 服务器）。
+
 ## 9. 运行时差异
 | | WASM | 进程 |
 | :--- | :--- | :--- |

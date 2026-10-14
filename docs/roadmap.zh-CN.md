@@ -750,7 +750,11 @@ flowchart TD
 - [x] 端到端测试（`apps/server/internal/server/subtitles_test.go`、`subtitle_flows_test.go`）
   - [x] 扫描到的电影从字幕插件获得其媒体库配置所要的法语字幕，插件对接回环接口上的模拟 Subsarr；通过 `SubtitleService` 删除、上传、手动修正以及检查设置
   - [x] 从模拟 Newznab 索引器经模拟 SABnzbd 抓取并入库的电影与单集立即得到法语字幕；电影得分最高的字幕无法解码，被加入阻止列表并由下一个替换，后者比作为电影音轨的语音录音晚 2.5 秒，按音轨同步；Subsarr 有了更好的字幕后，升级任务替换单集的字幕
-- [ ] 后续：翻译（Google、Gemini、Lingarr）与 Whisper 转写，作为各自的提供者类型
+  - [x] 用模拟 Lingarr 手动把单集的法语字幕翻译为西班牙语并署名；Whisper（模拟 whisper-asr-webservice）从电影音频的前 30 秒识别出法语，并把全片翻译为英语，插件经宿主 API 读取音频
+- [x] 翻译与转写，如 Bazarr（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）：只能手动翻译，经 `SUBTITLE_TRANSLATOR`；Whisper 作为提供者，只转写为音频的语言或翻译为英语
+  - [x] `SUBTITLE_TRANSLATOR` 与 `SubtitleService.TranslateSubtitle`、`ListSubtitleTranslators`：外挂文件以及本地与网络存储上的内嵌文字字幕流作为 `subtitles.translate` 任务翻译，按翻译器的批次，带或不带 SubRip 标记，保留格式或输出 SubRip，署名，以设置中的默认分数记为 `translated`
+  - [x] `plugins/subtitles` 中的 Google 翻译（如 deep_translator 访问其免费手机页面）、Gemini（密钥轮换与冷却、批次拆分、从右到左的行加嵌入标记）与 Lingarr
+  - [x] Whisper 作为 `plugins/subtitles` 的提供者：音频从宿主 API 流式取得（`/subtitles/audio/{token}`，与视频对齐的 16 kHz PCM，仅限本地与网络存储），语言取自音频流标签或经识别，沿用 Bazarr 的映射与含义不明的代码
 
 ---
 

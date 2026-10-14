@@ -24,7 +24,7 @@ func (p *plugin) ListSubtitleProviders(context.Context, *pluginv1.ListSubtitlePr
 	for i := range p.defs {
 		def := &p.defs[i]
 		info := pluginv1.SubtitleProviderInfo_builder{
-			Name: proto.String(def.Name), DisplayName: proto.String(def.DisplayName), Settings: settingFields(def),
+			Name: proto.String(def.Name), DisplayName: proto.String(def.DisplayName), Settings: settingFields(def.Settings),
 			Enabled: proto.Bool(p.enabled[def.Name] != nil), Languages: def.Languages,
 			HashVerifiable: proto.Bool(def.HashVerifiable), HearingImpairedVerifiable: proto.Bool(def.HearingImpairedVerifiable),
 			Movies: proto.Bool(def.Movies), Episodes: proto.Bool(def.Episodes),
@@ -241,5 +241,14 @@ func video(v *pluginv1.SubtitleVideo) *provider.Video {
 		VideoCodec: v.GetVideoCodec(), AudioCodec: v.GetAudioCodec(), Edition: v.GetEdition(), StreamingService: v.GetStreamingService(),
 		FrameRate: v.GetFrameRate(), FileName: v.GetFileName(), FileSize: v.GetFileSize(), FileHash: v.GetFileHash(),
 		AudioLanguages: v.GetAudioLanguages(), OriginalLanguage: v.GetOriginalLanguage(),
+		AudioURL: v.GetAudioUrl(), AudioStreams: audioStreams(v.GetAudioStreams()),
 	}
+}
+
+func audioStreams(streams []*pluginv1.SubtitleAudioStream) []provider.AudioStream {
+	var out []provider.AudioStream
+	for _, s := range streams {
+		out = append(out, provider.AudioStream{Index: int(s.GetIndex()), Language: s.GetLanguage()})
+	}
+	return out
 }

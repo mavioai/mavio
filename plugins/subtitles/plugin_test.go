@@ -48,7 +48,7 @@ type harness struct {
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
-	p, err := newPlugin(slog.New(slog.DiscardHandler), "1", t.TempDir(), nil)
+	p, err := newPlugin(slog.New(slog.DiscardHandler), "1", t.TempDir(), nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

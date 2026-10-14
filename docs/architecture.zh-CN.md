@@ -539,7 +539,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 | 字幕配置、历史、阻止列表、失败记录 | `libs/core`、`libs/store` | 语言配置、`table_history*`、`table_blacklist*`、`failedAttempts` |
 | 规则：缺少的字幕、评分、择优、升级、自适应搜索 | `libs/acquire/subtitles`（纯函数） | `list_missing_subtitles`、`subliminal_patch/score.py`、`download_best_subtitles`、`upgrade.py`、`adaptive_searching.py` |
 | 运行时与 API | `apps/server/internal/subtitles`、`SubtitleService` | `subtitles/wanted`、`upgrade`、`manual`、调度器的作业 |
-| 提供者 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流 |
+| 提供者、翻译器 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER`、`SUBTITLE_TRANSLATOR` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流、`subtitles/tools/translate` |
 | 修正、编码、语言识别 | `libs/subtitle` | subzero、字符集检测、`guess_language` |
 | 时间轴同步 | `libs/media/subsync`，语音由以 Go 运行的 Silero VAD 检测（`libs/media/vad`） | ffsubsync 及其 Silero 检测器 |
 
@@ -564,6 +564,11 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 内嵌文字字幕只在手动操作时、且只在本地和网络存储上提取为外挂字幕，来源是播放的提取缓存（[优化 §2.6](optimization.zh-CN.md#26-内嵌字幕)），缓存为空时由其单次 ffmpeg 运行填充；云存储上从不提取。
 * 按音频同步需读取整条音轨，因此只在本地和网络存储上进行；云存储上的字幕只能手动按该视频的另一个字幕文件同步，以其字幕条代表语音；这在任何存储上都不读取视频。
 * 语言识别与修正只读取字幕文件。
+* Whisper 的音频（§14.5）只在本地和网络存储上提供，内嵌字幕也只在那里翻译；云存储上 Whisper 找不到字幕，只翻译字幕文件。
 
 ### 14.4 字幕提供者（`plugins/subtitles`）
 移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
+
+### 14.5 翻译与转写
+* **翻译**如 Bazarr 一样只能手动进行：管理员用 `SUBTITLE_TRANSLATOR` 插件的翻译器（[插件 §8.14](plugins.zh-CN.md#814-字幕翻译器)）把电影或剧集的一个外挂字幕文件，或本地与网络存储上的一条内嵌文字字幕流（取自播放的提取缓存），翻译成一种语言并带上其 forced 与听障标记：用指定的翻译器，否则用设置中的翻译器，否则用第一个已启用的。它作为 `subtitles.translate` 任务运行。保留 SubRip 标记的翻译器收到 SubRip 形式的字幕条，译文保存为 SubRip；其他翻译器收到字幕条的纯文本，配置文件保留原始格式时译文沿用字幕的格式（SubRip、ASS、SSA、WebVTT），否则为 SubRip。时间轴与样式保持不变，没有文字的字幕条不发送；设置要求时，SubRip 译文在第一条之前加一条署名（`# Subtitles translated with … #`），如 Bazarr 的 `add_translator_info`。译文如下载一样保存（§14.2），在历史中记为 `translated`，得分为设置中默认的最高分百分比。
+* **转写**由 Whisper 完成，它如 Bazarr 一样是 `plugins/subtitles` 的一个提供者：把音频转写为其本身的语言，或翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，Whisper 从第一条音频流的前 30 秒识别；有多条音频流时，转写与字幕语言相同的那条。插件从宿主 API（[插件 §8.13](plugins.zh-CN.md#813-字幕提供者)）把音频流式送往 whisper-asr-webservice 服务器，后者以 SubRip 应答。
