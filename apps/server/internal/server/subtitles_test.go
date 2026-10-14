@@ -99,26 +99,6 @@ func TestSubtitles(t *testing.T) {
 	items := libraryv1connect.NewItemServiceClient(http.DefaultClient, srv.url, token)
 	subs := acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token)
 
-	// Subsarr is enabled in the plugin.
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId:   new("org.mavio.subtitles"),
-		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}}]}`),
-	}.Build()); err != nil {
-		t.Fatalf("SetPluginConfig: %v", err)
-	}
-	waitFor(t, "Subsarr enabled", func() bool {
-		resp, err := subs.ListSubtitleProviders(ctx, &acquisitionv1.ListSubtitleProvidersRequest{})
-		if err != nil {
-			return false
-		}
-		for _, p := range resp.GetProviders() {
-			if p.GetId() == "org.mavio.subtitles/subsarr" {
-				return p.GetEnabled()
-			}
-		}
-		return false
-	})
-
 	// A film lies in a library whose profile wants French subtitles.
 	movies := t.TempDir()
 	folder := filepath.Join(movies, "The Matrix (1999)")
@@ -166,6 +146,34 @@ func TestSubtitles(t *testing.T) {
 		}.Build())
 		return err == nil && wanted.GetTotal() == 1 && wanted.GetItems()[0].GetItemId() == movieID &&
 			len(wanted.GetItems()[0].GetMissing()) == 1 && wanted.GetItems()[0].GetMissing()[0].GetLanguage() == "fr"
+	})
+
+	// Subsarr is enabled once the film is probed and searched for at its
+	// import, with no provider, so that it is still wanting them.
+	waitFor(t, "the film probed and searched for", func() bool {
+		jobs, err := tasks.ListJobs(ctx, systemv1.ListJobsRequest_builder{
+			Kinds:  []string{library.JobProbe, library.JobRefresh, "subtitles.search"},
+			States: []systemv1.JobState{systemv1.JobState_JOB_STATE_PENDING, systemv1.JobState_JOB_STATE_RUNNING},
+		}.Build())
+		return err == nil && len(jobs.GetJobs()) == 0
+	})
+	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+		PluginId:   new("org.mavio.subtitles"),
+		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}}]}`),
+	}.Build()); err != nil {
+		t.Fatalf("SetPluginConfig: %v", err)
+	}
+	waitFor(t, "Subsarr enabled", func() bool {
+		resp, err := subs.ListSubtitleProviders(ctx, &acquisitionv1.ListSubtitleProvidersRequest{})
+		if err != nil {
+			return false
+		}
+		for _, p := range resp.GetProviders() {
+			if p.GetId() == "org.mavio.subtitles/subsarr" {
+				return p.GetEnabled()
+			}
+		}
+		return false
 	})
 
 	// The wanted search downloads them beside the film.

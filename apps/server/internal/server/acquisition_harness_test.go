@@ -52,15 +52,24 @@ type acquisitionServer struct {
 	downloads acquisitionv1connect.DownloadServiceClient
 	releases  acquisitionv1connect.ReleaseServiceClient
 	requests  acquisitionv1connect.RequestServiceClient
+	subtitles acquisitionv1connect.SubtitleServiceClient
+}
+
+// processPlugin is a process plugin an end-to-end test builds and
+// installs.
+type processPlugin struct {
+	name, source string
+	build        func() (string, error)
 }
 
 // startAcquisition starts the server with the metadata plugins answered
 // by routes, besides serviceRoutes, and with the indexers and the
 // download clients plugins when processPlugins is set. A request of the
-// plugins no route answers fails the test. Acquisition is set up with a
-// recycle bin, renaming, no free space check, and RSS syncs only when
-// asked, so that none runs between the steps.
-func startAcquisition(t *testing.T, routes map[string]string, processPlugins bool) *acquisitionServer {
+// plugins no route answers fails the test; extra process plugins are
+// installed besides. Acquisition is set up with a recycle bin, renaming,
+// no free space check, and RSS syncs only when asked, so that none runs
+// between the steps.
+func startAcquisition(t *testing.T, routes map[string]string, processPlugins bool, extra ...processPlugin) *acquisitionServer {
 	t.Helper()
 	ffmpeg, err := exec.LookPath("ffmpeg")
 	if err != nil {
@@ -92,6 +101,9 @@ func startAcquisition(t *testing.T, routes map[string]string, processPlugins boo
 		installProcessPlugin(t, pluginDir, "indexers", indexersSource, indexersBuild)
 		installProcessPlugin(t, pluginDir, "download-clients", downloadClientsSource, downloadClientsBuild)
 	}
+	for _, p := range extra {
+		installProcessPlugin(t, pluginDir, p.name, p.source, p.build)
+	}
 	srv := start(t, server.Config{
 		Database: "sqlite:" + filepath.Join(t.TempDir(), "mavio.db"), FFmpeg: ffmpeg, FFprobe: ffprobe,
 		TranscodeDir: t.TempDir(), CacheDir: t.TempDir(), MetadataDir: t.TempDir(),
@@ -120,6 +132,7 @@ func startAcquisition(t *testing.T, routes map[string]string, processPlugins boo
 		downloads: acquisitionv1connect.NewDownloadServiceClient(http.DefaultClient, srv.url, token),
 		releases:  acquisitionv1connect.NewReleaseServiceClient(http.DefaultClient, srv.url, token),
 		requests:  acquisitionv1connect.NewRequestServiceClient(http.DefaultClient, srv.url, token),
+		subtitles: acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token),
 	}
 	s.settings(func(settings *systemv1.ServerSettings) {
 		acq := settings.GetAcquisition()

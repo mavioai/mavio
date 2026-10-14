@@ -112,7 +112,7 @@ flowchart TD
 | P23 | 打包与发布 | 未开始 |
 | P24 | 存储 I/O 效率 | 进行中 |
 | P25 | 存储后端与 rclone | 进行中 |
-| P26 | 字幕获取 | 未开始 |
+| P26 | 字幕获取 | ✅ 完成 |
 
 ---
 
@@ -747,9 +747,9 @@ flowchart TD
   - [x] 修正之后保留 ASS 与 SSA 文件的样式和注释，修正只作用于字幕条目：按读取的脚本写出，只重写有变化的条目
 - [x] Silero VAD（`libs/media/vad`）：以 Go 实现 16 kHz 模型的推理，其权重由 `internal/cmd/silerogen` 从 Silero 的 ONNX 文件读出并嵌入，在生成的噪声和 Silero 的测试录音（`speech.wav` 样本）上，概率与 onnxruntime 的结果相差不超过 1e-5；一分钟音频在 M1 Max 的十个核心上耗时 0.16 s，单核 0.5 s
 - [x] 时间轴同步（`libs/media/subsync`，基于 Silero 语音检测的 ffsubsync 算法）：由字幕条目和由 ffmpeg 读出的音频得到语音信号，以 FFT 互相关对齐，并尝试帧率比、黄金分割搜索与推断的比例，沿用 ffsubsync 的质量门槛；在生成的字幕对上，偏移量、比例与分数与 ffsubsync 的结果相同（`testdata/golden.py`）；两小时的字幕对齐耗时 0.25 s
-- [ ] 端到端测试（`apps/server/internal/server/subtitles_test.go`）
+- [x] 端到端测试（`apps/server/internal/server/subtitles_test.go`、`subtitle_flows_test.go`）
   - [x] 扫描到的电影从字幕插件获得其媒体库配置所要的法语字幕，插件对接回环接口上的模拟 Subsarr；通过 `SubtitleService` 删除、上传、手动修正以及检查设置
-  - [ ] 入库的电影与剧集、一次升级、一个无法解码的字幕被加入阻止列表并被替换、一个与语音不同步的字幕被同步
+  - [x] 从模拟 Newznab 索引器经模拟 SABnzbd 抓取并入库的电影与单集立即得到法语字幕；电影得分最高的字幕无法解码，被加入阻止列表并由下一个替换，后者比作为电影音轨的语音录音晚 2.5 秒，按音轨同步；Subsarr 有了更好的字幕后，升级任务替换单集的字幕
 - [ ] 后续：翻译（Google、Gemini、Lingarr）与 Whisper 转写，作为各自的提供者类型
 
 ---

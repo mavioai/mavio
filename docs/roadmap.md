@@ -112,7 +112,7 @@ flowchart TD
 | P23 | Packaging and release | Not started |
 | P24 | Storage I/O efficiency | In progress |
 | P25 | Storage backends and rclone | In progress |
-| P26 | Subtitle acquisition | Not started |
+| P26 | Subtitle acquisition | ✅ Done |
 
 ---
 
@@ -747,9 +747,9 @@ flowchart TD
   - [x] Styles and comments of ASS and SSA files kept through the mods, which work on the cues: the script as read, with only the changed cues rewritten
 - [x] Silero VAD (`libs/media/vad`): the 16 kHz model's inference in Go, its weights read from Silero's ONNX file by `internal/cmd/silerogen` and embedded, probabilities within 1e-5 of onnxruntime's on generated noise and on Silero's test recording (the `speech.wav` fixture); a minute of audio takes 0.16 s on ten cores of an M1 Max, 0.5 s on one
 - [x] Synchronization (`libs/media/subsync`, ffsubsync's algorithm over Silero's speech): the speech of cues and of audio read by ffmpeg, alignment by FFT cross-correlation with the frame rate ratios, the golden-section search and the inferred ratio, ffsubsync's quality gate; offsets, ratios and scores the same as ffsubsync's on generated subtitle pairs (`testdata/golden.py`); two hours of subtitles aligned in 0.25 s
-- [ ] End-to-end test (`apps/server/internal/server/subtitles_test.go`)
+- [x] End-to-end tests (`apps/server/internal/server/subtitles_test.go`, `subtitle_flows_test.go`)
   - [x] A scanned film gets the French subtitles its library's profile wants from the subtitles plugin against a fake Subsarr on the loopback interface; deletion, upload, mods by hand and the settings' checks through `SubtitleService`
-  - [ ] An imported movie and episode, an upgrade, a subtitle failing to decode blocklisted and replaced, and a subtitle out of sync with speech synchronized
+  - [x] A film and an episode grabbed from a fake Newznab indexer through a fake SABnzbd and imported get their French subtitles at once; the film's best subtitle, failing to decode, is blocklisted and replaced by the next, 2.5 s late on the speech recording that is the film's audio and synchronized against it; the upgrade task replaces the episode's with a better one once Subsarr has it
 - [ ] Later: translation (Google, Gemini, Lingarr) and Whisper transcription, as provider types of their own
 
 ---
