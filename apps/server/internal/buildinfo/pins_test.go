@@ -64,6 +64,17 @@ func TestRclonePins(t *testing.T) {
 	}
 }
 
+// TestBunPins checks that the Dockerfile compiles the agent plugin with the
+// Bun mise.toml pins.
+func TestBunPins(t *testing.T) {
+	dockerfile, mise := pins(t)
+	version := regexp.MustCompile(`ARG BUN_VERSION=(\S+)`).FindSubmatch(dockerfile)
+	pinned := regexp.MustCompile(`(?m)^bun = "([^"]+)"`).FindSubmatch(mise)
+	if version == nil || pinned == nil || string(version[1]) != string(pinned[1]) {
+		t.Errorf("Bun versions: Dockerfile %q, mise.toml %q", version, pinned)
+	}
+}
+
 // pins reads the Dockerfile and mise.toml.
 func pins(t *testing.T) (dockerfile, mise []byte) {
 	t.Helper()

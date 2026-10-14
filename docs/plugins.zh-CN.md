@@ -168,9 +168,11 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `SUBTITLE_TRANSLATOR` 如 Bazarr 的翻译服务一样翻译字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SubtitleTranslatorService.ListSubtitleTranslators` 列出插件实现的翻译器及其设置、是否启用、每次接受多少字幕条以及是否保留 SubRip 标记；`TranslateSubtitleLines` 接受翻译器、源语言与目标语言、字幕条的文字（纯文本，或对保留标记的翻译器为 SubRip 中的形式）以及电影或剧集的描述，返回同样数量的译文（空译文保留原字幕条）及署名。服务端解析字幕、分批发送字幕条并写出译文。`plugins/subtitles` 实现了 Google 翻译（如 deep_translator 一样访问其免费的手机页面：每次一条、同时十条、失败重试，任何一条失败则整个翻译失败）、Gemini（以 JSON 分批发送，附带描述电影或剧集的指令；失败的批次对半拆分，被限速的 API 密钥轮换）与 Lingarr（把字幕的全部字幕条一次发往 Lingarr 服务器）。
 
 ### 8.15 AI 网关与智能体会话
-`AI_GATEWAY` 代表服务端访问 AI 模型提供商，使服务端的任何功能都不持有凭据。`AiGatewayService.ListAiProviders` 列出提供商及其认证方式（API key、OAuth 登录、登录是否为订阅登录，如 Claude Pro 或 ChatGPT Plus）、已保存的凭据与是否可用；`ListAiModels` 列出其模型，以及上下文窗口、推理、图片输入与价格。`SetAiApiKey` 保存或删除 key，`LogoutAi` 删除凭据。OAuth 登录在插件中运行：`StartAiLogin` 开始登录，`GetAiLogin` 返回登录展示的内容（登录页面、设备码、进度）、它询问的内容以及是否结束，`AnswerAiLogin` 作答，例如在提供商的重定向无法到达插件时提交浏览器被重定向到的地址；客户端经由服务端轮询。`CompleteAi` 请求模型给出一个回答，请求给出 schema 时回答为符合它的 JSON，并返回用量与费用。失败带有 Connect 错误码：被限流为 resource exhausted，没有可用凭据为 unauthenticated，提供商或模型未知为 failed precondition。
+`AI_GATEWAY` 代表服务端访问 AI 模型提供商，使服务端的任何功能都不持有凭据。`AiGatewayService.ListAiProviders` 列出提供商及其认证方式（API key、OAuth 登录、登录是否为订阅登录，如 Claude Pro 或 ChatGPT Plus）、已保存的凭据与是否可用；`ListAiModels` 列出其模型，以及上下文窗口、推理、图片输入与价格。`SetAiApiKey` 保存或删除 key，`LogoutAi` 删除凭据。OAuth 登录在插件中运行：`StartAiLogin` 开始登录，`GetAiLogin` 返回登录展示的内容（登录页面、设备码、进度）、它询问的内容以及是否结束，`AnswerAiLogin` 作答，例如在提供商的重定向无法到达插件时提交浏览器被重定向到的地址；客户端经由服务端轮询。`CompleteAi` 请求模型给出一个回答，请求给出 schema 时回答为符合它的 JSON，并返回用量与费用。失败带有 Connect 错误码：值得重试的失败（限流、过载、网络）为 unavailable，没有可用凭据为 unauthenticated，提供商或模型未知为 not found，上下文溢出为 invalid argument。
 
 `AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）以及删除。每条消息与回答都在返回之前保存。
+
+`plugins/agent` 以 Bun 编译的 TypeScript 子进程插件提供这两项能力，基于 [pi-ai](https://github.com/earendil-works/pi) 与 pi-durable：pi-ai 支持的所有提供商，带 API key、OAuth 登录（包括订阅登录；客户端提示风险并交由管理员决定）以及其配置添加的、由 OpenAI 兼容 API（如 Ollama 的）提供的提供商；凭据保存在其数据目录中（`credentials.json`，只有服务端的用户可读），会话保存在那里的 SQLite 数据库中，因此进行中的回答在重启后继续。按 schema 的回答经由模型调用的工具给出，提供商支持时使用约束采样。
 
 ## 9. 运行时差异
 | | WASM | 进程 |

@@ -1,0 +1,16 @@
+{
+  "id": "org.mavio.agent",
+  "name": "Agent",
+  "version": "0.1.0",
+  "description": "An AI gateway to the providers pi-ai supports, with their API keys and OAuth logins (subscriptions included) and OpenAI-compatible servers the administrator adds, and agent sessions kept by pi-durable.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "capabilities": [
+    "CAPABILITY_AI_GATEWAY",
+    "CAPABILITY_AGENT_SESSION"
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"providers\":{\"type\":\"array\",\"description\":\"AI providers served by OpenAI-compatible APIs, such as Ollama, LocalAI, LM Studio or vLLM\",\"items\":{\"type\":\"object\",\"required\":[\"id\",\"base_url\",\"models\"],\"properties\":{\"id\":{\"type\":\"string\",\"pattern\":\"^[a-z0-9][a-z0-9._-]*$\"},\"name\":{\"type\":\"string\"},\"base_url\":{\"type\":\"string\",\"format\":\"uri\",\"description\":\"The API's base URL, such as http://localhost:11434/v1\"},\"api_key\":{\"type\":\"string\",\"description\":\"The key the API takes; keyless servers need none\"},\"headers\":{\"type\":\"object\",\"additionalProperties\":{\"type\":\"string\"}},\"models\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"object\",\"required\":[\"id\"],\"properties\":{\"id\":{\"type\":\"string\",\"minLength\":1},\"name\":{\"type\":\"string\"},\"context_window\":{\"type\":\"integer\",\"minimum\":1},\"max_tokens\":{\"type\":\"integer\",\"minimum\":1},\"reasoning\":{\"type\":\"boolean\"},\"images\":{\"type\":\"boolean\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

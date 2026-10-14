@@ -67,6 +67,8 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 `package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。`libs/plugin` 也是如此：其 TypeScript SDK `@mavio/plugin` 有 `typecheck` 与 `test-ts`（Vitest），其 Go 的 `test` 依赖后者，因为名为 `test` 的脚本会取代推断出的目标。
 
+`plugins/agent` 是由 Bun（`mise.toml` 锁定的版本）运行的 TypeScript 子进程插件：它有 `typecheck`、`test`（`bun test`）、`build`（`bun build --compile`：为本平台生成一个可执行文件，与其清单一起放在 `dist/plugin` 中，即服务端可以启动的插件目录；`bun scripts/build.ts linux/arm64` 构建其他平台的）与 `dist`。可执行文件自带 Bun 运行时，因此服务端无需为它安装任何东西；Bun 原样运行 `node:http2`、`node:sqlite` 与 npm 包。其依赖与 Web UI 的一样来自 pnpm workspace；没有任何东西需要其安装脚本的包在 `pnpm-workspace.yaml` 的 `allowBuilds` 中被拒绝。
+
 `libs/client-rust/capi` 既是 Cargo workspace 的 crate，又是 Go 模块，即 C ABI 的 Go 绑定；作为位于 Cargo workspace 目录中的 Go 项目，它是 Nx 项目 `capi`，Nx 把其中的文件算作它自己的，因此 `client-rust` 的 Cargo 目标在输入中列出它的 Rust 源码（`libs/client-rust/project.json`）。其 `test` 在 `client-rust:build` 之后以 `CGO_ENABLED=0` 运行（与应用的构建方式一致），从 `target/debug` 加载该库；`generate` 为 `libs/client-rust/proto` 中 C ABI 的消息运行 `buf generate`，把 Go 写入 `gen/`、Rust 写入 `src/gen/`（均提交入库），`buf-lint` 检查这些消息。
 
 `libs/client-ts` 与 `apps/web` 同样有 `typecheck`，`libs/client-ts` 有 `test`（Vitest），`apps/web` 有 `build`（Vite），它把 Web UI 写入 `apps/server/internal/webui/dist`。服务端的 `build` 与 `dist` 依赖它（`apps/server/project.json`），使二进制内嵌该 UI；直接 `go build` 则内嵌该目录现有的内容，目录中只有 `.gitkeep` 时，服务端提供一个说明未随 UI 构建的页面。`apps/web` 还有 `snapshot` 与 `snapshot-record`（`snapshots/run.sh`）：用 Docker 启动 Playwright 的容器镜像，针对其中的浏览器运行快照测试，与参考图比对或录制参考图。`libs/design` 有 `gallery`，把各客户端的参考图汇集到 `dist/snapshots/gallery`（[客户端 §6.8](clients.zh-CN.md#68-组件画廊与视觉评审)）。`pnpm --filter @mavio/web dev` 用 Vite 提供 UI，并把其 API 调用发往 8686 端口上的服务端。
@@ -219,9 +221,9 @@ CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** �
 
 其余模块只在仓库内使用，不承诺对外 API 稳定。
 
-服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像在 `/usr/local/bin/rclone` 内置 `mise.toml` 锁定的 mavioai/rclone 发布版本的 Linux 构建，并按相同的 SHA-256 摘要校验，同一测试比对两处锁定。fork 的发布版本是其 `mavio` 分支上的标签 `v<rclone 版本>-mavio`，该分支在 rclone 发布版本之上只有一个提交；推送标签会运行 fork 的 `mavio release` 工作流，它不启用 cgo，为 Linux、macOS 与 Windows 的 amd64 和 arm64 交叉编译 rclone，并把 zip 与 `SHA256SUMS.txt` 附加到该标签的发布中。升级时需同时修改两个文件中的版本与摘要。镜像还会构建 DLNA、索引器与下载客户端插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中。
+服务端的发布二进制用 `VERSION=v0.1.0 pnpm nx run server:dist` 构建；镜像在仓库根目录用 `docker buildx build -f apps/server/Dockerfile --build-arg VERSION=v0.1.0 --platform linux/amd64,linux/arm64 .` 构建。Dockerfile 锁定与 `mise.toml` 相同的 jellyfin-ffmpeg 版本，并记录其两个 Linux 便携版的 SHA-256 摘要；升级 jellyfin-ffmpeg 时需同时修改这两个文件，两处锁定不一致时一个测试（`apps/server/internal/buildinfo`）会失败。镜像在 `/usr/local/bin/rclone` 内置 `mise.toml` 锁定的 mavioai/rclone 发布版本的 Linux 构建，并按相同的 SHA-256 摘要校验，同一测试比对两处锁定。fork 的发布版本是其 `mavio` 分支上的标签 `v<rclone 版本>-mavio`，该分支在 rclone 发布版本之上只有一个提交；推送标签会运行 fork 的 `mavio release` 工作流，它不启用 cgo，为 Linux、macOS 与 Windows 的 amd64 和 arm64 交叉编译 rclone，并把 zip 与 `SHA256SUMS.txt` 附加到该标签的发布中。升级时需同时修改两个文件中的版本与摘要。镜像还会构建 DLNA、索引器、下载客户端、字幕与智能体插件，并将它们放在插件种子目录 `/usr/lib/mavio/plugins` 中；智能体插件用 `mise.toml` 锁定的 Bun 版本编译，同一测试比较二者。
 
-第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist`（或 `indexers:dist`、`download-clients:dist`）按清单中的版本为服务端的每个平台构建 DLNA（或索引器、下载客户端）插件到 `plugins/<name>/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
+第一方进程插件用其 `dist` 目标打包：`pnpm nx run dlna:dist`（或 `indexers:dist`、`download-clients:dist`、`subtitles:dist`、`agent:dist`）按清单中的版本为服务端的每个平台构建 DLNA（或索引器、下载客户端、字幕、智能体）插件到 `plugins/<name>/dist/`，每个平台一个目录 zip 包，并生成列出它们及其 SHA-256 摘要的 `catalog.json`；zip 包的 URL 相对于目录。
 
 `scraper-tmdb` 的发布构建把 `MAVIO_TMDB_KEY` 设为 Mavio 自己的 TMDB API 密钥，`pnpm nx run scraper-tmdb:build` 把它编入插件，作为 TMDB 拒绝 Radarr 令牌后使用的密钥（[架构 §13.2](architecture.zh-CN.md#132-数据源与编号)）；该密钥从不提交。
 

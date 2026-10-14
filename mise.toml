@@ -2,6 +2,8 @@
 go = "1.27.2"
 node = "26.11.1"
 pnpm = "12.11.2"
+# TypeScript process plugins (plugins/agent), compiled to executables.
+bun = "1.4.3"
 buf = "1.73.0"
 golangci-lint = "2.14.0"
 sqlc = "1.31.1"

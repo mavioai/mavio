@@ -46,6 +46,7 @@ flowchart TD
     P24["P24 存储 I/O 效率<br/>存储类别、容器索引、关键帧 trickplay、字幕缓存"]
     P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
     P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
+    P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
 
     P0 --> P1
     P1 --> P2
@@ -82,6 +83,8 @@ flowchart TD
     P18 --> P25
     P19 --> P26
     P24 --> P26
+    P13 --> P27
+    P26 --> P27
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -113,6 +116,7 @@ flowchart TD
 | P24 | 存储 I/O 效率 | 进行中 |
 | P25 | 存储后端与 rclone | 进行中 |
 | P26 | 字幕获取 | ✅ 完成 |
+| P27 | AI 网关与字幕翻译 | 进行中 |
 
 ---
 
@@ -755,6 +759,26 @@ flowchart TD
   - [x] `SUBTITLE_TRANSLATOR` 与 `SubtitleService.TranslateSubtitle`、`ListSubtitleTranslators`：外挂文件以及本地与网络存储上的内嵌文字字幕流作为 `subtitles.translate` 任务翻译，按翻译器的批次，带或不带 SubRip 标记，保留格式或输出 SubRip，署名，以设置中的默认分数记为 `translated`
   - [x] `plugins/subtitles` 中的 Google 翻译（如 deep_translator 访问其免费手机页面）、Gemini（密钥轮换与冷却、批次拆分、从右到左的行加嵌入标记）与 Lingarr
   - [x] Whisper 作为 `plugins/subtitles` 的提供者：音频从宿主 API 流式取得（`/subtitles/audio/{token}`，与视频对齐的 16 kHz PCM，仅限本地与网络存储），语言取自音频流标签或经识别，沿用 Bazarr 的映射与含义不明的代码
+
+### P27 AI 网关与字幕翻译
+**范围**：移植 Lingarr：字幕由 AI 模型通过 `plugins/agent`（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)，它持有所有 AI 凭据与会话）以及 Lingarr 支持的翻译服务翻译；Lingarr 的提示词、上下文行、批次、重试、断行、自动化与统计放在服务端；取代 P26 的翻译器（Google、Gemini、Lingarr）。
+
+- `AI_GATEWAY` 与 `AGENT_SESSION`；没有 Unix 套接字时经回环 TCP 连接子进程插件；子进程插件的 TypeScript SDK（`libs/plugin/ts`）
+- 基于 pi-ai 与 pi-durable 的 `plugins/agent`：使用 API key 与 OAuth 登录（含订阅）的提供者、由配置添加的提供者、持久的会话
+- 服务端的 AI 管理：提供者、模型、key，以及转给客户端的登录
+- 服务端中 Lingarr 的翻译：其提示词与上下文行、以 JSON 回答的批次、后备链、重试、断行、重叠修正、按媒体库的自动化、校对与统计，AI 翻译经由网关
+- `plugins/subtitles` 中的翻译服务：DeepL、LibreTranslate、Google、Bing、Microsoft 与 Yandex
+
+**完成标准**：Lingarr 移植的用例通过或附理由跳过；端到端测试经由构建出的 `plugins/agent`，用回环接口上伪造的 OpenAI 兼容 API 提供的模型翻译一集的字幕，并重试一个被限流的批次，再用伪造的翻译服务翻译。
+
+**进展**：
+- [x] 没有 Unix 套接字时（Windows）经回环 TCP 连接子进程插件
+- [x] `libs/proto` 中的 `AiGatewayService` 与 `AgentSessionService`
+- [x] 子进程插件的 TypeScript SDK（`libs/plugin/ts`）：握手、令牌校验、HTTP 路由、宿主的传输
+- [x] `plugins/agent`：pi-ai 的所有提供者，API key 与 OAuth 登录（以事件与提示转发），凭据存于其数据目录，自定义 OpenAI 兼容提供者，带输出 schema 的补全，存于 SQLite 且跨重启保留的会话；由 Bun 为所有平台构建并预置在容器镜像中
+- [ ] 服务端：经插件注册表访问 AI 网关、使用构建出的插件的集成测试、管理 API
+- [ ] 服务端中 Lingarr 的翻译，以及 `plugins/subtitles` 中的翻译服务；移除 P26 的翻译器
+- [ ] 以后：客户端提示订阅登录的风险，交由管理员决定是否接受；登录与补全改为流式而非轮询；在 Windows 上验证该插件；删除已删除会话的条目（pi-durable 仍保留它们）
 
 ---
 

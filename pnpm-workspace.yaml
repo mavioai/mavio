@@ -3,6 +3,8 @@ packages:
   - libs/*
   - plugins/*
 allowBuilds:
+  '@google/genai': false
   nx: true
+  protobufjs: false
 minimumReleaseAgeExclude:
   - style-dictionary@5.6.1

@@ -11,6 +11,7 @@
 
 ARG GO_VERSION=1.27.2
 ARG NODE_VERSION=26.11.1
+ARG BUN_VERSION=1.4.3
 ARG JELLYFIN_FFMPEG_VERSION=8.1.3-1
 ARG RCLONE_VERSION=1.75.2-mavio
 
@@ -22,6 +23,17 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 	npm install -g "$(node -p 'require("./package.json").packageManager')" \
 	&& pnpm install --frozen-lockfile --filter @mavio/web... \
 	&& pnpm --filter @mavio/web build
+
+# The agent plugin, a TypeScript process plugin compiled by Bun for the target platform.
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-trixie-slim AS agent
+ARG TARGETARCH BUN_VERSION
+WORKDIR /src
+COPY . .
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+	npm install -g "$(node -p 'require("./package.json").packageManager')" "bun@${BUN_VERSION}" \
+	&& pnpm install --frozen-lockfile --filter @mavio/plugin-agent... \
+	&& cd plugins/agent && bun scripts/build.ts linux/$TARGETARCH \
+	&& mkdir -p /out/plugins && mv dist/plugin /out/plugins/agent
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-trixie AS server
 ARG TARGETOS TARGETARCH VERSION
@@ -92,6 +104,7 @@ COPY --from=server /out/mavio /usr/local/bin/mavio
 COPY --from=rclone /out/rclone /usr/local/bin/rclone
 # The plugins the image ships, installed into /config/plugins on the first start.
 COPY --from=server /out/plugins/ /usr/lib/mavio/plugins/
+COPY --from=agent /out/plugins/ /usr/lib/mavio/plugins/
 USER mavio
 # /config is Mavio's home: config.toml, the database, plugins, chosen artwork and backups; /cache
 # holds images, compiled plugins and transcodes. Mount media libraries under /media.

@@ -46,6 +46,7 @@ flowchart TD
     P24["P24 Storage I/O efficiency<br/>storage classes, container indexes, keyframe trickplay, subtitle caching"]
     P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
     P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
+    P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
 
     P0 --> P1
     P1 --> P2
@@ -82,6 +83,8 @@ flowchart TD
     P18 --> P25
     P19 --> P26
     P24 --> P26
+    P13 --> P27
+    P26 --> P27
 ```
 
 | Phase | Theme | Status |
@@ -113,6 +116,7 @@ flowchart TD
 | P24 | Storage I/O efficiency | In progress |
 | P25 | Storage backends and rclone | In progress |
 | P26 | Subtitle acquisition | ✅ Done |
+| P27 | AI gateway and subtitle translation | In progress |
 
 ---
 
@@ -755,6 +759,26 @@ flowchart TD
   - [x] `SUBTITLE_TRANSLATOR` and `SubtitleService.TranslateSubtitle` and `ListSubtitleTranslators`: external files and, on local and network storage, embedded text streams translated as `subtitles.translate` jobs, in the translators' batches, with or without SubRip's markup, the format kept or SubRip, credited, recorded as `translated` at the settings' default score
   - [x] Google Translate (its free page for phones, as deep_translator), Gemini (key rotation and rest, batches split, right-to-left lines embedded) and Lingarr in `plugins/subtitles`
   - [x] Whisper as a provider of `plugins/subtitles`: the audio streamed from the host API (`/subtitles/audio/{token}`, 16 kHz PCM aligned with the video, only on local and network storage), the language from the streams' tags or detected, Bazarr's mappings and ambiguous codes
+
+### P27 AI Gateway and Subtitle Translation
+**Scope**: porting Lingarr: subtitles translated by AI models through `plugins/agent` ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)), which holds every AI credential and conversation, and by the translation services Lingarr supports; Lingarr's prompts, context lines, batches, retries, line splitting, automation and statistics in the server; the translators of P26 (Google, Gemini, Lingarr) replaced.
+
+- `AI_GATEWAY` and `AGENT_SESSION`; process plugins reached over loopback TCP where Unix sockets are missing; the TypeScript SDK of process plugins (`libs/plugin/ts`)
+- `plugins/agent` on pi-ai and pi-durable: providers with API keys and OAuth logins, subscriptions included, providers added by configuration, durable sessions
+- The server's AI administration: providers, models, keys and logins relayed to clients
+- Lingarr's translation in the server: its prompts and context lines, batches answered as JSON, the fallback chain, retries, line splitting, overlap fixing, automation by library, proofreading and statistics, the AI's through the gateway
+- The translation services in `plugins/subtitles`: DeepL, LibreTranslate, Google, Bing, Microsoft and Yandex
+
+**Done when**: Lingarr's ported cases pass or are skipped with a reason; an end-to-end test translates an episode's subtitles with a model served by a fake OpenAI-compatible API on the loopback interface through the built `plugins/agent`, retrying a rate-limited batch, and with a fake translation service.
+
+**Progress**:
+- [x] Process plugins over loopback TCP where Unix sockets are missing (Windows)
+- [x] `AiGatewayService` and `AgentSessionService` in `libs/proto`
+- [x] The TypeScript SDK of process plugins (`libs/plugin/ts`): handshake, token checks, HTTP routes, the host's transport
+- [x] `plugins/agent`: every provider of pi-ai, API keys and OAuth logins relayed as events and prompts, credentials in its data folder, custom OpenAI-compatible providers, completions with output schemas, sessions in SQLite surviving restarts; built by Bun for every platform and seeded in the container image
+- [ ] The server: the AI gateway reached through the plugin registry, an integration test with the built plugin, the administration API
+- [ ] Lingarr's translation in the server, and the translation services in `plugins/subtitles`; the translators of P26 removed
+- [ ] Later: the clients' warning of the risk of subscription logins, left to the administrator to accept; logins and completions streamed rather than polled; the plugin verified on Windows; deleting the entries of deleted sessions, which pi-durable keeps
 
 ---
 
