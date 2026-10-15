@@ -53,10 +53,13 @@ func (m *Manager) Register(ctx context.Context, a Applier) error {
 
 // Update applies new settings and stores them. When an applier rejects
 // them, the appliers that took them get the current settings back and the
-// error is returned.
+// error is returned. The disabled plugins are kept as they are: they
+// change only through Change, which the plugins apply, so that settings
+// read before a plugin was enabled or disabled do not undo it.
 func (m *Manager) Update(ctx context.Context, s core.ServerSettings) (core.ServerSettings, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	s.DisabledPlugins = m.current.DisabledPlugins
 	return m.update(ctx, s)
 }
 

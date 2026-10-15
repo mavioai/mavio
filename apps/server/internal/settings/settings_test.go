@@ -84,6 +84,12 @@ func TestChange(t *testing.T) {
 	if len(stored.DisabledPlugins) != 1 {
 		t.Errorf("stored disabled plugins = %q", stored.DisabledPlugins)
 	}
+	// Settings read before the change do not undo it.
+	stale := m.Get()
+	stale.DisabledPlugins = nil
+	if got, err := m.Update(ctx, stale); err != nil || len(got.DisabledPlugins) != 1 {
+		t.Errorf("Update = %q, %v; want = the disabled plugins kept", got.DisabledPlugins, err)
+	}
 	if _, err := m.Change(ctx, func(s *core.ServerSettings) { s.Transcoding.EncoderPreset = "unknown" }); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("invalid change: %v", err)
 	}

@@ -415,6 +415,8 @@ func (m *Manager) put(e *entry) {
 func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	m.install.Lock()
 	defer m.install.Unlock()
+	m.setConfig.Lock()
+	defer m.setConfig.Unlock()
 	m.mu.Lock()
 	e, err := m.find(id)
 	if err == nil {

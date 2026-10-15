@@ -106,6 +106,8 @@ type Manager struct {
 	install sync.Mutex
 	// setConfig serializes SetConfig, so that the stored configuration is
 	// the one delivered last; unlike mu, it is held while storing.
+	// Uninstall holds it too, after install, so that no configuration is
+	// stored for a plugin it removed.
 	setConfig sync.Mutex
 
 	// ctx ends with Close, stopping event delivery.
