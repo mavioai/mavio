@@ -136,8 +136,11 @@ test("signs a Mavio account in through mavio.dev to each of its servers", async 
 
   await expect(servers.finishCallback(new URLSearchParams({ code: "c", state: "another" }))).rejects.toThrow(/not started here/);
   await servers.startSignIn("/library");
-  const back = await servers.finishCallback(new URLSearchParams({ code: "the code", state: started[1].state as string }));
-  expect(back).toBe("/library");
+  // Finishing it twice, as React's StrictMode does, spends the code once.
+  const params = new URLSearchParams({ code: "the code", state: started[1].state as string });
+  const [back, again] = await Promise.all([servers.finishCallback(params), servers.finishCallback(params)]);
+  expect([back, again]).toEqual(["/library", "/library"]);
+  expect(calls.filter((c) => c.endsWith("oauth/token"))).toHaveLength(1);
   expect(exchanged).toMatchObject({ grant_type: "authorization_code", code: "the code", client_id: "den" });
   expect(servers.account()).toEqual({ id: "acct-1", name: "Ann" });
   // The serving server at its own address, the other at the first URL that answers as it.

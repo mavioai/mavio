@@ -251,6 +251,7 @@ export class Servers {
   private refreshing = new Map<string, Promise<string | undefined>>();
   private renewing: Promise<string | undefined> | undefined;
   private syncing: Promise<void> | undefined;
+  private finishing: { key: string; done: Promise<string> } | undefined;
   private key: DeviceKey;
   /** The base URL of the server serving the web UI; unset on app.mavio.dev. */
   readonly home: string | undefined;
@@ -601,7 +602,15 @@ export class Servers {
    * with: exchanges the code for a session of the device key and signs in
    * to the account's servers. Returns where the web UI goes next.
    */
-  async finishCallback(params: URLSearchParams): Promise<string> {
+  finishCallback(params: URLSearchParams): Promise<string> {
+    // A page that completes it twice, as React's StrictMode does in
+    // development, waits for the first time: the code is spent once.
+    const key = params.toString();
+    if (this.finishing?.key !== key) this.finishing = { key, done: this.doFinishCallback(params) };
+    return this.finishing.done;
+  }
+
+  private async doFinishCallback(params: URLSearchParams): Promise<string> {
     const p = read<Pending>(this.storage, pendingKey);
     this.storage.setItem(pendingKey, "null");
     if (!p || params.get("state") !== p.state) throw new Error("this sign-in was not started here");
