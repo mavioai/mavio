@@ -15,7 +15,7 @@ import { useState } from "react";
 
 import { t } from "../../i18n.ts";
 import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
-import { input, Page } from "./common.tsx";
+import { input, Page, patched } from "./common.tsx";
 
 const accelerations: Partial<Record<HardwareAcceleration, () => string>> = {
   [HardwareAcceleration.AUTO]: () => t("transcoding.accelerationAuto"),
@@ -46,12 +46,12 @@ function TranscodingForm({ server, settings, available }: { server: ServerEntry;
   const update = useUpdateServerSettings(server);
   const [draft, setDraft] = useState(() => draftOf(settings));
   const [notice, setNotice] = useState<string>();
-  const set = (patch: Partial<TranscodingSettings>) => (setDraft((d) => create(TranscodingSettingsSchema, { ...d, ...patch })), setNotice(undefined));
+  const set = (patch: Partial<TranscodingSettings>) => (setDraft((d) => patched(TranscodingSettingsSchema, d, patch)), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(draftOf(settings));
   const save = () =>
     update.mutate(
       (s) => {
-        s.transcoding = create(TranscodingSettingsSchema, { ...draft, transcodeDir: draft.transcodeDir.trim() });
+        s.transcoding = patched(TranscodingSettingsSchema, draft, { transcodeDir: draft.transcodeDir.trim() });
       },
       { onSuccess: () => setNotice(t("transcoding.saved")) },
     );

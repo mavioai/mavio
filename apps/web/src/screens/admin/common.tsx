@@ -1,6 +1,7 @@
 // What the pages of a server's administration share: their header, the
 // link back from a page to its section's list, colored tiles, the
 // confirmation of what cannot be undone, and times and their lengths.
+import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
 import { Link, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -94,6 +95,14 @@ export function Confirm({
       </Row>
     </Group>
   );
+}
+
+/**
+ * A copy of a message with some fields changed. Spreading a message would
+ * lose its unset fields, whose defaults live on its prototype.
+ */
+export function patched<Desc extends DescMessage>(schema: Desc, message: MessageShape<Desc>, changes: Partial<MessageShape<Desc>>): MessageShape<Desc> {
+  return Object.assign(clone(schema, message), changes);
 }
 
 /** The class of inputs inside rows. */

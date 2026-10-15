@@ -658,7 +658,8 @@ flowchart TD
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`)
     - [x] Storage (`apps/web/src/screens/admin/storage.tsx`, `libs/client-ts/src/storage.ts`): rclone remotes with their authorization steps, and the offline clients (`StorageService`); walking the folders of rclone remotes in the folder picker
     - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)
-    - [ ] Acquisition: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
+    - [x] Acquisition (`apps/web/src/screens/admin/{acquisition,quality,formats,rules}.tsx`, `libs/client-ts/src/profiles.ts`): quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
+      - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
     - [ ] Subtitles: subtitle profiles and the libraries they apply to, the providers and the settings (`SubtitleService`)
     - [ ] AI: providers, API keys, subscription logins and models (`AiService`)
     - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)

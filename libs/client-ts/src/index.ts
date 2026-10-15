@@ -121,3 +121,13 @@ export {
   useStorageProviders,
   useStorageStatus,
 } from "./storage.ts";
+export {
+  useCustomFormats,
+  useDelayProfiles,
+  useDownloadClients,
+  useIndexers,
+  useQualityDefinitions,
+  useQualityProfiles,
+  useReleaseProfiles,
+  useRemotePathMappings,
+} from "./profiles.ts";

@@ -296,6 +296,7 @@ export type MessageKey =
   | 'settings.general'
   | 'settings.transcoding'
   | 'settings.storage'
+  | 'settings.acquisition'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -706,7 +707,156 @@ export type MessageKey =
   | 'storage.removeCompleted'
   | 'storage.removeFailed'
   | 'storage.removeOffline'
-  | 'storage.removeOfflineConfirm';
+  | 'storage.removeOfflineConfirm'
+  | 'acquisition.message'
+  | 'acquisition.indexers'
+  | 'acquisition.indexersFooter'
+  | 'acquisition.noIndexers'
+  | 'acquisition.clients'
+  | 'acquisition.clientsFooter'
+  | 'acquisition.noClients'
+  | 'acquisition.torrent'
+  | 'acquisition.usenet'
+  | 'acquisition.public'
+  | 'acquisition.semiPrivate'
+  | 'acquisition.private'
+  | 'acquisition.priority'
+  | 'acquisition.off'
+  | 'acquisition.leftOut'
+  | 'acquisition.movies'
+  | 'acquisition.series'
+  | 'acquisition.profilesOf'
+  | 'acquisition.upgrades'
+  | 'acquisition.addProfile'
+  | 'acquisition.rules'
+  | 'acquisition.qualities'
+  | 'acquisition.qualitiesDetail'
+  | 'acquisition.qualitiesMessage'
+  | 'acquisition.qualitiesFooter'
+  | 'acquisition.kind'
+  | 'acquisition.quality'
+  | 'acquisition.minSize'
+  | 'acquisition.preferredSize'
+  | 'acquisition.maxSize'
+  | 'acquisition.saved'
+  | 'acquisition.formats'
+  | 'acquisition.formatsDetail'
+  | 'acquisition.delays'
+  | 'acquisition.delaysDetail'
+  | 'acquisition.releases'
+  | 'acquisition.releasesDetail'
+  | 'acquisition.mappings'
+  | 'acquisition.mappingsDetail'
+  | 'acquisition.profile'
+  | 'acquisition.newProfile'
+  | 'acquisition.noProfile'
+  | 'acquisition.profileName'
+  | 'acquisition.upgradeAllowed'
+  | 'acquisition.upgradeAllowedDetail'
+  | 'acquisition.cutoff'
+  | 'acquisition.cutoffDetail'
+  | 'acquisition.language'
+  | 'acquisition.languageDetail'
+  | 'acquisition.languageAny'
+  | 'acquisition.languageOriginal'
+  | 'acquisition.languageUnknown'
+  | 'acquisition.profileQualities'
+  | 'acquisition.profileQualitiesFooter'
+  | 'acquisition.moveUp'
+  | 'acquisition.moveDown'
+  | 'acquisition.formatScores'
+  | 'acquisition.formatScoresFooter'
+  | 'acquisition.noFormats'
+  | 'acquisition.minFormatScore'
+  | 'acquisition.minFormatScoreDetail'
+  | 'acquisition.cutoffFormatScore'
+  | 'acquisition.cutoffFormatScoreDetail'
+  | 'acquisition.minUpgradeFormatScore'
+  | 'acquisition.minUpgradeFormatScoreDetail'
+  | 'acquisition.create'
+  | 'acquisition.removeProfile'
+  | 'acquisition.removeProfileConfirm'
+  | 'acquisition.removeProfileDetail'
+  | 'formats.message'
+  | 'formats.add'
+  | 'formats.new'
+  | 'formats.none'
+  | 'formats.name'
+  | 'formats.rename'
+  | 'formats.renameDetail'
+  | 'formats.conditions'
+  | 'formats.conditionsFooter'
+  | 'formats.addCondition'
+  | 'formats.noConditions'
+  | 'formats.kind'
+  | 'formats.conditionName'
+  | 'formats.removeCondition'
+  | 'formats.pattern'
+  | 'formats.value'
+  | 'formats.choose'
+  | 'formats.min'
+  | 'formats.max'
+  | 'formats.gigabytes'
+  | 'formats.exceptLanguage'
+  | 'formats.negate'
+  | 'formats.required'
+  | 'formats.releaseTitle'
+  | 'formats.edition'
+  | 'formats.language'
+  | 'formats.indexerFlag'
+  | 'formats.source'
+  | 'formats.resolution'
+  | 'formats.modifier'
+  | 'formats.size'
+  | 'formats.releaseGroup'
+  | 'formats.year'
+  | 'formats.releaseType'
+  | 'formats.remove'
+  | 'formats.removeConfirm'
+  | 'formats.removeDetail'
+  | 'rules.add'
+  | 'rules.remove'
+  | 'rules.removeConfirm'
+  | 'rules.delaysMessage'
+  | 'rules.delaysInOrder'
+  | 'rules.delaysFooter'
+  | 'rules.defaultDelay'
+  | 'rules.prefers'
+  | 'rules.usenetDelayOf'
+  | 'rules.torrentDelayOf'
+  | 'rules.tags'
+  | 'rules.delayTagsDetail'
+  | 'rules.releaseTagsDetail'
+  | 'rules.preferred'
+  | 'rules.usenetDelay'
+  | 'rules.torrentDelay'
+  | 'rules.minutes'
+  | 'rules.bypassQuality'
+  | 'rules.bypassQualityDetail'
+  | 'rules.bypassScore'
+  | 'rules.minScore'
+  | 'rules.releasesMessage'
+  | 'rules.releasesFooter'
+  | 'rules.noReleases'
+  | 'rules.unnamed'
+  | 'rules.requiredCount'
+  | 'rules.ignoredCount'
+  | 'rules.name'
+  | 'rules.enabled'
+  | 'rules.required'
+  | 'rules.requiredDetail'
+  | 'rules.ignored'
+  | 'rules.ignoredDetail'
+  | 'rules.indexer'
+  | 'rules.allIndexers'
+  | 'rules.mappingsMessage'
+  | 'rules.noMappings'
+  | 'rules.host'
+  | 'rules.hostDetail'
+  | 'rules.remotePath'
+  | 'rules.remotePathDetail'
+  | 'rules.localPath'
+  | 'rules.localPathDetail';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -995,6 +1145,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.general": "General",
     "settings.transcoding": "Transcoding",
     "settings.storage": "Storage",
+    "settings.acquisition": "Acquisition",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -1405,7 +1556,156 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeCompleted": "Remove imported downloads",
     "storage.removeFailed": "Remove failed downloads",
     "storage.removeOffline": "Remove",
-    "storage.removeOfflineConfirm": "Remove for Good"
+    "storage.removeOfflineConfirm": "Remove for Good",
+    "acquisition.message": "What decides which releases the server grabs and where they come from.",
+    "acquisition.indexers": "Indexers",
+    "acquisition.indexersFooter": "Indexers are configured in their plugins.",
+    "acquisition.noIndexers": "No indexers. Install and configure an indexer plugin.",
+    "acquisition.clients": "Download Clients",
+    "acquisition.clientsFooter": "Download clients are configured in their plugins; offline downloads of cloud drives in Storage.",
+    "acquisition.noClients": "No download clients. Install and configure a download client plugin.",
+    "acquisition.torrent": "Torrent",
+    "acquisition.usenet": "Usenet",
+    "acquisition.public": "Public",
+    "acquisition.semiPrivate": "Semi-private",
+    "acquisition.private": "Private",
+    "acquisition.priority": "Priority {priority}",
+    "acquisition.off": "Off",
+    "acquisition.leftOut": "Left out until {when}: {failure}",
+    "acquisition.movies": "Movies",
+    "acquisition.series": "Series",
+    "acquisition.profilesOf": "Quality Profiles: {kind}",
+    "acquisition.upgrades": "Upgrades",
+    "acquisition.addProfile": "Add Profile",
+    "acquisition.rules": "Rules",
+    "acquisition.qualities": "Quality Definitions",
+    "acquisition.qualitiesDetail": "The sizes each quality may have",
+    "acquisition.qualitiesMessage": "Sizes in megabytes per minute of runtime; zero for no limit.",
+    "acquisition.qualitiesFooter": "Releases outside a quality's sizes are rejected; the preferred size ranks those within.",
+    "acquisition.kind": "Kind",
+    "acquisition.quality": "Quality",
+    "acquisition.minSize": "Minimum",
+    "acquisition.preferredSize": "Preferred",
+    "acquisition.maxSize": "Maximum",
+    "acquisition.saved": "Saved.",
+    "acquisition.formats": "Custom Formats",
+    "acquisition.formatsDetail": "Conditions on releases that profiles score",
+    "acquisition.delays": "Delay Profiles",
+    "acquisition.delaysDetail": "Hold releases back for better ones",
+    "acquisition.releases": "Release Profiles",
+    "acquisition.releasesDetail": "Terms releases must have or must not have",
+    "acquisition.mappings": "Remote Path Mappings",
+    "acquisition.mappingsDetail": "Folders of download clients on other hosts",
+    "acquisition.profile": "Quality Profile",
+    "acquisition.newProfile": "New Quality Profile",
+    "acquisition.noProfile": "This profile no longer exists.",
+    "acquisition.profileName": "Name",
+    "acquisition.upgradeAllowed": "Upgrades",
+    "acquisition.upgradeAllowedDetail": "Replace files with better releases until the cutoff",
+    "acquisition.cutoff": "Upgrade Until",
+    "acquisition.cutoffDetail": "Once a file has this quality, no better one is sought",
+    "acquisition.language": "Language",
+    "acquisition.languageDetail": "The language releases must have",
+    "acquisition.languageAny": "Any",
+    "acquisition.languageOriginal": "Original",
+    "acquisition.languageUnknown": "Unknown",
+    "acquisition.profileQualities": "Qualities",
+    "acquisition.profileQualitiesFooter": "Best first. Releases of qualities that are off are rejected.",
+    "acquisition.moveUp": "Move Up",
+    "acquisition.moveDown": "Move Down",
+    "acquisition.formatScores": "Custom Format Scores",
+    "acquisition.formatScoresFooter": "A release scores the sum of its formats' scores.",
+    "acquisition.noFormats": "No custom formats.",
+    "acquisition.minFormatScore": "Minimum Score",
+    "acquisition.minFormatScoreDetail": "Releases scoring less are rejected",
+    "acquisition.cutoffFormatScore": "Upgrade Until Score",
+    "acquisition.cutoffFormatScoreDetail": "Once a file scores this, no better one is sought",
+    "acquisition.minUpgradeFormatScore": "Minimum Upgrade",
+    "acquisition.minUpgradeFormatScoreDetail": "How much a release must outscore the file",
+    "acquisition.create": "Add",
+    "acquisition.removeProfile": "Delete Profile",
+    "acquisition.removeProfileConfirm": "Delete {name}?",
+    "acquisition.removeProfileDetail": "A profile that movies or series use cannot be deleted.",
+    "formats.message": "Named conditions on releases, which quality profiles score.",
+    "formats.add": "Add Custom Format",
+    "formats.new": "New Custom Format",
+    "formats.none": "This custom format no longer exists.",
+    "formats.name": "Name",
+    "formats.rename": "Include When Renaming",
+    "formats.renameDetail": "Puts its name into file names",
+    "formats.conditions": "Conditions",
+    "formats.conditionsFooter": "A release has the format when one condition of each kind matches, and every required one does. Patterns are .NET regular expressions, ignoring case.",
+    "formats.addCondition": "Add Condition",
+    "formats.noConditions": "No conditions.",
+    "formats.kind": "Kind",
+    "formats.conditionName": "Condition name",
+    "formats.removeCondition": "Remove",
+    "formats.pattern": "Regular expression",
+    "formats.value": "Value",
+    "formats.choose": "Choose…",
+    "formats.min": "Minimum",
+    "formats.max": "Maximum",
+    "formats.gigabytes": "GB",
+    "formats.exceptLanguage": "Any but this",
+    "formats.negate": "Negate",
+    "formats.required": "Required",
+    "formats.releaseTitle": "Release title",
+    "formats.edition": "Edition",
+    "formats.language": "Language",
+    "formats.indexerFlag": "Indexer flag",
+    "formats.source": "Source",
+    "formats.resolution": "Resolution",
+    "formats.modifier": "Quality modifier",
+    "formats.size": "Size",
+    "formats.releaseGroup": "Release group",
+    "formats.year": "Year",
+    "formats.releaseType": "Release type",
+    "formats.remove": "Delete Custom Format",
+    "formats.removeConfirm": "Delete {name}?",
+    "formats.removeDetail": "Profiles stop scoring it.",
+    "rules.add": "Add",
+    "rules.remove": "Delete",
+    "rules.removeConfirm": "Delete for Good",
+    "rules.delaysMessage": "Wait before grabbing, for a better release to come.",
+    "rules.delaysInOrder": "In Order",
+    "rules.delaysFooter": "A movie or series takes the first profile sharing one of its tags, else the default one.",
+    "rules.defaultDelay": "Default",
+    "rules.prefers": "Prefers {protocol}",
+    "rules.usenetDelayOf": "Usenet {minutes} min",
+    "rules.torrentDelayOf": "Torrent {minutes} min",
+    "rules.tags": "Tags",
+    "rules.delayTagsDetail": "Separated by commas; at least one",
+    "rules.releaseTagsDetail": "Separated by commas; empty for all",
+    "rules.preferred": "Preferred Protocol",
+    "rules.usenetDelay": "Usenet Delay",
+    "rules.torrentDelay": "Torrent Delay",
+    "rules.minutes": "Minutes",
+    "rules.bypassQuality": "Bypass for Best Quality",
+    "rules.bypassQualityDetail": "Grab at once releases of the profile's best quality",
+    "rules.bypassScore": "Bypass Above Score",
+    "rules.minScore": "Score",
+    "rules.releasesMessage": "Require or ignore terms in the titles of releases.",
+    "rules.releasesFooter": "Terms are matched ignoring case; write /pattern/ for a regular expression.",
+    "rules.noReleases": "No release profiles.",
+    "rules.unnamed": "Unnamed",
+    "rules.requiredCount": "{count, plural, one {# required} other {# required}}",
+    "rules.ignoredCount": "{count, plural, one {# ignored} other {# ignored}}",
+    "rules.name": "Name",
+    "rules.enabled": "On",
+    "rules.required": "Must Contain",
+    "rules.requiredDetail": "One per line; a release needs one of them",
+    "rules.ignored": "Must Not Contain",
+    "rules.ignoredDetail": "One per line; a release with any is rejected",
+    "rules.indexer": "Indexer",
+    "rules.allIndexers": "All indexers",
+    "rules.mappingsMessage": "When a download client on another host reports a folder, the server reads it where it is mounted here.",
+    "rules.noMappings": "No remote path mappings.",
+    "rules.host": "Host",
+    "rules.hostDetail": "As the download client's settings name it",
+    "rules.remotePath": "Remote Path",
+    "rules.remotePathDetail": "The folder the client reports",
+    "rules.localPath": "Local Path",
+    "rules.localPathDetail": "Where the server sees it; absolute"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1692,6 +1992,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.general": "通用",
     "settings.transcoding": "转码",
     "settings.storage": "存储",
+    "settings.acquisition": "获取",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -2102,6 +2403,155 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.removeCompleted": "移除已导入的下载",
     "storage.removeFailed": "移除失败的下载",
     "storage.removeOffline": "移除",
-    "storage.removeOfflineConfirm": "确认移除"
+    "storage.removeOfflineConfirm": "确认移除",
+    "acquisition.message": "决定服务器抓取哪些发布以及从哪里获取。",
+    "acquisition.indexers": "索引器",
+    "acquisition.indexersFooter": "索引器在各自的插件中配置。",
+    "acquisition.noIndexers": "没有索引器。请安装并配置索引器插件。",
+    "acquisition.clients": "下载客户端",
+    "acquisition.clientsFooter": "下载客户端在各自的插件中配置；云盘离线下载在“存储”中配置。",
+    "acquisition.noClients": "没有下载客户端。请安装并配置下载客户端插件。",
+    "acquisition.torrent": "种子",
+    "acquisition.usenet": "Usenet",
+    "acquisition.public": "公开",
+    "acquisition.semiPrivate": "半私有",
+    "acquisition.private": "私有",
+    "acquisition.priority": "优先级 {priority}",
+    "acquisition.off": "已停用",
+    "acquisition.leftOut": "暂停使用至{when}：{failure}",
+    "acquisition.movies": "电影",
+    "acquisition.series": "剧集",
+    "acquisition.profilesOf": "质量配置：{kind}",
+    "acquisition.upgrades": "允许升级",
+    "acquisition.addProfile": "添加配置",
+    "acquisition.rules": "规则",
+    "acquisition.qualities": "质量定义",
+    "acquisition.qualitiesDetail": "各质量允许的大小",
+    "acquisition.qualitiesMessage": "大小以每分钟时长的 MB 计；0 表示不限。",
+    "acquisition.qualitiesFooter": "超出质量大小范围的发布会被拒绝；首选大小用于在范围内排序。",
+    "acquisition.kind": "类型",
+    "acquisition.quality": "质量",
+    "acquisition.minSize": "最小",
+    "acquisition.preferredSize": "首选",
+    "acquisition.maxSize": "最大",
+    "acquisition.saved": "已保存。",
+    "acquisition.formats": "自定义格式",
+    "acquisition.formatsDetail": "质量配置用来打分的发布条件",
+    "acquisition.delays": "延迟配置",
+    "acquisition.delaysDetail": "暂缓抓取以等待更好的发布",
+    "acquisition.releases": "发布配置",
+    "acquisition.releasesDetail": "发布必须包含或不得包含的词",
+    "acquisition.mappings": "远程路径映射",
+    "acquisition.mappingsDetail": "其他主机上下载客户端的文件夹",
+    "acquisition.profile": "质量配置",
+    "acquisition.newProfile": "新建质量配置",
+    "acquisition.noProfile": "该配置已不存在。",
+    "acquisition.profileName": "名称",
+    "acquisition.upgradeAllowed": "允许升级",
+    "acquisition.upgradeAllowedDetail": "在达到截止质量前用更好的发布替换文件",
+    "acquisition.cutoff": "升级截止",
+    "acquisition.cutoffDetail": "文件达到此质量后不再寻找更好的",
+    "acquisition.language": "语言",
+    "acquisition.languageDetail": "发布必须具有的语言",
+    "acquisition.languageAny": "任意",
+    "acquisition.languageOriginal": "原始语言",
+    "acquisition.languageUnknown": "未知",
+    "acquisition.profileQualities": "质量",
+    "acquisition.profileQualitiesFooter": "越靠上越好。未启用质量的发布会被拒绝。",
+    "acquisition.moveUp": "上移",
+    "acquisition.moveDown": "下移",
+    "acquisition.formatScores": "自定义格式分数",
+    "acquisition.formatScoresFooter": "发布的分数是其所匹配格式分数之和。",
+    "acquisition.noFormats": "没有自定义格式。",
+    "acquisition.minFormatScore": "最低分数",
+    "acquisition.minFormatScoreDetail": "分数更低的发布会被拒绝",
+    "acquisition.cutoffFormatScore": "升级截止分数",
+    "acquisition.cutoffFormatScoreDetail": "文件达到此分数后不再寻找更好的",
+    "acquisition.minUpgradeFormatScore": "最小升级幅度",
+    "acquisition.minUpgradeFormatScoreDetail": "发布分数需比文件高出多少",
+    "acquisition.create": "添加",
+    "acquisition.removeProfile": "删除配置",
+    "acquisition.removeProfileConfirm": "删除 {name}？",
+    "acquisition.removeProfileDetail": "正在被电影或剧集使用的配置无法删除。",
+    "formats.message": "针对发布的具名条件集合，由质量配置打分。",
+    "formats.add": "添加自定义格式",
+    "formats.new": "新建自定义格式",
+    "formats.none": "该自定义格式已不存在。",
+    "formats.name": "名称",
+    "formats.rename": "重命名时包含",
+    "formats.renameDetail": "将其名称写入文件名",
+    "formats.conditions": "条件",
+    "formats.conditionsFooter": "每类条件中有一个匹配且所有必需条件均匹配时，发布即具有该格式。模式为 .NET 正则表达式，不区分大小写。",
+    "formats.addCondition": "添加条件",
+    "formats.noConditions": "没有条件。",
+    "formats.kind": "类型",
+    "formats.conditionName": "条件名称",
+    "formats.removeCondition": "移除",
+    "formats.pattern": "正则表达式",
+    "formats.value": "值",
+    "formats.choose": "请选择…",
+    "formats.min": "最小",
+    "formats.max": "最大",
+    "formats.gigabytes": "GB",
+    "formats.exceptLanguage": "除此以外",
+    "formats.negate": "取反",
+    "formats.required": "必需",
+    "formats.releaseTitle": "发布标题",
+    "formats.edition": "版本",
+    "formats.language": "语言",
+    "formats.indexerFlag": "索引器标志",
+    "formats.source": "来源",
+    "formats.resolution": "分辨率",
+    "formats.modifier": "质量修饰",
+    "formats.size": "大小",
+    "formats.releaseGroup": "发布组",
+    "formats.year": "年份",
+    "formats.releaseType": "发布类型",
+    "formats.remove": "删除自定义格式",
+    "formats.removeConfirm": "删除 {name}？",
+    "formats.removeDetail": "质量配置将不再为它打分。",
+    "rules.add": "添加",
+    "rules.remove": "删除",
+    "rules.removeConfirm": "确认删除",
+    "rules.delaysMessage": "抓取前等待一段时间，以等更好的发布出现。",
+    "rules.delaysInOrder": "按顺序",
+    "rules.delaysFooter": "电影或剧集采用第一个与其共享标签的配置，否则采用默认配置。",
+    "rules.defaultDelay": "默认",
+    "rules.prefers": "优先 {protocol}",
+    "rules.usenetDelayOf": "Usenet {minutes} 分钟",
+    "rules.torrentDelayOf": "种子 {minutes} 分钟",
+    "rules.tags": "标签",
+    "rules.delayTagsDetail": "用逗号分隔；至少一个",
+    "rules.releaseTagsDetail": "用逗号分隔；留空则适用全部",
+    "rules.preferred": "优先协议",
+    "rules.usenetDelay": "Usenet 延迟",
+    "rules.torrentDelay": "种子延迟",
+    "rules.minutes": "分钟",
+    "rules.bypassQuality": "最佳质量时跳过",
+    "rules.bypassQualityDetail": "质量配置中最佳质量的发布立即抓取",
+    "rules.bypassScore": "高于分数时跳过",
+    "rules.minScore": "分数",
+    "rules.releasesMessage": "要求或忽略发布标题中的词语。",
+    "rules.releasesFooter": "词语匹配不区分大小写；正则表达式写作 /pattern/。",
+    "rules.noReleases": "没有发布配置。",
+    "rules.unnamed": "未命名",
+    "rules.requiredCount": "{count, plural, other {# 个必需}}",
+    "rules.ignoredCount": "{count, plural, other {# 个忽略}}",
+    "rules.name": "名称",
+    "rules.enabled": "启用",
+    "rules.required": "必须包含",
+    "rules.requiredDetail": "每行一个；发布需包含其中之一",
+    "rules.ignored": "不得包含",
+    "rules.ignoredDetail": "每行一个；包含任一项的发布会被拒绝",
+    "rules.indexer": "索引器",
+    "rules.allIndexers": "所有索引器",
+    "rules.mappingsMessage": "当其他主机上的下载客户端报告某个文件夹时，服务器在本机挂载的位置读取它。",
+    "rules.noMappings": "没有远程路径映射。",
+    "rules.host": "主机",
+    "rules.hostDetail": "与下载客户端设置中的写法一致",
+    "rules.remotePath": "远程路径",
+    "rules.remotePathDetail": "客户端报告的文件夹",
+    "rules.localPath": "本地路径",
+    "rules.localPathDetail": "服务器看到的位置；须为绝对路径"
   }
 };

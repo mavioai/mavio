@@ -986,6 +986,9 @@ public enum MavioStrings {
     /// The settings section of a server's rclone remotes and offline downloads
     public static var settingsStorage: String { NSLocalizedString("settings.storage", bundle: .module, comment: "") }
 
+    /// The settings section of what decides which releases a server grabs
+    public static var settingsAcquisition: String { NSLocalizedString("settings.acquisition", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -2274,4 +2277,471 @@ public enum MavioStrings {
 
     /// Confirms removing an offline download client
     public static var storageRemoveOfflineConfirm: String { NSLocalizedString("storage.removeOfflineConfirm", bundle: .module, comment: "") }
+
+    /// The line under the Acquisition page's title
+    public static var acquisitionMessage: String { NSLocalizedString("acquisition.message", bundle: .module, comment: "") }
+
+    /// Title of the indexers
+    public static var acquisitionIndexers: String { NSLocalizedString("acquisition.indexers", bundle: .module, comment: "") }
+
+    /// Footer of the indexers
+    public static var acquisitionIndexersFooter: String { NSLocalizedString("acquisition.indexersFooter", bundle: .module, comment: "") }
+
+    /// Shown when no indexer is configured
+    public static var acquisitionNoIndexers: String { NSLocalizedString("acquisition.noIndexers", bundle: .module, comment: "") }
+
+    /// Title of the download clients
+    public static var acquisitionClients: String { NSLocalizedString("acquisition.clients", bundle: .module, comment: "") }
+
+    /// Footer of the download clients
+    public static var acquisitionClientsFooter: String { NSLocalizedString("acquisition.clientsFooter", bundle: .module, comment: "") }
+
+    /// Shown when no download client is configured
+    public static var acquisitionNoClients: String { NSLocalizedString("acquisition.noClients", bundle: .module, comment: "") }
+
+    /// The torrent protocol
+    public static var acquisitionTorrent: String { NSLocalizedString("acquisition.torrent", bundle: .module, comment: "") }
+
+    /// The usenet protocol
+    public static var acquisitionUsenet: String { NSLocalizedString("acquisition.usenet", bundle: .module, comment: "") }
+
+    /// A public indexer
+    public static var acquisitionPublic: String { NSLocalizedString("acquisition.public", bundle: .module, comment: "") }
+
+    /// A semi-private indexer
+    public static var acquisitionSemiPrivate: String { NSLocalizedString("acquisition.semiPrivate", bundle: .module, comment: "") }
+
+    /// A private indexer
+    public static var acquisitionPrivate: String { NSLocalizedString("acquisition.private", bundle: .module, comment: "") }
+
+    /// An indexer's or client's priority
+    public static func acquisitionPriority(priority: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquisition.priority", bundle: .module, comment: ""), priority)
+    }
+
+    /// Marks something disabled
+    public static var acquisitionOff: String { NSLocalizedString("acquisition.off", bundle: .module, comment: "") }
+
+    /// An indexer or client left out after failing
+    public static func acquisitionLeftOut(when: String, failure: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquisition.leftOut", bundle: .module, comment: ""), when, failure)
+    }
+
+    /// The movie kind of profiles
+    public static var acquisitionMovies: String { NSLocalizedString("acquisition.movies", bundle: .module, comment: "") }
+
+    /// The series kind of profiles
+    public static var acquisitionSeries: String { NSLocalizedString("acquisition.series", bundle: .module, comment: "") }
+
+    /// Title of a kind's quality profiles
+    public static func acquisitionProfilesOf(kind: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquisition.profilesOf", bundle: .module, comment: ""), kind)
+    }
+
+    /// Marks a profile allowing upgrades
+    public static var acquisitionUpgrades: String { NSLocalizedString("acquisition.upgrades", bundle: .module, comment: "") }
+
+    /// Row adding a quality profile
+    public static var acquisitionAddProfile: String { NSLocalizedString("acquisition.addProfile", bundle: .module, comment: "") }
+
+    /// Title of the rules of acquisition
+    public static var acquisitionRules: String { NSLocalizedString("acquisition.rules", bundle: .module, comment: "") }
+
+    /// Page of the sizes of qualities
+    public static var acquisitionQualities: String { NSLocalizedString("acquisition.qualities", bundle: .module, comment: "") }
+
+    /// Detail of the quality definitions
+    public static var acquisitionQualitiesDetail: String { NSLocalizedString("acquisition.qualitiesDetail", bundle: .module, comment: "") }
+
+    /// The line under the quality definitions' title
+    public static var acquisitionQualitiesMessage: String { NSLocalizedString("acquisition.qualitiesMessage", bundle: .module, comment: "") }
+
+    /// Footer of the quality definitions
+    public static var acquisitionQualitiesFooter: String { NSLocalizedString("acquisition.qualitiesFooter", bundle: .module, comment: "") }
+
+    /// Chooses movies or series
+    public static var acquisitionKind: String { NSLocalizedString("acquisition.kind", bundle: .module, comment: "") }
+
+    /// Column of qualities
+    public static var acquisitionQuality: String { NSLocalizedString("acquisition.quality", bundle: .module, comment: "") }
+
+    /// A quality's minimum size
+    public static var acquisitionMinSize: String { NSLocalizedString("acquisition.minSize", bundle: .module, comment: "") }
+
+    /// A quality's preferred size
+    public static var acquisitionPreferredSize: String { NSLocalizedString("acquisition.preferredSize", bundle: .module, comment: "") }
+
+    /// A quality's maximum size
+    public static var acquisitionMaxSize: String { NSLocalizedString("acquisition.maxSize", bundle: .module, comment: "") }
+
+    /// Notice after saving
+    public static var acquisitionSaved: String { NSLocalizedString("acquisition.saved", bundle: .module, comment: "") }
+
+    /// Page of the custom formats
+    public static var acquisitionFormats: String { NSLocalizedString("acquisition.formats", bundle: .module, comment: "") }
+
+    /// Detail of the custom formats
+    public static var acquisitionFormatsDetail: String { NSLocalizedString("acquisition.formatsDetail", bundle: .module, comment: "") }
+
+    /// Page of the delay profiles
+    public static var acquisitionDelays: String { NSLocalizedString("acquisition.delays", bundle: .module, comment: "") }
+
+    /// Detail of the delay profiles
+    public static var acquisitionDelaysDetail: String { NSLocalizedString("acquisition.delaysDetail", bundle: .module, comment: "") }
+
+    /// Page of the release profiles
+    public static var acquisitionReleases: String { NSLocalizedString("acquisition.releases", bundle: .module, comment: "") }
+
+    /// Detail of the release profiles
+    public static var acquisitionReleasesDetail: String { NSLocalizedString("acquisition.releasesDetail", bundle: .module, comment: "") }
+
+    /// Page of the remote path mappings
+    public static var acquisitionMappings: String { NSLocalizedString("acquisition.mappings", bundle: .module, comment: "") }
+
+    /// Detail of the remote path mappings
+    public static var acquisitionMappingsDetail: String { NSLocalizedString("acquisition.mappingsDetail", bundle: .module, comment: "") }
+
+    /// Title of a quality profile's page
+    public static var acquisitionProfile: String { NSLocalizedString("acquisition.profile", bundle: .module, comment: "") }
+
+    /// Title of the page adding a quality profile
+    public static var acquisitionNewProfile: String { NSLocalizedString("acquisition.newProfile", bundle: .module, comment: "") }
+
+    /// Shown when the profile opened is gone
+    public static var acquisitionNoProfile: String { NSLocalizedString("acquisition.noProfile", bundle: .module, comment: "") }
+
+    /// A quality profile's name
+    public static var acquisitionProfileName: String { NSLocalizedString("acquisition.profileName", bundle: .module, comment: "") }
+
+    /// Switch allowing upgrades
+    public static var acquisitionUpgradeAllowed: String { NSLocalizedString("acquisition.upgradeAllowed", bundle: .module, comment: "") }
+
+    /// Detail of upgrades
+    public static var acquisitionUpgradeAllowedDetail: String { NSLocalizedString("acquisition.upgradeAllowedDetail", bundle: .module, comment: "") }
+
+    /// The quality where upgrades stop
+    public static var acquisitionCutoff: String { NSLocalizedString("acquisition.cutoff", bundle: .module, comment: "") }
+
+    /// Detail of the cutoff
+    public static var acquisitionCutoffDetail: String { NSLocalizedString("acquisition.cutoffDetail", bundle: .module, comment: "") }
+
+    /// The language movie releases must have
+    public static var acquisitionLanguage: String { NSLocalizedString("acquisition.language", bundle: .module, comment: "") }
+
+    /// Detail of the language
+    public static var acquisitionLanguageDetail: String { NSLocalizedString("acquisition.languageDetail", bundle: .module, comment: "") }
+
+    /// Any language
+    public static var acquisitionLanguageAny: String { NSLocalizedString("acquisition.languageAny", bundle: .module, comment: "") }
+
+    /// The movie's own language
+    public static var acquisitionLanguageOriginal: String { NSLocalizedString("acquisition.languageOriginal", bundle: .module, comment: "") }
+
+    /// Releases whose language is not known
+    public static var acquisitionLanguageUnknown: String { NSLocalizedString("acquisition.languageUnknown", bundle: .module, comment: "") }
+
+    /// Title of a profile's qualities
+    public static var acquisitionProfileQualities: String { NSLocalizedString("acquisition.profileQualities", bundle: .module, comment: "") }
+
+    /// Footer of a profile's qualities
+    public static var acquisitionProfileQualitiesFooter: String { NSLocalizedString("acquisition.profileQualitiesFooter", bundle: .module, comment: "") }
+
+    /// Moves an entry up
+    public static var acquisitionMoveUp: String { NSLocalizedString("acquisition.moveUp", bundle: .module, comment: "") }
+
+    /// Moves an entry down
+    public static var acquisitionMoveDown: String { NSLocalizedString("acquisition.moveDown", bundle: .module, comment: "") }
+
+    /// Title of a profile's format scores
+    public static var acquisitionFormatScores: String { NSLocalizedString("acquisition.formatScores", bundle: .module, comment: "") }
+
+    /// Footer of the format scores
+    public static var acquisitionFormatScoresFooter: String { NSLocalizedString("acquisition.formatScoresFooter", bundle: .module, comment: "") }
+
+    /// Shown when there is no custom format
+    public static var acquisitionNoFormats: String { NSLocalizedString("acquisition.noFormats", bundle: .module, comment: "") }
+
+    /// The least score a release must have
+    public static var acquisitionMinFormatScore: String { NSLocalizedString("acquisition.minFormatScore", bundle: .module, comment: "") }
+
+    /// Detail of the minimum score
+    public static var acquisitionMinFormatScoreDetail: String { NSLocalizedString("acquisition.minFormatScoreDetail", bundle: .module, comment: "") }
+
+    /// The score where upgrades stop
+    public static var acquisitionCutoffFormatScore: String { NSLocalizedString("acquisition.cutoffFormatScore", bundle: .module, comment: "") }
+
+    /// Detail of the cutoff score
+    public static var acquisitionCutoffFormatScoreDetail: String { NSLocalizedString("acquisition.cutoffFormatScoreDetail", bundle: .module, comment: "") }
+
+    /// The least a score must rise to upgrade
+    public static var acquisitionMinUpgradeFormatScore: String { NSLocalizedString("acquisition.minUpgradeFormatScore", bundle: .module, comment: "") }
+
+    /// Detail of the minimum upgrade
+    public static var acquisitionMinUpgradeFormatScoreDetail: String { NSLocalizedString("acquisition.minUpgradeFormatScoreDetail", bundle: .module, comment: "") }
+
+    /// Button creating an entry
+    public static var acquisitionCreate: String { NSLocalizedString("acquisition.create", bundle: .module, comment: "") }
+
+    /// Button deleting a quality profile
+    public static var acquisitionRemoveProfile: String { NSLocalizedString("acquisition.removeProfile", bundle: .module, comment: "") }
+
+    /// Asks before deleting a quality profile
+    public static func acquisitionRemoveProfileConfirm(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquisition.removeProfileConfirm", bundle: .module, comment: ""), name)
+    }
+
+    /// What deleting a profile needs
+    public static var acquisitionRemoveProfileDetail: String { NSLocalizedString("acquisition.removeProfileDetail", bundle: .module, comment: "") }
+
+    /// The line under the custom formats' title
+    public static var formatsMessage: String { NSLocalizedString("formats.message", bundle: .module, comment: "") }
+
+    /// Row adding a custom format
+    public static var formatsAdd: String { NSLocalizedString("formats.add", bundle: .module, comment: "") }
+
+    /// Title of the page adding a custom format
+    public static var formatsNew: String { NSLocalizedString("formats.new", bundle: .module, comment: "") }
+
+    /// Shown when the format opened is gone
+    public static var formatsNone: String { NSLocalizedString("formats.none", bundle: .module, comment: "") }
+
+    /// A custom format's name
+    public static var formatsName: String { NSLocalizedString("formats.name", bundle: .module, comment: "") }
+
+    /// Switch putting the format's name into file names
+    public static var formatsRename: String { NSLocalizedString("formats.rename", bundle: .module, comment: "") }
+
+    /// Detail of including when renaming
+    public static var formatsRenameDetail: String { NSLocalizedString("formats.renameDetail", bundle: .module, comment: "") }
+
+    /// Title of a format's conditions
+    public static var formatsConditions: String { NSLocalizedString("formats.conditions", bundle: .module, comment: "") }
+
+    /// Footer of the conditions
+    public static var formatsConditionsFooter: String { NSLocalizedString("formats.conditionsFooter", bundle: .module, comment: "") }
+
+    /// Button adding a condition
+    public static var formatsAddCondition: String { NSLocalizedString("formats.addCondition", bundle: .module, comment: "") }
+
+    /// Shown when a format has no condition
+    public static var formatsNoConditions: String { NSLocalizedString("formats.noConditions", bundle: .module, comment: "") }
+
+    /// A condition's kind
+    public static var formatsKind: String { NSLocalizedString("formats.kind", bundle: .module, comment: "") }
+
+    /// A condition's name
+    public static var formatsConditionName: String { NSLocalizedString("formats.conditionName", bundle: .module, comment: "") }
+
+    /// Button removing a condition
+    public static var formatsRemoveCondition: String { NSLocalizedString("formats.removeCondition", bundle: .module, comment: "") }
+
+    /// A condition's pattern
+    public static var formatsPattern: String { NSLocalizedString("formats.pattern", bundle: .module, comment: "") }
+
+    /// A condition's value
+    public static var formatsValue: String { NSLocalizedString("formats.value", bundle: .module, comment: "") }
+
+    /// Placeholder of a condition's value
+    public static var formatsChoose: String { NSLocalizedString("formats.choose", bundle: .module, comment: "") }
+
+    /// A range's minimum
+    public static var formatsMin: String { NSLocalizedString("formats.min", bundle: .module, comment: "") }
+
+    /// A range's maximum
+    public static var formatsMax: String { NSLocalizedString("formats.max", bundle: .module, comment: "") }
+
+    /// Unit of size conditions
+    public static var formatsGigabytes: String { NSLocalizedString("formats.gigabytes", bundle: .module, comment: "") }
+
+    /// Checkbox matching any language but the value
+    public static var formatsExceptLanguage: String { NSLocalizedString("formats.exceptLanguage", bundle: .module, comment: "") }
+
+    /// Checkbox inverting a condition
+    public static var formatsNegate: String { NSLocalizedString("formats.negate", bundle: .module, comment: "") }
+
+    /// Checkbox making a condition required
+    public static var formatsRequired: String { NSLocalizedString("formats.required", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsReleaseTitle: String { NSLocalizedString("formats.releaseTitle", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsEdition: String { NSLocalizedString("formats.edition", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsLanguage: String { NSLocalizedString("formats.language", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsIndexerFlag: String { NSLocalizedString("formats.indexerFlag", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsSource: String { NSLocalizedString("formats.source", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsResolution: String { NSLocalizedString("formats.resolution", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsModifier: String { NSLocalizedString("formats.modifier", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsSize: String { NSLocalizedString("formats.size", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsReleaseGroup: String { NSLocalizedString("formats.releaseGroup", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsYear: String { NSLocalizedString("formats.year", bundle: .module, comment: "") }
+
+    /// Condition kind
+    public static var formatsReleaseType: String { NSLocalizedString("formats.releaseType", bundle: .module, comment: "") }
+
+    /// Button deleting a custom format
+    public static var formatsRemove: String { NSLocalizedString("formats.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a custom format
+    public static func formatsRemoveConfirm(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("formats.removeConfirm", bundle: .module, comment: ""), name)
+    }
+
+    /// What deleting a format does
+    public static var formatsRemoveDetail: String { NSLocalizedString("formats.removeDetail", bundle: .module, comment: "") }
+
+    /// Button adding an entry
+    public static var rulesAdd: String { NSLocalizedString("rules.add", bundle: .module, comment: "") }
+
+    /// Button deleting an entry
+    public static var rulesRemove: String { NSLocalizedString("rules.remove", bundle: .module, comment: "") }
+
+    /// Confirms deleting an entry
+    public static var rulesRemoveConfirm: String { NSLocalizedString("rules.removeConfirm", bundle: .module, comment: "") }
+
+    /// The line under the delay profiles' title
+    public static var rulesDelaysMessage: String { NSLocalizedString("rules.delaysMessage", bundle: .module, comment: "") }
+
+    /// Title of the delay profiles in their order
+    public static var rulesDelaysInOrder: String { NSLocalizedString("rules.delaysInOrder", bundle: .module, comment: "") }
+
+    /// Footer of the delay profiles
+    public static var rulesDelaysFooter: String { NSLocalizedString("rules.delaysFooter", bundle: .module, comment: "") }
+
+    /// The default delay profile
+    public static var rulesDefaultDelay: String { NSLocalizedString("rules.defaultDelay", bundle: .module, comment: "") }
+
+    /// A delay profile's preferred protocol
+    public static func rulesPrefers(protocol: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.prefers", bundle: .module, comment: ""), protocol)
+    }
+
+    /// A delay profile's usenet delay
+    public static func rulesUsenetDelayOf(minutes: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.usenetDelayOf", bundle: .module, comment: ""), minutes)
+    }
+
+    /// A delay profile's torrent delay
+    public static func rulesTorrentDelayOf(minutes: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.torrentDelayOf", bundle: .module, comment: ""), minutes)
+    }
+
+    /// An entry's tags
+    public static var rulesTags: String { NSLocalizedString("rules.tags", bundle: .module, comment: "") }
+
+    /// Detail of a delay profile's tags
+    public static var rulesDelayTagsDetail: String { NSLocalizedString("rules.delayTagsDetail", bundle: .module, comment: "") }
+
+    /// Detail of a release profile's tags
+    public static var rulesReleaseTagsDetail: String { NSLocalizedString("rules.releaseTagsDetail", bundle: .module, comment: "") }
+
+    /// A delay profile's preferred protocol
+    public static var rulesPreferred: String { NSLocalizedString("rules.preferred", bundle: .module, comment: "") }
+
+    /// A delay profile's usenet delay
+    public static var rulesUsenetDelay: String { NSLocalizedString("rules.usenetDelay", bundle: .module, comment: "") }
+
+    /// A delay profile's torrent delay
+    public static var rulesTorrentDelay: String { NSLocalizedString("rules.torrentDelay", bundle: .module, comment: "") }
+
+    /// Unit of delays
+    public static var rulesMinutes: String { NSLocalizedString("rules.minutes", bundle: .module, comment: "") }
+
+    /// Switch bypassing the delay for the best quality
+    public static var rulesBypassQuality: String { NSLocalizedString("rules.bypassQuality", bundle: .module, comment: "") }
+
+    /// Detail of bypassing for the best quality
+    public static var rulesBypassQualityDetail: String { NSLocalizedString("rules.bypassQualityDetail", bundle: .module, comment: "") }
+
+    /// Switch bypassing the delay above a score
+    public static var rulesBypassScore: String { NSLocalizedString("rules.bypassScore", bundle: .module, comment: "") }
+
+    /// The score above which the delay is bypassed
+    public static var rulesMinScore: String { NSLocalizedString("rules.minScore", bundle: .module, comment: "") }
+
+    /// The line under the release profiles' title
+    public static var rulesReleasesMessage: String { NSLocalizedString("rules.releasesMessage", bundle: .module, comment: "") }
+
+    /// Footer of the release profiles
+    public static var rulesReleasesFooter: String { NSLocalizedString("rules.releasesFooter", bundle: .module, comment: "") }
+
+    /// Shown when there is no release profile
+    public static var rulesNoReleases: String { NSLocalizedString("rules.noReleases", bundle: .module, comment: "") }
+
+    /// A release profile without a name
+    public static var rulesUnnamed: String { NSLocalizedString("rules.unnamed", bundle: .module, comment: "") }
+
+    /// How many terms a release profile requires
+    public static func rulesRequiredCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.requiredCount", bundle: .module, comment: ""), count)
+    }
+
+    /// How many terms a release profile ignores
+    public static func rulesIgnoredCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.ignoredCount", bundle: .module, comment: ""), count)
+    }
+
+    /// A release profile's name
+    public static var rulesName: String { NSLocalizedString("rules.name", bundle: .module, comment: "") }
+
+    /// Switch enabling a release profile
+    public static var rulesEnabled: String { NSLocalizedString("rules.enabled", bundle: .module, comment: "") }
+
+    /// Terms a release must contain
+    public static var rulesRequired: String { NSLocalizedString("rules.required", bundle: .module, comment: "") }
+
+    /// Detail of the required terms
+    public static var rulesRequiredDetail: String { NSLocalizedString("rules.requiredDetail", bundle: .module, comment: "") }
+
+    /// Terms a release must not contain
+    public static var rulesIgnored: String { NSLocalizedString("rules.ignored", bundle: .module, comment: "") }
+
+    /// Detail of the ignored terms
+    public static var rulesIgnoredDetail: String { NSLocalizedString("rules.ignoredDetail", bundle: .module, comment: "") }
+
+    /// The indexer a release profile applies to
+    public static var rulesIndexer: String { NSLocalizedString("rules.indexer", bundle: .module, comment: "") }
+
+    /// A release profile applying to all indexers
+    public static var rulesAllIndexers: String { NSLocalizedString("rules.allIndexers", bundle: .module, comment: "") }
+
+    /// The line under the mappings' title
+    public static var rulesMappingsMessage: String { NSLocalizedString("rules.mappingsMessage", bundle: .module, comment: "") }
+
+    /// Shown when there is no mapping
+    public static var rulesNoMappings: String { NSLocalizedString("rules.noMappings", bundle: .module, comment: "") }
+
+    /// A download client's host
+    public static var rulesHost: String { NSLocalizedString("rules.host", bundle: .module, comment: "") }
+
+    /// Detail of the host
+    public static var rulesHostDetail: String { NSLocalizedString("rules.hostDetail", bundle: .module, comment: "") }
+
+    /// The folder the download client reports
+    public static var rulesRemotePath: String { NSLocalizedString("rules.remotePath", bundle: .module, comment: "") }
+
+    /// Detail of the remote path
+    public static var rulesRemotePathDetail: String { NSLocalizedString("rules.remotePathDetail", bundle: .module, comment: "") }
+
+    /// The folder the server sees
+    public static var rulesLocalPath: String { NSLocalizedString("rules.localPath", bundle: .module, comment: "") }
+
+    /// Detail of the local path
+    public static var rulesLocalPathDetail: String { NSLocalizedString("rules.localPathDetail", bundle: .module, comment: "") }
 }

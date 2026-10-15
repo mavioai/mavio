@@ -614,6 +614,8 @@
     <string name="settings_transcoding">Transcoding</string>
     <!-- The settings section of a server's rclone remotes and offline downloads -->
     <string name="settings_storage">Storage</string>
+    <!-- The settings section of what decides which releases a server grabs -->
+    <string name="settings_acquisition">Acquisition</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -1439,4 +1441,308 @@
     <string name="storage_remove_offline">Remove</string>
     <!-- Confirms removing an offline download client -->
     <string name="storage_remove_offline_confirm">Remove for Good</string>
+    <!-- The line under the Acquisition page's title -->
+    <string name="acquisition_message">What decides which releases the server grabs and where they come from.</string>
+    <!-- Title of the indexers -->
+    <string name="acquisition_indexers">Indexers</string>
+    <!-- Footer of the indexers -->
+    <string name="acquisition_indexers_footer">Indexers are configured in their plugins.</string>
+    <!-- Shown when no indexer is configured -->
+    <string name="acquisition_no_indexers">No indexers. Install and configure an indexer plugin.</string>
+    <!-- Title of the download clients -->
+    <string name="acquisition_clients">Download Clients</string>
+    <!-- Footer of the download clients -->
+    <string name="acquisition_clients_footer">Download clients are configured in their plugins; offline downloads of cloud drives in Storage.</string>
+    <!-- Shown when no download client is configured -->
+    <string name="acquisition_no_clients">No download clients. Install and configure a download client plugin.</string>
+    <!-- The torrent protocol -->
+    <string name="acquisition_torrent">Torrent</string>
+    <!-- The usenet protocol -->
+    <string name="acquisition_usenet">Usenet</string>
+    <!-- A public indexer -->
+    <string name="acquisition_public">Public</string>
+    <!-- A semi-private indexer -->
+    <string name="acquisition_semi_private">Semi-private</string>
+    <!-- A private indexer -->
+    <string name="acquisition_private">Private</string>
+    <!-- An indexer's or client's priority -->
+    <string name="acquisition_priority">Priority %s</string>
+    <!-- Marks something disabled -->
+    <string name="acquisition_off">Off</string>
+    <!-- An indexer or client left out after failing -->
+    <string name="acquisition_left_out">Left out until %1$s: %2$s</string>
+    <!-- The movie kind of profiles -->
+    <string name="acquisition_movies">Movies</string>
+    <!-- The series kind of profiles -->
+    <string name="acquisition_series">Series</string>
+    <!-- Title of a kind's quality profiles -->
+    <string name="acquisition_profiles_of">Quality Profiles: %s</string>
+    <!-- Marks a profile allowing upgrades -->
+    <string name="acquisition_upgrades">Upgrades</string>
+    <!-- Row adding a quality profile -->
+    <string name="acquisition_add_profile">Add Profile</string>
+    <!-- Title of the rules of acquisition -->
+    <string name="acquisition_rules">Rules</string>
+    <!-- Page of the sizes of qualities -->
+    <string name="acquisition_qualities">Quality Definitions</string>
+    <!-- Detail of the quality definitions -->
+    <string name="acquisition_qualities_detail">The sizes each quality may have</string>
+    <!-- The line under the quality definitions' title -->
+    <string name="acquisition_qualities_message">Sizes in megabytes per minute of runtime; zero for no limit.</string>
+    <!-- Footer of the quality definitions -->
+    <string name="acquisition_qualities_footer">Releases outside a quality\'s sizes are rejected; the preferred size ranks those within.</string>
+    <!-- Chooses movies or series -->
+    <string name="acquisition_kind">Kind</string>
+    <!-- Column of qualities -->
+    <string name="acquisition_quality">Quality</string>
+    <!-- A quality's minimum size -->
+    <string name="acquisition_min_size">Minimum</string>
+    <!-- A quality's preferred size -->
+    <string name="acquisition_preferred_size">Preferred</string>
+    <!-- A quality's maximum size -->
+    <string name="acquisition_max_size">Maximum</string>
+    <!-- Notice after saving -->
+    <string name="acquisition_saved">Saved.</string>
+    <!-- Page of the custom formats -->
+    <string name="acquisition_formats">Custom Formats</string>
+    <!-- Detail of the custom formats -->
+    <string name="acquisition_formats_detail">Conditions on releases that profiles score</string>
+    <!-- Page of the delay profiles -->
+    <string name="acquisition_delays">Delay Profiles</string>
+    <!-- Detail of the delay profiles -->
+    <string name="acquisition_delays_detail">Hold releases back for better ones</string>
+    <!-- Page of the release profiles -->
+    <string name="acquisition_releases">Release Profiles</string>
+    <!-- Detail of the release profiles -->
+    <string name="acquisition_releases_detail">Terms releases must have or must not have</string>
+    <!-- Page of the remote path mappings -->
+    <string name="acquisition_mappings">Remote Path Mappings</string>
+    <!-- Detail of the remote path mappings -->
+    <string name="acquisition_mappings_detail">Folders of download clients on other hosts</string>
+    <!-- Title of a quality profile's page -->
+    <string name="acquisition_profile">Quality Profile</string>
+    <!-- Title of the page adding a quality profile -->
+    <string name="acquisition_new_profile">New Quality Profile</string>
+    <!-- Shown when the profile opened is gone -->
+    <string name="acquisition_no_profile">This profile no longer exists.</string>
+    <!-- A quality profile's name -->
+    <string name="acquisition_profile_name">Name</string>
+    <!-- Switch allowing upgrades -->
+    <string name="acquisition_upgrade_allowed">Upgrades</string>
+    <!-- Detail of upgrades -->
+    <string name="acquisition_upgrade_allowed_detail">Replace files with better releases until the cutoff</string>
+    <!-- The quality where upgrades stop -->
+    <string name="acquisition_cutoff">Upgrade Until</string>
+    <!-- Detail of the cutoff -->
+    <string name="acquisition_cutoff_detail">Once a file has this quality, no better one is sought</string>
+    <!-- The language movie releases must have -->
+    <string name="acquisition_language">Language</string>
+    <!-- Detail of the language -->
+    <string name="acquisition_language_detail">The language releases must have</string>
+    <!-- Any language -->
+    <string name="acquisition_language_any">Any</string>
+    <!-- The movie's own language -->
+    <string name="acquisition_language_original">Original</string>
+    <!-- Releases whose language is not known -->
+    <string name="acquisition_language_unknown">Unknown</string>
+    <!-- Title of a profile's qualities -->
+    <string name="acquisition_profile_qualities">Qualities</string>
+    <!-- Footer of a profile's qualities -->
+    <string name="acquisition_profile_qualities_footer">Best first. Releases of qualities that are off are rejected.</string>
+    <!-- Moves an entry up -->
+    <string name="acquisition_move_up">Move Up</string>
+    <!-- Moves an entry down -->
+    <string name="acquisition_move_down">Move Down</string>
+    <!-- Title of a profile's format scores -->
+    <string name="acquisition_format_scores">Custom Format Scores</string>
+    <!-- Footer of the format scores -->
+    <string name="acquisition_format_scores_footer">A release scores the sum of its formats\' scores.</string>
+    <!-- Shown when there is no custom format -->
+    <string name="acquisition_no_formats">No custom formats.</string>
+    <!-- The least score a release must have -->
+    <string name="acquisition_min_format_score">Minimum Score</string>
+    <!-- Detail of the minimum score -->
+    <string name="acquisition_min_format_score_detail">Releases scoring less are rejected</string>
+    <!-- The score where upgrades stop -->
+    <string name="acquisition_cutoff_format_score">Upgrade Until Score</string>
+    <!-- Detail of the cutoff score -->
+    <string name="acquisition_cutoff_format_score_detail">Once a file scores this, no better one is sought</string>
+    <!-- The least a score must rise to upgrade -->
+    <string name="acquisition_min_upgrade_format_score">Minimum Upgrade</string>
+    <!-- Detail of the minimum upgrade -->
+    <string name="acquisition_min_upgrade_format_score_detail">How much a release must outscore the file</string>
+    <!-- Button creating an entry -->
+    <string name="acquisition_create">Add</string>
+    <!-- Button deleting a quality profile -->
+    <string name="acquisition_remove_profile">Delete Profile</string>
+    <!-- Asks before deleting a quality profile -->
+    <string name="acquisition_remove_profile_confirm">Delete %s\?</string>
+    <!-- What deleting a profile needs -->
+    <string name="acquisition_remove_profile_detail">A profile that movies or series use cannot be deleted.</string>
+    <!-- The line under the custom formats' title -->
+    <string name="formats_message">Named conditions on releases, which quality profiles score.</string>
+    <!-- Row adding a custom format -->
+    <string name="formats_add">Add Custom Format</string>
+    <!-- Title of the page adding a custom format -->
+    <string name="formats_new">New Custom Format</string>
+    <!-- Shown when the format opened is gone -->
+    <string name="formats_none">This custom format no longer exists.</string>
+    <!-- A custom format's name -->
+    <string name="formats_name">Name</string>
+    <!-- Switch putting the format's name into file names -->
+    <string name="formats_rename">Include When Renaming</string>
+    <!-- Detail of including when renaming -->
+    <string name="formats_rename_detail">Puts its name into file names</string>
+    <!-- Title of a format's conditions -->
+    <string name="formats_conditions">Conditions</string>
+    <!-- Footer of the conditions -->
+    <string name="formats_conditions_footer">A release has the format when one condition of each kind matches, and every required one does. Patterns are .NET regular expressions, ignoring case.</string>
+    <!-- Button adding a condition -->
+    <string name="formats_add_condition">Add Condition</string>
+    <!-- Shown when a format has no condition -->
+    <string name="formats_no_conditions">No conditions.</string>
+    <!-- A condition's kind -->
+    <string name="formats_kind">Kind</string>
+    <!-- A condition's name -->
+    <string name="formats_condition_name">Condition name</string>
+    <!-- Button removing a condition -->
+    <string name="formats_remove_condition">Remove</string>
+    <!-- A condition's pattern -->
+    <string name="formats_pattern">Regular expression</string>
+    <!-- A condition's value -->
+    <string name="formats_value">Value</string>
+    <!-- Placeholder of a condition's value -->
+    <string name="formats_choose">Choose…</string>
+    <!-- A range's minimum -->
+    <string name="formats_min">Minimum</string>
+    <!-- A range's maximum -->
+    <string name="formats_max">Maximum</string>
+    <!-- Unit of size conditions -->
+    <string name="formats_gigabytes">GB</string>
+    <!-- Checkbox matching any language but the value -->
+    <string name="formats_except_language">Any but this</string>
+    <!-- Checkbox inverting a condition -->
+    <string name="formats_negate">Negate</string>
+    <!-- Checkbox making a condition required -->
+    <string name="formats_required">Required</string>
+    <!-- Condition kind -->
+    <string name="formats_release_title">Release title</string>
+    <!-- Condition kind -->
+    <string name="formats_edition">Edition</string>
+    <!-- Condition kind -->
+    <string name="formats_language">Language</string>
+    <!-- Condition kind -->
+    <string name="formats_indexer_flag">Indexer flag</string>
+    <!-- Condition kind -->
+    <string name="formats_source">Source</string>
+    <!-- Condition kind -->
+    <string name="formats_resolution">Resolution</string>
+    <!-- Condition kind -->
+    <string name="formats_modifier">Quality modifier</string>
+    <!-- Condition kind -->
+    <string name="formats_size">Size</string>
+    <!-- Condition kind -->
+    <string name="formats_release_group">Release group</string>
+    <!-- Condition kind -->
+    <string name="formats_year">Year</string>
+    <!-- Condition kind -->
+    <string name="formats_release_type">Release type</string>
+    <!-- Button deleting a custom format -->
+    <string name="formats_remove">Delete Custom Format</string>
+    <!-- Asks before deleting a custom format -->
+    <string name="formats_remove_confirm">Delete %s\?</string>
+    <!-- What deleting a format does -->
+    <string name="formats_remove_detail">Profiles stop scoring it.</string>
+    <!-- Button adding an entry -->
+    <string name="rules_add">Add</string>
+    <!-- Button deleting an entry -->
+    <string name="rules_remove">Delete</string>
+    <!-- Confirms deleting an entry -->
+    <string name="rules_remove_confirm">Delete for Good</string>
+    <!-- The line under the delay profiles' title -->
+    <string name="rules_delays_message">Wait before grabbing, for a better release to come.</string>
+    <!-- Title of the delay profiles in their order -->
+    <string name="rules_delays_in_order">In Order</string>
+    <!-- Footer of the delay profiles -->
+    <string name="rules_delays_footer">A movie or series takes the first profile sharing one of its tags, else the default one.</string>
+    <!-- The default delay profile -->
+    <string name="rules_default_delay">Default</string>
+    <!-- A delay profile's preferred protocol -->
+    <string name="rules_prefers">Prefers %s</string>
+    <!-- A delay profile's usenet delay -->
+    <string name="rules_usenet_delay_of">Usenet %s min</string>
+    <!-- A delay profile's torrent delay -->
+    <string name="rules_torrent_delay_of">Torrent %s min</string>
+    <!-- An entry's tags -->
+    <string name="rules_tags">Tags</string>
+    <!-- Detail of a delay profile's tags -->
+    <string name="rules_delay_tags_detail">Separated by commas; at least one</string>
+    <!-- Detail of a release profile's tags -->
+    <string name="rules_release_tags_detail">Separated by commas; empty for all</string>
+    <!-- A delay profile's preferred protocol -->
+    <string name="rules_preferred">Preferred Protocol</string>
+    <!-- A delay profile's usenet delay -->
+    <string name="rules_usenet_delay">Usenet Delay</string>
+    <!-- A delay profile's torrent delay -->
+    <string name="rules_torrent_delay">Torrent Delay</string>
+    <!-- Unit of delays -->
+    <string name="rules_minutes">Minutes</string>
+    <!-- Switch bypassing the delay for the best quality -->
+    <string name="rules_bypass_quality">Bypass for Best Quality</string>
+    <!-- Detail of bypassing for the best quality -->
+    <string name="rules_bypass_quality_detail">Grab at once releases of the profile\'s best quality</string>
+    <!-- Switch bypassing the delay above a score -->
+    <string name="rules_bypass_score">Bypass Above Score</string>
+    <!-- The score above which the delay is bypassed -->
+    <string name="rules_min_score">Score</string>
+    <!-- The line under the release profiles' title -->
+    <string name="rules_releases_message">Require or ignore terms in the titles of releases.</string>
+    <!-- Footer of the release profiles -->
+    <string name="rules_releases_footer">Terms are matched ignoring case; write /pattern/ for a regular expression.</string>
+    <!-- Shown when there is no release profile -->
+    <string name="rules_no_releases">No release profiles.</string>
+    <!-- A release profile without a name -->
+    <string name="rules_unnamed">Unnamed</string>
+    <!-- How many terms a release profile requires -->
+    <plurals name="rules_required_count">
+        <item quantity="one">%d required</item>
+        <item quantity="other">%d required</item>
+    </plurals>
+    <!-- How many terms a release profile ignores -->
+    <plurals name="rules_ignored_count">
+        <item quantity="one">%d ignored</item>
+        <item quantity="other">%d ignored</item>
+    </plurals>
+    <!-- A release profile's name -->
+    <string name="rules_name">Name</string>
+    <!-- Switch enabling a release profile -->
+    <string name="rules_enabled">On</string>
+    <!-- Terms a release must contain -->
+    <string name="rules_required">Must Contain</string>
+    <!-- Detail of the required terms -->
+    <string name="rules_required_detail">One per line; a release needs one of them</string>
+    <!-- Terms a release must not contain -->
+    <string name="rules_ignored">Must Not Contain</string>
+    <!-- Detail of the ignored terms -->
+    <string name="rules_ignored_detail">One per line; a release with any is rejected</string>
+    <!-- The indexer a release profile applies to -->
+    <string name="rules_indexer">Indexer</string>
+    <!-- A release profile applying to all indexers -->
+    <string name="rules_all_indexers">All indexers</string>
+    <!-- The line under the mappings' title -->
+    <string name="rules_mappings_message">When a download client on another host reports a folder, the server reads it where it is mounted here.</string>
+    <!-- Shown when there is no mapping -->
+    <string name="rules_no_mappings">No remote path mappings.</string>
+    <!-- A download client's host -->
+    <string name="rules_host">Host</string>
+    <!-- Detail of the host -->
+    <string name="rules_host_detail">As the download client\'s settings name it</string>
+    <!-- The folder the download client reports -->
+    <string name="rules_remote_path">Remote Path</string>
+    <!-- Detail of the remote path -->
+    <string name="rules_remote_path_detail">The folder the client reports</string>
+    <!-- The folder the server sees -->
+    <string name="rules_local_path">Local Path</string>
+    <!-- Detail of the local path -->
+    <string name="rules_local_path_detail">Where the server sees it; absolute</string>
 </resources>
