@@ -4020,4 +4020,73 @@ public enum MavioStrings {
 
     /// Shortens a person's biography.
     public static var personLess: String { NSLocalizedString("person.less", bundle: .module, comment: "") }
+
+    /// Button opening an item's More menu.
+    public static var listsMore: String { NSLocalizedString("lists.more", bundle: .module, comment: "") }
+
+    /// Adds an item to one of the user's playlists.
+    public static var listsAddToPlaylist: String { NSLocalizedString("lists.addToPlaylist", bundle: .module, comment: "") }
+
+    /// Adds an item to one of the server's collections.
+    public static var listsAddToCollection: String { NSLocalizedString("lists.addToCollection", bundle: .module, comment: "") }
+
+    /// Renames a playlist or collection.
+    public static var listsRename: String { NSLocalizedString("lists.rename", bundle: .module, comment: "") }
+
+    /// Deletes a playlist or collection.
+    public static var listsDelete: String { NSLocalizedString("lists.delete", bundle: .module, comment: "") }
+
+    /// Shown after an item was added to a playlist or collection.
+    public static func listsAdded(name: String, list: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("lists.added", bundle: .module, comment: ""), name, list)
+    }
+
+    /// Name field of a new playlist.
+    public static var listsNewPlaylist: String { NSLocalizedString("lists.newPlaylist", bundle: .module, comment: "") }
+
+    /// Name field of a new collection.
+    public static var listsNewCollection: String { NSLocalizedString("lists.newCollection", bundle: .module, comment: "") }
+
+    /// Creates a playlist or collection holding the item.
+    public static var listsCreate: String { NSLocalizedString("lists.create", bundle: .module, comment: "") }
+
+    /// Label of a playlist's or collection's name.
+    public static var listsName: String { NSLocalizedString("lists.name", bundle: .module, comment: "") }
+
+    /// Saves a new name.
+    public static var listsSave: String { NSLocalizedString("lists.save", bundle: .module, comment: "") }
+
+    /// Asks before deleting a playlist or collection.
+    public static func listsDeleteTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("lists.deleteTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// What deleting a playlist does.
+    public static var listsDeletePlaylist: String { NSLocalizedString("lists.deletePlaylist", bundle: .module, comment: "") }
+
+    /// What deleting a collection does.
+    public static var listsDeleteCollection: String { NSLocalizedString("lists.deleteCollection", bundle: .module, comment: "") }
+
+    /// Shown for an empty playlist.
+    public static var listsEmptyPlaylist: String { NSLocalizedString("lists.emptyPlaylist", bundle: .module, comment: "") }
+
+    /// Shown for an empty collection.
+    public static var listsEmptyCollection: String { NSLocalizedString("lists.emptyCollection", bundle: .module, comment: "") }
+
+    /// Moves a playlist entry up.
+    public static var listsMoveUp: String { NSLocalizedString("lists.moveUp", bundle: .module, comment: "") }
+
+    /// Moves a playlist entry down.
+    public static var listsMoveDown: String { NSLocalizedString("lists.moveDown", bundle: .module, comment: "") }
+
+    /// Removes an entry from a playlist.
+    public static var listsRemove: String { NSLocalizedString("lists.remove", bundle: .module, comment: "") }
+
+    /// Removes an item from a collection.
+    public static func listsRemoveNamed(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("lists.removeNamed", bundle: .module, comment: ""), name)
+    }
+
+    /// Starts removing a collection's members.
+    public static var listsEdit: String { NSLocalizedString("lists.edit", bundle: .module, comment: "") }
 }

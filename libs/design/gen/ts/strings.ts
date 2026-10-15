@@ -1256,7 +1256,28 @@ export type MessageKey =
   | 'person.born'
   | 'person.died'
   | 'person.more'
-  | 'person.less';
+  | 'person.less'
+  | 'lists.more'
+  | 'lists.addToPlaylist'
+  | 'lists.addToCollection'
+  | 'lists.rename'
+  | 'lists.delete'
+  | 'lists.added'
+  | 'lists.newPlaylist'
+  | 'lists.newCollection'
+  | 'lists.create'
+  | 'lists.name'
+  | 'lists.save'
+  | 'lists.deleteTitle'
+  | 'lists.deletePlaylist'
+  | 'lists.deleteCollection'
+  | 'lists.emptyPlaylist'
+  | 'lists.emptyCollection'
+  | 'lists.moveUp'
+  | 'lists.moveDown'
+  | 'lists.remove'
+  | 'lists.removeNamed'
+  | 'lists.edit';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2505,7 +2526,28 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "person.born": "Born {date} (age {age})",
     "person.died": "Died {date}",
     "person.more": "More",
-    "person.less": "Less"
+    "person.less": "Less",
+    "lists.more": "More",
+    "lists.addToPlaylist": "Add to Playlist",
+    "lists.addToCollection": "Add to Collection",
+    "lists.rename": "Rename",
+    "lists.delete": "Delete",
+    "lists.added": "Added {name} to {list}",
+    "lists.newPlaylist": "New playlist",
+    "lists.newCollection": "New collection",
+    "lists.create": "Create",
+    "lists.name": "Name",
+    "lists.save": "Save",
+    "lists.deleteTitle": "Delete {name}?",
+    "lists.deletePlaylist": "The playlist is deleted; its items stay in their libraries.",
+    "lists.deleteCollection": "The collection is deleted for everyone; its items stay in their libraries.",
+    "lists.emptyPlaylist": "This playlist is empty. Add items from their More menu.",
+    "lists.emptyCollection": "This collection is empty.",
+    "lists.moveUp": "Move Up",
+    "lists.moveDown": "Move Down",
+    "lists.remove": "Remove",
+    "lists.removeNamed": "Remove {name}",
+    "lists.edit": "Edit"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3752,6 +3794,27 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "person.born": "生于 {date}（{age} 岁）",
     "person.died": "逝于 {date}",
     "person.more": "更多",
-    "person.less": "收起"
+    "person.less": "收起",
+    "lists.more": "更多",
+    "lists.addToPlaylist": "添加到播放列表",
+    "lists.addToCollection": "添加到合集",
+    "lists.rename": "重命名",
+    "lists.delete": "删除",
+    "lists.added": "已将 {name} 添加到 {list}",
+    "lists.newPlaylist": "新建播放列表",
+    "lists.newCollection": "新建合集",
+    "lists.create": "创建",
+    "lists.name": "名称",
+    "lists.save": "保存",
+    "lists.deleteTitle": "删除 {name}？",
+    "lists.deletePlaylist": "播放列表将被删除；其中的条目仍保留在各自的媒体库中。",
+    "lists.deleteCollection": "合集将对所有人删除；其中的条目仍保留在各自的媒体库中。",
+    "lists.emptyPlaylist": "此播放列表为空。可从条目的“更多”菜单添加。",
+    "lists.emptyCollection": "此合集为空。",
+    "lists.moveUp": "上移",
+    "lists.moveDown": "下移",
+    "lists.remove": "移除",
+    "lists.removeNamed": "移除 {name}",
+    "lists.edit": "编辑"
   }
 };

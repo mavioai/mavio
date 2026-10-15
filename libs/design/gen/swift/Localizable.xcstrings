@@ -22908,6 +22908,384 @@
           }
         }
       }
+    },
+    "lists.more": {
+      "comment": "Button opening an item's More menu.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
+          }
+        }
+      }
+    },
+    "lists.addToPlaylist": {
+      "comment": "Adds an item to one of the user's playlists.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Playlist"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到播放列表"
+          }
+        }
+      }
+    },
+    "lists.addToCollection": {
+      "comment": "Adds an item to one of the server's collections.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to Collection"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到合集"
+          }
+        }
+      }
+    },
+    "lists.rename": {
+      "comment": "Renames a playlist or collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名"
+          }
+        }
+      }
+    },
+    "lists.delete": {
+      "comment": "Deletes a playlist or collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "lists.added": {
+      "comment": "Shown after an item was added to a playlist or collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %1$@ to %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已将 %1$@ 添加到 %2$@"
+          }
+        }
+      }
+    },
+    "lists.newPlaylist": {
+      "comment": "Name field of a new playlist.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New playlist"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建播放列表"
+          }
+        }
+      }
+    },
+    "lists.newCollection": {
+      "comment": "Name field of a new collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New collection"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建合集"
+          }
+        }
+      }
+    },
+    "lists.create": {
+      "comment": "Creates a playlist or collection holding the item.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建"
+          }
+        }
+      }
+    },
+    "lists.name": {
+      "comment": "Label of a playlist's or collection's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称"
+          }
+        }
+      }
+    },
+    "lists.save": {
+      "comment": "Saves a new name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "lists.deleteTitle": {
+      "comment": "Asks before deleting a playlist or collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %@？"
+          }
+        }
+      }
+    },
+    "lists.deletePlaylist": {
+      "comment": "What deleting a playlist does.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The playlist is deleted; its items stay in their libraries."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放列表将被删除；其中的条目仍保留在各自的媒体库中。"
+          }
+        }
+      }
+    },
+    "lists.deleteCollection": {
+      "comment": "What deleting a collection does.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The collection is deleted for everyone; its items stay in their libraries."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "合集将对所有人删除；其中的条目仍保留在各自的媒体库中。"
+          }
+        }
+      }
+    },
+    "lists.emptyPlaylist": {
+      "comment": "Shown for an empty playlist.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This playlist is empty. Add items from their More menu."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此播放列表为空。可从条目的“更多”菜单添加。"
+          }
+        }
+      }
+    },
+    "lists.emptyCollection": {
+      "comment": "Shown for an empty collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This collection is empty."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此合集为空。"
+          }
+        }
+      }
+    },
+    "lists.moveUp": {
+      "comment": "Moves a playlist entry up.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上移"
+          }
+        }
+      }
+    },
+    "lists.moveDown": {
+      "comment": "Moves a playlist entry down.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move Down"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下移"
+          }
+        }
+      }
+    },
+    "lists.remove": {
+      "comment": "Removes an entry from a playlist.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
+          }
+        }
+      }
+    },
+    "lists.removeNamed": {
+      "comment": "Removes an item from a collection.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 %@"
+          }
+        }
+      }
+    },
+    "lists.edit": {
+      "comment": "Starts removing a collection's members.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

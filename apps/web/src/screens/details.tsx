@@ -24,6 +24,7 @@ import { Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, u
 
 import { locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
+import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { initialsOf } from "./person.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
@@ -245,7 +246,11 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
         {item.kind === ItemKind.EPISODE && item.seasonId && (
           <SeasonShelf server={server} episode={item} items={seasonEpisodes(item.seasonId)} />
         )}
-        {item.kind !== ItemKind.SERIES && item.kind !== ItemKind.SEASON && <Children server={server} item={item} items={children.data ?? []} />}
+        {item.kind === ItemKind.PLAYLIST && <PlaylistEntries server={server} playlist={item} />}
+        {item.kind === ItemKind.COLLECTION && children.isSuccess && <CollectionMembers server={server} collection={item} items={children.data} />}
+        {item.kind !== ItemKind.SERIES && item.kind !== ItemKind.SEASON && item.kind !== ItemKind.PLAYLIST && item.kind !== ItemKind.COLLECTION && (
+          <Children server={server} item={item} items={children.data ?? []} />
+        )}
         <Cast server={server} credits={credits} />
         {(similar.data?.length ?? 0) > 0 && (
           <Shelf title={t("item.similar")}>
@@ -585,6 +590,7 @@ function Actions({
         {(sources.length > 1 || copies.length > 0) && (
           <VersionMenu server={server} sources={sources} selected={source} onSelect={onSource} copies={copies} tv={tv} phone={phone} />
         )}
+        <MoreMenu server={server} item={item} className={circle} iconSize={icon} phone={phone} />
       </div>
       {status}
     </div>
@@ -843,7 +849,7 @@ function EpisodeList({ server, items, current }: { server: ServerEntry; items: I
   );
 }
 
-/** An album's tracks or a collection's items. */
+/** An album's tracks or a folder's items. */
 function Children({ server, item, items }: { server: ServerEntry; item: Item; items: Item[] }) {
   if (items.length === 0) return null;
   if (item.kind === ItemKind.MUSIC_ALBUM) {

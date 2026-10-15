@@ -627,7 +627,8 @@ flowchart TD
 - [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
   - [x] Discovery and request screens, with P20
   - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
-  - [ ] Collections and playlists (person pages are done)
+  - [x] Collections and playlists (`apps/web/src/screens/lists.tsx`, `libs/client-ts/src/lists.ts`)
+    - [ ] Playing a playlist or collection in order, the player going on to the next entry
   - [x] Playing the next episode at the end of one
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
@@ -683,6 +684,7 @@ flowchart TD
     - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
   - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
+    - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
   - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title

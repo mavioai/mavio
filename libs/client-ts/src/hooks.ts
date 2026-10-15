@@ -236,7 +236,7 @@ export function useItem(server: ServerEntry | undefined, itemId: string) {
   });
 }
 
-/** An item's seasons, episodes or tracks. */
+/** An item's seasons, episodes, tracks or members. */
 export function useChildren(server: ServerEntry, item: Item | undefined) {
   const servers = useServersStore();
   return useQuery({
@@ -245,7 +245,11 @@ export function useChildren(server: ServerEntry, item: Item | undefined) {
       (
         await servers
           .client(ItemService, server)
-          .listItems({ parentId: item!.id, sort: [{ field: SortField.INDEX }] })
+          .listItems({
+            parentId: item!.id,
+            // A collection's members in the order they were added.
+            sort: [{ field: item!.kind === ItemKind.COLLECTION ? SortField.LIST_ORDER : SortField.INDEX }],
+          })
       ).items,
     enabled: !!item,
   });

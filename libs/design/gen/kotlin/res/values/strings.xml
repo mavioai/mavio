@@ -2563,4 +2563,46 @@
     <string name="person_more">More</string>
     <!-- Shortens a person's biography. -->
     <string name="person_less">Less</string>
+    <!-- Button opening an item's More menu. -->
+    <string name="lists_more">More</string>
+    <!-- Adds an item to one of the user's playlists. -->
+    <string name="lists_add_to_playlist">Add to Playlist</string>
+    <!-- Adds an item to one of the server's collections. -->
+    <string name="lists_add_to_collection">Add to Collection</string>
+    <!-- Renames a playlist or collection. -->
+    <string name="lists_rename">Rename</string>
+    <!-- Deletes a playlist or collection. -->
+    <string name="lists_delete">Delete</string>
+    <!-- Shown after an item was added to a playlist or collection. -->
+    <string name="lists_added">Added %1$s to %2$s</string>
+    <!-- Name field of a new playlist. -->
+    <string name="lists_new_playlist">New playlist</string>
+    <!-- Name field of a new collection. -->
+    <string name="lists_new_collection">New collection</string>
+    <!-- Creates a playlist or collection holding the item. -->
+    <string name="lists_create">Create</string>
+    <!-- Label of a playlist's or collection's name. -->
+    <string name="lists_name">Name</string>
+    <!-- Saves a new name. -->
+    <string name="lists_save">Save</string>
+    <!-- Asks before deleting a playlist or collection. -->
+    <string name="lists_delete_title">Delete %s\?</string>
+    <!-- What deleting a playlist does. -->
+    <string name="lists_delete_playlist">The playlist is deleted; its items stay in their libraries.</string>
+    <!-- What deleting a collection does. -->
+    <string name="lists_delete_collection">The collection is deleted for everyone; its items stay in their libraries.</string>
+    <!-- Shown for an empty playlist. -->
+    <string name="lists_empty_playlist">This playlist is empty. Add items from their More menu.</string>
+    <!-- Shown for an empty collection. -->
+    <string name="lists_empty_collection">This collection is empty.</string>
+    <!-- Moves a playlist entry up. -->
+    <string name="lists_move_up">Move Up</string>
+    <!-- Moves a playlist entry down. -->
+    <string name="lists_move_down">Move Down</string>
+    <!-- Removes an entry from a playlist. -->
+    <string name="lists_remove">Remove</string>
+    <!-- Removes an item from a collection. -->
+    <string name="lists_remove_named">Remove %s</string>
+    <!-- Starts removing a collection's members. -->
+    <string name="lists_edit">Edit</string>
 </resources>

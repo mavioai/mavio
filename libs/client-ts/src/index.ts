@@ -142,6 +142,7 @@ export { isNoAiGateway, useAiActions, useAiLogin, useAiModels, useAiProviders } 
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
 export { useQuota, useRequestActions, useRequests } from "./requests.ts";
 export { usePerson, usePersonItems } from "./people.ts";
+export { useCollectionActions, useCollections, usePlaylistActions, usePlaylistEntries, usePlaylists } from "./lists.ts";
 export {
   useBlocklist,
   useDownloadActions,

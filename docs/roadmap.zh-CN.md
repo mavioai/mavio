@@ -627,7 +627,8 @@ flowchart TD
 - [x] Web UI（`apps/web`、`libs/client-ts`）：登录（密码、首个用户、Quick Connect）、多台服务器及其顺序、合并的首页、带推荐与全部标签的媒体库、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（直放与 HLS、音轨与字幕轨、外部播放器）、授权设备；由事件流刷新
   - [x] 发现与请求页面，随 P20
   - [x] 管理页面：媒体库、用户、设备、插件、任务、设置
-  - [ ] 合集与播放列表（人物页面已完成）
+  - [x] 合集与播放列表（`apps/web/src/screens/lists.tsx`、`libs/client-ts/src/lists.ts`）
+    - [ ] 按顺序播放播放列表或合集，播放器接着播放下一项
   - [x] 一集结束时播放下一集
   - [ ] 借助 JASSUB 保留样式的 ASS 字幕
   - [ ] 离线保存查询缓存
@@ -683,6 +684,7 @@ flowchart TD
     - [ ] 从发现的作品将电影与剧集添加到想要（`AddMovie`、`AddSeries`）
   - [ ] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`）
   - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
+    - [x] 通过条目的“更多”菜单使用播放列表与合集，播放列表的条目与合集的成员（§6.3.20）
   - [ ] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
   - [ ] Web UI 的 AI 助手会话（`AgentSessionService`）
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
