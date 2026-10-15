@@ -142,7 +142,7 @@ export function ItemCard({
         <Artwork
           src={image?.url}
           alt={item.name}
-          className={`${aspects[s]} rounded-md transition group-hover:brightness-110 group-active:opacity-80`}
+          className={`${aspects[s]} rounded-md transition group-hover:ring-2 group-hover:ring-on-background group-active:opacity-80`}
         />
         {progress !== undefined && (
           <div className="absolute inset-x-2.5 bottom-2.5 h-1 overflow-hidden rounded-full bg-white/35 shadow-level1">
@@ -228,7 +228,8 @@ export function Shelf({
           )}
         </div>
       </div>
-      <div ref={row} className={`scroll-row flex overflow-x-auto px-margin pb-1 ${tv ? "gap-gutter" : gap}`}>
+      {/* The padding leaves room for a hovered card's border, which the row would clip. */}
+      <div ref={row} className={`scroll-row -mt-1 flex overflow-x-auto px-margin pt-1 pb-1 ${tv ? "gap-gutter" : gap}`}>
         {children}
       </div>
     </section>

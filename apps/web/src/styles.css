@@ -194,7 +194,9 @@ body {
     z-index: 1;
   }
   & .scroll-row > a:focus [data-art] {
-    box-shadow: 0 18px 40px rgb(0 0 0 / 0.6);
+    box-shadow:
+      0 0 0 3px var(--mavio-color-on-background),
+      var(--mavio-elevation-level2);
   }
   & :is(input, select, textarea):focus {
     box-shadow: 0 0 0 3px #fff;

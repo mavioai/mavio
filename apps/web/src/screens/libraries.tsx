@@ -37,7 +37,7 @@ export function LibrariesScreen() {
                 <Artwork
                   src={libraryImageUrl(server, l, 480)}
                   alt={l.name}
-                  className="aspect-video rounded-md transition group-hover:brightness-110"
+                  className="aspect-video rounded-md transition group-hover:ring-2 group-hover:ring-on-background"
                 />
                 <div className="mt-2 type-headline">{l.name}</div>
               </Link>
