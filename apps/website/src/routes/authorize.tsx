@@ -112,6 +112,21 @@ function AppRequest({ q }: { q: Search }) {
   );
 }
 
+/** The account's avatar, colored from its name as in every client (libs/design/components.md, Avatar). */
+function Avatar({ name }: { name: string }) {
+  let hue = 0;
+  for (const c of name) hue = (hue * 31 + c.codePointAt(0)!) % 360;
+  return (
+    <span
+      aria-hidden
+      className="flex size-9 shrink-0 items-center justify-center rounded-full font-semibold text-white"
+      style={{ fontSize: 36 * 0.42, background: `hsl(${hue} 42% 44%)` }}
+    >
+      {[...name][0]?.toUpperCase()}
+    </span>
+  );
+}
+
 /** A server's web UI signing in its administrator, or claiming the server. */
 function ServerRequest({ request, me }: { request: string; me: Me }) {
   const site = useQuery({ queryKey: ["config"], queryFn: config });
@@ -145,9 +160,7 @@ function ServerRequest({ request, me }: { request: string; me: Me }) {
   const detail = me.username && me.username !== me.name ? `@${me.username}` : email;
   const signedInAs = (
     <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-left">
-      <span className="type-headline flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent">
-        {(me.name || me.username || "?").slice(0, 1).toUpperCase()}
-      </span>
+      <Avatar name={me.name || me.username || "?"} />
       <span className="flex min-w-0 flex-col">
         <span className="type-callout truncate font-semibold">{me.name || me.username}</span>
         {detail && <span className="type-footnote truncate text-text-secondary">{detail}</span>}

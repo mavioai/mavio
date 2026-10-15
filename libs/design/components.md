@@ -63,6 +63,13 @@ A cast or crew member.
 * **Anatomy**: a circular photo (`radius.full`), the name (`typography.callout`) and the role (`typography.footnote`, `color.textSecondary`), each on at most two lines.
 * **Without a photo**: the initials on `color.surfaceRaised`.
 
+## Avatar
+
+A user's or an account's picture in menus, lists of users and Homes.
+
+* **Anatomy**: a circle (`radius.full`) holding the first character of the name, upper-cased, in white and semibold, 0.42 of the circle's size.
+* **Color**: drawn from the name, so that a person has the same color everywhere and people side by side differ: the hue is 0, and for each character of the name, in code points, the hue times 31 plus the code point, modulo 360; the fill is that hue at 42% saturation and 44% lightness, on which white text stays legible.
+
 ## Track Picker
 
 The audio and subtitle pickers of the player and of the details screen.

@@ -361,7 +361,7 @@ export function libraryIcon(kind: LibraryKind): IconName {
   }
 }
 
-/** A person's initial on a color their name picks. */
+/** A person's initial on a color their name picks (libs/design/components.md, Avatar). */
 export function Avatar({ name, size = 32, className }: { name: string; size?: number; className?: string }) {
   let hue = 0;
   for (const c of name) hue = (hue * 31 + c.codePointAt(0)!) % 360;
