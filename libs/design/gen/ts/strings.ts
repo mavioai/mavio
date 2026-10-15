@@ -289,6 +289,7 @@ export type MessageKey =
   | 'settings.thisServer'
   | 'settings.plugins'
   | 'settings.pluginsMessage'
+  | 'settings.libraries'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -351,7 +352,73 @@ export type MessageKey =
   | 'schema.invalidJson'
   | 'schema.default'
   | 'schema.show'
-  | 'schema.hide';
+  | 'schema.hide'
+  | 'libraries.message'
+  | 'libraries.add'
+  | 'libraries.create'
+  | 'libraries.none'
+  | 'libraries.notFound'
+  | 'libraries.folderCount'
+  | 'libraries.scan'
+  | 'libraries.scanQueued'
+  | 'libraries.scanPending'
+  | 'libraries.saved'
+  | 'libraries.name'
+  | 'libraries.kind'
+  | 'libraries.kindMovies'
+  | 'libraries.kindShows'
+  | 'libraries.kindMusic'
+  | 'libraries.kindMusicVideos'
+  | 'libraries.kindHomeVideos'
+  | 'libraries.kindBooks'
+  | 'libraries.kindPhotos'
+  | 'libraries.kindMixed'
+  | 'libraries.folders'
+  | 'libraries.foldersFooter'
+  | 'libraries.folderPath'
+  | 'libraries.addFolder'
+  | 'libraries.browse'
+  | 'libraries.removeFolder'
+  | 'libraries.storageClass'
+  | 'libraries.storageAuto'
+  | 'libraries.storageAutoIs'
+  | 'libraries.storageLocal'
+  | 'libraries.storageNetwork'
+  | 'libraries.storageCloud'
+  | 'libraries.roots'
+  | 'libraries.parentFolder'
+  | 'libraries.chooseFolder'
+  | 'libraries.noFolders'
+  | 'libraries.metadata'
+  | 'libraries.language'
+  | 'libraries.country'
+  | 'libraries.serverDefault'
+  | 'libraries.saveLocalMetadata'
+  | 'libraries.saveLocalMetadataDetail'
+  | 'libraries.autoCollections'
+  | 'libraries.autoCollectionsDetail'
+  | 'libraries.downloadLyrics'
+  | 'libraries.scanning'
+  | 'libraries.scanInterval'
+  | 'libraries.scanNever'
+  | 'libraries.scanHourly'
+  | 'libraries.scanEveryHours'
+  | 'libraries.scanDaily'
+  | 'libraries.scanWeekly'
+  | 'libraries.trickplay'
+  | 'libraries.trickplayDetail'
+  | 'libraries.chapterImages'
+  | 'libraries.loudness'
+  | 'libraries.loudnessDetail'
+  | 'libraries.missingEpisodes'
+  | 'libraries.missingEpisodesFooter'
+  | 'libraries.missingAired'
+  | 'libraries.missingUnaired'
+  | 'libraries.missingSpecials'
+  | 'libraries.graceDays'
+  | 'libraries.graceDaysDetail'
+  | 'libraries.deleteTitle'
+  | 'libraries.deleteMessage';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -633,6 +700,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.thisServer": "{name} (This Server)",
     "settings.plugins": "Plugins",
     "settings.pluginsMessage": "Plugins bring the server metadata, subtitles, downloads and more.",
+    "settings.libraries": "Libraries",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -695,7 +763,73 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "schema.invalidJson": "Not valid JSON",
     "schema.default": "Default ({value})",
     "schema.show": "Show",
-    "schema.hide": "Hide"
+    "schema.hide": "Hide",
+    "libraries.message": "The folders the server scans, each library of one kind of media.",
+    "libraries.add": "Add Library",
+    "libraries.create": "Add",
+    "libraries.none": "No libraries yet. Add one to scan your media.",
+    "libraries.notFound": "This library no longer exists.",
+    "libraries.folderCount": "{count, plural, one {# folder} other {# folders}}",
+    "libraries.scan": "Scan",
+    "libraries.scanQueued": "Scan started",
+    "libraries.scanPending": "A scan is already waiting",
+    "libraries.saved": "Saved",
+    "libraries.name": "Name",
+    "libraries.kind": "Content",
+    "libraries.kindMovies": "Movies",
+    "libraries.kindShows": "TV Shows",
+    "libraries.kindMusic": "Music",
+    "libraries.kindMusicVideos": "Music Videos",
+    "libraries.kindHomeVideos": "Home Videos",
+    "libraries.kindBooks": "Books",
+    "libraries.kindPhotos": "Photos",
+    "libraries.kindMixed": "Mixed Content",
+    "libraries.folders": "Folders",
+    "libraries.foldersFooter": "Folders of the server, or of an rclone remote as rclone:remote:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs.",
+    "libraries.folderPath": "Folder path",
+    "libraries.addFolder": "Add",
+    "libraries.browse": "Browse",
+    "libraries.removeFolder": "Remove Folder",
+    "libraries.storageClass": "Storage",
+    "libraries.storageAuto": "Automatic",
+    "libraries.storageAutoIs": "Automatic ({storage})",
+    "libraries.storageLocal": "Local Disk",
+    "libraries.storageNetwork": "Network Share",
+    "libraries.storageCloud": "Cloud Drive",
+    "libraries.roots": "Drives",
+    "libraries.parentFolder": "Up",
+    "libraries.chooseFolder": "Add This Folder",
+    "libraries.noFolders": "No folders here.",
+    "libraries.metadata": "Metadata",
+    "libraries.language": "Metadata Language",
+    "libraries.country": "Country",
+    "libraries.serverDefault": "Server Default",
+    "libraries.saveLocalMetadata": "Save Metadata Next to the Media",
+    "libraries.saveLocalMetadataDetail": "NFO files and artwork, read back by scans.",
+    "libraries.autoCollections": "Group Movies into Collections",
+    "libraries.autoCollectionsDetail": "From the collections the metadata names.",
+    "libraries.downloadLyrics": "Download Lyrics",
+    "libraries.scanning": "Scanning",
+    "libraries.scanInterval": "Scan Automatically",
+    "libraries.scanNever": "Never",
+    "libraries.scanHourly": "Every Hour",
+    "libraries.scanEveryHours": "Every {hours} Hours",
+    "libraries.scanDaily": "Every Day",
+    "libraries.scanWeekly": "Every Week",
+    "libraries.trickplay": "Seek Thumbnails",
+    "libraries.trickplayDetail": "Images shown while seeking; takes time and space.",
+    "libraries.chapterImages": "Chapter Images",
+    "libraries.loudness": "Measure Loudness",
+    "libraries.loudnessDetail": "To play tracks at an even volume.",
+    "libraries.missingEpisodes": "Missing Episodes",
+    "libraries.missingEpisodesFooter": "Episodes without their files are listed in their series. Series monitored for acquisition list every episode.",
+    "libraries.missingAired": "Show Aired Episodes",
+    "libraries.missingUnaired": "Show Upcoming Episodes",
+    "libraries.missingSpecials": "Include Specials",
+    "libraries.graceDays": "Keep for Days",
+    "libraries.graceDaysDetail": "Days an aired episode stays listed for its file to arrive.",
+    "libraries.deleteTitle": "Delete {name}?",
+    "libraries.deleteMessage": "Its items leave the server. The media files stay."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -975,6 +1109,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.thisServer": "{name}（本服务器）",
     "settings.plugins": "插件",
     "settings.pluginsMessage": "插件为服务器提供元数据、字幕、下载等功能。",
+    "settings.libraries": "媒体库",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -1037,6 +1172,72 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "schema.invalidJson": "不是有效的 JSON",
     "schema.default": "默认（{value}）",
     "schema.show": "显示",
-    "schema.hide": "隐藏"
+    "schema.hide": "隐藏",
+    "libraries.message": "服务器扫描的文件夹，每个媒体库存放一类媒体。",
+    "libraries.add": "添加媒体库",
+    "libraries.create": "添加",
+    "libraries.none": "还没有媒体库。添加一个来扫描你的媒体。",
+    "libraries.notFound": "此媒体库已不存在。",
+    "libraries.folderCount": "{count} 个文件夹",
+    "libraries.scan": "扫描",
+    "libraries.scanQueued": "已开始扫描",
+    "libraries.scanPending": "已有扫描在等待",
+    "libraries.saved": "已保存",
+    "libraries.name": "名称",
+    "libraries.kind": "内容类型",
+    "libraries.kindMovies": "电影",
+    "libraries.kindShows": "剧集",
+    "libraries.kindMusic": "音乐",
+    "libraries.kindMusicVideos": "音乐视频",
+    "libraries.kindHomeVideos": "家庭视频",
+    "libraries.kindBooks": "图书",
+    "libraries.kindPhotos": "照片",
+    "libraries.kindMixed": "混合内容",
+    "libraries.folders": "文件夹",
+    "libraries.foldersFooter": "服务器上的文件夹，或以 rclone:远程:路径 表示的 rclone 远程中的文件夹。一个文件夹只属于一个媒体库。存储类型说明读取它的代价；云盘只按播放所需读取。",
+    "libraries.folderPath": "文件夹路径",
+    "libraries.addFolder": "添加",
+    "libraries.browse": "浏览",
+    "libraries.removeFolder": "移除文件夹",
+    "libraries.storageClass": "存储类型",
+    "libraries.storageAuto": "自动",
+    "libraries.storageAutoIs": "自动（{storage}）",
+    "libraries.storageLocal": "本地磁盘",
+    "libraries.storageNetwork": "网络共享",
+    "libraries.storageCloud": "云盘",
+    "libraries.roots": "磁盘",
+    "libraries.parentFolder": "上一级",
+    "libraries.chooseFolder": "添加此文件夹",
+    "libraries.noFolders": "此处没有文件夹。",
+    "libraries.metadata": "元数据",
+    "libraries.language": "元数据语言",
+    "libraries.country": "国家/地区",
+    "libraries.serverDefault": "服务器默认",
+    "libraries.saveLocalMetadata": "将元数据保存在媒体旁",
+    "libraries.saveLocalMetadataDetail": "NFO 文件与图片，扫描时会读回。",
+    "libraries.autoCollections": "将电影归入合集",
+    "libraries.autoCollectionsDetail": "按元数据中的合集。",
+    "libraries.downloadLyrics": "下载歌词",
+    "libraries.scanning": "扫描",
+    "libraries.scanInterval": "自动扫描",
+    "libraries.scanNever": "从不",
+    "libraries.scanHourly": "每小时",
+    "libraries.scanEveryHours": "每 {hours} 小时",
+    "libraries.scanDaily": "每天",
+    "libraries.scanWeekly": "每周",
+    "libraries.trickplay": "拖动预览图",
+    "libraries.trickplayDetail": "拖动进度时显示的图片；耗费时间与空间。",
+    "libraries.chapterImages": "章节图片",
+    "libraries.loudness": "测量响度",
+    "libraries.loudnessDetail": "以统一的音量播放曲目。",
+    "libraries.missingEpisodes": "缺失的剧集",
+    "libraries.missingEpisodesFooter": "列出剧集中没有文件的单集。为获取而监控的剧集会列出全部单集。",
+    "libraries.missingAired": "显示已播出的单集",
+    "libraries.missingUnaired": "显示即将播出的单集",
+    "libraries.missingSpecials": "包括特别篇",
+    "libraries.graceDays": "保留天数",
+    "libraries.graceDaysDetail": "单集播出后继续列出、等待其文件的天数。",
+    "libraries.deleteTitle": "删除“{name}”？",
+    "libraries.deleteMessage": "其条目将从服务器移除，媒体文件保留。"
   }
 };

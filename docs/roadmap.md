@@ -653,7 +653,8 @@ flowchart TD
     - [ ] The Plugins section among the web UI's snapshot tests
     - [ ] Overview: the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
     - [ ] General: the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
-    - [ ] Libraries: adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
+    - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
+    - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`), and walking the folders of rclone remotes in the folder picker
     - [ ] Storage: rclone remotes with their authorization steps, and the offline clients (`StorageService`)
     - [ ] Users: adding, editing and removing users, invitations, their libraries and parental ratings (`UserService`, `ListRatings`)
     - [ ] Acquisition: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)

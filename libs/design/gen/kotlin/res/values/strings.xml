@@ -600,6 +600,8 @@
     <string name="settings_plugins">Plugins</string>
     <!-- Explanation under the Plugins title. -->
     <string name="settings_plugins_message">Plugins bring the server metadata, subtitles, downloads and more.</string>
+    <!-- Settings section of a server's libraries. -->
+    <string name="settings_libraries">Libraries</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -726,4 +728,139 @@
     <string name="schema_show">Show</string>
     <!-- Button hiding a secret revealed in a field. -->
     <string name="schema_hide">Hide</string>
+    <!-- Explanation under the Libraries settings section. -->
+    <string name="libraries_message">The folders the server scans, each library of one kind of media.</string>
+    <!-- Button and title of adding a library. -->
+    <string name="libraries_add">Add Library</string>
+    <!-- Button creating the library being added. -->
+    <string name="libraries_create">Add</string>
+    <!-- Shown when a server has no libraries. -->
+    <string name="libraries_none">No libraries yet. Add one to scan your media.</string>
+    <!-- Shown when the library opened was deleted. -->
+    <string name="libraries_not_found">This library no longer exists.</string>
+    <!-- Number of a library's folders. -->
+    <plurals name="libraries_folder_count">
+        <item quantity="one">%d folder</item>
+        <item quantity="other">%d folders</item>
+    </plurals>
+    <!-- Button scanning a library for changed files. -->
+    <string name="libraries_scan">Scan</string>
+    <!-- Shown after a scan of a library was queued. -->
+    <string name="libraries_scan_queued">Scan started</string>
+    <!-- Shown when a scan of the library was already queued. -->
+    <string name="libraries_scan_pending">A scan is already waiting</string>
+    <!-- Shown after a library's changes were saved. -->
+    <string name="libraries_saved">Saved</string>
+    <!-- Label of a library's name. -->
+    <string name="libraries_name">Name</string>
+    <!-- Label of the kind of media a library holds. -->
+    <string name="libraries_kind">Content</string>
+    <!-- Library kind: movies. -->
+    <string name="libraries_kind_movies">Movies</string>
+    <!-- Library kind: TV shows. -->
+    <string name="libraries_kind_shows">TV Shows</string>
+    <!-- Library kind: music. -->
+    <string name="libraries_kind_music">Music</string>
+    <!-- Library kind: music videos. -->
+    <string name="libraries_kind_music_videos">Music Videos</string>
+    <!-- Library kind: home videos. -->
+    <string name="libraries_kind_home_videos">Home Videos</string>
+    <!-- Library kind: books. -->
+    <string name="libraries_kind_books">Books</string>
+    <!-- Library kind: photos. -->
+    <string name="libraries_kind_photos">Photos</string>
+    <!-- Library kind: movies and shows together. -->
+    <string name="libraries_kind_mixed">Mixed Content</string>
+    <!-- Group of a library's folders. -->
+    <string name="libraries_folders">Folders</string>
+    <!-- Explanation under a library's folders. -->
+    <string name="libraries_folders_footer">Folders of the server, or of an rclone remote as rclone:remote:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs.</string>
+    <!-- Placeholder of the field adding a folder by its path. -->
+    <string name="libraries_folder_path">Folder path</string>
+    <!-- Button adding the folder typed. -->
+    <string name="libraries_add_folder">Add</string>
+    <!-- Button showing the server's folders to choose from. -->
+    <string name="libraries_browse">Browse</string>
+    <!-- Accessibility label of the button removing a folder from a library. -->
+    <string name="libraries_remove_folder">Remove Folder</string>
+    <!-- Label of a folder's storage class. -->
+    <string name="libraries_storage_class">Storage</string>
+    <!-- Storage class detected from the device holding the folder. -->
+    <string name="libraries_storage_auto">Automatic</string>
+    <!-- Automatic storage class with the one detected. -->
+    <string name="libraries_storage_auto_is">Automatic (%s)</string>
+    <!-- Storage class: a disk of the server. -->
+    <string name="libraries_storage_local">Local Disk</string>
+    <!-- Storage class: an SMB or NFS share. -->
+    <string name="libraries_storage_network">Network Share</string>
+    <!-- Storage class: a cloud drive. -->
+    <string name="libraries_storage_cloud">Cloud Drive</string>
+    <!-- Title of the folder picker at the file system's roots. -->
+    <string name="libraries_roots">Drives</string>
+    <!-- Row of the folder picker going to the parent folder. -->
+    <string name="libraries_parent_folder">Up</string>
+    <!-- Button adding the folder shown in the picker. -->
+    <string name="libraries_choose_folder">Add This Folder</string>
+    <!-- Shown when a folder has no subfolders. -->
+    <string name="libraries_no_folders">No folders here.</string>
+    <!-- Group of a library's metadata settings. -->
+    <string name="libraries_metadata">Metadata</string>
+    <!-- Label of a library's metadata language. -->
+    <string name="libraries_language">Metadata Language</string>
+    <!-- Label of a library's metadata country, for ratings and release dates. -->
+    <string name="libraries_country">Country</string>
+    <!-- Option using the server's language or country. -->
+    <string name="libraries_server_default">Server Default</string>
+    <!-- Setting writing NFO files and artwork next to the media. -->
+    <string name="libraries_save_local_metadata">Save Metadata Next to the Media</string>
+    <!-- Detail of saving metadata next to media. -->
+    <string name="libraries_save_local_metadata_detail">NFO files and artwork, read back by scans.</string>
+    <!-- Setting creating collections from movie sets. -->
+    <string name="libraries_auto_collections">Group Movies into Collections</string>
+    <!-- Detail of automatic collections. -->
+    <string name="libraries_auto_collections_detail">From the collections the metadata names.</string>
+    <!-- Setting downloading lyrics for tracks without any. -->
+    <string name="libraries_download_lyrics">Download Lyrics</string>
+    <!-- Group of a library's scan settings. -->
+    <string name="libraries_scanning">Scanning</string>
+    <!-- Label of how often a library is scanned. -->
+    <string name="libraries_scan_interval">Scan Automatically</string>
+    <!-- Scan interval: never. -->
+    <string name="libraries_scan_never">Never</string>
+    <!-- Scan interval: hourly. -->
+    <string name="libraries_scan_hourly">Every Hour</string>
+    <!-- Scan interval of several hours. -->
+    <string name="libraries_scan_every_hours">Every %s Hours</string>
+    <!-- Scan interval: daily. -->
+    <string name="libraries_scan_daily">Every Day</string>
+    <!-- Scan interval: weekly. -->
+    <string name="libraries_scan_weekly">Every Week</string>
+    <!-- Setting making thumbnail sheets for seeking. -->
+    <string name="libraries_trickplay">Seek Thumbnails</string>
+    <!-- Detail of making seek thumbnails. -->
+    <string name="libraries_trickplay_detail">Images shown while seeking; takes time and space.</string>
+    <!-- Setting making an image of each chapter. -->
+    <string name="libraries_chapter_images">Chapter Images</string>
+    <!-- Setting measuring tracks' loudness. -->
+    <string name="libraries_loudness">Measure Loudness</string>
+    <!-- Detail of measuring loudness. -->
+    <string name="libraries_loudness_detail">To play tracks at an even volume.</string>
+    <!-- Group of the episodes a series lacks shown in it. -->
+    <string name="libraries_missing_episodes">Missing Episodes</string>
+    <!-- Explanation under the missing episodes settings. -->
+    <string name="libraries_missing_episodes_footer">Episodes without their files are listed in their series. Series monitored for acquisition list every episode.</string>
+    <!-- Setting listing missing episodes that aired. -->
+    <string name="libraries_missing_aired">Show Aired Episodes</string>
+    <!-- Setting listing episodes airing later. -->
+    <string name="libraries_missing_unaired">Show Upcoming Episodes</string>
+    <!-- Setting listing missing episodes of season 0 too. -->
+    <string name="libraries_missing_specials">Include Specials</string>
+    <!-- Label of how long aired episodes stay listed. -->
+    <string name="libraries_grace_days">Keep for Days</string>
+    <!-- Detail of the grace days. -->
+    <string name="libraries_grace_days_detail">Days an aired episode stays listed for its file to arrive.</string>
+    <!-- Title asking to confirm deleting a library. -->
+    <string name="libraries_delete_title">Delete %s\?</string>
+    <!-- Explains what deleting a library removes. -->
+    <string name="libraries_delete_message">Its items leave the server. The media files stay.</string>
 </resources>

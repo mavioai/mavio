@@ -62,6 +62,7 @@ export {
   usePluginConfig,
   usePlugins,
 } from "./plugins.ts";
+export { useDirectory, useLibraryActions, useLocalization, useServerLibraries } from "./admin.ts";
 export { type Artwork, artwork, imageOf, imageUrl, libraryImageUrl, thumbOf } from "./images.ts";
 export {
   browserDecoders,

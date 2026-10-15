@@ -1,0 +1,130 @@
+// What the pages of a server's administration share: their header, the
+// link back from a page to its section's list, colored tiles, and the
+// confirmation of what cannot be undone.
+import { Link, useSearch } from "@tanstack/react-router";
+import type { ReactNode } from "react";
+
+import { locale, t } from "../../i18n.ts";
+import { Icon, type IconName } from "../../icon.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import type { SettingsSearch } from "../settings.tsx";
+
+/** A page's title, the line under it, the buttons beside it, and its groups. */
+export function Page({
+  title,
+  message,
+  actions,
+  back,
+  children,
+}: {
+  title: ReactNode;
+  message?: ReactNode;
+  actions?: ReactNode;
+  back?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-7">
+      {back}
+      <header className="flex flex-wrap items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="type-title1">{title}</h2>
+          {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+      </header>
+      {children}
+    </div>
+  );
+}
+
+/** A link back to a section's list, keeping the server chosen. */
+export function BackLink({ section, label }: { section: string; label: string }) {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  return (
+    <Link
+      to="/settings/$section"
+      params={{ section }}
+      search={{ server: cur.server }}
+      className="inline-flex items-center gap-1 self-start type-body text-accent-text"
+    >
+      <Icon name="back" size={18} />
+      {label}
+    </Link>
+  );
+}
+
+/** An icon on a colored tile. */
+export function ColorTile({ icon, color, size = 32 }: { icon: IconName; color: string; size?: number }) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-[22%] text-white"
+      style={{ background: color, width: size, height: size }}
+    >
+      <Icon name={icon} fill size={Math.round(size * 0.58)} />
+    </span>
+  );
+}
+
+/** Asks before something that cannot be undone. */
+export function Confirm({
+  title,
+  message,
+  action,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  message?: string;
+  action: string;
+  busy: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Group>
+      <Row label={title} detail={message}>
+        <Button variant="plain" onClick={onCancel}>
+          {t("action.cancel")}
+        </Button>
+        <Button variant="secondary" className="text-danger" disabled={busy} onClick={onConfirm}>
+          {action}
+        </Button>
+      </Row>
+    </Group>
+  );
+}
+
+/** The class of inputs inside rows. */
+export const input =
+  "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";
+
+const languageNames = new Intl.DisplayNames([locale], { type: "language", fallback: "none" });
+const regionNames = new Intl.DisplayNames([locale], { type: "region", fallback: "none" });
+
+/** The options of languages, named in the UI's language where it can, in order. */
+export function languageOptions(languages: { code: string; name: string }[]) {
+  return named(languages, (code) => languageNames.of(code));
+}
+
+/** The options of countries, named in the UI's language where it can, in order. */
+export function countryOptions(countries: { code: string; name: string }[]) {
+  return named(countries, (code) => regionNames.of(code));
+}
+
+function named(list: { code: string; name: string }[], of: (code: string) => string | undefined) {
+  const seen = new Set<string>();
+  return list
+    .filter((x) => x.code && !seen.has(x.code) && seen.add(x.code))
+    .map((x) => {
+      let label = x.name;
+      try {
+        label = of(x.code) || x.name;
+      } catch {
+        // A code Intl does not take keeps the server's name.
+      }
+      return { value: x.code, label };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, locale));
+}

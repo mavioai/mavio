@@ -5329,6 +5329,24 @@
         }
       }
     },
+    "settings.libraries": {
+      "comment": "Settings section of a server's libraries.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libraries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库"
+          }
+        }
+      }
+    },
     "plugins.installed": {
       "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
@@ -6459,6 +6477,1206 @@
           "stringUnit": {
             "state": "translated",
             "value": "隐藏"
+          }
+        }
+      }
+    },
+    "libraries.message": {
+      "comment": "Explanation under the Libraries settings section.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The folders the server scans, each library of one kind of media."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器扫描的文件夹，每个媒体库存放一类媒体。"
+          }
+        }
+      }
+    },
+    "libraries.add": {
+      "comment": "Button and title of adding a library.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Library"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加媒体库"
+          }
+        }
+      }
+    },
+    "libraries.create": {
+      "comment": "Button creating the library being added.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "libraries.none": {
+      "comment": "Shown when a server has no libraries.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No libraries yet. Add one to scan your media."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有媒体库。添加一个来扫描你的媒体。"
+          }
+        }
+      }
+    },
+    "libraries.notFound": {
+      "comment": "Shown when the library opened was deleted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This library no longer exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此媒体库已不存在。"
+          }
+        }
+      }
+    },
+    "libraries.folderCount": {
+      "comment": "Number of a library's folders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld folder"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld folders"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个文件夹"
+          }
+        }
+      }
+    },
+    "libraries.scan": {
+      "comment": "Button scanning a library for changed files.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描"
+          }
+        }
+      }
+    },
+    "libraries.scanQueued": {
+      "comment": "Shown after a scan of a library was queued.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan started"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已开始扫描"
+          }
+        }
+      }
+    },
+    "libraries.scanPending": {
+      "comment": "Shown when a scan of the library was already queued.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A scan is already waiting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有扫描在等待"
+          }
+        }
+      }
+    },
+    "libraries.saved": {
+      "comment": "Shown after a library's changes were saved.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存"
+          }
+        }
+      }
+    },
+    "libraries.name": {
+      "comment": "Label of a library's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称"
+          }
+        }
+      }
+    },
+    "libraries.kind": {
+      "comment": "Label of the kind of media a library holds.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Content"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容类型"
+          }
+        }
+      }
+    },
+    "libraries.kindMovies": {
+      "comment": "Library kind: movies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "libraries.kindShows": {
+      "comment": "Library kind: TV shows.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV Shows"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "libraries.kindMusic": {
+      "comment": "Library kind: music.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音乐"
+          }
+        }
+      }
+    },
+    "libraries.kindMusicVideos": {
+      "comment": "Library kind: music videos.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music Videos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音乐视频"
+          }
+        }
+      }
+    },
+    "libraries.kindHomeVideos": {
+      "comment": "Library kind: home videos.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home Videos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家庭视频"
+          }
+        }
+      }
+    },
+    "libraries.kindBooks": {
+      "comment": "Library kind: books.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Books"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图书"
+          }
+        }
+      }
+    },
+    "libraries.kindPhotos": {
+      "comment": "Library kind: photos.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "照片"
+          }
+        }
+      }
+    },
+    "libraries.kindMixed": {
+      "comment": "Library kind: movies and shows together.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mixed Content"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "混合内容"
+          }
+        }
+      }
+    },
+    "libraries.folders": {
+      "comment": "Group of a library's folders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件夹"
+          }
+        }
+      }
+    },
+    "libraries.foldersFooter": {
+      "comment": "Explanation under a library's folders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folders of the server, or of an rclone remote as rclone:remote:path. A folder belongs to one library. The storage reports how costly reading it is; cloud drives are read only as playback needs."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器上的文件夹，或以 rclone:远程:路径 表示的 rclone 远程中的文件夹。一个文件夹只属于一个媒体库。存储类型说明读取它的代价；云盘只按播放所需读取。"
+          }
+        }
+      }
+    },
+    "libraries.folderPath": {
+      "comment": "Placeholder of the field adding a folder by its path.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder path"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件夹路径"
+          }
+        }
+      }
+    },
+    "libraries.addFolder": {
+      "comment": "Button adding the folder typed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "libraries.browse": {
+      "comment": "Button showing the server's folders to choose from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览"
+          }
+        }
+      }
+    },
+    "libraries.removeFolder": {
+      "comment": "Accessibility label of the button removing a folder from a library.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除文件夹"
+          }
+        }
+      }
+    },
+    "libraries.storageClass": {
+      "comment": "Label of a folder's storage class.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储类型"
+          }
+        }
+      }
+    },
+    "libraries.storageAuto": {
+      "comment": "Storage class detected from the device holding the folder.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动"
+          }
+        }
+      }
+    },
+    "libraries.storageAutoIs": {
+      "comment": "Automatic storage class with the one detected.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic (%@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动（%@）"
+          }
+        }
+      }
+    },
+    "libraries.storageLocal": {
+      "comment": "Storage class: a disk of the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Disk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地磁盘"
+          }
+        }
+      }
+    },
+    "libraries.storageNetwork": {
+      "comment": "Storage class: an SMB or NFS share.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network Share"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络共享"
+          }
+        }
+      }
+    },
+    "libraries.storageCloud": {
+      "comment": "Storage class: a cloud drive.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloud Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "云盘"
+          }
+        }
+      }
+    },
+    "libraries.roots": {
+      "comment": "Title of the folder picker at the file system's roots.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drives"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "磁盘"
+          }
+        }
+      }
+    },
+    "libraries.parentFolder": {
+      "comment": "Row of the folder picker going to the parent folder.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一级"
+          }
+        }
+      }
+    },
+    "libraries.chooseFolder": {
+      "comment": "Button adding the folder shown in the picker.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add This Folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加此文件夹"
+          }
+        }
+      }
+    },
+    "libraries.noFolders": {
+      "comment": "Shown when a folder has no subfolders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No folders here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此处没有文件夹。"
+          }
+        }
+      }
+    },
+    "libraries.metadata": {
+      "comment": "Group of a library's metadata settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据"
+          }
+        }
+      }
+    },
+    "libraries.language": {
+      "comment": "Label of a library's metadata language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据语言"
+          }
+        }
+      }
+    },
+    "libraries.country": {
+      "comment": "Label of a library's metadata country, for ratings and release dates.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Country"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国家/地区"
+          }
+        }
+      }
+    },
+    "libraries.serverDefault": {
+      "comment": "Option using the server's language or country.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server Default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器默认"
+          }
+        }
+      }
+    },
+    "libraries.saveLocalMetadata": {
+      "comment": "Setting writing NFO files and artwork next to the media.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Metadata Next to the Media"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将元数据保存在媒体旁"
+          }
+        }
+      }
+    },
+    "libraries.saveLocalMetadataDetail": {
+      "comment": "Detail of saving metadata next to media.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NFO files and artwork, read back by scans."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NFO 文件与图片，扫描时会读回。"
+          }
+        }
+      }
+    },
+    "libraries.autoCollections": {
+      "comment": "Setting creating collections from movie sets.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Group Movies into Collections"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将电影归入合集"
+          }
+        }
+      }
+    },
+    "libraries.autoCollectionsDetail": {
+      "comment": "Detail of automatic collections.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From the collections the metadata names."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按元数据中的合集。"
+          }
+        }
+      }
+    },
+    "libraries.downloadLyrics": {
+      "comment": "Setting downloading lyrics for tracks without any.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download Lyrics"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载歌词"
+          }
+        }
+      }
+    },
+    "libraries.scanning": {
+      "comment": "Group of a library's scan settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "扫描"
+          }
+        }
+      }
+    },
+    "libraries.scanInterval": {
+      "comment": "Label of how often a library is scanned.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan Automatically"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动扫描"
+          }
+        }
+      }
+    },
+    "libraries.scanNever": {
+      "comment": "Scan interval: never.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从不"
+          }
+        }
+      }
+    },
+    "libraries.scanHourly": {
+      "comment": "Scan interval: hourly.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every Hour"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小时"
+          }
+        }
+      }
+    },
+    "libraries.scanEveryHours": {
+      "comment": "Scan interval of several hours.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %@ Hours"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每 %@ 小时"
+          }
+        }
+      }
+    },
+    "libraries.scanDaily": {
+      "comment": "Scan interval: daily.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every Day"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天"
+          }
+        }
+      }
+    },
+    "libraries.scanWeekly": {
+      "comment": "Scan interval: weekly.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every Week"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每周"
+          }
+        }
+      }
+    },
+    "libraries.trickplay": {
+      "comment": "Setting making thumbnail sheets for seeking.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seek Thumbnails"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动预览图"
+          }
+        }
+      }
+    },
+    "libraries.trickplayDetail": {
+      "comment": "Detail of making seek thumbnails.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images shown while seeking; takes time and space."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动进度时显示的图片；耗费时间与空间。"
+          }
+        }
+      }
+    },
+    "libraries.chapterImages": {
+      "comment": "Setting making an image of each chapter.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chapter Images"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "章节图片"
+          }
+        }
+      }
+    },
+    "libraries.loudness": {
+      "comment": "Setting measuring tracks' loudness.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measure Loudness"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测量响度"
+          }
+        }
+      }
+    },
+    "libraries.loudnessDetail": {
+      "comment": "Detail of measuring loudness.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To play tracks at an even volume."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以统一的音量播放曲目。"
+          }
+        }
+      }
+    },
+    "libraries.missingEpisodes": {
+      "comment": "Group of the episodes a series lacks shown in it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缺失的剧集"
+          }
+        }
+      }
+    },
+    "libraries.missingEpisodesFooter": {
+      "comment": "Explanation under the missing episodes settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodes without their files are listed in their series. Series monitored for acquisition list every episode."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "列出剧集中没有文件的单集。为获取而监控的剧集会列出全部单集。"
+          }
+        }
+      }
+    },
+    "libraries.missingAired": {
+      "comment": "Setting listing missing episodes that aired.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Aired Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示已播出的单集"
+          }
+        }
+      }
+    },
+    "libraries.missingUnaired": {
+      "comment": "Setting listing episodes airing later.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Upcoming Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示即将播出的单集"
+          }
+        }
+      }
+    },
+    "libraries.missingSpecials": {
+      "comment": "Setting listing missing episodes of season 0 too.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include Specials"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包括特别篇"
+          }
+        }
+      }
+    },
+    "libraries.graceDays": {
+      "comment": "Label of how long aired episodes stay listed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep for Days"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留天数"
+          }
+        }
+      }
+    },
+    "libraries.graceDaysDetail": {
+      "comment": "Detail of the grace days.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Days an aired episode stays listed for its file to arrive."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "单集播出后继续列出、等待其文件的天数。"
+          }
+        }
+      }
+    },
+    "libraries.deleteTitle": {
+      "comment": "Title asking to confirm deleting a library.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除“%@”？"
+          }
+        }
+      }
+    },
+    "libraries.deleteMessage": {
+      "comment": "Explains what deleting a library removes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its items leave the server. The media files stay."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其条目将从服务器移除，媒体文件保留。"
           }
         }
       }

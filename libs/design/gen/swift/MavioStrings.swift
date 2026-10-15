@@ -965,6 +965,9 @@ public enum MavioStrings {
     /// Explanation under the Plugins title.
     public static var settingsPluginsMessage: String { NSLocalizedString("settings.pluginsMessage", bundle: .module, comment: "") }
 
+    /// Settings section of a server's libraries.
+    public static var settingsLibraries: String { NSLocalizedString("settings.libraries", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -1171,4 +1174,210 @@ public enum MavioStrings {
 
     /// Button hiding a secret revealed in a field.
     public static var schemaHide: String { NSLocalizedString("schema.hide", bundle: .module, comment: "") }
+
+    /// Explanation under the Libraries settings section.
+    public static var librariesMessage: String { NSLocalizedString("libraries.message", bundle: .module, comment: "") }
+
+    /// Button and title of adding a library.
+    public static var librariesAdd: String { NSLocalizedString("libraries.add", bundle: .module, comment: "") }
+
+    /// Button creating the library being added.
+    public static var librariesCreate: String { NSLocalizedString("libraries.create", bundle: .module, comment: "") }
+
+    /// Shown when a server has no libraries.
+    public static var librariesNone: String { NSLocalizedString("libraries.none", bundle: .module, comment: "") }
+
+    /// Shown when the library opened was deleted.
+    public static var librariesNotFound: String { NSLocalizedString("libraries.notFound", bundle: .module, comment: "") }
+
+    /// Number of a library's folders.
+    public static func librariesFolderCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.folderCount", bundle: .module, comment: ""), count)
+    }
+
+    /// Button scanning a library for changed files.
+    public static var librariesScan: String { NSLocalizedString("libraries.scan", bundle: .module, comment: "") }
+
+    /// Shown after a scan of a library was queued.
+    public static var librariesScanQueued: String { NSLocalizedString("libraries.scanQueued", bundle: .module, comment: "") }
+
+    /// Shown when a scan of the library was already queued.
+    public static var librariesScanPending: String { NSLocalizedString("libraries.scanPending", bundle: .module, comment: "") }
+
+    /// Shown after a library's changes were saved.
+    public static var librariesSaved: String { NSLocalizedString("libraries.saved", bundle: .module, comment: "") }
+
+    /// Label of a library's name.
+    public static var librariesName: String { NSLocalizedString("libraries.name", bundle: .module, comment: "") }
+
+    /// Label of the kind of media a library holds.
+    public static var librariesKind: String { NSLocalizedString("libraries.kind", bundle: .module, comment: "") }
+
+    /// Library kind: movies.
+    public static var librariesKindMovies: String { NSLocalizedString("libraries.kindMovies", bundle: .module, comment: "") }
+
+    /// Library kind: TV shows.
+    public static var librariesKindShows: String { NSLocalizedString("libraries.kindShows", bundle: .module, comment: "") }
+
+    /// Library kind: music.
+    public static var librariesKindMusic: String { NSLocalizedString("libraries.kindMusic", bundle: .module, comment: "") }
+
+    /// Library kind: music videos.
+    public static var librariesKindMusicVideos: String { NSLocalizedString("libraries.kindMusicVideos", bundle: .module, comment: "") }
+
+    /// Library kind: home videos.
+    public static var librariesKindHomeVideos: String { NSLocalizedString("libraries.kindHomeVideos", bundle: .module, comment: "") }
+
+    /// Library kind: books.
+    public static var librariesKindBooks: String { NSLocalizedString("libraries.kindBooks", bundle: .module, comment: "") }
+
+    /// Library kind: photos.
+    public static var librariesKindPhotos: String { NSLocalizedString("libraries.kindPhotos", bundle: .module, comment: "") }
+
+    /// Library kind: movies and shows together.
+    public static var librariesKindMixed: String { NSLocalizedString("libraries.kindMixed", bundle: .module, comment: "") }
+
+    /// Group of a library's folders.
+    public static var librariesFolders: String { NSLocalizedString("libraries.folders", bundle: .module, comment: "") }
+
+    /// Explanation under a library's folders.
+    public static var librariesFoldersFooter: String { NSLocalizedString("libraries.foldersFooter", bundle: .module, comment: "") }
+
+    /// Placeholder of the field adding a folder by its path.
+    public static var librariesFolderPath: String { NSLocalizedString("libraries.folderPath", bundle: .module, comment: "") }
+
+    /// Button adding the folder typed.
+    public static var librariesAddFolder: String { NSLocalizedString("libraries.addFolder", bundle: .module, comment: "") }
+
+    /// Button showing the server's folders to choose from.
+    public static var librariesBrowse: String { NSLocalizedString("libraries.browse", bundle: .module, comment: "") }
+
+    /// Accessibility label of the button removing a folder from a library.
+    public static var librariesRemoveFolder: String { NSLocalizedString("libraries.removeFolder", bundle: .module, comment: "") }
+
+    /// Label of a folder's storage class.
+    public static var librariesStorageClass: String { NSLocalizedString("libraries.storageClass", bundle: .module, comment: "") }
+
+    /// Storage class detected from the device holding the folder.
+    public static var librariesStorageAuto: String { NSLocalizedString("libraries.storageAuto", bundle: .module, comment: "") }
+
+    /// Automatic storage class with the one detected.
+    public static func librariesStorageAutoIs(storage: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.storageAutoIs", bundle: .module, comment: ""), storage)
+    }
+
+    /// Storage class: a disk of the server.
+    public static var librariesStorageLocal: String { NSLocalizedString("libraries.storageLocal", bundle: .module, comment: "") }
+
+    /// Storage class: an SMB or NFS share.
+    public static var librariesStorageNetwork: String { NSLocalizedString("libraries.storageNetwork", bundle: .module, comment: "") }
+
+    /// Storage class: a cloud drive.
+    public static var librariesStorageCloud: String { NSLocalizedString("libraries.storageCloud", bundle: .module, comment: "") }
+
+    /// Title of the folder picker at the file system's roots.
+    public static var librariesRoots: String { NSLocalizedString("libraries.roots", bundle: .module, comment: "") }
+
+    /// Row of the folder picker going to the parent folder.
+    public static var librariesParentFolder: String { NSLocalizedString("libraries.parentFolder", bundle: .module, comment: "") }
+
+    /// Button adding the folder shown in the picker.
+    public static var librariesChooseFolder: String { NSLocalizedString("libraries.chooseFolder", bundle: .module, comment: "") }
+
+    /// Shown when a folder has no subfolders.
+    public static var librariesNoFolders: String { NSLocalizedString("libraries.noFolders", bundle: .module, comment: "") }
+
+    /// Group of a library's metadata settings.
+    public static var librariesMetadata: String { NSLocalizedString("libraries.metadata", bundle: .module, comment: "") }
+
+    /// Label of a library's metadata language.
+    public static var librariesLanguage: String { NSLocalizedString("libraries.language", bundle: .module, comment: "") }
+
+    /// Label of a library's metadata country, for ratings and release dates.
+    public static var librariesCountry: String { NSLocalizedString("libraries.country", bundle: .module, comment: "") }
+
+    /// Option using the server's language or country.
+    public static var librariesServerDefault: String { NSLocalizedString("libraries.serverDefault", bundle: .module, comment: "") }
+
+    /// Setting writing NFO files and artwork next to the media.
+    public static var librariesSaveLocalMetadata: String { NSLocalizedString("libraries.saveLocalMetadata", bundle: .module, comment: "") }
+
+    /// Detail of saving metadata next to media.
+    public static var librariesSaveLocalMetadataDetail: String { NSLocalizedString("libraries.saveLocalMetadataDetail", bundle: .module, comment: "") }
+
+    /// Setting creating collections from movie sets.
+    public static var librariesAutoCollections: String { NSLocalizedString("libraries.autoCollections", bundle: .module, comment: "") }
+
+    /// Detail of automatic collections.
+    public static var librariesAutoCollectionsDetail: String { NSLocalizedString("libraries.autoCollectionsDetail", bundle: .module, comment: "") }
+
+    /// Setting downloading lyrics for tracks without any.
+    public static var librariesDownloadLyrics: String { NSLocalizedString("libraries.downloadLyrics", bundle: .module, comment: "") }
+
+    /// Group of a library's scan settings.
+    public static var librariesScanning: String { NSLocalizedString("libraries.scanning", bundle: .module, comment: "") }
+
+    /// Label of how often a library is scanned.
+    public static var librariesScanInterval: String { NSLocalizedString("libraries.scanInterval", bundle: .module, comment: "") }
+
+    /// Scan interval: never.
+    public static var librariesScanNever: String { NSLocalizedString("libraries.scanNever", bundle: .module, comment: "") }
+
+    /// Scan interval: hourly.
+    public static var librariesScanHourly: String { NSLocalizedString("libraries.scanHourly", bundle: .module, comment: "") }
+
+    /// Scan interval of several hours.
+    public static func librariesScanEveryHours(hours: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.scanEveryHours", bundle: .module, comment: ""), hours)
+    }
+
+    /// Scan interval: daily.
+    public static var librariesScanDaily: String { NSLocalizedString("libraries.scanDaily", bundle: .module, comment: "") }
+
+    /// Scan interval: weekly.
+    public static var librariesScanWeekly: String { NSLocalizedString("libraries.scanWeekly", bundle: .module, comment: "") }
+
+    /// Setting making thumbnail sheets for seeking.
+    public static var librariesTrickplay: String { NSLocalizedString("libraries.trickplay", bundle: .module, comment: "") }
+
+    /// Detail of making seek thumbnails.
+    public static var librariesTrickplayDetail: String { NSLocalizedString("libraries.trickplayDetail", bundle: .module, comment: "") }
+
+    /// Setting making an image of each chapter.
+    public static var librariesChapterImages: String { NSLocalizedString("libraries.chapterImages", bundle: .module, comment: "") }
+
+    /// Setting measuring tracks' loudness.
+    public static var librariesLoudness: String { NSLocalizedString("libraries.loudness", bundle: .module, comment: "") }
+
+    /// Detail of measuring loudness.
+    public static var librariesLoudnessDetail: String { NSLocalizedString("libraries.loudnessDetail", bundle: .module, comment: "") }
+
+    /// Group of the episodes a series lacks shown in it.
+    public static var librariesMissingEpisodes: String { NSLocalizedString("libraries.missingEpisodes", bundle: .module, comment: "") }
+
+    /// Explanation under the missing episodes settings.
+    public static var librariesMissingEpisodesFooter: String { NSLocalizedString("libraries.missingEpisodesFooter", bundle: .module, comment: "") }
+
+    /// Setting listing missing episodes that aired.
+    public static var librariesMissingAired: String { NSLocalizedString("libraries.missingAired", bundle: .module, comment: "") }
+
+    /// Setting listing episodes airing later.
+    public static var librariesMissingUnaired: String { NSLocalizedString("libraries.missingUnaired", bundle: .module, comment: "") }
+
+    /// Setting listing missing episodes of season 0 too.
+    public static var librariesMissingSpecials: String { NSLocalizedString("libraries.missingSpecials", bundle: .module, comment: "") }
+
+    /// Label of how long aired episodes stay listed.
+    public static var librariesGraceDays: String { NSLocalizedString("libraries.graceDays", bundle: .module, comment: "") }
+
+    /// Detail of the grace days.
+    public static var librariesGraceDaysDetail: String { NSLocalizedString("libraries.graceDaysDetail", bundle: .module, comment: "") }
+
+    /// Title asking to confirm deleting a library.
+    public static func librariesDeleteTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("libraries.deleteTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains what deleting a library removes.
+    public static var librariesDeleteMessage: String { NSLocalizedString("libraries.deleteMessage", bundle: .module, comment: "") }
 }
