@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { setPrefs, usePrefs } from "../prefs.ts";
+import { type Appearance, setPrefs, usePrefs } from "../prefs.ts";
 import { Avatar, useDismiss } from "../ui.tsx";
 
 /** The sign-in as the user menu presents it. */
@@ -106,18 +106,19 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   return (
     <div
       role="menu"
-      className={`absolute z-50 w-[280px] rounded-[14px] border border-border bg-surface-overlay/85 p-1.5 shadow-level3 backdrop-blur-xl ${
+      className={`absolute z-50 ${tv ? "w-[400px]" : "w-[300px]"} rounded-[14px] border border-border bg-surface-overlay/85 p-1.5 shadow-level3 backdrop-blur-xl ${
         placement === "above" ? "bottom-full left-0 mb-2" : "top-full right-0 mt-2"
       }`}
     >
       <div className="flex items-center gap-3 px-2.5 py-2">
         <Avatar name={account.name} size={36} />
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="truncate type-headline">{account.name}</div>
           <div className="truncate type-footnote text-text-secondary">
             {shown.kind === "mavioDev" ? t("auth.mavioAccount") : t("auth.standaloneUser", { server: account.line })}
           </div>
         </div>
+        <ThemeSwitch />
       </div>
       {users.length > 0 && (
         <>
@@ -144,7 +145,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         </>
       )}
       <Divider />
-      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut="⌘,">
+      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut={tv ? undefined : "⌘,"}>
         {t("nav.settings")}
       </MenuLink>
       <button
@@ -193,6 +194,40 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
           onPin={(pin) => switchTo.mutate({ user: asking, pin }, { onSuccess: () => (setAsking(undefined), onClose()) })}
         />
       )}
+    </div>
+  );
+}
+
+const themes: { value: Appearance; icon: IconName; label: () => string }[] = [
+  { value: "system", icon: "appearance", label: () => t("settings.system") },
+  { value: "light", icon: "lightMode", label: () => t("settings.light") },
+  { value: "dark", icon: "darkMode", label: () => t("settings.dark") },
+];
+
+/** The appearance, chosen beside the account's name: the system's, light or dark. */
+function ThemeSwitch() {
+  const { appearance, tv } = usePrefs();
+  return (
+    <div role="radiogroup" aria-label={t("settings.appearance")} className="flex shrink-0 rounded-full bg-fill p-0.5">
+      {themes.map((th) => {
+        const on = appearance === th.value;
+        return (
+          <button
+            key={th.value}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            aria-label={th.label()}
+            title={th.label()}
+            onClick={() => setPrefs({ appearance: th.value })}
+            className={`flex ${tv ? "size-9" : "size-7"} items-center justify-center rounded-full ${
+              on ? "bg-surface-raised text-on-background shadow-level1" : "text-text-secondary hover:text-on-background"
+            }`}
+          >
+            <Icon name={th.icon} fill={on} size={tv ? 20 : 16} />
+          </button>
+        );
+      })}
     </div>
   );
 }

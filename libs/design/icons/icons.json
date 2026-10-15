@@ -55,6 +55,8 @@
   "devices": "devices",
   "admin": "shield-check",
   "appearance": "circle-half",
+  "lightMode": "sun",
+  "darkMode": "moon",
   "television": "television",
   "users": "users",
   "lock": "lock-simple",
