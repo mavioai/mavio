@@ -213,6 +213,11 @@ body {
     background: #fff;
     color: #000;
   }
+  /* A menu's items look focused as they look hovered. */
+  & [role="menu"] :is(a, button):focus {
+    background: var(--mavio-color-fill);
+    color: inherit;
+  }
 }
 
 /* The sign-in screen (docs/clients.md §4.1): a wall of posters, tilted and

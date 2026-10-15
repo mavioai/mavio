@@ -385,10 +385,16 @@ export function useDismiss(ref: RefObject<HTMLElement | null>, open: boolean, on
     const down = (e: PointerEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     };
-    // Before other handlers of Escape, such as going back on a television.
+    // Before other handlers of Escape and Backspace, which go back on a
+    // television; focus returns to the element that opened it. A dialog
+    // above it, such as the PIN keypad, keeps its keys.
     const key = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (document.querySelector("[aria-modal]")) return;
+      const typing = document.activeElement?.matches("input, textarea, select") ?? false;
+      if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
       e.preventDefault();
+      e.stopImmediatePropagation();
+      if (ref.current?.contains(document.activeElement)) ref.current.querySelector("button")?.focus();
       onClose();
     };
     document.addEventListener("pointerdown", down);
