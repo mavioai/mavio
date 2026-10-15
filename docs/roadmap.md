@@ -627,7 +627,7 @@ flowchart TD
 - [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
   - [x] Discovery and request screens, with P20
   - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
-  - [ ] Person pages, collections and playlists
+  - [ ] Collections and playlists (person pages are done)
   - [x] Playing the next episode at the end of one
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
@@ -667,7 +667,8 @@ flowchart TD
     - [x] Backups and logs (`apps/web/src/screens/admin/backups.tsx`, `libs/client-ts/src/backups.ts`): making, downloading and deleting backups, and the recent log records by level, period and words (`BackupService`, `ListLogs`)
     - [x] API keys (`ApiKeysSection` in `apps/web/src/screens/admin/backups.tsx`): a section of the Server group, since keys are the server's and reach it in either mode; making a key with its token shown once, and revoking one (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
-  - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open
+  - [ ] The web UI's details: trailers and other extras
+  - [x] The web UI's person page (`apps/web/src/screens/person.tsx`, `libs/client-ts/src/people.ts`), opened from the cast's cards: the person and the titles crediting them
   - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
     - [ ] The catalogs' filters and sorts (`ListFilterValues`), and providers' titles (`SearchTitles`) among Search's results
     - [x] Requests (`apps/web/src/screens/requests.tsx`, `libs/client-ts/src/requests.ts`): the user's requests with their state and quotas, or everyone's for administrators, by status; approving, declining, retrying, changing the seasons of and deleting them (`RequestService`)

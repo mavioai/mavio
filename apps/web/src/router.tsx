@@ -7,6 +7,7 @@ import { HomeScreen } from "./screens/home.tsx";
 import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
 import { LibraryScreen } from "./screens/library.tsx";
+import { PersonScreen } from "./screens/person.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
 import { type RequestFilter, requestFilters, RequestsScreen } from "./screens/requests.tsx";
 import { SearchScreen } from "./screens/search.tsx";
@@ -121,6 +122,8 @@ const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$h
 
 const details = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId", component: Details });
 
+const person = createRoute({ getParentRoute: () => root, path: "/s/$serverId/person/$personId", component: PersonScreen });
+
 const player = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/play/$itemId",
@@ -150,6 +153,7 @@ export const router = createRouter({
     library,
     hub,
     details,
+    person,
     player,
   ]),
   scrollRestoration: true,

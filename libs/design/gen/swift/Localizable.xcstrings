@@ -22764,6 +22764,150 @@
           }
         }
       }
+    },
+    "person.movies": {
+      "comment": "Section of a person's page with the movies crediting them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "person.series": {
+      "comment": "Section of a person's page with the series crediting them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TV Shows"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "person.episodes": {
+      "comment": "Section of a person's page with the episodes crediting them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分集"
+          }
+        }
+      }
+    },
+    "person.none": {
+      "comment": "Shown when no item credits a person.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing on this server credits them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台服务器上没有署名此人的内容。"
+          }
+        }
+      }
+    },
+    "person.born": {
+      "comment": "A person's birth date and age, or age at death.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Born %1$@ (age %2$@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生于 %1$@（%2$@ 岁）"
+          }
+        }
+      }
+    },
+    "person.died": {
+      "comment": "A person's death date.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Died %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "逝于 %@"
+          }
+        }
+      }
+    },
+    "person.more": {
+      "comment": "Shows a person's whole biography.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多"
+          }
+        }
+      }
+    },
+    "person.less": {
+      "comment": "Shortens a person's biography.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Less"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收起"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

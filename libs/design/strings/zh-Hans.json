@@ -1245,5 +1245,13 @@
   "acquire.peers": "{seeders} 做种 · {peers} 节点",
   "acquire.usenet": "Usenet",
   "acquire.score": "分数 {score}",
-  "acquire.grab": "抓取"
+  "acquire.grab": "抓取",
+  "person.movies": "电影",
+  "person.series": "剧集",
+  "person.episodes": "分集",
+  "person.none": "这台服务器上没有署名此人的内容。",
+  "person.born": "生于 {date}（{age} 岁）",
+  "person.died": "逝于 {date}",
+  "person.more": "更多",
+  "person.less": "收起"
 }

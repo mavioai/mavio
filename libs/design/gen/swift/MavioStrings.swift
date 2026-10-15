@@ -3992,4 +3992,32 @@ public enum MavioStrings {
 
     /// Sends a release to a download client.
     public static var acquireGrab: String { NSLocalizedString("acquire.grab", bundle: .module, comment: "") }
+
+    /// Section of a person's page with the movies crediting them.
+    public static var personMovies: String { NSLocalizedString("person.movies", bundle: .module, comment: "") }
+
+    /// Section of a person's page with the series crediting them.
+    public static var personSeries: String { NSLocalizedString("person.series", bundle: .module, comment: "") }
+
+    /// Section of a person's page with the episodes crediting them.
+    public static var personEpisodes: String { NSLocalizedString("person.episodes", bundle: .module, comment: "") }
+
+    /// Shown when no item credits a person.
+    public static var personNone: String { NSLocalizedString("person.none", bundle: .module, comment: "") }
+
+    /// A person's birth date and age, or age at death.
+    public static func personBorn(date: String, age: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("person.born", bundle: .module, comment: ""), date, age)
+    }
+
+    /// A person's death date.
+    public static func personDied(date: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("person.died", bundle: .module, comment: ""), date)
+    }
+
+    /// Shows a person's whole biography.
+    public static var personMore: String { NSLocalizedString("person.more", bundle: .module, comment: "") }
+
+    /// Shortens a person's biography.
+    public static var personLess: String { NSLocalizedString("person.less", bundle: .module, comment: "") }
 }

@@ -1246,5 +1246,13 @@
   "acquire.peers": { "message": "{seeders} seeders · {peers} peers", "description": "A torrent's seeders and peers." },
   "acquire.usenet": { "message": "Usenet", "description": "A Usenet release's protocol." },
   "acquire.score": { "message": "Score {score}", "description": "A release's custom format score." },
-  "acquire.grab": { "message": "Grab", "description": "Sends a release to a download client." }
+  "acquire.grab": { "message": "Grab", "description": "Sends a release to a download client." },
+  "person.movies": { "message": "Movies", "description": "Section of a person's page with the movies crediting them." },
+  "person.series": { "message": "TV Shows", "description": "Section of a person's page with the series crediting them." },
+  "person.episodes": { "message": "Episodes", "description": "Section of a person's page with the episodes crediting them." },
+  "person.none": { "message": "Nothing on this server credits them.", "description": "Shown when no item credits a person." },
+  "person.born": { "message": "Born {date} (age {age})", "description": "A person's birth date and age, or age at death." },
+  "person.died": { "message": "Died {date}", "description": "A person's death date." },
+  "person.more": { "message": "More", "description": "Shows a person's whole biography." },
+  "person.less": { "message": "Less", "description": "Shortens a person's biography." }
 }

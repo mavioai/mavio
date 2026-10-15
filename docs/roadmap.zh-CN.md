@@ -627,7 +627,7 @@ flowchart TD
 - [x] Web UI（`apps/web`、`libs/client-ts`）：登录（密码、首个用户、Quick Connect）、多台服务器及其顺序、合并的首页、带推荐与全部标签的媒体库、推荐栏、跨服务器搜索、带版本与其他服务器副本的详情、播放器（直放与 HLS、音轨与字幕轨、外部播放器）、授权设备；由事件流刷新
   - [x] 发现与请求页面，随 P20
   - [x] 管理页面：媒体库、用户、设备、插件、任务、设置
-  - [ ] 人物页面、合集与播放列表
+  - [ ] 合集与播放列表（人物页面已完成）
   - [x] 一集结束时播放下一集
   - [ ] 借助 JASSUB 保留样式的 ASS 字幕
   - [ ] 离线保存查询缓存
@@ -667,7 +667,8 @@ flowchart TD
     - [x] 备份与日志（`apps/web/src/screens/admin/backups.tsx`、`libs/client-ts/src/backups.ts`）：创建、下载与删除备份，以及按级别、时间段与词筛选的最近日志记录（`BackupService`、`ListLogs`）
     - [x] API 密钥（`apps/web/src/screens/admin/backups.tsx` 中的 `ApiKeysSection`）：作为“服务器”分组的一个部分，因为密钥属于服务器，在两种模式下都能访问；创建密钥并只显示一次其令牌，以及撤销密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
-  - [ ] Web UI 的详情页：预告片与其他附加内容，以及人物页面及其作品，由演职人员卡片打开
+  - [ ] Web UI 的详情页：预告片与其他附加内容
+  - [x] Web UI 的人物页面（`apps/web/src/screens/person.tsx`、`libs/client-ts/src/people.ts`），由演职人员卡片打开：人物及署名此人的作品
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
     - [ ] 目录的筛选与排序（`ListFilterValues`），以及搜索结果中的提供者作品（`SearchTitles`）
     - [x] 请求（`apps/web/src/screens/requests.tsx`、`libs/client-ts/src/requests.ts`）：用户的请求及其状态与配额，管理员则可看所有人的请求，按状态筛选；批准、拒绝、重试、更改季与删除请求（`RequestService`）

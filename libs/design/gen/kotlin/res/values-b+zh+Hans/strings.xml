@@ -1281,4 +1281,12 @@
     <string name="acquire_usenet">Usenet</string>
     <string name="acquire_score">分数 %s</string>
     <string name="acquire_grab">抓取</string>
+    <string name="person_movies">电影</string>
+    <string name="person_series">剧集</string>
+    <string name="person_episodes">分集</string>
+    <string name="person_none">这台服务器上没有署名此人的内容。</string>
+    <string name="person_born">生于 %1$s（%2$s 岁）</string>
+    <string name="person_died">逝于 %s</string>
+    <string name="person_more">更多</string>
+    <string name="person_less">收起</string>
 </resources>

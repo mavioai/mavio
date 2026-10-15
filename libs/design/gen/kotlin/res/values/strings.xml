@@ -2547,4 +2547,20 @@
     <string name="acquire_score">Score %s</string>
     <!-- Sends a release to a download client. -->
     <string name="acquire_grab">Grab</string>
+    <!-- Section of a person's page with the movies crediting them. -->
+    <string name="person_movies">Movies</string>
+    <!-- Section of a person's page with the series crediting them. -->
+    <string name="person_series">TV Shows</string>
+    <!-- Section of a person's page with the episodes crediting them. -->
+    <string name="person_episodes">Episodes</string>
+    <!-- Shown when no item credits a person. -->
+    <string name="person_none">Nothing on this server credits them.</string>
+    <!-- A person's birth date and age, or age at death. -->
+    <string name="person_born">Born %1$s (age %2$s)</string>
+    <!-- A person's death date. -->
+    <string name="person_died">Died %s</string>
+    <!-- Shows a person's whole biography. -->
+    <string name="person_more">More</string>
+    <!-- Shortens a person's biography. -->
+    <string name="person_less">Less</string>
 </resources>

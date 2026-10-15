@@ -1248,7 +1248,15 @@ export type MessageKey =
   | 'acquire.peers'
   | 'acquire.usenet'
   | 'acquire.score'
-  | 'acquire.grab';
+  | 'acquire.grab'
+  | 'person.movies'
+  | 'person.series'
+  | 'person.episodes'
+  | 'person.none'
+  | 'person.born'
+  | 'person.died'
+  | 'person.more'
+  | 'person.less';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2489,7 +2497,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquire.peers": "{seeders} seeders · {peers} peers",
     "acquire.usenet": "Usenet",
     "acquire.score": "Score {score}",
-    "acquire.grab": "Grab"
+    "acquire.grab": "Grab",
+    "person.movies": "Movies",
+    "person.series": "TV Shows",
+    "person.episodes": "Episodes",
+    "person.none": "Nothing on this server credits them.",
+    "person.born": "Born {date} (age {age})",
+    "person.died": "Died {date}",
+    "person.more": "More",
+    "person.less": "Less"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3728,6 +3744,14 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "acquire.peers": "{seeders} 做种 · {peers} 节点",
     "acquire.usenet": "Usenet",
     "acquire.score": "分数 {score}",
-    "acquire.grab": "抓取"
+    "acquire.grab": "抓取",
+    "person.movies": "电影",
+    "person.series": "剧集",
+    "person.episodes": "分集",
+    "person.none": "这台服务器上没有署名此人的内容。",
+    "person.born": "生于 {date}（{age} 岁）",
+    "person.died": "逝于 {date}",
+    "person.more": "更多",
+    "person.less": "收起"
   }
 };

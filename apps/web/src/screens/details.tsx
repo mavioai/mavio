@@ -24,6 +24,7 @@ import { Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, u
 
 import { locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
+import { initialsOf } from "./person.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, useDismiss, yearOf } from "../ui.tsx";
@@ -894,23 +895,23 @@ function Cast({ server, credits }: { server: ServerEntry; credits: Credit[] }) {
       {sorted.map((c, i) => {
         const p = c.person!;
         const photo = artwork(server, p, ImageKind.PRIMARY, 240);
-        const initials = p.name
-          .split(/\s+/)
-          .map((w) => w[0])
-          .slice(0, 2)
-          .join("");
         return (
-          <div key={`${p.id}-${i}`} className="w-28 shrink-0 snap-start text-center [[data-tv]_&]:w-40">
+          <Link
+            key={`${p.id}-${i}`}
+            to="/s/$serverId/person/$personId"
+            params={{ serverId: server.id, personId: p.id }}
+            className="group w-28 shrink-0 snap-start rounded-lg text-center [[data-tv]_&]:w-40"
+          >
             <div className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-fill [[data-tv]_&]:w-36">
               {photo ? (
                 <img src={photo.url} alt="" loading="lazy" className="h-full w-full object-cover" />
               ) : (
-                <span className="absolute inset-0 flex items-center justify-center type-title3 text-text-secondary">{initials}</span>
+                <span className="absolute inset-0 flex items-center justify-center type-title3 text-text-secondary">{initialsOf(p.name)}</span>
               )}
             </div>
-            <div className="mt-2 line-clamp-2 type-callout">{p.name}</div>
+            <div className="mt-2 line-clamp-2 type-callout group-hover:underline">{p.name}</div>
             <div className="line-clamp-2 type-footnote text-text-secondary">{isCast(c) ? c.role : crewLabels[c.kind]!()}</div>
-          </div>
+          </Link>
         );
       })}
     </Shelf>
