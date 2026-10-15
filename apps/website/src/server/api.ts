@@ -73,7 +73,10 @@ export async function handleApi(req: Request, options: ApiOptions): Promise<Resp
 
 async function route(req: Request, pathname: string, options: ApiOptions, deps: Deps): Promise<Response | undefined> {
   if (pathname.startsWith("/api/auth/")) return options.auth.handler(req);
-  if (pathname === configPath) return Response.json({ appURL: options.appURL ?? defaultAppURL });
+  // Public, and read by the web UIs of servers.
+  if (pathname === configPath) {
+    return Response.json({ appURL: options.appURL ?? defaultAppURL }, { headers: { "access-control-allow-origin": "*" } });
+  }
   const oauth = await handleOAuth(req, pathname, {
     db: options.db,
     auth: options.auth,
