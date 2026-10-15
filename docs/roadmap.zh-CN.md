@@ -651,12 +651,28 @@ flowchart TD
     - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`SystemService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以卡片展示于“可用”与“已安装”选项卡，可按分类筛选，点击进入其详情与版本页；以及增删插件目录的插件目录页；位于设置的“服务器”分组，mavio.dev 模式下可选择服务器
     - [ ] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
     - [ ] 插件分区加入 Web UI 的快照测试
+    - [ ] 概览：服务器的版本与健康状况、正在播放的会话与最近的活动（`GetSystemInfo`、`GetHealth`、`SessionService.ListSessions`、`ListActivities`）
+    - [ ] 常规：服务器名称、元数据的语言与国家以及其他服务器设置（`UpdateServerSettings`、`LocalizationService`）
+    - [ ] 媒体库：添加、编辑、删除与扫描媒体库，带目录选择器（`LibraryService`、`ListDirectory`）
+    - [ ] 存储：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）
+    - [ ] 用户：添加、编辑与删除用户，邀请，用户的媒体库与家长分级（`UserService`、`ListRatings`）
+    - [ ] 获取：质量定义与质量配置、自定义格式、延迟配置与发布配置、远程路径映射，以及索引器与下载客户端（`ProfileService`、`ListIndexers`、`ListDownloadClients`）
+    - [ ] 字幕：字幕配置文件及其适用的媒体库、字幕源与设置（`SubtitleService`）
+    - [ ] AI：提供商、API 密钥、订阅登录与模型（`AiService`）
+    - [ ] 计划任务：计划任务、立即运行与作业（`TaskService`）
+    - [ ] 备份与日志（`BackupService`、`ListLogs`）
+    - [ ] 账户安全中的 API 密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
   - [ ] Web UI 的详情页：预告片与其他附加内容，以及人物页面及其作品，由演职人员卡片打开
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
     - [ ] 目录的筛选与排序（`ListFilterValues`），以及搜索结果中的提供者作品（`SearchTitles`）
     - [ ] 用户的请求及其状态，以及管理员批准、拒绝与编辑请求
     - [ ] 发现页的各页面加入 Web UI 的快照测试
+  - [ ] Web UI 的获取：想要的电影与剧集，按季或按集添加与监控，搜索与 RSS 同步（`WantedService`）；作品在索引器中的发布，带其质量、自定义格式与拒绝原因，可抓取（`SearchReleases`、`GrabRelease`）；以及下载的队列、历史、黑名单与手动导入（`DownloadService`）
+  - [ ] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`）
+  - [ ] Web UI 的播放与媒体库：播放列表与合集（`PlaylistService`、`CollectionService`）；在详情页与播放器中搜索、下载、上传、提取、同步与翻译字幕（`SubtitleService`）；以及音乐的歌词（`GetLyrics`）
+  - [ ] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
+  - [ ] Web UI 的 AI 助手会话（`AgentSessionService`）
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）

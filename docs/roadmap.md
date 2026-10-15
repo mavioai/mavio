@@ -651,12 +651,28 @@ flowchart TD
     - [x] Plugins (`apps/web/src/screens/plugins.tsx`, `libs/client-ts/src/plugins.ts`): the installed plugins with their state, enabled and disabled (`SystemService.SetPluginEnabled`), updated and uninstalled; those the catalogs offer, to install; as cards under Available and Installed tabs, filtered by category, each opening a page of its details and versions; and a Catalogs page to add and remove catalogs; under the Server group of the settings, which in mavio.dev mode chooses the server
     - [ ] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
+    - [ ] Overview: the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
+    - [ ] General: the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
+    - [ ] Libraries: adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
+    - [ ] Storage: rclone remotes with their authorization steps, and the offline clients (`StorageService`)
+    - [ ] Users: adding, editing and removing users, invitations, their libraries and parental ratings (`UserService`, `ListRatings`)
+    - [ ] Acquisition: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
+    - [ ] Subtitles: subtitle profiles and the libraries they apply to, the providers and the settings (`SubtitleService`)
+    - [ ] AI: providers, API keys, subscription logins and models (`AiService`)
+    - [ ] Tasks: the scheduled tasks, running one, and the jobs (`TaskService`)
+    - [ ] Backups and logs (`BackupService`, `ListLogs`)
+    - [ ] API keys among the account's security (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
   - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open
   - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
     - [ ] The catalogs' filters and sorts (`ListFilterValues`), and providers' titles (`SearchTitles`) among Search's results
     - [ ] The user's requests and their state, and administrators approving, declining and editing requests
     - [ ] Discover's screens among the web UI's snapshot tests
+  - [ ] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
+  - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)
+  - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
+  - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
+  - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
