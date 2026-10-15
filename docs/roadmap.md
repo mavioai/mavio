@@ -625,10 +625,10 @@ flowchart TD
   - [ ] The rest of the core's calls in the C ABI and the Go binding (`capi`, `proto`): Quick Connect, Home, libraries, details, search, playback and downloads, with the desktop app
   - [ ] Remote control commands and SyncPlay over the event stream, with the players of the apps that take them
 - [x] Web UI (`apps/web`, `libs/client-ts`): sign-in (password, first user, Quick Connect), several servers and their order, the merged Home, libraries with their Recommended and All tabs, hubs, search across servers, details with versions and copies on other servers, the player (direct play and HLS, audio and subtitle tracks, external players), authorizing devices; refreshed by the event streams
-  - [ ] Discovery and request screens, with P20
-  - [ ] Administration screens: libraries, users, devices, plugins, tasks, settings
+  - [x] Discovery and request screens, with P20
+  - [x] Administration screens: libraries, users, devices, plugins, tasks, settings
   - [ ] Person pages, collections and playlists
-  - [ ] Playing the next episode at the end of one
+  - [x] Playing the next episode at the end of one
   - [ ] Styled ASS subtitles with JASSUB
   - [ ] The query cache kept offline
   - [ ] Storybook of the components
