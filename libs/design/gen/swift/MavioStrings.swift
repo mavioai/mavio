@@ -842,7 +842,7 @@ public enum MavioStrings {
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 
     /// Group of the settings of the account and its servers.
-    public static var settingsAccountAndServers: String { NSLocalizedString("settings.accountAndServers", bundle: .module, comment: "") }
+    public static var settingsAccountGroup: String { NSLocalizedString("settings.accountGroup", bundle: .module, comment: "") }
 
     /// Settings section of the color theme and TV mode.
     public static var settingsAppearance: String { NSLocalizedString("settings.appearance", bundle: .module, comment: "") }
@@ -925,10 +925,8 @@ public enum MavioStrings {
     /// Settings section of the devices signed in as the user.
     public static var settingsDevices: String { NSLocalizedString("settings.devices", bundle: .module, comment: "") }
 
-    /// Explanation under the Devices title; server is its name.
-    public static func settingsDevicesMessage(server: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("settings.devicesMessage", bundle: .module, comment: ""), server)
-    }
+    /// Explanation under the Devices title.
+    public static var settingsDevicesMessage: String { NSLocalizedString("settings.devicesMessage", bundle: .module, comment: "") }
 
     /// Marks the session of this browser in the devices list.
     public static var settingsThisBrowser: String { NSLocalizedString("settings.thisBrowser", bundle: .module, comment: "") }
@@ -950,27 +948,33 @@ public enum MavioStrings {
     /// Marks the user as the server's administrator.
     public static var settingsAdmin: String { NSLocalizedString("settings.admin", bundle: .module, comment: "") }
 
-    /// Group of the settings of the servers the user administers.
-    public static var settingsAdministration: String { NSLocalizedString("settings.administration", bundle: .module, comment: "") }
+    /// Group of the settings of the server chosen above them.
+    public static var settingsServerGroup: String { NSLocalizedString("settings.serverGroup", bundle: .module, comment: "") }
+
+    /// Label of the choice of the server whose settings are shown.
+    public static var settingsServerChoice: String { NSLocalizedString("settings.serverChoice", bundle: .module, comment: "") }
+
+    /// The server serving the web UI among the servers to choose; name is its name.
+    public static func settingsThisServer(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("settings.thisServer", bundle: .module, comment: ""), name)
+    }
 
     /// Settings section of a server's plugins.
     public static var settingsPlugins: String { NSLocalizedString("settings.plugins", bundle: .module, comment: "") }
 
-    /// Explanation under the Plugins title; server is its name.
-    public static func settingsPluginsMessage(server: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("settings.pluginsMessage", bundle: .module, comment: ""), server)
-    }
+    /// Explanation under the Plugins title.
+    public static var settingsPluginsMessage: String { NSLocalizedString("settings.pluginsMessage", bundle: .module, comment: "") }
 
-    /// Group of the plugins installed on the server.
+    /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
-    /// Group of the catalogs' plugins not installed.
+    /// Tab of the plugins the catalogs offer, installed or not.
     public static var pluginsAvailable: String { NSLocalizedString("plugins.available", bundle: .module, comment: "") }
 
     /// Empty state of the installed plugins.
     public static var pluginsNoneInstalled: String { NSLocalizedString("plugins.noneInstalled", bundle: .module, comment: "") }
 
-    /// Empty state of the plugins available to install.
+    /// Empty state of the plugins the catalogs offer.
     public static var pluginsNoneAvailable: String { NSLocalizedString("plugins.noneAvailable", bundle: .module, comment: "") }
 
     /// State of a plugin that runs.
@@ -1015,8 +1019,8 @@ public enum MavioStrings {
     /// Group of the URLs of the plugin catalogs.
     public static var pluginsCatalogs: String { NSLocalizedString("plugins.catalogs", bundle: .module, comment: "") }
 
-    /// Footer of the plugin catalogs.
-    public static var pluginsCatalogsFooter: String { NSLocalizedString("plugins.catalogsFooter", bundle: .module, comment: "") }
+    /// Explanation under the Catalogs title.
+    public static var pluginsCatalogsMessage: String { NSLocalizedString("plugins.catalogsMessage", bundle: .module, comment: "") }
 
     /// Button adding a plugin catalog's URL.
     public static var pluginsAddCatalog: String { NSLocalizedString("plugins.addCatalog", bundle: .module, comment: "") }
@@ -1031,6 +1035,84 @@ public enum MavioStrings {
     public static func pluginsCatalogsUnreachable(reason: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("plugins.catalogsUnreachable", bundle: .module, comment: ""), reason)
     }
+
+    /// Choice of every category of plugins.
+    public static var pluginsAllCategories: String { NSLocalizedString("plugins.allCategories", bundle: .module, comment: "") }
+
+    /// Category of plugins giving metadata, images and titles to discover.
+    public static var pluginsCategoryMetadata: String { NSLocalizedString("plugins.categoryMetadata", bundle: .module, comment: "") }
+
+    /// Category of plugins finding and translating subtitles.
+    public static var pluginsCategorySubtitles: String { NSLocalizedString("plugins.categorySubtitles", bundle: .module, comment: "") }
+
+    /// Category of indexer and download client plugins.
+    public static var pluginsCategoryDownloads: String { NSLocalizedString("plugins.categoryDownloads", bundle: .module, comment: "") }
+
+    /// Category of plugins signing users in.
+    public static var pluginsCategoryAuthentication: String { NSLocalizedString("plugins.categoryAuthentication", bundle: .module, comment: "") }
+
+    /// Category of notification plugins.
+    public static var pluginsCategoryNotifications: String { NSLocalizedString("plugins.categoryNotifications", bundle: .module, comment: "") }
+
+    /// Category of plugins for devices the server plays on or serves, such as DLNA.
+    public static var pluginsCategoryDevices: String { NSLocalizedString("plugins.categoryDevices", bundle: .module, comment: "") }
+
+    /// Category of AI model and agent plugins.
+    public static var pluginsCategoryAi: String { NSLocalizedString("plugins.categoryAi", bundle: .module, comment: "") }
+
+    /// Category of plugins naming none.
+    public static var pluginsCategoryOther: String { NSLocalizedString("plugins.categoryOther", bundle: .module, comment: "") }
+
+    /// Button opening the plugin catalogs.
+    public static var pluginsManageCatalogs: String { NSLocalizedString("plugins.manageCatalogs", bundle: .module, comment: "") }
+
+    /// Empty state of a category of plugins.
+    public static var pluginsNoneInCategory: String { NSLocalizedString("plugins.noneInCategory", bundle: .module, comment: "") }
+
+    /// A catalog plugin with no version the server can run.
+    public static var pluginsNoVersion: String { NSLocalizedString("plugins.noVersion", bundle: .module, comment: "") }
+
+    /// Mark of an installed plugin whose catalog has a newer version.
+    public static var pluginsUpdateAvailable: String { NSLocalizedString("plugins.updateAvailable", bundle: .module, comment: "") }
+
+    /// A plugin that cannot be shown.
+    public static var pluginsNotFound: String { NSLocalizedString("plugins.notFound", bundle: .module, comment: "") }
+
+    /// Group of a plugin's details.
+    public static var pluginsInformation: String { NSLocalizedString("plugins.information", bundle: .module, comment: "") }
+
+    /// A plugin's installed version.
+    public static var pluginsVersion: String { NSLocalizedString("plugins.version", bundle: .module, comment: "") }
+
+    /// The newest version the catalog offers.
+    public static var pluginsLatestVersion: String { NSLocalizedString("plugins.latestVersion", bundle: .module, comment: "") }
+
+    /// A plugin's category.
+    public static var pluginsCategory: String { NSLocalizedString("plugins.category", bundle: .module, comment: "") }
+
+    /// A plugin's author.
+    public static var pluginsAuthor: String { NSLocalizedString("plugins.author", bundle: .module, comment: "") }
+
+    /// A plugin's license.
+    public static var pluginsLicense: String { NSLocalizedString("plugins.license", bundle: .module, comment: "") }
+
+    /// A plugin's home page.
+    public static var pluginsWebsite: String { NSLocalizedString("plugins.website", bundle: .module, comment: "") }
+
+    /// The catalog offering a plugin.
+    public static var pluginsCatalog: String { NSLocalizedString("plugins.catalog", bundle: .module, comment: "") }
+
+    /// A plugin's state.
+    public static var pluginsState: String { NSLocalizedString("plugins.state", bundle: .module, comment: "") }
+
+    /// The hosts a plugin may reach.
+    public static var pluginsNetworkAccess: String { NSLocalizedString("plugins.networkAccess", bundle: .module, comment: "") }
+
+    /// Group of the versions a catalog offers of a plugin.
+    public static var pluginsVersions: String { NSLocalizedString("plugins.versions", bundle: .module, comment: "") }
+
+    /// Button installing an older or newer version of an installed plugin.
+    public static var pluginsInstallThis: String { NSLocalizedString("plugins.installThis", bundle: .module, comment: "") }
 
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }

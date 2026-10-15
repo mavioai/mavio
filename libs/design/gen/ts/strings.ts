@@ -249,7 +249,7 @@ export type MessageKey =
   | 'menu.fullScreen'
   | 'menu.exitFullScreen'
   | 'settings.thisDevice'
-  | 'settings.accountAndServers'
+  | 'settings.accountGroup'
   | 'settings.appearance'
   | 'settings.appearanceMessage'
   | 'settings.system'
@@ -284,7 +284,9 @@ export type MessageKey =
   | 'settings.standaloneAccountMessage'
   | 'settings.manageAtMavio'
   | 'settings.admin'
-  | 'settings.administration'
+  | 'settings.serverGroup'
+  | 'settings.serverChoice'
+  | 'settings.thisServer'
   | 'settings.plugins'
   | 'settings.pluginsMessage'
   | 'plugins.installed'
@@ -303,11 +305,37 @@ export type MessageKey =
   | 'plugins.uninstallMessage'
   | 'plugins.by'
   | 'plugins.catalogs'
-  | 'plugins.catalogsFooter'
+  | 'plugins.catalogsMessage'
   | 'plugins.addCatalog'
   | 'plugins.catalogAddress'
   | 'plugins.removeCatalog'
   | 'plugins.catalogsUnreachable'
+  | 'plugins.allCategories'
+  | 'plugins.categoryMetadata'
+  | 'plugins.categorySubtitles'
+  | 'plugins.categoryDownloads'
+  | 'plugins.categoryAuthentication'
+  | 'plugins.categoryNotifications'
+  | 'plugins.categoryDevices'
+  | 'plugins.categoryAi'
+  | 'plugins.categoryOther'
+  | 'plugins.manageCatalogs'
+  | 'plugins.noneInCategory'
+  | 'plugins.noVersion'
+  | 'plugins.updateAvailable'
+  | 'plugins.notFound'
+  | 'plugins.information'
+  | 'plugins.version'
+  | 'plugins.latestVersion'
+  | 'plugins.category'
+  | 'plugins.author'
+  | 'plugins.license'
+  | 'plugins.website'
+  | 'plugins.catalog'
+  | 'plugins.state'
+  | 'plugins.networkAccess'
+  | 'plugins.versions'
+  | 'plugins.installThis'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -554,7 +582,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.fullScreen": "Full Screen",
     "menu.exitFullScreen": "Exit Full Screen",
     "settings.thisDevice": "This Device",
-    "settings.accountAndServers": "Account and Servers",
+    "settings.accountGroup": "Account",
     "settings.appearance": "Appearance",
     "settings.appearanceMessage": "Only affects this device.",
     "settings.system": "System",
@@ -582,20 +610,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.serversMessage": "The server you are signed in to.",
     "settings.copyAddress": "Copy Address",
     "settings.devices": "Devices",
-    "settings.devicesMessage": "The devices signed in to {server} as you.",
+    "settings.devicesMessage": "The devices signed in to this server as you.",
     "settings.thisBrowser": "This browser",
     "settings.account": "Account",
     "settings.mavioAccountMessage": "Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev.",
     "settings.standaloneAccountMessage": "User {name} of {server}.",
     "settings.manageAtMavio": "Manage at mavio.dev",
     "settings.admin": "Administrator",
-    "settings.administration": "Administration",
+    "settings.serverGroup": "Server",
+    "settings.serverChoice": "Server",
+    "settings.thisServer": "{name} (This Server)",
     "settings.plugins": "Plugins",
-    "settings.pluginsMessage": "The plugins of {server}, which bring it metadata, discovery, downloads and more.",
+    "settings.pluginsMessage": "Plugins bring the server metadata, subtitles, downloads and more.",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
-    "plugins.noneAvailable": "The catalogs offer no other plugins.",
+    "plugins.noneAvailable": "The catalogs offer no plugins.",
     "plugins.stateReady": "Running",
     "plugins.stateUnconfigured": "Needs configuration",
     "plugins.stateFailed": "Failed",
@@ -608,11 +638,37 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.uninstallMessage": "Its configuration and data are deleted.",
     "plugins.by": "By {author}",
     "plugins.catalogs": "Catalogs",
-    "plugins.catalogsFooter": "Plugins are installed from the catalogs at these addresses.",
+    "plugins.catalogsMessage": "Plugins are installed from the catalogs at these addresses.",
     "plugins.addCatalog": "Add",
     "plugins.catalogAddress": "Catalog address",
     "plugins.removeCatalog": "Remove",
     "plugins.catalogsUnreachable": "The catalogs can't be reached: {reason}",
+    "plugins.allCategories": "All Categories",
+    "plugins.categoryMetadata": "Metadata",
+    "plugins.categorySubtitles": "Subtitles",
+    "plugins.categoryDownloads": "Downloads",
+    "plugins.categoryAuthentication": "Authentication",
+    "plugins.categoryNotifications": "Notifications",
+    "plugins.categoryDevices": "Devices",
+    "plugins.categoryAi": "AI",
+    "plugins.categoryOther": "Other",
+    "plugins.manageCatalogs": "Manage Catalogs",
+    "plugins.noneInCategory": "No plugins in this category.",
+    "plugins.noVersion": "No version for this server yet",
+    "plugins.updateAvailable": "Update available",
+    "plugins.notFound": "This plugin is neither installed nor offered by the catalogs.",
+    "plugins.information": "Information",
+    "plugins.version": "Version",
+    "plugins.latestVersion": "Latest Version",
+    "plugins.category": "Category",
+    "plugins.author": "Author",
+    "plugins.license": "License",
+    "plugins.website": "Website",
+    "plugins.catalog": "Catalog",
+    "plugins.state": "State",
+    "plugins.networkAccess": "Network Access",
+    "plugins.versions": "Versions",
+    "plugins.installThis": "Install This Version",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -857,7 +913,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.fullScreen": "全屏",
     "menu.exitFullScreen": "退出全屏",
     "settings.thisDevice": "这台设备",
-    "settings.accountAndServers": "账户与服务器",
+    "settings.accountGroup": "账户",
     "settings.appearance": "外观",
     "settings.appearanceMessage": "只影响这台设备。",
     "settings.system": "跟随系统",
@@ -885,20 +941,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.serversMessage": "你登录的服务器。",
     "settings.copyAddress": "复制地址",
     "settings.devices": "设备",
-    "settings.devicesMessage": "以你的身份登录 {server} 的设备。",
+    "settings.devicesMessage": "以你的身份登录此服务器的设备。",
     "settings.thisBrowser": "这个浏览器",
     "settings.account": "账户",
     "settings.mavioAccountMessage": "你的 Mavio 账户。密码、通行密钥、两步验证、家庭与好友都在 mavio.dev 上管理。",
     "settings.standaloneAccountMessage": "{server} 上的用户 {name}。",
     "settings.manageAtMavio": "在 mavio.dev 管理",
     "settings.admin": "管理员",
-    "settings.administration": "管理",
+    "settings.serverGroup": "服务器",
+    "settings.serverChoice": "服务器",
+    "settings.thisServer": "{name}（本服务器）",
     "settings.plugins": "插件",
-    "settings.pluginsMessage": "{server} 的插件，为它提供元数据、发现、下载等功能。",
+    "settings.pluginsMessage": "插件为服务器提供元数据、字幕、下载等功能。",
     "plugins.installed": "已安装",
-    "plugins.available": "可安装",
+    "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
-    "plugins.noneAvailable": "插件目录中没有其他插件。",
+    "plugins.noneAvailable": "插件目录中没有插件。",
     "plugins.stateReady": "运行中",
     "plugins.stateUnconfigured": "需要配置",
     "plugins.stateFailed": "失败",
@@ -911,11 +969,37 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.uninstallMessage": "其配置与数据将被删除。",
     "plugins.by": "作者：{author}",
     "plugins.catalogs": "插件目录",
-    "plugins.catalogsFooter": "插件从这些地址上的插件目录安装。",
+    "plugins.catalogsMessage": "插件从这些地址上的插件目录安装。",
     "plugins.addCatalog": "添加",
     "plugins.catalogAddress": "插件目录地址",
     "plugins.removeCatalog": "移除",
     "plugins.catalogsUnreachable": "无法访问插件目录：{reason}",
+    "plugins.allCategories": "所有分类",
+    "plugins.categoryMetadata": "元数据",
+    "plugins.categorySubtitles": "字幕",
+    "plugins.categoryDownloads": "下载",
+    "plugins.categoryAuthentication": "身份验证",
+    "plugins.categoryNotifications": "通知",
+    "plugins.categoryDevices": "设备",
+    "plugins.categoryAi": "AI",
+    "plugins.categoryOther": "其他",
+    "plugins.manageCatalogs": "管理插件目录",
+    "plugins.noneInCategory": "此分类中没有插件。",
+    "plugins.noVersion": "暂无适用于此服务器的版本",
+    "plugins.updateAvailable": "有更新",
+    "plugins.notFound": "此插件既未安装，也不在插件目录中。",
+    "plugins.information": "信息",
+    "plugins.version": "版本",
+    "plugins.latestVersion": "最新版本",
+    "plugins.category": "分类",
+    "plugins.author": "作者",
+    "plugins.license": "许可证",
+    "plugins.website": "网站",
+    "plugins.catalog": "插件目录",
+    "plugins.state": "状态",
+    "plugins.networkAccess": "网络访问",
+    "plugins.versions": "版本",
+    "plugins.installThis": "安装此版本",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",

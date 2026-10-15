@@ -1,23 +1,25 @@
 // The settings (docs/clients.md §6.3): those of this browser, its
-// appearance, TV mode and playback, and those of the account and its
-// servers, the user's languages, the servers in their order, the
-// account's credentials and the devices signed in as the user.
-// Wide windows show them beside their own sidebar; phones list them first,
-// as the profile.
+// appearance, TV mode and playback; those of the account, the user's
+// languages, the servers in their order and the account's credentials;
+// and those of a server, chosen above them with a Mavio account, the
+// devices signed in to it as the user and, for its administrators, its
+// plugins. Wide windows show them beside their own sidebar; phones list
+// them first, as the profile.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
   type ServerEntry,
   serverKey,
+  useAdminServers,
   useServers,
   useServersStore,
-  useAdminServers,
   useSignedIn,
+  useSignIn,
 } from "@mavio/client-ts";
 import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, Navigate, useParams } from "@tanstack/react-router";
+import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
@@ -30,26 +32,68 @@ import { Security, SwitchUser } from "./security.tsx";
 
 type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices" | "plugins";
 
-const sections: Record<SectionId, { icon: IconName; color: string; title: () => string }> = {
+const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
   servers: { icon: "server", color: "#8E8E93", title: () => t("auth.servers") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
-  plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins") },
+  plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
 };
 
-const allGroups: { title: () => string; ids: SectionId[]; admin?: boolean }[] = [
+const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.accountAndServers"), ids: ["servers", "account", "devices"] },
-  { title: () => t("settings.administration"), ids: ["plugins"], admin: true },
+  { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
+  { title: () => t("settings.serverGroup"), ids: ["devices", "plugins"], server: true },
 ];
 
-/** The groups of sections, Administration only for a user who administers a server. */
-function useGroups() {
-  const admin = useAdminServers().length > 0;
-  return allGroups.filter((g) => !g.admin || admin);
+/** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
+export interface SettingsSearch {
+  server?: string;
+  /** Plugins: the tab of installed plugins rather than of those available. */
+  tab?: "installed";
+  /** Plugins: the category shown, a Category's number. */
+  category?: number;
+  /** Plugins: the plugin shown. */
+  plugin?: string;
+  /** Plugins: the catalogs shown. */
+  catalogs?: true;
+}
+
+export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
+  const str = (v: unknown) => (typeof v === "string" && v !== "" ? v : undefined);
+  return {
+    server: str(s.server),
+    tab: s.tab === "installed" ? "installed" : undefined,
+    category: typeof s.category === "number" && Number.isInteger(s.category) ? s.category : undefined,
+    plugin: str(s.plugin),
+    catalogs: s.catalogs === true ? true : undefined,
+  };
+}
+
+/** The server whose settings are shown and whether the user administers it. */
+export interface Chosen {
+  server: ServerEntry;
+  admin: boolean;
+}
+
+/** The server chosen, else the one serving the web UI, else the first signed in to. */
+function useChosen(): Chosen | undefined {
+  const servers = useServersStore();
+  const signedIn = useSignedIn();
+  const admins = useAdminServers();
+  const { server: id } = useSearch({ strict: false }) as SettingsSearch;
+  const home = servers.homeServer();
+  const server = signedIn.find((s) => s.id === id) ?? signedIn.find((s) => s.id === home?.id) ?? signedIn[0];
+  return server && { server, admin: admins.some((a) => a.id === server.id) };
+}
+
+/** The groups of sections, a server's administration only for its administrators. */
+function useGroups(chosen: Chosen | undefined) {
+  return allGroups
+    .filter((g) => !g.server || chosen)
+    .map((g) => ({ ...g, ids: g.ids.filter((id) => !sections[id].admin || chosen?.admin) }));
 }
 
 function isSection(s: string | undefined): s is SectionId {
@@ -58,12 +102,20 @@ function isSection(s: string | undefined): s is SectionId {
 
 export function SettingsScreen() {
   const { section } = useParams({ strict: false }) as { section?: string };
+  const search = useSearch({ strict: false }) as SettingsSearch;
   const width = useWidthClass();
   const prefs = usePrefs();
-  const groups = useGroups();
+  const chosen = useChosen();
+  const admins = useAdminServers();
+  const groups = useGroups(chosen);
   if (section !== undefined && !isSection(section)) return <Navigate to="/settings" />;
+  // A server the user does not administer has no administration; wait
+  // until the servers administered are known.
+  if (section && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
+    return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} />;
+  }
   if (width === "compact" && !prefs.tv) {
-    return section ? <CompactSection id={section} /> : <ProfileList />;
+    return section ? <CompactSection id={section} chosen={chosen} /> : <ProfileList groups={groups} />;
   }
   const id = section ?? "appearance";
   return (
@@ -78,11 +130,13 @@ export function SettingsScreen() {
         {groups.map((g) => (
           <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
             <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
+            {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
             {g.ids.map((s) => (
               <Link
                 key={s}
                 to="/settings/$section"
                 params={{ section: s }}
+                search={{ server: search.server }}
                 data-status={s === id ? "active" : undefined}
                 className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
               >
@@ -95,9 +149,39 @@ export function SettingsScreen() {
       </aside>
       <main className="min-w-0 flex-1 px-14 py-10">
         <div className="max-w-[900px]">
-          <SectionView id={id} />
+          <SectionView id={id} chosen={chosen} />
         </div>
       </main>
+    </div>
+  );
+}
+
+/**
+ * The choice of the server whose settings are shown, with a Mavio account
+ * alone: a standalone server's user is signed in to one server. The server
+ * serving the web UI is marked.
+ */
+function ServerChoice({ chosen, section }: { chosen: Chosen; section?: SectionId }) {
+  const servers = useServersStore();
+  const signIn = useSignIn();
+  const signedIn = useSignedIn();
+  const navigate = useNavigate();
+  if (signIn?.kind !== "mavioDev") return null;
+  const home = servers.homeServer();
+  return (
+    <div className="flex flex-col px-2 pb-1.5 [&>select]:min-h-10 [&>select]:w-full">
+      <Select
+        value={chosen.server.id}
+        label={t("settings.serverChoice")}
+        options={signedIn.map((s) => ({ value: s.id, label: s.id === home?.id ? t("settings.thisServer", { name: s.name }) : s.name }))}
+        onChange={(server) =>
+          void navigate(
+            section
+              ? { to: "/settings/$section", params: { section }, search: { server } }
+              : { to: "/settings", search: { server } },
+          )
+        }
+      />
     </div>
   );
 }
@@ -128,11 +212,12 @@ function AccountCard() {
 }
 
 /** The phone's profile: the account, the users to switch to, the sections and signing out. */
-function ProfileList() {
+function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const servers = useServersStore();
   const account = useAccount();
   const shown = account.shown;
-  const groups = useGroups();
+  const chosen = useChosen();
+  const search = useSearch({ strict: false }) as SettingsSearch;
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
       <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
@@ -144,8 +229,9 @@ function ProfileList() {
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
       {groups.map((g) => (
         <Group key={g.title()} title={g.title()}>
+          {g.server && chosen && <ServerChoice chosen={chosen} />}
           {g.ids.map((s) => (
-            <Link key={s} to="/settings/$section" params={{ section: s }} className="hover:bg-surface-raised">
+            <Link key={s} to="/settings/$section" params={{ section: s }} search={{ server: search.server }} className="hover:bg-surface-raised">
               <Row label={sections[s].title()} leading={<Tile id={s} />}>
                 <Icon name="forward" size={16} className="text-text-tertiary" />
               </Row>
@@ -204,19 +290,20 @@ function Members({ server }: { server: ServerEntry }) {
 }
 
 /** A section on a phone, below a link back to the list. */
-function CompactSection({ id }: { id: SectionId }) {
+function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefined }) {
+  const search = useSearch({ strict: false }) as SettingsSearch;
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
-      <Link to="/settings" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
+      <Link to="/settings" search={{ server: search.server }} className="inline-flex items-center gap-1 self-start type-body text-accent-text">
         <Icon name="back" size={18} />
         {t("nav.profile")}
       </Link>
-      <SectionView id={id} />
+      <SectionView id={id} chosen={chosen} />
     </div>
   );
 }
 
-function SectionView({ id }: { id: SectionId }) {
+function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined }) {
   switch (id) {
     case "appearance":
       return <AppearanceSection />;
@@ -229,9 +316,9 @@ function SectionView({ id }: { id: SectionId }) {
     case "account":
       return <AccountSection />;
     case "devices":
-      return <DevicesSection />;
+      return chosen && <DevicesSection key={chosen.server.id} server={chosen.server} />;
     case "plugins":
-      return <PluginsSection />;
+      return chosen?.admin && <PluginsSection key={chosen.server.id} server={chosen.server} />;
   }
 }
 
@@ -585,34 +672,21 @@ function AuthorizeDevice({ server }: { server: ServerEntry }) {
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
 
-/** The sessions of the user on a server of the shown sign-in, to sign one out. */
-function DevicesSection() {
+/** The sessions of the user on the server chosen, to sign one out. */
+function DevicesSection({ server }: { server: ServerEntry }) {
   const servers = useServersStore();
-  const signedIn = useSignedIn();
   const queryClient = useQueryClient();
-  const [serverId, setServerId] = useState<string>();
-  const server = signedIn.find((s) => s.id === serverId) ?? signedIn[0];
-  const key = serverKey(server?.id ?? "", "sessions", server?.userId);
+  const key = serverKey(server.id, "sessions", server.userId);
   const sessions = useQuery({
     queryKey: key,
-    queryFn: async () => (await servers.client(AuthService, server!).listSessions({})).sessions,
-    enabled: !!server,
+    queryFn: async () => (await servers.client(AuthService, server).listSessions({})).sessions,
   });
   const revoke = useMutation({
-    mutationFn: (id: string) => servers.client(AuthService, server!).revokeSession({ id }),
+    mutationFn: (id: string) => servers.client(AuthService, server).revokeSession({ id }),
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   });
-  if (!server) return null;
   return (
-    <Section title={t("settings.devices")} message={t("settings.devicesMessage", { server: server.name })}>
-      {signedIn.length > 1 && (
-        <Select
-          value={server.id}
-          label={t("auth.server")}
-          options={signedIn.map((s) => ({ value: s.id, label: s.name }))}
-          onChange={setServerId}
-        />
-      )}
+    <Section title={t("settings.devices")} message={t("settings.devicesMessage")}>
       <Group>
         {(sessions.data ?? []).map((s) => (
           <Row

@@ -9,7 +9,7 @@ import { LibrariesScreen } from "./screens/libraries.tsx";
 import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
 import { SearchScreen } from "./screens/search.tsx";
-import { SettingsScreen } from "./screens/settings.tsx";
+import { SettingsScreen, settingsSearch } from "./screens/settings.tsx";
 import {
   CallbackScreen,
   type SetupSearch,
@@ -57,9 +57,14 @@ const search = createRoute({
   component: SearchScreen,
 });
 
-const settings = createRoute({ getParentRoute: () => root, path: "/settings", component: SettingsScreen });
+const settings = createRoute({ getParentRoute: () => root, path: "/settings", validateSearch: settingsSearch, component: SettingsScreen });
 
-const settingsSection = createRoute({ getParentRoute: () => root, path: "/settings/$section", component: SettingsScreen });
+const settingsSection = createRoute({
+  getParentRoute: () => root,
+  path: "/settings/$section",
+  validateSearch: settingsSearch,
+  component: SettingsScreen,
+});
 
 // The profile became the settings.
 const profile = createRoute({

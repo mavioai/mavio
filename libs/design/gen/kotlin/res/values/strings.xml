@@ -521,7 +521,7 @@
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
     <!-- Group of the settings of the account and its servers. -->
-    <string name="settings_account_and_servers">Account and Servers</string>
+    <string name="settings_account_group">Account</string>
     <!-- Settings section of the color theme and TV mode. -->
     <string name="settings_appearance">Appearance</string>
     <!-- Explanation under the Appearance title. -->
@@ -576,8 +576,8 @@
     <string name="settings_copy_address">Copy Address</string>
     <!-- Settings section of the devices signed in as the user. -->
     <string name="settings_devices">Devices</string>
-    <!-- Explanation under the Devices title; server is its name. -->
-    <string name="settings_devices_message">The devices signed in to %s as you.</string>
+    <!-- Explanation under the Devices title. -->
+    <string name="settings_devices_message">The devices signed in to this server as you.</string>
     <!-- Marks the session of this browser in the devices list. -->
     <string name="settings_this_browser">This browser</string>
     <!-- Settings section of the signed-in account. -->
@@ -590,20 +590,24 @@
     <string name="settings_manage_at_mavio">Manage at mavio.dev</string>
     <!-- Marks the user as the server's administrator. -->
     <string name="settings_admin">Administrator</string>
-    <!-- Group of the settings of the servers the user administers. -->
-    <string name="settings_administration">Administration</string>
+    <!-- Group of the settings of the server chosen above them. -->
+    <string name="settings_server_group">Server</string>
+    <!-- Label of the choice of the server whose settings are shown. -->
+    <string name="settings_server_choice">Server</string>
+    <!-- The server serving the web UI among the servers to choose; name is its name. -->
+    <string name="settings_this_server">%s (This Server)</string>
     <!-- Settings section of a server's plugins. -->
     <string name="settings_plugins">Plugins</string>
-    <!-- Explanation under the Plugins title; server is its name. -->
-    <string name="settings_plugins_message">The plugins of %s, which bring it metadata, discovery, downloads and more.</string>
-    <!-- Group of the plugins installed on the server. -->
+    <!-- Explanation under the Plugins title. -->
+    <string name="settings_plugins_message">Plugins bring the server metadata, subtitles, downloads and more.</string>
+    <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
-    <!-- Group of the catalogs' plugins not installed. -->
+    <!-- Tab of the plugins the catalogs offer, installed or not. -->
     <string name="plugins_available">Available</string>
     <!-- Empty state of the installed plugins. -->
     <string name="plugins_none_installed">No plugins are installed.</string>
-    <!-- Empty state of the plugins available to install. -->
-    <string name="plugins_none_available">The catalogs offer no other plugins.</string>
+    <!-- Empty state of the plugins the catalogs offer. -->
+    <string name="plugins_none_available">The catalogs offer no plugins.</string>
     <!-- State of a plugin that runs. -->
     <string name="plugins_state_ready">Running</string>
     <!-- State of a plugin waiting for its configuration. -->
@@ -628,8 +632,8 @@
     <string name="plugins_by">By %s</string>
     <!-- Group of the URLs of the plugin catalogs. -->
     <string name="plugins_catalogs">Catalogs</string>
-    <!-- Footer of the plugin catalogs. -->
-    <string name="plugins_catalogs_footer">Plugins are installed from the catalogs at these addresses.</string>
+    <!-- Explanation under the Catalogs title. -->
+    <string name="plugins_catalogs_message">Plugins are installed from the catalogs at these addresses.</string>
     <!-- Button adding a plugin catalog's URL. -->
     <string name="plugins_add_catalog">Add</string>
     <!-- Placeholder and label of the field of a new catalog's URL. -->
@@ -638,6 +642,58 @@
     <string name="plugins_remove_catalog">Remove</string>
     <!-- Error listing the catalogs' plugins; reason is the error. -->
     <string name="plugins_catalogs_unreachable">The catalogs can\'t be reached: %s</string>
+    <!-- Choice of every category of plugins. -->
+    <string name="plugins_all_categories">All Categories</string>
+    <!-- Category of plugins giving metadata, images and titles to discover. -->
+    <string name="plugins_category_metadata">Metadata</string>
+    <!-- Category of plugins finding and translating subtitles. -->
+    <string name="plugins_category_subtitles">Subtitles</string>
+    <!-- Category of indexer and download client plugins. -->
+    <string name="plugins_category_downloads">Downloads</string>
+    <!-- Category of plugins signing users in. -->
+    <string name="plugins_category_authentication">Authentication</string>
+    <!-- Category of notification plugins. -->
+    <string name="plugins_category_notifications">Notifications</string>
+    <!-- Category of plugins for devices the server plays on or serves, such as DLNA. -->
+    <string name="plugins_category_devices">Devices</string>
+    <!-- Category of AI model and agent plugins. -->
+    <string name="plugins_category_ai">AI</string>
+    <!-- Category of plugins naming none. -->
+    <string name="plugins_category_other">Other</string>
+    <!-- Button opening the plugin catalogs. -->
+    <string name="plugins_manage_catalogs">Manage Catalogs</string>
+    <!-- Empty state of a category of plugins. -->
+    <string name="plugins_none_in_category">No plugins in this category.</string>
+    <!-- A catalog plugin with no version the server can run. -->
+    <string name="plugins_no_version">No version for this server yet</string>
+    <!-- Mark of an installed plugin whose catalog has a newer version. -->
+    <string name="plugins_update_available">Update available</string>
+    <!-- A plugin that cannot be shown. -->
+    <string name="plugins_not_found">This plugin is neither installed nor offered by the catalogs.</string>
+    <!-- Group of a plugin's details. -->
+    <string name="plugins_information">Information</string>
+    <!-- A plugin's installed version. -->
+    <string name="plugins_version">Version</string>
+    <!-- The newest version the catalog offers. -->
+    <string name="plugins_latest_version">Latest Version</string>
+    <!-- A plugin's category. -->
+    <string name="plugins_category">Category</string>
+    <!-- A plugin's author. -->
+    <string name="plugins_author">Author</string>
+    <!-- A plugin's license. -->
+    <string name="plugins_license">License</string>
+    <!-- A plugin's home page. -->
+    <string name="plugins_website">Website</string>
+    <!-- The catalog offering a plugin. -->
+    <string name="plugins_catalog">Catalog</string>
+    <!-- A plugin's state. -->
+    <string name="plugins_state">State</string>
+    <!-- The hosts a plugin may reach. -->
+    <string name="plugins_network_access">Network Access</string>
+    <!-- Group of the versions a catalog offers of a plugin. -->
+    <string name="plugins_versions">Versions</string>
+    <!-- Button installing an older or newer version of an installed plugin. -->
+    <string name="plugins_install_this">Install This Version</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->

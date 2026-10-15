@@ -4609,20 +4609,20 @@
         }
       }
     },
-    "settings.accountAndServers": {
+    "settings.accountGroup": {
       "comment": "Group of the settings of the account and its servers.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Account and Servers"
+            "value": "Account"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "账户与服务器"
+            "value": "账户"
           }
         }
       }
@@ -5114,19 +5114,19 @@
       }
     },
     "settings.devicesMessage": {
-      "comment": "Explanation under the Devices title; server is its name.",
+      "comment": "Explanation under the Devices title.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The devices signed in to %@ as you."
+            "value": "The devices signed in to this server as you."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "以你的身份登录 %@ 的设备。"
+            "value": "以你的身份登录此服务器的设备。"
           }
         }
       }
@@ -5239,20 +5239,56 @@
         }
       }
     },
-    "settings.administration": {
-      "comment": "Group of the settings of the servers the user administers.",
+    "settings.serverGroup": {
+      "comment": "Group of the settings of the server chosen above them.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Administration"
+            "value": "Server"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "管理"
+            "value": "服务器"
+          }
+        }
+      }
+    },
+    "settings.serverChoice": {
+      "comment": "Label of the choice of the server whose settings are shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器"
+          }
+        }
+      }
+    },
+    "settings.thisServer": {
+      "comment": "The server serving the web UI among the servers to choose; name is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (This Server)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@（本服务器）"
           }
         }
       }
@@ -5276,25 +5312,25 @@
       }
     },
     "settings.pluginsMessage": {
-      "comment": "Explanation under the Plugins title; server is its name.",
+      "comment": "Explanation under the Plugins title.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The plugins of %@, which bring it metadata, discovery, downloads and more."
+            "value": "Plugins bring the server metadata, subtitles, downloads and more."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 的插件，为它提供元数据、发现、下载等功能。"
+            "value": "插件为服务器提供元数据、字幕、下载等功能。"
           }
         }
       }
     },
     "plugins.installed": {
-      "comment": "Group of the plugins installed on the server.",
+      "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -5312,7 +5348,7 @@
       }
     },
     "plugins.available": {
-      "comment": "Group of the catalogs' plugins not installed.",
+      "comment": "Tab of the plugins the catalogs offer, installed or not.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -5324,7 +5360,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可安装"
+            "value": "可用"
           }
         }
       }
@@ -5348,19 +5384,19 @@
       }
     },
     "plugins.noneAvailable": {
-      "comment": "Empty state of the plugins available to install.",
+      "comment": "Empty state of the plugins the catalogs offer.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The catalogs offer no other plugins."
+            "value": "The catalogs offer no plugins."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "插件目录中没有其他插件。"
+            "value": "插件目录中没有插件。"
           }
         }
       }
@@ -5581,8 +5617,8 @@
         }
       }
     },
-    "plugins.catalogsFooter": {
-      "comment": "Footer of the plugin catalogs.",
+    "plugins.catalogsMessage": {
+      "comment": "Explanation under the Catalogs title.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -5667,6 +5703,474 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法访问插件目录：%@"
+          }
+        }
+      }
+    },
+    "plugins.allCategories": {
+      "comment": "Choice of every category of plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Categories"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有分类"
+          }
+        }
+      }
+    },
+    "plugins.categoryMetadata": {
+      "comment": "Category of plugins giving metadata, images and titles to discover.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据"
+          }
+        }
+      }
+    },
+    "plugins.categorySubtitles": {
+      "comment": "Category of plugins finding and translating subtitles.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
+          }
+        }
+      }
+    },
+    "plugins.categoryDownloads": {
+      "comment": "Category of indexer and download client plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下载"
+          }
+        }
+      }
+    },
+    "plugins.categoryAuthentication": {
+      "comment": "Category of plugins signing users in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authentication"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "身份验证"
+          }
+        }
+      }
+    },
+    "plugins.categoryNotifications": {
+      "comment": "Category of notification plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
+        }
+      }
+    },
+    "plugins.categoryDevices": {
+      "comment": "Category of plugins for devices the server plays on or serves, such as DLNA.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Devices"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设备"
+          }
+        }
+      }
+    },
+    "plugins.categoryAi": {
+      "comment": "Category of AI model and agent plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        }
+      }
+    },
+    "plugins.categoryOther": {
+      "comment": "Category of plugins naming none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他"
+          }
+        }
+      }
+    },
+    "plugins.manageCatalogs": {
+      "comment": "Button opening the plugin catalogs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Catalogs"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理插件目录"
+          }
+        }
+      }
+    },
+    "plugins.noneInCategory": {
+      "comment": "Empty state of a category of plugins.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No plugins in this category."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此分类中没有插件。"
+          }
+        }
+      }
+    },
+    "plugins.noVersion": {
+      "comment": "A catalog plugin with no version the server can run.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No version for this server yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无适用于此服务器的版本"
+          }
+        }
+      }
+    },
+    "plugins.updateAvailable": {
+      "comment": "Mark of an installed plugin whose catalog has a newer version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有更新"
+          }
+        }
+      }
+    },
+    "plugins.notFound": {
+      "comment": "A plugin that cannot be shown.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This plugin is neither installed nor offered by the catalogs."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此插件既未安装，也不在插件目录中。"
+          }
+        }
+      }
+    },
+    "plugins.information": {
+      "comment": "Group of a plugin's details.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Information"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "信息"
+          }
+        }
+      }
+    },
+    "plugins.version": {
+      "comment": "A plugin's installed version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "plugins.latestVersion": {
+      "comment": "The newest version the catalog offers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest Version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新版本"
+          }
+        }
+      }
+    },
+    "plugins.category": {
+      "comment": "A plugin's category.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Category"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分类"
+          }
+        }
+      }
+    },
+    "plugins.author": {
+      "comment": "A plugin's author.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Author"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者"
+          }
+        }
+      }
+    },
+    "plugins.license": {
+      "comment": "A plugin's license.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "License"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "许可证"
+          }
+        }
+      }
+    },
+    "plugins.website": {
+      "comment": "A plugin's home page.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网站"
+          }
+        }
+      }
+    },
+    "plugins.catalog": {
+      "comment": "The catalog offering a plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Catalog"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件目录"
+          }
+        }
+      }
+    },
+    "plugins.state": {
+      "comment": "A plugin's state.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "State"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状态"
+          }
+        }
+      }
+    },
+    "plugins.networkAccess": {
+      "comment": "The hosts a plugin may reach.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network Access"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络访问"
+          }
+        }
+      }
+    },
+    "plugins.versions": {
+      "comment": "Group of the versions a catalog offers of a plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本"
+          }
+        }
+      }
+    },
+    "plugins.installThis": {
+      "comment": "Button installing an older or newer version of an installed plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install This Version"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装此版本"
           }
         }
       }
