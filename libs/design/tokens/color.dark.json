@@ -15,8 +15,21 @@
       "$value": "{palette.neutral.750}"
     },
     "tvBackground": {
-      "$value": "{palette.neutral.1000}",
-      "$description": "Background of the television layout."
+      "$value": "{palette.neutral.900}",
+      "$description": "Background of the television layout: a dark gray rather than black, so that a focused card's shadow shows."
+    },
+    "tvFocusShadow": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0,
+          0,
+          0
+        ],
+        "alpha": 0.8,
+        "hex": "#000000"
+      },
+      "$description": "Shadow of a focused card on the television, deeper in the dark theme to show on its background."
     },
     "sidebar": {
       "$value": "{palette.neutral.950}",

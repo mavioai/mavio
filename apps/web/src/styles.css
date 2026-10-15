@@ -204,7 +204,7 @@ body {
   & [data-card]:focus [data-art] {
     outline: 3px solid var(--mavio-color-accent);
     outline-offset: 1.5px;
-    box-shadow: var(--mavio-elevation-level3);
+    box-shadow: 0 12px 32px var(--mavio-color-tv-focus-shadow);
   }
   & :is(input, select, textarea):focus {
     box-shadow: 0 0 0 3px #fff;

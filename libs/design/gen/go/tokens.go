@@ -14,6 +14,7 @@ type Colors struct {
 	SurfaceRaised  Color
 	SurfaceOverlay Color
 	TvBackground   Color
+	TvFocusShadow  Color
 	Sidebar        Color
 	Fill           Color
 	FillSelected   Color
@@ -43,7 +44,8 @@ var (
 		Surface:        Color{R: 28, G: 28, B: 30, A: 255},
 		SurfaceRaised:  Color{R: 44, G: 44, B: 46, A: 255},
 		SurfaceOverlay: Color{R: 58, G: 58, B: 60, A: 255},
-		TvBackground:   Color{R: 0, G: 0, B: 0, A: 255},
+		TvBackground:   Color{R: 28, G: 28, B: 30, A: 255},
+		TvFocusShadow:  Color{R: 0, G: 0, B: 0, A: 204},
 		Sidebar:        Color{R: 22, G: 22, B: 24, A: 255},
 		Fill:           Color{R: 118, G: 118, B: 128, A: 61},
 		FillSelected:   Color{R: 118, G: 118, B: 128, A: 82},
@@ -71,6 +73,7 @@ var (
 		SurfaceRaised:  Color{R: 255, G: 255, B: 255, A: 255},
 		SurfaceOverlay: Color{R: 255, G: 255, B: 255, A: 255},
 		TvBackground:   Color{R: 229, G: 229, B: 234, A: 255},
+		TvFocusShadow:  Color{R: 0, G: 0, B: 0, A: 77},
 		Sidebar:        Color{R: 245, G: 245, B: 247, A: 255},
 		Fill:           Color{R: 118, G: 118, B: 128, A: 31},
 		FillSelected:   Color{R: 118, G: 118, B: 128, A: 46},

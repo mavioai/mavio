@@ -18,6 +18,19 @@
       "$value": "{palette.neutral.200}",
       "$description": "Background of the television layout: a light gray, as on Apple TV, for white is glaring on a large screen."
     },
+    "tvFocusShadow": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0,
+          0,
+          0
+        ],
+        "alpha": 0.3,
+        "hex": "#000000"
+      },
+      "$description": "Shadow of a focused card on the television."
+    },
     "sidebar": {
       "$value": "{palette.neutral.50}",
       "$description": "Background of the sidebar of the desktop layout."
