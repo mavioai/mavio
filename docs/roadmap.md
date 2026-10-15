@@ -692,6 +692,7 @@ flowchart TD
     - [ ] A Play command's items after its first, queued in the player
     - [x] SyncPlay groups: created, joined and left from Watch Together, the player following the group with its clock kept in step (§6.3.24)
     - [ ] Editing a SyncPlay group's queue: adding items, moving and removing them (needs requests of `SyncPlayService`)
+    - [x] Issues: reported from an item's More menu, an item's open issues on its details, and the settings' Issues with an issue's comments, resolving, reopening and deleting (§6.3.25)
   - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app

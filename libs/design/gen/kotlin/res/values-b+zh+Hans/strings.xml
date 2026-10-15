@@ -320,6 +320,7 @@
     <string name="settings_api_keys">API 密钥</string>
     <string name="settings_wanted">想要</string>
     <string name="settings_downloads">下载</string>
+    <string name="settings_issues">问题</string>
     <string name="plugins_installed">已安装</string>
     <string name="plugins_available">可用</string>
     <string name="plugins_none_installed">尚未安装插件。</string>
@@ -1459,4 +1460,35 @@
     <string name="syncplay_paused">已暂停：%s</string>
     <string name="syncplay_waiting_for">正在等待 %s</string>
     <string name="syncplay_chip">%1$s · %2$s</string>
+    <string name="issues_report">报告问题…</string>
+    <string name="issues_report_title">报告“%s”的问题</string>
+    <string name="issues_type">问题类型</string>
+    <string name="issues_video">视频</string>
+    <string name="issues_audio">音频</string>
+    <string name="issues_subtitles">字幕</string>
+    <string name="issues_other">其他</string>
+    <string name="issues_season">季</string>
+    <string name="issues_episode">集</string>
+    <string name="issues_all_numbers">0 表示所有季或集。</string>
+    <string name="issues_message">出了什么问题？</string>
+    <string name="issues_send">报告</string>
+    <string name="issues_title">问题</string>
+    <string name="issues_item_title">未解决的问题</string>
+    <string name="issues_open">未解决</string>
+    <string name="issues_resolved">已解决</string>
+    <string name="issues_all">全部</string>
+    <string name="issues_filter">状态</string>
+    <string name="issues_none">没有问题。</string>
+    <plurals name="issues_count">
+        <item quantity="other">%d 个问题</item>
+    </plurals>
+    <string name="issues_resolve">标记为已解决</string>
+    <string name="issues_reopen">重新打开</string>
+    <string name="issues_delete">删除</string>
+    <string name="issues_confirm_delete">删除此问题及其评论？</string>
+    <string name="issues_comment">添加评论</string>
+    <string name="issues_comment_send">评论</string>
+    <string name="issues_reported_by">由 %s 报告</string>
+    <string name="issues_administrator">管理员</string>
+    <string name="issues_intro">对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。</string>
 </resources>

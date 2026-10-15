@@ -161,3 +161,4 @@ export {
   useWantedList,
 } from "./acquisition.ts";
 export { type ClockSample, clockSample, groupPositionAt, syncClock, useSyncPlayGroups } from "./syncplay.ts";
+export { useCurrentUser, useIssue, useIssueActions, useIssues } from "./issues.ts";

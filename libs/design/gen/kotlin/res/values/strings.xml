@@ -630,6 +630,8 @@
     <string name="settings_wanted">Wanted</string>
     <!-- Settings section of the server's downloads: queue, history, blocklist and manual import. -->
     <string name="settings_downloads">Downloads</string>
+    <!-- Settings section of the problems reported with items. -->
+    <string name="settings_issues">Issues</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2903,4 +2905,65 @@
     <string name="syncplay_waiting_for">Waiting for %s</string>
     <!-- A group's name and number of members, on the chip opening it. -->
     <string name="syncplay_chip">%1$s · %2$s</string>
+    <!-- More menu item reporting a problem with an item. -->
+    <string name="issues_report">Report a Problem…</string>
+    <!-- Title of the dialog reporting a problem. -->
+    <string name="issues_report_title">Report a Problem with %s</string>
+    <!-- Accessibility label of the kinds of problem. -->
+    <string name="issues_type">Problem</string>
+    <!-- A problem with the video. -->
+    <string name="issues_video">Video</string>
+    <!-- A problem with the audio. -->
+    <string name="issues_audio">Audio</string>
+    <!-- A problem with the subtitles. -->
+    <string name="issues_subtitles">Subtitles</string>
+    <!-- Another problem. -->
+    <string name="issues_other">Other</string>
+    <!-- Field of the season a problem is in. -->
+    <string name="issues_season">Season</string>
+    <!-- Field of the episode a problem is in. -->
+    <string name="issues_episode">Episode</string>
+    <!-- Explains the season and episode fields. -->
+    <string name="issues_all_numbers">0 means every season or episode.</string>
+    <!-- Field describing the problem. -->
+    <string name="issues_message">What\'s wrong?</string>
+    <!-- Reports the problem. -->
+    <string name="issues_send">Report</string>
+    <!-- Title of an issue while it loads. -->
+    <string name="issues_title">Issue</string>
+    <!-- Heading of an item's open issues on its details. -->
+    <string name="issues_item_title">Open Issues</string>
+    <!-- An issue not resolved. -->
+    <string name="issues_open">Open</string>
+    <!-- A resolved issue. -->
+    <string name="issues_resolved">Resolved</string>
+    <!-- Filter showing every issue. -->
+    <string name="issues_all">All</string>
+    <!-- Accessibility label of the issues' filter. -->
+    <string name="issues_filter">Status</string>
+    <!-- Shown when no issue matches. -->
+    <string name="issues_none">No issues.</string>
+    <!-- How many issues match. -->
+    <plurals name="issues_count">
+        <item quantity="one">%d issue</item>
+        <item quantity="other">%d issues</item>
+    </plurals>
+    <!-- Resolves an issue. -->
+    <string name="issues_resolve">Resolve</string>
+    <!-- Reopens an issue. -->
+    <string name="issues_reopen">Reopen</string>
+    <!-- Deletes an issue. -->
+    <string name="issues_delete">Delete</string>
+    <!-- Asks before deleting an issue. -->
+    <string name="issues_confirm_delete">Delete this issue and its comments?</string>
+    <!-- Field of a comment on an issue. -->
+    <string name="issues_comment">Add a comment</string>
+    <!-- Adds the comment. -->
+    <string name="issues_comment_send">Comment</string>
+    <!-- Who reported an issue. -->
+    <string name="issues_reported_by">Reported by %s</string>
+    <!-- A commenter other than the user, for users who are not administrators. -->
+    <string name="issues_administrator">Administrator</string>
+    <!-- Explains the settings' issues. -->
+    <string name="issues_intro">Problems reported with the server\'s movies and shows: your own, or everyone\'s for administrators.</string>
 </resources>

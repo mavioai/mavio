@@ -1010,6 +1010,9 @@ public enum MavioStrings {
     /// Settings section of the server's downloads: queue, history, blocklist and manual import.
     public static var settingsDownloads: String { NSLocalizedString("settings.downloads", bundle: .module, comment: "") }
 
+    /// Settings section of the problems reported with items.
+    public static var settingsIssues: String { NSLocalizedString("settings.issues", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -4580,4 +4583,97 @@ public enum MavioStrings {
     public static func syncplayChip(name: String, count: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("syncplay.chip", bundle: .module, comment: ""), name, count)
     }
+
+    /// More menu item reporting a problem with an item.
+    public static var issuesReport: String { NSLocalizedString("issues.report", bundle: .module, comment: "") }
+
+    /// Title of the dialog reporting a problem.
+    public static func issuesReportTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("issues.reportTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Accessibility label of the kinds of problem.
+    public static var issuesType: String { NSLocalizedString("issues.type", bundle: .module, comment: "") }
+
+    /// A problem with the video.
+    public static var issuesVideo: String { NSLocalizedString("issues.video", bundle: .module, comment: "") }
+
+    /// A problem with the audio.
+    public static var issuesAudio: String { NSLocalizedString("issues.audio", bundle: .module, comment: "") }
+
+    /// A problem with the subtitles.
+    public static var issuesSubtitles: String { NSLocalizedString("issues.subtitles", bundle: .module, comment: "") }
+
+    /// Another problem.
+    public static var issuesOther: String { NSLocalizedString("issues.other", bundle: .module, comment: "") }
+
+    /// Field of the season a problem is in.
+    public static var issuesSeason: String { NSLocalizedString("issues.season", bundle: .module, comment: "") }
+
+    /// Field of the episode a problem is in.
+    public static var issuesEpisode: String { NSLocalizedString("issues.episode", bundle: .module, comment: "") }
+
+    /// Explains the season and episode fields.
+    public static var issuesAllNumbers: String { NSLocalizedString("issues.allNumbers", bundle: .module, comment: "") }
+
+    /// Field describing the problem.
+    public static var issuesMessage: String { NSLocalizedString("issues.message", bundle: .module, comment: "") }
+
+    /// Reports the problem.
+    public static var issuesSend: String { NSLocalizedString("issues.send", bundle: .module, comment: "") }
+
+    /// Title of an issue while it loads.
+    public static var issuesTitle: String { NSLocalizedString("issues.title", bundle: .module, comment: "") }
+
+    /// Heading of an item's open issues on its details.
+    public static var issuesItemTitle: String { NSLocalizedString("issues.itemTitle", bundle: .module, comment: "") }
+
+    /// An issue not resolved.
+    public static var issuesOpen: String { NSLocalizedString("issues.open", bundle: .module, comment: "") }
+
+    /// A resolved issue.
+    public static var issuesResolved: String { NSLocalizedString("issues.resolved", bundle: .module, comment: "") }
+
+    /// Filter showing every issue.
+    public static var issuesAll: String { NSLocalizedString("issues.all", bundle: .module, comment: "") }
+
+    /// Accessibility label of the issues' filter.
+    public static var issuesFilter: String { NSLocalizedString("issues.filter", bundle: .module, comment: "") }
+
+    /// Shown when no issue matches.
+    public static var issuesNone: String { NSLocalizedString("issues.none", bundle: .module, comment: "") }
+
+    /// How many issues match.
+    public static func issuesCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("issues.count", bundle: .module, comment: ""), count)
+    }
+
+    /// Resolves an issue.
+    public static var issuesResolve: String { NSLocalizedString("issues.resolve", bundle: .module, comment: "") }
+
+    /// Reopens an issue.
+    public static var issuesReopen: String { NSLocalizedString("issues.reopen", bundle: .module, comment: "") }
+
+    /// Deletes an issue.
+    public static var issuesDelete: String { NSLocalizedString("issues.delete", bundle: .module, comment: "") }
+
+    /// Asks before deleting an issue.
+    public static var issuesConfirmDelete: String { NSLocalizedString("issues.confirmDelete", bundle: .module, comment: "") }
+
+    /// Field of a comment on an issue.
+    public static var issuesComment: String { NSLocalizedString("issues.comment", bundle: .module, comment: "") }
+
+    /// Adds the comment.
+    public static var issuesCommentSend: String { NSLocalizedString("issues.commentSend", bundle: .module, comment: "") }
+
+    /// Who reported an issue.
+    public static func issuesReportedBy(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("issues.reportedBy", bundle: .module, comment: ""), name)
+    }
+
+    /// A commenter other than the user, for users who are not administrators.
+    public static var issuesAdministrator: String { NSLocalizedString("issues.administrator", bundle: .module, comment: "") }
+
+    /// Explains the settings' issues.
+    public static var issuesIntro: String { NSLocalizedString("issues.intro", bundle: .module, comment: "") }
 }

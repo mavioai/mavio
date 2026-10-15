@@ -24,6 +24,7 @@ import { Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, u
 
 import { locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
+import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { initialsOf } from "./person.tsx";
@@ -263,6 +264,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
         <About item={item} series={series} credits={credits} source={selected} overview={!phone} />
         <Acquisition server={server} item={item} />
         <ItemSubtitles server={server} item={item} />
+        <ItemIssues server={server} item={item} />
       </div>
     </div>
   );

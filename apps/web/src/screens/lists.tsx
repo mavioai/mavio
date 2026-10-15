@@ -3,8 +3,8 @@
 // collection, and renaming or deleting a playlist or collection; a
 // playlist's entries in order, moved and removed; a collection's members
 // removed by its administrators. The menu also plays the item on another
-// device (§6.3.23), watches it together (§6.3.24) and, for administrators,
-// opens its metadata (§6.3.22).
+// device (§6.3.23), watches it together (§6.3.24), reports a problem with it
+// (§6.3.25) and, for administrators, opens its metadata (§6.3.22).
 import {
   errorMessage,
   type ServerEntry,
@@ -27,9 +27,10 @@ import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf, useDismiss } fr
 import { EditDialog, IdentifyDialog, identifiable, ImagesDialog, RefreshDialog } from "./metadata.tsx";
 import { field, Modal } from "./modal.tsx";
 import { playable, PlayOnDialog } from "./remote.tsx";
+import { ReportDialog, reportable, useMayReport } from "./issues.tsx";
 import { SyncPlayDialog } from "./syncplay.tsx";
 
-type Dialog = "playOn" | "together" | "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
+type Dialog = "playOn" | "together" | "report" | "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
 
 /** Kinds that can be put in a playlist or a collection. */
 const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== ItemKind.COLLECTION && kind !== ItemKind.FOLDER;
@@ -37,6 +38,7 @@ const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== Item
 /** The More menu of an item's actions, with the dialogs it opens. */
 export function MoreMenu({ server, item, className, iconSize, phone }: { server: ServerEntry; item: Item; className: string; iconSize: number; phone: boolean }) {
   const admin = useAdminServers().some((s) => s.id === server.id);
+  const mayReport = useMayReport(server);
   const [open, setOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>();
   const ref = useRef<HTMLDivElement>(null);
@@ -51,6 +53,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
         ] as [Dialog, string][])
       : []),
     ...(listable(item.kind) ? ([["playlist", t("lists.addToPlaylist")]] as [Dialog, string][]) : []),
+    ...(reportable(item.kind) && mayReport ? ([["report", t("issues.report")]] as [Dialog, string][]) : []),
     ...(listable(item.kind) && admin ? ([["collection", t("lists.addToCollection")]] as [Dialog, string][]) : []),
     ...(admin && item.kind !== ItemKind.PLAYLIST
       ? ([
@@ -92,6 +95,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
         </div>
       )}
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
+      {dialog === "report" && <ReportDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "together" && <SyncPlayDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "playOn" && <PlayOnDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "edit" && <EditDialog server={server} item={item} onClose={() => setDialog(undefined)} />}

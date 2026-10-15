@@ -304,6 +304,7 @@ export type MessageKey =
   | 'settings.apiKeys'
   | 'settings.wanted'
   | 'settings.downloads'
+  | 'settings.issues'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1426,7 +1427,36 @@ export type MessageKey =
   | 'syncplay.playing'
   | 'syncplay.paused'
   | 'syncplay.waitingFor'
-  | 'syncplay.chip';
+  | 'syncplay.chip'
+  | 'issues.report'
+  | 'issues.reportTitle'
+  | 'issues.type'
+  | 'issues.video'
+  | 'issues.audio'
+  | 'issues.subtitles'
+  | 'issues.other'
+  | 'issues.season'
+  | 'issues.episode'
+  | 'issues.allNumbers'
+  | 'issues.message'
+  | 'issues.send'
+  | 'issues.title'
+  | 'issues.itemTitle'
+  | 'issues.open'
+  | 'issues.resolved'
+  | 'issues.all'
+  | 'issues.filter'
+  | 'issues.none'
+  | 'issues.count'
+  | 'issues.resolve'
+  | 'issues.reopen'
+  | 'issues.delete'
+  | 'issues.confirmDelete'
+  | 'issues.comment'
+  | 'issues.commentSend'
+  | 'issues.reportedBy'
+  | 'issues.administrator'
+  | 'issues.intro';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1723,6 +1753,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.apiKeys": "API Keys",
     "settings.wanted": "Wanted",
     "settings.downloads": "Downloads",
+    "settings.issues": "Issues",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2845,7 +2876,36 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "syncplay.playing": "Playing {name}",
     "syncplay.paused": "Paused: {name}",
     "syncplay.waitingFor": "Waiting for {names}",
-    "syncplay.chip": "{name} · {count}"
+    "syncplay.chip": "{name} · {count}",
+    "issues.report": "Report a Problem…",
+    "issues.reportTitle": "Report a Problem with {name}",
+    "issues.type": "Problem",
+    "issues.video": "Video",
+    "issues.audio": "Audio",
+    "issues.subtitles": "Subtitles",
+    "issues.other": "Other",
+    "issues.season": "Season",
+    "issues.episode": "Episode",
+    "issues.allNumbers": "0 means every season or episode.",
+    "issues.message": "What's wrong?",
+    "issues.send": "Report",
+    "issues.title": "Issue",
+    "issues.itemTitle": "Open Issues",
+    "issues.open": "Open",
+    "issues.resolved": "Resolved",
+    "issues.all": "All",
+    "issues.filter": "Status",
+    "issues.none": "No issues.",
+    "issues.count": "{count, plural, one {# issue} other {# issues}}",
+    "issues.resolve": "Resolve",
+    "issues.reopen": "Reopen",
+    "issues.delete": "Delete",
+    "issues.confirmDelete": "Delete this issue and its comments?",
+    "issues.comment": "Add a comment",
+    "issues.commentSend": "Comment",
+    "issues.reportedBy": "Reported by {name}",
+    "issues.administrator": "Administrator",
+    "issues.intro": "Problems reported with the server's movies and shows: your own, or everyone's for administrators."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3140,6 +3200,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.apiKeys": "API 密钥",
     "settings.wanted": "想要",
     "settings.downloads": "下载",
+    "settings.issues": "问题",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -4262,6 +4323,35 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "syncplay.playing": "正在播放 {name}",
     "syncplay.paused": "已暂停：{name}",
     "syncplay.waitingFor": "正在等待 {names}",
-    "syncplay.chip": "{name} · {count}"
+    "syncplay.chip": "{name} · {count}",
+    "issues.report": "报告问题…",
+    "issues.reportTitle": "报告“{name}”的问题",
+    "issues.type": "问题类型",
+    "issues.video": "视频",
+    "issues.audio": "音频",
+    "issues.subtitles": "字幕",
+    "issues.other": "其他",
+    "issues.season": "季",
+    "issues.episode": "集",
+    "issues.allNumbers": "0 表示所有季或集。",
+    "issues.message": "出了什么问题？",
+    "issues.send": "报告",
+    "issues.title": "问题",
+    "issues.itemTitle": "未解决的问题",
+    "issues.open": "未解决",
+    "issues.resolved": "已解决",
+    "issues.all": "全部",
+    "issues.filter": "状态",
+    "issues.none": "没有问题。",
+    "issues.count": "{count, plural, other {# 个问题}}",
+    "issues.resolve": "标记为已解决",
+    "issues.reopen": "重新打开",
+    "issues.delete": "删除",
+    "issues.confirmDelete": "删除此问题及其评论？",
+    "issues.comment": "添加评论",
+    "issues.commentSend": "评论",
+    "issues.reportedBy": "由 {name} 报告",
+    "issues.administrator": "管理员",
+    "issues.intro": "对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。"
   }
 };
