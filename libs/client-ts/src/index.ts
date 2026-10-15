@@ -3,6 +3,15 @@
 // the TanStack Query hooks the screens use.
 export { backoff, follow, refreshes, useEvents } from "./events.ts";
 export {
+  type CatalogRow,
+  rowsOf,
+  titlesOf,
+  useCatalog,
+  useDiscovery,
+  useRequestTitle,
+  useTitle,
+} from "./discover.ts";
+export {
   type Content,
   type Entry,
   type Hubs,
