@@ -16,6 +16,7 @@ import { useCallback, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { Grid, ItemCard, LoadMore, Loading, StatusView, useDismiss } from "../ui.tsx";
 import { SectionView } from "./home.tsx";
 
@@ -47,13 +48,17 @@ export function LibraryScreen() {
 function Library({ server, libraryId }: { server: ServerEntry; libraryId: string }) {
   const { tab } = route.useSearch();
   const library = useLibrary(server, libraryId);
-  const segment =
-    "rounded-[7px] px-4 py-1 type-callout font-semibold text-text-secondary hover:text-on-background data-[active=true]:bg-surface-overlay data-[active=true]:text-on-background data-[active=true]:shadow-level1";
+  // On the television the choice looks like the tabs it stands in for:
+  // the current one filled, the focused one white.
+  const { tv } = usePrefs();
+  const segment = tv
+    ? "tv-pill rounded-full px-6 py-2 type-headline text-text-secondary data-[active=true]:bg-fill-selected data-[active=true]:text-on-background"
+    : "rounded-[7px] px-4 py-1 type-callout font-semibold text-text-secondary hover:text-on-background data-[active=true]:bg-surface-overlay data-[active=true]:text-on-background data-[active=true]:shadow-level1";
   return (
     <div>
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-3 px-margin pt-6 pb-3">
+      <div className={`flex flex-wrap gap-x-6 gap-y-3 px-margin pt-6 pb-3 ${tv ? "items-center" : "items-end"}`}>
         <h1 className="type-title1">{library.data?.name ?? " "}</h1>
-        <div role="tablist" className="flex rounded-[9px] bg-fill p-0.5">
+        <div role="tablist" className={tv ? "flex gap-1 rounded-full bg-surface-raised/60 p-1.5" : "flex rounded-[9px] bg-fill p-0.5"}>
           <Link role="tab" from="/s/$serverId/library/$libraryId" search={{}} data-active={tab !== "all"} className={segment}>
             {t("library.recommended")}
           </Link>

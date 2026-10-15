@@ -47,7 +47,7 @@ A hero 78 % of the screen's height reaches behind the bar, with the title's logo
 The page hides the navigation bar, and back returns to where it was opened from (§4). The backdrop fills 86 % of the screen's height, with the logo or name at 72 pt, two lines of overview without the tagline, the actions 64 pt high, and the text at most 960 pt wide. Focus starts on the primary action; focus on a season's pill chooses it. The rest is as on other layouts (`libs/design/components.md`, Details Screen).
 
 ### 6.3 Grids
-A library's items and search results are grids whose columns are at least a poster wide, `layout.gutter` apart. A library hides the navigation bar and the menu button: its name alone heads it at the top left, beside its Recommended and All.
+A library's items and search results are grids whose columns are at least a poster wide, `layout.gutter` apart. A library hides the navigation bar and the menu button: its name alone heads it at the top left, beside its Recommended and All in a pill that looks like the tabs: the current one filled with `color.fillSelected`, the focused one white.
 
 ### 6.4 Search
 * **Without tabs**: the page hides the navigation bar, focus starts on the keyboard, and back leaves the page once the query is empty.
