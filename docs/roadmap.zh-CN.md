@@ -662,7 +662,7 @@ flowchart TD
       - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
-    - [ ] AI：提供商、API 密钥、订阅登录与模型（`AiService`）
+    - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiService`）
     - [x] 计划任务（`apps/web/src/screens/admin/tasks.tsx`）：计划任务、立即运行与作业（`TaskService`）
     - [ ] 备份与日志（`BackupService`、`ListLogs`）
     - [ ] 账户安全中的 API 密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）

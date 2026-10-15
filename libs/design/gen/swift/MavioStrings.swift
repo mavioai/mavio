@@ -992,6 +992,9 @@ public enum MavioStrings {
     /// The settings section of a server's subtitle acquisition
     public static var settingsSubtitles: String { NSLocalizedString("settings.subtitles", bundle: .module, comment: "") }
 
+    /// Settings section of a server's AI providers.
+    public static var settingsAi: String { NSLocalizedString("settings.ai", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -3342,4 +3345,142 @@ public enum MavioStrings {
 
     /// How old an episode file must be
     public static var subtitlesEpisodeAge: String { NSLocalizedString("subtitles.episodeAge", bundle: .module, comment: "") }
+
+    /// Description of the AI settings.
+    public static var aiMessage: String { NSLocalizedString("ai.message", bundle: .module, comment: "") }
+
+    /// Row when no AI gateway plugin runs on the server.
+    public static var aiNoGateway: String { NSLocalizedString("ai.noGateway", bundle: .module, comment: "") }
+
+    /// Detail of the row linking to Plugins when no AI gateway plugin runs.
+    public static var aiNoGatewayDetail: String { NSLocalizedString("ai.noGatewayDetail", bundle: .module, comment: "") }
+
+    /// Footer explaining why an AI gateway plugin is needed.
+    public static var aiNoGatewayFooter: String { NSLocalizedString("ai.noGatewayFooter", bundle: .module, comment: "") }
+
+    /// Title of the list of AI providers.
+    public static var aiProviders: String { NSLocalizedString("ai.providers", bundle: .module, comment: "") }
+
+    /// Footer of the list of AI providers.
+    public static var aiProvidersFooter: String { NSLocalizedString("ai.providersFooter", bundle: .module, comment: "") }
+
+    /// Shown when the AI gateway lists no providers.
+    public static var aiNoProviders: String { NSLocalizedString("ai.noProviders", bundle: .module, comment: "") }
+
+    /// Status of an AI provider without a credential.
+    public static var aiNotSignedIn: String { NSLocalizedString("ai.notSignedIn", bundle: .module, comment: "") }
+
+    /// Status of an AI provider signed in with OAuth; label is the account kind.
+    public static func aiSignedIn(label: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.signedIn", bundle: .module, comment: ""), label)
+    }
+
+    /// Status of an AI provider with an API key.
+    public static var aiApiKeyStored: String { NSLocalizedString("ai.apiKeyStored", bundle: .module, comment: "") }
+
+    /// Status of an AI provider whose credential the plugin found, such as in an environment variable.
+    public static func aiFromSource(source: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.fromSource", bundle: .module, comment: ""), source)
+    }
+
+    /// Number of models of an AI provider.
+    public static func aiModelCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.modelCount", bundle: .module, comment: ""), count)
+    }
+
+    /// Marks an AI provider configured by the admin rather than built in.
+    public static var aiCustom: String { NSLocalizedString("ai.custom", bundle: .module, comment: "") }
+
+    /// Shown when an AI provider page's provider is not found.
+    public static var aiProviderGone: String { NSLocalizedString("ai.providerGone", bundle: .module, comment: "") }
+
+    /// Title and label of an AI provider's API key.
+    public static var aiApiKey: String { NSLocalizedString("ai.apiKey", bundle: .module, comment: "") }
+
+    /// Footer of an AI provider's API key field.
+    public static var aiApiKeyFooter: String { NSLocalizedString("ai.apiKeyFooter", bundle: .module, comment: "") }
+
+    /// Footer of an AI provider's API key field when a key is stored.
+    public static var aiApiKeyReplaceFooter: String { NSLocalizedString("ai.apiKeyReplaceFooter", bundle: .module, comment: "") }
+
+    /// Shown after an API key is saved.
+    public static var aiApiKeySaved: String { NSLocalizedString("ai.apiKeySaved", bundle: .module, comment: "") }
+
+    /// Removes an AI provider's OAuth credential.
+    public static var aiSignOut: String { NSLocalizedString("ai.signOut", bundle: .module, comment: "") }
+
+    /// Removes an AI provider's API key.
+    public static var aiRemoveKey: String { NSLocalizedString("ai.removeKey", bundle: .module, comment: "") }
+
+    /// Footer of removing an AI provider's credential.
+    public static var aiSignOutFooter: String { NSLocalizedString("ai.signOutFooter", bundle: .module, comment: "") }
+
+    /// Title of an AI provider's OAuth sign-in.
+    public static var aiOauth: String { NSLocalizedString("ai.oauth", bundle: .module, comment: "") }
+
+    /// Warning under a subscription sign-in of an AI provider.
+    public static var aiSubscriptionFooter: String { NSLocalizedString("ai.subscriptionFooter", bundle: .module, comment: "") }
+
+    /// Row starting an AI provider's OAuth sign-in; label is the account kind.
+    public static func aiSignInWith(label: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.signInWith", bundle: .module, comment: ""), label)
+    }
+
+    /// Detail when an AI provider is already signed in with OAuth.
+    public static var aiSignInAgain: String { NSLocalizedString("ai.signInAgain", bundle: .module, comment: "") }
+
+    /// Button starting an AI provider's OAuth sign-in.
+    public static var aiSignIn: String { NSLocalizedString("ai.signIn", bundle: .module, comment: "") }
+
+    /// Shown while an AI provider's sign-in runs.
+    public static var aiWaiting: String { NSLocalizedString("ai.waiting", bundle: .module, comment: "") }
+
+    /// Shown when an AI provider's sign-in succeeded.
+    public static var aiLoginSucceeded: String { NSLocalizedString("ai.loginSucceeded", bundle: .module, comment: "") }
+
+    /// Shown when an AI provider's sign-in failed without a message.
+    public static var aiLoginFailed: String { NSLocalizedString("ai.loginFailed", bundle: .module, comment: "") }
+
+    /// Shown when an AI provider's sign-in was canceled.
+    public static var aiLoginCanceled: String { NSLocalizedString("ai.loginCanceled", bundle: .module, comment: "") }
+
+    /// Button opening the page of an AI provider's sign-in.
+    public static var aiOpenPage: String { NSLocalizedString("ai.openPage", bundle: .module, comment: "") }
+
+    /// Shown above a device code of an AI provider's sign-in.
+    public static var aiEnterCode: String { NSLocalizedString("ai.enterCode", bundle: .module, comment: "") }
+
+    /// Label of an answer to a sign-in question without a message.
+    public static var aiAnswer: String { NSLocalizedString("ai.answer", bundle: .module, comment: "") }
+
+    /// Hint of a manual code question of an AI provider's sign-in.
+    public static var aiManualCode: String { NSLocalizedString("ai.manualCode", bundle: .module, comment: "") }
+
+    /// Submits the answer to a question of an AI provider's sign-in.
+    public static var aiSubmit: String { NSLocalizedString("ai.submit", bundle: .module, comment: "") }
+
+    /// Title of an AI provider's models.
+    public static var aiModels: String { NSLocalizedString("ai.models", bundle: .module, comment: "") }
+
+    /// Footer of the models of an AI provider without a credential.
+    public static var aiModelsFooter: String { NSLocalizedString("ai.modelsFooter", bundle: .module, comment: "") }
+
+    /// Shown when an AI provider has no models.
+    public static var aiNoModels: String { NSLocalizedString("ai.noModels", bundle: .module, comment: "") }
+
+    /// Context window of an AI model; tokens is a compact number.
+    public static func aiContextWindow(tokens: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.contextWindow", bundle: .module, comment: ""), tokens)
+    }
+
+    /// Marks an AI model that reasons.
+    public static var aiReasoning: String { NSLocalizedString("ai.reasoning", bundle: .module, comment: "") }
+
+    /// Marks an AI model that reads images.
+    public static var aiImages: String { NSLocalizedString("ai.images", bundle: .module, comment: "") }
+
+    /// Cost of an AI model per million tokens of input and of output.
+    public static func aiCost(input: String, output: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("ai.cost", bundle: .module, comment: ""), input, output)
+    }
 }

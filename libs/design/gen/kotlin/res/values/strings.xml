@@ -618,6 +618,8 @@
     <string name="settings_acquisition">Acquisition</string>
     <!-- The settings section of a server's subtitle acquisition -->
     <string name="settings_subtitles">Subtitles</string>
+    <!-- Settings section of a server's AI providers. -->
+    <string name="settings_ai">AI</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2137,4 +2139,91 @@
     <string name="subtitles_movie_age">Wait for movies, in hours</string>
     <!-- How old an episode file must be -->
     <string name="subtitles_episode_age">Wait for episodes, in hours</string>
+    <!-- Description of the AI settings. -->
+    <string name="ai_message">The models the AI gateway plugin can use, through providers signed in with an API key or an account.</string>
+    <!-- Row when no AI gateway plugin runs on the server. -->
+    <string name="ai_no_gateway">No AI gateway plugin</string>
+    <!-- Detail of the row linking to Plugins when no AI gateway plugin runs. -->
+    <string name="ai_no_gateway_detail">Install or enable one in Plugins</string>
+    <!-- Footer explaining why an AI gateway plugin is needed. -->
+    <string name="ai_no_gateway_footer">AI features such as subtitle translation use the providers of an AI gateway plugin.</string>
+    <!-- Title of the list of AI providers. -->
+    <string name="ai_providers">Providers</string>
+    <!-- Footer of the list of AI providers. -->
+    <string name="ai_providers_footer">A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.</string>
+    <!-- Shown when the AI gateway lists no providers. -->
+    <string name="ai_no_providers">The AI gateway plugin has no providers.</string>
+    <!-- Status of an AI provider without a credential. -->
+    <string name="ai_not_signed_in">No credential</string>
+    <!-- Status of an AI provider signed in with OAuth; label is the account kind. -->
+    <string name="ai_signed_in">Signed in with %s</string>
+    <!-- Status of an AI provider with an API key. -->
+    <string name="ai_api_key_stored">API key stored</string>
+    <!-- Status of an AI provider whose credential the plugin found, such as in an environment variable. -->
+    <string name="ai_from_source">From %s</string>
+    <!-- Number of models of an AI provider. -->
+    <plurals name="ai_model_count">
+        <item quantity="one">%d model</item>
+        <item quantity="other">%d models</item>
+    </plurals>
+    <!-- Marks an AI provider configured by the admin rather than built in. -->
+    <string name="ai_custom">Custom</string>
+    <!-- Shown when an AI provider page's provider is not found. -->
+    <string name="ai_provider_gone">This provider no longer exists.</string>
+    <!-- Title and label of an AI provider's API key. -->
+    <string name="ai_api_key">API key</string>
+    <!-- Footer of an AI provider's API key field. -->
+    <string name="ai_api_key_footer">The key is stored on the server and never shown again.</string>
+    <!-- Footer of an AI provider's API key field when a key is stored. -->
+    <string name="ai_api_key_replace_footer">A key is stored; entering another replaces it.</string>
+    <!-- Shown after an API key is saved. -->
+    <string name="ai_api_key_saved">Saved</string>
+    <!-- Removes an AI provider's OAuth credential. -->
+    <string name="ai_sign_out">Sign out</string>
+    <!-- Removes an AI provider's API key. -->
+    <string name="ai_remove_key">Remove API key</string>
+    <!-- Footer of removing an AI provider's credential. -->
+    <string name="ai_sign_out_footer">The provider can no longer be used until it has a credential again.</string>
+    <!-- Title of an AI provider's OAuth sign-in. -->
+    <string name="ai_oauth">Account</string>
+    <!-- Warning under a subscription sign-in of an AI provider. -->
+    <string name="ai_subscription_footer">This signs in with a subscription meant for the provider\'s own apps. Using it from a server may break the provider\'s terms of service and get the account suspended; decide for yourself whether to use it.</string>
+    <!-- Row starting an AI provider's OAuth sign-in; label is the account kind. -->
+    <string name="ai_sign_in_with">Sign in with %s</string>
+    <!-- Detail when an AI provider is already signed in with OAuth. -->
+    <string name="ai_sign_in_again">Signed in; signing in again replaces the account.</string>
+    <!-- Button starting an AI provider's OAuth sign-in. -->
+    <string name="ai_sign_in">Sign In</string>
+    <!-- Shown while an AI provider's sign-in runs. -->
+    <string name="ai_waiting">Waiting for the sign-in to finish…</string>
+    <!-- Shown when an AI provider's sign-in succeeded. -->
+    <string name="ai_login_succeeded">Signed in.</string>
+    <!-- Shown when an AI provider's sign-in failed without a message. -->
+    <string name="ai_login_failed">The sign-in failed.</string>
+    <!-- Shown when an AI provider's sign-in was canceled. -->
+    <string name="ai_login_canceled">The sign-in was canceled.</string>
+    <!-- Button opening the page of an AI provider's sign-in. -->
+    <string name="ai_open_page">Open Sign-In Page</string>
+    <!-- Shown above a device code of an AI provider's sign-in. -->
+    <string name="ai_enter_code">Enter this code on the provider\'s page:</string>
+    <!-- Label of an answer to a sign-in question without a message. -->
+    <string name="ai_answer">Answer</string>
+    <!-- Hint of a manual code question of an AI provider's sign-in. -->
+    <string name="ai_manual_code">If the page redirected to an address that did not load, paste that address or its code here.</string>
+    <!-- Submits the answer to a question of an AI provider's sign-in. -->
+    <string name="ai_submit">Continue</string>
+    <!-- Title of an AI provider's models. -->
+    <string name="ai_models">Models</string>
+    <!-- Footer of the models of an AI provider without a credential. -->
+    <string name="ai_models_footer">The models can be used once the provider has a credential.</string>
+    <!-- Shown when an AI provider has no models. -->
+    <string name="ai_no_models">No models.</string>
+    <!-- Context window of an AI model; tokens is a compact number. -->
+    <string name="ai_context_window">%s context</string>
+    <!-- Marks an AI model that reasons. -->
+    <string name="ai_reasoning">Reasoning</string>
+    <!-- Marks an AI model that reads images. -->
+    <string name="ai_images">Images</string>
+    <!-- Cost of an AI model per million tokens of input and of output. -->
+    <string name="ai_cost">%1$s / %2$s per 1M tokens</string>
 </resources>

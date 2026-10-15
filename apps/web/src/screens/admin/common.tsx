@@ -55,15 +55,17 @@ export function BackLink({ section, label }: { section: string; label: string })
   );
 }
 
-/** A row linking to a page of the section shown, or of Plugins for a plugin. */
+/** A row linking to a page of the section shown, or of another section, or of Plugins for a plugin. */
 export function PageLink({
   search,
+  section: to,
   icon,
   color,
   label,
   detail,
 }: {
   search: SettingsSearch;
+  section?: string;
   icon?: IconName;
   color?: string;
   label: ReactNode;
@@ -74,7 +76,7 @@ export function PageLink({
   return (
     <Link
       to="/settings/$section"
-      params={{ section: search.plugin ? "plugins" : (section ?? "") }}
+      params={{ section: to ?? (search.plugin ? "plugins" : (section ?? "")) }}
       search={{ server: cur.server, ...search }}
       className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:bg-surface-raised"
     >

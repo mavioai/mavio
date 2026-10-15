@@ -662,7 +662,7 @@ flowchart TD
       - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
     - [x] Subtitles (`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`, `libs/client-ts/src/subtitles.ts`): subtitle profiles and the libraries they apply to, the providers and translators, and the settings of searching and saving, synchronization and translation (`SubtitleService`, `ListSubtitleProfileAssignments`)
       - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
-    - [ ] AI: providers, API keys, subscription logins and models (`AiService`)
+    - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiService`)
     - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)
     - [ ] Backups and logs (`BackupService`, `ListLogs`)
     - [ ] API keys among the account's security (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)

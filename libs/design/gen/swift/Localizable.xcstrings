@@ -5491,6 +5491,24 @@
         }
       }
     },
+    "settings.ai": {
+      "comment": "Settings section of a server's AI providers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI"
+          }
+        }
+      }
+    },
     "plugins.installed": {
       "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
@@ -19125,6 +19143,780 @@
           "stringUnit": {
             "state": "translated",
             "value": "剧集等待时间（小时）"
+          }
+        }
+      }
+    },
+    "ai.message": {
+      "comment": "Description of the AI settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The models the AI gateway plugin can use, through providers signed in with an API key or an account."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 网关插件可用的模型，来自用 API 密钥或账号登录的提供商。"
+          }
+        }
+      }
+    },
+    "ai.noGateway": {
+      "comment": "Row when no AI gateway plugin runs on the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No AI gateway plugin"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 AI 网关插件"
+          }
+        }
+      }
+    },
+    "ai.noGatewayDetail": {
+      "comment": "Detail of the row linking to Plugins when no AI gateway plugin runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install or enable one in Plugins"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在插件中安装或启用"
+          }
+        }
+      }
+    },
+    "ai.noGatewayFooter": {
+      "comment": "Footer explaining why an AI gateway plugin is needed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI features such as subtitle translation use the providers of an AI gateway plugin."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕翻译等 AI 功能使用 AI 网关插件提供的提供商。"
+          }
+        }
+      }
+    },
+    "ai.providers": {
+      "comment": "Title of the list of AI providers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供商"
+          }
+        }
+      }
+    },
+    "ai.providersFooter": {
+      "comment": "Footer of the list of AI providers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供商有凭据后即可使用：API 密钥、在此登录的账号，或插件在环境中找到的凭据。"
+          }
+        }
+      }
+    },
+    "ai.noProviders": {
+      "comment": "Shown when the AI gateway lists no providers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI gateway plugin has no providers."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 网关插件没有提供商。"
+          }
+        }
+      }
+    },
+    "ai.notSignedIn": {
+      "comment": "Status of an AI provider without a credential.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No credential"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无凭据"
+          }
+        }
+      }
+    },
+    "ai.signedIn": {
+      "comment": "Status of an AI provider signed in with OAuth; label is the account kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed in with %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 %@ 登录"
+          }
+        }
+      }
+    },
+    "ai.apiKeyStored": {
+      "comment": "Status of an AI provider with an API key.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key stored"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存 API 密钥"
+          }
+        }
+      }
+    },
+    "ai.fromSource": {
+      "comment": "Status of an AI provider whose credential the plugin found, such as in an environment variable.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来自 %@"
+          }
+        }
+      }
+    },
+    "ai.modelCount": {
+      "comment": "Number of models of an AI provider.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld model"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld models"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个模型"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ai.custom": {
+      "comment": "Marks an AI provider configured by the admin rather than built in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义"
+          }
+        }
+      }
+    },
+    "ai.providerGone": {
+      "comment": "Shown when an AI provider page's provider is not found.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This provider no longer exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该提供商已不存在。"
+          }
+        }
+      }
+    },
+    "ai.apiKey": {
+      "comment": "Title and label of an AI provider's API key.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 密钥"
+          }
+        }
+      }
+    },
+    "ai.apiKeyFooter": {
+      "comment": "Footer of an AI provider's API key field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key is stored on the server and never shown again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密钥保存在服务器上，之后不会再显示。"
+          }
+        }
+      }
+    },
+    "ai.apiKeyReplaceFooter": {
+      "comment": "Footer of an AI provider's API key field when a key is stored.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A key is stored; entering another replaces it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存密钥；输入新的密钥会替换它。"
+          }
+        }
+      }
+    },
+    "ai.apiKeySaved": {
+      "comment": "Shown after an API key is saved.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存"
+          }
+        }
+      }
+    },
+    "ai.signOut": {
+      "comment": "Removes an AI provider's OAuth credential.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign out"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录"
+          }
+        }
+      }
+    },
+    "ai.removeKey": {
+      "comment": "Removes an AI provider's API key.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove API key"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除 API 密钥"
+          }
+        }
+      }
+    },
+    "ai.signOutFooter": {
+      "comment": "Footer of removing an AI provider's credential.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The provider can no longer be used until it has a credential again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除后，提供商在重新获得凭据前无法使用。"
+          }
+        }
+      }
+    },
+    "ai.oauth": {
+      "comment": "Title of an AI provider's OAuth sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号"
+          }
+        }
+      }
+    },
+    "ai.subscriptionFooter": {
+      "comment": "Warning under a subscription sign-in of an AI provider.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This signs in with a subscription meant for the provider's own apps. Using it from a server may break the provider's terms of service and get the account suspended; decide for yourself whether to use it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这会使用面向提供商自家应用的订阅登录。从服务器使用可能违反提供商的服务条款并导致账号被停用，请自行决定是否使用。"
+          }
+        }
+      }
+    },
+    "ai.signInWith": {
+      "comment": "Row starting an AI provider's OAuth sign-in; label is the account kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in with %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 %@ 登录"
+          }
+        }
+      }
+    },
+    "ai.signInAgain": {
+      "comment": "Detail when an AI provider is already signed in with OAuth.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed in; signing in again replaces the account."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已登录；重新登录会替换账号。"
+          }
+        }
+      }
+    },
+    "ai.signIn": {
+      "comment": "Button starting an AI provider's OAuth sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign In"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录"
+          }
+        }
+      }
+    },
+    "ai.waiting": {
+      "comment": "Shown while an AI provider's sign-in runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the sign-in to finish…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待登录完成…"
+          }
+        }
+      }
+    },
+    "ai.loginSucceeded": {
+      "comment": "Shown when an AI provider's sign-in succeeded.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed in."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已登录。"
+          }
+        }
+      }
+    },
+    "ai.loginFailed": {
+      "comment": "Shown when an AI provider's sign-in failed without a message.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sign-in failed."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录失败。"
+          }
+        }
+      }
+    },
+    "ai.loginCanceled": {
+      "comment": "Shown when an AI provider's sign-in was canceled.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The sign-in was canceled."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录已取消。"
+          }
+        }
+      }
+    },
+    "ai.openPage": {
+      "comment": "Button opening the page of an AI provider's sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Sign-In Page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开登录页面"
+          }
+        }
+      }
+    },
+    "ai.enterCode": {
+      "comment": "Shown above a device code of an AI provider's sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter this code on the provider's page:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在提供商页面输入此代码："
+          }
+        }
+      }
+    },
+    "ai.answer": {
+      "comment": "Label of an answer to a sign-in question without a message.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回答"
+          }
+        }
+      }
+    },
+    "ai.manualCode": {
+      "comment": "Hint of a manual code question of an AI provider's sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If the page redirected to an address that did not load, paste that address or its code here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果页面跳转到无法打开的地址，请将该地址或其中的代码粘贴到这里。"
+          }
+        }
+      }
+    },
+    "ai.submit": {
+      "comment": "Submits the answer to a question of an AI provider's sign-in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
+          }
+        }
+      }
+    },
+    "ai.models": {
+      "comment": "Title of an AI provider's models.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Models"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型"
+          }
+        }
+      }
+    },
+    "ai.modelsFooter": {
+      "comment": "Footer of the models of an AI provider without a credential.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The models can be used once the provider has a credential."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供商有凭据后才能使用这些模型。"
+          }
+        }
+      }
+    },
+    "ai.noModels": {
+      "comment": "Shown when an AI provider has no models.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No models."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有模型。"
+          }
+        }
+      }
+    },
+    "ai.contextWindow": {
+      "comment": "Context window of an AI model; tokens is a compact number.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ context"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 上下文"
+          }
+        }
+      }
+    },
+    "ai.reasoning": {
+      "comment": "Marks an AI model that reasons.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reasoning"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推理"
+          }
+        }
+      }
+    },
+    "ai.images": {
+      "comment": "Marks an AI model that reads images.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Images"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "图像"
+          }
+        }
+      }
+    },
+    "ai.cost": {
+      "comment": "Cost of an AI model per million tokens of input and of output.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ / %2$@ per 1M tokens"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每百万 token %1$@ / %2$@"
           }
         }
       }

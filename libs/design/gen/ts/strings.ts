@@ -298,6 +298,7 @@ export type MessageKey =
   | 'settings.storage'
   | 'settings.acquisition'
   | 'settings.subtitles'
+  | 'settings.ai'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1052,7 +1053,49 @@ export type MessageKey =
   | 'subtitles.addSourceLanguage'
   | 'subtitles.maxPerRun'
   | 'subtitles.movieAge'
-  | 'subtitles.episodeAge';
+  | 'subtitles.episodeAge'
+  | 'ai.message'
+  | 'ai.noGateway'
+  | 'ai.noGatewayDetail'
+  | 'ai.noGatewayFooter'
+  | 'ai.providers'
+  | 'ai.providersFooter'
+  | 'ai.noProviders'
+  | 'ai.notSignedIn'
+  | 'ai.signedIn'
+  | 'ai.apiKeyStored'
+  | 'ai.fromSource'
+  | 'ai.modelCount'
+  | 'ai.custom'
+  | 'ai.providerGone'
+  | 'ai.apiKey'
+  | 'ai.apiKeyFooter'
+  | 'ai.apiKeyReplaceFooter'
+  | 'ai.apiKeySaved'
+  | 'ai.signOut'
+  | 'ai.removeKey'
+  | 'ai.signOutFooter'
+  | 'ai.oauth'
+  | 'ai.subscriptionFooter'
+  | 'ai.signInWith'
+  | 'ai.signInAgain'
+  | 'ai.signIn'
+  | 'ai.waiting'
+  | 'ai.loginSucceeded'
+  | 'ai.loginFailed'
+  | 'ai.loginCanceled'
+  | 'ai.openPage'
+  | 'ai.enterCode'
+  | 'ai.answer'
+  | 'ai.manualCode'
+  | 'ai.submit'
+  | 'ai.models'
+  | 'ai.modelsFooter'
+  | 'ai.noModels'
+  | 'ai.contextWindow'
+  | 'ai.reasoning'
+  | 'ai.images'
+  | 'ai.cost';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1343,6 +1386,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.storage": "Storage",
     "settings.acquisition": "Acquisition",
     "settings.subtitles": "Subtitles",
+    "settings.ai": "AI",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2097,7 +2141,49 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "subtitles.addSourceLanguage": "Add a source language",
     "subtitles.maxPerRun": "Translations per run",
     "subtitles.movieAge": "Wait for movies, in hours",
-    "subtitles.episodeAge": "Wait for episodes, in hours"
+    "subtitles.episodeAge": "Wait for episodes, in hours",
+    "ai.message": "The models the AI gateway plugin can use, through providers signed in with an API key or an account.",
+    "ai.noGateway": "No AI gateway plugin",
+    "ai.noGatewayDetail": "Install or enable one in Plugins",
+    "ai.noGatewayFooter": "AI features such as subtitle translation use the providers of an AI gateway plugin.",
+    "ai.providers": "Providers",
+    "ai.providersFooter": "A provider can be used once it has a credential: an API key, an account signed in here, or one the plugin found in its environment.",
+    "ai.noProviders": "The AI gateway plugin has no providers.",
+    "ai.notSignedIn": "No credential",
+    "ai.signedIn": "Signed in with {label}",
+    "ai.apiKeyStored": "API key stored",
+    "ai.fromSource": "From {source}",
+    "ai.modelCount": "{count, plural, one {# model} other {# models}}",
+    "ai.custom": "Custom",
+    "ai.providerGone": "This provider no longer exists.",
+    "ai.apiKey": "API key",
+    "ai.apiKeyFooter": "The key is stored on the server and never shown again.",
+    "ai.apiKeyReplaceFooter": "A key is stored; entering another replaces it.",
+    "ai.apiKeySaved": "Saved",
+    "ai.signOut": "Sign out",
+    "ai.removeKey": "Remove API key",
+    "ai.signOutFooter": "The provider can no longer be used until it has a credential again.",
+    "ai.oauth": "Account",
+    "ai.subscriptionFooter": "This signs in with a subscription meant for the provider's own apps. Using it from a server may break the provider's terms of service and get the account suspended; decide for yourself whether to use it.",
+    "ai.signInWith": "Sign in with {label}",
+    "ai.signInAgain": "Signed in; signing in again replaces the account.",
+    "ai.signIn": "Sign In",
+    "ai.waiting": "Waiting for the sign-in to finish…",
+    "ai.loginSucceeded": "Signed in.",
+    "ai.loginFailed": "The sign-in failed.",
+    "ai.loginCanceled": "The sign-in was canceled.",
+    "ai.openPage": "Open Sign-In Page",
+    "ai.enterCode": "Enter this code on the provider's page:",
+    "ai.answer": "Answer",
+    "ai.manualCode": "If the page redirected to an address that did not load, paste that address or its code here.",
+    "ai.submit": "Continue",
+    "ai.models": "Models",
+    "ai.modelsFooter": "The models can be used once the provider has a credential.",
+    "ai.noModels": "No models.",
+    "ai.contextWindow": "{tokens} context",
+    "ai.reasoning": "Reasoning",
+    "ai.images": "Images",
+    "ai.cost": "{input} / {output} per 1M tokens"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -2386,6 +2472,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.storage": "存储",
     "settings.acquisition": "获取",
     "settings.subtitles": "字幕",
+    "settings.ai": "AI",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -3140,6 +3227,48 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "subtitles.addSourceLanguage": "添加源语言",
     "subtitles.maxPerRun": "每次运行的翻译数",
     "subtitles.movieAge": "电影等待时间（小时）",
-    "subtitles.episodeAge": "剧集等待时间（小时）"
+    "subtitles.episodeAge": "剧集等待时间（小时）",
+    "ai.message": "AI 网关插件可用的模型，来自用 API 密钥或账号登录的提供商。",
+    "ai.noGateway": "没有 AI 网关插件",
+    "ai.noGatewayDetail": "请在插件中安装或启用",
+    "ai.noGatewayFooter": "字幕翻译等 AI 功能使用 AI 网关插件提供的提供商。",
+    "ai.providers": "提供商",
+    "ai.providersFooter": "提供商有凭据后即可使用：API 密钥、在此登录的账号，或插件在环境中找到的凭据。",
+    "ai.noProviders": "AI 网关插件没有提供商。",
+    "ai.notSignedIn": "无凭据",
+    "ai.signedIn": "已用 {label} 登录",
+    "ai.apiKeyStored": "已保存 API 密钥",
+    "ai.fromSource": "来自 {source}",
+    "ai.modelCount": "{count, plural, other {# 个模型}}",
+    "ai.custom": "自定义",
+    "ai.providerGone": "该提供商已不存在。",
+    "ai.apiKey": "API 密钥",
+    "ai.apiKeyFooter": "密钥保存在服务器上，之后不会再显示。",
+    "ai.apiKeyReplaceFooter": "已保存密钥；输入新的密钥会替换它。",
+    "ai.apiKeySaved": "已保存",
+    "ai.signOut": "退出登录",
+    "ai.removeKey": "移除 API 密钥",
+    "ai.signOutFooter": "移除后，提供商在重新获得凭据前无法使用。",
+    "ai.oauth": "账号",
+    "ai.subscriptionFooter": "这会使用面向提供商自家应用的订阅登录。从服务器使用可能违反提供商的服务条款并导致账号被停用，请自行决定是否使用。",
+    "ai.signInWith": "用 {label} 登录",
+    "ai.signInAgain": "已登录；重新登录会替换账号。",
+    "ai.signIn": "登录",
+    "ai.waiting": "正在等待登录完成…",
+    "ai.loginSucceeded": "已登录。",
+    "ai.loginFailed": "登录失败。",
+    "ai.loginCanceled": "登录已取消。",
+    "ai.openPage": "打开登录页面",
+    "ai.enterCode": "请在提供商页面输入此代码：",
+    "ai.answer": "回答",
+    "ai.manualCode": "如果页面跳转到无法打开的地址，请将该地址或其中的代码粘贴到这里。",
+    "ai.submit": "继续",
+    "ai.models": "模型",
+    "ai.modelsFooter": "提供商有凭据后才能使用这些模型。",
+    "ai.noModels": "没有模型。",
+    "ai.contextWindow": "{tokens} 上下文",
+    "ai.reasoning": "推理",
+    "ai.images": "图像",
+    "ai.cost": "每百万 token {input} / {output}"
   }
 };
