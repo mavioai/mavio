@@ -32,12 +32,13 @@ export function LibrariesScreen() {
                 key={l.id}
                 to="/s/$serverId/library/$libraryId"
                 params={{ serverId: server.id, libraryId: l.id }}
+                data-card
                 className="group block"
               >
                 <Artwork
                   src={libraryImageUrl(server, l, 480)}
                   alt={l.name}
-                  className="aspect-video rounded-md transition group-hover:ring-2 group-hover:ring-on-background"
+                  className="aspect-video rounded-md transition"
                 />
                 <div className="mt-2 type-headline">{l.name}</div>
               </Link>

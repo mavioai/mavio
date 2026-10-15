@@ -137,6 +137,14 @@ body {
   outline-offset: 2px;
 }
 
+/* A card's artwork (libs/design/components.md, States): an accent border
+   a little apart from it, on hover with a pointer; TV mode borders the
+   card with focus instead. */
+:root:not([data-tv]) [data-card]:hover [data-art] {
+  outline: 2px solid var(--mavio-color-accent);
+  outline-offset: 2px;
+}
+
 /* TV mode (docs/clients.md §6.3): the television's layout and type scale
    of the tokens, and focus shown by scale and color rather than a ring. */
 :root[data-tv] {
@@ -193,10 +201,10 @@ body {
     position: relative;
     z-index: 1;
   }
-  & .scroll-row > a:focus [data-art] {
-    box-shadow:
-      0 0 0 3px var(--mavio-color-on-background),
-      var(--mavio-elevation-level2);
+  & [data-card]:focus [data-art] {
+    outline: 3px solid var(--mavio-color-accent);
+    outline-offset: 3px;
+    box-shadow: var(--mavio-elevation-level3);
   }
   & :is(input, select, textarea):focus {
     box-shadow: 0 0 0 3px #fff;

@@ -136,13 +136,14 @@ export function ItemCard({
     <Link
       to="/s/$serverId/item/$itemId"
       params={{ serverId, itemId: item.id }}
+      data-card
       className={`group block shrink-0 snap-start ${fluid ? "w-full" : widths[s]}`}
     >
       <div className="relative">
         <Artwork
           src={image?.url}
           alt={item.name}
-          className={`${aspects[s]} rounded-md transition group-hover:ring-2 group-hover:ring-on-background group-active:opacity-80`}
+          className={`${aspects[s]} rounded-md transition group-active:opacity-80`}
         />
         {progress !== undefined && (
           <div className="absolute inset-x-2.5 bottom-2.5 h-1 overflow-hidden rounded-full bg-white/35 shadow-level1">

@@ -11,8 +11,8 @@ Every interactive component has these states; television adds focused to every c
 | State | Appearance |
 | :--- | :--- |
 | Default | As specified below |
-| Hovered (pointer) | A card's artwork gains a 2 pt `color.onBackground` border |
-| Focused (television, keyboard) | Scales by `layout.focusScale` with `elevation.level2` and a 3 pt `color.onBackground` border on the artwork, over `duration.fast` with `easing.standard`; a 2 pt `color.focus` ring on keyboard focus elsewhere |
+| Hovered (pointer) | A card's artwork gains a 2 pt `color.accent` border, 2 pt apart from it |
+| Focused (television, keyboard) | Scales by `layout.focusScale` with `elevation.level3` and a 3 pt `color.accent` border on the artwork, 3 pt apart from it, over `duration.fast` with `easing.standard`; a 2 pt `color.focus` ring on keyboard focus elsewhere |
 | Pressed | Content dimmed to 80% opacity |
 | Loading | A `color.surfaceRaised` placeholder of the component's final size, so that nothing moves when content arrives |
 | Disabled | Content in `color.textDisabled` |
