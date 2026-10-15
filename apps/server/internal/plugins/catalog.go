@@ -366,7 +366,7 @@ func (m *Manager) swap(ctx context.Context, id, staged string) (Info, error) {
 	}
 	seen := m.otherIDs(id)
 	e := m.start(ctx, folder, seen)
-	if e.plugin == nil && backup != "" {
+	if e.plugin == nil && e.state != Disabled && backup != "" {
 		// The new version failed: bring the old one back.
 		_ = os.RemoveAll(target)
 		if err := os.Rename(backup, target); err != nil {
@@ -430,7 +430,7 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	if e.plugin != nil {
 		errs = append(errs, e.plugin.Close(ctx))
 	}
-	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id))
+	errs = append(errs, os.RemoveAll(filepath.Join(m.cfg.Dir, e.folder)), m.store.PluginConfigs().Delete(ctx, id), m.forgetDisabled(ctx, id))
 	if m.cfg.DataDir != "" {
 		errs = append(errs, os.RemoveAll(host.DataDir(m.cfg.DataDir, id)))
 	}

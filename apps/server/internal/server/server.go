@@ -221,6 +221,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Dir: cfg.PluginDir, CacheDir: pluginCache, Store: db, Logger: log, HostAPI: hostAPI,
 		DataDir: cfg.PluginDataDir, Fetch: cfg.PluginFetch, Activity: activityLog, DevicesChanged: hub.SharedSessionsChanged,
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
+		Disabled: set.Get().DisabledPlugins,
+		SaveDisabled: func(ctx context.Context, ids []string) error {
+			_, err := set.Change(ctx, func(s *core.ServerSettings) { s.DisabledPlugins = ids })
+			return err
+		},
 	})
 	if err != nil {
 		return err

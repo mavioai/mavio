@@ -20,6 +20,9 @@ type ServerSettings struct {
 	// PasswordResetPlugin is the ID of the plugin that delivers the PINs
 	// resetting forgotten passwords; empty when users cannot reset them.
 	PasswordResetPlugin string
+	// DisabledPlugins are the IDs of the installed plugins administrators
+	// disabled, which the server does not start.
+	DisabledPlugins []string
 	// SessionIdleDays is how long a session lasts unused, 1–3650 days.
 	SessionIdleDays int
 	Acquisition     AcquisitionSettings

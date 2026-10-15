@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -54,11 +55,27 @@ func (m *Manager) Register(ctx context.Context, a Applier) error {
 // them, the appliers that took them get the current settings back and the
 // error is returned.
 func (m *Manager) Update(ctx context.Context, s core.ServerSettings) (core.ServerSettings, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.update(ctx, s)
+}
+
+// Change applies and stores the current settings as change alters them,
+// with no other change in between, as Update does.
+func (m *Manager) Change(ctx context.Context, change func(s *core.ServerSettings)) (core.ServerSettings, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	s := m.current
+	s.DisabledPlugins = slices.Clone(s.DisabledPlugins)
+	change(&s)
+	return m.update(ctx, s)
+}
+
+// update is Update with m.mu held.
+func (m *Manager) update(ctx context.Context, s core.ServerSettings) (core.ServerSettings, error) {
 	if err := s.Validate(); err != nil {
 		return core.ServerSettings{}, err
 	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
 	restore := func(applied []Applier, cause error) error {
 		var errs []error
 		for _, undo := range applied {

@@ -343,6 +343,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 * `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` (8920 by default) with its PEM `CertificatePath` and `KeyPath`, both or neither, without which a server in mavio.dev mode serves its `mavio.site` certificate, `LocalDiscovery`, and `Relay`, whether clients may reach a server in mavio.dev mode through mavio.dev's relay (on by default).
 * `PluginCatalogs`: the http or https URLs of the catalogs plugins are installed from.
 * `PasswordResetPlugin`: the ID of the plugin that delivers the PINs resetting forgotten passwords; empty when users cannot reset them.
+* `DisabledPlugins`: the IDs of the installed plugins administrators disabled, which the server does not start; changed by enabling and disabling plugins rather than with the other settings.
 * `SessionIdleDays`: how many days a session lasts unused, 1–3650, 90 by default.
 * `Acquisition`: how releases are chosen, downloaded and imported (§13.4).
 * `Requests`: the permissions new users get, the default quotas, and where approved requests go (§13.6).

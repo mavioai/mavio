@@ -41,6 +41,9 @@ const (
 	// Failed plugins could not be started or rejected their stored
 	// configuration.
 	Failed
+	// Disabled plugins are installed but not started, as an administrator
+	// chose.
+	Disabled
 )
 
 // Info describes a plugin found in the plugin folder.
@@ -67,6 +70,11 @@ type Config struct {
 	Store   core.Store
 	// Catalogs returns the URLs of the plugin catalogs; nil means none.
 	Catalogs func() []string
+	// Disabled are the IDs of the plugins not to start.
+	Disabled []string
+	// SaveDisabled stores the IDs of the plugins not to start, when they
+	// change; nil stores nothing.
+	SaveDisabled func(ctx context.Context, ids []string) error
 	// Client downloads catalogs and plugin packages; nil uses one with a
 	// five-minute timeout.
 	Client *http.Client
@@ -106,6 +114,8 @@ type Manager struct {
 
 	mu      sync.Mutex
 	plugins []*entry // by ID
+	// disabled holds the IDs of the plugins not to start.
+	disabled map[string]bool
 	// queues hold the events waiting for each event consumer.
 	queues map[string]*eventQueue
 
@@ -136,7 +146,10 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	if cfg.Client == nil {
 		cfg.Client = &http.Client{Timeout: 5 * time.Minute}
 	}
-	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler)), queues: map[string]*eventQueue{}, devices: map[string][]Device{}}
+	m := &Manager{cfg: cfg, store: cfg.Store, log: cmp.Or(cfg.Logger, slog.New(slog.DiscardHandler)), queues: map[string]*eventQueue{}, devices: map[string][]Device{}, disabled: map[string]bool{}}
+	for _, id := range cfg.Disabled {
+		m.disabled[id] = true
+	}
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
@@ -196,7 +209,8 @@ func (m *Manager) sort() {
 }
 
 // start starts the plugin in a folder of the plugin folder and delivers
-// its configuration; seen are the IDs other folders hold.
+// its configuration, unless it is disabled; seen are the IDs other folders
+// hold.
 func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool) *entry {
 	dir := filepath.Join(m.cfg.Dir, folder)
 	e := &entry{folder: folder, revision: m.revisions.Add(1)}
@@ -206,6 +220,10 @@ func (m *Manager) start(ctx context.Context, folder string, seen map[string]bool
 		e.manifest = pluginv1.Manifest_builder{Id: new(folder)}.Build()
 	case seen[e.manifest.GetId()]:
 		e.err = fmt.Errorf("another folder holds plugin %s", e.manifest.GetId())
+	case m.isDisabled(e.manifest.GetId()):
+		e.state = Disabled
+		m.log.InfoContext(ctx, "plugin disabled", "plugin", e.manifest.GetId(), "version", e.manifest.GetVersion())
+		return e
 	default:
 		e.plugin, e.err = host.Open(ctx, dir, m.opts)
 	}

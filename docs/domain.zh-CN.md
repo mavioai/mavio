@@ -343,6 +343,7 @@ erDiagram
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启）。
 * `PluginCatalogs`：安装插件所用插件目录的 http 或 https URL。
 * `PasswordResetPlugin`：投递用于重置遗忘密码的 PIN 的插件 ID；为空时用户无法重置密码。
+* `DisabledPlugins`：管理员停用的已安装插件的 ID，服务端不启动它们；通过启用与停用插件更改，而不随其他设置更改。
 * `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。

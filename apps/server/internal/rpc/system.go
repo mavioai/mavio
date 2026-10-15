@@ -52,6 +52,7 @@ type PluginManager interface {
 	Catalog(ctx context.Context) ([]plugins.CatalogPlugin, error)
 	Install(ctx context.Context, id, version string) (plugins.Info, error)
 	Uninstall(ctx context.Context, id string) error
+	SetEnabled(ctx context.Context, id string, enabled bool) (plugins.Info, error)
 	// AIGateway returns the ready AI gateway plugin.
 	AIGateway() (string, pluginv1connect.AiGatewayServiceClient, bool)
 	Tasks() []plugins.Task
@@ -132,6 +133,7 @@ var pluginStates = map[plugins.State]systemv1.PluginState{
 	plugins.Ready:        systemv1.PluginState_PLUGIN_STATE_READY,
 	plugins.Unconfigured: systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED,
 	plugins.Failed:       systemv1.PluginState_PLUGIN_STATE_FAILED,
+	plugins.Disabled:     systemv1.PluginState_PLUGIN_STATE_DISABLED,
 }
 
 func pluginToProto(p plugins.Info) *systemv1.Plugin {

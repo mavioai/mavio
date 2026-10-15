@@ -62,3 +62,29 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("invalid settings: %v", err)
 	}
 }
+
+func TestChange(t *testing.T) {
+	ctx := t.Context()
+	db, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	m, err := Open(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.Change(ctx, func(s *core.ServerSettings) { s.DisabledPlugins = []string{"org.mavio.smoke"} }); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.Get().DisabledPlugins; len(got) != 1 || got[0] != "org.mavio.smoke" {
+		t.Errorf("current disabled plugins = %q", got)
+	}
+	stored, _ := db.Settings().Get(ctx)
+	if len(stored.DisabledPlugins) != 1 {
+		t.Errorf("stored disabled plugins = %q", stored.DisabledPlugins)
+	}
+	if _, err := m.Change(ctx, func(s *core.ServerSettings) { s.Transcoding.EncoderPreset = "unknown" }); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("invalid change: %v", err)
+	}
+}

@@ -106,6 +106,26 @@ func (s *SystemService) UninstallPlugin(ctx context.Context, req *systemv1.Unins
 	return &systemv1.UninstallPluginResponse{}, nil
 }
 
+// SetPluginEnabled disables a plugin or enables it again.
+func (s *SystemService) SetPluginEnabled(ctx context.Context, req *systemv1.SetPluginEnabledRequest) (*systemv1.SetPluginEnabledResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Plugins == nil {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
+	}
+	info, err := s.Plugins.SetEnabled(ctx, req.GetPluginId(), req.GetEnabled())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	kind, verb := "plugin.disabled", "disabled"
+	if req.GetEnabled() {
+		kind, verb = "plugin.enabled", "enabled"
+	}
+	plugin := s.pluginChanged(ctx, info, kind, verb)
+	return systemv1.SetPluginEnabledResponse_builder{Plugin: plugin}.Build(), nil
+}
+
 var hardwareAccelerations = map[core.HardwareAcceleration]systemv1.HardwareAcceleration{
 	core.HardwareAuto:         systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_AUTO,
 	core.HardwareNone:         systemv1.HardwareAcceleration_HARDWARE_ACCELERATION_NONE,
@@ -189,6 +209,8 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		Metadata:        meta,
 		// The subtitle settings are changed through SubtitleService.
 		Subtitles: current.Subtitles,
+		// The disabled plugins are changed through SetPluginEnabled.
+		DisabledPlugins: current.DisabledPlugins,
 	}, nil
 }
 
