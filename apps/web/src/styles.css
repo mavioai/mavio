@@ -164,8 +164,11 @@ body {
   --mavio-type-footnote-line-height: 26px;
   --mavio-type-caption-size: 18px;
   --mavio-type-caption-line-height: 24px;
-  /* Focus moved by the arrow keys stops below the tabs, with its row's title. */
+  /* Focus moved by the arrow keys stops below the tabs, with its row's
+     title, and above the screen's foot, with room for the card to grow,
+     so the last row scrolls to the end of the page. */
   scroll-padding-top: 200px;
+  scroll-padding-bottom: 120px;
 
   & :focus,
   & :focus-visible {
