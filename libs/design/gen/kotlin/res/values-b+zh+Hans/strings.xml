@@ -178,10 +178,11 @@
     <string name="auth_set_pin">设置 PIN</string>
     <string name="auth_remove_pin">移除 PIN</string>
     <string name="auth_pin_on">已开启</string>
-    <string name="auth_choose_mode">如何登录 %s？</string>
-    <string name="auth_mode_mavio_dev">使用 Mavio 账户</string>
-    <string name="auth_mode_mavio_dev_message">大家用自己的 Mavio 账户登录，你在 mavio.dev 与亲友共享媒体库，离家时也能访问服务器。</string>
-    <string name="auth_mode_standalone">独立</string>
+    <string name="auth_welcome">欢迎使用 Mavio</string>
+    <string name="auth_set_up_new_server">设置新服务器 %s</string>
+    <string name="auth_mode_mavio_dev">使用 Mavio 账户登录</string>
+    <string name="auth_mode_mavio_dev_message">登录您的 Mavio 账户，可以与亲友共享媒体库，离家时也能访问。</string>
+    <string name="auth_mode_standalone">独立服务器</string>
     <string name="auth_mode_standalone_message">服务器自己保存用户，从不联系 mavio.dev。</string>
     <string name="auth_claim">认领 %s</string>
     <string name="auth_claim_message">在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。</string>
@@ -192,7 +193,6 @@
     <string name="auth_try_again">重试</string>
     <string name="auth_mavio_account">Mavio 账户</string>
     <string name="auth_standalone_user">%s 的用户</string>
-    <string name="auth_continue">继续</string>
     <string name="auth_sign_in_to">登录 %s</string>
     <string name="auth_standalone_server">独立服务器</string>
     <string name="auth_or">或</string>

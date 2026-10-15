@@ -348,14 +348,16 @@
     <string name="auth_remove_pin">Remove PIN</string>
     <!-- State of a user who has a PIN. -->
     <string name="auth_pin_on">On</string>
-    <!-- Title of the setup screen choosing a new server's mode; server is its name. -->
-    <string name="auth_choose_mode">How Do People Sign In to %s\?</string>
+    <!-- Title of the setup screen choosing a new server's mode. -->
+    <string name="auth_welcome">Welcome to Mavio</string>
+    <!-- Line under the title of the setup screen choosing a new server's mode; server is its name. -->
+    <string name="auth_set_up_new_server">Set up the new server %s</string>
     <!-- Chooses mavio.dev mode at setup. -->
-    <string name="auth_mode_mavio_dev">With Mavio Accounts</string>
+    <string name="auth_mode_mavio_dev">Sign In with a Mavio Account</string>
     <!-- Explanation of mavio.dev mode at setup. -->
-    <string name="auth_mode_mavio_dev_message">People sign in with their Mavio accounts, you share libraries with friends and family at mavio.dev, and the server is reachable away from home.</string>
+    <string name="auth_mode_mavio_dev_message">Sign in to your Mavio account to share libraries with friends and family and to reach them away from home.</string>
     <!-- Chooses standalone mode at setup. -->
-    <string name="auth_mode_standalone">Standalone</string>
+    <string name="auth_mode_standalone">Standalone Server</string>
     <!-- Explanation of standalone mode at setup. -->
     <string name="auth_mode_standalone_message">The server keeps its own users and never contacts mavio.dev.</string>
     <!-- Title of the screen claiming a server for a Mavio account; server is its name. -->
@@ -376,8 +378,6 @@
     <string name="auth_mavio_account">Mavio account</string>
     <!-- Kind of a sign-in with a user of one standalone server; server is its name. -->
     <string name="auth_standalone_user">User of %s</string>
-    <!-- Button that signs in with the account shown. -->
-    <string name="auth_continue">Continue</string>
     <!-- Title of signing in to a server; server is its name. -->
     <string name="auth_sign_in_to">Sign In to %s</string>
     <!-- Describes a server that keeps its own users. -->

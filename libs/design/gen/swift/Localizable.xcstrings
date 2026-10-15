@@ -3079,20 +3079,38 @@
         }
       }
     },
-    "auth.chooseMode": {
-      "comment": "Title of the setup screen choosing a new server's mode; server is its name.",
+    "auth.welcome": {
+      "comment": "Title of the setup screen choosing a new server's mode.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "How Do People Sign In to %@?"
+            "value": "Welcome to Mavio"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "如何登录 %@？"
+            "value": "欢迎使用 Mavio"
+          }
+        }
+      }
+    },
+    "auth.setUpNewServer": {
+      "comment": "Line under the title of the setup screen choosing a new server's mode; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up the new server %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置新服务器 %@"
           }
         }
       }
@@ -3104,13 +3122,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "With Mavio Accounts"
+            "value": "Sign In with a Mavio Account"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用 Mavio 账户"
+            "value": "使用 Mavio 账户登录"
           }
         }
       }
@@ -3122,13 +3140,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "People sign in with their Mavio accounts, you share libraries with friends and family at mavio.dev, and the server is reachable away from home."
+            "value": "Sign in to your Mavio account to share libraries with friends and family and to reach them away from home."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "大家用自己的 Mavio 账户登录，你在 mavio.dev 与亲友共享媒体库，离家时也能访问服务器。"
+            "value": "登录您的 Mavio 账户，可以与亲友共享媒体库，离家时也能访问。"
           }
         }
       }
@@ -3140,13 +3158,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Standalone"
+            "value": "Standalone Server"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "独立"
+            "value": "独立服务器"
           }
         }
       }
@@ -3327,24 +3345,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 的用户"
-          }
-        }
-      }
-    },
-    "auth.continue": {
-      "comment": "Button that signs in with the account shown.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continue"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "继续"
           }
         }
       }

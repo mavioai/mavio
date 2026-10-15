@@ -564,9 +564,12 @@ public enum MavioStrings {
     /// State of a user who has a PIN.
     public static var authPinOn: String { NSLocalizedString("auth.pinOn", bundle: .module, comment: "") }
 
-    /// Title of the setup screen choosing a new server's mode; server is its name.
-    public static func authChooseMode(server: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("auth.chooseMode", bundle: .module, comment: ""), server)
+    /// Title of the setup screen choosing a new server's mode.
+    public static var authWelcome: String { NSLocalizedString("auth.welcome", bundle: .module, comment: "") }
+
+    /// Line under the title of the setup screen choosing a new server's mode; server is its name.
+    public static func authSetUpNewServer(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.setUpNewServer", bundle: .module, comment: ""), server)
     }
 
     /// Chooses mavio.dev mode at setup.
@@ -611,9 +614,6 @@ public enum MavioStrings {
     public static func authStandaloneUser(server: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("auth.standaloneUser", bundle: .module, comment: ""), server)
     }
-
-    /// Button that signs in with the account shown.
-    public static var authContinue: String { NSLocalizedString("auth.continue", bundle: .module, comment: "") }
 
     /// Title of signing in to a server; server is its name.
     public static func authSignInTo(server: String) -> String {

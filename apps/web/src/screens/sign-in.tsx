@@ -914,42 +914,29 @@ function ChooseMode({
   onChoose: (mode: "standalone" | "mavioDev") => void;
 }) {
   const look = useLook();
-  const [mode, setMode] = useState<"standalone" | "mavioDev">("mavioDev");
-  const tv = look.layout === "tv";
+  const phone = look.layout === "phone";
   const option = (m: "standalone" | "mavioDev", title: string, message: string) => (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={mode === m}
-      onClick={() => setMode(m)}
-      className={`flex items-start gap-3.5 text-left ${tv ? "rounded-[22px] bg-fill p-7 transition-transform focus:scale-[1.04]" : "rounded-[14px] bg-(--signin-group) p-4"} ${mode === m ? "ring-2 ring-accent" : ""}`}
-    >
-      <span
-        className={`mt-0.5 flex shrink-0 items-center justify-center rounded-full border-2 ${tv ? "h-8 w-8" : "h-[22px] w-[22px]"} ${mode === m ? "border-accent" : "border-text-tertiary"}`}
-      >
-        {mode === m && <span className={`rounded-full bg-accent ${tv ? "h-4 w-4" : "h-3 w-3"}`} />}
-      </span>
-      <span className="flex flex-col gap-1">
-        <span className={look.rowTitle}>{title}</span>
-        <span className={tv ? "text-[22px] leading-7 opacity-70" : "text-[14px] leading-5 text-text-secondary"}>{message}</span>
-      </span>
-    </button>
+    <div className="flex w-full flex-col gap-2">
+      <Action variant={m === "mavioDev" ? "primary" : "secondary"} disabled={busy} onClick={() => onChoose(m)}>
+        {title}
+      </Action>
+      <p className={look.subtitle}>{message}</p>
+    </div>
   );
   return (
-    <Steps
-      eyebrow={t("auth.newServerSetup")}
-      title={t("auth.chooseMode", { server: info.name })}
-      subtitle={info.url}
-    >
-      <div role="radiogroup" className="flex flex-col gap-3">
+    <div className={`flex flex-col ${phone ? "items-start gap-3" : "items-center gap-3 text-center"}`}>
+      <Wordmark height={phone ? 40 : 36} className={phone ? "mb-1" : "mb-3"} />
+      <h1 className={look.title}>{t("auth.welcome")}</h1>
+      <div className="mb-4 flex w-full flex-col gap-0.5">
+        <p className={`[overflow-wrap:anywhere] ${look.body}`}>{t("auth.setUpNewServer", { server: info.name })}</p>
+        <p className={`truncate ${look.subtitle}`}>{info.url}</p>
+      </div>
+      {error && <p className="text-[15px] text-danger">{error}</p>}
+      <div className={`flex w-full flex-col ${look.stack}`}>
         {option("mavioDev", t("auth.modeMavioDev"), t("auth.modeMavioDevMessage"))}
         {option("standalone", t("auth.modeStandalone"), t("auth.modeStandaloneMessage"))}
       </div>
-      {error && <p className="text-[15px] text-danger">{error}</p>}
-      <Action disabled={busy} onClick={() => onChoose(mode)}>
-        {t("auth.continue")}
-      </Action>
-    </Steps>
+    </div>
   );
 }
 
