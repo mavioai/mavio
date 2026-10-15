@@ -419,7 +419,7 @@ var catalog = map[string]map[string]Message{
 		"auth.claim":                        {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "认领 "}, {Arg: "server"}}}},
 		"auth.claimMessage":                 {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。"}}}},
 		"auth.claimServer":                  {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "前往 mavio.dev 继续"}}}},
-		"auth.signInWithMavio":              {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "用 Mavio 账户登录"}}}},
+		"auth.signInWithMavio":              {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "使用 Mavio 账户登录"}}}},
 		"auth.signingIn":                    {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "正在登录…"}}}},
 		"auth.tryAgain":                     {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "重试"}}}},
 		"auth.mavioAccount":                 {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "Mavio 账户"}}}},

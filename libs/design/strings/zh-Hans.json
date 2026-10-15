@@ -172,7 +172,7 @@
   "auth.claim": "认领 {server}",
   "auth.claimMessage": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。",
   "auth.claimServer": "前往 mavio.dev 继续",
-  "auth.signInWithMavio": "用 Mavio 账户登录",
+  "auth.signInWithMavio": "使用 Mavio 账户登录",
   "auth.signingIn": "正在登录…",
   "auth.tryAgain": "重试",
   "auth.mavioAccount": "Mavio 账户",
