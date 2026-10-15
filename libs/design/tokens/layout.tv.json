@@ -59,7 +59,7 @@
     },
     "focusScale": {
       "$type": "number",
-      "$value": 1.08,
+      "$value": 1.05,
       "$description": "Scale of a card that has focus."
     }
   }

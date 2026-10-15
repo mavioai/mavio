@@ -334,7 +334,7 @@ export const layout = {
     "touchTarget": 0,
     "sidebar": 0,
     "rail": 0,
-    "focusScale": 1.08
+    "focusScale": 1.05
   }
 } as const;
 

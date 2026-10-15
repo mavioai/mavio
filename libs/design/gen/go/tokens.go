@@ -251,6 +251,6 @@ var (
 		TouchTarget: 0,
 		Sidebar:     0,
 		Rail:        0,
-		FocusScale:  1.08,
+		FocusScale:  1.05,
 	}
 )

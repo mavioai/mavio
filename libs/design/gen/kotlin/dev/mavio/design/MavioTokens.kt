@@ -256,5 +256,5 @@ val TvLayout = MavioLayout(
     touchTarget = 0.dp,
     sidebar = 0.dp,
     rail = 0.dp,
-    focusScale = 1.08f,
+    focusScale = 1.05f,
 )
