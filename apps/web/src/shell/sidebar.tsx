@@ -2,8 +2,8 @@
 // search, Home, the libraries of the shown sign-in and the user at its
 // foot. Collapsed, it is a rail of icons.
 import { useLibraries } from "@mavio/client-ts";
-import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
@@ -38,14 +38,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
         {rail ? (
           <NavItem rail to="/search" icon="search" label={t("nav.search")} />
         ) : (
-          <Link
-            to="/search"
-            className="mb-2 flex h-9 items-center gap-2 rounded-[10px] bg-fill px-2.5 type-callout text-text-tertiary hover:text-text-secondary"
-          >
-            <Icon name="search" size={16} />
-            <span className="flex-1">{t("nav.search")}</span>
-            {shortcuts && <kbd className="font-sans type-caption">{shortcutLabel("search")}</kbd>}
-          </Link>
+          <SearchBox shortcut={shortcuts ? shortcutLabel("search") : undefined} />
         )}
         <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact />
         {rail ? (
@@ -78,6 +71,38 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
         <UserButton compact={rail} />
       </div>
     </nav>
+  );
+}
+
+/** The sidebar's search field, whose search runs on the Search page when it is confirmed. */
+function SearchBox({ shortcut }: { shortcut?: string }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const q = location.pathname === "/search" ? ((location.search as { q?: string }).q ?? "") : "";
+  const [text, setText] = useState(q);
+  useEffect(() => setText(q), [q]);
+  return (
+    <form
+      role="search"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (text.trim()) void navigate({ to: "/search", search: { q: text.trim() } });
+      }}
+      className="mb-2 flex h-9 items-center gap-2 rounded-[10px] bg-fill px-2.5 type-callout text-text-tertiary"
+    >
+      <Icon name="search" size={16} />
+      <input
+        data-search-box
+        type="search"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={t("nav.search")}
+        aria-label={t("nav.search")}
+        enterKeyHint="search"
+        className="min-w-0 flex-1 bg-transparent text-on-background outline-none placeholder:text-text-tertiary"
+      />
+      {shortcut && !text && <kbd className="font-sans type-caption">{shortcut}</kbd>}
+    </form>
   );
 }
 

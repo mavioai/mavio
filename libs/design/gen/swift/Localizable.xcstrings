@@ -3475,6 +3475,60 @@
         }
       }
     },
+    "search.space": {
+      "comment": "Key of the television's on-screen keyboard that types a space.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Space"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "空格"
+          }
+        }
+      }
+    },
+    "search.backspace": {
+      "comment": "Key of the television's on-screen keyboard that deletes the last character.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "search.clear": {
+      "comment": "Key of the television's on-screen keyboard that clears the search.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空"
+          }
+        }
+      }
+    },
     "menu.manageAccount": {
       "comment": "User menu item opening the Mavio account's page at mavio.dev.",
       "extractionState": "manual",

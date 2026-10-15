@@ -392,6 +392,12 @@
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->
     <string name="search_no_results">No results</string>
+    <!-- Key of the television's on-screen keyboard that types a space. -->
+    <string name="search_space">Space</string>
+    <!-- Key of the television's on-screen keyboard that deletes the last character. -->
+    <string name="search_backspace">Delete</string>
+    <!-- Key of the television's on-screen keyboard that clears the search. -->
+    <string name="search_clear">Clear</string>
     <!-- User menu item opening the Mavio account's page at mavio.dev. -->
     <string name="menu_manage_account">Manage Account at mavio.dev</string>
     <!-- User menu item opening the servers' settings. -->

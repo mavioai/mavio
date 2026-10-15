@@ -200,6 +200,9 @@
     <string name="auth_new_server_setup">新服务器</string>
     <string name="search_placeholder">搜索电影、剧集等</string>
     <string name="search_no_results">没有结果</string>
+    <string name="search_space">空格</string>
+    <string name="search_backspace">删除</string>
+    <string name="search_clear">清空</string>
     <string name="menu_manage_account">在 mavio.dev 管理账户</string>
     <string name="menu_manage_servers">管理服务器</string>
     <plurals name="menu_server_count">

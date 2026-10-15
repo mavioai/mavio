@@ -52,7 +52,12 @@ function useShortcuts(tv: boolean) {
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       const s = shortcutOf(e);
-      if (s === "search") void navigate({ to: "/search" });
+      if (s === "search") {
+        // The sidebar's field where it shows, else the Search page.
+        const box = document.querySelector<HTMLInputElement>("[data-search-box]");
+        if (box) box.focus();
+        else void navigate({ to: "/search" });
+      }
       else if (s === "settings") void navigate({ to: "/settings" });
       else if (s === "tvMode") setPrefs({ tv: !tv });
       else if (s === "fullScreen") toggleFullScreen();

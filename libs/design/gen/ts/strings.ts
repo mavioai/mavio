@@ -188,6 +188,9 @@ export type MessageKey =
   | 'auth.newServerSetup'
   | 'search.placeholder'
   | 'search.noResults'
+  | 'search.space'
+  | 'search.backspace'
+  | 'search.clear'
   | 'menu.manageAccount'
   | 'menu.manageServers'
   | 'menu.serverCount'
@@ -416,6 +419,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.newServerSetup": "New Server",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results",
+    "search.space": "Space",
+    "search.backspace": "Delete",
+    "search.clear": "Clear",
     "menu.manageAccount": "Manage Account at mavio.dev",
     "menu.manageServers": "Manage Servers",
     "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
@@ -642,6 +648,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.newServerSetup": "新服务器",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果",
+    "search.space": "空格",
+    "search.backspace": "删除",
+    "search.clear": "清空",
     "menu.manageAccount": "在 mavio.dev 管理账户",
     "menu.manageServers": "管理服务器",
     "menu.serverCount": "{count, plural, other {# 台服务器}}",

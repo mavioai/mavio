@@ -636,6 +636,15 @@ public enum MavioStrings {
     /// Shown when a search finds nothing on any server.
     public static var searchNoResults: String { NSLocalizedString("search.noResults", bundle: .module, comment: "") }
 
+    /// Key of the television's on-screen keyboard that types a space.
+    public static var searchSpace: String { NSLocalizedString("search.space", bundle: .module, comment: "") }
+
+    /// Key of the television's on-screen keyboard that deletes the last character.
+    public static var searchBackspace: String { NSLocalizedString("search.backspace", bundle: .module, comment: "") }
+
+    /// Key of the television's on-screen keyboard that clears the search.
+    public static var searchClear: String { NSLocalizedString("search.clear", bundle: .module, comment: "") }
+
     /// User menu item opening the Mavio account's page at mavio.dev.
     public static var menuManageAccount: String { NSLocalizedString("menu.manageAccount", bundle: .module, comment: "") }
 

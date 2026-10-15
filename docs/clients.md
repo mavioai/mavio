@@ -171,7 +171,7 @@ A client is signed in at once to every server of its sign-in ([Accounts §7](acc
   * **the same title on several servers**, matched by TMDB, TVDB or IMDb IDs, appears once: from the server where the user played it last, else the first in the user's order; its details offer the other servers' versions;
   * **the other hubs** follow server by server in the user's order, each server's in the order of its pinned libraries;
   * **Trending** from discovery appears once, from the first server that discovers, its titles marked available when any server has them; requests go to that server.
-* **Search** asks every server at once and lists the results by server.
+* **Search** asks every server at once and lists the results by server. A search runs when it is confirmed: the field of the sidebar, or of the Search page where no sidebar shows it, searches when Return is pressed, and typing alone does not leave the page. On the television, the left of Search holds the query, keys for a space, deleting a character and clearing, and a keyboard of letters and digits, which a keyboard can type into as well; back within it deletes a character, and goes back only once there is none. The larger right shows Home's rows while nothing is typed, and the results, in a grid by server, as the query is typed.
 * **Progressive and offline**: each server's hubs are drawn as they arrive, in their fixed places, so that a slow server holds back no other; an unreachable server's hubs come from the offline store, marked offline.
 * **Played state** stays on each server: the same title played on one server is not marked played on another.
 

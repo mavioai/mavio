@@ -633,6 +633,7 @@ flowchart TD
   - [ ] The query cache kept offline
   - [ ] Storybook of the components
   - [ ] Snapshot tests of the screens beyond sign-in and Home
+  - [ ] Popular searches: the queries each server records and ranks, which the television's search shows while nothing is typed, where it shows Home's rows now
 - [x] iPhone and iPad app (`apps/ios`, `libs/apple`): sign-in (password, first user, Quick Connect, servers found nearby), several servers with tokens in the Keychain, the merged Home, libraries with their Recommended and Library tabs, sorting and filters, hubs, search across servers, details with versions and copies on other servers, the player (AVPlayer and AetherEngine chosen by the capabilities the app declares, HLS from the server, audio and subtitle tracks, playback speed, AirPlay, Picture in Picture on AVPlayer), downloads with a background `URLSession` and offline playback with replayed progress, authorizing devices; a tab bar on the iPhone and a sidebar on the iPad
   - [ ] Discovery and request screens, with P20
   - [ ] Picture in Picture while AetherEngine plays
