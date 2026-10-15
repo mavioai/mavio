@@ -995,6 +995,12 @@ public enum MavioStrings {
     /// Settings section of a server's AI providers.
     public static var settingsAi: String { NSLocalizedString("settings.ai", bundle: .module, comment: "") }
 
+    /// Settings section of a server's backups.
+    public static var settingsBackups: String { NSLocalizedString("settings.backups", bundle: .module, comment: "") }
+
+    /// Settings section of a server's log.
+    public static var settingsLogs: String { NSLocalizedString("settings.logs", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -3483,4 +3489,91 @@ public enum MavioStrings {
     public static func aiCost(input: String, output: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("ai.cost", bundle: .module, comment: ""), input, output)
     }
+
+    /// Description of the backups settings.
+    public static var backupsMessage: String { NSLocalizedString("backups.message", bundle: .module, comment: "") }
+
+    /// Row making a backup of the server.
+    public static var backupsCreate: String { NSLocalizedString("backups.create", bundle: .module, comment: "") }
+
+    /// Detail of making a backup.
+    public static var backupsCreateDetail: String { NSLocalizedString("backups.createDetail", bundle: .module, comment: "") }
+
+    /// Detail while a backup is made.
+    public static var backupsCreating: String { NSLocalizedString("backups.creating", bundle: .module, comment: "") }
+
+    /// Button making a backup.
+    public static var backupsCreateAction: String { NSLocalizedString("backups.createAction", bundle: .module, comment: "") }
+
+    /// Footer explaining how a backup is restored.
+    public static var backupsRestoreFooter: String { NSLocalizedString("backups.restoreFooter", bundle: .module, comment: "") }
+
+    /// Title of the list of backups.
+    public static var backupsList: String { NSLocalizedString("backups.list", bundle: .module, comment: "") }
+
+    /// Shown when the server has no backups.
+    public static var backupsNone: String { NSLocalizedString("backups.none", bundle: .module, comment: "") }
+
+    /// Version of the server that made a backup.
+    public static func backupsVersion(version: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("backups.version", bundle: .module, comment: ""), version)
+    }
+
+    /// Downloads a backup.
+    public static var backupsDownload: String { NSLocalizedString("backups.download", bundle: .module, comment: "") }
+
+    /// Deletes a backup.
+    public static var backupsRemove: String { NSLocalizedString("backups.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a backup; name is its file name.
+    public static func backupsRemoveTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("backups.removeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains deleting a backup.
+    public static var backupsRemoveMessage: String { NSLocalizedString("backups.removeMessage", bundle: .module, comment: "") }
+
+    /// Description of the logs settings.
+    public static var logsMessage: String { NSLocalizedString("logs.message", bundle: .module, comment: "") }
+
+    /// Label of the minimum level of log records shown.
+    public static var logsLevel: String { NSLocalizedString("logs.level", bundle: .module, comment: "") }
+
+    /// Log level debug.
+    public static var logsDebug: String { NSLocalizedString("logs.debug", bundle: .module, comment: "") }
+
+    /// Log level info.
+    public static var logsInfo: String { NSLocalizedString("logs.info", bundle: .module, comment: "") }
+
+    /// Log level warning.
+    public static var logsWarn: String { NSLocalizedString("logs.warn", bundle: .module, comment: "") }
+
+    /// Log level error.
+    public static var logsError: String { NSLocalizedString("logs.error", bundle: .module, comment: "") }
+
+    /// Label of how far back log records are shown.
+    public static var logsPeriod: String { NSLocalizedString("logs.period", bundle: .module, comment: "") }
+
+    /// Log records of the last hour.
+    public static var logsLastHour: String { NSLocalizedString("logs.lastHour", bundle: .module, comment: "") }
+
+    /// Log records of the last day.
+    public static var logsLastDay: String { NSLocalizedString("logs.lastDay", bundle: .module, comment: "") }
+
+    /// All the log records the server keeps.
+    public static var logsAll: String { NSLocalizedString("logs.all", bundle: .module, comment: "") }
+
+    /// Placeholder of the field filtering log records by words.
+    public static var logsFilter: String { NSLocalizedString("logs.filter", bundle: .module, comment: "") }
+
+    /// Fetches the log records again.
+    public static var logsRefresh: String { NSLocalizedString("logs.refresh", bundle: .module, comment: "") }
+
+    /// Number of log records shown.
+    public static func logsCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("logs.count", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when no log records match.
+    public static var logsNone: String { NSLocalizedString("logs.none", bundle: .module, comment: "") }
 }

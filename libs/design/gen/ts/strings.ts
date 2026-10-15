@@ -299,6 +299,8 @@ export type MessageKey =
   | 'settings.acquisition'
   | 'settings.subtitles'
   | 'settings.ai'
+  | 'settings.backups'
+  | 'settings.logs'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1095,7 +1097,34 @@ export type MessageKey =
   | 'ai.contextWindow'
   | 'ai.reasoning'
   | 'ai.images'
-  | 'ai.cost';
+  | 'ai.cost'
+  | 'backups.message'
+  | 'backups.create'
+  | 'backups.createDetail'
+  | 'backups.creating'
+  | 'backups.createAction'
+  | 'backups.restoreFooter'
+  | 'backups.list'
+  | 'backups.none'
+  | 'backups.version'
+  | 'backups.download'
+  | 'backups.remove'
+  | 'backups.removeTitle'
+  | 'backups.removeMessage'
+  | 'logs.message'
+  | 'logs.level'
+  | 'logs.debug'
+  | 'logs.info'
+  | 'logs.warn'
+  | 'logs.error'
+  | 'logs.period'
+  | 'logs.lastHour'
+  | 'logs.lastDay'
+  | 'logs.all'
+  | 'logs.filter'
+  | 'logs.refresh'
+  | 'logs.count'
+  | 'logs.none';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1387,6 +1416,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.acquisition": "Acquisition",
     "settings.subtitles": "Subtitles",
     "settings.ai": "AI",
+    "settings.backups": "Backups",
+    "settings.logs": "Logs",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2183,7 +2214,34 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.contextWindow": "{tokens} context",
     "ai.reasoning": "Reasoning",
     "ai.images": "Images",
-    "ai.cost": "{input} / {output} per 1M tokens"
+    "ai.cost": "{input} / {output} per 1M tokens",
+    "backups.message": "A backup holds the server's database, the artwork chosen for items and its plugins.",
+    "backups.create": "Back Up Now",
+    "backups.createDetail": "Backups are kept on the server until deleted.",
+    "backups.creating": "Backing up…",
+    "backups.createAction": "Back Up",
+    "backups.restoreFooter": "To restore a backup, download it and start a new server with -restore and the backup's file.",
+    "backups.list": "Backups",
+    "backups.none": "No backups.",
+    "backups.version": "Mavio {version}",
+    "backups.download": "Download",
+    "backups.remove": "Delete",
+    "backups.removeTitle": "Delete {name}?",
+    "backups.removeMessage": "The backup's file is deleted from the server.",
+    "logs.message": "The server's recent log records, newest first.",
+    "logs.level": "Level",
+    "logs.debug": "Debug",
+    "logs.info": "Info",
+    "logs.warn": "Warning",
+    "logs.error": "Error",
+    "logs.period": "Period",
+    "logs.lastHour": "Last hour",
+    "logs.lastDay": "Last 24 hours",
+    "logs.all": "All kept",
+    "logs.filter": "Filter",
+    "logs.refresh": "Refresh",
+    "logs.count": "{count, plural, one {# record} other {# records}}",
+    "logs.none": "No log records."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -2473,6 +2531,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.acquisition": "获取",
     "settings.subtitles": "字幕",
     "settings.ai": "AI",
+    "settings.backups": "备份",
+    "settings.logs": "日志",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -3269,6 +3329,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "ai.contextWindow": "{tokens} 上下文",
     "ai.reasoning": "推理",
     "ai.images": "图像",
-    "ai.cost": "每百万 token {input} / {output}"
+    "ai.cost": "每百万 token {input} / {output}",
+    "backups.message": "备份包含服务器的数据库、为条目选择的图片及其插件。",
+    "backups.create": "立即备份",
+    "backups.createDetail": "备份保存在服务器上，直到被删除。",
+    "backups.creating": "正在备份…",
+    "backups.createAction": "备份",
+    "backups.restoreFooter": "要恢复备份，请下载它，然后使用 -restore 与该备份文件启动新的服务器。",
+    "backups.list": "备份",
+    "backups.none": "没有备份。",
+    "backups.version": "Mavio {version}",
+    "backups.download": "下载",
+    "backups.remove": "删除",
+    "backups.removeTitle": "删除 {name}？",
+    "backups.removeMessage": "备份文件会从服务器上删除。",
+    "logs.message": "服务器最近的日志记录，最新的在前。",
+    "logs.level": "级别",
+    "logs.debug": "调试",
+    "logs.info": "信息",
+    "logs.warn": "警告",
+    "logs.error": "错误",
+    "logs.period": "时间段",
+    "logs.lastHour": "最近一小时",
+    "logs.lastDay": "最近 24 小时",
+    "logs.all": "全部保留的记录",
+    "logs.filter": "筛选",
+    "logs.refresh": "刷新",
+    "logs.count": "{count, plural, other {# 条记录}}",
+    "logs.none": "没有日志记录。"
   }
 };

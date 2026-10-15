@@ -664,7 +664,7 @@ flowchart TD
       - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
     - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiService`)
     - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)
-    - [ ] Backups and logs (`BackupService`, `ListLogs`)
+    - [x] Backups and logs (`apps/web/src/screens/admin/backups.tsx`, `libs/client-ts/src/backups.ts`): making, downloading and deleting backups, and the recent log records by level, period and words (`BackupService`, `ListLogs`)
     - [ ] API keys among the account's security (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
   - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open

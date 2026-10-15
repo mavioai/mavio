@@ -139,3 +139,4 @@ export {
   useSubtitleTranslators,
 } from "./subtitles.ts";
 export { isNoAiGateway, useAiActions, useAiLogin, useAiModels, useAiProviders } from "./ai.ts";
+export { useBackupDownload, useBackups, useLogs } from "./backups.ts";

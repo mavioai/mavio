@@ -620,6 +620,10 @@
     <string name="settings_subtitles">Subtitles</string>
     <!-- Settings section of a server's AI providers. -->
     <string name="settings_ai">AI</string>
+    <!-- Settings section of a server's backups. -->
+    <string name="settings_backups">Backups</string>
+    <!-- Settings section of a server's log. -->
+    <string name="settings_logs">Logs</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2226,4 +2230,61 @@
     <string name="ai_images">Images</string>
     <!-- Cost of an AI model per million tokens of input and of output. -->
     <string name="ai_cost">%1$s / %2$s per 1M tokens</string>
+    <!-- Description of the backups settings. -->
+    <string name="backups_message">A backup holds the server\'s database, the artwork chosen for items and its plugins.</string>
+    <!-- Row making a backup of the server. -->
+    <string name="backups_create">Back Up Now</string>
+    <!-- Detail of making a backup. -->
+    <string name="backups_create_detail">Backups are kept on the server until deleted.</string>
+    <!-- Detail while a backup is made. -->
+    <string name="backups_creating">Backing up…</string>
+    <!-- Button making a backup. -->
+    <string name="backups_create_action">Back Up</string>
+    <!-- Footer explaining how a backup is restored. -->
+    <string name="backups_restore_footer">To restore a backup, download it and start a new server with -restore and the backup\'s file.</string>
+    <!-- Title of the list of backups. -->
+    <string name="backups_list">Backups</string>
+    <!-- Shown when the server has no backups. -->
+    <string name="backups_none">No backups.</string>
+    <!-- Version of the server that made a backup. -->
+    <string name="backups_version">Mavio %s</string>
+    <!-- Downloads a backup. -->
+    <string name="backups_download">Download</string>
+    <!-- Deletes a backup. -->
+    <string name="backups_remove">Delete</string>
+    <!-- Asks before deleting a backup; name is its file name. -->
+    <string name="backups_remove_title">Delete %s\?</string>
+    <!-- Explains deleting a backup. -->
+    <string name="backups_remove_message">The backup\'s file is deleted from the server.</string>
+    <!-- Description of the logs settings. -->
+    <string name="logs_message">The server\'s recent log records, newest first.</string>
+    <!-- Label of the minimum level of log records shown. -->
+    <string name="logs_level">Level</string>
+    <!-- Log level debug. -->
+    <string name="logs_debug">Debug</string>
+    <!-- Log level info. -->
+    <string name="logs_info">Info</string>
+    <!-- Log level warning. -->
+    <string name="logs_warn">Warning</string>
+    <!-- Log level error. -->
+    <string name="logs_error">Error</string>
+    <!-- Label of how far back log records are shown. -->
+    <string name="logs_period">Period</string>
+    <!-- Log records of the last hour. -->
+    <string name="logs_last_hour">Last hour</string>
+    <!-- Log records of the last day. -->
+    <string name="logs_last_day">Last 24 hours</string>
+    <!-- All the log records the server keeps. -->
+    <string name="logs_all">All kept</string>
+    <!-- Placeholder of the field filtering log records by words. -->
+    <string name="logs_filter">Filter</string>
+    <!-- Fetches the log records again. -->
+    <string name="logs_refresh">Refresh</string>
+    <!-- Number of log records shown. -->
+    <plurals name="logs_count">
+        <item quantity="one">%d record</item>
+        <item quantity="other">%d records</item>
+    </plurals>
+    <!-- Shown when no log records match. -->
+    <string name="logs_none">No log records.</string>
 </resources>

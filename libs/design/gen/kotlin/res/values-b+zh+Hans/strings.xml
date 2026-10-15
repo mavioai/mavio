@@ -315,6 +315,8 @@
     <string name="settings_acquisition">获取</string>
     <string name="settings_subtitles">字幕</string>
     <string name="settings_ai">AI</string>
+    <string name="settings_backups">备份</string>
+    <string name="settings_logs">日志</string>
     <string name="plugins_installed">已安装</string>
     <string name="plugins_available">可用</string>
     <string name="plugins_none_installed">尚未安装插件。</string>
@@ -1118,4 +1120,33 @@
     <string name="ai_reasoning">推理</string>
     <string name="ai_images">图像</string>
     <string name="ai_cost">每百万 token %1$s / %2$s</string>
+    <string name="backups_message">备份包含服务器的数据库、为条目选择的图片及其插件。</string>
+    <string name="backups_create">立即备份</string>
+    <string name="backups_create_detail">备份保存在服务器上，直到被删除。</string>
+    <string name="backups_creating">正在备份…</string>
+    <string name="backups_create_action">备份</string>
+    <string name="backups_restore_footer">要恢复备份，请下载它，然后使用 -restore 与该备份文件启动新的服务器。</string>
+    <string name="backups_list">备份</string>
+    <string name="backups_none">没有备份。</string>
+    <string name="backups_version">Mavio %s</string>
+    <string name="backups_download">下载</string>
+    <string name="backups_remove">删除</string>
+    <string name="backups_remove_title">删除 %s？</string>
+    <string name="backups_remove_message">备份文件会从服务器上删除。</string>
+    <string name="logs_message">服务器最近的日志记录，最新的在前。</string>
+    <string name="logs_level">级别</string>
+    <string name="logs_debug">调试</string>
+    <string name="logs_info">信息</string>
+    <string name="logs_warn">警告</string>
+    <string name="logs_error">错误</string>
+    <string name="logs_period">时间段</string>
+    <string name="logs_last_hour">最近一小时</string>
+    <string name="logs_last_day">最近 24 小时</string>
+    <string name="logs_all">全部保留的记录</string>
+    <string name="logs_filter">筛选</string>
+    <string name="logs_refresh">刷新</string>
+    <plurals name="logs_count">
+        <item quantity="other">%d 条记录</item>
+    </plurals>
+    <string name="logs_none">没有日志记录。</string>
 </resources>

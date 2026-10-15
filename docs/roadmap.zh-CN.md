@@ -664,7 +664,7 @@ flowchart TD
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
     - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiService`）
     - [x] 计划任务（`apps/web/src/screens/admin/tasks.tsx`）：计划任务、立即运行与作业（`TaskService`）
-    - [ ] 备份与日志（`BackupService`、`ListLogs`）
+    - [x] 备份与日志（`apps/web/src/screens/admin/backups.tsx`、`libs/client-ts/src/backups.ts`）：创建、下载与删除备份，以及按级别、时间段与词筛选的最近日志记录（`BackupService`、`ListLogs`）
     - [ ] 账户安全中的 API 密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
   - [ ] Web UI 的详情页：预告片与其他附加内容，以及人物页面及其作品，由演职人员卡片打开
