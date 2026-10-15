@@ -7,6 +7,7 @@ public struct MavioColors: Sendable {
     public let surface: Color
     public let surfaceRaised: Color
     public let surfaceOverlay: Color
+    public let tvBackground: Color
     public let sidebar: Color
     public let fill: Color
     public let fillSelected: Color
@@ -33,6 +34,7 @@ public struct MavioColors: Sendable {
         surface: Color(.sRGB, red: 0.1098, green: 0.1098, blue: 0.1176, opacity: 1),
         surfaceRaised: Color(.sRGB, red: 0.1725, green: 0.1725, blue: 0.1804, opacity: 1),
         surfaceOverlay: Color(.sRGB, red: 0.2275, green: 0.2275, blue: 0.2353, opacity: 1),
+        tvBackground: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1),
         sidebar: Color(.sRGB, red: 0.0863, green: 0.0863, blue: 0.0941, opacity: 1),
         fill: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.24),
         fillSelected: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.32),
@@ -60,6 +62,7 @@ public struct MavioColors: Sendable {
         surface: Color(.sRGB, red: 0.949, green: 0.949, blue: 0.9686, opacity: 1),
         surfaceRaised: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
         surfaceOverlay: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1),
+        tvBackground: Color(.sRGB, red: 0.898, green: 0.898, blue: 0.9176, opacity: 1),
         sidebar: Color(.sRGB, red: 0.9608, green: 0.9608, blue: 0.9686, opacity: 1),
         fill: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.12),
         fillSelected: Color(.sRGB, red: 0.4627, green: 0.4627, blue: 0.502, opacity: 0.18),

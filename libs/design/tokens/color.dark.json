@@ -14,6 +14,10 @@
     "surfaceOverlay": {
       "$value": "{palette.neutral.750}"
     },
+    "tvBackground": {
+      "$value": "{palette.neutral.1000}",
+      "$description": "Background of the television layout."
+    },
     "sidebar": {
       "$value": "{palette.neutral.950}",
       "$description": "Background of the sidebar of the desktop layout."

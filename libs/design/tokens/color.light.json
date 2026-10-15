@@ -14,6 +14,10 @@
     "surfaceOverlay": {
       "$value": "{palette.neutral.0}"
     },
+    "tvBackground": {
+      "$value": "{palette.neutral.200}",
+      "$description": "Background of the television layout: a light gray, as on Apple TV, for white is glaring on a large screen."
+    },
     "sidebar": {
       "$value": "{palette.neutral.50}",
       "$description": "Background of the sidebar of the desktop layout."

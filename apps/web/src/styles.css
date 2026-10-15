@@ -147,6 +147,7 @@ body {
   --mavio-layout-sidebar: 0px;
   --mavio-layout-rail: 0px;
   --mavio-layout-focus-scale: 1.05;
+  --mavio-color-background: var(--mavio-color-tv-background);
   --mavio-type-display-size: 52px;
   --mavio-type-display-line-height: 60px;
   --mavio-type-title1-size: 42px;

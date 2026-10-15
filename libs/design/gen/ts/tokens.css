@@ -7,6 +7,7 @@
   --mavio-color-surface: #1C1C1E;
   --mavio-color-surface-raised: #2C2C2E;
   --mavio-color-surface-overlay: #3A3A3C;
+  --mavio-color-tv-background: #000000;
   --mavio-color-sidebar: #161618;
   --mavio-color-fill: rgba(118, 118, 128, 0.24);
   --mavio-color-fill-selected: rgba(118, 118, 128, 0.32);
@@ -102,6 +103,7 @@
     --mavio-color-surface: #F2F2F7;
     --mavio-color-surface-raised: #FFFFFF;
     --mavio-color-surface-overlay: #FFFFFF;
+    --mavio-color-tv-background: #E5E5EA;
     --mavio-color-sidebar: #F5F5F7;
     --mavio-color-fill: rgba(118, 118, 128, 0.12);
     --mavio-color-fill-selected: rgba(118, 118, 128, 0.18);
@@ -130,6 +132,7 @@
   --mavio-color-surface: #F2F2F7;
   --mavio-color-surface-raised: #FFFFFF;
   --mavio-color-surface-overlay: #FFFFFF;
+  --mavio-color-tv-background: #E5E5EA;
   --mavio-color-sidebar: #F5F5F7;
   --mavio-color-fill: rgba(118, 118, 128, 0.12);
   --mavio-color-fill-selected: rgba(118, 118, 128, 0.18);
