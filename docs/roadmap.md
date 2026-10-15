@@ -652,7 +652,8 @@ flowchart TD
     - [x] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
     - [x] Overview (`apps/web/src/screens/admin/overview.tsx`): the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
-    - [ ] General: the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
+    - [x] General (`apps/web/src/screens/admin/general.tsx`): the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
+    - [x] Transcoding (`apps/web/src/screens/admin/transcoding.tsx`): hardware acceleration, the encoder, tone mapping, deinterlacing, the downmix and the transcode folder (`TranscodingSettings`)
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`), and walking the folders of rclone remotes in the folder picker
     - [ ] Storage: rclone remotes with their authorization steps, and the offline clients (`StorageService`)

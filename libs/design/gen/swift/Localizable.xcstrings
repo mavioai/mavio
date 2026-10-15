@@ -5401,6 +5401,42 @@
         }
       }
     },
+    "settings.general": {
+      "comment": "Settings section of a server's name, metadata language, sign-in and network.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通用"
+          }
+        }
+      }
+    },
+    "settings.transcoding": {
+      "comment": "Settings section of how a server transcodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcoding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转码"
+          }
+        }
+      }
+    },
     "plugins.installed": {
       "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
@@ -10611,6 +10647,1194 @@
           "stringUnit": {
             "state": "translated",
             "value": "第 %1$@/%2$@ 次尝试"
+          }
+        }
+      }
+    },
+    "general.saved": {
+      "comment": "Notice after saving the server's settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存。"
+          }
+        }
+      }
+    },
+    "general.name": {
+      "comment": "The name the server shows to clients.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器名称"
+          }
+        }
+      }
+    },
+    "general.nameDetail": {
+      "comment": "Detail of the server name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty uses the computer's name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "留空则使用计算机名称"
+          }
+        }
+      }
+    },
+    "general.language": {
+      "comment": "The server's language of metadata.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metadata language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据语言"
+          }
+        }
+      }
+    },
+    "general.languageDetail": {
+      "comment": "Detail of the metadata language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For libraries without their own, requests and Discover"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于未单独设置的媒体库、请求与发现"
+          }
+        }
+      }
+    },
+    "general.languageDefault": {
+      "comment": "The default metadata language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English (default)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "英语（默认）"
+          }
+        }
+      }
+    },
+    "general.country": {
+      "comment": "The server's country of metadata and ratings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Country"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国家/地区"
+          }
+        }
+      }
+    },
+    "general.countryDetail": {
+      "comment": "Detail of the metadata country.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Names titles and rates them"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于作品名称与分级"
+          }
+        }
+      }
+    },
+    "general.countryDefault": {
+      "comment": "The default metadata country.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "United States (default)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "美国（默认）"
+          }
+        }
+      }
+    },
+    "general.signIn": {
+      "comment": "Group of sign-in settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign-In"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录"
+          }
+        }
+      }
+    },
+    "general.idleDays": {
+      "comment": "How many days an unused device stays signed in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stay signed in"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持登录"
+          }
+        }
+      }
+    },
+    "general.idleDaysDetail": {
+      "comment": "Detail of how long devices stay signed in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Days a device stays signed in unused"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设备未使用时保持登录的天数"
+          }
+        }
+      }
+    },
+    "general.resetPlugin": {
+      "comment": "The plugin that delivers PINs resetting forgotten passwords.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password resets"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码重置"
+          }
+        }
+      }
+    },
+    "general.resetPluginDetail": {
+      "comment": "Detail of the password reset plugin.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plugin that sends the PIN of a forgotten password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送忘记密码时所需 PIN 的插件"
+          }
+        }
+      }
+    },
+    "general.resetPluginNone": {
+      "comment": "Detail when no plugin can reset passwords.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install a plugin that sends PINs to let users reset forgotten passwords"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装可发送 PIN 的插件，用户即可重置忘记的密码"
+          }
+        }
+      }
+    },
+    "general.resetOff": {
+      "comment": "Users cannot reset forgotten passwords.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "general.network": {
+      "comment": "Group of how the server is reached.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络"
+          }
+        }
+      }
+    },
+    "general.networkFooter": {
+      "comment": "Footer of the network settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes to the network apply at once; clients may need to reconnect."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络设置立即生效；客户端可能需要重新连接。"
+          }
+        }
+      }
+    },
+    "general.baseUrl": {
+      "comment": "The path a reverse proxy serves the server under.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Base URL"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基础 URL"
+          }
+        }
+      }
+    },
+    "general.baseUrlDetail": {
+      "comment": "Detail of the base URL.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The path behind a reverse proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反向代理下的路径"
+          }
+        }
+      }
+    },
+    "general.httpsPort": {
+      "comment": "The port the server serves HTTPS on.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTPS port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTPS 端口"
+          }
+        }
+      }
+    },
+    "general.httpsPortDetail": {
+      "comment": "Detail of the HTTPS port.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 serves no HTTPS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 表示不提供 HTTPS"
+          }
+        }
+      }
+    },
+    "general.httpsPortMavioDev": {
+      "comment": "Detail of the HTTPS port in mavio.dev mode.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 serves no HTTPS; without a certificate, the server's mavio.site certificate is used"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 表示不提供 HTTPS；未设置证书时使用服务器的 mavio.site 证书"
+          }
+        }
+      }
+    },
+    "general.certificate": {
+      "comment": "Path of the PEM certificate for HTTPS.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certificate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "证书"
+          }
+        }
+      }
+    },
+    "general.certificateDetail": {
+      "comment": "Detail of the certificate and key paths.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paths of PEM files on the server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器上 PEM 文件的路径"
+          }
+        }
+      }
+    },
+    "general.key": {
+      "comment": "Path of the PEM private key for HTTPS.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private key"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "私钥"
+          }
+        }
+      }
+    },
+    "general.discovery": {
+      "comment": "Whether clients on the local network find the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local discovery"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地发现"
+          }
+        }
+      }
+    },
+    "general.discoveryDetail": {
+      "comment": "Detail of local discovery.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets apps on the local network find the server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让本地网络中的应用发现此服务器"
+          }
+        }
+      }
+    },
+    "general.relay": {
+      "comment": "Whether clients may reach the server through mavio.dev's relay.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relay"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中继"
+          }
+        }
+      }
+    },
+    "general.relayDetail": {
+      "comment": "Detail of the relay.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lets clients that cannot reach the server directly connect through mavio.dev"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "让无法直接连接服务器的客户端通过 mavio.dev 连接"
+          }
+        }
+      }
+    },
+    "transcoding.message": {
+      "comment": "Line under the Transcoding title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How the server re-encodes what a device cannot play as it is."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器如何为无法直接播放的设备重新编码。"
+          }
+        }
+      }
+    },
+    "transcoding.saved": {
+      "comment": "Notice after saving the transcoding settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存。"
+          }
+        }
+      }
+    },
+    "transcoding.hardware": {
+      "comment": "Group of hardware acceleration.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardware"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "硬件"
+          }
+        }
+      }
+    },
+    "transcoding.acceleration": {
+      "comment": "The hardware acceleration transcodes use.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acceleration"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "硬件加速"
+          }
+        }
+      }
+    },
+    "transcoding.accelerationDetail": {
+      "comment": "Detail of hardware acceleration.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decoding and filtering on the GPU"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 GPU 上解码与处理"
+          }
+        }
+      }
+    },
+    "transcoding.accelerationAuto": {
+      "comment": "Uses what the hardware supports.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动"
+          }
+        }
+      }
+    },
+    "transcoding.accelerationNone": {
+      "comment": "Transcodes in software only.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
+        }
+      }
+    },
+    "transcoding.hardwareEncoding": {
+      "comment": "Whether the GPU encodes too.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardware encoding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "硬件编码"
+          }
+        }
+      }
+    },
+    "transcoding.hardwareEncodingDetail": {
+      "comment": "Detail of hardware encoding.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faster, at some cost in quality"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更快，但画质略有损失"
+          }
+        }
+      }
+    },
+    "transcoding.encoding": {
+      "comment": "Group of the encoder's settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encoding"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编码"
+          }
+        }
+      }
+    },
+    "transcoding.preset": {
+      "comment": "The encoder's speed preset.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preset"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预设"
+          }
+        }
+      }
+    },
+    "transcoding.presetDetail": {
+      "comment": "Detail of the encoder preset.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faster presets use less CPU for larger files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "较快的预设占用更少 CPU，但文件更大"
+          }
+        }
+      }
+    },
+    "transcoding.presetAuto": {
+      "comment": "Picks a preset by the source.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By the source"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按来源选择"
+          }
+        }
+      }
+    },
+    "transcoding.avcCrf": {
+      "comment": "The constant rate factor of H.264.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "H.264 quality (CRF)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "H.264 质量（CRF）"
+          }
+        }
+      }
+    },
+    "transcoding.hevcCrf": {
+      "comment": "The constant rate factor of HEVC.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HEVC quality (CRF)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HEVC 质量（CRF）"
+          }
+        }
+      }
+    },
+    "transcoding.crfDetail": {
+      "comment": "Detail of CRF.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lower is better and larger, 0 to 51"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "越低画质越好、文件越大，范围 0 至 51"
+          }
+        }
+      }
+    },
+    "transcoding.threads": {
+      "comment": "How many threads ffmpeg uses.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Threads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "线程数"
+          }
+        }
+      }
+    },
+    "transcoding.threadsDetail": {
+      "comment": "Detail of the thread count.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 lets FFmpeg decide"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 表示由 FFmpeg 决定"
+          }
+        }
+      }
+    },
+    "transcoding.video": {
+      "comment": "Group of video processing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频"
+          }
+        }
+      }
+    },
+    "transcoding.tonemap": {
+      "comment": "The algorithm mapping HDR to SDR.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tone mapping"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色调映射"
+          }
+        }
+      }
+    },
+    "transcoding.tonemapDetail": {
+      "comment": "Detail of tone mapping.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How HDR is shown on SDR screens"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如何在 SDR 屏幕上显示 HDR"
+          }
+        }
+      }
+    },
+    "transcoding.tonemapRange": {
+      "comment": "The output range of tone mapping.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tone mapping range"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色调映射范围"
+          }
+        }
+      }
+    },
+    "transcoding.tonemapDesat": {
+      "comment": "How much tone mapping desaturates highlights.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desaturation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去饱和"
+          }
+        }
+      }
+    },
+    "transcoding.tonemapPeak": {
+      "comment": "The signal peak of tone mapping.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Peak"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "峰值"
+          }
+        }
+      }
+    },
+    "transcoding.tonemapPeakDetail": {
+      "comment": "Detail of the tone mapping peak.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 reads it from the source"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 表示从来源读取"
+          }
+        }
+      }
+    },
+    "transcoding.deinterlace": {
+      "comment": "The deinterlacing filter.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deinterlacing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去隔行"
+          }
+        }
+      }
+    },
+    "transcoding.doubleRate": {
+      "comment": "Whether deinterlacing outputs a frame per field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Double the frame rate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双倍帧率"
+          }
+        }
+      }
+    },
+    "transcoding.doubleRateDetail": {
+      "comment": "Detail of double rate deinterlacing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A frame per field, smoother motion"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每场输出一帧，动作更流畅"
+          }
+        }
+      }
+    },
+    "transcoding.crop": {
+      "comment": "Whether transcodes crop black borders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crop black borders"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裁剪黑边"
+          }
+        }
+      }
+    },
+    "transcoding.cropDetail": {
+      "comment": "Detail of cropping black borders.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Detected from the video"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "根据视频自动检测"
+          }
+        }
+      }
+    },
+    "transcoding.audio": {
+      "comment": "Group of audio processing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频"
+          }
+        }
+      }
+    },
+    "transcoding.downmixBoost": {
+      "comment": "How much downmixed audio is boosted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downmix boost"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缩混增益"
+          }
+        }
+      }
+    },
+    "transcoding.downmixBoostDetail": {
+      "comment": "Detail of the downmix boost.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Raises the volume of surround sound downmixed to stereo, 0.5 to 3"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提高环绕声缩混为立体声后的音量，范围 0.5 至 3"
+          }
+        }
+      }
+    },
+    "transcoding.folder": {
+      "comment": "The folder of running transcodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcode folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "转码文件夹"
+          }
+        }
+      }
+    },
+    "transcoding.folderDefault": {
+      "comment": "Placeholder when the transcode folder is the default.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server's default"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器默认"
+          }
+        }
+      }
+    },
+    "transcoding.folderFooter": {
+      "comment": "Footer of the transcode folder.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An absolute folder on the server with room for running transcodes."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器上的绝对路径，需有足够空间存放进行中的转码。"
           }
         }
       }

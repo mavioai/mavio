@@ -1,12 +1,13 @@
 // Server administration (docs/clients.md §6.3.4–§6.3.7): a server's
 // libraries, with the folders of its file system to choose from, the
 // languages, countries and ratings it knows, its users and invitations,
-// what it runs and plays, what happened on it, and its tasks and jobs.
+// what it runs and plays, what happened on it, its tasks and jobs, and
+// its settings.
 import { LibraryService, type LibrarySpec } from "@mavio/proto/mavio/library/v1/library_pb";
 import { SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
 import { ActivityService, type Severity } from "@mavio/proto/mavio/system/v1/activity_pb";
 import { LocalizationService } from "@mavio/proto/mavio/system/v1/localization_pb";
-import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
+import { type ServerSettings, SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { type JobState, TaskService } from "@mavio/proto/mavio/system/v1/task_pb";
 import {
   type CreateInvitationRequestSchema,
@@ -212,5 +213,36 @@ export function useJobs(server: ServerEntry, states: JobState[], limit: number) 
     queryKey: serverKey(server.id, "jobs", states, limit),
     queryFn: () => servers.client(TaskService, server).listJobs({ states, limit }),
     refetchInterval: 5_000,
+  });
+}
+
+/** A server's settings, with the hardware accelerations its ffmpeg supports. */
+export function useServerSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "settings"),
+    queryFn: () => servers.client(SystemService, server).getServerSettings({}),
+  });
+}
+
+/**
+ * Changes a server's settings: change is applied to the settings the server
+ * has now, so that what other pages change in the meantime is kept.
+ */
+export function useUpdateServerSettings(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (change: (s: ServerSettings) => void) => {
+      const client = servers.client(SystemService, server);
+      const { settings } = await client.getServerSettings({});
+      if (!settings) throw new Error("the server sent no settings");
+      change(settings);
+      return (await client.updateServerSettings({ settings })).settings;
+    },
+    onSettled: async () => {
+      await qc.invalidateQueries({ queryKey: serverKey(server.id, "settings") });
+      await qc.invalidateQueries({ queryKey: serverKey(server.id, "plugins", "catalogs") });
+    },
   });
 }

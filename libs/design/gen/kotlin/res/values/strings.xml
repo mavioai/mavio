@@ -608,6 +608,10 @@
     <string name="settings_overview">Overview</string>
     <!-- Settings section of a server's recurring tasks and jobs. -->
     <string name="settings_tasks">Tasks</string>
+    <!-- Settings section of a server's name, metadata language, sign-in and network. -->
+    <string name="settings_general">General</string>
+    <!-- Settings section of how a server transcodes. -->
+    <string name="settings_transcoding">Transcoding</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -1189,4 +1193,136 @@
     <string name="tasks_runs">runs %s</string>
     <!-- Which attempt a job is on. -->
     <string name="tasks_attempts">attempt %1$s of %2$s</string>
+    <!-- Notice after saving the server's settings. -->
+    <string name="general_saved">Saved.</string>
+    <!-- The name the server shows to clients. -->
+    <string name="general_name">Server name</string>
+    <!-- Detail of the server name. -->
+    <string name="general_name_detail">Empty uses the computer\'s name</string>
+    <!-- The server's language of metadata. -->
+    <string name="general_language">Metadata language</string>
+    <!-- Detail of the metadata language. -->
+    <string name="general_language_detail">For libraries without their own, requests and Discover</string>
+    <!-- The default metadata language. -->
+    <string name="general_language_default">English (default)</string>
+    <!-- The server's country of metadata and ratings. -->
+    <string name="general_country">Country</string>
+    <!-- Detail of the metadata country. -->
+    <string name="general_country_detail">Names titles and rates them</string>
+    <!-- The default metadata country. -->
+    <string name="general_country_default">United States (default)</string>
+    <!-- Group of sign-in settings. -->
+    <string name="general_sign_in">Sign-In</string>
+    <!-- How many days an unused device stays signed in. -->
+    <string name="general_idle_days">Stay signed in</string>
+    <!-- Detail of how long devices stay signed in. -->
+    <string name="general_idle_days_detail">Days a device stays signed in unused</string>
+    <!-- The plugin that delivers PINs resetting forgotten passwords. -->
+    <string name="general_reset_plugin">Password resets</string>
+    <!-- Detail of the password reset plugin. -->
+    <string name="general_reset_plugin_detail">The plugin that sends the PIN of a forgotten password</string>
+    <!-- Detail when no plugin can reset passwords. -->
+    <string name="general_reset_plugin_none">Install a plugin that sends PINs to let users reset forgotten passwords</string>
+    <!-- Users cannot reset forgotten passwords. -->
+    <string name="general_reset_off">Off</string>
+    <!-- Group of how the server is reached. -->
+    <string name="general_network">Network</string>
+    <!-- Footer of the network settings. -->
+    <string name="general_network_footer">Changes to the network apply at once; clients may need to reconnect.</string>
+    <!-- The path a reverse proxy serves the server under. -->
+    <string name="general_base_url">Base URL</string>
+    <!-- Detail of the base URL. -->
+    <string name="general_base_url_detail">The path behind a reverse proxy</string>
+    <!-- The port the server serves HTTPS on. -->
+    <string name="general_https_port">HTTPS port</string>
+    <!-- Detail of the HTTPS port. -->
+    <string name="general_https_port_detail">0 serves no HTTPS</string>
+    <!-- Detail of the HTTPS port in mavio.dev mode. -->
+    <string name="general_https_port_mavio_dev">0 serves no HTTPS; without a certificate, the server\'s mavio.site certificate is used</string>
+    <!-- Path of the PEM certificate for HTTPS. -->
+    <string name="general_certificate">Certificate</string>
+    <!-- Detail of the certificate and key paths. -->
+    <string name="general_certificate_detail">Paths of PEM files on the server</string>
+    <!-- Path of the PEM private key for HTTPS. -->
+    <string name="general_key">Private key</string>
+    <!-- Whether clients on the local network find the server. -->
+    <string name="general_discovery">Local discovery</string>
+    <!-- Detail of local discovery. -->
+    <string name="general_discovery_detail">Lets apps on the local network find the server</string>
+    <!-- Whether clients may reach the server through mavio.dev's relay. -->
+    <string name="general_relay">Relay</string>
+    <!-- Detail of the relay. -->
+    <string name="general_relay_detail">Lets clients that cannot reach the server directly connect through mavio.dev</string>
+    <!-- Line under the Transcoding title. -->
+    <string name="transcoding_message">How the server re-encodes what a device cannot play as it is.</string>
+    <!-- Notice after saving the transcoding settings. -->
+    <string name="transcoding_saved">Saved.</string>
+    <!-- Group of hardware acceleration. -->
+    <string name="transcoding_hardware">Hardware</string>
+    <!-- The hardware acceleration transcodes use. -->
+    <string name="transcoding_acceleration">Acceleration</string>
+    <!-- Detail of hardware acceleration. -->
+    <string name="transcoding_acceleration_detail">Decoding and filtering on the GPU</string>
+    <!-- Uses what the hardware supports. -->
+    <string name="transcoding_acceleration_auto">Automatic</string>
+    <!-- Transcodes in software only. -->
+    <string name="transcoding_acceleration_none">None</string>
+    <!-- Whether the GPU encodes too. -->
+    <string name="transcoding_hardware_encoding">Hardware encoding</string>
+    <!-- Detail of hardware encoding. -->
+    <string name="transcoding_hardware_encoding_detail">Faster, at some cost in quality</string>
+    <!-- Group of the encoder's settings. -->
+    <string name="transcoding_encoding">Encoding</string>
+    <!-- The encoder's speed preset. -->
+    <string name="transcoding_preset">Preset</string>
+    <!-- Detail of the encoder preset. -->
+    <string name="transcoding_preset_detail">Faster presets use less CPU for larger files</string>
+    <!-- Picks a preset by the source. -->
+    <string name="transcoding_preset_auto">By the source</string>
+    <!-- The constant rate factor of H.264. -->
+    <string name="transcoding_avc_crf">H.264 quality (CRF)</string>
+    <!-- The constant rate factor of HEVC. -->
+    <string name="transcoding_hevc_crf">HEVC quality (CRF)</string>
+    <!-- Detail of CRF. -->
+    <string name="transcoding_crf_detail">Lower is better and larger, 0 to 51</string>
+    <!-- How many threads ffmpeg uses. -->
+    <string name="transcoding_threads">Threads</string>
+    <!-- Detail of the thread count. -->
+    <string name="transcoding_threads_detail">0 lets FFmpeg decide</string>
+    <!-- Group of video processing. -->
+    <string name="transcoding_video">Video</string>
+    <!-- The algorithm mapping HDR to SDR. -->
+    <string name="transcoding_tonemap">Tone mapping</string>
+    <!-- Detail of tone mapping. -->
+    <string name="transcoding_tonemap_detail">How HDR is shown on SDR screens</string>
+    <!-- The output range of tone mapping. -->
+    <string name="transcoding_tonemap_range">Tone mapping range</string>
+    <!-- How much tone mapping desaturates highlights. -->
+    <string name="transcoding_tonemap_desat">Desaturation</string>
+    <!-- The signal peak of tone mapping. -->
+    <string name="transcoding_tonemap_peak">Peak</string>
+    <!-- Detail of the tone mapping peak. -->
+    <string name="transcoding_tonemap_peak_detail">0 reads it from the source</string>
+    <!-- The deinterlacing filter. -->
+    <string name="transcoding_deinterlace">Deinterlacing</string>
+    <!-- Whether deinterlacing outputs a frame per field. -->
+    <string name="transcoding_double_rate">Double the frame rate</string>
+    <!-- Detail of double rate deinterlacing. -->
+    <string name="transcoding_double_rate_detail">A frame per field, smoother motion</string>
+    <!-- Whether transcodes crop black borders. -->
+    <string name="transcoding_crop">Crop black borders</string>
+    <!-- Detail of cropping black borders. -->
+    <string name="transcoding_crop_detail">Detected from the video</string>
+    <!-- Group of audio processing. -->
+    <string name="transcoding_audio">Audio</string>
+    <!-- How much downmixed audio is boosted. -->
+    <string name="transcoding_downmix_boost">Downmix boost</string>
+    <!-- Detail of the downmix boost. -->
+    <string name="transcoding_downmix_boost_detail">Raises the volume of surround sound downmixed to stereo, 0.5 to 3</string>
+    <!-- The folder of running transcodes. -->
+    <string name="transcoding_folder">Transcode folder</string>
+    <!-- Placeholder when the transcode folder is the default. -->
+    <string name="transcoding_folder_default">The server\'s default</string>
+    <!-- Footer of the transcode folder. -->
+    <string name="transcoding_folder_footer">An absolute folder on the server with room for running transcodes.</string>
 </resources>

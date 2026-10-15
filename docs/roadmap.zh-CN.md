@@ -652,7 +652,8 @@ flowchart TD
     - [x] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
     - [ ] 插件分区加入 Web UI 的快照测试
     - [x] 概览（`apps/web/src/screens/admin/overview.tsx`）：服务器的版本与健康状况、正在播放的会话与最近的活动（`GetSystemInfo`、`GetHealth`、`SessionService.ListSessions`、`ListActivities`）
-    - [ ] 常规：服务器名称、元数据的语言与国家以及其他服务器设置（`UpdateServerSettings`、`LocalizationService`）
+    - [x] 常规（`apps/web/src/screens/admin/general.tsx`）：服务器名称、元数据的语言与国家以及其他服务器设置（`UpdateServerSettings`、`LocalizationService`）
+    - [x] 转码（`apps/web/src/screens/admin/transcoding.tsx`）：硬件加速、编码器、色调映射、去隔行、缩混与转码文件夹（`TranscodingSettings`）
     - [x] 媒体库（`apps/web/src/screens/admin/libraries.tsx`、`libs/client-ts/src/admin.ts`）：添加、编辑、删除与扫描媒体库，带目录选择器（`LibraryService`、`ListDirectory`）
     - [ ] 媒体库按顺序排列的提供者，以及其在首页与“推荐”中的行（`ProviderOrder`、`LibraryHubs`），并在目录选择器中浏览 rclone 远程的文件夹
     - [ ] 存储：rclone 远端及其授权步骤，以及离线客户端（`StorageService`）

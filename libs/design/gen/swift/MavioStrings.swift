@@ -977,6 +977,12 @@ public enum MavioStrings {
     /// Settings section of a server's recurring tasks and jobs.
     public static var settingsTasks: String { NSLocalizedString("settings.tasks", bundle: .module, comment: "") }
 
+    /// Settings section of a server's name, metadata language, sign-in and network.
+    public static var settingsGeneral: String { NSLocalizedString("settings.general", bundle: .module, comment: "") }
+
+    /// Settings section of how a server transcodes.
+    public static var settingsTranscoding: String { NSLocalizedString("settings.transcoding", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -1897,4 +1903,202 @@ public enum MavioStrings {
     public static func tasksAttempts(attempts: String, max: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("tasks.attempts", bundle: .module, comment: ""), attempts, max)
     }
+
+    /// Notice after saving the server's settings.
+    public static var generalSaved: String { NSLocalizedString("general.saved", bundle: .module, comment: "") }
+
+    /// The name the server shows to clients.
+    public static var generalName: String { NSLocalizedString("general.name", bundle: .module, comment: "") }
+
+    /// Detail of the server name.
+    public static var generalNameDetail: String { NSLocalizedString("general.nameDetail", bundle: .module, comment: "") }
+
+    /// The server's language of metadata.
+    public static var generalLanguage: String { NSLocalizedString("general.language", bundle: .module, comment: "") }
+
+    /// Detail of the metadata language.
+    public static var generalLanguageDetail: String { NSLocalizedString("general.languageDetail", bundle: .module, comment: "") }
+
+    /// The default metadata language.
+    public static var generalLanguageDefault: String { NSLocalizedString("general.languageDefault", bundle: .module, comment: "") }
+
+    /// The server's country of metadata and ratings.
+    public static var generalCountry: String { NSLocalizedString("general.country", bundle: .module, comment: "") }
+
+    /// Detail of the metadata country.
+    public static var generalCountryDetail: String { NSLocalizedString("general.countryDetail", bundle: .module, comment: "") }
+
+    /// The default metadata country.
+    public static var generalCountryDefault: String { NSLocalizedString("general.countryDefault", bundle: .module, comment: "") }
+
+    /// Group of sign-in settings.
+    public static var generalSignIn: String { NSLocalizedString("general.signIn", bundle: .module, comment: "") }
+
+    /// How many days an unused device stays signed in.
+    public static var generalIdleDays: String { NSLocalizedString("general.idleDays", bundle: .module, comment: "") }
+
+    /// Detail of how long devices stay signed in.
+    public static var generalIdleDaysDetail: String { NSLocalizedString("general.idleDaysDetail", bundle: .module, comment: "") }
+
+    /// The plugin that delivers PINs resetting forgotten passwords.
+    public static var generalResetPlugin: String { NSLocalizedString("general.resetPlugin", bundle: .module, comment: "") }
+
+    /// Detail of the password reset plugin.
+    public static var generalResetPluginDetail: String { NSLocalizedString("general.resetPluginDetail", bundle: .module, comment: "") }
+
+    /// Detail when no plugin can reset passwords.
+    public static var generalResetPluginNone: String { NSLocalizedString("general.resetPluginNone", bundle: .module, comment: "") }
+
+    /// Users cannot reset forgotten passwords.
+    public static var generalResetOff: String { NSLocalizedString("general.resetOff", bundle: .module, comment: "") }
+
+    /// Group of how the server is reached.
+    public static var generalNetwork: String { NSLocalizedString("general.network", bundle: .module, comment: "") }
+
+    /// Footer of the network settings.
+    public static var generalNetworkFooter: String { NSLocalizedString("general.networkFooter", bundle: .module, comment: "") }
+
+    /// The path a reverse proxy serves the server under.
+    public static var generalBaseUrl: String { NSLocalizedString("general.baseUrl", bundle: .module, comment: "") }
+
+    /// Detail of the base URL.
+    public static var generalBaseUrlDetail: String { NSLocalizedString("general.baseUrlDetail", bundle: .module, comment: "") }
+
+    /// The port the server serves HTTPS on.
+    public static var generalHttpsPort: String { NSLocalizedString("general.httpsPort", bundle: .module, comment: "") }
+
+    /// Detail of the HTTPS port.
+    public static var generalHttpsPortDetail: String { NSLocalizedString("general.httpsPortDetail", bundle: .module, comment: "") }
+
+    /// Detail of the HTTPS port in mavio.dev mode.
+    public static var generalHttpsPortMavioDev: String { NSLocalizedString("general.httpsPortMavioDev", bundle: .module, comment: "") }
+
+    /// Path of the PEM certificate for HTTPS.
+    public static var generalCertificate: String { NSLocalizedString("general.certificate", bundle: .module, comment: "") }
+
+    /// Detail of the certificate and key paths.
+    public static var generalCertificateDetail: String { NSLocalizedString("general.certificateDetail", bundle: .module, comment: "") }
+
+    /// Path of the PEM private key for HTTPS.
+    public static var generalKey: String { NSLocalizedString("general.key", bundle: .module, comment: "") }
+
+    /// Whether clients on the local network find the server.
+    public static var generalDiscovery: String { NSLocalizedString("general.discovery", bundle: .module, comment: "") }
+
+    /// Detail of local discovery.
+    public static var generalDiscoveryDetail: String { NSLocalizedString("general.discoveryDetail", bundle: .module, comment: "") }
+
+    /// Whether clients may reach the server through mavio.dev's relay.
+    public static var generalRelay: String { NSLocalizedString("general.relay", bundle: .module, comment: "") }
+
+    /// Detail of the relay.
+    public static var generalRelayDetail: String { NSLocalizedString("general.relayDetail", bundle: .module, comment: "") }
+
+    /// Line under the Transcoding title.
+    public static var transcodingMessage: String { NSLocalizedString("transcoding.message", bundle: .module, comment: "") }
+
+    /// Notice after saving the transcoding settings.
+    public static var transcodingSaved: String { NSLocalizedString("transcoding.saved", bundle: .module, comment: "") }
+
+    /// Group of hardware acceleration.
+    public static var transcodingHardware: String { NSLocalizedString("transcoding.hardware", bundle: .module, comment: "") }
+
+    /// The hardware acceleration transcodes use.
+    public static var transcodingAcceleration: String { NSLocalizedString("transcoding.acceleration", bundle: .module, comment: "") }
+
+    /// Detail of hardware acceleration.
+    public static var transcodingAccelerationDetail: String { NSLocalizedString("transcoding.accelerationDetail", bundle: .module, comment: "") }
+
+    /// Uses what the hardware supports.
+    public static var transcodingAccelerationAuto: String { NSLocalizedString("transcoding.accelerationAuto", bundle: .module, comment: "") }
+
+    /// Transcodes in software only.
+    public static var transcodingAccelerationNone: String { NSLocalizedString("transcoding.accelerationNone", bundle: .module, comment: "") }
+
+    /// Whether the GPU encodes too.
+    public static var transcodingHardwareEncoding: String { NSLocalizedString("transcoding.hardwareEncoding", bundle: .module, comment: "") }
+
+    /// Detail of hardware encoding.
+    public static var transcodingHardwareEncodingDetail: String { NSLocalizedString("transcoding.hardwareEncodingDetail", bundle: .module, comment: "") }
+
+    /// Group of the encoder's settings.
+    public static var transcodingEncoding: String { NSLocalizedString("transcoding.encoding", bundle: .module, comment: "") }
+
+    /// The encoder's speed preset.
+    public static var transcodingPreset: String { NSLocalizedString("transcoding.preset", bundle: .module, comment: "") }
+
+    /// Detail of the encoder preset.
+    public static var transcodingPresetDetail: String { NSLocalizedString("transcoding.presetDetail", bundle: .module, comment: "") }
+
+    /// Picks a preset by the source.
+    public static var transcodingPresetAuto: String { NSLocalizedString("transcoding.presetAuto", bundle: .module, comment: "") }
+
+    /// The constant rate factor of H.264.
+    public static var transcodingAvcCrf: String { NSLocalizedString("transcoding.avcCrf", bundle: .module, comment: "") }
+
+    /// The constant rate factor of HEVC.
+    public static var transcodingHevcCrf: String { NSLocalizedString("transcoding.hevcCrf", bundle: .module, comment: "") }
+
+    /// Detail of CRF.
+    public static var transcodingCrfDetail: String { NSLocalizedString("transcoding.crfDetail", bundle: .module, comment: "") }
+
+    /// How many threads ffmpeg uses.
+    public static var transcodingThreads: String { NSLocalizedString("transcoding.threads", bundle: .module, comment: "") }
+
+    /// Detail of the thread count.
+    public static var transcodingThreadsDetail: String { NSLocalizedString("transcoding.threadsDetail", bundle: .module, comment: "") }
+
+    /// Group of video processing.
+    public static var transcodingVideo: String { NSLocalizedString("transcoding.video", bundle: .module, comment: "") }
+
+    /// The algorithm mapping HDR to SDR.
+    public static var transcodingTonemap: String { NSLocalizedString("transcoding.tonemap", bundle: .module, comment: "") }
+
+    /// Detail of tone mapping.
+    public static var transcodingTonemapDetail: String { NSLocalizedString("transcoding.tonemapDetail", bundle: .module, comment: "") }
+
+    /// The output range of tone mapping.
+    public static var transcodingTonemapRange: String { NSLocalizedString("transcoding.tonemapRange", bundle: .module, comment: "") }
+
+    /// How much tone mapping desaturates highlights.
+    public static var transcodingTonemapDesat: String { NSLocalizedString("transcoding.tonemapDesat", bundle: .module, comment: "") }
+
+    /// The signal peak of tone mapping.
+    public static var transcodingTonemapPeak: String { NSLocalizedString("transcoding.tonemapPeak", bundle: .module, comment: "") }
+
+    /// Detail of the tone mapping peak.
+    public static var transcodingTonemapPeakDetail: String { NSLocalizedString("transcoding.tonemapPeakDetail", bundle: .module, comment: "") }
+
+    /// The deinterlacing filter.
+    public static var transcodingDeinterlace: String { NSLocalizedString("transcoding.deinterlace", bundle: .module, comment: "") }
+
+    /// Whether deinterlacing outputs a frame per field.
+    public static var transcodingDoubleRate: String { NSLocalizedString("transcoding.doubleRate", bundle: .module, comment: "") }
+
+    /// Detail of double rate deinterlacing.
+    public static var transcodingDoubleRateDetail: String { NSLocalizedString("transcoding.doubleRateDetail", bundle: .module, comment: "") }
+
+    /// Whether transcodes crop black borders.
+    public static var transcodingCrop: String { NSLocalizedString("transcoding.crop", bundle: .module, comment: "") }
+
+    /// Detail of cropping black borders.
+    public static var transcodingCropDetail: String { NSLocalizedString("transcoding.cropDetail", bundle: .module, comment: "") }
+
+    /// Group of audio processing.
+    public static var transcodingAudio: String { NSLocalizedString("transcoding.audio", bundle: .module, comment: "") }
+
+    /// How much downmixed audio is boosted.
+    public static var transcodingDownmixBoost: String { NSLocalizedString("transcoding.downmixBoost", bundle: .module, comment: "") }
+
+    /// Detail of the downmix boost.
+    public static var transcodingDownmixBoostDetail: String { NSLocalizedString("transcoding.downmixBoostDetail", bundle: .module, comment: "") }
+
+    /// The folder of running transcodes.
+    public static var transcodingFolder: String { NSLocalizedString("transcoding.folder", bundle: .module, comment: "") }
+
+    /// Placeholder when the transcode folder is the default.
+    public static var transcodingFolderDefault: String { NSLocalizedString("transcoding.folderDefault", bundle: .module, comment: "") }
+
+    /// Footer of the transcode folder.
+    public static var transcodingFolderFooter: String { NSLocalizedString("transcoding.folderFooter", bundle: .module, comment: "") }
 }

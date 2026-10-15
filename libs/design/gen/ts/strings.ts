@@ -293,6 +293,8 @@ export type MessageKey =
   | 'settings.users'
   | 'settings.overview'
   | 'settings.tasks'
+  | 'settings.general'
+  | 'settings.transcoding'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -581,7 +583,73 @@ export type MessageKey =
   | 'tasks.noJobs'
   | 'tasks.showMore'
   | 'tasks.runs'
-  | 'tasks.attempts';
+  | 'tasks.attempts'
+  | 'general.saved'
+  | 'general.name'
+  | 'general.nameDetail'
+  | 'general.language'
+  | 'general.languageDetail'
+  | 'general.languageDefault'
+  | 'general.country'
+  | 'general.countryDetail'
+  | 'general.countryDefault'
+  | 'general.signIn'
+  | 'general.idleDays'
+  | 'general.idleDaysDetail'
+  | 'general.resetPlugin'
+  | 'general.resetPluginDetail'
+  | 'general.resetPluginNone'
+  | 'general.resetOff'
+  | 'general.network'
+  | 'general.networkFooter'
+  | 'general.baseUrl'
+  | 'general.baseUrlDetail'
+  | 'general.httpsPort'
+  | 'general.httpsPortDetail'
+  | 'general.httpsPortMavioDev'
+  | 'general.certificate'
+  | 'general.certificateDetail'
+  | 'general.key'
+  | 'general.discovery'
+  | 'general.discoveryDetail'
+  | 'general.relay'
+  | 'general.relayDetail'
+  | 'transcoding.message'
+  | 'transcoding.saved'
+  | 'transcoding.hardware'
+  | 'transcoding.acceleration'
+  | 'transcoding.accelerationDetail'
+  | 'transcoding.accelerationAuto'
+  | 'transcoding.accelerationNone'
+  | 'transcoding.hardwareEncoding'
+  | 'transcoding.hardwareEncodingDetail'
+  | 'transcoding.encoding'
+  | 'transcoding.preset'
+  | 'transcoding.presetDetail'
+  | 'transcoding.presetAuto'
+  | 'transcoding.avcCrf'
+  | 'transcoding.hevcCrf'
+  | 'transcoding.crfDetail'
+  | 'transcoding.threads'
+  | 'transcoding.threadsDetail'
+  | 'transcoding.video'
+  | 'transcoding.tonemap'
+  | 'transcoding.tonemapDetail'
+  | 'transcoding.tonemapRange'
+  | 'transcoding.tonemapDesat'
+  | 'transcoding.tonemapPeak'
+  | 'transcoding.tonemapPeakDetail'
+  | 'transcoding.deinterlace'
+  | 'transcoding.doubleRate'
+  | 'transcoding.doubleRateDetail'
+  | 'transcoding.crop'
+  | 'transcoding.cropDetail'
+  | 'transcoding.audio'
+  | 'transcoding.downmixBoost'
+  | 'transcoding.downmixBoostDetail'
+  | 'transcoding.folder'
+  | 'transcoding.folderDefault'
+  | 'transcoding.folderFooter';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -867,6 +935,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.users": "Users",
     "settings.overview": "Overview",
     "settings.tasks": "Tasks",
+    "settings.general": "General",
+    "settings.transcoding": "Transcoding",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -1155,7 +1225,73 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "tasks.noJobs": "No jobs.",
     "tasks.showMore": "Show More",
     "tasks.runs": "runs {when}",
-    "tasks.attempts": "attempt {attempts} of {max}"
+    "tasks.attempts": "attempt {attempts} of {max}",
+    "general.saved": "Saved.",
+    "general.name": "Server name",
+    "general.nameDetail": "Empty uses the computer's name",
+    "general.language": "Metadata language",
+    "general.languageDetail": "For libraries without their own, requests and Discover",
+    "general.languageDefault": "English (default)",
+    "general.country": "Country",
+    "general.countryDetail": "Names titles and rates them",
+    "general.countryDefault": "United States (default)",
+    "general.signIn": "Sign-In",
+    "general.idleDays": "Stay signed in",
+    "general.idleDaysDetail": "Days a device stays signed in unused",
+    "general.resetPlugin": "Password resets",
+    "general.resetPluginDetail": "The plugin that sends the PIN of a forgotten password",
+    "general.resetPluginNone": "Install a plugin that sends PINs to let users reset forgotten passwords",
+    "general.resetOff": "Off",
+    "general.network": "Network",
+    "general.networkFooter": "Changes to the network apply at once; clients may need to reconnect.",
+    "general.baseUrl": "Base URL",
+    "general.baseUrlDetail": "The path behind a reverse proxy",
+    "general.httpsPort": "HTTPS port",
+    "general.httpsPortDetail": "0 serves no HTTPS",
+    "general.httpsPortMavioDev": "0 serves no HTTPS; without a certificate, the server's mavio.site certificate is used",
+    "general.certificate": "Certificate",
+    "general.certificateDetail": "Paths of PEM files on the server",
+    "general.key": "Private key",
+    "general.discovery": "Local discovery",
+    "general.discoveryDetail": "Lets apps on the local network find the server",
+    "general.relay": "Relay",
+    "general.relayDetail": "Lets clients that cannot reach the server directly connect through mavio.dev",
+    "transcoding.message": "How the server re-encodes what a device cannot play as it is.",
+    "transcoding.saved": "Saved.",
+    "transcoding.hardware": "Hardware",
+    "transcoding.acceleration": "Acceleration",
+    "transcoding.accelerationDetail": "Decoding and filtering on the GPU",
+    "transcoding.accelerationAuto": "Automatic",
+    "transcoding.accelerationNone": "None",
+    "transcoding.hardwareEncoding": "Hardware encoding",
+    "transcoding.hardwareEncodingDetail": "Faster, at some cost in quality",
+    "transcoding.encoding": "Encoding",
+    "transcoding.preset": "Preset",
+    "transcoding.presetDetail": "Faster presets use less CPU for larger files",
+    "transcoding.presetAuto": "By the source",
+    "transcoding.avcCrf": "H.264 quality (CRF)",
+    "transcoding.hevcCrf": "HEVC quality (CRF)",
+    "transcoding.crfDetail": "Lower is better and larger, 0 to 51",
+    "transcoding.threads": "Threads",
+    "transcoding.threadsDetail": "0 lets FFmpeg decide",
+    "transcoding.video": "Video",
+    "transcoding.tonemap": "Tone mapping",
+    "transcoding.tonemapDetail": "How HDR is shown on SDR screens",
+    "transcoding.tonemapRange": "Tone mapping range",
+    "transcoding.tonemapDesat": "Desaturation",
+    "transcoding.tonemapPeak": "Peak",
+    "transcoding.tonemapPeakDetail": "0 reads it from the source",
+    "transcoding.deinterlace": "Deinterlacing",
+    "transcoding.doubleRate": "Double the frame rate",
+    "transcoding.doubleRateDetail": "A frame per field, smoother motion",
+    "transcoding.crop": "Crop black borders",
+    "transcoding.cropDetail": "Detected from the video",
+    "transcoding.audio": "Audio",
+    "transcoding.downmixBoost": "Downmix boost",
+    "transcoding.downmixBoostDetail": "Raises the volume of surround sound downmixed to stereo, 0.5 to 3",
+    "transcoding.folder": "Transcode folder",
+    "transcoding.folderDefault": "The server's default",
+    "transcoding.folderFooter": "An absolute folder on the server with room for running transcodes."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1439,6 +1575,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.users": "用户",
     "settings.overview": "概览",
     "settings.tasks": "任务",
+    "settings.general": "通用",
+    "settings.transcoding": "转码",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -1727,6 +1865,72 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "tasks.noJobs": "没有作业。",
     "tasks.showMore": "显示更多",
     "tasks.runs": "{when}运行",
-    "tasks.attempts": "第 {attempts}/{max} 次尝试"
+    "tasks.attempts": "第 {attempts}/{max} 次尝试",
+    "general.saved": "已保存。",
+    "general.name": "服务器名称",
+    "general.nameDetail": "留空则使用计算机名称",
+    "general.language": "元数据语言",
+    "general.languageDetail": "用于未单独设置的媒体库、请求与发现",
+    "general.languageDefault": "英语（默认）",
+    "general.country": "国家/地区",
+    "general.countryDetail": "用于作品名称与分级",
+    "general.countryDefault": "美国（默认）",
+    "general.signIn": "登录",
+    "general.idleDays": "保持登录",
+    "general.idleDaysDetail": "设备未使用时保持登录的天数",
+    "general.resetPlugin": "密码重置",
+    "general.resetPluginDetail": "发送忘记密码时所需 PIN 的插件",
+    "general.resetPluginNone": "安装可发送 PIN 的插件，用户即可重置忘记的密码",
+    "general.resetOff": "关闭",
+    "general.network": "网络",
+    "general.networkFooter": "网络设置立即生效；客户端可能需要重新连接。",
+    "general.baseUrl": "基础 URL",
+    "general.baseUrlDetail": "反向代理下的路径",
+    "general.httpsPort": "HTTPS 端口",
+    "general.httpsPortDetail": "0 表示不提供 HTTPS",
+    "general.httpsPortMavioDev": "0 表示不提供 HTTPS；未设置证书时使用服务器的 mavio.site 证书",
+    "general.certificate": "证书",
+    "general.certificateDetail": "服务器上 PEM 文件的路径",
+    "general.key": "私钥",
+    "general.discovery": "本地发现",
+    "general.discoveryDetail": "让本地网络中的应用发现此服务器",
+    "general.relay": "中继",
+    "general.relayDetail": "让无法直接连接服务器的客户端通过 mavio.dev 连接",
+    "transcoding.message": "服务器如何为无法直接播放的设备重新编码。",
+    "transcoding.saved": "已保存。",
+    "transcoding.hardware": "硬件",
+    "transcoding.acceleration": "硬件加速",
+    "transcoding.accelerationDetail": "在 GPU 上解码与处理",
+    "transcoding.accelerationAuto": "自动",
+    "transcoding.accelerationNone": "无",
+    "transcoding.hardwareEncoding": "硬件编码",
+    "transcoding.hardwareEncodingDetail": "更快，但画质略有损失",
+    "transcoding.encoding": "编码",
+    "transcoding.preset": "预设",
+    "transcoding.presetDetail": "较快的预设占用更少 CPU，但文件更大",
+    "transcoding.presetAuto": "按来源选择",
+    "transcoding.avcCrf": "H.264 质量（CRF）",
+    "transcoding.hevcCrf": "HEVC 质量（CRF）",
+    "transcoding.crfDetail": "越低画质越好、文件越大，范围 0 至 51",
+    "transcoding.threads": "线程数",
+    "transcoding.threadsDetail": "0 表示由 FFmpeg 决定",
+    "transcoding.video": "视频",
+    "transcoding.tonemap": "色调映射",
+    "transcoding.tonemapDetail": "如何在 SDR 屏幕上显示 HDR",
+    "transcoding.tonemapRange": "色调映射范围",
+    "transcoding.tonemapDesat": "去饱和",
+    "transcoding.tonemapPeak": "峰值",
+    "transcoding.tonemapPeakDetail": "0 表示从来源读取",
+    "transcoding.deinterlace": "去隔行",
+    "transcoding.doubleRate": "双倍帧率",
+    "transcoding.doubleRateDetail": "每场输出一帧，动作更流畅",
+    "transcoding.crop": "裁剪黑边",
+    "transcoding.cropDetail": "根据视频自动检测",
+    "transcoding.audio": "音频",
+    "transcoding.downmixBoost": "缩混增益",
+    "transcoding.downmixBoostDetail": "提高环绕声缩混为立体声后的音量，范围 0.5 至 3",
+    "transcoding.folder": "转码文件夹",
+    "transcoding.folderDefault": "服务器默认",
+    "transcoding.folderFooter": "服务器上的绝对路径，需有足够空间存放进行中的转码。"
   }
 };

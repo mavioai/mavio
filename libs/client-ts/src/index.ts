@@ -75,8 +75,10 @@ export {
   useRatings,
   useRunTask,
   useServerLibraries,
+  useServerSettings,
   useSystemInfo,
   useTasks,
+  useUpdateServerSettings,
   useUserActions,
   useUsers,
 } from "./admin.ts";

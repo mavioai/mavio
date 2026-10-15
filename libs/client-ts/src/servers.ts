@@ -909,6 +909,11 @@ export class Servers {
     }
   }
 
+  /** Takes a server's new name, as its administrator changed it. */
+  rename(id: string, name: string) {
+    this.set(this.list.map((s) => (s.id === id ? { ...s, name } : s)));
+  }
+
   /** Orders the servers as the user arranged them. */
   order(ids: string[]) {
     const rank = (s: ServerEntry) => {
