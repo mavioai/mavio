@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.subtitles",
+  "id": "dev.mavio.subtitles",
   "name": "Subtitles",
   "version": "0.1.0",
   "description": "Subtitles for movies and episodes from the subtitle sites Bazarr supports, such as OpenSubtitles.com, with their throttling, through a proxy, FlareSolverr and a captcha solving service; subtitles transcribed by Whisper, and translated with DeepL, LibreTranslate, Google Translate, Bing, Microsoft Translator or Yandex.Translate.",

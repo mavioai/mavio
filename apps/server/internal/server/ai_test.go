@@ -138,7 +138,7 @@ func TestAI(t *testing.T) {
 		return err == nil
 	})
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
+		PluginId: new("dev.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -147,8 +147,8 @@ func TestAI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListAiProviders: %v", err)
 	}
-	if list.GetPluginId() != "org.mavio.agent" {
-		t.Errorf("plugin = %q, want org.mavio.agent", list.GetPluginId())
+	if list.GetPluginId() != "dev.mavio.agent" {
+		t.Errorf("plugin = %q, want dev.mavio.agent", list.GetPluginId())
 	}
 	provider := func(id string) *pluginv1.AiProvider {
 		list, err := ai.ListAiProviders(ctx, &systemv1.ListAiProvidersRequest{})

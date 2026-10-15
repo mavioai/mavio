@@ -34,7 +34,7 @@ done
 cat > dist/catalog.json <<JSON
 {
   "plugins": [{
-    "id": "org.mavio.indexers",
+    "id": "dev.mavio.indexers",
     "name": "Indexers",
     "description": "Searches torrent and Usenet indexers as Prowlarr does: Newznab, Torznab, Cardigann definitions and the sites Prowlarr implements in code.",
     "author": "Mavio",

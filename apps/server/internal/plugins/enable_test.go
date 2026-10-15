@@ -42,7 +42,7 @@ func TestSetEnabled(t *testing.T) {
 	}
 
 	m := openWith(nil)
-	const id = "org.mavio.smoke"
+	const id = "dev.mavio.smoke"
 	if _, err := m.SetEnabled(ctx, "org.example.missing", false); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("SetEnabled of an unknown plugin: %v, want ErrNotFound", err)
 	}

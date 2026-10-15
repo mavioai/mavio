@@ -331,7 +331,7 @@ func TestReleases(t *testing.T) {
 	}
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.indexers"), ConfigJson: new(string(cfg)),
+		PluginId: new("dev.mavio.indexers"), ConfigJson: new(string(cfg)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -349,7 +349,7 @@ func TestReleases(t *testing.T) {
 		}
 		return len(indexers) == 4
 	}, func() any { return indexers })
-	if want := "org.mavio.indexers/nzbsu 10"; indexers[0] != want {
+	if want := "dev.mavio.indexers/nzbsu 10"; indexers[0] != want {
 		t.Errorf("first indexer = %q, want = %q, the one of the lowest priority", indexers[0], want)
 	}
 
@@ -419,7 +419,7 @@ func TestReleases(t *testing.T) {
 	// Text, of one indexer implemented in code.
 	found = search(acquisitionv1.SearchReleasesRequest_builder{
 		Query: new("ubuntu"), Indexers: []*acquisitionv1.IndexerRef{
-			acquisitionv1.IndexerRef_builder{PluginId: new("org.mavio.indexers"), IndexerId: new("nzbindex")}.Build(),
+			acquisitionv1.IndexerRef_builder{PluginId: new("dev.mavio.indexers"), IndexerId: new("nzbindex")}.Build(),
 		},
 	}.Build())
 	if len(found) == 0 {

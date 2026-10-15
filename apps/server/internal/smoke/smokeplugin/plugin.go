@@ -36,7 +36,7 @@ import (
 )
 
 // ID must match the smoke test manifest.
-const ID = "org.mavio.smoke"
+const ID = "dev.mavio.smoke"
 
 // Version must match the manifest too; builds of other versions set it
 // with -ldflags "-X main.Version=…".

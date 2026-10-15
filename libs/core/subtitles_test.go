@@ -117,7 +117,7 @@ func TestSubtitleSettingsValidate(t *testing.T) {
 		{"sync offset", func(s *SubtitleSettings) { s.Sync.MaxOffset = 0 }, false},
 		{"sync deviation", func(s *SubtitleSettings) { s.Sync.MaxScaleDeviation = -0.1 }, false},
 		{"translation score", func(s *SubtitleSettings) { s.Translation.DefaultScore = 101 }, false},
-		{"translator", func(s *SubtitleSettings) { s.Translation.Translator = "org.mavio.subtitles/deepl" }, true},
+		{"translator", func(s *SubtitleSettings) { s.Translation.Translator = "dev.mavio.subtitles/deepl" }, true},
 		{"translator without plugin", func(s *SubtitleSettings) { s.Translation.Translator = "deepl" }, false},
 		{"AI translator", func(s *SubtitleSettings) { s.Translation.Translator = "ai/openrouter/anthropic/claude" }, true},
 		{"AI translator without model", func(s *SubtitleSettings) { s.Translation.Translator = "ai/openai" }, false},

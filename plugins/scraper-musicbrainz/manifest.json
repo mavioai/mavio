@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.scraper-musicbrainz",
+  "id": "dev.mavio.scraper-musicbrainz",
   "name": "MusicBrainz",
   "version": "0.1.0",
   "description": "Metadata for music artists, albums and tracks from MusicBrainz, with album covers from the Cover Art Archive.",

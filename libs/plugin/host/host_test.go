@@ -88,7 +88,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	for i, h := range hosts {
 		quoted[i] = fmt.Sprintf("%q", h)
 	}
-	manifest := fmt.Sprintf(`{"id":"org.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
+	manifest := fmt.Sprintf(`{"id":"dev.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
 			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER","CAPABILITY_INDEXER_PROVIDER","CAPABILITY_DOWNLOAD_CLIENT_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
@@ -220,7 +220,7 @@ func TestHostAPI(t *testing.T) {
 		}
 		p = openWith(t, rt, func(o *host.Options) { o.HostAPI = hostAPI })
 		ctx := t.Context()
-		want := `418 org.mavio.testplugin GET /a/b?c=d auth=""`
+		want := `418 dev.mavio.testplugin GET /a/b?c=d auth=""`
 		if got, err := search(ctx, p, "host:/a/b?c=d"); err != nil || got != want {
 			t.Errorf("host call = %q, %v; want %q", got, err, want)
 		}
@@ -246,7 +246,7 @@ func TestTasksAndDataFolder(t *testing.T) {
 		if !strings.HasSuffix(msg, ": kept") {
 			t.Errorf("write task = %q", msg)
 		}
-		if got, err := os.ReadFile(filepath.Join(host.DataDir(data, "org.mavio.testplugin"), "note.txt")); err != nil || string(got) != "kept" {
+		if got, err := os.ReadFile(filepath.Join(host.DataDir(data, "dev.mavio.testplugin"), "note.txt")); err != nil || string(got) != "kept" {
 			t.Errorf("file in the data folder = %q, %v", got, err)
 		}
 
@@ -498,7 +498,7 @@ func TestDataFileProviders(t *testing.T) {
 		data := t.TempDir()
 		p := openWith(t, rt, func(o *host.Options) { o.DataDir = data })
 		ctx := t.Context()
-		dir := host.DataDir(data, "org.mavio.testplugin")
+		dir := host.DataDir(data, "dev.mavio.testplugin")
 
 		sources, err := p.MediaSources().GetMediaSources(ctx, pluginv1.GetMediaSourcesRequest_builder{ItemId: proto.String("a")}.Build())
 		if err != nil || len(sources.GetSources()) != 0 {

@@ -90,7 +90,7 @@ func TestMetadataManagement(t *testing.T) {
 	token := withToken(first.GetAccessToken())
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, url, token)
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{"api_key":"secret","image_base":"` + artwork.URL + `"}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret","image_base":"` + artwork.URL + `"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestMetadataManagement(t *testing.T) {
 	found, err := meta.SearchRemote(ctx, libraryv1.SearchRemoteRequest_builder{
 		ItemId: new(movie.GetId()), Name: new("Farewell My Concubine"),
 	}.Build())
-	if err != nil || len(found.GetResults()) != 1 || found.GetResults()[0].GetProvider() != "org.mavio.smoke" {
+	if err != nil || len(found.GetResults()) != 1 || found.GetResults()[0].GetProvider() != "dev.mavio.smoke" {
 		t.Fatalf("SearchRemote = %v, %v", found, err)
 	}
 	identified, err := meta.IdentifyItem(ctx, libraryv1.IdentifyItemRequest_builder{

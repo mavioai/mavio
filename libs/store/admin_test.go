@@ -34,7 +34,7 @@ func TestSettings(t *testing.T) {
 		if err := s.Settings().Put(ctx, &same); err != nil || !same.UpdatedAt.Equal(got.UpdatedAt) {
 			t.Errorf("Put of the stored settings: UpdatedAt = %v, %v; want = %v", same.UpdatedAt, err, got.UpdatedAt)
 		}
-		set.DisabledPlugins = []string{"org.mavio.dlna"}
+		set.DisabledPlugins = []string{"dev.mavio.dlna"}
 		set.Subtitles.MinimumScore = 70
 		if err := s.Settings().Put(ctx, &set); err != nil {
 			t.Fatal(err)

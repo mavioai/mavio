@@ -99,12 +99,12 @@ func TestEndToEnd(t *testing.T) {
 		t.Fatalf("ListPlugins = %v, %v; want the plugin unconfigured", plugins, err)
 	}
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{}`),
 	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("SetPluginConfig without the key: %v, want invalid_argument", err)
 	}
 	set, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build())
 	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY {
 		t.Fatalf("SetPluginConfig = %v, %v; want ready", set, err)
@@ -216,7 +216,7 @@ func installPlugin(t *testing.T, capabilities ...string) string {
 		t.Fatalf("build plugin: %v\n%s", err, out)
 	}
 	schema := `{"type":"object","properties":{"api_key":{"type":"string","minLength":1}},"required":["api_key"]}`
-	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
+	manifest := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
 		"capabilities":["%s"],"configSchema":%q,"apiVersion":"1.0"}`, strings.Join(capabilities, `","`), schema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)

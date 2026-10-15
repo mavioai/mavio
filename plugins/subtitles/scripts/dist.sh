@@ -34,7 +34,7 @@ done
 cat > dist/catalog.json <<JSON
 {
   "plugins": [{
-    "id": "org.mavio.subtitles",
+    "id": "dev.mavio.subtitles",
     "name": "Subtitles",
     "description": "Subtitles for movies and episodes from the subtitle sites Bazarr supports, such as OpenSubtitles.com, with their throttling.",
     "author": "Mavio",

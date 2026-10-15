@@ -207,7 +207,7 @@ func TestSubtitleFlows(t *testing.T) {
 	// episodes never.
 	subsarr, whisper, libre := newFakeSubsarr(t), newFakeWhisper(t), newFakeLibreTranslate(t)
 	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.subtitles"),
+		PluginId: new("dev.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}},
 			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}],
 			"translators": [{"name": "libretranslate", "enabled": true, "settings": {"url": "` + libre.URL + `"}}]}`),
@@ -220,7 +220,7 @@ func TestSubtitleFlows(t *testing.T) {
 			return false
 		}
 		for _, p := range resp.GetProviders() {
-			if p.GetId() == "org.mavio.subtitles/subsarr" {
+			if p.GetId() == "dev.mavio.subtitles/subsarr" {
 				return p.GetEnabled()
 			}
 		}
@@ -392,7 +392,7 @@ func TestSubtitleFlows(t *testing.T) {
 		return strings.ToUpper(last)
 	})
 	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
+		PluginId: new("dev.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -438,7 +438,7 @@ func TestSubtitleFlows(t *testing.T) {
 	// interface.
 	waitFor(t, "LibreTranslate translating", func() bool {
 		_, err := subs.TranslateSubtitle(ctx, acquisitionv1.TranslateSubtitleRequest_builder{
-			ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("org.mavio.subtitles/libretranslate"),
+			ItemId: new(pilot.GetId()), Path: new(pilotFrench), Translator: new("dev.mavio.subtitles/libretranslate"),
 			Language: acquisitionv1.SubtitleLanguageSpec_builder{Language: new("de")}.Build(),
 		}.Build())
 		return err == nil
@@ -450,7 +450,7 @@ func TestSubtitleFlows(t *testing.T) {
 	if err != nil || !strings.Contains(string(german), "[de] Bonjour, Walter.") || !strings.Contains(string(german), "# Subtitles translated with LibreTranslate #") {
 		t.Errorf("translation = %q, %v; want the cue translated by LibreTranslate and credited", german, err)
 	}
-	if r := history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)[0].GetTranslation(); strings.Join(r.GetTranslators(), ",") != "org.mavio.subtitles/libretranslate" || r.GetInputTokens() != 0 {
+	if r := history(pilot.GetId(), acquisitionv1.SubtitleAction_SUBTITLE_ACTION_TRANSLATED)[0].GetTranslation(); strings.Join(r.GetTranslators(), ",") != "dev.mavio.subtitles/libretranslate" || r.GetInputTokens() != 0 {
 		t.Errorf("translation record = %v", r)
 	}
 	if got := libre.texts(); !slices.Equal(got, []string{"Bonjour, Walter."}) {
@@ -469,7 +469,7 @@ func TestSubtitleFlows(t *testing.T) {
 	}
 	var transcribed *acquisitionv1.ScoredSubtitle
 	for _, sub := range found.GetSubtitles() {
-		if sub.GetProvider() == "org.mavio.subtitles/whisperai" {
+		if sub.GetProvider() == "dev.mavio.subtitles/whisperai" {
 			transcribed = sub
 		}
 	}

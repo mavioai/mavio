@@ -114,7 +114,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 			"CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET"`+resolver+`],
 		"localMetadataFiles":["*.title"]`)
 	dataDir := filepath.Join(t.TempDir(), "data")
-	smokeData := filepath.Join(dataDir, "org.mavio.smoke")
+	smokeData := filepath.Join(dataDir, "dev.mavio.smoke")
 
 	films, home, music, photos := t.TempDir(), t.TempDir(), t.TempDir(), t.TempDir()
 	film := filepath.Join(films, "Farewell My Concubine (1993)", "Farewell My Concubine (1993).mkv")
@@ -159,7 +159,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	images := imageServer(t)
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{"image_base":"` + images.URL + `"}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"image_base":"` + images.URL + `"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
@@ -176,7 +176,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 
 	// Users of an authentication plugin sign in with the passwords it
 	// accepts.
-	if _, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("directory"), AuthProvider: new("org.mavio.smoke")}.Build()); err != nil {
+	if _, err := users.CreateUser(ctx, userv1.CreateUserRequest_builder{Name: new("directory"), AuthProvider: new("dev.mavio.smoke")}.Build()); err != nil {
 		t.Fatalf("CreateUser(directory): %v", err)
 	}
 	login := func(name, password string) error {
@@ -196,7 +196,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 		t.Fatalf("GetServerSettings: %v", err)
 	}
 	set := settings.GetSettings()
-	set.SetPasswordResetPlugin("org.mavio.smoke")
+	set.SetPasswordResetPlugin("dev.mavio.smoke")
 	if _, err := system.UpdateServerSettings(ctx, systemv1.UpdateServerSettingsRequest_builder{Settings: set}.Build()); err != nil {
 		t.Fatalf("UpdateServerSettings: %v", err)
 	}
@@ -333,7 +333,7 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	meta := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, srv.url, token)
 	filmID := filmItem.GetItem().GetId()
 	subs, err := meta.SearchSubtitles(ctx, libraryv1.SearchSubtitlesRequest_builder{ItemId: new(filmID), Language: new("en")}.Build())
-	if err != nil || len(subs.GetSubtitles()) != 1 || subs.GetSubtitles()[0].GetProvider() != "org.mavio.smoke" {
+	if err != nil || len(subs.GetSubtitles()) != 1 || subs.GetSubtitles()[0].GetProvider() != "dev.mavio.smoke" {
 		t.Fatalf("SearchSubtitles = %v, %v", subs, err)
 	}
 	sub := subs.GetSubtitles()[0]

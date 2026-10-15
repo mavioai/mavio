@@ -244,7 +244,7 @@ func TestRequestFlows(t *testing.T) {
 	_, teenToken := s.user("teen", userv1.UserPolicy_builder{
 		AllLibraries: new(true), MaxParentalRating: new(int32(10)), BlockUnrated: new(true), RequestMovies: new(true), RequestSeries: new(true),
 	}.Build())
-	const trending, popular = "org.mavio.scraper-tmdb/trending", "org.mavio.scraper-tmdb/popular"
+	const trending, popular = "dev.mavio.scraper-tmdb/trending", "dev.mavio.scraper-tmdb/popular"
 	names := func(discover acquisitionv1connect.DiscoverServiceClient, catalog string, kind acquisitionv1.MediaKind) []string {
 		t.Helper()
 		resp, err := discover.Discover(ctx, acquisitionv1.DiscoverRequest_builder{Catalog: new(catalog), MediaKind: new(kind)}.Build())

@@ -17,7 +17,7 @@ import (
 )
 
 // ID is the plugin's ID, as its manifest gives it.
-const ID = "org.mavio.subtitles"
+const ID = "dev.mavio.subtitles"
 
 // Version is the plugin's version; builds set it with
 // -ldflags "-X main.Version=…".

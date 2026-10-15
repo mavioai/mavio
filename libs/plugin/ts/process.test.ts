@@ -53,7 +53,7 @@ describe("serve", () => {
 		const stdout = new PassThrough();
 		const line = new Promise<string>((resolve) => stdout.once("data", (b: Buffer) => resolve(b.toString())));
 		const done = serve({
-			pluginId: "org.mavio.test",
+			pluginId: "dev.mavio.test",
 			stdout,
 			routes(router) {
 				router.service(PluginService, {
@@ -64,7 +64,7 @@ describe("serve", () => {
 		});
 		const handshake = JSON.parse(await line);
 		expect(handshake.mavio_plugin).toBe(1);
-		expect(handshake.plugin_id).toBe("org.mavio.test");
+		expect(handshake.plugin_id).toBe("dev.mavio.test");
 		expect(handshake.address !== undefined).toBe(loopback());
 
 		const denied = await client(handshake, socket, "wrong")
@@ -82,6 +82,6 @@ describe("serve", () => {
 
 	test("requires the host's environment", async () => {
 		delete process.env[env.token];
-		await expect(serve({ pluginId: "org.mavio.test", routes() {} })).rejects.toThrow(env.token);
+		await expect(serve({ pluginId: "dev.mavio.test", routes() {} })).rejects.toThrow(env.token);
 	});
 });

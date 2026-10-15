@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.indexers",
+  "id": "dev.mavio.indexers",
   "name": "Indexers",
   "version": "0.1.0",
   "description": "Searches torrent and Usenet indexers as Prowlarr does: Newznab, Torznab, Cardigann definitions and the sites Prowlarr implements in code.",

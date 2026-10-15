@@ -34,7 +34,7 @@ done
 cat > dist/catalog.json <<JSON
 {
   "plugins": [{
-    "id": "org.mavio.download-clients",
+    "id": "dev.mavio.download-clients",
     "name": "Download Clients",
     "description": "Sends releases to the download clients Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, SABnzbd and NZBGet, and follows their downloads.",
     "author": "Mavio",

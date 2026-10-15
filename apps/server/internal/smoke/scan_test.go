@@ -203,7 +203,7 @@ func lines(state []string, rel string) []string {
 func TestScanReconciles(t *testing.T) {
 	ctx := t.Context()
 	plugin := openPlugin(t, "wasm")
-	provider := &providers.Plugin{ID: "org.mavio.smoke", Client: plugin.Metadata()}
+	provider := &providers.Plugin{ID: "dev.mavio.smoke", Client: plugin.Metadata()}
 
 	stores := map[string]*store.Store{}
 	openStore := func(name, dsn string) {

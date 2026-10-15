@@ -98,7 +98,7 @@ func TestMediaExtras(t *testing.T) {
 	}
 	token := withToken(first.GetAccessToken())
 	if _, err := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token).SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}

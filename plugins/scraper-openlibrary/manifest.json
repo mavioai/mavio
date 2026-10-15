@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.scraper-openlibrary",
+  "id": "dev.mavio.scraper-openlibrary",
   "name": "Open Library",
   "version": "0.1.0",
   "description": "Metadata and covers for books and audiobooks from Open Library, found by ISBN, Open Library ID or title and author.",

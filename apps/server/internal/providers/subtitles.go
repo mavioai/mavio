@@ -20,7 +20,7 @@ import (
 // library.SubtitleProvider. The IDs of its subtitles are
 // "<provider>/<subtitle>", naming the plugin's provider.
 type SubtitlePlugin struct {
-	// ID names the plugin, such as "org.mavio.subtitles".
+	// ID names the plugin, such as "dev.mavio.subtitles".
 	ID     string
 	Client pluginv1connect.SubtitleProviderServiceClient
 }

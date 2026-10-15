@@ -32,7 +32,7 @@ func TestPublish(t *testing.T) {
 	m.Publish(core.Activity{ID: core.NewID(), Type: "user.login", Title: "admin signed in"})
 	m.Publish(core.Activity{ID: core.NewID(), Type: "item.added", Title: "Movie", Attributes: map[string]string{"library": "l1"}})
 	m.Publish(core.Activity{ID: core.NewID(), Type: "item.removed", Title: "Movie"})
-	file := filepath.Join(data, "org.mavio.smoke", "events")
+	file := filepath.Join(data, "dev.mavio.smoke", "events")
 	want := "item.added library=l1\nitem.removed\n"
 	for deadline := time.Now().Add(10 * time.Second); ; time.Sleep(50 * time.Millisecond) {
 		got, _ := os.ReadFile(file)

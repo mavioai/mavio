@@ -424,7 +424,7 @@ func TestReleaseProfilesAndMappings(t *testing.T) {
 	})
 	admin := acquisitionv1connect.NewProfileServiceClient(http.DefaultClient, url, as("admin"))
 
-	indexer := acquisitionv1.IndexerRef_builder{PluginId: new("org.mavio.indexers"), IndexerId: new("nzbgeek")}.Build()
+	indexer := acquisitionv1.IndexerRef_builder{PluginId: new("dev.mavio.indexers"), IndexerId: new("nzbgeek")}.Build()
 	res, err := admin.CreateReleaseProfile(ctx, acquisitionv1.CreateReleaseProfileRequest_builder{Profile: acquisitionv1.ReleaseProfile_builder{
 		Name: new("No HDCAM"), Enabled: new(true), Ignored: []string{"HDCAM", `/\bTS\b/i`}, Indexer: indexer, Tags: []string{"new"},
 	}.Build()}.Build())
@@ -432,11 +432,11 @@ func TestReleaseProfilesAndMappings(t *testing.T) {
 		t.Fatalf("CreateReleaseProfile: %v", err)
 	}
 	p := res.GetProfile()
-	if p.GetIndexer().GetPluginId() != "org.mavio.indexers" || p.GetIndexer().GetIndexerId() != "nzbgeek" || len(p.GetIgnored()) != 2 {
+	if p.GetIndexer().GetPluginId() != "dev.mavio.indexers" || p.GetIndexer().GetIndexerId() != "nzbgeek" || len(p.GetIgnored()) != 2 {
 		t.Errorf("created release profile = %v", p)
 	}
 	stored, err := db.ReleaseProfiles().List(ctx)
-	if err != nil || len(stored) != 1 || stored[0].IndexerID != "org.mavio.indexers/nzbgeek" {
+	if err != nil || len(stored) != 1 || stored[0].IndexerID != "dev.mavio.indexers/nzbgeek" {
 		t.Errorf("stored release profiles = %+v, %v", stored, err)
 	}
 	p.ClearIndexer()

@@ -17,7 +17,7 @@ import (
 )
 
 // ID is the plugin's ID, as its manifest gives it.
-const ID = "org.mavio.download-clients"
+const ID = "dev.mavio.download-clients"
 
 // Version is the plugin's version; builds set it with
 // -ldflags "-X main.Version=…".

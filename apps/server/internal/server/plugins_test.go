@@ -96,7 +96,7 @@ func installSmoke(t *testing.T, rt, fields string) string {
 	if err := os.WriteFile(manifest.Executable(dir, m), data, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	doc := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":%q,"apiVersion":"1.0",%s}`, m.GetRuntime().String(), fields)
+	doc := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":%q,"apiVersion":"1.0",%s}`, m.GetRuntime().String(), fields)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(doc), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	tasks := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, withToken(first.GetAccessToken()))
 
 	// The plugin's task is listed, scheduled, and runs on demand.
-	const id = "plugin:org.mavio.smoke:count"
+	const id = "plugin:dev.mavio.smoke:count"
 	task := func() *systemv1.Task {
 		t.Helper()
 		list, err := tasks.ListTasks(ctx, &systemv1.ListTasksRequest{})
@@ -151,7 +151,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 		t.Fatalf("ListTasks = %v, want %s", list, id)
 		return nil
 	}
-	if got := task(); got.GetPluginId() != "org.mavio.smoke" || got.GetName() != "Count" ||
+	if got := task(); got.GetPluginId() != "dev.mavio.smoke" || got.GetName() != "Count" ||
 		got.GetInterval().AsDuration() != 24*time.Hour || got.GetNextRunTime() == nil {
 		t.Errorf("plugin task = %v", got)
 	}
@@ -166,7 +166,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	if run := task().GetLastRun(); run.GetState() != systemv1.JobState_JOB_STATE_SUCCEEDED {
 		t.Errorf("task run = %v", run)
 	}
-	if got, err := os.ReadFile(filepath.Join(dataDir, "org.mavio.smoke", "runs")); err != nil || string(got) != "1" {
+	if got, err := os.ReadFile(filepath.Join(dataDir, "dev.mavio.smoke", "runs")); err != nil || string(got) != "1" {
 		t.Errorf("runs in the plugin's data folder = %q, %v", got, err)
 	}
 
@@ -177,9 +177,9 @@ func testPluginPlatform(t *testing.T, rt string) {
 	if err != nil {
 		t.Fatalf("CreateUser: %v", err)
 	}
-	want := "task.completed plugin=org.mavio.smoke task=plugin:org.mavio.smoke:count\n" +
+	want := "task.completed plugin=dev.mavio.smoke task=plugin:dev.mavio.smoke:count\n" +
 		"user.created by=" + first.GetUser().GetId() + "\n"
-	events := filepath.Join(dataDir, "org.mavio.smoke", "events")
+	events := filepath.Join(dataDir, "dev.mavio.smoke", "events")
 	for deadline := time.Now().Add(30 * time.Second); ; time.Sleep(100 * time.Millisecond) {
 		got, _ := os.ReadFile(events)
 		if string(got) == want {
@@ -194,7 +194,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	// token, and serve sandboxed pages; forged user headers are dropped.
 	whoami := func(header, value string) (string, string) {
 		t.Helper()
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.url+"/plugins/org.mavio.smoke/whoami", nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.url+"/plugins/dev.mavio.smoke/whoami", nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -224,7 +224,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 		t.Errorf("whoami with the plugin's own credentials = %s", body)
 	}
 	// The plugin learns how the server is reached.
-	resp, err := http.Get(srv.url + "/plugins/org.mavio.smoke/server")
+	resp, err := http.Get(srv.url + "/plugins/dev.mavio.smoke/server")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,7 +234,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	if want := fmt.Sprintf(`name=%q version="v-test" http=%s https=0 base=""`, host, srv.url[strings.LastIndex(srv.url, ":")+1:]); string(info) != want {
 		t.Errorf("GET server = %s, want %s", info, want)
 	}
-	resp, err = http.Get(srv.url + "/plugins/org.mavio.missing/whoami")
+	resp, err = http.Get(srv.url + "/plugins/dev.mavio.missing/whoami")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +247,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	// commands to; the plugin carries them out as the user and the device.
 	setDevices := func(body string) {
 		t.Helper()
-		resp, err := http.Post(srv.url+"/plugins/org.mavio.smoke/devices", "text/plain", strings.NewReader(body))
+		resp, err := http.Post(srv.url+"/plugins/dev.mavio.smoke/devices", "text/plain", strings.NewReader(body))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -280,7 +280,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 		return nil
 	}
 	tv := device()
-	if tv.GetPluginId() != "org.mavio.smoke" || tv.GetDeviceId() != "tv" || tv.GetDeviceName() != "Device tv" ||
+	if tv.GetPluginId() != "dev.mavio.smoke" || tv.GetDeviceId() != "tv" || tv.GetDeviceName() != "Device tv" ||
 		tv.GetClient() != "Smoke TV" || !tv.GetOnline() || tv.GetUserId() != "" {
 		t.Fatalf("device session = %v", tv)
 	}
@@ -307,7 +307,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 	if err := send(sessionv1.Command_builder{Volume: &sessionv1.Volume{}}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("SendCommand(empty volume) = %v, want invalid_argument", err)
 	}
-	if got, _ := os.ReadFile(filepath.Join(dataDir, "org.mavio.smoke", "volume")); string(got) != "true 30 false false\n" {
+	if got, _ := os.ReadFile(filepath.Join(dataDir, "dev.mavio.smoke", "volume")); string(got) != "true 30 false false\n" {
 		t.Errorf("volume commands = %q", got)
 	}
 	// Listed again, it keeps its session; unlisted, it is gone.
@@ -336,7 +336,7 @@ func testPluginPlatform(t *testing.T, rt string) {
 			t.Errorf("imdb kind = %v, want the built-in one", k)
 		}
 	}
-	if last := kinds.GetKinds()[len(keys)-1]; last.GetKey() != "trakt" || last.GetPluginId() != "org.mavio.smoke" || !last.GetPersons() ||
+	if last := kinds.GetKinds()[len(keys)-1]; last.GetKey() != "trakt" || last.GetPluginId() != "dev.mavio.smoke" || !last.GetPersons() ||
 		len(last.GetItemKinds()) != 1 || strings.Count(strings.Join(keys, ","), "imdb") != 1 {
 		t.Errorf("movie external ID kinds = %q, last = %v", keys, last)
 	}

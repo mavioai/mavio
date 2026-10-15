@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.scraper-tmdb",
+  "id": "dev.mavio.scraper-tmdb",
   "name": "TMDB",
   "version": "0.1.0",
   "description": "Metadata and images for movies and TV series, the episodes of series, and movies and series to discover, from The Movie Database (TMDB).",

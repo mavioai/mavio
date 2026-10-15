@@ -77,12 +77,12 @@ func TestChange(t *testing.T) {
 		t.Fatal(err)
 	}
 	if _, err := m.Change(ctx, func(s *core.ServerSettings) error {
-		s.DisabledPlugins = []string{"org.mavio.smoke"}
+		s.DisabledPlugins = []string{"dev.mavio.smoke"}
 		return nil
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if got := m.Get().DisabledPlugins; len(got) != 1 || got[0] != "org.mavio.smoke" {
+	if got := m.Get().DisabledPlugins; len(got) != 1 || got[0] != "dev.mavio.smoke" {
 		t.Errorf("current disabled plugins = %q", got)
 	}
 	stored, _ := db.Settings().Get(ctx)
@@ -93,12 +93,12 @@ func TestChange(t *testing.T) {
 	// failing, leaves the current settings as they were.
 	fail := errors.New("refused")
 	if _, err := m.Change(ctx, func(s *core.ServerSettings) error {
-		s.DisabledPlugins[0] = "org.mavio.dlna"
+		s.DisabledPlugins[0] = "dev.mavio.dlna"
 		return fail
 	}); !errors.Is(err, fail) {
 		t.Errorf("failing change = %v, want = %v", err, fail)
 	}
-	if got := m.Get().DisabledPlugins; got[0] != "org.mavio.smoke" {
+	if got := m.Get().DisabledPlugins; got[0] != "dev.mavio.smoke" {
 		t.Errorf("disabled plugins after a failing change = %q", got)
 	}
 }

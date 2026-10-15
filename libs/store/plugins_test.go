@@ -11,7 +11,7 @@ import (
 func TestPluginConfigs(t *testing.T) {
 	eachBackend(t, func(t *testing.T, s *store.Store) {
 		ctx := t.Context()
-		const id = "org.mavio.scraper-tmdb"
+		const id = "dev.mavio.scraper-tmdb"
 		if _, err := s.PluginConfigs().Get(ctx, id); !errors.Is(err, core.ErrNotFound) {
 			t.Errorf("Get before Put: %v, want ErrNotFound", err)
 		}

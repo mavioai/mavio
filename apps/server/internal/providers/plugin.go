@@ -16,7 +16,7 @@ import (
 
 // Plugin is a metadata provider plugin as a library.Provider.
 type Plugin struct {
-	// ID names the plugin in logs, such as "org.mavio.scraper-tmdb".
+	// ID names the plugin in logs, such as "dev.mavio.scraper-tmdb".
 	ID     string
 	Client pluginv1connect.MetadataProviderServiceClient
 }

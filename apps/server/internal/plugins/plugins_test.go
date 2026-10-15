@@ -66,7 +66,7 @@ func installWith(t *testing.T, root, folder, schema, fields string) {
 	if err := os.WriteFile(filepath.Join(dir, "plugin.wasm"), data, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
+	manifest := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":"RUNTIME_WASM",
 		%s,"configSchema":%q,"apiVersion":"1.0"}`, fields, schema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)
@@ -119,7 +119,7 @@ func TestManager(t *testing.T) {
 	if len(list) != 2 || list[0].Manifest.GetId() != "broken" || list[0].State != plugins.Failed || list[0].Err == nil {
 		t.Fatalf("Plugins() = %+v, want the broken folder failed, by its name", list)
 	}
-	if got := state(t, m, "org.mavio.smoke"); got.State != plugins.Unconfigured {
+	if got := state(t, m, "dev.mavio.smoke"); got.State != plugins.Unconfigured {
 		t.Errorf("before configuration: state = %v, want Unconfigured", got.State)
 	}
 	providers := m.MetadataProviders()
@@ -130,13 +130,13 @@ func TestManager(t *testing.T) {
 		t.Errorf("unconfigured provider: Metadata = %v, %v; want = %v", res, err, library.ErrProviderUnavailable)
 	}
 
-	if _, err := m.SetConfig(ctx, "org.mavio.smoke", `{"api_key":""}`); !errors.Is(err, core.ErrInvalid) {
+	if _, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":""}`); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("SetConfig against the schema: %v, want ErrInvalid", err)
 	}
 	if _, err := m.SetConfig(ctx, "org.example.missing", `{}`); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("SetConfig of an unknown plugin: %v, want ErrNotFound", err)
 	}
-	info, err := m.SetConfig(ctx, "org.mavio.smoke", `{"api_key":"secret"}`)
+	info, err := m.SetConfig(ctx, "dev.mavio.smoke", `{"api_key":"secret"}`)
 	if err != nil || info.State != plugins.Ready {
 		t.Fatalf("SetConfig = %+v, %v; want Ready", info, err)
 	}
@@ -144,7 +144,7 @@ func TestManager(t *testing.T) {
 	if res, err := providers[0].Metadata(ctx, concubine); err != nil || res == nil {
 		t.Errorf("configured provider: Metadata = %v, %v; want the film", res, err)
 	}
-	if c, err := m.Config(ctx, "org.mavio.smoke"); err != nil || c.JSON != `{"api_key":"secret"}` {
+	if c, err := m.Config(ctx, "dev.mavio.smoke"); err != nil || c.JSON != `{"api_key":"secret"}` {
 		t.Errorf("Config = %+v, %v", c, err)
 	}
 	if err := m.Close(ctx); err != nil {
@@ -152,12 +152,12 @@ func TestManager(t *testing.T) {
 	}
 
 	// The stored configuration is delivered when the server starts again.
-	if got := state(t, open(t, dir, s), "org.mavio.smoke"); got.State != plugins.Ready {
+	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Ready {
 		t.Errorf("after a restart: state = %v, %v; want Ready", got.State, got.Err)
 	}
 	// An upgrade whose schema the stored configuration no longer fits.
 	install(t, dir, "smoke", `{"type":"object","properties":{"token":{"type":"string"}},"required":["token"]}`)
-	if got := state(t, open(t, dir, s), "org.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {
+	if got := state(t, open(t, dir, s), "dev.mavio.smoke"); got.State != plugins.Failed || got.Err == nil {
 		t.Errorf("stale configuration: state = %v, %v; want Failed", got.State, got.Err)
 	}
 }
@@ -167,7 +167,7 @@ func TestManagerWithoutPlugins(t *testing.T) {
 	if err != nil || len(m.Plugins()) != 0 || len(m.MetadataProviders()) != 0 {
 		t.Errorf("Open without a folder = %v, %v", m.Plugins(), err)
 	}
-	if _, err := m.Config(t.Context(), "org.mavio.smoke"); !errors.Is(err, core.ErrNotFound) {
+	if _, err := m.Config(t.Context(), "dev.mavio.smoke"); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("Config: %v, want ErrNotFound", err)
 	}
 }
@@ -189,11 +189,11 @@ func TestAuthAndNotifiers(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = db.Close() })
 	m := open(t, root, db)
-	res, err := m.Authenticate(ctx, "org.mavio.smoke", "admin-ann", "directory")
+	res, err := m.Authenticate(ctx, "dev.mavio.smoke", "admin-ann", "directory")
 	if err != nil || !res.Authenticated || !res.Admin || res.DisplayName != "ADMIN-ANN" {
 		t.Errorf("Authenticate = %+v, %v", res, err)
 	}
-	if res, err := m.Authenticate(ctx, "org.mavio.smoke", "bob", "wrong"); err != nil || res.Authenticated {
+	if res, err := m.Authenticate(ctx, "dev.mavio.smoke", "bob", "wrong"); err != nil || res.Authenticated {
 		t.Errorf("Authenticate with a wrong password = %+v, %v", res, err)
 	}
 	if _, err := m.Authenticate(ctx, "org.example.none", "bob", "directory"); !errors.Is(err, core.ErrNotFound) {

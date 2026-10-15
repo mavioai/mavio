@@ -15,7 +15,7 @@ import (
 
 func valid() *pluginv1.Manifest {
 	return pluginv1.Manifest_builder{
-		Id:           proto.String("org.mavio.scraper-tmdb"),
+		Id:           proto.String("dev.mavio.scraper-tmdb"),
 		Name:         proto.String("TMDB"),
 		Version:      proto.String("1.2.3"),
 		Runtime:      pluginv1.Runtime_RUNTIME_WASM.Enum(),

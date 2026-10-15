@@ -86,7 +86,7 @@ import (
 
 // ID and Version must match the test manifests.
 const (
-	ID      = "org.mavio.testplugin"
+	ID      = "dev.mavio.testplugin"
 	Version = "0.1.0"
 )
 

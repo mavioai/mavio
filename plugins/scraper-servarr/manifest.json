@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.scraper-servarr",
+  "id": "dev.mavio.scraper-servarr",
   "name": "Servarr",
   "version": "0.1.0",
   "description": "Metadata for movies from Radarr's metadata service and for series and their episodes, in TheTVDB's order, from Sonarr's SkyHook; Radarr's lists of movies; the titles, air-dated series and numbering releases use, from Sonarr's services and XEM. Needs no keys.",

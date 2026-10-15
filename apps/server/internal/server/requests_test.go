@@ -228,10 +228,10 @@ func TestRequests(t *testing.T) {
 		t.Fatalf("UpdateServerSettings: %v", err)
 	}
 	for id, cfg := range map[string]any{
-		"org.mavio.indexers": map[string]any{"indexers": []any{
+		"dev.mavio.indexers": map[string]any{"indexers": []any{
 			map[string]any{"id": "nzb", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
 		}},
-		"org.mavio.download-clients": map[string]any{"clients": []any{
+		"dev.mavio.download-clients": map[string]any{"clients": []any{
 			map[string]any{"id": "sab", "name": "SABnzbd", "definition": "sabnzbd", "settings": map[string]any{
 				"host": "127.0.0.1", "port": sab.Listener.Addr().(*net.TCPAddr).Port, "api_key": sabAPIKey, "movie_category": "movies", "tv_category": "tv",
 			}},
@@ -297,7 +297,7 @@ func TestRequests(t *testing.T) {
 	for _, c := range catalogs.GetCatalogs() {
 		catalogIDs = append(catalogIDs, c.GetId())
 	}
-	const trending, popular = "org.mavio.scraper-tmdb/trending", "org.mavio.scraper-tmdb/popular"
+	const trending, popular = "dev.mavio.scraper-tmdb/trending", "dev.mavio.scraper-tmdb/popular"
 	if !slices.Contains(catalogIDs, trending) || !slices.Contains(catalogIDs, popular) {
 		t.Fatalf("catalogs = %q, want = TMDB's trending and popular titles among them", catalogIDs)
 	}

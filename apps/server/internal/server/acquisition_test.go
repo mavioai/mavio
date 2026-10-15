@@ -489,10 +489,10 @@ func TestAcquisition(t *testing.T) {
 		t.Fatalf("CreateLibrary: %v", err)
 	}
 	for id, cfg := range map[string]any{
-		"org.mavio.indexers": map[string]any{"indexers": []any{
+		"dev.mavio.indexers": map[string]any{"indexers": []any{
 			map[string]any{"id": "nzb", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
 		}},
-		"org.mavio.download-clients": map[string]any{"clients": []any{
+		"dev.mavio.download-clients": map[string]any{"clients": []any{
 			map[string]any{"id": "sab", "name": "SABnzbd", "definition": "sabnzbd", "settings": map[string]any{
 				"host": "127.0.0.1", "port": sab.Listener.Addr().(*net.TCPAddr).Port, "api_key": sabAPIKey, "movie_category": "movies", "tv_category": "tv",
 			}},
@@ -599,7 +599,7 @@ func TestAcquisition(t *testing.T) {
 			return q != nil && sab.job(rel.id) != nil
 		}, describeQueue)
 		if q.GetState() != acquisitionv1.DownloadState_DOWNLOAD_STATE_DOWNLOADING || q.GetQuality() != quality ||
-			q.GetClientPluginId() != "org.mavio.download-clients" || q.GetClientId() != "sab" || q.GetDownloadId() != sab.job(rel.id).id ||
+			q.GetClientPluginId() != "dev.mavio.download-clients" || q.GetClientId() != "sab" || q.GetDownloadId() != sab.job(rel.id).id ||
 			q.GetProtocol() != acquisitionv1.DownloadProtocol_DOWNLOAD_PROTOCOL_USENET || q.GetIndexer().GetIndexerId() != "nzb" {
 			t.Errorf("queued %s = %v, want = downloading %s in SABnzbd, from the indexer", rel.title, q, quality)
 		}

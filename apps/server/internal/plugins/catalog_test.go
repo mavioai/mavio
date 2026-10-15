@@ -23,7 +23,7 @@ func pack(t *testing.T, manifestVersion string) []byte {
 	if err != nil {
 		t.Fatal(err)
 	}
-	manifest := `{"id":"org.mavio.smoke","name":"Smoke","version":"` + manifestVersion + `","runtime":"RUNTIME_WASM",
+	manifest := `{"id":"dev.mavio.smoke","name":"Smoke","version":"` + manifestVersion + `","runtime":"RUNTIME_WASM",
 		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"configSchema":"{}","apiVersion":"1.0"}`
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
@@ -46,7 +46,7 @@ func TestCatalogInstall(t *testing.T) {
 		{"version": "9.0.0", "api_version": "2.0", "runtime": "RUNTIME_WASM", "url": "future.zip"},
 		{"version": "8.0.0", "api_version": "1.0", "runtime": "RUNTIME_PROCESS", "os": "plan9", "arch": "mips", "url": "x.zip"},
 	}
-	index, _ := json.Marshal(map[string]any{"plugins": []any{map[string]any{"id": "org.mavio.smoke", "name": "Smoke", "versions": versions}}})
+	index, _ := json.Marshal(map[string]any{"plugins": []any{map[string]any{"id": "dev.mavio.smoke", "name": "Smoke", "versions": versions}}})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/index.json":
@@ -79,22 +79,22 @@ func TestCatalogInstall(t *testing.T) {
 	if err != nil || len(cat) != 1 || len(cat[0].Versions) != 2 || cat[0].Versions[0].Version != "0.10.0" {
 		t.Fatalf("Catalog = %+v, %v; want 0.10.0 and 0.1.0 only", cat, err)
 	}
-	if _, err := m.Install(ctx, "org.mavio.smoke", "0.1.0"); err != nil {
+	if _, err := m.Install(ctx, "dev.mavio.smoke", "0.1.0"); err != nil {
 		t.Fatal(err)
 	}
 	// The newest package does not match its hash; the installed version
 	// keeps running.
-	if _, err := m.Install(ctx, "org.mavio.smoke", ""); err == nil {
+	if _, err := m.Install(ctx, "dev.mavio.smoke", ""); err == nil {
 		t.Error("installing a package with the wrong hash: no error")
 	}
-	if p := state(t, m, "org.mavio.smoke"); p.State != plugins.Ready || p.Manifest.GetVersion() != "0.1.0" {
+	if p := state(t, m, "dev.mavio.smoke"); p.State != plugins.Ready || p.Manifest.GetVersion() != "0.1.0" {
 		t.Errorf("plugin after the failed upgrade = %+v", p)
 	}
 	if _, err := m.Install(ctx, "org.example.none", ""); err == nil {
 		t.Error("installing an unknown plugin: no error")
 	}
 	entries, _ := os.ReadDir(root)
-	if len(entries) != 1 || entries[0].Name() != "org.mavio.smoke" {
+	if len(entries) != 1 || entries[0].Name() != "dev.mavio.smoke" {
 		t.Errorf("plugin folder = %v", entries)
 	}
 	// A server started again finds the installed plugin.
@@ -102,7 +102,7 @@ func TestCatalogInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 	again := open(t, root, db)
-	if p := state(t, again, "org.mavio.smoke"); p.State != plugins.Ready {
+	if p := state(t, again, "dev.mavio.smoke"); p.State != plugins.Ready {
 		t.Errorf("plugin after a restart = %+v", p)
 	}
 }

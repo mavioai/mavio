@@ -202,10 +202,10 @@ func TestSeriesAcquisition(t *testing.T) {
 		t.Fatalf("CreateLibrary: %v", err)
 	}
 	for id, cfg := range map[string]any{
-		"org.mavio.indexers": map[string]any{"indexers": []any{
+		"dev.mavio.indexers": map[string]any{"indexers": []any{
 			map[string]any{"id": "nzb", "definition": "newznab", "settings": map[string]any{"base_url": indexer.URL, "api_key": "nzbkey"}},
 		}},
-		"org.mavio.download-clients": map[string]any{"clients": []any{
+		"dev.mavio.download-clients": map[string]any{"clients": []any{
 			map[string]any{"id": "sab", "name": "SABnzbd", "definition": "sabnzbd", "settings": map[string]any{
 				"host": "127.0.0.1", "port": sab.Listener.Addr().(*net.TCPAddr).Port, "api_key": sabAPIKey, "movie_category": "movies", "tv_category": "tv",
 			}},

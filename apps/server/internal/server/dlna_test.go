@@ -142,11 +142,11 @@ func TestDLNA(t *testing.T) {
 		map[bool]string{true: `,"interfaces":["` + lo + `"]`}[lo != ""])
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.dlna"), ConfigJson: new(cfg),
+		PluginId: new("dev.mavio.dlna"), ConfigJson: new(cfg),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
-	base := srv.url + "/plugins/org.mavio.dlna"
+	base := srv.url + "/plugins/dev.mavio.dlna"
 	var desc []byte
 	waitFor(t, "the media server's description", func() bool {
 		resp, err := http.Get(base + "/description.xml")
@@ -248,7 +248,7 @@ func TestDLNA(t *testing.T) {
 			t.Fatalf("ListSessions: %v", err)
 		}
 		for _, s := range list.GetSessions() {
-			if s.GetPluginId() == "org.mavio.dlna" {
+			if s.GetPluginId() == "dev.mavio.dlna" {
 				return s
 			}
 		}

@@ -49,7 +49,7 @@ func smokePackage(t *testing.T, version string) []byte {
 		t.Fatal(err)
 	}
 	schema := `{"type":"object","properties":{"api_key":{"type":"string","minLength":1}},"required":["api_key"]}`
-	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":%q,"runtime":"RUNTIME_WASM",
+	manifest := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":%q,"runtime":"RUNTIME_WASM",
 		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"configSchema":%q,"apiVersion":"1.0"}`, version, schema)
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
@@ -78,7 +78,7 @@ func catalog(t *testing.T) string {
 			"version": v, "api_version": "1.0", "runtime": "RUNTIME_WASM", "url": "smoke-" + v + ".zip", "sha256": hex.EncodeToString(sum[:]),
 		})
 	}
-	index, _ := json.Marshal(map[string]any{"plugins": []any{map[string]any{"id": "org.mavio.smoke", "name": "Smoke", "versions": versions}}})
+	index, _ := json.Marshal(map[string]any{"plugins": []any{map[string]any{"id": "dev.mavio.smoke", "name": "Smoke", "versions": versions}}})
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/catalog.json" {
 			_, _ = w.Write(index)
@@ -208,18 +208,18 @@ func TestAdministration(t *testing.T) {
 		}
 		return list.GetPlugins()[0]
 	}
-	if _, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("org.mavio.smoke"), Version: new("0.1.0")}.Build()); err != nil {
+	if _, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke"), Version: new("0.1.0")}.Build()); err != nil {
 		t.Fatalf("InstallPlugin 0.1.0: %v", err)
 	}
 	if p := plugin(); p.GetManifest().GetVersion() != "0.1.0" || p.GetState() != systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED {
 		t.Fatalf("installed plugin: %v", p)
 	}
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId: new("org.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
+		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
-	installed, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("org.mavio.smoke")}.Build())
+	installed, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build())
 	if err != nil {
 		t.Fatalf("upgrade: %v", err)
 	}
@@ -291,7 +291,7 @@ func TestAdministration(t *testing.T) {
 		t.Errorf("StopPlayback: %v", err)
 	}
 
-	if _, err := system.UninstallPlugin(ctx, systemv1.UninstallPluginRequest_builder{PluginId: new("org.mavio.smoke")}.Build()); err != nil {
+	if _, err := system.UninstallPlugin(ctx, systemv1.UninstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build()); err != nil {
 		t.Fatalf("UninstallPlugin: %v", err)
 	}
 	if p := plugin(); p != nil {

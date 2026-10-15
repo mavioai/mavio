@@ -39,7 +39,7 @@ const (
 
 // A catalog is a JSON document listing plugins and their versions:
 //
-//	{"plugins": [{"id": "org.mavio.scraper-tmdb", "name": "TMDB", …,
+//	{"plugins": [{"id": "dev.mavio.scraper-tmdb", "name": "TMDB", …,
 //	  "versions": [{"version": "0.2.0", "api_version": "1.0",
 //	    "runtime": "RUNTIME_WASM", "url": "tmdb-0.2.0.zip",
 //	    "sha256": "…", "changelog": "…", "release_time": "…"}]}]}

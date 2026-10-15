@@ -75,7 +75,7 @@ func openPlugin(t *testing.T, rt string) host.Plugin {
 		t.Fatal(err)
 	}
 	runtimeName := map[string]string{"wasm": "RUNTIME_WASM", "process": "RUNTIME_PROCESS"}[rt]
-	manifest := fmt.Sprintf(`{"id":"org.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":%q,
+	manifest := fmt.Sprintf(`{"id":"dev.mavio.smoke","name":"Smoke","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER"],"apiVersion":"1.0"}`, runtimeName)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
 		t.Fatal(err)

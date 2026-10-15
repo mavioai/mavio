@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.agent",
+  "id": "dev.mavio.agent",
   "name": "Agent",
   "version": "0.1.0",
   "description": "An AI gateway to the providers pi-ai supports, with their API keys and OAuth logins (subscriptions included) and OpenAI-compatible servers the administrator adds, and agent sessions kept by pi-durable.",

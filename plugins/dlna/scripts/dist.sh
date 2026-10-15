@@ -34,7 +34,7 @@ done
 cat > dist/catalog.json <<JSON
 {
   "plugins": [{
-    "id": "org.mavio.dlna",
+    "id": "dev.mavio.dlna",
     "name": "DLNA",
     "description": "A DLNA media server for televisions and other devices on the local network, and Play To, which plays on DLNA renderers.",
     "author": "Mavio",

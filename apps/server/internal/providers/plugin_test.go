@@ -68,7 +68,7 @@ func newFake() *fakeClient {
 
 func TestPluginSearchesUnidentifiedItems(t *testing.T) {
 	c := newFake()
-	p := &Plugin{ID: "org.mavio.test", Client: c}
+	p := &Plugin{ID: "dev.mavio.test", Client: c}
 	res, err := p.Metadata(t.Context(), library.Lookup{Kind: core.KindMovie, Name: "Farewell My Concubine", Year: 1993, Language: "zh", Country: "CN"})
 	if err != nil {
 		t.Fatal(err)

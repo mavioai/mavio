@@ -74,7 +74,7 @@ func serveTCP(addr string) error {
 	if addr == "" {
 		addr = ln.Addr().String()
 	}
-	if err := json.NewEncoder(os.Stdout).Encode(proc.Handshake{Protocol: proc.ProtocolVersion, PluginID: "org.mavio.tcp", Address: addr}); err != nil {
+	if err := json.NewEncoder(os.Stdout).Encode(proc.Handshake{Protocol: proc.ProtocolVersion, PluginID: "dev.mavio.tcp", Address: addr}); err != nil {
 		return err
 	}
 	<-p.done
@@ -87,7 +87,7 @@ func start(t *testing.T, addr string) (*Plugin, error) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	m := pluginv1.Manifest_builder{Id: proto.String("org.mavio.tcp"), Runtime: pluginv1.Runtime_RUNTIME_PROCESS.Enum()}.Build()
+	m := pluginv1.Manifest_builder{Id: proto.String("dev.mavio.tcp"), Runtime: pluginv1.Runtime_RUNTIME_PROCESS.Enum()}.Build()
 	return Start(t.Context(), exe, m, Options{
 		Env:     []string{envTCPPlugin + "=" + addr},
 		HostAPI: http.NotFoundHandler(),

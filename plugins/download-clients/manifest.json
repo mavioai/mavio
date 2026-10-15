@@ -1,5 +1,5 @@
 {
-  "id": "org.mavio.download-clients",
+  "id": "dev.mavio.download-clients",
   "name": "Download Clients",
   "version": "0.1.0",
   "description": "Sends releases to the download clients Radarr and Sonarr support, such as qBittorrent, Transmission, Deluge, rTorrent, SABnzbd and NZBGet, and follows their downloads.",

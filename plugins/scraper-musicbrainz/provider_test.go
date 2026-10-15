@@ -182,7 +182,7 @@ func TestLimiter(t *testing.T) {
 }
 
 func TestManifest(t *testing.T) {
-	if shipped.GetId() != "org.mavio.scraper-musicbrainz" || !strings.Contains(shipped.GetConfigSchema(), "requests_per_second") {
+	if shipped.GetId() != "dev.mavio.scraper-musicbrainz" || !strings.Contains(shipped.GetConfigSchema(), "requests_per_second") {
 		t.Errorf("manifest: %v", shipped)
 	}
 }

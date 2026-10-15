@@ -31,7 +31,7 @@ func TestTasks(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = m.Close(t.Context()) })
 
-	if tasks := m.Tasks(); len(tasks) != 2 || tasks[0].Plugin != "org.mavio.smoke" || tasks[0].Task.GetId() != "count" {
+	if tasks := m.Tasks(); len(tasks) != 2 || tasks[0].Plugin != "dev.mavio.smoke" || tasks[0].Task.GetId() != "count" {
 		t.Fatalf("Tasks() = %v", tasks)
 	}
 	// Starting the plugin scheduled the task with an interval.
@@ -58,26 +58,26 @@ func TestTasks(t *testing.T) {
 			t.Errorf("next runs = %+v", next)
 		}
 	}
-	if got, err := os.ReadFile(filepath.Join(data, "org.mavio.smoke", "runs")); err != nil || string(got) != "2" {
+	if got, err := os.ReadFile(filepath.Join(data, "dev.mavio.smoke", "runs")); err != nil || string(got) != "2" {
 		t.Errorf("runs counted in the data folder = %q, %v", got, err)
 	}
 	// Requested runs queue nothing; failures are errors.
-	if next, err := m.RunTask(ctx, plugins.TaskJob("org.mavio.smoke", "count", now, false)); err != nil || len(next) != 0 {
+	if next, err := m.RunTask(ctx, plugins.TaskJob("dev.mavio.smoke", "count", now, false)); err != nil || len(next) != 0 {
 		t.Errorf("requested run = %v, %v", next, err)
 	}
-	if _, err := m.RunTask(ctx, plugins.TaskJob("org.mavio.smoke", "fail", now, false)); err == nil {
+	if _, err := m.RunTask(ctx, plugins.TaskJob("dev.mavio.smoke", "fail", now, false)); err == nil {
 		t.Error("failing task succeeded")
 	}
 	// Runs of tasks that are gone are dropped.
-	if next, err := m.RunTask(ctx, plugins.TaskJob("org.mavio.smoke", "gone", now, true)); err != nil || len(next) != 0 {
+	if next, err := m.RunTask(ctx, plugins.TaskJob("dev.mavio.smoke", "gone", now, true)); err != nil || len(next) != 0 {
 		t.Errorf("run of a task that is gone = %v, %v", next, err)
 	}
 
 	// Uninstalling deletes the data folder.
-	if err := m.Uninstall(ctx, "org.mavio.smoke"); err != nil {
+	if err := m.Uninstall(ctx, "dev.mavio.smoke"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(data, "org.mavio.smoke")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(data, "dev.mavio.smoke")); !os.IsNotExist(err) {
 		t.Errorf("data folder after uninstalling: %v", err)
 	}
 }

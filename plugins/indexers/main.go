@@ -17,7 +17,7 @@ import (
 )
 
 // ID is the plugin's ID, as its manifest gives it.
-const ID = "org.mavio.indexers"
+const ID = "dev.mavio.indexers"
 
 // Version is the plugin's version; builds set it with
 // -ldflags "-X main.Version=…".

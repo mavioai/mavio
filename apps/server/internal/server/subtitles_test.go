@@ -158,7 +158,7 @@ func TestSubtitles(t *testing.T) {
 		return err == nil && len(jobs.GetJobs()) == 0
 	})
 	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
-		PluginId:   new("org.mavio.subtitles"),
+		PluginId:   new("dev.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}}]}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
@@ -169,7 +169,7 @@ func TestSubtitles(t *testing.T) {
 			return false
 		}
 		for _, p := range resp.GetProviders() {
-			if p.GetId() == "org.mavio.subtitles/subsarr" {
+			if p.GetId() == "dev.mavio.subtitles/subsarr" {
 				return p.GetEnabled()
 			}
 		}
@@ -189,7 +189,7 @@ func TestSubtitles(t *testing.T) {
 	mu.Unlock()
 	history, err := subs.ListSubtitleHistory(ctx, &acquisitionv1.ListSubtitleHistoryRequest{})
 	if err != nil || len(history.GetEvents()) != 1 || history.GetEvents()[0].GetAction() != acquisitionv1.SubtitleAction_SUBTITLE_ACTION_DOWNLOADED ||
-		history.GetEvents()[0].GetProvider() != "org.mavio.subtitles/subsarr" {
+		history.GetEvents()[0].GetProvider() != "dev.mavio.subtitles/subsarr" {
 		t.Fatalf("ListSubtitleHistory = %v, %v", history, err)
 	}
 	itemSubtitles := func() *acquisitionv1.GetItemSubtitlesResponse {

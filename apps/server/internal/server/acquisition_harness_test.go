@@ -214,8 +214,8 @@ func (s *acquisitionServer) plugins(indexers, clients []any) {
 	s.t.Helper()
 	ctx := s.t.Context()
 	for id, cfg := range map[string]any{
-		"org.mavio.indexers":         map[string]any{"indexers": indexers},
-		"org.mavio.download-clients": map[string]any{"clients": clients},
+		"dev.mavio.indexers":         map[string]any{"indexers": indexers},
+		"dev.mavio.download-clients": map[string]any{"clients": clients},
 	} {
 		data, err := json.Marshal(cfg)
 		if err != nil {
