@@ -126,7 +126,10 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   return (
     <div
       role="menu"
-      className={`absolute z-50 ${tv ? "w-[400px]" : "w-[300px]"} rounded-[14px] border border-border bg-surface-overlay/85 p-1.5 shadow-level3 backdrop-blur-xl ${
+      className={`absolute z-50 rounded-[14px] border border-border p-1.5 shadow-level3 ${
+        // On the television, frosted glass over the artwork behind it.
+        tv ? "w-[400px] bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : "w-[300px] bg-surface-overlay/85 backdrop-blur-xl"
+      } ${
         placement === "above" ? "bottom-full left-0 mb-2" : "top-full right-0 mt-2"
       }`}
     >
