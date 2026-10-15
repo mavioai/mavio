@@ -44,6 +44,14 @@ pub use self::__buffa::view::AccessView;
 #[doc(inline)]
 pub use self::__buffa::view::AccessOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::CreateClaimRequestRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateClaimRequestRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateClaimRequestResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateClaimRequestResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ClaimServerRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ClaimServerRequestOwnedView;
@@ -87,6 +95,14 @@ pub use self::__buffa::view::PublishLibrariesRequestOwnedView;
 pub use self::__buffa::view::PublishLibrariesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::PublishLibrariesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishConnectionsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishConnectionsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishConnectionsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::PublishConnectionsResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::NoticeView;
 #[doc(inline)]
@@ -203,6 +219,38 @@ pub use self::__buffa::view::CreateAuthorizationCodeRequestOwnedView;
 pub use self::__buffa::view::CreateAuthorizationCodeResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAuthorizationCodeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetClaimRequestRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetClaimRequestRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetClaimRequestResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetClaimRequestResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerClaimRequestRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerClaimRequestRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerClaimRequestResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerClaimRequestResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetLinkCodeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetLinkCodeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetLinkCodeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetLinkCodeResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerLinkCodeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerLinkCodeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerLinkCodeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::AnswerLinkCodeResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateRelayTicketRequestView;
 #[doc(inline)]

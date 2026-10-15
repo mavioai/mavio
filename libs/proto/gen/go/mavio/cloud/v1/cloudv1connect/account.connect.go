@@ -54,6 +54,18 @@ const (
 	// AccountServiceCreateAuthorizationCodeProcedure is the fully-qualified name of the
 	// AccountService's CreateAuthorizationCode RPC.
 	AccountServiceCreateAuthorizationCodeProcedure = "/mavio.cloud.v1.AccountService/CreateAuthorizationCode"
+	// AccountServiceGetClaimRequestProcedure is the fully-qualified name of the AccountService's
+	// GetClaimRequest RPC.
+	AccountServiceGetClaimRequestProcedure = "/mavio.cloud.v1.AccountService/GetClaimRequest"
+	// AccountServiceAnswerClaimRequestProcedure is the fully-qualified name of the AccountService's
+	// AnswerClaimRequest RPC.
+	AccountServiceAnswerClaimRequestProcedure = "/mavio.cloud.v1.AccountService/AnswerClaimRequest"
+	// AccountServiceGetLinkCodeProcedure is the fully-qualified name of the AccountService's
+	// GetLinkCode RPC.
+	AccountServiceGetLinkCodeProcedure = "/mavio.cloud.v1.AccountService/GetLinkCode"
+	// AccountServiceAnswerLinkCodeProcedure is the fully-qualified name of the AccountService's
+	// AnswerLinkCode RPC.
+	AccountServiceAnswerLinkCodeProcedure = "/mavio.cloud.v1.AccountService/AnswerLinkCode"
 	// AccountServiceCreateRelayTicketProcedure is the fully-qualified name of the AccountService's
 	// CreateRelayTicket RPC.
 	AccountServiceCreateRelayTicketProcedure = "/mavio.cloud.v1.AccountService/CreateRelayTicket"
@@ -102,12 +114,28 @@ type AccountServiceClient interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
-	// CreateAuthorizationCode approves a server's web interface signing the
-	// account in (docs/accounts.md §6): the code it gives, sent back to the
-	// redirect URI, is exchanged within a minute at /api/oauth/token with
-	// the PKCE verifier for an assertion for the device key. A server the
-	// account neither administers nor has access to is PERMISSION_DENIED.
+	// CreateAuthorizationCode approves a web UI signing the account in
+	// (docs/accounts.md §6): the code it gives, sent back to the redirect
+	// URI, is exchanged within a minute at /api/oauth/token with the PKCE
+	// verifier for a session of the device key. A server's web UI signs in
+	// only the server's administrator, and other accounts are
+	// PERMISSION_DENIED; app.mavio.dev signs in any account.
 	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
+	// GetClaimRequest gives the server and the web UI of a claim request
+	// for the account to confirm.
+	GetClaimRequest(context.Context, *v1.GetClaimRequestRequest) (*v1.GetClaimRequestResponse, error)
+	// AnswerClaimRequest confirms a claim request, claiming its server for
+	// the account, or declines it, and gives the URL the browser goes to
+	// next: the request's redirect URI with an authorization code, or with
+	// an error. An unknown, answered or expired request is NOT_FOUND.
+	AnswerClaimRequest(context.Context, *v1.AnswerClaimRequestRequest) (*v1.AnswerClaimRequestResponse, error)
+	// GetLinkCode gives what the device showing a code at mavio.dev/link
+	// signs in to. An unknown or expired code is NOT_FOUND.
+	GetLinkCode(context.Context, *v1.GetLinkCodeRequest) (*v1.GetLinkCodeResponse, error)
+	// AnswerLinkCode signs the device showing a code in to the account, or
+	// refuses it. A server's web UI signs in only the server's
+	// administrator, and other accounts are PERMISSION_DENIED.
+	AnswerLinkCode(context.Context, *v1.AnswerLinkCodeRequest) (*v1.AnswerLinkCodeResponse, error)
 	// CreateRelayTicket gives the name a client reaches one of the
 	// account's servers at through the relay of the server's region
 	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
@@ -190,6 +218,32 @@ func NewAccountServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(accountServiceMethods.ByName("CreateAuthorizationCode")),
 			connect.WithClientOptions(opts...),
 		),
+		getClaimRequest: connect.NewClient[v1.GetClaimRequestRequest, v1.GetClaimRequestResponse](
+			httpClient,
+			baseURL+AccountServiceGetClaimRequestProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("GetClaimRequest")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		answerClaimRequest: connect.NewClient[v1.AnswerClaimRequestRequest, v1.AnswerClaimRequestResponse](
+			httpClient,
+			baseURL+AccountServiceAnswerClaimRequestProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("AnswerClaimRequest")),
+			connect.WithClientOptions(opts...),
+		),
+		getLinkCode: connect.NewClient[v1.GetLinkCodeRequest, v1.GetLinkCodeResponse](
+			httpClient,
+			baseURL+AccountServiceGetLinkCodeProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("GetLinkCode")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		answerLinkCode: connect.NewClient[v1.AnswerLinkCodeRequest, v1.AnswerLinkCodeResponse](
+			httpClient,
+			baseURL+AccountServiceAnswerLinkCodeProcedure,
+			connect.WithSchema(accountServiceMethods.ByName("AnswerLinkCode")),
+			connect.WithClientOptions(opts...),
+		),
 		createRelayTicket: connect.NewClient[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse](
 			httpClient,
 			baseURL+AccountServiceCreateRelayTicketProcedure,
@@ -252,6 +306,10 @@ type accountServiceClient struct {
 	removeServer            *connect.Client[v1.RemoveServerRequest, v1.RemoveServerResponse]
 	createAssertion         *connect.Client[v1.CreateAssertionRequest, v1.CreateAssertionResponse]
 	createAuthorizationCode *connect.Client[v1.CreateAuthorizationCodeRequest, v1.CreateAuthorizationCodeResponse]
+	getClaimRequest         *connect.Client[v1.GetClaimRequestRequest, v1.GetClaimRequestResponse]
+	answerClaimRequest      *connect.Client[v1.AnswerClaimRequestRequest, v1.AnswerClaimRequestResponse]
+	getLinkCode             *connect.Client[v1.GetLinkCodeRequest, v1.GetLinkCodeResponse]
+	answerLinkCode          *connect.Client[v1.AnswerLinkCodeRequest, v1.AnswerLinkCodeResponse]
 	createRelayTicket       *connect.Client[v1.CreateRelayTicketRequest, v1.CreateRelayTicketResponse]
 	listAccess              *connect.Client[v1.ListAccessRequest, v1.ListAccessResponse]
 	grantAccess             *connect.Client[v1.GrantAccessRequest, v1.GrantAccessResponse]
@@ -319,6 +377,42 @@ func (c *accountServiceClient) CreateAssertion(ctx context.Context, req *v1.Crea
 // CreateAuthorizationCode calls mavio.cloud.v1.AccountService.CreateAuthorizationCode.
 func (c *accountServiceClient) CreateAuthorizationCode(ctx context.Context, req *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error) {
 	response, err := c.createAuthorizationCode.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetClaimRequest calls mavio.cloud.v1.AccountService.GetClaimRequest.
+func (c *accountServiceClient) GetClaimRequest(ctx context.Context, req *v1.GetClaimRequestRequest) (*v1.GetClaimRequestResponse, error) {
+	response, err := c.getClaimRequest.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AnswerClaimRequest calls mavio.cloud.v1.AccountService.AnswerClaimRequest.
+func (c *accountServiceClient) AnswerClaimRequest(ctx context.Context, req *v1.AnswerClaimRequestRequest) (*v1.AnswerClaimRequestResponse, error) {
+	response, err := c.answerClaimRequest.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetLinkCode calls mavio.cloud.v1.AccountService.GetLinkCode.
+func (c *accountServiceClient) GetLinkCode(ctx context.Context, req *v1.GetLinkCodeRequest) (*v1.GetLinkCodeResponse, error) {
+	response, err := c.getLinkCode.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AnswerLinkCode calls mavio.cloud.v1.AccountService.AnswerLinkCode.
+func (c *accountServiceClient) AnswerLinkCode(ctx context.Context, req *v1.AnswerLinkCodeRequest) (*v1.AnswerLinkCodeResponse, error) {
+	response, err := c.answerLinkCode.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -419,12 +513,28 @@ type AccountServiceHandler interface {
 	// server the account neither administers nor has access to is
 	// PERMISSION_DENIED.
 	CreateAssertion(context.Context, *v1.CreateAssertionRequest) (*v1.CreateAssertionResponse, error)
-	// CreateAuthorizationCode approves a server's web interface signing the
-	// account in (docs/accounts.md §6): the code it gives, sent back to the
-	// redirect URI, is exchanged within a minute at /api/oauth/token with
-	// the PKCE verifier for an assertion for the device key. A server the
-	// account neither administers nor has access to is PERMISSION_DENIED.
+	// CreateAuthorizationCode approves a web UI signing the account in
+	// (docs/accounts.md §6): the code it gives, sent back to the redirect
+	// URI, is exchanged within a minute at /api/oauth/token with the PKCE
+	// verifier for a session of the device key. A server's web UI signs in
+	// only the server's administrator, and other accounts are
+	// PERMISSION_DENIED; app.mavio.dev signs in any account.
 	CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error)
+	// GetClaimRequest gives the server and the web UI of a claim request
+	// for the account to confirm.
+	GetClaimRequest(context.Context, *v1.GetClaimRequestRequest) (*v1.GetClaimRequestResponse, error)
+	// AnswerClaimRequest confirms a claim request, claiming its server for
+	// the account, or declines it, and gives the URL the browser goes to
+	// next: the request's redirect URI with an authorization code, or with
+	// an error. An unknown, answered or expired request is NOT_FOUND.
+	AnswerClaimRequest(context.Context, *v1.AnswerClaimRequestRequest) (*v1.AnswerClaimRequestResponse, error)
+	// GetLinkCode gives what the device showing a code at mavio.dev/link
+	// signs in to. An unknown or expired code is NOT_FOUND.
+	GetLinkCode(context.Context, *v1.GetLinkCodeRequest) (*v1.GetLinkCodeResponse, error)
+	// AnswerLinkCode signs the device showing a code in to the account, or
+	// refuses it. A server's web UI signs in only the server's
+	// administrator, and other accounts are PERMISSION_DENIED.
+	AnswerLinkCode(context.Context, *v1.AnswerLinkCodeRequest) (*v1.AnswerLinkCodeResponse, error)
 	// CreateRelayTicket gives the name a client reaches one of the
 	// account's servers at through the relay of the server's region
 	// (docs/mavio-dev.md §5), valid for a few minutes. A server the account
@@ -503,6 +613,32 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 		connect.WithSchema(accountServiceMethods.ByName("CreateAuthorizationCode")),
 		connect.WithHandlerOptions(opts...),
 	)
+	accountServiceGetClaimRequestHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceGetClaimRequestProcedure,
+		svc.GetClaimRequest,
+		connect.WithSchema(accountServiceMethods.ByName("GetClaimRequest")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceAnswerClaimRequestHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceAnswerClaimRequestProcedure,
+		svc.AnswerClaimRequest,
+		connect.WithSchema(accountServiceMethods.ByName("AnswerClaimRequest")),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceGetLinkCodeHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceGetLinkCodeProcedure,
+		svc.GetLinkCode,
+		connect.WithSchema(accountServiceMethods.ByName("GetLinkCode")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	accountServiceAnswerLinkCodeHandler := connect.NewUnaryHandlerSimple(
+		AccountServiceAnswerLinkCodeProcedure,
+		svc.AnswerLinkCode,
+		connect.WithSchema(accountServiceMethods.ByName("AnswerLinkCode")),
+		connect.WithHandlerOptions(opts...),
+	)
 	accountServiceCreateRelayTicketHandler := connect.NewUnaryHandlerSimple(
 		AccountServiceCreateRelayTicketProcedure,
 		svc.CreateRelayTicket,
@@ -569,6 +705,14 @@ func NewAccountServiceHandler(svc AccountServiceHandler, opts ...connect.Handler
 			accountServiceCreateAssertionHandler.ServeHTTP(w, r)
 		case AccountServiceCreateAuthorizationCodeProcedure:
 			accountServiceCreateAuthorizationCodeHandler.ServeHTTP(w, r)
+		case AccountServiceGetClaimRequestProcedure:
+			accountServiceGetClaimRequestHandler.ServeHTTP(w, r)
+		case AccountServiceAnswerClaimRequestProcedure:
+			accountServiceAnswerClaimRequestHandler.ServeHTTP(w, r)
+		case AccountServiceGetLinkCodeProcedure:
+			accountServiceGetLinkCodeHandler.ServeHTTP(w, r)
+		case AccountServiceAnswerLinkCodeProcedure:
+			accountServiceAnswerLinkCodeHandler.ServeHTTP(w, r)
 		case AccountServiceCreateRelayTicketProcedure:
 			accountServiceCreateRelayTicketHandler.ServeHTTP(w, r)
 		case AccountServiceListAccessProcedure:
@@ -620,6 +764,22 @@ func (UnimplementedAccountServiceHandler) CreateAssertion(context.Context, *v1.C
 
 func (UnimplementedAccountServiceHandler) CreateAuthorizationCode(context.Context, *v1.CreateAuthorizationCodeRequest) (*v1.CreateAuthorizationCodeResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.CreateAuthorizationCode is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) GetClaimRequest(context.Context, *v1.GetClaimRequestRequest) (*v1.GetClaimRequestResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.GetClaimRequest is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) AnswerClaimRequest(context.Context, *v1.AnswerClaimRequestRequest) (*v1.AnswerClaimRequestResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.AnswerClaimRequest is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) GetLinkCode(context.Context, *v1.GetLinkCodeRequest) (*v1.GetLinkCodeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.GetLinkCode is not implemented"))
+}
+
+func (UnimplementedAccountServiceHandler) AnswerLinkCode(context.Context, *v1.AnswerLinkCodeRequest) (*v1.AnswerLinkCodeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.AccountService.AnswerLinkCode is not implemented"))
 }
 
 func (UnimplementedAccountServiceHandler) CreateRelayTicket(context.Context, *v1.CreateRelayTicketRequest) (*v1.CreateRelayTicketResponse, error) {

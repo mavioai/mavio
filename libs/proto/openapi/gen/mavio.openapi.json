@@ -7801,38 +7801,6 @@
         "title": "AuthorizeQuickConnectResponse",
         "additionalProperties": false
       },
-      "mavio.auth.v1.ClaimServerRequest": {
-        "type": "object",
-        "properties": {
-          "claimCode": {
-            "type": "string",
-            "title": "claim_code",
-            "maxLength": 64,
-            "minLength": 1
-          }
-        },
-        "title": "ClaimServerRequest",
-        "required": [
-          "claimCode"
-        ],
-        "additionalProperties": false
-      },
-      "mavio.auth.v1.ClaimServerResponse": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/mavio.user.v1.User"
-              }
-            ],
-            "title": "user",
-            "description": "The administrator."
-          }
-        },
-        "title": "ClaimServerResponse",
-        "additionalProperties": false
-      },
       "mavio.auth.v1.CreateApiKeyRequest": {
         "type": "object",
         "properties": {
@@ -8118,7 +8086,7 @@
           "mavioDevUrl": {
             "type": "string",
             "title": "mavio_dev_url",
-            "description": "In mavio.dev mode, and while setup has not chosen a mode, the base URL\n of mavio.dev's API, where setup gets claim codes and clients get\n sign-in assertions for the server."
+            "description": "In mavio.dev mode, and while setup has not chosen a mode, the base URL\n of mavio.dev's API, where the server is claimed and clients sign in."
           }
         },
         "title": "GetAuthInfoResponse",
@@ -8617,6 +8585,66 @@
           }
         },
         "title": "SignInWithAssertionResponse",
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.StartClaimRequest": {
+        "type": "object",
+        "properties": {
+          "redirectUri": {
+            "type": "string",
+            "title": "redirect_uri",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Where mavio.dev sends the browser back with the authorization code:\n the web UI's own page, at whatever address it was opened."
+          },
+          "codeChallenge": {
+            "type": "string",
+            "title": "code_challenge",
+            "maxLength": 43,
+            "minLength": 43,
+            "description": "The S256 PKCE challenge: the base64url SHA-256 of the verifier."
+          },
+          "deviceKey": {
+            "type": "string",
+            "title": "device_key",
+            "maxLength": 32,
+            "minLength": 32,
+            "format": "byte",
+            "description": "The Ed25519 public key of the device that signs in."
+          },
+          "state": {
+            "type": "string",
+            "title": "state",
+            "maxLength": 128,
+            "description": "Sent back with the code."
+          }
+        },
+        "title": "StartClaimRequest",
+        "required": [
+          "redirectUri",
+          "codeChallenge",
+          "deviceKey"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.auth.v1.StartClaimResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "url",
+            "description": "The page at mavio.dev where an account confirms the claim."
+          },
+          "expireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "expire_time"
+          }
+        },
+        "title": "StartClaimResponse",
         "additionalProperties": false
       },
       "mavio.auth.v1.StartInvitationPasskeyRequest": {
@@ -19951,7 +19979,7 @@
     },
     {
       "name": "AuthService",
-      "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,\n Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,\n RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,\n ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,\n AcceptInvitation, ClaimServer and SignInWithAssertion are public; the other methods act on the calling user.\n\n In mavio.dev mode devices sign in with SignInWithAssertion: Login, the\n passkey sign-in, Quick Connect, password resets, invitations and\n switching fail with FAILED_PRECONDITION, as mavio.dev keeps them.\n\n A session belongs to a device's Ed25519 key. Its access token lasts an\n hour; before it expires, or when a call fails with UNAUTHENTICATED\n because it has, the device asks StartRefresh for a nonce and signs it\n with its key for a new token from RefreshSession."
+      "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,\n Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,\n RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,\n ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,\n AcceptInvitation, StartClaim and SignInWithAssertion are public; the other methods act on the calling user.\n\n In mavio.dev mode devices sign in with SignInWithAssertion: Login, the\n passkey sign-in, Quick Connect, password resets, invitations and\n switching fail with FAILED_PRECONDITION, as mavio.dev keeps them.\n\n A session belongs to a device's Ed25519 key. Its access token lasts an\n hour; before it expires, or when a call fails with UNAUTHENTICATED\n because it has, the device asks StartRefresh for a nonce and signs it\n with its key for a new token from RefreshSession."
     },
     {
       "name": "LibraryService",
@@ -26376,68 +26404,6 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/ClaimServer": {
-      "post": {
-        "tags": [
-          "AuthService"
-        ],
-        "summary": "ClaimServer",
-        "description": "ClaimServer sets up a server in mavio.dev mode, or claims it again\n after its command line unclaimed it, with a claim code from\n mavio.dev/claim, whose account becomes the administrator. It fails\n with FAILED_PRECONDITION when the server is standalone or claimed,\n INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when\n mavio.dev cannot be reached.",
-        "operationId": "mavio.auth.v1.AuthService.ClaimServer",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.ClaimServerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.ClaimServerResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/mavio.auth.v1.AuthService/CreateApiKey": {
       "post": {
         "tags": [
@@ -27547,6 +27513,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.auth.v1.SignInWithAssertionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/StartClaim": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "StartClaim",
+        "description": "StartClaim starts setting up a server in mavio.dev mode, or claiming\n it again after its command line unclaimed it (docs/accounts.md §3.2).\n The server asks mavio.dev for a claim request and returns the page\n where an account confirms it; mavio.dev then claims the server for the\n account, which becomes the administrator, and sends the browser to the\n redirect URI with an authorization code for the device key, which\n signs the account in. The server asks mavio.dev for the request's\n outcome until it is claimed or the request expires; a later StartClaim\n replaces an earlier request. It fails with FAILED_PRECONDITION when the\n server is standalone or claimed and UNAVAILABLE when mavio.dev cannot\n be reached.",
+        "operationId": "mavio.auth.v1.AuthService.StartClaim",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.StartClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartClaimResponse"
                 }
               }
             }

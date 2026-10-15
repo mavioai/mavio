@@ -58,6 +58,40 @@ pub type OwnedCreateAuthorizationCodeResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<GetClaimRequestRequestView<'static>>`.
+pub type OwnedGetClaimRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetClaimRequestResponseView<'static>>`.
+pub type OwnedGetClaimRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'static>,
+>;
+///Shorthand for `OwnedView<AnswerClaimRequestRequestView<'static>>`.
+pub type OwnedAnswerClaimRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AnswerClaimRequestResponseView<'static>>`.
+pub type OwnedAnswerClaimRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetLinkCodeRequestView<'static>>`.
+pub type OwnedGetLinkCodeRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetLinkCodeResponseView<'static>>`.
+pub type OwnedGetLinkCodeResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeResponseView<'static>,
+>;
+///Shorthand for `OwnedView<AnswerLinkCodeRequestView<'static>>`.
+pub type OwnedAnswerLinkCodeRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AnswerLinkCodeResponseView<'static>>`.
+pub type OwnedAnswerLinkCodeResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<CreateRelayTicketRequestView<'static>>`.
 pub type OwnedCreateRelayTicketRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::CreateRelayTicketRequestView<'static>,
@@ -346,6 +380,144 @@ for ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationCodeResponseView<
         'static,
     >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetClaimRequestResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetClaimRequestResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetLinkCodeResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetLinkCodeResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerLinkCodeResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerLinkCodeResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -684,6 +856,30 @@ pub const ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC: ::connectrpc::Spec = :
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/GetClaimRequest",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `AnswerClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/AnswerClaimRequest",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetLinkCode` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_GET_LINK_CODE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/GetLinkCode",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `AnswerLinkCode` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_ANSWER_LINK_CODE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/AnswerLinkCode",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `CreateRelayTicket` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const ACCOUNT_SERVICE_CREATE_RELAY_TICKET_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.cloud.v1.AccountService/CreateRelayTicket",
@@ -736,7 +932,8 @@ pub const ACCOUNT_SERVICE_LEAVE_SERVER_SPEC: ::connectrpc::Spec = ::connectrpc::
 /// (docs/accounts.md §3, docs/mavio-dev.md §2): their servers, sign-in
 /// assertions, claim codes, and the library access records an
 /// administrator grants and an account accepts. Requests carry the
-/// account's mavio.dev session, as its cookie or as a bearer token.
+/// account's mavio.dev session: the website's cookie, or the access token
+/// of a device's session (docs/mavio-dev.md §2) as a bearer token.
 ///
 /// # Implementing handlers
 ///
@@ -933,11 +1130,12 @@ pub trait AccountService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// CreateAuthorizationCode approves a server's web interface signing the
-    /// account in (docs/accounts.md §6): the code it gives, sent back to the
-    /// redirect URI, is exchanged within a minute at /api/oauth/token with
-    /// the PKCE verifier for an assertion for the device key. A server the
-    /// account neither administers nor has access to is PERMISSION_DENIED.
+    /// CreateAuthorizationCode approves a web UI signing the account in
+    /// (docs/accounts.md §6): the code it gives, sent back to the redirect
+    /// URI, is exchanged within a minute at /api/oauth/token with the PKCE
+    /// verifier for a session of the device key. A server's web UI signs in
+    /// only the server's administrator, and other accounts are
+    /// PERMISSION_DENIED; app.mavio.dev signs in any account.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -957,6 +1155,105 @@ pub trait AccountService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::cloud::v1::CreateAuthorizationCodeResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetClaimRequest gives the server and the web UI of a claim request
+    /// for the account to confirm.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_claim_request<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AnswerClaimRequest confirms a claim request, claiming its server for
+    /// the account, or declines it, and gives the URL the browser goes to
+    /// next: the request's redirect URI with an authorization code, or with
+    /// an error. An unknown, answered or expired request is NOT_FOUND.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn answer_claim_request<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetLinkCode gives what the device showing a code at mavio.dev/link
+    /// signs in to. An unknown or expired code is NOT_FOUND.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_link_code<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::GetLinkCodeResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AnswerLinkCode signs the device showing a code in to the account, or
+    /// refuses it. A server's web UI signs in only the server's
+    /// administrator, and other accounts are PERMISSION_DENIED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn answer_link_code<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::AnswerLinkCodeResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1388,6 +1685,122 @@ impl<S: AccountService> AccountServiceExt for S {
                 },
             )
             .with_spec(ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC)
+            .route_view_idempotent(
+                ACCOUNT_SERVICE_SERVICE_NAME,
+                "GetClaimRequest",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_claim_request(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC)
+            .route_view(
+                ACCOUNT_SERVICE_SERVICE_NAME,
+                "AnswerClaimRequest",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.answer_claim_request(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC)
+            .route_view_idempotent(
+                ACCOUNT_SERVICE_SERVICE_NAME,
+                "GetLinkCode",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_link_code(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::GetLinkCodeResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ACCOUNT_SERVICE_GET_LINK_CODE_SPEC)
+            .route_view(
+                ACCOUNT_SERVICE_SERVICE_NAME,
+                "AnswerLinkCode",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.answer_link_code(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::AnswerLinkCodeResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(ACCOUNT_SERVICE_ANSWER_LINK_CODE_SPEC)
             .route_view(
                 ACCOUNT_SERVICE_SERVICE_NAME,
                 "CreateRelayTicket",
@@ -1716,6 +2129,30 @@ impl<T: AccountService> ::connectrpc::Dispatcher for AccountServiceServer<T> {
                         .with_spec(ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC),
                 )
             }
+            "GetClaimRequest" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC),
+                )
+            }
+            "AnswerClaimRequest" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC),
+                )
+            }
+            "GetLinkCode" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(ACCOUNT_SERVICE_GET_LINK_CODE_SPEC),
+                )
+            }
+            "AnswerLinkCode" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(ACCOUNT_SERVICE_ANSWER_LINK_CODE_SPEC),
+                )
+            }
             "CreateRelayTicket" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1930,6 +2367,94 @@ impl<T: AccountService> ::connectrpc::Dispatcher for AccountServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::cloud::v1::CreateAuthorizationCodeResponse,
+                        >(format)
+                })
+            }
+            "GetClaimRequest" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_claim_request(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+                        >(format)
+                })
+            }
+            "AnswerClaimRequest" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                    >::from_parts(&req, &body);
+                    svc.answer_claim_request(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+                        >(format)
+                })
+            }
+            "GetLinkCode" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_link_code(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::GetLinkCodeResponse,
+                        >(format)
+                })
+            }
+            "AnswerLinkCode" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+                    >::from_parts(&req, &body);
+                    svc.answer_link_code(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::AnswerLinkCodeResponse,
                         >(format)
                 })
             }
@@ -2546,6 +3071,186 @@ where
                 &self.transport,
                 &self.config,
                 ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetClaimRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/GetClaimRequest.
+    pub async fn get_claim_request(
+        &self,
+        request: crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_claim_request_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_claim_request_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AnswerClaimRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/AnswerClaimRequest.
+    pub async fn answer_claim_request(
+        &self,
+        request: crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.answer_claim_request_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AnswerClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn answer_claim_request_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetLinkCode RPC. Sends a request to /mavio.cloud.v1.AccountService/GetLinkCode.
+    pub async fn get_link_code(
+        &self,
+        request: crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_link_code_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetLinkCode RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_link_code_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::GetLinkCodeRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetLinkCodeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ACCOUNT_SERVICE_GET_LINK_CODE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AnswerLinkCode RPC. Sends a request to /mavio.cloud.v1.AccountService/AnswerLinkCode.
+    pub async fn answer_link_code(
+        &self,
+        request: crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.answer_link_code_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AnswerLinkCode RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn answer_link_code_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::AnswerLinkCodeRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerLinkCodeResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                ACCOUNT_SERVICE_ANSWER_LINK_CODE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

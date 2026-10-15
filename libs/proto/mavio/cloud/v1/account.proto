@@ -10,7 +10,8 @@ import "mavio/cloud/v1/cloud.proto";
 // (docs/accounts.md §3, docs/mavio-dev.md §2): their servers, sign-in
 // assertions, claim codes, and the library access records an
 // administrator grants and an account accepts. Requests carry the
-// account's mavio.dev session, as its cookie or as a bearer token.
+// account's mavio.dev session: the website's cookie, or the access token
+// of a device's session (docs/mavio-dev.md §2) as a bearer token.
 service AccountService {
   // GetAccount gives the signed-in account.
   rpc GetAccount(GetAccountRequest) returns (GetAccountResponse) {
@@ -36,12 +37,32 @@ service AccountService {
   // server the account neither administers nor has access to is
   // PERMISSION_DENIED.
   rpc CreateAssertion(CreateAssertionRequest) returns (CreateAssertionResponse);
-  // CreateAuthorizationCode approves a server's web interface signing the
-  // account in (docs/accounts.md §6): the code it gives, sent back to the
-  // redirect URI, is exchanged within a minute at /api/oauth/token with
-  // the PKCE verifier for an assertion for the device key. A server the
-  // account neither administers nor has access to is PERMISSION_DENIED.
+  // CreateAuthorizationCode approves a web UI signing the account in
+  // (docs/accounts.md §6): the code it gives, sent back to the redirect
+  // URI, is exchanged within a minute at /api/oauth/token with the PKCE
+  // verifier for a session of the device key. A server's web UI signs in
+  // only the server's administrator, and other accounts are
+  // PERMISSION_DENIED; app.mavio.dev signs in any account.
   rpc CreateAuthorizationCode(CreateAuthorizationCodeRequest) returns (CreateAuthorizationCodeResponse);
+  // GetClaimRequest gives the server and the web UI of a claim request
+  // for the account to confirm.
+  rpc GetClaimRequest(GetClaimRequestRequest) returns (GetClaimRequestResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AnswerClaimRequest confirms a claim request, claiming its server for
+  // the account, or declines it, and gives the URL the browser goes to
+  // next: the request's redirect URI with an authorization code, or with
+  // an error. An unknown, answered or expired request is NOT_FOUND.
+  rpc AnswerClaimRequest(AnswerClaimRequestRequest) returns (AnswerClaimRequestResponse);
+  // GetLinkCode gives what the device showing a code at mavio.dev/link
+  // signs in to. An unknown or expired code is NOT_FOUND.
+  rpc GetLinkCode(GetLinkCodeRequest) returns (GetLinkCodeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // AnswerLinkCode signs the device showing a code in to the account, or
+  // refuses it. A server's web UI signs in only the server's
+  // administrator, and other accounts are PERMISSION_DENIED.
+  rpc AnswerLinkCode(AnswerLinkCodeRequest) returns (AnswerLinkCodeResponse);
   // CreateRelayTicket gives the name a client reaches one of the
   // account's servers at through the relay of the server's region
   // (docs/mavio-dev.md §5), valid for a few minutes. A server the account
@@ -89,6 +110,8 @@ message Server {
   // The libraries the server published.
   repeated Library libraries = 7;
   google.protobuf.Timestamp claim_time = 8;
+  // The URLs the server published, best first.
+  repeated string connections = 9;
 }
 
 // AccessRecord is an account's library access record on a server.
@@ -163,7 +186,8 @@ message CreateAssertionResponse {
 }
 
 message CreateAuthorizationCodeRequest {
-  string server_id = 1 [(buf.validate.field).required = true];
+  // The server whose web UI signs in; empty for app.mavio.dev.
+  string server_id = 1;
   // Where the web interface receives the code: an HTTP or HTTPS URL.
   string redirect_uri = 2 [
     (buf.validate.field).required = true,
@@ -187,6 +211,50 @@ message CreateAuthorizationCodeRequest {
 message CreateAuthorizationCodeResponse {
   string code = 1;
 }
+
+message GetClaimRequestRequest {
+  string claim_request = 1 [(buf.validate.field).required = true];
+}
+
+message GetClaimRequestResponse {
+  string server_id = 1;
+  string server_name = 2;
+  // The redirect URI of the web UI that started the claim.
+  string redirect_uri = 3;
+  // Whether the server is claimed now, by this account or another.
+  bool claimed = 4;
+  google.protobuf.Timestamp expire_time = 5;
+}
+
+message AnswerClaimRequestRequest {
+  string claim_request = 1 [(buf.validate.field).required = true];
+  bool confirm = 2;
+}
+
+message AnswerClaimRequestResponse {
+  // Where the browser goes next.
+  string redirect_url = 1;
+}
+
+message GetLinkCodeRequest {
+  string user_code = 1 [(buf.validate.field).required = true];
+}
+
+message GetLinkCodeResponse {
+  // The server whose web UI shows the code; empty for app.mavio.dev and
+  // Mavio's apps.
+  string server_id = 1;
+  string server_name = 2;
+  // The client's ID: a server's ID, "app", or an app's reverse-DNS ID.
+  string client_id = 3;
+}
+
+message AnswerLinkCodeRequest {
+  string user_code = 1 [(buf.validate.field).required = true];
+  bool approve = 2;
+}
+
+message AnswerLinkCodeResponse {}
 
 message CreateRelayTicketRequest {
   string server_id = 1 [(buf.validate.field).required = true];

@@ -10,7 +10,7 @@ import "mavio/user/v1/user.proto";
 // Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
 // RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
 // ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,
-// AcceptInvitation, ClaimServer and SignInWithAssertion are public; the other methods act on the calling user.
+// AcceptInvitation, StartClaim and SignInWithAssertion are public; the other methods act on the calling user.
 //
 // In mavio.dev mode devices sign in with SignInWithAssertion: Login, the
 // passkey sign-in, Quick Connect, password resets, invitations and
@@ -132,13 +132,18 @@ service AuthService {
   // session opened before switching keep their user, so the client opens
   // them again.
   rpc SwitchUser(SwitchUserRequest) returns (SwitchUserResponse);
-  // ClaimServer sets up a server in mavio.dev mode, or claims it again
-  // after its command line unclaimed it, with a claim code from
-  // mavio.dev/claim, whose account becomes the administrator. It fails
-  // with FAILED_PRECONDITION when the server is standalone or claimed,
-  // INVALID_ARGUMENT for a code mavio.dev refuses and UNAVAILABLE when
-  // mavio.dev cannot be reached.
-  rpc ClaimServer(ClaimServerRequest) returns (ClaimServerResponse);
+  // StartClaim starts setting up a server in mavio.dev mode, or claiming
+  // it again after its command line unclaimed it (docs/accounts.md §3.2).
+  // The server asks mavio.dev for a claim request and returns the page
+  // where an account confirms it; mavio.dev then claims the server for the
+  // account, which becomes the administrator, and sends the browser to the
+  // redirect URI with an authorization code for the device key, which
+  // signs the account in. The server asks mavio.dev for the request's
+  // outcome until it is claimed or the request expires; a later StartClaim
+  // replaces an earlier request. It fails with FAILED_PRECONDITION when the
+  // server is standalone or claimed and UNAVAILABLE when mavio.dev cannot
+  // be reached.
+  rpc StartClaim(StartClaimRequest) returns (StartClaimResponse);
   // SignInWithAssertion signs a device in to a server in mavio.dev mode
   // with a sign-in assertion mavio.dev issued for the server and the
   // device's key, replacing the device's previous session. The device
@@ -205,8 +210,7 @@ message GetAuthInfoResponse {
   // How the server signs people in; unspecified until its setup chooses.
   AccountMode mode = 5;
   // In mavio.dev mode, and while setup has not chosen a mode, the base URL
-  // of mavio.dev's API, where setup gets claim codes and clients get
-  // sign-in assertions for the server.
+  // of mavio.dev's API, where the server is claimed and clients sign in.
   string mavio_dev_url = 6;
 }
 
@@ -554,19 +558,34 @@ message SwitchUserResponse {
   mavio.user.v1.User user = 1;
 }
 
-message ClaimServerRequest {
-  string claim_code = 1 [
+message StartClaimRequest {
+  // Where mavio.dev sends the browser back with the authorization code:
+  // the web UI's own page, at whatever address it was opened.
+  string redirect_uri = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
-      min_len: 1
-      max_len: 64
+      uri: true
+      max_len: 2048
     }
   ];
+  // The S256 PKCE challenge: the base64url SHA-256 of the verifier.
+  string code_challenge = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.len = 43
+  ];
+  // The Ed25519 public key of the device that signs in.
+  bytes device_key = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+  // Sent back with the code.
+  string state = 4 [(buf.validate.field).string.max_len = 128];
 }
 
-message ClaimServerResponse {
-  // The administrator.
-  mavio.user.v1.User user = 1;
+message StartClaimResponse {
+  // The page at mavio.dev where an account confirms the claim.
+  string url = 1;
+  google.protobuf.Timestamp expire_time = 2;
 }
 
 message SignInWithAssertionRequest {

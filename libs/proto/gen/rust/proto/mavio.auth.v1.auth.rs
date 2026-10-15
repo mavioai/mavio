@@ -654,8 +654,7 @@ pub struct GetAuthInfoResponse {
     /// Field 5: `mode`
     pub mode: ::core::option::Option<::buffa::EnumValue<AccountMode>>,
     /// In mavio.dev mode, and while setup has not chosen a mode, the base URL
-    /// of mavio.dev's API, where setup gets claim codes and clients get
-    /// sign-in assertions for the server.
+    /// of mavio.dev's API, where the server is claimed and clients sign in.
     ///
     /// Field 6: `mavio_dev_url`
     pub mavio_dev_url: ::core::option::Option<::buffa::alloc::string::String>,
@@ -7724,46 +7723,94 @@ impl ::buffa::ExtensionSet for SwitchUserResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct ClaimServerRequest {
-    /// Field 1: `claim_code`
-    pub claim_code: ::core::option::Option<::buffa::alloc::string::String>,
+pub struct StartClaimRequest {
+    /// Where mavio.dev sends the browser back with the authorization code:
+    /// the web UI's own page, at whatever address it was opened.
+    ///
+    /// Field 1: `redirect_uri`
+    pub redirect_uri: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The S256 PKCE challenge: the base64url SHA-256 of the verifier.
+    ///
+    /// Field 2: `code_challenge`
+    pub code_challenge: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The Ed25519 public key of the device that signs in.
+    ///
+    /// Field 3: `device_key`
+    pub device_key: ::core::option::Option<::buffa::alloc::vec::Vec<u8>>,
+    /// Sent back with the code.
+    ///
+    /// Field 4: `state`
+    pub state: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for ClaimServerRequest {
+impl ::core::fmt::Debug for StartClaimRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ClaimServerRequest")
-            .field("claim_code", &self.claim_code)
+        f.debug_struct("StartClaimRequest")
+            .field("redirect_uri", &self.redirect_uri)
+            .field("code_challenge", &self.code_challenge)
+            .field("device_key", &self.device_key)
+            .field("state", &self.state)
             .finish()
     }
 }
-impl ClaimServerRequest {
+impl StartClaimRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.ClaimServerRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimRequest";
 }
-impl ClaimServerRequest {
+impl StartClaimRequest {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::claim_code`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_claim_code(
+    ///Sets [`Self::redirect_uri`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_redirect_uri(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.claim_code = Some(value.into());
+        self.redirect_uri = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::code_challenge`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_code_challenge(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.code_challenge = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::device_key`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_device_key(
+        mut self,
+        value: impl Into<::buffa::alloc::vec::Vec<u8>>,
+    ) -> Self {
+        self.device_key = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::state`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_state(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.state = Some(value.into());
         self
     }
 }
-::buffa::impl_default_instance!(ClaimServerRequest);
-impl ::buffa::MessageName for ClaimServerRequest {
+::buffa::impl_default_instance!(StartClaimRequest);
+impl ::buffa::MessageName for StartClaimRequest {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "ClaimServerRequest";
-    const FULL_NAME: &'static str = "mavio.auth.v1.ClaimServerRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.ClaimServerRequest";
+    const NAME: &'static str = "StartClaimRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimRequest";
 }
-impl ::buffa::Message for ClaimServerRequest {
+impl ::buffa::Message for StartClaimRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -7776,7 +7823,16 @@ impl ::buffa::Message for ClaimServerRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.claim_code {
+        if let Some(ref v) = self.redirect_uri {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.code_challenge {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.device_key {
+            size += 1u64 + ::buffa::types::bytes_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.state {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -7789,8 +7845,17 @@ impl ::buffa::Message for ClaimServerRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.claim_code {
+        if let Some(ref v) = self.redirect_uri {
             ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.code_challenge {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.device_key {
+            ::buffa::types::put_shared_bytes_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.state {
+            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7812,8 +7877,40 @@ impl ::buffa::Message for ClaimServerRequest {
                 )?;
                 ::buffa::types::merge_string(
                     self
-                        .claim_code
+                        .redirect_uri
                         .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .code_challenge
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_bytes(
+                    self.device_key.get_or_insert_with(::buffa::alloc::vec::Vec::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.state.get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
             }
@@ -7825,12 +7922,15 @@ impl ::buffa::Message for ClaimServerRequest {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.claim_code = ::core::option::Option::None;
+        self.redirect_uri = ::core::option::Option::None;
+        self.code_challenge = ::core::option::Option::None;
+        self.device_key = ::core::option::Option::None;
+        self.state = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for ClaimServerRequest {
-    const PROTO_FQN: &'static str = "mavio.auth.v1.ClaimServerRequest";
+impl ::buffa::ExtensionSet for StartClaimRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartClaimRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -7839,37 +7939,51 @@ impl ::buffa::ExtensionSet for ClaimServerRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct ClaimServerResponse {
-    /// The administrator.
+pub struct StartClaimResponse {
+    /// The page at mavio.dev where an account confirms the claim.
     ///
-    /// Field 1: `user`
-    pub user: ::buffa::MessageField<
-        super::super::user::v1::User,
-        ::buffa::Inline<super::super::user::v1::User>,
+    /// Field 1: `url`
+    pub url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `expire_time`
+    pub expire_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for ClaimServerResponse {
+impl ::core::fmt::Debug for StartClaimResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("ClaimServerResponse").field("user", &self.user).finish()
+        f.debug_struct("StartClaimResponse")
+            .field("url", &self.url)
+            .field("expire_time", &self.expire_time)
+            .finish()
     }
 }
-impl ClaimServerResponse {
+impl StartClaimResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.ClaimServerResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimResponse";
 }
-::buffa::impl_default_instance!(ClaimServerResponse);
-impl ::buffa::MessageName for ClaimServerResponse {
+impl StartClaimResponse {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_url(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.url = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(StartClaimResponse);
+impl ::buffa::MessageName for StartClaimResponse {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "ClaimServerResponse";
-    const FULL_NAME: &'static str = "mavio.auth.v1.ClaimServerResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.ClaimServerResponse";
+    const NAME: &'static str = "StartClaimResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimResponse";
 }
-impl ::buffa::Message for ClaimServerResponse {
+impl ::buffa::Message for StartClaimResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -7882,9 +7996,12 @@ impl ::buffa::Message for ClaimServerResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.user.is_set() {
+        if let Some(ref v) = self.url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.expire_time.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.user.compute_size(__cache);
+            let inner_size = self.expire_time.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -7900,13 +8017,16 @@ impl ::buffa::Message for ClaimServerResponse {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.user.is_set() {
+        if let Some(ref v) = self.url {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if self.expire_time.is_set() {
             ::buffa::types::put_len_delimited_header(
-                1u32,
+                2u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.user.write_to(__cache, buf);
+            self.expire_time.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -7926,8 +8046,18 @@ impl ::buffa::Message for ClaimServerResponse {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
+                ::buffa::types::merge_string(
+                    self.url.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.user.get_or_insert_default(),
+                    self.expire_time.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -7940,12 +8070,13 @@ impl ::buffa::Message for ClaimServerResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.user = ::buffa::MessageField::none();
+        self.url = ::core::option::Option::None;
+        self.expire_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for ClaimServerResponse {
-    const PROTO_FQN: &'static str = "mavio.auth.v1.ClaimServerResponse";
+impl ::buffa::ExtensionSet for StartClaimResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartClaimResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

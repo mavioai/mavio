@@ -1,3 +1,13 @@
+///Shorthand for `OwnedView<CreateClaimRequestRequestView<'static>>`.
+pub type OwnedCreateClaimRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<'static>,
+>;
+///Shorthand for `OwnedView<CreateClaimRequestResponseView<'static>>`.
+pub type OwnedCreateClaimRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<ClaimServerRequestView<'static>>`.
 pub type OwnedClaimServerRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::ClaimServerRequestView<'static>,
@@ -21,6 +31,16 @@ pub type OwnedPublishLibrariesRequestView = ::buffa::view::OwnedView<
 ///Shorthand for `OwnedView<PublishLibrariesResponseView<'static>>`.
 pub type OwnedPublishLibrariesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::PublishLibrariesResponseView<'static>,
+>;
+///Shorthand for `OwnedView<PublishConnectionsRequestView<'static>>`.
+pub type OwnedPublishConnectionsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsRequestView<'static>,
+>;
+///Shorthand for `OwnedView<PublishConnectionsResponseView<'static>>`.
+pub type OwnedPublishConnectionsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsResponseView<
+        'static,
+    >,
 >;
 ///Shorthand for `OwnedView<SetAcmeChallengeRequestView<'static>>`.
 pub type OwnedSetAcmeChallengeRequestView = ::buffa::view::OwnedView<
@@ -64,6 +84,42 @@ pub type OwnedSetRelayRegionRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetRelayRegionResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<'static>,
 >;
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateClaimRequestResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateClaimRequestResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::ClaimServerResponse>
 for crate::proto::mavio::cloud::v1::__buffa::view::ClaimServerResponseView<'_> {
     fn encode(
@@ -144,6 +200,42 @@ for crate::proto::mavio::cloud::v1::__buffa::view::PublishLibrariesResponseView<
 impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::PublishLibrariesResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::PublishLibrariesResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::PublishConnectionsResponse>
+for crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::PublishConnectionsResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -340,6 +432,12 @@ for ::buffa::view::OwnedView<
 }
 /// Full service name for this service.
 pub const SERVER_SERVICE_SERVICE_NAME: &str = "mavio.cloud.v1.ServerService";
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/CreateClaimRequest",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `ClaimServer` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SERVER_SERVICE_CLAIM_SERVER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.cloud.v1.ServerService/ClaimServer",
@@ -355,6 +453,12 @@ pub const SERVER_SERVICE_LIST_CHANGES_SPEC: ::connectrpc::Spec = ::connectrpc::S
 /// Static [`Spec`](::connectrpc::Spec) for the `PublishLibraries` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.cloud.v1.ServerService/PublishLibraries",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// Static [`Spec`](::connectrpc::Spec) for the `PublishConnections` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_PUBLISH_CONNECTIONS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/PublishConnections",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
@@ -394,7 +498,8 @@ pub const SERVER_SERVICE_SET_RELAY_REGION_SPEC: ::connectrpc::Spec = ::connectrp
 /// (private_key_jwt): EdDSA, with the server's ID as its kid, iss and sub,
 /// mavio.dev's API base URL as its aud, a random jti, and an expiry at
 /// most a minute after it was issued, carried as a bearer token. Claiming
-/// registers the key; the other methods need a claimed server.
+/// registers the key, and CreateClaimRequest and ClaimServer carry it; the
+/// other methods need a claimed server.
 ///
 /// # Implementing handlers
 ///
@@ -445,10 +550,42 @@ pub const SERVER_SERVICE_SET_RELAY_REGION_SPEC: ::connectrpc::Spec = ::connectrp
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait ServerService: Send + Sync + 'static {
-    /// ClaimServer registers the server under the account that created the
-    /// claim code at mavio.dev/claim, which becomes its administrator. An
-    /// unknown, used or expired code fails with INVALID_ARGUMENT. Claiming a
-    /// server again, after its command line unclaimed it, keeps its changes.
+    /// CreateClaimRequest asks for a claim that an account confirms at the
+    /// page it returns, for the web UI at a redirect URI that started it
+    /// (docs/accounts.md §3.2). Confirming claims the server for the account,
+    /// and sends the browser to the redirect URI with an authorization code
+    /// of the account for the server and the device key, as /authorize does;
+    /// the server then fetches the outcome with ClaimServer.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn create_claim_request<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ClaimServer gives the account that claimed the server, which becomes
+    /// its administrator: with a claim code from mavio.dev/claim, it claims
+    /// the server for the code's account, and with a claim request it gives
+    /// the account that confirmed the request. A claim request not confirmed
+    /// yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
+    /// and an unknown, declined or expired request, with INVALID_ARGUMENT.
+    /// Claiming a server again, after its command line unclaimed it, keeps
+    /// its changes.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -516,6 +653,30 @@ pub trait ServerService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::cloud::v1::PublishLibrariesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// PublishConnections replaces the URLs clients reach the server at,
+    /// which mavio.dev gives the accounts that reach it.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn publish_connections<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::cloud::v1::PublishConnectionsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -676,6 +837,35 @@ impl<S: ServerService> ServerServiceExt for S {
         router
             .route_view(
                 SERVER_SERVICE_SERVICE_NAME,
+                "CreateClaimRequest",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.create_claim_request(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
                 "ClaimServer",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -761,6 +951,35 @@ impl<S: ServerService> ServerServiceExt for S {
                 },
             )
             .with_spec(SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC)
+            .route_view(
+                SERVER_SERVICE_SERVICE_NAME,
+                "PublishConnections",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.publish_connections(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::cloud::v1::PublishConnectionsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SERVER_SERVICE_PUBLISH_CONNECTIONS_SPEC)
             .route_view(
                 SERVER_SERVICE_SERVICE_NAME,
                 "SetAcmeChallenge",
@@ -960,6 +1179,12 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
         let method = path.strip_prefix("mavio.cloud.v1.ServerService/")?;
         match method {
+            "CreateClaimRequest" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC),
+                )
+            }
             "ClaimServer" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -976,6 +1201,12 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC),
+                )
+            }
+            "PublishConnections" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SERVER_SERVICE_PUBLISH_CONNECTIONS_SPEC),
                 )
             }
             "SetAcmeChallenge" => {
@@ -1023,6 +1254,28 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "CreateClaimRequest" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                    >::from_parts(&req, &body);
+                    svc.create_claim_request(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+                        >(format)
+                })
+            }
             "ClaimServer" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -1086,6 +1339,28 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::cloud::v1::PublishLibrariesResponse,
+                        >(format)
+                })
+            }
+            "PublishConnections" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+                    >::from_parts(&req, &body);
+                    svc.publish_connections(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::cloud::v1::PublishConnectionsResponse,
                         >(format)
                 })
             }
@@ -1266,7 +1541,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
 /// let client = ServerServiceClient::new(conn, config);
-/// let response = client.claim_server(request).await?;
+/// let response = client.create_claim_request(request).await?;
 /// ```
 ///
 /// # Example (Connect / HTTP/1.1 or ALPN)
@@ -1278,7 +1553,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
 /// let client = ServerServiceClient::new(http, config);
-/// let response = client.claim_server(request).await?;
+/// let response = client.create_claim_request(request).await?;
 /// ```
 ///
 /// # Working with the response
@@ -1288,7 +1563,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// message, so field access is zero-copy:
 ///
 /// ```rust,ignore
-/// let resp = client.claim_server(request).await?;
+/// let resp = client.create_claim_request(request).await?;
 /// let name: &str = resp.view().name;  // borrow into the response buffer
 /// ```
 ///
@@ -1296,7 +1571,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// [`into_owned()`](::connectrpc::client::UnaryResponse::into_owned):
 ///
 /// ```rust,ignore
-/// let owned = client.claim_server(request).await?.into_owned();
+/// let owned = client.create_claim_request(request).await?.into_owned();
 /// ```
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
@@ -1326,6 +1601,51 @@ where
     /// Get a mutable reference to the client configuration.
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
+    }
+    /// Call the CreateClaimRequest RPC. Sends a request to /mavio.cloud.v1.ServerService/CreateClaimRequest.
+    pub async fn create_claim_request(
+        &self,
+        request: crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.create_claim_request_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the CreateClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_claim_request_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
     }
     /// Call the ClaimServer RPC. Sends a request to /mavio.cloud.v1.ServerService/ClaimServer.
     pub async fn claim_server(
@@ -1456,6 +1776,51 @@ where
                 &self.transport,
                 &self.config,
                 SERVER_SERVICE_PUBLISH_LIBRARIES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the PublishConnections RPC. Sends a request to /mavio.cloud.v1.ServerService/PublishConnections.
+    pub async fn publish_connections(
+        &self,
+        request: crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.publish_connections_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the PublishConnections RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn publish_connections_with_options(
+        &self,
+        request: crate::proto::mavio::cloud::v1::PublishConnectionsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::cloud::v1::__buffa::view::PublishConnectionsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SERVER_SERVICE_PUBLISH_CONNECTIONS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

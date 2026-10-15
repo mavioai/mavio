@@ -548,21 +548,444 @@ func (b0 Access_builder) Build() *Access {
 	return m0
 }
 
+type CreateClaimRequestRequest struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PublicKey     []byte                 `protobuf:"bytes,1,opt,name=public_key,json=publicKey"`
+	xxx_hidden_Name          *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Version       *string                `protobuf:"bytes,3,opt,name=version"`
+	xxx_hidden_RedirectUri   *string                `protobuf:"bytes,4,opt,name=redirect_uri,json=redirectUri"`
+	xxx_hidden_CodeChallenge *string                `protobuf:"bytes,5,opt,name=code_challenge,json=codeChallenge"`
+	xxx_hidden_DeviceKey     []byte                 `protobuf:"bytes,6,opt,name=device_key,json=deviceKey"`
+	xxx_hidden_State         *string                `protobuf:"bytes,7,opt,name=state"`
+	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
+	XXX_presence             [1]uint32
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *CreateClaimRequestRequest) Reset() {
+	*x = CreateClaimRequestRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateClaimRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClaimRequestRequest) ProtoMessage() {}
+
+func (x *CreateClaimRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateClaimRequestRequest) GetPublicKey() []byte {
+	if x != nil {
+		return x.xxx_hidden_PublicKey
+	}
+	return nil
+}
+
+func (x *CreateClaimRequestRequest) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestRequest) GetVersion() string {
+	if x != nil {
+		if x.xxx_hidden_Version != nil {
+			return *x.xxx_hidden_Version
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestRequest) GetRedirectUri() string {
+	if x != nil {
+		if x.xxx_hidden_RedirectUri != nil {
+			return *x.xxx_hidden_RedirectUri
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestRequest) GetCodeChallenge() string {
+	if x != nil {
+		if x.xxx_hidden_CodeChallenge != nil {
+			return *x.xxx_hidden_CodeChallenge
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestRequest) GetDeviceKey() []byte {
+	if x != nil {
+		return x.xxx_hidden_DeviceKey
+	}
+	return nil
+}
+
+func (x *CreateClaimRequestRequest) GetState() string {
+	if x != nil {
+		if x.xxx_hidden_State != nil {
+			return *x.xxx_hidden_State
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestRequest) SetPublicKey(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_PublicKey = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetVersion(v string) {
+	x.xxx_hidden_Version = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetRedirectUri(v string) {
+	x.xxx_hidden_RedirectUri = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetCodeChallenge(v string) {
+	x.xxx_hidden_CodeChallenge = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetDeviceKey(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_DeviceKey = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+}
+
+func (x *CreateClaimRequestRequest) SetState(v string) {
+	x.xxx_hidden_State = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+}
+
+func (x *CreateClaimRequestRequest) HasPublicKey() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CreateClaimRequestRequest) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CreateClaimRequestRequest) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *CreateClaimRequestRequest) HasRedirectUri() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *CreateClaimRequestRequest) HasCodeChallenge() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *CreateClaimRequestRequest) HasDeviceKey() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *CreateClaimRequestRequest) HasState() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *CreateClaimRequestRequest) ClearPublicKey() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_PublicKey = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Version = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearRedirectUri() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_RedirectUri = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearCodeChallenge() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_CodeChallenge = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearDeviceKey() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_DeviceKey = nil
+}
+
+func (x *CreateClaimRequestRequest) ClearState() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_State = nil
+}
+
+type CreateClaimRequestRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The server's Ed25519 identity public key, whose fingerprint is the ID
+	// in the request's JWT.
+	PublicKey []byte
+	// The name the server shows.
+	Name    *string
+	Version *string
+	// Where the browser goes once the account confirms or declines: an
+	// HTTP or HTTPS URL of the web UI that started the claim.
+	RedirectUri *string
+	// The S256 PKCE challenge of the authorization code.
+	CodeChallenge *string
+	// The Ed25519 public key of the device that signs in.
+	DeviceKey []byte
+	// Sent back with the code.
+	State *string
+}
+
+func (b0 CreateClaimRequestRequest_builder) Build() *CreateClaimRequestRequest {
+	m0 := &CreateClaimRequestRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.PublicKey != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		x.xxx_hidden_PublicKey = b.PublicKey
+	}
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		x.xxx_hidden_Version = b.Version
+	}
+	if b.RedirectUri != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		x.xxx_hidden_RedirectUri = b.RedirectUri
+	}
+	if b.CodeChallenge != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		x.xxx_hidden_CodeChallenge = b.CodeChallenge
+	}
+	if b.DeviceKey != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		x.xxx_hidden_DeviceKey = b.DeviceKey
+	}
+	if b.State != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		x.xxx_hidden_State = b.State
+	}
+	return m0
+}
+
+type CreateClaimRequestResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ClaimRequest *string                `protobuf:"bytes,1,opt,name=claim_request,json=claimRequest"`
+	xxx_hidden_Url          *string                `protobuf:"bytes,2,opt,name=url"`
+	xxx_hidden_ExpireTime   *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_time,json=expireTime"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *CreateClaimRequestResponse) Reset() {
+	*x = CreateClaimRequestResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateClaimRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClaimRequestResponse) ProtoMessage() {}
+
+func (x *CreateClaimRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateClaimRequestResponse) GetClaimRequest() string {
+	if x != nil {
+		if x.xxx_hidden_ClaimRequest != nil {
+			return *x.xxx_hidden_ClaimRequest
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestResponse) GetUrl() string {
+	if x != nil {
+		if x.xxx_hidden_Url != nil {
+			return *x.xxx_hidden_Url
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateClaimRequestResponse) GetExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_ExpireTime
+	}
+	return nil
+}
+
+func (x *CreateClaimRequestResponse) SetClaimRequest(v string) {
+	x.xxx_hidden_ClaimRequest = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *CreateClaimRequestResponse) SetUrl(v string) {
+	x.xxx_hidden_Url = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *CreateClaimRequestResponse) SetExpireTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_ExpireTime = v
+}
+
+func (x *CreateClaimRequestResponse) HasClaimRequest() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CreateClaimRequestResponse) HasUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CreateClaimRequestResponse) HasExpireTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_ExpireTime != nil
+}
+
+func (x *CreateClaimRequestResponse) ClearClaimRequest() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ClaimRequest = nil
+}
+
+func (x *CreateClaimRequestResponse) ClearUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Url = nil
+}
+
+func (x *CreateClaimRequestResponse) ClearExpireTime() {
+	x.xxx_hidden_ExpireTime = nil
+}
+
+type CreateClaimRequestResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The request's ID, which ClaimServer takes.
+	ClaimRequest *string
+	// The page where an account confirms it.
+	Url        *string
+	ExpireTime *timestamppb.Timestamp
+}
+
+func (b0 CreateClaimRequestResponse_builder) Build() *CreateClaimRequestResponse {
+	m0 := &CreateClaimRequestResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ClaimRequest != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_ClaimRequest = b.ClaimRequest
+	}
+	if b.Url != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Url = b.Url
+	}
+	x.xxx_hidden_ExpireTime = b.ExpireTime
+	return m0
+}
+
 type ClaimServerRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ClaimCode   *string                `protobuf:"bytes,1,opt,name=claim_code,json=claimCode"`
-	xxx_hidden_PublicKey   []byte                 `protobuf:"bytes,2,opt,name=public_key,json=publicKey"`
-	xxx_hidden_Name        *string                `protobuf:"bytes,3,opt,name=name"`
-	xxx_hidden_Version     *string                `protobuf:"bytes,4,opt,name=version"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ClaimCode    *string                `protobuf:"bytes,1,opt,name=claim_code,json=claimCode"`
+	xxx_hidden_PublicKey    []byte                 `protobuf:"bytes,2,opt,name=public_key,json=publicKey"`
+	xxx_hidden_Name         *string                `protobuf:"bytes,3,opt,name=name"`
+	xxx_hidden_Version      *string                `protobuf:"bytes,4,opt,name=version"`
+	xxx_hidden_ClaimRequest *string                `protobuf:"bytes,5,opt,name=claim_request,json=claimRequest"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *ClaimServerRequest) Reset() {
 	*x = ClaimServerRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -574,7 +997,7 @@ func (x *ClaimServerRequest) String() string {
 func (*ClaimServerRequest) ProtoMessage() {}
 
 func (x *ClaimServerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,9 +1045,19 @@ func (x *ClaimServerRequest) GetVersion() string {
 	return ""
 }
 
+func (x *ClaimServerRequest) GetClaimRequest() string {
+	if x != nil {
+		if x.xxx_hidden_ClaimRequest != nil {
+			return *x.xxx_hidden_ClaimRequest
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ClaimServerRequest) SetClaimCode(v string) {
 	x.xxx_hidden_ClaimCode = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
 func (x *ClaimServerRequest) SetPublicKey(v []byte) {
@@ -632,17 +1065,22 @@ func (x *ClaimServerRequest) SetPublicKey(v []byte) {
 		v = []byte{}
 	}
 	x.xxx_hidden_PublicKey = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
 }
 
 func (x *ClaimServerRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
 }
 
 func (x *ClaimServerRequest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *ClaimServerRequest) SetClaimRequest(v string) {
+	x.xxx_hidden_ClaimRequest = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *ClaimServerRequest) HasClaimCode() bool {
@@ -673,6 +1111,13 @@ func (x *ClaimServerRequest) HasVersion() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
+func (x *ClaimServerRequest) HasClaimRequest() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *ClaimServerRequest) ClearClaimCode() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ClaimCode = nil
@@ -693,9 +1138,15 @@ func (x *ClaimServerRequest) ClearVersion() {
 	x.xxx_hidden_Version = nil
 }
 
+func (x *ClaimServerRequest) ClearClaimRequest() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_ClaimRequest = nil
+}
+
 type ClaimServerRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// A claim code, or a claim_request; exactly one is set.
 	ClaimCode *string
 	// The server's Ed25519 identity public key, whose fingerprint is the ID
 	// in the request's JWT.
@@ -703,6 +1154,8 @@ type ClaimServerRequest_builder struct {
 	// The name the server shows.
 	Name    *string
 	Version *string
+	// A claim request's ID from CreateClaimRequest.
+	ClaimRequest *string
 }
 
 func (b0 ClaimServerRequest_builder) Build() *ClaimServerRequest {
@@ -710,20 +1163,24 @@ func (b0 ClaimServerRequest_builder) Build() *ClaimServerRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ClaimCode != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
 		x.xxx_hidden_ClaimCode = b.ClaimCode
 	}
 	if b.PublicKey != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
 		x.xxx_hidden_PublicKey = b.PublicKey
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_Version = b.Version
+	}
+	if b.ClaimRequest != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_ClaimRequest = b.ClaimRequest
 	}
 	return m0
 }
@@ -740,7 +1197,7 @@ type ClaimServerResponse struct {
 
 func (x *ClaimServerResponse) Reset() {
 	*x = ClaimServerResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -752,7 +1209,7 @@ func (x *ClaimServerResponse) String() string {
 func (*ClaimServerResponse) ProtoMessage() {}
 
 func (x *ClaimServerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -843,7 +1300,7 @@ type ListChangesRequest struct {
 
 func (x *ListChangesRequest) Reset() {
 	*x = ListChangesRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -855,7 +1312,7 @@ func (x *ListChangesRequest) String() string {
 func (*ListChangesRequest) ProtoMessage() {}
 
 func (x *ListChangesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[4]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -951,7 +1408,7 @@ type ListChangesResponse struct {
 
 func (x *ListChangesResponse) Reset() {
 	*x = ListChangesResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -963,7 +1420,7 @@ func (x *ListChangesResponse) String() string {
 func (*ListChangesResponse) ProtoMessage() {}
 
 func (x *ListChangesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[5]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1076,7 +1533,7 @@ type Change struct {
 
 func (x *Change) Reset() {
 	*x = Change{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1088,7 +1545,7 @@ func (x *Change) String() string {
 func (*Change) ProtoMessage() {}
 
 func (x *Change) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[6]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1349,7 +1806,7 @@ func (b0 Change_builder) Build() *Change {
 type case_Change_Kind protoreflect.FieldNumber
 
 func (x case_Change_Kind) String() string {
-	md := file_mavio_cloud_v1_cloud_proto_msgTypes[6].Descriptor()
+	md := file_mavio_cloud_v1_cloud_proto_msgTypes[8].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -1398,7 +1855,7 @@ type AccessGranted struct {
 
 func (x *AccessGranted) Reset() {
 	*x = AccessGranted{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1410,7 +1867,7 @@ func (x *AccessGranted) String() string {
 func (*AccessGranted) ProtoMessage() {}
 
 func (x *AccessGranted) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[7]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1492,7 +1949,7 @@ type AccessRevoked struct {
 
 func (x *AccessRevoked) Reset() {
 	*x = AccessRevoked{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1504,7 +1961,7 @@ func (x *AccessRevoked) String() string {
 func (*AccessRevoked) ProtoMessage() {}
 
 func (x *AccessRevoked) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[8]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1571,7 +2028,7 @@ type AccountRevoked struct {
 
 func (x *AccountRevoked) Reset() {
 	*x = AccountRevoked{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1583,7 +2040,7 @@ func (x *AccountRevoked) String() string {
 func (*AccountRevoked) ProtoMessage() {}
 
 func (x *AccountRevoked) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[9]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1683,7 +2140,7 @@ type Library struct {
 
 func (x *Library) Reset() {
 	*x = Library{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1695,7 +2152,7 @@ func (x *Library) String() string {
 func (*Library) ProtoMessage() {}
 
 func (x *Library) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[10]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1824,7 +2281,7 @@ type PublishLibrariesRequest struct {
 
 func (x *PublishLibrariesRequest) Reset() {
 	*x = PublishLibrariesRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1836,7 +2293,7 @@ func (x *PublishLibrariesRequest) String() string {
 func (*PublishLibrariesRequest) ProtoMessage() {}
 
 func (x *PublishLibrariesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[11]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1882,7 +2339,7 @@ type PublishLibrariesResponse struct {
 
 func (x *PublishLibrariesResponse) Reset() {
 	*x = PublishLibrariesResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1894,7 +2351,7 @@ func (x *PublishLibrariesResponse) String() string {
 func (*PublishLibrariesResponse) ProtoMessage() {}
 
 func (x *PublishLibrariesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[12]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1917,6 +2374,108 @@ func (b0 PublishLibrariesResponse_builder) Build() *PublishLibrariesResponse {
 	return m0
 }
 
+type PublishConnectionsRequest struct {
+	state           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Urls []string               `protobuf:"bytes,1,rep,name=urls"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *PublishConnectionsRequest) Reset() {
+	*x = PublishConnectionsRequest{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishConnectionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishConnectionsRequest) ProtoMessage() {}
+
+func (x *PublishConnectionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PublishConnectionsRequest) GetUrls() []string {
+	if x != nil {
+		return x.xxx_hidden_Urls
+	}
+	return nil
+}
+
+func (x *PublishConnectionsRequest) SetUrls(v []string) {
+	x.xxx_hidden_Urls = v
+}
+
+type PublishConnectionsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// HTTP and HTTPS base URLs, best first, such as
+	// https://192-168-1-10.<ID>.mavio.site:8920 and http://192.168.1.10:8686.
+	Urls []string
+}
+
+func (b0 PublishConnectionsRequest_builder) Build() *PublishConnectionsRequest {
+	m0 := &PublishConnectionsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Urls = b.Urls
+	return m0
+}
+
+type PublishConnectionsResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishConnectionsResponse) Reset() {
+	*x = PublishConnectionsResponse{}
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishConnectionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishConnectionsResponse) ProtoMessage() {}
+
+func (x *PublishConnectionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type PublishConnectionsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 PublishConnectionsResponse_builder) Build() *PublishConnectionsResponse {
+	m0 := &PublishConnectionsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 // Notice tells a server, as a binary frame on its WebSocket connection
 // at /servers/notices under mavio.dev's API base URL, that its changes
 // reached a cursor. The server opens the connection with the same JWT as
@@ -1932,7 +2491,7 @@ type Notice struct {
 
 func (x *Notice) Reset() {
 	*x = Notice{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1944,7 +2503,7 @@ func (x *Notice) String() string {
 func (*Notice) ProtoMessage() {}
 
 func (x *Notice) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[13]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2005,7 +2564,7 @@ type SetAcmeChallengeRequest struct {
 
 func (x *SetAcmeChallengeRequest) Reset() {
 	*x = SetAcmeChallengeRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2017,7 +2576,7 @@ func (x *SetAcmeChallengeRequest) String() string {
 func (*SetAcmeChallengeRequest) ProtoMessage() {}
 
 func (x *SetAcmeChallengeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[14]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2062,7 +2621,7 @@ type SetAcmeChallengeResponse struct {
 
 func (x *SetAcmeChallengeResponse) Reset() {
 	*x = SetAcmeChallengeResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2074,7 +2633,7 @@ func (x *SetAcmeChallengeResponse) String() string {
 func (*SetAcmeChallengeResponse) ProtoMessage() {}
 
 func (x *SetAcmeChallengeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[15]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2105,7 +2664,7 @@ type ClearAcmeChallengeRequest struct {
 
 func (x *ClearAcmeChallengeRequest) Reset() {
 	*x = ClearAcmeChallengeRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2117,7 +2676,7 @@ func (x *ClearAcmeChallengeRequest) String() string {
 func (*ClearAcmeChallengeRequest) ProtoMessage() {}
 
 func (x *ClearAcmeChallengeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[16]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2148,7 +2707,7 @@ type ClearAcmeChallengeResponse struct {
 
 func (x *ClearAcmeChallengeResponse) Reset() {
 	*x = ClearAcmeChallengeResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2160,7 +2719,7 @@ func (x *ClearAcmeChallengeResponse) String() string {
 func (*ClearAcmeChallengeResponse) ProtoMessage() {}
 
 func (x *ClearAcmeChallengeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[17]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2191,7 +2750,7 @@ type CreateAcmeBindingRequest struct {
 
 func (x *CreateAcmeBindingRequest) Reset() {
 	*x = CreateAcmeBindingRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2203,7 +2762,7 @@ func (x *CreateAcmeBindingRequest) String() string {
 func (*CreateAcmeBindingRequest) ProtoMessage() {}
 
 func (x *CreateAcmeBindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[18]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2238,7 +2797,7 @@ type CreateAcmeBindingResponse struct {
 
 func (x *CreateAcmeBindingResponse) Reset() {
 	*x = CreateAcmeBindingResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2250,7 +2809,7 @@ func (x *CreateAcmeBindingResponse) String() string {
 func (*CreateAcmeBindingResponse) ProtoMessage() {}
 
 func (x *CreateAcmeBindingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[19]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2346,7 +2905,7 @@ type ListRelaysRequest struct {
 
 func (x *ListRelaysRequest) Reset() {
 	*x = ListRelaysRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2358,7 +2917,7 @@ func (x *ListRelaysRequest) String() string {
 func (*ListRelaysRequest) ProtoMessage() {}
 
 func (x *ListRelaysRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[20]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2390,7 +2949,7 @@ type ListRelaysResponse struct {
 
 func (x *ListRelaysResponse) Reset() {
 	*x = ListRelaysResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2402,7 +2961,7 @@ func (x *ListRelaysResponse) String() string {
 func (*ListRelaysResponse) ProtoMessage() {}
 
 func (x *ListRelaysResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[21]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2453,7 +3012,7 @@ type Relay struct {
 
 func (x *Relay) Reset() {
 	*x = Relay{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2465,7 +3024,7 @@ func (x *Relay) String() string {
 func (*Relay) ProtoMessage() {}
 
 func (x *Relay) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[22]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2565,7 +3124,7 @@ type SetRelayRegionRequest struct {
 
 func (x *SetRelayRegionRequest) Reset() {
 	*x = SetRelayRegionRequest{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2577,7 +3136,7 @@ func (x *SetRelayRegionRequest) String() string {
 func (*SetRelayRegionRequest) ProtoMessage() {}
 
 func (x *SetRelayRegionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[23]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2640,7 +3199,7 @@ type SetRelayRegionResponse struct {
 
 func (x *SetRelayRegionResponse) Reset() {
 	*x = SetRelayRegionResponse{}
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2652,7 +3211,7 @@ func (x *SetRelayRegionResponse) String() string {
 func (*SetRelayRegionResponse) ProtoMessage() {}
 
 func (x *SetRelayRegionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[24]
+	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2694,15 +3253,33 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\rblock_unrated\x18\x04 \x01(\bR\fblockUnrated\x12%\n" +
 	"\x0eallowed_labels\x18\x05 \x03(\tR\rallowedLabels\x12%\n" +
 	"\x0eblocked_labels\x18\x06 \x03(\tR\rblockedLabels\x12%\n" +
-	"\x0eallow_download\x18\a \x01(\bR\rallowDownload\"\xad\x01\n" +
-	"\x12ClaimServerRequest\x12+\n" +
+	"\x0eallow_download\x18\a \x01(\bR\rallowDownload\"\xb9\x02\n" +
+	"\x19CreateClaimRequestRequest\x12)\n" +
 	"\n" +
-	"claim_code\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18@R\tclaimCode\x12)\n" +
+	"public_key\x18\x01 \x01(\fB\n" +
+	"\xbaH\a\xc8\x01\x01z\x02h R\tpublicKey\x12\x1c\n" +
+	"\x04name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04name\x12!\n" +
+	"\aversion\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18@R\aversion\x121\n" +
+	"\fredirect_uri\x18\x04 \x01(\tB\x0e\xbaH\v\xc8\x01\x01r\x06\x18\x80\x10\x88\x01\x01R\vredirectUri\x122\n" +
+	"\x0ecode_challenge\x18\x05 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x98\x01+R\rcodeChallenge\x12)\n" +
+	"\n" +
+	"device_key\x18\x06 \x01(\fB\n" +
+	"\xbaH\a\xc8\x01\x01z\x02h R\tdeviceKey\x12\x1e\n" +
+	"\x05state\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x05state\"\x90\x01\n" +
+	"\x1aCreateClaimRequestResponse\x12#\n" +
+	"\rclaim_request\x18\x01 \x01(\tR\fclaimRequest\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\x12;\n" +
+	"\vexpire_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expireTime\"\xd6\x01\n" +
+	"\x12ClaimServerRequest\x12&\n" +
+	"\n" +
+	"claim_code\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x18@R\tclaimCode\x12)\n" +
 	"\n" +
 	"public_key\x18\x02 \x01(\fB\n" +
 	"\xbaH\a\xc8\x01\x01z\x02h R\tpublicKey\x12\x1c\n" +
 	"\x04name\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04name\x12!\n" +
-	"\aversion\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\aversion\"l\n" +
+	"\aversion\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\aversion\x12,\n" +
+	"\rclaim_request\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x18@R\fclaimRequest\"l\n" +
 	"\x13ClaimServerResponse\x12=\n" +
 	"\radministrator\x18\x01 \x01(\v2\x17.mavio.cloud.v1.AccountR\radministrator\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\x03R\x06cursor\"\\\n" +
@@ -2744,7 +3321,10 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\x04kind\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18 R\x04kind\"[\n" +
 	"\x17PublishLibrariesRequest\x12@\n" +
 	"\tlibraries\x18\x01 \x03(\v2\x17.mavio.cloud.v1.LibraryB\t\xbaH\x06\x92\x01\x03\x10\xe8\aR\tlibraries\"\x1a\n" +
-	"\x18PublishLibrariesResponse\" \n" +
+	"\x18PublishLibrariesResponse\"C\n" +
+	"\x19PublishConnectionsRequest\x12&\n" +
+	"\x04urls\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\x10@\"\br\x06\x18\x80\x04\x88\x01\x01R\x04urls\"\x1c\n" +
+	"\x1aPublishConnectionsResponse\" \n" +
 	"\x06Notice\x12\x16\n" +
 	"\x06cursor\x18\x01 \x01(\x03R\x06cursor\"V\n" +
 	"\x17SetAcmeChallengeRequest\x12;\n" +
@@ -2768,11 +3348,13 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\vAccountKind\x12\x1c\n" +
 	"\x18ACCOUNT_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11ACCOUNT_KIND_FULL\x10\x01\x12\x18\n" +
-	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xb8\x06\n" +
-	"\rServerService\x12V\n" +
+	"\x14ACCOUNT_KIND_MANAGED\x10\x022\x97\b\n" +
+	"\rServerService\x12k\n" +
+	"\x12CreateClaimRequest\x12).mavio.cloud.v1.CreateClaimRequestRequest\x1a*.mavio.cloud.v1.CreateClaimRequestResponse\x12V\n" +
 	"\vClaimServer\x12\".mavio.cloud.v1.ClaimServerRequest\x1a#.mavio.cloud.v1.ClaimServerResponse\x12[\n" +
 	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01\x12j\n" +
-	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02\x12j\n" +
+	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02\x12p\n" +
+	"\x12PublishConnections\x12).mavio.cloud.v1.PublishConnectionsRequest\x1a*.mavio.cloud.v1.PublishConnectionsResponse\"\x03\x90\x02\x02\x12j\n" +
 	"\x10SetAcmeChallenge\x12'.mavio.cloud.v1.SetAcmeChallengeRequest\x1a(.mavio.cloud.v1.SetAcmeChallengeResponse\"\x03\x90\x02\x02\x12p\n" +
 	"\x12ClearAcmeChallenge\x12).mavio.cloud.v1.ClearAcmeChallengeRequest\x1a*.mavio.cloud.v1.ClearAcmeChallengeResponse\"\x03\x90\x02\x02\x12h\n" +
 	"\x11CreateAcmeBinding\x12(.mavio.cloud.v1.CreateAcmeBindingRequest\x1a).mavio.cloud.v1.CreateAcmeBindingResponse\x12X\n" +
@@ -2783,74 +3365,83 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"CloudProtoP\x01ZAgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/cloud/v1;cloudv1\xa2\x02\x03MCX\xaa\x02\x0eMavio.Cloud.V1\xca\x02\x0eMavio\\Cloud\\V1\xe2\x02\x1aMavio\\Cloud\\V1\\GPBMetadata\xea\x02\x10Mavio::Cloud::V1b\beditionsp\xe8\a"
 
 var file_mavio_cloud_v1_cloud_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
 	(AccountKind)(0),                   // 0: mavio.cloud.v1.AccountKind
 	(AccountRevoked_Reason)(0),         // 1: mavio.cloud.v1.AccountRevoked.Reason
 	(*Account)(nil),                    // 2: mavio.cloud.v1.Account
 	(*Access)(nil),                     // 3: mavio.cloud.v1.Access
-	(*ClaimServerRequest)(nil),         // 4: mavio.cloud.v1.ClaimServerRequest
-	(*ClaimServerResponse)(nil),        // 5: mavio.cloud.v1.ClaimServerResponse
-	(*ListChangesRequest)(nil),         // 6: mavio.cloud.v1.ListChangesRequest
-	(*ListChangesResponse)(nil),        // 7: mavio.cloud.v1.ListChangesResponse
-	(*Change)(nil),                     // 8: mavio.cloud.v1.Change
-	(*AccessGranted)(nil),              // 9: mavio.cloud.v1.AccessGranted
-	(*AccessRevoked)(nil),              // 10: mavio.cloud.v1.AccessRevoked
-	(*AccountRevoked)(nil),             // 11: mavio.cloud.v1.AccountRevoked
-	(*Library)(nil),                    // 12: mavio.cloud.v1.Library
-	(*PublishLibrariesRequest)(nil),    // 13: mavio.cloud.v1.PublishLibrariesRequest
-	(*PublishLibrariesResponse)(nil),   // 14: mavio.cloud.v1.PublishLibrariesResponse
-	(*Notice)(nil),                     // 15: mavio.cloud.v1.Notice
-	(*SetAcmeChallengeRequest)(nil),    // 16: mavio.cloud.v1.SetAcmeChallengeRequest
-	(*SetAcmeChallengeResponse)(nil),   // 17: mavio.cloud.v1.SetAcmeChallengeResponse
-	(*ClearAcmeChallengeRequest)(nil),  // 18: mavio.cloud.v1.ClearAcmeChallengeRequest
-	(*ClearAcmeChallengeResponse)(nil), // 19: mavio.cloud.v1.ClearAcmeChallengeResponse
-	(*CreateAcmeBindingRequest)(nil),   // 20: mavio.cloud.v1.CreateAcmeBindingRequest
-	(*CreateAcmeBindingResponse)(nil),  // 21: mavio.cloud.v1.CreateAcmeBindingResponse
-	(*ListRelaysRequest)(nil),          // 22: mavio.cloud.v1.ListRelaysRequest
-	(*ListRelaysResponse)(nil),         // 23: mavio.cloud.v1.ListRelaysResponse
-	(*Relay)(nil),                      // 24: mavio.cloud.v1.Relay
-	(*SetRelayRegionRequest)(nil),      // 25: mavio.cloud.v1.SetRelayRegionRequest
-	(*SetRelayRegionResponse)(nil),     // 26: mavio.cloud.v1.SetRelayRegionResponse
-	(v1.RestrictionProfile)(0),         // 27: mavio.user.v1.RestrictionProfile
-	(*timestamppb.Timestamp)(nil),      // 28: google.protobuf.Timestamp
+	(*CreateClaimRequestRequest)(nil),  // 4: mavio.cloud.v1.CreateClaimRequestRequest
+	(*CreateClaimRequestResponse)(nil), // 5: mavio.cloud.v1.CreateClaimRequestResponse
+	(*ClaimServerRequest)(nil),         // 6: mavio.cloud.v1.ClaimServerRequest
+	(*ClaimServerResponse)(nil),        // 7: mavio.cloud.v1.ClaimServerResponse
+	(*ListChangesRequest)(nil),         // 8: mavio.cloud.v1.ListChangesRequest
+	(*ListChangesResponse)(nil),        // 9: mavio.cloud.v1.ListChangesResponse
+	(*Change)(nil),                     // 10: mavio.cloud.v1.Change
+	(*AccessGranted)(nil),              // 11: mavio.cloud.v1.AccessGranted
+	(*AccessRevoked)(nil),              // 12: mavio.cloud.v1.AccessRevoked
+	(*AccountRevoked)(nil),             // 13: mavio.cloud.v1.AccountRevoked
+	(*Library)(nil),                    // 14: mavio.cloud.v1.Library
+	(*PublishLibrariesRequest)(nil),    // 15: mavio.cloud.v1.PublishLibrariesRequest
+	(*PublishLibrariesResponse)(nil),   // 16: mavio.cloud.v1.PublishLibrariesResponse
+	(*PublishConnectionsRequest)(nil),  // 17: mavio.cloud.v1.PublishConnectionsRequest
+	(*PublishConnectionsResponse)(nil), // 18: mavio.cloud.v1.PublishConnectionsResponse
+	(*Notice)(nil),                     // 19: mavio.cloud.v1.Notice
+	(*SetAcmeChallengeRequest)(nil),    // 20: mavio.cloud.v1.SetAcmeChallengeRequest
+	(*SetAcmeChallengeResponse)(nil),   // 21: mavio.cloud.v1.SetAcmeChallengeResponse
+	(*ClearAcmeChallengeRequest)(nil),  // 22: mavio.cloud.v1.ClearAcmeChallengeRequest
+	(*ClearAcmeChallengeResponse)(nil), // 23: mavio.cloud.v1.ClearAcmeChallengeResponse
+	(*CreateAcmeBindingRequest)(nil),   // 24: mavio.cloud.v1.CreateAcmeBindingRequest
+	(*CreateAcmeBindingResponse)(nil),  // 25: mavio.cloud.v1.CreateAcmeBindingResponse
+	(*ListRelaysRequest)(nil),          // 26: mavio.cloud.v1.ListRelaysRequest
+	(*ListRelaysResponse)(nil),         // 27: mavio.cloud.v1.ListRelaysResponse
+	(*Relay)(nil),                      // 28: mavio.cloud.v1.Relay
+	(*SetRelayRegionRequest)(nil),      // 29: mavio.cloud.v1.SetRelayRegionRequest
+	(*SetRelayRegionResponse)(nil),     // 30: mavio.cloud.v1.SetRelayRegionResponse
+	(v1.RestrictionProfile)(0),         // 31: mavio.user.v1.RestrictionProfile
+	(*timestamppb.Timestamp)(nil),      // 32: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
-	27, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
-	2,  // 2: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
-	8,  // 3: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
-	28, // 4: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
-	9,  // 5: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
-	10, // 6: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
-	2,  // 7: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
-	11, // 8: mavio.cloud.v1.Change.account_revoked:type_name -> mavio.cloud.v1.AccountRevoked
-	2,  // 9: mavio.cloud.v1.AccessGranted.account:type_name -> mavio.cloud.v1.Account
-	3,  // 10: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
-	1,  // 11: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
-	12, // 12: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
-	24, // 13: mavio.cloud.v1.ListRelaysResponse.relays:type_name -> mavio.cloud.v1.Relay
-	4,  // 14: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
-	6,  // 15: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
-	13, // 16: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
-	16, // 17: mavio.cloud.v1.ServerService.SetAcmeChallenge:input_type -> mavio.cloud.v1.SetAcmeChallengeRequest
-	18, // 18: mavio.cloud.v1.ServerService.ClearAcmeChallenge:input_type -> mavio.cloud.v1.ClearAcmeChallengeRequest
-	20, // 19: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
-	22, // 20: mavio.cloud.v1.ServerService.ListRelays:input_type -> mavio.cloud.v1.ListRelaysRequest
-	25, // 21: mavio.cloud.v1.ServerService.SetRelayRegion:input_type -> mavio.cloud.v1.SetRelayRegionRequest
-	5,  // 22: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
-	7,  // 23: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
-	14, // 24: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
-	17, // 25: mavio.cloud.v1.ServerService.SetAcmeChallenge:output_type -> mavio.cloud.v1.SetAcmeChallengeResponse
-	19, // 26: mavio.cloud.v1.ServerService.ClearAcmeChallenge:output_type -> mavio.cloud.v1.ClearAcmeChallengeResponse
-	21, // 27: mavio.cloud.v1.ServerService.CreateAcmeBinding:output_type -> mavio.cloud.v1.CreateAcmeBindingResponse
-	23, // 28: mavio.cloud.v1.ServerService.ListRelays:output_type -> mavio.cloud.v1.ListRelaysResponse
-	26, // 29: mavio.cloud.v1.ServerService.SetRelayRegion:output_type -> mavio.cloud.v1.SetRelayRegionResponse
-	22, // [22:30] is the sub-list for method output_type
-	14, // [14:22] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	31, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
+	32, // 2: mavio.cloud.v1.CreateClaimRequestResponse.expire_time:type_name -> google.protobuf.Timestamp
+	2,  // 3: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
+	10, // 4: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
+	32, // 5: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
+	11, // 6: mavio.cloud.v1.Change.access_granted:type_name -> mavio.cloud.v1.AccessGranted
+	12, // 7: mavio.cloud.v1.Change.access_revoked:type_name -> mavio.cloud.v1.AccessRevoked
+	2,  // 8: mavio.cloud.v1.Change.account_changed:type_name -> mavio.cloud.v1.Account
+	13, // 9: mavio.cloud.v1.Change.account_revoked:type_name -> mavio.cloud.v1.AccountRevoked
+	2,  // 10: mavio.cloud.v1.AccessGranted.account:type_name -> mavio.cloud.v1.Account
+	3,  // 11: mavio.cloud.v1.AccessGranted.access:type_name -> mavio.cloud.v1.Access
+	1,  // 12: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
+	14, // 13: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
+	28, // 14: mavio.cloud.v1.ListRelaysResponse.relays:type_name -> mavio.cloud.v1.Relay
+	4,  // 15: mavio.cloud.v1.ServerService.CreateClaimRequest:input_type -> mavio.cloud.v1.CreateClaimRequestRequest
+	6,  // 16: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
+	8,  // 17: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
+	15, // 18: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
+	17, // 19: mavio.cloud.v1.ServerService.PublishConnections:input_type -> mavio.cloud.v1.PublishConnectionsRequest
+	20, // 20: mavio.cloud.v1.ServerService.SetAcmeChallenge:input_type -> mavio.cloud.v1.SetAcmeChallengeRequest
+	22, // 21: mavio.cloud.v1.ServerService.ClearAcmeChallenge:input_type -> mavio.cloud.v1.ClearAcmeChallengeRequest
+	24, // 22: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
+	26, // 23: mavio.cloud.v1.ServerService.ListRelays:input_type -> mavio.cloud.v1.ListRelaysRequest
+	29, // 24: mavio.cloud.v1.ServerService.SetRelayRegion:input_type -> mavio.cloud.v1.SetRelayRegionRequest
+	5,  // 25: mavio.cloud.v1.ServerService.CreateClaimRequest:output_type -> mavio.cloud.v1.CreateClaimRequestResponse
+	7,  // 26: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
+	9,  // 27: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
+	16, // 28: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse
+	18, // 29: mavio.cloud.v1.ServerService.PublishConnections:output_type -> mavio.cloud.v1.PublishConnectionsResponse
+	21, // 30: mavio.cloud.v1.ServerService.SetAcmeChallenge:output_type -> mavio.cloud.v1.SetAcmeChallengeResponse
+	23, // 31: mavio.cloud.v1.ServerService.ClearAcmeChallenge:output_type -> mavio.cloud.v1.ClearAcmeChallengeResponse
+	25, // 32: mavio.cloud.v1.ServerService.CreateAcmeBinding:output_type -> mavio.cloud.v1.CreateAcmeBindingResponse
+	27, // 33: mavio.cloud.v1.ServerService.ListRelays:output_type -> mavio.cloud.v1.ListRelaysResponse
+	30, // 34: mavio.cloud.v1.ServerService.SetRelayRegion:output_type -> mavio.cloud.v1.SetRelayRegionResponse
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_mavio_cloud_v1_cloud_proto_init() }
@@ -2858,7 +3449,7 @@ func file_mavio_cloud_v1_cloud_proto_init() {
 	if File_mavio_cloud_v1_cloud_proto != nil {
 		return
 	}
-	file_mavio_cloud_v1_cloud_proto_msgTypes[6].OneofWrappers = []any{
+	file_mavio_cloud_v1_cloud_proto_msgTypes[8].OneofWrappers = []any{
 		(*change_AccessGranted)(nil),
 		(*change_AccessRevoked)(nil),
 		(*change_AccountChanged)(nil),
@@ -2870,7 +3461,7 @@ func file_mavio_cloud_v1_cloud_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_cloud_v1_cloud_proto_rawDesc), len(file_mavio_cloud_v1_cloud_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   25,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

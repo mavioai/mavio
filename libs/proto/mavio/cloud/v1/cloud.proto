@@ -12,12 +12,24 @@ import "mavio/user/v1/user.proto";
 // (private_key_jwt): EdDSA, with the server's ID as its kid, iss and sub,
 // mavio.dev's API base URL as its aud, a random jti, and an expiry at
 // most a minute after it was issued, carried as a bearer token. Claiming
-// registers the key; the other methods need a claimed server.
+// registers the key, and CreateClaimRequest and ClaimServer carry it; the
+// other methods need a claimed server.
 service ServerService {
-  // ClaimServer registers the server under the account that created the
-  // claim code at mavio.dev/claim, which becomes its administrator. An
-  // unknown, used or expired code fails with INVALID_ARGUMENT. Claiming a
-  // server again, after its command line unclaimed it, keeps its changes.
+  // CreateClaimRequest asks for a claim that an account confirms at the
+  // page it returns, for the web UI at a redirect URI that started it
+  // (docs/accounts.md §3.2). Confirming claims the server for the account,
+  // and sends the browser to the redirect URI with an authorization code
+  // of the account for the server and the device key, as /authorize does;
+  // the server then fetches the outcome with ClaimServer.
+  rpc CreateClaimRequest(CreateClaimRequestRequest) returns (CreateClaimRequestResponse);
+  // ClaimServer gives the account that claimed the server, which becomes
+  // its administrator: with a claim code from mavio.dev/claim, it claims
+  // the server for the code's account, and with a claim request it gives
+  // the account that confirmed the request. A claim request not confirmed
+  // yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
+  // and an unknown, declined or expired request, with INVALID_ARGUMENT.
+  // Claiming a server again, after its command line unclaimed it, keeps
+  // its changes.
   rpc ClaimServer(ClaimServerRequest) returns (ClaimServerResponse);
   // ListChanges gives the server's changes after a cursor, oldest first.
   rpc ListChanges(ListChangesRequest) returns (ListChangesResponse) {
@@ -27,6 +39,11 @@ service ServerService {
   // server, which access records name, so that administrators edit access
   // from anywhere.
   rpc PublishLibraries(PublishLibrariesRequest) returns (PublishLibrariesResponse) {
+    option idempotency_level = IDEMPOTENT;
+  }
+  // PublishConnections replaces the URLs clients reach the server at,
+  // which mavio.dev gives the accounts that reach it.
+  rpc PublishConnections(PublishConnectionsRequest) returns (PublishConnectionsResponse) {
     option idempotency_level = IDEMPOTENT;
   }
   // SetAcmeChallenge publishes the TXT values of the server's ACME DNS-01
@@ -97,14 +114,50 @@ message Access {
   bool allow_download = 7;
 }
 
-message ClaimServerRequest {
-  string claim_code = 1 [
+message CreateClaimRequestRequest {
+  // The server's Ed25519 identity public key, whose fingerprint is the ID
+  // in the request's JWT.
+  bytes public_key = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+  // The name the server shows.
+  string name = 2 [(buf.validate.field).string.max_len = 128];
+  string version = 3 [(buf.validate.field).string.max_len = 64];
+  // Where the browser goes once the account confirms or declines: an
+  // HTTP or HTTPS URL of the web UI that started the claim.
+  string redirect_uri = 4 [
     (buf.validate.field).required = true,
     (buf.validate.field).string = {
-      min_len: 1
-      max_len: 64
+      uri: true
+      max_len: 2048
     }
   ];
+  // The S256 PKCE challenge of the authorization code.
+  string code_challenge = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.len = 43
+  ];
+  // The Ed25519 public key of the device that signs in.
+  bytes device_key = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).bytes.len = 32
+  ];
+  // Sent back with the code.
+  string state = 7 [(buf.validate.field).string.max_len = 128];
+}
+
+message CreateClaimRequestResponse {
+  // The request's ID, which ClaimServer takes.
+  string claim_request = 1;
+  // The page where an account confirms it.
+  string url = 2;
+  google.protobuf.Timestamp expire_time = 3;
+}
+
+message ClaimServerRequest {
+  // A claim code, or a claim_request; exactly one is set.
+  string claim_code = 1 [(buf.validate.field).string.max_len = 64];
   // The server's Ed25519 identity public key, whose fingerprint is the ID
   // in the request's JWT.
   bytes public_key = 2 [
@@ -114,6 +167,8 @@ message ClaimServerRequest {
   // The name the server shows.
   string name = 3 [(buf.validate.field).string.max_len = 128];
   string version = 4 [(buf.validate.field).string.max_len = 64];
+  // A claim request's ID from CreateClaimRequest.
+  string claim_request = 5 [(buf.validate.field).string.max_len = 64];
 }
 
 message ClaimServerResponse {
@@ -197,6 +252,22 @@ message PublishLibrariesRequest {
 }
 
 message PublishLibrariesResponse {}
+
+message PublishConnectionsRequest {
+  // HTTP and HTTPS base URLs, best first, such as
+  // https://192-168-1-10.<ID>.mavio.site:8920 and http://192.168.1.10:8686.
+  repeated string urls = 1 [(buf.validate.field).repeated = {
+    max_items: 64
+    items: {
+      string: {
+        uri: true
+        max_len: 512
+      }
+    }
+  }];
+}
+
+message PublishConnectionsResponse {}
 
 // Notice tells a server, as a binary frame on its WebSocket connection
 // at /servers/notices under mavio.dev's API base URL, that its changes
