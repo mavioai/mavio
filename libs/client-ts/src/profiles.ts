@@ -52,10 +52,10 @@ export function useQualityDefinitions(server: ServerEntry, kind: MediaKind) {
 }
 
 /**
- * A list kept by ProfileService and the mutations of its entries, each
+ * A list of acquisition's and the mutations of its entries, each
  * refreshing the list.
  */
-function useEntries<T, C, R, U, D>(
+export function useEntries<T, C, R, U, D>(
   server: ServerEntry,
   name: string,
   list: () => Promise<T[]>,

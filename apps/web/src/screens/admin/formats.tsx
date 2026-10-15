@@ -17,8 +17,7 @@ import { useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { PageLink } from "./acquisition.tsx";
-import { BackLink, Confirm, input, Page, patched } from "./common.tsx";
+import { BackLink, Confirm, input, Page, PageLink, patched } from "./common.tsx";
 import { NumberInput, releaseLanguages } from "./quality.tsx";
 
 const kinds: { kind: Kind; title: () => string }[] = [

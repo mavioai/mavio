@@ -4,8 +4,8 @@
 // and those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
 // overview, general settings, libraries, users, transcoding, storage,
-// acquisition, plugins and tasks. Wide windows show them beside their own sidebar; phones list
-// them first, as the profile.
+// acquisition, subtitles, plugins and tasks. Wide windows show them
+// beside their own sidebar; phones list them first, as the profile.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
@@ -34,12 +34,13 @@ import { OverviewSection } from "./admin/overview.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
 import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
+import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { TranscodingSection } from "./admin/transcoding.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "plugins" | "tasks";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "subtitles" | "plugins" | "tasks";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -55,6 +56,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   transcoding: { icon: "quality", color: "#FF2D55", title: () => t("settings.transcoding"), admin: true },
   storage: { icon: "server", color: "#30B0C7", title: () => t("settings.storage"), admin: true },
   acquisition: { icon: "downloads", color: "#34C759", title: () => t("settings.acquisition"), admin: true },
+  subtitles: { icon: "subtitles", color: "#FF9500", title: () => t("settings.subtitles"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
@@ -62,7 +64,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "storage", "acquisition", "plugins", "tasks"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "storage", "acquisition", "subtitles", "plugins", "tasks"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -84,6 +86,8 @@ export interface SettingsSearch {
   remote?: string;
   /** Acquisition: the page shown, and the profile or format on it. */
   acquisition?: string;
+  /** Subtitles: the page shown, and the profile on it. */
+  subtitles?: string;
   id?: string;
 }
 
@@ -99,6 +103,7 @@ export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
     user: str(s.user),
     remote: str(s.remote),
     acquisition: str(s.acquisition),
+    subtitles: str(s.subtitles),
     id: str(s.id),
   };
 }
@@ -352,6 +357,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <GeneralSection key={chosen.server.id} server={chosen.server} />;
     case "acquisition":
       return chosen?.admin && <AcquisitionSection key={chosen.server.id} server={chosen.server} />;
+    case "subtitles":
+      return chosen?.admin && <SubtitlesSection key={chosen.server.id} server={chosen.server} />;
     case "storage":
       return chosen?.admin && <StorageSection key={chosen.server.id} server={chosen.server} />;
     case "transcoding":

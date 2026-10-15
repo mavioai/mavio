@@ -131,3 +131,11 @@ export {
   useReleaseProfiles,
   useRemotePathMappings,
 } from "./profiles.ts";
+export {
+  useSubtitleAssignments,
+  useSubtitleProfiles,
+  useSubtitleProviders,
+  useSubtitleSettings,
+  useSubtitleTranslators,
+} from "./subtitles.ts";
+export { useAiModels } from "./ai.ts";

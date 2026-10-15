@@ -616,6 +616,8 @@
     <string name="settings_storage">Storage</string>
     <!-- The settings section of what decides which releases a server grabs -->
     <string name="settings_acquisition">Acquisition</string>
+    <!-- The settings section of a server's subtitle acquisition -->
+    <string name="settings_subtitles">Subtitles</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -1745,4 +1747,394 @@
     <string name="rules_local_path">Local Path</string>
     <!-- Detail of the local path -->
     <string name="rules_local_path_detail">Where the server sees it; absolute</string>
+    <!-- The line under Subtitles' title -->
+    <string name="subtitles_message">Find the subtitles movies and episodes lack, and translate those no provider has.</string>
+    <!-- Group of subtitle providers -->
+    <string name="subtitles_providers">Providers</string>
+    <!-- Footer of subtitle providers -->
+    <string name="subtitles_providers_footer">Subtitle provider plugins add providers; each is set up in its plugin.</string>
+    <!-- A provider serves movies -->
+    <string name="subtitles_movies">Movies</string>
+    <!-- A provider serves episodes -->
+    <string name="subtitles_episodes">Episodes</string>
+    <!-- A provider throttled after failing -->
+    <string name="subtitles_throttled">Paused until %1$s: %2$s</string>
+    <!-- A plugin failed to list its providers or translators -->
+    <string name="subtitles_plugin_failed">%s could not list its own.</string>
+    <!-- No subtitle providers -->
+    <string name="subtitles_no_providers">No subtitle providers. Install a subtitle provider plugin to add some.</string>
+    <!-- Group of subtitle translators -->
+    <string name="subtitles_translators">Translators</string>
+    <!-- Footer of subtitle translators -->
+    <string name="subtitles_translators_footer">Subtitle translator plugins add translators; the models of signed-in AI providers translate too.</string>
+    <!-- No translators -->
+    <string name="subtitles_no_translators">No translator plugins.</string>
+    <!-- Group of subtitle profiles -->
+    <string name="subtitles_profiles">Profiles</string>
+    <!-- Footer of subtitle profiles -->
+    <string name="subtitles_profiles_footer">A profile names the languages of subtitles wanted.</string>
+    <!-- Adds a subtitle profile -->
+    <string name="subtitles_add_profile">Add Profile</string>
+    <!-- Group of libraries with their subtitle profiles -->
+    <string name="subtitles_libraries">Libraries</string>
+    <!-- Footer of the libraries' subtitle profiles -->
+    <string name="subtitles_libraries_footer">Movies and episodes of a library want the subtitles of its profile; assigning one searches for those they lack.</string>
+    <!-- No subtitle profile assigned -->
+    <string name="subtitles_no_profile">None</string>
+    <!-- No libraries -->
+    <string name="subtitles_no_libraries">No libraries.</string>
+    <!-- Group of links to the subtitle settings -->
+    <string name="subtitles_settings">Settings</string>
+    <!-- Page of subtitle search and save settings -->
+    <string name="subtitles_searching">Searching and Saving</string>
+    <!-- Detail of the searching page link -->
+    <string name="subtitles_searching_detail">Scores, searches, upgrades, where subtitles are saved and the fixes applied to them</string>
+    <!-- Page of subtitle synchronization settings -->
+    <string name="subtitles_sync">Synchronization</string>
+    <!-- Detail of the sync page link -->
+    <string name="subtitles_sync_detail">Aligning downloaded subtitles with the audio</string>
+    <!-- Page of subtitle translation settings -->
+    <string name="subtitles_translation">Translation</string>
+    <!-- Detail of the translation page link -->
+    <string name="subtitles_translation_detail">Translators, prompts, validation and automatic translation</string>
+    <!-- Forced subtitles -->
+    <string name="subtitles_forced">Forced</string>
+    <!-- Hearing-impaired subtitles, short -->
+    <string name="subtitles_hi_short">SDH</string>
+    <!-- Hearing-impaired subtitles excluded, short -->
+    <string name="subtitles_no_hi_short">no SDH</string>
+    <!-- Title of a subtitle profile page -->
+    <string name="subtitles_profile">Subtitle Profile</string>
+    <!-- A subtitle profile was deleted -->
+    <string name="subtitles_profile_gone">This profile no longer exists.</string>
+    <!-- Title of a new subtitle profile -->
+    <string name="subtitles_new_profile">New Subtitle Profile</string>
+    <!-- Group of a profile's languages -->
+    <string name="subtitles_languages">Languages</string>
+    <!-- Footer of a profile's languages -->
+    <string name="subtitles_languages_footer">Each language is wanted unless its audio conditions say otherwise.</string>
+    <!-- A subtitle language -->
+    <string name="subtitles_language">Language</string>
+    <!-- How a language treats hearing-impaired subtitles -->
+    <string name="subtitles_hearing_impaired">Hearing impaired</string>
+    <!-- Normal subtitles wanted, SDH taken in their place -->
+    <string name="subtitles_hi_allowed">SDH accepted</string>
+    <!-- Only hearing-impaired subtitles -->
+    <string name="subtitles_hi_required">SDH only</string>
+    <!-- Hearing-impaired subtitles excluded -->
+    <string name="subtitles_hi_excluded">No SDH</string>
+    <!-- Only forced subtitles -->
+    <string name="subtitles_forced_only">Forced only</string>
+    <!-- Not wanted when an audio stream has the language -->
+    <string name="subtitles_audio_exclude">Not when the audio has it</string>
+    <!-- Wanted only when an audio stream has the language -->
+    <string name="subtitles_audio_only_include">Only when the audio has it</string>
+    <!-- A profile's cutoff -->
+    <string name="subtitles_cutoff">Stop after</string>
+    <!-- Detail of a profile's cutoff -->
+    <string name="subtitles_cutoff_detail">Once these subtitles are found, the others are no longer searched for</string>
+    <!-- No cutoff -->
+    <string name="subtitles_cutoff_none">Every language</string>
+    <!-- Cutoff at any language -->
+    <string name="subtitles_cutoff_any">Any language</string>
+    <!-- Keeps subtitles in their provider's format -->
+    <string name="subtitles_original_format">Original format</string>
+    <!-- Detail of original format -->
+    <string name="subtitles_original_format_detail">Keep subtitles in the format their provider gives rather than SubRip</string>
+    <!-- A profile's tag -->
+    <string name="subtitles_tag">Tag</string>
+    <!-- Detail of a profile's tag -->
+    <string name="subtitles_tag_detail">Movies and series with it get this profile, when tags assign profiles</string>
+    <!-- Group of words subtitle release names must contain -->
+    <string name="subtitles_release_names">Release names</string>
+    <!-- Footer of release name words -->
+    <string name="subtitles_release_names_footer">One word per line.</string>
+    <!-- Words subtitle names must contain -->
+    <string name="subtitles_must_contain">Must contain one of</string>
+    <!-- Words subtitle names must not contain -->
+    <string name="subtitles_must_not_contain">Must not contain</string>
+    <!-- Deletes a subtitle profile -->
+    <string name="subtitles_remove">Delete Profile</string>
+    <!-- Asks before deleting a subtitle profile -->
+    <string name="subtitles_remove_title">Delete %s\?</string>
+    <!-- What deleting a subtitle profile does -->
+    <string name="subtitles_remove_message">Libraries, movies and series lose it.</string>
+    <!-- The subtitle settings were saved -->
+    <string name="subtitles_saved">Saved.</string>
+    <!-- No default language -->
+    <string name="subtitles_language_unset">Unknown</string>
+    <!-- Group of minimum scores -->
+    <string name="subtitles_scores">Minimum scores</string>
+    <!-- Footer of minimum scores -->
+    <string name="subtitles_scores_footer">Percentages of the highest score subtitles can have; those below are not downloaded automatically.</string>
+    <!-- Minimum score of episodes -->
+    <string name="subtitles_minimum_score">Episodes</string>
+    <!-- Minimum score of movies -->
+    <string name="subtitles_minimum_score_movie">Movies</string>
+    <!-- Group of search settings -->
+    <string name="subtitles_searches">Searches</string>
+    <!-- Interval of episodes' searches -->
+    <string name="subtitles_wanted_interval">Search episodes every</string>
+    <!-- Interval of movies' searches -->
+    <string name="subtitles_wanted_interval_movie">Search movies every</string>
+    <!-- Hours, zero for never -->
+    <string name="subtitles_hours_never">Hours; 0 never</string>
+    <!-- Searches failed languages less often -->
+    <string name="subtitles_adaptive">Adaptive searching</string>
+    <!-- Detail of adaptive searching -->
+    <string name="subtitles_adaptive_detail">Search less often for subtitles that keep not being found</string>
+    <!-- Adaptive delay in days -->
+    <string name="subtitles_adaptive_delay">Days before searching less</string>
+    <!-- Adaptive interval in days -->
+    <string name="subtitles_adaptive_delta">Then once every, in days</string>
+    <!-- Describes videos by release names -->
+    <string name="subtitles_scene_name">Use release names</string>
+    <!-- Detail of scene names -->
+    <string name="subtitles_scene_name_detail">Describe videos to providers by the release names their files came from</string>
+    <!-- Does not hash videos -->
+    <string name="subtitles_skip_hashing">Skip hashing</string>
+    <!-- Detail of skip hashing -->
+    <string name="subtitles_skip_hashing_detail">Do not read videos to compute the hashes some providers match by</string>
+    <!-- Group of embedded subtitle settings -->
+    <string name="subtitles_embedded">Embedded subtitles</string>
+    <!-- Counts embedded subtitles as present -->
+    <string name="subtitles_use_embedded">Count embedded subtitles</string>
+    <!-- Detail of using embedded subtitles -->
+    <string name="subtitles_use_embedded_detail">A video\'s own subtitle streams satisfy its profile</string>
+    <!-- Ignores PGS embedded subtitles -->
+    <string name="subtitles_ignore_pgs">Ignore PGS</string>
+    <!-- Ignores VobSub embedded subtitles -->
+    <string name="subtitles_ignore_vobsub">Ignore VobSub</string>
+    <!-- Ignores ASS embedded subtitles -->
+    <string name="subtitles_ignore_ass">Ignore ASS</string>
+    <!-- Default audio language -->
+    <string name="subtitles_default_audio">Audio without a language</string>
+    <!-- Detail of default audio language -->
+    <string name="subtitles_default_audio_detail">The language of audio streams that name none</string>
+    <!-- Default embedded subtitle language -->
+    <string name="subtitles_default_embedded">Subtitles without a language</string>
+    <!-- Group of upgrade settings -->
+    <string name="subtitles_upgrades">Upgrades</string>
+    <!-- Searches for better subtitles -->
+    <string name="subtitles_upgrade">Upgrade subtitles</string>
+    <!-- Detail of upgrades -->
+    <string name="subtitles_upgrade_detail">Search again for recent downloads below the highest score</string>
+    <!-- Upgrade interval in hours -->
+    <string name="subtitles_upgrade_interval">Every, in hours</string>
+    <!-- Upgrade window in days -->
+    <string name="subtitles_upgrade_days">Downloads of the last, in days</string>
+    <!-- Upgrades manual downloads too -->
+    <string name="subtitles_upgrade_manual">Include manual downloads</string>
+    <!-- Group of save settings -->
+    <string name="subtitles_saving">Saving</string>
+    <!-- Where subtitles are saved -->
+    <string name="subtitles_folder">Save in</string>
+    <!-- Subtitles beside the video -->
+    <string name="subtitles_folder_video">The video\'s folder</string>
+    <!-- Subtitles in a subfolder -->
+    <string name="subtitles_folder_relative">A subfolder</string>
+    <!-- Subtitles in the metadata folder -->
+    <string name="subtitles_folder_metadata">The metadata folder</string>
+    <!-- Name of the subtitle subfolder -->
+    <string name="subtitles_custom_folder">Subfolder name</string>
+    <!-- Suffix of hearing-impaired subtitle names -->
+    <string name="subtitles_hi_extension">SDH suffix</string>
+    <!-- Detail of the SDH suffix -->
+    <string name="subtitles_hi_extension_detail">Added to the names of hearing-impaired subtitles</string>
+    <!-- Saves subtitles without their language in names -->
+    <string name="subtitles_single_language">Leave out the language</string>
+    <!-- Detail of single language -->
+    <string name="subtitles_single_language_detail">Name subtitles after the video alone; only one language can be kept</string>
+    <!-- Saves subtitles in UTF-8 -->
+    <string name="subtitles_utf">Save as UTF-8</string>
+    <!-- Group of subtitle mods -->
+    <string name="subtitles_mods">Fixes</string>
+    <!-- Footer of subtitle mods -->
+    <string name="subtitles_mods_footer">Applied to every subtitle downloaded.</string>
+    <!-- The OCR fixes mod -->
+    <string name="subtitles_mod_ocr">Fix OCR errors</string>
+    <!-- The remove HI mod -->
+    <string name="subtitles_mod_remove_hi">Remove SDH descriptions</string>
+    <!-- The common fixes mod -->
+    <string name="subtitles_mod_common">Common fixes</string>
+    <!-- The remove tags mod -->
+    <string name="subtitles_mod_remove_tags">Remove styling</string>
+    <!-- The fix uppercase mod -->
+    <string name="subtitles_mod_uppercase">Fix all-caps text</string>
+    <!-- The reverse RTL mod -->
+    <string name="subtitles_mod_rtl">Reverse right-to-left punctuation</string>
+    <!-- The emoji mod -->
+    <string name="subtitles_mod_emoji">Remove emoji</string>
+    <!-- Group of language equivalences -->
+    <string name="subtitles_equivalences">Equivalent languages</string>
+    <!-- Footer of language equivalences -->
+    <string name="subtitles_equivalences_footer">Subtitles in the language on the left count as the one on the right.</string>
+    <!-- No language equivalences -->
+    <string name="subtitles_no_equivalences">None.</string>
+    <!-- Kind of subtitles -->
+    <string name="subtitles_kind">Kind</string>
+    <!-- Normal subtitles -->
+    <string name="subtitles_kind_normal">Normal</string>
+    <!-- Group of tag settings -->
+    <string name="subtitles_tags">Tags</string>
+    <!-- Footer of tag settings -->
+    <string name="subtitles_tags_footer">Profiles\' tags assign them to movies and series with the same tag.</string>
+    <!-- Lets tags assign movies' profiles -->
+    <string name="subtitles_movie_tags">Tags assign movies\' profiles</string>
+    <!-- Lets tags assign series' profiles -->
+    <string name="subtitles_series_tags">Tags assign series\' profiles</string>
+    <!-- Tags that assign no profile -->
+    <string name="subtitles_no_profile_tags">Tags of no profile</string>
+    <!-- Detail of no-profile tags -->
+    <string name="subtitles_no_profile_tags_detail">Separated by commas</string>
+    <!-- Footer of synchronization -->
+    <string name="subtitles_sync_footer">Synchronizing against the audio works only on local and network storage.</string>
+    <!-- Synchronizes downloaded subtitles -->
+    <string name="subtitles_sync_enabled">Synchronize downloads</string>
+    <!-- Synchronizes episodes' subtitles below a threshold -->
+    <string name="subtitles_sync_threshold">Only episodes\' below a score</string>
+    <!-- Detail of sync threshold -->
+    <string name="subtitles_sync_threshold_detail">A percentage of the highest score</string>
+    <!-- Synchronizes movies' subtitles below a threshold -->
+    <string name="subtitles_sync_movie_threshold">Only movies\' below a score</string>
+    <!-- A threshold score -->
+    <string name="subtitles_threshold">Score</string>
+    <!-- Synchronizes against the audio -->
+    <string name="subtitles_force_audio">Always against the audio</string>
+    <!-- Detail of forcing audio -->
+    <string name="subtitles_force_audio_detail">Even when another subtitle could serve as reference</string>
+    <!-- Uses the original-language audio stream -->
+    <string name="subtitles_original_language">Original-language audio</string>
+    <!-- Detail of original-language audio -->
+    <string name="subtitles_original_language_detail">Synchronize against the audio stream in the original language</string>
+    <!-- Providers not synchronized -->
+    <string name="subtitles_excluded_providers">Except providers</string>
+    <!-- Detail of excluded providers -->
+    <string name="subtitles_excluded_providers_detail">Separated by commas, of %s</string>
+    <!-- Languages not synchronized -->
+    <string name="subtitles_excluded_languages">Except languages</string>
+    <!-- Detail of excluded languages -->
+    <string name="subtitles_excluded_languages_detail">Language codes separated by commas</string>
+    <!-- Group of alignment settings -->
+    <string name="subtitles_alignment">Alignment</string>
+    <!-- Largest offset searched -->
+    <string name="subtitles_max_offset">Largest offset, in seconds</string>
+    <!-- Tries common frame rate ratios -->
+    <string name="subtitles_fix_framerate">Try frame rate ratios</string>
+    <!-- Detail of frame rate fixing -->
+    <string name="subtitles_fix_framerate_detail">Also try the ratios of common frame rates</string>
+    <!-- Golden section search -->
+    <string name="subtitles_golden_section">Search for the best ratio</string>
+    <!-- Detail of golden section search -->
+    <string name="subtitles_golden_section_detail">Slower, for subtitles of an unusual frame rate</string>
+    <!-- Minimum alignment score -->
+    <string name="subtitles_min_score">Lowest alignment score</string>
+    <!-- Largest accepted offset -->
+    <string name="subtitles_max_quality_offset">Largest offset accepted, in seconds</string>
+    <!-- Largest scale deviation -->
+    <string name="subtitles_max_scale_deviation">Largest scale deviation</string>
+    <!-- Footer of translators -->
+    <string name="subtitles_translator_footer">Fallbacks are tried in order when the translator fails or does not translate between the languages.</string>
+    <!-- The default translator -->
+    <string name="subtitles_translator">Translator</string>
+    <!-- The first enabled plugin translator -->
+    <string name="subtitles_translator_first">The first plugin translator</string>
+    <!-- A fallback translator's position -->
+    <string name="subtitles_fallback_of">Fallback %s</string>
+    <!-- Adds a fallback translator -->
+    <string name="subtitles_add_fallback">Add a fallback</string>
+    <!-- Placeholder of a select -->
+    <string name="subtitles_choose">Choose…</string>
+    <!-- Group of translation output settings -->
+    <string name="subtitles_output">Translations</string>
+    <!-- Score translations are recorded with -->
+    <string name="subtitles_default_score">Score</string>
+    <!-- Detail of the default score -->
+    <string name="subtitles_default_score_detail">Recorded with translations, as a percentage of the highest score</string>
+    <!-- Adds a cue crediting the translator -->
+    <string name="subtitles_credit">Credit the translator</string>
+    <!-- Detail of crediting -->
+    <string name="subtitles_credit_detail">Add a first cue naming the translator</string>
+    <!-- Translates plain text -->
+    <string name="subtitles_strip_formatting">Strip formatting</string>
+    <!-- Detail of stripping formatting -->
+    <string name="subtitles_strip_formatting_detail">Translate plain text and drop the styles of ASS files</string>
+    <!-- Keeps cues' line breaks -->
+    <string name="subtitles_preserve_line_breaks">Keep line breaks</string>
+    <!-- Trims overlapping cues -->
+    <string name="subtitles_fix_overlaps">Fix overlapping cues</string>
+    <!-- Group of AI model translation settings -->
+    <string name="subtitles_models">AI models</string>
+    <!-- Footer of AI model settings -->
+    <string name="subtitles_models_footer">Each prompt can use the placeholders shown above it.</string>
+    <!-- Context cues before -->
+    <string name="subtitles_context_before">Cues of context before</string>
+    <!-- Context cues after -->
+    <string name="subtitles_context_after">Cues of context after</string>
+    <!-- Gives context as JSON with translations -->
+    <string name="subtitles_translated_context">Context with translations</string>
+    <!-- Detail of translated context -->
+    <string name="subtitles_translated_context_detail">Give the context as JSON, with the translations of the cues before</string>
+    <!-- Translates cues in batches -->
+    <string name="subtitles_batch">Translate in batches</string>
+    <!-- Detail of batches -->
+    <string name="subtitles_batch_detail">Send many cues at once and read the answer as JSON</string>
+    <!-- Largest batch -->
+    <string name="subtitles_max_batch_size">Cues per batch</string>
+    <!-- Detail of the batch size -->
+    <string name="subtitles_max_batch_size_detail">0 for every cue</string>
+    <!-- Names languages by codes in prompts -->
+    <string name="subtitles_language_codes">Name languages by code</string>
+    <!-- System prompt of translation -->
+    <string name="subtitles_prompt">Instructions</string>
+    <!-- User prompt of translation -->
+    <string name="subtitles_user_prompt">Message of each cue</string>
+    <!-- System prompt of proofreading -->
+    <string name="subtitles_proofread_prompt">Proofreading instructions</string>
+    <!-- User prompt of proofreading -->
+    <string name="subtitles_proofread_user_prompt">Proofreading message</string>
+    <!-- Group of retry settings -->
+    <string name="subtitles_retries">Retries</string>
+    <!-- Most attempts -->
+    <string name="subtitles_max_retries">Attempts</string>
+    <!-- Retry delay -->
+    <string name="subtitles_retry_delay">First delay, in seconds</string>
+    <!-- Retry delay multiplier -->
+    <string name="subtitles_retry_multiplier">Delay multiplier</string>
+    <!-- Request timeout -->
+    <string name="subtitles_request_timeout">Request timeout, in seconds</string>
+    <!-- Group of validation settings -->
+    <string name="subtitles_validation">Validation</string>
+    <!-- Footer of validation -->
+    <string name="subtitles_validation_footer">Subtitles outside these bounds look broken and are not translated.</string>
+    <!-- Validates subtitles before translating -->
+    <string name="subtitles_validation_enabled">Validate subtitles</string>
+    <!-- Largest subtitle file -->
+    <string name="subtitles_max_file_size">Largest file, in KB</string>
+    <!-- Longest cue -->
+    <string name="subtitles_max_cue_length">Longest cue, in characters</string>
+    <!-- Shortest cue -->
+    <string name="subtitles_min_cue_length">Shortest cue, in characters</string>
+    <!-- Shortest cue duration -->
+    <string name="subtitles_min_duration">Shortest cue, in milliseconds</string>
+    <!-- Longest cue duration -->
+    <string name="subtitles_max_duration">Longest cue, in seconds</string>
+    <!-- Group of automation settings -->
+    <string name="subtitles_automation">Automatic translation</string>
+    <!-- Footer of automation -->
+    <string name="subtitles_automation_footer">Movies and episodes still lacking subtitles their profile wants get them translated from a subtitle they have in a source language.</string>
+    <!-- Translates missing subtitles automatically -->
+    <string name="subtitles_automation_enabled">Translate automatically</string>
+    <!-- Automation interval -->
+    <string name="subtitles_automation_interval">Every, in hours</string>
+    <!-- A language translated from -->
+    <string name="subtitles_source_language">Source language</string>
+    <!-- Adds a source language -->
+    <string name="subtitles_add_source_language">Add a source language</string>
+    <!-- Most translations per run -->
+    <string name="subtitles_max_per_run">Translations per run</string>
+    <!-- How old a movie file must be -->
+    <string name="subtitles_movie_age">Wait for movies, in hours</string>
+    <!-- How old an episode file must be -->
+    <string name="subtitles_episode_age">Wait for episodes, in hours</string>
 </resources>

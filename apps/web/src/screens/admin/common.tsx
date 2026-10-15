@@ -2,7 +2,7 @@
 // link back from a page to its section's list, colored tiles, the
 // confirmation of what cannot be undone, and times and their lengths.
 import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link, useParams, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { locale, t } from "../../i18n.ts";
@@ -51,6 +51,39 @@ export function BackLink({ section, label }: { section: string; label: string })
     >
       <Icon name="back" size={18} />
       {label}
+    </Link>
+  );
+}
+
+/** A row linking to a page of the section shown, or of Plugins for a plugin. */
+export function PageLink({
+  search,
+  icon,
+  color,
+  label,
+  detail,
+}: {
+  search: SettingsSearch;
+  icon?: IconName;
+  color?: string;
+  label: ReactNode;
+  detail?: ReactNode;
+}) {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  const { section } = useParams({ strict: false });
+  return (
+    <Link
+      to="/settings/$section"
+      params={{ section: search.plugin ? "plugins" : (section ?? "") }}
+      search={{ server: cur.server, ...search }}
+      className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:bg-surface-raised"
+    >
+      {icon && <ColorTile icon={icon} color={color ?? "#8E8E93"} />}
+      <div className="min-w-0 flex-1">
+        <div className="truncate type-body">{label}</div>
+        {detail && <div className="type-footnote break-words text-text-secondary">{detail}</div>}
+      </div>
+      <Icon name="forward" size={16} className="shrink-0 text-text-tertiary" />
     </Link>
   );
 }

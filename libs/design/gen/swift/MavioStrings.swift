@@ -989,6 +989,9 @@ public enum MavioStrings {
     /// The settings section of what decides which releases a server grabs
     public static var settingsAcquisition: String { NSLocalizedString("settings.acquisition", bundle: .module, comment: "") }
 
+    /// The settings section of a server's subtitle acquisition
+    public static var settingsSubtitles: String { NSLocalizedString("settings.subtitles", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -2744,4 +2747,599 @@ public enum MavioStrings {
 
     /// Detail of the local path
     public static var rulesLocalPathDetail: String { NSLocalizedString("rules.localPathDetail", bundle: .module, comment: "") }
+
+    /// The line under Subtitles' title
+    public static var subtitlesMessage: String { NSLocalizedString("subtitles.message", bundle: .module, comment: "") }
+
+    /// Group of subtitle providers
+    public static var subtitlesProviders: String { NSLocalizedString("subtitles.providers", bundle: .module, comment: "") }
+
+    /// Footer of subtitle providers
+    public static var subtitlesProvidersFooter: String { NSLocalizedString("subtitles.providersFooter", bundle: .module, comment: "") }
+
+    /// A provider serves movies
+    public static var subtitlesMovies: String { NSLocalizedString("subtitles.movies", bundle: .module, comment: "") }
+
+    /// A provider serves episodes
+    public static var subtitlesEpisodes: String { NSLocalizedString("subtitles.episodes", bundle: .module, comment: "") }
+
+    /// A provider throttled after failing
+    public static func subtitlesThrottled(when: String, reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("subtitles.throttled", bundle: .module, comment: ""), when, reason)
+    }
+
+    /// A plugin failed to list its providers or translators
+    public static func subtitlesPluginFailed(plugin: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("subtitles.pluginFailed", bundle: .module, comment: ""), plugin)
+    }
+
+    /// No subtitle providers
+    public static var subtitlesNoProviders: String { NSLocalizedString("subtitles.noProviders", bundle: .module, comment: "") }
+
+    /// Group of subtitle translators
+    public static var subtitlesTranslators: String { NSLocalizedString("subtitles.translators", bundle: .module, comment: "") }
+
+    /// Footer of subtitle translators
+    public static var subtitlesTranslatorsFooter: String { NSLocalizedString("subtitles.translatorsFooter", bundle: .module, comment: "") }
+
+    /// No translators
+    public static var subtitlesNoTranslators: String { NSLocalizedString("subtitles.noTranslators", bundle: .module, comment: "") }
+
+    /// Group of subtitle profiles
+    public static var subtitlesProfiles: String { NSLocalizedString("subtitles.profiles", bundle: .module, comment: "") }
+
+    /// Footer of subtitle profiles
+    public static var subtitlesProfilesFooter: String { NSLocalizedString("subtitles.profilesFooter", bundle: .module, comment: "") }
+
+    /// Adds a subtitle profile
+    public static var subtitlesAddProfile: String { NSLocalizedString("subtitles.addProfile", bundle: .module, comment: "") }
+
+    /// Group of libraries with their subtitle profiles
+    public static var subtitlesLibraries: String { NSLocalizedString("subtitles.libraries", bundle: .module, comment: "") }
+
+    /// Footer of the libraries' subtitle profiles
+    public static var subtitlesLibrariesFooter: String { NSLocalizedString("subtitles.librariesFooter", bundle: .module, comment: "") }
+
+    /// No subtitle profile assigned
+    public static var subtitlesNoProfile: String { NSLocalizedString("subtitles.noProfile", bundle: .module, comment: "") }
+
+    /// No libraries
+    public static var subtitlesNoLibraries: String { NSLocalizedString("subtitles.noLibraries", bundle: .module, comment: "") }
+
+    /// Group of links to the subtitle settings
+    public static var subtitlesSettings: String { NSLocalizedString("subtitles.settings", bundle: .module, comment: "") }
+
+    /// Page of subtitle search and save settings
+    public static var subtitlesSearching: String { NSLocalizedString("subtitles.searching", bundle: .module, comment: "") }
+
+    /// Detail of the searching page link
+    public static var subtitlesSearchingDetail: String { NSLocalizedString("subtitles.searchingDetail", bundle: .module, comment: "") }
+
+    /// Page of subtitle synchronization settings
+    public static var subtitlesSync: String { NSLocalizedString("subtitles.sync", bundle: .module, comment: "") }
+
+    /// Detail of the sync page link
+    public static var subtitlesSyncDetail: String { NSLocalizedString("subtitles.syncDetail", bundle: .module, comment: "") }
+
+    /// Page of subtitle translation settings
+    public static var subtitlesTranslation: String { NSLocalizedString("subtitles.translation", bundle: .module, comment: "") }
+
+    /// Detail of the translation page link
+    public static var subtitlesTranslationDetail: String { NSLocalizedString("subtitles.translationDetail", bundle: .module, comment: "") }
+
+    /// Forced subtitles
+    public static var subtitlesForced: String { NSLocalizedString("subtitles.forced", bundle: .module, comment: "") }
+
+    /// Hearing-impaired subtitles, short
+    public static var subtitlesHiShort: String { NSLocalizedString("subtitles.hiShort", bundle: .module, comment: "") }
+
+    /// Hearing-impaired subtitles excluded, short
+    public static var subtitlesNoHiShort: String { NSLocalizedString("subtitles.noHiShort", bundle: .module, comment: "") }
+
+    /// Title of a subtitle profile page
+    public static var subtitlesProfile: String { NSLocalizedString("subtitles.profile", bundle: .module, comment: "") }
+
+    /// A subtitle profile was deleted
+    public static var subtitlesProfileGone: String { NSLocalizedString("subtitles.profileGone", bundle: .module, comment: "") }
+
+    /// Title of a new subtitle profile
+    public static var subtitlesNewProfile: String { NSLocalizedString("subtitles.newProfile", bundle: .module, comment: "") }
+
+    /// Group of a profile's languages
+    public static var subtitlesLanguages: String { NSLocalizedString("subtitles.languages", bundle: .module, comment: "") }
+
+    /// Footer of a profile's languages
+    public static var subtitlesLanguagesFooter: String { NSLocalizedString("subtitles.languagesFooter", bundle: .module, comment: "") }
+
+    /// A subtitle language
+    public static var subtitlesLanguage: String { NSLocalizedString("subtitles.language", bundle: .module, comment: "") }
+
+    /// How a language treats hearing-impaired subtitles
+    public static var subtitlesHearingImpaired: String { NSLocalizedString("subtitles.hearingImpaired", bundle: .module, comment: "") }
+
+    /// Normal subtitles wanted, SDH taken in their place
+    public static var subtitlesHiAllowed: String { NSLocalizedString("subtitles.hiAllowed", bundle: .module, comment: "") }
+
+    /// Only hearing-impaired subtitles
+    public static var subtitlesHiRequired: String { NSLocalizedString("subtitles.hiRequired", bundle: .module, comment: "") }
+
+    /// Hearing-impaired subtitles excluded
+    public static var subtitlesHiExcluded: String { NSLocalizedString("subtitles.hiExcluded", bundle: .module, comment: "") }
+
+    /// Only forced subtitles
+    public static var subtitlesForcedOnly: String { NSLocalizedString("subtitles.forcedOnly", bundle: .module, comment: "") }
+
+    /// Not wanted when an audio stream has the language
+    public static var subtitlesAudioExclude: String { NSLocalizedString("subtitles.audioExclude", bundle: .module, comment: "") }
+
+    /// Wanted only when an audio stream has the language
+    public static var subtitlesAudioOnlyInclude: String { NSLocalizedString("subtitles.audioOnlyInclude", bundle: .module, comment: "") }
+
+    /// A profile's cutoff
+    public static var subtitlesCutoff: String { NSLocalizedString("subtitles.cutoff", bundle: .module, comment: "") }
+
+    /// Detail of a profile's cutoff
+    public static var subtitlesCutoffDetail: String { NSLocalizedString("subtitles.cutoffDetail", bundle: .module, comment: "") }
+
+    /// No cutoff
+    public static var subtitlesCutoffNone: String { NSLocalizedString("subtitles.cutoffNone", bundle: .module, comment: "") }
+
+    /// Cutoff at any language
+    public static var subtitlesCutoffAny: String { NSLocalizedString("subtitles.cutoffAny", bundle: .module, comment: "") }
+
+    /// Keeps subtitles in their provider's format
+    public static var subtitlesOriginalFormat: String { NSLocalizedString("subtitles.originalFormat", bundle: .module, comment: "") }
+
+    /// Detail of original format
+    public static var subtitlesOriginalFormatDetail: String { NSLocalizedString("subtitles.originalFormatDetail", bundle: .module, comment: "") }
+
+    /// A profile's tag
+    public static var subtitlesTag: String { NSLocalizedString("subtitles.tag", bundle: .module, comment: "") }
+
+    /// Detail of a profile's tag
+    public static var subtitlesTagDetail: String { NSLocalizedString("subtitles.tagDetail", bundle: .module, comment: "") }
+
+    /// Group of words subtitle release names must contain
+    public static var subtitlesReleaseNames: String { NSLocalizedString("subtitles.releaseNames", bundle: .module, comment: "") }
+
+    /// Footer of release name words
+    public static var subtitlesReleaseNamesFooter: String { NSLocalizedString("subtitles.releaseNamesFooter", bundle: .module, comment: "") }
+
+    /// Words subtitle names must contain
+    public static var subtitlesMustContain: String { NSLocalizedString("subtitles.mustContain", bundle: .module, comment: "") }
+
+    /// Words subtitle names must not contain
+    public static var subtitlesMustNotContain: String { NSLocalizedString("subtitles.mustNotContain", bundle: .module, comment: "") }
+
+    /// Deletes a subtitle profile
+    public static var subtitlesRemove: String { NSLocalizedString("subtitles.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a subtitle profile
+    public static func subtitlesRemoveTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("subtitles.removeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// What deleting a subtitle profile does
+    public static var subtitlesRemoveMessage: String { NSLocalizedString("subtitles.removeMessage", bundle: .module, comment: "") }
+
+    /// The subtitle settings were saved
+    public static var subtitlesSaved: String { NSLocalizedString("subtitles.saved", bundle: .module, comment: "") }
+
+    /// No default language
+    public static var subtitlesLanguageUnset: String { NSLocalizedString("subtitles.languageUnset", bundle: .module, comment: "") }
+
+    /// Group of minimum scores
+    public static var subtitlesScores: String { NSLocalizedString("subtitles.scores", bundle: .module, comment: "") }
+
+    /// Footer of minimum scores
+    public static var subtitlesScoresFooter: String { NSLocalizedString("subtitles.scoresFooter", bundle: .module, comment: "") }
+
+    /// Minimum score of episodes
+    public static var subtitlesMinimumScore: String { NSLocalizedString("subtitles.minimumScore", bundle: .module, comment: "") }
+
+    /// Minimum score of movies
+    public static var subtitlesMinimumScoreMovie: String { NSLocalizedString("subtitles.minimumScoreMovie", bundle: .module, comment: "") }
+
+    /// Group of search settings
+    public static var subtitlesSearches: String { NSLocalizedString("subtitles.searches", bundle: .module, comment: "") }
+
+    /// Interval of episodes' searches
+    public static var subtitlesWantedInterval: String { NSLocalizedString("subtitles.wantedInterval", bundle: .module, comment: "") }
+
+    /// Interval of movies' searches
+    public static var subtitlesWantedIntervalMovie: String { NSLocalizedString("subtitles.wantedIntervalMovie", bundle: .module, comment: "") }
+
+    /// Hours, zero for never
+    public static var subtitlesHoursNever: String { NSLocalizedString("subtitles.hoursNever", bundle: .module, comment: "") }
+
+    /// Searches failed languages less often
+    public static var subtitlesAdaptive: String { NSLocalizedString("subtitles.adaptive", bundle: .module, comment: "") }
+
+    /// Detail of adaptive searching
+    public static var subtitlesAdaptiveDetail: String { NSLocalizedString("subtitles.adaptiveDetail", bundle: .module, comment: "") }
+
+    /// Adaptive delay in days
+    public static var subtitlesAdaptiveDelay: String { NSLocalizedString("subtitles.adaptiveDelay", bundle: .module, comment: "") }
+
+    /// Adaptive interval in days
+    public static var subtitlesAdaptiveDelta: String { NSLocalizedString("subtitles.adaptiveDelta", bundle: .module, comment: "") }
+
+    /// Describes videos by release names
+    public static var subtitlesSceneName: String { NSLocalizedString("subtitles.sceneName", bundle: .module, comment: "") }
+
+    /// Detail of scene names
+    public static var subtitlesSceneNameDetail: String { NSLocalizedString("subtitles.sceneNameDetail", bundle: .module, comment: "") }
+
+    /// Does not hash videos
+    public static var subtitlesSkipHashing: String { NSLocalizedString("subtitles.skipHashing", bundle: .module, comment: "") }
+
+    /// Detail of skip hashing
+    public static var subtitlesSkipHashingDetail: String { NSLocalizedString("subtitles.skipHashingDetail", bundle: .module, comment: "") }
+
+    /// Group of embedded subtitle settings
+    public static var subtitlesEmbedded: String { NSLocalizedString("subtitles.embedded", bundle: .module, comment: "") }
+
+    /// Counts embedded subtitles as present
+    public static var subtitlesUseEmbedded: String { NSLocalizedString("subtitles.useEmbedded", bundle: .module, comment: "") }
+
+    /// Detail of using embedded subtitles
+    public static var subtitlesUseEmbeddedDetail: String { NSLocalizedString("subtitles.useEmbeddedDetail", bundle: .module, comment: "") }
+
+    /// Ignores PGS embedded subtitles
+    public static var subtitlesIgnorePgs: String { NSLocalizedString("subtitles.ignorePgs", bundle: .module, comment: "") }
+
+    /// Ignores VobSub embedded subtitles
+    public static var subtitlesIgnoreVobsub: String { NSLocalizedString("subtitles.ignoreVobsub", bundle: .module, comment: "") }
+
+    /// Ignores ASS embedded subtitles
+    public static var subtitlesIgnoreAss: String { NSLocalizedString("subtitles.ignoreAss", bundle: .module, comment: "") }
+
+    /// Default audio language
+    public static var subtitlesDefaultAudio: String { NSLocalizedString("subtitles.defaultAudio", bundle: .module, comment: "") }
+
+    /// Detail of default audio language
+    public static var subtitlesDefaultAudioDetail: String { NSLocalizedString("subtitles.defaultAudioDetail", bundle: .module, comment: "") }
+
+    /// Default embedded subtitle language
+    public static var subtitlesDefaultEmbedded: String { NSLocalizedString("subtitles.defaultEmbedded", bundle: .module, comment: "") }
+
+    /// Group of upgrade settings
+    public static var subtitlesUpgrades: String { NSLocalizedString("subtitles.upgrades", bundle: .module, comment: "") }
+
+    /// Searches for better subtitles
+    public static var subtitlesUpgrade: String { NSLocalizedString("subtitles.upgrade", bundle: .module, comment: "") }
+
+    /// Detail of upgrades
+    public static var subtitlesUpgradeDetail: String { NSLocalizedString("subtitles.upgradeDetail", bundle: .module, comment: "") }
+
+    /// Upgrade interval in hours
+    public static var subtitlesUpgradeInterval: String { NSLocalizedString("subtitles.upgradeInterval", bundle: .module, comment: "") }
+
+    /// Upgrade window in days
+    public static var subtitlesUpgradeDays: String { NSLocalizedString("subtitles.upgradeDays", bundle: .module, comment: "") }
+
+    /// Upgrades manual downloads too
+    public static var subtitlesUpgradeManual: String { NSLocalizedString("subtitles.upgradeManual", bundle: .module, comment: "") }
+
+    /// Group of save settings
+    public static var subtitlesSaving: String { NSLocalizedString("subtitles.saving", bundle: .module, comment: "") }
+
+    /// Where subtitles are saved
+    public static var subtitlesFolder: String { NSLocalizedString("subtitles.folder", bundle: .module, comment: "") }
+
+    /// Subtitles beside the video
+    public static var subtitlesFolderVideo: String { NSLocalizedString("subtitles.folderVideo", bundle: .module, comment: "") }
+
+    /// Subtitles in a subfolder
+    public static var subtitlesFolderRelative: String { NSLocalizedString("subtitles.folderRelative", bundle: .module, comment: "") }
+
+    /// Subtitles in the metadata folder
+    public static var subtitlesFolderMetadata: String { NSLocalizedString("subtitles.folderMetadata", bundle: .module, comment: "") }
+
+    /// Name of the subtitle subfolder
+    public static var subtitlesCustomFolder: String { NSLocalizedString("subtitles.customFolder", bundle: .module, comment: "") }
+
+    /// Suffix of hearing-impaired subtitle names
+    public static var subtitlesHiExtension: String { NSLocalizedString("subtitles.hiExtension", bundle: .module, comment: "") }
+
+    /// Detail of the SDH suffix
+    public static var subtitlesHiExtensionDetail: String { NSLocalizedString("subtitles.hiExtensionDetail", bundle: .module, comment: "") }
+
+    /// Saves subtitles without their language in names
+    public static var subtitlesSingleLanguage: String { NSLocalizedString("subtitles.singleLanguage", bundle: .module, comment: "") }
+
+    /// Detail of single language
+    public static var subtitlesSingleLanguageDetail: String { NSLocalizedString("subtitles.singleLanguageDetail", bundle: .module, comment: "") }
+
+    /// Saves subtitles in UTF-8
+    public static var subtitlesUtf: String { NSLocalizedString("subtitles.utf", bundle: .module, comment: "") }
+
+    /// Group of subtitle mods
+    public static var subtitlesMods: String { NSLocalizedString("subtitles.mods", bundle: .module, comment: "") }
+
+    /// Footer of subtitle mods
+    public static var subtitlesModsFooter: String { NSLocalizedString("subtitles.modsFooter", bundle: .module, comment: "") }
+
+    /// The OCR fixes mod
+    public static var subtitlesModOcr: String { NSLocalizedString("subtitles.modOcr", bundle: .module, comment: "") }
+
+    /// The remove HI mod
+    public static var subtitlesModRemoveHi: String { NSLocalizedString("subtitles.modRemoveHi", bundle: .module, comment: "") }
+
+    /// The common fixes mod
+    public static var subtitlesModCommon: String { NSLocalizedString("subtitles.modCommon", bundle: .module, comment: "") }
+
+    /// The remove tags mod
+    public static var subtitlesModRemoveTags: String { NSLocalizedString("subtitles.modRemoveTags", bundle: .module, comment: "") }
+
+    /// The fix uppercase mod
+    public static var subtitlesModUppercase: String { NSLocalizedString("subtitles.modUppercase", bundle: .module, comment: "") }
+
+    /// The reverse RTL mod
+    public static var subtitlesModRtl: String { NSLocalizedString("subtitles.modRtl", bundle: .module, comment: "") }
+
+    /// The emoji mod
+    public static var subtitlesModEmoji: String { NSLocalizedString("subtitles.modEmoji", bundle: .module, comment: "") }
+
+    /// Group of language equivalences
+    public static var subtitlesEquivalences: String { NSLocalizedString("subtitles.equivalences", bundle: .module, comment: "") }
+
+    /// Footer of language equivalences
+    public static var subtitlesEquivalencesFooter: String { NSLocalizedString("subtitles.equivalencesFooter", bundle: .module, comment: "") }
+
+    /// No language equivalences
+    public static var subtitlesNoEquivalences: String { NSLocalizedString("subtitles.noEquivalences", bundle: .module, comment: "") }
+
+    /// Kind of subtitles
+    public static var subtitlesKind: String { NSLocalizedString("subtitles.kind", bundle: .module, comment: "") }
+
+    /// Normal subtitles
+    public static var subtitlesKindNormal: String { NSLocalizedString("subtitles.kindNormal", bundle: .module, comment: "") }
+
+    /// Group of tag settings
+    public static var subtitlesTags: String { NSLocalizedString("subtitles.tags", bundle: .module, comment: "") }
+
+    /// Footer of tag settings
+    public static var subtitlesTagsFooter: String { NSLocalizedString("subtitles.tagsFooter", bundle: .module, comment: "") }
+
+    /// Lets tags assign movies' profiles
+    public static var subtitlesMovieTags: String { NSLocalizedString("subtitles.movieTags", bundle: .module, comment: "") }
+
+    /// Lets tags assign series' profiles
+    public static var subtitlesSeriesTags: String { NSLocalizedString("subtitles.seriesTags", bundle: .module, comment: "") }
+
+    /// Tags that assign no profile
+    public static var subtitlesNoProfileTags: String { NSLocalizedString("subtitles.noProfileTags", bundle: .module, comment: "") }
+
+    /// Detail of no-profile tags
+    public static var subtitlesNoProfileTagsDetail: String { NSLocalizedString("subtitles.noProfileTagsDetail", bundle: .module, comment: "") }
+
+    /// Footer of synchronization
+    public static var subtitlesSyncFooter: String { NSLocalizedString("subtitles.syncFooter", bundle: .module, comment: "") }
+
+    /// Synchronizes downloaded subtitles
+    public static var subtitlesSyncEnabled: String { NSLocalizedString("subtitles.syncEnabled", bundle: .module, comment: "") }
+
+    /// Synchronizes episodes' subtitles below a threshold
+    public static var subtitlesSyncThreshold: String { NSLocalizedString("subtitles.syncThreshold", bundle: .module, comment: "") }
+
+    /// Detail of sync threshold
+    public static var subtitlesSyncThresholdDetail: String { NSLocalizedString("subtitles.syncThresholdDetail", bundle: .module, comment: "") }
+
+    /// Synchronizes movies' subtitles below a threshold
+    public static var subtitlesSyncMovieThreshold: String { NSLocalizedString("subtitles.syncMovieThreshold", bundle: .module, comment: "") }
+
+    /// A threshold score
+    public static var subtitlesThreshold: String { NSLocalizedString("subtitles.threshold", bundle: .module, comment: "") }
+
+    /// Synchronizes against the audio
+    public static var subtitlesForceAudio: String { NSLocalizedString("subtitles.forceAudio", bundle: .module, comment: "") }
+
+    /// Detail of forcing audio
+    public static var subtitlesForceAudioDetail: String { NSLocalizedString("subtitles.forceAudioDetail", bundle: .module, comment: "") }
+
+    /// Uses the original-language audio stream
+    public static var subtitlesOriginalLanguage: String { NSLocalizedString("subtitles.originalLanguage", bundle: .module, comment: "") }
+
+    /// Detail of original-language audio
+    public static var subtitlesOriginalLanguageDetail: String { NSLocalizedString("subtitles.originalLanguageDetail", bundle: .module, comment: "") }
+
+    /// Providers not synchronized
+    public static var subtitlesExcludedProviders: String { NSLocalizedString("subtitles.excludedProviders", bundle: .module, comment: "") }
+
+    /// Detail of excluded providers
+    public static func subtitlesExcludedProvidersDetail(names: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("subtitles.excludedProvidersDetail", bundle: .module, comment: ""), names)
+    }
+
+    /// Languages not synchronized
+    public static var subtitlesExcludedLanguages: String { NSLocalizedString("subtitles.excludedLanguages", bundle: .module, comment: "") }
+
+    /// Detail of excluded languages
+    public static var subtitlesExcludedLanguagesDetail: String { NSLocalizedString("subtitles.excludedLanguagesDetail", bundle: .module, comment: "") }
+
+    /// Group of alignment settings
+    public static var subtitlesAlignment: String { NSLocalizedString("subtitles.alignment", bundle: .module, comment: "") }
+
+    /// Largest offset searched
+    public static var subtitlesMaxOffset: String { NSLocalizedString("subtitles.maxOffset", bundle: .module, comment: "") }
+
+    /// Tries common frame rate ratios
+    public static var subtitlesFixFramerate: String { NSLocalizedString("subtitles.fixFramerate", bundle: .module, comment: "") }
+
+    /// Detail of frame rate fixing
+    public static var subtitlesFixFramerateDetail: String { NSLocalizedString("subtitles.fixFramerateDetail", bundle: .module, comment: "") }
+
+    /// Golden section search
+    public static var subtitlesGoldenSection: String { NSLocalizedString("subtitles.goldenSection", bundle: .module, comment: "") }
+
+    /// Detail of golden section search
+    public static var subtitlesGoldenSectionDetail: String { NSLocalizedString("subtitles.goldenSectionDetail", bundle: .module, comment: "") }
+
+    /// Minimum alignment score
+    public static var subtitlesMinScore: String { NSLocalizedString("subtitles.minScore", bundle: .module, comment: "") }
+
+    /// Largest accepted offset
+    public static var subtitlesMaxQualityOffset: String { NSLocalizedString("subtitles.maxQualityOffset", bundle: .module, comment: "") }
+
+    /// Largest scale deviation
+    public static var subtitlesMaxScaleDeviation: String { NSLocalizedString("subtitles.maxScaleDeviation", bundle: .module, comment: "") }
+
+    /// Footer of translators
+    public static var subtitlesTranslatorFooter: String { NSLocalizedString("subtitles.translatorFooter", bundle: .module, comment: "") }
+
+    /// The default translator
+    public static var subtitlesTranslator: String { NSLocalizedString("subtitles.translator", bundle: .module, comment: "") }
+
+    /// The first enabled plugin translator
+    public static var subtitlesTranslatorFirst: String { NSLocalizedString("subtitles.translatorFirst", bundle: .module, comment: "") }
+
+    /// A fallback translator's position
+    public static func subtitlesFallbackOf(position: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("subtitles.fallbackOf", bundle: .module, comment: ""), position)
+    }
+
+    /// Adds a fallback translator
+    public static var subtitlesAddFallback: String { NSLocalizedString("subtitles.addFallback", bundle: .module, comment: "") }
+
+    /// Placeholder of a select
+    public static var subtitlesChoose: String { NSLocalizedString("subtitles.choose", bundle: .module, comment: "") }
+
+    /// Group of translation output settings
+    public static var subtitlesOutput: String { NSLocalizedString("subtitles.output", bundle: .module, comment: "") }
+
+    /// Score translations are recorded with
+    public static var subtitlesDefaultScore: String { NSLocalizedString("subtitles.defaultScore", bundle: .module, comment: "") }
+
+    /// Detail of the default score
+    public static var subtitlesDefaultScoreDetail: String { NSLocalizedString("subtitles.defaultScoreDetail", bundle: .module, comment: "") }
+
+    /// Adds a cue crediting the translator
+    public static var subtitlesCredit: String { NSLocalizedString("subtitles.credit", bundle: .module, comment: "") }
+
+    /// Detail of crediting
+    public static var subtitlesCreditDetail: String { NSLocalizedString("subtitles.creditDetail", bundle: .module, comment: "") }
+
+    /// Translates plain text
+    public static var subtitlesStripFormatting: String { NSLocalizedString("subtitles.stripFormatting", bundle: .module, comment: "") }
+
+    /// Detail of stripping formatting
+    public static var subtitlesStripFormattingDetail: String { NSLocalizedString("subtitles.stripFormattingDetail", bundle: .module, comment: "") }
+
+    /// Keeps cues' line breaks
+    public static var subtitlesPreserveLineBreaks: String { NSLocalizedString("subtitles.preserveLineBreaks", bundle: .module, comment: "") }
+
+    /// Trims overlapping cues
+    public static var subtitlesFixOverlaps: String { NSLocalizedString("subtitles.fixOverlaps", bundle: .module, comment: "") }
+
+    /// Group of AI model translation settings
+    public static var subtitlesModels: String { NSLocalizedString("subtitles.models", bundle: .module, comment: "") }
+
+    /// Footer of AI model settings
+    public static var subtitlesModelsFooter: String { NSLocalizedString("subtitles.modelsFooter", bundle: .module, comment: "") }
+
+    /// Context cues before
+    public static var subtitlesContextBefore: String { NSLocalizedString("subtitles.contextBefore", bundle: .module, comment: "") }
+
+    /// Context cues after
+    public static var subtitlesContextAfter: String { NSLocalizedString("subtitles.contextAfter", bundle: .module, comment: "") }
+
+    /// Gives context as JSON with translations
+    public static var subtitlesTranslatedContext: String { NSLocalizedString("subtitles.translatedContext", bundle: .module, comment: "") }
+
+    /// Detail of translated context
+    public static var subtitlesTranslatedContextDetail: String { NSLocalizedString("subtitles.translatedContextDetail", bundle: .module, comment: "") }
+
+    /// Translates cues in batches
+    public static var subtitlesBatch: String { NSLocalizedString("subtitles.batch", bundle: .module, comment: "") }
+
+    /// Detail of batches
+    public static var subtitlesBatchDetail: String { NSLocalizedString("subtitles.batchDetail", bundle: .module, comment: "") }
+
+    /// Largest batch
+    public static var subtitlesMaxBatchSize: String { NSLocalizedString("subtitles.maxBatchSize", bundle: .module, comment: "") }
+
+    /// Detail of the batch size
+    public static var subtitlesMaxBatchSizeDetail: String { NSLocalizedString("subtitles.maxBatchSizeDetail", bundle: .module, comment: "") }
+
+    /// Names languages by codes in prompts
+    public static var subtitlesLanguageCodes: String { NSLocalizedString("subtitles.languageCodes", bundle: .module, comment: "") }
+
+    /// System prompt of translation
+    public static var subtitlesPrompt: String { NSLocalizedString("subtitles.prompt", bundle: .module, comment: "") }
+
+    /// User prompt of translation
+    public static var subtitlesUserPrompt: String { NSLocalizedString("subtitles.userPrompt", bundle: .module, comment: "") }
+
+    /// System prompt of proofreading
+    public static var subtitlesProofreadPrompt: String { NSLocalizedString("subtitles.proofreadPrompt", bundle: .module, comment: "") }
+
+    /// User prompt of proofreading
+    public static var subtitlesProofreadUserPrompt: String { NSLocalizedString("subtitles.proofreadUserPrompt", bundle: .module, comment: "") }
+
+    /// Group of retry settings
+    public static var subtitlesRetries: String { NSLocalizedString("subtitles.retries", bundle: .module, comment: "") }
+
+    /// Most attempts
+    public static var subtitlesMaxRetries: String { NSLocalizedString("subtitles.maxRetries", bundle: .module, comment: "") }
+
+    /// Retry delay
+    public static var subtitlesRetryDelay: String { NSLocalizedString("subtitles.retryDelay", bundle: .module, comment: "") }
+
+    /// Retry delay multiplier
+    public static var subtitlesRetryMultiplier: String { NSLocalizedString("subtitles.retryMultiplier", bundle: .module, comment: "") }
+
+    /// Request timeout
+    public static var subtitlesRequestTimeout: String { NSLocalizedString("subtitles.requestTimeout", bundle: .module, comment: "") }
+
+    /// Group of validation settings
+    public static var subtitlesValidation: String { NSLocalizedString("subtitles.validation", bundle: .module, comment: "") }
+
+    /// Footer of validation
+    public static var subtitlesValidationFooter: String { NSLocalizedString("subtitles.validationFooter", bundle: .module, comment: "") }
+
+    /// Validates subtitles before translating
+    public static var subtitlesValidationEnabled: String { NSLocalizedString("subtitles.validationEnabled", bundle: .module, comment: "") }
+
+    /// Largest subtitle file
+    public static var subtitlesMaxFileSize: String { NSLocalizedString("subtitles.maxFileSize", bundle: .module, comment: "") }
+
+    /// Longest cue
+    public static var subtitlesMaxCueLength: String { NSLocalizedString("subtitles.maxCueLength", bundle: .module, comment: "") }
+
+    /// Shortest cue
+    public static var subtitlesMinCueLength: String { NSLocalizedString("subtitles.minCueLength", bundle: .module, comment: "") }
+
+    /// Shortest cue duration
+    public static var subtitlesMinDuration: String { NSLocalizedString("subtitles.minDuration", bundle: .module, comment: "") }
+
+    /// Longest cue duration
+    public static var subtitlesMaxDuration: String { NSLocalizedString("subtitles.maxDuration", bundle: .module, comment: "") }
+
+    /// Group of automation settings
+    public static var subtitlesAutomation: String { NSLocalizedString("subtitles.automation", bundle: .module, comment: "") }
+
+    /// Footer of automation
+    public static var subtitlesAutomationFooter: String { NSLocalizedString("subtitles.automationFooter", bundle: .module, comment: "") }
+
+    /// Translates missing subtitles automatically
+    public static var subtitlesAutomationEnabled: String { NSLocalizedString("subtitles.automationEnabled", bundle: .module, comment: "") }
+
+    /// Automation interval
+    public static var subtitlesAutomationInterval: String { NSLocalizedString("subtitles.automationInterval", bundle: .module, comment: "") }
+
+    /// A language translated from
+    public static var subtitlesSourceLanguage: String { NSLocalizedString("subtitles.sourceLanguage", bundle: .module, comment: "") }
+
+    /// Adds a source language
+    public static var subtitlesAddSourceLanguage: String { NSLocalizedString("subtitles.addSourceLanguage", bundle: .module, comment: "") }
+
+    /// Most translations per run
+    public static var subtitlesMaxPerRun: String { NSLocalizedString("subtitles.maxPerRun", bundle: .module, comment: "") }
+
+    /// How old a movie file must be
+    public static var subtitlesMovieAge: String { NSLocalizedString("subtitles.movieAge", bundle: .module, comment: "") }
+
+    /// How old an episode file must be
+    public static var subtitlesEpisodeAge: String { NSLocalizedString("subtitles.episodeAge", bundle: .module, comment: "") }
 }

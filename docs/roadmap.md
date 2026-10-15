@@ -660,7 +660,8 @@ flowchart TD
     - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)
     - [x] Acquisition (`apps/web/src/screens/admin/{acquisition,quality,formats,rules}.tsx`, `libs/client-ts/src/profiles.ts`): quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
       - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
-    - [ ] Subtitles: subtitle profiles and the libraries they apply to, the providers and the settings (`SubtitleService`)
+    - [x] Subtitles (`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`, `libs/client-ts/src/subtitles.ts`): subtitle profiles and the libraries they apply to, the providers and translators, and the settings of searching and saving, synchronization and translation (`SubtitleService`, `ListSubtitleProfileAssignments`)
+      - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
     - [ ] AI: providers, API keys, subscription logins and models (`AiService`)
     - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)
     - [ ] Backups and logs (`BackupService`, `ListLogs`)

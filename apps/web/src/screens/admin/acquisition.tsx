@@ -7,14 +7,12 @@ import { type Timestamp, timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useDownloadClients, useIndexers, usePlugins, useQualityProfiles } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { DownloadProtocol, IndexerPrivacy } from "@mavio/proto/mavio/acquisition/v1/release_pb";
-import { Link, useSearch } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useSearch } from "@tanstack/react-router";
 
 import { locale, t } from "../../i18n.ts";
-import { Icon, type IconName } from "../../icon.tsx";
 import { Group } from "../../ui.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { ColorTile, fromNow, Page } from "./common.tsx";
+import { fromNow, Page, PageLink } from "./common.tsx";
 import { CustomFormatPage, CustomFormatsPage } from "./formats.tsx";
 import { QualityDefinitionsPage, QualityProfilePage } from "./quality.tsx";
 import { DelayProfilesPage, ReleaseProfilesPage, RemotePathMappingsPage } from "./rules.tsx";
@@ -46,38 +44,6 @@ export const mediaKinds = [
   { kind: MediaKind.MOVIE, title: () => t("acquisition.movies") },
   { kind: MediaKind.SERIES, title: () => t("acquisition.series") },
 ];
-
-/** A row linking to a page of the section. */
-export function PageLink({
-  search,
-  icon,
-  color,
-  label,
-  detail,
-}: {
-  search: SettingsSearch;
-  icon?: IconName;
-  color?: string;
-  label: ReactNode;
-  detail?: ReactNode;
-}) {
-  const cur = useSearch({ strict: false }) as SettingsSearch;
-  return (
-    <Link
-      to="/settings/$section"
-      params={{ section: search.plugin ? "plugins" : "acquisition" }}
-      search={{ server: cur.server, ...search }}
-      className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:bg-surface-raised"
-    >
-      {icon && <ColorTile icon={icon} color={color ?? "#8E8E93"} />}
-      <div className="min-w-0 flex-1">
-        <div className="truncate type-body">{label}</div>
-        {detail && <div className="type-footnote break-words text-text-secondary">{detail}</div>}
-      </div>
-      <Icon name="forward" size={16} className="shrink-0 text-text-tertiary" />
-    </Link>
-  );
-}
 
 const protocols: Record<DownloadProtocol, () => string> = {
   [DownloadProtocol.UNSPECIFIED]: () => "",

@@ -5473,6 +5473,24 @@
         }
       }
     },
+    "settings.subtitles": {
+      "comment": "The settings section of a server's subtitle acquisition",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕"
+          }
+        }
+      }
+    },
     "plugins.installed": {
       "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
@@ -15597,6 +15615,3516 @@
           "stringUnit": {
             "state": "translated",
             "value": "服务器看到的位置；须为绝对路径"
+          }
+        }
+      }
+    },
+    "subtitles.message": {
+      "comment": "The line under Subtitles' title",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find the subtitles movies and episodes lack, and translate those no provider has."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为电影和剧集查找缺少的字幕，并翻译没有提供商提供的字幕。"
+          }
+        }
+      }
+    },
+    "subtitles.providers": {
+      "comment": "Group of subtitle providers",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提供商"
+          }
+        }
+      }
+    },
+    "subtitles.providersFooter": {
+      "comment": "Footer of subtitle providers",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle provider plugins add providers; each is set up in its plugin."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕提供商插件添加提供商，各自在其插件中设置。"
+          }
+        }
+      }
+    },
+    "subtitles.movies": {
+      "comment": "A provider serves movies",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "subtitles.episodes": {
+      "comment": "A provider serves episodes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "subtitles.throttled": {
+      "comment": "A provider throttled after failing",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused until %1$@: %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停至%1$@：%2$@"
+          }
+        }
+      }
+    },
+    "subtitles.pluginFailed": {
+      "comment": "A plugin failed to list its providers or translators",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ could not list its own."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 无法列出其项目。"
+          }
+        }
+      }
+    },
+    "subtitles.noProviders": {
+      "comment": "No subtitle providers",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No subtitle providers. Install a subtitle provider plugin to add some."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有字幕提供商。安装字幕提供商插件以添加。"
+          }
+        }
+      }
+    },
+    "subtitles.translators": {
+      "comment": "Group of subtitle translators",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translators"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译器"
+          }
+        }
+      }
+    },
+    "subtitles.translatorsFooter": {
+      "comment": "Footer of subtitle translators",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle translator plugins add translators; the models of signed-in AI providers translate too."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕翻译插件添加翻译器；已登录的 AI 提供商的模型也可翻译。"
+          }
+        }
+      }
+    },
+    "subtitles.noTranslators": {
+      "comment": "No translators",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No translator plugins."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有翻译插件。"
+          }
+        }
+      }
+    },
+    "subtitles.profiles": {
+      "comment": "Group of subtitle profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置"
+          }
+        }
+      }
+    },
+    "subtitles.profilesFooter": {
+      "comment": "Footer of subtitle profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A profile names the languages of subtitles wanted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置列出所需字幕的语言。"
+          }
+        }
+      }
+    },
+    "subtitles.addProfile": {
+      "comment": "Adds a subtitle profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加配置"
+          }
+        }
+      }
+    },
+    "subtitles.libraries": {
+      "comment": "Group of libraries with their subtitle profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libraries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库"
+          }
+        }
+      }
+    },
+    "subtitles.librariesFooter": {
+      "comment": "Footer of the libraries' subtitle profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies and episodes of a library want the subtitles of its profile; assigning one searches for those they lack."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库中的电影和剧集需要其配置的字幕；分配配置后会搜索它们缺少的字幕。"
+          }
+        }
+      }
+    },
+    "subtitles.noProfile": {
+      "comment": "No subtitle profile assigned",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
+          }
+        }
+      }
+    },
+    "subtitles.noLibraries": {
+      "comment": "No libraries",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No libraries."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有媒体库。"
+          }
+        }
+      }
+    },
+    "subtitles.settings": {
+      "comment": "Group of links to the subtitle settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
+          }
+        }
+      }
+    },
+    "subtitles.searching": {
+      "comment": "Page of subtitle search and save settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searching and Saving"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索与保存"
+          }
+        }
+      }
+    },
+    "subtitles.searchingDetail": {
+      "comment": "Detail of the searching page link",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scores, searches, upgrades, where subtitles are saved and the fixes applied to them"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分数、搜索、升级、字幕保存位置及应用的修正"
+          }
+        }
+      }
+    },
+    "subtitles.sync": {
+      "comment": "Page of subtitle synchronization settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronization"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步"
+          }
+        }
+      }
+    },
+    "subtitles.syncDetail": {
+      "comment": "Detail of the sync page link",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aligning downloaded subtitles with the audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将下载的字幕与音频对齐"
+          }
+        }
+      }
+    },
+    "subtitles.translation": {
+      "comment": "Page of subtitle translation settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译"
+          }
+        }
+      }
+    },
+    "subtitles.translationDetail": {
+      "comment": "Detail of the translation page link",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translators, prompts, validation and automatic translation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译器、提示词、校验与自动翻译"
+          }
+        }
+      }
+    },
+    "subtitles.forced": {
+      "comment": "Forced subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forced"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强制"
+          }
+        }
+      }
+    },
+    "subtitles.hiShort": {
+      "comment": "Hearing-impaired subtitles, short",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SDH"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "听障"
+          }
+        }
+      }
+    },
+    "subtitles.noHiShort": {
+      "comment": "Hearing-impaired subtitles excluded, short",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "no SDH"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非听障"
+          }
+        }
+      }
+    },
+    "subtitles.profile": {
+      "comment": "Title of a subtitle profile page",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitle Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕配置"
+          }
+        }
+      }
+    },
+    "subtitles.profileGone": {
+      "comment": "A subtitle profile was deleted",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This profile no longer exists."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该配置已不存在。"
+          }
+        }
+      }
+    },
+    "subtitles.newProfile": {
+      "comment": "Title of a new subtitle profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Subtitle Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新字幕配置"
+          }
+        }
+      }
+    },
+    "subtitles.languages": {
+      "comment": "Group of a profile's languages",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Languages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
+          }
+        }
+      }
+    },
+    "subtitles.languagesFooter": {
+      "comment": "Footer of a profile's languages",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each language is wanted unless its audio conditions say otherwise."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "除非音频条件另有规定，每种语言都需要。"
+          }
+        }
+      }
+    },
+    "subtitles.language": {
+      "comment": "A subtitle language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
+          }
+        }
+      }
+    },
+    "subtitles.hearingImpaired": {
+      "comment": "How a language treats hearing-impaired subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hearing impaired"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "听障字幕"
+          }
+        }
+      }
+    },
+    "subtitles.hiAllowed": {
+      "comment": "Normal subtitles wanted, SDH taken in their place",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SDH accepted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接受听障字幕"
+          }
+        }
+      }
+    },
+    "subtitles.hiRequired": {
+      "comment": "Only hearing-impaired subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SDH only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅听障字幕"
+          }
+        }
+      }
+    },
+    "subtitles.hiExcluded": {
+      "comment": "Hearing-impaired subtitles excluded",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No SDH"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不要听障字幕"
+          }
+        }
+      }
+    },
+    "subtitles.forcedOnly": {
+      "comment": "Only forced subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forced only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅强制字幕"
+          }
+        }
+      }
+    },
+    "subtitles.audioExclude": {
+      "comment": "Not wanted when an audio stream has the language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not when the audio has it"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频有该语言时不需要"
+          }
+        }
+      }
+    },
+    "subtitles.audioOnlyInclude": {
+      "comment": "Wanted only when an audio stream has the language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only when the audio has it"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅在音频有该语言时需要"
+          }
+        }
+      }
+    },
+    "subtitles.cutoff": {
+      "comment": "A profile's cutoff",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop after"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "达到后停止"
+          }
+        }
+      }
+    },
+    "subtitles.cutoffDetail": {
+      "comment": "Detail of a profile's cutoff",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once these subtitles are found, the others are no longer searched for"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找到这些字幕后，不再搜索其余字幕"
+          }
+        }
+      }
+    },
+    "subtitles.cutoffNone": {
+      "comment": "No cutoff",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有语言"
+          }
+        }
+      }
+    },
+    "subtitles.cutoffAny": {
+      "comment": "Cutoff at any language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Any language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任一语言"
+          }
+        }
+      }
+    },
+    "subtitles.originalFormat": {
+      "comment": "Keeps subtitles in their provider's format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original format"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留原始格式"
+          }
+        }
+      }
+    },
+    "subtitles.originalFormatDetail": {
+      "comment": "Detail of original format",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep subtitles in the format their provider gives rather than SubRip"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留提供商给出的格式，而不转换为 SubRip"
+          }
+        }
+      }
+    },
+    "subtitles.tag": {
+      "comment": "A profile's tag",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签"
+          }
+        }
+      }
+    },
+    "subtitles.tagDetail": {
+      "comment": "Detail of a profile's tag",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies and series with it get this profile, when tags assign profiles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在允许标签分配配置时，带有该标签的电影和剧集使用此配置"
+          }
+        }
+      }
+    },
+    "subtitles.releaseNames": {
+      "comment": "Group of words subtitle release names must contain",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release names"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发布名称"
+          }
+        }
+      }
+    },
+    "subtitles.releaseNamesFooter": {
+      "comment": "Footer of release name words",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One word per line."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每行一个词。"
+          }
+        }
+      }
+    },
+    "subtitles.mustContain": {
+      "comment": "Words subtitle names must contain",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Must contain one of"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "必须包含其一"
+          }
+        }
+      }
+    },
+    "subtitles.mustNotContain": {
+      "comment": "Words subtitle names must not contain",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Must not contain"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不得包含"
+          }
+        }
+      }
+    },
+    "subtitles.remove": {
+      "comment": "Deletes a subtitle profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除配置"
+          }
+        }
+      }
+    },
+    "subtitles.removeTitle": {
+      "comment": "Asks before deleting a subtitle profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %@？"
+          }
+        }
+      }
+    },
+    "subtitles.removeMessage": {
+      "comment": "What deleting a subtitle profile does",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Libraries, movies and series lose it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体库、电影和剧集将不再使用它。"
+          }
+        }
+      }
+    },
+    "subtitles.saved": {
+      "comment": "The subtitle settings were saved",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存。"
+          }
+        }
+      }
+    },
+    "subtitles.languageUnset": {
+      "comment": "No default language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知"
+          }
+        }
+      }
+    },
+    "subtitles.scores": {
+      "comment": "Group of minimum scores",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimum scores"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最低分数"
+          }
+        }
+      }
+    },
+    "subtitles.scoresFooter": {
+      "comment": "Footer of minimum scores",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Percentages of the highest score subtitles can have; those below are not downloaded automatically."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "字幕可得最高分的百分比；低于它的不会自动下载。"
+          }
+        }
+      }
+    },
+    "subtitles.minimumScore": {
+      "comment": "Minimum score of episodes",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episodes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "subtitles.minimumScoreMovie": {
+      "comment": "Minimum score of movies",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "subtitles.searches": {
+      "comment": "Group of search settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索"
+          }
+        }
+      }
+    },
+    "subtitles.wantedInterval": {
+      "comment": "Interval of episodes' searches",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search episodes every"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索剧集间隔"
+          }
+        }
+      }
+    },
+    "subtitles.wantedIntervalMovie": {
+      "comment": "Interval of movies' searches",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search movies every"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索电影间隔"
+          }
+        }
+      }
+    },
+    "subtitles.hoursNever": {
+      "comment": "Hours, zero for never",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hours; 0 never"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小时；0 表示从不"
+          }
+        }
+      }
+    },
+    "subtitles.adaptive": {
+      "comment": "Searches failed languages less often",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adaptive searching"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自适应搜索"
+          }
+        }
+      }
+    },
+    "subtitles.adaptiveDetail": {
+      "comment": "Detail of adaptive searching",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search less often for subtitles that keep not being found"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对一直找不到的字幕降低搜索频率"
+          }
+        }
+      }
+    },
+    "subtitles.adaptiveDelay": {
+      "comment": "Adaptive delay in days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Days before searching less"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "降低频率前的天数"
+          }
+        }
+      }
+    },
+    "subtitles.adaptiveDelta": {
+      "comment": "Adaptive interval in days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Then once every, in days"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "之后每隔几天搜索一次"
+          }
+        }
+      }
+    },
+    "subtitles.sceneName": {
+      "comment": "Describes videos by release names",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use release names"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用发布名称"
+          }
+        }
+      }
+    },
+    "subtitles.sceneNameDetail": {
+      "comment": "Detail of scene names",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe videos to providers by the release names their files came from"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按文件来源的发布名称向提供商描述视频"
+          }
+        }
+      }
+    },
+    "subtitles.skipHashing": {
+      "comment": "Does not hash videos",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip hashing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跳过哈希计算"
+          }
+        }
+      }
+    },
+    "subtitles.skipHashingDetail": {
+      "comment": "Detail of skip hashing",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do not read videos to compute the hashes some providers match by"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不读取视频来计算部分提供商用于匹配的哈希"
+          }
+        }
+      }
+    },
+    "subtitles.embedded": {
+      "comment": "Group of embedded subtitle settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Embedded subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内嵌字幕"
+          }
+        }
+      }
+    },
+    "subtitles.useEmbedded": {
+      "comment": "Counts embedded subtitles as present",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Count embedded subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "计入内嵌字幕"
+          }
+        }
+      }
+    },
+    "subtitles.useEmbeddedDetail": {
+      "comment": "Detail of using embedded subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A video's own subtitle streams satisfy its profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频自带的字幕流可满足其配置"
+          }
+        }
+      }
+    },
+    "subtitles.ignorePgs": {
+      "comment": "Ignores PGS embedded subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore PGS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忽略 PGS"
+          }
+        }
+      }
+    },
+    "subtitles.ignoreVobsub": {
+      "comment": "Ignores VobSub embedded subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore VobSub"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忽略 VobSub"
+          }
+        }
+      }
+    },
+    "subtitles.ignoreAss": {
+      "comment": "Ignores ASS embedded subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ignore ASS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忽略 ASS"
+          }
+        }
+      }
+    },
+    "subtitles.defaultAudio": {
+      "comment": "Default audio language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio without a language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无语言的音频"
+          }
+        }
+      }
+    },
+    "subtitles.defaultAudioDetail": {
+      "comment": "Detail of default audio language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language of audio streams that name none"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未标明语言的音频流所用的语言"
+          }
+        }
+      }
+    },
+    "subtitles.defaultEmbedded": {
+      "comment": "Default embedded subtitle language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles without a language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无语言的字幕"
+          }
+        }
+      }
+    },
+    "subtitles.upgrades": {
+      "comment": "Group of upgrade settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrades"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级"
+          }
+        }
+      }
+    },
+    "subtitles.upgrade": {
+      "comment": "Searches for better subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrade subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级字幕"
+          }
+        }
+      }
+    },
+    "subtitles.upgradeDetail": {
+      "comment": "Detail of upgrades",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search again for recent downloads below the highest score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为最近下载但未达最高分的字幕再次搜索"
+          }
+        }
+      }
+    },
+    "subtitles.upgradeInterval": {
+      "comment": "Upgrade interval in hours",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every, in hours"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "间隔（小时）"
+          }
+        }
+      }
+    },
+    "subtitles.upgradeDays": {
+      "comment": "Upgrade window in days",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloads of the last, in days"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近几天内的下载"
+          }
+        }
+      }
+    },
+    "subtitles.upgradeManual": {
+      "comment": "Upgrades manual downloads too",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include manual downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包括手动下载的"
+          }
+        }
+      }
+    },
+    "subtitles.saving": {
+      "comment": "Group of save settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "subtitles.folder": {
+      "comment": "Where subtitles are saved",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save in"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存位置"
+          }
+        }
+      }
+    },
+    "subtitles.folderVideo": {
+      "comment": "Subtitles beside the video",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The video's folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频所在文件夹"
+          }
+        }
+      }
+    },
+    "subtitles.folderRelative": {
+      "comment": "Subtitles in a subfolder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A subfolder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "子文件夹"
+          }
+        }
+      }
+    },
+    "subtitles.folderMetadata": {
+      "comment": "Subtitles in the metadata folder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The metadata folder"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元数据文件夹"
+          }
+        }
+      }
+    },
+    "subtitles.customFolder": {
+      "comment": "Name of the subtitle subfolder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subfolder name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "子文件夹名称"
+          }
+        }
+      }
+    },
+    "subtitles.hiExtension": {
+      "comment": "Suffix of hearing-impaired subtitle names",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SDH suffix"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "听障字幕后缀"
+          }
+        }
+      }
+    },
+    "subtitles.hiExtensionDetail": {
+      "comment": "Detail of the SDH suffix",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added to the names of hearing-impaired subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加到听障字幕文件名中"
+          }
+        }
+      }
+    },
+    "subtitles.singleLanguage": {
+      "comment": "Saves subtitles without their language in names",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave out the language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "省略语言"
+          }
+        }
+      }
+    },
+    "subtitles.singleLanguageDetail": {
+      "comment": "Detail of single language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name subtitles after the video alone; only one language can be kept"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅以视频命名字幕；只能保留一种语言"
+          }
+        }
+      }
+    },
+    "subtitles.utf": {
+      "comment": "Saves subtitles in UTF-8",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save as UTF-8"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存为 UTF-8"
+          }
+        }
+      }
+    },
+    "subtitles.mods": {
+      "comment": "Group of subtitle mods",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正"
+          }
+        }
+      }
+    },
+    "subtitles.modsFooter": {
+      "comment": "Footer of subtitle mods",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applied to every subtitle downloaded."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用于每个下载的字幕。"
+          }
+        }
+      }
+    },
+    "subtitles.modOcr": {
+      "comment": "The OCR fixes mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix OCR errors"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正 OCR 错误"
+          }
+        }
+      }
+    },
+    "subtitles.modRemoveHi": {
+      "comment": "The remove HI mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove SDH descriptions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除听障描述"
+          }
+        }
+      }
+    },
+    "subtitles.modCommon": {
+      "comment": "The common fixes mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Common fixes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "常规修正"
+          }
+        }
+      }
+    },
+    "subtitles.modRemoveTags": {
+      "comment": "The remove tags mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove styling"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除样式"
+          }
+        }
+      }
+    },
+    "subtitles.modUppercase": {
+      "comment": "The fix uppercase mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix all-caps text"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正全大写文本"
+          }
+        }
+      }
+    },
+    "subtitles.modRtl": {
+      "comment": "The reverse RTL mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reverse right-to-left punctuation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转从右到左文字的标点"
+          }
+        }
+      }
+    },
+    "subtitles.modEmoji": {
+      "comment": "The emoji mod",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove emoji"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除表情符号"
+          }
+        }
+      }
+    },
+    "subtitles.equivalences": {
+      "comment": "Group of language equivalences",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equivalent languages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等同语言"
+          }
+        }
+      }
+    },
+    "subtitles.equivalencesFooter": {
+      "comment": "Footer of language equivalences",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles in the language on the left count as the one on the right."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "左侧语言的字幕视为右侧语言的字幕。"
+          }
+        }
+      }
+    },
+    "subtitles.noEquivalences": {
+      "comment": "No language equivalences",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无。"
+          }
+        }
+      }
+    },
+    "subtitles.kind": {
+      "comment": "Kind of subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kind"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类型"
+          }
+        }
+      }
+    },
+    "subtitles.kindNormal": {
+      "comment": "Normal subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "普通"
+          }
+        }
+      }
+    },
+    "subtitles.tags": {
+      "comment": "Group of tag settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签"
+          }
+        }
+      }
+    },
+    "subtitles.tagsFooter": {
+      "comment": "Footer of tag settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiles' tags assign them to movies and series with the same tag."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置的标签会将其分配给带有相同标签的电影和剧集。"
+          }
+        }
+      }
+    },
+    "subtitles.movieTags": {
+      "comment": "Lets tags assign movies' profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags assign movies' profiles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签分配电影的配置"
+          }
+        }
+      }
+    },
+    "subtitles.seriesTags": {
+      "comment": "Lets tags assign series' profiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags assign series' profiles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标签分配剧集的配置"
+          }
+        }
+      }
+    },
+    "subtitles.noProfileTags": {
+      "comment": "Tags that assign no profile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags of no profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "表示无配置的标签"
+          }
+        }
+      }
+    },
+    "subtitles.noProfileTagsDetail": {
+      "comment": "Detail of no-profile tags",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separated by commas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以逗号分隔"
+          }
+        }
+      }
+    },
+    "subtitles.syncFooter": {
+      "comment": "Footer of synchronization",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronizing against the audio works only on local and network storage."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与音频同步仅适用于本地和网络存储。"
+          }
+        }
+      }
+    },
+    "subtitles.syncEnabled": {
+      "comment": "Synchronizes downloaded subtitles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronize downloads"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同步下载的字幕"
+          }
+        }
+      }
+    },
+    "subtitles.syncThreshold": {
+      "comment": "Synchronizes episodes' subtitles below a threshold",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only episodes' below a score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅低于分数的剧集字幕"
+          }
+        }
+      }
+    },
+    "subtitles.syncThresholdDetail": {
+      "comment": "Detail of sync threshold",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A percentage of the highest score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高分的百分比"
+          }
+        }
+      }
+    },
+    "subtitles.syncMovieThreshold": {
+      "comment": "Synchronizes movies' subtitles below a threshold",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only movies' below a score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅低于分数的电影字幕"
+          }
+        }
+      }
+    },
+    "subtitles.threshold": {
+      "comment": "A threshold score",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分数"
+          }
+        }
+      }
+    },
+    "subtitles.forceAudio": {
+      "comment": "Synchronizes against the audio",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always against the audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "始终以音频为参照"
+          }
+        }
+      }
+    },
+    "subtitles.forceAudioDetail": {
+      "comment": "Detail of forcing audio",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even when another subtitle could serve as reference"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使有其他字幕可作参照"
+          }
+        }
+      }
+    },
+    "subtitles.originalLanguage": {
+      "comment": "Uses the original-language audio stream",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original-language audio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原语言音频"
+          }
+        }
+      }
+    },
+    "subtitles.originalLanguageDetail": {
+      "comment": "Detail of original-language audio",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronize against the audio stream in the original language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以原语言的音频流为参照同步"
+          }
+        }
+      }
+    },
+    "subtitles.excludedProviders": {
+      "comment": "Providers not synchronized",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Except providers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排除的提供商"
+          }
+        }
+      }
+    },
+    "subtitles.excludedProvidersDetail": {
+      "comment": "Detail of excluded providers",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separated by commas, of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以逗号分隔，可选：%@"
+          }
+        }
+      }
+    },
+    "subtitles.excludedLanguages": {
+      "comment": "Languages not synchronized",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Except languages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排除的语言"
+          }
+        }
+      }
+    },
+    "subtitles.excludedLanguagesDetail": {
+      "comment": "Detail of excluded languages",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language codes separated by commas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以逗号分隔的语言代码"
+          }
+        }
+      }
+    },
+    "subtitles.alignment": {
+      "comment": "Group of alignment settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alignment"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对齐"
+          }
+        }
+      }
+    },
+    "subtitles.maxOffset": {
+      "comment": "Largest offset searched",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largest offset, in seconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大偏移（秒）"
+          }
+        }
+      }
+    },
+    "subtitles.fixFramerate": {
+      "comment": "Tries common frame rate ratios",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try frame rate ratios"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尝试帧率比例"
+          }
+        }
+      }
+    },
+    "subtitles.fixFramerateDetail": {
+      "comment": "Detail of frame rate fixing",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also try the ratios of common frame rates"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同时尝试常见帧率的比例"
+          }
+        }
+      }
+    },
+    "subtitles.goldenSection": {
+      "comment": "Golden section search",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for the best ratio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索最佳比例"
+          }
+        }
+      }
+    },
+    "subtitles.goldenSectionDetail": {
+      "comment": "Detail of golden section search",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slower, for subtitles of an unusual frame rate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "较慢，适用于帧率不常见的字幕"
+          }
+        }
+      }
+    },
+    "subtitles.minScore": {
+      "comment": "Minimum alignment score",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lowest alignment score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最低对齐分数"
+          }
+        }
+      }
+    },
+    "subtitles.maxQualityOffset": {
+      "comment": "Largest accepted offset",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largest offset accepted, in seconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可接受的最大偏移（秒）"
+          }
+        }
+      }
+    },
+    "subtitles.maxScaleDeviation": {
+      "comment": "Largest scale deviation",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largest scale deviation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大缩放偏差"
+          }
+        }
+      }
+    },
+    "subtitles.translatorFooter": {
+      "comment": "Footer of translators",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallbacks are tried in order when the translator fails or does not translate between the languages."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当翻译器失败或不支持该语言对时，按顺序尝试备用翻译器。"
+          }
+        }
+      }
+    },
+    "subtitles.translator": {
+      "comment": "The default translator",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译器"
+          }
+        }
+      }
+    },
+    "subtitles.translatorFirst": {
+      "comment": "The first enabled plugin translator",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first plugin translator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第一个插件翻译器"
+          }
+        }
+      }
+    },
+    "subtitles.fallbackOf": {
+      "comment": "A fallback translator's position",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fallback %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "备用 %@"
+          }
+        }
+      }
+    },
+    "subtitles.addFallback": {
+      "comment": "Adds a fallback translator",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a fallback"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加备用"
+          }
+        }
+      }
+    },
+    "subtitles.choose": {
+      "comment": "Placeholder of a select",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择…"
+          }
+        }
+      }
+    },
+    "subtitles.output": {
+      "comment": "Group of translation output settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "译文"
+          }
+        }
+      }
+    },
+    "subtitles.defaultScore": {
+      "comment": "Score translations are recorded with",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分数"
+          }
+        }
+      }
+    },
+    "subtitles.defaultScoreDetail": {
+      "comment": "Detail of the default score",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recorded with translations, as a percentage of the highest score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记录到译文的分数，为最高分的百分比"
+          }
+        }
+      }
+    },
+    "subtitles.credit": {
+      "comment": "Adds a cue crediting the translator",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Credit the translator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "署名翻译器"
+          }
+        }
+      }
+    },
+    "subtitles.creditDetail": {
+      "comment": "Detail of crediting",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a first cue naming the translator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加一条注明翻译器的首条字幕"
+          }
+        }
+      }
+    },
+    "subtitles.stripFormatting": {
+      "comment": "Translates plain text",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strip formatting"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去除格式"
+          }
+        }
+      }
+    },
+    "subtitles.stripFormattingDetail": {
+      "comment": "Detail of stripping formatting",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translate plain text and drop the styles of ASS files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翻译纯文本并去掉 ASS 文件的样式"
+          }
+        }
+      }
+    },
+    "subtitles.preserveLineBreaks": {
+      "comment": "Keeps cues' line breaks",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep line breaks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留换行"
+          }
+        }
+      }
+    },
+    "subtitles.fixOverlaps": {
+      "comment": "Trims overlapping cues",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fix overlapping cues"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正重叠字幕"
+          }
+        }
+      }
+    },
+    "subtitles.models": {
+      "comment": "Group of AI model translation settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI models"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 模型"
+          }
+        }
+      }
+    },
+    "subtitles.modelsFooter": {
+      "comment": "Footer of AI model settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each prompt can use the placeholders shown above it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个提示词可使用其上方列出的占位符。"
+          }
+        }
+      }
+    },
+    "subtitles.contextBefore": {
+      "comment": "Context cues before",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cues of context before"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前文字幕条数"
+          }
+        }
+      }
+    },
+    "subtitles.contextAfter": {
+      "comment": "Context cues after",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cues of context after"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "后文字幕条数"
+          }
+        }
+      }
+    },
+    "subtitles.translatedContext": {
+      "comment": "Gives context as JSON with translations",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Context with translations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附带译文的上下文"
+          }
+        }
+      }
+    },
+    "subtitles.translatedContextDetail": {
+      "comment": "Detail of translated context",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Give the context as JSON, with the translations of the cues before"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以 JSON 提供上下文，附带前文的译文"
+          }
+        }
+      }
+    },
+    "subtitles.batch": {
+      "comment": "Translates cues in batches",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translate in batches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "批量翻译"
+          }
+        }
+      }
+    },
+    "subtitles.batchDetail": {
+      "comment": "Detail of batches",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send many cues at once and read the answer as JSON"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一次发送多条字幕并以 JSON 读取结果"
+          }
+        }
+      }
+    },
+    "subtitles.maxBatchSize": {
+      "comment": "Largest batch",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cues per batch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每批字幕条数"
+          }
+        }
+      }
+    },
+    "subtitles.maxBatchSizeDetail": {
+      "comment": "Detail of the batch size",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 for every cue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0 表示全部"
+          }
+        }
+      }
+    },
+    "subtitles.languageCodes": {
+      "comment": "Names languages by codes in prompts",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name languages by code"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以代码表示语言"
+          }
+        }
+      }
+    },
+    "subtitles.prompt": {
+      "comment": "System prompt of translation",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令"
+          }
+        }
+      }
+    },
+    "subtitles.userPrompt": {
+      "comment": "User prompt of translation",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message of each cue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每条字幕的消息"
+          }
+        }
+      }
+    },
+    "subtitles.proofreadPrompt": {
+      "comment": "System prompt of proofreading",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proofreading instructions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校对指令"
+          }
+        }
+      }
+    },
+    "subtitles.proofreadUserPrompt": {
+      "comment": "User prompt of proofreading",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proofreading message"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校对消息"
+          }
+        }
+      }
+    },
+    "subtitles.retries": {
+      "comment": "Group of retry settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retries"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "subtitles.maxRetries": {
+      "comment": "Most attempts",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attempts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尝试次数"
+          }
+        }
+      }
+    },
+    "subtitles.retryDelay": {
+      "comment": "Retry delay",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First delay, in seconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首次延迟（秒）"
+          }
+        }
+      }
+    },
+    "subtitles.retryMultiplier": {
+      "comment": "Retry delay multiplier",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delay multiplier"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "延迟倍数"
+          }
+        }
+      }
+    },
+    "subtitles.requestTimeout": {
+      "comment": "Request timeout",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request timeout, in seconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求超时（秒）"
+          }
+        }
+      }
+    },
+    "subtitles.validation": {
+      "comment": "Group of validation settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校验"
+          }
+        }
+      }
+    },
+    "subtitles.validationFooter": {
+      "comment": "Footer of validation",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtitles outside these bounds look broken and are not translated."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "超出这些范围的字幕被视为损坏，不予翻译。"
+          }
+        }
+      }
+    },
+    "subtitles.validationEnabled": {
+      "comment": "Validates subtitles before translating",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validate subtitles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "校验字幕"
+          }
+        }
+      }
+    },
+    "subtitles.maxFileSize": {
+      "comment": "Largest subtitle file",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largest file, in KB"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大文件（KB）"
+          }
+        }
+      }
+    },
+    "subtitles.maxCueLength": {
+      "comment": "Longest cue",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest cue, in characters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最长字幕（字符）"
+          }
+        }
+      }
+    },
+    "subtitles.minCueLength": {
+      "comment": "Shortest cue",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortest cue, in characters"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最短字幕（字符）"
+          }
+        }
+      }
+    },
+    "subtitles.minDuration": {
+      "comment": "Shortest cue duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortest cue, in milliseconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最短时长（毫秒）"
+          }
+        }
+      }
+    },
+    "subtitles.maxDuration": {
+      "comment": "Longest cue duration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Longest cue, in seconds"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最长时长（秒）"
+          }
+        }
+      }
+    },
+    "subtitles.automation": {
+      "comment": "Group of automation settings",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic translation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动翻译"
+          }
+        }
+      }
+    },
+    "subtitles.automationFooter": {
+      "comment": "Footer of automation",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies and episodes still lacking subtitles their profile wants get them translated from a subtitle they have in a source language."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仍缺少配置所需字幕的电影和剧集，会从其已有的源语言字幕翻译得到。"
+          }
+        }
+      }
+    },
+    "subtitles.automationEnabled": {
+      "comment": "Translates missing subtitles automatically",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translate automatically"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动翻译"
+          }
+        }
+      }
+    },
+    "subtitles.automationInterval": {
+      "comment": "Automation interval",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every, in hours"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "间隔（小时）"
+          }
+        }
+      }
+    },
+    "subtitles.sourceLanguage": {
+      "comment": "A language translated from",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "源语言"
+          }
+        }
+      }
+    },
+    "subtitles.addSourceLanguage": {
+      "comment": "Adds a source language",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a source language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加源语言"
+          }
+        }
+      }
+    },
+    "subtitles.maxPerRun": {
+      "comment": "Most translations per run",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Translations per run"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每次运行的翻译数"
+          }
+        }
+      }
+    },
+    "subtitles.movieAge": {
+      "comment": "How old a movie file must be",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for movies, in hours"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影等待时间（小时）"
+          }
+        }
+      }
+    },
+    "subtitles.episodeAge": {
+      "comment": "How old an episode file must be",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wait for episodes, in hours"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集等待时间（小时）"
           }
         }
       }

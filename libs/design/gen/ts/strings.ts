@@ -297,6 +297,7 @@ export type MessageKey =
   | 'settings.transcoding'
   | 'settings.storage'
   | 'settings.acquisition'
+  | 'settings.subtitles'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -856,7 +857,202 @@ export type MessageKey =
   | 'rules.remotePath'
   | 'rules.remotePathDetail'
   | 'rules.localPath'
-  | 'rules.localPathDetail';
+  | 'rules.localPathDetail'
+  | 'subtitles.message'
+  | 'subtitles.providers'
+  | 'subtitles.providersFooter'
+  | 'subtitles.movies'
+  | 'subtitles.episodes'
+  | 'subtitles.throttled'
+  | 'subtitles.pluginFailed'
+  | 'subtitles.noProviders'
+  | 'subtitles.translators'
+  | 'subtitles.translatorsFooter'
+  | 'subtitles.noTranslators'
+  | 'subtitles.profiles'
+  | 'subtitles.profilesFooter'
+  | 'subtitles.addProfile'
+  | 'subtitles.libraries'
+  | 'subtitles.librariesFooter'
+  | 'subtitles.noProfile'
+  | 'subtitles.noLibraries'
+  | 'subtitles.settings'
+  | 'subtitles.searching'
+  | 'subtitles.searchingDetail'
+  | 'subtitles.sync'
+  | 'subtitles.syncDetail'
+  | 'subtitles.translation'
+  | 'subtitles.translationDetail'
+  | 'subtitles.forced'
+  | 'subtitles.hiShort'
+  | 'subtitles.noHiShort'
+  | 'subtitles.profile'
+  | 'subtitles.profileGone'
+  | 'subtitles.newProfile'
+  | 'subtitles.languages'
+  | 'subtitles.languagesFooter'
+  | 'subtitles.language'
+  | 'subtitles.hearingImpaired'
+  | 'subtitles.hiAllowed'
+  | 'subtitles.hiRequired'
+  | 'subtitles.hiExcluded'
+  | 'subtitles.forcedOnly'
+  | 'subtitles.audioExclude'
+  | 'subtitles.audioOnlyInclude'
+  | 'subtitles.cutoff'
+  | 'subtitles.cutoffDetail'
+  | 'subtitles.cutoffNone'
+  | 'subtitles.cutoffAny'
+  | 'subtitles.originalFormat'
+  | 'subtitles.originalFormatDetail'
+  | 'subtitles.tag'
+  | 'subtitles.tagDetail'
+  | 'subtitles.releaseNames'
+  | 'subtitles.releaseNamesFooter'
+  | 'subtitles.mustContain'
+  | 'subtitles.mustNotContain'
+  | 'subtitles.remove'
+  | 'subtitles.removeTitle'
+  | 'subtitles.removeMessage'
+  | 'subtitles.saved'
+  | 'subtitles.languageUnset'
+  | 'subtitles.scores'
+  | 'subtitles.scoresFooter'
+  | 'subtitles.minimumScore'
+  | 'subtitles.minimumScoreMovie'
+  | 'subtitles.searches'
+  | 'subtitles.wantedInterval'
+  | 'subtitles.wantedIntervalMovie'
+  | 'subtitles.hoursNever'
+  | 'subtitles.adaptive'
+  | 'subtitles.adaptiveDetail'
+  | 'subtitles.adaptiveDelay'
+  | 'subtitles.adaptiveDelta'
+  | 'subtitles.sceneName'
+  | 'subtitles.sceneNameDetail'
+  | 'subtitles.skipHashing'
+  | 'subtitles.skipHashingDetail'
+  | 'subtitles.embedded'
+  | 'subtitles.useEmbedded'
+  | 'subtitles.useEmbeddedDetail'
+  | 'subtitles.ignorePgs'
+  | 'subtitles.ignoreVobsub'
+  | 'subtitles.ignoreAss'
+  | 'subtitles.defaultAudio'
+  | 'subtitles.defaultAudioDetail'
+  | 'subtitles.defaultEmbedded'
+  | 'subtitles.upgrades'
+  | 'subtitles.upgrade'
+  | 'subtitles.upgradeDetail'
+  | 'subtitles.upgradeInterval'
+  | 'subtitles.upgradeDays'
+  | 'subtitles.upgradeManual'
+  | 'subtitles.saving'
+  | 'subtitles.folder'
+  | 'subtitles.folderVideo'
+  | 'subtitles.folderRelative'
+  | 'subtitles.folderMetadata'
+  | 'subtitles.customFolder'
+  | 'subtitles.hiExtension'
+  | 'subtitles.hiExtensionDetail'
+  | 'subtitles.singleLanguage'
+  | 'subtitles.singleLanguageDetail'
+  | 'subtitles.utf'
+  | 'subtitles.mods'
+  | 'subtitles.modsFooter'
+  | 'subtitles.modOcr'
+  | 'subtitles.modRemoveHi'
+  | 'subtitles.modCommon'
+  | 'subtitles.modRemoveTags'
+  | 'subtitles.modUppercase'
+  | 'subtitles.modRtl'
+  | 'subtitles.modEmoji'
+  | 'subtitles.equivalences'
+  | 'subtitles.equivalencesFooter'
+  | 'subtitles.noEquivalences'
+  | 'subtitles.kind'
+  | 'subtitles.kindNormal'
+  | 'subtitles.tags'
+  | 'subtitles.tagsFooter'
+  | 'subtitles.movieTags'
+  | 'subtitles.seriesTags'
+  | 'subtitles.noProfileTags'
+  | 'subtitles.noProfileTagsDetail'
+  | 'subtitles.syncFooter'
+  | 'subtitles.syncEnabled'
+  | 'subtitles.syncThreshold'
+  | 'subtitles.syncThresholdDetail'
+  | 'subtitles.syncMovieThreshold'
+  | 'subtitles.threshold'
+  | 'subtitles.forceAudio'
+  | 'subtitles.forceAudioDetail'
+  | 'subtitles.originalLanguage'
+  | 'subtitles.originalLanguageDetail'
+  | 'subtitles.excludedProviders'
+  | 'subtitles.excludedProvidersDetail'
+  | 'subtitles.excludedLanguages'
+  | 'subtitles.excludedLanguagesDetail'
+  | 'subtitles.alignment'
+  | 'subtitles.maxOffset'
+  | 'subtitles.fixFramerate'
+  | 'subtitles.fixFramerateDetail'
+  | 'subtitles.goldenSection'
+  | 'subtitles.goldenSectionDetail'
+  | 'subtitles.minScore'
+  | 'subtitles.maxQualityOffset'
+  | 'subtitles.maxScaleDeviation'
+  | 'subtitles.translatorFooter'
+  | 'subtitles.translator'
+  | 'subtitles.translatorFirst'
+  | 'subtitles.fallbackOf'
+  | 'subtitles.addFallback'
+  | 'subtitles.choose'
+  | 'subtitles.output'
+  | 'subtitles.defaultScore'
+  | 'subtitles.defaultScoreDetail'
+  | 'subtitles.credit'
+  | 'subtitles.creditDetail'
+  | 'subtitles.stripFormatting'
+  | 'subtitles.stripFormattingDetail'
+  | 'subtitles.preserveLineBreaks'
+  | 'subtitles.fixOverlaps'
+  | 'subtitles.models'
+  | 'subtitles.modelsFooter'
+  | 'subtitles.contextBefore'
+  | 'subtitles.contextAfter'
+  | 'subtitles.translatedContext'
+  | 'subtitles.translatedContextDetail'
+  | 'subtitles.batch'
+  | 'subtitles.batchDetail'
+  | 'subtitles.maxBatchSize'
+  | 'subtitles.maxBatchSizeDetail'
+  | 'subtitles.languageCodes'
+  | 'subtitles.prompt'
+  | 'subtitles.userPrompt'
+  | 'subtitles.proofreadPrompt'
+  | 'subtitles.proofreadUserPrompt'
+  | 'subtitles.retries'
+  | 'subtitles.maxRetries'
+  | 'subtitles.retryDelay'
+  | 'subtitles.retryMultiplier'
+  | 'subtitles.requestTimeout'
+  | 'subtitles.validation'
+  | 'subtitles.validationFooter'
+  | 'subtitles.validationEnabled'
+  | 'subtitles.maxFileSize'
+  | 'subtitles.maxCueLength'
+  | 'subtitles.minCueLength'
+  | 'subtitles.minDuration'
+  | 'subtitles.maxDuration'
+  | 'subtitles.automation'
+  | 'subtitles.automationFooter'
+  | 'subtitles.automationEnabled'
+  | 'subtitles.automationInterval'
+  | 'subtitles.sourceLanguage'
+  | 'subtitles.addSourceLanguage'
+  | 'subtitles.maxPerRun'
+  | 'subtitles.movieAge'
+  | 'subtitles.episodeAge';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1146,6 +1342,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.transcoding": "Transcoding",
     "settings.storage": "Storage",
     "settings.acquisition": "Acquisition",
+    "settings.subtitles": "Subtitles",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -1705,7 +1902,202 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "rules.remotePath": "Remote Path",
     "rules.remotePathDetail": "The folder the client reports",
     "rules.localPath": "Local Path",
-    "rules.localPathDetail": "Where the server sees it; absolute"
+    "rules.localPathDetail": "Where the server sees it; absolute",
+    "subtitles.message": "Find the subtitles movies and episodes lack, and translate those no provider has.",
+    "subtitles.providers": "Providers",
+    "subtitles.providersFooter": "Subtitle provider plugins add providers; each is set up in its plugin.",
+    "subtitles.movies": "Movies",
+    "subtitles.episodes": "Episodes",
+    "subtitles.throttled": "Paused until {when}: {reason}",
+    "subtitles.pluginFailed": "{plugin} could not list its own.",
+    "subtitles.noProviders": "No subtitle providers. Install a subtitle provider plugin to add some.",
+    "subtitles.translators": "Translators",
+    "subtitles.translatorsFooter": "Subtitle translator plugins add translators; the models of signed-in AI providers translate too.",
+    "subtitles.noTranslators": "No translator plugins.",
+    "subtitles.profiles": "Profiles",
+    "subtitles.profilesFooter": "A profile names the languages of subtitles wanted.",
+    "subtitles.addProfile": "Add Profile",
+    "subtitles.libraries": "Libraries",
+    "subtitles.librariesFooter": "Movies and episodes of a library want the subtitles of its profile; assigning one searches for those they lack.",
+    "subtitles.noProfile": "None",
+    "subtitles.noLibraries": "No libraries.",
+    "subtitles.settings": "Settings",
+    "subtitles.searching": "Searching and Saving",
+    "subtitles.searchingDetail": "Scores, searches, upgrades, where subtitles are saved and the fixes applied to them",
+    "subtitles.sync": "Synchronization",
+    "subtitles.syncDetail": "Aligning downloaded subtitles with the audio",
+    "subtitles.translation": "Translation",
+    "subtitles.translationDetail": "Translators, prompts, validation and automatic translation",
+    "subtitles.forced": "Forced",
+    "subtitles.hiShort": "SDH",
+    "subtitles.noHiShort": "no SDH",
+    "subtitles.profile": "Subtitle Profile",
+    "subtitles.profileGone": "This profile no longer exists.",
+    "subtitles.newProfile": "New Subtitle Profile",
+    "subtitles.languages": "Languages",
+    "subtitles.languagesFooter": "Each language is wanted unless its audio conditions say otherwise.",
+    "subtitles.language": "Language",
+    "subtitles.hearingImpaired": "Hearing impaired",
+    "subtitles.hiAllowed": "SDH accepted",
+    "subtitles.hiRequired": "SDH only",
+    "subtitles.hiExcluded": "No SDH",
+    "subtitles.forcedOnly": "Forced only",
+    "subtitles.audioExclude": "Not when the audio has it",
+    "subtitles.audioOnlyInclude": "Only when the audio has it",
+    "subtitles.cutoff": "Stop after",
+    "subtitles.cutoffDetail": "Once these subtitles are found, the others are no longer searched for",
+    "subtitles.cutoffNone": "Every language",
+    "subtitles.cutoffAny": "Any language",
+    "subtitles.originalFormat": "Original format",
+    "subtitles.originalFormatDetail": "Keep subtitles in the format their provider gives rather than SubRip",
+    "subtitles.tag": "Tag",
+    "subtitles.tagDetail": "Movies and series with it get this profile, when tags assign profiles",
+    "subtitles.releaseNames": "Release names",
+    "subtitles.releaseNamesFooter": "One word per line.",
+    "subtitles.mustContain": "Must contain one of",
+    "subtitles.mustNotContain": "Must not contain",
+    "subtitles.remove": "Delete Profile",
+    "subtitles.removeTitle": "Delete {name}?",
+    "subtitles.removeMessage": "Libraries, movies and series lose it.",
+    "subtitles.saved": "Saved.",
+    "subtitles.languageUnset": "Unknown",
+    "subtitles.scores": "Minimum scores",
+    "subtitles.scoresFooter": "Percentages of the highest score subtitles can have; those below are not downloaded automatically.",
+    "subtitles.minimumScore": "Episodes",
+    "subtitles.minimumScoreMovie": "Movies",
+    "subtitles.searches": "Searches",
+    "subtitles.wantedInterval": "Search episodes every",
+    "subtitles.wantedIntervalMovie": "Search movies every",
+    "subtitles.hoursNever": "Hours; 0 never",
+    "subtitles.adaptive": "Adaptive searching",
+    "subtitles.adaptiveDetail": "Search less often for subtitles that keep not being found",
+    "subtitles.adaptiveDelay": "Days before searching less",
+    "subtitles.adaptiveDelta": "Then once every, in days",
+    "subtitles.sceneName": "Use release names",
+    "subtitles.sceneNameDetail": "Describe videos to providers by the release names their files came from",
+    "subtitles.skipHashing": "Skip hashing",
+    "subtitles.skipHashingDetail": "Do not read videos to compute the hashes some providers match by",
+    "subtitles.embedded": "Embedded subtitles",
+    "subtitles.useEmbedded": "Count embedded subtitles",
+    "subtitles.useEmbeddedDetail": "A video's own subtitle streams satisfy its profile",
+    "subtitles.ignorePgs": "Ignore PGS",
+    "subtitles.ignoreVobsub": "Ignore VobSub",
+    "subtitles.ignoreAss": "Ignore ASS",
+    "subtitles.defaultAudio": "Audio without a language",
+    "subtitles.defaultAudioDetail": "The language of audio streams that name none",
+    "subtitles.defaultEmbedded": "Subtitles without a language",
+    "subtitles.upgrades": "Upgrades",
+    "subtitles.upgrade": "Upgrade subtitles",
+    "subtitles.upgradeDetail": "Search again for recent downloads below the highest score",
+    "subtitles.upgradeInterval": "Every, in hours",
+    "subtitles.upgradeDays": "Downloads of the last, in days",
+    "subtitles.upgradeManual": "Include manual downloads",
+    "subtitles.saving": "Saving",
+    "subtitles.folder": "Save in",
+    "subtitles.folderVideo": "The video's folder",
+    "subtitles.folderRelative": "A subfolder",
+    "subtitles.folderMetadata": "The metadata folder",
+    "subtitles.customFolder": "Subfolder name",
+    "subtitles.hiExtension": "SDH suffix",
+    "subtitles.hiExtensionDetail": "Added to the names of hearing-impaired subtitles",
+    "subtitles.singleLanguage": "Leave out the language",
+    "subtitles.singleLanguageDetail": "Name subtitles after the video alone; only one language can be kept",
+    "subtitles.utf": "Save as UTF-8",
+    "subtitles.mods": "Fixes",
+    "subtitles.modsFooter": "Applied to every subtitle downloaded.",
+    "subtitles.modOcr": "Fix OCR errors",
+    "subtitles.modRemoveHi": "Remove SDH descriptions",
+    "subtitles.modCommon": "Common fixes",
+    "subtitles.modRemoveTags": "Remove styling",
+    "subtitles.modUppercase": "Fix all-caps text",
+    "subtitles.modRtl": "Reverse right-to-left punctuation",
+    "subtitles.modEmoji": "Remove emoji",
+    "subtitles.equivalences": "Equivalent languages",
+    "subtitles.equivalencesFooter": "Subtitles in the language on the left count as the one on the right.",
+    "subtitles.noEquivalences": "None.",
+    "subtitles.kind": "Kind",
+    "subtitles.kindNormal": "Normal",
+    "subtitles.tags": "Tags",
+    "subtitles.tagsFooter": "Profiles' tags assign them to movies and series with the same tag.",
+    "subtitles.movieTags": "Tags assign movies' profiles",
+    "subtitles.seriesTags": "Tags assign series' profiles",
+    "subtitles.noProfileTags": "Tags of no profile",
+    "subtitles.noProfileTagsDetail": "Separated by commas",
+    "subtitles.syncFooter": "Synchronizing against the audio works only on local and network storage.",
+    "subtitles.syncEnabled": "Synchronize downloads",
+    "subtitles.syncThreshold": "Only episodes' below a score",
+    "subtitles.syncThresholdDetail": "A percentage of the highest score",
+    "subtitles.syncMovieThreshold": "Only movies' below a score",
+    "subtitles.threshold": "Score",
+    "subtitles.forceAudio": "Always against the audio",
+    "subtitles.forceAudioDetail": "Even when another subtitle could serve as reference",
+    "subtitles.originalLanguage": "Original-language audio",
+    "subtitles.originalLanguageDetail": "Synchronize against the audio stream in the original language",
+    "subtitles.excludedProviders": "Except providers",
+    "subtitles.excludedProvidersDetail": "Separated by commas, of {names}",
+    "subtitles.excludedLanguages": "Except languages",
+    "subtitles.excludedLanguagesDetail": "Language codes separated by commas",
+    "subtitles.alignment": "Alignment",
+    "subtitles.maxOffset": "Largest offset, in seconds",
+    "subtitles.fixFramerate": "Try frame rate ratios",
+    "subtitles.fixFramerateDetail": "Also try the ratios of common frame rates",
+    "subtitles.goldenSection": "Search for the best ratio",
+    "subtitles.goldenSectionDetail": "Slower, for subtitles of an unusual frame rate",
+    "subtitles.minScore": "Lowest alignment score",
+    "subtitles.maxQualityOffset": "Largest offset accepted, in seconds",
+    "subtitles.maxScaleDeviation": "Largest scale deviation",
+    "subtitles.translatorFooter": "Fallbacks are tried in order when the translator fails or does not translate between the languages.",
+    "subtitles.translator": "Translator",
+    "subtitles.translatorFirst": "The first plugin translator",
+    "subtitles.fallbackOf": "Fallback {position}",
+    "subtitles.addFallback": "Add a fallback",
+    "subtitles.choose": "Choose…",
+    "subtitles.output": "Translations",
+    "subtitles.defaultScore": "Score",
+    "subtitles.defaultScoreDetail": "Recorded with translations, as a percentage of the highest score",
+    "subtitles.credit": "Credit the translator",
+    "subtitles.creditDetail": "Add a first cue naming the translator",
+    "subtitles.stripFormatting": "Strip formatting",
+    "subtitles.stripFormattingDetail": "Translate plain text and drop the styles of ASS files",
+    "subtitles.preserveLineBreaks": "Keep line breaks",
+    "subtitles.fixOverlaps": "Fix overlapping cues",
+    "subtitles.models": "AI models",
+    "subtitles.modelsFooter": "Each prompt can use the placeholders shown above it.",
+    "subtitles.contextBefore": "Cues of context before",
+    "subtitles.contextAfter": "Cues of context after",
+    "subtitles.translatedContext": "Context with translations",
+    "subtitles.translatedContextDetail": "Give the context as JSON, with the translations of the cues before",
+    "subtitles.batch": "Translate in batches",
+    "subtitles.batchDetail": "Send many cues at once and read the answer as JSON",
+    "subtitles.maxBatchSize": "Cues per batch",
+    "subtitles.maxBatchSizeDetail": "0 for every cue",
+    "subtitles.languageCodes": "Name languages by code",
+    "subtitles.prompt": "Instructions",
+    "subtitles.userPrompt": "Message of each cue",
+    "subtitles.proofreadPrompt": "Proofreading instructions",
+    "subtitles.proofreadUserPrompt": "Proofreading message",
+    "subtitles.retries": "Retries",
+    "subtitles.maxRetries": "Attempts",
+    "subtitles.retryDelay": "First delay, in seconds",
+    "subtitles.retryMultiplier": "Delay multiplier",
+    "subtitles.requestTimeout": "Request timeout, in seconds",
+    "subtitles.validation": "Validation",
+    "subtitles.validationFooter": "Subtitles outside these bounds look broken and are not translated.",
+    "subtitles.validationEnabled": "Validate subtitles",
+    "subtitles.maxFileSize": "Largest file, in KB",
+    "subtitles.maxCueLength": "Longest cue, in characters",
+    "subtitles.minCueLength": "Shortest cue, in characters",
+    "subtitles.minDuration": "Shortest cue, in milliseconds",
+    "subtitles.maxDuration": "Longest cue, in seconds",
+    "subtitles.automation": "Automatic translation",
+    "subtitles.automationFooter": "Movies and episodes still lacking subtitles their profile wants get them translated from a subtitle they have in a source language.",
+    "subtitles.automationEnabled": "Translate automatically",
+    "subtitles.automationInterval": "Every, in hours",
+    "subtitles.sourceLanguage": "Source language",
+    "subtitles.addSourceLanguage": "Add a source language",
+    "subtitles.maxPerRun": "Translations per run",
+    "subtitles.movieAge": "Wait for movies, in hours",
+    "subtitles.episodeAge": "Wait for episodes, in hours"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1993,6 +2385,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.transcoding": "转码",
     "settings.storage": "存储",
     "settings.acquisition": "获取",
+    "settings.subtitles": "字幕",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -2552,6 +2945,201 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "rules.remotePath": "远程路径",
     "rules.remotePathDetail": "客户端报告的文件夹",
     "rules.localPath": "本地路径",
-    "rules.localPathDetail": "服务器看到的位置；须为绝对路径"
+    "rules.localPathDetail": "服务器看到的位置；须为绝对路径",
+    "subtitles.message": "为电影和剧集查找缺少的字幕，并翻译没有提供商提供的字幕。",
+    "subtitles.providers": "提供商",
+    "subtitles.providersFooter": "字幕提供商插件添加提供商，各自在其插件中设置。",
+    "subtitles.movies": "电影",
+    "subtitles.episodes": "剧集",
+    "subtitles.throttled": "暂停至{when}：{reason}",
+    "subtitles.pluginFailed": "{plugin} 无法列出其项目。",
+    "subtitles.noProviders": "没有字幕提供商。安装字幕提供商插件以添加。",
+    "subtitles.translators": "翻译器",
+    "subtitles.translatorsFooter": "字幕翻译插件添加翻译器；已登录的 AI 提供商的模型也可翻译。",
+    "subtitles.noTranslators": "没有翻译插件。",
+    "subtitles.profiles": "配置",
+    "subtitles.profilesFooter": "配置列出所需字幕的语言。",
+    "subtitles.addProfile": "添加配置",
+    "subtitles.libraries": "媒体库",
+    "subtitles.librariesFooter": "媒体库中的电影和剧集需要其配置的字幕；分配配置后会搜索它们缺少的字幕。",
+    "subtitles.noProfile": "无",
+    "subtitles.noLibraries": "没有媒体库。",
+    "subtitles.settings": "设置",
+    "subtitles.searching": "搜索与保存",
+    "subtitles.searchingDetail": "分数、搜索、升级、字幕保存位置及应用的修正",
+    "subtitles.sync": "同步",
+    "subtitles.syncDetail": "将下载的字幕与音频对齐",
+    "subtitles.translation": "翻译",
+    "subtitles.translationDetail": "翻译器、提示词、校验与自动翻译",
+    "subtitles.forced": "强制",
+    "subtitles.hiShort": "听障",
+    "subtitles.noHiShort": "非听障",
+    "subtitles.profile": "字幕配置",
+    "subtitles.profileGone": "该配置已不存在。",
+    "subtitles.newProfile": "新字幕配置",
+    "subtitles.languages": "语言",
+    "subtitles.languagesFooter": "除非音频条件另有规定，每种语言都需要。",
+    "subtitles.language": "语言",
+    "subtitles.hearingImpaired": "听障字幕",
+    "subtitles.hiAllowed": "接受听障字幕",
+    "subtitles.hiRequired": "仅听障字幕",
+    "subtitles.hiExcluded": "不要听障字幕",
+    "subtitles.forcedOnly": "仅强制字幕",
+    "subtitles.audioExclude": "音频有该语言时不需要",
+    "subtitles.audioOnlyInclude": "仅在音频有该语言时需要",
+    "subtitles.cutoff": "达到后停止",
+    "subtitles.cutoffDetail": "找到这些字幕后，不再搜索其余字幕",
+    "subtitles.cutoffNone": "所有语言",
+    "subtitles.cutoffAny": "任一语言",
+    "subtitles.originalFormat": "保留原始格式",
+    "subtitles.originalFormatDetail": "保留提供商给出的格式，而不转换为 SubRip",
+    "subtitles.tag": "标签",
+    "subtitles.tagDetail": "在允许标签分配配置时，带有该标签的电影和剧集使用此配置",
+    "subtitles.releaseNames": "发布名称",
+    "subtitles.releaseNamesFooter": "每行一个词。",
+    "subtitles.mustContain": "必须包含其一",
+    "subtitles.mustNotContain": "不得包含",
+    "subtitles.remove": "删除配置",
+    "subtitles.removeTitle": "删除 {name}？",
+    "subtitles.removeMessage": "媒体库、电影和剧集将不再使用它。",
+    "subtitles.saved": "已保存。",
+    "subtitles.languageUnset": "未知",
+    "subtitles.scores": "最低分数",
+    "subtitles.scoresFooter": "字幕可得最高分的百分比；低于它的不会自动下载。",
+    "subtitles.minimumScore": "剧集",
+    "subtitles.minimumScoreMovie": "电影",
+    "subtitles.searches": "搜索",
+    "subtitles.wantedInterval": "搜索剧集间隔",
+    "subtitles.wantedIntervalMovie": "搜索电影间隔",
+    "subtitles.hoursNever": "小时；0 表示从不",
+    "subtitles.adaptive": "自适应搜索",
+    "subtitles.adaptiveDetail": "对一直找不到的字幕降低搜索频率",
+    "subtitles.adaptiveDelay": "降低频率前的天数",
+    "subtitles.adaptiveDelta": "之后每隔几天搜索一次",
+    "subtitles.sceneName": "使用发布名称",
+    "subtitles.sceneNameDetail": "按文件来源的发布名称向提供商描述视频",
+    "subtitles.skipHashing": "跳过哈希计算",
+    "subtitles.skipHashingDetail": "不读取视频来计算部分提供商用于匹配的哈希",
+    "subtitles.embedded": "内嵌字幕",
+    "subtitles.useEmbedded": "计入内嵌字幕",
+    "subtitles.useEmbeddedDetail": "视频自带的字幕流可满足其配置",
+    "subtitles.ignorePgs": "忽略 PGS",
+    "subtitles.ignoreVobsub": "忽略 VobSub",
+    "subtitles.ignoreAss": "忽略 ASS",
+    "subtitles.defaultAudio": "无语言的音频",
+    "subtitles.defaultAudioDetail": "未标明语言的音频流所用的语言",
+    "subtitles.defaultEmbedded": "无语言的字幕",
+    "subtitles.upgrades": "升级",
+    "subtitles.upgrade": "升级字幕",
+    "subtitles.upgradeDetail": "为最近下载但未达最高分的字幕再次搜索",
+    "subtitles.upgradeInterval": "间隔（小时）",
+    "subtitles.upgradeDays": "最近几天内的下载",
+    "subtitles.upgradeManual": "包括手动下载的",
+    "subtitles.saving": "保存",
+    "subtitles.folder": "保存位置",
+    "subtitles.folderVideo": "视频所在文件夹",
+    "subtitles.folderRelative": "子文件夹",
+    "subtitles.folderMetadata": "元数据文件夹",
+    "subtitles.customFolder": "子文件夹名称",
+    "subtitles.hiExtension": "听障字幕后缀",
+    "subtitles.hiExtensionDetail": "添加到听障字幕文件名中",
+    "subtitles.singleLanguage": "省略语言",
+    "subtitles.singleLanguageDetail": "仅以视频命名字幕；只能保留一种语言",
+    "subtitles.utf": "保存为 UTF-8",
+    "subtitles.mods": "修正",
+    "subtitles.modsFooter": "应用于每个下载的字幕。",
+    "subtitles.modOcr": "修正 OCR 错误",
+    "subtitles.modRemoveHi": "移除听障描述",
+    "subtitles.modCommon": "常规修正",
+    "subtitles.modRemoveTags": "移除样式",
+    "subtitles.modUppercase": "修正全大写文本",
+    "subtitles.modRtl": "反转从右到左文字的标点",
+    "subtitles.modEmoji": "移除表情符号",
+    "subtitles.equivalences": "等同语言",
+    "subtitles.equivalencesFooter": "左侧语言的字幕视为右侧语言的字幕。",
+    "subtitles.noEquivalences": "无。",
+    "subtitles.kind": "类型",
+    "subtitles.kindNormal": "普通",
+    "subtitles.tags": "标签",
+    "subtitles.tagsFooter": "配置的标签会将其分配给带有相同标签的电影和剧集。",
+    "subtitles.movieTags": "标签分配电影的配置",
+    "subtitles.seriesTags": "标签分配剧集的配置",
+    "subtitles.noProfileTags": "表示无配置的标签",
+    "subtitles.noProfileTagsDetail": "以逗号分隔",
+    "subtitles.syncFooter": "与音频同步仅适用于本地和网络存储。",
+    "subtitles.syncEnabled": "同步下载的字幕",
+    "subtitles.syncThreshold": "仅低于分数的剧集字幕",
+    "subtitles.syncThresholdDetail": "最高分的百分比",
+    "subtitles.syncMovieThreshold": "仅低于分数的电影字幕",
+    "subtitles.threshold": "分数",
+    "subtitles.forceAudio": "始终以音频为参照",
+    "subtitles.forceAudioDetail": "即使有其他字幕可作参照",
+    "subtitles.originalLanguage": "原语言音频",
+    "subtitles.originalLanguageDetail": "以原语言的音频流为参照同步",
+    "subtitles.excludedProviders": "排除的提供商",
+    "subtitles.excludedProvidersDetail": "以逗号分隔，可选：{names}",
+    "subtitles.excludedLanguages": "排除的语言",
+    "subtitles.excludedLanguagesDetail": "以逗号分隔的语言代码",
+    "subtitles.alignment": "对齐",
+    "subtitles.maxOffset": "最大偏移（秒）",
+    "subtitles.fixFramerate": "尝试帧率比例",
+    "subtitles.fixFramerateDetail": "同时尝试常见帧率的比例",
+    "subtitles.goldenSection": "搜索最佳比例",
+    "subtitles.goldenSectionDetail": "较慢，适用于帧率不常见的字幕",
+    "subtitles.minScore": "最低对齐分数",
+    "subtitles.maxQualityOffset": "可接受的最大偏移（秒）",
+    "subtitles.maxScaleDeviation": "最大缩放偏差",
+    "subtitles.translatorFooter": "当翻译器失败或不支持该语言对时，按顺序尝试备用翻译器。",
+    "subtitles.translator": "翻译器",
+    "subtitles.translatorFirst": "第一个插件翻译器",
+    "subtitles.fallbackOf": "备用 {position}",
+    "subtitles.addFallback": "添加备用",
+    "subtitles.choose": "选择…",
+    "subtitles.output": "译文",
+    "subtitles.defaultScore": "分数",
+    "subtitles.defaultScoreDetail": "记录到译文的分数，为最高分的百分比",
+    "subtitles.credit": "署名翻译器",
+    "subtitles.creditDetail": "添加一条注明翻译器的首条字幕",
+    "subtitles.stripFormatting": "去除格式",
+    "subtitles.stripFormattingDetail": "翻译纯文本并去掉 ASS 文件的样式",
+    "subtitles.preserveLineBreaks": "保留换行",
+    "subtitles.fixOverlaps": "修正重叠字幕",
+    "subtitles.models": "AI 模型",
+    "subtitles.modelsFooter": "每个提示词可使用其上方列出的占位符。",
+    "subtitles.contextBefore": "前文字幕条数",
+    "subtitles.contextAfter": "后文字幕条数",
+    "subtitles.translatedContext": "附带译文的上下文",
+    "subtitles.translatedContextDetail": "以 JSON 提供上下文，附带前文的译文",
+    "subtitles.batch": "批量翻译",
+    "subtitles.batchDetail": "一次发送多条字幕并以 JSON 读取结果",
+    "subtitles.maxBatchSize": "每批字幕条数",
+    "subtitles.maxBatchSizeDetail": "0 表示全部",
+    "subtitles.languageCodes": "以代码表示语言",
+    "subtitles.prompt": "指令",
+    "subtitles.userPrompt": "每条字幕的消息",
+    "subtitles.proofreadPrompt": "校对指令",
+    "subtitles.proofreadUserPrompt": "校对消息",
+    "subtitles.retries": "重试",
+    "subtitles.maxRetries": "尝试次数",
+    "subtitles.retryDelay": "首次延迟（秒）",
+    "subtitles.retryMultiplier": "延迟倍数",
+    "subtitles.requestTimeout": "请求超时（秒）",
+    "subtitles.validation": "校验",
+    "subtitles.validationFooter": "超出这些范围的字幕被视为损坏，不予翻译。",
+    "subtitles.validationEnabled": "校验字幕",
+    "subtitles.maxFileSize": "最大文件（KB）",
+    "subtitles.maxCueLength": "最长字幕（字符）",
+    "subtitles.minCueLength": "最短字幕（字符）",
+    "subtitles.minDuration": "最短时长（毫秒）",
+    "subtitles.maxDuration": "最长时长（秒）",
+    "subtitles.automation": "自动翻译",
+    "subtitles.automationFooter": "仍缺少配置所需字幕的电影和剧集，会从其已有的源语言字幕翻译得到。",
+    "subtitles.automationEnabled": "自动翻译",
+    "subtitles.automationInterval": "间隔（小时）",
+    "subtitles.sourceLanguage": "源语言",
+    "subtitles.addSourceLanguage": "添加源语言",
+    "subtitles.maxPerRun": "每次运行的翻译数",
+    "subtitles.movieAge": "电影等待时间（小时）",
+    "subtitles.episodeAge": "剧集等待时间（小时）"
   }
 };
