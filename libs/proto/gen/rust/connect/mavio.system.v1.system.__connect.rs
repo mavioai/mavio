@@ -66,6 +66,14 @@ pub type OwnedUninstallPluginRequestView = ::buffa::view::OwnedView<
 pub type OwnedUninstallPluginResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::UninstallPluginResponseView<'static>,
 >;
+///Shorthand for `OwnedView<SetPluginEnabledRequestView<'static>>`.
+pub type OwnedSetPluginEnabledRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SetPluginEnabledResponseView<'static>>`.
+pub type OwnedSetPluginEnabledResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<GetServerSettingsRequestView<'static>>`.
 pub type OwnedGetServerSettingsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsRequestView<'static>,
@@ -378,6 +386,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SetPluginEnabledResponse>
+for crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SetPluginEnabledResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetServerSettingsResponse>
 for crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsResponseView<'_> {
     fn encode(
@@ -571,6 +613,12 @@ pub const SYSTEM_SERVICE_INSTALL_PLUGIN_SPEC: ::connectrpc::Spec = ::connectrpc:
 /// Static [`Spec`](::connectrpc::Spec) for the `UninstallPlugin` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SYSTEM_SERVICE_UNINSTALL_PLUGIN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.SystemService/UninstallPlugin",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `SetPluginEnabled` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYSTEM_SERVICE_SET_PLUGIN_ENABLED_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.SystemService/SetPluginEnabled",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -838,6 +886,31 @@ pub trait SystemService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::UninstallPluginResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SetPluginEnabled stops a plugin, keeping it installed with its
+    /// configuration, or starts it again; the server remembers it across
+    /// restarts and upgrades. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn set_plugin_enabled<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::SetPluginEnabledResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1202,6 +1275,35 @@ impl<S: SystemService> SystemServiceExt for S {
                 },
             )
             .with_spec(SYSTEM_SERVICE_UNINSTALL_PLUGIN_SPEC)
+            .route_view(
+                SYSTEM_SERVICE_SERVICE_NAME,
+                "SetPluginEnabled",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.set_plugin_enabled(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::SetPluginEnabledResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYSTEM_SERVICE_SET_PLUGIN_ENABLED_SPEC)
             .route_view_idempotent(
                 SYSTEM_SERVICE_SERVICE_NAME,
                 "GetServerSettings",
@@ -1420,6 +1522,12 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         .with_spec(SYSTEM_SERVICE_UNINSTALL_PLUGIN_SPEC),
                 )
             }
+            "SetPluginEnabled" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SYSTEM_SERVICE_SET_PLUGIN_ENABLED_SPEC),
+                )
+            }
             "GetServerSettings" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1632,6 +1740,28 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::UninstallPluginResponse,
+                        >(format)
+                })
+            }
+            "SetPluginEnabled" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+                    >::from_parts(&req, &body);
+                    svc.set_plugin_enabled(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::SetPluginEnabledResponse,
                         >(format)
                 })
             }
@@ -2205,6 +2335,51 @@ where
                 &self.transport,
                 &self.config,
                 SYSTEM_SERVICE_UNINSTALL_PLUGIN_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SetPluginEnabled RPC. Sends a request to /mavio.system.v1.SystemService/SetPluginEnabled.
+    pub async fn set_plugin_enabled(
+        &self,
+        request: crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.set_plugin_enabled_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SetPluginEnabled RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn set_plugin_enabled_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::SetPluginEnabledRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::SetPluginEnabledResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYSTEM_SERVICE_SET_PLUGIN_ENABLED_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

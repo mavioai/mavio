@@ -128,6 +128,14 @@ pub use self::__buffa::view::UninstallPluginResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::UninstallPluginResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SetPluginEnabledRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginEnabledRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginEnabledResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginEnabledResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::TranscodingSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::TranscodingSettingsOwnedView;

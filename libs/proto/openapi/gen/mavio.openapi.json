@@ -18064,7 +18064,8 @@
           "PLUGIN_STATE_UNSPECIFIED",
           "PLUGIN_STATE_READY",
           "PLUGIN_STATE_UNCONFIGURED",
-          "PLUGIN_STATE_FAILED"
+          "PLUGIN_STATE_FAILED",
+          "PLUGIN_STATE_DISABLED"
         ],
         "description": "PluginState is whether a plugin is in use."
       },
@@ -18395,6 +18396,39 @@
           }
         },
         "title": "SetPluginConfigResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginEnabledRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled"
+          }
+        },
+        "title": "SetPluginEnabledRequest",
+        "required": [
+          "pluginId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "plugin": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Plugin"
+              }
+            ],
+            "title": "plugin"
+          }
+        },
+        "title": "SetPluginEnabledResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.Severity": {
@@ -20473,14 +20507,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListNextUp": {
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfiles": {
       "post": {
         "tags": [
-          "ItemService"
+          "SubtitleService"
         ],
-        "summary": "ListNextUp",
-        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
-        "operationId": "mavio.library.v1.ItemService.ListNextUp",
+        "summary": "ListSubtitleProfiles",
+        "description": "ListSubtitleProfiles lists the subtitle profiles by name.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20505,7 +20539,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesRequest"
               }
             }
           },
@@ -20527,7 +20561,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesResponse"
                 }
               }
             }
@@ -21955,13 +21989,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "CreateRemotePathMapping",
+        "operationId": "mavio.acquisition.v1.ProfileService.CreateRemotePathMapping",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21986,7 +22020,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingRequest"
               }
             }
           },
@@ -22008,7 +22042,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingResponse"
                 }
               }
             }
@@ -22631,13 +22665,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "ProfileService"
+          "CollectionService"
         ],
-        "summary": "ListRemotePathMappings",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListRemotePathMappings",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22662,7 +22696,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -22684,7 +22718,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -24855,14 +24889,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfiles": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "CollectionService"
         ],
-        "summary": "ListSubtitleProfiles",
-        "description": "ListSubtitleProfiles lists the subtitle profiles by name.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24887,7 +24920,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -24909,7 +24942,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -28078,14 +28111,13 @@
         }
       }
     },
-    "/mavio.storage.v1.StorageService/ContinueRemote": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "StorageService"
+          "CollectionService"
         ],
-        "summary": "ContinueRemote",
-        "description": "ContinueRemote answers the question of a remote's configuration.",
-        "operationId": "mavio.storage.v1.StorageService.ContinueRemote",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28110,7 +28142,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.storage.v1.ContinueRemoteRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -28132,7 +28164,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.storage.v1.ContinueRemoteResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -28202,13 +28234,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/CreateRemotePathMapping": {
+    "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": {
       "post": {
         "tags": [
           "ProfileService"
         ],
-        "summary": "CreateRemotePathMapping",
-        "operationId": "mavio.acquisition.v1.ProfileService.CreateRemotePathMapping",
+        "summary": "ListRemotePathMappings",
+        "operationId": "mavio.acquisition.v1.ProfileService.ListRemotePathMappings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28233,7 +28265,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsRequest"
               }
             }
           },
@@ -28255,7 +28287,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateRemotePathMappingResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsResponse"
                 }
               }
             }
@@ -28693,13 +28725,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.library.v1.ItemService/ListNextUp": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ItemService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "ListNextUp",
+        "description": "ListNextUp lists the next episode to watch of each series the caller\n has played, the series played most recently first. Episodes being\n watched are left to continue watching: ListItems with resumable set,\n sorted by last played.",
+        "operationId": "mavio.library.v1.ItemService.ListNextUp",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28724,7 +28757,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListNextUpRequest"
               }
             }
           },
@@ -28746,7 +28779,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListNextUpResponse"
                 }
               }
             }
@@ -31777,13 +31810,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.storage.v1.StorageService/ContinueRemote": {
       "post": {
         "tags": [
-          "CollectionService"
+          "StorageService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "ContinueRemote",
+        "description": "ContinueRemote answers the question of a remote's configuration.",
+        "operationId": "mavio.storage.v1.StorageService.ContinueRemote",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31808,7 +31842,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.storage.v1.ContinueRemoteRequest"
               }
             }
           },
@@ -31830,7 +31864,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.storage.v1.ContinueRemoteResponse"
                 }
               }
             }
@@ -33996,6 +34030,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.SetPluginConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.SystemService/SetPluginEnabled": {
+      "post": {
+        "tags": [
+          "SystemService"
+        ],
+        "summary": "SetPluginEnabled",
+        "description": "SetPluginEnabled stops a plugin, keeping it installed with its\n configuration, or starts it again; the server remembers it across\n restarts and upgrades. Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.SetPluginEnabled",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.SetPluginEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.SetPluginEnabledResponse"
                 }
               }
             }

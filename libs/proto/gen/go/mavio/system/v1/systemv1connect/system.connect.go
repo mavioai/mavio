@@ -56,6 +56,9 @@ const (
 	// SystemServiceUninstallPluginProcedure is the fully-qualified name of the SystemService's
 	// UninstallPlugin RPC.
 	SystemServiceUninstallPluginProcedure = "/mavio.system.v1.SystemService/UninstallPlugin"
+	// SystemServiceSetPluginEnabledProcedure is the fully-qualified name of the SystemService's
+	// SetPluginEnabled RPC.
+	SystemServiceSetPluginEnabledProcedure = "/mavio.system.v1.SystemService/SetPluginEnabled"
 	// SystemServiceGetServerSettingsProcedure is the fully-qualified name of the SystemService's
 	// GetServerSettings RPC.
 	SystemServiceGetServerSettingsProcedure = "/mavio.system.v1.SystemService/GetServerSettings"
@@ -94,6 +97,10 @@ type SystemServiceClient interface {
 	// UninstallPlugin stops a plugin and removes its folder and
 	// configuration. Administrators only.
 	UninstallPlugin(context.Context, *v1.UninstallPluginRequest) (*v1.UninstallPluginResponse, error)
+	// SetPluginEnabled stops a plugin, keeping it installed with its
+	// configuration, or starts it again; the server remembers it across
+	// restarts and upgrades. Administrators only.
+	SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error)
 	// GetServerSettings returns the settings administrators change while
 	// the server runs. Administrators only.
 	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
@@ -173,6 +180,12 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(systemServiceMethods.ByName("UninstallPlugin")),
 			connect.WithClientOptions(opts...),
 		),
+		setPluginEnabled: connect.NewClient[v1.SetPluginEnabledRequest, v1.SetPluginEnabledResponse](
+			httpClient,
+			baseURL+SystemServiceSetPluginEnabledProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("SetPluginEnabled")),
+			connect.WithClientOptions(opts...),
+		),
 		getServerSettings: connect.NewClient[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse](
 			httpClient,
 			baseURL+SystemServiceGetServerSettingsProcedure,
@@ -213,6 +226,7 @@ type systemServiceClient struct {
 	listCatalogPlugins   *connect.Client[v1.ListCatalogPluginsRequest, v1.ListCatalogPluginsResponse]
 	installPlugin        *connect.Client[v1.InstallPluginRequest, v1.InstallPluginResponse]
 	uninstallPlugin      *connect.Client[v1.UninstallPluginRequest, v1.UninstallPluginResponse]
+	setPluginEnabled     *connect.Client[v1.SetPluginEnabledRequest, v1.SetPluginEnabledResponse]
 	getServerSettings    *connect.Client[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse]
 	updateServerSettings *connect.Client[v1.UpdateServerSettingsRequest, v1.UpdateServerSettingsResponse]
 	listDirectory        *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
@@ -291,6 +305,15 @@ func (c *systemServiceClient) UninstallPlugin(ctx context.Context, req *v1.Unins
 	return nil, err
 }
 
+// SetPluginEnabled calls mavio.system.v1.SystemService.SetPluginEnabled.
+func (c *systemServiceClient) SetPluginEnabled(ctx context.Context, req *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error) {
+	response, err := c.setPluginEnabled.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // GetServerSettings calls mavio.system.v1.SystemService.GetServerSettings.
 func (c *systemServiceClient) GetServerSettings(ctx context.Context, req *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error) {
 	response, err := c.getServerSettings.CallUnary(ctx, connect.NewRequest(req))
@@ -352,6 +375,10 @@ type SystemServiceHandler interface {
 	// UninstallPlugin stops a plugin and removes its folder and
 	// configuration. Administrators only.
 	UninstallPlugin(context.Context, *v1.UninstallPluginRequest) (*v1.UninstallPluginResponse, error)
+	// SetPluginEnabled stops a plugin, keeping it installed with its
+	// configuration, or starts it again; the server remembers it across
+	// restarts and upgrades. Administrators only.
+	SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error)
 	// GetServerSettings returns the settings administrators change while
 	// the server runs. Administrators only.
 	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
@@ -427,6 +454,12 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(systemServiceMethods.ByName("UninstallPlugin")),
 		connect.WithHandlerOptions(opts...),
 	)
+	systemServiceSetPluginEnabledHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceSetPluginEnabledProcedure,
+		svc.SetPluginEnabled,
+		connect.WithSchema(systemServiceMethods.ByName("SetPluginEnabled")),
+		connect.WithHandlerOptions(opts...),
+	)
 	systemServiceGetServerSettingsHandler := connect.NewUnaryHandlerSimple(
 		SystemServiceGetServerSettingsProcedure,
 		svc.GetServerSettings,
@@ -472,6 +505,8 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 			systemServiceInstallPluginHandler.ServeHTTP(w, r)
 		case SystemServiceUninstallPluginProcedure:
 			systemServiceUninstallPluginHandler.ServeHTTP(w, r)
+		case SystemServiceSetPluginEnabledProcedure:
+			systemServiceSetPluginEnabledHandler.ServeHTTP(w, r)
 		case SystemServiceGetServerSettingsProcedure:
 			systemServiceGetServerSettingsHandler.ServeHTTP(w, r)
 		case SystemServiceUpdateServerSettingsProcedure:
@@ -519,6 +554,10 @@ func (UnimplementedSystemServiceHandler) InstallPlugin(context.Context, *v1.Inst
 
 func (UnimplementedSystemServiceHandler) UninstallPlugin(context.Context, *v1.UninstallPluginRequest) (*v1.UninstallPluginResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.UninstallPlugin is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) SetPluginEnabled(context.Context, *v1.SetPluginEnabledRequest) (*v1.SetPluginEnabledResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.SetPluginEnabled is not implemented"))
 }
 
 func (UnimplementedSystemServiceHandler) GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error) {

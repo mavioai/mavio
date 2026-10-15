@@ -44,6 +44,12 @@ service SystemService {
   // UninstallPlugin stops a plugin and removes its folder and
   // configuration. Administrators only.
   rpc UninstallPlugin(UninstallPluginRequest) returns (UninstallPluginResponse);
+
+  // SetPluginEnabled stops a plugin, keeping it installed with its
+  // configuration, or starts it again; the server remembers it across
+  // restarts and upgrades. Administrators only.
+  rpc SetPluginEnabled(SetPluginEnabledRequest) returns (SetPluginEnabledResponse);
+
   // GetServerSettings returns the settings administrators change while
   // the server runs. Administrators only.
   rpc GetServerSettings(GetServerSettingsRequest) returns (GetServerSettingsResponse) {
@@ -103,6 +109,8 @@ enum PluginState {
   // The plugin could not be started or rejected its stored configuration;
   // see Plugin.error.
   PLUGIN_STATE_FAILED = 3;
+  // An administrator disabled the plugin: it is installed but not started.
+  PLUGIN_STATE_DISABLED = 4;
 }
 
 // Plugin is a plugin found in the server's plugin folder.
@@ -186,6 +194,15 @@ message UninstallPluginRequest {
 }
 
 message UninstallPluginResponse {}
+
+message SetPluginEnabledRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  bool enabled = 2;
+}
+
+message SetPluginEnabledResponse {
+  Plugin plugin = 1;
+}
 
 enum HardwareAcceleration {
   HARDWARE_ACCELERATION_UNSPECIFIED = 0;
