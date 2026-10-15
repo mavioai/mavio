@@ -68,7 +68,7 @@ export function UserButton({ compact = false, placement = "above" }: { compact?:
   useEffect(close, [pathname, close]);
   if (!account.shown) return null;
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} data-focus-scope className="relative">
       <button
         type="button"
         aria-haspopup="menu"
