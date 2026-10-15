@@ -148,5 +148,6 @@ pnpm nx show projects                              # 列出项目（名称 = 目
 ## 提交与 PR
 - 使用 Conventional Commits，scope 为 Nx 项目名：`feat(naming): parse absolute episode numbers`、`build(nx): …`、`docs: …`。
 - 每个提交保持单一目的；提交前确保 `pnpm nx affected -t build test lint tidy-check` 通过。
+- 开发过程中不运行快照测试（`snapshot`、`snapshot-record`），除非另有要求：推送之前，为 UI 有变动的每个客户端录制参考图、比对，并在单独的提交中提交它们（[docs/clients.zh-CN.md](docs/clients.zh-CN.md) §6.8）。
 - 架构、依赖方向、技术选型的变更必须同步更新相关文档和本文件（中英文两个版本）。
 - 修改 `libs/core` 中的领域模型时，必须在同一个提交中更新 [docs/domain.zh-CN.md](docs/domain.zh-CN.md)（中英文两个版本）。

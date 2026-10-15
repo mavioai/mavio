@@ -249,7 +249,7 @@ flowchart LR
   * Web UI 的测试（`apps/web/snapshots`）在 `http://mavio.test` 向浏览器提供构建好的 UI、由固定数据生成的服务端应答以及生成的图片，固定时钟，Inter 字体随 UI 一同发布，因此不依赖网络与本机字体。浏览器运行在 Playwright 的容器镜像中，在每台机器上都相同，测试连接到它；参考图位于 `apps/web/snapshots/references`。
   * Apple 的测试（`libs/apple/Tests/MavioUITests`）在 iOS 模拟器上以英文用 `MavioUI` 绘制各页面，在 Mac 上跳过；参考图位于 `libs/apple/snapshots`。
   * Android 的测试是 `libs/android/ui` 的单元测试，在 JVM 上由 Robolectric 的原生图形绘制，无需模拟器；参考图位于 `libs/android/ui/snapshots`。
-  * 每个客户端的 `snapshot` 目标负责比对，`snapshot-record` 录制参考图，参考图随改变它的改动一同提交；在 Android 上由 `test` 比对。`design:gallery` 把参考图汇集到 `dist/snapshots/gallery`，即把各平台并排展示的页面。
+  * 每个客户端的 `snapshot` 目标负责比对，`snapshot-record` 录制参考图。UI 变动期间参考图保持不变：除非另有要求，在推送之前统一录制、比对并提交一次；在 Android 上由 `test` 比对。`design:gallery` 把参考图汇集到 `dist/snapshots/gallery`，即把各平台并排展示的页面。
 * **功能对齐**：`libs/design/parity.md` 列出每个功能在各客户端的状态（已上线、计划中、不适用），使客户端缺少某功能只能出于决定；为某个客户端增加功能的 PR 同时更新它。
 
 ---

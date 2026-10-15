@@ -148,5 +148,6 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
 ## Commits and PRs
 - Use Conventional Commits with the Nx project name as scope: `feat(naming): parse absolute episode numbers`, `build(nx): …`, `docs: …`.
 - Keep each commit to a single purpose; make sure `pnpm nx affected -t build test lint tidy-check` passes before committing.
+- Snapshot tests (`snapshot`, `snapshot-record`) are not run while developing, unless asked: before pushing, record the references of every client whose UI changed, compare, and commit them in a commit of their own ([docs/clients.md](docs/clients.md) §6.8).
 - Changes to the architecture, dependency direction or technology choices must update the relevant documents and this file (both language versions).
 - Changes to the domain model in `libs/core` must update [docs/domain.md](docs/domain.md) (both language versions) in the same commit.
