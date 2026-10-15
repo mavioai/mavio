@@ -1,10 +1,13 @@
-// Server administration (docs/clients.md §6.3.4, §6.3.5): a server's
+// Server administration (docs/clients.md §6.3.4–§6.3.7): a server's
 // libraries, with the folders of its file system to choose from, the
-// languages, countries and ratings it knows, and its users and
-// invitations.
+// languages, countries and ratings it knows, its users and invitations,
+// what it runs and plays, what happened on it, and its tasks and jobs.
 import { LibraryService, type LibrarySpec } from "@mavio/proto/mavio/library/v1/library_pb";
+import { SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
+import { ActivityService, type Severity } from "@mavio/proto/mavio/system/v1/activity_pb";
 import { LocalizationService } from "@mavio/proto/mavio/system/v1/localization_pb";
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
+import { type JobState, TaskService } from "@mavio/proto/mavio/system/v1/task_pb";
 import {
   type CreateInvitationRequestSchema,
   type CreateUserRequestSchema,
@@ -144,4 +147,70 @@ export function useInvitationActions(server: ServerEntry) {
 /** The link of an invitation: the web UI of the server, with the token in the fragment so that it is never sent. */
 export function invitationLink(server: ServerEntry, token: string): string {
   return `${server.url.replace(/\/$/, "")}/invite#${encodeURIComponent(token)}`;
+}
+
+/** What the server runs on and since when, and whether it serves. */
+export function useSystemInfo(server: ServerEntry) {
+  const servers = useServersStore();
+  const client = () => servers.client(SystemService, server);
+  const info = useQuery({ queryKey: serverKey(server.id, "system", "info"), queryFn: () => client().getSystemInfo({}) });
+  const health = useQuery({
+    queryKey: serverKey(server.id, "system", "health"),
+    queryFn: () => client().getHealth({}),
+    refetchInterval: 30_000,
+  });
+  return { info, health };
+}
+
+/** Every user's sessions, those playing first, refreshed every few seconds. */
+export function useAllSessions(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "sessions", "all"),
+    queryFn: async () => (await servers.client(SessionService, server).listSessions({ allUsers: true })).sessions,
+    refetchInterval: 5_000,
+  });
+}
+
+/** The server's latest activities, newest first, those less severe than minSeverity left out. */
+export function useActivities(server: ServerEntry, minSeverity: Severity, limit: number) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "activities", minSeverity, limit),
+    queryFn: () => servers.client(ActivityService, server).listActivities({ minSeverity, limit }),
+    refetchInterval: 30_000,
+  });
+}
+
+/** The server's recurring tasks, refreshed often while one runs. */
+export function useTasks(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "tasks"),
+    queryFn: async () => (await servers.client(TaskService, server).listTasks({})).tasks,
+    refetchInterval: (q) => (q.state.data?.some((t) => t.running) ? 2_000 : 15_000),
+  });
+}
+
+/** Runs a task now; enqueued is false when a run was already queued. */
+export function useRunTask(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => servers.client(TaskService, server).runTask({ id }),
+    onSettled: async () => {
+      await qc.invalidateQueries({ queryKey: serverKey(server.id, "tasks") });
+      await qc.invalidateQueries({ queryKey: serverKey(server.id, "jobs") });
+    },
+  });
+}
+
+/** The jobs of the server's queue in the states given, or all, most recently created first. */
+export function useJobs(server: ServerEntry, states: JobState[], limit: number) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "jobs", states, limit),
+    queryFn: () => servers.client(TaskService, server).listJobs({ states, limit }),
+    refetchInterval: 5_000,
+  });
 }

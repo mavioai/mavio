@@ -291,6 +291,8 @@ export type MessageKey =
   | 'settings.pluginsMessage'
   | 'settings.libraries'
   | 'settings.users'
+  | 'settings.overview'
+  | 'settings.tasks'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -529,7 +531,57 @@ export type MessageKey =
   | 'users.revoke'
   | 'users.conversionLinks'
   | 'users.ratingAll'
-  | 'users.ratingAdult';
+  | 'users.ratingAdult'
+  | 'overview.server'
+  | 'overview.status'
+  | 'overview.serving'
+  | 'overview.notServing'
+  | 'overview.version'
+  | 'overview.platform'
+  | 'overview.database'
+  | 'overview.ffmpeg'
+  | 'overview.ffmpegMissing'
+  | 'overview.uptime'
+  | 'overview.nowPlaying'
+  | 'overview.nothingPlaying'
+  | 'overview.directPlay'
+  | 'overview.directStream'
+  | 'overview.transcode'
+  | 'overview.activity'
+  | 'overview.activityShown'
+  | 'overview.activityAll'
+  | 'overview.activityWarnings'
+  | 'overview.activityErrors'
+  | 'overview.noActivity'
+  | 'overview.showMore'
+  | 'overview.severityInfo'
+  | 'overview.severityWarning'
+  | 'overview.severityError'
+  | 'tasks.message'
+  | 'tasks.server'
+  | 'tasks.run'
+  | 'tasks.queued'
+  | 'tasks.alreadyQueued'
+  | 'tasks.runningNow'
+  | 'tasks.neverRun'
+  | 'tasks.next'
+  | 'tasks.every'
+  | 'tasks.onDemand'
+  | 'tasks.pending'
+  | 'tasks.running'
+  | 'tasks.succeeded'
+  | 'tasks.failed'
+  | 'tasks.jobs'
+  | 'tasks.jobsShown'
+  | 'tasks.jobsAll'
+  | 'tasks.jobsActive'
+  | 'tasks.jobsFailed'
+  | 'tasks.jobsSucceeded'
+  | 'tasks.jobsFooter'
+  | 'tasks.noJobs'
+  | 'tasks.showMore'
+  | 'tasks.runs'
+  | 'tasks.attempts';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -813,6 +865,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.pluginsMessage": "Plugins bring the server metadata, subtitles, downloads and more.",
     "settings.libraries": "Libraries",
     "settings.users": "Users",
+    "settings.overview": "Overview",
+    "settings.tasks": "Tasks",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -1051,7 +1105,57 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.revoke": "Revoke",
     "users.conversionLinks": "Links for Managed Users",
     "users.ratingAll": "All ages",
-    "users.ratingAdult": "Adult content"
+    "users.ratingAdult": "Adult content",
+    "overview.server": "Server",
+    "overview.status": "Status",
+    "overview.serving": "Running",
+    "overview.notServing": "Not ready",
+    "overview.version": "Version",
+    "overview.platform": "Platform",
+    "overview.database": "Database",
+    "overview.ffmpeg": "FFmpeg",
+    "overview.ffmpegMissing": "Not found",
+    "overview.uptime": "Running for",
+    "overview.nowPlaying": "Now Playing",
+    "overview.nothingPlaying": "Nothing is playing.",
+    "overview.directPlay": "Direct Play",
+    "overview.directStream": "Direct Stream",
+    "overview.transcode": "Transcoding",
+    "overview.activity": "Activity",
+    "overview.activityShown": "Activities shown",
+    "overview.activityAll": "All",
+    "overview.activityWarnings": "Warnings and errors",
+    "overview.activityErrors": "Errors",
+    "overview.noActivity": "Nothing happened yet.",
+    "overview.showMore": "Show More",
+    "overview.severityInfo": "Information",
+    "overview.severityWarning": "Warning",
+    "overview.severityError": "Error",
+    "tasks.message": "What the server does on its own, and the jobs it queued.",
+    "tasks.server": "Server",
+    "tasks.run": "Run",
+    "tasks.queued": "Queued",
+    "tasks.alreadyQueued": "Already queued",
+    "tasks.runningNow": "Running",
+    "tasks.neverRun": "Never ran",
+    "tasks.next": "next {when}",
+    "tasks.every": "every {length}",
+    "tasks.onDemand": "on demand",
+    "tasks.pending": "Waiting",
+    "tasks.running": "Running",
+    "tasks.succeeded": "Succeeded",
+    "tasks.failed": "Failed",
+    "tasks.jobs": "Jobs",
+    "tasks.jobsShown": "Jobs shown",
+    "tasks.jobsAll": "All",
+    "tasks.jobsActive": "Waiting and running",
+    "tasks.jobsFailed": "Failed",
+    "tasks.jobsSucceeded": "Succeeded",
+    "tasks.jobsFooter": "Jobs are scans, refreshes, downloads and other background work, newest first. Finished jobs are cleaned up after a while.",
+    "tasks.noJobs": "No jobs.",
+    "tasks.showMore": "Show More",
+    "tasks.runs": "runs {when}",
+    "tasks.attempts": "attempt {attempts} of {max}"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1333,6 +1437,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.pluginsMessage": "插件为服务器提供元数据、字幕、下载等功能。",
     "settings.libraries": "媒体库",
     "settings.users": "用户",
+    "settings.overview": "概览",
+    "settings.tasks": "任务",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -1571,6 +1677,56 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.revoke": "撤销",
     "users.conversionLinks": "托管用户的链接",
     "users.ratingAll": "所有年龄",
-    "users.ratingAdult": "成人内容"
+    "users.ratingAdult": "成人内容",
+    "overview.server": "服务器",
+    "overview.status": "状态",
+    "overview.serving": "运行中",
+    "overview.notServing": "未就绪",
+    "overview.version": "版本",
+    "overview.platform": "平台",
+    "overview.database": "数据库",
+    "overview.ffmpeg": "FFmpeg",
+    "overview.ffmpegMissing": "未找到",
+    "overview.uptime": "已运行",
+    "overview.nowPlaying": "正在播放",
+    "overview.nothingPlaying": "当前没有播放。",
+    "overview.directPlay": "直接播放",
+    "overview.directStream": "直接串流",
+    "overview.transcode": "转码",
+    "overview.activity": "活动",
+    "overview.activityShown": "显示的活动",
+    "overview.activityAll": "全部",
+    "overview.activityWarnings": "警告与错误",
+    "overview.activityErrors": "错误",
+    "overview.noActivity": "暂无活动。",
+    "overview.showMore": "显示更多",
+    "overview.severityInfo": "信息",
+    "overview.severityWarning": "警告",
+    "overview.severityError": "错误",
+    "tasks.message": "服务器自动执行的工作，以及它排队的作业。",
+    "tasks.server": "服务器",
+    "tasks.run": "运行",
+    "tasks.queued": "已加入队列",
+    "tasks.alreadyQueued": "已在队列中",
+    "tasks.runningNow": "运行中",
+    "tasks.neverRun": "从未运行",
+    "tasks.next": "下次：{when}",
+    "tasks.every": "每{length}",
+    "tasks.onDemand": "按需运行",
+    "tasks.pending": "等待中",
+    "tasks.running": "运行中",
+    "tasks.succeeded": "已成功",
+    "tasks.failed": "失败",
+    "tasks.jobs": "作业",
+    "tasks.jobsShown": "显示的作业",
+    "tasks.jobsAll": "全部",
+    "tasks.jobsActive": "等待与运行中",
+    "tasks.jobsFailed": "失败",
+    "tasks.jobsSucceeded": "已成功",
+    "tasks.jobsFooter": "作业是扫描、刷新、下载等后台工作，最新的在前。已完成的作业会在一段时间后清理。",
+    "tasks.noJobs": "没有作业。",
+    "tasks.showMore": "显示更多",
+    "tasks.runs": "{when}运行",
+    "tasks.attempts": "第 {attempts}/{max} 次尝试"
   }
 };

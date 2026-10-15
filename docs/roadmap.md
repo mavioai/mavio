@@ -651,7 +651,7 @@ flowchart TD
     - [x] Plugins (`apps/web/src/screens/plugins.tsx`, `libs/client-ts/src/plugins.ts`): the installed plugins with their state, enabled and disabled (`SystemService.SetPluginEnabled`), updated and uninstalled; those the catalogs offer, to install; as cards under Available and Installed tabs, filtered by category, each opening a page of its details and versions; and a Catalogs page to add and remove catalogs; under the Server group of the settings, which in mavio.dev mode chooses the server
     - [x] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
-    - [ ] Overview: the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
+    - [x] Overview (`apps/web/src/screens/admin/overview.tsx`): the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
     - [ ] General: the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`), and walking the folders of rclone remotes in the folder picker
@@ -660,7 +660,7 @@ flowchart TD
     - [ ] Acquisition: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
     - [ ] Subtitles: subtitle profiles and the libraries they apply to, the providers and the settings (`SubtitleService`)
     - [ ] AI: providers, API keys, subscription logins and models (`AiService`)
-    - [ ] Tasks: the scheduled tasks, running one, and the jobs (`TaskService`)
+    - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)
     - [ ] Backups and logs (`BackupService`, `ListLogs`)
     - [ ] API keys among the account's security (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev

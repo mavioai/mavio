@@ -64,13 +64,19 @@ export {
 } from "./plugins.ts";
 export {
   invitationLink,
+  useActivities,
+  useAllSessions,
   useDirectory,
   useInvitationActions,
   useInvitations,
+  useJobs,
   useLibraryActions,
   useLocalization,
   useRatings,
+  useRunTask,
   useServerLibraries,
+  useSystemInfo,
+  useTasks,
   useUserActions,
   useUsers,
 } from "./admin.ts";

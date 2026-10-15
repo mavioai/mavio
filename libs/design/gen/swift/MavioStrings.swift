@@ -971,6 +971,12 @@ public enum MavioStrings {
     /// Settings section of a server's users and invitations.
     public static var settingsUsers: String { NSLocalizedString("settings.users", bundle: .module, comment: "") }
 
+    /// Settings section of a server's state, who plays on it and its activity.
+    public static var settingsOverview: String { NSLocalizedString("settings.overview", bundle: .module, comment: "") }
+
+    /// Settings section of a server's recurring tasks and jobs.
+    public static var settingsTasks: String { NSLocalizedString("settings.tasks", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -1733,4 +1739,162 @@ public enum MavioStrings {
 
     /// A rating limit allowing adult content.
     public static var usersRatingAdult: String { NSLocalizedString("users.ratingAdult", bundle: .module, comment: "") }
+
+    /// Group of facts about the server.
+    public static var overviewServer: String { NSLocalizedString("overview.server", bundle: .module, comment: "") }
+
+    /// Whether the server serves requests.
+    public static var overviewStatus: String { NSLocalizedString("overview.status", bundle: .module, comment: "") }
+
+    /// The server serves requests.
+    public static var overviewServing: String { NSLocalizedString("overview.serving", bundle: .module, comment: "") }
+
+    /// The server does not serve requests yet.
+    public static var overviewNotServing: String { NSLocalizedString("overview.notServing", bundle: .module, comment: "") }
+
+    /// The server's version.
+    public static var overviewVersion: String { NSLocalizedString("overview.version", bundle: .module, comment: "") }
+
+    /// The operating system and architecture the server runs on.
+    public static var overviewPlatform: String { NSLocalizedString("overview.platform", bundle: .module, comment: "") }
+
+    /// The database the server uses.
+    public static var overviewDatabase: String { NSLocalizedString("overview.database", bundle: .module, comment: "") }
+
+    /// The version of FFmpeg the server uses.
+    public static var overviewFfmpeg: String { NSLocalizedString("overview.ffmpeg", bundle: .module, comment: "") }
+
+    /// FFmpeg is not available to the server.
+    public static var overviewFfmpegMissing: String { NSLocalizedString("overview.ffmpegMissing", bundle: .module, comment: "") }
+
+    /// How long the server has been running.
+    public static var overviewUptime: String { NSLocalizedString("overview.uptime", bundle: .module, comment: "") }
+
+    /// Group of what devices are playing.
+    public static var overviewNowPlaying: String { NSLocalizedString("overview.nowPlaying", bundle: .module, comment: "") }
+
+    /// Shown when no device plays anything.
+    public static var overviewNothingPlaying: String { NSLocalizedString("overview.nothingPlaying", bundle: .module, comment: "") }
+
+    /// The file is played as it is.
+    public static var overviewDirectPlay: String { NSLocalizedString("overview.directPlay", bundle: .module, comment: "") }
+
+    /// The streams are copied into another container.
+    public static var overviewDirectStream: String { NSLocalizedString("overview.directStream", bundle: .module, comment: "") }
+
+    /// The media is re-encoded.
+    public static var overviewTranscode: String { NSLocalizedString("overview.transcode", bundle: .module, comment: "") }
+
+    /// Group of what happened on the server.
+    public static var overviewActivity: String { NSLocalizedString("overview.activity", bundle: .module, comment: "") }
+
+    /// Label of the filter of activities.
+    public static var overviewActivityShown: String { NSLocalizedString("overview.activityShown", bundle: .module, comment: "") }
+
+    /// Shows every activity.
+    public static var overviewActivityAll: String { NSLocalizedString("overview.activityAll", bundle: .module, comment: "") }
+
+    /// Shows warnings and errors only.
+    public static var overviewActivityWarnings: String { NSLocalizedString("overview.activityWarnings", bundle: .module, comment: "") }
+
+    /// Shows errors only.
+    public static var overviewActivityErrors: String { NSLocalizedString("overview.activityErrors", bundle: .module, comment: "") }
+
+    /// Shown when there are no activities.
+    public static var overviewNoActivity: String { NSLocalizedString("overview.noActivity", bundle: .module, comment: "") }
+
+    /// Loads more activities.
+    public static var overviewShowMore: String { NSLocalizedString("overview.showMore", bundle: .module, comment: "") }
+
+    /// Severity of an ordinary activity.
+    public static var overviewSeverityInfo: String { NSLocalizedString("overview.severityInfo", bundle: .module, comment: "") }
+
+    /// Severity of a warning.
+    public static var overviewSeverityWarning: String { NSLocalizedString("overview.severityWarning", bundle: .module, comment: "") }
+
+    /// Severity of an error.
+    public static var overviewSeverityError: String { NSLocalizedString("overview.severityError", bundle: .module, comment: "") }
+
+    /// Line under the Tasks title.
+    public static var tasksMessage: String { NSLocalizedString("tasks.message", bundle: .module, comment: "") }
+
+    /// Group of the server's own tasks.
+    public static var tasksServer: String { NSLocalizedString("tasks.server", bundle: .module, comment: "") }
+
+    /// Button that runs a task now.
+    public static var tasksRun: String { NSLocalizedString("tasks.run", bundle: .module, comment: "") }
+
+    /// A task's run was queued.
+    public static var tasksQueued: String { NSLocalizedString("tasks.queued", bundle: .module, comment: "") }
+
+    /// A task's run was already queued.
+    public static var tasksAlreadyQueued: String { NSLocalizedString("tasks.alreadyQueued", bundle: .module, comment: "") }
+
+    /// A task is running.
+    public static var tasksRunningNow: String { NSLocalizedString("tasks.runningNow", bundle: .module, comment: "") }
+
+    /// A task that has never run.
+    public static var tasksNeverRun: String { NSLocalizedString("tasks.neverRun", bundle: .module, comment: "") }
+
+    /// When a task runs next, such as 'in 2 hours'.
+    public static func tasksNext(when: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("tasks.next", bundle: .module, comment: ""), when)
+    }
+
+    /// How often a task runs.
+    public static func tasksEvery(length: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("tasks.every", bundle: .module, comment: ""), length)
+    }
+
+    /// A task that runs only when asked.
+    public static var tasksOnDemand: String { NSLocalizedString("tasks.onDemand", bundle: .module, comment: "") }
+
+    /// A job waiting to run.
+    public static var tasksPending: String { NSLocalizedString("tasks.pending", bundle: .module, comment: "") }
+
+    /// A job running.
+    public static var tasksRunning: String { NSLocalizedString("tasks.running", bundle: .module, comment: "") }
+
+    /// A job that succeeded.
+    public static var tasksSucceeded: String { NSLocalizedString("tasks.succeeded", bundle: .module, comment: "") }
+
+    /// A job that failed.
+    public static var tasksFailed: String { NSLocalizedString("tasks.failed", bundle: .module, comment: "") }
+
+    /// Group of the jobs of the server's queue.
+    public static var tasksJobs: String { NSLocalizedString("tasks.jobs", bundle: .module, comment: "") }
+
+    /// Label of the filter of jobs.
+    public static var tasksJobsShown: String { NSLocalizedString("tasks.jobsShown", bundle: .module, comment: "") }
+
+    /// Shows every job.
+    public static var tasksJobsAll: String { NSLocalizedString("tasks.jobsAll", bundle: .module, comment: "") }
+
+    /// Shows jobs waiting or running.
+    public static var tasksJobsActive: String { NSLocalizedString("tasks.jobsActive", bundle: .module, comment: "") }
+
+    /// Shows failed jobs.
+    public static var tasksJobsFailed: String { NSLocalizedString("tasks.jobsFailed", bundle: .module, comment: "") }
+
+    /// Shows jobs that succeeded.
+    public static var tasksJobsSucceeded: String { NSLocalizedString("tasks.jobsSucceeded", bundle: .module, comment: "") }
+
+    /// Footer of the jobs.
+    public static var tasksJobsFooter: String { NSLocalizedString("tasks.jobsFooter", bundle: .module, comment: "") }
+
+    /// Shown when there are no jobs.
+    public static var tasksNoJobs: String { NSLocalizedString("tasks.noJobs", bundle: .module, comment: "") }
+
+    /// Loads more jobs.
+    public static var tasksShowMore: String { NSLocalizedString("tasks.showMore", bundle: .module, comment: "") }
+
+    /// When a waiting job runs, such as 'in 5 minutes'.
+    public static func tasksRuns(when: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("tasks.runs", bundle: .module, comment: ""), when)
+    }
+
+    /// Which attempt a job is on.
+    public static func tasksAttempts(attempts: String, max: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("tasks.attempts", bundle: .module, comment: ""), attempts, max)
+    }
 }

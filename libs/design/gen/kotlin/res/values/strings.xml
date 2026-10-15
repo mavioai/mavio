@@ -604,6 +604,10 @@
     <string name="settings_libraries">Libraries</string>
     <!-- Settings section of a server's users and invitations. -->
     <string name="settings_users">Users</string>
+    <!-- Settings section of a server's state, who plays on it and its activity. -->
+    <string name="settings_overview">Overview</string>
+    <!-- Settings section of a server's recurring tasks and jobs. -->
+    <string name="settings_tasks">Tasks</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -1085,4 +1089,104 @@
     <string name="users_rating_all">All ages</string>
     <!-- A rating limit allowing adult content. -->
     <string name="users_rating_adult">Adult content</string>
+    <!-- Group of facts about the server. -->
+    <string name="overview_server">Server</string>
+    <!-- Whether the server serves requests. -->
+    <string name="overview_status">Status</string>
+    <!-- The server serves requests. -->
+    <string name="overview_serving">Running</string>
+    <!-- The server does not serve requests yet. -->
+    <string name="overview_not_serving">Not ready</string>
+    <!-- The server's version. -->
+    <string name="overview_version">Version</string>
+    <!-- The operating system and architecture the server runs on. -->
+    <string name="overview_platform">Platform</string>
+    <!-- The database the server uses. -->
+    <string name="overview_database">Database</string>
+    <!-- The version of FFmpeg the server uses. -->
+    <string name="overview_ffmpeg">FFmpeg</string>
+    <!-- FFmpeg is not available to the server. -->
+    <string name="overview_ffmpeg_missing">Not found</string>
+    <!-- How long the server has been running. -->
+    <string name="overview_uptime">Running for</string>
+    <!-- Group of what devices are playing. -->
+    <string name="overview_now_playing">Now Playing</string>
+    <!-- Shown when no device plays anything. -->
+    <string name="overview_nothing_playing">Nothing is playing.</string>
+    <!-- The file is played as it is. -->
+    <string name="overview_direct_play">Direct Play</string>
+    <!-- The streams are copied into another container. -->
+    <string name="overview_direct_stream">Direct Stream</string>
+    <!-- The media is re-encoded. -->
+    <string name="overview_transcode">Transcoding</string>
+    <!-- Group of what happened on the server. -->
+    <string name="overview_activity">Activity</string>
+    <!-- Label of the filter of activities. -->
+    <string name="overview_activity_shown">Activities shown</string>
+    <!-- Shows every activity. -->
+    <string name="overview_activity_all">All</string>
+    <!-- Shows warnings and errors only. -->
+    <string name="overview_activity_warnings">Warnings and errors</string>
+    <!-- Shows errors only. -->
+    <string name="overview_activity_errors">Errors</string>
+    <!-- Shown when there are no activities. -->
+    <string name="overview_no_activity">Nothing happened yet.</string>
+    <!-- Loads more activities. -->
+    <string name="overview_show_more">Show More</string>
+    <!-- Severity of an ordinary activity. -->
+    <string name="overview_severity_info">Information</string>
+    <!-- Severity of a warning. -->
+    <string name="overview_severity_warning">Warning</string>
+    <!-- Severity of an error. -->
+    <string name="overview_severity_error">Error</string>
+    <!-- Line under the Tasks title. -->
+    <string name="tasks_message">What the server does on its own, and the jobs it queued.</string>
+    <!-- Group of the server's own tasks. -->
+    <string name="tasks_server">Server</string>
+    <!-- Button that runs a task now. -->
+    <string name="tasks_run">Run</string>
+    <!-- A task's run was queued. -->
+    <string name="tasks_queued">Queued</string>
+    <!-- A task's run was already queued. -->
+    <string name="tasks_already_queued">Already queued</string>
+    <!-- A task is running. -->
+    <string name="tasks_running_now">Running</string>
+    <!-- A task that has never run. -->
+    <string name="tasks_never_run">Never ran</string>
+    <!-- When a task runs next, such as 'in 2 hours'. -->
+    <string name="tasks_next">next %s</string>
+    <!-- How often a task runs. -->
+    <string name="tasks_every">every %s</string>
+    <!-- A task that runs only when asked. -->
+    <string name="tasks_on_demand">on demand</string>
+    <!-- A job waiting to run. -->
+    <string name="tasks_pending">Waiting</string>
+    <!-- A job running. -->
+    <string name="tasks_running">Running</string>
+    <!-- A job that succeeded. -->
+    <string name="tasks_succeeded">Succeeded</string>
+    <!-- A job that failed. -->
+    <string name="tasks_failed">Failed</string>
+    <!-- Group of the jobs of the server's queue. -->
+    <string name="tasks_jobs">Jobs</string>
+    <!-- Label of the filter of jobs. -->
+    <string name="tasks_jobs_shown">Jobs shown</string>
+    <!-- Shows every job. -->
+    <string name="tasks_jobs_all">All</string>
+    <!-- Shows jobs waiting or running. -->
+    <string name="tasks_jobs_active">Waiting and running</string>
+    <!-- Shows failed jobs. -->
+    <string name="tasks_jobs_failed">Failed</string>
+    <!-- Shows jobs that succeeded. -->
+    <string name="tasks_jobs_succeeded">Succeeded</string>
+    <!-- Footer of the jobs. -->
+    <string name="tasks_jobs_footer">Jobs are scans, refreshes, downloads and other background work, newest first. Finished jobs are cleaned up after a while.</string>
+    <!-- Shown when there are no jobs. -->
+    <string name="tasks_no_jobs">No jobs.</string>
+    <!-- Loads more jobs. -->
+    <string name="tasks_show_more">Show More</string>
+    <!-- When a waiting job runs, such as 'in 5 minutes'. -->
+    <string name="tasks_runs">runs %s</string>
+    <!-- Which attempt a job is on. -->
+    <string name="tasks_attempts">attempt %1$s of %2$s</string>
 </resources>

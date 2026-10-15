@@ -1,6 +1,6 @@
 // What the pages of a server's administration share: their header, the
-// link back from a page to its section's list, colored tiles, and the
-// confirmation of what cannot be undone.
+// link back from a page to its section's list, colored tiles, the
+// confirmation of what cannot be undone, and times and their lengths.
 import { Link, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -127,4 +127,36 @@ function named(list: { code: string; name: string }[], of: (code: string) => str
       return { value: x.code, label };
     })
     .sort((a, b) => a.label.localeCompare(b.label, locale));
+}
+
+const relative = new Intl.RelativeTimeFormat([locale], { numeric: "auto" });
+const units: [Intl.RelativeTimeFormatUnit, number][] = [
+  ["day", 86_400_000],
+  ["hour", 3_600_000],
+  ["minute", 60_000],
+];
+
+/** When a time is from now, as "5 minutes ago" or "in 2 hours", in the UI's language. */
+export function fromNow(date: Date, now = Date.now()): string {
+  const ms = date.getTime() - now;
+  for (const [unit, size] of units) {
+    if (Math.abs(ms) >= size) return relative.format(Math.round(ms / size), unit);
+  }
+  return relative.format(Math.round(ms / 1000), "second");
+}
+
+const lengthUnits = Object.fromEntries(
+  (["day", "hour", "minute", "second"] as const).map((unit) => [unit, new Intl.NumberFormat([locale], { style: "unit", unit, unitDisplay: "short" })]),
+);
+
+/** A length of time as its largest whole unit or two, as "2 hr 5 min" or "3 days", in the UI's language. */
+export function lengthOf(ms: number): string {
+  const f = (unit: keyof typeof lengthUnits, n: number) => lengthUnits[unit].format(n);
+  const m = Math.round(ms / 60_000);
+  if (m < 1) return f("second", Math.max(0, Math.round(ms / 1000)));
+  if (m < 60) return f("minute", m);
+  const h = Math.floor(m / 60);
+  if (h < 24) return m % 60 ? `${f("hour", h)} ${f("minute", m % 60)}` : f("hour", h);
+  const d = Math.floor(h / 24);
+  return h % 24 ? `${f("day", d)} ${f("hour", h % 24)}` : f("day", d);
 }

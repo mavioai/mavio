@@ -3,8 +3,8 @@
 // languages, the servers in their order and the account's credentials;
 // and those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
-// libraries and plugins. Wide windows show them beside their own sidebar; phones list
-// them first, as the profile.
+// overview, libraries, users, plugins and tasks. Wide windows show them
+// beside their own sidebar; phones list them first, as the profile.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
@@ -28,11 +28,13 @@ import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from ".
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
+import { OverviewSection } from "./admin/overview.tsx";
+import { TasksSection } from "./admin/tasks.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices" | "libraries" | "users" | "plugins";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "devices" | "libraries" | "users" | "plugins" | "tasks";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -40,16 +42,18 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
   servers: { icon: "server", color: "#8E8E93", title: () => t("auth.servers") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
+  overview: { icon: "server", color: "#8E8E93", title: () => t("settings.overview"), admin: true },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
   libraries: { icon: "folder", color: "#007AFF", title: () => t("settings.libraries"), admin: true },
   users: { icon: "users", color: "#FF9500", title: () => t("settings.users"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
+  tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["devices", "libraries", "users", "plugins"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "devices", "libraries", "users", "plugins", "tasks"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -325,6 +329,10 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return <ServersSection />;
     case "account":
       return <AccountSection />;
+    case "overview":
+      return chosen?.admin && <OverviewSection key={chosen.server.id} server={chosen.server} />;
+    case "tasks":
+      return chosen?.admin && <TasksSection key={chosen.server.id} server={chosen.server} />;
     case "devices":
       return chosen && <DevicesSection key={chosen.server.id} server={chosen.server} />;
     case "libraries":
