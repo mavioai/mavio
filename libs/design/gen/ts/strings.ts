@@ -84,6 +84,27 @@ export type MessageKey =
   | 'item.audioTracks'
   | 'item.subtitleTracks'
   | 'item.file'
+  | 'item.playEpisode'
+  | 'item.resumeEpisode'
+  | 'item.episodeShort'
+  | 'item.fromStart'
+  | 'item.endsAt'
+  | 'item.critics'
+  | 'item.released'
+  | 'item.firstAired'
+  | 'item.aired'
+  | 'item.rated'
+  | 'item.genres'
+  | 'item.country'
+  | 'item.originalTitle'
+  | 'item.status'
+  | 'item.continuing'
+  | 'item.ended'
+  | 'item.runtime'
+  | 'item.video'
+  | 'item.links'
+  | 'item.moreFrom'
+  | 'item.version'
   | 'player.play'
   | 'player.pause'
   | 'player.seekBack'
@@ -124,6 +145,7 @@ export type MessageKey =
   | 'action.back'
   | 'action.scrollBack'
   | 'action.scrollForward'
+  | 'action.showLess'
   | 'action.close'
   | 'auth.signIn'
   | 'auth.server'
@@ -315,6 +337,27 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.audioTracks": "Audio",
     "item.subtitleTracks": "Subtitles",
     "item.file": "File",
+    "item.playEpisode": "Play {episode}",
+    "item.resumeEpisode": "Resume {episode}",
+    "item.episodeShort": "S{season} E{episode}",
+    "item.fromStart": "Play from Beginning",
+    "item.endsAt": "Ends at {time}",
+    "item.critics": "Critics {score}%",
+    "item.released": "Released",
+    "item.firstAired": "First Aired",
+    "item.aired": "Aired",
+    "item.rated": "Rated",
+    "item.genres": "Genres",
+    "item.country": "Country",
+    "item.originalTitle": "Original Title",
+    "item.status": "Status",
+    "item.continuing": "Continuing",
+    "item.ended": "Ended",
+    "item.runtime": "Runtime",
+    "item.video": "Video",
+    "item.links": "Links",
+    "item.moreFrom": "More from {season}",
+    "item.version": "Version",
     "player.play": "Play",
     "player.pause": "Pause",
     "player.seekBack": "Back {count, plural, one {# second} other {# seconds}}",
@@ -355,6 +398,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.back": "Back",
     "action.scrollBack": "Scroll Back",
     "action.scrollForward": "Scroll Forward",
+    "action.showLess": "Show Less",
     "action.close": "Close",
     "auth.signIn": "Sign In",
     "auth.server": "Server",
@@ -544,6 +588,27 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.audioTracks": "音频",
     "item.subtitleTracks": "字幕",
     "item.file": "文件",
+    "item.playEpisode": "播放 {episode}",
+    "item.resumeEpisode": "继续播放 {episode}",
+    "item.episodeShort": "S{season} E{episode}",
+    "item.fromStart": "从头播放",
+    "item.endsAt": "{time} 结束",
+    "item.critics": "影评 {score}%",
+    "item.released": "上映日期",
+    "item.firstAired": "首播日期",
+    "item.aired": "播出日期",
+    "item.rated": "分级",
+    "item.genres": "类型",
+    "item.country": "国家或地区",
+    "item.originalTitle": "原名",
+    "item.status": "状态",
+    "item.continuing": "连载中",
+    "item.ended": "已完结",
+    "item.runtime": "片长",
+    "item.video": "视频",
+    "item.links": "链接",
+    "item.moreFrom": "{season} 的其他剧集",
+    "item.version": "版本",
     "player.play": "播放",
     "player.pause": "暂停",
     "player.seekBack": "{count, plural, other {后退 # 秒}}",
@@ -584,6 +649,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.back": "返回",
     "action.scrollBack": "向前滚动",
     "action.scrollForward": "向后滚动",
+    "action.showLess": "收起",
     "action.close": "关闭",
     "auth.signIn": "登录",
     "auth.server": "服务器",

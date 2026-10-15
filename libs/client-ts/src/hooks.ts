@@ -251,26 +251,62 @@ export function useChildren(server: ServerEntry, item: Item | undefined) {
   });
 }
 
-/** The episode after an episode in its series, by season and number. */
-export function useNextEpisode(server: ServerEntry, item: Item | undefined) {
+/** A series' episodes, by season and number. */
+export function useEpisodes(server: ServerEntry, seriesId: string | undefined) {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server.id, "next", item?.id),
+    queryKey: serverKey(server.id, "episodes", seriesId),
     queryFn: async () => {
       const { items } = await servers
         .client(ItemService, server)
-        .listItems({ parentId: item!.seriesId, recursive: true, kinds: [ItemKind.EPISODE] });
-      return nextEpisode(items, item!.id) ?? null;
+        .listItems({ parentId: seriesId, recursive: true, kinds: [ItemKind.EPISODE] });
+      return items.toSorted(byEpisode);
     },
-    enabled: item?.kind === ItemKind.EPISODE && !!item.seriesId,
+    enabled: !!seriesId,
   });
+}
+
+function byEpisode(a: Item, b: Item): number {
+  return a.parentIndexNumber - b.parentIndexNumber || a.indexNumber - b.indexNumber;
+}
+
+/** The episode after an episode in its series, by season and number. */
+export function useNextEpisode(server: ServerEntry, item: Item | undefined) {
+  const episodes = useEpisodes(server, item?.kind === ItemKind.EPISODE ? item.seriesId : undefined);
+  return { ...episodes, data: episodes.data && item ? (nextEpisode(episodes.data, item.id) ?? null) : undefined };
 }
 
 /** Of a series' episodes in any order, the one after id by season and number. */
 export function nextEpisode(episodes: Item[], id: string): Item | undefined {
-  const order = episodes.toSorted((a, b) => a.parentIndexNumber - b.parentIndexNumber || a.indexNumber - b.indexNumber);
+  const order = episodes.toSorted(byEpisode);
   const at = order.findIndex((i) => i.id === id);
   return at >= 0 ? order[at + 1] : undefined;
+}
+
+/**
+ * The episode of a series to watch next, of its episodes in any order: the
+ * one played last if it is unfinished, else the first unplayed one after
+ * it, else the first unplayed one, else the first. Specials count only in
+ * a series that has nothing else.
+ */
+export function seriesNextUp(episodes: Item[]): Item | undefined {
+  const regular = episodes.filter((e) => e.parentIndexNumber > 0);
+  const order = (regular.length ? regular : episodes).toSorted(byEpisode);
+  const time = (e: Item) => {
+    const t = e.userData?.lastPlayedTime;
+    return t ? Number(t.seconds) * 1000 + t.nanos / 1e6 : 0;
+  };
+  let last = -1;
+  for (let i = 0; i < order.length; i++) {
+    if (time(order[i]) > 0 && (last < 0 || time(order[i]) >= time(order[last]))) last = i;
+  }
+  const unplayed = (e: Item) => !e.userData?.played;
+  if (last >= 0) {
+    if (unplayed(order[last]) && order[last].userData?.position) return order[last];
+    const after = order.slice(last + 1).find(unplayed);
+    if (after) return after;
+  }
+  return order.find(unplayed) ?? order[0];
 }
 
 /** Items like an item. */

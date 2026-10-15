@@ -166,6 +166,48 @@
     <string name="item_subtitle_tracks">Subtitles</string>
     <!-- Label of an item's file. -->
     <string name="item_file">File</string>
+    <!-- Plays the episode to watch next of a series; episode is its short number, as S2 E3. -->
+    <string name="item_play_episode">Play %s</string>
+    <!-- Resumes the episode to watch next of a series; episode is its short number, as S2 E3. -->
+    <string name="item_resume_episode">Resume %s</string>
+    <!-- Short season and episode numbers of an episode, on buttons and cards. -->
+    <string name="item_episode_short">S%1$s E%2$s</string>
+    <!-- Plays a partly watched item from its start. -->
+    <string name="item_from_start">Play from Beginning</string>
+    <!-- The time of day an item would end if played now; time is a clock time. -->
+    <string name="item_ends_at">Ends at %s</string>
+    <!-- The critics' score of an item, out of 100. -->
+    <string name="item_critics">Critics %s%%</string>
+    <!-- Fact of the details: the date a film came out. -->
+    <string name="item_released">Released</string>
+    <!-- Fact of the details: the date a series first aired. -->
+    <string name="item_first_aired">First Aired</string>
+    <!-- Fact of the details: the date an episode aired. -->
+    <string name="item_aired">Aired</string>
+    <!-- Fact of the details: the content rating. -->
+    <string name="item_rated">Rated</string>
+    <!-- Fact of the details: the genres. -->
+    <string name="item_genres">Genres</string>
+    <!-- Fact of the details: the countries an item was made in. -->
+    <string name="item_country">Country</string>
+    <!-- Fact of the details: the title in the original language. -->
+    <string name="item_original_title">Original Title</string>
+    <!-- Fact of the details: whether a series continues. -->
+    <string name="item_status">Status</string>
+    <!-- Status of a series still airing. -->
+    <string name="item_continuing">Continuing</string>
+    <!-- Status of a series that has ended. -->
+    <string name="item_ended">Ended</string>
+    <!-- Fact of the details: how long an item runs. -->
+    <string name="item_runtime">Runtime</string>
+    <!-- Fact of the details: the video of the selected version. -->
+    <string name="item_video">Video</string>
+    <!-- Fact of the details: pages of the item on other sites. -->
+    <string name="item_links">Links</string>
+    <!-- Section of the other episodes of an episode's season; season is its name. -->
+    <string name="item_more_from">More from %s</string>
+    <!-- Button choosing the media file of an item to play. -->
+    <string name="item_version">Version</string>
     <!-- State of a download not started yet. -->
     <string name="download_waiting">Waiting</string>
     <!-- State of a download interrupted, to be resumed. -->
@@ -262,6 +304,8 @@
     <string name="action_scroll_back">Scroll Back</string>
     <!-- Accessibility label of the arrow scrolling a shelf forward. -->
     <string name="action_scroll_forward">Scroll Forward</string>
+    <!-- Collapses text expanded with More. -->
+    <string name="action_show_less">Show Less</string>
     <!-- Button that closes a menu or a sheet. -->
     <string name="action_close">Close</string>
     <!-- Signs in to a server. -->

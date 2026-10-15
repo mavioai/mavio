@@ -151,7 +151,7 @@ export function ItemCard({
           </div>
         )}
         {item.userData?.played && (
-          <span className="absolute top-1.5 right-1.5 rounded-full bg-scrim p-0.5 text-on-background">
+          <span className="absolute top-1.5 right-1.5 rounded-full bg-scrim p-0.5 text-white">
             <Icon name="played" fill size={18} />
           </span>
         )}

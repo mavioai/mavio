@@ -279,6 +279,81 @@ public enum MavioStrings {
     /// Label of an item's file.
     public static var itemFile: String { NSLocalizedString("item.file", bundle: .module, comment: "") }
 
+    /// Plays the episode to watch next of a series; episode is its short number, as S2 E3.
+    public static func itemPlayEpisode(episode: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.playEpisode", bundle: .module, comment: ""), episode)
+    }
+
+    /// Resumes the episode to watch next of a series; episode is its short number, as S2 E3.
+    public static func itemResumeEpisode(episode: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.resumeEpisode", bundle: .module, comment: ""), episode)
+    }
+
+    /// Short season and episode numbers of an episode, on buttons and cards.
+    public static func itemEpisodeShort(season: String, episode: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.episodeShort", bundle: .module, comment: ""), season, episode)
+    }
+
+    /// Plays a partly watched item from its start.
+    public static var itemFromStart: String { NSLocalizedString("item.fromStart", bundle: .module, comment: "") }
+
+    /// The time of day an item would end if played now; time is a clock time.
+    public static func itemEndsAt(time: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.endsAt", bundle: .module, comment: ""), time)
+    }
+
+    /// The critics' score of an item, out of 100.
+    public static func itemCritics(score: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.critics", bundle: .module, comment: ""), score)
+    }
+
+    /// Fact of the details: the date a film came out.
+    public static var itemReleased: String { NSLocalizedString("item.released", bundle: .module, comment: "") }
+
+    /// Fact of the details: the date a series first aired.
+    public static var itemFirstAired: String { NSLocalizedString("item.firstAired", bundle: .module, comment: "") }
+
+    /// Fact of the details: the date an episode aired.
+    public static var itemAired: String { NSLocalizedString("item.aired", bundle: .module, comment: "") }
+
+    /// Fact of the details: the content rating.
+    public static var itemRated: String { NSLocalizedString("item.rated", bundle: .module, comment: "") }
+
+    /// Fact of the details: the genres.
+    public static var itemGenres: String { NSLocalizedString("item.genres", bundle: .module, comment: "") }
+
+    /// Fact of the details: the countries an item was made in.
+    public static var itemCountry: String { NSLocalizedString("item.country", bundle: .module, comment: "") }
+
+    /// Fact of the details: the title in the original language.
+    public static var itemOriginalTitle: String { NSLocalizedString("item.originalTitle", bundle: .module, comment: "") }
+
+    /// Fact of the details: whether a series continues.
+    public static var itemStatus: String { NSLocalizedString("item.status", bundle: .module, comment: "") }
+
+    /// Status of a series still airing.
+    public static var itemContinuing: String { NSLocalizedString("item.continuing", bundle: .module, comment: "") }
+
+    /// Status of a series that has ended.
+    public static var itemEnded: String { NSLocalizedString("item.ended", bundle: .module, comment: "") }
+
+    /// Fact of the details: how long an item runs.
+    public static var itemRuntime: String { NSLocalizedString("item.runtime", bundle: .module, comment: "") }
+
+    /// Fact of the details: the video of the selected version.
+    public static var itemVideo: String { NSLocalizedString("item.video", bundle: .module, comment: "") }
+
+    /// Fact of the details: pages of the item on other sites.
+    public static var itemLinks: String { NSLocalizedString("item.links", bundle: .module, comment: "") }
+
+    /// Section of the other episodes of an episode's season; season is its name.
+    public static func itemMoreFrom(season: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("item.moreFrom", bundle: .module, comment: ""), season)
+    }
+
+    /// Button choosing the media file of an item to play.
+    public static var itemVersion: String { NSLocalizedString("item.version", bundle: .module, comment: "") }
+
     /// State of a download not started yet.
     public static var downloadWaiting: String { NSLocalizedString("download.waiting", bundle: .module, comment: "") }
 
@@ -422,6 +497,9 @@ public enum MavioStrings {
 
     /// Accessibility label of the arrow scrolling a shelf forward.
     public static var actionScrollForward: String { NSLocalizedString("action.scrollForward", bundle: .module, comment: "") }
+
+    /// Collapses text expanded with More.
+    public static var actionShowLess: String { NSLocalizedString("action.showLess", bundle: .module, comment: "") }
 
     /// Button that closes a menu or a sheet.
     public static var actionClose: String { NSLocalizedString("action.close", bundle: .module, comment: "") }

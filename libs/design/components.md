@@ -46,15 +46,35 @@ A titled horizontal row of cards (Continue Watching, Next Up, Latest in a librar
 
 The top of an item's details screen.
 
-* **Anatomy**: the backdrop filling the width, fading into `color.background`; over its lower part the logo or title (`typography.display`), a line of facts (`typography.callout`, `color.textSecondary`: year, rating, runtime, resolution), the primary action (Play or Resume, `color.button` with `color.onButton`), and secondary actions (favorite, mark played, more).
-* **Layout**: phones stack the poster above the text; tablets, desktops and television place the text at the left of the backdrop.
-* **Overview**: `typography.body`, three lines with a "more" action on phones.
+* **Anatomy**: the backdrop, else an episode's still, else the poster blurred behind the poster itself; over its lower left, darkened toward it, the series an episode or season belongs to (its logo, linking to it), an episode's number, the logo or title (`typography.display`), the facts, the ratings and badges, the tagline (`typography.headline`), the overview and the actions.
+* **Facts**: one line (`typography.callout`) of the year, or a series' years ("2023–") and number of seasons, a season's number of episodes, an episode's air date, the runtime and up to three genres, each separator kept with the fact before it so that no line starts with one. Below it the community rating with a star, the critics' score, and badges outlined in white: the official rating, the chosen version's resolution, dynamic range and surround, and CC when it has subtitles.
+* **Overview**: `typography.body`, three lines (two on television) with More when it is longer; More opens it whole with the tagline in a dialog, or expands it in place on phones.
+* **Actions**: the primary action, white with black content, plays what is next: Resume or Play for a movie or episode; for a series or season the episode to watch next with its number, "Resume S1 E2". Beside it, as circles, Play from Beginning when there is progress, favorite and played, then the version menu when the title has several versions or is on other servers. Under them a status line (`typography.footnote`): the progress bar, the episode's name, the time left and when it would end.
+* **Next episode**: of a series' episodes, ignoring specials unless there are only specials, the one played last if it is unfinished, else the first unplayed one after it, else the first unplayed one, else the first.
+* **Version menu**: a pill "Version 2160p" opening upward a menu of the versions, each named by what its file name adds to its folder's ("2160p") with its resolution, range, surround, container and size, the chosen one checked; then the same title on the user's other servers.
+* **Layout**: tablets, desktops and television place the text at the left of the artwork, which fills 70% of the window's height (520–700 pt) on desktops, inset with corners of 18 pt, and 86% of the screen on television, where focus starts on the primary action and the tabs are hidden. Phones show the artwork at 64% of the height with the logo or title, facts and badges, and put the actions and overview below it on the page.
+
+## Details Screen
+
+Below the header, in order:
+
+* **Episodes**: a series has its seasons as pills, starting with the season of the next episode, and that season's episodes in a row of episode cards, with See All opening the season; on television focus on a pill chooses it. A season lists its episodes as episode rows. An episode shows its season's other episodes in a row, scrolled to it.
+* **Cast and crew**: a shelf of person cards, the actors in billing order, then the directors and writers.
+* **Similar**: a shelf of posters.
+* **Details**: the tagline, the whole overview and links to the external sites at the left; at the right the facts (release or air date, status, runtime, official rating, genres, directors, writers, studio, country, original title) and below them the chosen version's video, audio, subtitles, file and size, each a caption (`typography.caption`, `color.textSecondary`) over its value.
+
+## Episode Card
+
+An episode in a series' row.
+
+* **Anatomy**: a thumbnail card's artwork, `layout.thumbnail` wide; below it the number ("S1 E2", `color.accentText` for the next episode) with the runtime and air date (`typography.footnote`, `color.textSecondary`), the title (`typography.headline`) and three lines of overview (`typography.footnote`).
+* **Overlays**: as the thumbnail card.
 
 ## Episode Row
 
 An episode in a season's list.
 
-* **Anatomy**: a thumbnail card's artwork at the left (width `layout.thumbnail` / 2 on phones); the number and title (`typography.headline`), the runtime and air date (`typography.footnote`, `color.textSecondary`) and two lines of overview (`typography.callout`).
+* **Anatomy**: a thumbnail card's artwork at the left, a third of the row at most (140 pt to `layout.thumbnail`); the number (`color.accentText` for the next episode), the title (`typography.headline`), the runtime and air date (`typography.footnote`, `color.textSecondary`) and three lines of overview (`typography.callout`).
 * **Overlays**: as the thumbnail card.
 
 ## Person Card
@@ -62,7 +82,7 @@ An episode in a season's list.
 A cast or crew member.
 
 * **Anatomy**: a circular photo (`radius.full`), the name (`typography.callout`) and the role (`typography.footnote`, `color.textSecondary`), each on at most two lines.
-* **Without a photo**: the initials on `color.surfaceRaised`.
+* **Without a photo**: the initials on `color.fill`.
 
 ## Avatar
 

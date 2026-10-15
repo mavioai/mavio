@@ -220,7 +220,7 @@ Home is a column of hubs, after Plex's: rows of items, each a reason to watch so
 * **Hero**: Home opens with up to five of the latest films and shows with backdrops, one after another, each with its facts and the buttons to play it and open its details.
 
 ### 6.4 Components
-The core components are specified once in `libs/design/components.md` — their anatomy, their states (default, focused, pressed, loading, watched progress, played), their sizes per form factor and their tokens — and implemented natively on each platform; the specification is shared, not the code. They are the poster and thumbnail cards, the shelf row, the details header, the episode row, the person card, the track and subtitle pickers, and the empty, error and offline states. Television adds the focused state (scale and shadow) to every card.
+The core components are specified once in `libs/design/components.md` — their anatomy, their states (default, focused, pressed, loading, watched progress, played), their sizes per form factor and their tokens — and implemented natively on each platform; the specification is shared, not the code. They are the poster and thumbnail cards, the shelf row, the details header and screen, the episode card and row, the person card, the track and subtitle pickers, and the empty, error and offline states. Television adds the focused state (scale and shadow) to every card.
 
 ### 6.5 On-Screen Controller
 Every player follows one layout and state machine:

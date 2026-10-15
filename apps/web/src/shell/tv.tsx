@@ -23,12 +23,14 @@ export function TvShell() {
   // Search opens only when selected everywhere, since its page hides the tabs.
   const onTab = tabs.some((d) => d.to === pathname);
   const search = pathname === "/search";
+  // A title's details fill the screen without the tabs; back leaves them.
+  const details = pathname.includes("/item/");
   // Home's hero reaches the top of the screen, behind the tabs.
-  const behind = pathname === "/" || pathname.includes("/item/");
+  const behind = pathname === "/";
   const scrolled = useScrolled();
   return (
     <div className="min-h-screen">
-      {!search && (
+      {!search && !details && (
         <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8 pb-6">
           {/* Scrolled content passes under the tabs, never through them. */}
           <div
@@ -56,7 +58,7 @@ export function TvShell() {
           </div>
         </header>
       )}
-      <main className={behind ? "pb-16" : search ? "pt-12 pb-16" : "pt-32 pb-16"}>
+      <main className={behind || details ? "pb-16" : search ? "pt-12 pb-16" : "pt-32 pb-16"}>
         <Outlet />
       </main>
     </div>

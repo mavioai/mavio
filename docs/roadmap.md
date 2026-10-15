@@ -646,9 +646,10 @@ flowchart TD
   - [ ] The multicast entitlement, so that servers on the network are found on a device and not only in the simulator
   - [ ] Snapshot tests of the screens beyond Home
 - [ ] The navigation of [Clients §6.3](clients.md) in every client, the web UI first: the three layouts chosen by window width, the desktop layout's sidebar with its user menu, the television layout's top navigation and remote focus, and the sign-in screens of the two modes; the Apple and Android apps also take the primary button filled with `color.button` and the accent only on progress, selection, links and switches
-  - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details with versions and facts, and the player's side panel with quality and the next episode
+  - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details as `libs/design/components.md` specifies them (the episode to watch next, seasons and episodes, the version menu, cast and crew, the facts and media), and the player's side panel with quality and the next episode
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
+  - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)

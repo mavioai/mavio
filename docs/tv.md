@@ -21,7 +21,7 @@
 * **Tabs**: Home, Libraries and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
 * **Avatar**: the signed-in user's avatar at the right of the tabs, centered on them vertically, opens the user menu (§5).
 * **Band**: once the page scrolls, a solid band of the background lies under the bar, so that content scrolled up passes under it rather than through it. It is not blurred, since a blurred edge looks poor on a large screen.
-* **Behind the bar**: Home's hero and a title's details reach the top of the screen, behind the bar; other pages start below it.
+* **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details and Search hide the bar (§6.2, §6.4).
 * **Opening tabs**: on a tab's own page, moving focus to another tab opens it, as on tvOS. Deeper pages open a tab only when it is selected, so that moving up to the tabs does not leave the page. Search opens only when selected, from every page, since its page hides the tabs (§6.4).
 
 ## 4. Focus
@@ -43,7 +43,7 @@
 A hero 78 % of the screen's height reaches behind the bar, with the title's logo or name at 72 pt and buttons 64 pt high; the rows follow it. A row on television has no scroll arrows, and its cards are `layout.gutter` apart.
 
 ### 6.2 Details
-The backdrop fills 86 % of the screen's height behind the bar, with the logo or name at 72 pt, the actions 64 pt high, and the text at most 900 pt wide.
+The page hides the navigation bar, and back leaves it. The backdrop fills 86 % of the screen's height, with the logo or name at 72 pt, two lines of overview without the tagline, the actions 64 pt high, and the text at most 960 pt wide. Focus starts on the primary action; focus on a season's pill chooses it. The rest is as on other layouts (`libs/design/components.md`, Details Screen).
 
 ### 6.3 Grids
 A library's items and search results are grids whose columns are at least a poster wide, `layout.gutter` apart.
