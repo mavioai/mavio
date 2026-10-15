@@ -253,13 +253,13 @@ body {
     background: #fff;
     color: #000;
   }
-  /* The user menu's dots have two looks only: with focus, menu open or
-     not, the selected tab's on its glass. */
+  /* The user menu's dots are bare, and in the tabs' glass with focus or
+     while their menu is open. */
   & [data-tv-dots]:focus,
+  & [data-tv-dots][aria-expanded="true"],
   & [data-tv-dots][aria-expanded="true"]:focus {
-    background:
-      linear-gradient(var(--mavio-color-fill-selected) 0 0),
-      color-mix(in oklab, var(--mavio-color-surface-raised) 60%, transparent);
+    background: color-mix(in oklab, var(--mavio-color-surface-raised) 60%, transparent);
+    backdrop-filter: blur(24px);
     color: var(--mavio-color-on-background);
   }
   /* A menu's items look focused as they look hovered. */

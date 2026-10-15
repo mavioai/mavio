@@ -19,7 +19,7 @@
 ## 3. Navigation Bar
 
 * **Tabs**: Home, Libraries and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
-* **Menu button**: three vertical dots in a round glass button as tall as the tabs, at the screen's right and centered on the tabs vertically, open the user menu (§5); the user's avatar and name head the menu rather than sit beside the tabs.
+* **Menu button**: three vertical dots in a round button as tall as the tabs, at the screen's right and centered on the tabs vertically, open the user menu (§5); the user's avatar and name head the menu rather than sit beside the tabs.
 * **Band**: once the page scrolls, a solid band of the background lies under the bar, so that content scrolled up passes under it rather than through it. It is not blurred, since a blurred edge looks poor on a large screen.
 * **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details and Search hide the bar (§6.2, §6.4).
 * **Opening tabs**: on a tab's own page, moving focus to another tab opens it, as on tvOS. Deeper pages open a tab only when it is selected, so that moving up to the tabs does not leave the page. Search opens only when selected, from every page, since its page hides the tabs (§6.4).
@@ -36,7 +36,7 @@
 
 * **User menu**: the menu button opens the same menu as on other layouts, 400 pt wide for the larger type and in frosted glass — `color.surfaceOverlay` at 45 % over a strong blur — so that the artwork behind shows through: the appearance, switching users, settings, switching back to the standard layout and, in television mode, full screen. Its items fill with `color.fill` when they have focus, as they do under a pointer elsewhere.
 * **Focus within**: while a menu is open, focus moves only among its items and the button that opened it. Back closes it and returns focus to the button.
-* **The menu button**: it has two looks only: with focus, the selected tab's `color.fillSelected` on its glass, and otherwise its glass alone, whether its menu is open or not. Selecting it opens the menu with focus on Settings, the button back to its glass; back returns focus to it, and selecting it while its menu is open closes the menu.
+* **The menu button**: it has two looks only: bare, and, with focus or while its menu is open, in the tabs' glass. Selecting it opens the menu with focus on Settings; back returns focus to it, and selecting it while its menu is open closes the menu.
 
 ## 6. Screens
 

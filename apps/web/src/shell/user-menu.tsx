@@ -59,7 +59,7 @@ export function useSwitchUsers(server?: ServerEntry) {
 
 /**
  * The button with the user's avatar and name, which opens the user menu;
- * on the television, three dots in glass beside the tabs instead.
+ * on the television, three dots beside the tabs instead.
  */
 export function UserButton({
   compact = false,
@@ -90,7 +90,7 @@ export function UserButton({
         onClick={() => setOpen(!open)}
         className={
           dots
-            ? "flex size-16 items-center justify-center rounded-full bg-surface-raised/60 text-text-secondary backdrop-blur-xl"
+            ? "flex size-16 items-center justify-center rounded-full text-text-secondary"
             : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`
         }
       >
