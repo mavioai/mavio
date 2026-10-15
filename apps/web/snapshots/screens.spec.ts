@@ -38,7 +38,7 @@ for (const size of sizes) {
 
     test("sign-in", async ({ page }) => {
       await open(page, "/sign-in", []);
-      await expect(page.getByRole("button", { name: "Connect to a Server" })).toBeVisible();
+      await expect(page.getByLabel("Password")).toBeVisible();
       await expect(page).toHaveScreenshot(`sign-in-${size}.png`);
     });
 
@@ -77,7 +77,7 @@ test.describe("tv", () => {
 
   test("sign-in", async ({ page }) => {
     await open(page, "/sign-in", [], { tv: true });
-    await expect(page.getByRole("tab").first()).toBeVisible();
+    await expect(page.getByLabel("Password")).toBeVisible();
     await expect(page).toHaveScreenshot("sign-in-tv.png");
   });
 
