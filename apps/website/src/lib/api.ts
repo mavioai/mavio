@@ -27,6 +27,19 @@ export async function switchTo(body: { accountId: string; pin?: string; password
   }
 }
 
+/** Config is the site's configuration for its pages. */
+export interface Config {
+  /** app.mavio.dev's origin. */
+  appURL: string;
+}
+
+/** config fetches the site's configuration. */
+export async function config(): Promise<Config> {
+  const res = await fetch("/api/config");
+  if (!res.ok) throw new Error(res.statusText);
+  return res.json();
+}
+
 /** message returns an error's message for the page. */
 export function message(err: unknown): string {
   if (err && typeof err === "object" && "rawMessage" in err && typeof err.rawMessage === "string") return err.rawMessage;

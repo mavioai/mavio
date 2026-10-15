@@ -33,6 +33,8 @@ export const servers = pgTable(
     // The region of the relay the server keeps a connection to; empty
     // when it keeps none.
     relayRegion: text("relay_region").notNull().default(""),
+    // The URLs the server published, best first.
+    connections: jsonb("connections").$type<string[]>().notNull().default([]),
   },
   (t) => [index("servers_administrator_id_idx").on(t.administratorId)],
 );
@@ -47,22 +49,89 @@ export const claimCodes = pgTable("claim_codes", {
 });
 
 /**
- * authorizationCodes are the codes that sign accounts in to servers' web
- * interfaces (docs/accounts.md §6), by their SHA-256, exchanged once.
+ * claimRequests are the claims servers asked for, which an account
+ * confirms at /claim (docs/accounts.md §3.2), by a random ID: the server's
+ * key, and the redirect URI, PKCE challenge, device key and state of the
+ * web UI that started it. accountId is the account that confirmed it.
+ */
+export const claimRequests = pgTable(
+  "claim_requests",
+  {
+    id: text("id").primaryKey(),
+    serverId: text("server_id").notNull(),
+    publicKey: bytea("public_key").notNull(),
+    name: text("name").notNull().default(""),
+    version: text("version").notNull().default(""),
+    redirectUri: text("redirect_uri").notNull(),
+    codeChallenge: text("code_challenge").notNull(),
+    deviceKey: bytea("device_key").notNull(),
+    state: text("state").notNull().default(""),
+    accountId: text("account_id").references(() => user.id, { onDelete: "cascade" }),
+    declined: boolean("declined").notNull().default(false),
+    expiresAt: time("expires_at").notNull(),
+  },
+  (t) => [index("claim_requests_expires_at_idx").on(t.expiresAt)],
+);
+
+/**
+ * authorizationCodes are the codes that sign accounts in to web UIs
+ * (docs/accounts.md §6), by their SHA-256, exchanged once: a server's, or
+ * app.mavio.dev's without a server.
  */
 export const authorizationCodes = pgTable("authorization_codes", {
   codeHash: text("code_hash").primaryKey(),
   accountId: text("account_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  serverId: text("server_id")
-    .notNull()
-    .references(() => servers.id, { onDelete: "cascade" }),
+  serverId: text("server_id").references(() => servers.id, { onDelete: "cascade" }),
   redirectUri: text("redirect_uri").notNull(),
   codeChallenge: text("code_challenge").notNull(),
   deviceKey: bytea("device_key").notNull(),
   expiresAt: time("expires_at").notNull(),
 });
+
+/**
+ * deviceSessions are the sessions of devices' keys (docs/mavio-dev.md §2):
+ * the web UIs' and the apps', whose short access tokens a device renews by
+ * signing the time with its key, later than its last renewal.
+ */
+export const deviceSessions = pgTable(
+  "device_sessions",
+  {
+    id: text("id").primaryKey(),
+    accountId: text("account_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    // The client the session was given to: a server's ID, "app" or an app's reverse-DNS ID.
+    clientId: text("client_id").notNull(),
+    deviceKey: bytea("device_key").notNull(),
+    // The time, in milliseconds, the device signed for its last renewal.
+    renewedAt: bigint("renewed_at", { mode: "number" }).notNull().default(0),
+    createdAt: time("created_at").notNull(),
+    lastSeenAt: time("last_seen_at").notNull(),
+  },
+  (t) => [index("device_sessions_account_id_idx").on(t.accountId)],
+);
+
+/**
+ * linkCodes are the codes that sign devices in at /link (RFC 8628), by
+ * the SHA-256 of their device codes: the client and device key asking,
+ * and the account that approved it.
+ */
+export const linkCodes = pgTable(
+  "link_codes",
+  {
+    deviceCodeHash: text("device_code_hash").primaryKey(),
+    userCode: text("user_code").notNull().unique(),
+    clientId: text("client_id").notNull(),
+    deviceKey: bytea("device_key").notNull(),
+    accountId: text("account_id").references(() => user.id, { onDelete: "cascade" }),
+    denied: boolean("denied").notNull().default(false),
+    polledAt: time("polled_at"),
+    expiresAt: time("expires_at").notNull(),
+  },
+  (t) => [index("link_codes_expires_at_idx").on(t.expiresAt)],
+);
 
 /** serverTokens are the IDs of servers' JWTs, accepted once each until they expire. */
 export const serverTokens = pgTable(

@@ -1,7 +1,8 @@
 // mavio.dev's API under /api (docs/mavio-dev.md §2, §3): better-auth at
-// /api/auth, the Connect services of mavio.cloud.v1, the token endpoint of
-// servers' web interfaces at /api/oauth/token, and servers'
-// WebSockets at /api/servers/notices.
+// /api/auth, the Connect services of mavio.cloud.v1, the OAuth endpoints
+// of devices at /api/oauth, the pages' configuration at /api/config, and
+// servers' WebSockets at /api/servers/notices. Web UIs call the accounts'
+// services and the OAuth endpoints from their own origins.
 import { ConnectError, type ConnectRouter, createConnectRouter } from "@connectrpc/connect";
 import { createFetchHandler } from "@connectrpc/connect/protocol";
 import { createValidateInterceptor } from "@connectrpc/validate";
@@ -12,7 +13,7 @@ import { FriendService, HomeService } from "@mavio/proto/mavio/cloud/v1/home_pb"
 import { accountService } from "./account-service.ts";
 import type { Acme } from "./acme.ts";
 import { type Auth, apiURL } from "./auth.ts";
-import { handleToken, tokenPath } from "./authorization.ts";
+import { cors, handleOAuth, preflight } from "./authorization.ts";
 import type { Database } from "./db/index.ts";
 import { friendService } from "./friend-service.ts";
 import { homeService } from "./home-service.ts";
@@ -26,6 +27,8 @@ export interface ApiOptions {
   auth: Auth;
   /** The site's origin, such as https://mavio.dev. */
   baseURL: string;
+  /** app.mavio.dev's origin. */
+  appURL?: string;
   now?: () => Date;
   /** notify tells servers that their changes reached cursors, once a request recorded changes. */
   notify?: (cursors: Map<string, number>) => void;
@@ -39,6 +42,15 @@ export interface ApiOptions {
 
 /** noticesPath is where servers open their WebSockets (docs/mavio-dev.md §3). */
 export const noticesPath = "/api/servers/notices";
+
+/** configPath is where the pages read the site's configuration. */
+export const configPath = "/api/config";
+
+/** defaultAppURL is app.mavio.dev's origin when none is configured. */
+export const defaultAppURL = "https://app.mavio.dev";
+
+// The services web UIs call across origins, with devices' access tokens.
+const crossOrigin = ["/api/mavio.cloud.v1.AccountService/", "/api/mavio.cloud.v1.FriendService/", "/api/mavio.cloud.v1.HomeService/"];
 
 /** handleApi serves a request under /api, or returns undefined for other paths. */
 export async function handleApi(req: Request, options: ApiOptions): Promise<Response | undefined> {
@@ -61,8 +73,25 @@ export async function handleApi(req: Request, options: ApiOptions): Promise<Resp
 
 async function route(req: Request, pathname: string, options: ApiOptions, deps: Deps): Promise<Response | undefined> {
   if (pathname.startsWith("/api/auth/")) return options.auth.handler(req);
-  if (pathname === tokenPath) return handleToken(req, { db: options.db, auth: options.auth, apiURL: deps.apiURL, now: options.now ?? (() => new Date()) });
+  if (pathname === configPath) return Response.json({ appURL: options.appURL ?? defaultAppURL });
+  const oauth = await handleOAuth(req, pathname, {
+    db: options.db,
+    auth: options.auth,
+    baseURL: options.baseURL,
+    now: options.now ?? (() => new Date()),
+  });
+  if (oauth) return oauth;
   if (!pathname.startsWith("/api/mavio.")) return undefined;
+  if (crossOrigin.some((p) => pathname.startsWith(p))) {
+    if (req.method === "OPTIONS") return preflight(req);
+    const res = await serve(req, pathname, options, deps);
+    for (const [k, v] of Object.entries(cors(req))) res.headers.set(k, v);
+    return res;
+  }
+  return serve(req, pathname, options, deps);
+}
+
+async function serve(req: Request, pathname: string, options: ApiOptions, deps: Deps): Promise<Response> {
   const router: ConnectRouter = createConnectRouter({ interceptors: [createValidateInterceptor()] });
   router.service(ServerService, serverService(deps));
   router.service(AccountService, accountService({ ...deps, auth: options.auth }));

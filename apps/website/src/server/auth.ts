@@ -1,12 +1,12 @@
 // Accounts at mavio.dev (docs/mavio-dev.md §2), built on better-auth:
-// e-mail and password, passkeys, TOTP, user names, code sign-in for
-// televisions (RFC 8628), bearer sessions for native clients, and the JWT
-// plugin whose keys sign sign-in assertions.
+// e-mail and password, passkeys, TOTP, user names, bearer sessions, and
+// the JWT plugin whose keys sign sign-in assertions. Devices hold sessions
+// of their own keys instead (device-sessions.ts).
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { APIError, createAuthMiddleware } from "better-auth/api";
-import { bearer, deviceAuthorization, jwt, twoFactor, username } from "better-auth/plugins";
+import { bearer, jwt, twoFactor, username } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { eq } from "drizzle-orm";
 
@@ -72,13 +72,6 @@ export function createAuth(db: Database, config: Config) {
       jwt({
         jwks: { keyPairConfig: { alg: "EdDSA", crv: "Ed25519" } },
         jwt: { issuer: apiURL(config.baseURL) },
-      }),
-      deviceAuthorization({
-        verificationUri: "/link",
-        expiresIn: "10m",
-        interval: "5s",
-        // Mavio's own clients, by their reverse-DNS IDs.
-        validateClient: (id) => /^dev\.mavio\.[a-z0-9.-]+$/.test(id),
       }),
       bearer(),
       homes(db),

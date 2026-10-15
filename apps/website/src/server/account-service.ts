@@ -1,5 +1,6 @@
 // mavio.cloud.v1.AccountService (docs/mavio-dev.md §2), which signed-in
-// accounts call with their mavio.dev sessions.
+// accounts call with their mavio.dev sessions: the website's, or devices'
+// (device-sessions.ts).
 import { create, fromJson } from "@bufbuild/protobuf";
 import { timestampFromDate } from "@bufbuild/protobuf/wkt";
 import { Code, ConnectError, type HandlerContext, type ServiceImpl } from "@connectrpc/connect";
@@ -7,12 +8,16 @@ import {
   AcceptInvitationResponseSchema,
   type AccountService,
   AccessRecordSchema,
+  AnswerClaimRequestResponseSchema,
+  AnswerLinkCodeResponseSchema,
   CreateAssertionResponseSchema,
   CreateAuthorizationCodeResponseSchema,
   CreateClaimCodeResponseSchema,
   CreateRelayTicketResponseSchema,
   DeclineInvitationResponseSchema,
   GetAccountResponseSchema,
+  GetClaimRequestResponseSchema,
+  GetLinkCodeResponseSchema,
   GrantAccessResponseSchema,
   InvitationSchema,
   LeaveServerResponseSchema,
@@ -31,7 +36,7 @@ import {
   AccessSchema,
   LibrarySchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull } from "drizzle-orm";
 
 import type { Auth } from "./auth.ts";
 import {
@@ -45,27 +50,79 @@ import {
 } from "./authorization.ts";
 import { AccountRevoked_Reason, accessJson, accountOf, accountRevoked, addChange, managed } from "./changes.ts";
 import { claimCodeHash, claimCodeLifetime, newClaimCode } from "./claim-codes.ts";
-import { schema, type Tx } from "./db/index.ts";
+import { type Database, schema, type Tx } from "./db/index.ts";
+import { appClientID, signedIn as sessionAccount } from "./device-sessions.ts";
 import { between, effectivePass, homeOf, ownPass } from "./home.ts";
-import { base64url } from "./ids.ts";
+import { userCodeKey } from "./link-codes.ts";
 import { relayHost, relayTicket, ticketLifetime } from "./relay.ts";
-import { available, type Deps } from "./server-service.ts";
+import { available, type Deps, registerServer } from "./server-service.ts";
 
 type User = typeof schema.user.$inferSelect;
 type Record = typeof schema.accessRecords.$inferSelect;
 
 const access = (r: Record): Access => fromJson(AccessSchema, r.access as never);
 
+// administeredBy checks that an account administers a server, as a server's web UI signs in only its administrator.
+async function administeredBy(db: Database | Tx, me: User, serverId: string) {
+  const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, serverId) });
+  if (server?.administratorId !== me.id) {
+    throw new ConnectError("only the server's administrator signs in to its web UI", Code.PermissionDenied);
+  }
+}
+
+// authorizationCode creates an authorization code of an account for a web UI.
+async function authorizationCode(
+  db: Database | Tx,
+  me: User,
+  c: { serverId: string | null; redirectUri: string; codeChallenge: string; deviceKey: Uint8Array },
+  at: Date,
+): Promise<string> {
+  await deleteExpiredCodes(db, me.id, at);
+  const code = newAuthorizationCode();
+  await db.insert(schema.authorizationCodes).values({
+    codeHash: await sha256Hex(code),
+    accountId: me.id,
+    serverId: c.serverId,
+    redirectUri: c.redirectUri,
+    codeChallenge: c.codeChallenge,
+    deviceKey: c.deviceKey,
+    expiresAt: new Date(at.getTime() + authorizationCodeLifetime),
+  });
+  return code;
+}
+
+// pendingClaim returns a claim request not answered yet.
+async function pendingClaim(db: Database | Tx, id: string, at: Date) {
+  const r = await db.query.claimRequests.findFirst({
+    where: and(
+      eq(schema.claimRequests.id, id),
+      isNull(schema.claimRequests.accountId),
+      eq(schema.claimRequests.declined, false),
+      gt(schema.claimRequests.expiresAt, at),
+    ),
+  });
+  if (!r) throw new ConnectError("unknown, answered or expired claim request", Code.NotFound);
+  return r;
+}
+
+// pendingLink returns a link code not answered yet.
+async function pendingLink(db: Database | Tx, userCode: string, at: Date) {
+  const l = await db.query.linkCodes.findFirst({
+    where: and(
+      eq(schema.linkCodes.userCode, userCodeKey(userCode)),
+      isNull(schema.linkCodes.accountId),
+      eq(schema.linkCodes.denied, false),
+      gt(schema.linkCodes.expiresAt, at),
+    ),
+  });
+  if (!l) throw new ConnectError("unknown or expired code", Code.NotFound);
+  return l;
+}
+
 /** accountService implements AccountService. */
 export function accountService({ db, apiURL, auth, relays, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof AccountService> {
   // signedIn returns the account of the request's session.
-  async function signedIn(ctx: HandlerContext): Promise<User> {
-    const session = await auth.api.getSession({ headers: ctx.requestHeader });
-    if (!session) throw new ConnectError("sign in to mavio.dev", Code.Unauthenticated);
-    const u = await db.query.user.findFirst({ where: eq(schema.user.id, session.user.id) });
-    if (!u) throw new ConnectError("sign in to mavio.dev", Code.Unauthenticated);
-    return u;
-  }
+  const signedIn = (ctx: HandlerContext): Promise<User> => sessionAccount(db, auth, ctx.requestHeader, now());
 
   // full returns the account of the request's session, refusing managed accounts.
   async function full(ctx: HandlerContext): Promise<User> {
@@ -135,6 +192,7 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
       const me = await signedIn(ctx);
       await db.transaction(async (tx) => {
         await tx.delete(schema.session).where(eq(schema.session.userId, me.id));
+        await tx.delete(schema.deviceSessions).where(eq(schema.deviceSessions.accountId, me.id));
         await accountRevoked(tx, me.id, AccountRevoked_Reason.COMPROMISED);
       });
       return create(ReportCompromisedResponseSchema);
@@ -175,6 +233,7 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((l) => create(LibrarySchema, { id: l.id, name: l.name, kind: l.kind })),
             claimTime: timestampFromDate(s.claimedAt),
+            connections: s.connections,
           });
         });
       return create(ListServersResponseSchema, { servers });
@@ -203,22 +262,65 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
       if (!redirectURI(req.redirectUri)) {
         throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
       }
-      if (!(await hasAccess(db, req.serverId, me.id))) {
-        throw new ConnectError("the account has no access to the server", Code.PermissionDenied);
-      }
-      const at = now();
-      await deleteExpiredCodes(db, me.id, at);
-      const code = newAuthorizationCode();
-      await db.insert(schema.authorizationCodes).values({
-        codeHash: await sha256Hex(code),
-        accountId: me.id,
-        serverId: req.serverId,
-        redirectUri: req.redirectUri,
-        codeChallenge: req.codeChallenge,
-        deviceKey: req.deviceKey,
-        expiresAt: new Date(at.getTime() + authorizationCodeLifetime),
-      });
+      if (req.serverId) await administeredBy(db, me, req.serverId);
+      const code = await authorizationCode(db, me, { ...req, serverId: req.serverId || null }, now());
       return create(CreateAuthorizationCodeResponseSchema, { code });
+    },
+
+    async getClaimRequest(req, ctx) {
+      await signedIn(ctx);
+      const r = await pendingClaim(db, req.claimRequest, now());
+      const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, r.serverId) });
+      return create(GetClaimRequestResponseSchema, {
+        serverId: r.serverId,
+        serverName: r.name,
+        redirectUri: r.redirectUri,
+        claimed: !!server,
+        expireTime: timestampFromDate(r.expiresAt),
+      });
+    },
+
+    async answerClaimRequest(req, ctx) {
+      const me = await full(ctx);
+      const at = now();
+      return db.transaction(async (tx) => {
+        const r = await pendingClaim(tx, req.claimRequest, at);
+        const to = new URL(r.redirectUri);
+        if (r.state) to.searchParams.set("state", r.state);
+        if (!req.confirm) {
+          await tx.update(schema.claimRequests).set({ declined: true }).where(eq(schema.claimRequests.id, r.id));
+          to.searchParams.set("error", "access_denied");
+          return create(AnswerClaimRequestResponseSchema, { redirectUrl: to.toString() });
+        }
+        await registerServer(tx, { id: r.serverId, publicKey: r.publicKey, name: r.name, version: r.version }, me, at);
+        await tx.update(schema.claimRequests).set({ accountId: me.id }).where(eq(schema.claimRequests.id, r.id));
+        const code = await authorizationCode(tx, me, {
+          serverId: r.serverId,
+          redirectUri: r.redirectUri,
+          codeChallenge: r.codeChallenge,
+          deviceKey: r.deviceKey,
+        }, at);
+        to.searchParams.set("code", code);
+        return create(AnswerClaimRequestResponseSchema, { redirectUrl: to.toString() });
+      });
+    },
+
+    async getLinkCode(req, ctx) {
+      await signedIn(ctx);
+      const l = await pendingLink(db, req.userCode, now());
+      const server = appClientID(l.clientId) ? undefined : await db.query.servers.findFirst({ where: eq(schema.servers.id, l.clientId) });
+      return create(GetLinkCodeResponseSchema, { serverId: server?.id ?? "", serverName: server?.name ?? "", clientId: l.clientId });
+    },
+
+    async answerLinkCode(req, ctx) {
+      const me = await signedIn(ctx);
+      const l = await pendingLink(db, req.userCode, now());
+      if (req.approve && !appClientID(l.clientId)) await administeredBy(db, me, l.clientId);
+      await db
+        .update(schema.linkCodes)
+        .set(req.approve ? { accountId: me.id } : { denied: true })
+        .where(eq(schema.linkCodes.deviceCodeHash, l.deviceCodeHash));
+      return create(AnswerLinkCodeResponseSchema);
     },
 
     async createRelayTicket(req, ctx) {

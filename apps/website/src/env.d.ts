@@ -4,6 +4,8 @@ declare module "cloudflare:workers" {
   export const env: {
     HYPERDRIVE: { connectionString: string };
     BASE_URL: string;
+    /** app.mavio.dev's origin, by default https://app.mavio.dev. */
+    APP_URL?: string;
     BETTER_AUTH_SECRET: string;
     /** The domain of servers' ACME challenges' TXT records, such as acme.mavio.dev. */
     ACME_DOMAIN?: string;

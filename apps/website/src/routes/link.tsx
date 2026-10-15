@@ -1,68 +1,76 @@
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 
-import { authClient } from "../lib/auth-client.ts";
+import { accounts, message } from "../lib/api.ts";
 import { useAccount } from "../lib/session.ts";
 import { Button, Card, ErrorText, Field, Muted, Page } from "../ui.tsx";
 
-// A television shows a code and the person signs it in here (RFC 8628).
+// A television shows a code and the person signs it in here (RFC 8628):
+// Mavio's apps and app.mavio.dev for any account, and a server's web UI
+// for its administrator.
 export const Route = createFileRoute("/link")({
-  validateSearch: (s: Record<string, unknown>): { user_code?: string } => ({
-    user_code: typeof s.user_code === "string" ? s.user_code : undefined,
+  validateSearch: (s: Record<string, unknown>): { code?: string } => ({
+    code: typeof s.code === "string" ? s.code : undefined,
   }),
   component: LinkDevice,
 });
 
 function LinkDevice() {
   const me = useAccount();
-  const { user_code } = Route.useSearch();
+  const search = Route.useSearch();
   const [code, setCode] = useState<string>();
-  const [error, setError] = useState<string>();
   const [done, setDone] = useState<"approved" | "denied">();
+  const check = useMutation({
+    mutationFn: async (userCode: string) => {
+      const res = await accounts.getLinkCode({ userCode });
+      setCode(userCode);
+      return res;
+    },
+  });
+  const answer = useMutation({
+    mutationFn: async (approve: boolean) => {
+      await accounts.answerLinkCode({ userCode: code ?? "", approve });
+      setDone(approve ? "approved" : "denied");
+    },
+  });
   if (!me) return null;
 
-  async function check(e: FormEvent<HTMLFormElement>) {
+  function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const userCode = String(new FormData(e.currentTarget).get("code")).toUpperCase().replace(/[\s-]/g, "");
-    const res = await authClient.device({ query: { user_code: userCode } });
-    if (res.error) setError(res.error.error_description);
-    else {
-      setError(undefined);
-      setCode(userCode);
-    }
+    check.mutate(String(new FormData(e.currentTarget).get("code")));
   }
 
-  async function answer(approve: boolean) {
-    if (!code) return;
-    const res = approve ? await authClient.device.approve({ userCode: code }) : await authClient.device.deny({ userCode: code });
-    if (res.error) setError(res.error.error_description);
-    else setDone(approve ? "approved" : "denied");
-  }
-
+  const target = check.data?.serverName ? `the web UI of ${check.data.serverName}` : "Mavio";
   return (
     <Page title="Sign in a television">
       <Card>
         {done ? (
           <Muted>{done === "approved" ? "The television is signed in to your account." : "The television was not signed in."}</Muted>
-        ) : code ? (
+        ) : code && check.data ? (
           <>
             <Muted>
-              Sign in the television showing {code} as {me.name}? It reaches every server your account reaches.
+              Sign in {target} on the television showing {code.toUpperCase()} as {me.name}? It reaches your account's
+              servers.
             </Muted>
             <div className="flex gap-3">
-              <Button onClick={() => answer(true)}>Sign in</Button>
-              <Button kind="secondary" onClick={() => answer(false)}>
+              <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
+                Sign in
+              </Button>
+              <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
                 Cancel
               </Button>
             </div>
           </>
         ) : (
-          <form className="flex flex-col gap-4" onSubmit={check}>
-            <Field label="The code on the television" name="code" defaultValue={user_code} autoComplete="off" required />
-            <Button type="submit">Continue</Button>
+          <form className="flex flex-col gap-4" onSubmit={submit}>
+            <Field label="The code on the television" name="code" defaultValue={search.code} autoComplete="off" required />
+            <Button type="submit" disabled={check.isPending}>
+              Continue
+            </Button>
           </form>
         )}
-        <ErrorText error={error} />
+        <ErrorText error={check.error ? message(check.error) : answer.error ? message(answer.error) : undefined} />
       </Card>
     </Page>
   );

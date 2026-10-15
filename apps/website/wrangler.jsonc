@@ -9,7 +9,7 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [{ "pattern": "mavio.dev", "custom_domain": true }],
-  "vars": { "BASE_URL": "https://mavio.dev", "ACME_DOMAIN": "acme.mavio.dev" },
+  "vars": { "BASE_URL": "https://mavio.dev", "APP_URL": "https://app.mavio.dev", "ACME_DOMAIN": "acme.mavio.dev" },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",

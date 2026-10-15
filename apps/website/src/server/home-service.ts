@@ -31,6 +31,7 @@ import { and, asc, count, eq, inArray } from "drizzle-orm";
 import type { Auth } from "./auth.ts";
 import { accessJson, accountChanged, accountOf, addChange, managed, reachedServers } from "./changes.ts";
 import { type Database, schema, type Tx } from "./db/index.ts";
+import { signedIn as sessionAccount } from "./device-sessions.ts";
 import { frozen, homeOf, maxMembers, removeMember, setPin } from "./home.ts";
 import * as password from "./password.ts";
 import type { Deps } from "./server-service.ts";
@@ -43,10 +44,7 @@ type StoredOffer = { serverId: string; access: unknown };
 /** homeService implements HomeService. */
 export function homeService({ db, auth, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof HomeService> {
   async function signedIn(ctx: HandlerContext): Promise<User> {
-    const session = await auth.api.getSession({ headers: ctx.requestHeader });
-    const u = session && (await db.query.user.findFirst({ where: eq(schema.user.id, session.user.id) }));
-    if (!u) throw new ConnectError("sign in to mavio.dev", Code.Unauthenticated);
-    return u;
+    return sessionAccount(db, auth, ctx.requestHeader, now());
   }
 
   async function full(ctx: HandlerContext): Promise<User> {

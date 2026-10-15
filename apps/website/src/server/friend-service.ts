@@ -17,6 +17,7 @@ import { and, eq, or } from "drizzle-orm";
 import type { Auth } from "./auth.ts";
 import { accountOf, managed } from "./changes.ts";
 import { schema } from "./db/index.ts";
+import { signedIn as sessionAccount } from "./device-sessions.ts";
 import { between } from "./home.ts";
 import type { Deps } from "./server-service.ts";
 
@@ -26,9 +27,7 @@ type User = typeof schema.user.$inferSelect;
 export function friendService({ db, auth, now = () => new Date() }: Deps & { auth: Auth }): ServiceImpl<typeof FriendService> {
   // signedIn returns the full account of the request's session.
   async function signedIn(ctx: HandlerContext): Promise<User> {
-    const session = await auth.api.getSession({ headers: ctx.requestHeader });
-    const u = session && (await db.query.user.findFirst({ where: eq(schema.user.id, session.user.id) }));
-    if (!u) throw new ConnectError("sign in to mavio.dev", Code.Unauthenticated);
+    const u = await sessionAccount(db, auth, ctx.requestHeader, now());
     if (managed(u)) throw new ConnectError("managed accounts have no friends", Code.PermissionDenied);
     return u;
   }

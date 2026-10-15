@@ -23,6 +23,7 @@ export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Res
       db,
       auth,
       baseURL: env.BASE_URL,
+      appURL: env.APP_URL,
       notify: (cursors) => ctx.waitUntil(Promise.all([...cursors].map(([id, cursor]) => hub(id).notify(cursor)))),
       connectNotices: (id, r) => hub(id).fetch(r),
       acme: acme(),

@@ -1,6 +1,7 @@
 // mavio.cloud.v1.ServerService (docs/mavio-dev.md §2), which servers call
 // with JWTs signed by their identity keys.
 import { create, fromJson } from "@bufbuild/protobuf";
+import { timestampFromDate } from "@bufbuild/protobuf/wkt";
 import { Code, ConnectError, type HandlerContext, type ServiceImpl } from "@connectrpc/connect";
 import {
   AccessRevokedSchema,
@@ -8,20 +9,24 @@ import {
   ClaimServerResponseSchema,
   ClearAcmeChallengeResponseSchema,
   CreateAcmeBindingResponseSchema,
+  CreateClaimRequestResponseSchema,
   ListChangesResponseSchema,
+  PublishConnectionsResponseSchema,
   PublishLibrariesResponseSchema,
   type ServerService,
   ListRelaysResponseSchema,
   SetAcmeChallengeResponseSchema,
   SetRelayRegionResponseSchema,
 } from "@mavio/proto/mavio/cloud/v1/cloud_pb";
-import { and, asc, eq, gt } from "drizzle-orm";
+import { and, asc, eq, gt, lt } from "drizzle-orm";
 
 import type { Acme } from "./acme.ts";
+import { redirectURI } from "./authorization.ts";
 import { accountOf, addChange } from "./changes.ts";
-import { claimCodeHash } from "./claim-codes.ts";
-import type { Database } from "./db/index.ts";
+import { claimCodeHash, claimCodeLifetime } from "./claim-codes.ts";
+import type { Database, Tx } from "./db/index.ts";
 import { schema } from "./db/index.ts";
+import { base64url } from "./ids.ts";
 import type { Relays } from "./relay.ts";
 import { bearer, keyID, verifyServerToken } from "./server-token.ts";
 
@@ -39,6 +44,46 @@ export interface Deps {
 
 const defaultPageSize = 100;
 
+type User = typeof schema.user.$inferSelect;
+
+/** siteURL returns the site's origin of the API's base URL. */
+export function siteURL(apiURL: string): string {
+  return apiURL.replace(/\/api$/, "");
+}
+
+/**
+ * registerServer claims a server for an administrator and returns its
+ * cursor. Claiming a server again, after its command line unclaimed it,
+ * keeps its changes, and a previous administrator keeps no access.
+ */
+export async function registerServer(
+  tx: Tx,
+  s: { id: string; publicKey: Uint8Array; name: string; version: string },
+  admin: User,
+  at: Date,
+): Promise<number> {
+  const existing = await tx.query.servers.findFirst({ where: eq(schema.servers.id, s.id) });
+  let cursor = 0;
+  const fields = { name: s.name, version: s.version, administratorId: admin.id, claimedAt: at };
+  if (existing) {
+    await tx.update(schema.servers).set(fields).where(eq(schema.servers.id, s.id));
+    cursor = existing.cursor;
+    if (existing.administratorId !== admin.id) {
+      await addChange(
+        tx,
+        s.id,
+        { case: "accessRevoked", value: create(AccessRevokedSchema, { accountId: existing.administratorId }) },
+        at,
+      );
+    }
+  } else {
+    await tx.insert(schema.servers).values({ id: s.id, publicKey: s.publicKey, ...fields });
+  }
+  // The administrator reaches every library without a record.
+  await tx.delete(schema.accessRecords).where(and(eq(schema.accessRecords.serverId, s.id), eq(schema.accessRecords.accountId, admin.id)));
+  return cursor;
+}
+
 /** authenticateServer returns the claimed server whose JWT the request carries. */
 export async function authenticateServer({ db, apiURL, now = () => new Date() }: Deps, headers: Headers) {
   const token = bearer(headers);
@@ -54,9 +99,53 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
   const authenticate = (ctx: HandlerContext) => authenticateServer(deps, ctx.requestHeader);
 
   return {
+    async createClaimRequest(req, ctx) {
+      const at = now();
+      const serverId = await verifyServerToken(db, bearer(ctx.requestHeader), req.publicKey, apiURL, at);
+      if (!redirectURI(req.redirectUri)) {
+        throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
+      }
+      await db.delete(schema.claimRequests).where(lt(schema.claimRequests.expiresAt, at));
+      const id = base64url(crypto.getRandomValues(new Uint8Array(18)));
+      const expiresAt = new Date(at.getTime() + claimCodeLifetime);
+      await db.insert(schema.claimRequests).values({
+        id,
+        serverId,
+        publicKey: req.publicKey,
+        name: req.name,
+        version: req.version,
+        redirectUri: req.redirectUri,
+        codeChallenge: req.codeChallenge,
+        deviceKey: req.deviceKey,
+        state: req.state,
+        expiresAt,
+      });
+      return create(CreateClaimRequestResponseSchema, {
+        claimRequest: id,
+        url: `${siteURL(apiURL)}/claim?request=${id}`,
+        expireTime: timestampFromDate(expiresAt),
+      });
+    },
+
     async claimServer(req, ctx) {
       const at = now();
       const id = await verifyServerToken(db, bearer(ctx.requestHeader), req.publicKey, apiURL, at);
+      if (!req.claimCode === !req.claimRequest) {
+        throw new ConnectError("a claim code or a claim request, not both", Code.InvalidArgument);
+      }
+      if (req.claimRequest) {
+        // A confirmed request claimed the server already; the server learns its administrator once.
+        const key = and(eq(schema.claimRequests.id, req.claimRequest), eq(schema.claimRequests.serverId, id));
+        const r = await db.query.claimRequests.findFirst({ where: key });
+        if (!r || r.declined || r.expiresAt <= at) {
+          throw new ConnectError("unknown, declined or expired claim request", Code.InvalidArgument);
+        }
+        if (!r.accountId) throw new ConnectError("the claim request is not confirmed yet", Code.FailedPrecondition);
+        const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, id), with: { administrator: true } });
+        if (!server) throw new ConnectError("unknown, declined or expired claim request", Code.InvalidArgument);
+        await db.delete(schema.claimRequests).where(key);
+        return create(ClaimServerResponseSchema, { administrator: accountOf(server.administrator), cursor: BigInt(server.cursor) });
+      }
       const codeHash = await claimCodeHash(req.claimCode);
       return db.transaction(async (tx) => {
         const [code] = await tx.delete(schema.claimCodes).where(eq(schema.claimCodes.codeHash, codeHash)).returning();
@@ -65,29 +154,7 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
         }
         const admin = await tx.query.user.findFirst({ where: eq(schema.user.id, code.accountId) });
         if (!admin) throw new ConnectError("unknown, used or expired claim code", Code.InvalidArgument);
-        const existing = await tx.query.servers.findFirst({ where: eq(schema.servers.id, id) });
-        let cursor = 0;
-        const fields = { name: req.name, version: req.version, administratorId: admin.id, claimedAt: at };
-        if (existing) {
-          // Claimed again after its command line unclaimed it: the changes
-          // stay, and a previous administrator keeps no access.
-          await tx.update(schema.servers).set(fields).where(eq(schema.servers.id, id));
-          cursor = existing.cursor;
-          if (existing.administratorId !== admin.id) {
-            await addChange(
-              tx,
-              id,
-              { case: "accessRevoked", value: create(AccessRevokedSchema, { accountId: existing.administratorId }) },
-              at,
-            );
-          }
-        } else {
-          await tx.insert(schema.servers).values({ id, publicKey: req.publicKey, ...fields });
-        }
-        // The administrator reaches every library without a record.
-        await tx
-          .delete(schema.accessRecords)
-          .where(and(eq(schema.accessRecords.serverId, id), eq(schema.accessRecords.accountId, admin.id)));
+        const cursor = await registerServer(tx, { id, publicKey: req.publicKey, name: req.name, version: req.version }, admin, at);
         return create(ClaimServerResponseSchema, { administrator: accountOf(admin), cursor: BigInt(cursor) });
       });
     },
@@ -121,6 +188,12 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
         }
       });
       return create(PublishLibrariesResponseSchema);
+    },
+
+    async publishConnections(req, ctx) {
+      const server = await authenticate(ctx);
+      await db.update(schema.servers).set({ connections: req.urls }).where(eq(schema.servers.id, server.id));
+      return create(PublishConnectionsResponseSchema);
     },
 
     async setAcmeChallenge(req, ctx) {
