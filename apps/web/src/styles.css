@@ -164,6 +164,8 @@ body {
   --mavio-type-footnote-line-height: 26px;
   --mavio-type-caption-size: 18px;
   --mavio-type-caption-line-height: 24px;
+  /* Focus moved by the arrow keys stops below the tabs, with its row's title. */
+  scroll-padding-top: 200px;
 
   & :focus,
   & :focus-visible {

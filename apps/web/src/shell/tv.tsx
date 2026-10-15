@@ -2,7 +2,7 @@
 // Android TV: tabs in a pill at the top, the user's avatar beside them,
 // and focus moved with the arrow keys.
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 import { toggleFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
@@ -21,10 +21,16 @@ export function TvShell() {
   const { pathname } = useLocation();
   // Home's hero reaches the top of the screen, behind the tabs.
   const behind = pathname === "/" || pathname.includes("/item/");
+  const scrolled = useScrolled();
   return (
     <div className="min-h-screen">
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8">
-        <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface/60 p-1.5 backdrop-blur-xl">
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8 pb-6">
+        {/* Scrolled content passes under the tabs, never through them. */}
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
+        />
+        <nav aria-label={t("nav.navigation")} className="pointer-events-auto relative flex gap-1 rounded-full bg-surface/60 p-1.5 backdrop-blur-xl">
           {tabs.map((d) => (
             <Link
               key={d.to}
@@ -45,6 +51,16 @@ export function TvShell() {
       </main>
     </div>
   );
+}
+
+function subscribeScroll(l: () => void) {
+  window.addEventListener("scroll", l, { passive: true });
+  return () => window.removeEventListener("scroll", l);
+}
+
+/** Whether the page has scrolled from its top. */
+function useScrolled(): boolean {
+  return useSyncExternalStore(subscribeScroll, () => window.scrollY > 0);
 }
 
 /** F toggles full screen, as in the player, unless typing. */
