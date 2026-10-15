@@ -1,11 +1,11 @@
 // The sidebar of the desktop layout (docs/clients.md §6.3): the wordmark,
 // search, Home, the libraries of the shown sign-in and the user at its
 // foot. Collapsed, it is a rail of icons.
-import { useLibraries } from "@mavio/client-ts";
+import { useDiscovery, useLibraries } from "@mavio/client-ts";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 
-import { t } from "../i18n.ts";
+import { discoverLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
 import { Wordmark } from "../logo.tsx";
@@ -16,6 +16,7 @@ import { UserButton } from "./user-menu.tsx";
 export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () => void }) {
   const libraries = useLibraries();
   const several = libraries.length > 1;
+  const discovers = !!useDiscovery(discoverLanguage).server;
   const shortcuts = useShortcutsShown();
   return (
     <nav
@@ -41,6 +42,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           <SearchBox shortcut={shortcuts ? shortcutLabel("search") : undefined} />
         )}
         <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact />
+        {discovers && <NavItem rail={rail} to="/discover" icon="discover" label={t("nav.discover")} />}
         {rail ? (
           <div className="my-2 h-px w-8 bg-border" />
         ) : (
@@ -120,7 +122,7 @@ function NavItem({
   exact = false,
 }: {
   rail: boolean;
-  to: "/" | "/search";
+  to: "/" | "/discover" | "/search";
   icon: IconName;
   label: string;
   exact?: boolean;

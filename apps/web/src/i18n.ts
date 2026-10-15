@@ -17,6 +17,9 @@ export function pickLocale(languages: readonly string[]): Locale {
 /** The locale of this browser. */
 export const locale: Locale = pickLocale(typeof navigator === "undefined" ? [] : navigator.languages);
 
+/** The language of discovered names and overviews: the locale's, as ISO 639-1. */
+export const discoverLanguage = locale.split("-")[0];
+
 type Args = Record<string, string | number>;
 
 /** The end of the brace group starting at start, or -1. */

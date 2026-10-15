@@ -8,6 +8,7 @@ import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
 import { Artwork, CardPlaceholder, ItemCard, Shelf, StatusView } from "../ui.tsx";
+import { kindParam } from "./discover.tsx";
 import { Hero, heroEntries } from "./hero.tsx";
 
 /** The title of a section, named by its kind, library and seed. */
@@ -140,6 +141,16 @@ export function SectionView({ section: s, several }: { section: Section; several
               to="/s/$serverId/item/$itemId"
               params={{ serverId: at.serverId, itemId: at.itemId }}
               className="block w-poster shrink-0 snap-start"
+            >
+              {card}
+            </Link>
+          ) : s.serverId && title.externalIds.tmdb ? (
+            // A title no server has opens on Discover, to be requested.
+            <Link
+              key={`${title.name}-${title.year}`}
+              to="/s/$serverId/title/$kind/$tmdbId"
+              params={{ serverId: s.serverId, kind: kindParam(title.mediaKind), tmdbId: title.externalIds.tmdb }}
+              className="block w-poster shrink-0 snap-start opacity-80"
             >
               {card}
             </Link>

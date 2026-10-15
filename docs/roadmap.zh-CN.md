@@ -650,6 +650,10 @@ flowchart TD
   - [ ] Web UI 的管理功能：设置中用户管理的服务器，及其媒体库、用户与任务
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
   - [ ] Web UI 的详情页：预告片与其他附加内容，以及人物页面及其作品，由演职人员卡片打开
+  - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
+    - [ ] 目录的筛选与排序（`ListFilterValues`），以及搜索结果中的提供者作品（`SearchTitles`）
+    - [ ] 用户的请求及其状态，以及管理员批准、拒绝与编辑请求
+    - [ ] 发现页的各页面加入 Web UI 的快照测试
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用
 - [ ] Android 手机与平板应用（`apps/android`、`libs/android`）

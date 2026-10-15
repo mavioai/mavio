@@ -9,11 +9,12 @@ import { useEffect } from "react";
 import { focusable } from "./spatial.ts";
 
 /** The pages of the tabs, which Back leaves for the tabs. */
-const tabPages = ["/", "/libraries"];
+const tabPages = ["/", "/libraries", "/discover"];
 
 /** Where Back goes from a page opened directly, with nowhere to return to. */
 function parentOf(pathname: string): string {
   if (pathname.includes("/library/")) return "/libraries";
+  if (pathname.includes("/title/") || pathname.includes("/discover/")) return "/discover";
   return "/";
 }
 

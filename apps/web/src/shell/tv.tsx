@@ -1,17 +1,19 @@
 // The television layout (docs/tv.md), the same as on tvOS and
 // Android TV: tabs in a pill at the top, the user menu's dots at the right,
 // and focus moved with the arrow keys.
+import { useDiscovery } from "@mavio/client-ts";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
 
-import { t } from "../i18n.ts";
+import { discoverLanguage, t } from "../i18n.ts";
 import { useTvBack } from "./back.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { UserButton } from "./user-menu.tsx";
 
-const tabs: { to: "/" | "/libraries" | "/search"; label: () => string }[] = [
+const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; label: () => string }[] = [
   { to: "/", label: () => t("nav.home") },
   { to: "/libraries", label: () => t("nav.libraries") },
+  { to: "/discover", label: () => t("nav.discover") },
   { to: "/search", label: () => t("nav.search") },
 ];
 
@@ -20,6 +22,9 @@ export function TvShell() {
   useTvBack();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  // Discover is a tab where a server discovers.
+  const discovers = !!useDiscovery(discoverLanguage).server;
+  const tabs = allTabs.filter((d) => d.to !== "/discover" || discovers);
   // On a tab's own page, as on tvOS, focusing another tab opens it in its
   // place, so that Back never steps through the tabs; deeper pages leave the
   // tabs to select, so that moving up does not leave them.
@@ -27,9 +32,10 @@ export function TvShell() {
   const onTab = tabs.some((d) => d.to === pathname);
   const search = pathname === "/search";
   // A title's details and a library fill the screen without the tabs, the
-  // library under its name; back leaves them.
-  const details = pathname.includes("/item/");
-  const library = pathname.includes("/library/");
+  // library under its name, as do a discovered title and a catalog; back
+  // leaves them.
+  const details = pathname.includes("/item/") || pathname.includes("/title/");
+  const library = pathname.includes("/library/") || pathname.includes("/discover/");
   // Home's hero reaches the top of the screen, behind the tabs.
   const behind = pathname === "/";
   const scrolled = useScrolled();

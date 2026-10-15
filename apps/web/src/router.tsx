@@ -2,6 +2,7 @@ import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/
 import type { Filter, Sort } from "@mavio/client-ts";
 
 import { Details } from "./screens/details.tsx";
+import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
 import { HomeScreen } from "./screens/home.tsx";
 import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
@@ -83,6 +84,20 @@ const library = createRoute({
   component: LibraryScreen,
 });
 
+const discover = createRoute({ getParentRoute: () => root, path: "/discover", component: DiscoverScreen });
+
+const catalog = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/discover/$catalog",
+  validateSearch: (s: Record<string, unknown>): { kind?: "movie" | "series"; tmdb?: number } => ({
+    kind: s.kind === "movie" || s.kind === "series" ? s.kind : undefined,
+    tmdb: Number(s.tmdb) > 0 ? Number(s.tmdb) : undefined,
+  }),
+  component: CatalogScreen,
+});
+
+const title = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId", component: TitleScreen });
+
 const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$hubId", component: HubScreen });
 
 const details = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId", component: Details });
@@ -105,6 +120,9 @@ export const router = createRouter({
     callback,
     libraries,
     search,
+    discover,
+    catalog,
+    title,
     settings,
     settingsSection,
     profile,

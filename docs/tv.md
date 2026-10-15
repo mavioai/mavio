@@ -18,10 +18,10 @@
 
 ## 3. Navigation Bar
 
-* **Tabs**: Home, Libraries and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
+* **Tabs**: Home, Libraries, Discover (where a server discovers) and Search in a pill centered at the top, on `color.surfaceRaised` at 60 %; the current tab is filled with `color.fillSelected`.
 * **Menu button**: three vertical dots in a round button as tall as the tabs, at the screen's right and centered on the tabs vertically, open the user menu (§5); the user's avatar and name head the menu rather than sit beside the tabs.
 * **Band**: once the page scrolls, a solid band of the background lies under the bar, so that content scrolled up passes under it rather than through it. It is not blurred, since a blurred edge looks poor on a large screen.
-* **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details, a library and Search hide the bar (§6.2, §6.3, §6.4).
+* **Behind the bar**: Home's hero reaches the top of the screen, behind the bar; other pages start below it. A title's details, a discovered title, a library, a catalog and Search hide the bar (§6.2, §6.3, §6.4).
 * **Opening tabs**: on a tab's own page, moving focus to another tab opens it, as on tvOS. Deeper pages open a tab only when it is selected, so that moving up to the tabs does not leave the page. Search opens only when selected, from every page, since its page hides the tabs (§6.4).
 
 ## 4. Focus
@@ -30,7 +30,7 @@
 * **Scrolling**: the page scrolls to keep the focused element in view, stopping 200 pt below the top, so that its row's title shows under the bar, and 120 pt above the bottom, with room for a card to grow, so that the last row reaches the page's end. A row scrolls sideways to keep its focused card in view.
 * **Cards**: a focused card scales by `layout.focusScale` (1.05) and its artwork gets a 3 pt `color.accent` border 1.5 pt apart from it and a shadow of `color.tvFocusShadow` with an offset of 12 pt and a blur of 32 pt, over `duration.fast` with `easing.standard`. The other cards of a row are at 75 % opacity. Rows leave room above and below for a card to grow.
 * **Buttons and tabs**: a focused button or tab turns white with black content. White belongs to focus alone: a button that is white elsewhere, such as Play over the artwork, is glass like the others until it has focus. A text field with focus gets a white ring of 3 pt.
-* **Back**: it always goes up a level, never simply back through the browser's history. An open menu or dialog closes, and focus returns to what opened it. On a tab's page, back moves focus from the page to its tab and returns the page to its top, with every row scrolled back to its start; from a tab, it moves to Home's. Any deeper page — a title's details, a library, Search — returns to where it was opened from, as it was left: the page at the same position, the row scrolled as it was, and focus on the card that opened it. A page opened directly returns to its parent: a library to Libraries, anything else to Home. Opening a tab by focusing it replaces the page rather than adding to the history, so that back never steps through the tabs.
+* **Back**: it always goes up a level, never simply back through the browser's history. An open menu or dialog closes, and focus returns to what opened it. On a tab's page, back moves focus from the page to its tab and returns the page to its top, with every row scrolled back to its start; from a tab, it moves to Home's. Any deeper page — a title's details, a library, Search — returns to where it was opened from, as it was left: the page at the same position, the row scrolled as it was, and focus on the card that opened it. A page opened directly returns to its parent: a library to Libraries, a discovered title or a catalog to Discover, anything else to Home. Opening a tab by focusing it replaces the page rather than adding to the history, so that back never steps through the tabs.
 
 ## 5. Menus
 
@@ -49,6 +49,8 @@ The page hides the navigation bar, and back returns to where it was opened from 
 
 ### 6.3 Grids
 A library's items and search results are grids whose columns are at least a poster wide, `layout.gutter` apart. A library hides the navigation bar and the menu button: its name alone heads it at the top left, beside its Recommended and All in a pill that looks like the tabs: the current one filled with `color.fillSelected`, the focused one white. Focus starts on the current one when the library opens. As on the tabs, focus chooses without selecting: moving to Recommended or All shows it, and moving along All's filters — All, Unplayed, Played, Favorites, in a pill alike — applies them. These choices and the order replace the page rather than adding to the history, so that back leaves the library for where it was opened from.
+
+A catalog of Discover is a grid alike, under its name, with focus starting on its first title; a discovered title is laid out as an item's details (§6.2), focus starting on its first action. A row of Discover ends with a See All card, which opens its catalog, in place of the link beside the row's title on other layouts.
 
 ### 6.4 Search
 * **Without tabs**: the page hides the navigation bar, focus starts on the keyboard, and back leaves the page once the query is empty.

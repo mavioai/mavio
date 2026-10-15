@@ -650,6 +650,10 @@ flowchart TD
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
   - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open
+  - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
+    - [ ] The catalogs' filters and sorts (`ListFilterValues`), and providers' titles (`SearchTitles`) among Search's results
+    - [ ] The user's requests and their state, and administrators approving, declining and editing requests
+    - [ ] Discover's screens among the web UI's snapshot tests
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)

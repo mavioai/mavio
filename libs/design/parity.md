@@ -44,7 +44,7 @@ The state of every feature on each client ([Clients §6.8](../../docs/clients.md
 | Top Shelf | — | — | ○ | — | — | — | — |
 | Watch Next and channels | — | — | — | — | — | ○ | — |
 | **Requests and administration** | | | | | | | |
-| Discovery and requests | ○ | ○ | ○ | ○ | ○ | ○ | ○ |
+| Discovery and requests | ✓ | ○ | ○ | ○ | ○ | ○ | ○ |
 | Administration | ○ | — | — | — | — | — | — |
 | First-run setup | ○ | — | — | — | — | — | — |
 

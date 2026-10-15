@@ -3,11 +3,11 @@
 // up to 840 px, and the sidebar beside the content from there, collapsible
 // to the rail. TV mode replaces them with the television layout. Sign-in,
 // setup, the player and the settings bring their own.
-import { useEvents, useServersStore, useSignIn } from "@mavio/client-ts";
+import { useDiscovery, useEvents, useServersStore, useSignIn } from "@mavio/client-ts";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { t } from "../i18n.ts";
+import { discoverLanguage, t } from "../i18n.ts";
 import { toggleFullScreen } from "../fullscreen.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutOf } from "../keys.ts";
@@ -102,15 +102,19 @@ function DesktopShell({ overlay }: { overlay: boolean }) {
   );
 }
 
-const tabs: { to: "/" | "/libraries" | "/search"; icon: IconName; label: () => string }[] = [
+const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; icon: IconName; label: () => string }[] = [
   { to: "/", icon: "home", label: () => t("nav.home") },
   { to: "/libraries", icon: "movies", label: () => t("nav.libraries") },
+  { to: "/discover", icon: "discover", label: () => t("nav.discover") },
   { to: "/search", icon: "search", label: () => t("nav.search") },
 ];
 
 /** The phone layout: the wordmark and the user's avatar on top, tabs below. */
 function CompactShell() {
   const account = useAccount();
+  // Discover is a tab where a server discovers.
+  const discovers = !!useDiscovery(discoverLanguage).server;
+  const tabs = allTabs.filter((d) => d.to !== "/discover" || discovers);
   return (
     <div className="min-h-screen pb-[calc(56px+env(safe-area-inset-bottom))]">
       <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-background/80 px-margin pt-[env(safe-area-inset-top)] backdrop-blur-xl">
