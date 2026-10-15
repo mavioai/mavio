@@ -122,6 +122,8 @@ export type MessageKey =
   | 'action.delete'
   | 'action.save'
   | 'action.back'
+  | 'action.scrollBack'
+  | 'action.scrollForward'
   | 'action.close'
   | 'auth.signIn'
   | 'auth.server'
@@ -189,6 +191,7 @@ export type MessageKey =
   | 'menu.manageAccount'
   | 'menu.manageServers'
   | 'menu.serverCount'
+  | 'menu.tvMode'
   | 'settings.thisDevice'
   | 'settings.accountAndServers'
   | 'settings.appearance'
@@ -344,6 +347,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.delete": "Delete",
     "action.save": "Save",
     "action.back": "Back",
+    "action.scrollBack": "Scroll Back",
+    "action.scrollForward": "Scroll Forward",
     "action.close": "Close",
     "auth.signIn": "Sign In",
     "auth.server": "Server",
@@ -411,6 +416,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.manageAccount": "Manage Account at mavio.dev",
     "menu.manageServers": "Manage Servers",
     "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
+    "menu.tvMode": "Switch to TV Mode",
     "settings.thisDevice": "This Device",
     "settings.accountAndServers": "Account and Servers",
     "settings.appearance": "Appearance",
@@ -564,6 +570,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.delete": "删除",
     "action.save": "保存",
     "action.back": "返回",
+    "action.scrollBack": "向前滚动",
+    "action.scrollForward": "向后滚动",
     "action.close": "关闭",
     "auth.signIn": "登录",
     "auth.server": "服务器",
@@ -631,6 +639,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.manageAccount": "在 mavio.dev 管理账户",
     "menu.manageServers": "管理服务器",
     "menu.serverCount": "{count, plural, other {# 台服务器}}",
+    "menu.tvMode": "切换到电视模式",
     "settings.thisDevice": "这台设备",
     "settings.accountAndServers": "账户与服务器",
     "settings.appearance": "外观",

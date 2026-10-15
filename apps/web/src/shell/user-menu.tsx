@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { setPrefs } from "../prefs.ts";
 import { Avatar, useDismiss } from "../ui.tsx";
 
 /** The sign-in as the user menu presents it. */
@@ -145,6 +146,18 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
       <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut="⌘,">
         {t("nav.settings")}
       </MenuLink>
+      <button
+        type="button"
+        role="menuitem"
+        onClick={() => {
+          onClose();
+          setPrefs({ tv: true });
+        }}
+        className={itemClass}
+      >
+        <Icon name="television" size={18} className="text-text-secondary" />
+        <span className="flex-1">{t("menu.tvMode")}</span>
+      </button>
       {shown.kind === "mavioDev" ? (
         manage && (
           <a role="menuitem" href={manage} target="_blank" rel="noreferrer" onClick={onClose} className={itemClass}>

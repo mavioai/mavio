@@ -133,6 +133,8 @@
     <string name="action_delete">删除</string>
     <string name="action_save">保存</string>
     <string name="action_back">返回</string>
+    <string name="action_scroll_back">向前滚动</string>
+    <string name="action_scroll_forward">向后滚动</string>
     <string name="action_close">关闭</string>
     <string name="auth_sign_in">登录</string>
     <string name="auth_server">服务器</string>
@@ -203,6 +205,7 @@
     <plurals name="menu_server_count">
         <item quantity="other">%d 台服务器</item>
     </plurals>
+    <string name="menu_tv_mode">切换到电视模式</string>
     <string name="settings_this_device">这台设备</string>
     <string name="settings_account_and_servers">账户与服务器</string>
     <string name="settings_appearance">外观</string>

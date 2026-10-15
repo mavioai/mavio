@@ -2269,6 +2269,42 @@
         }
       }
     },
+    "action.scrollBack": {
+      "comment": "Accessibility label of the arrow scrolling a shelf back.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scroll Back"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向前滚动"
+          }
+        }
+      }
+    },
+    "action.scrollForward": {
+      "comment": "Accessibility label of the arrow scrolling a shelf forward.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scroll Forward"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向后滚动"
+          }
+        }
+      }
+    },
     "action.close": {
       "comment": "Button that closes a menu or a sheet.",
       "extractionState": "manual",
@@ -3507,6 +3543,24 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "menu.tvMode": {
+      "comment": "User menu item switching to the television layout.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to TV Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到电视模式"
           }
         }
       }

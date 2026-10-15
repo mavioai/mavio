@@ -648,7 +648,7 @@ flowchart TD
   - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details with versions and facts, and the player's side panel with quality and the next episode
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
-  - [ ] The Apple and Android apps
+  - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
 - [ ] Android phone and tablet app (`apps/android`, `libs/android`)
 - [ ] Apple TV and Android TV apps

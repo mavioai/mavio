@@ -37,8 +37,8 @@ A 16:9 card of an episode, a video or a chapter.
 
 A titled horizontal row of cards (Continue Watching, Next Up, Latest in a library).
 
-* **Anatomy**: the title (`typography.title3`) with a "more" action on desktops and touch screens; the cards below it, `layout.gutter` apart, the first aligned with `layout.margin`.
-* **Behavior**: scrolls horizontally by touch, wheel and trackpad; on television focus moves card by card and the row scrolls to keep the focused card in view; on desktops arrows appear on hover at both ends.
+* **Anatomy**: the title (`typography.title3`) with a "more" action on desktops and touch screens; the cards below it, one and a half `layout.gutter` apart (`layout.gutter` on television), the first aligned with `layout.margin`.
+* **Behavior**: scrolls horizontally by touch, wheel and trackpad; on television focus moves card by card and the row scrolls to keep the focused card in view; where a mouse points, two arrows at the end of the title scroll it back and forward by most of its width, each dimmed at its end and both hidden when the cards fit; television has none.
 * **Empty**: a shelf with no items is hidden.
 
 ## Details Header

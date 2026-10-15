@@ -10,6 +10,7 @@ import { type ReactNode, type RefObject, useEffect, useRef, useState } from "rea
 
 import { t } from "./i18n.ts";
 import { Icon, type IconName } from "./icon.tsx";
+import { usePrefs } from "./prefs.ts";
 
 /** The shape of an item's card. */
 export type Shape = "poster" | "thumb" | "square";
@@ -170,7 +171,10 @@ export function CardPlaceholder({ shape = "poster" }: { shape?: Shape }) {
   );
 }
 
-/** A titled row of cards that scrolls sideways, with arrows on hover. */
+/**
+ * A titled row of cards that scrolls sideways, with arrows at the end of
+ * its title where a mouse points; a remote moves through it by focus.
+ */
 export function Shelf({
   title,
   badge,
@@ -182,41 +186,64 @@ export function Shelf({
   more?: ReactNode;
   children: ReactNode;
 }) {
+  const { tv } = usePrefs();
   const row = useRef<HTMLDivElement>(null);
+  const [ends, setEnds] = useState({ start: true, end: true });
+  useEffect(() => {
+    const el = row.current;
+    if (!el || tv) return;
+    const update = () =>
+      setEnds({ start: el.scrollLeft <= 1, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    el.addEventListener("scroll", update, { passive: true });
+    return () => (ro.disconnect(), el.removeEventListener("scroll", update));
+  }, [tv]);
   const scroll = (dir: number) => row.current?.scrollBy({ left: dir * row.current.clientWidth * 0.8, behavior: "smooth" });
+  const arrows = !tv && !(ends.start && ends.end);
   return (
-    <section className="group/shelf relative py-3">
-      <div className="mb-2 flex items-baseline gap-3 px-margin">
+    <section className="py-3">
+      <div className="mb-2 flex items-center gap-3 px-margin">
         <h2 className="truncate type-title3">{title}</h2>
         {badge}
-        <div className="ml-auto shrink-0 type-callout text-accent-text hover:opacity-80">{more}</div>
-      </div>
-      <div className="relative">
-        <div ref={row} className="scroll-row flex gap-gutter overflow-x-auto px-margin pb-1">
-          {children}
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          {more && <div className="type-callout text-accent-text hover:opacity-80">{more}</div>}
+          {arrows && (
+            <div className="hidden gap-1 pointer-fine:flex">
+              {(["back", "forward"] as const).map((dir) => (
+                <button
+                  key={dir}
+                  type="button"
+                  tabIndex={-1}
+                  aria-label={dir === "back" ? t("action.scrollBack") : t("action.scrollForward")}
+                  disabled={dir === "back" ? ends.start : ends.end}
+                  onClick={() => scroll(dir === "back" ? -1 : 1)}
+                  className="flex size-7 items-center justify-center rounded-full text-text-secondary hover:bg-fill hover:text-on-background disabled:text-text-disabled disabled:hover:bg-transparent"
+                >
+                  <Icon name={dir} size={18} />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        {(["back", "forward"] as const).map((dir) => (
-          <button
-            key={dir}
-            type="button"
-            tabIndex={-1}
-            aria-hidden
-            onClick={() => scroll(dir === "back" ? -1 : 1)}
-            className={`absolute top-0 bottom-8 hidden w-10 items-center justify-center bg-scrim opacity-0 transition group-hover/shelf:opacity-100 pointer-fine:flex ${dir === "back" ? "left-0" : "right-0"}`}
-          >
-            <Icon name={dir} />
-          </button>
-        ))}
+      </div>
+      <div ref={row} className={`scroll-row flex overflow-x-auto px-margin pb-1 ${tv ? "gap-gutter" : gap}`}>
+        {children}
       </div>
     </section>
   );
 }
 
+/** The space between cards side by side, wider than the gutter outside TV mode. */
+const gap = "gap-x-[calc(var(--mavio-layout-gutter)*1.5)]";
+
 /** A grid of cards whose columns are at least a poster wide. */
 export function Grid({ shape = "poster", children }: { shape?: Shape; children: ReactNode }) {
+  const { tv } = usePrefs();
   const min = shape === "thumb" ? "var(--mavio-layout-thumbnail)" : "var(--mavio-layout-poster)";
   return (
-    <div className="grid gap-x-gutter gap-y-6 px-margin" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${min}, 1fr))` }}>
+    <div className={`grid gap-y-6 px-margin ${tv ? "gap-x-gutter" : gap}`} style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${min}, 1fr))` }}>
       {children}
     </div>
   );

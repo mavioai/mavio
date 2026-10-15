@@ -258,6 +258,10 @@
     <string name="action_save">Save</string>
     <!-- Button that goes back one step. -->
     <string name="action_back">Back</string>
+    <!-- Accessibility label of the arrow scrolling a shelf back. -->
+    <string name="action_scroll_back">Scroll Back</string>
+    <!-- Accessibility label of the arrow scrolling a shelf forward. -->
+    <string name="action_scroll_forward">Scroll Forward</string>
     <!-- Button that closes a menu or a sheet. -->
     <string name="action_close">Close</string>
     <!-- Signs in to a server. -->
@@ -397,6 +401,8 @@
         <item quantity="one">%d server</item>
         <item quantity="other">%d servers</item>
     </plurals>
+    <!-- User menu item switching to the television layout. -->
+    <string name="menu_tv_mode">Switch to TV Mode</string>
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
     <!-- Group of the settings of the account and its servers. -->

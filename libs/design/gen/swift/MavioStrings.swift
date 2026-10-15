@@ -417,6 +417,12 @@ public enum MavioStrings {
     /// Button that goes back one step.
     public static var actionBack: String { NSLocalizedString("action.back", bundle: .module, comment: "") }
 
+    /// Accessibility label of the arrow scrolling a shelf back.
+    public static var actionScrollBack: String { NSLocalizedString("action.scrollBack", bundle: .module, comment: "") }
+
+    /// Accessibility label of the arrow scrolling a shelf forward.
+    public static var actionScrollForward: String { NSLocalizedString("action.scrollForward", bundle: .module, comment: "") }
+
     /// Button that closes a menu or a sheet.
     public static var actionClose: String { NSLocalizedString("action.close", bundle: .module, comment: "") }
 
@@ -640,6 +646,9 @@ public enum MavioStrings {
     public static func menuServerCount(count: Int) -> String {
         String.localizedStringWithFormat(NSLocalizedString("menu.serverCount", bundle: .module, comment: ""), count)
     }
+
+    /// User menu item switching to the television layout.
+    public static var menuTvMode: String { NSLocalizedString("menu.tvMode", bundle: .module, comment: "") }
 
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
