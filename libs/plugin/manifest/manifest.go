@@ -10,6 +10,7 @@ package manifest
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -308,7 +309,28 @@ func (s *Schema) Validate(configJSON string) error {
 	if err != nil {
 		return fmt.Errorf("config is not valid JSON: %w", err)
 	}
-	return s.s.Validate(doc)
+	err = s.s.Validate(doc)
+	var ve *jsonschema.ValidationError
+	if !errors.As(err, &ve) {
+		return err
+	}
+	// The default message leads with the schema's URL, which tells a user
+	// nothing; name only where the configuration fails and why.
+	var problems []string
+	for _, u := range ve.BasicOutput().Errors {
+		if u.Error == nil || strings.HasPrefix(u.Error.String(), "validation failed") {
+			continue
+		}
+		at := ""
+		if u.InstanceLocation != "" {
+			at = " at " + u.InstanceLocation
+		}
+		problems = append(problems, u.Error.String()+at)
+	}
+	if len(problems) == 0 {
+		return err
+	}
+	return fmt.Errorf("invalid config: %s", strings.Join(problems, "; "))
 }
 
 // ValidateConfig checks configJSON against the manifest's schema; a manifest

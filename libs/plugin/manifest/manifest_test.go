@@ -248,9 +248,14 @@ func TestValidateConfig(t *testing.T) {
 	if err := ValidateConfig(m, `{"api_key":"k"}`); err != nil {
 		t.Errorf("valid config: %v", err)
 	}
-	for _, cfg := range []string{`{}`, `{"api_key":1}`, `not json`} {
-		if err := ValidateConfig(m, cfg); err == nil {
-			t.Errorf("config %s accepted", cfg)
+	for _, tt := range []struct{ cfg, want string }{
+		{`{}`, "invalid config: missing property 'api_key'"},
+		{`{"api_key":1}`, "invalid config: got number, want string at /api_key"},
+		{`not json`, "config is not valid JSON"},
+	} {
+		err := ValidateConfig(m, tt.cfg)
+		if err == nil || !strings.HasPrefix(err.Error(), tt.want) {
+			t.Errorf("ValidateConfig(%s) = %v, want %q", tt.cfg, err, tt.want)
 		}
 	}
 	m.ClearConfigSchema()
