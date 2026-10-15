@@ -3,7 +3,8 @@
 // exist, Safari plays it natively. Progress is reported every 10 seconds
 // and on pause, seek and stop. A side panel picks the audio, subtitles and
 // quality and tells how the item plays; an episode's end starts the next.
-// Other devices of the user control it remotely (§6.3.23).
+// Other devices of the user control it remotely (§6.3.23), and it follows
+// the SyncPlay group playing its item (§6.3.24).
 import {
   capabilities,
   errorMessage,
@@ -30,7 +31,9 @@ import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { prefs, type Quality, qualities, qualityBitrates } from "../prefs.ts";
+import { useGroupPlayer } from "../syncplay.tsx";
 import { StatusView } from "../ui.tsx";
+import { GroupChip } from "./syncplay.tsx";
 
 const route = getRouteApi("/s/$serverId/play/$itemId");
 
@@ -114,14 +117,22 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     else void router.navigate({ to: "/s/$serverId/item/$itemId", params: { serverId: server.id, itemId } });
   }, [router, server.id, itemId]);
 
+  // The SyncPlay group playing the item, which the controls ask instead of the video.
+  const group = useGroupPlayer(server, itemId, video, back);
+  const groupRef = useRef(group);
+  useEffect(() => {
+    groupRef.current = group;
+  });
+
   const playNext = useCallback(() => {
+    if (group) return group.next(next.data ? [next.data.id] : []);
     if (!next.data) return;
     void router.navigate({
       to: "/s/$serverId/play/$itemId",
       params: { serverId: server.id, itemId: next.data.id },
       replace: true,
     });
-  }, [router, server.id, next.data]);
+  }, [router, server.id, next.data, group]);
 
   // Starts playback, again whenever the user picks other streams.
   useEffect(() => {
@@ -171,7 +182,9 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           v.src = p.url;
           v.addEventListener("loadedmetadata", () => start > 0 && (v.currentTime = start), { once: true });
         }
-        v.play().catch(() => setPaused(true));
+        // A group's member waits for the group to play.
+        if (groupRef.current) groupRef.current.restarted();
+        else v.play().catch(() => setPaused(true));
       } catch (err) {
         if (!cancelled) setError(errorMessage(err));
       }
@@ -236,16 +249,20 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     };
   }, [shown]);
 
-  const toggle = useCallback(() => {
-    const v = video.current;
-    if (!v) return;
-    if (v.paused) void v.play();
-    else v.pause();
-  }, []);
-  const seekBy = useCallback((s: number) => {
-    const v = video.current;
-    if (v) v.currentTime = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + s));
-  }, []);
+  const play = useCallback(() => (group ? group.unpause() : void video.current?.play()), [group]);
+  const pause = useCallback(() => (group ? group.pause() : video.current?.pause()), [group]);
+  const toggle = useCallback(() => (video.current?.paused ? play() : pause()), [play, pause]);
+  const seekTo = useCallback(
+    (s: number) => {
+      const v = video.current;
+      if (!v) return;
+      const to = Math.max(0, Math.min(v.duration || Infinity, s));
+      if (group) group.seek(to * 1000);
+      else v.currentTime = to;
+    },
+    [group],
+  );
+  const seekBy = useCallback((s: number) => seekTo((video.current?.currentTime ?? 0) + s), [seekTo]);
   const fullScreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void shell.current?.requestFullscreen();
@@ -258,15 +275,15 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     const c = e.kind.value.command?.kind;
     if (c?.case === "playState") {
       const commands: Partial<Record<PlayStateCommand, () => void>> = {
-        [PlayStateCommand.PAUSE]: () => v.pause(),
-        [PlayStateCommand.UNPAUSE]: () => void v.play(),
+        [PlayStateCommand.PAUSE]: pause,
+        [PlayStateCommand.UNPAUSE]: play,
         [PlayStateCommand.STOP]: back,
         [PlayStateCommand.NEXT]: playNext,
         [PlayStateCommand.PREVIOUS]: () => (v.currentTime = 0),
       };
       commands[c.value.command]?.();
     } else if (c?.case === "seek" && c.value.position) {
-      v.currentTime = durationMs(c.value.position) / 1000;
+      seekTo(durationMs(c.value.position) / 1000);
     } else if (c?.case === "volume") {
       if (c.value.level !== undefined) v.volume = c.value.level / 100;
       if (c.value.muted !== undefined) v.muted = c.value.muted;
@@ -340,8 +357,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
         onDurationChange={(e) => Number.isFinite(e.currentTarget.duration) && setDuration(e.currentTarget.duration)}
         onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
-        onRateChange={(e) => setSpeed(e.currentTarget.playbackRate)}
-        onEnded={() => (prefs().autoplayNext && next.data ? playNext() : back())}
+        onRateChange={(e) => !group && setSpeed(e.currentTarget.playbackRate)}
+        onEnded={() => (group ? group.ended() : prefs().autoplayNext && next.data ? playNext() : back())}
       >
         {external.map((s) => (
           <track
@@ -380,10 +397,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
             )}
             <div className="truncate type-title3 font-semibold">{current?.name ?? ""}</div>
           </div>
+          {group && <GroupChip server={server} group={group.group} />}
         </div>
 
         <div className="pointer-events-auto absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent px-5 pt-16 pb-4">
-          <Scrubber time={time} total={total} onSeek={(s) => video.current && (video.current.currentTime = s)} />
+          <Scrubber time={time} total={total} onSeek={seekTo} />
           <div className="mt-2 flex items-center gap-1">
             <PlayerButton label={paused ? t("player.play") : t("player.pause")} onClick={toggle} large>
               <Icon name={paused ? "play" : "pause"} fill size={30} />
@@ -404,7 +422,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
               {clock(time)} / {clock(total)}
             </span>
             <div className="ml-auto flex items-center gap-1">
-              {next.data && (
+              {(next.data || (group && group.group.currentIndex < group.group.queue.length - 1)) && (
                 <button
                   type="button"
                   onClick={playNext}
@@ -486,8 +504,9 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                       key={r}
                       type="button"
                       aria-pressed={r === speed}
+                      disabled={!!group}
                       onClick={() => video.current && (video.current.playbackRate = r)}
-                      className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums ${r === speed ? "bg-white text-black" : "bg-white/10 hover:bg-white/20"}`}
+                      className={`h-8 rounded-full px-3 type-footnote font-semibold tabular-nums disabled:opacity-40 ${r === speed ? "bg-white text-black" : "bg-white/10 hover:bg-white/20"}`}
                     >
                       {r}×
                     </button>

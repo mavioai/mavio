@@ -690,6 +690,8 @@ flowchart TD
   - [ ] Web UI 的共同观看：同步播放组（`SyncPlayService`）、控制其他会话（`SessionService.SendCommand`），以及对作品报告问题并由管理员处理（`IssueService`）
     - [x] 控制用户的其他设备：条目“更多”菜单中的“在…上播放”和“设备”设置中的控制；浏览器执行发给它的命令（§6.3.23）
     - [ ] “播放”命令中第一个之后的条目，在播放器中排队
+    - [x] 同步播放组：从“一起看”创建、加入和离开，播放器跟随小组并保持时钟同步（§6.3.24）
+    - [ ] 编辑同步播放组的队列：添加、移动和移除条目（需要 `SyncPlayService` 的新请求）
   - [ ] Web UI 的 AI 助手会话（`AgentSessionService`）
   - [ ] Apple 与 Android 应用，其横向列表也采用[横向列表](../libs/design/components.zh-CN.md#横向列表)的间距，Mac 上还有标题栏末端的箭头
 - [ ] 切片：Android 手机与平板应用、Apple TV 与 Android TV 应用、Mac 应用

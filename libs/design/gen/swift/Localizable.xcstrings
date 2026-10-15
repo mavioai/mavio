@@ -25626,6 +25626,348 @@
           }
         }
       }
+    },
+    "syncplay.watchTogether": {
+      "comment": "Opens the SyncPlay groups from an item's More menu.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch Together"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一起看"
+          }
+        }
+      }
+    },
+    "syncplay.title": {
+      "comment": "Title of the SyncPlay dialog outside a group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch Together"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一起看"
+          }
+        }
+      }
+    },
+    "syncplay.intro": {
+      "comment": "Explains SyncPlay groups.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join a group to play the same thing at the same time on every device in it, or start one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入一个小组，让小组里的每台设备同时播放同样的内容，或新建一个小组。"
+          }
+        }
+      }
+    },
+    "syncplay.noGroups": {
+      "comment": "Shown when the server has no SyncPlay group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No one is watching together on this server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此服务器上没有人在一起看。"
+          }
+        }
+      }
+    },
+    "syncplay.groupName": {
+      "comment": "Field naming a new SyncPlay group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Group name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "小组名称"
+          }
+        }
+      }
+    },
+    "syncplay.defaultName": {
+      "comment": "Default name of a new SyncPlay group, after its creator.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@'s group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的小组"
+          }
+        }
+      }
+    },
+    "syncplay.create": {
+      "comment": "Creates a SyncPlay group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建"
+          }
+        }
+      }
+    },
+    "syncplay.join": {
+      "comment": "Joins a SyncPlay group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Join"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入"
+          }
+        }
+      }
+    },
+    "syncplay.leave": {
+      "comment": "Leaves the SyncPlay group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave Group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "离开小组"
+          }
+        }
+      }
+    },
+    "syncplay.watch": {
+      "comment": "Opens the player on what the group plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "观看"
+          }
+        }
+      }
+    },
+    "syncplay.playHere": {
+      "comment": "Plays the item for every member of the group.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play “%@” in the Group"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在小组中播放“%@”"
+          }
+        }
+      }
+    },
+    "syncplay.members": {
+      "comment": "Accessibility label of the group's members.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Members"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成员"
+          }
+        }
+      }
+    },
+    "syncplay.thisBrowser": {
+      "comment": "Marks the member that is this browser.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个浏览器"
+          }
+        }
+      }
+    },
+    "syncplay.loading": {
+      "comment": "A member the group waits for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载中"
+          }
+        }
+      }
+    },
+    "syncplay.idle": {
+      "comment": "A group playing nothing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing is playing."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有在播放。"
+          }
+        }
+      }
+    },
+    "syncplay.playing": {
+      "comment": "What a group plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在播放 %@"
+          }
+        }
+      }
+    },
+    "syncplay.paused": {
+      "comment": "What a paused group plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暂停：%@"
+          }
+        }
+      }
+    },
+    "syncplay.waitingFor": {
+      "comment": "Who a group waits for before it plays.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待 %@"
+          }
+        }
+      }
+    },
+    "syncplay.chip": {
+      "comment": "A group's name and number of members, on the chip opening it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -4511,4 +4511,73 @@ public enum MavioStrings {
 
     /// Dismisses a message.
     public static var remoteDismiss: String { NSLocalizedString("remote.dismiss", bundle: .module, comment: "") }
+
+    /// Opens the SyncPlay groups from an item's More menu.
+    public static var syncplayWatchTogether: String { NSLocalizedString("syncplay.watchTogether", bundle: .module, comment: "") }
+
+    /// Title of the SyncPlay dialog outside a group.
+    public static var syncplayTitle: String { NSLocalizedString("syncplay.title", bundle: .module, comment: "") }
+
+    /// Explains SyncPlay groups.
+    public static var syncplayIntro: String { NSLocalizedString("syncplay.intro", bundle: .module, comment: "") }
+
+    /// Shown when the server has no SyncPlay group.
+    public static var syncplayNoGroups: String { NSLocalizedString("syncplay.noGroups", bundle: .module, comment: "") }
+
+    /// Field naming a new SyncPlay group.
+    public static var syncplayGroupName: String { NSLocalizedString("syncplay.groupName", bundle: .module, comment: "") }
+
+    /// Default name of a new SyncPlay group, after its creator.
+    public static func syncplayDefaultName(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.defaultName", bundle: .module, comment: ""), name)
+    }
+
+    /// Creates a SyncPlay group.
+    public static var syncplayCreate: String { NSLocalizedString("syncplay.create", bundle: .module, comment: "") }
+
+    /// Joins a SyncPlay group.
+    public static var syncplayJoin: String { NSLocalizedString("syncplay.join", bundle: .module, comment: "") }
+
+    /// Leaves the SyncPlay group.
+    public static var syncplayLeave: String { NSLocalizedString("syncplay.leave", bundle: .module, comment: "") }
+
+    /// Opens the player on what the group plays.
+    public static var syncplayWatch: String { NSLocalizedString("syncplay.watch", bundle: .module, comment: "") }
+
+    /// Plays the item for every member of the group.
+    public static func syncplayPlayHere(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.playHere", bundle: .module, comment: ""), name)
+    }
+
+    /// Accessibility label of the group's members.
+    public static var syncplayMembers: String { NSLocalizedString("syncplay.members", bundle: .module, comment: "") }
+
+    /// Marks the member that is this browser.
+    public static var syncplayThisBrowser: String { NSLocalizedString("syncplay.thisBrowser", bundle: .module, comment: "") }
+
+    /// A member the group waits for.
+    public static var syncplayLoading: String { NSLocalizedString("syncplay.loading", bundle: .module, comment: "") }
+
+    /// A group playing nothing.
+    public static var syncplayIdle: String { NSLocalizedString("syncplay.idle", bundle: .module, comment: "") }
+
+    /// What a group plays.
+    public static func syncplayPlaying(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.playing", bundle: .module, comment: ""), name)
+    }
+
+    /// What a paused group plays.
+    public static func syncplayPaused(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.paused", bundle: .module, comment: ""), name)
+    }
+
+    /// Who a group waits for before it plays.
+    public static func syncplayWaitingFor(names: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.waitingFor", bundle: .module, comment: ""), names)
+    }
+
+    /// A group's name and number of members, on the chip opening it.
+    public static func syncplayChip(name: String, count: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("syncplay.chip", bundle: .module, comment: ""), name, count)
+    }
 }

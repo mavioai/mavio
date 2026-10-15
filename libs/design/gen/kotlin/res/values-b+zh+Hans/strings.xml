@@ -1440,4 +1440,23 @@
     <string name="remote_sent">已发送</string>
     <string name="remote_message_from">来自 %s</string>
     <string name="remote_dismiss">关闭</string>
+    <string name="syncplay_watch_together">一起看</string>
+    <string name="syncplay_title">一起看</string>
+    <string name="syncplay_intro">加入一个小组，让小组里的每台设备同时播放同样的内容，或新建一个小组。</string>
+    <string name="syncplay_no_groups">此服务器上没有人在一起看。</string>
+    <string name="syncplay_group_name">小组名称</string>
+    <string name="syncplay_default_name">%s 的小组</string>
+    <string name="syncplay_create">创建</string>
+    <string name="syncplay_join">加入</string>
+    <string name="syncplay_leave">离开小组</string>
+    <string name="syncplay_watch">观看</string>
+    <string name="syncplay_play_here">在小组中播放“%s”</string>
+    <string name="syncplay_members">成员</string>
+    <string name="syncplay_this_browser">这个浏览器</string>
+    <string name="syncplay_loading">加载中</string>
+    <string name="syncplay_idle">没有在播放。</string>
+    <string name="syncplay_playing">正在播放 %s</string>
+    <string name="syncplay_paused">已暂停：%s</string>
+    <string name="syncplay_waiting_for">正在等待 %s</string>
+    <string name="syncplay_chip">%1$s · %2$s</string>
 </resources>

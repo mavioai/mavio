@@ -690,6 +690,8 @@ flowchart TD
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
     - [x] Controlling the user's other devices: Play On from an item's More menu and the control from the Devices settings; the browser carries out the commands sent to it (§6.3.23)
     - [ ] A Play command's items after its first, queued in the player
+    - [x] SyncPlay groups: created, joined and left from Watch Together, the player following the group with its clock kept in step (§6.3.24)
+    - [ ] Editing a SyncPlay group's queue: adding items, moving and removing them (needs requests of `SyncPlayService`)
   - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app

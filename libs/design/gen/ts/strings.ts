@@ -1407,7 +1407,26 @@ export type MessageKey =
   | 'remote.send'
   | 'remote.sent'
   | 'remote.messageFrom'
-  | 'remote.dismiss';
+  | 'remote.dismiss'
+  | 'syncplay.watchTogether'
+  | 'syncplay.title'
+  | 'syncplay.intro'
+  | 'syncplay.noGroups'
+  | 'syncplay.groupName'
+  | 'syncplay.defaultName'
+  | 'syncplay.create'
+  | 'syncplay.join'
+  | 'syncplay.leave'
+  | 'syncplay.watch'
+  | 'syncplay.playHere'
+  | 'syncplay.members'
+  | 'syncplay.thisBrowser'
+  | 'syncplay.loading'
+  | 'syncplay.idle'
+  | 'syncplay.playing'
+  | 'syncplay.paused'
+  | 'syncplay.waitingFor'
+  | 'syncplay.chip';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2807,7 +2826,26 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "remote.send": "Send",
     "remote.sent": "Sent",
     "remote.messageFrom": "From {name}",
-    "remote.dismiss": "Dismiss"
+    "remote.dismiss": "Dismiss",
+    "syncplay.watchTogether": "Watch Together",
+    "syncplay.title": "Watch Together",
+    "syncplay.intro": "Join a group to play the same thing at the same time on every device in it, or start one.",
+    "syncplay.noGroups": "No one is watching together on this server.",
+    "syncplay.groupName": "Group name",
+    "syncplay.defaultName": "{name}'s group",
+    "syncplay.create": "Create",
+    "syncplay.join": "Join",
+    "syncplay.leave": "Leave Group",
+    "syncplay.watch": "Watch",
+    "syncplay.playHere": "Play “{name}” in the Group",
+    "syncplay.members": "Members",
+    "syncplay.thisBrowser": "This browser",
+    "syncplay.loading": "Loading",
+    "syncplay.idle": "Nothing is playing.",
+    "syncplay.playing": "Playing {name}",
+    "syncplay.paused": "Paused: {name}",
+    "syncplay.waitingFor": "Waiting for {names}",
+    "syncplay.chip": "{name} · {count}"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4205,6 +4243,25 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "remote.send": "发送",
     "remote.sent": "已发送",
     "remote.messageFrom": "来自 {name}",
-    "remote.dismiss": "关闭"
+    "remote.dismiss": "关闭",
+    "syncplay.watchTogether": "一起看",
+    "syncplay.title": "一起看",
+    "syncplay.intro": "加入一个小组，让小组里的每台设备同时播放同样的内容，或新建一个小组。",
+    "syncplay.noGroups": "此服务器上没有人在一起看。",
+    "syncplay.groupName": "小组名称",
+    "syncplay.defaultName": "{name} 的小组",
+    "syncplay.create": "创建",
+    "syncplay.join": "加入",
+    "syncplay.leave": "离开小组",
+    "syncplay.watch": "观看",
+    "syncplay.playHere": "在小组中播放“{name}”",
+    "syncplay.members": "成员",
+    "syncplay.thisBrowser": "这个浏览器",
+    "syncplay.loading": "加载中",
+    "syncplay.idle": "没有在播放。",
+    "syncplay.playing": "正在播放 {name}",
+    "syncplay.paused": "已暂停：{name}",
+    "syncplay.waitingFor": "正在等待 {names}",
+    "syncplay.chip": "{name} · {count}"
   }
 };

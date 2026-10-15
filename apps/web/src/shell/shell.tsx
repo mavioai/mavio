@@ -16,16 +16,19 @@ import { Wordmark } from "../logo.tsx";
 import { setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { Avatar } from "../ui.tsx";
 import { RemoteCommands } from "../screens/remote.tsx";
+import { GroupIndicator } from "../screens/syncplay.tsx";
+import { SyncPlayProvider } from "../syncplay.tsx";
 import { SidebarPanel } from "./sidebar.tsx";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
 
 export function Shell() {
   return (
-    <>
+    <SyncPlayProvider>
       <Content />
       <RemoteCommands />
-    </>
+      <GroupIndicator />
+    </SyncPlayProvider>
   );
 }
 
