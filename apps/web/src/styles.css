@@ -142,7 +142,7 @@ body {
    card with focus instead. */
 :root:not([data-tv]) [data-card]:hover [data-art] {
   outline: 2px solid var(--mavio-color-accent);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 /* TV mode (docs/clients.md §6.3): the television's layout and type scale
@@ -203,7 +203,7 @@ body {
   }
   & [data-card]:focus [data-art] {
     outline: 3px solid var(--mavio-color-accent);
-    outline-offset: 3px;
+    outline-offset: 1.5px;
     box-shadow: var(--mavio-elevation-level3);
   }
   & :is(input, select, textarea):focus {

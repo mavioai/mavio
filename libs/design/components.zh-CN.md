@@ -11,8 +11,8 @@
 | 状态 | 外观 |
 | :--- | :--- |
 | 默认 | 如下文所述 |
-| 指针悬停 | 卡片的图片加上 2 pt 的 `color.accent` 边框，与图片相隔 2 pt |
-| 获得焦点（电视、键盘） | 以 `easing.standard` 在 `duration.fast` 内放大到 `layout.focusScale`，带 `elevation.level3`，图片加上 3 pt 的 `color.accent` 边框，与图片相隔 3 pt；其他平台的键盘焦点显示 2 pt 的 `color.focus` 边框 |
+| 指针悬停 | 卡片的图片加上 2 pt 的 `color.accent` 边框，与图片相隔 1 pt |
+| 获得焦点（电视、键盘） | 以 `easing.standard` 在 `duration.fast` 内放大到 `layout.focusScale`，带 `elevation.level3`，图片加上 3 pt 的 `color.accent` 边框，与图片相隔 1.5 pt；其他平台的键盘焦点显示 2 pt 的 `color.focus` 边框 |
 | 按下 | 内容不透明度降至 80% |
 | 加载 | 与组件最终尺寸相同的 `color.surfaceRaised` 占位，内容到达时不发生移动 |
 | 禁用 | 内容使用 `color.textDisabled` |
