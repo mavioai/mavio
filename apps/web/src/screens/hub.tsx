@@ -13,7 +13,7 @@ const route = getRouteApi("/s/$serverId/hub/$hubId");
 export function HubScreen() {
   const { serverId, hubId } = route.useParams();
   const server = useServer(serverId);
-  if (!server?.token) return <StatusView icon="error" title={t("auth.signedOut")} />;
+  if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   return <Hub server={server} hubId={hubId} several={useSignedIn().length > 1} />;
 }
 

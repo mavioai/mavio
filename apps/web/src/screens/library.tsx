@@ -40,7 +40,7 @@ const filterLabels: Record<Filter, MessageKey> = {
 export function LibraryScreen() {
   const { serverId, libraryId } = route.useParams();
   const server = useServer(serverId);
-  if (!server?.token) return <StatusView icon="error" title={t("auth.signedOut")} />;
+  if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   return <Library server={server} libraryId={libraryId} />;
 }
 

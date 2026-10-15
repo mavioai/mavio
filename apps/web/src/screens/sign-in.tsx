@@ -1,30 +1,27 @@
-// Sign-in (docs/clients.md §4.1, docs/accounts.md §6): with a Mavio account
-// through mavio.dev, the last one used here offered first, or to a server
-// by its address, those signed in to before listed first; on a server, a
-// password with the code of the user's authenticator app when it has one,
-// a passkey or Quick Connect. A new server's setup chooses its mode:
-// claiming it for a Mavio account, or creating its first user. A server
-// can also be added to a kept sign-in, a Mavio account's among them.
+// Sign-in and setup (docs/clients.md §4.1, docs/accounts.md §6). A server
+// in mavio.dev mode signs in its administrator with their Mavio account at
+// mavio.dev, and app.mavio.dev any Mavio account; a standalone server signs
+// in its users with a password, the code of their authenticator app when
+// they have one, a passkey or Quick Connect. A television signs a Mavio
+// account in with a code approved at mavio.dev/link. A new server's setup
+// chooses its mode: claiming it for a Mavio account at mavio.dev, or
+// creating its administrator; a television asks for a computer or phone.
 //
 // Each step is in the address, so that the browser's Back, Escape and a
 // remote's Back go to the step before. A card on a wall of posters on a
-// desktop, the whole screen on a phone, and tabs on the left on a
-// television.
+// desktop and a television, the whole screen on a phone.
 import {
   errorMessage,
   isTotpRequired,
   isUnauthenticated,
-  normalizeUrl,
+  type LinkCode,
   type QuickConnect,
-  type ServerEntry,
   type ServerInfo,
-  signInKey,
-  useServers,
   useServersStore,
-  useSignIns,
+  useSignIn,
 } from "@mavio/client-ts";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getRouteApi, Link, useCanGoBack, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getRouteApi, Link, Navigate, useCanGoBack, useNavigate } from "@tanstack/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 import type { IconName } from "../icon.tsx";
@@ -33,25 +30,24 @@ import { t } from "../i18n.ts";
 import { Wordmark } from "../logo.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { useSpatialNavigation } from "../shell/spatial.ts";
-import { Avatar } from "../ui.tsx";
 
-const route = getRouteApi("/sign-in");
+const signInRoute = getRouteApi("/sign-in");
+const setupRoute = getRouteApi("/setup");
 
-/** The steps of signing in, each with its own address. */
-export const steps = ["welcome", "mavio", "servers", "new", "server"] as const;
-export type Step = (typeof steps)[number];
+/** The steps of signing in to a standalone server after the password. */
+export const signInSteps = ["totp", "quick"] as const;
 
 /** The search of /sign-in. */
 export interface SignInSearch {
-  step?: Step;
-  /** The address of the server signed in to at the server step. */
-  server?: string;
-  /** Adds a sign-in to those kept, from settings. */
-  add?: boolean;
-  /** The key of the kept sign-in a server is added to. */
-  to?: string;
-  /** How many steps were taken here, which Back retraces. */
-  d?: number;
+  step?: (typeof signInSteps)[number];
+}
+
+/** The steps of setting a new server up. */
+export const setupSteps = ["mode", "admin"] as const;
+
+/** The search of /setup. */
+export interface SetupSearch {
+  step?: (typeof setupSteps)[number];
 }
 
 type Layout = "card" | "phone" | "tv";
@@ -69,14 +65,7 @@ const looks = {
     field: "h-11 rounded-[10px] px-3.5 text-[15px]",
     section: "text-[13px] font-semibold text-text-tertiary",
     group: "rounded-[12px]",
-    row: "min-h-14 gap-3 px-3.5",
     rowTitle: "text-[15px] font-semibold",
-    rowDetail: "text-[12px] text-text-tertiary",
-    avatar: 32,
-    account: "gap-3.5 rounded-[14px] p-3.5",
-    accountAvatar: 44,
-    accountName: "text-[16px] font-semibold",
-    accountDetail: "text-[13px] text-text-tertiary",
     digit: "h-[60px] w-12 rounded-[12px] text-[30px]",
     icon: 18,
   },
@@ -91,15 +80,8 @@ const looks = {
     field: "h-12 px-4 text-[17px]",
     section: "px-4 text-[13px] font-semibold text-text-tertiary uppercase",
     group: "rounded-[12px]",
-    row: "min-h-[60px] gap-3 px-4",
     rowTitle: "text-[17px] font-semibold",
-    rowDetail: "text-[13px] text-text-tertiary",
-    avatar: 36,
-    account: "gap-3.5 rounded-[14px] p-4",
-    accountAvatar: 48,
-    accountName: "text-[17px] font-semibold",
-    accountDetail: "text-[14px] text-text-tertiary",
-    digit: "h-[60px] w-12 rounded-[12px] text-[30px]",
+    digit: "h-[52px] w-10 rounded-[10px] text-[26px]",
     icon: 20,
   },
   tv: {
@@ -113,14 +95,7 @@ const looks = {
     field: "h-[84px] rounded-[22px] px-7 text-[28px]",
     section: "text-[22px] font-semibold text-text-tertiary",
     group: "",
-    row: "min-h-[104px] gap-6 rounded-[22px] bg-fill px-8 transition-transform focus:scale-[1.04]",
     rowTitle: "text-[30px] font-semibold",
-    rowDetail: "text-[22px] opacity-60",
-    avatar: 56,
-    account: "gap-6 rounded-[22px] bg-fill px-8 py-6 transition-transform focus:scale-[1.04]",
-    accountAvatar: 76,
-    accountName: "text-[32px] font-semibold",
-    accountDetail: "text-[22px] opacity-60",
     digit: "h-[110px] w-[88px] rounded-[22px] text-[56px]",
     icon: 30,
   },
@@ -131,147 +106,74 @@ type Look = (typeof looks)[Layout] & { layout: Layout };
 const LookContext = createContext<Look>({ ...looks.card, layout: "card" });
 const useLook = () => useContext(LookContext);
 
-export function SignInScreen() {
-  const servers = useServersStore();
-  const list = useServers();
-  const { all } = useSignIns();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const canGoBack = useCanGoBack();
-  const search = route.useSearch();
+/** The look of this window: a television's, a phone's or a card's. */
+function useLayoutLook(): Look {
   const { tv } = usePrefs();
   const width = useWidthClass();
   const layout: Layout = tv ? "tv" : width === "compact" ? "phone" : "card";
-  const look: Look = { ...looks[layout], layout };
-  const d = search.d ?? 0;
-  // Fixed on arrival: signing in must not turn the first sign-in into adding.
-  const [adding] = useState(() => !!search.add || !!search.to || servers.signedIn().length > 0);
-  const [address, setAddress] = useState(list.some((s) => s.url === servers.home) ? "" : servers.home);
-  const [qc, setQc] = useState<QuickConnect>();
-  const [error, setError] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const [needsCode, setNeedsCode] = useState(false);
-  // The mode a new server's setup chose.
-  const [setupMode, setSetupMode] = useState<"standalone" | "mavioDev">();
+  return { ...looks[layout], layout };
+}
 
-  // The serving server: a new one is set up first; one in mavio.dev mode
-  // signs Mavio accounts in.
-  const home = useQuery({ queryKey: ["authInfo", servers.home], queryFn: () => servers.probe(servers.home), retry: false });
-  const lastAccount = list.find((s) => s.mode === "mavioDev" && s.account);
-  // The server that signs a Mavio account in: the serving one, else the last one's.
-  const mavioServer = home.data?.mode === "mavioDev" ? home.data.url : lastAccount?.url;
-  const target = search.to ? all.find((x) => x.key === search.to) : undefined;
-  // The servers signed in to before, but those already in the sign-in added to.
-  const known = list.filter((s) => s.mode !== "mavioDev" && !(search.to && s.token && signInKey(s) === search.to));
-
-  let step: Step = search.step ?? (search.server ? "server" : search.to ? "servers" : tv ? "mavio" : "welcome");
-  // A television starts on the Mavio tab only where a server signs Mavio accounts in.
-  if (tv && !search.step && step === "mavio" && home.isFetched && !mavioServer) step = "servers";
-  if (search.to && (step === "welcome" || step === "mavio")) step = "servers";
-  // With no server signed in to before, connecting starts at the address.
-  if (step === "servers" && known.length === 0) step = "new";
-
-  let url: string | undefined;
-  try {
-    url = search.server ? normalizeUrl(search.server) : undefined;
-  } catch {
-    url = undefined;
+/**
+ * The frame of a step in this window's layout: on a phone, the wall of
+ * posters above the first step of signing in, and the whole screen for
+ * the others.
+ */
+function Screen({ wall = false, children }: { wall?: boolean; children: ReactNode }) {
+  const look = useLayoutLook();
+  let frame: ReactNode;
+  if (look.layout === "tv") {
+    frame = (
+      <div className="relative flex h-dvh items-center justify-center overflow-hidden bg-background px-[120px] py-[90px]">
+        <SpatialNavigation />
+        <PosterWall layout="tv" />
+        <Wordmark height={60} className="absolute top-[90px] left-[120px]" />
+        <div className="relative max-h-full w-full max-w-[1040px] overflow-y-auto rounded-[44px] border border-(--signin-separator) bg-(--signin-card) px-[90px] py-20 shadow-(--signin-shadow) backdrop-blur-[50px] backdrop-saturate-150">
+          {children}
+        </div>
+      </div>
+    );
+  } else if (look.layout === "phone") {
+    frame = wall ? (
+      <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
+        <PosterWall layout="phone" />
+        <div className="relative mt-auto px-6 pb-14">{children}</div>
+      </div>
+    ) : (
+      <div className="min-h-dvh bg-background px-5 pt-14 pb-10">{children}</div>
+    );
+  } else {
+    frame = <Frame>{children}</Frame>;
   }
-  const probe = useQuery({
-    queryKey: ["authInfo", url],
-    queryFn: () => servers.probe(url!),
-    enabled: step === "server" && !!url,
-    retry: false,
-  });
-  const info = step === "server" ? probe.data : undefined;
-  // The serving server's first setup, which has no step before it.
-  const firstRun = d === 0 && !adding && !!info?.setupRequired && info.url === home.data?.url;
+  return <LookContext value={look}>{frame}</LookContext>;
+}
 
-  // A new serving server is set up at once.
-  useEffect(() => {
-    if (home.data?.setupRequired && !adding && !search.server && !search.step) {
-      void navigate({ to: "/sign-in", search: { step: "server", server: home.data.url }, replace: true });
-    }
-  }, [home.data]);
+function SpatialNavigation() {
+  useSpatialNavigation();
+  return null;
+}
 
-  // A step starts afresh.
-  useEffect(() => {
-    setError(undefined);
-    setNeedsCode(false);
-    setSetupMode(undefined);
-    setQc(undefined);
-  }, [step, url]);
-
-  const keep = { add: search.add, to: search.to };
-  /** Goes on to a step, which Back returns from. */
-  const go = (to: Step, server?: string) =>
-    void navigate({ to: "/sign-in", search: { ...keep, step: to, server, d: d + 1 } });
-  /** Leaves sign-in for where it was opened from. */
-  const leave = () => (canGoBack ? history.back() : void navigate({ to: adding ? "/settings" : "/", replace: true }));
-
-  // The step before this one, or leaving; none at the first step of a first sign-in.
-  const leaving = adding ? ("leave" as const) : undefined;
-  let parent: Step | "leave" | undefined;
-  switch (step) {
-    case "welcome":
-      parent = leaving;
-      break;
-    case "mavio":
-      parent = tv ? leaving : "welcome";
-      break;
-    case "servers":
-      parent = search.to || tv ? leaving : "welcome";
-      break;
-    case "new":
-      parent = known.length ? "servers" : search.to || tv ? leaving : "welcome";
-      break;
-    case "server":
-      if (firstRun) parent = undefined;
-      else if (d === 0 && adding && search.server && !search.step) parent = "leave";
-      else parent = known.some((s) => s.url === url) ? "servers" : "new";
-  }
-  const inner = !!qc || !!setupMode;
-  const back =
-    inner || parent
-      ? () => {
-          if (qc) return setQc(undefined);
-          if (setupMode) {
-            setSetupMode(undefined);
-            setError(undefined);
-            return;
-          }
-          if (d > 0) return history.back();
-          if (parent === "leave") return leave();
-          if (parent) void navigate({ to: "/sign-in", search: { ...keep, step: parent }, replace: true });
-        }
-      : undefined;
-
-  // Escape, and Backspace outside a field, go back a step before the
-  // television's going back leaves the screen.
-  const backRef = useRef(back);
-  backRef.current = back;
+/** Escape, and Backspace outside a field, go back a step, as a remote's Back does. */
+function useBackKey(back: (() => void) | undefined) {
+  const ref = useRef(back);
+  ref.current = back;
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !ref.current) return;
       const typing = e.target instanceof Element && e.target.matches("input, textarea, select");
       if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
       e.preventDefault();
-      backRef.current?.();
+      ref.current();
     };
     document.addEventListener("keydown", key, true);
     return () => document.removeEventListener("keydown", key, true);
   }, []);
+}
 
-  const done = (entry?: ServerEntry) => {
-    if (entry && search.to) servers.addTo(entry.id, search.to);
-    void navigate({ to: adding && (search.to || search.server) ? "/settings" : "/", replace: true });
-  };
-
-  // Goes to mavio.dev, which comes back to /sign-in/mavio-dev.
-  const toMavioDev = async (u: string) => {
-    window.location.href = await servers.startMavioDevSignIn(u, `${location.origin}/sign-in/mavio-dev`);
-  };
-
+/** Runs the actions of a step one at a time, keeping the error of the last. */
+function useRun() {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string>();
   const run = async (f: () => Promise<void>) => {
     setBusy(true);
     setError(undefined);
@@ -283,322 +185,555 @@ export function SignInScreen() {
       setBusy(false);
     }
   };
+  return { busy, error, setError, run };
+}
 
-  const connect = (a: string) =>
-    run(async () => {
-      let i: ServerInfo;
-      try {
-        i = await servers.probe(a);
-      } catch (err) {
-        throw /not a Mavio server/.test(String(err)) ? new Error(t("auth.notMavio")) : err;
-      }
-      queryClient.setQueryData(["authInfo", i.url], i);
-      go("server", i.url);
-    });
+/** What the server serving the web UI tells before anyone signs in; nothing on app.mavio.dev. */
+function useHomeInfo() {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: ["authInfo", servers.home],
+    queryFn: () => servers.probe(servers.home!),
+    enabled: !servers.app,
+    retry: false,
+  });
+}
 
-  // Quick Connect waits for the code to be entered on another device.
+/** Signing in (docs/accounts.md §6): the way the serving server signs people in, or app.mavio.dev's. */
+export function SignInScreen() {
+  const servers = useServersStore();
+  const signIn = useSignIn();
+  const { tv } = usePrefs();
+  const home = useHomeInfo();
+  if (signIn) return <Navigate to="/" replace />;
+  if (servers.app) {
+    return tv ? (
+      <Screen>
+        <LinkSignIn />
+      </Screen>
+    ) : (
+      <Screen wall>
+        <MavioSignIn />
+      </Screen>
+    );
+  }
+  const info = home.data;
+  if (!info) {
+    return (
+      <Screen>
+        <Pending error={home.error} onRetry={() => void home.refetch()} />
+      </Screen>
+    );
+  }
+  if (info.setupRequired) {
+    return tv ? (
+      <Screen>
+        <SetUpElsewhere info={info} />
+      </Screen>
+    ) : (
+      <Navigate to="/setup" replace />
+    );
+  }
+  if (info.mode === "mavioDev") {
+    return tv ? (
+      <Screen>
+        <LinkSignIn info={info} />
+      </Screen>
+    ) : (
+      <Screen wall>
+        <MavioSignIn info={info} />
+      </Screen>
+    );
+  }
+  return (
+    <Screen>
+      <StandaloneSignIn info={info} />
+    </Screen>
+  );
+}
+
+/** Waiting for the serving server to answer, or why it did not. */
+function Pending({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+  const look = useLook();
+  return (
+    <div className={`flex flex-col items-center text-center ${look.stack}`}>
+      <Wordmark height={look.layout === "tv" ? 48 : 32} />
+      {error ? (
+        <>
+          <p className="text-[15px] text-danger">{errorMessage(error)}</p>
+          <Action variant="secondary" onClick={onRetry}>
+            {t("auth.tryAgain")}
+          </Action>
+        </>
+      ) : (
+        <p className={look.body}>{t("state.loading")}</p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Signing a Mavio account in at mavio.dev: the administrator of the
+ * serving server, whose other accounts watch at app.mavio.dev, or any
+ * account on app.mavio.dev.
+ */
+function MavioSignIn({ info }: { info?: ServerInfo }) {
+  const servers = useServersStore();
+  const look = useLook();
+  const { busy, error, run } = useRun();
+  const app = useQuery({ queryKey: ["appUrl", info?.id], queryFn: () => servers.appUrl(), enabled: !!info, staleTime: Infinity });
+  const phone = look.layout === "phone";
+  return (
+    <div className={`flex flex-col ${phone ? "items-start gap-3" : "items-center gap-3 text-center"}`}>
+      <Wordmark height={phone ? 40 : 36} className={phone ? "mb-1" : "mb-3"} />
+      {info && <h1 className={look.title}>{info.name}</h1>}
+      {info && <p className={`mb-4 ${look.body}`}>{t("auth.mavioDevMessage")}</p>}
+      {error && <p className="text-[15px] text-danger">{error}</p>}
+      <Action
+        disabled={busy}
+        onClick={() =>
+          run(async () => {
+            window.location.href = await servers.startSignIn("/");
+          })
+        }
+      >
+        {t("auth.signInWithMavio")}
+      </Action>
+      {app.data && (
+        <p className={`mt-2 ${look.subtitle}`}>
+          <a href={app.data} className="hover:underline">
+            {t("auth.othersUseApp", { host: new URL(app.data).host })}
+          </a>
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * A television's sign-in with a Mavio account: a code to approve at
+ * mavio.dev/link, polled for until approved, and replaced as it expires.
+ */
+function LinkSignIn({ info }: { info?: ServerInfo }) {
+  const servers = useServersStore();
+  const look = useLook();
+  const [link, setLink] = useState<LinkCode>();
+  const [error, setError] = useState<string>();
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    if (!qc) return;
     let stop = false;
-    const tick = async () => {
-      if (stop) return;
-      if (Date.now() > qc.expires.getTime()) {
-        setQc(undefined);
-        return;
-      }
-      try {
-        const entry = await servers.pollQuickConnect(qc);
-        if (entry) {
-          done(entry);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = (l: LinkCode) => {
+      timer = setTimeout(async () => {
+        if (stop) return;
+        if (Date.now() > l.expires.getTime()) return void start();
+        try {
+          // Signed in, the sign-in screen leaves for Home.
+          if (await servers.pollLink(l)) return;
+        } catch (err) {
+          if (!stop) setError(errorMessage(err));
           return;
         }
-      } catch (err) {
-        setError(errorMessage(err));
-        setQc(undefined);
-        return;
-      }
-      setTimeout(tick, 3000);
+        poll(l);
+      }, l.interval);
     };
-    const first = setTimeout(tick, 3000);
+    const start = async () => {
+      setError(undefined);
+      try {
+        const l = await servers.startLink();
+        if (stop) return;
+        setLink(l);
+        poll(l);
+      } catch (err) {
+        if (!stop) setError(errorMessage(err));
+      }
+    };
+    void start();
     return () => {
       stop = true;
-      clearTimeout(first);
+      clearTimeout(timer);
     };
-  }, [qc]);
+  }, [servers, attempt]);
+  const where = link && link.verificationUri.replace(/^https?:\/\//, "");
+  return (
+    <Steps title={t("auth.signInWithMavio")} subtitle={info?.name}>
+      {link && <p className={look.body}>{t("auth.linkMessage", { url: where! })}</p>}
+      {link && <Code code={link.userCode} />}
+      {error ? (
+        <>
+          <p className="text-[15px] text-danger">{error}</p>
+          <Action variant="secondary" onClick={() => setAttempt(attempt + 1)}>
+            {t("auth.tryAgain")}
+          </Action>
+        </>
+      ) : (
+        <Waiting />
+      )}
+    </Steps>
+  );
+}
 
-  /** Opens a server signed in to before: shows it when still signed in, else signs in again. */
-  const openServer = (s: ServerEntry) => {
-    if (!s.token) return go("server", s.url);
-    if (search.to) servers.addTo(s.id, search.to);
-    else servers.show(signInKey(s));
-    done();
-  };
+/** A code to enter on another device, a character to a box. */
+function Code({ code }: { code: string }) {
+  const look = useLook();
+  return (
+    <div className="flex items-center justify-center gap-2.5" aria-label={code}>
+      {[...code].map((c, i) =>
+        c === "-" ? (
+          <span key={i} className="w-3 text-center text-text-tertiary">
+            –
+          </span>
+        ) : (
+          <span key={i} className={`flex items-center justify-center bg-fill font-mono font-semibold ${look.digit}`}>
+            {c}
+          </span>
+        ),
+      )}
+    </div>
+  );
+}
 
-  const errorLine = error && <p className="text-[15px] text-danger">{error}</p>;
-  const addTo = target && t("auth.addToMessage", { name: target.name });
+function Waiting() {
+  const look = useLook();
+  return (
+    <p className={`flex items-center justify-center gap-2 ${look.body}`}>
+      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-tertiary border-t-transparent" />
+      {t("auth.waiting")}
+    </p>
+  );
+}
 
-  let content: ReactNode;
-  if (step === "welcome") {
-    content = (
-      <Welcome
-        mavio={!!mavioServer || home.isPending}
-        mavioReady={!!mavioServer}
-        onMavio={() => go("mavio")}
-        onServers={() => go("servers")}
-      />
-    );
-  } else if (step === "mavio") {
-    content = (
-      <Steps
-        title={t("auth.signInWithMavio")}
-        subtitle={lastAccount ? t("auth.lastAccount") : undefined}
-        onBack={tv ? undefined : back}
-      >
-        {lastAccount && (
-          <AccountCard entry={lastAccount} disabled={busy} onClick={() => run(() => toMavioDev(lastAccount.url))} />
-        )}
-        {!mavioServer && !home.isPending && <p className={look.body}>{t("auth.noMavioServer")}</p>}
-        {errorLine}
-        <Action
-          variant={lastAccount ? "secondary" : "primary"}
-          disabled={busy || !mavioServer}
-          onClick={() => mavioServer && run(() => toMavioDev(mavioServer))}
-        >
-          {lastAccount ? t("auth.otherAccount") : t("auth.signInWithMavio")}
-        </Action>
-      </Steps>
-    );
-  } else if (step === "servers") {
-    content = (
-      <Steps
-        title={target ? t("auth.addServer") : t("auth.connectToServer")}
-        subtitle={addTo}
-        onBack={tv && !search.to ? undefined : back}
-      >
-        <div className="flex flex-col gap-2">
-          <p className={look.section}>{t("auth.recentServers")}</p>
-          <Rows>
-            {known.map((s) => (
-              <Row
-                key={s.id}
-                name={s.name}
-                detail={s.token ? t("auth.signedInAs", { name: s.userName }) : `${s.userName} · ${t("auth.signedOut")}`}
-                disabled={busy}
-                onClick={() => openServer(s)}
-              />
-            ))}
-          </Rows>
-        </div>
-        {errorLine}
-        <Action variant="secondary" icon="add" onClick={() => go("new")}>
-          {t("auth.newServer")}
-        </Action>
-      </Steps>
-    );
-  } else if (step === "new") {
-    content = (
-      <Steps title={t("auth.newServer")} subtitle={addTo} onBack={tv && !parent ? undefined : back}>
+/** A television's screen of a server not set up yet, which is set up in a browser. */
+function SetUpElsewhere({ info }: { info: ServerInfo }) {
+  const look = useLook();
+  return (
+    <Steps eyebrow={t("auth.newServerSetup")} title={t("auth.setUpElsewhere", { server: info.name })}>
+      <p className={look.body}>{t("auth.setUpElsewhereMessage")}</p>
+      <p className={`font-mono font-semibold [overflow-wrap:anywhere] ${look.title}`}>{info.url.replace(/^https?:\/\//, "")}</p>
+    </Steps>
+  );
+}
+
+/**
+ * Signing in to a standalone server: a name and password, then the code of
+ * the user's authenticator app when they have one; a passkey; or Quick
+ * Connect. The password waits in memory for the code's step, which a
+ * reload sends back to the first.
+ */
+function StandaloneSignIn({ info }: { info: ServerInfo }) {
+  const servers = useServersStore();
+  const navigate = useNavigate();
+  const canGoBack = useCanGoBack();
+  const { step } = signInRoute.useSearch();
+  const { busy, error, setError, run } = useRun();
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const look = useLook();
+  const first = step === undefined || (step === "totp" && !name);
+  const back = first ? undefined : () => (canGoBack ? history.back() : void navigate({ to: "/sign-in", replace: true }));
+  useBackKey(back);
+  useEffect(() => setError(undefined), [step]);
+
+  const signIn = (totp?: string) =>
+    run(async () => {
+      try {
+        await servers.signInWithPassword(name.trim(), password, totp);
+      } catch (err) {
+        if (!totp && isTotpRequired(err)) {
+          setCode("");
+          void navigate({ to: "/sign-in", search: { step: "totp" } });
+          return;
+        }
+        throw isUnauthenticated(err) ? new Error(t(totp ? "auth.wrongCode" : "auth.wrongPassword")) : err;
+      }
+    });
+
+  const subtitle = `${t("auth.standaloneServer")} · ${info.url}`;
+  if (step === "quick") return <QuickConnectSignIn info={info} onBack={back} />;
+  if (step === "totp" && name) {
+    return (
+      <Steps title={t("auth.totpCode")} subtitle={subtitle} onBack={back}>
         <form
           className={`flex flex-col ${look.stack}`}
           onSubmit={(e) => {
             e.preventDefault();
-            void connect(address);
+            void signIn(code);
           }}
         >
+          <p className={look.body}>{t("auth.totpMessage")}</p>
           <Fields
             fields={[
               {
-                label: t("auth.server"),
-                value: address,
-                onChange: (e) => setAddress(e.target.value),
-                placeholder: t("auth.serverAddress"),
-                autoFocus: !tv,
+                label: t("auth.totpCode"),
+                value: code,
+                onChange: (e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6)),
+                autoComplete: "one-time-code",
+                inputMode: "numeric",
+                autoFocus: true,
                 required: true,
-                inputMode: "url",
-                autoCapitalize: "off",
-                autoCorrect: "off",
               },
             ]}
           />
-          {errorLine}
-          <Action type="submit" disabled={busy || !address.trim()}>
-            {t("auth.connect")}
+          {error && <p className="text-[15px] text-danger">{error}</p>}
+          <Action type="submit" disabled={busy || code.length !== 6}>
+            {t("auth.signIn")}
           </Action>
         </form>
       </Steps>
     );
-  } else if (!info) {
-    content = (
-      <Steps title={t("auth.connectToServer")} subtitle={url} onBack={back}>
-        {probe.error || !url ? (
-          <p className="text-[15px] text-danger">
-            {!url || /not a Mavio server/.test(String(probe.error)) ? t("auth.notMavio") : errorMessage(probe.error)}
-          </p>
-        ) : (
-          <p className={look.body}>{t("state.loading")}</p>
-        )}
-      </Steps>
-    );
-  } else if (qc) {
-    content = (
-      <Steps title={t("auth.quickConnectTitle")} subtitle={info.name} onBack={back}>
-        <p className={look.body}>{t("auth.quickConnectCode", { code: qc.code })}</p>
-        <div className="flex justify-center gap-2.5" aria-label={qc.code}>
-          {[...qc.code].map((digit, i) => (
-            <span key={i} className={`flex items-center justify-center bg-fill font-mono font-semibold ${look.digit}`}>
-              {digit}
-            </span>
-          ))}
-        </div>
-        <p className={`flex items-center justify-center gap-2 ${look.body}`}>
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-text-tertiary border-t-transparent" />
-          {t("auth.waiting")}
-        </p>
-      </Steps>
-    );
-  } else if (info.setupRequired && !info.mode && !setupMode) {
-    content = <ChooseMode info={info} onBack={back} onChoose={setSetupMode} />;
-  } else if (info.mode === "mavioDev" || setupMode === "mavioDev") {
-    content = info.setupRequired ? (
-      <Claim
-        info={info}
-        busy={busy}
-        error={error}
-        onBack={back}
-        onClaim={(code) =>
-          run(async () => {
-            queryClient.setQueryData(["authInfo", info.url], await servers.claimServer(info.url, code));
-            await toMavioDev(info.url);
-          })
-        }
-      />
-    ) : (
-      <Steps title={info.name} subtitle={info.url} onBack={back}>
-        <p className={look.body}>{t("auth.mavioDevMessage")}</p>
-        {errorLine}
-        <Action disabled={busy} onClick={() => run(() => toMavioDev(info.url))}>
-          {t("auth.signInWithMavio")}
-        </Action>
-      </Steps>
-    );
-  } else {
-    content = (
-      <Credentials
-        info={info}
-        busy={busy}
-        error={error}
-        onBack={back}
-        onSubmit={(name, password, code) =>
-          run(async () => {
-            let entry: ServerEntry;
-            try {
-              entry = info.setupRequired
-                ? await servers.createFirstUser(info.url, name, password)
-                : await servers.signIn(info.url, name, password, code);
-            } catch (err) {
-              if (!code && isTotpRequired(err)) {
-                setNeedsCode(true);
-                return;
-              }
-              throw isUnauthenticated(err) ? new Error(t(code ? "auth.wrongCode" : "auth.wrongPassword")) : err;
-            }
-            done(entry);
-          })
-        }
-        needsCode={needsCode}
-        onPasskey={() => run(async () => done(await servers.signInWithPasskey(info.url)))}
-        onQuickConnect={() => run(async () => setQc(await servers.startQuickConnect(info.url)))}
-      />
-    );
   }
-
-  if (layout === "tv") {
-    const mavioTab = step === "mavio";
-    const tabs: [Step, string, IconName, boolean][] = [
-      ...(search.to ? [] : [["mavio", t("auth.signInWithMavio"), "profile", mavioTab] as [Step, string, IconName, boolean]]),
-      ["servers", t("auth.connectToServer"), "server", !mavioTab],
-    ];
-    // Moving focus onto a tab shows it, in place of the step shown.
-    const show = (s: Step) => void navigate({ to: "/sign-in", search: { ...keep, step: s, d: search.d }, replace: true });
-    return (
-      <LookContext value={look}>
-        <SpatialNavigation />
-        <div className="relative flex h-dvh overflow-hidden bg-background">
-          <PosterWall layout="tv" />
-          <div className="relative flex w-full gap-20 px-[120px] py-[90px]">
-            <aside className="flex w-[520px] shrink-0 flex-col">
-              <Wordmark height={60} className="mb-16" />
-              <div role="tablist" aria-orientation="vertical" className="flex flex-col gap-4">
-                {tabs.map(([s, label, icon, on]) => (
-                  <button
-                    key={s}
-                    type="button"
-                    role="tab"
-                    aria-selected={on}
-                    onFocus={() => on || show(s)}
-                    onClick={() => on || show(s)}
-                    className={`flex h-[92px] items-center gap-5 rounded-[22px] px-8 text-left text-[32px] font-semibold transition-transform focus:scale-[1.06] focus:shadow-[0_18px_40px_rgb(0_0_0/0.4)] ${on ? "bg-fill" : "text-text-secondary"}`}
-                  >
-                    <Icon name={icon} size={36} />
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-auto text-[20px] text-text-tertiary">{t("auth.tvHint")}</p>
-            </aside>
-            <div
-              role="tabpanel"
-              className="min-w-0 flex-1 self-center overflow-y-auto rounded-[44px] border border-(--signin-separator) bg-(--signin-card) px-[90px] py-20 shadow-(--signin-shadow) backdrop-blur-[50px] backdrop-saturate-150"
-            >
-              {content}
-            </div>
-          </div>
-        </div>
-      </LookContext>
-    );
-  }
-
-  if (layout === "phone") {
-    return (
-      <LookContext value={look}>
-        {step === "welcome" ? (
-          <div className="relative flex min-h-dvh flex-col overflow-hidden bg-background">
-            <PosterWall layout="phone" />
-            {adding && <Close />}
-            <div className="relative mt-auto px-6 pb-14">{content}</div>
-          </div>
-        ) : (
-          <div className="min-h-dvh bg-background px-5 pt-14 pb-10">{content}</div>
-        )}
-      </LookContext>
-    );
-  }
-
+  const passkeys = passkeysHere(info.url);
   return (
-    <LookContext value={look}>
-      <Frame>
-        {adding && step === "welcome" && <Close />}
-        {content}
-      </Frame>
-    </LookContext>
+    <Steps title={t("auth.signInTo", { server: info.name })} subtitle={subtitle}>
+      <form
+        className={`flex flex-col ${look.stack}`}
+        onSubmit={(e) => {
+          e.preventDefault();
+          void signIn();
+        }}
+      >
+        <Credentials name={name} password={password} setName={setName} setPassword={setPassword} />
+        {error && <p className="text-[15px] text-danger">{error}</p>}
+        <Action type="submit" disabled={busy || !name.trim()}>
+          {t("auth.signIn")}
+        </Action>
+        <div className="flex items-center gap-3 text-[13px] text-text-tertiary">
+          <span className="h-px flex-1 bg-(--signin-separator)" />
+          {t("auth.or")}
+          <span className="h-px flex-1 bg-(--signin-separator)" />
+        </div>
+        <div className={`grid gap-2.5 ${passkeys ? "grid-cols-2" : "grid-cols-1"}`}>
+          {passkeys && (
+            <Action variant="secondary" icon="key" onClick={() => run(async () => void (await servers.signInWithPasskey()))} disabled={busy}>
+              {t("auth.passkey")}
+            </Action>
+          )}
+          <Action variant="secondary" icon="devices" onClick={() => void navigate({ to: "/sign-in", search: { step: "quick" } })}>
+            {t("auth.quickConnect")}
+          </Action>
+        </div>
+      </form>
+    </Steps>
   );
 }
 
-function SpatialNavigation() {
-  useSpatialNavigation();
-  return null;
+/** A name and a password. */
+function Credentials({
+  name,
+  password,
+  setName,
+  setPassword,
+  creating = false,
+}: {
+  name: string;
+  password: string;
+  setName: (s: string) => void;
+  setPassword: (s: string) => void;
+  creating?: boolean;
+}) {
+  const look = useLook();
+  return (
+    <Fields
+      fields={[
+        {
+          label: t("auth.username"),
+          value: name,
+          onChange: (e) => setName(e.target.value),
+          autoComplete: "username",
+          autoCapitalize: "off",
+          autoFocus: look.layout !== "tv",
+          required: true,
+        },
+        {
+          label: t("auth.password"),
+          type: "password",
+          value: password,
+          onChange: (e) => setPassword(e.target.value),
+          autoComplete: creating ? "new-password" : "current-password",
+          required: creating,
+        },
+      ]}
+    />
+  );
 }
 
-/** Closes sign-in that was opened to add a sign-in. */
-function Close() {
+/** Quick Connect: a code entered on a device signed in to the server, waited for until it is. */
+function QuickConnectSignIn({ info, onBack }: { info: ServerInfo; onBack?: () => void }) {
+  const servers = useServersStore();
+  const look = useLook();
+  const [qc, setQc] = useState<QuickConnect>();
+  const [error, setError] = useState<string>();
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let stop = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = (q: QuickConnect) => {
+      timer = setTimeout(async () => {
+        if (stop) return;
+        if (Date.now() > q.expires.getTime()) return void start();
+        try {
+          // Signed in, the sign-in screen leaves for Home.
+          if (await servers.pollQuickConnect(q)) return;
+        } catch (err) {
+          if (!stop) setError(errorMessage(err));
+          return;
+        }
+        poll(q);
+      }, 3000);
+    };
+    const start = async () => {
+      setError(undefined);
+      try {
+        const q = await servers.startQuickConnect();
+        if (stop) return;
+        setQc(q);
+        poll(q);
+      } catch (err) {
+        if (!stop) setError(errorMessage(err));
+      }
+    };
+    void start();
+    return () => {
+      stop = true;
+      clearTimeout(timer);
+    };
+  }, [servers, attempt]);
   return (
-    <Link
-      to="/settings"
-      aria-label={t("action.close")}
-      className="absolute top-4 right-4 z-10 rounded-full bg-fill p-1.5 text-text-secondary hover:bg-fill-selected"
-    >
-      <Icon name="close" size={18} />
-    </Link>
+    <Steps title={t("auth.quickConnectTitle")} subtitle={info.name} onBack={onBack}>
+      {qc && <p className={look.body}>{t("auth.quickConnectCode", { code: qc.code })}</p>}
+      {qc && <Code code={qc.code} />}
+      {error ? (
+        <>
+          <p className="text-[15px] text-danger">{error}</p>
+          <Action variant="secondary" onClick={() => setAttempt(attempt + 1)}>
+            {t("auth.tryAgain")}
+          </Action>
+        </>
+      ) : (
+        <Waiting />
+      )}
+    </Steps>
+  );
+}
+
+/**
+ * Setting the serving server up (docs/accounts.md §2, §3.2): choosing its
+ * mode, then claiming it at mavio.dev or creating its administrator.
+ */
+export function SetupScreen() {
+  const servers = useServersStore();
+  const signIn = useSignIn();
+  const { tv } = usePrefs();
+  const home = useHomeInfo();
+  if (servers.app || signIn) return <Navigate to="/" replace />;
+  const info = home.data;
+  if (!info) {
+    return (
+      <Screen>
+        <Pending error={home.error} onRetry={() => void home.refetch()} />
+      </Screen>
+    );
+  }
+  if (!info.setupRequired) return <Navigate to="/sign-in" replace />;
+  return <Screen>{tv ? <SetUpElsewhere info={info} /> : <Setup info={info} />}</Screen>;
+}
+
+function Setup({ info }: { info: ServerInfo }) {
+  const servers = useServersStore();
+  const navigate = useNavigate();
+  const canGoBack = useCanGoBack();
+  const { step } = setupRoute.useSearch();
+  const { busy, error, setError, run } = useRun();
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const look = useLook();
+  // A mode the server was started with skips the choice.
+  const admin = info.mode === "standalone" || (!info.mode && step === "admin");
+  const back =
+    admin && !info.mode ? () => (canGoBack ? history.back() : void navigate({ to: "/setup", search: { step: "mode" }, replace: true })) : undefined;
+  useBackKey(back);
+  useEffect(() => setError(undefined), [step]);
+
+  const claim = () =>
+    run(async () => {
+      window.location.href = await servers.startClaim("/");
+    });
+
+  if (admin) {
+    return (
+      <Steps
+        eyebrow={t("auth.newServerSetup")}
+        title={t("auth.setUp", { server: info.name })}
+        subtitle={`${t("auth.standaloneServer")} · ${info.url}`}
+        onBack={back}
+      >
+        <form
+          className={`flex flex-col ${look.stack}`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run(async () => void (await servers.createFirstUser(name.trim(), password)));
+          }}
+        >
+          <p className={look.body}>{t("auth.setUpMessage")}</p>
+          <Credentials name={name} password={password} setName={setName} setPassword={setPassword} creating />
+          {error && <p className="text-[15px] text-danger">{error}</p>}
+          <Action type="submit" disabled={busy || !name.trim()}>
+            {t("auth.createAccount")}
+          </Action>
+        </form>
+      </Steps>
+    );
+  }
+  if (info.mode === "mavioDev") {
+    return (
+      <Steps eyebrow={t("auth.newServerSetup")} title={t("auth.claim", { server: info.name })} subtitle={info.url}>
+        <p className={look.body}>{t("auth.claimMessage")}</p>
+        {error && <p className="text-[15px] text-danger">{error}</p>}
+        <Action disabled={busy} onClick={claim}>
+          {t("auth.claimServer")}
+        </Action>
+      </Steps>
+    );
+  }
+  return (
+    <ChooseMode
+      info={info}
+      busy={busy}
+      error={error}
+      onChoose={(mode) => (mode === "mavioDev" ? void claim() : void navigate({ to: "/setup", search: { step: "admin" } }))}
+    />
+  );
+}
+
+/** Where mavio.dev comes back to with the code of a sign-in or a claim. */
+export function CallbackScreen() {
+  const servers = useServersStore();
+  const navigate = useNavigate();
+  const [error, setError] = useState<string>();
+  useEffect(() => {
+    servers.finishCallback(new URLSearchParams(location.search)).then(
+      (to) => void navigate({ to, replace: true }),
+      (err: unknown) => setError(errorMessage(err)),
+    );
+    // Once: the code is spent.
+  }, []);
+  return (
+    <Screen>
+      <div className="flex flex-col items-center gap-4 text-center">
+        <Wordmark height={32} />
+        {error ? (
+          <>
+            <p className="text-[15px] text-danger">{error}</p>
+            <Link to="/sign-in" replace className="text-[15px] font-semibold text-accent-text hover:underline">
+              {t("auth.tryAgain")}
+            </Link>
+          </>
+        ) : (
+          <p className="text-[15px] text-text-secondary">{t("auth.signingIn")}</p>
+        )}
+      </div>
+    </Screen>
   );
 }
 
@@ -669,37 +804,6 @@ function PosterWall({ layout }: { layout: Layout }) {
   );
 }
 
-/** The first step: the two ways of signing in. */
-function Welcome({
-  mavio,
-  mavioReady,
-  onMavio,
-  onServers,
-}: {
-  mavio: boolean;
-  mavioReady: boolean;
-  onMavio: () => void;
-  onServers: () => void;
-}) {
-  const look = useLook();
-  const phone = look.layout === "phone";
-  return (
-    <div className={`flex flex-col ${phone ? "items-start gap-3" : "items-center gap-3 text-center"}`}>
-      <Wordmark height={phone ? 40 : 36} className={phone ? "mb-1" : "mb-3"} />
-      {!phone && <h1 className={look.title}>{t("auth.welcome")}</h1>}
-      <p className={`mb-4 ${phone ? "text-[16px] leading-[22px] text-text-secondary" : look.body}`}>{t("auth.welcomeMessage")}</p>
-      {mavio && (
-        <Action disabled={!mavioReady} onClick={onMavio}>
-          {t("auth.signInWithMavio")}
-        </Action>
-      )}
-      <Action variant="secondary" onClick={onServers}>
-        {t("auth.connectToServer")}
-      </Action>
-    </div>
-  );
-}
-
 /** A step's back link, title and the line under it, above its content. */
 function Steps({
   title,
@@ -759,59 +863,6 @@ function Action({
   );
 }
 
-/** Rows grouped together, or apart on a television. */
-function Rows({ children }: { children: ReactNode }) {
-  const look = useLook();
-  return look.layout === "tv" ? (
-    <div className="flex flex-col gap-4">{children}</div>
-  ) : (
-    <div className={`flex flex-col divide-y divide-(--signin-separator) overflow-hidden bg-(--signin-group) ${look.group}`}>{children}</div>
-  );
-}
-
-/** A server's row: its initial in a circle, its name and who is signed in. */
-function Row({ name, detail, disabled, onClick }: { name: string; detail: string; disabled?: boolean; onClick: () => void }) {
-  const look = useLook();
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`flex w-full items-center text-left hover:bg-fill ${look.row}`}
-    >
-      <Avatar name={name} size={look.avatar} />
-      <span className="min-w-0 flex-1">
-        <span className={`block truncate ${look.rowTitle}`}>{name}</span>
-        <span className={`block truncate ${look.rowDetail}`}>{detail}</span>
-      </span>
-      <Icon name="forward" size={look.icon} className="shrink-0 opacity-50" />
-    </button>
-  );
-}
-
-/** The Mavio account last signed in with, which continues as it. */
-function AccountCard({ entry, disabled, onClick }: { entry: ServerEntry; disabled: boolean; onClick: () => void }) {
-  const look = useLook();
-  const name = entry.account?.name ?? entry.userName;
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`flex w-full items-center text-left hover:bg-fill ${look.layout === "tv" ? "" : "bg-(--signin-group)"} ${look.account}`}
-    >
-      <Avatar name={name} size={look.accountAvatar} />
-      <span className="min-w-0 flex-1">
-        <span className={`block truncate ${look.accountName}`}>{name}</span>
-        <span className={`block truncate ${look.accountDetail}`}>{t("auth.mavioAccountOf", { server: entry.name })}</span>
-      </span>
-      <span className={`shrink-0 font-semibold text-accent-text ${look.layout === "tv" ? "text-[28px]" : "text-[15px]"}`}>
-        {t("auth.continue")}
-      </span>
-    </button>
-  );
-}
-
 type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & { label: string };
 
 /**
@@ -850,45 +901,16 @@ function Fields({ fields }: { fields: FieldProps[] }) {
   );
 }
 
-/** Where mavio.dev comes back to with the code of a Mavio account's sign-in. */
-export function MavioDevCallbackScreen() {
-  const servers = useServersStore();
-  const navigate = useNavigate();
-  const [error, setError] = useState<string>();
-  useEffect(() => {
-    servers.finishMavioDevSignIn(new URLSearchParams(location.search)).then(
-      () => void navigate({ to: "/", replace: true }),
-      (err: unknown) => setError(errorMessage(err)),
-    );
-    // Once: the code is spent.
-  }, []);
-  return (
-    <Frame>
-      <div className="flex flex-col items-center gap-4 text-center">
-        <Wordmark height={32} />
-        {error ? (
-          <>
-            <p className="text-[15px] text-danger">{error}</p>
-            <Link to="/sign-in" replace className="text-[15px] font-semibold text-accent-text hover:underline">
-              {t("auth.tryAgain")}
-            </Link>
-          </>
-        ) : (
-          <p className="text-[15px] text-text-secondary">{t("auth.signingIn")}</p>
-        )}
-      </div>
-    </Frame>
-  );
-}
-
 /** A new server's choice of mode (docs/accounts.md §2). */
 function ChooseMode({
   info,
-  onBack,
+  busy,
+  error,
   onChoose,
 }: {
   info: ServerInfo;
-  onBack?: () => void;
+  busy: boolean;
+  error?: string;
   onChoose: (mode: "standalone" | "mavioDev") => void;
 }) {
   const look = useLook();
@@ -918,69 +940,15 @@ function ChooseMode({
       eyebrow={t("auth.newServerSetup")}
       title={t("auth.chooseMode", { server: info.name })}
       subtitle={info.url}
-      onBack={onBack}
     >
       <div role="radiogroup" className="flex flex-col gap-3">
         {option("mavioDev", t("auth.modeMavioDev"), t("auth.modeMavioDevMessage"))}
         {option("standalone", t("auth.modeStandalone"), t("auth.modeStandaloneMessage"))}
       </div>
-      <Action onClick={() => onChoose(mode)}>{t("auth.continue")}</Action>
-    </Steps>
-  );
-}
-
-/** Claims a new server for the Mavio account whose claim code is entered. */
-function Claim({
-  info,
-  busy,
-  error,
-  onBack,
-  onClaim,
-}: {
-  info: ServerInfo;
-  busy: boolean;
-  error?: string;
-  onBack?: () => void;
-  onClaim: (code: string) => void;
-}) {
-  const look = useLook();
-  const [code, setCode] = useState("");
-  const site = info.mavioDevUrl?.replace(/\/api\/?$/, "");
-  return (
-    <Steps eyebrow={t("auth.newServerSetup")} title={t("auth.claim", { server: info.name })} subtitle={info.url} onBack={onBack}>
-      <form
-        className={`flex flex-col ${look.stack}`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          onClaim(code);
-        }}
-      >
-        <p className={look.body}>{t("auth.claimMessage")}</p>
-        {site && (
-          <a href={`${site}/claim`} target="_blank" rel="noopener" className="self-start font-semibold text-accent-text hover:underline">
-            {t("auth.getClaimCode")}
-          </a>
-        )}
-        <Fields
-          fields={[
-            {
-              label: t("auth.claimCode"),
-              value: code,
-              onChange: (e) => setCode(e.target.value.toUpperCase()),
-              placeholder: "XXXX-XXXX",
-              autoComplete: "off",
-              autoCapitalize: "characters",
-              className: "font-mono",
-              autoFocus: look.layout !== "tv",
-              required: true,
-            },
-          ]}
-        />
-        {error && <p className="text-[15px] text-danger">{error}</p>}
-        <Action type="submit" disabled={busy || !code.trim()}>
-          {t("auth.claimServer")}
-        </Action>
-      </form>
+      {error && <p className="text-[15px] text-danger">{error}</p>}
+      <Action disabled={busy} onClick={() => onChoose(mode)}>
+        {t("auth.continue")}
+      </Action>
     </Steps>
   );
 }
@@ -994,110 +962,4 @@ export function passkeysHere(url: string): boolean {
   if (typeof PublicKeyCredential === "undefined" || !window.isSecureContext) return false;
   const u = new URL(url);
   return u.origin === location.origin && !/^[\d.]+$|^\[/.test(u.hostname);
-}
-
-function Credentials({
-  info,
-  busy,
-  error,
-  needsCode,
-  onBack,
-  onSubmit,
-  onPasskey,
-  onQuickConnect,
-}: {
-  info: ServerInfo;
-  busy: boolean;
-  error?: string;
-  needsCode: boolean;
-  onBack?: () => void;
-  onSubmit: (name: string, password: string, code?: string) => void;
-  onPasskey: () => void;
-  onQuickConnect: () => void;
-}) {
-  const look = useLook();
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-  const passkeys = passkeysHere(info.url);
-  return (
-    <Steps
-      eyebrow={info.setupRequired ? t("auth.newServerSetup") : undefined}
-      title={info.setupRequired ? t("auth.setUp", { server: info.name }) : t("auth.signInTo", { server: info.name })}
-      subtitle={`${t("auth.standaloneServer")} · ${info.url}`}
-      onBack={onBack}
-    >
-      <form
-        className={`flex flex-col ${look.stack}`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit(name.trim(), password, needsCode ? code : undefined);
-        }}
-      >
-        {info.setupRequired && <p className={look.body}>{t("auth.setUpMessage")}</p>}
-        <Fields
-          fields={[
-            {
-              label: t("auth.username"),
-              value: name,
-              onChange: (e) => setName(e.target.value),
-              autoComplete: "username",
-              autoCapitalize: "off",
-              autoFocus: look.layout !== "tv",
-              required: true,
-            },
-            {
-              label: t("auth.password"),
-              type: "password",
-              value: password,
-              onChange: (e) => setPassword(e.target.value),
-              autoComplete: info.setupRequired ? "new-password" : "current-password",
-              required: info.setupRequired,
-            },
-          ]}
-        />
-        {needsCode && (
-          <>
-            <p className={look.body}>{t("auth.totpMessage")}</p>
-            <Fields
-              fields={[
-                {
-                  label: t("auth.totpCode"),
-                  value: code,
-                  onChange: (e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6)),
-                  autoComplete: "one-time-code",
-                  inputMode: "numeric",
-                  autoFocus: true,
-                  required: true,
-                },
-              ]}
-            />
-          </>
-        )}
-        {error && <p className="text-[15px] text-danger">{error}</p>}
-        <Action type="submit" disabled={busy || !name.trim() || (needsCode && code.length !== 6)}>
-          {info.setupRequired ? t("auth.createAccount") : t("auth.signIn")}
-        </Action>
-        {!info.setupRequired && (
-          <>
-            <div className="flex items-center gap-3 text-[13px] text-text-tertiary">
-              <span className="h-px flex-1 bg-(--signin-separator)" />
-              {t("auth.or")}
-              <span className="h-px flex-1 bg-(--signin-separator)" />
-            </div>
-            <div className={`grid gap-2.5 ${passkeys ? "grid-cols-2" : "grid-cols-1"}`}>
-              {passkeys && (
-                <Action variant="secondary" icon="key" onClick={onPasskey} disabled={busy}>
-                  {t("auth.passkey")}
-                </Action>
-              )}
-              <Action variant="secondary" icon="devices" onClick={onQuickConnect} disabled={busy}>
-                {t("auth.quickConnect")}
-              </Action>
-            </div>
-          </>
-        )}
-      </form>
-    </Steps>
-  );
 }

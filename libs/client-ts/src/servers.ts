@@ -1,36 +1,34 @@
-// The servers the web UI is signed in to (docs/clients.md §4.1, §5.4): the
-// one serving it and those the user added, each with its own user and
-// token, in the user's order, grouped into the sign-ins of
-// docs/accounts.md §7, of which one is shown.
+// The servers the web UI is signed in to (docs/clients.md §4.1, §5.4,
+// docs/accounts.md §6, §7): one sign-in at a time. A Mavio account holds a
+// session of the browser's device key at mavio.dev, with which it signs in
+// to each of the account's servers; a standalone server's user is signed
+// in to the server serving the web UI alone. app.mavio.dev, served by no
+// server, signs Mavio accounts in only.
 import type { DescService } from "@bufbuild/protobuf";
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { type Client, Code, ConnectError, createClient, type Transport } from "@connectrpc/connect";
+import { createConnectTransport } from "@connectrpc/connect-web";
 import { AccountMode, AuthService, type GetAuthInfoResponse, type SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
-import { DisplayPreferencesService } from "@mavio/proto/mavio/user/v1/display_preferences_pb";
+import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 
-import { assertionMessage, browserDeviceKey, type DeviceKey, refreshMessage } from "./device-key.ts";
+import { assertionMessage, browserDeviceKey, type DeviceKey, refreshMessage, renewalMessage } from "./device-key.ts";
 import { transport } from "./server.ts";
 
-/** A server the user added. */
+/** A server signed in to. */
 export interface ServerEntry {
   /** The server's own ID, the same at every address. */
   id: string;
   name: string;
   version: string;
-  /** Its base URL, such as `https://media.example.com/mavio`. */
+  /** The base URL it is reached at, such as `https://media.example.com/mavio`; empty while unreachable. */
   url: string;
+  /** The URLs a Mavio account's server published, best first. */
+  urls?: string[];
   userId: string;
   userName: string;
   /** How the server signs people in, as it told at sign-in. */
   mode?: "standalone" | "mavioDev";
-  /** In mavio.dev mode, the Mavio account signed in. */
-  account?: { id: string; name: string };
-  /**
-   * The key of the sign-in a standalone server was added to; unset when
-   * it is a sign-in of its own.
-   */
-  signIn?: string;
   /** This browser's session; unset when signed out. */
   sessionId?: string;
   /** The session's access token; unset when signed out. */
@@ -52,31 +50,45 @@ export interface ServerInfo {
   mavioDevUrl?: string;
 }
 
-/**
- * A sign-in the browser keeps (docs/accounts.md §7): a Mavio account with
- * the servers it is signed in to, or a user of one standalone server.
- */
+/** A Mavio account signed in. */
+export interface Account {
+  id: string;
+  name: string;
+}
+
+/** The sign-in of the web UI: a Mavio account's, or a standalone server user's. */
 export interface SignIn {
-  /** `account:<ID>` or `server:<ID>`. */
-  key: string;
   kind: "mavioDev" | "standalone";
   /** The account's or the user's name. */
   name: string;
-  /** Its signed-in servers, in the user's order. */
+  /** The Mavio account. */
+  account?: Account;
+  /** The servers signed in to, in the user's order. */
   servers: ServerEntry[];
 }
 
-/** The key of the sign-in a server's session belongs to. */
-export function signInKey(s: ServerEntry): string {
-  return s.mode === "mavioDev" && s.account ? `account:${s.account.id}` : (s.signIn ?? `server:${s.id}`);
+/** The device's session at mavio.dev. */
+interface AccountSession {
+  /** The base URL of mavio.dev's API. */
+  api: string;
+  clientId: string;
+  sessionId: string;
+  token: string;
+  /** When the access token expires, in milliseconds since the epoch. */
+  expires: number;
+  account: Account;
 }
 
-/** A mavio.dev sign-in on its way to mavio.dev and back. */
-interface PendingSignIn {
+/** A sign-in on its way to mavio.dev and back. */
+interface Pending {
+  kind: "signIn" | "claim";
+  api: string;
+  clientId: string;
   state: string;
   verifier: string;
-  url: string;
   redirectUri: string;
+  /** Where the web UI goes once signed in. */
+  returnTo: string;
 }
 
 /** A Quick Connect request: the user enters the code on a signed-in device. */
@@ -87,23 +99,45 @@ export interface QuickConnect {
   secret: string;
 }
 
-/** Where the servers are kept in the browser. */
+/** A link code a television shows, which an account approves at mavio.dev/link. */
+export interface LinkCode {
+  userCode: string;
+  /** Where to enter it. */
+  verificationUri: string;
+  /** Where to go to approve it without typing it. */
+  verificationUriComplete: string;
+  deviceCode: string;
+  /** How often to poll, in milliseconds. */
+  interval: number;
+  expires: Date;
+}
+
+/** Where the sign-in is kept in the browser. */
 export interface Storage {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
 }
 
 const serversKey = "mavio.servers";
+const accountKey = "mavio.account";
 const deviceKey = "mavio.device";
-const shownKey = "mavio.signIn";
 const pendingKey = "mavio.pendingSignIn";
-
-/** The client and view of the display preferences holding the user's servers. */
-const prefsClient = "mavio-web";
-const prefsView = "servers";
 
 /** How long before its expiry an access token is refreshed. */
 const refreshMargin = 5 * 60_000;
+/** How long before its expiry mavio.dev's access token is renewed. */
+const renewMargin = 60_000;
+/** How long a server's address is tried. */
+const reachTimeout = 4000;
+/** How long a server just claimed is waited for to learn its administrator. */
+const claimWait = 30_000;
+
+/** The grant type that renews a device's session at mavio.dev. */
+const renewGrant = "urn:mavio:params:oauth:grant-type:device-signature";
+const deviceCodeGrant = "urn:ietf:params:oauth:grant-type:device_code";
+
+/** The client ID of app.mavio.dev. */
+const appClient = "app";
 
 /** A sign-in's answer. */
 interface SignedIn {
@@ -133,15 +167,10 @@ async function device(storage: Storage, key: DeviceKey) {
   return { id, name: browser, client: "Mavio Web", clientVersion: "0.0.0", publicKey: await key.publicKey() };
 }
 
-/** Normalizes an address the user typed into a base URL. */
-export function normalizeUrl(input: string, defaultPort = 8686): string {
-  let s = input.trim().replace(/\/+$/, "");
-  if (s === "") throw new Error("empty address");
-  const typedScheme = s.includes("://");
-  if (!typedScheme) s = `http://${s}`;
-  const u = new URL(s);
+/** Normalizes a base URL: no trailing slashes. */
+export function normalizeUrl(input: string): string {
+  const u = new URL(input.trim());
   if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error(`${input} is not http or https`);
-  if (!typedScheme && u.port === "") u.port = String(defaultPort);
   return `${u.protocol}//${u.host}${u.pathname.replace(/\/+$/, "")}`;
 }
 
@@ -174,32 +203,75 @@ function randomString(): string {
   return base64url(crypto.getRandomValues(new Uint8Array(32)));
 }
 
+async function s256(verifier: string): Promise<string> {
+  return base64url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
+}
+
+/** The site of mavio.dev's API. */
+function siteOf(api: string): string {
+  return api.replace(/\/+$/, "").replace(/\/api$/, "");
+}
+
+function read<T>(storage: Storage, key: string): T | undefined {
+  try {
+    return JSON.parse(storage.getItem(key) ?? "null") ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** An OAuth endpoint's refusal. */
+class OAuthError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+/** Where the web UI runs. */
+export interface Options {
+  /**
+   * The base URL of mavio.dev's API on app.mavio.dev, which no server
+   * serves; unset when a server serves the web UI.
+   */
+  mavioDevUrl?: string;
+  key?: DeviceKey;
+}
+
 /**
- * The servers, kept in the browser with their sessions, and their list
- * without sessions in the display preferences of the serving server, so
- * that it follows the user across browsers. Each session belongs to the
- * browser's device key, which signs its refreshes. Observed with
+ * The sign-in, kept in the browser with its sessions, each of the
+ * browser's device key, which signs their refreshes. Observed with
  * useSyncExternalStore.
  */
 export class Servers {
   private list: ServerEntry[];
-  private shown: string | null;
+  private session: AccountSession | undefined;
+  private signIn_: SignIn | undefined;
   private listeners = new Set<() => void>();
   private transports = new Map<string, { sessionId?: string; url: string; transport: Transport }>();
   private refreshing = new Map<string, Promise<string | undefined>>();
+  private renewing: Promise<string | undefined> | undefined;
+  private syncing: Promise<void> | undefined;
+  private key: DeviceKey;
+  /** The base URL of the server serving the web UI; unset on app.mavio.dev. */
+  readonly home: string | undefined;
+  /** The base URL of mavio.dev's API on app.mavio.dev. */
+  readonly appApi: string | undefined;
 
   constructor(
     private storage: Storage,
-    /** The base URL of the server serving the web UI. */
-    readonly home: string,
-    private key: DeviceKey = browserDeviceKey(),
+    /** The origin and base path of the web UI, such as `https://media.example.com/mavio`. */
+    readonly base: string,
+    options: Options = {},
   ) {
-    try {
-      this.list = JSON.parse(storage.getItem(serversKey) ?? "[]") as ServerEntry[];
-    } catch {
-      this.list = [];
-    }
-    this.shown = storage.getItem(shownKey);
+    this.key = options.key ?? browserDeviceKey();
+    this.appApi = options.mavioDevUrl;
+    this.home = options.mavioDevUrl ? undefined : base;
+    this.list = read<ServerEntry[]>(storage, serversKey) ?? [];
+    this.session = read<AccountSession>(storage, accountKey);
+    this.signIn_ = this.compute();
   }
 
   subscribe = (listener: () => void) => {
@@ -210,61 +282,65 @@ export class Servers {
   /** The servers in the user's order; a stable array until they change. */
   snapshot = () => this.list;
 
+  /** The sign-in; a stable object until it changes. */
+  signInSnapshot = () => this.signIn_;
+
+  /** Whether this is app.mavio.dev, which signs Mavio accounts in only. */
+  get app(): boolean {
+    return !this.home;
+  }
+
+  /** The Mavio account signed in. */
+  account(): Account | undefined {
+    return this.session?.account;
+  }
+
   /** One server. */
   get(id: string): ServerEntry | undefined {
     return this.list.find((s) => s.id === id);
   }
 
-  /** The servers the user is signed in to, in their order, in every sign-in. */
+  /** The servers signed in to, in the user's order. */
   signedIn(): ServerEntry[] {
     return this.list.filter((s) => s.token);
   }
 
-  /** The sign-ins kept, in the order of their first servers. */
-  signIns(): SignIn[] {
-    const out = new Map<string, SignIn>();
-    for (const s of this.signedIn()) {
-      const key = signInKey(s);
-      const known = out.get(key);
-      if (known) known.servers.push(s);
-      else out.set(key, { key, kind: key.startsWith("account:") ? "mavioDev" : "standalone", name: "", servers: [s] });
-    }
-    // Named by the account, or by the user of the server whose sign-in it is.
-    for (const x of out.values()) {
-      const own = x.kind === "mavioDev" ? x.servers.find((s) => s.account) : x.servers.find((s) => x.key === `server:${s.id}`);
-      x.name = (x.kind === "mavioDev" ? own?.account?.name : own?.userName) ?? x.servers[0].userName;
-    }
-    return [...out.values()];
+  /** The server serving the web UI, once signed in to. */
+  homeServer(): ServerEntry | undefined {
+    return this.home ? this.list.find((s) => s.url === this.home) : undefined;
   }
 
-  /** The key the user chose to show; read with shownSignIn. */
-  shownSnapshot = () => this.shown;
-
-  /**
-   * The sign-in shown: the one the user chose, else the one of the serving
-   * server, else the first.
-   */
-  shownSignIn(): SignIn | undefined {
-    const all = this.signIns();
-    const home = this.homeServer();
-    return (
-      all.find((x) => x.key === this.shown) ??
-      (home?.token ? all.find((x) => x.key === signInKey(home)) : undefined) ??
-      all[0]
-    );
+  private compute(): SignIn | undefined {
+    const servers = this.signedIn();
+    if (this.session) {
+      const a = this.session.account;
+      return { kind: "mavioDev", name: a.name, account: a, servers };
+    }
+    if (servers.length === 0) return undefined;
+    return { kind: "standalone", name: servers[0].userName, servers };
   }
 
-  /** Shows another kept sign-in. */
-  show(key: string) {
-    this.shown = key;
-    this.storage.setItem(shownKey, key);
+  private emit() {
+    this.signIn_ = this.compute();
     for (const l of this.listeners) l();
+  }
+
+  private set(list: ServerEntry[]) {
+    this.list = list;
+    this.storage.setItem(serversKey, JSON.stringify(list));
+    this.emit();
+  }
+
+  private setSession(s: AccountSession | undefined) {
+    this.session = s;
+    this.storage.setItem(accountKey, JSON.stringify(s ?? null));
+    this.emit();
   }
 
   /**
    * The Connect client of a service on a server, whose access token is
-   * refreshed as it expires; a session the server ended signs the user out
-   * of it.
+   * refreshed as it expires; a session the server ended signs a Mavio
+   * account in again, and the user of a standalone server out.
    */
   client<T extends DescService>(service: T, server: ServerEntry): Client<T> {
     let t = this.transports.get(server.id);
@@ -291,7 +367,8 @@ export class Servers {
   /**
    * Refreshes a server's access token by signing its nonce with the device
    * key; one refresh runs at a time. A session the server no longer
-   * refreshes signs the user out of it.
+   * refreshes is replaced with a new one of the Mavio account, or signs the
+   * user out of it.
    */
   refresh(id: string): Promise<string | undefined> {
     let p = this.refreshing.get(id);
@@ -304,10 +381,7 @@ export class Servers {
 
   private async doRefresh(id: string): Promise<string | undefined> {
     const s = this.get(id);
-    if (!s?.sessionId) {
-      this.forgetToken(id);
-      return undefined;
-    }
+    if (!s?.sessionId) return this.ended(id);
     const sessionId = s.sessionId;
     const auth = createClient(AuthService, transport({ url: s.url }));
     try {
@@ -316,85 +390,55 @@ export class Servers {
       const r = await auth.refreshSession({ sessionId, nonce, signature });
       const at = this.list.findIndex((x) => x.id === id);
       if (at < 0 || this.list[at].sessionId !== sessionId) return undefined;
-      this.set(this.list.with(at, { ...this.list[at], token: r.accessToken, expires: expiry(r) }), false);
+      this.set(this.list.with(at, { ...this.list[at], token: r.accessToken, expires: expiry(r) }));
       return r.accessToken;
     } catch (err) {
-      if (ConnectError.from(err).code === Code.Unauthenticated) {
-        this.forgetToken(id);
-        return undefined;
-      }
+      if (ConnectError.from(err).code === Code.Unauthenticated) return this.ended(id);
       throw err;
     }
   }
 
-  /** The server serving the web UI, once added. */
-  homeServer(): ServerEntry | undefined {
-    return this.list.find((s) => s.url === this.home);
-  }
-
-  private set(list: ServerEntry[], sync = true) {
-    this.list = list;
-    this.storage.setItem(serversKey, JSON.stringify(list));
-    for (const l of this.listeners) l();
-    if (sync) void this.save();
-  }
-
-  /** Writes the list, without sessions, to the serving server's preferences. */
-  private async save() {
-    const home = this.homeServer();
-    if (!home?.token) return;
-    const list = this.list.map(({ sessionId: _, token: __, expires: ___, ...s }) => s);
+  // ended handles a server's session that ended: a Mavio account signs in again.
+  private async ended(id: string): Promise<string | undefined> {
+    this.forgetToken(id);
+    const s = this.get(id);
+    if (!this.session || !s?.url) return undefined;
     try {
-      await this.client(DisplayPreferencesService, home).setDisplayPreferences({
-        client: prefsClient,
-        view: prefsView,
-        values: { list: JSON.stringify(list) },
-      });
+      return (await this.assert(s)).token;
     } catch {
-      // Kept in the browser; written with the next change.
+      return undefined;
     }
   }
 
-  /** Adds the servers the user added in other browsers, signed out here. */
-  async load() {
-    const home = this.homeServer();
-    if (!home?.token) return;
-    const prefs = await this.client(DisplayPreferencesService, home).getDisplayPreferences({
-      client: prefsClient,
-      view: prefsView,
-    });
-    const raw = prefs.preferences?.values.list;
-    if (!raw) return;
-    let kept: ServerEntry[];
-    try {
-      kept = JSON.parse(raw) as ServerEntry[];
-    } catch {
-      return;
+  /** Forgets the session of a server that ended it. */
+  forgetToken(id: string) {
+    const at = this.list.findIndex((s) => s.id === id);
+    if (at >= 0 && this.list[at].token) {
+      const { sessionId: _, token: __, expires: ___, ...rest } = this.list[at];
+      this.set(this.list.with(at, rest));
     }
-    const merged = kept.map((k) => {
-      const here = this.get(k.id);
-      return { ...k, ...here, sessionId: here?.sessionId, token: here?.token, expires: here?.expires };
-    });
-    const rest = this.list.filter((s) => !kept.some((k) => k.id === s.id));
-    this.set([...merged, ...rest], false);
   }
 
-  /** Asks the server at an address who it is. */
-  async probe(address: string): Promise<ServerInfo> {
-    const url = normalizeUrl(address);
-    return info(url, await createClient(AuthService, transport({ url })).getAuthInfo({}));
+  /** Asks the server at a URL who it is. */
+  async probe(url: string, timeoutMs?: number): Promise<ServerInfo> {
+    const u = normalizeUrl(url);
+    return info(u, await createClient(AuthService, transport({ url: u })).getAuthInfo({}, { timeoutMs }));
   }
 
-  private added(i: ServerInfo, r: SignedIn, account?: { id: string; name: string }): ServerEntry {
+  // Standalone servers: the serving server's users.
+
+  private homeUrl(): string {
+    if (!this.home) throw new Error("no server serves this page");
+    return this.home;
+  }
+
+  private added(i: ServerInfo, r: SignedIn): ServerEntry {
     const entry: ServerEntry = {
       id: i.id,
       name: i.name,
       version: i.version,
       url: i.url,
       mode: i.mode,
-      account,
-      // Signing in again keeps the sign-in it was added to.
-      signIn: this.get(i.id)?.signIn,
       userId: r.user?.id ?? "",
       userName: r.user?.name ?? "",
       sessionId: r.session?.id,
@@ -403,18 +447,16 @@ export class Servers {
     };
     const at = this.list.findIndex((s) => s.id === i.id);
     this.set(at < 0 ? [...this.list, entry] : this.list.with(at, entry));
-    // A new sign-in is shown.
-    this.show(signInKey(entry));
     return entry;
   }
 
   /**
-   * Signs in to the server at an address with a name and password, and the
-   * current code of the user's TOTP when it has one; without the code
-   * such a user's sign-in fails as isTotpRequired tells.
+   * Signs in to the serving server with a name and password, and the
+   * current code of the user's TOTP when it has one; without the code such
+   * a user's sign-in fails as isTotpRequired tells.
    */
-  async signIn(address: string, name: string, password: string, totpCode?: string): Promise<ServerEntry> {
-    const i = await this.probe(address);
+  async signInWithPassword(name: string, password: string, totpCode?: string): Promise<ServerEntry> {
+    const i = await this.probe(this.homeUrl());
     const r = await createClient(AuthService, transport({ url: i.url })).login({
       name,
       password,
@@ -424,9 +466,9 @@ export class Servers {
     return this.added(i, r);
   }
 
-  /** Signs in to the server at an address with a passkey of the browser's choosing. */
-  async signInWithPasskey(address: string): Promise<ServerEntry> {
-    const i = await this.probe(address);
+  /** Signs in to the serving server with a passkey of the browser's choosing. */
+  async signInWithPasskey(): Promise<ServerEntry> {
+    const i = await this.probe(this.homeUrl());
     const auth = createClient(AuthService, transport({ url: i.url }));
     const start = await auth.startPasskeySignIn({});
     const publicKey = PublicKeyCredential.parseRequestOptionsFromJSON(JSON.parse(start.optionsJson));
@@ -440,105 +482,9 @@ export class Servers {
     return this.added(i, r);
   }
 
-  /** The users a server's session may switch to (docs/accounts.md §4.4). */
-  async switchableUsers(server: ServerEntry): Promise<SwitchableUser[]> {
-    return (await this.client(AuthService, server).listSwitchableUsers({})).users;
-  }
-
-  /**
-   * Switches a server's session to another user, with its PIN when it has
-   * one; the session's token acts as that user from then on.
-   */
-  async switchUser(server: ServerEntry, userId: string, pin?: string): Promise<ServerEntry> {
-    const r = await this.client(AuthService, server).switchUser({ userId, pin });
-    const at = this.list.findIndex((s) => s.id === server.id);
-    if (at < 0) throw new Error(`${server.name} was removed`);
-    const entry = { ...this.list[at], userId: r.user?.id ?? userId, userName: r.user?.name ?? "" };
-    this.set(this.list.with(at, entry), false);
-    return entry;
-  }
-
-  /**
-   * Sets up a new server in mavio.dev mode with a claim code from
-   * mavio.dev/claim, which makes its account the administrator; the
-   * account then signs in with startMavioDevSignIn.
-   */
-  async claimServer(address: string, claimCode: string): Promise<ServerInfo> {
-    const i = await this.probe(address);
-    await createClient(AuthService, transport({ url: i.url })).claimServer({ claimCode: claimCode.trim() });
-    return this.probe(i.url);
-  }
-
-  /**
-   * Starts signing a Mavio account in to the server at an address
-   * (docs/accounts.md §6): returns the mavio.dev page to go to, which comes
-   * back to redirectUri, where finishMavioDevSignIn completes it.
-   */
-  async startMavioDevSignIn(address: string, redirectUri: string): Promise<string> {
-    const i = await this.probe(address);
-    if (i.mode !== "mavioDev" || !i.mavioDevUrl) throw new Error(`${i.name} does not sign in with Mavio accounts`);
-    const verifier = randomString();
-    const state = randomString();
-    const challenge = base64url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
-    const pending: PendingSignIn = { state, verifier, url: i.url, redirectUri };
-    this.storage.setItem(pendingKey, JSON.stringify(pending));
-    const u = new URL(`${i.mavioDevUrl.replace(/\/api\/?$/, "")}/authorize`);
-    u.search = new URLSearchParams({
-      client_id: i.id,
-      redirect_uri: redirectUri,
-      state,
-      code_challenge: challenge,
-      code_challenge_method: "S256",
-      device_key: base64url(await this.key.publicKey()),
-    }).toString();
-    return u.toString();
-  }
-
-  /**
-   * Completes a mavio.dev sign-in with the parameters mavio.dev came back
-   * with: exchanges the code for a sign-in assertion and signs in to the
-   * server with it.
-   */
-  async finishMavioDevSignIn(params: URLSearchParams): Promise<ServerEntry> {
-    let pending: PendingSignIn | undefined;
-    try {
-      pending = JSON.parse(this.storage.getItem(pendingKey) ?? "null") ?? undefined;
-    } catch {
-      pending = undefined;
-    }
-    this.storage.setItem(pendingKey, "null");
-    if (!pending || params.get("state") !== pending.state) throw new Error("this sign-in was not started here");
-    if (params.get("error")) throw new Error(params.get("error_description") ?? params.get("error") ?? "");
-    const i = await this.probe(pending.url);
-    if (!i.mavioDevUrl) throw new Error(`${i.name} does not sign in with Mavio accounts`);
-    const res = await fetch(`${i.mavioDevUrl.replace(/\/$/, "")}/oauth/token`, {
-      method: "POST",
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        code: params.get("code") ?? "",
-        client_id: i.id,
-        redirect_uri: pending.redirectUri,
-        code_verifier: pending.verifier,
-      }),
-    });
-    const token = (await res.json()) as {
-      assertion?: string;
-      account?: { id: string; userName?: string; displayName?: string };
-      error_description?: string;
-    };
-    if (!res.ok || !token.assertion || !token.account) throw new Error(token.error_description ?? res.statusText);
-    const r = await createClient(AuthService, transport({ url: i.url })).signInWithAssertion({
-      assertion: token.assertion,
-      device: await device(this.storage, this.key),
-      signature: await this.key.sign(assertionMessage(token.assertion)),
-    });
-    const name = token.account.displayName || token.account.userName || "";
-    return this.added(i, r, { id: token.account.id, name });
-  }
-
-  /** Creates the first user of a new server and signs in as them. */
-  async createFirstUser(address: string, name: string, password: string): Promise<ServerEntry> {
-    const i = await this.probe(address);
+  /** Sets the serving server up in standalone mode: creates its first user and signs in as them. */
+  async createFirstUser(name: string, password: string): Promise<ServerEntry> {
+    const i = await this.probe(this.homeUrl());
     const r = await createClient(AuthService, transport({ url: i.url })).createFirstUser({
       name,
       password,
@@ -547,9 +493,9 @@ export class Servers {
     return this.added(i, r);
   }
 
-  /** Starts signing in with Quick Connect. */
-  async startQuickConnect(address: string): Promise<QuickConnect> {
-    const i = await this.probe(address);
+  /** Starts signing in to the serving server with Quick Connect. */
+  async startQuickConnect(): Promise<QuickConnect> {
+    const i = await this.probe(this.homeUrl());
     const r = await createClient(AuthService, transport({ url: i.url })).startQuickConnect({
       device: await device(this.storage, this.key),
     });
@@ -575,54 +521,367 @@ export class Servers {
     await this.client(AuthService, server).authorizeQuickConnect({ code: code.trim() });
   }
 
+  /** The users a server's session may switch to (docs/accounts.md §4.4). */
+  async switchableUsers(server: ServerEntry): Promise<SwitchableUser[]> {
+    return (await this.client(AuthService, server).listSwitchableUsers({})).users;
+  }
+
   /**
-   * Adds a standalone server signed in to a kept sign-in, such as a Mavio
-   * account's, whose servers it then joins; the sign-in is shown.
+   * Switches a server's session to another user, with its PIN when it has
+   * one; the session's token acts as that user from then on.
    */
-  addTo(id: string, key: string) {
-    const at = this.list.findIndex((s) => s.id === id);
-    if (at < 0 || this.list[at].mode === "mavioDev") return;
-    const own = key === `server:${id}`;
-    const { signIn: _, ...rest } = this.list[at];
-    this.set(this.list.with(at, own ? rest : { ...rest, signIn: key }));
-    this.show(key);
+  async switchUser(server: ServerEntry, userId: string, pin?: string): Promise<ServerEntry> {
+    const r = await this.client(AuthService, server).switchUser({ userId, pin });
+    const at = this.list.findIndex((s) => s.id === server.id);
+    if (at < 0) throw new Error(`${server.name} was removed`);
+    const entry = { ...this.list[at], userId: r.user?.id ?? userId, userName: r.user?.name ?? "" };
+    this.set(this.list.with(at, entry));
+    return entry;
   }
 
-  /** Forgets the session of a server that ended it. */
-  forgetToken(id: string) {
-    const at = this.list.findIndex((s) => s.id === id);
-    if (at >= 0 && this.list[at].token) {
-      const { sessionId: _, token: __, expires: ___, ...rest } = this.list[at];
-      this.set(this.list.with(at, rest), false);
+  // Mavio accounts: a session of the device key at mavio.dev.
+
+  /** The base URL of mavio.dev's API and the client ID this web UI signs in as. */
+  private async mavioClient(): Promise<{ api: string; clientId: string }> {
+    if (this.appApi) return { api: this.appApi, clientId: appClient };
+    const i = await this.probe(this.homeUrl());
+    if (!i.mavioDevUrl) throw new Error(`${i.name} does not sign in with Mavio accounts`);
+    return { api: i.mavioDevUrl, clientId: i.id };
+  }
+
+  /** The address of app.mavio.dev, where the accounts of a server other than its administrator watch. */
+  async appUrl(): Promise<string> {
+    const { api } = await this.mavioClient();
+    const res = await fetch(`${siteOf(api)}/api/config`);
+    if (!res.ok) throw new Error(`mavio.dev's configuration: ${res.statusText}`);
+    return ((await res.json()) as { appURL: string }).appURL;
+  }
+
+  /** Where mavio.dev sends the browser back to. */
+  callbackUri(): string {
+    return `${this.base.replace(/\/+$/, "")}/auth/callback`;
+  }
+
+  private async pending(kind: Pending["kind"], api: string, clientId: string, returnTo: string) {
+    const p: Pending = { kind, api, clientId, state: randomString(), verifier: randomString(), redirectUri: this.callbackUri(), returnTo };
+    this.storage.setItem(pendingKey, JSON.stringify(p));
+    return { ...p, challenge: await s256(p.verifier) };
+  }
+
+  /**
+   * Starts signing a Mavio account in (docs/accounts.md §6): returns the
+   * mavio.dev page to go to, which comes back to callbackUri, where
+   * finishCallback completes it and returns returnTo.
+   */
+  async startSignIn(returnTo = "/"): Promise<string> {
+    const { api, clientId } = await this.mavioClient();
+    const p = await this.pending("signIn", api, clientId, returnTo);
+    const u = new URL(`${siteOf(api)}/authorize`);
+    u.search = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: p.redirectUri,
+      state: p.state,
+      code_challenge: p.challenge,
+      code_challenge_method: "S256",
+      device_key: base64url(await this.key.publicKey()),
+    }).toString();
+    return u.toString();
+  }
+
+  /**
+   * Starts claiming the serving server for a Mavio account (docs/accounts.md
+   * §3.2): returns the mavio.dev page where the account confirms it, which
+   * comes back to callbackUri signed in.
+   */
+  async startClaim(returnTo = "/"): Promise<string> {
+    const { api, clientId } = await this.mavioClient();
+    const p = await this.pending("claim", api, clientId, returnTo);
+    const r = await createClient(AuthService, transport({ url: this.homeUrl() })).startClaim({
+      redirectUri: p.redirectUri,
+      codeChallenge: p.challenge,
+      deviceKey: await this.key.publicKey(),
+      state: p.state,
+    });
+    return r.url;
+  }
+
+  /**
+   * Completes a sign-in or a claim with the parameters mavio.dev came back
+   * with: exchanges the code for a session of the device key and signs in
+   * to the account's servers. Returns where the web UI goes next.
+   */
+  async finishCallback(params: URLSearchParams): Promise<string> {
+    const p = read<Pending>(this.storage, pendingKey);
+    this.storage.setItem(pendingKey, "null");
+    if (!p || params.get("state") !== p.state) throw new Error("this sign-in was not started here");
+    const error = params.get("error");
+    if (error) throw new OAuthError(error, params.get("error_description") ?? error);
+    await this.startSession(
+      p.api,
+      p.clientId,
+      await this.oauth(p.api, "token", {
+        grant_type: "authorization_code",
+        code: params.get("code") ?? "",
+        client_id: p.clientId,
+        redirect_uri: p.redirectUri,
+        code_verifier: p.verifier,
+      }),
+    );
+    await this.sync(p.kind === "claim");
+    return p.returnTo;
+  }
+
+  /** Starts signing in a television with a code an account approves at mavio.dev/link. */
+  async startLink(): Promise<LinkCode> {
+    const { api, clientId } = await this.mavioClient();
+    const r = (await this.oauth(api, "device", { client_id: clientId, device_key: base64url(await this.key.publicKey()) })) as {
+      device_code: string;
+      user_code: string;
+      verification_uri: string;
+      verification_uri_complete: string;
+      expires_in: number;
+      interval: number;
+    };
+    return {
+      userCode: r.user_code,
+      verificationUri: r.verification_uri,
+      verificationUriComplete: r.verification_uri_complete,
+      deviceCode: r.device_code,
+      interval: r.interval * 1000,
+      expires: new Date(Date.now() + r.expires_in * 1000),
+    };
+  }
+
+  /** Signs in once the link code was approved; false until then. */
+  async pollLink(link: LinkCode): Promise<boolean> {
+    const { api, clientId } = await this.mavioClient();
+    let token: unknown;
+    try {
+      token = await this.oauth(api, "token", { grant_type: deviceCodeGrant, device_code: link.deviceCode, client_id: clientId });
+    } catch (err) {
+      if (err instanceof OAuthError && (err.code === "authorization_pending" || err.code === "slow_down")) return false;
+      throw err;
     }
+    await this.startSession(api, clientId, token);
+    await this.sync();
+    return true;
   }
 
-  /** Removes a kept sign-in: signs out of its servers, which stay listed. */
-  async signOut(key: string) {
-    const sessions = this.signedIn().filter((s) => signInKey(s) === key);
-    await Promise.all(
-      sessions.map(async (s) => {
-        try {
-          await this.client(AuthService, s).logout({});
-        } catch {
-          // Its session ends once idle.
-        }
-        this.forgetToken(s.id);
+  private async oauth(api: string, endpoint: string, fields: Record<string, string>): Promise<unknown> {
+    const res = await fetch(`${api.replace(/\/+$/, "")}/oauth/${endpoint}`, { method: "POST", body: new URLSearchParams(fields) });
+    const body = (await res.json().catch(() => ({}))) as { error?: string; error_description?: string };
+    if (!res.ok) throw new OAuthError(body.error ?? "server_error", body.error_description ?? res.statusText);
+    return body;
+  }
+
+  private async startSession(api: string, clientId: string, token: unknown) {
+    const t = token as {
+      access_token: string;
+      expires_in: number;
+      session_id: string;
+      account: { id: string; userName?: string; displayName?: string };
+    };
+    // Another account's servers go with its sign-in.
+    if (this.session && this.session.account.id !== t.account.id) await this.signOut();
+    this.setSession({
+      api,
+      clientId,
+      sessionId: t.session_id,
+      token: t.access_token,
+      expires: Date.now() + t.expires_in * 1000,
+      account: { id: t.account.id, name: t.account.displayName || t.account.userName || "" },
+    });
+  }
+
+  /** mavio.dev's access token, renewed with a signature of the device key when it is about to expire. */
+  private accountToken(): Promise<string | undefined> {
+    const s = this.session;
+    if (!s) return Promise.resolve(undefined);
+    if (s.expires - Date.now() > renewMargin) return Promise.resolve(s.token);
+    this.renewing ??= this.renew(s).finally(() => (this.renewing = undefined));
+    return this.renewing;
+  }
+
+  private async renew(s: AccountSession): Promise<string | undefined> {
+    const timestamp = Date.now();
+    const signature = base64url(await this.key.sign(renewalMessage(s.sessionId, timestamp)));
+    let r: { access_token: string; expires_in: number };
+    try {
+      r = (await this.oauth(s.api, "token", {
+        grant_type: renewGrant,
+        session_id: s.sessionId,
+        timestamp: String(timestamp),
+        signature,
+      })) as typeof r;
+    } catch (err) {
+      // A session mavio.dev ended signs the account out everywhere.
+      if (err instanceof OAuthError && err.code === "invalid_grant") {
+        await this.signOut();
+        return undefined;
+      }
+      throw err;
+    }
+    if (this.session?.sessionId !== s.sessionId) return undefined;
+    this.setSession({ ...s, token: r.access_token, expires: Date.now() + r.expires_in * 1000 });
+    return r.access_token;
+  }
+
+  /** A Connect client of a service of mavio.dev, called with the account's session. */
+  mavioDev<T extends DescService>(service: T): Client<T> {
+    const s = this.session;
+    if (!s) throw new Error("no Mavio account is signed in");
+    return createClient(
+      service,
+      createConnectTransport({
+        baseUrl: s.api,
+        interceptors: [
+          (next) => async (req) => {
+            const token = await this.accountToken();
+            if (!token) throw new ConnectError("signed out of mavio.dev", Code.Unauthenticated);
+            req.header.set("Authorization", `Bearer ${token}`);
+            return next(req);
+          },
+        ],
       }),
     );
   }
 
-  /** Signs out of a server and forgets it. */
-  async remove(id: string) {
-    const s = this.get(id);
-    if (s?.token) {
+  /** The site of mavio.dev, where the account is managed. */
+  mavioDevSite(): string | undefined {
+    return this.session && siteOf(this.session.api);
+  }
+
+  /**
+   * Follows the account's servers: signs in to those it newly reaches, at
+   * the first of their URLs that answers, and forgets those it no longer
+   * reaches. One sync runs at a time.
+   */
+  sync(claimed = false): Promise<void> {
+    this.syncing ??= this.doSync(claimed).finally(() => (this.syncing = undefined));
+    return this.syncing;
+  }
+
+  private async doSync(claimed: boolean) {
+    if (!this.session) return;
+    const { servers } = await this.mavioDev(AccountService).listServers({});
+    const homeId = this.home ? (await this.probe(this.home).catch(() => undefined))?.id : undefined;
+    const known = new Map(this.list.map((s) => [s.id, s]));
+    const next: ServerEntry[] = [];
+    for (const s of servers) {
+      const was = known.get(s.id);
+      next.push({
+        id: s.id,
+        name: s.name,
+        version: s.version,
+        url: was?.url ?? "",
+        urls: s.connections,
+        userId: was?.userId ?? "",
+        userName: was?.userName ?? "",
+        mode: "mavioDev",
+        sessionId: was?.sessionId,
+        token: was?.token,
+        expires: was?.expires,
+        ...(s.id === homeId && this.home ? { url: this.home } : {}),
+      });
+    }
+    // The user's order first, then the servers newly reached.
+    const rank = (s: ServerEntry) => {
+      const i = this.list.findIndex((x) => x.id === s.id);
+      return i < 0 ? this.list.length : i;
+    };
+    const gone = this.list.filter((s) => !next.some((n) => n.id === s.id));
+    this.set(next.toSorted((a, b) => rank(a) - rank(b)));
+    await Promise.all(gone.map((s) => this.logout(s)));
+    await Promise.all(
+      this.list
+        .filter((s) => !s.token)
+        .map(async (s) => {
+          try {
+            await this.assert(s, claimed && s.id === homeId ? claimWait : 0);
+          } catch {
+            // Unreachable for now; tried again with the next sync.
+          }
+        }),
+    );
+  }
+
+  /** The first of a server's URLs that answers as the server, HTTPS only from an HTTPS page. */
+  private async reach(s: ServerEntry): Promise<string | undefined> {
+    const secure = typeof location !== "undefined" && location.protocol === "https:";
+    const urls = (s.urls ?? []).filter((u) => !secure || u.startsWith("https:"));
+    for (const u of urls) {
       try {
-        await this.client(AuthService, s).logout({});
+        if ((await this.probe(u, reachTimeout)).id === s.id) return normalizeUrl(u);
       } catch {
-        // Its session ends once idle.
+        // The next one.
       }
     }
-    this.set(this.list.filter((x) => x.id !== id));
+    return undefined;
+  }
+
+  /**
+   * Signs the account in to a server with an assertion of mavio.dev,
+   * waiting up to wait milliseconds for a server just claimed to learn of
+   * its administrator.
+   */
+  private async assert(s: ServerEntry, wait = 0): Promise<ServerEntry> {
+    const url = s.url || (await this.reach(s));
+    if (!url) throw new Error(`${s.name} cannot be reached`);
+    const publicKey = await this.key.publicKey();
+    const auth = createClient(AuthService, transport({ url }));
+    const until = Date.now() + wait;
+    for (;;) {
+      const { assertion } = await this.mavioDev(AccountService).createAssertion({ serverId: s.id, deviceKey: publicKey });
+      try {
+        const r = await auth.signInWithAssertion({
+          assertion,
+          device: await device(this.storage, this.key),
+          signature: await this.key.sign(assertionMessage(assertion)),
+        });
+        const at = this.list.findIndex((x) => x.id === s.id);
+        if (at < 0) throw new Error(`${s.name} was removed`);
+        const entry: ServerEntry = {
+          ...this.list[at],
+          url,
+          userId: r.user?.id ?? "",
+          userName: r.user?.name ?? "",
+          sessionId: r.session?.id,
+          token: r.accessToken,
+          expires: expiry(r),
+        };
+        this.set(this.list.with(at, entry));
+        return entry;
+      } catch (err) {
+        if (ConnectError.from(err).code !== Code.FailedPrecondition || Date.now() > until) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+  }
+
+  private async logout(s: ServerEntry) {
+    if (!s.token) return;
+    try {
+      await createClient(AuthService, transport({ url: s.url, token: s.token })).logout({});
+    } catch {
+      // Its session ends once idle.
+    }
+  }
+
+  /** Signs out: ends every server's session and the Mavio account's session at mavio.dev. */
+  async signOut() {
+    const list = this.list;
+    const s = this.session;
+    this.set([]);
+    this.setSession(undefined);
+    this.transports.clear();
+    await Promise.all(list.map((x) => this.logout(x)));
+    if (s) {
+      try {
+        await this.oauth(s.api, "revoke", { token: s.token });
+      } catch {
+        // It expires unused.
+      }
+    }
   }
 
   /** Orders the servers as the user arranged them. */

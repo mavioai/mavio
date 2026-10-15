@@ -19,8 +19,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// The web UI is served by a Mavio server at its root (docs/clients.md §4.1).
-const servers = new Servers(localStorage, location.origin);
+// The web UI is served by a Mavio server at its root, or as app.mavio.dev
+// by no server, built with mavio.dev's API (docs/clients.md §4.1).
+const servers = new Servers(localStorage, location.origin, { mavioDevUrl: import.meta.env.VITE_MAVIO_DEV_URL || undefined });
 
 document.documentElement.lang = locale;
 applyTheme();

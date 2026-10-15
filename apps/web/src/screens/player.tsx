@@ -68,7 +68,7 @@ function trackLabel(s: MediaStream): [string, string] {
 export function PlayerScreen() {
   const { serverId, itemId } = route.useParams();
   const server = useServer(serverId);
-  if (!server?.token) return <StatusView icon="error" title={t("auth.signedOut")} />;
+  if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   return <Player key={itemId} server={server} itemId={itemId} />;
 }
 

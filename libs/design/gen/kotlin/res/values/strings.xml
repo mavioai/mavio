@@ -272,20 +272,14 @@
     <string name="auth_quick_connect">Use Quick Connect</string>
     <!-- Instruction of Quick Connect; code is six digits. -->
     <string name="auth_quick_connect_code">Enter %s on a device that is signed in</string>
-    <!-- Title of the first sign-in screen. -->
-    <string name="auth_welcome">Welcome to Mavio</string>
     <!-- Title of the screen creating the first user of a new server; server is its name. -->
     <string name="auth_set_up">Set Up %s</string>
     <!-- Explanation on the screen creating the first user of a new server. -->
     <string name="auth_set_up_message">Create the administrator account of this server.</string>
     <!-- Creates the first user of a new server and signs in. -->
     <string name="auth_create_account">Create Account</string>
-    <!-- Adds another server to sign in to. -->
-    <string name="auth_add_server">Add Server</string>
     <!-- Signs out of a server and forgets it. -->
     <string name="auth_sign_out">Sign Out</string>
-    <!-- State of a server whose session ended; the user signs in again. -->
-    <string name="auth_signed_out">Signed out</string>
     <!-- The user signed in to a server; name is the user's. -->
     <string name="auth_signed_in_as">Signed in as %s</string>
     <!-- Section of the profile listing the servers the user signed in to. -->
@@ -296,8 +290,6 @@
     <string name="auth_authorize">Authorize</string>
     <!-- Confirmation after approving a Quick Connect code. -->
     <string name="auth_authorized">The device is signed in.</string>
-    <!-- Error when the address entered answers but is not a Mavio server. -->
-    <string name="auth_not_mavio">This address is not a Mavio server.</string>
     <!-- Error when signing in fails. -->
     <string name="auth_wrong_password">The username or password is incorrect.</string>
     <!-- Moves a server earlier in the user's order of servers. -->
@@ -369,49 +361,23 @@
     <!-- Title of the screen claiming a server for a Mavio account; server is its name. -->
     <string name="auth_claim">Claim %s</string>
     <!-- Explanation of claiming a server. -->
-    <string name="auth_claim_message">Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server\'s administrator.</string>
-    <!-- Opens mavio.dev's page giving claim codes. -->
-    <string name="auth_get_claim_code">Get a Claim Code</string>
-    <!-- Field of the claim code from mavio.dev. -->
-    <string name="auth_claim_code">Claim Code</string>
-    <!-- Claims the server with the code entered. -->
-    <string name="auth_claim_server">Claim</string>
+    <string name="auth_claim_message">Sign in at mavio.dev and confirm there. Your Mavio account becomes this server\'s administrator.</string>
+    <!-- Goes to mavio.dev to claim the server. -->
+    <string name="auth_claim_server">Continue at mavio.dev</string>
     <!-- Signs in to a server with a Mavio account at mavio.dev. -->
     <string name="auth_sign_in_with_mavio">Sign In with Mavio</string>
     <!-- Explanation on the sign-in screen of a server in mavio.dev mode. -->
-    <string name="auth_mavio_dev_message">This server signs people in with their Mavio accounts.</string>
+    <string name="auth_mavio_dev_message">This server signs in its administrator with their Mavio account.</string>
     <!-- Shown while a sign-in through mavio.dev completes. -->
     <string name="auth_signing_in">Signing in…</string>
     <!-- Starts signing in again after a failure. -->
     <string name="auth_try_again">Try Again</string>
-    <!-- Section of the profile listing the sign-ins kept in this browser. -->
-    <string name="auth_sign_ins">Sign-Ins</string>
     <!-- Kind of a sign-in with a Mavio account. -->
     <string name="auth_mavio_account">Mavio account</string>
     <!-- Kind of a sign-in with a user of one standalone server; server is its name. -->
     <string name="auth_standalone_user">User of %s</string>
-    <!-- Shows the content of another kept sign-in. -->
-    <string name="auth_show">Show</string>
-    <!-- Marks the sign-in whose content is shown. -->
-    <string name="auth_shown">Shown</string>
-    <!-- Explanation on the first screen of sign-in. -->
-    <string name="auth_welcome_message">Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly.</string>
-    <!-- Button and title of signing in to a server by its address. -->
-    <string name="auth_connect_to_server">Connect to a Server</string>
-    <!-- Line under the title of signing in with Mavio. -->
-    <string name="auth_last_account">The account last used on this device</string>
     <!-- Button that signs in with the account shown. -->
     <string name="auth_continue">Continue</string>
-    <!-- Button that signs in with a Mavio account other than the last one. -->
-    <string name="auth_other_account">Sign In with Another Account</string>
-    <!-- Heading of the servers this device signed in to before. -->
-    <string name="auth_recent_servers">Servers Signed In Before</string>
-    <!-- Button and title of signing in to a server not signed in to before. -->
-    <string name="auth_new_server">Connect to a New Server</string>
-    <!-- Placeholder of the server address field. -->
-    <string name="auth_server_address">Server address, such as https://media.example.net</string>
-    <!-- Button that connects to the server address entered. -->
-    <string name="auth_connect">Connect</string>
     <!-- Title of signing in to a server; server is its name. -->
     <string name="auth_sign_in_to">Sign In to %s</string>
     <!-- Describes a server that keeps its own users. -->
@@ -424,16 +390,8 @@
     <string name="auth_waiting">Waiting for authorization…</string>
     <!-- Button that signs in to a server with a passkey, beside Quick Connect. -->
     <string name="auth_passkey">Passkey</string>
-    <!-- Shown under Sign In with Mavio when no server here signs in Mavio accounts. -->
-    <string name="auth_no_mavio_server">This server keeps its own users: connect to it to sign in.</string>
-    <!-- Hint at the bottom of the sign-in screen on a television. -->
-    <string name="auth_tv_hint">Arrow keys move focus · OK selects · Back goes back</string>
-    <!-- Line under the title of adding a server to a kept sign-in; name is the account or user. -->
-    <string name="auth_add_to_message">The server joins the servers of %s.</string>
     <!-- Eyebrow above the steps of setting up a new server. -->
     <string name="auth_new_server_setup">New Server</string>
-    <!-- Line under the account last signed in with; server is the server it signed in to. -->
-    <string name="auth_mavio_account_of">Mavio account · %s</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->
@@ -497,14 +455,10 @@
     <string name="settings_subtitle_mode_none">Never</string>
     <!-- Subtitle mode showing subtitles when the audio differs from the preferred languages, and forced ones otherwise. -->
     <string name="settings_subtitle_mode_smart">Smart</string>
-    <!-- Explanation under the Sign-Ins title. -->
-    <string name="settings_sign_ins_message">The sign-ins kept on this device. One shows at a time; switching between them needs no password.</string>
-    <!-- Button that signs in with another account or to another server. -->
-    <string name="settings_add_sign_in">Add a Sign-In</string>
     <!-- Explanation under the Servers title in mavio.dev mode. -->
-    <string name="settings_servers_mavio_message">The servers your Mavio account reaches, and those you added to it. Their order arranges Home.</string>
-    <!-- Explanation under the Servers title. -->
-    <string name="settings_servers_message">The servers this device signed in to. Their order arranges Home.</string>
+    <string name="settings_servers_mavio_message">The servers your Mavio account reaches. Their order arranges Home.</string>
+    <!-- Explanation under the Servers title on a standalone server. -->
+    <string name="settings_servers_message">The server you are signed in to.</string>
     <!-- Button that copies a server's address. -->
     <string name="settings_copy_address">Copy Address</string>
     <!-- Settings section of the devices signed in as the user. -->
@@ -523,4 +477,14 @@
     <string name="settings_manage_at_mavio">Manage at mavio.dev</string>
     <!-- Marks the user as the server's administrator. -->
     <string name="settings_admin">Administrator</string>
+    <!-- State of a server of the account that does not answer at any of its addresses. -->
+    <string name="auth_unreachable">Can\'t be reached</string>
+    <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
+    <string name="auth_others_use_app">Everyone else watches at %s.</string>
+    <!-- Title on a television of a server not set up yet; server is its name. -->
+    <string name="auth_set_up_elsewhere">Set Up %s on a Computer or Phone</string>
+    <!-- Above the address of the server, on a television of a server not set up yet. -->
+    <string name="auth_set_up_elsewhere_message">Open this address in a browser:</string>
+    <!-- Instruction on a television signing in with a Mavio account; url is mavio.dev's link page. -->
+    <string name="auth_link_message">On your phone or computer, go to %s and enter this code.</string>
 </resources>

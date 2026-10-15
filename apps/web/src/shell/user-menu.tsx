@@ -1,7 +1,7 @@
-// The user of the shown sign-in and the menu it opens (docs/clients.md
-// §6.3): switching to another user of the server, the settings, the
-// sign-ins, the account at mavio.dev or the servers, and signing out.
-import { errorMessage, type ServerEntry, serverKey, type SignIn, useServersStore, useSignIns } from "@mavio/client-ts";
+// The user signed in and the menu it opens (docs/clients.md §6.3):
+// switching to another user of the server, the settings, the account at
+// mavio.dev or the servers, and signing out.
+import { errorMessage, type ServerEntry, serverKey, type SignIn, useServersStore, useSignIn } from "@mavio/client-ts";
 import type { SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -12,13 +12,12 @@ import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { Avatar, useDismiss } from "../ui.tsx";
 
-/** The shown sign-in as the user menu presents it. */
-export function useAccount(): { shown?: SignIn; count: number; name: string; line: string } {
-  const { all, shown } = useSignIns();
-  if (!shown) return { count: all.length, name: "", line: "" };
+/** The sign-in as the user menu presents it. */
+export function useAccount(): { shown?: SignIn; name: string; line: string } {
+  const shown = useSignIn();
+  if (!shown) return { name: "", line: "" };
   return {
     shown,
-    count: all.length,
     name: shown.name,
     line:
       shown.kind === "mavioDev"
@@ -27,17 +26,10 @@ export function useAccount(): { shown?: SignIn; count: number; name: string; lin
   };
 }
 
-/** The address of the account's page at mavio.dev, which its servers tell. */
-export function useMavioDevAccountUrl(shown?: SignIn): string | undefined {
+/** The address of the Mavio account's page at mavio.dev. */
+export function useMavioDevAccountUrl(): string | undefined {
   const servers = useServersStore();
-  const server = shown?.kind === "mavioDev" ? shown.servers[0] : undefined;
-  const info = useQuery({
-    queryKey: ["authInfo", server?.url],
-    queryFn: () => servers.probe(server!.url),
-    enabled: !!server,
-    staleTime: Number.POSITIVE_INFINITY,
-  });
-  const site = info.data?.mavioDevUrl?.replace(/\/api\/?$/, "");
+  const site = useSignIn()?.kind === "mavioDev" ? servers.mavioDevSite() : undefined;
   return site ? `${site}/account` : undefined;
 }
 
@@ -107,7 +99,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
-  const manage = useMavioDevAccountUrl(shown);
+  const manage = useMavioDevAccountUrl();
 
   return (
     <div
@@ -153,9 +145,6 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
       <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut="⌘,">
         {t("nav.settings")}
       </MenuLink>
-      <MenuLink icon="users" to="/settings/$section" section="sign-ins" onClose={onClose} shortcut={String(account.count)}>
-        {t("auth.signIns")}
-      </MenuLink>
       {shown.kind === "mavioDev" ? (
         manage && (
           <a role="menuitem" href={manage} target="_blank" rel="noreferrer" onClick={onClose} className={itemClass}>
@@ -174,7 +163,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         role="menuitem"
         onClick={() => {
           onClose();
-          void servers.signOut(shown.key);
+          void servers.signOut();
         }}
         className={itemClass}
       >

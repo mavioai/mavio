@@ -9,7 +9,15 @@ import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
 import { SearchScreen } from "./screens/search.tsx";
 import { SettingsScreen } from "./screens/settings.tsx";
-import { MavioDevCallbackScreen, type SignInSearch, SignInScreen, type Step, steps } from "./screens/sign-in.tsx";
+import {
+  CallbackScreen,
+  type SetupSearch,
+  SetupScreen,
+  setupSteps,
+  type SignInSearch,
+  SignInScreen,
+  signInSteps,
+} from "./screens/sign-in.tsx";
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -20,16 +28,22 @@ const signIn = createRoute({
   getParentRoute: () => root,
   path: "/sign-in",
   validateSearch: (s: Record<string, unknown>): SignInSearch => ({
-    step: typeof s.step === "string" && (steps as readonly string[]).includes(s.step) ? (s.step as Step) : undefined,
-    server: typeof s.server === "string" ? s.server : undefined,
-    add: s.add === true || s.add === "true" ? true : undefined,
-    to: typeof s.to === "string" ? s.to : undefined,
-    d: typeof s.d === "number" && s.d > 0 ? s.d : undefined,
+    step: signInSteps.find((x) => x === s.step),
   }),
   component: SignInScreen,
 });
 
-const mavioDevCallback = createRoute({ getParentRoute: () => root, path: "/sign-in/mavio-dev", component: MavioDevCallbackScreen });
+const setup = createRoute({
+  getParentRoute: () => root,
+  path: "/setup",
+  validateSearch: (s: Record<string, unknown>): SetupSearch => ({
+    step: setupSteps.find((x) => x === s.step),
+  }),
+  component: SetupScreen,
+});
+
+// Where mavio.dev comes back to (docs/accounts.md §6).
+const callback = createRoute({ getParentRoute: () => root, path: "/auth/callback", component: CallbackScreen });
 
 const libraries = createRoute({ getParentRoute: () => root, path: "/libraries", component: LibrariesScreen });
 
@@ -87,7 +101,8 @@ export const router = createRouter({
   routeTree: root.addChildren([
     home,
     signIn,
-    mavioDevCallback,
+    setup,
+    callback,
     libraries,
     search,
     settings,

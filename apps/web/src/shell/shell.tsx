@@ -2,8 +2,8 @@
 // width: a tab bar below 600 px, a rail with the sidebar over the content
 // up to 840 px, and the sidebar beside the content from there, collapsible
 // to the rail. TV mode replaces them with the television layout. Sign-in,
-// the player and the settings bring their own.
-import { useEvents, useServersStore, useSignedIn } from "@mavio/client-ts";
+// setup, the player and the settings bring their own.
+import { useEvents, useServersStore, useSignIn } from "@mavio/client-ts";
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -18,23 +18,22 @@ import { useAccount } from "./user-menu.tsx";
 
 export function Shell() {
   const servers = useServersStore();
-  const signedIn = useSignedIn();
+  const signIn = useSignIn();
   const { pathname } = useLocation();
   const prefs = usePrefs();
   const width = useWidthClass();
   useEvents();
   useShortcuts();
 
-  // The servers the user added in other browsers, kept by the serving server.
-  const homeToken = signedIn.find((s) => s.url === servers.home)?.token;
+  // A Mavio account follows the servers it reaches, as it opens.
+  const account = signIn?.account?.id;
   useEffect(() => {
-    if (homeToken) servers.load().catch(() => {});
-  }, [servers, homeToken]);
+    if (account) servers.sync().catch(() => {});
+  }, [servers, account]);
 
-  if (signedIn.length === 0 && !pathname.startsWith("/sign-in")) {
-    return <Navigate to="/sign-in" />;
-  }
-  if (pathname.startsWith("/sign-in") || pathname.includes("/play/")) return <Outlet />;
+  const bare = ["/sign-in", "/setup", "/auth/callback"].includes(pathname);
+  if (!signIn && !bare) return <Navigate to="/sign-in" />;
+  if (bare || pathname.includes("/play/")) return <Outlet />;
   if (pathname.startsWith("/settings")) return <Outlet />;
   if (prefs.tv) return <TvShell />;
   if (width === "compact") return <CompactShell />;

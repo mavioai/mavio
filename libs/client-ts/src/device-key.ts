@@ -28,6 +28,11 @@ export function refreshMessage(sessionId: string, nonce: Uint8Array): Uint8Array
   return out;
 }
 
+/** What a device signs to renew its session at mavio.dev at a time in milliseconds, as mavio.dev checks it. */
+export function renewalMessage(sessionId: string, timestamp: number): Uint8Array {
+  return new TextEncoder().encode(`mavio-dev-renew-v1\0${sessionId}\0${timestamp}`);
+}
+
 function generate(): Promise<CryptoKeyPair> {
   return crypto.subtle.generateKey({ name: "Ed25519" }, false, ["sign", "verify"]) as Promise<CryptoKeyPair>;
 }

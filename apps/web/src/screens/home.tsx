@@ -54,7 +54,8 @@ export function HomeScreen() {
   const sections = useHome();
   const several = useSignedIn().length > 1;
   const servers = useServers();
-  const signedOut = servers.filter((s) => !s.token);
+  // A Mavio account's servers that answer at none of their addresses.
+  const unreachable = servers.filter((s) => !s.token);
   const hero = heroEntries(sections, servers);
   const { tv } = usePrefs();
   return (
@@ -65,9 +66,9 @@ export function HomeScreen() {
         <SectionView key={s.id} section={s} several={several} />
       ))}
       {sections.length === 0 && <StatusView title={t("state.empty")} />}
-      {signedOut.length > 0 && (
+      {unreachable.length > 0 && (
         <p className="px-margin pt-6 type-footnote text-text-tertiary">
-          {signedOut.map((s) => `${s.name}: ${t("auth.signedOut")}`).join(" · ")}
+          {unreachable.map((s) => `${s.name}: ${t("auth.unreachable")}`).join(" · ")}
         </p>
       )}
     </div>

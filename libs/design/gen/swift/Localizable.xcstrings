@@ -2395,24 +2395,6 @@
         }
       }
     },
-    "auth.welcome": {
-      "comment": "Title of the first sign-in screen.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Welcome to Mavio"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "欢迎使用 Mavio"
-          }
-        }
-      }
-    },
     "auth.setUp": {
       "comment": "Title of the screen creating the first user of a new server; server is its name.",
       "extractionState": "manual",
@@ -2467,24 +2449,6 @@
         }
       }
     },
-    "auth.addServer": {
-      "comment": "Adds another server to sign in to.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add Server"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加服务器"
-          }
-        }
-      }
-    },
     "auth.signOut": {
       "comment": "Signs out of a server and forgets it.",
       "extractionState": "manual",
@@ -2499,24 +2463,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "退出登录"
-          }
-        }
-      }
-    },
-    "auth.signedOut": {
-      "comment": "State of a server whose session ended; the user signs in again.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Signed out"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已退出登录"
           }
         }
       }
@@ -2607,24 +2553,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "设备已登录。"
-          }
-        }
-      }
-    },
-    "auth.notMavio": {
-      "comment": "Error when the address entered answers but is not a Mavio server.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This address is not a Mavio server."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "此地址不是 Mavio 服务器。"
           }
         }
       }
@@ -3266,67 +3194,31 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server's administrator."
+            "value": "Sign in at mavio.dev and confirm there. Your Mavio account becomes this server's administrator."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在 mavio.dev 获取认领码并填写在这里。你的 Mavio 账户将成为这台服务器的管理员。"
-          }
-        }
-      }
-    },
-    "auth.getClaimCode": {
-      "comment": "Opens mavio.dev's page giving claim codes.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Get a Claim Code"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "获取认领码"
-          }
-        }
-      }
-    },
-    "auth.claimCode": {
-      "comment": "Field of the claim code from mavio.dev.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claim Code"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "认领码"
+            "value": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。"
           }
         }
       }
     },
     "auth.claimServer": {
-      "comment": "Claims the server with the code entered.",
+      "comment": "Goes to mavio.dev to claim the server.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Claim"
+            "value": "Continue at mavio.dev"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "认领"
+            "value": "前往 mavio.dev 继续"
           }
         }
       }
@@ -3356,13 +3248,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This server signs people in with their Mavio accounts."
+            "value": "This server signs in its administrator with their Mavio account."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这台服务器使用 Mavio 账户登录。"
+            "value": "这台服务器的管理员使用 Mavio 账户登录。"
           }
         }
       }
@@ -3403,24 +3295,6 @@
         }
       }
     },
-    "auth.signIns": {
-      "comment": "Section of the profile listing the sign-ins kept in this browser.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign-Ins"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录身份"
-          }
-        }
-      }
-    },
     "auth.mavioAccount": {
       "comment": "Kind of a sign-in with a Mavio account.",
       "extractionState": "manual",
@@ -3457,96 +3331,6 @@
         }
       }
     },
-    "auth.show": {
-      "comment": "Shows the content of another kept sign-in.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示"
-          }
-        }
-      }
-    },
-    "auth.shown": {
-      "comment": "Marks the sign-in whose content is shown.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shown"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "当前显示"
-          }
-        }
-      }
-    },
-    "auth.welcomeMessage": {
-      "comment": "Explanation on the first screen of sign-in.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录 Mavio 账户，就能看到它能访问的所有服务器；也可以直接连接一台独立服务器。"
-          }
-        }
-      }
-    },
-    "auth.connectToServer": {
-      "comment": "Button and title of signing in to a server by its address.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect to a Server"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接到服务器"
-          }
-        }
-      }
-    },
-    "auth.lastAccount": {
-      "comment": "Line under the title of signing in with Mavio.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The account last used on this device"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "上次在这台设备上使用的账户"
-          }
-        }
-      }
-    },
     "auth.continue": {
       "comment": "Button that signs in with the account shown.",
       "extractionState": "manual",
@@ -3561,96 +3345,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "继续"
-          }
-        }
-      }
-    },
-    "auth.otherAccount": {
-      "comment": "Button that signs in with a Mavio account other than the last one.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign In with Another Account"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用其他账户登录"
-          }
-        }
-      }
-    },
-    "auth.recentServers": {
-      "comment": "Heading of the servers this device signed in to before.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Servers Signed In Before"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录过的服务器"
-          }
-        }
-      }
-    },
-    "auth.newServer": {
-      "comment": "Button and title of signing in to a server not signed in to before.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect to a New Server"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接新服务器"
-          }
-        }
-      }
-    },
-    "auth.serverAddress": {
-      "comment": "Placeholder of the server address field.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Server address, such as https://media.example.net"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "服务器地址，如 https://media.example.net"
-          }
-        }
-      }
-    },
-    "auth.connect": {
-      "comment": "Button that connects to the server address entered.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接"
           }
         }
       }
@@ -3763,60 +3457,6 @@
         }
       }
     },
-    "auth.noMavioServer": {
-      "comment": "Shown under Sign In with Mavio when no server here signs in Mavio accounts.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This server keeps its own users: connect to it to sign in."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台服务器有自己的用户，请连接到服务器登录。"
-          }
-        }
-      }
-    },
-    "auth.tvHint": {
-      "comment": "Hint at the bottom of the sign-in screen on a television.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arrow keys move focus · OK selects · Back goes back"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "方向键移动焦点 · 确认键选择 · 返回键退回"
-          }
-        }
-      }
-    },
-    "auth.addToMessage": {
-      "comment": "Line under the title of adding a server to a kept sign-in; name is the account or user.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The server joins the servers of %@."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台服务器将加入 %@ 的服务器。"
-          }
-        }
-      }
-    },
     "auth.newServerSetup": {
       "comment": "Eyebrow above the steps of setting up a new server.",
       "extractionState": "manual",
@@ -3831,24 +3471,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "新服务器"
-          }
-        }
-      }
-    },
-    "auth.mavioAccountOf": {
-      "comment": "Line under the account last signed in with; server is the server it signed in to.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mavio account · %@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mavio 账户 · %@"
           }
         }
       }
@@ -4411,42 +4033,6 @@
         }
       }
     },
-    "settings.signInsMessage": {
-      "comment": "Explanation under the Sign-Ins title.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The sign-ins kept on this device. One shows at a time; switching between them needs no password."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。"
-          }
-        }
-      }
-    },
-    "settings.addSignIn": {
-      "comment": "Button that signs in with another account or to another server.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add a Sign-In"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "添加登录"
-          }
-        }
-      }
-    },
     "settings.serversMavioMessage": {
       "comment": "Explanation under the Servers title in mavio.dev mode.",
       "extractionState": "manual",
@@ -4454,31 +4040,31 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The servers your Mavio account reaches, and those you added to it. Their order arranges Home."
+            "value": "The servers your Mavio account reaches. Their order arranges Home."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的 Mavio 账户能访问的服务器，以及你添加给它的服务器。顺序决定首页上各服务器内容的排列。"
+            "value": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。"
           }
         }
       }
     },
     "settings.serversMessage": {
-      "comment": "Explanation under the Servers title.",
+      "comment": "Explanation under the Servers title on a standalone server.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The servers this device signed in to. Their order arranges Home."
+            "value": "The server you are signed in to."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。"
+            "value": "你登录的服务器。"
           }
         }
       }
@@ -4641,6 +4227,96 @@
           "stringUnit": {
             "state": "translated",
             "value": "管理员"
+          }
+        }
+      }
+    },
+    "auth.unreachable": {
+      "comment": "State of a server of the account that does not answer at any of its addresses.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can't be reached"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法连接"
+          }
+        }
+      }
+    },
+    "auth.othersUseApp": {
+      "comment": "Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everyone else watches at %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他人请在 %@ 观看。"
+          }
+        }
+      }
+    },
+    "auth.setUpElsewhere": {
+      "comment": "Title on a television of a server not set up yet; server is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set Up %@ on a Computer or Phone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在电脑或手机上设置 %@"
+          }
+        }
+      }
+    },
+    "auth.setUpElsewhereMessage": {
+      "comment": "Above the address of the server, on a television of a server not set up yet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open this address in a browser:"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在浏览器中打开这个地址："
+          }
+        }
+      }
+    },
+    "auth.linkMessage": {
+      "comment": "Instruction on a television signing in with a Mavio account; url is mavio.dev's link page.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On your phone or computer, go to %@ and enter this code."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在手机或电脑上访问 %@，输入这个代码。"
           }
         }
       }

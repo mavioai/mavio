@@ -440,9 +440,6 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("auth.quickConnectCode", bundle: .module, comment: ""), code)
     }
 
-    /// Title of the first sign-in screen.
-    public static var authWelcome: String { NSLocalizedString("auth.welcome", bundle: .module, comment: "") }
-
     /// Title of the screen creating the first user of a new server; server is its name.
     public static func authSetUp(server: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("auth.setUp", bundle: .module, comment: ""), server)
@@ -454,14 +451,8 @@ public enum MavioStrings {
     /// Creates the first user of a new server and signs in.
     public static var authCreateAccount: String { NSLocalizedString("auth.createAccount", bundle: .module, comment: "") }
 
-    /// Adds another server to sign in to.
-    public static var authAddServer: String { NSLocalizedString("auth.addServer", bundle: .module, comment: "") }
-
     /// Signs out of a server and forgets it.
     public static var authSignOut: String { NSLocalizedString("auth.signOut", bundle: .module, comment: "") }
-
-    /// State of a server whose session ended; the user signs in again.
-    public static var authSignedOut: String { NSLocalizedString("auth.signedOut", bundle: .module, comment: "") }
 
     /// The user signed in to a server; name is the user's.
     public static func authSignedInAs(name: String) -> String {
@@ -479,9 +470,6 @@ public enum MavioStrings {
 
     /// Confirmation after approving a Quick Connect code.
     public static var authAuthorized: String { NSLocalizedString("auth.authorized", bundle: .module, comment: "") }
-
-    /// Error when the address entered answers but is not a Mavio server.
-    public static var authNotMavio: String { NSLocalizedString("auth.notMavio", bundle: .module, comment: "") }
 
     /// Error when signing in fails.
     public static var authWrongPassword: String { NSLocalizedString("auth.wrongPassword", bundle: .module, comment: "") }
@@ -601,13 +589,7 @@ public enum MavioStrings {
     /// Explanation of claiming a server.
     public static var authClaimMessage: String { NSLocalizedString("auth.claimMessage", bundle: .module, comment: "") }
 
-    /// Opens mavio.dev's page giving claim codes.
-    public static var authGetClaimCode: String { NSLocalizedString("auth.getClaimCode", bundle: .module, comment: "") }
-
-    /// Field of the claim code from mavio.dev.
-    public static var authClaimCode: String { NSLocalizedString("auth.claimCode", bundle: .module, comment: "") }
-
-    /// Claims the server with the code entered.
+    /// Goes to mavio.dev to claim the server.
     public static var authClaimServer: String { NSLocalizedString("auth.claimServer", bundle: .module, comment: "") }
 
     /// Signs in to a server with a Mavio account at mavio.dev.
@@ -622,9 +604,6 @@ public enum MavioStrings {
     /// Starts signing in again after a failure.
     public static var authTryAgain: String { NSLocalizedString("auth.tryAgain", bundle: .module, comment: "") }
 
-    /// Section of the profile listing the sign-ins kept in this browser.
-    public static var authSignIns: String { NSLocalizedString("auth.signIns", bundle: .module, comment: "") }
-
     /// Kind of a sign-in with a Mavio account.
     public static var authMavioAccount: String { NSLocalizedString("auth.mavioAccount", bundle: .module, comment: "") }
 
@@ -633,38 +612,8 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("auth.standaloneUser", bundle: .module, comment: ""), server)
     }
 
-    /// Shows the content of another kept sign-in.
-    public static var authShow: String { NSLocalizedString("auth.show", bundle: .module, comment: "") }
-
-    /// Marks the sign-in whose content is shown.
-    public static var authShown: String { NSLocalizedString("auth.shown", bundle: .module, comment: "") }
-
-    /// Explanation on the first screen of sign-in.
-    public static var authWelcomeMessage: String { NSLocalizedString("auth.welcomeMessage", bundle: .module, comment: "") }
-
-    /// Button and title of signing in to a server by its address.
-    public static var authConnectToServer: String { NSLocalizedString("auth.connectToServer", bundle: .module, comment: "") }
-
-    /// Line under the title of signing in with Mavio.
-    public static var authLastAccount: String { NSLocalizedString("auth.lastAccount", bundle: .module, comment: "") }
-
     /// Button that signs in with the account shown.
     public static var authContinue: String { NSLocalizedString("auth.continue", bundle: .module, comment: "") }
-
-    /// Button that signs in with a Mavio account other than the last one.
-    public static var authOtherAccount: String { NSLocalizedString("auth.otherAccount", bundle: .module, comment: "") }
-
-    /// Heading of the servers this device signed in to before.
-    public static var authRecentServers: String { NSLocalizedString("auth.recentServers", bundle: .module, comment: "") }
-
-    /// Button and title of signing in to a server not signed in to before.
-    public static var authNewServer: String { NSLocalizedString("auth.newServer", bundle: .module, comment: "") }
-
-    /// Placeholder of the server address field.
-    public static var authServerAddress: String { NSLocalizedString("auth.serverAddress", bundle: .module, comment: "") }
-
-    /// Button that connects to the server address entered.
-    public static var authConnect: String { NSLocalizedString("auth.connect", bundle: .module, comment: "") }
 
     /// Title of signing in to a server; server is its name.
     public static func authSignInTo(server: String) -> String {
@@ -686,24 +635,8 @@ public enum MavioStrings {
     /// Button that signs in to a server with a passkey, beside Quick Connect.
     public static var authPasskey: String { NSLocalizedString("auth.passkey", bundle: .module, comment: "") }
 
-    /// Shown under Sign In with Mavio when no server here signs in Mavio accounts.
-    public static var authNoMavioServer: String { NSLocalizedString("auth.noMavioServer", bundle: .module, comment: "") }
-
-    /// Hint at the bottom of the sign-in screen on a television.
-    public static var authTvHint: String { NSLocalizedString("auth.tvHint", bundle: .module, comment: "") }
-
-    /// Line under the title of adding a server to a kept sign-in; name is the account or user.
-    public static func authAddToMessage(name: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("auth.addToMessage", bundle: .module, comment: ""), name)
-    }
-
     /// Eyebrow above the steps of setting up a new server.
     public static var authNewServerSetup: String { NSLocalizedString("auth.newServerSetup", bundle: .module, comment: "") }
-
-    /// Line under the account last signed in with; server is the server it signed in to.
-    public static func authMavioAccountOf(server: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("auth.mavioAccountOf", bundle: .module, comment: ""), server)
-    }
 
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }
@@ -797,16 +730,10 @@ public enum MavioStrings {
     /// Subtitle mode showing subtitles when the audio differs from the preferred languages, and forced ones otherwise.
     public static var settingsSubtitleModeSmart: String { NSLocalizedString("settings.subtitleModeSmart", bundle: .module, comment: "") }
 
-    /// Explanation under the Sign-Ins title.
-    public static var settingsSignInsMessage: String { NSLocalizedString("settings.signInsMessage", bundle: .module, comment: "") }
-
-    /// Button that signs in with another account or to another server.
-    public static var settingsAddSignIn: String { NSLocalizedString("settings.addSignIn", bundle: .module, comment: "") }
-
     /// Explanation under the Servers title in mavio.dev mode.
     public static var settingsServersMavioMessage: String { NSLocalizedString("settings.serversMavioMessage", bundle: .module, comment: "") }
 
-    /// Explanation under the Servers title.
+    /// Explanation under the Servers title on a standalone server.
     public static var settingsServersMessage: String { NSLocalizedString("settings.serversMessage", bundle: .module, comment: "") }
 
     /// Button that copies a server's address.
@@ -839,4 +766,25 @@ public enum MavioStrings {
 
     /// Marks the user as the server's administrator.
     public static var settingsAdmin: String { NSLocalizedString("settings.admin", bundle: .module, comment: "") }
+
+    /// State of a server of the account that does not answer at any of its addresses.
+    public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
+
+    /// Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's.
+    public static func authOthersUseApp(host: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.othersUseApp", bundle: .module, comment: ""), host)
+    }
+
+    /// Title on a television of a server not set up yet; server is its name.
+    public static func authSetUpElsewhere(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.setUpElsewhere", bundle: .module, comment: ""), server)
+    }
+
+    /// Above the address of the server, on a television of a server not set up yet.
+    public static var authSetUpElsewhereMessage: String { NSLocalizedString("auth.setUpElsewhereMessage", bundle: .module, comment: "") }
+
+    /// Instruction on a television signing in with a Mavio account; url is mavio.dev's link page.
+    public static func authLinkMessage(url: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.linkMessage", bundle: .module, comment: ""), url)
+    }
 }

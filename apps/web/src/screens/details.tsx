@@ -43,7 +43,7 @@ export function Details() {
   const { serverId, itemId } = route.useParams();
   const server = useServer(serverId);
   const q = useItem(server?.token ? server : undefined, itemId);
-  if (!server?.token) return <StatusView icon="error" title={t("auth.signedOut")} />;
+  if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
   if (q.isError || !q.data.item) {
     return (

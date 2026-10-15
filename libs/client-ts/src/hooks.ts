@@ -46,18 +46,16 @@ export function useServers(): ServerEntry[] {
   return useSyncExternalStore(s.subscribe, s.snapshot);
 }
 
-/** The sign-ins kept in the browser, and the one shown. */
-export function useSignIns(): { all: SignIn[]; shown?: SignIn } {
+/** The sign-in: a Mavio account's or a standalone server user's; undefined when signed out. */
+export function useSignIn(): SignIn | undefined {
   const s = useServersStore();
-  const list = useServers();
-  const shown = useSyncExternalStore(s.subscribe, s.shownSnapshot);
-  return useMemo(() => ({ all: s.signIns(), shown: s.shownSignIn() }), [s, list, shown]);
+  return useSyncExternalStore(s.subscribe, s.signInSnapshot);
 }
 
-/** The servers of the sign-in shown, in the user's order. */
+/** The servers signed in to, in the user's order. */
 export function useSignedIn(): ServerEntry[] {
-  const { shown } = useSignIns();
-  return useMemo(() => shown?.servers ?? [], [shown]);
+  const signIn = useSignIn();
+  return useMemo(() => signIn?.servers ?? [], [signIn]);
 }
 
 /** One server, once it is known. */

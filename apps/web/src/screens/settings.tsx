@@ -1,7 +1,7 @@
 // The settings (docs/clients.md §6.3): those of this browser, its
 // appearance, TV mode and playback, and those of the account and its
-// servers, the user's languages, the sign-ins kept, the servers in their
-// order, the account's credentials and the devices signed in as the user.
+// servers, the user's languages, the servers in their order, the
+// account's credentials and the devices signed in as the user.
 // Wide windows show them beside their own sidebar; phones list them first,
 // as the profile.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
@@ -12,12 +12,11 @@ import {
   useServers,
   useServersStore,
   useSignedIn,
-  useSignIns,
 } from "@mavio/client-ts";
 import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, Navigate, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, Navigate, useParams } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
@@ -27,13 +26,12 @@ import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../sh
 import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "sign-ins" | "servers" | "account" | "devices";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
-  "sign-ins": { icon: "key", color: "#007AFF", title: () => t("auth.signIns") },
   servers: { icon: "server", color: "#8E8E93", title: () => t("auth.servers") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
@@ -41,7 +39,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 
 const groups: { title: () => string; ids: SectionId[] }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.accountAndServers"), ids: ["sign-ins", "servers", "account", "devices"] },
+  { title: () => t("settings.accountAndServers"), ids: ["servers", "account", "devices"] },
 ];
 
 function isSection(s: string | undefined): s is SectionId {
@@ -102,7 +100,7 @@ function Tile({ id }: { id: SectionId }) {
   );
 }
 
-/** The user of the shown sign-in. */
+/** The user signed in. */
 function AccountCard() {
   const account = useAccount();
   return (
@@ -144,7 +142,7 @@ function ProfileList() {
         </Group>
       ))}
       {shown && (
-        <Button variant="secondary" className="text-danger" onClick={() => void servers.signOut(shown.key)}>
+        <Button variant="secondary" className="text-danger" onClick={() => void servers.signOut()}>
           {t("auth.signOut")}
         </Button>
       )}
@@ -214,8 +212,6 @@ function SectionView({ id }: { id: SectionId }) {
       return <PlaybackSection />;
     case "subtitles-audio":
       return <LanguagesSection />;
-    case "sign-ins":
-      return <SignInsSection />;
     case "servers":
       return <ServersSection />;
     case "account":
@@ -342,8 +338,8 @@ function languages(s: string): string[] | undefined {
 }
 
 /**
- * The user's languages and when subtitles show, read from the shown
- * sign-in's first server and saved to each of them.
+ * The user's languages and when subtitles show, read from the first
+ * server signed in to and saved to each of them.
  */
 function LanguagesSection() {
   const servers = useServersStore();
@@ -436,49 +432,10 @@ function LanguagesForm({
   );
 }
 
-function SignInsSection() {
-  const servers = useServersStore();
-  const { all, shown } = useSignIns();
-  return (
-    <Section title={t("auth.signIns")} message={t("settings.signInsMessage")}>
-      <Group>
-        {all.map((s) => (
-          <Row
-            key={s.key}
-            label={s.name}
-            leading={<Avatar name={s.name} size={36} />}
-            detail={
-              s.kind === "mavioDev"
-                ? `${t("auth.mavioAccount")} · ${s.servers.map((x) => x.name).join(", ")}`
-                : t("auth.standaloneUser", { server: s.servers[0].name })
-            }
-          >
-            {s.key === shown?.key ? (
-              <span className="type-callout text-text-secondary">{t("auth.shown")}</span>
-            ) : (
-              <Button variant="secondary" onClick={() => servers.show(s.key)}>
-                {t("auth.show")}
-              </Button>
-            )}
-            <Button variant="plain" className="text-danger" onClick={() => void servers.signOut(s.key)}>
-              {t("auth.signOut")}
-            </Button>
-          </Row>
-        ))}
-        <Link to="/sign-in" search={{ add: true }} className="flex min-h-13 items-center gap-3 px-4 type-body text-accent-text hover:bg-surface-raised">
-          <Icon name="add" size={20} />
-          {t("settings.addSignIn")}
-        </Link>
-      </Group>
-    </Section>
-  );
-}
-
 function ServersSection() {
   const servers = useServersStore();
   const list = useServers();
   const account = useAccount();
-  const navigate = useNavigate();
   const [copied, setCopied] = useState<string>();
   const move = (i: number, by: number) => {
     const ids = list.map((s) => s.id);
@@ -500,35 +457,25 @@ function ServersSection() {
                 {[...s.name][0]?.toUpperCase()}
               </span>
             }
-            detail={`${s.token ? t("auth.signedInAs", { name: s.userName }) : t("auth.signedOut")} · ${s.url}`}
+            detail={s.token ? `${t("auth.signedInAs", { name: s.userName })} · ${s.url}` : t("auth.unreachable")}
           >
             <div className="flex items-center gap-0.5">
-              <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
-              <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
-              <IconButton
-                icon={copied === s.id ? "check" : "external"}
-                label={t("settings.copyAddress")}
-                onClick={() => void navigator.clipboard?.writeText(s.url).then(() => setCopied(s.id))}
-              />
-              {!s.token && (
-                <Button variant="secondary" onClick={() => void navigate({ to: "/sign-in", search: { server: s.url, add: true } })}>
-                  {t("auth.signIn")}
-                </Button>
+              {list.length > 1 && (
+                <>
+                  <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
+                  <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
+                </>
               )}
-              <Button variant="plain" className="text-danger" onClick={() => void servers.remove(s.id)}>
-                {t("auth.signOut")}
-              </Button>
+              {s.url && (
+                <IconButton
+                  icon={copied === s.id ? "check" : "external"}
+                  label={t("settings.copyAddress")}
+                  onClick={() => void navigator.clipboard?.writeText(s.url).then(() => setCopied(s.id))}
+                />
+              )}
             </div>
           </Row>
         ))}
-        <Link
-          to="/sign-in"
-          search={account.shown ? { to: account.shown.key } : { add: true }}
-          className="flex min-h-13 items-center gap-3 px-4 type-body text-accent-text hover:bg-surface-raised"
-        >
-          <Icon name="add" size={20} />
-          {t("auth.addServer")}
-        </Link>
       </Group>
     </Section>
   );
@@ -556,7 +503,7 @@ function IconButton({
 function AccountSection() {
   const account = useAccount();
   const shown = account.shown;
-  const manage = useMavioDevAccountUrl(shown);
+  const manage = useMavioDevAccountUrl();
   if (!shown) return null;
   if (shown.kind === "mavioDev") {
     return (

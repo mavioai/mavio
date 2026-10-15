@@ -129,19 +129,15 @@ export type MessageKey =
   | 'auth.password'
   | 'auth.quickConnect'
   | 'auth.quickConnectCode'
-  | 'auth.welcome'
   | 'auth.setUp'
   | 'auth.setUpMessage'
   | 'auth.createAccount'
-  | 'auth.addServer'
   | 'auth.signOut'
-  | 'auth.signedOut'
   | 'auth.signedInAs'
   | 'auth.servers'
   | 'auth.authorizeDevice'
   | 'auth.authorize'
   | 'auth.authorized'
-  | 'auth.notMavio'
   | 'auth.wrongPassword'
   | 'auth.moveUp'
   | 'auth.moveDown'
@@ -177,38 +173,21 @@ export type MessageKey =
   | 'auth.modeStandaloneMessage'
   | 'auth.claim'
   | 'auth.claimMessage'
-  | 'auth.getClaimCode'
-  | 'auth.claimCode'
   | 'auth.claimServer'
   | 'auth.signInWithMavio'
   | 'auth.mavioDevMessage'
   | 'auth.signingIn'
   | 'auth.tryAgain'
-  | 'auth.signIns'
   | 'auth.mavioAccount'
   | 'auth.standaloneUser'
-  | 'auth.show'
-  | 'auth.shown'
-  | 'auth.welcomeMessage'
-  | 'auth.connectToServer'
-  | 'auth.lastAccount'
   | 'auth.continue'
-  | 'auth.otherAccount'
-  | 'auth.recentServers'
-  | 'auth.newServer'
-  | 'auth.serverAddress'
-  | 'auth.connect'
   | 'auth.signInTo'
   | 'auth.standaloneServer'
   | 'auth.or'
   | 'auth.quickConnectTitle'
   | 'auth.waiting'
   | 'auth.passkey'
-  | 'auth.noMavioServer'
-  | 'auth.tvHint'
-  | 'auth.addToMessage'
   | 'auth.newServerSetup'
-  | 'auth.mavioAccountOf'
   | 'search.placeholder'
   | 'search.noResults'
   | 'menu.manageAccount'
@@ -239,8 +218,6 @@ export type MessageKey =
   | 'settings.subtitleModeForced'
   | 'settings.subtitleModeNone'
   | 'settings.subtitleModeSmart'
-  | 'settings.signInsMessage'
-  | 'settings.addSignIn'
   | 'settings.serversMavioMessage'
   | 'settings.serversMessage'
   | 'settings.copyAddress'
@@ -251,7 +228,12 @@ export type MessageKey =
   | 'settings.mavioAccountMessage'
   | 'settings.standaloneAccountMessage'
   | 'settings.manageAtMavio'
-  | 'settings.admin';
+  | 'settings.admin'
+  | 'auth.unreachable'
+  | 'auth.othersUseApp'
+  | 'auth.setUpElsewhere'
+  | 'auth.setUpElsewhereMessage'
+  | 'auth.linkMessage';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -373,19 +355,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.password": "Password",
     "auth.quickConnect": "Use Quick Connect",
     "auth.quickConnectCode": "Enter {code} on a device that is signed in",
-    "auth.welcome": "Welcome to Mavio",
     "auth.setUp": "Set Up {server}",
     "auth.setUpMessage": "Create the administrator account of this server.",
     "auth.createAccount": "Create Account",
-    "auth.addServer": "Add Server",
     "auth.signOut": "Sign Out",
-    "auth.signedOut": "Signed out",
     "auth.signedInAs": "Signed in as {name}",
     "auth.servers": "Servers",
     "auth.authorizeDevice": "Authorize a Device",
     "auth.authorize": "Authorize",
     "auth.authorized": "The device is signed in.",
-    "auth.notMavio": "This address is not a Mavio server.",
     "auth.wrongPassword": "The username or password is incorrect.",
     "auth.moveUp": "Move Up",
     "auth.moveDown": "Move Down",
@@ -420,39 +398,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.modeStandalone": "Standalone",
     "auth.modeStandaloneMessage": "The server keeps its own users and never contacts mavio.dev.",
     "auth.claim": "Claim {server}",
-    "auth.claimMessage": "Get a claim code at mavio.dev and enter it here. Your Mavio account becomes this server's administrator.",
-    "auth.getClaimCode": "Get a Claim Code",
-    "auth.claimCode": "Claim Code",
-    "auth.claimServer": "Claim",
+    "auth.claimMessage": "Sign in at mavio.dev and confirm there. Your Mavio account becomes this server's administrator.",
+    "auth.claimServer": "Continue at mavio.dev",
     "auth.signInWithMavio": "Sign In with Mavio",
-    "auth.mavioDevMessage": "This server signs people in with their Mavio accounts.",
+    "auth.mavioDevMessage": "This server signs in its administrator with their Mavio account.",
     "auth.signingIn": "Signing in…",
     "auth.tryAgain": "Try Again",
-    "auth.signIns": "Sign-Ins",
     "auth.mavioAccount": "Mavio account",
     "auth.standaloneUser": "User of {server}",
-    "auth.show": "Show",
-    "auth.shown": "Shown",
-    "auth.welcomeMessage": "Sign in with a Mavio account to see every server it reaches, or connect to a standalone server directly.",
-    "auth.connectToServer": "Connect to a Server",
-    "auth.lastAccount": "The account last used on this device",
     "auth.continue": "Continue",
-    "auth.otherAccount": "Sign In with Another Account",
-    "auth.recentServers": "Servers Signed In Before",
-    "auth.newServer": "Connect to a New Server",
-    "auth.serverAddress": "Server address, such as https://media.example.net",
-    "auth.connect": "Connect",
     "auth.signInTo": "Sign In to {server}",
     "auth.standaloneServer": "Standalone server",
     "auth.or": "or",
     "auth.quickConnectTitle": "Quick Connect",
     "auth.waiting": "Waiting for authorization…",
     "auth.passkey": "Passkey",
-    "auth.noMavioServer": "This server keeps its own users: connect to it to sign in.",
-    "auth.tvHint": "Arrow keys move focus · OK selects · Back goes back",
-    "auth.addToMessage": "The server joins the servers of {name}.",
     "auth.newServerSetup": "New Server",
-    "auth.mavioAccountOf": "Mavio account · {server}",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results",
     "menu.manageAccount": "Manage Account at mavio.dev",
@@ -483,10 +444,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.subtitleModeForced": "Forced Only",
     "settings.subtitleModeNone": "Never",
     "settings.subtitleModeSmart": "Smart",
-    "settings.signInsMessage": "The sign-ins kept on this device. One shows at a time; switching between them needs no password.",
-    "settings.addSignIn": "Add a Sign-In",
-    "settings.serversMavioMessage": "The servers your Mavio account reaches, and those you added to it. Their order arranges Home.",
-    "settings.serversMessage": "The servers this device signed in to. Their order arranges Home.",
+    "settings.serversMavioMessage": "The servers your Mavio account reaches. Their order arranges Home.",
+    "settings.serversMessage": "The server you are signed in to.",
     "settings.copyAddress": "Copy Address",
     "settings.devices": "Devices",
     "settings.devicesMessage": "The devices signed in to {server} as you.",
@@ -495,7 +454,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.mavioAccountMessage": "Your Mavio account. Its password, passkeys, two-step verification, Home and friends are managed at mavio.dev.",
     "settings.standaloneAccountMessage": "User {name} of {server}.",
     "settings.manageAtMavio": "Manage at mavio.dev",
-    "settings.admin": "Administrator"
+    "settings.admin": "Administrator",
+    "auth.unreachable": "Can't be reached",
+    "auth.othersUseApp": "Everyone else watches at {host}.",
+    "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
+    "auth.setUpElsewhereMessage": "Open this address in a browser:",
+    "auth.linkMessage": "On your phone or computer, go to {url} and enter this code."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -615,19 +579,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.password": "密码",
     "auth.quickConnect": "使用 Quick Connect",
     "auth.quickConnectCode": "在已登录的设备上输入 {code}",
-    "auth.welcome": "欢迎使用 Mavio",
     "auth.setUp": "设置{server}",
     "auth.setUpMessage": "创建此服务器的管理员账户。",
     "auth.createAccount": "创建账户",
-    "auth.addServer": "添加服务器",
     "auth.signOut": "退出登录",
-    "auth.signedOut": "已退出登录",
     "auth.signedInAs": "已登录为 {name}",
     "auth.servers": "服务器",
     "auth.authorizeDevice": "授权设备",
     "auth.authorize": "授权",
     "auth.authorized": "设备已登录。",
-    "auth.notMavio": "此地址不是 Mavio 服务器。",
     "auth.wrongPassword": "用户名或密码不正确。",
     "auth.moveUp": "上移",
     "auth.moveDown": "下移",
@@ -662,39 +622,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.modeStandalone": "独立",
     "auth.modeStandaloneMessage": "服务器自己保存用户，从不联系 mavio.dev。",
     "auth.claim": "认领 {server}",
-    "auth.claimMessage": "在 mavio.dev 获取认领码并填写在这里。你的 Mavio 账户将成为这台服务器的管理员。",
-    "auth.getClaimCode": "获取认领码",
-    "auth.claimCode": "认领码",
-    "auth.claimServer": "认领",
+    "auth.claimMessage": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。",
+    "auth.claimServer": "前往 mavio.dev 继续",
     "auth.signInWithMavio": "用 Mavio 账户登录",
-    "auth.mavioDevMessage": "这台服务器使用 Mavio 账户登录。",
+    "auth.mavioDevMessage": "这台服务器的管理员使用 Mavio 账户登录。",
     "auth.signingIn": "正在登录…",
     "auth.tryAgain": "重试",
-    "auth.signIns": "登录身份",
     "auth.mavioAccount": "Mavio 账户",
     "auth.standaloneUser": "{server} 的用户",
-    "auth.show": "显示",
-    "auth.shown": "当前显示",
-    "auth.welcomeMessage": "登录 Mavio 账户，就能看到它能访问的所有服务器；也可以直接连接一台独立服务器。",
-    "auth.connectToServer": "连接到服务器",
-    "auth.lastAccount": "上次在这台设备上使用的账户",
     "auth.continue": "继续",
-    "auth.otherAccount": "使用其他账户登录",
-    "auth.recentServers": "登录过的服务器",
-    "auth.newServer": "连接新服务器",
-    "auth.serverAddress": "服务器地址，如 https://media.example.net",
-    "auth.connect": "连接",
     "auth.signInTo": "登录 {server}",
     "auth.standaloneServer": "独立服务器",
     "auth.or": "或",
     "auth.quickConnectTitle": "Quick Connect",
     "auth.waiting": "等待授权…",
     "auth.passkey": "通行密钥",
-    "auth.noMavioServer": "这台服务器有自己的用户，请连接到服务器登录。",
-    "auth.tvHint": "方向键移动焦点 · 确认键选择 · 返回键退回",
-    "auth.addToMessage": "这台服务器将加入 {name} 的服务器。",
     "auth.newServerSetup": "新服务器",
-    "auth.mavioAccountOf": "Mavio 账户 · {server}",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果",
     "menu.manageAccount": "在 mavio.dev 管理账户",
@@ -725,10 +668,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.subtitleModeForced": "仅强制字幕",
     "settings.subtitleModeNone": "从不",
     "settings.subtitleModeSmart": "智能",
-    "settings.signInsMessage": "这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。",
-    "settings.addSignIn": "添加登录",
-    "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器，以及你添加给它的服务器。顺序决定首页上各服务器内容的排列。",
-    "settings.serversMessage": "这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。",
+    "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。",
+    "settings.serversMessage": "你登录的服务器。",
     "settings.copyAddress": "复制地址",
     "settings.devices": "设备",
     "settings.devicesMessage": "以你的身份登录 {server} 的设备。",
@@ -737,6 +678,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.mavioAccountMessage": "你的 Mavio 账户。密码、通行密钥、两步验证、家庭与好友都在 mavio.dev 上管理。",
     "settings.standaloneAccountMessage": "{server} 上的用户 {name}。",
     "settings.manageAtMavio": "在 mavio.dev 管理",
-    "settings.admin": "管理员"
+    "settings.admin": "管理员",
+    "auth.unreachable": "无法连接",
+    "auth.othersUseApp": "其他人请在 {host} 观看。",
+    "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
+    "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
+    "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。"
   }
 };
