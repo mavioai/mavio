@@ -3386,7 +3386,7 @@
       }
     },
     "auth.or": {
-      "comment": "Separates the password from the other ways of signing in.",
+      "comment": "Separates ways of signing in, or of setting up a server.",
       "extractionState": "manual",
       "localizations": {
         "en": {

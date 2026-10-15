@@ -382,7 +382,7 @@
     <string name="auth_sign_in_to">Sign In to %s</string>
     <!-- Describes a server that keeps its own users. -->
     <string name="auth_standalone_server">Standalone server</string>
-    <!-- Separates the password from the other ways of signing in. -->
+    <!-- Separates ways of signing in, or of setting up a server. -->
     <string name="auth_or">or</string>
     <!-- Title of signing in by entering a code on a signed-in device. -->
     <string name="auth_quick_connect_title">Quick Connect</string>

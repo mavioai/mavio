@@ -181,7 +181,7 @@
   "auth.standaloneUser": { "message": "User of {server}", "description": "Kind of a sign-in with a user of one standalone server; server is its name." },
   "auth.signInTo": { "message": "Sign In to {server}", "description": "Title of signing in to a server; server is its name." },
   "auth.standaloneServer": { "message": "Standalone server", "description": "Describes a server that keeps its own users." },
-  "auth.or": { "message": "or", "description": "Separates the password from the other ways of signing in." },
+  "auth.or": { "message": "or", "description": "Separates ways of signing in, or of setting up a server." },
   "auth.quickConnectTitle": { "message": "Quick Connect", "description": "Title of signing in by entering a code on a signed-in device." },
   "auth.waiting": { "message": "Waiting for authorization…", "description": "Shown while a Quick Connect code waits to be entered." },
   "auth.passkey": { "message": "Passkey", "description": "Button that signs in to a server with a passkey, beside Quick Connect." },

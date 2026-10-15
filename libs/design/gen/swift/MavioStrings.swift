@@ -623,7 +623,7 @@ public enum MavioStrings {
     /// Describes a server that keeps its own users.
     public static var authStandaloneServer: String { NSLocalizedString("auth.standaloneServer", bundle: .module, comment: "") }
 
-    /// Separates the password from the other ways of signing in.
+    /// Separates ways of signing in, or of setting up a server.
     public static var authOr: String { NSLocalizedString("auth.or", bundle: .module, comment: "") }
 
     /// Title of signing in by entering a code on a signed-in device.

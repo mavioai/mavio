@@ -498,11 +498,7 @@ function StandaloneSignIn({ info }: { info: ServerInfo }) {
         <Action type="submit" disabled={busy || !name.trim()}>
           {t("auth.signIn")}
         </Action>
-        <div className="flex items-center gap-3 text-[13px] text-text-tertiary">
-          <span className="h-px flex-1 bg-(--signin-separator)" />
-          {t("auth.or")}
-          <span className="h-px flex-1 bg-(--signin-separator)" />
-        </div>
+        <Or />
         <div className={`grid gap-2.5 ${passkeys ? "grid-cols-2" : "grid-cols-1"}`}>
           {passkeys && (
             <Action variant="secondary" icon="key" onClick={() => run(async () => void (await servers.signInWithPasskey()))} disabled={busy}>
@@ -841,6 +837,17 @@ function Steps({
   );
 }
 
+/** A line between ways of going on, broken by "or". */
+function Or() {
+  return (
+    <div className="flex w-full items-center gap-3 text-[13px] text-text-tertiary">
+      <span className="h-px flex-1 bg-(--signin-separator)" />
+      {t("auth.or")}
+      <span className="h-px flex-1 bg-(--signin-separator)" />
+    </div>
+  );
+}
+
 /** A button of sign-in, as wide as its step. */
 function Action({
   variant = "primary",
@@ -934,6 +941,7 @@ function ChooseMode({
       {error && <p className="text-[15px] text-danger">{error}</p>}
       <div className={`flex w-full flex-col ${look.stack}`}>
         {option("mavioDev", t("auth.modeMavioDev"), t("auth.modeMavioDevMessage"))}
+        <Or />
         {option("standalone", t("auth.modeStandalone"), t("auth.modeStandaloneMessage"))}
       </div>
     </div>
