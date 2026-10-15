@@ -16,9 +16,9 @@ export interface Relays {
 /** ticketLifetime is how long a ticket admits new connections, in seconds. */
 export const ticketLifetime = 300;
 
-/** parseRelays reads the RELAYS variable, a JSON object of base URLs by region. */
-export function parseRelays(json: string, secret: string, zone = "mavio.site"): Relays {
-  const urls = new Map(Object.entries(JSON.parse(json) as Record<string, string>));
+/** parseRelays reads the RELAYS binding, the base URLs by region. */
+export function parseRelays(byRegion: Record<string, string>, secret: string, zone = "mavio.site"): Relays {
+  const urls = new Map(Object.entries(byRegion));
   for (const region of urls.keys()) {
     if (!/^[a-z0-9]{1,16}$/.test(region)) throw new Error(`relay region ${region} must be a label without dashes`);
   }

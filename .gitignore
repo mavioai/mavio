@@ -35,4 +35,4 @@ local.properties
 
 # Cloudflare Workers (apps/website)
 .cloudflare/
-.dev.vars
+.env.local

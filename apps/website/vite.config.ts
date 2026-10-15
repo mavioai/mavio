@@ -6,5 +6,5 @@ import { defineConfig } from "vite";
 
 // mavio.dev on Cloudflare Workers (docs/mavio-dev.md §2).
 export default defineConfig({
-  plugins: [cloudflare({ viteEnvironment: { name: "ssr" }, types: { generate: false } }), tanstackStart(), react(), tailwindcss()],
+  plugins: [cloudflare({ viteEnvironment: { name: "ssr" } }), tanstackStart(), react(), tailwindcss()],
 });

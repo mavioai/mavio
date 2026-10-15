@@ -9,11 +9,14 @@ import { type Acme, cloudflareDns, googleBindings } from "./acme.ts";
 import { handleApi } from "./api.ts";
 import { createAuth } from "./auth.ts";
 import { type Database, schema } from "./db/index.ts";
+import type { NoticeHub } from "./notice-hub.ts";
 import { parseRelays } from "./relay.ts";
 
 /** serveApi serves a request under /api; notices go to the servers' Durable Objects once it is done. */
 export async function serveApi(req: Request, ctx: ExecutionContext): Promise<Response> {
-  const hub = (id: string) => env.NOTICES.get(env.NOTICES.idFromName(id));
+  // The binding names its Worker, so its type does not know the class.
+  const notices = env.NOTICES as DurableObjectNamespace<NoticeHub>;
+  const hub = (id: string) => notices.get(notices.idFromName(id));
   const client = new pg.Client({ connectionString: env.HYPERDRIVE.connectionString });
   await client.connect();
   try {

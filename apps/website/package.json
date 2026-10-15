@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "cf dev",
     "build": "cf build",
-    "typecheck": "tsc -p tsconfig.json",
+    "typecheck": "cf workers types && tsc -p tsconfig.json && tsc -p test/tsconfig.json",
     "test": "vitest run",
     "generate-auth-schema": "auth generate --config scripts/auth-schema.ts --output src/server/db/auth-schema.ts --yes",
     "generate-migration": "drizzle-kit generate",
