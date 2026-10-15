@@ -671,7 +671,8 @@ flowchart TD
   - [ ] Web UI 的详情页：预告片与其他附加内容
   - [x] Web UI 的人物页面（`apps/web/src/screens/person.tsx`、`libs/client-ts/src/people.ts`），由演职人员卡片打开：人物及署名此人的作品
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页
-    - [ ] 目录的筛选与排序（`ListFilterValues`），以及搜索结果中的提供者作品（`SearchTitles`）
+    - [x] 目录的筛选与排序（`apps/web/src/screens/discover-filters.tsx`）：目录支持的排序、类型、制片公司、关键词、按国家的流媒体服务、原始语言、年份、时长、评分与评分人数，保存在页面地址中（`ListFilterValues`）；以及搜索结果中提供发现的服务器找到的作品（`SearchTitles`）
+    - [ ] 电视网与分级筛选：提供者无法搜索电视网，只能按其 ID 选择；分级需要某个国家的分级体系
     - [x] 请求（`apps/web/src/screens/requests.tsx`、`libs/client-ts/src/requests.ts`）：用户的请求及其状态与配额，管理员则可看所有人的请求，按状态筛选；批准、拒绝、重试、更改季与删除请求（`RequestService`）
     - [ ] 黑名单：在作品或合集页面屏蔽它们，以及列出已屏蔽的作品以解除屏蔽（`BlockTitle`、`ListBlockedTitles`、`BlockCollection`）
     - [ ] 管理员代其他用户请求或不计入配额（`CreateRequest` 的 `user_id` 与 `ignore_quota`）

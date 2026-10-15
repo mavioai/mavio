@@ -1,8 +1,9 @@
 import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
-import type { Filter, Sort } from "@mavio/client-ts";
+import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 
 import { Details } from "./screens/details.tsx";
 import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
+import { parseFilters } from "./screens/discover-filters.tsx";
 import { HomeScreen } from "./screens/home.tsx";
 import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
@@ -100,9 +101,10 @@ const discover = createRoute({ getParentRoute: () => root, path: "/discover", co
 const catalog = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/discover/$catalog",
-  validateSearch: (s: Record<string, unknown>): { kind?: "movie" | "series"; tmdb?: number } => ({
+  validateSearch: (s: Record<string, unknown>): { kind?: "movie" | "series"; tmdb?: number; f?: CatalogFilters } => ({
     kind: s.kind === "movie" || s.kind === "series" ? s.kind : undefined,
     tmdb: Number(s.tmdb) > 0 ? Number(s.tmdb) : undefined,
+    f: parseFilters(s.f),
   }),
   component: CatalogScreen,
 });

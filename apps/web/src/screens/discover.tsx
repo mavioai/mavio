@@ -2,8 +2,10 @@
 // discovers, a catalog's titles, and a title with its seasons, to watch
 // when a library has it and to request when none does.
 import {
+  type CatalogFilters,
   type CatalogRow,
   errorMessage,
+  filterCount,
   rowsOf,
   type ServerEntry,
   titlesOf,
@@ -22,6 +24,7 @@ import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
+import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
 import { Artwork, Button, CardPlaceholder, Grid, LoadMore, Loading, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
 
 /** A title's kind in addresses. */
@@ -58,7 +61,8 @@ function rowTitle({ catalog, mediaKind }: CatalogRow): string {
   }
 }
 
-function tmdbOf(title: DiscoveredTitle): number {
+/** A title's TMDB ID. */
+export function tmdbOf(title: DiscoveredTitle): number {
   return Number(title.externalIds.tmdb ?? 0);
 }
 
@@ -189,10 +193,12 @@ const catalogRoute = getRouteApi("/s/$serverId/discover/$catalog");
 /** All the titles of a catalog, page by page. */
 export function CatalogScreen() {
   const { serverId, catalog } = catalogRoute.useParams();
-  const { kind, tmdb } = catalogRoute.useSearch();
+  const { kind, tmdb, f = noFilters } = catalogRoute.useSearch();
+  const navigate = catalogRoute.useNavigate();
   const server = useServer(serverId);
   const { catalogs } = useDiscovery(discoverLanguage);
-  const q = useCatalog(server?.token ? server : undefined, catalog, mediaKindOf(kind), discoverLanguage, tmdb ?? 0);
+  const [filtering, setFiltering] = useState(false);
+  const q = useCatalog(server?.token ? server : undefined, catalog, mediaKindOf(kind), discoverLanguage, tmdb ?? 0, f);
   // On the television focus starts on the first title, as the page has no tabs.
   const { tv } = usePrefs();
   const grid = useRef<HTMLDivElement>(null);
@@ -203,17 +209,48 @@ export function CatalogScreen() {
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   const found = catalogs.find((c) => c.id === catalog);
   const title = found ? (tmdb ? found.name : rowTitle({ catalog: found, mediaKind: mediaKindOf(kind) })) : "";
+  // Recommendations and similar titles take no filters.
+  const filterable = !!found && !tmdb && (found.filters.length > 0 || found.sorts.length > 0);
+  const n = filterCount(f);
+  const titles = q.isSuccess ? titlesOf(q.data.pages) : [];
   return (
     <div>
-      <ScreenTitle>{title || " "}</ScreenTitle>
+      <div className="flex items-end justify-between gap-3 pe-margin">
+        <ScreenTitle>{title || " "}</ScreenTitle>
+        {filterable && (
+          <Button variant={n > 0 || f.sort ? "primary" : "secondary"} onClick={() => setFiltering(true)} className="mb-2 shrink-0">
+            <Icon name="filter" size={16} />
+            {n > 0 ? `${t("discover.filters")} (${n})` : t("discover.filters")}
+          </Button>
+        )}
+      </div>
+      {filtering && found && (
+        <FiltersDialog
+          server={server}
+          catalog={found}
+          mediaKind={mediaKindOf(kind)}
+          value={f}
+          onClose={() => setFiltering(false)}
+          onApply={(next) => {
+            setFiltering(false);
+            void navigate({ search: (cur) => ({ ...cur, f: parseFilters(next) }), replace: true });
+          }}
+        />
+      )}
       {q.isPending ? (
         <Loading />
       ) : q.isError ? (
         <StatusView icon="error" title={t("state.error")} action={{ label: t("action.retry"), onClick: () => void q.refetch() }} />
+      ) : titles.length === 0 && (n > 0 || !!f.sort) ? (
+        <StatusView
+          icon="search"
+          title={t("discover.noMatches")}
+          action={{ label: t("discover.reset"), onClick: () => void navigate({ search: (cur) => ({ ...cur, f: undefined }), replace: true }) }}
+        />
       ) : (
         <div ref={grid} className="pt-2">
           <Grid>
-            {titlesOf(q.data.pages).map((title) => (
+            {titles.map((title) => (
               <TitleCard key={`${title.mediaKind}/${tmdbOf(title)}`} serverId={server.id} title={title} fluid />
             ))}
           </Grid>
@@ -223,6 +260,8 @@ export function CatalogScreen() {
     </div>
   );
 }
+
+const noFilters: CatalogFilters = {};
 
 const titleRoute = getRouteApi("/s/$serverId/title/$kind/$tmdbId");
 

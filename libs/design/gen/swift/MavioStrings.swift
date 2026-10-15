@@ -216,6 +216,89 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("discover.requestFailed", bundle: .module, comment: ""), reason)
     }
 
+    /// Button and dialog filtering and sorting a catalog's titles.
+    public static var discoverFilters: String { NSLocalizedString("discover.filters", bundle: .module, comment: "") }
+
+    /// Label of the order of a catalog's titles.
+    public static var discoverSortBy: String { NSLocalizedString("discover.sortBy", bundle: .module, comment: "") }
+
+    /// The catalog's own order.
+    public static var discoverSortDefault: String { NSLocalizedString("discover.sortDefault", bundle: .module, comment: "") }
+
+    /// Order of titles by popularity.
+    public static var discoverSortPopularity: String { NSLocalizedString("discover.sortPopularity", bundle: .module, comment: "") }
+
+    /// Order of titles by release date.
+    public static var discoverSortReleaseDate: String { NSLocalizedString("discover.sortReleaseDate", bundle: .module, comment: "") }
+
+    /// Order of titles by rating.
+    public static var discoverSortRating: String { NSLocalizedString("discover.sortRating", bundle: .module, comment: "") }
+
+    /// Order of titles by how many voted.
+    public static var discoverSortVotes: String { NSLocalizedString("discover.sortVotes", bundle: .module, comment: "") }
+
+    /// Order of titles by name.
+    public static var discoverSortTitle: String { NSLocalizedString("discover.sortTitle", bundle: .module, comment: "") }
+
+    /// Order from highest to lowest.
+    public static var discoverDescending: String { NSLocalizedString("discover.descending", bundle: .module, comment: "") }
+
+    /// Order from lowest to highest.
+    public static var discoverAscending: String { NSLocalizedString("discover.ascending", bundle: .module, comment: "") }
+
+    /// Filter of titles by genre.
+    public static var discoverGenres: String { NSLocalizedString("discover.genres", bundle: .module, comment: "") }
+
+    /// Filter of movies by production company.
+    public static var discoverStudios: String { NSLocalizedString("discover.studios", bundle: .module, comment: "") }
+
+    /// Filter of titles by keyword.
+    public static var discoverKeywords: String { NSLocalizedString("discover.keywords", bundle: .module, comment: "") }
+
+    /// Placeholder of the field searching studios or keywords to filter by.
+    public static func discoverSearchValues(filter: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.searchValues", bundle: .module, comment: ""), filter)
+    }
+
+    /// Filter of titles by the streaming services offering them.
+    public static var discoverWatchProviders: String { NSLocalizedString("discover.watchProviders", bundle: .module, comment: "") }
+
+    /// Filter of titles by their original language.
+    public static var discoverOriginalLanguage: String { NSLocalizedString("discover.originalLanguage", bundle: .module, comment: "") }
+
+    /// Choice that does not filter.
+    public static var discoverAny: String { NSLocalizedString("discover.any", bundle: .module, comment: "") }
+
+    /// Filter of titles by the years of their release.
+    public static var discoverReleased: String { NSLocalizedString("discover.released", bundle: .module, comment: "") }
+
+    /// Label of the lower end of a range.
+    public static var discoverFrom: String { NSLocalizedString("discover.from", bundle: .module, comment: "") }
+
+    /// Label of the upper end of a range.
+    public static var discoverTo: String { NSLocalizedString("discover.to", bundle: .module, comment: "") }
+
+    /// Filter of titles by runtime.
+    public static var discoverRuntime: String { NSLocalizedString("discover.runtime", bundle: .module, comment: "") }
+
+    /// Filter of titles by their lowest rating.
+    public static var discoverRatingMin: String { NSLocalizedString("discover.ratingMin", bundle: .module, comment: "") }
+
+    /// Filter of titles by how many voted at least.
+    public static var discoverVotesMin: String { NSLocalizedString("discover.votesMin", bundle: .module, comment: "") }
+
+    /// Button clearing the filters and the order.
+    public static var discoverReset: String { NSLocalizedString("discover.reset", bundle: .module, comment: "") }
+
+    /// Button applying the filters.
+    public static var discoverApply: String { NSLocalizedString("discover.apply", bundle: .module, comment: "") }
+
+    /// Shown when the filters leave no titles.
+    public static var discoverNoMatches: String { NSLocalizedString("discover.noMatches", bundle: .module, comment: "") }
+
+    /// The label of the choice of the country whose streaming services Discover's filters list.
+    public static var discoverRegion: String { NSLocalizedString("discover.region", bundle: .module, comment: "") }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 
@@ -817,6 +900,9 @@ public enum MavioStrings {
 
     /// Key of the television's on-screen keyboard that clears the search.
     public static var searchClear: String { NSLocalizedString("search.clear", bundle: .module, comment: "") }
+
+    /// Row of the movies and series discovery providers find by name.
+    public static var searchDiscover: String { NSLocalizedString("search.discover", bundle: .module, comment: "") }
 
     /// User menu item opening the Mavio account's page at mavio.dev.
     public static var menuManageAccount: String { NSLocalizedString("menu.manageAccount", bundle: .module, comment: "") }

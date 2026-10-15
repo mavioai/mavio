@@ -69,6 +69,33 @@ export type MessageKey =
   | 'discover.requestSeasons'
   | 'discover.watch'
   | 'discover.requestFailed'
+  | 'discover.filters'
+  | 'discover.sortBy'
+  | 'discover.sortDefault'
+  | 'discover.sortPopularity'
+  | 'discover.sortReleaseDate'
+  | 'discover.sortRating'
+  | 'discover.sortVotes'
+  | 'discover.sortTitle'
+  | 'discover.descending'
+  | 'discover.ascending'
+  | 'discover.genres'
+  | 'discover.studios'
+  | 'discover.keywords'
+  | 'discover.searchValues'
+  | 'discover.watchProviders'
+  | 'discover.originalLanguage'
+  | 'discover.any'
+  | 'discover.released'
+  | 'discover.from'
+  | 'discover.to'
+  | 'discover.runtime'
+  | 'discover.ratingMin'
+  | 'discover.votesMin'
+  | 'discover.reset'
+  | 'discover.apply'
+  | 'discover.noMatches'
+  | 'discover.region'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -242,6 +269,7 @@ export type MessageKey =
   | 'search.space'
   | 'search.backspace'
   | 'search.clear'
+  | 'search.discover'
   | 'menu.manageAccount'
   | 'menu.manageServers'
   | 'menu.serverCount'
@@ -1542,6 +1570,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.requestSeasons": "{count, plural, one {Request # Season} other {Request # Seasons}}",
     "discover.watch": "Watch",
     "discover.requestFailed": "Couldn't request it: {reason}",
+    "discover.filters": "Filters",
+    "discover.sortBy": "Sort By",
+    "discover.sortDefault": "Default",
+    "discover.sortPopularity": "Popularity",
+    "discover.sortReleaseDate": "Release Date",
+    "discover.sortRating": "Rating",
+    "discover.sortVotes": "Votes",
+    "discover.sortTitle": "Title",
+    "discover.descending": "Descending",
+    "discover.ascending": "Ascending",
+    "discover.genres": "Genres",
+    "discover.studios": "Studios",
+    "discover.keywords": "Keywords",
+    "discover.searchValues": "Search {filter}",
+    "discover.watchProviders": "Streaming Services",
+    "discover.originalLanguage": "Original Language",
+    "discover.any": "Any",
+    "discover.released": "Released",
+    "discover.from": "From",
+    "discover.to": "To",
+    "discover.runtime": "Runtime (Minutes)",
+    "discover.ratingMin": "Minimum Rating",
+    "discover.votesMin": "Minimum Votes",
+    "discover.reset": "Reset",
+    "discover.apply": "Show Titles",
+    "discover.noMatches": "No titles match the filters.",
+    "discover.region": "Country or region",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -1715,6 +1770,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "search.space": "Space",
     "search.backspace": "Delete",
     "search.clear": "Clear",
+    "search.discover": "From Discover",
     "menu.manageAccount": "Manage Account at mavio.dev",
     "menu.manageServers": "Manage Servers",
     "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
@@ -3013,6 +3069,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.requestSeasons": "{count, plural, other {请求 # 季}}",
     "discover.watch": "观看",
     "discover.requestFailed": "无法请求：{reason}",
+    "discover.filters": "筛选",
+    "discover.sortBy": "排序方式",
+    "discover.sortDefault": "默认",
+    "discover.sortPopularity": "热度",
+    "discover.sortReleaseDate": "上映日期",
+    "discover.sortRating": "评分",
+    "discover.sortVotes": "评分人数",
+    "discover.sortTitle": "标题",
+    "discover.descending": "降序",
+    "discover.ascending": "升序",
+    "discover.genres": "类型",
+    "discover.studios": "制片公司",
+    "discover.keywords": "关键词",
+    "discover.searchValues": "搜索{filter}",
+    "discover.watchProviders": "流媒体服务",
+    "discover.originalLanguage": "原始语言",
+    "discover.any": "任意",
+    "discover.released": "上映年份",
+    "discover.from": "从",
+    "discover.to": "到",
+    "discover.runtime": "时长（分钟）",
+    "discover.ratingMin": "最低评分",
+    "discover.votesMin": "最少评分人数",
+    "discover.reset": "重置",
+    "discover.apply": "显示作品",
+    "discover.noMatches": "没有符合筛选条件的作品。",
+    "discover.region": "国家或地区",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",
@@ -3186,6 +3269,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "search.space": "空格",
     "search.backspace": "删除",
     "search.clear": "清空",
+    "search.discover": "来自发现",
     "menu.manageAccount": "在 mavio.dev 管理账户",
     "menu.manageServers": "管理服务器",
     "menu.serverCount": "{count, plural, other {# 台服务器}}",

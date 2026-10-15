@@ -1,10 +1,12 @@
 // Discovery and requests (docs/clients.md §6.3.2): the catalogs of the
-// first server that discovers, their titles page by page, a title with its
-// seasons, and requests of it.
-import { type Catalog, DiscoverService, type DiscoveredTitle, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
+// first server that discovers, their titles page by page, filtered and
+// sorted (§6.3.28), the values of their filters, titles found by name, a
+// title with its seasons, and requests of it.
+import type { MessageInitShape } from "@bufbuild/protobuf";
+import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
-import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
+import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore, useSignedIn } from "./hooks.ts";
@@ -62,18 +64,122 @@ export function useDiscovery(language: string): { server?: ServerEntry; catalogs
   });
 }
 
-/** A catalog's titles page by page; tmdbId names the title of recommendations and similar titles. */
-export function useCatalog(server: ServerEntry | undefined, catalog: string, mediaKind: MediaKind, language: string, tmdbId = 0) {
+/** A filter value chosen by its provider's ID, with its name to show. */
+export interface NamedValue {
+  id: string;
+  name: string;
+}
+
+/** How a catalog's titles are filtered and sorted; unset fields do not filter. */
+export interface CatalogFilters {
+  sort?: DiscoverSort;
+  ascending?: boolean;
+  genres?: string[];
+  studios?: NamedValue[];
+  keywords?: NamedValue[];
+  watchProviders?: string[];
+  /** ISO 3166-1 country of the watch providers. */
+  watchRegion?: string;
+  originalLanguage?: string;
+  /** Years of release, inclusive. */
+  yearFrom?: number;
+  yearTo?: number;
+  /** Minutes. */
+  runtimeMin?: number;
+  runtimeMax?: number;
+  /** 0–10. */
+  ratingMin?: number;
+  votesMin?: number;
+}
+
+/** How many filters are set, the sort aside. */
+export function filterCount(f: CatalogFilters): number {
+  return [
+    f.genres?.length,
+    f.studios?.length,
+    f.keywords?.length,
+    f.watchProviders?.length,
+    f.originalLanguage,
+    f.yearFrom || f.yearTo,
+    f.runtimeMin || f.runtimeMax,
+    f.ratingMin,
+    f.votesMin,
+  ].filter(Boolean).length;
+}
+
+/** The fields of a DiscoverRequest that filter and sort as filters do. */
+export function discoverRequestOf(f: CatalogFilters): MessageInitShape<typeof DiscoverRequestSchema> {
+  const providers = f.watchProviders ?? [];
+  return {
+    sort: f.sort ?? DiscoverSort.UNSPECIFIED,
+    ascending: f.ascending ?? false,
+    genres: f.genres ?? [],
+    studios: (f.studios ?? []).map((v) => v.id),
+    keywords: (f.keywords ?? []).map((v) => v.id),
+    watchProviders: providers,
+    watchRegion: providers.length > 0 ? (f.watchRegion ?? "") : "",
+    originalLanguage: f.originalLanguage ?? "",
+    releasedFrom: f.yearFrom ? `${f.yearFrom}-01-01` : "",
+    releasedTo: f.yearTo ? `${f.yearTo}-12-31` : "",
+    runtimeMin: f.runtimeMin ?? 0,
+    runtimeMax: f.runtimeMax ?? 0,
+    ratingMin: f.ratingMin ?? 0,
+    votesMin: f.votesMin ?? 0,
+  };
+}
+
+/**
+ * A catalog's titles page by page, filtered and sorted; tmdbId names the
+ * title of recommendations and similar titles.
+ */
+export function useCatalog(server: ServerEntry | undefined, catalog: string, mediaKind: MediaKind, language: string, tmdbId = 0, filters: CatalogFilters = {}) {
   const servers = useServersStore();
   return useInfiniteQuery({
-    queryKey: serverKey(server?.id ?? "", "discover", "catalog", catalog, mediaKind, tmdbId, language),
+    queryKey: serverKey(server?.id ?? "", "discover", "catalog", catalog, mediaKind, tmdbId, language, filters),
     queryFn: async ({ pageParam }) => {
-      const r = await servers.client(DiscoverService, server!).discover({ catalog, mediaKind, tmdbId, language, page: pageParam });
+      const r = await servers
+        .client(DiscoverService, server!)
+        .discover({ ...discoverRequestOf(filters), catalog, mediaKind, tmdbId, language, page: pageParam });
       return { titles: r.titles, next: r.page < r.totalPages ? r.page + 1 : undefined };
     },
     initialPageParam: 1,
     getNextPageParam: (last) => last.next,
     enabled: !!server,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/**
+ * The values a catalog's filter takes: all of them for genres and watch
+ * providers, those matching a query for studios and keywords, none
+ * without one.
+ */
+export function useFilterValues(
+  server: ServerEntry | undefined,
+  v: { catalog: string; filter: DiscoverFilter; mediaKind: MediaKind; query?: string; language: string; region?: string },
+  enabled = true,
+) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "filterValues", v),
+    queryFn: async () => (await servers.client(DiscoverService, server!).listFilterValues({ ...v, query: v.query ?? "", region: v.region ?? "" })).values,
+    enabled: !!server && enabled,
+    staleTime: 60 * 60_000,
+  });
+}
+
+/** Movies and series the first discovery provider that searches finds by name, page by page; none for an empty query. */
+export function useSearchTitles(server: ServerEntry | undefined, query: string, language: string) {
+  const servers = useServersStore();
+  return useInfiniteQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "search", query, language),
+    queryFn: async ({ pageParam }) => {
+      const r = await servers.client(DiscoverService, server!).searchTitles({ query, language, page: pageParam });
+      return { titles: r.titles, next: r.page < r.totalPages ? r.page + 1 : undefined };
+    },
+    initialPageParam: 1,
+    getNextPageParam: (last) => last.next,
+    enabled: !!server && query.trim() !== "",
     staleTime: 5 * 60_000,
   });
 }

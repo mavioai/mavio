@@ -1,15 +1,17 @@
 // Search asks every server at once and lists the results by server
-// (docs/clients.md §5.4). A search runs when it is confirmed; on the
+// (docs/clients.md §5.4), and the server that discovers for titles to
+// request (§6.3.28). A search runs when it is confirmed; on the
 // television it runs as the on-screen keyboard types, beside the results
 // (docs/tv.md §6.4).
-import { type SearchResults, useHome, useSearch, useSignedIn } from "@mavio/client-ts";
+import { type SearchResults, titlesOf, useDiscovery, useHome, useSearch, useSearchTitles, useSignedIn } from "@mavio/client-ts";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
-import { t } from "../i18n.ts";
+import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { CardPlaceholder, Grid, ItemCard, Shelf, StatusView } from "../ui.tsx";
+import { tmdbOf, TitleCard } from "./discover.tsx";
 import { SectionView } from "./home.tsx";
 
 const route = getRouteApi("/search");
@@ -152,8 +154,13 @@ function Suggestions() {
 /** The results of each server, in a row each, or a grid on the television. */
 function Results({ q, results, grid }: { q: string; results: SearchResults[]; grid: boolean }) {
   const several = useSignedIn().length > 1;
+  // The titles the first server that discovers finds, to request.
+  const discovery = useDiscovery(discoverLanguage);
+  const found = useSearchTitles(discovery.catalogs.length > 0 ? discovery.server : undefined, q, discoverLanguage);
+  const titles = titlesOf(found.data?.pages);
   if (q === "") return null;
-  const none = results.every((r) => !r.pending) && results.every((r) => r.items.length === 0);
+  const none =
+    results.every((r) => !r.pending) && results.every((r) => r.items.length === 0) && !discovery.pending && !found.isLoading && titles.length === 0;
   return (
     <>
       {results.map(({ server, items, pending, error }) => {
@@ -196,6 +203,23 @@ function Results({ q, results, grid }: { q: string; results: SearchResults[]; gr
           </Shelf>
         );
       })}
+      {discovery.server && titles.length > 0 &&
+        (grid ? (
+          <section className="py-3">
+            <h2 className="mb-2 px-margin type-title3">{t("search.discover")}</h2>
+            <Grid>
+              {titles.map((title) => (
+                <TitleCard key={`${title.mediaKind}/${tmdbOf(title)}`} serverId={discovery.server!.id} title={title} fluid />
+              ))}
+            </Grid>
+          </section>
+        ) : (
+          <Shelf title={t("search.discover")}>
+            {titles.map((title) => (
+              <TitleCard key={`${title.mediaKind}/${tmdbOf(title)}`} serverId={discovery.server!.id} title={title} />
+            ))}
+          </Shelf>
+        ))}
       {none && <StatusView icon="search" title={t("search.noResults")} />}
     </>
   );

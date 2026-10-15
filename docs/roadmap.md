@@ -671,7 +671,8 @@ flowchart TD
   - [ ] The web UI's details: trailers and other extras
   - [x] The web UI's person page (`apps/web/src/screens/person.tsx`, `libs/client-ts/src/people.ts`), opened from the cast's cards: the person and the titles crediting them
   - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
-    - [ ] The catalogs' filters and sorts (`ListFilterValues`), and providers' titles (`SearchTitles`) among Search's results
+    - [x] The catalogs' filters and sorts (`apps/web/src/screens/discover-filters.tsx`): the order, genres, studios, keywords, streaming services by country, original language, years, runtime, rating and votes a catalog takes, kept in the page's address (`ListFilterValues`); and the titles the server that discovers finds among Search's results (`SearchTitles`)
+    - [ ] The networks and certifications filters: networks can be chosen only by their ID, as the provider cannot search them, and certifications need the rating system of a country
     - [x] Requests (`apps/web/src/screens/requests.tsx`, `libs/client-ts/src/requests.ts`): the user's requests with their state and quotas, or everyone's for administrators, by status; approving, declining, retrying, changing the seasons of and deleting them (`RequestService`)
     - [ ] The blocklist: blocking a title or a collection from its page, and the blocked titles to unblock (`BlockTitle`, `ListBlockedTitles`, `BlockCollection`)
     - [ ] Administrators requesting for another user or outside their quota (`CreateRequest`'s `user_id` and `ignore_quota`)

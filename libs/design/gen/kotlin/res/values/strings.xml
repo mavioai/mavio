@@ -120,6 +120,60 @@
     <string name="discover_watch">Watch</string>
     <!-- Shown when a request fails; reason is the server's. -->
     <string name="discover_request_failed">Couldn\'t request it: %s</string>
+    <!-- Button and dialog filtering and sorting a catalog's titles. -->
+    <string name="discover_filters">Filters</string>
+    <!-- Label of the order of a catalog's titles. -->
+    <string name="discover_sort_by">Sort By</string>
+    <!-- The catalog's own order. -->
+    <string name="discover_sort_default">Default</string>
+    <!-- Order of titles by popularity. -->
+    <string name="discover_sort_popularity">Popularity</string>
+    <!-- Order of titles by release date. -->
+    <string name="discover_sort_release_date">Release Date</string>
+    <!-- Order of titles by rating. -->
+    <string name="discover_sort_rating">Rating</string>
+    <!-- Order of titles by how many voted. -->
+    <string name="discover_sort_votes">Votes</string>
+    <!-- Order of titles by name. -->
+    <string name="discover_sort_title">Title</string>
+    <!-- Order from highest to lowest. -->
+    <string name="discover_descending">Descending</string>
+    <!-- Order from lowest to highest. -->
+    <string name="discover_ascending">Ascending</string>
+    <!-- Filter of titles by genre. -->
+    <string name="discover_genres">Genres</string>
+    <!-- Filter of movies by production company. -->
+    <string name="discover_studios">Studios</string>
+    <!-- Filter of titles by keyword. -->
+    <string name="discover_keywords">Keywords</string>
+    <!-- Placeholder of the field searching studios or keywords to filter by. -->
+    <string name="discover_search_values">Search %s</string>
+    <!-- Filter of titles by the streaming services offering them. -->
+    <string name="discover_watch_providers">Streaming Services</string>
+    <!-- Filter of titles by their original language. -->
+    <string name="discover_original_language">Original Language</string>
+    <!-- Choice that does not filter. -->
+    <string name="discover_any">Any</string>
+    <!-- Filter of titles by the years of their release. -->
+    <string name="discover_released">Released</string>
+    <!-- Label of the lower end of a range. -->
+    <string name="discover_from">From</string>
+    <!-- Label of the upper end of a range. -->
+    <string name="discover_to">To</string>
+    <!-- Filter of titles by runtime. -->
+    <string name="discover_runtime">Runtime (Minutes)</string>
+    <!-- Filter of titles by their lowest rating. -->
+    <string name="discover_rating_min">Minimum Rating</string>
+    <!-- Filter of titles by how many voted at least. -->
+    <string name="discover_votes_min">Minimum Votes</string>
+    <!-- Button clearing the filters and the order. -->
+    <string name="discover_reset">Reset</string>
+    <!-- Button applying the filters. -->
+    <string name="discover_apply">Show Titles</string>
+    <!-- Shown when the filters leave no titles. -->
+    <string name="discover_no_matches">No titles match the filters.</string>
+    <!-- The label of the choice of the country whose streaming services Discover's filters list. -->
+    <string name="discover_region">Country or region</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->
@@ -503,6 +557,8 @@
     <string name="search_backspace">Delete</string>
     <!-- Key of the television's on-screen keyboard that clears the search. -->
     <string name="search_clear">Clear</string>
+    <!-- Row of the movies and series discovery providers find by name. -->
+    <string name="search_discover">From Discover</string>
     <!-- User menu item opening the Mavio account's page at mavio.dev. -->
     <string name="menu_manage_account">Manage Account at mavio.dev</string>
     <!-- User menu item opening the servers' settings. -->
