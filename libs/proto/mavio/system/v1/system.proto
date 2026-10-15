@@ -160,10 +160,12 @@ message CatalogPlugin {
   string homepage = 5;
   // The catalog listing it.
   string catalog_url = 6;
-  // Newest first; only versions the server can run.
+  // Newest first; only versions the server can run, none when it can run
+  // no version.
   repeated CatalogVersion versions = 7;
   // Empty when not installed.
   string installed_version = 8;
+  mavio.plugin.v1.Category category = 9;
 }
 
 // CatalogVersion is a version of a catalog plugin.

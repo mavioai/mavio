@@ -2810,7 +2810,8 @@ pub struct CatalogPluginView<'a> {
     ///
     /// Field 6: `catalog_url`
     pub catalog_url: ::core::option::Option<&'a str>,
-    /// Newest first; only versions the server can run.
+    /// Newest first; only versions the server can run, none when it can run
+    /// no version.
     ///
     /// Field 7: `versions`
     pub versions: ::buffa::RepeatedView<
@@ -2821,6 +2822,10 @@ pub struct CatalogPluginView<'a> {
     ///
     /// Field 8: `installed_version`
     pub installed_version: ::core::option::Option<&'a str>,
+    /// Field 9: `category`
+    pub category: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::plugin::v1::Category>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for CatalogPluginView<'a> {
@@ -2902,6 +2907,15 @@ impl<'a> ::buffa::MessageView<'a> for CatalogPluginView<'a> {
                 )?;
                 view.installed_version = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.category = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -2956,6 +2970,7 @@ impl<'a> ::buffa::MessageView<'a> for CatalogPluginView<'a> {
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             installed_version: self.installed_version.map(|s| s.to_string()),
+            category: self.category,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -2996,6 +3011,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CatalogPluginView<'a> {
         if let Some(ref v) = self.installed_version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.category {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3035,6 +3053,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CatalogPluginView<'a> {
         }
         if let Some(ref v) = self.installed_version {
             ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.category {
+            ::buffa::types::put_int32_field(9u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3159,7 +3180,8 @@ impl CatalogPluginOwnedView {
     pub fn catalog_url(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().catalog_url
     }
-    /// Newest first; only versions the server can run.
+    /// Newest first; only versions the server can run, none when it can run
+    /// no version.
     ///
     /// Field 7: `versions`
     #[must_use]
@@ -3177,6 +3199,15 @@ impl CatalogPluginOwnedView {
     #[must_use]
     pub fn installed_version(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().installed_version
+    }
+    /// Field 9: `category`
+    #[must_use]
+    pub fn category(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::plugin::v1::Category>,
+    > {
+        self.0.reborrow().category
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<CatalogPluginView<'static>>>

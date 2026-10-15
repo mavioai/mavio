@@ -5,7 +5,7 @@
 /// (manifest.json) and returned by Describe.
 #[derive(Clone, Debug, Default)]
 pub struct ManifestView<'a> {
-    /// Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+    /// Reverse-DNS identifier, e.g. "dev.mavio.scraper-tmdb".
     ///
     /// Field 1: `id`
     pub id: ::core::option::Option<&'a str>,
@@ -67,6 +67,10 @@ pub struct ManifestView<'a> {
     ///
     /// Field 16: `local_metadata_files`
     pub local_metadata_files: ::buffa::RepeatedView<'a, &'a str>,
+    /// What the plugin is for.
+    ///
+    /// Field 17: `category`
+    pub category: ::core::option::Option<::buffa::EnumValue<super::super::Category>>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ManifestView<'a> {
@@ -198,6 +202,15 @@ impl<'a> ::buffa::MessageView<'a> for ManifestView<'a> {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 view.config_page = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.category = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
             }
             9u32 => {
                 if tag.wire_type() == ::buffa::encoding::WireType::LengthDelimited {
@@ -335,6 +348,7 @@ impl<'a> ::buffa::MessageView<'a> for ManifestView<'a> {
                 .iter()
                 .map(|s| s.to_string())
                 .collect(),
+            category: self.category,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -413,6 +427,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ManifestView<'a> {
         }
         for v in &self.local_metadata_files {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.category {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -495,6 +512,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ManifestView<'a> {
         }
         for v in &self.local_metadata_files {
             ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        if let Some(ref v) = self.category {
+            ::buffa::types::put_int32_field(17u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -585,7 +605,7 @@ impl ManifestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+    /// Reverse-DNS identifier, e.g. "dev.mavio.scraper-tmdb".
     ///
     /// Field 1: `id`
     #[must_use]
@@ -699,6 +719,15 @@ impl ManifestOwnedView {
     #[must_use]
     pub fn local_metadata_files(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().local_metadata_files
+    }
+    /// What the plugin is for.
+    ///
+    /// Field 17: `category`
+    #[must_use]
+    pub fn category(
+        &self,
+    ) -> ::core::option::Option<::buffa::EnumValue<super::super::Category>> {
+        self.0.reborrow().category
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ManifestView<'static>>>

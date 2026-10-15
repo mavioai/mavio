@@ -14294,6 +14294,21 @@
         ],
         "description": "CatalogKind is what a catalog lists."
       },
+      "mavio.plugin.v1.Category": {
+        "type": "string",
+        "title": "Category",
+        "enum": [
+          "CATEGORY_UNSPECIFIED",
+          "CATEGORY_METADATA",
+          "CATEGORY_SUBTITLES",
+          "CATEGORY_DOWNLOADS",
+          "CATEGORY_AUTHENTICATION",
+          "CATEGORY_NOTIFICATIONS",
+          "CATEGORY_DEVICES",
+          "CATEGORY_AI"
+        ],
+        "description": "Category is what a plugin is for, by which clients group plugins."
+      },
       "mavio.plugin.v1.DiscoverFilter": {
         "type": "string",
         "title": "DiscoverFilter",
@@ -14384,7 +14399,7 @@
           "id": {
             "type": "string",
             "title": "id",
-            "description": "Reverse-DNS identifier, e.g. \"org.mavio.scraper-tmdb\"."
+            "description": "Reverse-DNS identifier, e.g. \"dev.mavio.scraper-tmdb\"."
           },
           "name": {
             "type": "string",
@@ -14473,6 +14488,15 @@
             },
             "title": "local_metadata_files",
             "description": "Names of the files beside the media a local metadata reader reads, as\n patterns such as \"*.yaml\" or \"movie.json\" (path.Match syntax, without\n \"/\"); requires CAPABILITY_LOCAL_METADATA."
+          },
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.Category"
+              }
+            ],
+            "title": "category",
+            "description": "What the plugin is for."
           }
         },
         "title": "Manifest",
@@ -16935,12 +16959,20 @@
               "$ref": "#/components/schemas/mavio.system.v1.CatalogVersion"
             },
             "title": "versions",
-            "description": "Newest first; only versions the server can run."
+            "description": "Newest first; only versions the server can run, none when it can run\n no version."
           },
           "installedVersion": {
             "type": "string",
             "title": "installed_version",
             "description": "Empty when not installed."
+          },
+          "category": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.Category"
+              }
+            ],
+            "title": "category"
           }
         },
         "title": "CatalogPlugin",

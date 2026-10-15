@@ -221,6 +221,73 @@ func (x Capability) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// Category is what a plugin is for, by which clients group plugins.
+type Category int32
+
+const (
+	Category_CATEGORY_UNSPECIFIED Category = 0
+	// Metadata, images and titles to discover.
+	Category_CATEGORY_METADATA Category = 1
+	// Subtitles: finding, downloading and translating them.
+	Category_CATEGORY_SUBTITLES Category = 2
+	// Indexers and download clients.
+	Category_CATEGORY_DOWNLOADS Category = 3
+	// Signing users in.
+	Category_CATEGORY_AUTHENTICATION Category = 4
+	// Notifications of what happens on the server.
+	Category_CATEGORY_NOTIFICATIONS Category = 5
+	// Devices the server plays on or serves, such as DLNA televisions.
+	Category_CATEGORY_DEVICES Category = 6
+	// AI models and agents.
+	Category_CATEGORY_AI Category = 7
+)
+
+// Enum value maps for Category.
+var (
+	Category_name = map[int32]string{
+		0: "CATEGORY_UNSPECIFIED",
+		1: "CATEGORY_METADATA",
+		2: "CATEGORY_SUBTITLES",
+		3: "CATEGORY_DOWNLOADS",
+		4: "CATEGORY_AUTHENTICATION",
+		5: "CATEGORY_NOTIFICATIONS",
+		6: "CATEGORY_DEVICES",
+		7: "CATEGORY_AI",
+	}
+	Category_value = map[string]int32{
+		"CATEGORY_UNSPECIFIED":    0,
+		"CATEGORY_METADATA":       1,
+		"CATEGORY_SUBTITLES":      2,
+		"CATEGORY_DOWNLOADS":      3,
+		"CATEGORY_AUTHENTICATION": 4,
+		"CATEGORY_NOTIFICATIONS":  5,
+		"CATEGORY_DEVICES":        6,
+		"CATEGORY_AI":             7,
+	}
+)
+
+func (x Category) Enum() *Category {
+	p := new(Category)
+	*p = x
+	return p
+}
+
+func (x Category) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Category) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_plugin_v1_plugin_proto_enumTypes[2].Descriptor()
+}
+
+func (Category) Type() protoreflect.EnumType {
+	return &file_mavio_plugin_v1_plugin_proto_enumTypes[2]
+}
+
+func (x Category) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // Manifest describes a plugin. It is shipped alongside the plugin
 // (manifest.json) and returned by Describe.
 type Manifest struct {
@@ -241,6 +308,7 @@ type Manifest struct {
 	xxx_hidden_ConfigPage         *string                `protobuf:"bytes,14,opt,name=config_page,json=configPage"`
 	xxx_hidden_ExternalIdKinds    *[]*ExternalIdKind     `protobuf:"bytes,15,rep,name=external_id_kinds,json=externalIdKinds"`
 	xxx_hidden_LocalMetadataFiles []string               `protobuf:"bytes,16,rep,name=local_metadata_files,json=localMetadataFiles"`
+	xxx_hidden_Category           Category               `protobuf:"varint,17,opt,name=category,enum=mavio.plugin.v1.Category"`
 	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
 	XXX_presence                  [1]uint32
 	unknownFields                 protoimpl.UnknownFields
@@ -420,44 +488,53 @@ func (x *Manifest) GetLocalMetadataFiles() []string {
 	return nil
 }
 
+func (x *Manifest) GetCategory() Category {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 16) {
+			return x.xxx_hidden_Category
+		}
+	}
+	return Category_CATEGORY_UNSPECIFIED
+}
+
 func (x *Manifest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 17)
 }
 
 func (x *Manifest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 17)
 }
 
 func (x *Manifest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 17)
 }
 
 func (x *Manifest) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 17)
 }
 
 func (x *Manifest) SetAuthor(v string) {
 	x.xxx_hidden_Author = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 17)
 }
 
 func (x *Manifest) SetHomepage(v string) {
 	x.xxx_hidden_Homepage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 17)
 }
 
 func (x *Manifest) SetLicense(v string) {
 	x.xxx_hidden_License = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 17)
 }
 
 func (x *Manifest) SetRuntime(v Runtime) {
 	x.xxx_hidden_Runtime = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 17)
 }
 
 func (x *Manifest) SetCapabilities(v []Capability) {
@@ -470,12 +547,12 @@ func (x *Manifest) SetPermissions(v *Permissions) {
 
 func (x *Manifest) SetConfigSchema(v string) {
 	x.xxx_hidden_ConfigSchema = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 17)
 }
 
 func (x *Manifest) SetApiVersion(v string) {
 	x.xxx_hidden_ApiVersion = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 17)
 }
 
 func (x *Manifest) SetTasks(v []*Task) {
@@ -484,7 +561,7 @@ func (x *Manifest) SetTasks(v []*Task) {
 
 func (x *Manifest) SetConfigPage(v string) {
 	x.xxx_hidden_ConfigPage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 16)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 17)
 }
 
 func (x *Manifest) SetExternalIdKinds(v []*ExternalIdKind) {
@@ -493,6 +570,11 @@ func (x *Manifest) SetExternalIdKinds(v []*ExternalIdKind) {
 
 func (x *Manifest) SetLocalMetadataFiles(v []string) {
 	x.xxx_hidden_LocalMetadataFiles = v
+}
+
+func (x *Manifest) SetCategory(v Category) {
+	x.xxx_hidden_Category = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 17)
 }
 
 func (x *Manifest) HasId() bool {
@@ -579,6 +661,13 @@ func (x *Manifest) HasConfigPage() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
 }
 
+func (x *Manifest) HasCategory() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 16)
+}
+
 func (x *Manifest) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -638,10 +727,15 @@ func (x *Manifest) ClearConfigPage() {
 	x.xxx_hidden_ConfigPage = nil
 }
 
+func (x *Manifest) ClearCategory() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 16)
+	x.xxx_hidden_Category = Category_CATEGORY_UNSPECIFIED
+}
+
 type Manifest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+	// Reverse-DNS identifier, e.g. "dev.mavio.scraper-tmdb".
 	Id   *string
 	Name *string
 	// Semantic version of the plugin.
@@ -670,6 +764,8 @@ type Manifest_builder struct {
 	// patterns such as "*.yaml" or "movie.json" (path.Match syntax, without
 	// "/"); requires CAPABILITY_LOCAL_METADATA.
 	LocalMetadataFiles []string
+	// What the plugin is for.
+	Category *Category
 }
 
 func (b0 Manifest_builder) Build() *Manifest {
@@ -677,54 +773,58 @@ func (b0 Manifest_builder) Build() *Manifest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 17)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 17)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 17)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 17)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Author != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 17)
 		x.xxx_hidden_Author = b.Author
 	}
 	if b.Homepage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 17)
 		x.xxx_hidden_Homepage = b.Homepage
 	}
 	if b.License != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 17)
 		x.xxx_hidden_License = b.License
 	}
 	if b.Runtime != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 17)
 		x.xxx_hidden_Runtime = *b.Runtime
 	}
 	x.xxx_hidden_Capabilities = b.Capabilities
 	x.xxx_hidden_Permissions = b.Permissions
 	if b.ConfigSchema != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 17)
 		x.xxx_hidden_ConfigSchema = b.ConfigSchema
 	}
 	if b.ApiVersion != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 17)
 		x.xxx_hidden_ApiVersion = b.ApiVersion
 	}
 	x.xxx_hidden_Tasks = &b.Tasks
 	if b.ConfigPage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 16)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 17)
 		x.xxx_hidden_ConfigPage = b.ConfigPage
 	}
 	x.xxx_hidden_ExternalIdKinds = &b.ExternalIdKinds
 	x.xxx_hidden_LocalMetadataFiles = b.LocalMetadataFiles
+	if b.Category != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 17)
+		x.xxx_hidden_Category = *b.Category
+	}
 	return m0
 }
 
@@ -1515,7 +1615,7 @@ var File_mavio_plugin_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\x80\x05\n" +
+	"\x1cmavio/plugin/v1/plugin.proto\x12\x0fmavio.plugin.v1\x1a\x1emavio/plugin/v1/metadata.proto\x1a\x1amavio/plugin/v1/task.proto\"\xb7\x05\n" +
 	"\bManifest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
@@ -1535,7 +1635,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\vconfig_page\x18\x0e \x01(\tR\n" +
 	"configPage\x12K\n" +
 	"\x11external_id_kinds\x18\x0f \x03(\v2\x1f.mavio.plugin.v1.ExternalIdKindR\x0fexternalIdKinds\x120\n" +
-	"\x14local_metadata_files\x18\x10 \x03(\tR\x12localMetadataFiles\"\x96\x01\n" +
+	"\x14local_metadata_files\x18\x10 \x03(\tR\x12localMetadataFiles\x125\n" +
+	"\bcategory\x18\x11 \x01(\x0e2\x19.mavio.plugin.v1.CategoryR\bcategory\"\x96\x01\n" +
 	"\x0eExternalIdKind\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12;\n" +
@@ -1598,7 +1699,16 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"#CAPABILITY_DOWNLOAD_CLIENT_PROVIDER\x10\x18\x12\"\n" +
 	"\x1eCAPABILITY_SUBTITLE_TRANSLATOR\x10\x19\x12\x19\n" +
 	"\x15CAPABILITY_AI_GATEWAY\x10\x1a\x12\x1c\n" +
-	"\x18CAPABILITY_AGENT_SESSION\x10\x1b2\xda\x02\n" +
+	"\x18CAPABILITY_AGENT_SESSION\x10\x1b*\xcb\x01\n" +
+	"\bCategory\x12\x18\n" +
+	"\x14CATEGORY_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11CATEGORY_METADATA\x10\x01\x12\x16\n" +
+	"\x12CATEGORY_SUBTITLES\x10\x02\x12\x16\n" +
+	"\x12CATEGORY_DOWNLOADS\x10\x03\x12\x1b\n" +
+	"\x17CATEGORY_AUTHENTICATION\x10\x04\x12\x1a\n" +
+	"\x16CATEGORY_NOTIFICATIONS\x10\x05\x12\x14\n" +
+	"\x10CATEGORY_DEVICES\x10\x06\x12\x0f\n" +
+	"\vCATEGORY_AI\x10\a2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +
@@ -1606,46 +1716,48 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\bShutdown\x12 .mavio.plugin.v1.ShutdownRequest\x1a!.mavio.plugin.v1.ShutdownResponseB\xc5\x01\n" +
 	"\x13com.mavio.plugin.v1B\vPluginProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
-var file_mavio_plugin_v1_plugin_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_mavio_plugin_v1_plugin_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_mavio_plugin_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_mavio_plugin_v1_plugin_proto_goTypes = []any{
 	(Runtime)(0),              // 0: mavio.plugin.v1.Runtime
 	(Capability)(0),           // 1: mavio.plugin.v1.Capability
-	(*Manifest)(nil),          // 2: mavio.plugin.v1.Manifest
-	(*ExternalIdKind)(nil),    // 3: mavio.plugin.v1.ExternalIdKind
-	(*Permissions)(nil),       // 4: mavio.plugin.v1.Permissions
-	(*DescribeRequest)(nil),   // 5: mavio.plugin.v1.DescribeRequest
-	(*DescribeResponse)(nil),  // 6: mavio.plugin.v1.DescribeResponse
-	(*ConfigureRequest)(nil),  // 7: mavio.plugin.v1.ConfigureRequest
-	(*ConfigureResponse)(nil), // 8: mavio.plugin.v1.ConfigureResponse
-	(*HealthRequest)(nil),     // 9: mavio.plugin.v1.HealthRequest
-	(*HealthResponse)(nil),    // 10: mavio.plugin.v1.HealthResponse
-	(*ShutdownRequest)(nil),   // 11: mavio.plugin.v1.ShutdownRequest
-	(*ShutdownResponse)(nil),  // 12: mavio.plugin.v1.ShutdownResponse
-	(*Task)(nil),              // 13: mavio.plugin.v1.Task
-	(MediaKind)(0),            // 14: mavio.plugin.v1.MediaKind
+	(Category)(0),             // 2: mavio.plugin.v1.Category
+	(*Manifest)(nil),          // 3: mavio.plugin.v1.Manifest
+	(*ExternalIdKind)(nil),    // 4: mavio.plugin.v1.ExternalIdKind
+	(*Permissions)(nil),       // 5: mavio.plugin.v1.Permissions
+	(*DescribeRequest)(nil),   // 6: mavio.plugin.v1.DescribeRequest
+	(*DescribeResponse)(nil),  // 7: mavio.plugin.v1.DescribeResponse
+	(*ConfigureRequest)(nil),  // 8: mavio.plugin.v1.ConfigureRequest
+	(*ConfigureResponse)(nil), // 9: mavio.plugin.v1.ConfigureResponse
+	(*HealthRequest)(nil),     // 10: mavio.plugin.v1.HealthRequest
+	(*HealthResponse)(nil),    // 11: mavio.plugin.v1.HealthResponse
+	(*ShutdownRequest)(nil),   // 12: mavio.plugin.v1.ShutdownRequest
+	(*ShutdownResponse)(nil),  // 13: mavio.plugin.v1.ShutdownResponse
+	(*Task)(nil),              // 14: mavio.plugin.v1.Task
+	(MediaKind)(0),            // 15: mavio.plugin.v1.MediaKind
 }
 var file_mavio_plugin_v1_plugin_proto_depIdxs = []int32{
 	0,  // 0: mavio.plugin.v1.Manifest.runtime:type_name -> mavio.plugin.v1.Runtime
 	1,  // 1: mavio.plugin.v1.Manifest.capabilities:type_name -> mavio.plugin.v1.Capability
-	4,  // 2: mavio.plugin.v1.Manifest.permissions:type_name -> mavio.plugin.v1.Permissions
-	13, // 3: mavio.plugin.v1.Manifest.tasks:type_name -> mavio.plugin.v1.Task
-	3,  // 4: mavio.plugin.v1.Manifest.external_id_kinds:type_name -> mavio.plugin.v1.ExternalIdKind
-	14, // 5: mavio.plugin.v1.ExternalIdKind.media_kinds:type_name -> mavio.plugin.v1.MediaKind
-	2,  // 6: mavio.plugin.v1.DescribeResponse.manifest:type_name -> mavio.plugin.v1.Manifest
-	5,  // 7: mavio.plugin.v1.PluginService.Describe:input_type -> mavio.plugin.v1.DescribeRequest
-	7,  // 8: mavio.plugin.v1.PluginService.Configure:input_type -> mavio.plugin.v1.ConfigureRequest
-	9,  // 9: mavio.plugin.v1.PluginService.Health:input_type -> mavio.plugin.v1.HealthRequest
-	11, // 10: mavio.plugin.v1.PluginService.Shutdown:input_type -> mavio.plugin.v1.ShutdownRequest
-	6,  // 11: mavio.plugin.v1.PluginService.Describe:output_type -> mavio.plugin.v1.DescribeResponse
-	8,  // 12: mavio.plugin.v1.PluginService.Configure:output_type -> mavio.plugin.v1.ConfigureResponse
-	10, // 13: mavio.plugin.v1.PluginService.Health:output_type -> mavio.plugin.v1.HealthResponse
-	12, // 14: mavio.plugin.v1.PluginService.Shutdown:output_type -> mavio.plugin.v1.ShutdownResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	5,  // 2: mavio.plugin.v1.Manifest.permissions:type_name -> mavio.plugin.v1.Permissions
+	14, // 3: mavio.plugin.v1.Manifest.tasks:type_name -> mavio.plugin.v1.Task
+	4,  // 4: mavio.plugin.v1.Manifest.external_id_kinds:type_name -> mavio.plugin.v1.ExternalIdKind
+	2,  // 5: mavio.plugin.v1.Manifest.category:type_name -> mavio.plugin.v1.Category
+	15, // 6: mavio.plugin.v1.ExternalIdKind.media_kinds:type_name -> mavio.plugin.v1.MediaKind
+	3,  // 7: mavio.plugin.v1.DescribeResponse.manifest:type_name -> mavio.plugin.v1.Manifest
+	6,  // 8: mavio.plugin.v1.PluginService.Describe:input_type -> mavio.plugin.v1.DescribeRequest
+	8,  // 9: mavio.plugin.v1.PluginService.Configure:input_type -> mavio.plugin.v1.ConfigureRequest
+	10, // 10: mavio.plugin.v1.PluginService.Health:input_type -> mavio.plugin.v1.HealthRequest
+	12, // 11: mavio.plugin.v1.PluginService.Shutdown:input_type -> mavio.plugin.v1.ShutdownRequest
+	7,  // 12: mavio.plugin.v1.PluginService.Describe:output_type -> mavio.plugin.v1.DescribeResponse
+	9,  // 13: mavio.plugin.v1.PluginService.Configure:output_type -> mavio.plugin.v1.ConfigureResponse
+	11, // 14: mavio.plugin.v1.PluginService.Health:output_type -> mavio.plugin.v1.HealthResponse
+	13, // 15: mavio.plugin.v1.PluginService.Shutdown:output_type -> mavio.plugin.v1.ShutdownResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_plugin_proto_init() }
@@ -1660,7 +1772,7 @@ func file_mavio_plugin_v1_plugin_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_plugin_proto_rawDesc), len(file_mavio_plugin_v1_plugin_proto_rawDesc)),
-			NumEnums:      2,
+			NumEnums:      3,
 			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,

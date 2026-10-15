@@ -98,10 +98,29 @@ enum Capability {
   CAPABILITY_AGENT_SESSION = 27;
 }
 
+// Category is what a plugin is for, by which clients group plugins.
+enum Category {
+  CATEGORY_UNSPECIFIED = 0;
+  // Metadata, images and titles to discover.
+  CATEGORY_METADATA = 1;
+  // Subtitles: finding, downloading and translating them.
+  CATEGORY_SUBTITLES = 2;
+  // Indexers and download clients.
+  CATEGORY_DOWNLOADS = 3;
+  // Signing users in.
+  CATEGORY_AUTHENTICATION = 4;
+  // Notifications of what happens on the server.
+  CATEGORY_NOTIFICATIONS = 5;
+  // Devices the server plays on or serves, such as DLNA televisions.
+  CATEGORY_DEVICES = 6;
+  // AI models and agents.
+  CATEGORY_AI = 7;
+}
+
 // Manifest describes a plugin. It is shipped alongside the plugin
 // (manifest.json) and returned by Describe.
 message Manifest {
-  // Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+  // Reverse-DNS identifier, e.g. "dev.mavio.scraper-tmdb".
   string id = 1;
   string name = 2;
   // Semantic version of the plugin.
@@ -130,6 +149,8 @@ message Manifest {
   // patterns such as "*.yaml" or "movie.json" (path.Match syntax, without
   // "/"); requires CAPABILITY_LOCAL_METADATA.
   repeated string local_metadata_files = 16;
+  // What the plugin is for.
+  Category category = 17;
 }
 
 // ExternalIdKind is a kind of external ID, e.g. the ID of a movie on a

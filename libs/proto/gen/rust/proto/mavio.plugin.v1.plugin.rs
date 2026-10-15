@@ -414,11 +414,128 @@ impl ::buffa::Enumeration for Capability {
         ]
     }
 }
+/// Category is what a plugin is for, by which clients group plugins.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum Category {
+    CATEGORY_UNSPECIFIED = 0i32,
+    /// Metadata, images and titles to discover.
+    CATEGORY_METADATA = 1i32,
+    /// Subtitles: finding, downloading and translating them.
+    CATEGORY_SUBTITLES = 2i32,
+    /// Indexers and download clients.
+    CATEGORY_DOWNLOADS = 3i32,
+    /// Signing users in.
+    CATEGORY_AUTHENTICATION = 4i32,
+    /// Notifications of what happens on the server.
+    CATEGORY_NOTIFICATIONS = 5i32,
+    /// Devices the server plays on or serves, such as DLNA televisions.
+    CATEGORY_DEVICES = 6i32,
+    /// AI models and agents.
+    CATEGORY_AI = 7i32,
+}
+impl Category {
+    ///Idiomatic alias for [`Self::CATEGORY_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::CATEGORY_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::CATEGORY_METADATA`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Metadata: Self = Self::CATEGORY_METADATA;
+    ///Idiomatic alias for [`Self::CATEGORY_SUBTITLES`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Subtitles: Self = Self::CATEGORY_SUBTITLES;
+    ///Idiomatic alias for [`Self::CATEGORY_DOWNLOADS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Downloads: Self = Self::CATEGORY_DOWNLOADS;
+    ///Idiomatic alias for [`Self::CATEGORY_AUTHENTICATION`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Authentication: Self = Self::CATEGORY_AUTHENTICATION;
+    ///Idiomatic alias for [`Self::CATEGORY_NOTIFICATIONS`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Notifications: Self = Self::CATEGORY_NOTIFICATIONS;
+    ///Idiomatic alias for [`Self::CATEGORY_DEVICES`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Devices: Self = Self::CATEGORY_DEVICES;
+    ///Idiomatic alias for [`Self::CATEGORY_AI`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Ai: Self = Self::CATEGORY_AI;
+}
+impl ::core::default::Default for Category {
+    fn default() -> Self {
+        Self::CATEGORY_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for Category {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::CATEGORY_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::CATEGORY_METADATA),
+            2i32 => ::core::option::Option::Some(Self::CATEGORY_SUBTITLES),
+            3i32 => ::core::option::Option::Some(Self::CATEGORY_DOWNLOADS),
+            4i32 => ::core::option::Option::Some(Self::CATEGORY_AUTHENTICATION),
+            5i32 => ::core::option::Option::Some(Self::CATEGORY_NOTIFICATIONS),
+            6i32 => ::core::option::Option::Some(Self::CATEGORY_DEVICES),
+            7i32 => ::core::option::Option::Some(Self::CATEGORY_AI),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::CATEGORY_UNSPECIFIED => "CATEGORY_UNSPECIFIED",
+            Self::CATEGORY_METADATA => "CATEGORY_METADATA",
+            Self::CATEGORY_SUBTITLES => "CATEGORY_SUBTITLES",
+            Self::CATEGORY_DOWNLOADS => "CATEGORY_DOWNLOADS",
+            Self::CATEGORY_AUTHENTICATION => "CATEGORY_AUTHENTICATION",
+            Self::CATEGORY_NOTIFICATIONS => "CATEGORY_NOTIFICATIONS",
+            Self::CATEGORY_DEVICES => "CATEGORY_DEVICES",
+            Self::CATEGORY_AI => "CATEGORY_AI",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "CATEGORY_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::CATEGORY_UNSPECIFIED)
+            }
+            "CATEGORY_METADATA" => ::core::option::Option::Some(Self::CATEGORY_METADATA),
+            "CATEGORY_SUBTITLES" => {
+                ::core::option::Option::Some(Self::CATEGORY_SUBTITLES)
+            }
+            "CATEGORY_DOWNLOADS" => {
+                ::core::option::Option::Some(Self::CATEGORY_DOWNLOADS)
+            }
+            "CATEGORY_AUTHENTICATION" => {
+                ::core::option::Option::Some(Self::CATEGORY_AUTHENTICATION)
+            }
+            "CATEGORY_NOTIFICATIONS" => {
+                ::core::option::Option::Some(Self::CATEGORY_NOTIFICATIONS)
+            }
+            "CATEGORY_DEVICES" => ::core::option::Option::Some(Self::CATEGORY_DEVICES),
+            "CATEGORY_AI" => ::core::option::Option::Some(Self::CATEGORY_AI),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::CATEGORY_UNSPECIFIED,
+            Self::CATEGORY_METADATA,
+            Self::CATEGORY_SUBTITLES,
+            Self::CATEGORY_DOWNLOADS,
+            Self::CATEGORY_AUTHENTICATION,
+            Self::CATEGORY_NOTIFICATIONS,
+            Self::CATEGORY_DEVICES,
+            Self::CATEGORY_AI,
+        ]
+    }
+}
 /// Manifest describes a plugin. It is shipped alongside the plugin
 /// (manifest.json) and returned by Describe.
 #[derive(Clone, PartialEq, Default)]
 pub struct Manifest {
-    /// Reverse-DNS identifier, e.g. "org.mavio.scraper-tmdb".
+    /// Reverse-DNS identifier, e.g. "dev.mavio.scraper-tmdb".
     ///
     /// Field 1: `id`
     pub id: ::core::option::Option<::buffa::alloc::string::String>,
@@ -472,6 +589,10 @@ pub struct Manifest {
     ///
     /// Field 16: `local_metadata_files`
     pub local_metadata_files: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// What the plugin is for.
+    ///
+    /// Field 17: `category`
+    pub category: ::core::option::Option<::buffa::EnumValue<Category>>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -494,6 +615,7 @@ impl ::core::fmt::Debug for Manifest {
             .field("config_page", &self.config_page)
             .field("external_id_kinds", &self.external_id_kinds)
             .field("local_metadata_files", &self.local_metadata_files)
+            .field("category", &self.category)
             .finish()
     }
 }
@@ -612,6 +734,16 @@ impl Manifest {
         self.config_page = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::category`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_category(
+        mut self,
+        value: impl Into<::buffa::EnumValue<Category>>,
+    ) -> Self {
+        self.category = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Manifest);
 impl ::buffa::MessageName for Manifest {
@@ -701,6 +833,9 @@ impl ::buffa::Message for Manifest {
         for v in &self.local_metadata_files {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.category {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -781,6 +916,9 @@ impl ::buffa::Message for Manifest {
         }
         for v in &self.local_metadata_files {
             ::buffa::types::put_string_field(16u32, v, buf);
+        }
+        if let Some(ref v) = self.category {
+            ::buffa::types::put_int32_field(17u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -998,6 +1136,15 @@ impl ::buffa::Message for Manifest {
                 )?;
                 self.local_metadata_files.push(__elem);
             }
+            17u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.category = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1022,6 +1169,7 @@ impl ::buffa::Message for Manifest {
         self.config_page = ::core::option::Option::None;
         self.external_id_kinds.clear();
         self.local_metadata_files.clear();
+        self.category = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

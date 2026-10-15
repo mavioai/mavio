@@ -2202,7 +2202,8 @@ pub struct CatalogPlugin {
     ///
     /// Field 6: `catalog_url`
     pub catalog_url: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Newest first; only versions the server can run.
+    /// Newest first; only versions the server can run, none when it can run
+    /// no version.
     ///
     /// Field 7: `versions`
     pub versions: ::buffa::alloc::vec::Vec<CatalogVersion>,
@@ -2210,6 +2211,10 @@ pub struct CatalogPlugin {
     ///
     /// Field 8: `installed_version`
     pub installed_version: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 9: `category`
+    pub category: ::core::option::Option<
+        ::buffa::EnumValue<super::super::plugin::v1::Category>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2224,6 +2229,7 @@ impl ::core::fmt::Debug for CatalogPlugin {
             .field("catalog_url", &self.catalog_url)
             .field("versions", &self.versions)
             .field("installed_version", &self.installed_version)
+            .field("category", &self.category)
             .finish()
     }
 }
@@ -2302,6 +2308,16 @@ impl CatalogPlugin {
         self.installed_version = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::category`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_category(
+        mut self,
+        value: impl Into<::buffa::EnumValue<super::super::plugin::v1::Category>>,
+    ) -> Self {
+        self.category = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(CatalogPlugin);
 impl ::buffa::MessageName for CatalogPlugin {
@@ -2352,6 +2368,9 @@ impl ::buffa::Message for CatalogPlugin {
         if let Some(ref v) = self.installed_version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.category {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2390,6 +2409,9 @@ impl ::buffa::Message for CatalogPlugin {
         }
         if let Some(ref v) = self.installed_version {
             ::buffa::types::put_string_field(8u32, v, buf);
+        }
+        if let Some(ref v) = self.category {
+            ::buffa::types::put_int32_field(9u32, v.to_i32(), buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2494,6 +2516,15 @@ impl ::buffa::Message for CatalogPlugin {
                     buf,
                 )?;
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.category = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2510,6 +2541,7 @@ impl ::buffa::Message for CatalogPlugin {
         self.catalog_url = ::core::option::Option::None;
         self.versions.clear();
         self.installed_version = ::core::option::Option::None;
+        self.category = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
