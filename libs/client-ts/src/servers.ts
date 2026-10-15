@@ -26,6 +26,11 @@ export interface ServerEntry {
   mode?: "standalone" | "mavioDev";
   /** In mavio.dev mode, the Mavio account signed in. */
   account?: { id: string; name: string };
+  /**
+   * The key of the sign-in a standalone server was added to; unset when
+   * it is a sign-in of its own.
+   */
+  signIn?: string;
   /** This browser's session; unset when signed out. */
   sessionId?: string;
   /** The session's access token; unset when signed out. */
@@ -63,7 +68,7 @@ export interface SignIn {
 
 /** The key of the sign-in a server's session belongs to. */
 export function signInKey(s: ServerEntry): string {
-  return s.mode === "mavioDev" && s.account ? `account:${s.account.id}` : `server:${s.id}`;
+  return s.mode === "mavioDev" && s.account ? `account:${s.account.id}` : (s.signIn ?? `server:${s.id}`);
 }
 
 /** A mavio.dev sign-in on its way to mavio.dev and back. */
@@ -222,10 +227,12 @@ export class Servers {
       const key = signInKey(s);
       const known = out.get(key);
       if (known) known.servers.push(s);
-      else {
-        const kind = key.startsWith("account:") ? "mavioDev" : "standalone";
-        out.set(key, { key, kind, name: kind === "mavioDev" ? (s.account?.name ?? "") : s.userName, servers: [s] });
-      }
+      else out.set(key, { key, kind: key.startsWith("account:") ? "mavioDev" : "standalone", name: "", servers: [s] });
+    }
+    // Named by the account, or by the user of the server whose sign-in it is.
+    for (const x of out.values()) {
+      const own = x.kind === "mavioDev" ? x.servers.find((s) => s.account) : x.servers.find((s) => x.key === `server:${s.id}`);
+      x.name = (x.kind === "mavioDev" ? own?.account?.name : own?.userName) ?? x.servers[0].userName;
     }
     return [...out.values()];
   }
@@ -386,6 +393,8 @@ export class Servers {
       url: i.url,
       mode: i.mode,
       account,
+      // Signing in again keeps the sign-in it was added to.
+      signIn: this.get(i.id)?.signIn,
       userId: r.user?.id ?? "",
       userName: r.user?.name ?? "",
       sessionId: r.session?.id,
@@ -564,6 +573,19 @@ export class Servers {
   /** Signs in the device showing a Quick Connect code as the user of a server. */
   async authorizeQuickConnect(server: ServerEntry, code: string) {
     await this.client(AuthService, server).authorizeQuickConnect({ code: code.trim() });
+  }
+
+  /**
+   * Adds a standalone server signed in to a kept sign-in, such as a Mavio
+   * account's, whose servers it then joins; the sign-in is shown.
+   */
+  addTo(id: string, key: string) {
+    const at = this.list.findIndex((s) => s.id === id);
+    if (at < 0 || this.list[at].mode === "mavioDev") return;
+    const own = key === `server:${id}`;
+    const { signIn: _, ...rest } = this.list[at];
+    this.set(this.list.with(at, own ? rest : { ...rest, signIn: key }));
+    this.show(key);
   }
 
   /** Forgets the session of a server that ended it. */

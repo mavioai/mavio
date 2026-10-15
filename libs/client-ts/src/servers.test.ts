@@ -276,6 +276,17 @@ test("signs a Mavio account in through mavio.dev and groups its servers into one
   expect(servers.shownSignIn()?.key).toBe("server:nas");
   servers.show("account:acct-1");
   expect(servers.shownSignIn()?.servers.map((s) => s.id)).toEqual(["den", "attic"]);
+  // A standalone server added to the account's sign-in joins its servers, and leaves them again.
+  servers.addTo("nas", "account:acct-1");
+  expect(servers.signIns().map((s) => [s.key, s.name, s.servers.map((x) => x.id)])).toEqual([
+    ["account:acct-1", "Ann", ["den", "attic", "nas"]],
+  ]);
+  servers.addTo("nas", "server:nas");
+  expect(servers.signIns().map((s) => [s.key, s.name])).toEqual([
+    ["account:acct-1", "Ann"],
+    ["server:nas", "bob"],
+  ]);
+  servers.show("account:acct-1");
   await servers.signOut("account:acct-1");
   expect(servers.signIns().map((s) => s.key)).toEqual(["server:nas"]);
   expect(servers.shownSignIn()?.key).toBe("server:nas");

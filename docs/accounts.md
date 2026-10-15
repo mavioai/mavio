@@ -193,6 +193,7 @@ A client shows one **sign-in** at a time: either a Mavio account, with the serve
 * Changing sign-ins shows the other sign-in's content. The sign-ins not shown keep their sessions and refresh them when shown again; one whose session ended (§5.3) asks to sign in again.
 * Removing a kept sign-in signs it out and ends its session.
 * A server added by address, local discovery or a QR code that turns out to be in mavio.dev mode is reached through a Mavio account.
+* A standalone server can be added to a kept sign-in, a Mavio account's included, whose content then includes it; it keeps its own user and session, and removing the sign-in signs out of it too.
 
 Changing sign-ins is the client's own and differs from switching users: switching within a Home (§3.6) or within a standalone server (§4.4) changes who is signed in within one sign-in, which then keeps the user switched to.
 
