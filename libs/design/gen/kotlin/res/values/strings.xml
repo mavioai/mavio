@@ -405,6 +405,10 @@
     <string name="menu_tv_mode">Switch to TV Mode</string>
     <!-- User menu item in TV mode switching back to the layout chosen by window width. -->
     <string name="menu_standard_mode">Switch to Standard Mode</string>
+    <!-- User menu item in TV mode putting the page in full screen. -->
+    <string name="menu_full_screen">Full Screen</string>
+    <!-- User menu item in TV mode leaving full screen. -->
+    <string name="menu_exit_full_screen">Exit Full Screen</string>
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
     <!-- Group of the settings of the account and its servers. -->

@@ -3583,6 +3583,42 @@
         }
       }
     },
+    "menu.fullScreen": {
+      "comment": "User menu item in TV mode putting the page in full screen.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Screen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全屏"
+          }
+        }
+      }
+    },
+    "menu.exitFullScreen": {
+      "comment": "User menu item in TV mode leaving full screen.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit Full Screen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出全屏"
+          }
+        }
+      }
+    },
     "settings.thisDevice": {
       "comment": "Group of the settings that only affect this device.",
       "extractionState": "manual",

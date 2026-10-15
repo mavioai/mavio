@@ -653,6 +653,12 @@ public enum MavioStrings {
     /// User menu item in TV mode switching back to the layout chosen by window width.
     public static var menuStandardMode: String { NSLocalizedString("menu.standardMode", bundle: .module, comment: "") }
 
+    /// User menu item in TV mode putting the page in full screen.
+    public static var menuFullScreen: String { NSLocalizedString("menu.fullScreen", bundle: .module, comment: "") }
+
+    /// User menu item in TV mode leaving full screen.
+    public static var menuExitFullScreen: String { NSLocalizedString("menu.exitFullScreen", bundle: .module, comment: "") }
+
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 

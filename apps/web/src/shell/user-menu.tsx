@@ -8,6 +8,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { toggleFullScreen, useFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { type Appearance, setPrefs, usePrefs } from "../prefs.ts";
@@ -98,6 +99,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   const account = useAccount();
   const shown = account.shown!;
   const { tv } = usePrefs();
+  const full = useFullScreen();
   const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
@@ -160,6 +162,13 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         <Icon name={tv ? "sidebar" : "television"} size={18} className="text-text-secondary" />
         <span className="flex-1">{tv ? t("menu.standardMode") : t("menu.tvMode")}</span>
       </button>
+      {tv && (
+        <button type="button" role="menuitem" onClick={() => (onClose(), toggleFullScreen())} className={itemClass}>
+          <Icon name={full ? "exitFullScreen" : "fullScreen"} size={18} className="text-text-secondary" />
+          <span className="flex-1">{full ? t("menu.exitFullScreen") : t("menu.fullScreen")}</span>
+          <span className="type-footnote text-text-tertiary">F</span>
+        </button>
+      )}
       {shown.kind === "mavioDev" ? (
         manage && (
           <a role="menuitem" href={manage} target="_blank" rel="noreferrer" onClick={onClose} className={itemClass}>

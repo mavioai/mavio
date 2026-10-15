@@ -207,6 +207,8 @@
     </plurals>
     <string name="menu_tv_mode">切换到电视模式</string>
     <string name="menu_standard_mode">切换到普通模式</string>
+    <string name="menu_full_screen">全屏</string>
+    <string name="menu_exit_full_screen">退出全屏</string>
     <string name="settings_this_device">这台设备</string>
     <string name="settings_account_and_servers">账户与服务器</string>
     <string name="settings_appearance">外观</string>

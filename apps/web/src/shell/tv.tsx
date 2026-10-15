@@ -2,7 +2,9 @@
 // Android TV: tabs in a pill at the top, the user's avatar beside them,
 // and focus moved with the arrow keys.
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import { useEffect } from "react";
 
+import { toggleFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { UserButton } from "./user-menu.tsx";
@@ -15,6 +17,7 @@ const tabs: { to: "/" | "/libraries" | "/search"; label: () => string }[] = [
 
 export function TvShell() {
   useSpatialNavigation();
+  useFullScreenKey();
   const { pathname } = useLocation();
   // Home's hero reaches the top of the screen, behind the tabs.
   const behind = pathname === "/" || pathname.includes("/item/");
@@ -42,4 +45,19 @@ export function TvShell() {
       </main>
     </div>
   );
+}
+
+/** F toggles full screen, as in the player, unless typing. */
+function useFullScreenKey() {
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "f" || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const el = e.target as HTMLElement;
+      if (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)) return;
+      e.preventDefault();
+      toggleFullScreen();
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, []);
 }

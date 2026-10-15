@@ -193,6 +193,8 @@ export type MessageKey =
   | 'menu.serverCount'
   | 'menu.tvMode'
   | 'menu.standardMode'
+  | 'menu.fullScreen'
+  | 'menu.exitFullScreen'
   | 'settings.thisDevice'
   | 'settings.accountAndServers'
   | 'settings.appearance'
@@ -419,6 +421,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
     "menu.tvMode": "Switch to TV Mode",
     "menu.standardMode": "Switch to Standard Mode",
+    "menu.fullScreen": "Full Screen",
+    "menu.exitFullScreen": "Exit Full Screen",
     "settings.thisDevice": "This Device",
     "settings.accountAndServers": "Account and Servers",
     "settings.appearance": "Appearance",
@@ -643,6 +647,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.serverCount": "{count, plural, other {# 台服务器}}",
     "menu.tvMode": "切换到电视模式",
     "menu.standardMode": "切换到普通模式",
+    "menu.fullScreen": "全屏",
+    "menu.exitFullScreen": "退出全屏",
     "settings.thisDevice": "这台设备",
     "settings.accountAndServers": "账户与服务器",
     "settings.appearance": "外观",
