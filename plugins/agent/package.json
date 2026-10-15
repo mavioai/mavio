@@ -7,8 +7,7 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun test",
-    "build": "bun scripts/build.ts",
-    "dist": "bun scripts/dist.ts"
+    "build": "bun scripts/build.ts"
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.16.0",
@@ -33,12 +32,6 @@
         ],
         "outputs": [
           "{projectRoot}/dist/plugin"
-        ]
-      },
-      "dist": {
-        "cache": false,
-        "outputs": [
-          "{projectRoot}/dist"
         ]
       }
     }

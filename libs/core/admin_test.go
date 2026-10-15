@@ -35,6 +35,9 @@ func TestServerSettingsValidate(t *testing.T) {
 		{"metadata language of a region", func(s *ServerSettings) { s.Metadata.PreferredLanguage = "en-US" }, false},
 		{"lower-case metadata country", func(s *ServerSettings) { s.Metadata.Country = "de" }, false},
 		{"catalog without a scheme", func(s *ServerSettings) { s.PluginCatalogs = []string{"example.com/catalog.json"} }, false},
+		{"catalog file", func(s *ServerSettings) { s.PluginCatalogs = []string{"file:///src/mavio/plugins/catalog.json"} }, true},
+		{"catalog file on a host", func(s *ServerSettings) { s.PluginCatalogs = []string{"file://nas/plugins/catalog.json"} }, false},
+		{"catalog of another scheme", func(s *ServerSettings) { s.PluginCatalogs = []string{"ftp://example.com/catalog.json"} }, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -42,7 +42,8 @@
 | `IPasswordResetProvider` | `PASSWORD_RESET_PROVIDER` | §8.10 |
 | 通知服务（webhook、邮件） | `NOTIFIER`（已有），现在接收 §4 的全部活动 | §4 |
 | 按媒体库类型的提供者顺序（`MetadataFetcherOrder`、`ImageFetcherOrder` 等） | 按媒体库的提供者顺序与开关 | §8.11 |
-| 插件仓库 | 目录（catalog，已有） | — |
+| 插件仓库 | 目录（catalog，已有）；第一方插件的目录是 mavioai/plugins 的最新发布版本（[架构 §7.5](architecture.zh-CN.md#75-服务端中的插件)） | — |
+| 插件在其仓库中的分类 | 清单与目录中的 `category`：元数据、字幕、下载、身份验证、通知、设备或 AI，客户端据此对插件分组 | — |
 | `IChannel`、`ILiveTvService`、`ITunerHost`、`IListingsProvider` | 不采用 | — |
 
 ## 3. 宿主 API
@@ -206,4 +207,4 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 提供其媒体库的 `user`（必填）、显示的 `server_name`、`media_server` 与 `play_to`（默认开启）、使用的 `interfaces`（默认为所有已启用、支持组播且有 IPv4 地址的接口）、`announce_interval_minutes`（默认 30）、`ssdp_port`（供测试）、`renderers`（额外的描述 URL）与 `profiles`。
 
 ### 10.6 打包
-`pnpm nx run dlna:dist` 为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包，并把其目录写入 `plugins/dlna/dist/catalog.json`。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
+`tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。

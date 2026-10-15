@@ -14,8 +14,8 @@ import (
 type ServerSettings struct {
 	Transcoding TranscodingSettings
 	Network     NetworkSettings
-	// PluginCatalogs are the URLs of the plugin catalogs plugins are
-	// installed from.
+	// PluginCatalogs are the http, https or file URLs of the plugin
+	// catalogs plugins are installed from.
 	PluginCatalogs []string
 	// PasswordResetPlugin is the ID of the plugin that delivers the PINs
 	// resetting forgotten passwords; empty when users cannot reset them.
@@ -205,11 +205,26 @@ func (s *ServerSettings) Validate() error {
 		return err
 	}
 	for _, c := range s.PluginCatalogs {
-		if u, err := url.Parse(c); err != nil || u.Scheme != "https" && u.Scheme != "http" || u.Host == "" {
-			return fmt.Errorf("%w: plugin catalog %q is not an http or https URL", ErrInvalid, c)
+		if !validCatalog(c) {
+			return fmt.Errorf("%w: plugin catalog %q is not an http, https or file URL", ErrInvalid, c)
 		}
 	}
 	return nil
+}
+
+// validCatalog reports whether s is the http or https URL of a plugin
+// catalog, or the file URL of one in a checkout of the repository.
+func validCatalog(s string) bool {
+	u, err := url.Parse(s)
+	switch {
+	case err != nil:
+		return false
+	case u.Scheme == "http" || u.Scheme == "https":
+		return u.Host != ""
+	case u.Scheme == "file":
+		return u.Host == "" && strings.HasPrefix(u.Path, "/")
+	}
+	return false
 }
 
 // validBaseURL reports whether s is a clean absolute path of unreserved

@@ -7,6 +7,7 @@
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
   "runtime": "RUNTIME_WASM",
+  "category": "CATEGORY_METADATA",
   "capabilities": ["CAPABILITY_METADATA_PROVIDER", "CAPABILITY_EPISODE_LIST_PROVIDER", "CAPABILITY_DISCOVERY_PROVIDER", "CAPABILITY_SCENE_MAPPING_PROVIDER"],
   "permissions": { "httpHosts": ["api.radarr.video", "skyhook.sonarr.tv", "services.sonarr.tv", "thexem.info"] },
   "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",

@@ -25,11 +25,12 @@ pnpm install
 pnpm nx run-many -t build test
 ```
 
-带示例媒体库运行服务端，开发用播放器位于 http://localhost:8686/dev/player：
+带示例媒体库运行服务端，开发用播放器位于 http://localhost:8686/dev/player，新服务端使用从检出构建的第一方插件目录：
 
 ```bash
 pnpm nx run fixtures:dev-library
-cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library
+pnpm nx run plugindist:catalog
+cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library --plugin-catalog ../../plugins/catalog.json
 ```
 
 或以容器运行，把媒体挂载在 `/media` 下：

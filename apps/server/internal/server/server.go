@@ -87,6 +87,9 @@ type Config struct {
 	// PluginSeedDir holds plugin folders installed into PluginDir once,
 	// such as those a container image ships; empty seeds none.
 	PluginSeedDir string
+	// PluginCatalog is the URL of the catalog a new server lists among its
+	// plugin catalogs, such as plugins.OfficialCatalog; empty lists none.
+	PluginCatalog string
 	// PluginDataDir holds the plugins' data folders; empty gives plugins
 	// none.
 	PluginDataDir string
@@ -203,6 +206,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	set, err := settings.Open(ctx, db)
 	if err != nil {
+		return err
+	}
+	if err := seedCatalog(ctx, set, cfg.PluginCatalog); err != nil {
 		return err
 	}
 	// Plugins start before the handler tree exists; their host API calls
@@ -763,4 +769,17 @@ func subtitleFolder(set *settings.Manager, metadataDir string) func() library.Su
 		s := set.Get().Subtitles
 		return library.SubtitleFolder{Kind: s.Folder, Relative: s.CustomFolder, MetadataDir: metadataDir}
 	}
+}
+
+// seedCatalog gives a new server, whose settings were never stored, the
+// catalog of its configuration.
+func seedCatalog(ctx context.Context, set *settings.Manager, catalog string) error {
+	if !set.Get().UpdatedAt.IsZero() || catalog == "" {
+		return nil
+	}
+	_, err := set.Change(ctx, func(s *core.ServerSettings) error {
+		s.PluginCatalogs = []string{catalog}
+		return nil
+	})
+	return err
 }

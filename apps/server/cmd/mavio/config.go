@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"math"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/mavioai/mavio/apps/server/internal/certs"
+	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/apps/server/internal/server"
 )
 
@@ -82,6 +84,7 @@ var settings = []setting{
 	{key: "metadata-dir", path: true, usage: "directory for the artwork chosen for items of libraries not saving metadata next to their media", def: under("metadata")},
 	{key: "backup-dir", path: true, usage: "directory for backups; empty makes none", def: under("backups")},
 	{key: "discovery-addr", usage: "UDP address answering discovery requests from clients on the local network; empty answers none", def: constant(":7359")},
+	{key: "plugin-catalog", usage: "catalog of the first-party plugins a new server starts with: a URL, or the path of a catalog file, such as the plugins/catalog.json tools/plugindist builds in a checkout; empty starts with none", def: constant(plugins.OfficialCatalog)},
 	{key: "mavio-dev-url", usage: "base URL of mavio.dev's API, which servers in mavio.dev mode are claimed at and connect to", def: constant("https://mavio.dev/api")},
 	{key: "certificate-dir", path: true, usage: "directory of the server's mavio.site certificate in mavio.dev mode; empty obtains none", def: under("certificates")},
 	{key: "acme-directories", usage: "comma-separated ACME directory URLs the mavio.site certificate is obtained from, tried in order", def: constant(certs.LetsEncrypt + "," + certs.GoogleTrustServices)},
@@ -192,6 +195,9 @@ func load(flags *pflag.FlagSet) (options, error) {
 		if s.key == "database" {
 			file, isPath = strings.CutPrefix(value, "sqlite:")
 		}
+		if s.key == "plugin-catalog" {
+			isPath = !strings.Contains(value, "://")
+		}
 		if isPath && file != "" {
 			if fromFile(s.key) && !filepath.IsAbs(file) {
 				return options{}, fmt.Errorf("%s: %s %q is not an absolute path", v.ConfigFileUsed(), s.key, file)
@@ -199,9 +205,12 @@ func load(flags *pflag.FlagSet) (options, error) {
 			if file, err = filepath.Abs(file); err != nil {
 				return options{}, fmt.Errorf("%s: %w", s.key, err)
 			}
-			if s.key == "database" {
+			switch s.key {
+			case "database":
 				value = "sqlite:" + file
-			} else {
+			case "plugin-catalog":
+				value = fileURL(file)
+			default:
 				value = file
 			}
 		}
@@ -225,6 +234,16 @@ func load(flags *pflag.FlagSet) (options, error) {
 	return o, nil
 }
 
+// fileURL returns the file URL of an absolute path.
+func fileURL(path string) string {
+	p := filepath.ToSlash(path)
+	if !strings.HasPrefix(p, "/") {
+		// A Windows path, such as C:/mavio/plugins/catalog.json.
+		p = "/" + p
+	}
+	return (&url.URL{Scheme: "file", Path: p}).String()
+}
+
 // assign sets a setting's value.
 func assign(o *options, key, value string) error {
 	cfg := &o.Server
@@ -235,7 +254,7 @@ func assign(o *options, key, value string) error {
 		"cache-dir": &cfg.CacheDir, "transcode-dir": &cfg.TranscodeDir, "plugin-dir": &cfg.PluginDir,
 		"plugin-seed-dir": &cfg.PluginSeedDir, "plugin-data-dir": &cfg.PluginDataDir,
 		"metadata-dir": &cfg.MetadataDir, "backup-dir": &cfg.BackupDir, "discovery-addr": &cfg.DiscoveryAddr,
-		"mavio-dev-url": &cfg.MavioDevURL, "certificate-dir": &cfg.CertificateDir, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
+		"plugin-catalog": &cfg.PluginCatalog, "mavio-dev-url": &cfg.MavioDevURL, "certificate-dir": &cfg.CertificateDir, "claim-token": &cfg.ClaimToken, "dev-library": &cfg.DevLibrary,
 	}
 	if key == "rclone-cache-size" {
 		n, err := parseSize(value)

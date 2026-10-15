@@ -18,6 +18,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 )
@@ -61,6 +62,7 @@ func (s *SystemService) ListCatalogPlugins(ctx context.Context, _ *systemv1.List
 		out[i] = systemv1.CatalogPlugin_builder{
 			Id: &p.ID, Name: &p.Name, Description: &p.Description, Author: &p.Author, Homepage: &p.Homepage,
 			CatalogUrl: &p.CatalogURL, Versions: versions, InstalledVersion: &p.Installed,
+			Category: pluginv1.Category(pluginv1.Category_value[p.Category]).Enum(),
 		}.Build()
 	}
 	return systemv1.ListCatalogPluginsResponse_builder{Plugins: out}.Build(), nil

@@ -7,6 +7,7 @@
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
   "runtime": "RUNTIME_WASM",
+  "category": "CATEGORY_METADATA",
   "capabilities": ["CAPABILITY_METADATA_PROVIDER", "CAPABILITY_EPISODE_LIST_PROVIDER", "CAPABILITY_DISCOVERY_PROVIDER"],
   "permissions": { "httpHosts": ["api.themoviedb.org"] },
   "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1,\"description\":\"TMDB API key or API read access token; without one, Radarr's token is used\"},\"max_cast_members\":{\"type\":\"integer\",\"minimum\":0,\"default\":15},\"hide_missing_cast_members\":{\"type\":\"boolean\",\"default\":false},\"include_adult\":{\"type\":\"boolean\",\"default\":false}},\"additionalProperties\":false}",

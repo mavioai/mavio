@@ -31,5 +31,6 @@ use (
 	./plugins/scraper-tmdb
 	./plugins/subtitles
 	./tools/fixtures
+	./tools/plugindist
 	./tools/testport
 )

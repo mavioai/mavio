@@ -37,10 +37,15 @@ const (
 	maxPackage = 200 << 20
 )
 
+// OfficialCatalog is the catalog of the first-party plugins: the
+// catalog.json of the latest release of mavioai/plugins, whose
+// packages are relative to it.
+const OfficialCatalog = "https://github.com/mavioai/plugins/releases/latest/download/catalog.json"
+
 // A catalog is a JSON document listing plugins and their versions:
 //
 //	{"plugins": [{"id": "dev.mavio.scraper-tmdb", "name": "TMDB", …,
-//	  "versions": [{"version": "0.2.0", "api_version": "1.0",
+//	  "category": "CATEGORY_METADATA", "versions": [{"version": "0.2.0", "api_version": "1.0",
 //	    "runtime": "RUNTIME_WASM", "url": "tmdb-0.2.0.zip",
 //	    "sha256": "…", "changelog": "…", "release_time": "…"}]}]}
 //
@@ -58,6 +63,8 @@ type CatalogPlugin struct {
 	Description string `json:"description"`
 	Author      string `json:"author"`
 	Homepage    string `json:"homepage"`
+	// Category is a pluginv1.Category's name, such as "CATEGORY_METADATA".
+	Category string `json:"category"`
 	// Versions are newest first, once listed by Catalog.
 	Versions []CatalogVersion `json:"versions"`
 	// CatalogURL is the catalog listing it.
@@ -119,8 +126,10 @@ func compareVersions(a, b string) int {
 }
 
 // Catalog lists the plugins of the catalogs, with the versions this server
-// can run, newest first. The first catalog listing a plugin wins. A
-// catalog that cannot be read is logged and left out, unless none can be.
+// can run, newest first, and none for a plugin it can run no version of,
+// such as one not released yet. The first catalog listing a plugin wins,
+// unless only a later one has a version this server runs. A catalog that
+// cannot be read is logged and left out, unless none can be.
 func (m *Manager) Catalog(ctx context.Context) ([]CatalogPlugin, error) {
 	var catalogs []string
 	if m.cfg.Catalogs != nil {
@@ -140,16 +149,15 @@ func (m *Manager) Catalog(ctx context.Context) ([]CatalogPlugin, error) {
 			continue
 		}
 		for _, p := range plugins {
-			if slices.ContainsFunc(out, func(o CatalogPlugin) bool { return o.ID == p.ID }) {
-				continue
-			}
 			p.Versions = slices.DeleteFunc(p.Versions, func(v CatalogVersion) bool { return !v.runnable() })
-			if len(p.Versions) == 0 {
-				continue
-			}
 			slices.SortStableFunc(p.Versions, func(a, b CatalogVersion) int { return compareVersions(b.Version, a.Version) })
 			p.CatalogURL, p.Installed = c, installed[p.ID]
-			out = append(out, p)
+			switch i := slices.IndexFunc(out, func(o CatalogPlugin) bool { return o.ID == p.ID }); {
+			case i < 0:
+				out = append(out, p)
+			case len(out[i].Versions) == 0 && len(p.Versions) > 0:
+				out[i] = p
+			}
 		}
 	}
 	if len(errs) > 0 && len(errs) == len(catalogs) {
@@ -171,7 +179,12 @@ func (m *Manager) readCatalog(ctx context.Context, catalog string) ([]CatalogPlu
 	return f.Plugins, nil
 }
 
+// download reads an http, https or file URL, such as that of a catalog in
+// a checkout of the repository.
 func (m *Manager) download(ctx context.Context, rawURL string, limit int64) ([]byte, error) {
+	if u, err := url.Parse(rawURL); err == nil && u.Scheme == "file" {
+		return readFile(u, limit)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err
@@ -213,6 +226,9 @@ func (m *Manager) Install(ctx context.Context, id, version string) (Info, error)
 		return Info{}, fmt.Errorf("plugin %s is in no catalog: %w", id, core.ErrNotFound)
 	}
 	p := catalog[i]
+	if len(p.Versions) == 0 {
+		return Info{}, fmt.Errorf("plugin %s has no version this server runs: %w", id, core.ErrNotFound)
+	}
 	v := p.Versions[0]
 	if version != "" {
 		j := slices.IndexFunc(p.Versions, func(v CatalogVersion) bool { return v.Version == version })
@@ -441,4 +457,26 @@ func (m *Manager) Uninstall(ctx context.Context, id string) error {
 	}
 	m.log.InfoContext(ctx, "plugin uninstalled", "plugin", id)
 	return nil
+}
+
+// readFile reads the file of a file URL, of at most limit bytes.
+func readFile(u *url.URL, limit int64) ([]byte, error) {
+	p := u.Path
+	if len(p) > 2 && p[0] == '/' && p[2] == ':' {
+		// A Windows path, such as /C:/mavio/plugins/catalog.json.
+		p = p[1:]
+	}
+	f, err := os.Open(filepath.FromSlash(p))
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	data, err := io.ReadAll(io.LimitReader(f, limit+1))
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %w", u, err)
+	}
+	if int64(len(data)) > limit {
+		return nil, fmt.Errorf("read %s: larger than %d bytes", u, limit)
+	}
+	return data, nil
 }

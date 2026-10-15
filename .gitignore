@@ -16,6 +16,9 @@ coverage/
 apps/server/internal/webui/dist/*
 !apps/server/internal/webui/dist/.gitkeep
 
+# the catalog of the first-party plugins built locally (see tools/plugindist)
+/plugins/catalog.json
+
 # generated test media (see tools/fixtures)
 .fixtures/
 

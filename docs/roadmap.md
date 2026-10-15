@@ -681,7 +681,8 @@ flowchart TD
 **Progress**:
 - [ ] Tag `libs/proto` and `libs/plugin` releases
 - [ ] Publish the server's release binaries and container images
-- [ ] Publish the official plugin catalog
+- [x] Package the first-party plugins and their catalog (`tools/plugindist`); `plugin-catalog` defaults to the `catalog.json` of mavioai/plugins' latest release
+- [ ] Publish the official plugin catalog: create the mavioai/plugins repository, whose workflow takes the source of Mavio's latest release, runs `plugindist:dist` and publishes the packages and `catalog.json` as a release
 
 ### P24 Storage I/O Efficiency
 **Scope**: what the server reads of media on its own, by the cost of reading it ([Optimization §2](optimization.md#2-storage-access-by-storage-class)): storage classes of library paths, keyframes from container indexes, trickplay from keyframes, embedded subtitles cached once on local storage and read while playing on cloud storage.

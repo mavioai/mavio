@@ -53,6 +53,7 @@ func TestLoadDefaults(t *testing.T) {
 		{"metadata-dir", cfg.MetadataDir, filepath.Join(home, "metadata")},
 		{"backup-dir", cfg.BackupDir, filepath.Join(home, "backups")},
 		{"discovery-addr", cfg.DiscoveryAddr, ":7359"},
+		{"plugin-catalog", cfg.PluginCatalog, "https://github.com/mavioai/plugins/releases/latest/download/catalog.json"},
 		{"mavio-dev-url", cfg.MavioDevURL, "https://mavio.dev/api"},
 		{"claim-token", cfg.ClaimToken, ""},
 		{"dev-library", cfg.DevLibrary, ""},
@@ -94,7 +95,7 @@ func TestLoadPrecedence(t *testing.T) {
 	t.Setenv("MAVIO_HOME", home)
 	t.Setenv("MAVIO_METADATA_DIR", "env-art")
 	t.Setenv("MAVIO_ADDR", ":9100")
-	o, err := run(t, home, toml, "--addr", ":9200", "--cache-dir", "cache")
+	o, err := run(t, home, toml, "--addr", ":9200", "--cache-dir", "cache", "--plugin-catalog", "plugins/catalog.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,6 +109,7 @@ func TestLoadPrecedence(t *testing.T) {
 		{"plugin-dir from the file", cfg.PluginDir, filepath.Join(elsewhere, "extensions")},
 		{"backup-dir: emptied by the file", cfg.BackupDir, ""},
 		{"metadata-dir: the variable before the file, whose relative path is then not checked", cfg.MetadataDir, filepath.Join(work, "env-art")},
+		{"plugin-catalog: a path becomes a file URL", cfg.PluginCatalog, fileURL(filepath.Join(work, "plugins", "catalog.json"))},
 	} {
 		if tc.got != tc.want {
 			t.Errorf("%s = %q, want %q", tc.name, tc.got, tc.want)
@@ -132,6 +134,7 @@ func TestLoadRejects(t *testing.T) {
 		{"relative folder", `plugin-dir = "plugins"`},
 		{"relative database", `database = "sqlite:mavio.db"`},
 		{"home-relative folder", `cache-dir = "~/cache"`},
+		{"relative catalog", `plugin-catalog = "plugins/catalog.json"`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			home := t.TempDir()

@@ -7,6 +7,7 @@
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
   "runtime": "RUNTIME_WASM",
+  "category": "CATEGORY_METADATA",
   "capabilities": ["CAPABILITY_METADATA_PROVIDER"],
   "permissions": { "httpHosts": ["musicbrainz.org", "coverartarchive.org"] },
   "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"base_url\":{\"type\":\"string\",\"format\":\"uri\",\"description\":\"MusicBrainz server, for mirrors\",\"default\":\"https://musicbrainz.org\"},\"requests_per_second\":{\"type\":\"number\",\"exclusiveMinimum\":0,\"description\":\"At most 1 on musicbrainz.org\",\"default\":1}},\"additionalProperties\":false}",

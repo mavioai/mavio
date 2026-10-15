@@ -42,7 +42,8 @@
 | `IPasswordResetProvider` | `PASSWORD_RESET_PROVIDER` | §8.10 |
 | Notification services (webhook, e-mail) | `NOTIFIER` (exists), now with every activity of §4 | §4 |
 | Provider order per library type (`MetadataFetcherOrder`, `ImageFetcherOrder`, …) | Provider order and switches per library | §8.11 |
-| Plugin repositories | Catalogs (exist) | — |
+| Plugin repositories | Catalogs (exist); the first-party plugins' is the latest release of mavioai/plugins ([Architecture §7.5](architecture.md#75-plugins-in-the-server)) | — |
+| A plugin's category in its repository | The manifest's and the catalog's `category`: metadata, subtitles, downloads, authentication, notifications, devices or AI, by which clients group plugins | — |
 | `IChannel`, `ILiveTvService`, `ITunerHost`, `IListingsProvider` | Not adopted | — |
 
 ## 3. Host API
@@ -206,4 +207,4 @@ Built-in profiles cover Samsung, LG, Sony and Panasonic televisions, Kodi and VL
 The `user` whose libraries are served (required), the `server_name` shown, `media_server` and `play_to` (default on), the `interfaces` to use (default every interface up with multicast and IPv4), `announce_interval_minutes` (default 30), `ssdp_port` (for tests), `renderers` (extra description URLs) and `profiles`.
 
 ### 10.6 Packaging
-`pnpm nx run dlna:dist` builds the plugin for Linux, macOS and Windows on amd64 and arm64, packs each as a catalog zip of `manifest.json` and the executable, and writes their catalog to `plugins/dlna/dist/catalog.json`. The container image ships the plugin in its plugin seed folder (architecture document §12); SSDP multicast reaches a container only on the host network.
+`tools/plugindist` builds the plugin for Linux, macOS and Windows on amd64 and arm64 and packs each as a catalog zip of `manifest.json` and the executable, with the other first-party plugins ([Development §7](development.md#7-releases-and-versioning)). The container image ships the plugin in its plugin seed folder (architecture document §12); SSDP multicast reaches a container only on the host network.

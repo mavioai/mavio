@@ -25,11 +25,12 @@ pnpm install
 pnpm nx run-many -t build test
 ```
 
-Run the server with the sample library and the development player at http://localhost:8686/dev/player:
+Run the server with the sample library, the development player at http://localhost:8686/dev/player and, for a new server, the catalog of the first-party plugins built from the checkout:
 
 ```bash
 pnpm nx run fixtures:dev-library
-cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library
+pnpm nx run plugindist:catalog
+cd apps/server && go run ./cmd/mavio --dev --dev-library ../../.fixtures/dev-library --plugin-catalog ../../plugins/catalog.json
 ```
 
 Or as a container, with media mounted under `/media`:

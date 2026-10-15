@@ -7,6 +7,7 @@
   "homepage": "https://github.com/mavioai/mavio",
   "license": "GPL-3.0-only",
   "runtime": "RUNTIME_PROCESS",
+  "category": "CATEGORY_DEVICES",
   "capabilities": ["CAPABILITY_HTTP_HANDLER", "CAPABILITY_DEVICE_CONTROLLER", "CAPABILITY_EVENT_CONSUMER"],
   "permissions": {
     "api": ["mavio.library.v1.LibraryService:read", "mavio.library.v1.ItemService:read", "mavio.playback.v1.PlaybackService"],

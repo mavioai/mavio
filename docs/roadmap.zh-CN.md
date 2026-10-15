@@ -681,7 +681,8 @@ flowchart TD
 **进度**：
 - [ ] 为 `libs/proto` 与 `libs/plugin` 打发布标签
 - [ ] 发布服务端的版本二进制与容器镜像
-- [ ] 发布官方插件目录
+- [x] 第一方插件及其目录的打包（`tools/plugindist`）；`plugin-catalog` 默认是 mavioai/plugins 最新发布版本的 `catalog.json`
+- [ ] 发布官方插件目录：创建 mavioai/plugins 仓库，其工作流取得 Mavio 最新发布版本的源码，运行 `plugindist:dist`，并把各插件的包与 `catalog.json` 作为一个发布版本发布
 
 ### P24 存储 I/O 效率
 **范围**：按读取的代价决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md#2-按存储类别访问存储storage-access-by-storage-class)）：媒体库路径的存储类别；从容器索引读取关键帧；只用关键帧生成 trickplay；本地存储上的内嵌字幕一次提取并缓存，云存储上边播边读。
