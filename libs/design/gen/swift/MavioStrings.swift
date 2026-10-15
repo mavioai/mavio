@@ -1001,6 +1001,9 @@ public enum MavioStrings {
     /// Settings section of a server's log.
     public static var settingsLogs: String { NSLocalizedString("settings.logs", bundle: .module, comment: "") }
 
+    /// Settings section of a server's API keys.
+    public static var settingsApiKeys: String { NSLocalizedString("settings.apiKeys", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -3576,4 +3579,65 @@ public enum MavioStrings {
 
     /// Shown when no log records match.
     public static var logsNone: String { NSLocalizedString("logs.none", bundle: .module, comment: "") }
+
+    /// Description of the API keys settings.
+    public static var keysMessage: String { NSLocalizedString("keys.message", bundle: .module, comment: "") }
+
+    /// Placeholder of a new API key's name.
+    public static var keysName: String { NSLocalizedString("keys.name", bundle: .module, comment: "") }
+
+    /// Button making an API key.
+    public static var keysCreate: String { NSLocalizedString("keys.create", bundle: .module, comment: "") }
+
+    /// Footer of making an API key.
+    public static var keysCreateFooter: String { NSLocalizedString("keys.createFooter", bundle: .module, comment: "") }
+
+    /// Title above a new API key's token; name is the key's name.
+    public static func keysMadeTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("keys.madeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Footer under a new API key's token.
+    public static var keysMadeFooter: String { NSLocalizedString("keys.madeFooter", bundle: .module, comment: "") }
+
+    /// Copies a new API key's token.
+    public static var keysCopy: String { NSLocalizedString("keys.copy", bundle: .module, comment: "") }
+
+    /// Hides a new API key's token.
+    public static var keysDone: String { NSLocalizedString("keys.done", bundle: .module, comment: "") }
+
+    /// Title of the list of API keys.
+    public static var keysList: String { NSLocalizedString("keys.list", bundle: .module, comment: "") }
+
+    /// Shown when the server has no API keys.
+    public static var keysNone: String { NSLocalizedString("keys.none", bundle: .module, comment: "") }
+
+    /// The administrator an API key acts as.
+    public static func keysActsAs(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("keys.actsAs", bundle: .module, comment: ""), name)
+    }
+
+    /// When an API key was made; when is relative, such as 5 minutes ago.
+    public static func keysCreated(when: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("keys.created", bundle: .module, comment: ""), when)
+    }
+
+    /// When an API key was last used; when is relative.
+    public static func keysUsed(when: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("keys.used", bundle: .module, comment: ""), when)
+    }
+
+    /// An API key not used yet.
+    public static var keysNeverUsed: String { NSLocalizedString("keys.neverUsed", bundle: .module, comment: "") }
+
+    /// Revokes an API key.
+    public static var keysRevoke: String { NSLocalizedString("keys.revoke", bundle: .module, comment: "") }
+
+    /// Asks before revoking an API key; name is its name.
+    public static func keysRevokeTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("keys.revokeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains revoking an API key.
+    public static var keysRevokeMessage: String { NSLocalizedString("keys.revokeMessage", bundle: .module, comment: "") }
 }

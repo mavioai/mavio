@@ -1,14 +1,16 @@
-// The settings' Backups and Logs (docs/clients.md §6.3.14): the server's
-// backups, made, downloaded and deleted here, and its recent log records.
+// The settings' Backups, Logs and API Keys (docs/clients.md §6.3.14–§6.3.15):
+// the server's backups, made, downloaded and deleted here, its recent log
+// records, and the keys integrations call its API with.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
-import { errorMessage, type ServerEntry, useBackupDownload, useBackups, useLogs } from "@mavio/client-ts";
+import { errorMessage, type ServerEntry, useApiKeys, useBackupDownload, useBackups, useLogs, useUsers } from "@mavio/client-ts";
+import type { ApiKey } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import type { Backup } from "@mavio/proto/mavio/system/v1/backup_pb";
 import { LogLevel, type LogRecord } from "@mavio/proto/mavio/system/v1/system_pb";
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row, Select } from "../../ui.tsx";
-import { Confirm, fromNow, Page } from "./common.tsx";
+import { Confirm, fromNow, input, Page } from "./common.tsx";
 
 const megabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "megabyte", maximumFractionDigits: 1 });
 const gigabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "gigabyte", maximumFractionDigits: 2 });
@@ -176,5 +178,99 @@ function LogRow({ record, level }: { record: LogRecord; level: string }) {
         </p>
       )}
     </div>
+  );
+}
+
+/** The section of the server chosen in the settings. */
+export function ApiKeysSection({ server }: { server: ServerEntry }) {
+  const { list, create } = useApiKeys(server);
+  const [name, setName] = useState("");
+  const [made, setMade] = useState<{ id: string; name: string; token: string }>();
+  const [copied, setCopied] = useState(false);
+  const users = useUsers(server);
+  const userName = (id: string) => users.data?.find((u) => u.id === id)?.name ?? "";
+  const add = () =>
+    create.mutate(name.trim(), {
+      onSuccess: (r) => (setMade({ id: r.apiKey?.id ?? "", name: r.apiKey?.name ?? name.trim(), token: r.token }), setName(""), setCopied(false)),
+    });
+  return (
+    <Page title={t("settings.apiKeys")} message={t("keys.message")}>
+      <Group footer={t("keys.createFooter")}>
+        <form
+          className="flex flex-wrap items-center gap-3 px-4 py-2.5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            add();
+          }}
+        >
+          <input
+            className={`${input} flex-1`}
+            aria-label={t("keys.name")}
+            placeholder={t("keys.name")}
+            maxLength={100}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Button type="submit" disabled={!name.trim() || create.isPending}>
+            {create.isPending ? "…" : t("keys.create")}
+          </Button>
+        </form>
+        {create.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(create.error)}</p>}
+      </Group>
+      {made && list.data?.some((k) => k.id === made.id) && (
+        <Group title={t("keys.madeTitle", { name: made.name })} footer={t("keys.madeFooter")}>
+          <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
+            <code className="min-w-0 flex-1 font-mono type-callout break-all select-all">{made.token}</code>
+            <Button variant="secondary" onClick={() => void navigator.clipboard?.writeText(made.token).then(() => setCopied(true))}>
+              {copied ? t("users.copied") : t("keys.copy")}
+            </Button>
+            <Button variant="plain" onClick={() => setMade(undefined)}>
+              {t("keys.done")}
+            </Button>
+          </div>
+        </Group>
+      )}
+      <Group title={t("keys.list")}>
+        {(list.data ?? []).map((k) => (
+          <ApiKeyRow key={k.id} server={server} apiKey={k} userName={userName(k.userId)} />
+        ))}
+        {list.isSuccess && list.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("keys.none")}</p>}
+        {list.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(list.error)}</p>}
+      </Group>
+    </Page>
+  );
+}
+
+function ApiKeyRow({ server, apiKey, userName }: { server: ServerEntry; apiKey: ApiKey; userName: string }) {
+  const { revoke } = useApiKeys(server);
+  const [revoking, setRevoking] = useState(false);
+  if (revoking)
+    return (
+      <Confirm
+        title={t("keys.revokeTitle", { name: apiKey.name })}
+        message={revoke.isError ? errorMessage(revoke.error) : t("keys.revokeMessage")}
+        action={t("keys.revoke")}
+        busy={revoke.isPending}
+        onCancel={() => setRevoking(false)}
+        onConfirm={() => revoke.mutate(apiKey.id, { onSuccess: () => setRevoking(false) })}
+      />
+    );
+  const created = apiKey.createTime && timestampDate(apiKey.createTime);
+  const used = apiKey.lastUseTime && timestampDate(apiKey.lastUseTime);
+  return (
+    <Row
+      label={apiKey.name}
+      detail={[
+        userName && t("keys.actsAs", { name: userName }),
+        created && t("keys.created", { when: fromNow(created) }),
+        used ? t("keys.used", { when: fromNow(used) }) : t("keys.neverUsed"),
+      ]
+        .filter(Boolean)
+        .join(" · ")}
+    >
+      <Button variant="plain" className="text-danger" onClick={() => setRevoking(true)}>
+        {t("keys.revoke")}
+      </Button>
+    </Row>
   );
 }

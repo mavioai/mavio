@@ -1,7 +1,9 @@
-// A server's backups and log (docs/clients.md §6.3.14): making, listing,
-// downloading and deleting backups, and the recent log records.
+// A server's backups, log and API keys (docs/clients.md §6.3.14–§6.3.15):
+// making, listing, downloading and deleting backups, the recent log
+// records, and the keys integrations call the API with.
 import { create } from "@bufbuild/protobuf";
 import { DurationSchema } from "@bufbuild/protobuf/wkt";
+import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { BackupService } from "@mavio/proto/mavio/system/v1/backup_pb";
 import { type LogLevel, SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -57,4 +59,18 @@ export function useLogs(server: ServerEntry, minLevel: LogLevel, hours = 0, limi
         })
       ).records,
   });
+}
+
+/** The server's API keys; making one, whose token is returned once, and revoking one. */
+export function useApiKeys(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  const queryKey = serverKey(server.id, "api-keys");
+  const c = () => servers.client(AuthService, server);
+  const onSuccess = () => qc.invalidateQueries({ queryKey });
+  return {
+    list: useQuery({ queryKey, queryFn: async () => (await c().listApiKeys({})).apiKeys }),
+    create: useMutation({ mutationFn: (name: string) => c().createApiKey({ name }), onSuccess }),
+    revoke: useMutation({ mutationFn: (id: string) => c().revokeApiKey({ id }), onSuccess }),
+  };
 }

@@ -624,6 +624,8 @@
     <string name="settings_backups">Backups</string>
     <!-- Settings section of a server's log. -->
     <string name="settings_logs">Logs</string>
+    <!-- Settings section of a server's API keys. -->
+    <string name="settings_api_keys">API Keys</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2287,4 +2289,38 @@
     </plurals>
     <!-- Shown when no log records match. -->
     <string name="logs_none">No log records.</string>
+    <!-- Description of the API keys settings. -->
+    <string name="keys_message">Keys that scripts and other integrations call the server\'s API with, each acting as the administrator who made it.</string>
+    <!-- Placeholder of a new API key's name. -->
+    <string name="keys_name">Name</string>
+    <!-- Button making an API key. -->
+    <string name="keys_create">Create</string>
+    <!-- Footer of making an API key. -->
+    <string name="keys_create_footer">Name a key after what will use it, so that it can be revoked alone.</string>
+    <!-- Title above a new API key's token; name is the key's name. -->
+    <string name="keys_made_title">Key for %s</string>
+    <!-- Footer under a new API key's token. -->
+    <string name="keys_made_footer">Copy the key now: it is not shown again. Send it as Authorization: Bearer and the key.</string>
+    <!-- Copies a new API key's token. -->
+    <string name="keys_copy">Copy</string>
+    <!-- Hides a new API key's token. -->
+    <string name="keys_done">Done</string>
+    <!-- Title of the list of API keys. -->
+    <string name="keys_list">Keys</string>
+    <!-- Shown when the server has no API keys. -->
+    <string name="keys_none">No API keys.</string>
+    <!-- The administrator an API key acts as. -->
+    <string name="keys_acts_as">As %s</string>
+    <!-- When an API key was made; when is relative, such as 5 minutes ago. -->
+    <string name="keys_created">Created %s</string>
+    <!-- When an API key was last used; when is relative. -->
+    <string name="keys_used">Used %s</string>
+    <!-- An API key not used yet. -->
+    <string name="keys_never_used">Never used</string>
+    <!-- Revokes an API key. -->
+    <string name="keys_revoke">Revoke</string>
+    <!-- Asks before revoking an API key; name is its name. -->
+    <string name="keys_revoke_title">Revoke %s\?</string>
+    <!-- Explains revoking an API key. -->
+    <string name="keys_revoke_message">What uses this key can no longer call the server.</string>
 </resources>

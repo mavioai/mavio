@@ -301,6 +301,7 @@ export type MessageKey =
   | 'settings.ai'
   | 'settings.backups'
   | 'settings.logs'
+  | 'settings.apiKeys'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1124,7 +1125,24 @@ export type MessageKey =
   | 'logs.filter'
   | 'logs.refresh'
   | 'logs.count'
-  | 'logs.none';
+  | 'logs.none'
+  | 'keys.message'
+  | 'keys.name'
+  | 'keys.create'
+  | 'keys.createFooter'
+  | 'keys.madeTitle'
+  | 'keys.madeFooter'
+  | 'keys.copy'
+  | 'keys.done'
+  | 'keys.list'
+  | 'keys.none'
+  | 'keys.actsAs'
+  | 'keys.created'
+  | 'keys.used'
+  | 'keys.neverUsed'
+  | 'keys.revoke'
+  | 'keys.revokeTitle'
+  | 'keys.revokeMessage';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1418,6 +1436,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.ai": "AI",
     "settings.backups": "Backups",
     "settings.logs": "Logs",
+    "settings.apiKeys": "API Keys",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2241,7 +2260,24 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "logs.filter": "Filter",
     "logs.refresh": "Refresh",
     "logs.count": "{count, plural, one {# record} other {# records}}",
-    "logs.none": "No log records."
+    "logs.none": "No log records.",
+    "keys.message": "Keys that scripts and other integrations call the server's API with, each acting as the administrator who made it.",
+    "keys.name": "Name",
+    "keys.create": "Create",
+    "keys.createFooter": "Name a key after what will use it, so that it can be revoked alone.",
+    "keys.madeTitle": "Key for {name}",
+    "keys.madeFooter": "Copy the key now: it is not shown again. Send it as Authorization: Bearer and the key.",
+    "keys.copy": "Copy",
+    "keys.done": "Done",
+    "keys.list": "Keys",
+    "keys.none": "No API keys.",
+    "keys.actsAs": "As {name}",
+    "keys.created": "Created {when}",
+    "keys.used": "Used {when}",
+    "keys.neverUsed": "Never used",
+    "keys.revoke": "Revoke",
+    "keys.revokeTitle": "Revoke {name}?",
+    "keys.revokeMessage": "What uses this key can no longer call the server."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -2533,6 +2569,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.ai": "AI",
     "settings.backups": "备份",
     "settings.logs": "日志",
+    "settings.apiKeys": "API 密钥",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -3356,6 +3393,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "logs.filter": "筛选",
     "logs.refresh": "刷新",
     "logs.count": "{count, plural, other {# 条记录}}",
-    "logs.none": "没有日志记录。"
+    "logs.none": "没有日志记录。",
+    "keys.message": "脚本与其他集成调用服务器 API 时使用的密钥，各以创建它的管理员身份操作。",
+    "keys.name": "名称",
+    "keys.create": "创建",
+    "keys.createFooter": "请按用途为密钥命名，以便单独撤销。",
+    "keys.madeTitle": "{name} 的密钥",
+    "keys.madeFooter": "请立即复制此密钥：它不会再次显示。调用时以 Authorization: Bearer 加密钥的形式发送。",
+    "keys.copy": "复制",
+    "keys.done": "完成",
+    "keys.list": "密钥",
+    "keys.none": "没有 API 密钥。",
+    "keys.actsAs": "以 {name} 身份",
+    "keys.created": "创建于{when}",
+    "keys.used": "使用于{when}",
+    "keys.neverUsed": "从未使用",
+    "keys.revoke": "撤销",
+    "keys.revokeTitle": "撤销 {name}？",
+    "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。"
   }
 };

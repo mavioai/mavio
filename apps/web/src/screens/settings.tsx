@@ -36,13 +36,13 @@ import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
-import { BackupsSection, LogsSection } from "./admin/backups.tsx";
+import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx";
 import { TranscodingSection } from "./admin/transcoding.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -62,6 +62,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   ai: { icon: "key", color: "#BF5AF2", title: () => t("settings.ai"), admin: true },
   backups: { icon: "folder", color: "#5856D6", title: () => t("settings.backups"), admin: true },
   logs: { icon: "info", color: "#8E8E93", title: () => t("settings.logs"), admin: true },
+  "api-keys": { icon: "lock", color: "#636366", title: () => t("settings.apiKeys"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
@@ -69,7 +70,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "storage", "acquisition", "subtitles", "ai", "plugins", "tasks", "backups", "logs"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "storage", "acquisition", "subtitles", "ai", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -370,6 +371,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <BackupsSection key={chosen.server.id} server={chosen.server} />;
     case "logs":
       return chosen?.admin && <LogsSection key={chosen.server.id} server={chosen.server} />;
+    case "api-keys":
+      return chosen?.admin && <ApiKeysSection key={chosen.server.id} server={chosen.server} />;
     case "storage":
       return chosen?.admin && <StorageSection key={chosen.server.id} server={chosen.server} />;
     case "transcoding":

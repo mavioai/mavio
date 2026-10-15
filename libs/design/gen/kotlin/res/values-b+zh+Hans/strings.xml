@@ -317,6 +317,7 @@
     <string name="settings_ai">AI</string>
     <string name="settings_backups">备份</string>
     <string name="settings_logs">日志</string>
+    <string name="settings_api_keys">API 密钥</string>
     <string name="plugins_installed">已安装</string>
     <string name="plugins_available">可用</string>
     <string name="plugins_none_installed">尚未安装插件。</string>
@@ -1149,4 +1150,21 @@
         <item quantity="other">%d 条记录</item>
     </plurals>
     <string name="logs_none">没有日志记录。</string>
+    <string name="keys_message">脚本与其他集成调用服务器 API 时使用的密钥，各以创建它的管理员身份操作。</string>
+    <string name="keys_name">名称</string>
+    <string name="keys_create">创建</string>
+    <string name="keys_create_footer">请按用途为密钥命名，以便单独撤销。</string>
+    <string name="keys_made_title">%s 的密钥</string>
+    <string name="keys_made_footer">请立即复制此密钥：它不会再次显示。调用时以 Authorization: Bearer 加密钥的形式发送。</string>
+    <string name="keys_copy">复制</string>
+    <string name="keys_done">完成</string>
+    <string name="keys_list">密钥</string>
+    <string name="keys_none">没有 API 密钥。</string>
+    <string name="keys_acts_as">以 %s 身份</string>
+    <string name="keys_created">创建于%s</string>
+    <string name="keys_used">使用于%s</string>
+    <string name="keys_never_used">从未使用</string>
+    <string name="keys_revoke">撤销</string>
+    <string name="keys_revoke_title">撤销 %s？</string>
+    <string name="keys_revoke_message">使用此密钥的程序将无法再调用服务器。</string>
 </resources>
