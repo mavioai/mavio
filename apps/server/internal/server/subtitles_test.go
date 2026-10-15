@@ -129,6 +129,15 @@ func TestSubtitles(t *testing.T) {
 	}.Build()); err != nil {
 		t.Fatalf("AssignSubtitleProfile: %v", err)
 	}
+	assigned, err := subs.ListSubtitleProfileAssignments(ctx, acquisitionv1.ListSubtitleProfileAssignmentsRequest_builder{
+		TargetIds: []string{lib.GetLibrary().GetId()},
+	}.Build())
+	if err != nil {
+		t.Fatalf("ListSubtitleProfileAssignments: %v", err)
+	}
+	if a := assigned.GetAssignments(); len(a) != 1 || a[0].GetProfileId() != profile.GetProfile().GetId() {
+		t.Errorf("assignments = %v, want the library's French profile", a)
+	}
 	var movieID string
 	waitFor(t, "the film scanned", func() bool {
 		list, err := items.ListItems(ctx, libraryv1.ListItemsRequest_builder{Kinds: []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_MOVIE}}.Build())

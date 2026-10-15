@@ -702,6 +702,18 @@ pub use self::__buffa::view::AssignSubtitleProfileResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::AssignSubtitleProfileResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfileAssignmentsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfileAssignmentsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileAssignmentView;
+#[doc(inline)]
+pub use self::__buffa::view::SubtitleProfileAssignmentOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfileAssignmentsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListSubtitleProfileAssignmentsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SubtitleLanguageEquivalenceView;
 #[doc(inline)]
 pub use self::__buffa::view::SubtitleLanguageEquivalenceOwnedView;

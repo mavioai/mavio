@@ -3570,6 +3570,37 @@
         "title": "ListSubtitleHistoryResponse",
         "additionalProperties": false
       },
+      "mavio.acquisition.v1.ListSubtitleProfileAssignmentsRequest": {
+        "type": "object",
+        "properties": {
+          "targetIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "target_ids",
+            "maxItems": 1000,
+            "description": "The libraries, movies and series whose assignments are listed; all\n when empty."
+          }
+        },
+        "title": "ListSubtitleProfileAssignmentsRequest",
+        "additionalProperties": false
+      },
+      "mavio.acquisition.v1.ListSubtitleProfileAssignmentsResponse": {
+        "type": "object",
+        "properties": {
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.SubtitleProfileAssignment"
+            },
+            "title": "assignments"
+          }
+        },
+        "title": "ListSubtitleProfileAssignmentsResponse",
+        "additionalProperties": false
+      },
       "mavio.acquisition.v1.ListSubtitleProfilesRequest": {
         "type": "object",
         "title": "ListSubtitleProfilesRequest",
@@ -5900,6 +5931,22 @@
         "title": "SubtitleProfile",
         "additionalProperties": false,
         "description": "SubtitleProfile is the subtitles movies and episodes want, as Bazarr's\n language profiles."
+      },
+      "mavio.acquisition.v1.SubtitleProfileAssignment": {
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "string",
+            "title": "target_id"
+          },
+          "profileId": {
+            "type": "string",
+            "title": "profile_id"
+          }
+        },
+        "title": "SubtitleProfileAssignment",
+        "additionalProperties": false,
+        "description": "SubtitleProfileAssignment is the profile assigned to a library, a movie\n or a series."
       },
       "mavio.acquisition.v1.SubtitleProfileItem": {
         "type": "object",
@@ -20477,14 +20524,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/SwitchUser": {
+    "/mavio.home.v1.HomeService/GetHub": {
       "post": {
         "tags": [
-          "AuthService"
+          "HomeService"
         ],
-        "summary": "SwitchUser",
-        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
-        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.home.v1.HomeService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20509,7 +20556,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
+                "$ref": "#/components/schemas/mavio.home.v1.GetHubRequest"
               }
             }
           },
@@ -20531,7 +20578,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
+                  "$ref": "#/components/schemas/mavio.home.v1.GetHubResponse"
                 }
               }
             }
@@ -20539,14 +20586,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfiles": {
+    "/mavio.acquisition.v1.DownloadService/ListDownloadClients": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "DownloadService"
         ],
-        "summary": "ListSubtitleProfiles",
-        "description": "ListSubtitleProfiles lists the subtitle profiles by name.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles",
+        "summary": "ListDownloadClients",
+        "description": "ListDownloadClients lists the clients every ready download client\n provider has configured.",
+        "operationId": "mavio.acquisition.v1.DownloadService.ListDownloadClients",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20571,7 +20618,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListDownloadClientsRequest"
               }
             }
           },
@@ -20593,7 +20640,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListDownloadClientsResponse"
                 }
               }
             }
@@ -20909,14 +20956,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/ListDownloadClients": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "DownloadService"
+          "CollectionService"
         ],
-        "summary": "ListDownloadClients",
-        "description": "ListDownloadClients lists the clients every ready download client\n provider has configured.",
-        "operationId": "mavio.acquisition.v1.DownloadService.ListDownloadClients",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -20941,7 +20987,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListDownloadClientsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -20963,7 +21009,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListDownloadClientsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -21156,14 +21202,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DownloadService/ManualImport": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "DownloadService"
+          "CollectionService"
         ],
-        "summary": "ManualImport",
-        "description": "ManualImport imports a video file of a tracked movie download, or of\n a folder that is not one, for the movie chosen whatever the import\n specifications reject, and completes a tracked download.",
-        "operationId": "mavio.acquisition.v1.DownloadService.ManualImport",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21188,7 +21233,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ManualImportRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -21210,7 +21255,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ManualImportResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -22697,13 +22742,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "ListRemotePathMappings",
+        "operationId": "mavio.acquisition.v1.ProfileService.ListRemotePathMappings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22728,7 +22773,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsRequest"
               }
             }
           },
@@ -22750,7 +22795,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsResponse"
                 }
               }
             }
@@ -24118,14 +24163,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "CollectionService"
         ],
-        "summary": "AssignSubtitleProfile",
-        "description": "AssignSubtitleProfile assigns a profile to a library, a movie or a\n series, or removes the assignment; the movies and episodes it covers\n are searched for the subtitles they now lack.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24150,7 +24195,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -24172,7 +24217,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -24921,13 +24966,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfileAssignments": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "ListSubtitleProfileAssignments",
+        "description": "ListSubtitleProfileAssignments lists the profiles assigned to\n libraries, movies and series.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfileAssignments",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24952,7 +24998,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfileAssignmentsRequest"
               }
             }
           },
@@ -24974,7 +25020,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfileAssignmentsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfiles": {
+      "post": {
+        "tags": [
+          "SubtitleService"
+        ],
+        "summary": "ListSubtitleProfiles",
+        "description": "ListSubtitleProfiles lists the subtitle profiles by name.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.ListSubtitleProfiles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListSubtitleProfilesResponse"
                 }
               }
             }
@@ -27895,6 +28003,68 @@
         }
       }
     },
+    "/mavio.auth.v1.AuthService/SwitchUser": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "SwitchUser",
+        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
+        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.DiscoverService/GetTitle": {
       "post": {
         "tags": [
@@ -27950,68 +28120,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.acquisition.v1.GetTitleResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.home.v1.HomeService/GetHub": {
-      "post": {
-        "tags": [
-          "HomeService"
-        ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.home.v1.HomeService.GetHub",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.home.v1.GetHubRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.home.v1.GetHubResponse"
                 }
               }
             }
@@ -28081,14 +28189,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "AssignSubtitleProfile",
+        "description": "AssignSubtitleProfile assigns a profile to a library, a movie or a\n series, or removes the assignment; the movies and episodes it covers\n are searched for the subtitles they now lack.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28113,7 +28221,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileRequest"
               }
             }
           },
@@ -28135,68 +28243,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.AssignSubtitleProfileResponse"
                 }
               }
             }
@@ -28266,13 +28313,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/ListRemotePathMappings": {
+    "/mavio.acquisition.v1.DownloadService/ManualImport": {
       "post": {
         "tags": [
-          "ProfileService"
+          "DownloadService"
         ],
-        "summary": "ListRemotePathMappings",
-        "operationId": "mavio.acquisition.v1.ProfileService.ListRemotePathMappings",
+        "summary": "ManualImport",
+        "description": "ManualImport imports a video file of a tracked movie download, or of\n a folder that is not one, for the movie chosen whatever the import\n specifications reject, and completes a tracked download.",
+        "operationId": "mavio.acquisition.v1.DownloadService.ManualImport",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -28297,7 +28345,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ManualImportRequest"
               }
             }
           },
@@ -28319,7 +28367,68 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ListRemotePathMappingsResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ManualImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }

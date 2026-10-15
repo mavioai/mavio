@@ -212,6 +212,27 @@ func (s *SubtitleService) AssignSubtitleProfile(ctx context.Context, req *acquis
 	return &acquisitionv1.AssignSubtitleProfileResponse{}, nil
 }
 
+// ListSubtitleProfileAssignments lists the profiles assigned to libraries,
+// movies and series.
+func (s *SubtitleService) ListSubtitleProfileAssignments(ctx context.Context, req *acquisitionv1.ListSubtitleProfileAssignmentsRequest) (*acquisitionv1.ListSubtitleProfileAssignmentsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	targets := make([]core.ID, len(req.GetTargetIds()))
+	for i, id := range req.GetTargetIds() {
+		targets[i] = core.MustParseID(id)
+	}
+	assignments, err := s.store.SubtitleProfileAssignments().List(ctx, targets...)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	out := make([]*acquisitionv1.SubtitleProfileAssignment, len(assignments))
+	for i, a := range assignments {
+		out[i] = acquisitionv1.SubtitleProfileAssignment_builder{TargetId: new(a.TargetID.String()), ProfileId: new(a.ProfileID.String())}.Build()
+	}
+	return acquisitionv1.ListSubtitleProfileAssignmentsResponse_builder{Assignments: out}.Build(), nil
+}
+
 var subtitleFolders = map[acquisitionv1.SubtitleFolder]core.SubtitleFolder{
 	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_UNSPECIFIED: core.SubtitleFolderCurrent,
 	acquisitionv1.SubtitleFolder_SUBTITLE_FOLDER_RELATIVE:    core.SubtitleFolderRelative,

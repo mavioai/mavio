@@ -31,6 +31,11 @@ service SubtitleService {
   rpc AssignSubtitleProfile(AssignSubtitleProfileRequest) returns (AssignSubtitleProfileResponse) {
     option idempotency_level = IDEMPOTENT;
   }
+  // ListSubtitleProfileAssignments lists the profiles assigned to
+  // libraries, movies and series.
+  rpc ListSubtitleProfileAssignments(ListSubtitleProfileAssignmentsRequest) returns (ListSubtitleProfileAssignmentsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 
   rpc GetSubtitleSettings(GetSubtitleSettingsRequest) returns (GetSubtitleSettingsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
@@ -231,6 +236,28 @@ message AssignSubtitleProfileRequest {
 }
 
 message AssignSubtitleProfileResponse {}
+
+message ListSubtitleProfileAssignmentsRequest {
+  // The libraries, movies and series whose assignments are listed; all
+  // when empty.
+  repeated string target_ids = 1 [(buf.validate.field).repeated = {
+    max_items: 1000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+}
+
+// SubtitleProfileAssignment is the profile assigned to a library, a movie
+// or a series.
+message SubtitleProfileAssignment {
+  string target_id = 1;
+  string profile_id = 2;
+}
+
+message ListSubtitleProfileAssignmentsResponse {
+  repeated SubtitleProfileAssignment assignments = 1;
+}
 
 // SubtitleFolder is where subtitles are saved, as Bazarr's subfolder
 // setting.

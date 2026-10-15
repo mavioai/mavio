@@ -48,6 +48,9 @@ const (
 	// SubtitleServiceAssignSubtitleProfileProcedure is the fully-qualified name of the
 	// SubtitleService's AssignSubtitleProfile RPC.
 	SubtitleServiceAssignSubtitleProfileProcedure = "/mavio.acquisition.v1.SubtitleService/AssignSubtitleProfile"
+	// SubtitleServiceListSubtitleProfileAssignmentsProcedure is the fully-qualified name of the
+	// SubtitleService's ListSubtitleProfileAssignments RPC.
+	SubtitleServiceListSubtitleProfileAssignmentsProcedure = "/mavio.acquisition.v1.SubtitleService/ListSubtitleProfileAssignments"
 	// SubtitleServiceGetSubtitleSettingsProcedure is the fully-qualified name of the SubtitleService's
 	// GetSubtitleSettings RPC.
 	SubtitleServiceGetSubtitleSettingsProcedure = "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings"
@@ -130,6 +133,9 @@ type SubtitleServiceClient interface {
 	// series, or removes the assignment; the movies and episodes it covers
 	// are searched for the subtitles they now lack.
 	AssignSubtitleProfile(context.Context, *v1.AssignSubtitleProfileRequest) (*v1.AssignSubtitleProfileResponse, error)
+	// ListSubtitleProfileAssignments lists the profiles assigned to
+	// libraries, movies and series.
+	ListSubtitleProfileAssignments(context.Context, *v1.ListSubtitleProfileAssignmentsRequest) (*v1.ListSubtitleProfileAssignmentsResponse, error)
 	GetSubtitleSettings(context.Context, *v1.GetSubtitleSettingsRequest) (*v1.GetSubtitleSettingsResponse, error)
 	// UpdateSubtitleSettings replaces the settings and applies them at once.
 	UpdateSubtitleSettings(context.Context, *v1.UpdateSubtitleSettingsRequest) (*v1.UpdateSubtitleSettingsResponse, error)
@@ -240,6 +246,13 @@ func NewSubtitleServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			baseURL+SubtitleServiceAssignSubtitleProfileProcedure,
 			connect.WithSchema(subtitleServiceMethods.ByName("AssignSubtitleProfile")),
 			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
+		listSubtitleProfileAssignments: connect.NewClient[v1.ListSubtitleProfileAssignmentsRequest, v1.ListSubtitleProfileAssignmentsResponse](
+			httpClient,
+			baseURL+SubtitleServiceListSubtitleProfileAssignmentsProcedure,
+			connect.WithSchema(subtitleServiceMethods.ByName("ListSubtitleProfileAssignments")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		getSubtitleSettings: connect.NewClient[v1.GetSubtitleSettingsRequest, v1.GetSubtitleSettingsResponse](
@@ -396,6 +409,7 @@ type subtitleServiceClient struct {
 	updateSubtitleProfile            *connect.Client[v1.UpdateSubtitleProfileRequest, v1.UpdateSubtitleProfileResponse]
 	deleteSubtitleProfile            *connect.Client[v1.DeleteSubtitleProfileRequest, v1.DeleteSubtitleProfileResponse]
 	assignSubtitleProfile            *connect.Client[v1.AssignSubtitleProfileRequest, v1.AssignSubtitleProfileResponse]
+	listSubtitleProfileAssignments   *connect.Client[v1.ListSubtitleProfileAssignmentsRequest, v1.ListSubtitleProfileAssignmentsResponse]
 	getSubtitleSettings              *connect.Client[v1.GetSubtitleSettingsRequest, v1.GetSubtitleSettingsResponse]
 	updateSubtitleSettings           *connect.Client[v1.UpdateSubtitleSettingsRequest, v1.UpdateSubtitleSettingsResponse]
 	listSubtitleProviders            *connect.Client[v1.ListSubtitleProvidersRequest, v1.ListSubtitleProvidersResponse]
@@ -459,6 +473,16 @@ func (c *subtitleServiceClient) DeleteSubtitleProfile(ctx context.Context, req *
 // AssignSubtitleProfile calls mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile.
 func (c *subtitleServiceClient) AssignSubtitleProfile(ctx context.Context, req *v1.AssignSubtitleProfileRequest) (*v1.AssignSubtitleProfileResponse, error) {
 	response, err := c.assignSubtitleProfile.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListSubtitleProfileAssignments calls
+// mavio.acquisition.v1.SubtitleService.ListSubtitleProfileAssignments.
+func (c *subtitleServiceClient) ListSubtitleProfileAssignments(ctx context.Context, req *v1.ListSubtitleProfileAssignmentsRequest) (*v1.ListSubtitleProfileAssignmentsResponse, error) {
+	response, err := c.listSubtitleProfileAssignments.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -678,6 +702,9 @@ type SubtitleServiceHandler interface {
 	// series, or removes the assignment; the movies and episodes it covers
 	// are searched for the subtitles they now lack.
 	AssignSubtitleProfile(context.Context, *v1.AssignSubtitleProfileRequest) (*v1.AssignSubtitleProfileResponse, error)
+	// ListSubtitleProfileAssignments lists the profiles assigned to
+	// libraries, movies and series.
+	ListSubtitleProfileAssignments(context.Context, *v1.ListSubtitleProfileAssignmentsRequest) (*v1.ListSubtitleProfileAssignmentsResponse, error)
 	GetSubtitleSettings(context.Context, *v1.GetSubtitleSettingsRequest) (*v1.GetSubtitleSettingsResponse, error)
 	// UpdateSubtitleSettings replaces the settings and applies them at once.
 	UpdateSubtitleSettings(context.Context, *v1.UpdateSubtitleSettingsRequest) (*v1.UpdateSubtitleSettingsResponse, error)
@@ -784,6 +811,13 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 		svc.AssignSubtitleProfile,
 		connect.WithSchema(subtitleServiceMethods.ByName("AssignSubtitleProfile")),
 		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
+	subtitleServiceListSubtitleProfileAssignmentsHandler := connect.NewUnaryHandlerSimple(
+		SubtitleServiceListSubtitleProfileAssignmentsProcedure,
+		svc.ListSubtitleProfileAssignments,
+		connect.WithSchema(subtitleServiceMethods.ByName("ListSubtitleProfileAssignments")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
 	subtitleServiceGetSubtitleSettingsHandler := connect.NewUnaryHandlerSimple(
@@ -942,6 +976,8 @@ func NewSubtitleServiceHandler(svc SubtitleServiceHandler, opts ...connect.Handl
 			subtitleServiceDeleteSubtitleProfileHandler.ServeHTTP(w, r)
 		case SubtitleServiceAssignSubtitleProfileProcedure:
 			subtitleServiceAssignSubtitleProfileHandler.ServeHTTP(w, r)
+		case SubtitleServiceListSubtitleProfileAssignmentsProcedure:
+			subtitleServiceListSubtitleProfileAssignmentsHandler.ServeHTTP(w, r)
 		case SubtitleServiceGetSubtitleSettingsProcedure:
 			subtitleServiceGetSubtitleSettingsHandler.ServeHTTP(w, r)
 		case SubtitleServiceUpdateSubtitleSettingsProcedure:
@@ -1013,6 +1049,10 @@ func (UnimplementedSubtitleServiceHandler) DeleteSubtitleProfile(context.Context
 
 func (UnimplementedSubtitleServiceHandler) AssignSubtitleProfile(context.Context, *v1.AssignSubtitleProfileRequest) (*v1.AssignSubtitleProfileResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.AssignSubtitleProfile is not implemented"))
+}
+
+func (UnimplementedSubtitleServiceHandler) ListSubtitleProfileAssignments(context.Context, *v1.ListSubtitleProfileAssignmentsRequest) (*v1.ListSubtitleProfileAssignmentsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.SubtitleService.ListSubtitleProfileAssignments is not implemented"))
 }
 
 func (UnimplementedSubtitleServiceHandler) GetSubtitleSettings(context.Context, *v1.GetSubtitleSettingsRequest) (*v1.GetSubtitleSettingsResponse, error) {
