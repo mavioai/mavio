@@ -86,9 +86,10 @@ export function WantedSection({ server }: { server: ServerEntry }) {
 }
 
 /** A wanted movie or episode's row: its name linking to its details, what it shows, and searching and unmonitoring it. */
-function WantedRow({ server, itemId, label, detail }: { server: ServerEntry; itemId: string; label: string; detail: string }) {
+function WantedRow({ server, itemId, movie, label, detail }: { server: ServerEntry; itemId: string; movie: boolean; label: string; detail: string }) {
   const actions = useWantedActions(server);
   const [searched, setSearched] = useState(false);
+  const unmonitor = movie ? actions.setWantedMonitored : actions.setMonitored;
   return (
     <div className="flex min-h-13 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
       <div className="min-w-0 flex-1">
@@ -96,11 +97,17 @@ function WantedRow({ server, itemId, label, detail }: { server: ServerEntry; ite
           {label}
         </Link>
         <div className="type-footnote break-words text-text-secondary">{detail}</div>
-        {(actions.search.isError || actions.setMonitored.isError) && (
-          <div className="type-footnote break-words text-danger">{errorMessage(actions.search.error ?? actions.setMonitored.error)}</div>
+        {(actions.search.isError || unmonitor.isError) && (
+          <div className="type-footnote break-words text-danger">{errorMessage(actions.search.error ?? unmonitor.error)}</div>
         )}
       </div>
-      <Button variant="plain" disabled={actions.setMonitored.isPending} onClick={() => actions.setMonitored.mutate({ itemIds: [itemId], monitored: false })}>
+      <Button
+        variant="plain"
+        disabled={unmonitor.isPending}
+        onClick={() =>
+          movie ? actions.setWantedMonitored.mutate({ itemId, monitored: false }) : actions.setMonitored.mutate({ itemIds: [itemId], monitored: false })
+        }
+      >
         {t("wanted.unmonitor")}
       </Button>
       <Button variant="secondary" disabled={actions.search.isPending || searched} onClick={() => actions.search.mutate({ itemIds: [itemId] }, { onSuccess: () => setSearched(true) })}>
@@ -112,7 +119,7 @@ function WantedRow({ server, itemId, label, detail }: { server: ServerEntry; ite
 
 function MovieRow({ server, movie: m }: { server: ServerEntry; movie: WantedMovie }) {
   const detail = [m.quality && t("wanted.has", { quality: m.quality }), !m.available && t("wanted.notAvailable")].filter(Boolean).join(" · ");
-  return <WantedRow server={server} itemId={m.itemId} label={m.year > 0 ? `${m.name} (${m.year})` : m.name} detail={detail} />;
+  return <WantedRow server={server} itemId={m.itemId} movie label={m.year > 0 ? `${m.name} (${m.year})` : m.name} detail={detail} />;
 }
 
 function EpisodeRow({ server, episode: e }: { server: ServerEntry; episode: WantedEpisode }) {
@@ -124,5 +131,5 @@ function EpisodeRow({ server, episode: e }: { server: ServerEntry; episode: Want
     .filter(Boolean)
     .join(" · ");
   const label = `${e.seriesName} · ${episodeCode(e.seasonNumber, e.episodeNumber)}${e.name ? ` · ${e.name}` : ""}`;
-  return <WantedRow server={server} itemId={e.itemId} label={label} detail={detail} />;
+  return <WantedRow server={server} itemId={e.itemId} movie={false} label={label} detail={detail} />;
 }

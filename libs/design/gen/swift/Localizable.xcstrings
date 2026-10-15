@@ -22476,6 +22476,294 @@
           }
         }
       }
+    },
+    "acquire.title": {
+      "comment": "Title of an item's acquisition on its details, for administrators.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acquisition"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取"
+          }
+        }
+      }
+    },
+    "acquire.notWanted": {
+      "comment": "Shown when a movie or series is not wanted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not wanted: the server doesn't acquire it."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未在想要中：服务器不会获取它。"
+          }
+        }
+      }
+    },
+    "acquire.notWantedFooter": {
+      "comment": "Footer explaining how items become wanted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movies and series are added to the wanted when requested."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影与剧集在被请求时加入想要。"
+          }
+        }
+      }
+    },
+    "acquire.monitored": {
+      "comment": "Toggle of whether an item is searched for and upgraded.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monitored"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受监控"
+          }
+        }
+      }
+    },
+    "acquire.profile": {
+      "comment": "Label of a wanted item's quality profile.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quality Profile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "质量配置"
+          }
+        }
+      }
+    },
+    "acquire.lastSearch": {
+      "comment": "When a wanted item was last searched for.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last searched"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次搜索"
+          }
+        }
+      }
+    },
+    "acquire.search": {
+      "comment": "Searches for an item and grabs the best release.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic Search"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动搜索"
+          }
+        }
+      }
+    },
+    "acquire.interactive": {
+      "comment": "Opens the releases of an item to choose from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interactive Search"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "交互式搜索"
+          }
+        }
+      }
+    },
+    "acquire.releasesTitle": {
+      "comment": "Title of the releases dialog.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Releases of %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的发布"
+          }
+        }
+      }
+    },
+    "acquire.indexerFailed": {
+      "comment": "An indexer that failed during a search.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ failed: %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 失败：%2$@"
+          }
+        }
+      }
+    },
+    "acquire.searchingIndexers": {
+      "comment": "Shown while releases are searched.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Searching the indexers…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索索引器…"
+          }
+        }
+      }
+    },
+    "acquire.noReleases": {
+      "comment": "Shown when a search finds no releases.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No releases found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未找到发布。"
+          }
+        }
+      }
+    },
+    "acquire.peers": {
+      "comment": "A torrent's seeders and peers.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ seeders · %2$@ peers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ 做种 · %2$@ 节点"
+          }
+        }
+      }
+    },
+    "acquire.usenet": {
+      "comment": "A Usenet release's protocol.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        }
+      }
+    },
+    "acquire.score": {
+      "comment": "A release's custom format score.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Score %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分数 %@"
+          }
+        }
+      }
+    },
+    "acquire.grab": {
+      "comment": "Sends a release to a download client.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grab"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抓取"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -1232,7 +1232,23 @@ export type MessageKey =
   | 'downloads.unblock'
   | 'downloads.importFooter'
   | 'downloads.folder'
-  | 'downloads.scan';
+  | 'downloads.scan'
+  | 'acquire.title'
+  | 'acquire.notWanted'
+  | 'acquire.notWantedFooter'
+  | 'acquire.monitored'
+  | 'acquire.profile'
+  | 'acquire.lastSearch'
+  | 'acquire.search'
+  | 'acquire.interactive'
+  | 'acquire.releasesTitle'
+  | 'acquire.indexerFailed'
+  | 'acquire.searchingIndexers'
+  | 'acquire.noReleases'
+  | 'acquire.peers'
+  | 'acquire.usenet'
+  | 'acquire.score'
+  | 'acquire.grab';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2457,7 +2473,23 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "downloads.unblock": "Remove",
     "downloads.importFooter": "Files are matched to wanted movies by their names; files no movie matches cannot be imported here.",
     "downloads.folder": "Folder on the server",
-    "downloads.scan": "Scan"
+    "downloads.scan": "Scan",
+    "acquire.title": "Acquisition",
+    "acquire.notWanted": "Not wanted: the server doesn't acquire it.",
+    "acquire.notWantedFooter": "Movies and series are added to the wanted when requested.",
+    "acquire.monitored": "Monitored",
+    "acquire.profile": "Quality Profile",
+    "acquire.lastSearch": "Last searched",
+    "acquire.search": "Automatic Search",
+    "acquire.interactive": "Interactive Search",
+    "acquire.releasesTitle": "Releases of {name}",
+    "acquire.indexerFailed": "{indexer} failed: {message}",
+    "acquire.searchingIndexers": "Searching the indexers…",
+    "acquire.noReleases": "No releases found.",
+    "acquire.peers": "{seeders} seeders · {peers} peers",
+    "acquire.usenet": "Usenet",
+    "acquire.score": "Score {score}",
+    "acquire.grab": "Grab"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3680,6 +3712,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "downloads.unblock": "移除",
     "downloads.importFooter": "文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。",
     "downloads.folder": "服务器上的文件夹",
-    "downloads.scan": "扫描"
+    "downloads.scan": "扫描",
+    "acquire.title": "获取",
+    "acquire.notWanted": "未在想要中：服务器不会获取它。",
+    "acquire.notWantedFooter": "电影与剧集在被请求时加入想要。",
+    "acquire.monitored": "受监控",
+    "acquire.profile": "质量配置",
+    "acquire.lastSearch": "上次搜索",
+    "acquire.search": "自动搜索",
+    "acquire.interactive": "交互式搜索",
+    "acquire.releasesTitle": "{name} 的发布",
+    "acquire.indexerFailed": "{indexer} 失败：{message}",
+    "acquire.searchingIndexers": "正在搜索索引器…",
+    "acquire.noReleases": "未找到发布。",
+    "acquire.peers": "{seeders} 做种 · {peers} 节点",
+    "acquire.usenet": "Usenet",
+    "acquire.score": "分数 {score}",
+    "acquire.grab": "抓取"
   }
 };

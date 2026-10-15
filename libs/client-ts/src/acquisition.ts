@@ -14,10 +14,11 @@ import {
   type SeriesMonitor,
   type Wanted,
   type WantedFilter,
+  WantedSchema,
   type WantedKind,
   WantedService,
 } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
-import type { MessageInitShape } from "@bufbuild/protobuf";
+import { clone, type MessageInitShape } from "@bufbuild/protobuf";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore } from "./hooks.ts";
@@ -83,6 +84,17 @@ export function useWantedActions(server: ServerEntry) {
     setMonitored: useMutation({ mutationFn: (v: { itemIds: string[]; monitored: boolean }) => c().setMonitored(v), onSuccess }),
     monitorSeries: useMutation({ mutationFn: (v: { itemIds: string[]; monitor: SeriesMonitor }) => c().monitorSeries(v), onSuccess }),
     update: useMutation({ mutationFn: async (wanted: Wanted) => (await c().updateWanted({ wanted })).wanted, onSuccess }),
+    // Movies and series are monitored through their wanted; seasons and episodes by setMonitored.
+    setWantedMonitored: useMutation({
+      mutationFn: async (v: { itemId: string; monitored: boolean }) => {
+        const w = (await c().getWanted({ itemId: v.itemId })).wanted;
+        if (!w) throw new ConnectError("not wanted", Code.NotFound);
+        const next = clone(WantedSchema, w);
+        next.monitored = v.monitored;
+        return (await c().updateWanted({ wanted: next })).wanted;
+      },
+      onSuccess,
+    }),
   };
 }
 

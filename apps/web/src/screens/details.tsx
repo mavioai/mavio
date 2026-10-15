@@ -23,6 +23,7 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import { Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
+import { Acquisition } from "./acquire.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, useDismiss, yearOf } from "../ui.tsx";
@@ -253,6 +254,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
           </Shelf>
         )}
         <About item={item} series={series} credits={credits} source={selected} overview={!phone} />
+        <Acquisition server={server} item={item} />
       </div>
     </div>
   );

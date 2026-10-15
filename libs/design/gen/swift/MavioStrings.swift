@@ -3936,4 +3936,60 @@ public enum MavioStrings {
 
     /// Lists the files of a folder to import.
     public static var downloadsScan: String { NSLocalizedString("downloads.scan", bundle: .module, comment: "") }
+
+    /// Title of an item's acquisition on its details, for administrators.
+    public static var acquireTitle: String { NSLocalizedString("acquire.title", bundle: .module, comment: "") }
+
+    /// Shown when a movie or series is not wanted.
+    public static var acquireNotWanted: String { NSLocalizedString("acquire.notWanted", bundle: .module, comment: "") }
+
+    /// Footer explaining how items become wanted.
+    public static var acquireNotWantedFooter: String { NSLocalizedString("acquire.notWantedFooter", bundle: .module, comment: "") }
+
+    /// Toggle of whether an item is searched for and upgraded.
+    public static var acquireMonitored: String { NSLocalizedString("acquire.monitored", bundle: .module, comment: "") }
+
+    /// Label of a wanted item's quality profile.
+    public static var acquireProfile: String { NSLocalizedString("acquire.profile", bundle: .module, comment: "") }
+
+    /// When a wanted item was last searched for.
+    public static var acquireLastSearch: String { NSLocalizedString("acquire.lastSearch", bundle: .module, comment: "") }
+
+    /// Searches for an item and grabs the best release.
+    public static var acquireSearch: String { NSLocalizedString("acquire.search", bundle: .module, comment: "") }
+
+    /// Opens the releases of an item to choose from.
+    public static var acquireInteractive: String { NSLocalizedString("acquire.interactive", bundle: .module, comment: "") }
+
+    /// Title of the releases dialog.
+    public static func acquireReleasesTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquire.releasesTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// An indexer that failed during a search.
+    public static func acquireIndexerFailed(indexer: String, message: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquire.indexerFailed", bundle: .module, comment: ""), indexer, message)
+    }
+
+    /// Shown while releases are searched.
+    public static var acquireSearchingIndexers: String { NSLocalizedString("acquire.searchingIndexers", bundle: .module, comment: "") }
+
+    /// Shown when a search finds no releases.
+    public static var acquireNoReleases: String { NSLocalizedString("acquire.noReleases", bundle: .module, comment: "") }
+
+    /// A torrent's seeders and peers.
+    public static func acquirePeers(seeders: String, peers: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquire.peers", bundle: .module, comment: ""), seeders, peers)
+    }
+
+    /// A Usenet release's protocol.
+    public static var acquireUsenet: String { NSLocalizedString("acquire.usenet", bundle: .module, comment: "") }
+
+    /// A release's custom format score.
+    public static func acquireScore(score: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("acquire.score", bundle: .module, comment: ""), score)
+    }
+
+    /// Sends a release to a download client.
+    public static var acquireGrab: String { NSLocalizedString("acquire.grab", bundle: .module, comment: "") }
 }

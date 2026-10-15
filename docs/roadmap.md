@@ -674,8 +674,10 @@ flowchart TD
     - [ ] The blocklist: blocking a title or a collection from its page, and the blocked titles to unblock (`BlockTitle`, `ListBlockedTitles`, `BlockCollection`)
     - [ ] Administrators requesting for another user or outside their quota (`CreateRequest`'s `user_id` and `ignore_quota`)
     - [ ] Discover's screens among the web UI's snapshot tests
-  - [ ] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
+  - [x] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
     - [x] Wanted and Downloads in the settings (`apps/web/src/screens/admin/wanted.tsx`, `apps/web/src/screens/admin/downloads.tsx`, `libs/client-ts/src/acquisition.ts`): the missing and cutoff unmet movies and episodes, searched, unmonitored and synced by RSS; the queue, history, blocklist and a folder's manual import
+    - [x] An item's acquisition on its details (`apps/web/src/screens/acquire.tsx`): monitoring, the quality profile, automatic and interactive searches with grabbing, and the item's downloads and history
+    - [ ] A series' monitoring choices (`MonitorSeries`) and its other wanted settings: tags, minimum availability, new items, season folders
     - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
     - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
   - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)

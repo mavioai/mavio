@@ -1230,5 +1230,21 @@
   "downloads.unblock": { "message": "Remove", "description": "Takes a release off the blocklist." },
   "downloads.importFooter": { "message": "Files are matched to wanted movies by their names; files no movie matches cannot be imported here.", "description": "Footer of importing a folder." },
   "downloads.folder": { "message": "Folder on the server", "description": "Label of the folder to import." },
-  "downloads.scan": { "message": "Scan", "description": "Lists the files of a folder to import." }
+  "downloads.scan": { "message": "Scan", "description": "Lists the files of a folder to import." },
+  "acquire.title": { "message": "Acquisition", "description": "Title of an item's acquisition on its details, for administrators." },
+  "acquire.notWanted": { "message": "Not wanted: the server doesn't acquire it.", "description": "Shown when a movie or series is not wanted." },
+  "acquire.notWantedFooter": { "message": "Movies and series are added to the wanted when requested.", "description": "Footer explaining how items become wanted." },
+  "acquire.monitored": { "message": "Monitored", "description": "Toggle of whether an item is searched for and upgraded." },
+  "acquire.profile": { "message": "Quality Profile", "description": "Label of a wanted item's quality profile." },
+  "acquire.lastSearch": { "message": "Last searched", "description": "When a wanted item was last searched for." },
+  "acquire.search": { "message": "Automatic Search", "description": "Searches for an item and grabs the best release." },
+  "acquire.interactive": { "message": "Interactive Search", "description": "Opens the releases of an item to choose from." },
+  "acquire.releasesTitle": { "message": "Releases of {name}", "description": "Title of the releases dialog." },
+  "acquire.indexerFailed": { "message": "{indexer} failed: {message}", "description": "An indexer that failed during a search." },
+  "acquire.searchingIndexers": { "message": "Searching the indexers…", "description": "Shown while releases are searched." },
+  "acquire.noReleases": { "message": "No releases found.", "description": "Shown when a search finds no releases." },
+  "acquire.peers": { "message": "{seeders} seeders · {peers} peers", "description": "A torrent's seeders and peers." },
+  "acquire.usenet": { "message": "Usenet", "description": "A Usenet release's protocol." },
+  "acquire.score": { "message": "Score {score}", "description": "A release's custom format score." },
+  "acquire.grab": { "message": "Grab", "description": "Sends a release to a download client." }
 }

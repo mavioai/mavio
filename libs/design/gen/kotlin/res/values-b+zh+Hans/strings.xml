@@ -1265,4 +1265,20 @@
     <string name="downloads_import_footer">文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。</string>
     <string name="downloads_folder">服务器上的文件夹</string>
     <string name="downloads_scan">扫描</string>
+    <string name="acquire_title">获取</string>
+    <string name="acquire_not_wanted">未在想要中：服务器不会获取它。</string>
+    <string name="acquire_not_wanted_footer">电影与剧集在被请求时加入想要。</string>
+    <string name="acquire_monitored">受监控</string>
+    <string name="acquire_profile">质量配置</string>
+    <string name="acquire_last_search">上次搜索</string>
+    <string name="acquire_search">自动搜索</string>
+    <string name="acquire_interactive">交互式搜索</string>
+    <string name="acquire_releases_title">%s 的发布</string>
+    <string name="acquire_indexer_failed">%1$s 失败：%2$s</string>
+    <string name="acquire_searching_indexers">正在搜索索引器…</string>
+    <string name="acquire_no_releases">未找到发布。</string>
+    <string name="acquire_peers">%1$s 做种 · %2$s 节点</string>
+    <string name="acquire_usenet">Usenet</string>
+    <string name="acquire_score">分数 %s</string>
+    <string name="acquire_grab">抓取</string>
 </resources>

@@ -1229,5 +1229,21 @@
   "downloads.unblock": "移除",
   "downloads.importFooter": "文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。",
   "downloads.folder": "服务器上的文件夹",
-  "downloads.scan": "扫描"
+  "downloads.scan": "扫描",
+  "acquire.title": "获取",
+  "acquire.notWanted": "未在想要中：服务器不会获取它。",
+  "acquire.notWantedFooter": "电影与剧集在被请求时加入想要。",
+  "acquire.monitored": "受监控",
+  "acquire.profile": "质量配置",
+  "acquire.lastSearch": "上次搜索",
+  "acquire.search": "自动搜索",
+  "acquire.interactive": "交互式搜索",
+  "acquire.releasesTitle": "{name} 的发布",
+  "acquire.indexerFailed": "{indexer} 失败：{message}",
+  "acquire.searchingIndexers": "正在搜索索引器…",
+  "acquire.noReleases": "未找到发布。",
+  "acquire.peers": "{seeders} 做种 · {peers} 节点",
+  "acquire.usenet": "Usenet",
+  "acquire.score": "分数 {score}",
+  "acquire.grab": "抓取"
 }

@@ -2515,4 +2515,36 @@
     <string name="downloads_folder">Folder on the server</string>
     <!-- Lists the files of a folder to import. -->
     <string name="downloads_scan">Scan</string>
+    <!-- Title of an item's acquisition on its details, for administrators. -->
+    <string name="acquire_title">Acquisition</string>
+    <!-- Shown when a movie or series is not wanted. -->
+    <string name="acquire_not_wanted">Not wanted: the server doesn\'t acquire it.</string>
+    <!-- Footer explaining how items become wanted. -->
+    <string name="acquire_not_wanted_footer">Movies and series are added to the wanted when requested.</string>
+    <!-- Toggle of whether an item is searched for and upgraded. -->
+    <string name="acquire_monitored">Monitored</string>
+    <!-- Label of a wanted item's quality profile. -->
+    <string name="acquire_profile">Quality Profile</string>
+    <!-- When a wanted item was last searched for. -->
+    <string name="acquire_last_search">Last searched</string>
+    <!-- Searches for an item and grabs the best release. -->
+    <string name="acquire_search">Automatic Search</string>
+    <!-- Opens the releases of an item to choose from. -->
+    <string name="acquire_interactive">Interactive Search</string>
+    <!-- Title of the releases dialog. -->
+    <string name="acquire_releases_title">Releases of %s</string>
+    <!-- An indexer that failed during a search. -->
+    <string name="acquire_indexer_failed">%1$s failed: %2$s</string>
+    <!-- Shown while releases are searched. -->
+    <string name="acquire_searching_indexers">Searching the indexers…</string>
+    <!-- Shown when a search finds no releases. -->
+    <string name="acquire_no_releases">No releases found.</string>
+    <!-- A torrent's seeders and peers. -->
+    <string name="acquire_peers">%1$s seeders · %2$s peers</string>
+    <!-- A Usenet release's protocol. -->
+    <string name="acquire_usenet">Usenet</string>
+    <!-- A release's custom format score. -->
+    <string name="acquire_score">Score %s</string>
+    <!-- Sends a release to a download client. -->
+    <string name="acquire_grab">Grab</string>
 </resources>

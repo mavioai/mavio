@@ -123,7 +123,7 @@ function Queue({ server }: { server: ServerEntry }) {
   );
 }
 
-function QueueRow({ server, item: i }: { server: ServerEntry; item: QueueItem }) {
+export function QueueRow({ server, item: i }: { server: ServerEntry; item: QueueItem }) {
   const [panel, setPanel] = useState<"remove" | "import">();
   const size = Number(i.size);
   const progress = size > 0 && i.state === DownloadState.DOWNLOADING ? Math.max(0, Math.min(1, 1 - Number(i.remainingSize) / size)) : undefined;
@@ -327,7 +327,7 @@ function History({ server }: { server: ServerEntry }) {
   );
 }
 
-function HistoryRow({ server, event: e }: { server: ServerEntry; event: HistoryEvent }) {
+export function HistoryRow({ server, event: e }: { server: ServerEntry; event: HistoryEvent }) {
   const { markFailed } = useDownloadActions(server);
   const [confirming, setConfirming] = useState(false);
   const data = Object.entries(e.data).toSorted(([a], [b]) => a.localeCompare(b));
