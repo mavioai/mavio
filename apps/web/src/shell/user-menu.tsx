@@ -57,8 +57,19 @@ export function useSwitchUsers(server?: ServerEntry) {
   return { users: users.data && users.data.length > 1 ? users.data : [], switchTo };
 }
 
-/** The button with the user's avatar and name, which opens the user menu. */
-export function UserButton({ compact = false, placement = "above" }: { compact?: boolean; placement?: "above" | "below" }) {
+/**
+ * The button with the user's avatar and name, which opens the user menu;
+ * on the television, three dots in glass beside the tabs instead.
+ */
+export function UserButton({
+  compact = false,
+  dots = false,
+  placement = "above",
+}: {
+  compact?: boolean;
+  dots?: boolean;
+  placement?: "above" | "below";
+}) {
   const account = useAccount();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -74,12 +85,16 @@ export function UserButton({ compact = false, placement = "above" }: { compact?:
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t("nav.userMenu", { name: account.name })}
-        title={compact ? account.name : undefined}
+        title={compact || dots ? account.name : undefined}
         onClick={() => setOpen(!open)}
-        className={`flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`}
+        className={
+          dots
+            ? `flex size-16 items-center justify-center rounded-full text-text-secondary backdrop-blur-xl ${open ? "bg-fill" : "bg-surface-raised/60"}`
+            : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`
+        }
       >
-        <Avatar name={account.name} size={compact ? 36 : 32} />
-        {!compact && (
+        {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 36 : 32} />}
+        {!compact && !dots && (
           <>
             <span className="min-w-0 flex-1">
               <span className="block truncate type-callout font-semibold">{account.name}</span>

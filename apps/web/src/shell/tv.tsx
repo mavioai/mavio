@@ -1,5 +1,5 @@
 // The television layout (docs/tv.md), the same as on tvOS and
-// Android TV: tabs in a pill at the top, the user's avatar beside them,
+// Android TV: tabs in a pill at the top, the user menu's dots at the right,
 // and focus moved with the arrow keys.
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
@@ -54,9 +54,9 @@ export function TvShell() {
                 </Link>
               ))}
             </nav>
-            {/* The avatar, centered on the tabs. */}
-            <div className="pointer-events-auto absolute -right-10">
-              <UserButton compact placement="below" />
+            {/* The user menu's dots, at the screen's right, centered on the tabs. */}
+            <div className="pointer-events-auto absolute right-0">
+              <UserButton dots placement="below" />
             </div>
           </div>
         </header>
