@@ -12,6 +12,7 @@
 | [docs/testing.zh-CN.md](docs/testing.zh-CN.md) | 测试分层、从 Jellyfin 移植测试、测试媒体 |
 | [docs/roadmap.zh-CN.md](docs/roadmap.zh-CN.md) | 阶段划分、完成标准、当前进度、风险 |
 | [docs/optimization.zh-CN.md](docs/optimization.zh-CN.md) | 优化主题，每个附落地对照索引：存储 I/O 延迟缓解与推测式预热、按存储类别访问存储、通过 rclone 读取远端存储 |
+| [docs/tv.zh-CN.md](docs/tv.zh-CN.md) | 电视布局：屏幕、导航栏、焦点、菜单、页面、播放器、各平台实现 |
 | [docs/plugins.zh-CN.md](docs/plugins.zh-CN.md) | 插件平台：宿主 API、事件、HTTP 路由、任务、远程设备、提供者类型；DLNA 插件 |
 | [docs/clients.zh-CN.md](docs/clients.zh-CN.md) | 客户端：内嵌 Web UI，Apple、Android 与桌面应用，共享 Rust 核心，设计系统 |
 | [docs/accounts.zh-CN.md](docs/accounts.zh-CN.md) | 账户：mavio.dev 模式与独立模式、媒体库访问、托管用户与切换、Home、好友、令牌 |

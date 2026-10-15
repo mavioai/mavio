@@ -155,7 +155,7 @@ body {
   outline-offset: 1px;
 }
 
-/* TV mode (docs/clients.md §6.3): the television's layout and type scale
+/* TV mode (docs/tv.md): the television's layout and type scale
    of the tokens, and focus shown by scale and color rather than a ring. */
 :root[data-tv] {
   --mavio-layout-margin: 80px;

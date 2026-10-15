@@ -1,4 +1,4 @@
-// The television layout (docs/clients.md §6.3), the same as on tvOS and
+// The television layout (docs/tv.md), the same as on tvOS and
 // Android TV: tabs in a pill at the top, the user's avatar beside them,
 // and focus moved with the arrow keys.
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";

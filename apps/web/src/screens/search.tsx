@@ -1,6 +1,7 @@
 // Search asks every server at once and lists the results by server
 // (docs/clients.md §5.4). A search runs when it is confirmed; on the
-// television it runs as the on-screen keyboard types, beside the results.
+// television it runs as the on-screen keyboard types, beside the results
+// (docs/tv.md §6.4).
 import { type SearchResults, useHome, useSearch, useSignedIn } from "@mavio/client-ts";
 import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";

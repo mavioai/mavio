@@ -1,5 +1,5 @@
 // Focus that moves with the arrow keys to the nearest element in their
-// direction, as a remote moves it on a television (docs/clients.md §6.3).
+// direction, as a remote moves it on a television (docs/tv.md).
 import { useEffect } from "react";
 
 type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
