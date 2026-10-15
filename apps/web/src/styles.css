@@ -114,10 +114,20 @@
   scrollbar-width: none;
   scroll-snap-type: x proximity;
   /* Snapping keeps the row's margin before the first card. */
-  scroll-padding-inline: var(--spacing-margin);
+  scroll-padding-inline: var(--mavio-layout-margin);
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* A caret that blinks as a text field's does. */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: blink 1s step-end infinite;
 }
 
 @keyframes fade {

@@ -20,39 +20,43 @@ export function TvShell() {
   const navigate = useNavigate();
   // On a tab's own page, as on tvOS, focusing another tab opens it; deeper
   // pages leave the tabs to select, so that moving up does not leave them.
+  // Search opens only when selected everywhere, since its page hides the tabs.
   const onTab = tabs.some((d) => d.to === pathname);
+  const search = pathname === "/search";
   // Home's hero reaches the top of the screen, behind the tabs.
   const behind = pathname === "/" || pathname.includes("/item/");
   const scrolled = useScrolled();
   return (
     <div className="min-h-screen">
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8 pb-6">
-        {/* Scrolled content passes under the tabs, never through them. */}
-        <div
-          aria-hidden
-          className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
-        />
-        <div className="relative flex w-full items-center justify-center">
-          <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
-            {tabs.map((d) => (
-              <Link
-                key={d.to}
-                to={d.to}
-                activeOptions={{ exact: d.to === "/" }}
-              onFocus={() => onTab && d.to !== pathname && void navigate({ to: d.to })}
-                className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
-              >
-                {d.label()}
-              </Link>
-            ))}
-          </nav>
-          {/* The avatar, centered on the tabs. */}
-          <div className="pointer-events-auto absolute -right-10">
-            <UserButton compact placement="below" />
+      {!search && (
+        <header className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-center justify-center px-margin pt-8 pb-6">
+          {/* Scrolled content passes under the tabs, never through them. */}
+          <div
+            aria-hidden
+            className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
+          />
+          <div className="relative flex w-full items-center justify-center">
+            <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
+              {tabs.map((d) => (
+                <Link
+                  key={d.to}
+                  to={d.to}
+                  activeOptions={{ exact: d.to === "/" }}
+                  onFocus={() => onTab && d.to !== pathname && d.to !== "/search" && void navigate({ to: d.to })}
+                  className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
+                >
+                  {d.label()}
+                </Link>
+              ))}
+            </nav>
+            {/* The avatar, centered on the tabs. */}
+            <div className="pointer-events-auto absolute -right-10">
+              <UserButton compact placement="below" />
+            </div>
           </div>
-        </div>
-      </header>
-      <main className={behind ? "pb-16" : "pt-32 pb-16"}>
+        </header>
+      )}
+      <main className={behind ? "pb-16" : search ? "pt-12 pb-16" : "pt-32 pb-16"}>
         <Outlet />
       </main>
     </div>

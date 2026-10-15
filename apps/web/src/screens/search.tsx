@@ -103,19 +103,21 @@ function TvSearch() {
   const key = "tv-pill flex items-center justify-center rounded-lg bg-fill type-headline";
   return (
     <div className="flex items-start gap-gutter pl-margin">
-      <div role="search" onKeyDown={onKeyDown} className="sticky top-32 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
+      <div role="search" onKeyDown={onKeyDown} className="sticky top-12 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
         <div aria-live="polite" className="flex min-h-16 items-center gap-3 rounded-lg bg-surface-raised px-5">
           <Icon name="search" className="shrink-0 text-text-secondary" />
-          <span className={`min-w-0 flex-1 truncate type-title3 ${text ? "" : "text-text-tertiary"}`}>
-            {text || t("search.placeholder")}
+          {/* The caret shows where the keyboard types, wherever focus is. */}
+          <span className="flex min-w-0 flex-1 items-center type-title3">
+            <span className="truncate whitespace-pre">{text}</span>
+            <span aria-hidden className="caret mx-px h-[1.1em] w-0.5 shrink-0 rounded-full bg-accent" />
+            {!text && <span className="truncate text-text-tertiary">{t("search.placeholder")}</span>}
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button type="button" onClick={() => type(" ")} className={`${key} h-14`}>
             {t("search.space")}
           </button>
-          <button type="button" onClick={erase} className={`${key} h-14 gap-2`}>
-            <Icon name="backspace" size={22} />
+          <button type="button" onClick={erase} className={`${key} h-14`}>
             {t("search.backspace")}
           </button>
           <button type="button" onClick={() => setText("")} className={`${key} h-14`}>
@@ -123,15 +125,16 @@ function TvSearch() {
           </button>
         </div>
         <div className="grid grid-cols-6 gap-2">
-          {keys.map((c) => (
-            <button key={c} type="button" onClick={() => type(c)} className={`${key} aspect-square uppercase`}>
+          {/* The page has no tabs, so focus starts on the keyboard. */}
+          {keys.map((c, i) => (
+            <button key={c} type="button" autoFocus={i === 0} onClick={() => type(c)} className={`${key} aspect-square uppercase`}>
               {c}
             </button>
           ))}
         </div>
       </div>
       {/* Its rows and grids keep only a little room for a focused card to grow. */}
-      <div className="min-w-0 flex-1" style={{ "--spacing-margin": "24px" } as CSSProperties}>
+      <div className="min-w-0 flex-1" style={{ "--mavio-layout-margin": "24px" } as CSSProperties}>
         {q === "" ? <Suggestions /> : <Results q={q} results={results} grid />}
       </div>
     </div>
