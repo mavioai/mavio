@@ -84,12 +84,13 @@ export function UserButton({
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
+        data-tv-dots={dots || undefined}
         aria-label={t("nav.userMenu", { name: account.name })}
         title={compact || dots ? account.name : undefined}
         onClick={() => setOpen(!open)}
         className={
           dots
-            ? `flex size-16 items-center justify-center rounded-full text-text-secondary backdrop-blur-xl ${open ? "bg-fill" : "bg-surface-raised/60"}`
+            ? "flex size-16 items-center justify-center rounded-full bg-surface-raised/60 text-text-secondary backdrop-blur-xl"
             : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`
         }
       >
@@ -122,9 +123,15 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
   const manage = useMavioDevAccountUrl();
+  // On the television the menu opens with focus on the settings.
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (tv) ref.current?.querySelector<HTMLElement>("[data-menu-start]")?.focus();
+  }, [tv]);
 
   return (
     <div
+      ref={ref}
       role="menu"
       className={`absolute z-50 rounded-[14px] border border-border p-1.5 shadow-level3 ${
         // On the television, frosted glass over the artwork behind it.
@@ -168,7 +175,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         </>
       )}
       <Divider />
-      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut={keys ? shortcutLabel("settings") : undefined}>
+      <MenuLink start icon="settings" to="/settings" onClose={onClose} shortcut={keys ? shortcutLabel("settings") : undefined}>
         {t("nav.settings")}
       </MenuLink>
       <button
@@ -275,6 +282,7 @@ function Divider() {
 }
 
 function MenuLink({
+  start = false,
   icon,
   to,
   section,
@@ -282,6 +290,7 @@ function MenuLink({
   onClose,
   children,
 }: {
+  start?: boolean;
   icon: IconName;
   to: "/settings" | "/settings/$section";
   section?: string;
@@ -290,7 +299,7 @@ function MenuLink({
   children: ReactNode;
 }) {
   return (
-    <Link role="menuitem" to={to} params={section ? { section } : undefined} onClick={onClose} className={itemClass}>
+    <Link role="menuitem" data-menu-start={start || undefined} to={to} params={section ? { section } : undefined} onClick={onClose} className={itemClass}>
       <Icon name={icon} size={18} className="text-text-secondary" />
       <span className="flex-1">{children}</span>
       {shortcut && <Shortcut>{shortcut}</Shortcut>}

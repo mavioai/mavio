@@ -36,7 +36,7 @@
 
 * **User menu**: the menu button opens the same menu as on other layouts, 400 pt wide for the larger type and in frosted glass — `color.surfaceOverlay` at 45 % over a strong blur — so that the artwork behind shows through: the appearance, switching users, settings, switching back to the standard layout and, in television mode, full screen. Its items fill with `color.fill` when they have focus, as they do under a pointer elsewhere.
 * **Focus within**: while a menu is open, focus moves only among its items and the button that opened it. Back closes it and returns focus to the button.
-* **The menu button**: with focus and its menu closed, it is highlighted with `color.fill`; while its menu is open and focus is in the menu, it keeps that highlight; with focus while its menu is open, it turns white, and selecting it closes the menu.
+* **The menu button**: it has two looks only: with focus, the selected tab's `color.fillSelected` on its glass, and otherwise its glass alone, whether its menu is open or not. Selecting it opens the menu with focus on Settings, the button back to its glass; back returns focus to it, and selecting it while its menu is open closes the menu.
 
 ## 6. Screens
 
