@@ -113,6 +113,16 @@ function regionOf(el: HTMLElement): Element {
   return el.closest("[data-focus-region]") ?? el.closest("main") ?? document.body;
 }
 
+/** The chosen element of a choice that focus chooses (data-focus-choice). */
+const chosen = "[aria-selected=true], [aria-checked=true]";
+
+/** Focus entering a choice from outside lands on its chosen element. */
+function enter(active: HTMLElement, next: HTMLElement | undefined): HTMLElement | undefined {
+  const choice = next?.closest("[data-focus-choice]");
+  if (!choice || choice.contains(active)) return next;
+  return choice.querySelector<HTMLElement>(chosen) ?? next;
+}
+
 /**
  * Where focus goes from active (docs/tv.md §4). Up and down go to the
  * row above or below, to its element nearest across; left and right move
@@ -122,6 +132,10 @@ function regionOf(el: HTMLElement): Element {
  * tabs, at the current one. Undefined when there is nowhere to go.
  */
 export function moveFrom(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
+  return enter(active, step(active, dir, all, tabs));
+}
+
+function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
   const region = regionOf(active);
   const rows = rowsOf(all.filter((el) => regionOf(el) === region));
   const ri = rows.findIndex((row) => row.some((b) => b.el === active));
@@ -135,7 +149,7 @@ export function moveFrom(active: HTMLElement, dir: Direction, all: HTMLElement[]
   const above = () => {
     if (!tabs || inTabs) return undefined;
     const items = all.filter((el) => tabs.contains(el));
-    return items.find((el) => el.matches("[data-status=active]")) ?? (items.length ? closestTo(rowsOf(items)[0], x) : undefined);
+    return items.find((el) => el.matches(`[data-status=active], ${chosen}`)) ?? (items.length ? closestTo(rowsOf(items)[0], x) : undefined);
   };
   switch (dir) {
     case "ArrowUp":

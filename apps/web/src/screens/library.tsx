@@ -12,7 +12,7 @@ import {
 import type { MessageKey } from "@mavio/design/strings";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -48,9 +48,20 @@ export function LibraryScreen() {
 function Library({ server, libraryId }: { server: ServerEntry; libraryId: string }) {
   const { tab } = route.useSearch();
   const library = useLibrary(server, libraryId);
+  const navigate = useNavigate({ from: "/s/$serverId/library/$libraryId" });
   // On the television the choice looks like the tabs it stands in for:
-  // the current one filled, the focused one white.
+  // the current one filled, the focused one white. Focus chooses, as on
+  // the tabs, and a choice replaces the page rather than adding to the
+  // history, so that back leaves the library (docs/tv.md §6.3).
   const { tv } = usePrefs();
+  const all = tab === "all";
+  const current = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (tv && document.activeElement === document.body) current.current?.focus({ preventScroll: true });
+  }, [tv]);
+  const choose = (to: "recommended" | "all") => {
+    if (tv && (to === "all") !== all) void navigate({ search: (s) => ({ ...s, tab: to === "all" ? ("all" as const) : undefined }), replace: true });
+  };
   const segment = tv
     ? "tv-pill rounded-full px-6 py-2 type-headline text-text-secondary data-[active=true]:bg-fill-selected data-[active=true]:text-on-background"
     : "rounded-[7px] px-4 py-1 type-callout font-semibold text-text-secondary hover:text-on-background data-[active=true]:bg-surface-overlay data-[active=true]:text-on-background data-[active=true]:shadow-level1";
@@ -58,22 +69,40 @@ function Library({ server, libraryId }: { server: ServerEntry; libraryId: string
     <div>
       <div className={`flex flex-wrap gap-x-6 gap-y-3 px-margin pt-6 pb-3 ${tv ? "items-center" : "items-end"}`}>
         <h1 className="type-title1">{library.data?.name ?? " "}</h1>
-        <div role="tablist" className={tv ? "flex gap-1 rounded-full bg-surface-raised/60 p-1.5" : "flex rounded-[9px] bg-fill p-0.5"}>
-          <Link role="tab" from="/s/$serverId/library/$libraryId" search={{}} data-active={tab !== "all"} className={segment}>
+        <div
+          role="tablist"
+          data-focus-choice
+          className={tv ? "flex gap-1 rounded-full bg-surface-raised/60 p-1.5" : "flex rounded-[9px] bg-fill p-0.5"}
+        >
+          <Link
+            ref={all ? undefined : current}
+            role="tab"
+            from="/s/$serverId/library/$libraryId"
+            search={{}}
+            replace={tv}
+            aria-selected={!all}
+            data-active={!all}
+            onFocus={() => choose("recommended")}
+            className={segment}
+          >
             {t("library.recommended")}
           </Link>
           <Link
+            ref={all ? current : undefined}
             role="tab"
             from="/s/$serverId/library/$libraryId"
             search={(s) => ({ ...s, tab: "all" as const })}
-            data-active={tab === "all"}
+            replace={tv}
+            aria-selected={all}
+            data-active={all}
+            onFocus={() => choose("all")}
             className={segment}
           >
             {t("library.all")}
           </Link>
         </div>
       </div>
-      {tab === "all" ? <AllItems server={server} libraryId={libraryId} /> : <Recommended server={server} libraryId={libraryId} />}
+      {all ? <AllItems server={server} libraryId={libraryId} /> : <Recommended server={server} libraryId={libraryId} />}
     </div>
   );
 }
@@ -99,21 +128,35 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
   const navigate = useNavigate({ from: "/s/$serverId/library/$libraryId" });
   const q = useLibraryItems(server, libraryId, sort, filter);
   const total = q.data?.pages[0]?.total;
+  // On the television the filters are chosen by focus, as the tabs are,
+  // and neither they nor the order add to the history.
+  const { tv } = usePrefs();
+  const filterTo = (k: Filter) => (k === "all" ? undefined : k);
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 px-margin pt-1 pb-5">
-        {(Object.keys(filterLabels) as Filter[]).map((k) => (
-          <Link
-            key={k}
-            from="/s/$serverId/library/$libraryId"
-            search={(s) => ({ ...s, filter: k === "all" ? undefined : k })}
-            data-active={filter === k}
-            className="inline-flex h-8 items-center rounded-full bg-fill px-3.5 type-callout font-medium hover:bg-fill-selected data-[active=true]:bg-button data-[active=true]:text-on-button"
-          >
-            {t(filterLabels[k])}
-          </Link>
-        ))}
-        <SortMenu sort={sort} onSort={(k) => void navigate({ search: (s) => ({ ...s, sort: k }) })} />
+      <div className={`flex flex-wrap items-center px-margin pt-1 pb-5 ${tv ? "gap-4" : "gap-2"}`}>
+        <div role="radiogroup" aria-label={t("library.filter")} data-focus-choice className={`flex flex-wrap ${tv ? "gap-1 rounded-full bg-surface-raised/60 p-1.5" : "gap-2"}`}>
+          {(Object.keys(filterLabels) as Filter[]).map((k) => (
+            <Link
+              key={k}
+              role="radio"
+              aria-checked={filter === k}
+              from="/s/$serverId/library/$libraryId"
+              search={(s) => ({ ...s, filter: filterTo(k) })}
+              replace={tv}
+              data-active={filter === k}
+              onFocus={() => tv && filter !== k && void navigate({ search: (s) => ({ ...s, filter: filterTo(k) }), replace: true })}
+              className={
+                tv
+                  ? "tv-pill rounded-full px-5 py-2 type-headline text-text-secondary data-[active=true]:bg-fill-selected data-[active=true]:text-on-background"
+                  : "inline-flex h-8 items-center rounded-full bg-fill px-3.5 type-callout font-medium hover:bg-fill-selected data-[active=true]:bg-button data-[active=true]:text-on-button"
+              }
+            >
+              {t(filterLabels[k])}
+            </Link>
+          ))}
+        </div>
+        <SortMenu sort={sort} onSort={(k) => void navigate({ search: (s) => ({ ...s, sort: k }), replace: tv })} />
         {total !== undefined && (
           <span className="ml-auto type-callout text-text-tertiary">{t("library.itemCount", { count: total })}</span>
         )}
@@ -146,22 +189,31 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setOpen(false), []);
   useDismiss(ref, open, close);
+  // On the television the menu opens with focus on the current order.
+  const { tv } = usePrefs();
+  useEffect(() => {
+    if (open && tv) ref.current?.querySelector<HTMLElement>("[aria-checked=true]")?.focus();
+  }, [open, tv]);
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} data-focus-scope className="relative">
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 type-callout text-text-secondary hover:bg-fill hover:text-on-background"
+        className={`inline-flex items-center rounded-full text-text-secondary hover:bg-fill hover:text-on-background ${
+          tv ? "h-12 gap-2 px-5 type-headline" : "h-8 gap-1.5 px-3 type-callout"
+        }`}
       >
-        <Icon name="sort" size={16} />
+        <Icon name="sort" size={tv ? 22 : 16} />
         {t("library.sortBy", { sort: t(sortLabels[sort]) })}
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute top-full left-0 z-30 mt-1.5 w-56 rounded-[12px] border border-border bg-surface-overlay/90 p-1.5 shadow-level3 backdrop-blur-xl"
+          className={`absolute top-full left-0 z-30 mt-1.5 rounded-[12px] border border-border p-1.5 shadow-level3 ${
+            tv ? "w-80 bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : "w-56 bg-surface-overlay/90 backdrop-blur-xl"
+          }`}
         >
           {(Object.keys(sortLabels) as Sort[]).map((k) => (
             <button
@@ -170,7 +222,7 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
               role="menuitemradio"
               aria-checked={k === sort}
               onClick={() => (onSort(k), close())}
-              className="flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left type-body hover:bg-fill"
+              className={`flex w-full items-center gap-2 rounded-lg px-2.5 text-left hover:bg-fill ${tv ? "min-h-12 type-headline" : "min-h-9 type-body"}`}
             >
               <span className="w-4">{k === sort && <Icon name="check" size={16} className="text-accent-text" />}</span>
               {t(sortLabels[k])}

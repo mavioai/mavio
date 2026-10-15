@@ -243,21 +243,14 @@ body {
     background: #fff;
     color: #000;
   }
-  /* A button that opens a menu is bright with focus only while its menu
-     is open, and shows a highlight otherwise, as when the menu has focus. */
-  & [aria-haspopup]:focus {
+  /* A button whose menu is open, focus in the menu, keeps a highlight. */
+  & [aria-haspopup][aria-expanded="true"]:not(:focus) {
     background: var(--mavio-color-fill);
-    color: inherit;
-  }
-  & [aria-haspopup][aria-expanded="true"]:focus {
-    background: #fff;
-    color: #000;
   }
   /* The user menu's dots are bare, and in the tabs' glass with focus or
      while their menu is open. */
   & [data-tv-dots]:focus,
-  & [data-tv-dots][aria-expanded="true"],
-  & [data-tv-dots][aria-expanded="true"]:focus {
+  & [data-tv-dots][aria-expanded="true"]:not(:focus) {
     background: color-mix(in oklab, var(--mavio-color-surface-raised) 60%, transparent);
     backdrop-filter: blur(24px);
     color: var(--mavio-color-on-background);
