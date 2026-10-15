@@ -31,7 +31,7 @@
 | mavio.dev's services (relay, certificates, discovery) | Yes | No |
 | Signing in a television | A code at mavio.dev/link | The server's Quick Connect |
 
-A new server asks which mode to use on first start; mavio.dev mode then starts claiming (§3.2). The server keeps the mode in the `accounts` group of its settings.
+A new server is set up in its web UI, at `/setup`, which it opens in the default browser when it starts on a desktop (`open-browser`); a television's web UI asks for a computer or phone instead. The setup chooses the mode: mavio.dev mode then claims the server (§3.2), and standalone mode creates its administrator. The server keeps the mode in the `accounts` group of its settings, where it is fixed once the server is claimed or its administrator created.
 
 ### 2.1 Changing the Mode
 The administrator changes a server's mode by hand. It removes all user data (users, sessions, devices, watch history, playlists and preferences) and keeps libraries, metadata and server settings:
@@ -58,7 +58,7 @@ A server learns an account's ID, user name, display name, avatar and kind; it le
 
 ### 3.2 Servers and Claiming
 * A server's **ID** is the fingerprint of its identity public key (§5.1) and is its OpenID Connect `client_id` at mavio.dev; it authenticates with a JWT signed by its identity key (`private_key_jwt`).
-* **Claiming** registers the server with mavio.dev through a registration request signed with its identity key, which carries a claim code valid for a few minutes. The server's setup gets the code by signing in to mavio.dev and passes it to `AuthService.ClaimServer`; a server without a browser at hand takes one from mavio.dev/claim in `MAVIO_CLAIM_TOKEN` and claims itself when it starts unclaimed. Claiming puts a server whose mode is unset in mavio.dev mode. The claiming account becomes the server's administrator: its user is created, or promoted when the server already has one, and any other administrator becomes a member.
+* **Claiming** registers the server with mavio.dev through requests signed with its identity key. The setup calls `AuthService.StartClaim` with its redirect URI, PKCE challenge and device key; the server asks mavio.dev for a **claim request** carrying them, valid for a few minutes, and the browser goes to its page, `/claim?request=…`, where a full account confirms or cancels it, while the server polls `ClaimServer` for the outcome. Confirming registers the server and sends the browser back to the setup with an authorization code, which signs the account in as on any server (§6). A server without a browser at hand takes a claim code from mavio.dev/claim in `MAVIO_CLAIM_TOKEN` and claims itself when it starts unclaimed. Claiming puts a server whose mode is unset in mavio.dev mode. The claiming account becomes the server's administrator: its user is created, or promoted when the server already has one, and any other administrator becomes a member.
 * The administrator manages the server's settings and libraries and grants, edits and revokes library access. When the administrator's account is lost, `mavio admin unclaim` returns the server to the unclaimed state, making the administrator a member and signing it out everywhere, and another account claims it; the server stays in mavio.dev mode, so its user data stays, and it keeps the position of the changes it applied.
 * The server keeps a connection to mavio.dev ([mavio.dev §3](mavio-dev.md#3-push-to-servers)), through which it receives changes to its access records (§3.3) and revocations (§5.5). A server that was offline asks for the changes it missed when it reconnects.
 
@@ -180,22 +180,23 @@ sequenceDiagram
     Note over C,S: Every later request goes to S alone
 ```
 
-* The server's web interface signs in through the authorization code flow with PKCE (RFC 7636), with the server's ID as `client_id`: mavio.dev's `/authorize` page names the origin of the redirect URI and warns when it is neither one of the server's `mavio.site` names nor on the local network, and the code, exchanged once at `/api/oauth/token` with the verifier from that origin, gives a sign-in assertion for the device key the request named. The web interface so reaches that server alone and holds no mavio.dev session, which another server's administrator could take from its pages.
-* A television signs in to mavio.dev with a code: it shows the code, and the person enters it at mavio.dev/link or approves it in a client signed in to mavio.dev, which names the device being signed in.
+* **A device's session at mavio.dev.** A client signed in with a Mavio account holds a session at mavio.dev bound to its device key (§5.2), which lists the account's servers and gives their sign-in assertions. Its access token, from `/api/oauth/token`, lasts ten minutes; the client renews it by signing the session and the current time with the device key, so that a stolen access token cannot be renewed. Signing out ends every server's session and revokes the session at `/api/oauth/revoke`; reporting an account compromised ends all of its sessions.
+* **A server's web UI** signs in the server's administrator alone, through the authorization code flow with PKCE (RFC 7636) with the server's ID as `client_id`. mavio.dev's `/authorize` page names the origin of the redirect URI, warns when it is neither one of the server's `mavio.site` names nor on the local network, and sends any other account to app.mavio.dev; the code, exchanged once at the token endpoint with the verifier from that origin, starts the session of the device key the request named. The administrator then sees what app.mavio.dev shows: every server of the account.
+* **app.mavio.dev**, the web UI served by no server, signs in any Mavio account the same way with the `client_id` `app`, without a page to confirm, and comes back to the page that started.
+* **A television** signs in with a link code (RFC 8628): `/api/oauth/device` gives it a code to show while it polls the token endpoint, and the person enters the code at mavio.dev/link, which names the device being signed in.
 * While mavio.dev is unreachable, open sessions keep refreshing against the server's synchronized access records; new sign-ins wait for mavio.dev.
 * A standalone server signs in with its own credentials and Quick Connect (§4.3) and never contacts mavio.dev.
 
 ## 7. Clients
 
-A client shows one **sign-in** at a time: either a Mavio account, with the servers the account administers or has access to, or a user of one standalone server, with that server. Every sign-in made on the device is kept, so that the person changes sign-ins without entering credentials again:
+A client has one **sign-in**: a Mavio account, with the servers the account administers or has access to, or a user of one standalone server, with that server.
 
-* A kept sign-in is its device-bound session (§5.2): a mavio.dev session, or a standalone server's session. The client keeps no password.
-* Changing sign-ins shows the other sign-in's content. The sign-ins not shown keep their sessions and refresh them when shown again; one whose session ended (§5.3) asks to sign in again.
-* Removing a kept sign-in signs it out and ends its session.
-* A server added by address, local discovery or a QR code that turns out to be in mavio.dev mode is reached through a Mavio account.
-* A standalone server can be added to a kept sign-in, a Mavio account's included, whose content then includes it; it keeps its own user and session, and removing the sign-in signs out of it too.
+* The sign-in is its device-bound sessions (§5.2): a Mavio account's session at mavio.dev and a session on each of its servers, or a standalone server's session. The client keeps no password.
+* A Mavio account's client follows the account's servers: as it opens, it signs in to the servers newly listed, at the first of the addresses each published (§8) that answers, and signs out of those no longer listed. A server answering at none shows as unreachable until it does.
+* Signing out ends every session of the sign-in; another account or user then signs in afresh.
+* A server's own web UI signs in that server's people only: its administrator in mavio.dev mode, its users in standalone mode. An app, served by no server, reaches a standalone server by address, local discovery or a QR code, and one that turns out to be in mavio.dev mode through a Mavio account.
 
-Changing sign-ins is the client's own and differs from switching users: switching within a Home (§3.6) or within a standalone server (§4.4) changes who is signed in within one sign-in, which then keeps the user switched to.
+Switching users within a Home (§3.6) or within a standalone server (§4.4) changes who is signed in within the sign-in, which then keeps the user switched to.
 
 ## 8. Server Implementation
 
@@ -204,7 +205,7 @@ Changing sign-ins is the client's own and differs from switching users: switchin
 * **Standalone credentials.** Passwords are hashed with argon2id ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)); TOTP (RFC 6238) is computed with the standard library's HMAC; passkeys use `go-webauthn/webauthn`. A passkey belongs to the host name a browser reached the server at, its relying party, taken from the request's origin, which must be HTTPS, or HTTP on `localhost`; it works at that host only, and IP addresses cannot have passkeys. A passkey signs in alone; TOTP is the second factor of a password.
 * **Management in mavio.dev mode.** Clients manage access, friends and Homes at mavio.dev itself; the server's RPCs that create users, set credentials, invite, switch users or sign in with the server's own credentials answer `failed_precondition`. `UserService.UpdateUser` changes only the server's own policy of an account's user, since its name, access, restriction and whether it is disabled are mavio.dev's, and `DeleteUser` purges only users whose access was revoked. Switching users within a Home happens between the client and mavio.dev, and the server only sees a sign-in with a new assertion.
 * **Server information.** `AuthService.GetAuthInfo`, which needs no sign-in, gives the server's mode with its ID and name, so that a client knows how to sign in before it does; it reports that setup is required until the mode is chosen and while a server in mavio.dev mode is unclaimed.
-* **The link to mavio.dev.** `internal/cloud` signs the server's requests to mavio.dev's `mavio.cloud.v1.ServerService` with its identity key, claims the server, and keeps a claimed server's WebSocket to mavio.dev ([mavio.dev §3](mavio-dev.md#3-push-to-servers)). The account settings keep the administrator's account and the cursor of the last change the server applied; the server fetches the changes after it with `ListChanges` and applies them in the transaction that advances the cursor. An access record creates or updates the account's user and enables it; a revoked record disables the user and ends its sessions; an account change renames the user and gives a managed account's user its restriction profile, or makes a converted account's user a member; a deleted account's user is deleted with its data, and a suspended or compromised account's sessions end. The administrator's user keeps its kind and access through every change. The server publishes its libraries with `PublishLibraries` when it connects and again whenever they change.
+* **The link to mavio.dev.** `internal/cloud` signs the server's requests to mavio.dev's `mavio.cloud.v1.ServerService` with its identity key, claims the server (§3.2), and keeps a claimed server's WebSocket to mavio.dev ([mavio.dev §3](mavio-dev.md#3-push-to-servers)). The account settings keep the administrator's account and the cursor of the last change the server applied; the server fetches the changes after it with `ListChanges` and applies them in the transaction that advances the cursor. An access record creates or updates the account's user and enables it; a revoked record disables the user and ends its sessions; an account change renames the user and gives a managed account's user its restriction profile, or makes a converted account's user a member; a deleted account's user is deleted with its data, and a suspended or compromised account's sessions end. The administrator's user keeps its kind and access through every change. The server publishes its libraries with `PublishLibraries` when it connects and again whenever they change, and with `PublishConnections` the URLs clients reach it at, best first: its addresses' `mavio.site` names over HTTPS once it has its certificate, then its addresses over HTTP.
 
 ## 9. mavio.dev
 
@@ -215,7 +216,7 @@ Changing sign-ins is the client's own and differs from switching users: switchin
 | Library access records and their invitations | What an account did on a server |
 | Friends and Homes | |
 
-It is the OpenID Connect issuer of servers in mavio.dev mode, keeps their access records and pushes changes and revocations to them, signs in televisions with codes, and runs the relay, certificates and discovery for those servers; how it is built and deployed is described in [mavio.dev](mavio-dev.md).
+It is the OpenID Connect issuer of servers in mavio.dev mode, keeps their access records and pushes changes and revocations to them, keeps devices' sessions and signs in televisions with codes, and runs the relay, certificates and discovery for those servers; how it is built and deployed is described in [mavio.dev](mavio-dev.md).
 
 ## 10. Security Notes
 

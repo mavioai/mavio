@@ -647,7 +647,6 @@ flowchart TD
 - [ ] The navigation of [Clients §6.3](clients.md) in every client, the web UI first: the three layouts chosen by window width, the desktop layout's sidebar with its user menu, the television layout's top navigation and remote focus, and the sign-in screens of the two modes; the Apple and Android apps also take the primary button filled with `color.button` and the accent only on progress, selection, links and switches
   - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details with versions and facts, and the player's side panel with quality and the next episode
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
-  - [ ] The web UI: finding servers on the local network at sign-in
   - [ ] The web UI: switching between the members of a Home on a server in mavio.dev mode, which now happens on mavio.dev
   - [ ] The Apple and Android apps
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app
@@ -820,7 +819,11 @@ flowchart TD
 - [ ] Running `apps/dns` on two VMs, delegating `mavio.site` to them with glue records, and adding `mavio.site` to the Public Suffix List
 - [x] `apps/relay` and relay tickets: the relay splicing clients' connections by the ClientHello's name to servers' connections back, servers authenticated by their identity keys; `AccountService.CreateRelayTicket`, `ServerService.ListRelays` and `SetRelayRegion`; the server's `internal/relay`, which keeps a connection to the nearest relay and serves TLS on the connections it relays; tested on each side against the other's protocol, with the tickets checked against a shared vector
 - [ ] Running `apps/relay` on VMs in Europe, the United States and Singapore, with the relays' A and AAAA records in `apps/dns`'s configuration and `RELAYS` and `RELAY_TICKET_SECRET` in the Worker's
-- [x] The web UI: the choice of mode at setup with claiming, Mavio accounts signed in through mavio.dev's authorization code flow with PKCE (`/authorize`, `AccountService.CreateAuthorizationCode`, `/api/oauth/token`), kept sign-ins changed in the profile, each showing its own servers; switching a standalone server's users with PINs; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
+- [x] The web UI: `/setup` choosing the mode on a new server, opened by the server on first start, and claiming it through a claim request (`AuthService.StartClaim`, mavio.dev's `/claim`) that comes back signed in; one sign-in, a Mavio account's through mavio.dev's authorization code flow with PKCE (`/authorize`, `/auth/callback`, `/api/oauth/token`) into a session of the device key, restricted to the administrator on a server's own web UI and pointing everyone else to app.mavio.dev, or a standalone server's; every server of the account at the first of its published URLs that answers; link codes on televisions; signing out of every session; switching a standalone server's users with PINs; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
+- [ ] A QR code of the server's address on a new server's television setup, and of mavio.dev/link beside a television's link code
+- [ ] Reaching a Mavio account's servers through the relay when none of their published URLs answers
+- [ ] Managing the account, its Homes, friends and access records inside the web UI rather than on mavio.dev's pages
+- [ ] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
 - [ ] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
 
 ---
