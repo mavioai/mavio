@@ -90,6 +90,7 @@ func StartDaemon(ctx context.Context, opts DaemonOptions) (*Daemon, error) {
 		_ = os.RemoveAll(dir)
 		return nil, err
 	}
+	d.client.Require(Version)
 	if err := d.prepareConfig(ctx); err != nil {
 		_ = os.RemoveAll(dir)
 		return nil, err
@@ -203,6 +204,13 @@ func (d *Daemon) launch(ctx context.Context) error {
 			return fmt.Errorf("rclone did not answer: %w", wctx.Err())
 		case <-time.After(100 * time.Millisecond):
 		}
+	}
+	// The binary may have been replaced since the last start.
+	d.client.verified.Store(false)
+	if err := d.client.CheckVersion(wctx); err != nil {
+		_ = cmd.Process.Kill()
+		<-exited
+		return err
 	}
 	d.mu.Lock()
 	d.cmd, d.exited = cmd, exited

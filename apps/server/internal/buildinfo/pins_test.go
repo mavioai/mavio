@@ -32,14 +32,23 @@ func TestFFmpegPins(t *testing.T) {
 }
 
 // TestRclonePins checks that the container image verifies mavioai/rclone
-// against the same release and SHA-256 digests mise.toml pins, and that
-// every platform mise.toml pins downloads that release.
+// against the same release and SHA-256 digests mise.toml pins, that the
+// server requires that release of the rcd, and that every platform
+// mise.toml pins downloads it.
 func TestRclonePins(t *testing.T) {
 	dockerfile, mise := pins(t)
 	version := regexp.MustCompile(`ARG RCLONE_VERSION=(\S+)`).FindSubmatch(dockerfile)
 	pinned := regexp.MustCompile(`(?s)\[tools\."http:rclone"\]\s*version = "([^"]+)"`).FindSubmatch(mise)
 	if version == nil || pinned == nil || string(version[1]) != string(pinned[1]) {
 		t.Fatalf("rclone versions: Dockerfile %q, mise.toml %q", version, pinned)
+	}
+	client, err := os.ReadFile(filepath.Join("..", "..", "..", "..", "libs", "rclone", "client.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	required := regexp.MustCompile(`const Version = "v([^"]+)"`).FindSubmatch(client)
+	if required == nil || string(required[1]) != string(pinned[1]) {
+		t.Errorf("rclone versions: libs/rclone requires %q, mise.toml pins %q", required, pinned)
 	}
 	urls := regexp.MustCompile(`url = "https://github\.com/mavioai/rclone/releases/download/v([^/]+)/rclone-v([^-]+-[^-]+)-`).FindAllSubmatch(mise, -1)
 	if len(urls) == 0 {

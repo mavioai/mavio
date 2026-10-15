@@ -334,6 +334,41 @@ func TestClientErrors(t *testing.T) {
 	}
 }
 
+func TestClientRequiresVersion(t *testing.T) {
+	for _, tt := range []struct {
+		name, runs string
+		want       error
+	}{
+		{"the fork's release", Version, nil},
+		{"upstream rclone", "v1.75.2", ErrVersion},
+		{"another release of the fork", "v1.74.0-mavio", ErrVersion},
+	} {
+		calls := 0
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/core/version" {
+				_, _ = io.WriteString(w, `{"version":"`+tt.runs+`"}`)
+				return
+			}
+			calls++
+			_, _ = io.WriteString(w, `{}`)
+		}))
+		c, err := NewClient(Endpoint{URL: srv.URL}, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.Require(Version)
+		err = c.Call(t.Context(), "operations/list", map[string]any{}, nil)
+		_, rerr := c.request(t.Context(), http.MethodGet, srv.URL+"/[mem:]/a", nil)
+		srv.Close()
+		if !errors.Is(err, tt.want) || !errors.Is(rerr, tt.want) {
+			t.Errorf("%s: Call() = %v, request() = %v, want = %v", tt.name, err, rerr, tt.want)
+		}
+		if want := map[bool]int{true: 1, false: 0}[tt.want == nil]; calls != want {
+			t.Errorf("%s: the rcd got %d calls, want = %d", tt.name, calls, want)
+		}
+	}
+}
+
 func TestClientKeepsIdleConnections(t *testing.T) {
 	for _, u := range []string{"https://rclone.example:5572", "unix:///tmp/rc.sock"} {
 		c, err := NewClient(Endpoint{URL: u}, nil)

@@ -36,8 +36,8 @@ type rcloneRuntime struct {
 
 // startRclone starts the rcd cfg asks for, or reaches the one at
 // cfg.RcloneURL. Without rclone the server serves no remotes, which nil
-// tells; an rcd that does not start is logged and leaves the server
-// without them too.
+// tells; an rcd that does not start, or runs another release than
+// rclone.Version, is logged and leaves the server without them too.
 // class gives the storage class of library paths, which decides whether
 // the files of a folder are cached.
 func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository, class func(context.Context, string) core.StorageClass) *rcloneRuntime {
@@ -53,11 +53,18 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
 			return nil
 		}
+		// An rcd that does not answer yet is checked when it first does.
+		rt.Client.Require(rclone.Version)
 		cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		if err := rt.Client.Noop(cctx); err != nil {
+		err = rt.Client.CheckVersion(cctx)
+		cancel()
+		if errors.Is(err, rclone.ErrVersion) {
+			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
+			return nil
+		}
+		if err != nil {
 			log.WarnContext(ctx, "rclone does not answer yet", "url", cfg.RcloneURL, "err", err)
 		}
-		cancel()
 	case cfg.Rclone != "":
 		bin, err := exec.LookPath(cfg.Rclone)
 		if err != nil {
