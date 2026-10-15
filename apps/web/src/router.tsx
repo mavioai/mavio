@@ -9,7 +9,7 @@ import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
 import { SearchScreen } from "./screens/search.tsx";
 import { SettingsScreen } from "./screens/settings.tsx";
-import { MavioDevCallbackScreen, SignInScreen } from "./screens/sign-in.tsx";
+import { MavioDevCallbackScreen, type SignInSearch, SignInScreen, type Step, steps } from "./screens/sign-in.tsx";
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -19,9 +19,12 @@ const home = createRoute({ getParentRoute: () => root, path: "/", component: Hom
 const signIn = createRoute({
   getParentRoute: () => root,
   path: "/sign-in",
-  validateSearch: (s: Record<string, unknown>): { server?: string; add?: boolean } => ({
+  validateSearch: (s: Record<string, unknown>): SignInSearch => ({
+    step: typeof s.step === "string" && (steps as readonly string[]).includes(s.step) ? (s.step as Step) : undefined,
     server: typeof s.server === "string" ? s.server : undefined,
     add: s.add === true || s.add === "true" ? true : undefined,
+    to: typeof s.to === "string" ? s.to : undefined,
+    d: typeof s.d === "number" && s.d > 0 ? s.d : undefined,
   }),
   component: SignInScreen,
 });

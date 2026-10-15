@@ -521,7 +521,11 @@ function ServersSection() {
             </div>
           </Row>
         ))}
-        <Link to="/sign-in" search={{ add: true }} className="flex min-h-13 items-center gap-3 px-4 type-body text-accent-text hover:bg-surface-raised">
+        <Link
+          to="/sign-in"
+          search={account.shown ? { to: account.shown.key } : { add: true }}
+          className="flex min-h-13 items-center gap-3 px-4 type-body text-accent-text hover:bg-surface-raised"
+        >
           <Icon name="add" size={20} />
           {t("auth.addServer")}
         </Link>

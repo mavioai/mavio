@@ -217,6 +217,10 @@
     <string name="auth_waiting">等待授权…</string>
     <string name="auth_passkey">通行密钥</string>
     <string name="auth_no_mavio_server">这台服务器有自己的用户，请连接到服务器登录。</string>
+    <string name="auth_tv_hint">方向键移动焦点 · 确认键选择 · 返回键退回</string>
+    <string name="auth_add_to_message">这台服务器将加入 %s 的服务器。</string>
+    <string name="auth_new_server_setup">新服务器</string>
+    <string name="auth_mavio_account_of">Mavio 账户 · %s</string>
     <string name="search_placeholder">搜索电影、剧集等</string>
     <string name="search_no_results">没有结果</string>
     <string name="menu_manage_account">在 mavio.dev 管理账户</string>
@@ -251,7 +255,7 @@
     <string name="settings_subtitle_mode_smart">智能</string>
     <string name="settings_sign_ins_message">这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。</string>
     <string name="settings_add_sign_in">添加登录</string>
-    <string name="settings_servers_mavio_message">你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。</string>
+    <string name="settings_servers_mavio_message">你的 Mavio 账户能访问的服务器，以及你添加给它的服务器。顺序决定首页上各服务器内容的排列。</string>
     <string name="settings_servers_message">这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。</string>
     <string name="settings_copy_address">复制地址</string>
     <string name="settings_devices">设备</string>

@@ -426,6 +426,14 @@
     <string name="auth_passkey">Passkey</string>
     <!-- Shown under Sign In with Mavio when no server here signs in Mavio accounts. -->
     <string name="auth_no_mavio_server">This server keeps its own users: connect to it to sign in.</string>
+    <!-- Hint at the bottom of the sign-in screen on a television. -->
+    <string name="auth_tv_hint">Arrow keys move focus · OK selects · Back goes back</string>
+    <!-- Line under the title of adding a server to a kept sign-in; name is the account or user. -->
+    <string name="auth_add_to_message">The server joins the servers of %s.</string>
+    <!-- Eyebrow above the steps of setting up a new server. -->
+    <string name="auth_new_server_setup">New Server</string>
+    <!-- Line under the account last signed in with; server is the server it signed in to. -->
+    <string name="auth_mavio_account_of">Mavio account · %s</string>
     <!-- Placeholder of the search field. -->
     <string name="search_placeholder">Search movies, shows and more</string>
     <!-- Shown when a search finds nothing on any server. -->
@@ -494,7 +502,7 @@
     <!-- Button that signs in with another account or to another server. -->
     <string name="settings_add_sign_in">Add a Sign-In</string>
     <!-- Explanation under the Servers title in mavio.dev mode. -->
-    <string name="settings_servers_mavio_message">The servers your Mavio account reaches. Their order arranges Home.</string>
+    <string name="settings_servers_mavio_message">The servers your Mavio account reaches, and those you added to it. Their order arranges Home.</string>
     <!-- Explanation under the Servers title. -->
     <string name="settings_servers_message">The servers this device signed in to. Their order arranges Home.</string>
     <!-- Button that copies a server's address. -->

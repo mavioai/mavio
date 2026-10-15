@@ -3781,6 +3781,78 @@
         }
       }
     },
+    "auth.tvHint": {
+      "comment": "Hint at the bottom of the sign-in screen on a television.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrow keys move focus · OK selects · Back goes back"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "方向键移动焦点 · 确认键选择 · 返回键退回"
+          }
+        }
+      }
+    },
+    "auth.addToMessage": {
+      "comment": "Line under the title of adding a server to a kept sign-in; name is the account or user.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server joins the servers of %@."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这台服务器将加入 %@ 的服务器。"
+          }
+        }
+      }
+    },
+    "auth.newServerSetup": {
+      "comment": "Eyebrow above the steps of setting up a new server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新服务器"
+          }
+        }
+      }
+    },
+    "auth.mavioAccountOf": {
+      "comment": "Line under the account last signed in with; server is the server it signed in to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mavio account · %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mavio 账户 · %@"
+          }
+        }
+      }
+    },
     "search.placeholder": {
       "comment": "Placeholder of the search field.",
       "extractionState": "manual",
@@ -4382,13 +4454,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The servers your Mavio account reaches. Their order arranges Home."
+            "value": "The servers your Mavio account reaches, and those you added to it. Their order arranges Home."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。"
+            "value": "你的 Mavio 账户能访问的服务器，以及你添加给它的服务器。顺序决定首页上各服务器内容的排列。"
           }
         }
       }

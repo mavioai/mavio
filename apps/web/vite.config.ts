@@ -2,6 +2,10 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+// During development the UI calls the server at MAVIO_SERVER, else the one
+// running on its default port.
+const server = process.env.MAVIO_SERVER ?? "http://localhost:8686";
+
 // The server embeds the build and serves it at / (docs/clients.md §4.1).
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -12,11 +16,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 1024,
   },
   server: {
-    // During development the UI calls the server running on its default port.
-    proxy: {
-      "/mavio.": "http://localhost:8686",
-      "/images/": "http://localhost:8686",
-      "/media/": "http://localhost:8686",
-    },
+    proxy: { "/mavio.": server, "/images/": server, "/media/": server },
   },
 });

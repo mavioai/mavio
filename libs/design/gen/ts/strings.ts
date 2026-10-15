@@ -205,6 +205,10 @@ export type MessageKey =
   | 'auth.waiting'
   | 'auth.passkey'
   | 'auth.noMavioServer'
+  | 'auth.tvHint'
+  | 'auth.addToMessage'
+  | 'auth.newServerSetup'
+  | 'auth.mavioAccountOf'
   | 'search.placeholder'
   | 'search.noResults'
   | 'menu.manageAccount'
@@ -445,6 +449,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.waiting": "Waiting for authorization…",
     "auth.passkey": "Passkey",
     "auth.noMavioServer": "This server keeps its own users: connect to it to sign in.",
+    "auth.tvHint": "Arrow keys move focus · OK selects · Back goes back",
+    "auth.addToMessage": "The server joins the servers of {name}.",
+    "auth.newServerSetup": "New Server",
+    "auth.mavioAccountOf": "Mavio account · {server}",
     "search.placeholder": "Search movies, shows and more",
     "search.noResults": "No results",
     "menu.manageAccount": "Manage Account at mavio.dev",
@@ -477,7 +485,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.subtitleModeSmart": "Smart",
     "settings.signInsMessage": "The sign-ins kept on this device. One shows at a time; switching between them needs no password.",
     "settings.addSignIn": "Add a Sign-In",
-    "settings.serversMavioMessage": "The servers your Mavio account reaches. Their order arranges Home.",
+    "settings.serversMavioMessage": "The servers your Mavio account reaches, and those you added to it. Their order arranges Home.",
     "settings.serversMessage": "The servers this device signed in to. Their order arranges Home.",
     "settings.copyAddress": "Copy Address",
     "settings.devices": "Devices",
@@ -683,6 +691,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.waiting": "等待授权…",
     "auth.passkey": "通行密钥",
     "auth.noMavioServer": "这台服务器有自己的用户，请连接到服务器登录。",
+    "auth.tvHint": "方向键移动焦点 · 确认键选择 · 返回键退回",
+    "auth.addToMessage": "这台服务器将加入 {name} 的服务器。",
+    "auth.newServerSetup": "新服务器",
+    "auth.mavioAccountOf": "Mavio 账户 · {server}",
     "search.placeholder": "搜索电影、剧集等",
     "search.noResults": "没有结果",
     "menu.manageAccount": "在 mavio.dev 管理账户",
@@ -715,7 +727,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.subtitleModeSmart": "智能",
     "settings.signInsMessage": "这台设备上保留的登录。一次只显示一个，切换时不用重新输入密码。",
     "settings.addSignIn": "添加登录",
-    "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。",
+    "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器，以及你添加给它的服务器。顺序决定首页上各服务器内容的排列。",
     "settings.serversMessage": "这台设备登录过的服务器。顺序决定首页上各服务器内容的排列。",
     "settings.copyAddress": "复制地址",
     "settings.devices": "设备",

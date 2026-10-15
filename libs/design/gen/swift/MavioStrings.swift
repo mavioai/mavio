@@ -689,6 +689,22 @@ public enum MavioStrings {
     /// Shown under Sign In with Mavio when no server here signs in Mavio accounts.
     public static var authNoMavioServer: String { NSLocalizedString("auth.noMavioServer", bundle: .module, comment: "") }
 
+    /// Hint at the bottom of the sign-in screen on a television.
+    public static var authTvHint: String { NSLocalizedString("auth.tvHint", bundle: .module, comment: "") }
+
+    /// Line under the title of adding a server to a kept sign-in; name is the account or user.
+    public static func authAddToMessage(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.addToMessage", bundle: .module, comment: ""), name)
+    }
+
+    /// Eyebrow above the steps of setting up a new server.
+    public static var authNewServerSetup: String { NSLocalizedString("auth.newServerSetup", bundle: .module, comment: "") }
+
+    /// Line under the account last signed in with; server is the server it signed in to.
+    public static func authMavioAccountOf(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.mavioAccountOf", bundle: .module, comment: ""), server)
+    }
+
     /// Placeholder of the search field.
     public static var searchPlaceholder: String { NSLocalizedString("search.placeholder", bundle: .module, comment: "") }
 

@@ -197,3 +197,53 @@ body {
     color: #000;
   }
 }
+
+/* The sign-in screen (docs/clients.md §4.1): a wall of posters, tilted and
+   blurred under a veil, with the card's glass above it, in each theme. */
+:root {
+  --signin-card: rgb(28 28 30 / 0.82);
+  --signin-group: rgb(118 118 128 / 0.14);
+  --signin-field: rgb(118 118 128 / 0.12);
+  --signin-separator: rgb(84 84 88 / 0.5);
+  --signin-wall: 0.7;
+  --signin-veil: radial-gradient(ellipse at center, rgb(0 0 0 / 0.4), rgb(0 0 0 / 0.82));
+  --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.5);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --signin-card: rgb(255 255 255 / 0.84);
+    --signin-group: rgb(118 118 128 / 0.08);
+    --signin-field: rgb(255 255 255 / 0.9);
+    --signin-separator: rgb(60 60 67 / 0.14);
+    --signin-wall: 0.6;
+    --signin-veil: radial-gradient(ellipse at center, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.8));
+    --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.14);
+  }
+}
+:root[data-theme="light"] {
+  --signin-card: rgb(255 255 255 / 0.84);
+  --signin-group: rgb(118 118 128 / 0.08);
+  --signin-field: rgb(255 255 255 / 0.9);
+  --signin-separator: rgb(60 60 67 / 0.14);
+  --signin-wall: 0.6;
+  --signin-veil: radial-gradient(ellipse at center, rgb(255 255 255 / 0.4), rgb(255 255 255 / 0.8));
+  --signin-shadow: 0 30px 80px rgb(0 0 0 / 0.14);
+}
+
+/* The wall's columns drift slowly, the odd ones against the even. */
+@keyframes drift {
+  to {
+    transform: translateY(-12%);
+  }
+}
+.poster-column {
+  animation: drift 90s ease-in-out infinite alternate;
+  &:nth-child(even) {
+    animation-direction: alternate-reverse;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .poster-column {
+    animation: none;
+  }
+}
