@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { shortcutLabel, useShortcutsShown } from "../keys.ts";
 import { Wordmark } from "../logo.tsx";
 import { libraryIcon } from "../ui.tsx";
 import { UserButton } from "./user-menu.tsx";
@@ -15,6 +16,7 @@ import { UserButton } from "./user-menu.tsx";
 export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () => void }) {
   const libraries = useLibraries();
   const several = libraries.length > 1;
+  const shortcuts = useShortcutsShown();
   return (
     <nav
       aria-label={t("nav.navigation")}
@@ -42,7 +44,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
           >
             <Icon name="search" size={16} />
             <span className="flex-1">{t("nav.search")}</span>
-            <kbd className="font-sans type-caption">⌘K</kbd>
+            {shortcuts && <kbd className="font-sans type-caption">{shortcutLabel("search")}</kbd>}
           </Link>
         )}
         <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact />

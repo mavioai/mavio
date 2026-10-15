@@ -79,10 +79,12 @@ export function useSpatialNavigation() {
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
       // The caret of a field moves sideways.
       if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
-      const all = [...document.querySelectorAll<HTMLElement>(focusable)].filter(visible);
+      // An open menu or dialog keeps focus within it.
+      const scope = document.querySelector<HTMLElement>("[aria-modal], [role=menu]");
+      const all = [...(scope ?? document).querySelectorAll<HTMLElement>(focusable)].filter(visible);
       e.preventDefault();
       if (!active || active === document.body || !all.includes(active)) {
-        (document.querySelector<HTMLElement>("main " + focusable.split(",")[0]) ?? all[0])?.focus();
+        (scope ? all[0] : (document.querySelector<HTMLElement>("main " + focusable.split(",")[0]) ?? all[0]))?.focus();
         return;
       }
       const next = nearest(

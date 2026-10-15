@@ -8,7 +8,9 @@ import { Link, Navigate, Outlet, useLocation, useNavigate } from "@tanstack/reac
 import { useEffect, useState } from "react";
 
 import { t } from "../i18n.ts";
+import { toggleFullScreen } from "../fullscreen.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { shortcutOf } from "../keys.ts";
 import { Wordmark } from "../logo.tsx";
 import { setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { Avatar } from "../ui.tsx";
@@ -23,7 +25,7 @@ export function Shell() {
   const prefs = usePrefs();
   const width = useWidthClass();
   useEvents();
-  useShortcuts();
+  useShortcuts(prefs.tv);
 
   // A Mavio account follows the servers it reaches, as it opens.
   const account = signIn?.account?.id;
@@ -40,20 +42,26 @@ export function Shell() {
   return <DesktopShell overlay={width === "medium"} />;
 }
 
-/** ⌘K searches and ⌘, opens the settings, as on the Mac. */
-function useShortcuts() {
+/**
+ * The shortcuts of keys.ts: search, the settings, TV mode, and full screen
+ * with the browser's own keys, which the page takes so that its menus
+ * know it is in full screen.
+ */
+function useShortcuts(tv: boolean) {
   const navigate = useNavigate();
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.altKey || e.shiftKey) return;
-      if (e.key === "k") void navigate({ to: "/search" });
-      else if (e.key === ",") void navigate({ to: "/settings" });
+      const s = shortcutOf(e);
+      if (s === "search") void navigate({ to: "/search" });
+      else if (s === "settings") void navigate({ to: "/settings" });
+      else if (s === "tvMode") setPrefs({ tv: !tv });
+      else if (s === "fullScreen") toggleFullScreen();
       else return;
       e.preventDefault();
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [navigate]);
+  }, [navigate, tv]);
 }
 
 /**

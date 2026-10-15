@@ -11,6 +11,7 @@ import { createPortal } from "react-dom";
 import { toggleFullScreen, useFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { shortcutLabel, useShortcutsShown } from "../keys.ts";
 import { type Appearance, setPrefs, usePrefs } from "../prefs.ts";
 import { Avatar, useDismiss } from "../ui.tsx";
 
@@ -100,6 +101,8 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   const shown = account.shown!;
   const { tv } = usePrefs();
   const full = useFullScreen();
+  // Shortcuts are shown only where a keyboard can press them.
+  const keys = useShortcutsShown();
   const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
@@ -147,7 +150,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         </>
       )}
       <Divider />
-      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut={tv ? undefined : "⌘,"}>
+      <MenuLink icon="settings" to="/settings" onClose={onClose} shortcut={keys ? shortcutLabel("settings") : undefined}>
         {t("nav.settings")}
       </MenuLink>
       <button
@@ -161,12 +164,13 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
       >
         <Icon name={tv ? "sidebar" : "television"} size={18} className="text-text-secondary" />
         <span className="flex-1">{tv ? t("menu.standardMode") : t("menu.tvMode")}</span>
+        {keys && <Shortcut>{shortcutLabel("tvMode")}</Shortcut>}
       </button>
       {tv && (
         <button type="button" role="menuitem" onClick={() => (onClose(), toggleFullScreen())} className={itemClass}>
           <Icon name={full ? "exitFullScreen" : "fullScreen"} size={18} className="text-text-secondary" />
           <span className="flex-1">{full ? t("menu.exitFullScreen") : t("menu.fullScreen")}</span>
-          <span className="type-footnote text-text-tertiary">F</span>
+          {keys && <Shortcut>{shortcutLabel("fullScreen")}</Shortcut>}
         </button>
       )}
       {shown.kind === "mavioDev" ? (
@@ -241,6 +245,11 @@ function ThemeSwitch() {
   );
 }
 
+/** The keys of a menu item's shortcut, at its end. */
+function Shortcut({ children }: { children: string }) {
+  return <kbd className="font-sans type-footnote text-text-tertiary">{children}</kbd>;
+}
+
 const itemClass = "flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-left type-body hover:bg-fill";
 
 function Divider() {
@@ -266,7 +275,7 @@ function MenuLink({
     <Link role="menuitem" to={to} params={section ? { section } : undefined} onClick={onClose} className={itemClass}>
       <Icon name={icon} size={18} className="text-text-secondary" />
       <span className="flex-1">{children}</span>
-      {shortcut && <span className="type-footnote text-text-tertiary">{shortcut}</span>}
+      {shortcut && <Shortcut>{shortcut}</Shortcut>}
     </Link>
   );
 }

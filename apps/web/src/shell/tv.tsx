@@ -2,9 +2,8 @@
 // Android TV: tabs in a pill at the top, the user's avatar beside them,
 // and focus moved with the arrow keys.
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
-import { toggleFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { UserButton } from "./user-menu.tsx";
@@ -17,7 +16,6 @@ const tabs: { to: "/" | "/libraries" | "/search"; label: () => string }[] = [
 
 export function TvShell() {
   useSpatialNavigation();
-  useFullScreenKey();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   // On a tab's own page, as on tvOS, focusing another tab opens it; deeper
@@ -35,7 +33,7 @@ export function TvShell() {
           className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
         />
         <div className="relative flex w-full items-center justify-center">
-          <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface/60 p-1.5 backdrop-blur-xl">
+          <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
             {tabs.map((d) => (
               <Link
                 key={d.to}
@@ -69,19 +67,4 @@ function subscribeScroll(l: () => void) {
 /** Whether the page has scrolled from its top. */
 function useScrolled(): boolean {
   return useSyncExternalStore(subscribeScroll, () => window.scrollY > 0);
-}
-
-/** F toggles full screen, as in the player, unless typing. */
-function useFullScreenKey() {
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== "f" || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
-      const el = e.target as HTMLElement;
-      if (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)) return;
-      e.preventDefault();
-      toggleFullScreen();
-    };
-    document.addEventListener("keydown", key);
-    return () => document.removeEventListener("keydown", key);
-  }, []);
 }
