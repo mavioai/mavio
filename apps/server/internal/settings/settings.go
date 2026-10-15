@@ -5,9 +5,9 @@ package settings
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"slices"
 	"sync"
 
 	"github.com/mavioai/mavio/libs/core"
@@ -51,30 +51,40 @@ func (m *Manager) Register(ctx context.Context, a Applier) error {
 	return a(ctx, m.current)
 }
 
-// Update applies new settings and stores them. When an applier rejects
-// them, the appliers that took them get the current settings back and the
-// error is returned. The disabled plugins are kept as they are: they
-// change only through Change, which the plugins apply, so that settings
-// read before a plugin was enabled or disabled do not undo it.
-func (m *Manager) Update(ctx context.Context, s core.ServerSettings) (core.ServerSettings, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	s.DisabledPlugins = m.current.DisabledPlugins
-	return m.update(ctx, s)
-}
-
 // Change applies and stores the current settings as change alters them,
-// with no other change in between, as Update does.
-func (m *Manager) Change(ctx context.Context, change func(s *core.ServerSettings)) (core.ServerSettings, error) {
+// with no other change in between, so that each caller changes only what
+// it owns: the server settings, the subtitle settings, the disabled
+// plugins. When change fails or an applier rejects the settings, the
+// appliers that took them get the current settings back and the error is
+// returned.
+func (m *Manager) Change(ctx context.Context, change func(s *core.ServerSettings) error) (core.ServerSettings, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	s := m.current
-	s.DisabledPlugins = slices.Clone(s.DisabledPlugins)
-	change(&s)
+	s, err := clone(m.current)
+	if err != nil {
+		return core.ServerSettings{}, err
+	}
+	if err := change(&s); err != nil {
+		return core.ServerSettings{}, err
+	}
 	return m.update(ctx, s)
 }
 
-// update is Update with m.mu held.
+// clone copies s deeply, so that a change cannot alter the current
+// settings through the slices they share.
+func clone(s core.ServerSettings) (core.ServerSettings, error) {
+	data, err := json.Marshal(s)
+	if err != nil {
+		return core.ServerSettings{}, fmt.Errorf("copy settings: %w", err)
+	}
+	var out core.ServerSettings
+	if err := json.Unmarshal(data, &out); err != nil {
+		return core.ServerSettings{}, fmt.Errorf("copy settings: %w", err)
+	}
+	return out, nil
+}
+
+// update stores s, with m.mu held.
 func (m *Manager) update(ctx context.Context, s core.ServerSettings) (core.ServerSettings, error) {
 	if err := s.Validate(); err != nil {
 		return core.ServerSettings{}, err

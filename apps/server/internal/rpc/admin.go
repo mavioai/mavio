@@ -209,7 +209,8 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		Metadata:        meta,
 		// The subtitle settings are changed through SubtitleService, and
 		// the disabled plugins through SetPluginEnabled.
-		Subtitles: current.Subtitles,
+		Subtitles:       current.Subtitles,
+		DisabledPlugins: current.DisabledPlugins,
 	}, nil
 }
 
@@ -415,12 +416,11 @@ func (s *SystemService) UpdateServerSettings(ctx context.Context, req *systemv1.
 	if s.Settings == nil {
 		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("settings cannot be changed"))
 	}
-	current := s.currentSettings()
-	next, err := settingsFromProto(req.GetSettings(), &current)
-	if err != nil {
-		return nil, err
-	}
-	set, err := s.Settings.Update(ctx, next)
+	set, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
+		next, err := settingsFromProto(req.GetSettings(), cur)
+		*cur = next
+		return err
+	})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

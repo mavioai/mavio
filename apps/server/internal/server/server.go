@@ -223,7 +223,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Catalogs: func() []string { return set.Get().PluginCatalogs },
 		Disabled: set.Get().DisabledPlugins,
 		SaveDisabled: func(ctx context.Context, ids []string) error {
-			_, err := set.Change(ctx, func(s *core.ServerSettings) { s.DisabledPlugins = ids })
+			_, err := set.Change(ctx, func(s *core.ServerSettings) error {
+				s.DisabledPlugins = ids
+				return nil
+			})
 			return err
 		},
 	})
@@ -342,9 +345,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Activity: activityLog, Events: hub.Notify, Logger: log,
 		MetadataSettings: func() core.MetadataSettings { return set.Get().Metadata },
 		DropBlocklistedTags: func(ctx context.Context, tags []string) error {
-			s := set.Get()
-			s.Requests.BlocklistedTags = slices.DeleteFunc(slices.Clone(s.Requests.BlocklistedTags), func(t string) bool { return slices.Contains(tags, t) })
-			_, err := set.Update(ctx, s)
+			_, err := set.Change(ctx, func(s *core.ServerSettings) error {
+				s.Requests.BlocklistedTags = slices.DeleteFunc(s.Requests.BlocklistedTags, func(t string) bool { return slices.Contains(tags, t) })
+				return nil
+			})
 			return err
 		},
 	}

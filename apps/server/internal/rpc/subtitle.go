@@ -373,9 +373,10 @@ func (s *SubtitleService) UpdateSubtitleSettings(ctx context.Context, req *acqui
 			return nil, invalid(err)
 		}
 	}
-	all := s.Settings.Get()
-	all.Subtitles = sub
-	all, err = s.Settings.Update(ctx, all)
+	all, err := s.Settings.Change(ctx, func(cur *core.ServerSettings) error {
+		cur.Subtitles = sub
+		return nil
+	})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/mavioai/mavio/libs/store"
 )
 
-func TestUpdate(t *testing.T) {
+func TestChangeApplied(t *testing.T) {
 	ctx := t.Context()
 	db, err := store.Open(ctx, "sqlite:"+filepath.Join(t.TempDir(), "db"))
 	if err != nil {
@@ -37,14 +37,17 @@ func TestUpdate(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	s := m.Get()
-	s.Transcoding.EncoderPreset = "fast"
-	if _, err := m.Update(ctx, s); err != nil {
+	preset := func(p string) func(*core.ServerSettings) error {
+		return func(s *core.ServerSettings) error {
+			s.Transcoding.EncoderPreset = p
+			return nil
+		}
+	}
+	if _, err := m.Change(ctx, preset("fast")); err != nil {
 		t.Fatal(err)
 	}
-	s.Transcoding.EncoderPreset = "veryslow"
-	if _, err := m.Update(ctx, s); !errors.Is(err, reject) {
-		t.Errorf("Update rejected = %v, want %v", err, reject)
+	if _, err := m.Change(ctx, preset("veryslow")); !errors.Is(err, reject) {
+		t.Errorf("Change rejected = %v, want %v", err, reject)
 	}
 	// The first applier got the fast preset back.
 	if want := []string{"", "fast", "veryslow", "fast"}; len(applied) != 4 || applied[3] != "fast" {
@@ -57,8 +60,7 @@ func TestUpdate(t *testing.T) {
 	if stored.Transcoding.EncoderPreset != "fast" {
 		t.Errorf("stored preset = %q", stored.Transcoding.EncoderPreset)
 	}
-	s.Transcoding.EncoderPreset = "unknown"
-	if _, err := m.Update(ctx, s); !errors.Is(err, core.ErrInvalid) {
+	if _, err := m.Change(ctx, preset("unknown")); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("invalid settings: %v", err)
 	}
 }
@@ -74,7 +76,10 @@ func TestChange(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := m.Change(ctx, func(s *core.ServerSettings) { s.DisabledPlugins = []string{"org.mavio.smoke"} }); err != nil {
+	if _, err := m.Change(ctx, func(s *core.ServerSettings) error {
+		s.DisabledPlugins = []string{"org.mavio.smoke"}
+		return nil
+	}); err != nil {
 		t.Fatal(err)
 	}
 	if got := m.Get().DisabledPlugins; len(got) != 1 || got[0] != "org.mavio.smoke" {
@@ -84,13 +89,16 @@ func TestChange(t *testing.T) {
 	if len(stored.DisabledPlugins) != 1 {
 		t.Errorf("stored disabled plugins = %q", stored.DisabledPlugins)
 	}
-	// Settings read before the change do not undo it.
-	stale := m.Get()
-	stale.DisabledPlugins = nil
-	if got, err := m.Update(ctx, stale); err != nil || len(got.DisabledPlugins) != 1 {
-		t.Errorf("Update = %q, %v; want = the disabled plugins kept", got.DisabledPlugins, err)
+	// A change failing, or altering what it was given in place and then
+	// failing, leaves the current settings as they were.
+	fail := errors.New("refused")
+	if _, err := m.Change(ctx, func(s *core.ServerSettings) error {
+		s.DisabledPlugins[0] = "org.mavio.dlna"
+		return fail
+	}); !errors.Is(err, fail) {
+		t.Errorf("failing change = %v, want = %v", err, fail)
 	}
-	if _, err := m.Change(ctx, func(s *core.ServerSettings) { s.Transcoding.EncoderPreset = "unknown" }); !errors.Is(err, core.ErrInvalid) {
-		t.Errorf("invalid change: %v", err)
+	if got := m.Get().DisabledPlugins; got[0] != "org.mavio.smoke" {
+		t.Errorf("disabled plugins after a failing change = %q", got)
 	}
 }
