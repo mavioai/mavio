@@ -261,7 +261,7 @@ erDiagram
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
 | `StorageJobRepository` | 按类型与键 `Get` 存储任务（未保存时返回 `ErrNotFound`），`List` 某一类型的任务（最早在前），`Put`（替换类型与键相同的任务，保留其创建时间），`Delete` |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
-| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
+| `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入，只写与已保存内容不同的分组；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
@@ -337,7 +337,7 @@ erDiagram
 ## 12. 管理
 
 ### 12.1 服务端设置
-`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，读取时以默认值（`DefaultServerSettings`）补全后来新增的设置。
+`ServerSettings` 是管理员在服务端运行时修改的设置；命令行参数只提供其中一些的初始值。只保存一组设置，其各分组——`Transcoding`、`Network`、`PluginCatalogs`、`PasswordResetPlugin`、`DisabledPlugins`、`SessionIdleDays`、`Acquisition`、`Requests`、`Metadata` 与 `Subtitles`——分开保存，读取时以默认值（`DefaultServerSettings`）补全未保存的分组与后来新增的设置。各分组由其所属方修改：字幕设置由字幕服务修改，停用的插件由启用与停用插件修改，其余由服务端设置修改；修改作用于当前设置，而不是用先前读取的副本替换它。
 
 * `Transcoding`：`HardwareAcceleration`（`auto` 使用服务端 ffmpeg 与硬件所支持的加速，`none`，或 `videotoolbox`）、是否允许硬件编码器、软件编码器的 `EncoderPreset`（为空时按片源选择）、`H264CRF` 与 `H265CRF`（0–51）、`Threads`、色调映射（`TonemapAlgorithm`、`TonemapRange`、`TonemapDesat`、`TonemapPeak`）、去隔行（`yadif` 或 `bwdif`，可选倍帧率）、立体声 `DownmixBoost`（0.5–3）、`CropBlackBorders`，以及 `TranscodeDir`（绝对路径；为空时沿用服务端启动时的目录）。
 * `Network`：向客户端显示的 `ServerName`（为空时为主机名）、反向代理下服务端所在的 `BaseURL`（规整的路径，如 `/mavio`）、`HTTPSPort`（默认 8920）及其 PEM 格式的 `CertificatePath` 与 `KeyPath`（两者都设置或都不设置；都不设置时，mavio.dev 模式的服务端使用其 `mavio.site` 证书）、`LocalDiscovery`，以及 `Relay`：客户端能否经 mavio.dev 的中转访问 mavio.dev 模式的服务端（默认开启）。

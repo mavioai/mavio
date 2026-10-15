@@ -15,12 +15,32 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/setting"
 )
 
-// serverSettingsKey keys the server settings among the settings rows and
-// accountsKey the account settings.
-const (
-	serverSettingsKey = "server"
-	accountsKey       = "accounts"
-)
+// accountsKey keys the account settings among the settings rows; the
+// server settings take a row per group, keyed as settingsGroups names them.
+const accountsKey = "accounts"
+
+// settingsGroup is a group of the server settings and the key of its row.
+type settingsGroup struct {
+	key   string
+	value any
+}
+
+// settingsGroups returns the groups of s, each stored in a row of its own
+// as JSON, so that writing one leaves the others as they are.
+func settingsGroups(s *core.ServerSettings) []settingsGroup {
+	return []settingsGroup{
+		{"transcoding", &s.Transcoding},
+		{"network", &s.Network},
+		{"plugin_catalogs", &s.PluginCatalogs},
+		{"password_reset_plugin", &s.PasswordResetPlugin},
+		{"disabled_plugins", &s.DisabledPlugins},
+		{"session_idle_days", &s.SessionIdleDays},
+		{"acquisition", &s.Acquisition},
+		{"requests", &s.Requests},
+		{"metadata", &s.Metadata},
+		{"subtitles", &s.Subtitles},
+	}
+}
 
 type settings struct{ s *Store }
 
@@ -28,41 +48,87 @@ type settings struct{ s *Store }
 func (s *Store) Settings() core.SettingsRepository { return settings{s} }
 
 func (r settings) Get(ctx context.Context) (core.ServerSettings, error) {
-	row, err := r.s.read.Setting.Query().Where(setting.Key(serverSettingsKey)).Only(ctx)
-	if ent.IsNotFound(err) {
-		return core.DefaultServerSettings(), nil
-	}
-	if err != nil {
-		return core.ServerSettings{}, mapErr(err, "get settings")
-	}
-	// Settings added later keep their defaults.
+	// Groups not stored, and settings added to a group later, keep their
+	// defaults.
 	out := core.DefaultServerSettings()
-	if err := json.Unmarshal([]byte(row.Value), &out); err != nil {
-		return core.ServerSettings{}, fmt.Errorf("get settings: %w", err)
+	rows, err := r.rows(ctx, r.s.read)
+	if err != nil {
+		return core.ServerSettings{}, err
 	}
-	out.UpdatedAt = row.UpdatedAt.UTC()
+	for _, g := range settingsGroups(&out) {
+		row, ok := rows[g.key]
+		if !ok {
+			continue
+		}
+		if err := json.Unmarshal([]byte(row.Value), g.value); err != nil {
+			return core.ServerSettings{}, fmt.Errorf("get settings %s: %w", g.key, err)
+		}
+		if row.UpdatedAt.After(out.UpdatedAt) {
+			out.UpdatedAt = row.UpdatedAt.UTC()
+		}
+	}
 	return out, nil
 }
 
+// Put stores the groups of s that differ from those stored.
 func (r settings) Put(ctx context.Context, s *core.ServerSettings) error {
 	if err := s.Validate(); err != nil {
 		return err
 	}
-	s.UpdatedAt = time.Now().UTC()
-	v := *s
-	v.UpdatedAt = time.Time{}
-	data, err := json.Marshal(v)
+	now := time.Now().UTC()
+	wrote := false
+	err := r.s.InTx(ctx, func(tx core.Store) error {
+		w := tx.(*Store).write
+		rows, err := r.rows(ctx, w)
+		if err != nil {
+			return err
+		}
+		for _, g := range settingsGroups(s) {
+			data, err := json.Marshal(g.value)
+			if err != nil {
+				return fmt.Errorf("put settings %s: %w", g.key, err)
+			}
+			if row, ok := rows[g.key]; ok && row.Value == string(data) {
+				continue
+			}
+			err = w.Setting.Create().
+				SetKey(g.key).
+				SetValue(string(data)).
+				SetUpdatedAt(now).
+				OnConflictColumns(setting.FieldKey).
+				UpdateNewValues().
+				Exec(ctx)
+			if err != nil {
+				return mapErr(err, "put settings "+g.key)
+			}
+			wrote = true
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
-	err = r.s.write.Setting.Create().
-		SetKey(serverSettingsKey).
-		SetValue(string(data)).
-		SetUpdatedAt(s.UpdatedAt).
-		OnConflictColumns(setting.FieldKey).
-		UpdateNewValues().
-		Exec(ctx)
-	return mapErr(err, "put settings")
+	if wrote {
+		s.UpdatedAt = now
+	}
+	return nil
+}
+
+// rows returns the stored rows of the server settings by key.
+func (r settings) rows(ctx context.Context, c *ent.Client) (map[string]*ent.Setting, error) {
+	var keys []string
+	for _, g := range settingsGroups(&core.ServerSettings{}) {
+		keys = append(keys, g.key)
+	}
+	rows, err := c.Setting.Query().Where(setting.KeyIn(keys...)).All(ctx)
+	if err != nil {
+		return nil, mapErr(err, "get settings")
+	}
+	out := make(map[string]*ent.Setting, len(rows))
+	for _, row := range rows {
+		out[row.Key] = row
+	}
+	return out, nil
 }
 
 func (r settings) Accounts(ctx context.Context) (core.AccountSettings, error) {

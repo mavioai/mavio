@@ -29,6 +29,19 @@ func TestSettings(t *testing.T) {
 			len(got.PluginCatalogs) != 1 || got.UpdatedAt.IsZero() {
 			t.Errorf("Get = %+v, %v", got, err)
 		}
+		// Only groups that differ from those stored are written.
+		same := got
+		if err := s.Settings().Put(ctx, &same); err != nil || !same.UpdatedAt.Equal(got.UpdatedAt) {
+			t.Errorf("Put of the stored settings: UpdatedAt = %v, %v; want = %v", same.UpdatedAt, err, got.UpdatedAt)
+		}
+		set.DisabledPlugins = []string{"org.mavio.dlna"}
+		set.Subtitles.MinimumScore = 70
+		if err := s.Settings().Put(ctx, &set); err != nil {
+			t.Fatal(err)
+		}
+		if got, _ = s.Settings().Get(ctx); len(got.DisabledPlugins) != 1 || got.Subtitles.MinimumScore != 70 || got.Network.BaseURL != "/mavio" {
+			t.Errorf("Get = %q, %d, %q; want = the groups changed and the others kept", got.DisabledPlugins, got.Subtitles.MinimumScore, got.Network.BaseURL)
+		}
 		bad := set
 		bad.Transcoding.HardwareAcceleration = "magic"
 		if err := s.Settings().Put(ctx, &bad); !errors.Is(err, core.ErrInvalid) {

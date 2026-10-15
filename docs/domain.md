@@ -261,7 +261,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
 | `StorageJobRepository` | `Get` a storage job by kind and key (`ErrNotFound` when not stored), `List` those of a kind (oldest first), `Put` (replacing the job of the same kind and key, keeping when it was created), `Delete` |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
-| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`; `Accounts` (zero until stored) and `PutAccounts` the account settings |
+| `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`, writing only the groups that differ from those stored; `Accounts` (zero until stored) and `PutAccounts` the account settings |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
@@ -337,7 +337,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 ## 12. Administration
 
 ### 12.1 Server Settings
-`ServerSettings` are what administrators change while the server runs; command-line flags give only the first values of some. One set is stored, read back with the defaults for settings added later (`DefaultServerSettings`).
+`ServerSettings` are what administrators change while the server runs; command-line flags give only the first values of some. One set is stored, each of its groups — `Transcoding`, `Network`, `PluginCatalogs`, `PasswordResetPlugin`, `DisabledPlugins`, `SessionIdleDays`, `Acquisition`, `Requests`, `Metadata` and `Subtitles` — apart, read back with the defaults for groups not stored and settings added later (`DefaultServerSettings`). Each is changed by what owns it: the subtitle settings by the subtitle service, the disabled plugins by enabling and disabling plugins, the rest by the server settings; a change alters the current settings rather than replacing them with a copy read earlier.
 
 * `Transcoding`: the `HardwareAcceleration` (`auto` uses what the server's ffmpeg and hardware support, `none`, or `videotoolbox`), whether hardware encoders may be used, the software encoders' `EncoderPreset` (empty picks one by the source), `H264CRF` and `H265CRF` (0–51), `Threads`, tone mapping (`TonemapAlgorithm`, `TonemapRange`, `TonemapDesat`, `TonemapPeak`), deinterlacing (`yadif` or `bwdif`, optionally at double rate), the stereo `DownmixBoost` (0.5–3), `CropBlackBorders`, and the `TranscodeDir` (an absolute folder; empty keeps the one the server started with).
 * `Network`: the `ServerName` shown to clients (empty means the host name), the `BaseURL` a reverse proxy serves the server under (a clean path such as `/mavio`), an `HTTPSPort` (8920 by default) with its PEM `CertificatePath` and `KeyPath`, both or neither, without which a server in mavio.dev mode serves its `mavio.site` certificate, `LocalDiscovery`, and `Relay`, whether clients may reach a server in mavio.dev mode through mavio.dev's relay (on by default).
