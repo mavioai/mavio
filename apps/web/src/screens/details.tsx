@@ -510,7 +510,11 @@ function Actions({
   }`;
   const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 px-10" : phone ? "h-12 flex-1 px-5" : "h-11 px-6"
-  } ${phone ? "bg-button text-on-button hover:opacity-90" : "bg-white text-black hover:bg-white/90"}`;
+  } ${
+    // On a television white is focus's, so the first button is glass like
+    // the others until it has focus.
+    phone ? "bg-button text-on-button hover:opacity-90" : tv ? "bg-white/20 text-white backdrop-blur-xl" : "bg-white text-black hover:bg-white/90"
+  }`;
   const label = episode
     ? t(resumable ? "item.resumeEpisode" : "item.playEpisode", { episode })
     : t(resumable ? "item.resume" : "item.play");
