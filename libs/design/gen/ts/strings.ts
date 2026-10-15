@@ -192,6 +192,7 @@ export type MessageKey =
   | 'menu.manageServers'
   | 'menu.serverCount'
   | 'menu.tvMode'
+  | 'menu.standardMode'
   | 'settings.thisDevice'
   | 'settings.accountAndServers'
   | 'settings.appearance'
@@ -417,6 +418,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.manageServers": "Manage Servers",
     "menu.serverCount": "{count, plural, one {# server} other {# servers}}",
     "menu.tvMode": "Switch to TV Mode",
+    "menu.standardMode": "Switch to Standard Mode",
     "settings.thisDevice": "This Device",
     "settings.accountAndServers": "Account and Servers",
     "settings.appearance": "Appearance",
@@ -640,6 +642,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.manageServers": "管理服务器",
     "menu.serverCount": "{count, plural, other {# 台服务器}}",
     "menu.tvMode": "切换到电视模式",
+    "menu.standardMode": "切换到普通模式",
     "settings.thisDevice": "这台设备",
     "settings.accountAndServers": "账户与服务器",
     "settings.appearance": "外观",

@@ -190,6 +190,7 @@
   "menu.manageServers": { "message": "Manage Servers", "description": "User menu item opening the servers' settings." },
   "menu.serverCount": { "message": "{count, plural, one {# server} other {# servers}}", "description": "How many servers a Mavio account reaches, under its name in the user menu." },
   "menu.tvMode": { "message": "Switch to TV Mode", "description": "User menu item switching to the television layout." },
+  "menu.standardMode": { "message": "Switch to Standard Mode", "description": "User menu item in TV mode switching back to the layout chosen by window width." },
   "settings.thisDevice": { "message": "This Device", "description": "Group of the settings that only affect this device." },
   "settings.accountAndServers": { "message": "Account and Servers", "description": "Group of the settings of the account and its servers." },
   "settings.appearance": { "message": "Appearance", "description": "Settings section of the color theme and TV mode." },

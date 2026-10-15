@@ -10,7 +10,7 @@ import { createPortal } from "react-dom";
 
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
-import { setPrefs } from "../prefs.ts";
+import { setPrefs, usePrefs } from "../prefs.ts";
 import { Avatar, useDismiss } from "../ui.tsx";
 
 /** The sign-in as the user menu presents it. */
@@ -97,6 +97,7 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
   const servers = useServersStore();
   const account = useAccount();
   const shown = account.shown!;
+  const { tv } = usePrefs();
   const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
@@ -151,12 +152,12 @@ function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClos
         role="menuitem"
         onClick={() => {
           onClose();
-          setPrefs({ tv: true });
+          setPrefs({ tv: !tv });
         }}
         className={itemClass}
       >
-        <Icon name="television" size={18} className="text-text-secondary" />
-        <span className="flex-1">{t("menu.tvMode")}</span>
+        <Icon name={tv ? "sidebar" : "television"} size={18} className="text-text-secondary" />
+        <span className="flex-1">{tv ? t("menu.standardMode") : t("menu.tvMode")}</span>
       </button>
       {shown.kind === "mavioDev" ? (
         manage && (

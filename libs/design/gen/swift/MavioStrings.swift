@@ -650,6 +650,9 @@ public enum MavioStrings {
     /// User menu item switching to the television layout.
     public static var menuTvMode: String { NSLocalizedString("menu.tvMode", bundle: .module, comment: "") }
 
+    /// User menu item in TV mode switching back to the layout chosen by window width.
+    public static var menuStandardMode: String { NSLocalizedString("menu.standardMode", bundle: .module, comment: "") }
+
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 
