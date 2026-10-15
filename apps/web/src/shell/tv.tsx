@@ -5,6 +5,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
 
 import { t } from "../i18n.ts";
+import { useTvBack } from "./back.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { UserButton } from "./user-menu.tsx";
 
@@ -16,10 +17,12 @@ const tabs: { to: "/" | "/libraries" | "/search"; label: () => string }[] = [
 
 export function TvShell() {
   useSpatialNavigation();
+  useTvBack();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  // On a tab's own page, as on tvOS, focusing another tab opens it; deeper
-  // pages leave the tabs to select, so that moving up does not leave them.
+  // On a tab's own page, as on tvOS, focusing another tab opens it in its
+  // place, so that Back never steps through the tabs; deeper pages leave the
+  // tabs to select, so that moving up does not leave them.
   // Search opens only when selected everywhere, since its page hides the tabs.
   const onTab = tabs.some((d) => d.to === pathname);
   const search = pathname === "/search";
@@ -38,13 +41,13 @@ export function TvShell() {
             className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
           />
           <div className="relative flex w-full items-center justify-center">
-            <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
+            <nav data-tv-tabs aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
               {tabs.map((d) => (
                 <Link
                   key={d.to}
                   to={d.to}
                   activeOptions={{ exact: d.to === "/" }}
-                  onFocus={() => onTab && d.to !== pathname && d.to !== "/search" && void navigate({ to: d.to })}
+                  onFocus={() => onTab && d.to !== pathname && d.to !== "/search" && void navigate({ to: d.to, replace: true })}
                   className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
                 >
                   {d.label()}

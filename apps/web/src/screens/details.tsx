@@ -417,9 +417,12 @@ function Overview({ item, inline = false, lines = 3 }: { item: Item; inline?: bo
 /** The whole overview and tagline, over the screen. */
 function OverviewDialog({ item, onClose }: { item: Item; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Focus returns to More when the dialog goes, as a closed dialog's would.
+  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
   useEffect(() => {
-    ref.current?.showModal();
-  }, []);
+    if (!ref.current?.open) ref.current?.showModal();
+    return () => opener?.focus({ preventScroll: true });
+  }, [opener]);
   // Back closes the dialog rather than leaving the screen.
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key !== "Escape" && e.key !== "Backspace") return;

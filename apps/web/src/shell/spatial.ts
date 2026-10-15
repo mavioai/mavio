@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
 
-const focusable = [
+/** The elements focus can move to. */
+export const focusable = [
   "a[href]",
   "button:not([disabled])",
   "input:not([disabled])",
@@ -64,18 +65,13 @@ export function nearest(from: DOMRect, dir: Direction, candidates: HTMLElement[]
   return best;
 }
 
-/** Moves focus with the arrow keys; Escape and Backspace go back. */
+/** Moves focus with the arrow keys; Back is the shell's (back.ts). */
 export function useSpatialNavigation() {
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
       const typing = active?.matches("input, textarea, select") ?? false;
-      if ((e.key === "Escape" || (e.key === "Backspace" && !typing)) && location.pathname !== "/") {
-        e.preventDefault();
-        history.back();
-        return;
-      }
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
       // The caret of a field moves sideways.
       if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;

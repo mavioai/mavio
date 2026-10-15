@@ -8,7 +8,7 @@
 
 * **Where it applies**: on Apple TV, Android TV and Google TV always; on a computer connected to a television, in the television mode of the web UI, the Mac and the desktop app, a setting under Appearance that the user menu also switches, with ⌃⌘T on the Mac and Shift+F11 elsewhere. In television mode the menu also offers full screen, with the browser's and the Mac's keys, ⌃⌘F and F11.
 * **Theme**: it starts dark, as televisions are watched in dim rooms, and follows the user's choice of light or dark after that.
-* **Input**: the D-pad moves focus, select activates the focused element, and back returns. On a computer the arrow keys are the D-pad, Return is select, and Escape and Backspace are back. Nothing reacts to hover, and nothing shows a keyboard shortcut, since a remote cannot press it.
+* **Input**: the D-pad moves focus, select activates the focused element, and back goes up a level (§4). On a computer the arrow keys are the D-pad, Return is select, and Escape and Backspace are back. Nothing reacts to hover, and nothing shows a keyboard shortcut, since a remote cannot press it.
 
 ## 2. Screen
 
@@ -30,6 +30,7 @@
 * **Scrolling**: the page scrolls to keep the focused element in view, stopping 200 pt below the top, so that its row's title shows under the bar, and 120 pt above the bottom, with room for a card to grow, so that the last row reaches the page's end. A row scrolls sideways to keep its focused card in view.
 * **Cards**: a focused card scales by `layout.focusScale` (1.05) and its artwork gets a 3 pt `color.accent` border 1.5 pt apart from it and a shadow of `color.tvFocusShadow` with an offset of 12 pt and a blur of 32 pt, over `duration.fast` with `easing.standard`. The other cards of a row are at 75 % opacity. Rows leave room above and below for a card to grow.
 * **Buttons and tabs**: a focused button or tab turns white with black content. A text field with focus gets a white ring of 3 pt.
+* **Back**: it always goes up a level, never simply back through the browser's history. An open menu or dialog closes, and focus returns to what opened it. On a tab's page, back moves focus from the page to its tab and returns the page to its top, with every row scrolled back to its start; from a tab, it moves to Home's. Any deeper page — a title's details, a library, Search — returns to where it was opened from, as it was left: the page at the same position, the row scrolled as it was, and focus on the card that opened it. A page opened directly returns to its parent: a library to Libraries, anything else to Home. Opening a tab by focusing it replaces the page rather than adding to the history, so that back never steps through the tabs.
 
 ## 5. Menus
 
@@ -43,7 +44,7 @@
 A hero 78 % of the screen's height reaches behind the bar, with the title's logo or name at 72 pt and buttons 64 pt high; the rows follow it. A row on television has no scroll arrows, and its cards are `layout.gutter` apart.
 
 ### 6.2 Details
-The page hides the navigation bar, and back leaves it. The backdrop fills 86 % of the screen's height, with the logo or name at 72 pt, two lines of overview without the tagline, the actions 64 pt high, and the text at most 960 pt wide. Focus starts on the primary action; focus on a season's pill chooses it. The rest is as on other layouts (`libs/design/components.md`, Details Screen).
+The page hides the navigation bar, and back returns to where it was opened from (§4). The backdrop fills 86 % of the screen's height, with the logo or name at 72 pt, two lines of overview without the tagline, the actions 64 pt high, and the text at most 960 pt wide. Focus starts on the primary action; focus on a season's pill chooses it. The rest is as on other layouts (`libs/design/components.md`, Details Screen).
 
 ### 6.3 Grids
 A library's items and search results are grids whose columns are at least a poster wide, `layout.gutter` apart.
@@ -67,5 +68,5 @@ The on-screen controller follows the platform's focus and stays up while it has 
 | :--- | :--- | :--- |
 | Apple TV | The tvOS focus engine | `apps/tvos` |
 | Android TV and Google TV | Compose for TV focus | `apps/android-tv` |
-| Web UI | Its own focus movement (§4), with the root element's `data-tv` switching the tokens to their `tv` values | `apps/web/src/shell/tv.tsx`, `apps/web/src/shell/spatial.ts`, `apps/web/src/styles.css` |
+| Web UI | Its own focus movement (§4), with the root element's `data-tv` switching the tokens to their `tv` values | `apps/web/src/shell/tv.tsx`, `apps/web/src/shell/spatial.ts`, `apps/web/src/shell/back.ts`, `apps/web/src/styles.css` |
 | Mac and desktop | The television mode of each app, with the arrow keys as the D-pad | `apps/macos`, `apps/desktop` |
