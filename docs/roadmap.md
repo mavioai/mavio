@@ -670,7 +670,9 @@ flowchart TD
   - [ ] The web UI's details: trailers and other extras, and a person's page with their titles, which the cast's cards would open
   - [x] The web UI's Discover (`apps/web/src/screens/discover.tsx`, `libs/client-ts/src/discover.ts`): the catalogs of the first server that discovers in rows, each catalog's grid, a title with its seasons, Watch, and requests of a movie or of seasons of a series; Home's Trending opens a title no server has
     - [ ] The catalogs' filters and sorts (`ListFilterValues`), and providers' titles (`SearchTitles`) among Search's results
-    - [ ] The user's requests and their state, and administrators approving, declining and editing requests
+    - [x] Requests (`apps/web/src/screens/requests.tsx`, `libs/client-ts/src/requests.ts`): the user's requests with their state and quotas, or everyone's for administrators, by status; approving, declining, retrying, changing the seasons of and deleting them (`RequestService`)
+    - [ ] The blocklist: blocking a title or a collection from its page, and the blocked titles to unblock (`BlockTitle`, `ListBlockedTitles`, `BlockCollection`)
+    - [ ] Administrators requesting for another user or outside their quota (`CreateRequest`'s `user_id` and `ignore_quota`)
     - [ ] Discover's screens among the web UI's snapshot tests
   - [ ] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
   - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)

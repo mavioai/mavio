@@ -1142,7 +1142,28 @@ export type MessageKey =
   | 'keys.neverUsed'
   | 'keys.revoke'
   | 'keys.revokeTitle'
-  | 'keys.revokeMessage';
+  | 'keys.revokeMessage'
+  | 'requests.title'
+  | 'requests.all'
+  | 'requests.pending'
+  | 'requests.approved'
+  | 'requests.available'
+  | 'requests.failed'
+  | 'requests.declined'
+  | 'requests.none'
+  | 'requests.noneMessage'
+  | 'requests.by'
+  | 'requests.movieQuota'
+  | 'requests.movieQuotaDays'
+  | 'requests.seasonQuota'
+  | 'requests.seasonQuotaDays'
+  | 'requests.approve'
+  | 'requests.decline'
+  | 'requests.retry'
+  | 'requests.editSeasons'
+  | 'requests.editTitle'
+  | 'requests.remove'
+  | 'requests.removeTitle';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2277,7 +2298,28 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.neverUsed": "Never used",
     "keys.revoke": "Revoke",
     "keys.revokeTitle": "Revoke {name}?",
-    "keys.revokeMessage": "What uses this key can no longer call the server."
+    "keys.revokeMessage": "What uses this key can no longer call the server.",
+    "requests.title": "Requests",
+    "requests.all": "All",
+    "requests.pending": "Pending",
+    "requests.approved": "Approved",
+    "requests.available": "Available",
+    "requests.failed": "Failed",
+    "requests.declined": "Declined",
+    "requests.none": "No requests",
+    "requests.noneMessage": "Movies and series requested from Discover appear here.",
+    "requests.by": "By {name}",
+    "requests.movieQuota": "{remaining} of {limit} movie requests left",
+    "requests.movieQuotaDays": "{remaining} of {limit} movie requests left in {days} days",
+    "requests.seasonQuota": "{remaining} of {limit} season requests left",
+    "requests.seasonQuotaDays": "{remaining} of {limit} season requests left in {days} days",
+    "requests.approve": "Approve",
+    "requests.decline": "Decline",
+    "requests.retry": "Retry",
+    "requests.editSeasons": "Change Seasons",
+    "requests.editTitle": "Seasons of {name}",
+    "requests.remove": "Delete",
+    "requests.removeTitle": "Delete this request?"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3410,6 +3452,27 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.neverUsed": "从未使用",
     "keys.revoke": "撤销",
     "keys.revokeTitle": "撤销 {name}？",
-    "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。"
+    "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。",
+    "requests.title": "请求",
+    "requests.all": "全部",
+    "requests.pending": "待审批",
+    "requests.approved": "已批准",
+    "requests.available": "可观看",
+    "requests.failed": "失败",
+    "requests.declined": "已拒绝",
+    "requests.none": "没有请求",
+    "requests.noneMessage": "从“发现”中请求的电影与剧集会显示在这里。",
+    "requests.by": "由 {name} 请求",
+    "requests.movieQuota": "剩余 {remaining}/{limit} 个电影请求",
+    "requests.movieQuotaDays": "{days} 天内剩余 {remaining}/{limit} 个电影请求",
+    "requests.seasonQuota": "剩余 {remaining}/{limit} 个季请求",
+    "requests.seasonQuotaDays": "{days} 天内剩余 {remaining}/{limit} 个季请求",
+    "requests.approve": "批准",
+    "requests.decline": "拒绝",
+    "requests.retry": "重试",
+    "requests.editSeasons": "更改季",
+    "requests.editTitle": "{name} 的季",
+    "requests.remove": "删除",
+    "requests.removeTitle": "删除此请求？"
   }
 };

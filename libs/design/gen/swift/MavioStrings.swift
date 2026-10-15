@@ -3640,4 +3640,79 @@ public enum MavioStrings {
 
     /// Explains revoking an API key.
     public static var keysRevokeMessage: String { NSLocalizedString("keys.revokeMessage", bundle: .module, comment: "") }
+
+    /// Title of the requests screen and the link to it from Discover.
+    public static var requestsTitle: String { NSLocalizedString("requests.title", bundle: .module, comment: "") }
+
+    /// Filter showing every request.
+    public static var requestsAll: String { NSLocalizedString("requests.all", bundle: .module, comment: "") }
+
+    /// Status and filter of requests waiting for an administrator.
+    public static var requestsPending: String { NSLocalizedString("requests.pending", bundle: .module, comment: "") }
+
+    /// Status and filter of approved requests being acquired.
+    public static var requestsApproved: String { NSLocalizedString("requests.approved", bundle: .module, comment: "") }
+
+    /// Status and filter of requests whose titles are available.
+    public static var requestsAvailable: String { NSLocalizedString("requests.available", bundle: .module, comment: "") }
+
+    /// Status and filter of approved requests that could not be acquired.
+    public static var requestsFailed: String { NSLocalizedString("requests.failed", bundle: .module, comment: "") }
+
+    /// Status and filter of declined requests.
+    public static var requestsDeclined: String { NSLocalizedString("requests.declined", bundle: .module, comment: "") }
+
+    /// Shown when no requests match the filter.
+    public static var requestsNone: String { NSLocalizedString("requests.none", bundle: .module, comment: "") }
+
+    /// Explains where requests come from.
+    public static var requestsNoneMessage: String { NSLocalizedString("requests.noneMessage", bundle: .module, comment: "") }
+
+    /// Who made a request; name is the user's name.
+    public static func requestsBy(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.by", bundle: .module, comment: ""), name)
+    }
+
+    /// The user's movie request quota without a period.
+    public static func requestsMovieQuota(remaining: String, limit: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.movieQuota", bundle: .module, comment: ""), remaining, limit)
+    }
+
+    /// The user's movie request quota over a number of days.
+    public static func requestsMovieQuotaDays(remaining: String, limit: String, days: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.movieQuotaDays", bundle: .module, comment: ""), remaining, limit, days)
+    }
+
+    /// The user's season request quota without a period.
+    public static func requestsSeasonQuota(remaining: String, limit: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.seasonQuota", bundle: .module, comment: ""), remaining, limit)
+    }
+
+    /// The user's season request quota over a number of days.
+    public static func requestsSeasonQuotaDays(remaining: String, limit: String, days: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.seasonQuotaDays", bundle: .module, comment: ""), remaining, limit, days)
+    }
+
+    /// Approves a pending request.
+    public static var requestsApprove: String { NSLocalizedString("requests.approve", bundle: .module, comment: "") }
+
+    /// Declines a pending request.
+    public static var requestsDecline: String { NSLocalizedString("requests.decline", bundle: .module, comment: "") }
+
+    /// Approves a failed request again.
+    public static var requestsRetry: String { NSLocalizedString("requests.retry", bundle: .module, comment: "") }
+
+    /// Changes the seasons of a pending series request.
+    public static var requestsEditSeasons: String { NSLocalizedString("requests.editSeasons", bundle: .module, comment: "") }
+
+    /// Title of the dialog changing the seasons of a request.
+    public static func requestsEditTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("requests.editTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Deletes a request.
+    public static var requestsRemove: String { NSLocalizedString("requests.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a request.
+    public static var requestsRemoveTitle: String { NSLocalizedString("requests.removeTitle", bundle: .module, comment: "") }
 }

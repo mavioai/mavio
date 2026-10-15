@@ -1167,4 +1167,25 @@
     <string name="keys_revoke">撤销</string>
     <string name="keys_revoke_title">撤销 %s？</string>
     <string name="keys_revoke_message">使用此密钥的程序将无法再调用服务器。</string>
+    <string name="requests_title">请求</string>
+    <string name="requests_all">全部</string>
+    <string name="requests_pending">待审批</string>
+    <string name="requests_approved">已批准</string>
+    <string name="requests_available">可观看</string>
+    <string name="requests_failed">失败</string>
+    <string name="requests_declined">已拒绝</string>
+    <string name="requests_none">没有请求</string>
+    <string name="requests_none_message">从“发现”中请求的电影与剧集会显示在这里。</string>
+    <string name="requests_by">由 %s 请求</string>
+    <string name="requests_movie_quota">剩余 %1$s/%2$s 个电影请求</string>
+    <string name="requests_movie_quota_days">%1$s 天内剩余 %2$s/%3$s 个电影请求</string>
+    <string name="requests_season_quota">剩余 %1$s/%2$s 个季请求</string>
+    <string name="requests_season_quota_days">%1$s 天内剩余 %2$s/%3$s 个季请求</string>
+    <string name="requests_approve">批准</string>
+    <string name="requests_decline">拒绝</string>
+    <string name="requests_retry">重试</string>
+    <string name="requests_edit_seasons">更改季</string>
+    <string name="requests_edit_title">%s 的季</string>
+    <string name="requests_remove">删除</string>
+    <string name="requests_remove_title">删除此请求？</string>
 </resources>

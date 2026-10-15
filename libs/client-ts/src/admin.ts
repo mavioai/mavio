@@ -90,11 +90,12 @@ export function useRatings(server: ServerEntry, country = "") {
 }
 
 /** A server's users. */
-export function useUsers(server: ServerEntry) {
+export function useUsers(server: ServerEntry, enabled = true) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "users"),
     queryFn: async () => (await servers.client(UserService, server).listUsers({})).users,
+    enabled,
   });
 }
 

@@ -8,6 +8,7 @@ import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
 import { LibraryScreen } from "./screens/library.tsx";
 import { PlayerScreen } from "./screens/player.tsx";
+import { type RequestFilter, requestFilters, RequestsScreen } from "./screens/requests.tsx";
 import { SearchScreen } from "./screens/search.tsx";
 import { SettingsScreen, settingsSearch } from "./screens/settings.tsx";
 import {
@@ -105,6 +106,15 @@ const catalog = createRoute({
   component: CatalogScreen,
 });
 
+const requests = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/requests",
+  validateSearch: (s: Record<string, unknown>): { status?: RequestFilter } => ({
+    status: typeof s.status === "string" && s.status in requestFilters ? (s.status as RequestFilter) : undefined,
+  }),
+  component: RequestsScreen,
+});
+
 const title = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId", component: TitleScreen });
 
 const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$hubId", component: HubScreen });
@@ -133,6 +143,7 @@ export const router = createRouter({
     discover,
     catalog,
     title,
+    requests,
     settings,
     settingsSection,
     profile,

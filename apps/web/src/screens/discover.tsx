@@ -36,7 +36,7 @@ function mediaKindOf(p: KindParam | undefined): MediaKind {
 }
 
 /** The same TMDB image at a width, rather than its original size. */
-function sized(url: string, width: number): string | undefined {
+export function sized(url: string, width: number): string | undefined {
   if (!url) return undefined;
   return url.replace(/(image\.tmdb\.org\/t\/p\/)original\//, `$1w${width}/`);
 }
@@ -125,7 +125,18 @@ export function DiscoverScreen() {
   if (!server) return <StatusView icon="discover" title={t("discover.notSetUp")} message={t("discover.notSetUpMessage")} />;
   return (
     <div className={tv ? "" : "pt-2"}>
-      {!tv && <ScreenTitle>{t("nav.discover")}</ScreenTitle>}
+      <div className="flex items-end justify-between gap-3 pr-margin">
+        {!tv && <ScreenTitle>{t("nav.discover")}</ScreenTitle>}
+        <Link
+          to="/s/$serverId/requests"
+          params={{ serverId: server.id }}
+          search={{}}
+          className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected ${tv ? "mt-4 ml-margin" : "mb-2"}`}
+        >
+          <Icon name="pending" size={16} />
+          {t("requests.title")}
+        </Link>
+      </div>
       {rowsOf(catalogs).map((row) => (
         <CatalogShelf key={`${row.catalog.id}/${row.mediaKind}`} server={server} row={row} title={rowTitle(row)} />
       ))}
@@ -369,21 +380,28 @@ function Seasons({ seasons }: { seasons: SeasonStatus[] }) {
   );
 }
 
-/** The dialog choosing the seasons of a series to request: all those not requested yet, or some. */
-function RequestDialog({
+/**
+ * The dialog choosing the seasons of a series to request: all those not
+ * requested yet, or some; or, given a pending request's seasons, changing
+ * them.
+ */
+export function RequestDialog({
   title,
+  requested,
   busy,
   onCancel,
   onRequest,
 }: {
   title: Title;
+  requested?: number[];
   busy: boolean;
   onCancel: () => void;
   onRequest: (seasons?: number[]) => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
-  const open = title.seasons.filter((s) => s.requestable);
-  const [chosen, setChosen] = useState<Set<number>>(() => new Set(open.map((s) => s.seasonNumber)));
+  const choosable = (s: SeasonStatus) => s.requestable || !!requested?.includes(s.seasonNumber);
+  const open = title.seasons.filter(choosable);
+  const [chosen, setChosen] = useState<Set<number>>(() => new Set(requested ?? open.map((s) => s.seasonNumber)));
   const all = chosen.size === open.length;
   // Focus returns to Request when the dialog goes.
   const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
@@ -422,7 +440,7 @@ function RequestDialog({
     >
       <div className="flex max-h-[80vh] flex-col gap-3 p-6">
         <h2 id="request-title" className="type-title2">
-          {t("discover.requestTitle", { name: title.name })}
+          {requested ? t("requests.editTitle", { name: title.name }) : t("discover.requestTitle", { name: title.name })}
         </h2>
         <div className="-mx-3 flex min-h-0 flex-col overflow-y-auto">
           <button type="button" role="checkbox" aria-checked={all} onClick={() => setChosen(all ? new Set() : new Set(open.map((s) => s.seasonNumber)))} className={row}>
@@ -437,7 +455,7 @@ function RequestDialog({
                 type="button"
                 role="checkbox"
                 aria-checked={chosen.has(s.seasonNumber)}
-                disabled={!s.requestable}
+                disabled={!choosable(s)}
                 onClick={() => toggle(s.seasonNumber)}
                 className={`${row} disabled:opacity-50 disabled:hover:bg-transparent`}
               >
@@ -453,8 +471,11 @@ function RequestDialog({
           <Button variant="secondary" onClick={onCancel}>
             {t("action.cancel")}
           </Button>
-          <Button disabled={busy || chosen.size === 0} onClick={() => onRequest(all ? undefined : [...chosen].sort((a, b) => a - b))}>
-            {t("discover.requestSeasons", { count: chosen.size })}
+          <Button
+            disabled={busy || chosen.size === 0}
+            onClick={() => onRequest(all && !requested ? undefined : [...chosen].sort((a, b) => a - b))}
+          >
+            {requested ? t("action.save") : t("discover.requestSeasons", { count: chosen.size })}
           </Button>
         </div>
       </div>

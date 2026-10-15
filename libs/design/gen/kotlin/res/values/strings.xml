@@ -2323,4 +2323,46 @@
     <string name="keys_revoke_title">Revoke %s\?</string>
     <!-- Explains revoking an API key. -->
     <string name="keys_revoke_message">What uses this key can no longer call the server.</string>
+    <!-- Title of the requests screen and the link to it from Discover. -->
+    <string name="requests_title">Requests</string>
+    <!-- Filter showing every request. -->
+    <string name="requests_all">All</string>
+    <!-- Status and filter of requests waiting for an administrator. -->
+    <string name="requests_pending">Pending</string>
+    <!-- Status and filter of approved requests being acquired. -->
+    <string name="requests_approved">Approved</string>
+    <!-- Status and filter of requests whose titles are available. -->
+    <string name="requests_available">Available</string>
+    <!-- Status and filter of approved requests that could not be acquired. -->
+    <string name="requests_failed">Failed</string>
+    <!-- Status and filter of declined requests. -->
+    <string name="requests_declined">Declined</string>
+    <!-- Shown when no requests match the filter. -->
+    <string name="requests_none">No requests</string>
+    <!-- Explains where requests come from. -->
+    <string name="requests_none_message">Movies and series requested from Discover appear here.</string>
+    <!-- Who made a request; name is the user's name. -->
+    <string name="requests_by">By %s</string>
+    <!-- The user's movie request quota without a period. -->
+    <string name="requests_movie_quota">%1$s of %2$s movie requests left</string>
+    <!-- The user's movie request quota over a number of days. -->
+    <string name="requests_movie_quota_days">%1$s of %2$s movie requests left in %3$s days</string>
+    <!-- The user's season request quota without a period. -->
+    <string name="requests_season_quota">%1$s of %2$s season requests left</string>
+    <!-- The user's season request quota over a number of days. -->
+    <string name="requests_season_quota_days">%1$s of %2$s season requests left in %3$s days</string>
+    <!-- Approves a pending request. -->
+    <string name="requests_approve">Approve</string>
+    <!-- Declines a pending request. -->
+    <string name="requests_decline">Decline</string>
+    <!-- Approves a failed request again. -->
+    <string name="requests_retry">Retry</string>
+    <!-- Changes the seasons of a pending series request. -->
+    <string name="requests_edit_seasons">Change Seasons</string>
+    <!-- Title of the dialog changing the seasons of a request. -->
+    <string name="requests_edit_title">Seasons of %s</string>
+    <!-- Deletes a request. -->
+    <string name="requests_remove">Delete</string>
+    <!-- Asks before deleting a request. -->
+    <string name="requests_remove_title">Delete this request?</string>
 </resources>

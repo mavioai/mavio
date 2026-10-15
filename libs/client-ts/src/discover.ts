@@ -119,6 +119,10 @@ export function useRequestTitle(server: ServerEntry) {
           allSeasons: mediaKind === MediaKind.SERIES && seasons === undefined,
         })
       ).request,
-    onSettled: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "discover") }),
+    onSettled: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "discover") }),
+        qc.invalidateQueries({ queryKey: serverKey(server.id, "requests") }),
+      ]),
   });
 }
