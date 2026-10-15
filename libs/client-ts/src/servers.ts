@@ -81,7 +81,6 @@ interface AccountSession {
 
 /** A sign-in on its way to mavio.dev and back. */
 interface Pending {
-  kind: "signIn" | "claim";
   api: string;
   clientId: string;
   state: string;
@@ -129,8 +128,6 @@ const refreshMargin = 5 * 60_000;
 const renewMargin = 60_000;
 /** How long a server's address is tried. */
 const reachTimeout = 4000;
-/** How long a server just claimed is waited for to learn its administrator. */
-const claimWait = 30_000;
 
 /** The grant type that renews a device's session at mavio.dev. */
 const renewGrant = "urn:mavio:params:oauth:grant-type:device-signature";
@@ -562,8 +559,8 @@ export class Servers {
     return `${this.base.replace(/\/+$/, "")}/auth/callback`;
   }
 
-  private async pending(kind: Pending["kind"], api: string, clientId: string, returnTo: string) {
-    const p: Pending = { kind, api, clientId, state: randomString(), verifier: randomString(), redirectUri: this.callbackUri(), returnTo };
+  private async pending(api: string, clientId: string, returnTo: string) {
+    const p: Pending = { api, clientId, state: randomString(), verifier: randomString(), redirectUri: this.callbackUri(), returnTo };
     this.storage.setItem(pendingKey, JSON.stringify(p));
     return { ...p, challenge: await s256(p.verifier) };
   }
@@ -571,11 +568,22 @@ export class Servers {
   /**
    * Starts signing a Mavio account in (docs/accounts.md §6): returns the
    * mavio.dev page to go to, which comes back to callbackUri, where
-   * finishCallback completes it and returns returnTo.
+   * finishCallback completes it and returns returnTo. The serving server
+   * pushes its web UI's request to mavio.dev, and signing in to a server
+   * not claimed yet claims it; app.mavio.dev sends its own.
    */
   async startSignIn(returnTo = "/"): Promise<string> {
     const { api, clientId } = await this.mavioClient();
-    const p = await this.pending("signIn", api, clientId, returnTo);
+    const p = await this.pending(api, clientId, returnTo);
+    if (clientId !== appClient) {
+      const r = await createClient(AuthService, transport({ url: this.homeUrl() })).startSignIn({
+        redirectUri: p.redirectUri,
+        codeChallenge: p.challenge,
+        deviceKey: await this.key.publicKey(),
+        state: p.state,
+      });
+      return r.url;
+    }
     const u = new URL(`${siteOf(api)}/authorize`);
     u.search = new URLSearchParams({
       client_id: clientId,
@@ -589,24 +597,7 @@ export class Servers {
   }
 
   /**
-   * Starts claiming the serving server for a Mavio account (docs/accounts.md
-   * §3.2): returns the mavio.dev page where the account confirms it, which
-   * comes back to callbackUri signed in.
-   */
-  async startClaim(returnTo = "/"): Promise<string> {
-    const { api, clientId } = await this.mavioClient();
-    const p = await this.pending("claim", api, clientId, returnTo);
-    const r = await createClient(AuthService, transport({ url: this.homeUrl() })).startClaim({
-      redirectUri: p.redirectUri,
-      codeChallenge: p.challenge,
-      deviceKey: await this.key.publicKey(),
-      state: p.state,
-    });
-    return r.url;
-  }
-
-  /**
-   * Completes a sign-in or a claim with the parameters mavio.dev came back
+   * Completes a sign-in with the parameters mavio.dev came back
    * with: exchanges the code for a session of the device key and signs in
    * to the account's servers. Returns where the web UI goes next.
    */
@@ -627,7 +618,7 @@ export class Servers {
         code_verifier: p.verifier,
       }),
     );
-    await this.sync(p.kind === "claim");
+    await this.sync();
     return p.returnTo;
   }
 
@@ -756,12 +747,12 @@ export class Servers {
    * the first of their URLs that answers, and forgets those it no longer
    * reaches. One sync runs at a time.
    */
-  sync(claimed = false): Promise<void> {
-    this.syncing ??= this.doSync(claimed).finally(() => (this.syncing = undefined));
+  sync(): Promise<void> {
+    this.syncing ??= this.doSync().finally(() => (this.syncing = undefined));
     return this.syncing;
   }
 
-  private async doSync(claimed: boolean) {
+  private async doSync() {
     if (!this.session) return;
     const { servers } = await this.mavioDev(AccountService).listServers({});
     const homeId = this.home ? (await this.probe(this.home).catch(() => undefined))?.id : undefined;
@@ -797,7 +788,7 @@ export class Servers {
         .filter((s) => !s.token)
         .map(async (s) => {
           try {
-            await this.assert(s, claimed && s.id === homeId ? claimWait : 0);
+            await this.assert(s);
           } catch {
             // Unreachable for now; tried again with the next sync.
           }
@@ -819,43 +810,29 @@ export class Servers {
     return undefined;
   }
 
-  /**
-   * Signs the account in to a server with an assertion of mavio.dev,
-   * waiting up to wait milliseconds for a server just claimed to learn of
-   * its administrator.
-   */
-  private async assert(s: ServerEntry, wait = 0): Promise<ServerEntry> {
+  /** Signs the account in to a server with an assertion of mavio.dev. */
+  private async assert(s: ServerEntry): Promise<ServerEntry> {
     const url = s.url || (await this.reach(s));
     if (!url) throw new Error(`${s.name} cannot be reached`);
-    const publicKey = await this.key.publicKey();
-    const auth = createClient(AuthService, transport({ url }));
-    const until = Date.now() + wait;
-    for (;;) {
-      const { assertion } = await this.mavioDev(AccountService).createAssertion({ serverId: s.id, deviceKey: publicKey });
-      try {
-        const r = await auth.signInWithAssertion({
-          assertion,
-          device: await device(this.storage, this.key),
-          signature: await this.key.sign(assertionMessage(assertion)),
-        });
-        const at = this.list.findIndex((x) => x.id === s.id);
-        if (at < 0) throw new Error(`${s.name} was removed`);
-        const entry: ServerEntry = {
-          ...this.list[at],
-          url,
-          userId: r.user?.id ?? "",
-          userName: r.user?.name ?? "",
-          sessionId: r.session?.id,
-          token: r.accessToken,
-          expires: expiry(r),
-        };
-        this.set(this.list.with(at, entry));
-        return entry;
-      } catch (err) {
-        if (ConnectError.from(err).code !== Code.FailedPrecondition || Date.now() > until) throw err;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-    }
+    const { assertion } = await this.mavioDev(AccountService).createAssertion({ serverId: s.id, deviceKey: await this.key.publicKey() });
+    const r = await createClient(AuthService, transport({ url })).signInWithAssertion({
+      assertion,
+      device: await device(this.storage, this.key),
+      signature: await this.key.sign(assertionMessage(assertion)),
+    });
+    const at = this.list.findIndex((x) => x.id === s.id);
+    if (at < 0) throw new Error(`${s.name} was removed`);
+    const entry: ServerEntry = {
+      ...this.list[at],
+      url,
+      userId: r.user?.id ?? "",
+      userName: r.user?.name ?? "",
+      sessionId: r.session?.id,
+      token: r.accessToken,
+      expires: expiry(r),
+    };
+    this.set(this.list.with(at, entry));
+    return entry;
   }
 
   private async logout(s: ServerEntry) {

@@ -650,9 +650,10 @@ function Setup({ info }: { info: ServerInfo }) {
   useBackKey(back);
   useEffect(() => setError(undefined), [step]);
 
-  const claim = () =>
+  // The first Mavio account to sign in claims the server (docs/accounts.md §3.2).
+  const signIn = () =>
     run(async () => {
-      window.location.href = await servers.startClaim("/");
+      window.location.href = await servers.startSignIn("/");
     });
 
   if (admin) {
@@ -680,28 +681,17 @@ function Setup({ info }: { info: ServerInfo }) {
       </Steps>
     );
   }
-  if (info.mode === "mavioDev") {
-    return (
-      <Steps eyebrow={t("auth.newServerSetup")} title={t("auth.claim", { server: info.name })} subtitle={info.url}>
-        <p className={look.body}>{t("auth.claimMessage")}</p>
-        {error && <p className="text-[15px] text-danger">{error}</p>}
-        <Action disabled={busy} onClick={claim}>
-          {t("auth.claimServer")}
-        </Action>
-      </Steps>
-    );
-  }
   return (
     <ChooseMode
       info={info}
       busy={busy}
       error={error}
-      onChoose={(mode) => (mode === "mavioDev" ? void claim() : void navigate({ to: "/setup", search: { step: "admin" } }))}
+      onChoose={(mode) => (mode === "mavioDev" ? void signIn() : void navigate({ to: "/setup", search: { step: "admin" } }))}
     />
   );
 }
 
-/** Where mavio.dev comes back to with the code of a sign-in or a claim. */
+/** Where mavio.dev comes back to with the code of a sign-in. */
 export function CallbackScreen() {
   const servers = useServersStore();
   const navigate = useNavigate();
@@ -907,7 +897,10 @@ function Fields({ fields }: { fields: FieldProps[] }) {
   );
 }
 
-/** A new server's choice of mode (docs/accounts.md §2). */
+/**
+ * A new server's choice of mode (docs/accounts.md §2); a server started
+ * in mavio.dev mode offers only signing in.
+ */
 function ChooseMode({
   info,
   busy,
@@ -940,8 +933,12 @@ function ChooseMode({
       {error && <p className="text-[15px] text-danger">{error}</p>}
       <div className={`flex w-full flex-col ${look.stack}`}>
         {option("mavioDev", t("auth.modeMavioDev"), t("auth.modeMavioDevMessage"))}
-        <Or />
-        {option("standalone", t("auth.modeStandalone"), t("auth.modeStandaloneMessage"))}
+        {!info.mode && (
+          <>
+            <Or />
+            {option("standalone", t("auth.modeStandalone"), t("auth.modeStandaloneMessage"))}
+          </>
+        )}
       </div>
     </div>
   );

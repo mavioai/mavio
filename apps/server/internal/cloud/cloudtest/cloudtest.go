@@ -1,6 +1,6 @@
 // Package cloudtest simulates mavio.dev's API for servers in tests: it
-// checks the JWTs servers sign, claims servers with claim codes and claim
-// requests, keeps their changes, libraries and connections, sends notices on their WebSockets, and
+// checks the JWTs servers sign, claims servers with claim codes and
+// authorization requests, keeps their changes, libraries and connections, sends notices on their WebSockets, and
 // signs sign-in assertions with the key it publishes.
 package cloudtest
 
@@ -38,16 +38,17 @@ type Server struct {
 
 	mu       sync.Mutex
 	codes    map[string]*cloudv1.Account
-	requests map[string]*claimRequest
+	requests map[string]*authorizationRequest
 	servers  map[string]*server
 	relays   []*cloudv1.Relay
 }
 
-// claimRequest is a claim request, with the account that confirmed it.
-type claimRequest struct {
+// authorizationRequest is an authorization request a server pushed, with
+// the account that approved it.
+type authorizationRequest struct {
 	serverID string
 	key      ed25519.PublicKey
-	request  *cloudv1.CreateClaimRequestRequest
+	request  *cloudv1.CreateAuthorizationRequestRequest
 	account  *cloudv1.Account
 }
 
@@ -73,7 +74,7 @@ type tokenKey struct{}
 // New starts a simulated mavio.dev, stopped at the end of the test.
 func New(t testing.TB) *Server {
 	_, key, _ := ed25519.GenerateKey(rand.Reader)
-	s := &Server{key: key, codes: map[string]*cloudv1.Account{}, requests: map[string]*claimRequest{}, servers: map[string]*server{}}
+	s := &Server{key: key, codes: map[string]*cloudv1.Account{}, requests: map[string]*authorizationRequest{}, servers: map[string]*server{}}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api"+cloud.JWKSPath, s.jwks)
 	path, h := cloudv1connect.NewServerServiceHandler(s)
@@ -95,9 +96,9 @@ func (s *Server) AddClaimCode(code string, account *cloudv1.Account) {
 	s.codes[code] = account
 }
 
-// ClaimRequest returns the claim request with an ID, as the server asked
-// for it, and whether it exists.
-func (s *Server) ClaimRequest(id string) (*cloudv1.CreateClaimRequestRequest, bool) {
+// AuthorizationRequest returns the authorization request with an ID, as
+// the server pushed it, and whether it exists.
+func (s *Server) AuthorizationRequest(id string) (*cloudv1.CreateAuthorizationRequestRequest, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	r, ok := s.requests[id]
@@ -107,15 +108,18 @@ func (s *Server) ClaimRequest(id string) (*cloudv1.CreateClaimRequestRequest, bo
 	return r.request, true
 }
 
-// ConfirmClaimRequest confirms the claim request with an ID for account,
-// reporting whether it exists.
-func (s *Server) ConfirmClaimRequest(id string, account *cloudv1.Account) bool {
+// ApproveAuthorizationRequest approves the authorization request with an
+// ID for account, registering its server when it claims it, and reports
+// whether it exists.
+func (s *Server) ApproveAuthorizationRequest(id string, account *cloudv1.Account) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	r, ok := s.requests[id]
 	if ok {
 		r.account = account
-		s.register(r.serverID, r.key)
+		if r.request.GetClaim() {
+			s.register(r.serverID, r.key)
+		}
 	}
 	return ok
 }
@@ -327,25 +331,29 @@ func (s *Server) Disconnect(serverID string) {
 	}
 }
 
-// CreateClaimRequest keeps a claim request until a test confirms it.
-func (s *Server) CreateClaimRequest(ctx context.Context, req *cloudv1.CreateClaimRequestRequest) (*cloudv1.CreateClaimRequestResponse, error) {
+// CreateAuthorizationRequest keeps an authorization request until a test
+// approves it; one that does not claim the server needs it registered.
+func (s *Server) CreateAuthorizationRequest(ctx context.Context, req *cloudv1.CreateAuthorizationRequestRequest) (*cloudv1.CreateAuthorizationRequestResponse, error) {
 	id, err := s.verify(ctx, req.GetPublicKey())
 	if err != nil {
 		return nil, err
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if _, ok := s.servers[id]; !ok && !req.GetClaim() {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the server is not claimed"))
+	}
 	requestID := rand.Text()
-	s.requests[requestID] = &claimRequest{serverID: id, key: req.GetPublicKey(), request: req}
-	return cloudv1.CreateClaimRequestResponse_builder{
-		ClaimRequest: &requestID,
-		Url:          new(strings.TrimSuffix(s.URL, "/api") + "/claim?request=" + requestID),
-		ExpireTime:   timestamppb.New(time.Now().Add(15 * time.Minute)),
+	s.requests[requestID] = &authorizationRequest{serverID: id, key: req.GetPublicKey(), request: req}
+	return cloudv1.CreateAuthorizationRequestResponse_builder{
+		AuthorizationRequest: &requestID,
+		Url:                  new(strings.TrimSuffix(s.URL, "/api") + "/authorize?request_uri=" + requestID),
+		ExpireTime:           timestamppb.New(time.Now().Add(15 * time.Minute)),
 	}.Build(), nil
 }
 
-// ClaimServer claims a server with a claim code or a confirmed claim
-// request.
+// ClaimServer claims a server with a claim code or an approved
+// authorization request that claims it.
 func (s *Server) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerRequest) (*cloudv1.ClaimServerResponse, error) {
 	id, err := s.verify(ctx, req.GetPublicKey())
 	if err != nil {
@@ -354,13 +362,13 @@ func (s *Server) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerReques
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var account *cloudv1.Account
-	if r := req.GetClaimRequest(); r != "" {
+	if r := req.GetAuthorizationRequest(); r != "" {
 		cr, ok := s.requests[r]
-		if !ok || cr.serverID != id {
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("unknown claim request"))
+		if !ok || cr.serverID != id || !cr.request.GetClaim() {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("unknown authorization request"))
 		}
 		if cr.account == nil {
-			return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the claim request is not confirmed yet"))
+			return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the authorization request is not approved yet"))
 		}
 		account = cr.account
 	} else {

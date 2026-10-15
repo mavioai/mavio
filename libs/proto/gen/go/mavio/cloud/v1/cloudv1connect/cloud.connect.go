@@ -33,9 +33,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ServerServiceCreateClaimRequestProcedure is the fully-qualified name of the ServerService's
-	// CreateClaimRequest RPC.
-	ServerServiceCreateClaimRequestProcedure = "/mavio.cloud.v1.ServerService/CreateClaimRequest"
+	// ServerServiceCreateAuthorizationRequestProcedure is the fully-qualified name of the
+	// ServerService's CreateAuthorizationRequest RPC.
+	ServerServiceCreateAuthorizationRequestProcedure = "/mavio.cloud.v1.ServerService/CreateAuthorizationRequest"
 	// ServerServiceClaimServerProcedure is the fully-qualified name of the ServerService's ClaimServer
 	// RPC.
 	ServerServiceClaimServerProcedure = "/mavio.cloud.v1.ServerService/ClaimServer"
@@ -67,19 +67,23 @@ const (
 
 // ServerServiceClient is a client for the mavio.cloud.v1.ServerService service.
 type ServerServiceClient interface {
-	// CreateClaimRequest asks for a claim that an account confirms at the
-	// page it returns, for the web UI at a redirect URI that started it
-	// (docs/accounts.md §3.2). Confirming claims the server for the account,
-	// and sends the browser to the redirect URI with an authorization code
-	// of the account for the server and the device key, as /authorize does;
-	// the server then fetches the outcome with ClaimServer.
-	CreateClaimRequest(context.Context, *v1.CreateClaimRequestRequest) (*v1.CreateClaimRequestResponse, error)
+	// CreateAuthorizationRequest pushes the authorization request of the
+	// server's web UI at a redirect URI (docs/accounts.md §6), as RFC 9126
+	// does, and returns the /authorize page where the account approves it.
+	// Approving sends the browser to the redirect URI with an authorization
+	// code of the account for the server and the device key. A request that
+	// claims the server registers it for the account that approves it,
+	// which becomes its administrator (docs/accounts.md §3.2), and the
+	// server then fetches the outcome with ClaimServer; any other request
+	// needs a claimed server and signs in only its administrator.
+	CreateAuthorizationRequest(context.Context, *v1.CreateAuthorizationRequestRequest) (*v1.CreateAuthorizationRequestResponse, error)
 	// ClaimServer gives the account that claimed the server, which becomes
 	// its administrator: with a claim code from mavio.dev/claim, it claims
-	// the server for the code's account, and with a claim request it gives
-	// the account that confirmed the request. A claim request not confirmed
-	// yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
-	// and an unknown, declined or expired request, with INVALID_ARGUMENT.
+	// the server for the code's account, and with an authorization request
+	// that claims the server it gives the account that approved the
+	// request. A request not approved yet fails with FAILED_PRECONDITION;
+	// an unknown, used or expired code, and an unknown, declined or expired
+	// request, with INVALID_ARGUMENT.
 	// Claiming a server again, after its command line unclaimed it, keeps
 	// its changes.
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
@@ -123,10 +127,10 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 	baseURL = strings.TrimRight(baseURL, "/")
 	serverServiceMethods := v1.File_mavio_cloud_v1_cloud_proto.Services().ByName("ServerService").Methods()
 	return &serverServiceClient{
-		createClaimRequest: connect.NewClient[v1.CreateClaimRequestRequest, v1.CreateClaimRequestResponse](
+		createAuthorizationRequest: connect.NewClient[v1.CreateAuthorizationRequestRequest, v1.CreateAuthorizationRequestResponse](
 			httpClient,
-			baseURL+ServerServiceCreateClaimRequestProcedure,
-			connect.WithSchema(serverServiceMethods.ByName("CreateClaimRequest")),
+			baseURL+ServerServiceCreateAuthorizationRequestProcedure,
+			connect.WithSchema(serverServiceMethods.ByName("CreateAuthorizationRequest")),
 			connect.WithClientOptions(opts...),
 		),
 		claimServer: connect.NewClient[v1.ClaimServerRequest, v1.ClaimServerResponse](
@@ -195,21 +199,21 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // serverServiceClient implements ServerServiceClient.
 type serverServiceClient struct {
-	createClaimRequest *connect.Client[v1.CreateClaimRequestRequest, v1.CreateClaimRequestResponse]
-	claimServer        *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
-	listChanges        *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
-	publishLibraries   *connect.Client[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse]
-	publishConnections *connect.Client[v1.PublishConnectionsRequest, v1.PublishConnectionsResponse]
-	setAcmeChallenge   *connect.Client[v1.SetAcmeChallengeRequest, v1.SetAcmeChallengeResponse]
-	clearAcmeChallenge *connect.Client[v1.ClearAcmeChallengeRequest, v1.ClearAcmeChallengeResponse]
-	createAcmeBinding  *connect.Client[v1.CreateAcmeBindingRequest, v1.CreateAcmeBindingResponse]
-	listRelays         *connect.Client[v1.ListRelaysRequest, v1.ListRelaysResponse]
-	setRelayRegion     *connect.Client[v1.SetRelayRegionRequest, v1.SetRelayRegionResponse]
+	createAuthorizationRequest *connect.Client[v1.CreateAuthorizationRequestRequest, v1.CreateAuthorizationRequestResponse]
+	claimServer                *connect.Client[v1.ClaimServerRequest, v1.ClaimServerResponse]
+	listChanges                *connect.Client[v1.ListChangesRequest, v1.ListChangesResponse]
+	publishLibraries           *connect.Client[v1.PublishLibrariesRequest, v1.PublishLibrariesResponse]
+	publishConnections         *connect.Client[v1.PublishConnectionsRequest, v1.PublishConnectionsResponse]
+	setAcmeChallenge           *connect.Client[v1.SetAcmeChallengeRequest, v1.SetAcmeChallengeResponse]
+	clearAcmeChallenge         *connect.Client[v1.ClearAcmeChallengeRequest, v1.ClearAcmeChallengeResponse]
+	createAcmeBinding          *connect.Client[v1.CreateAcmeBindingRequest, v1.CreateAcmeBindingResponse]
+	listRelays                 *connect.Client[v1.ListRelaysRequest, v1.ListRelaysResponse]
+	setRelayRegion             *connect.Client[v1.SetRelayRegionRequest, v1.SetRelayRegionResponse]
 }
 
-// CreateClaimRequest calls mavio.cloud.v1.ServerService.CreateClaimRequest.
-func (c *serverServiceClient) CreateClaimRequest(ctx context.Context, req *v1.CreateClaimRequestRequest) (*v1.CreateClaimRequestResponse, error) {
-	response, err := c.createClaimRequest.CallUnary(ctx, connect.NewRequest(req))
+// CreateAuthorizationRequest calls mavio.cloud.v1.ServerService.CreateAuthorizationRequest.
+func (c *serverServiceClient) CreateAuthorizationRequest(ctx context.Context, req *v1.CreateAuthorizationRequestRequest) (*v1.CreateAuthorizationRequestResponse, error) {
+	response, err := c.createAuthorizationRequest.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -299,19 +303,23 @@ func (c *serverServiceClient) SetRelayRegion(ctx context.Context, req *v1.SetRel
 
 // ServerServiceHandler is an implementation of the mavio.cloud.v1.ServerService service.
 type ServerServiceHandler interface {
-	// CreateClaimRequest asks for a claim that an account confirms at the
-	// page it returns, for the web UI at a redirect URI that started it
-	// (docs/accounts.md §3.2). Confirming claims the server for the account,
-	// and sends the browser to the redirect URI with an authorization code
-	// of the account for the server and the device key, as /authorize does;
-	// the server then fetches the outcome with ClaimServer.
-	CreateClaimRequest(context.Context, *v1.CreateClaimRequestRequest) (*v1.CreateClaimRequestResponse, error)
+	// CreateAuthorizationRequest pushes the authorization request of the
+	// server's web UI at a redirect URI (docs/accounts.md §6), as RFC 9126
+	// does, and returns the /authorize page where the account approves it.
+	// Approving sends the browser to the redirect URI with an authorization
+	// code of the account for the server and the device key. A request that
+	// claims the server registers it for the account that approves it,
+	// which becomes its administrator (docs/accounts.md §3.2), and the
+	// server then fetches the outcome with ClaimServer; any other request
+	// needs a claimed server and signs in only its administrator.
+	CreateAuthorizationRequest(context.Context, *v1.CreateAuthorizationRequestRequest) (*v1.CreateAuthorizationRequestResponse, error)
 	// ClaimServer gives the account that claimed the server, which becomes
 	// its administrator: with a claim code from mavio.dev/claim, it claims
-	// the server for the code's account, and with a claim request it gives
-	// the account that confirmed the request. A claim request not confirmed
-	// yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
-	// and an unknown, declined or expired request, with INVALID_ARGUMENT.
+	// the server for the code's account, and with an authorization request
+	// that claims the server it gives the account that approved the
+	// request. A request not approved yet fails with FAILED_PRECONDITION;
+	// an unknown, used or expired code, and an unknown, declined or expired
+	// request, with INVALID_ARGUMENT.
 	// Claiming a server again, after its command line unclaimed it, keeps
 	// its changes.
 	ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error)
@@ -351,10 +359,10 @@ type ServerServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	serverServiceMethods := v1.File_mavio_cloud_v1_cloud_proto.Services().ByName("ServerService").Methods()
-	serverServiceCreateClaimRequestHandler := connect.NewUnaryHandlerSimple(
-		ServerServiceCreateClaimRequestProcedure,
-		svc.CreateClaimRequest,
-		connect.WithSchema(serverServiceMethods.ByName("CreateClaimRequest")),
+	serverServiceCreateAuthorizationRequestHandler := connect.NewUnaryHandlerSimple(
+		ServerServiceCreateAuthorizationRequestProcedure,
+		svc.CreateAuthorizationRequest,
+		connect.WithSchema(serverServiceMethods.ByName("CreateAuthorizationRequest")),
 		connect.WithHandlerOptions(opts...),
 	)
 	serverServiceClaimServerHandler := connect.NewUnaryHandlerSimple(
@@ -420,8 +428,8 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 	)
 	return "/mavio.cloud.v1.ServerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ServerServiceCreateClaimRequestProcedure:
-			serverServiceCreateClaimRequestHandler.ServeHTTP(w, r)
+		case ServerServiceCreateAuthorizationRequestProcedure:
+			serverServiceCreateAuthorizationRequestHandler.ServeHTTP(w, r)
 		case ServerServiceClaimServerProcedure:
 			serverServiceClaimServerHandler.ServeHTTP(w, r)
 		case ServerServiceListChangesProcedure:
@@ -449,8 +457,8 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 // UnimplementedServerServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedServerServiceHandler struct{}
 
-func (UnimplementedServerServiceHandler) CreateClaimRequest(context.Context, *v1.CreateClaimRequestRequest) (*v1.CreateClaimRequestResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.CreateClaimRequest is not implemented"))
+func (UnimplementedServerServiceHandler) CreateAuthorizationRequest(context.Context, *v1.CreateAuthorizationRequestRequest) (*v1.CreateAuthorizationRequestResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.cloud.v1.ServerService.CreateAuthorizationRequest is not implemented"))
 }
 
 func (UnimplementedServerServiceHandler) ClaimServer(context.Context, *v1.ClaimServerRequest) (*v1.ClaimServerResponse, error) {

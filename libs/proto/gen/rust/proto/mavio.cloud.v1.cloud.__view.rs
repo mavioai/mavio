@@ -696,7 +696,7 @@ impl ::buffa::HasMessageView for super::super::Access {
     type ViewHandle = AccessOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct CreateClaimRequestRequestView<'a> {
+pub struct CreateAuthorizationRequestRequestView<'a> {
     /// The server's Ed25519 identity public key, whose fingerprint is the ID
     /// in the request's JWT.
     ///
@@ -708,8 +708,8 @@ pub struct CreateClaimRequestRequestView<'a> {
     pub name: ::core::option::Option<&'a str>,
     /// Field 3: `version`
     pub version: ::core::option::Option<&'a str>,
-    /// Where the browser goes once the account confirms or declines: an
-    /// HTTP or HTTPS URL of the web UI that started the claim.
+    /// Where the browser goes once the account approves or declines: an
+    /// HTTP or HTTPS URL of the web UI that started signing in.
     ///
     /// Field 4: `redirect_uri`
     pub redirect_uri: ::core::option::Option<&'a str>,
@@ -725,10 +725,15 @@ pub struct CreateClaimRequestRequestView<'a> {
     ///
     /// Field 7: `state`
     pub state: ::core::option::Option<&'a str>,
+    /// Whether the request claims the server: its mode is unset, or it is
+    /// unclaimed in mavio.dev mode.
+    ///
+    /// Field 8: `claim`
+    pub claim: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestRequestView<'a> {
-    type Owned = super::super::CreateClaimRequestRequest;
+impl<'a> ::buffa::MessageView<'a> for CreateAuthorizationRequestRequestView<'a> {
+    type Owned = super::super::CreateAuthorizationRequestRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -806,6 +811,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestRequestView<'a> {
                 )?;
                 view.state = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.claim = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -817,7 +829,7 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::CreateClaimRequestRequest,
+        super::super::CreateAuthorizationRequestRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -827,13 +839,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::CreateClaimRequestRequest,
+        super::super::CreateAuthorizationRequestRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::CreateClaimRequestRequest {
+        ::core::result::Result::Ok(super::super::CreateAuthorizationRequestRequest {
             public_key: self.public_key.map(|b| (b).to_vec()),
             name: self.name.map(|s| s.to_string()),
             version: self.version.map(|s| s.to_string()),
@@ -841,12 +853,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestRequestView<'a> {
             code_challenge: self.code_challenge.map(|s| s.to_string()),
             device_key: self.device_key.map(|b| (b).to_vec()),
             state: self.state.map(|s| s.to_string()),
+            claim: self.claim,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for CreateAuthorizationRequestRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -872,6 +885,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestRequestView<'a> {
         }
         if let Some(ref v) = self.state {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.claim.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -905,27 +921,30 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestRequestView<'a> {
         if let Some(ref v) = self.state {
             ::buffa::types::put_string_field(7u32, v, buf);
         }
+        if let Some(v) = self.claim {
+            ::buffa::types::put_bool_field(8u32, v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for CreateClaimRequestRequestView<'a> {
+impl<'a> ::buffa::MessageName for CreateAuthorizationRequestRequestView<'a> {
     const PACKAGE: &'static str = "mavio.cloud.v1";
-    const NAME: &'static str = "CreateClaimRequestRequest";
-    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateClaimRequestRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestRequest";
+    const NAME: &'static str = "CreateAuthorizationRequestRequest";
+    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestRequest";
 }
-::buffa::impl_default_view_instance!(CreateClaimRequestRequestView);
-::buffa::impl_view_reborrow!(CreateClaimRequestRequestView);
-/** Self-contained, `'static` owned view of a `CreateClaimRequestRequest` message.
+::buffa::impl_default_view_instance!(CreateAuthorizationRequestRequestView);
+::buffa::impl_view_reborrow!(CreateAuthorizationRequestRequestView);
+/** Self-contained, `'static` owned view of a `CreateAuthorizationRequestRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`CreateClaimRequestRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`CreateAuthorizationRequestRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`CreateClaimRequestRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`CreateAuthorizationRequestRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct CreateClaimRequestRequestOwnedView(
-    ::buffa::OwnedView<CreateClaimRequestRequestView<'static>>,
+pub struct CreateAuthorizationRequestRequestOwnedView(
+    ::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>>,
 );
-impl CreateClaimRequestRequestOwnedView {
+impl CreateAuthorizationRequestRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -939,7 +958,9 @@ impl CreateClaimRequestRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            CreateAuthorizationRequestRequestOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -954,7 +975,7 @@ impl CreateClaimRequestRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestRequestOwnedView(
+            CreateAuthorizationRequestRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -968,15 +989,17 @@ impl CreateClaimRequestRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::CreateClaimRequestRequest,
+        msg: &super::super::CreateAuthorizationRequestRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            CreateAuthorizationRequestRequestOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
         )
     }
-    /// Borrow the full [`CreateClaimRequestRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`CreateAuthorizationRequestRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &CreateClaimRequestRequestView<'_> {
+    pub fn view(&self) -> &CreateAuthorizationRequestRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -987,7 +1010,7 @@ impl CreateClaimRequestRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::CreateClaimRequestRequest {
+    pub fn to_owned_message(&self) -> super::super::CreateAuthorizationRequestRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -1020,8 +1043,8 @@ impl CreateClaimRequestRequestOwnedView {
     pub fn version(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().version
     }
-    /// Where the browser goes once the account confirms or declines: an
-    /// HTTP or HTTPS URL of the web UI that started the claim.
+    /// Where the browser goes once the account approves or declines: an
+    /// HTTP or HTTPS URL of the web UI that started signing in.
     ///
     /// Field 4: `redirect_uri`
     #[must_use]
@@ -1049,36 +1072,50 @@ impl CreateClaimRequestRequestOwnedView {
     pub fn state(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().state
     }
-}
-impl ::core::convert::From<::buffa::OwnedView<CreateClaimRequestRequestView<'static>>>
-for CreateClaimRequestRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<CreateClaimRequestRequestView<'static>>) -> Self {
-        CreateClaimRequestRequestOwnedView(inner)
+    /// Whether the request claims the server: its mode is unset, or it is
+    /// unclaimed in mavio.dev mode.
+    ///
+    /// Field 8: `claim`
+    #[must_use]
+    pub fn claim(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().claim
     }
 }
-impl ::core::convert::From<CreateClaimRequestRequestOwnedView>
-for ::buffa::OwnedView<CreateClaimRequestRequestView<'static>> {
-    fn from(wrapper: CreateClaimRequestRequestOwnedView) -> Self {
+impl ::core::convert::From<
+    ::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>>,
+> for CreateAuthorizationRequestRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>>,
+    ) -> Self {
+        CreateAuthorizationRequestRequestOwnedView(inner)
+    }
+}
+impl ::core::convert::From<CreateAuthorizationRequestRequestOwnedView>
+for ::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>> {
+    fn from(wrapper: CreateAuthorizationRequestRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<CreateClaimRequestRequestView<'static>>>
-for CreateClaimRequestRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<CreateClaimRequestRequestView<'static>> {
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>>,
+> for CreateAuthorizationRequestRequestOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<CreateAuthorizationRequestRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::CreateClaimRequestRequest {
-    type View<'a> = CreateClaimRequestRequestView<'a>;
-    type ViewHandle = CreateClaimRequestRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::CreateAuthorizationRequestRequest {
+    type View<'a> = CreateAuthorizationRequestRequestView<'a>;
+    type ViewHandle = CreateAuthorizationRequestRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct CreateClaimRequestResponseView<'a> {
+pub struct CreateAuthorizationRequestResponseView<'a> {
     /// The request's ID, which ClaimServer takes.
     ///
-    /// Field 1: `claim_request`
-    pub claim_request: ::core::option::Option<&'a str>,
-    /// The page where an account confirms it.
+    /// Field 1: `authorization_request`
+    pub authorization_request: ::core::option::Option<&'a str>,
+    /// The page where the account approves it.
     ///
     /// Field 2: `url`
     pub url: ::core::option::Option<&'a str>,
@@ -1088,8 +1125,8 @@ pub struct CreateClaimRequestResponseView<'a> {
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestResponseView<'a> {
-    type Owned = super::super::CreateClaimRequestResponse;
+impl<'a> ::buffa::MessageView<'a> for CreateAuthorizationRequestResponseView<'a> {
+    type Owned = super::super::CreateAuthorizationRequestResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -1123,7 +1160,7 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestResponseView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.claim_request = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.authorization_request = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             2u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -1164,7 +1201,7 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::CreateClaimRequestResponse,
+        super::super::CreateAuthorizationRequestResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -1174,14 +1211,14 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::CreateClaimRequestResponse,
+        super::super::CreateAuthorizationRequestResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::CreateClaimRequestResponse {
-            claim_request: self.claim_request.map(|s| s.to_string()),
+        ::core::result::Result::Ok(super::super::CreateAuthorizationRequestResponse {
+            authorization_request: self.authorization_request.map(|s| s.to_string()),
             url: self.url.map(|s| s.to_string()),
             expire_time: match self.expire_time.as_option() {
                 Some(v) => {
@@ -1197,13 +1234,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateClaimRequestResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for CreateAuthorizationRequestResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(ref v) = self.url {
@@ -1228,7 +1265,7 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestResponseView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
         if let Some(ref v) = self.url {
@@ -1245,24 +1282,24 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateClaimRequestResponseView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for CreateClaimRequestResponseView<'a> {
+impl<'a> ::buffa::MessageName for CreateAuthorizationRequestResponseView<'a> {
     const PACKAGE: &'static str = "mavio.cloud.v1";
-    const NAME: &'static str = "CreateClaimRequestResponse";
-    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateClaimRequestResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestResponse";
+    const NAME: &'static str = "CreateAuthorizationRequestResponse";
+    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestResponse";
 }
-::buffa::impl_default_view_instance!(CreateClaimRequestResponseView);
-::buffa::impl_view_reborrow!(CreateClaimRequestResponseView);
-/** Self-contained, `'static` owned view of a `CreateClaimRequestResponse` message.
+::buffa::impl_default_view_instance!(CreateAuthorizationRequestResponseView);
+::buffa::impl_view_reborrow!(CreateAuthorizationRequestResponseView);
+/** Self-contained, `'static` owned view of a `CreateAuthorizationRequestResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`CreateClaimRequestResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`CreateAuthorizationRequestResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`CreateClaimRequestResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`CreateAuthorizationRequestResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct CreateClaimRequestResponseOwnedView(
-    ::buffa::OwnedView<CreateClaimRequestResponseView<'static>>,
+pub struct CreateAuthorizationRequestResponseOwnedView(
+    ::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>>,
 );
-impl CreateClaimRequestResponseOwnedView {
+impl CreateAuthorizationRequestResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -1276,7 +1313,9 @@ impl CreateClaimRequestResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            CreateAuthorizationRequestResponseOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -1291,7 +1330,7 @@ impl CreateClaimRequestResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestResponseOwnedView(
+            CreateAuthorizationRequestResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -1305,15 +1344,17 @@ impl CreateClaimRequestResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::CreateClaimRequestResponse,
+        msg: &super::super::CreateAuthorizationRequestResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            CreateClaimRequestResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            CreateAuthorizationRequestResponseOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
         )
     }
-    /// Borrow the full [`CreateClaimRequestResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`CreateAuthorizationRequestResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &CreateClaimRequestResponseView<'_> {
+    pub fn view(&self) -> &CreateAuthorizationRequestResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -1324,7 +1365,7 @@ impl CreateClaimRequestResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::CreateClaimRequestResponse {
+    pub fn to_owned_message(&self) -> super::super::CreateAuthorizationRequestResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -1339,12 +1380,12 @@ impl CreateClaimRequestResponseOwnedView {
     }
     /// The request's ID, which ClaimServer takes.
     ///
-    /// Field 1: `claim_request`
+    /// Field 1: `authorization_request`
     #[must_use]
-    pub fn claim_request(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().claim_request
+    pub fn authorization_request(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().authorization_request
     }
-    /// The page where an account confirms it.
+    /// The page where the account approves it.
     ///
     /// Field 2: `url`
     #[must_use]
@@ -1361,31 +1402,37 @@ impl CreateClaimRequestResponseOwnedView {
         &self.0.reborrow().expire_time
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<CreateClaimRequestResponseView<'static>>>
-for CreateClaimRequestResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<CreateClaimRequestResponseView<'static>>) -> Self {
-        CreateClaimRequestResponseOwnedView(inner)
+impl ::core::convert::From<
+    ::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>>,
+> for CreateAuthorizationRequestResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>>,
+    ) -> Self {
+        CreateAuthorizationRequestResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<CreateClaimRequestResponseOwnedView>
-for ::buffa::OwnedView<CreateClaimRequestResponseView<'static>> {
-    fn from(wrapper: CreateClaimRequestResponseOwnedView) -> Self {
+impl ::core::convert::From<CreateAuthorizationRequestResponseOwnedView>
+for ::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>> {
+    fn from(wrapper: CreateAuthorizationRequestResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<CreateClaimRequestResponseView<'static>>>
-for CreateClaimRequestResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<CreateClaimRequestResponseView<'static>> {
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>>,
+> for CreateAuthorizationRequestResponseOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<CreateAuthorizationRequestResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::CreateClaimRequestResponse {
-    type View<'a> = CreateClaimRequestResponseView<'a>;
-    type ViewHandle = CreateClaimRequestResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::CreateAuthorizationRequestResponse {
+    type View<'a> = CreateAuthorizationRequestResponseView<'a>;
+    type ViewHandle = CreateAuthorizationRequestResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct ClaimServerRequestView<'a> {
-    /// A claim code, or a claim_request; exactly one is set.
+    /// A claim code, or an authorization_request; exactly one is set.
     ///
     /// Field 1: `claim_code`
     pub claim_code: ::core::option::Option<&'a str>,
@@ -1400,10 +1447,11 @@ pub struct ClaimServerRequestView<'a> {
     pub name: ::core::option::Option<&'a str>,
     /// Field 4: `version`
     pub version: ::core::option::Option<&'a str>,
-    /// A claim request's ID from CreateClaimRequest.
+    /// The ID of an authorization request that claims the server, from
+    /// CreateAuthorizationRequest.
     ///
-    /// Field 5: `claim_request`
-    pub claim_request: ::core::option::Option<&'a str>,
+    /// Field 5: `authorization_request`
+    pub authorization_request: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ClaimServerRequestView<'a> {
@@ -1469,7 +1517,7 @@ impl<'a> ::buffa::MessageView<'a> for ClaimServerRequestView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.claim_request = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.authorization_request = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -1497,7 +1545,7 @@ impl<'a> ::buffa::MessageView<'a> for ClaimServerRequestView<'a> {
             public_key: self.public_key.map(|b| (b).to_vec()),
             name: self.name.map(|s| s.to_string()),
             version: self.version.map(|s| s.to_string()),
-            claim_request: self.claim_request.map(|s| s.to_string()),
+            authorization_request: self.authorization_request.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1521,7 +1569,7 @@ impl<'a> ::buffa::ViewEncode<'a> for ClaimServerRequestView<'a> {
         if let Some(ref v) = self.version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1547,7 +1595,7 @@ impl<'a> ::buffa::ViewEncode<'a> for ClaimServerRequestView<'a> {
         if let Some(ref v) = self.version {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
@@ -1645,7 +1693,7 @@ impl ClaimServerRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// A claim code, or a claim_request; exactly one is set.
+    /// A claim code, or an authorization_request; exactly one is set.
     ///
     /// Field 1: `claim_code`
     #[must_use]
@@ -1672,12 +1720,13 @@ impl ClaimServerRequestOwnedView {
     pub fn version(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().version
     }
-    /// A claim request's ID from CreateClaimRequest.
+    /// The ID of an authorization request that claims the server, from
+    /// CreateAuthorizationRequest.
     ///
-    /// Field 5: `claim_request`
+    /// Field 5: `authorization_request`
     #[must_use]
-    pub fn claim_request(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().claim_request
+    pub fn authorization_request(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().authorization_request
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ClaimServerRequestView<'static>>>

@@ -210,13 +210,13 @@ pub type OwnedSwitchUserRequestView = ::buffa::view::OwnedView<
 pub type OwnedSwitchUserResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::auth::v1::__buffa::view::SwitchUserResponseView<'static>,
 >;
-///Shorthand for `OwnedView<StartClaimRequestView<'static>>`.
-pub type OwnedStartClaimRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::auth::v1::__buffa::view::StartClaimRequestView<'static>,
+///Shorthand for `OwnedView<StartSignInRequestView<'static>>`.
+pub type OwnedStartSignInRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartSignInRequestView<'static>,
 >;
-///Shorthand for `OwnedView<StartClaimResponseView<'static>>`.
-pub type OwnedStartClaimResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<'static>,
+///Shorthand for `OwnedView<StartSignInResponseView<'static>>`.
+pub type OwnedStartSignInResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::auth::v1::__buffa::view::StartSignInResponseView<'static>,
 >;
 ///Shorthand for `OwnedView<SignInWithAssertionRequestView<'static>>`.
 pub type OwnedSignInWithAssertionRequestView = ::buffa::view::OwnedView<
@@ -1070,8 +1070,8 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartClaimResponse>
-for crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<'_> {
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartSignInResponse>
+for crate::proto::mavio::auth::v1::__buffa::view::StartSignInResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -1079,9 +1079,9 @@ for crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<'_> {
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartClaimResponse>
+impl ::connectrpc::Encodable<crate::proto::mavio::auth::v1::StartSignInResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<'static>,
+    crate::proto::mavio::auth::v1::__buffa::view::StartSignInResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -1286,9 +1286,9 @@ pub const AUTH_SERVICE_SWITCH_USER_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `StartClaim` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const AUTH_SERVICE_START_CLAIM_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.auth.v1.AuthService/StartClaim",
+/// Static [`Spec`](::connectrpc::Spec) for the `StartSignIn` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AUTH_SERVICE_START_SIGN_IN_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.auth.v1.AuthService/StartSignIn",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -1302,7 +1302,7 @@ pub const AUTH_SERVICE_SIGN_IN_WITH_ASSERTION_SPEC: ::connectrpc::Spec = ::conne
 /// Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,
 /// RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,
 /// ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,
-/// AcceptInvitation, StartClaim and SignInWithAssertion are public; the other methods act on the calling user.
+/// AcceptInvitation, StartSignIn and SignInWithAssertion are public; the other methods act on the calling user.
 ///
 /// In mavio.dev mode devices sign in with SignInWithAssertion: Login, the
 /// passkey sign-in, Quick Connect, password resets, invitations and
@@ -1965,17 +1965,17 @@ pub trait AuthService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// StartClaim starts setting up a server in mavio.dev mode, or claiming
-    /// it again after its command line unclaimed it (docs/accounts.md §3.2).
-    /// The server asks mavio.dev for a claim request and returns the page
-    /// where an account confirms it; mavio.dev then claims the server for the
-    /// account, which becomes the administrator, and sends the browser to the
-    /// redirect URI with an authorization code for the device key, which
-    /// signs the account in. The server asks mavio.dev for the request's
-    /// outcome until it is claimed or the request expires; a later StartClaim
-    /// replaces an earlier request. It fails with FAILED_PRECONDITION when the
-    /// server is standalone or claimed and UNAVAILABLE when mavio.dev cannot
-    /// be reached.
+    /// StartSignIn starts signing a Mavio account in to the server's web UI
+    /// (docs/accounts.md §6): the server pushes the web UI's authorization
+    /// request to mavio.dev, signed with its identity key, and returns the
+    /// page where the account approves it, which sends the browser to the
+    /// redirect URI with an authorization code for the device key. While the
+    /// server's mode is unset, or it is unclaimed in mavio.dev mode, signing
+    /// in claims it (docs/accounts.md §3.2): the account that approves
+    /// becomes the administrator, and the server learns of it when the
+    /// account signs in with SignInWithAssertion. It fails with
+    /// FAILED_PRECONDITION when the server is standalone and UNAVAILABLE when
+    /// mavio.dev cannot be reached.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1984,17 +1984,17 @@ pub trait AuthService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn start_claim<'a>(
+    fn start_sign_in<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::auth::v1::StartClaimRequest,
+            crate::proto::mavio::auth::v1::StartSignInRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::auth::v1::StartClaimResponse,
+                crate::proto::mavio::auth::v1::StartSignInResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2004,7 +2004,10 @@ pub trait AuthService: Send + Sync + 'static {
     /// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
     /// assertion. A wrong, expired or used assertion, a wrong signature and
     /// an account without access to the server fail with UNAUTHENTICATED; a
-    /// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+    /// server not in mavio.dev mode fails with FAILED_PRECONDITION. On a
+    /// server that a sign-in is claiming, it first asks mavio.dev for the
+    /// account that approved it, and fails with UNAVAILABLE when mavio.dev
+    /// cannot be reached.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -2757,13 +2760,13 @@ impl<S: AuthService> AuthServiceExt for S {
             .with_spec(AUTH_SERVICE_SWITCH_USER_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
-                "StartClaim",
+                "StartSignIn",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::auth::v1::__buffa::view::StartClaimRequestView<
+                            crate::proto::mavio::auth::v1::__buffa::view::StartSignInRequestView<
                                 'static,
                             >,
                         >,
@@ -2772,18 +2775,18 @@ impl<S: AuthService> AuthServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::auth::v1::StartClaimRequest,
+                                crate::proto::mavio::auth::v1::StartSignInRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.start_claim(ctx, sreq)
+                            svc.start_sign_in(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::auth::v1::StartClaimResponse,
+                                    crate::proto::mavio::auth::v1::StartSignInResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(AUTH_SERVICE_START_CLAIM_SPEC)
+            .with_spec(AUTH_SERVICE_START_SIGN_IN_SPEC)
             .route_view(
                 AUTH_SERVICE_SERVICE_NAME,
                 "SignInWithAssertion",
@@ -3011,10 +3014,10 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         .with_spec(AUTH_SERVICE_SWITCH_USER_SPEC),
                 )
             }
-            "StartClaim" => {
+            "StartSignIn" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(AUTH_SERVICE_START_CLAIM_SPEC),
+                        .with_spec(AUTH_SERVICE_START_SIGN_IN_SPEC),
                 )
             }
             "SignInWithAssertion" => {
@@ -3562,25 +3565,25 @@ impl<T: AuthService> ::connectrpc::Dispatcher for AuthServiceServer<T> {
                         >(format)
                 })
             }
-            "StartClaim" => {
+            "StartSignIn" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::auth::v1::StartClaimRequest,
+                        crate::proto::mavio::auth::v1::StartSignInRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::auth::v1::__buffa::view::StartClaimRequestView<
+                    let req: crate::proto::mavio::auth::v1::__buffa::view::StartSignInRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::auth::v1::StartClaimRequest,
+                        crate::proto::mavio::auth::v1::StartSignInRequest,
                     >::from_parts(&req, &body);
-                    svc.start_claim(ctx, req)
+                    svc.start_sign_in(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::auth::v1::StartClaimResponse,
+                            crate::proto::mavio::auth::v1::StartSignInResponse,
                         >(format)
                 })
             }
@@ -4798,35 +4801,35 @@ where
             )
             .await
     }
-    /// Call the StartClaim RPC. Sends a request to /mavio.auth.v1.AuthService/StartClaim.
-    pub async fn start_claim(
+    /// Call the StartSignIn RPC. Sends a request to /mavio.auth.v1.AuthService/StartSignIn.
+    pub async fn start_sign_in(
         &self,
-        request: crate::proto::mavio::auth::v1::StartClaimRequest,
+        request: crate::proto::mavio::auth::v1::StartSignInRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartSignInResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.start_claim_with_options(
+        self.start_sign_in_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the StartClaim RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn start_claim_with_options(
+    /// Call the StartSignIn RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn start_sign_in_with_options(
         &self,
-        request: crate::proto::mavio::auth::v1::StartClaimRequest,
+        request: crate::proto::mavio::auth::v1::StartSignInRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::auth::v1::__buffa::view::StartClaimResponseView<
+                crate::proto::mavio::auth::v1::__buffa::view::StartSignInResponseView<
                     'static,
                 >,
             >,
@@ -4836,7 +4839,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                AUTH_SERVICE_START_CLAIM_SPEC
+                AUTH_SERVICE_START_SIGN_IN_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

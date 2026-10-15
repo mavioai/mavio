@@ -374,7 +374,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			n := set.Get().Network
 			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: https.Port()}
 		},
-		StartClaim: claimer.Start, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
+		SignIn: claimer, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
 		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})
@@ -430,10 +430,6 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
 	g.Go(func() error {
 		link.Run(ctx)
-		return nil
-	})
-	g.Go(func() error {
-		claimer.Run(ctx)
 		return nil
 	})
 	if certificates != nil {

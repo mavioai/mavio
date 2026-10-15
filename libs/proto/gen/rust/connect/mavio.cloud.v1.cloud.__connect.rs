@@ -1,10 +1,12 @@
-///Shorthand for `OwnedView<CreateClaimRequestRequestView<'static>>`.
-pub type OwnedCreateClaimRequestRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<'static>,
+///Shorthand for `OwnedView<CreateAuthorizationRequestRequestView<'static>>`.
+pub type OwnedCreateAuthorizationRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<CreateClaimRequestResponseView<'static>>`.
-pub type OwnedCreateClaimRequestResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+///Shorthand for `OwnedView<CreateAuthorizationRequestResponseView<'static>>`.
+pub type OwnedCreateAuthorizationRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestResponseView<
         'static,
     >,
 >;
@@ -84,8 +86,12 @@ pub type OwnedSetRelayRegionRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetRelayRegionResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::cloud::v1::__buffa::view::SetRelayRegionResponseView<'static>,
 >;
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateClaimRequestResponse>
-for crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::CreateAuthorizationRequestResponse,
+>
+for crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -93,9 +99,11 @@ for crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseVie
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::CreateClaimRequestResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::CreateAuthorizationRequestResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+    crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestResponseView<
         'static,
     >,
 > {
@@ -432,9 +440,9 @@ for ::buffa::view::OwnedView<
 }
 /// Full service name for this service.
 pub const SERVER_SERVICE_SERVICE_NAME: &str = "mavio.cloud.v1.ServerService";
-/// Static [`Spec`](::connectrpc::Spec) for the `CreateClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.cloud.v1.ServerService/CreateClaimRequest",
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateAuthorizationRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SERVER_SERVICE_CREATE_AUTHORIZATION_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.ServerService/CreateAuthorizationRequest",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -498,8 +506,8 @@ pub const SERVER_SERVICE_SET_RELAY_REGION_SPEC: ::connectrpc::Spec = ::connectrp
 /// (private_key_jwt): EdDSA, with the server's ID as its kid, iss and sub,
 /// mavio.dev's API base URL as its aud, a random jti, and an expiry at
 /// most a minute after it was issued, carried as a bearer token. Claiming
-/// registers the key, and CreateClaimRequest and ClaimServer carry it; the
-/// other methods need a claimed server.
+/// registers the key, and CreateAuthorizationRequest and ClaimServer carry
+/// it; the other methods need a claimed server.
 ///
 /// # Implementing handlers
 ///
@@ -550,12 +558,15 @@ pub const SERVER_SERVICE_SET_RELAY_REGION_SPEC: ::connectrpc::Spec = ::connectrp
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait ServerService: Send + Sync + 'static {
-    /// CreateClaimRequest asks for a claim that an account confirms at the
-    /// page it returns, for the web UI at a redirect URI that started it
-    /// (docs/accounts.md §3.2). Confirming claims the server for the account,
-    /// and sends the browser to the redirect URI with an authorization code
-    /// of the account for the server and the device key, as /authorize does;
-    /// the server then fetches the outcome with ClaimServer.
+    /// CreateAuthorizationRequest pushes the authorization request of the
+    /// server's web UI at a redirect URI (docs/accounts.md §6), as RFC 9126
+    /// does, and returns the /authorize page where the account approves it.
+    /// Approving sends the browser to the redirect URI with an authorization
+    /// code of the account for the server and the device key. A request that
+    /// claims the server registers it for the account that approves it,
+    /// which becomes its administrator (docs/accounts.md §3.2), and the
+    /// server then fetches the outcome with ClaimServer; any other request
+    /// needs a claimed server and signs in only its administrator.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -564,26 +575,27 @@ pub trait ServerService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn create_claim_request<'a>(
+    fn create_authorization_request<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+            crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+                crate::proto::mavio::cloud::v1::CreateAuthorizationRequestResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
     /// ClaimServer gives the account that claimed the server, which becomes
     /// its administrator: with a claim code from mavio.dev/claim, it claims
-    /// the server for the code's account, and with a claim request it gives
-    /// the account that confirmed the request. A claim request not confirmed
-    /// yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
-    /// and an unknown, declined or expired request, with INVALID_ARGUMENT.
+    /// the server for the code's account, and with an authorization request
+    /// that claims the server it gives the account that approved the
+    /// request. A request not approved yet fails with FAILED_PRECONDITION;
+    /// an unknown, used or expired code, and an unknown, declined or expired
+    /// request, with INVALID_ARGUMENT.
     /// Claiming a server again, after its command line unclaimed it, keeps
     /// its changes.
     ///
@@ -837,13 +849,13 @@ impl<S: ServerService> ServerServiceExt for S {
         router
             .route_view(
                 SERVER_SERVICE_SERVICE_NAME,
-                "CreateClaimRequest",
+                "CreateAuthorizationRequest",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestRequestView<
                                 'static,
                             >,
                         >,
@@ -852,18 +864,18 @@ impl<S: ServerService> ServerServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                                crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.create_claim_request(ctx, sreq)
+                            svc.create_authorization_request(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+                                    crate::proto::mavio::cloud::v1::CreateAuthorizationRequestResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC)
+            .with_spec(SERVER_SERVICE_CREATE_AUTHORIZATION_REQUEST_SPEC)
             .route_view(
                 SERVER_SERVICE_SERVICE_NAME,
                 "ClaimServer",
@@ -1179,10 +1191,10 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
         let method = path.strip_prefix("mavio.cloud.v1.ServerService/")?;
         match method {
-            "CreateClaimRequest" => {
+            "CreateAuthorizationRequest" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC),
+                        .with_spec(SERVER_SERVICE_CREATE_AUTHORIZATION_REQUEST_SPEC),
                 )
             }
             "ClaimServer" => {
@@ -1254,25 +1266,25 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
-            "CreateClaimRequest" => {
+            "CreateAuthorizationRequest" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestRequestView<
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
                     >::from_parts(&req, &body);
-                    svc.create_claim_request(ctx, req)
+                    svc.create_authorization_request(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::cloud::v1::CreateClaimRequestResponse,
+                            crate::proto::mavio::cloud::v1::CreateAuthorizationRequestResponse,
                         >(format)
                 })
             }
@@ -1541,7 +1553,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
 /// let client = ServerServiceClient::new(conn, config);
-/// let response = client.create_claim_request(request).await?;
+/// let response = client.create_authorization_request(request).await?;
 /// ```
 ///
 /// # Example (Connect / HTTP/1.1 or ALPN)
@@ -1553,7 +1565,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
 /// let client = ServerServiceClient::new(http, config);
-/// let response = client.create_claim_request(request).await?;
+/// let response = client.create_authorization_request(request).await?;
 /// ```
 ///
 /// # Working with the response
@@ -1563,7 +1575,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// message, so field access is zero-copy:
 ///
 /// ```rust,ignore
-/// let resp = client.create_claim_request(request).await?;
+/// let resp = client.create_authorization_request(request).await?;
 /// let name: &str = resp.view().name;  // borrow into the response buffer
 /// ```
 ///
@@ -1571,7 +1583,7 @@ impl<T: ServerService> ::connectrpc::Dispatcher for ServerServiceServer<T> {
 /// [`into_owned()`](::connectrpc::client::UnaryResponse::into_owned):
 ///
 /// ```rust,ignore
-/// let owned = client.create_claim_request(request).await?.into_owned();
+/// let owned = client.create_authorization_request(request).await?.into_owned();
 /// ```
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
@@ -1602,35 +1614,35 @@ where
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
     }
-    /// Call the CreateClaimRequest RPC. Sends a request to /mavio.cloud.v1.ServerService/CreateClaimRequest.
-    pub async fn create_claim_request(
+    /// Call the CreateAuthorizationRequest RPC. Sends a request to /mavio.cloud.v1.ServerService/CreateAuthorizationRequest.
+    pub async fn create_authorization_request(
         &self,
-        request: crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.create_claim_request_with_options(
+        self.create_authorization_request_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the CreateClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn create_claim_request_with_options(
+    /// Call the CreateAuthorizationRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_authorization_request_with_options(
         &self,
-        request: crate::proto::mavio::cloud::v1::CreateClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::CreateAuthorizationRequestRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::CreateClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::CreateAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
@@ -1640,7 +1652,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                SERVER_SERVICE_CREATE_CLAIM_REQUEST_SPEC
+                SERVER_SERVICE_CREATE_AUTHORIZATION_REQUEST_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

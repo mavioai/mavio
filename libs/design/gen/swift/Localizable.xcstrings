@@ -3187,60 +3187,6 @@
         }
       }
     },
-    "auth.claim": {
-      "comment": "Title of the screen claiming a server for a Mavio account; server is its name.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claim %@"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "认领 %@"
-          }
-        }
-      }
-    },
-    "auth.claimMessage": {
-      "comment": "Explanation of claiming a server.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign in at mavio.dev and confirm there. Your Mavio account becomes this server's administrator."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。"
-          }
-        }
-      }
-    },
-    "auth.claimServer": {
-      "comment": "Goes to mavio.dev to claim the server.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continue at mavio.dev"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "前往 mavio.dev 继续"
-          }
-        }
-      }
-    },
     "auth.signInWithMavio": {
       "comment": "Signs in to a server with a Mavio account at mavio.dev.",
       "extractionState": "manual",

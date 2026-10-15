@@ -33,8 +33,8 @@
     {
       "idx": 4,
       "version": "7",
-      "when": 1792043403222,
-      "tag": "0004_sessions_and_claim_requests",
+      "when": 1792051809914,
+      "tag": "0004_sessions_and_authorization_requests",
       "breakpoints": true
     }
   ]

@@ -574,7 +574,7 @@ impl ::buffa::ExtensionSet for Access {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct CreateClaimRequestRequest {
+pub struct CreateAuthorizationRequestRequest {
     /// The server's Ed25519 identity public key, whose fingerprint is the ID
     /// in the request's JWT.
     ///
@@ -586,8 +586,8 @@ pub struct CreateClaimRequestRequest {
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `version`
     pub version: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Where the browser goes once the account confirms or declines: an
-    /// HTTP or HTTPS URL of the web UI that started the claim.
+    /// Where the browser goes once the account approves or declines: an
+    /// HTTP or HTTPS URL of the web UI that started signing in.
     ///
     /// Field 4: `redirect_uri`
     pub redirect_uri: ::core::option::Option<::buffa::alloc::string::String>,
@@ -603,12 +603,17 @@ pub struct CreateClaimRequestRequest {
     ///
     /// Field 7: `state`
     pub state: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Whether the request claims the server: its mode is unset, or it is
+    /// unclaimed in mavio.dev mode.
+    ///
+    /// Field 8: `claim`
+    pub claim: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for CreateClaimRequestRequest {
+impl ::core::fmt::Debug for CreateAuthorizationRequestRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("CreateClaimRequestRequest")
+        f.debug_struct("CreateAuthorizationRequestRequest")
             .field("public_key", &self.public_key)
             .field("name", &self.name)
             .field("version", &self.version)
@@ -616,17 +621,18 @@ impl ::core::fmt::Debug for CreateClaimRequestRequest {
             .field("code_challenge", &self.code_challenge)
             .field("device_key", &self.device_key)
             .field("state", &self.state)
+            .field("claim", &self.claim)
             .finish()
     }
 }
-impl CreateClaimRequestRequest {
+impl CreateAuthorizationRequestRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestRequest";
 }
-impl CreateClaimRequestRequest {
+impl CreateAuthorizationRequestRequest {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::public_key`] to `Some(value)`, consuming and returning `self`.
@@ -697,15 +703,22 @@ impl CreateClaimRequestRequest {
         self.state = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::claim`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_claim(mut self, value: bool) -> Self {
+        self.claim = Some(value);
+        self
+    }
 }
-::buffa::impl_default_instance!(CreateClaimRequestRequest);
-impl ::buffa::MessageName for CreateClaimRequestRequest {
+::buffa::impl_default_instance!(CreateAuthorizationRequestRequest);
+impl ::buffa::MessageName for CreateAuthorizationRequestRequest {
     const PACKAGE: &'static str = "mavio.cloud.v1";
-    const NAME: &'static str = "CreateClaimRequestRequest";
-    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateClaimRequestRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestRequest";
+    const NAME: &'static str = "CreateAuthorizationRequestRequest";
+    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestRequest";
 }
-impl ::buffa::Message for CreateClaimRequestRequest {
+impl ::buffa::Message for CreateAuthorizationRequestRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -739,6 +752,9 @@ impl ::buffa::Message for CreateClaimRequestRequest {
         if let Some(ref v) = self.state {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.claim.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -769,6 +785,9 @@ impl ::buffa::Message for CreateClaimRequestRequest {
         }
         if let Some(ref v) = self.state {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        if let Some(v) = self.claim {
+            ::buffa::types::put_bool_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -857,6 +876,15 @@ impl ::buffa::Message for CreateClaimRequestRequest {
                     buf,
                 )?;
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.claim = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -872,11 +900,12 @@ impl ::buffa::Message for CreateClaimRequestRequest {
         self.code_challenge = ::core::option::Option::None;
         self.device_key = ::core::option::Option::None;
         self.state = ::core::option::Option::None;
+        self.claim = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for CreateClaimRequestRequest {
-    const PROTO_FQN: &'static str = "mavio.cloud.v1.CreateClaimRequestRequest";
+impl ::buffa::ExtensionSet for CreateAuthorizationRequestRequest {
+    const PROTO_FQN: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -885,12 +914,12 @@ impl ::buffa::ExtensionSet for CreateClaimRequestRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct CreateClaimRequestResponse {
+pub struct CreateAuthorizationRequestResponse {
     /// The request's ID, which ClaimServer takes.
     ///
-    /// Field 1: `claim_request`
-    pub claim_request: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The page where an account confirms it.
+    /// Field 1: `authorization_request`
+    pub authorization_request: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The page where the account approves it.
     ///
     /// Field 2: `url`
     pub url: ::core::option::Option<::buffa::alloc::string::String>,
@@ -902,31 +931,31 @@ pub struct CreateClaimRequestResponse {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for CreateClaimRequestResponse {
+impl ::core::fmt::Debug for CreateAuthorizationRequestResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("CreateClaimRequestResponse")
-            .field("claim_request", &self.claim_request)
+        f.debug_struct("CreateAuthorizationRequestResponse")
+            .field("authorization_request", &self.authorization_request)
             .field("url", &self.url)
             .field("expire_time", &self.expire_time)
             .finish()
     }
 }
-impl CreateClaimRequestResponse {
+impl CreateAuthorizationRequestResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestResponse";
 }
-impl CreateClaimRequestResponse {
+impl CreateAuthorizationRequestResponse {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::claim_request`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_claim_request(
+    ///Sets [`Self::authorization_request`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_authorization_request(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.claim_request = Some(value.into());
+        self.authorization_request = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -937,14 +966,14 @@ impl CreateClaimRequestResponse {
         self
     }
 }
-::buffa::impl_default_instance!(CreateClaimRequestResponse);
-impl ::buffa::MessageName for CreateClaimRequestResponse {
+::buffa::impl_default_instance!(CreateAuthorizationRequestResponse);
+impl ::buffa::MessageName for CreateAuthorizationRequestResponse {
     const PACKAGE: &'static str = "mavio.cloud.v1";
-    const NAME: &'static str = "CreateClaimRequestResponse";
-    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateClaimRequestResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateClaimRequestResponse";
+    const NAME: &'static str = "CreateAuthorizationRequestResponse";
+    const FULL_NAME: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.cloud.v1.CreateAuthorizationRequestResponse";
 }
-impl ::buffa::Message for CreateClaimRequestResponse {
+impl ::buffa::Message for CreateAuthorizationRequestResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -957,7 +986,7 @@ impl ::buffa::Message for CreateClaimRequestResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(ref v) = self.url {
@@ -981,7 +1010,7 @@ impl ::buffa::Message for CreateClaimRequestResponse {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
         if let Some(ref v) = self.url {
@@ -1015,7 +1044,7 @@ impl ::buffa::Message for CreateClaimRequestResponse {
                 )?;
                 ::buffa::types::merge_string(
                     self
-                        .claim_request
+                        .authorization_request
                         .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
@@ -1049,14 +1078,14 @@ impl ::buffa::Message for CreateClaimRequestResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.claim_request = ::core::option::Option::None;
+        self.authorization_request = ::core::option::Option::None;
         self.url = ::core::option::Option::None;
         self.expire_time = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for CreateClaimRequestResponse {
-    const PROTO_FQN: &'static str = "mavio.cloud.v1.CreateClaimRequestResponse";
+impl ::buffa::ExtensionSet for CreateAuthorizationRequestResponse {
+    const PROTO_FQN: &'static str = "mavio.cloud.v1.CreateAuthorizationRequestResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -1066,7 +1095,7 @@ impl ::buffa::ExtensionSet for CreateClaimRequestResponse {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ClaimServerRequest {
-    /// A claim code, or a claim_request; exactly one is set.
+    /// A claim code, or an authorization_request; exactly one is set.
     ///
     /// Field 1: `claim_code`
     pub claim_code: ::core::option::Option<::buffa::alloc::string::String>,
@@ -1081,10 +1110,11 @@ pub struct ClaimServerRequest {
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 4: `version`
     pub version: ::core::option::Option<::buffa::alloc::string::String>,
-    /// A claim request's ID from CreateClaimRequest.
+    /// The ID of an authorization request that claims the server, from
+    /// CreateAuthorizationRequest.
     ///
-    /// Field 5: `claim_request`
-    pub claim_request: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 5: `authorization_request`
+    pub authorization_request: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1095,7 +1125,7 @@ impl ::core::fmt::Debug for ClaimServerRequest {
             .field("public_key", &self.public_key)
             .field("name", &self.name)
             .field("version", &self.version)
-            .field("claim_request", &self.claim_request)
+            .field("authorization_request", &self.authorization_request)
             .finish()
     }
 }
@@ -1149,12 +1179,12 @@ impl ClaimServerRequest {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::claim_request`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_claim_request(
+    ///Sets [`Self::authorization_request`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_authorization_request(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.claim_request = Some(value.into());
+        self.authorization_request = Some(value.into());
         self
     }
 }
@@ -1190,7 +1220,7 @@ impl ::buffa::Message for ClaimServerRequest {
         if let Some(ref v) = self.version {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1215,7 +1245,7 @@ impl ::buffa::Message for ClaimServerRequest {
         if let Some(ref v) = self.version {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if let Some(ref v) = self.claim_request {
+        if let Some(ref v) = self.authorization_request {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
@@ -1280,7 +1310,7 @@ impl ::buffa::Message for ClaimServerRequest {
                 )?;
                 ::buffa::types::merge_string(
                     self
-                        .claim_request
+                        .authorization_request
                         .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
@@ -1297,7 +1327,7 @@ impl ::buffa::Message for ClaimServerRequest {
         self.public_key = ::core::option::Option::None;
         self.name = ::core::option::Option::None;
         self.version = ::core::option::Option::None;
-        self.claim_request = ::core::option::Option::None;
+        self.authorization_request = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

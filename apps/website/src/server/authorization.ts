@@ -1,9 +1,11 @@
 // Signing devices in to mavio.dev (docs/accounts.md §6): an authorization
 // code flow with PKCE whose client is a server's web UI, by the server's
 // ID, or app.mavio.dev; and link codes for televisions. The account
-// approves at /authorize, which gets a code from
-// AccountService.CreateAuthorizationCode and sends it to the redirect URI,
-// or at /claim, or at /link; the device then gets a session of its key at
+// approves at /authorize: a server pushes its web UI's request with
+// ServerService.CreateAuthorizationRequest, and approving it with
+// AccountService.AnswerAuthorizationRequest sends a code to the redirect
+// URI, as AccountService.CreateAuthorizationCode does for app.mavio.dev;
+// or the account approves at /link. The device then gets a session of its key at
 // /api/oauth/token (device-sessions.ts), with which it asks for sign-in
 // assertions of its servers.
 import { toJson } from "@bufbuild/protobuf";

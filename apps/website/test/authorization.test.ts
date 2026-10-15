@@ -1,4 +1,4 @@
-import { Code } from "@connectrpc/connect";
+import { type Client, Code } from "@connectrpc/connect";
 import { AccountService } from "@mavio/proto/mavio/cloud/v1/account_pb";
 import { describe, expect, test } from "vitest";
 
@@ -25,6 +25,31 @@ async function newDevice() {
   };
 }
 
+/**
+ * pushed has a server push its web UI's authorization request, which the
+ * account of asAccount answers, and returns where the browser goes next.
+ */
+async function pushed(
+  site: Site,
+  server: Awaited<ReturnType<typeof newServer>>,
+  asAccount: Client<typeof AccountService>,
+  deviceKey: Uint8Array,
+  fields: { claim?: boolean; approve?: boolean } = {},
+): Promise<URL> {
+  const { authorizationRequest } = await site.serverClient(server).createAuthorizationRequest({
+    publicKey: server.publicKey,
+    redirectUri: redirect,
+    codeChallenge: await s256(verifier),
+    deviceKey,
+    claim: fields.claim,
+  });
+  const { redirectUrl } = await asAccount.answerAuthorizationRequest({
+    authorizationRequest,
+    approve: fields.approve ?? true,
+  });
+  return new URL(redirectUrl);
+}
+
 function post(site: Site, path: string, fields: Record<string, string>, origin = local) {
   return site.fetch(new Request(`${apiURL}/oauth/${path}`, { method: "POST", headers: { origin }, body: new URLSearchParams(fields) }));
 }
@@ -33,10 +58,7 @@ describe("authorization codes", () => {
   test("are exchanged once with the verifier for a session of the device key", async () => {
     const { site, alice, asAlice, server } = await claimed();
     const device = await newDevice();
-    const challenge = await s256(verifier);
-    const newCode = async () =>
-      (await asAlice.createAuthorizationCode({ serverId: server.id, redirectUri: redirect, codeChallenge: challenge, deviceKey: device.publicKey }))
-        .code;
+    const newCode = async () => (await pushed(site, server, asAlice, device.publicKey)).searchParams.get("code") ?? "";
     const exchange = (c: string, fields: Record<string, string> = {}, origin = local) =>
       post(site, "token", { grant_type: "authorization_code", code: c, client_id: server.id, redirect_uri: redirect, code_verifier: verifier, ...fields }, origin);
 
@@ -75,14 +97,26 @@ describe("authorization codes", () => {
     const bob = await site.signUp("bob");
     const asBob = site.client(AccountService, bob.headers);
     await asAlice.grantAccess({ serverId: server.id, userName: "bob", access: { allLibraries: true } });
-    const invitations = await asBob.listInvitations({});
-    expect(invitations.invitations).toHaveLength(1);
     await asBob.acceptInvitation({ serverId: server.id });
-    const req = { serverId: server.id, redirectUri: redirect, codeChallenge: await s256(verifier), deviceKey: new Uint8Array(32) };
-    expect(await code(asBob.createAuthorizationCode(req))).toBe(Code.PermissionDenied);
-    expect(await code(site.client(AccountService).createAuthorizationCode(req))).toBe(Code.Unauthenticated);
-    expect(await code(asAlice.createAuthorizationCode({ ...req, redirectUri: "javascript:alert(1)" }))).toBe(Code.InvalidArgument);
-    expect(await code(asAlice.createAuthorizationCode({ ...req, codeChallenge: "short" }))).toBe(Code.InvalidArgument);
+    expect(await code(pushed(site, server, asBob, new Uint8Array(32)))).toBe(Code.PermissionDenied);
+    expect(await code(pushed(site, server, site.client(AccountService), new Uint8Array(32)))).toBe(Code.Unauthenticated);
+    const api = site.serverClient(server);
+    const req = { publicKey: server.publicKey, redirectUri: redirect, codeChallenge: await s256(verifier), deviceKey: new Uint8Array(32) };
+    expect(await code(api.createAuthorizationRequest({ ...req, redirectUri: "javascript:alert(1)" }))).toBe(Code.InvalidArgument);
+    expect(await code(api.createAuthorizationRequest({ ...req, codeChallenge: "short" }))).toBe(Code.InvalidArgument);
+    // A server not claimed yet pushes only requests that claim it.
+    const other = await newServer();
+    expect(await code(site.serverClient(other).createAuthorizationRequest({ ...req, publicKey: other.publicKey }))).toBe(
+      Code.FailedPrecondition,
+    );
+    const request = (await api.createAuthorizationRequest(req)).authorizationRequest;
+    expect(await asBob.getAuthorizationRequest({ authorizationRequest: request })).toMatchObject({
+      serverId: server.id,
+      serverName: "Home",
+      claim: false,
+      claimed: true,
+      administrator: false,
+    });
   });
 
   test("sign any account in to app.mavio.dev", async () => {
@@ -156,15 +190,15 @@ describe("device sessions", () => {
   });
 });
 
-describe("claim requests", () => {
-  test("claim the server for the account that confirms, which signs in", async () => {
+describe("authorization requests that claim the server", () => {
+  test("claim it for the account that approves, which signs in", async () => {
     const site = await newSite();
     const alice = await site.signUp("alice");
     const asAlice = site.client(AccountService, alice.headers);
     const server = await newServer();
     const api = site.serverClient(server);
     const device = await newDevice();
-    const created = await api.createClaimRequest({
+    const created = await api.createAuthorizationRequest({
       publicKey: server.publicKey,
       name: "Home",
       version: "1.0",
@@ -172,22 +206,27 @@ describe("claim requests", () => {
       codeChallenge: await s256(verifier),
       deviceKey: device.publicKey,
       state: "s1",
+      claim: true,
     });
-    expect(created.url).toBe(`http://localhost:3000/claim?request=${created.claimRequest}`);
-    const claim = { claimRequest: created.claimRequest, publicKey: server.publicKey };
+    expect(created.url).toBe(`http://localhost:3000/authorize?request_uri=${created.authorizationRequest}`);
+    const claim = { authorizationRequest: created.authorizationRequest, publicKey: server.publicKey };
     expect(await code(api.claimServer(claim))).toBe(Code.FailedPrecondition);
-    expect(await asAlice.getClaimRequest({ claimRequest: created.claimRequest })).toMatchObject({
+    expect(await asAlice.getAuthorizationRequest({ authorizationRequest: created.authorizationRequest })).toMatchObject({
       serverId: server.id,
       serverName: "Home",
       redirectUri: redirect,
+      claim: true,
       claimed: false,
+      administrator: false,
     });
 
-    const { redirectUrl } = await asAlice.answerClaimRequest({ claimRequest: created.claimRequest, confirm: true });
+    const { redirectUrl } = await asAlice.answerAuthorizationRequest({ authorizationRequest: created.authorizationRequest, approve: true });
     const to = new URL(redirectUrl);
     expect(to.origin + to.pathname).toBe(redirect);
     expect(to.searchParams.get("state")).toBe("s1");
-    expect(await code(asAlice.answerClaimRequest({ claimRequest: created.claimRequest, confirm: true }))).toBe(Code.NotFound);
+    expect(await code(asAlice.answerAuthorizationRequest({ authorizationRequest: created.authorizationRequest, approve: true }))).toBe(
+      Code.NotFound,
+    );
 
     const resp = await api.claimServer(claim);
     expect(resp.administrator?.id).toBe(alice.id);
@@ -210,18 +249,9 @@ describe("claim requests", () => {
     const site = await newSite();
     const alice = await site.signUp("alice");
     const server = await newServer();
-    const api = site.serverClient(server);
-    const created = await api.createClaimRequest({
-      publicKey: server.publicKey,
-      redirectUri: redirect,
-      codeChallenge: await s256(verifier),
-      deviceKey: new Uint8Array(32),
-    });
-    const { redirectUrl } = await site
-      .client(AccountService, alice.headers)
-      .answerClaimRequest({ claimRequest: created.claimRequest, confirm: false });
-    expect(new URL(redirectUrl).searchParams.get("error")).toBe("access_denied");
-    expect(await code(api.claimServer({ claimRequest: created.claimRequest, publicKey: server.publicKey }))).toBe(Code.InvalidArgument);
+    const to = await pushed(site, server, site.client(AccountService, alice.headers), new Uint8Array(32), { claim: true, approve: false });
+    expect(to.searchParams.get("error")).toBe("access_denied");
+    expect((await site.client(AccountService, alice.headers).listServers({})).servers).toHaveLength(0);
   });
 });
 

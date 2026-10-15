@@ -131,46 +131,70 @@ func TestClaimUnreachable(t *testing.T) {
 	}
 }
 
-func TestClaimRequest(t *testing.T) {
+func TestSignIn(t *testing.T) {
 	ctx := t.Context()
 	st := openStore(t)
 	dev := cloudtest.New(t)
 	key := identity.Generate()
 	claims := 0
-	c := &cloud.Claimer{Store: st, Client: cloud.NewClient(dev.URL, key, nil), PollInterval: 10 * time.Millisecond, Claimed: func() { claims++ }}
-	go c.Run(ctx)
-	r := cloud.ClaimRequest{RedirectURI: "http://localhost:8686/auth/callback", CodeChallenge: "challenge", DeviceKey: make([]byte, 32), State: "s"}
-	start := func() string {
+	c := &cloud.Claimer{Store: st, Client: cloud.NewClient(dev.URL, key, nil), Claimed: func() { claims++ }}
+	r := cloud.SignInRequest{RedirectURI: "http://localhost:8686/auth/callback", CodeChallenge: "challenge", DeviceKey: make([]byte, 32), State: "s"}
+	start := func() *cloudv1.CreateAuthorizationRequestRequest {
 		t.Helper()
-		u, _, err := c.Start(ctx, r)
+		u, _, err := c.StartSignIn(ctx, r)
 		if err != nil {
 			t.Fatal(err)
 		}
-		request, ok := strings.CutPrefix(u, strings.TrimSuffix(dev.URL, "/api")+"/claim?request=")
+		id, ok := strings.CutPrefix(u, strings.TrimSuffix(dev.URL, "/api")+"/authorize?request_uri=")
 		if !ok {
-			t.Fatalf("Start = %q, want mavio.dev's claim page", u)
+			t.Fatalf("StartSignIn = %q, want mavio.dev's authorization page", u)
 		}
-		return request
+		req, _ := dev.AuthorizationRequest(id)
+		return req
 	}
 
-	// A later request replaces an earlier one, which is no longer asked for.
-	first := start()
-	second := start()
-	dev.ConfirmClaimRequest(first, account("acct-9", "mallory"))
-	time.Sleep(50 * time.Millisecond)
-	if a, _ := st.Settings().Accounts(ctx); a.Claimed() {
-		t.Fatalf("settings = %+v, want unclaimed while the current request waits", a)
+	// While no request is approved, the server stays unclaimed.
+	u, _, err := c.StartSignIn(ctx, r)
+	if err != nil {
+		t.Fatal(err)
 	}
-	dev.ConfirmClaimRequest(second, account("acct-1", "alice"))
-	eventually(t, "the server is claimed", func() bool {
-		a, _ := st.Settings().Accounts(ctx)
-		return a.Claimed() && a.Administrator == "acct-1"
-	})
+	first := strings.TrimPrefix(u, strings.TrimSuffix(dev.URL, "/api")+"/authorize?request_uri=")
+	if req, ok := dev.AuthorizationRequest(first); !ok || !req.GetClaim() || req.GetRedirectUri() != r.RedirectURI || req.GetState() != "s" {
+		t.Fatalf("authorization request = %v, %v; want one claiming the server for the web UI", req, ok)
+	}
+	if err := c.Complete(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if a, _ := st.Settings().Accounts(ctx); a.Claimed() {
+		t.Fatalf("settings = %+v, want unclaimed while the request waits", a)
+	}
+
+	// Approving it claims the server once the account signs in.
+	dev.ApproveAuthorizationRequest(first, account("acct-1", "alice"))
+	if err := c.Complete(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if a, _ := st.Settings().Accounts(ctx); !a.Claimed() || a.Administrator != "acct-1" || a.Mode != core.AccountModeMavioDev {
+		t.Fatalf("settings = %+v, want claimed by acct-1", a)
+	}
 	if u, err := st.Users().GetByAccountID(ctx, "acct-1"); err != nil || u.Kind != core.UserAdmin {
 		t.Errorf("alice = %+v, %v; want the administrator", u, err)
 	}
-	if _, _, err := c.Start(ctx, r); !errors.Is(err, cloud.ErrNotClaimable) {
-		t.Errorf("Start of a claimed server: %v, want ErrNotClaimable", err)
+	if err := c.Complete(ctx); err != nil || claims != 1 {
+		t.Errorf("Complete again = %v with %d claims, want nothing more", err, claims)
+	}
+
+	// A claimed server's sign-ins no longer claim it.
+	if req := start(); req.GetClaim() {
+		t.Errorf("authorization request of a claimed server = %v, want one that does not claim it", req)
+	}
+
+	standalone := &cloud.Claimer{Store: openStore(t), Client: cloud.NewClient(dev.URL, identity.Generate(), nil)}
+	if err := standalone.Store.Settings().PutAccounts(ctx, &core.AccountSettings{Mode: core.AccountModeStandalone}); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := standalone.StartSignIn(ctx, r); !errors.Is(err, cloud.ErrStandalone) {
+		t.Errorf("StartSignIn of a standalone server: %v, want ErrStandalone", err)
 	}
 }
 

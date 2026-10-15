@@ -8,7 +8,7 @@ import {
   AcceptInvitationResponseSchema,
   type AccountService,
   AccessRecordSchema,
-  AnswerClaimRequestResponseSchema,
+  AnswerAuthorizationRequestResponseSchema,
   AnswerLinkCodeResponseSchema,
   CreateAssertionResponseSchema,
   CreateAuthorizationCodeResponseSchema,
@@ -16,7 +16,7 @@ import {
   CreateRelayTicketResponseSchema,
   DeclineInvitationResponseSchema,
   GetAccountResponseSchema,
-  GetClaimRequestResponseSchema,
+  GetAuthorizationRequestResponseSchema,
   GetLinkCodeResponseSchema,
   GrantAccessResponseSchema,
   InvitationSchema,
@@ -91,17 +91,17 @@ async function authorizationCode(
   return code;
 }
 
-// pendingClaim returns a claim request not answered yet.
-async function pendingClaim(db: Database | Tx, id: string, at: Date) {
-  const r = await db.query.claimRequests.findFirst({
+// pendingRequest returns an authorization request not answered yet.
+async function pendingRequest(db: Database | Tx, id: string, at: Date) {
+  const r = await db.query.authorizationRequests.findFirst({
     where: and(
-      eq(schema.claimRequests.id, id),
-      isNull(schema.claimRequests.accountId),
-      eq(schema.claimRequests.declined, false),
-      gt(schema.claimRequests.expiresAt, at),
+      eq(schema.authorizationRequests.id, id),
+      isNull(schema.authorizationRequests.accountId),
+      eq(schema.authorizationRequests.declined, false),
+      gt(schema.authorizationRequests.expiresAt, at),
     ),
   });
-  if (!r) throw new ConnectError("unknown, answered or expired claim request", Code.NotFound);
+  if (!r) throw new ConnectError("unknown, answered or expired authorization request", Code.NotFound);
   return r;
 }
 
@@ -262,46 +262,54 @@ export function accountService({ db, apiURL, auth, relays, now = () => new Date(
       if (!redirectURI(req.redirectUri)) {
         throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
       }
-      if (req.serverId) await administeredBy(db, me, req.serverId);
-      const code = await authorizationCode(db, me, { ...req, serverId: req.serverId || null }, now());
+      const code = await authorizationCode(db, me, { ...req, serverId: null }, now());
       return create(CreateAuthorizationCodeResponseSchema, { code });
     },
 
-    async getClaimRequest(req, ctx) {
-      await signedIn(ctx);
-      const r = await pendingClaim(db, req.claimRequest, now());
+    async getAuthorizationRequest(req, ctx) {
+      const me = await signedIn(ctx);
+      const r = await pendingRequest(db, req.authorizationRequest, now());
       const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, r.serverId) });
-      return create(GetClaimRequestResponseSchema, {
+      return create(GetAuthorizationRequestResponseSchema, {
         serverId: r.serverId,
-        serverName: r.name,
+        serverName: server?.name || r.name,
         redirectUri: r.redirectUri,
+        claim: r.claim,
         claimed: !!server,
+        administrator: server?.administratorId === me.id,
         expireTime: timestampFromDate(r.expiresAt),
       });
     },
 
-    async answerClaimRequest(req, ctx) {
-      const me = await full(ctx);
+    async answerAuthorizationRequest(req, ctx) {
+      const me = await signedIn(ctx);
       const at = now();
       return db.transaction(async (tx) => {
-        const r = await pendingClaim(tx, req.claimRequest, at);
+        const r = await pendingRequest(tx, req.authorizationRequest, at);
         const to = new URL(r.redirectUri);
         if (r.state) to.searchParams.set("state", r.state);
-        if (!req.confirm) {
-          await tx.update(schema.claimRequests).set({ declined: true }).where(eq(schema.claimRequests.id, r.id));
+        if (!req.approve) {
+          await tx.update(schema.authorizationRequests).set({ declined: true }).where(eq(schema.authorizationRequests.id, r.id));
           to.searchParams.set("error", "access_denied");
-          return create(AnswerClaimRequestResponseSchema, { redirectUrl: to.toString() });
+          return create(AnswerAuthorizationRequestResponseSchema, { redirectUrl: to.toString() });
         }
-        await registerServer(tx, { id: r.serverId, publicKey: r.publicKey, name: r.name, version: r.version }, me, at);
-        await tx.update(schema.claimRequests).set({ accountId: me.id }).where(eq(schema.claimRequests.id, r.id));
-        const code = await authorizationCode(tx, me, {
-          serverId: r.serverId,
-          redirectUri: r.redirectUri,
-          codeChallenge: r.codeChallenge,
-          deviceKey: r.deviceKey,
-        }, at);
+        if (r.claim) {
+          if (managed(me)) throw new ConnectError("managed accounts cannot claim servers", Code.PermissionDenied);
+          await registerServer(tx, { id: r.serverId, publicKey: r.publicKey, name: r.name, version: r.version }, me, at);
+          // The server fetches the account that claimed it with ClaimServer.
+          await tx.update(schema.authorizationRequests).set({ accountId: me.id }).where(eq(schema.authorizationRequests.id, r.id));
+        } else {
+          await administeredBy(tx, me, r.serverId);
+          await tx.delete(schema.authorizationRequests).where(eq(schema.authorizationRequests.id, r.id));
+        }
+        const code = await authorizationCode(
+          tx,
+          me,
+          { serverId: r.serverId, redirectUri: r.redirectUri, codeChallenge: r.codeChallenge, deviceKey: r.deviceKey },
+          at,
+        );
         to.searchParams.set("code", code);
-        return create(AnswerClaimRequestResponseSchema, { redirectUrl: to.toString() });
+        return create(AnswerAuthorizationRequestResponseSchema, { redirectUrl: to.toString() });
       });
     },
 

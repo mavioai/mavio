@@ -184,9 +184,6 @@
     <string name="auth_mode_mavio_dev_message">登录您的 Mavio 账户，可以与亲友共享媒体库，离家时也能访问。</string>
     <string name="auth_mode_standalone">独立服务器</string>
     <string name="auth_mode_standalone_message">服务器自己保存用户，从不联系 mavio.dev。</string>
-    <string name="auth_claim">认领 %s</string>
-    <string name="auth_claim_message">在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。</string>
-    <string name="auth_claim_server">前往 mavio.dev 继续</string>
     <string name="auth_sign_in_with_mavio">使用 Mavio 账户登录</string>
     <string name="auth_signing_in">正在登录…</string>
     <string name="auth_try_again">重试</string>

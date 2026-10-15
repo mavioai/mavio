@@ -25,7 +25,7 @@ func TestMavioDevMode(t *testing.T) {
 	dev := cloudtest.New(t)
 	key := identity.Generate()
 	h, st := newHandler(t, nil, func(o *httpserver.Options) {
-		claimer(t, o, dev, key)
+		claimer(o, dev, key)
 		o.Assertions = cloud.NewVerifier(dev.URL, key.ID(), cloud.NewKeySet(dev.URL, nil))
 		o.MavioDevURL = dev.URL
 	})
@@ -48,7 +48,7 @@ func TestMavioDevMode(t *testing.T) {
 		t.Errorf("GetAuthInfo before setup = %v, %v; want the mavio.dev URL", info, err)
 	}
 
-	claim(t, public, dev, cloudv1.Account_builder{Id: new("acct-1"), UserName: new("alice")}.Build())
+	claim(t, public, dev, key, cloudv1.Account_builder{Id: new("acct-1"), UserName: new("alice")}.Build())
 	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetMavioDevUrl() != dev.URL {
 		t.Errorf("GetAuthInfo in mavio.dev mode = %v, %v; want the mavio.dev URL", info, err)
 	}

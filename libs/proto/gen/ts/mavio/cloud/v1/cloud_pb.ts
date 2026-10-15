@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/cloud/v1/cloud.proto.
  */
 export const file_mavio_cloud_v1_cloud: GenFile = /*@__PURE__*/
-  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIvEBChlDcmVhdGVDbGFpbVJlcXVlc3RSZXF1ZXN0Eh4KCnB1YmxpY19rZXkYASABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgCIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgDIAEoCUIHukgEcgIYQBIkCgxyZWRpcmVjdF91cmkYBCABKAlCDrpIC8gBAXIGGIAQiAEBEiMKDmNvZGVfY2hhbGxlbmdlGAUgASgJQgu6SAjIAQFyA5gBKxIeCgpkZXZpY2Vfa2V5GAYgASgMQgq6SAfIAQF6AmggEhcKBXN0YXRlGAcgASgJQgi6SAVyAxiAASJxChpDcmVhdGVDbGFpbVJlcXVlc3RSZXNwb25zZRIVCg1jbGFpbV9yZXF1ZXN0GAEgASgJEgsKA3VybBgCIAEoCRIvCgtleHBpcmVfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiowEKEkNsYWltU2VydmVyUmVxdWVzdBIbCgpjbGFpbV9jb2RlGAEgASgJQge6SARyAhhAEh4KCnB1YmxpY19rZXkYAiABKAxCCrpIB8gBAXoCaCASFgoEbmFtZRgDIAEoCUIIukgFcgMYgAESGAoHdmVyc2lvbhgEIAEoCUIHukgEcgIYQBIeCg1jbGFpbV9yZXF1ZXN0GAUgASgJQge6SARyAhhAIlUKE0NsYWltU2VydmVyUmVzcG9uc2USLgoNYWRtaW5pc3RyYXRvchgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSDgoGY3Vyc29yGAIgASgDIksKEkxpc3RDaGFuZ2VzUmVxdWVzdBIWCgVhZnRlchgBIAEoA0IHukgEIgIoABIdCglwYWdlX3NpemUYAiABKAVCCrpIBxoFGOgHKAAiXAoTTGlzdENoYW5nZXNSZXNwb25zZRInCgdjaGFuZ2VzGAEgAygLMhYubWF2aW8uY2xvdWQudjEuQ2hhbmdlEgwKBG1vcmUYAiABKAgSDgoGY3Vyc29yGAMgASgDIrICCgZDaGFuZ2USDgoGY3Vyc29yGAEgASgDEi8KC2NyZWF0ZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI3Cg5hY2Nlc3NfZ3JhbnRlZBgDIAEoCzIdLm1hdmlvLmNsb3VkLnYxLkFjY2Vzc0dyYW50ZWRIABI3Cg5hY2Nlc3NfcmV2b2tlZBgEIAEoCzIdLm1hdmlvLmNsb3VkLnYxLkFjY2Vzc1Jldm9rZWRIABIyCg9hY2NvdW50X2NoYW5nZWQYBSABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50SAASOQoPYWNjb3VudF9yZXZva2VkGAYgASgLMh4ubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWRIAEIGCgRraW5kImEKDUFjY2Vzc0dyYW50ZWQSKAoHYWNjb3VudBgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAIgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzIiMKDUFjY2Vzc1Jldm9rZWQSEgoKYWNjb3VudF9pZBgBIAEoCSK/AQoOQWNjb3VudFJldm9rZWQSEgoKYWNjb3VudF9pZBgBIAEoCRI1CgZyZWFzb24YAiABKA4yJS5tYXZpby5jbG91ZC52MS5BY2NvdW50UmV2b2tlZC5SZWFzb24iYgoGUmVhc29uEhYKElJFQVNPTl9VTlNQRUNJRklFRBAAEhQKEFJFQVNPTl9TVVNQRU5ERUQQARISCg5SRUFTT05fREVMRVRFRBACEhYKElJFQVNPTl9DT01QUk9NSVNFRBADIk4KB0xpYnJhcnkSFAoCaWQYASABKAlCCLpIBXIDsAEBEhYKBG5hbWUYAiABKAlCCLpIBXIDGIACEhUKBGtpbmQYAyABKAlCB7pIBHICGCAiUAoXUHVibGlzaExpYnJhcmllc1JlcXVlc3QSNQoJbGlicmFyaWVzGAEgAygLMhcubWF2aW8uY2xvdWQudjEuTGlicmFyeUIJukgGkgEDEOgHIhoKGFB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSI9ChlQdWJsaXNoQ29ubmVjdGlvbnNSZXF1ZXN0EiAKBHVybHMYASADKAlCErpID5IBDBBAIghyBhiABIgBASIcChpQdWJsaXNoQ29ubmVjdGlvbnNSZXNwb25zZSIYCgZOb3RpY2USDgoGY3Vyc29yGAEgASgDIk4KF1NldEFjbWVDaGFsbGVuZ2VSZXF1ZXN0EjMKBnZhbHVlcxgBIAMoCUIjukggkgEdCAEQAiIXchUyE15bQS1aYS16MC05Xy1dezQzfSQiGgoYU2V0QWNtZUNoYWxsZW5nZVJlc3BvbnNlIhsKGUNsZWFyQWNtZUNoYWxsZW5nZVJlcXVlc3QiHAoaQ2xlYXJBY21lQ2hhbGxlbmdlUmVzcG9uc2UiGgoYQ3JlYXRlQWNtZUJpbmRpbmdSZXF1ZXN0Ij0KGUNyZWF0ZUFjbWVCaW5kaW5nUmVzcG9uc2USDgoGa2V5X2lkGAEgASgJEhAKCGhtYWNfa2V5GAIgASgMIhMKEUxpc3RSZWxheXNSZXF1ZXN0IjsKEkxpc3RSZWxheXNSZXNwb25zZRIlCgZyZWxheXMYASADKAsyFS5tYXZpby5jbG91ZC52MS5SZWxheSIkCgVSZWxheRIOCgZyZWdpb24YASABKAkSCwoDdXJsGAIgASgJIj0KFVNldFJlbGF5UmVnaW9uUmVxdWVzdBIkCgZyZWdpb24YASABKAlCFLpIEXIPGBAyC15bYS16MC05XSokIhgKFlNldFJlbGF5UmVnaW9uUmVzcG9uc2UqXAoLQWNjb3VudEtpbmQSHAoYQUNDT1VOVF9LSU5EX1VOU1BFQ0lGSUVEEAASFQoRQUNDT1VOVF9LSU5EX0ZVTEwQARIYChRBQ0NPVU5UX0tJTkRfTUFOQUdFRBACMpcICg1TZXJ2ZXJTZXJ2aWNlEmsKEkNyZWF0ZUNsYWltUmVxdWVzdBIpLm1hdmlvLmNsb3VkLnYxLkNyZWF0ZUNsYWltUmVxdWVzdFJlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5DcmVhdGVDbGFpbVJlcXVlc3RSZXNwb25zZRJWCgtDbGFpbVNlcnZlchIiLm1hdmlvLmNsb3VkLnYxLkNsYWltU2VydmVyUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkNsYWltU2VydmVyUmVzcG9uc2USWwoLTGlzdENoYW5nZXMSIi5tYXZpby5jbG91ZC52MS5MaXN0Q2hhbmdlc1JlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5MaXN0Q2hhbmdlc1Jlc3BvbnNlIgOQAgESagoQUHVibGlzaExpYnJhcmllcxInLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXF1ZXN0GigubWF2aW8uY2xvdWQudjEuUHVibGlzaExpYnJhcmllc1Jlc3BvbnNlIgOQAgIScAoSUHVibGlzaENvbm5lY3Rpb25zEikubWF2aW8uY2xvdWQudjEuUHVibGlzaENvbm5lY3Rpb25zUmVxdWVzdBoqLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hDb25uZWN0aW9uc1Jlc3BvbnNlIgOQAgISagoQU2V0QWNtZUNoYWxsZW5nZRInLm1hdmlvLmNsb3VkLnYxLlNldEFjbWVDaGFsbGVuZ2VSZXF1ZXN0GigubWF2aW8uY2xvdWQudjEuU2V0QWNtZUNoYWxsZW5nZVJlc3BvbnNlIgOQAgIScAoSQ2xlYXJBY21lQ2hhbGxlbmdlEikubWF2aW8uY2xvdWQudjEuQ2xlYXJBY21lQ2hhbGxlbmdlUmVxdWVzdBoqLm1hdmlvLmNsb3VkLnYxLkNsZWFyQWNtZUNoYWxsZW5nZVJlc3BvbnNlIgOQAgISaAoRQ3JlYXRlQWNtZUJpbmRpbmcSKC5tYXZpby5jbG91ZC52MS5DcmVhdGVBY21lQmluZGluZ1JlcXVlc3QaKS5tYXZpby5jbG91ZC52MS5DcmVhdGVBY21lQmluZGluZ1Jlc3BvbnNlElgKCkxpc3RSZWxheXMSIS5tYXZpby5jbG91ZC52MS5MaXN0UmVsYXlzUmVxdWVzdBoiLm1hdmlvLmNsb3VkLnYxLkxpc3RSZWxheXNSZXNwb25zZSIDkAIBEmQKDlNldFJlbGF5UmVnaW9uEiUubWF2aW8uY2xvdWQudjEuU2V0UmVsYXlSZWdpb25SZXF1ZXN0GiYubWF2aW8uY2xvdWQudjEuU2V0UmVsYXlSZWdpb25SZXNwb25zZSIDkAICQr0BChJjb20ubWF2aW8uY2xvdWQudjFCCkNsb3VkUHJvdG9QAVpBZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2Nsb3VkL3YxO2Nsb3VkdjGiAgNNQ1iqAg5NYXZpby5DbG91ZC5WMcoCDk1hdmlvXENsb3VkXFYx4gIaTWF2aW9cQ2xvdWRcVjFcR1BCTWV0YWRhdGHqAhBNYXZpbzo6Q2xvdWQ6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
+  fileDesc("ChptYXZpby9jbG91ZC92MS9jbG91ZC5wcm90bxIObWF2aW8uY2xvdWQudjEioQEKB0FjY291bnQSCgoCaWQYASABKAkSEQoJdXNlcl9uYW1lGAIgASgJEhQKDGRpc3BsYXlfbmFtZRgDIAEoCRIpCgRraW5kGAQgASgOMhsubWF2aW8uY2xvdWQudjEuQWNjb3VudEtpbmQSNgoLcmVzdHJpY3Rpb24YBSABKA4yIS5tYXZpby51c2VyLnYxLlJlc3RyaWN0aW9uUHJvZmlsZSKwAQoGQWNjZXNzEhUKDWFsbF9saWJyYXJpZXMYASABKAgSEwoLbGlicmFyeV9pZHMYAiADKAkSGwoTbWF4X3BhcmVudGFsX3JhdGluZxgDIAEoBRIVCg1ibG9ja191bnJhdGVkGAQgASgIEhYKDmFsbG93ZWRfbGFiZWxzGAUgAygJEhYKDmJsb2NrZWRfbGFiZWxzGAYgAygJEhYKDmFsbG93X2Rvd25sb2FkGAcgASgIIogCCiFDcmVhdGVBdXRob3JpemF0aW9uUmVxdWVzdFJlcXVlc3QSHgoKcHVibGljX2tleRgBIAEoDEIKukgHyAEBegJoIBIWCgRuYW1lGAIgASgJQgi6SAVyAxiAARIYCgd2ZXJzaW9uGAMgASgJQge6SARyAhhAEiQKDHJlZGlyZWN0X3VyaRgEIAEoCUIOukgLyAEBcgYYgBCIAQESIwoOY29kZV9jaGFsbGVuZ2UYBSABKAlCC7pICMgBAXIDmAErEh4KCmRldmljZV9rZXkYBiABKAxCCrpIB8gBAXoCaCASFwoFc3RhdGUYByABKAlCCLpIBXIDGIABEg0KBWNsYWltGAggASgIIoEBCiJDcmVhdGVBdXRob3JpemF0aW9uUmVxdWVzdFJlc3BvbnNlEh0KFWF1dGhvcml6YXRpb25fcmVxdWVzdBgBIAEoCRILCgN1cmwYAiABKAkSLwoLZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIqsBChJDbGFpbVNlcnZlclJlcXVlc3QSGwoKY2xhaW1fY29kZRgBIAEoCUIHukgEcgIYQBIeCgpwdWJsaWNfa2V5GAIgASgMQgq6SAfIAQF6AmggEhYKBG5hbWUYAyABKAlCCLpIBXIDGIABEhgKB3ZlcnNpb24YBCABKAlCB7pIBHICGEASJgoVYXV0aG9yaXphdGlvbl9yZXF1ZXN0GAUgASgJQge6SARyAhhAIlUKE0NsYWltU2VydmVyUmVzcG9uc2USLgoNYWRtaW5pc3RyYXRvchgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSDgoGY3Vyc29yGAIgASgDIksKEkxpc3RDaGFuZ2VzUmVxdWVzdBIWCgVhZnRlchgBIAEoA0IHukgEIgIoABIdCglwYWdlX3NpemUYAiABKAVCCrpIBxoFGOgHKAAiXAoTTGlzdENoYW5nZXNSZXNwb25zZRInCgdjaGFuZ2VzGAEgAygLMhYubWF2aW8uY2xvdWQudjEuQ2hhbmdlEgwKBG1vcmUYAiABKAgSDgoGY3Vyc29yGAMgASgDIrICCgZDaGFuZ2USDgoGY3Vyc29yGAEgASgDEi8KC2NyZWF0ZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI3Cg5hY2Nlc3NfZ3JhbnRlZBgDIAEoCzIdLm1hdmlvLmNsb3VkLnYxLkFjY2Vzc0dyYW50ZWRIABI3Cg5hY2Nlc3NfcmV2b2tlZBgEIAEoCzIdLm1hdmlvLmNsb3VkLnYxLkFjY2Vzc1Jldm9rZWRIABIyCg9hY2NvdW50X2NoYW5nZWQYBSABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50SAASOQoPYWNjb3VudF9yZXZva2VkGAYgASgLMh4ubWF2aW8uY2xvdWQudjEuQWNjb3VudFJldm9rZWRIAEIGCgRraW5kImEKDUFjY2Vzc0dyYW50ZWQSKAoHYWNjb3VudBgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAIgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzIiMKDUFjY2Vzc1Jldm9rZWQSEgoKYWNjb3VudF9pZBgBIAEoCSK/AQoOQWNjb3VudFJldm9rZWQSEgoKYWNjb3VudF9pZBgBIAEoCRI1CgZyZWFzb24YAiABKA4yJS5tYXZpby5jbG91ZC52MS5BY2NvdW50UmV2b2tlZC5SZWFzb24iYgoGUmVhc29uEhYKElJFQVNPTl9VTlNQRUNJRklFRBAAEhQKEFJFQVNPTl9TVVNQRU5ERUQQARISCg5SRUFTT05fREVMRVRFRBACEhYKElJFQVNPTl9DT01QUk9NSVNFRBADIk4KB0xpYnJhcnkSFAoCaWQYASABKAlCCLpIBXIDsAEBEhYKBG5hbWUYAiABKAlCCLpIBXIDGIACEhUKBGtpbmQYAyABKAlCB7pIBHICGCAiUAoXUHVibGlzaExpYnJhcmllc1JlcXVlc3QSNQoJbGlicmFyaWVzGAEgAygLMhcubWF2aW8uY2xvdWQudjEuTGlicmFyeUIJukgGkgEDEOgHIhoKGFB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSI9ChlQdWJsaXNoQ29ubmVjdGlvbnNSZXF1ZXN0EiAKBHVybHMYASADKAlCErpID5IBDBBAIghyBhiABIgBASIcChpQdWJsaXNoQ29ubmVjdGlvbnNSZXNwb25zZSIYCgZOb3RpY2USDgoGY3Vyc29yGAEgASgDIk4KF1NldEFjbWVDaGFsbGVuZ2VSZXF1ZXN0EjMKBnZhbHVlcxgBIAMoCUIjukggkgEdCAEQAiIXchUyE15bQS1aYS16MC05Xy1dezQzfSQiGgoYU2V0QWNtZUNoYWxsZW5nZVJlc3BvbnNlIhsKGUNsZWFyQWNtZUNoYWxsZW5nZVJlcXVlc3QiHAoaQ2xlYXJBY21lQ2hhbGxlbmdlUmVzcG9uc2UiGgoYQ3JlYXRlQWNtZUJpbmRpbmdSZXF1ZXN0Ij0KGUNyZWF0ZUFjbWVCaW5kaW5nUmVzcG9uc2USDgoGa2V5X2lkGAEgASgJEhAKCGhtYWNfa2V5GAIgASgMIhMKEUxpc3RSZWxheXNSZXF1ZXN0IjsKEkxpc3RSZWxheXNSZXNwb25zZRIlCgZyZWxheXMYASADKAsyFS5tYXZpby5jbG91ZC52MS5SZWxheSIkCgVSZWxheRIOCgZyZWdpb24YASABKAkSCwoDdXJsGAIgASgJIj0KFVNldFJlbGF5UmVnaW9uUmVxdWVzdBIkCgZyZWdpb24YASABKAlCFLpIEXIPGBAyC15bYS16MC05XSokIhgKFlNldFJlbGF5UmVnaW9uUmVzcG9uc2UqXAoLQWNjb3VudEtpbmQSHAoYQUNDT1VOVF9LSU5EX1VOU1BFQ0lGSUVEEAASFQoRQUNDT1VOVF9LSU5EX0ZVTEwQARIYChRBQ0NPVU5UX0tJTkRfTUFOQUdFRBACMrAICg1TZXJ2ZXJTZXJ2aWNlEoMBChpDcmVhdGVBdXRob3JpemF0aW9uUmVxdWVzdBIxLm1hdmlvLmNsb3VkLnYxLkNyZWF0ZUF1dGhvcml6YXRpb25SZXF1ZXN0UmVxdWVzdBoyLm1hdmlvLmNsb3VkLnYxLkNyZWF0ZUF1dGhvcml6YXRpb25SZXF1ZXN0UmVzcG9uc2USVgoLQ2xhaW1TZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5DbGFpbVNlcnZlclJlc3BvbnNlElsKC0xpc3RDaGFuZ2VzEiIubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdENoYW5nZXNSZXNwb25zZSIDkAIBEmoKEFB1Ymxpc2hMaWJyYXJpZXMSJy5tYXZpby5jbG91ZC52MS5QdWJsaXNoTGlicmFyaWVzUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hMaWJyYXJpZXNSZXNwb25zZSIDkAICEnAKElB1Ymxpc2hDb25uZWN0aW9ucxIpLm1hdmlvLmNsb3VkLnYxLlB1Ymxpc2hDb25uZWN0aW9uc1JlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5QdWJsaXNoQ29ubmVjdGlvbnNSZXNwb25zZSIDkAICEmoKEFNldEFjbWVDaGFsbGVuZ2USJy5tYXZpby5jbG91ZC52MS5TZXRBY21lQ2hhbGxlbmdlUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLlNldEFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEnAKEkNsZWFyQWNtZUNoYWxsZW5nZRIpLm1hdmlvLmNsb3VkLnYxLkNsZWFyQWNtZUNoYWxsZW5nZVJlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5DbGVhckFjbWVDaGFsbGVuZ2VSZXNwb25zZSIDkAICEmgKEUNyZWF0ZUFjbWVCaW5kaW5nEigubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXF1ZXN0GikubWF2aW8uY2xvdWQudjEuQ3JlYXRlQWNtZUJpbmRpbmdSZXNwb25zZRJYCgpMaXN0UmVsYXlzEiEubWF2aW8uY2xvdWQudjEuTGlzdFJlbGF5c1JlcXVlc3QaIi5tYXZpby5jbG91ZC52MS5MaXN0UmVsYXlzUmVzcG9uc2UiA5ACARJkCg5TZXRSZWxheVJlZ2lvbhIlLm1hdmlvLmNsb3VkLnYxLlNldFJlbGF5UmVnaW9uUmVxdWVzdBomLm1hdmlvLmNsb3VkLnYxLlNldFJlbGF5UmVnaW9uUmVzcG9uc2UiA5ACAkK9AQoSY29tLm1hdmlvLmNsb3VkLnYxQgpDbG91ZFByb3RvUAFaQWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9jbG91ZC92MTtjbG91ZHYxogIDTUNYqgIOTWF2aW8uQ2xvdWQuVjHKAg5NYXZpb1xDbG91ZFxWMeICGk1hdmlvXENsb3VkXFYxXEdQQk1ldGFkYXRh6gIQTWF2aW86OkNsb3VkOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
 
 /**
  * Account is a Mavio account as a server sees it.
@@ -126,9 +126,9 @@ export const AccessSchema: GenMessage<Access> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_cloud, 1);
 
 /**
- * @generated from message mavio.cloud.v1.CreateClaimRequestRequest
+ * @generated from message mavio.cloud.v1.CreateAuthorizationRequestRequest
  */
-export type CreateClaimRequestRequest = Message<"mavio.cloud.v1.CreateClaimRequestRequest"> & {
+export type CreateAuthorizationRequestRequest = Message<"mavio.cloud.v1.CreateAuthorizationRequestRequest"> & {
   /**
    * The server's Ed25519 identity public key, whose fingerprint is the ID
    * in the request's JWT.
@@ -150,8 +150,8 @@ export type CreateClaimRequestRequest = Message<"mavio.cloud.v1.CreateClaimReque
   version: string;
 
   /**
-   * Where the browser goes once the account confirms or declines: an
-   * HTTP or HTTPS URL of the web UI that started the claim.
+   * Where the browser goes once the account approves or declines: an
+   * HTTP or HTTPS URL of the web UI that started signing in.
    *
    * @generated from field: string redirect_uri = 4;
    */
@@ -177,28 +177,36 @@ export type CreateClaimRequestRequest = Message<"mavio.cloud.v1.CreateClaimReque
    * @generated from field: string state = 7;
    */
   state: string;
+
+  /**
+   * Whether the request claims the server: its mode is unset, or it is
+   * unclaimed in mavio.dev mode.
+   *
+   * @generated from field: bool claim = 8;
+   */
+  claim: boolean;
 };
 
 /**
- * Describes the message mavio.cloud.v1.CreateClaimRequestRequest.
- * Use `create(CreateClaimRequestRequestSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.CreateAuthorizationRequestRequest.
+ * Use `create(CreateAuthorizationRequestRequestSchema)` to create a new message.
  */
-export const CreateClaimRequestRequestSchema: GenMessage<CreateClaimRequestRequest> = /*@__PURE__*/
+export const CreateAuthorizationRequestRequestSchema: GenMessage<CreateAuthorizationRequestRequest> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_cloud, 2);
 
 /**
- * @generated from message mavio.cloud.v1.CreateClaimRequestResponse
+ * @generated from message mavio.cloud.v1.CreateAuthorizationRequestResponse
  */
-export type CreateClaimRequestResponse = Message<"mavio.cloud.v1.CreateClaimRequestResponse"> & {
+export type CreateAuthorizationRequestResponse = Message<"mavio.cloud.v1.CreateAuthorizationRequestResponse"> & {
   /**
    * The request's ID, which ClaimServer takes.
    *
-   * @generated from field: string claim_request = 1;
+   * @generated from field: string authorization_request = 1;
    */
-  claimRequest: string;
+  authorizationRequest: string;
 
   /**
-   * The page where an account confirms it.
+   * The page where the account approves it.
    *
    * @generated from field: string url = 2;
    */
@@ -211,10 +219,10 @@ export type CreateClaimRequestResponse = Message<"mavio.cloud.v1.CreateClaimRequ
 };
 
 /**
- * Describes the message mavio.cloud.v1.CreateClaimRequestResponse.
- * Use `create(CreateClaimRequestResponseSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.CreateAuthorizationRequestResponse.
+ * Use `create(CreateAuthorizationRequestResponseSchema)` to create a new message.
  */
-export const CreateClaimRequestResponseSchema: GenMessage<CreateClaimRequestResponse> = /*@__PURE__*/
+export const CreateAuthorizationRequestResponseSchema: GenMessage<CreateAuthorizationRequestResponse> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_cloud, 3);
 
 /**
@@ -222,7 +230,7 @@ export const CreateClaimRequestResponseSchema: GenMessage<CreateClaimRequestResp
  */
 export type ClaimServerRequest = Message<"mavio.cloud.v1.ClaimServerRequest"> & {
   /**
-   * A claim code, or a claim_request; exactly one is set.
+   * A claim code, or an authorization_request; exactly one is set.
    *
    * @generated from field: string claim_code = 1;
    */
@@ -249,11 +257,12 @@ export type ClaimServerRequest = Message<"mavio.cloud.v1.ClaimServerRequest"> & 
   version: string;
 
   /**
-   * A claim request's ID from CreateClaimRequest.
+   * The ID of an authorization request that claims the server, from
+   * CreateAuthorizationRequest.
    *
-   * @generated from field: string claim_request = 5;
+   * @generated from field: string authorization_request = 5;
    */
-  claimRequest: string;
+  authorizationRequest: string;
 };
 
 /**
@@ -847,34 +856,38 @@ export const AccountKindSchema: GenEnum<AccountKind> = /*@__PURE__*/
  * (private_key_jwt): EdDSA, with the server's ID as its kid, iss and sub,
  * mavio.dev's API base URL as its aud, a random jti, and an expiry at
  * most a minute after it was issued, carried as a bearer token. Claiming
- * registers the key, and CreateClaimRequest and ClaimServer carry it; the
- * other methods need a claimed server.
+ * registers the key, and CreateAuthorizationRequest and ClaimServer carry
+ * it; the other methods need a claimed server.
  *
  * @generated from service mavio.cloud.v1.ServerService
  */
 export const ServerService: GenService<{
   /**
-   * CreateClaimRequest asks for a claim that an account confirms at the
-   * page it returns, for the web UI at a redirect URI that started it
-   * (docs/accounts.md §3.2). Confirming claims the server for the account,
-   * and sends the browser to the redirect URI with an authorization code
-   * of the account for the server and the device key, as /authorize does;
-   * the server then fetches the outcome with ClaimServer.
+   * CreateAuthorizationRequest pushes the authorization request of the
+   * server's web UI at a redirect URI (docs/accounts.md §6), as RFC 9126
+   * does, and returns the /authorize page where the account approves it.
+   * Approving sends the browser to the redirect URI with an authorization
+   * code of the account for the server and the device key. A request that
+   * claims the server registers it for the account that approves it,
+   * which becomes its administrator (docs/accounts.md §3.2), and the
+   * server then fetches the outcome with ClaimServer; any other request
+   * needs a claimed server and signs in only its administrator.
    *
-   * @generated from rpc mavio.cloud.v1.ServerService.CreateClaimRequest
+   * @generated from rpc mavio.cloud.v1.ServerService.CreateAuthorizationRequest
    */
-  createClaimRequest: {
+  createAuthorizationRequest: {
     methodKind: "unary";
-    input: typeof CreateClaimRequestRequestSchema;
-    output: typeof CreateClaimRequestResponseSchema;
+    input: typeof CreateAuthorizationRequestRequestSchema;
+    output: typeof CreateAuthorizationRequestResponseSchema;
   },
   /**
    * ClaimServer gives the account that claimed the server, which becomes
    * its administrator: with a claim code from mavio.dev/claim, it claims
-   * the server for the code's account, and with a claim request it gives
-   * the account that confirmed the request. A claim request not confirmed
-   * yet fails with FAILED_PRECONDITION; an unknown, used or expired code,
-   * and an unknown, declined or expired request, with INVALID_ARGUMENT.
+   * the server for the code's account, and with an authorization request
+   * that claims the server it gives the account that approved the
+   * request. A request not approved yet fails with FAILED_PRECONDITION;
+   * an unknown, used or expired code, and an unknown, declined or expired
+   * request, with INVALID_ARGUMENT.
    * Claiming a server again, after its command line unclaimed it, keeps
    * its changes.
    *

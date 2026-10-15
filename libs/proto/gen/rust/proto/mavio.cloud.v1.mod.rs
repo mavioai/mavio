@@ -44,13 +44,13 @@ pub use self::__buffa::view::AccessView;
 #[doc(inline)]
 pub use self::__buffa::view::AccessOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::CreateClaimRequestRequestView;
+pub use self::__buffa::view::CreateAuthorizationRequestRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::CreateClaimRequestRequestOwnedView;
+pub use self::__buffa::view::CreateAuthorizationRequestRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::CreateClaimRequestResponseView;
+pub use self::__buffa::view::CreateAuthorizationRequestResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::CreateClaimRequestResponseOwnedView;
+pub use self::__buffa::view::CreateAuthorizationRequestResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ClaimServerRequestView;
 #[doc(inline)]
@@ -220,21 +220,21 @@ pub use self::__buffa::view::CreateAuthorizationCodeResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::CreateAuthorizationCodeResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::GetClaimRequestRequestView;
+pub use self::__buffa::view::GetAuthorizationRequestRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::GetClaimRequestRequestOwnedView;
+pub use self::__buffa::view::GetAuthorizationRequestRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::GetClaimRequestResponseView;
+pub use self::__buffa::view::GetAuthorizationRequestResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::GetClaimRequestResponseOwnedView;
+pub use self::__buffa::view::GetAuthorizationRequestResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::AnswerClaimRequestRequestView;
+pub use self::__buffa::view::AnswerAuthorizationRequestRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::AnswerClaimRequestRequestOwnedView;
+pub use self::__buffa::view::AnswerAuthorizationRequestRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::AnswerClaimRequestResponseView;
+pub use self::__buffa::view::AnswerAuthorizationRequestResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::AnswerClaimRequestResponseOwnedView;
+pub use self::__buffa::view::AnswerAuthorizationRequestResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::GetLinkCodeRequestView;
 #[doc(inline)]

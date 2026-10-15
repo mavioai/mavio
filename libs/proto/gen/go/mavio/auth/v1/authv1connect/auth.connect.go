@@ -100,8 +100,8 @@ const (
 	AuthServiceListSwitchableUsersProcedure = "/mavio.auth.v1.AuthService/ListSwitchableUsers"
 	// AuthServiceSwitchUserProcedure is the fully-qualified name of the AuthService's SwitchUser RPC.
 	AuthServiceSwitchUserProcedure = "/mavio.auth.v1.AuthService/SwitchUser"
-	// AuthServiceStartClaimProcedure is the fully-qualified name of the AuthService's StartClaim RPC.
-	AuthServiceStartClaimProcedure = "/mavio.auth.v1.AuthService/StartClaim"
+	// AuthServiceStartSignInProcedure is the fully-qualified name of the AuthService's StartSignIn RPC.
+	AuthServiceStartSignInProcedure = "/mavio.auth.v1.AuthService/StartSignIn"
 	// AuthServiceSignInWithAssertionProcedure is the fully-qualified name of the AuthService's
 	// SignInWithAssertion RPC.
 	AuthServiceSignInWithAssertionProcedure = "/mavio.auth.v1.AuthService/SignInWithAssertion"
@@ -208,25 +208,28 @@ type AuthServiceClient interface {
 	// session opened before switching keep their user, so the client opens
 	// them again.
 	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
-	// StartClaim starts setting up a server in mavio.dev mode, or claiming
-	// it again after its command line unclaimed it (docs/accounts.md §3.2).
-	// The server asks mavio.dev for a claim request and returns the page
-	// where an account confirms it; mavio.dev then claims the server for the
-	// account, which becomes the administrator, and sends the browser to the
-	// redirect URI with an authorization code for the device key, which
-	// signs the account in. The server asks mavio.dev for the request's
-	// outcome until it is claimed or the request expires; a later StartClaim
-	// replaces an earlier request. It fails with FAILED_PRECONDITION when the
-	// server is standalone or claimed and UNAVAILABLE when mavio.dev cannot
-	// be reached.
-	StartClaim(context.Context, *v1.StartClaimRequest) (*v1.StartClaimResponse, error)
+	// StartSignIn starts signing a Mavio account in to the server's web UI
+	// (docs/accounts.md §6): the server pushes the web UI's authorization
+	// request to mavio.dev, signed with its identity key, and returns the
+	// page where the account approves it, which sends the browser to the
+	// redirect URI with an authorization code for the device key. While the
+	// server's mode is unset, or it is unclaimed in mavio.dev mode, signing
+	// in claims it (docs/accounts.md §3.2): the account that approves
+	// becomes the administrator, and the server learns of it when the
+	// account signs in with SignInWithAssertion. It fails with
+	// FAILED_PRECONDITION when the server is standalone and UNAVAILABLE when
+	// mavio.dev cannot be reached.
+	StartSignIn(context.Context, *v1.StartSignInRequest) (*v1.StartSignInResponse, error)
 	// SignInWithAssertion signs a device in to a server in mavio.dev mode
 	// with a sign-in assertion mavio.dev issued for the server and the
 	// device's key, replacing the device's previous session. The device
 	// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
 	// assertion. A wrong, expired or used assertion, a wrong signature and
 	// an account without access to the server fail with UNAUTHENTICATED; a
-	// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+	// server not in mavio.dev mode fails with FAILED_PRECONDITION. On a
+	// server that a sign-in is claiming, it first asks mavio.dev for the
+	// account that approved it, and fails with UNAVAILABLE when mavio.dev
+	// cannot be reached.
 	SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error)
 }
 
@@ -391,10 +394,10 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
 			connect.WithClientOptions(opts...),
 		),
-		startClaim: connect.NewClient[v1.StartClaimRequest, v1.StartClaimResponse](
+		startSignIn: connect.NewClient[v1.StartSignInRequest, v1.StartSignInResponse](
 			httpClient,
-			baseURL+AuthServiceStartClaimProcedure,
-			connect.WithSchema(authServiceMethods.ByName("StartClaim")),
+			baseURL+AuthServiceStartSignInProcedure,
+			connect.WithSchema(authServiceMethods.ByName("StartSignIn")),
 			connect.WithClientOptions(opts...),
 		),
 		signInWithAssertion: connect.NewClient[v1.SignInWithAssertionRequest, v1.SignInWithAssertionResponse](
@@ -432,7 +435,7 @@ type authServiceClient struct {
 	acceptInvitation       *connect.Client[v1.AcceptInvitationRequest, v1.AcceptInvitationResponse]
 	listSwitchableUsers    *connect.Client[v1.ListSwitchableUsersRequest, v1.ListSwitchableUsersResponse]
 	switchUser             *connect.Client[v1.SwitchUserRequest, v1.SwitchUserResponse]
-	startClaim             *connect.Client[v1.StartClaimRequest, v1.StartClaimResponse]
+	startSignIn            *connect.Client[v1.StartSignInRequest, v1.StartSignInResponse]
 	signInWithAssertion    *connect.Client[v1.SignInWithAssertionRequest, v1.SignInWithAssertionResponse]
 }
 
@@ -652,9 +655,9 @@ func (c *authServiceClient) SwitchUser(ctx context.Context, req *v1.SwitchUserRe
 	return nil, err
 }
 
-// StartClaim calls mavio.auth.v1.AuthService.StartClaim.
-func (c *authServiceClient) StartClaim(ctx context.Context, req *v1.StartClaimRequest) (*v1.StartClaimResponse, error) {
-	response, err := c.startClaim.CallUnary(ctx, connect.NewRequest(req))
+// StartSignIn calls mavio.auth.v1.AuthService.StartSignIn.
+func (c *authServiceClient) StartSignIn(ctx context.Context, req *v1.StartSignInRequest) (*v1.StartSignInResponse, error) {
+	response, err := c.startSignIn.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -771,25 +774,28 @@ type AuthServiceHandler interface {
 	// session opened before switching keep their user, so the client opens
 	// them again.
 	SwitchUser(context.Context, *v1.SwitchUserRequest) (*v1.SwitchUserResponse, error)
-	// StartClaim starts setting up a server in mavio.dev mode, or claiming
-	// it again after its command line unclaimed it (docs/accounts.md §3.2).
-	// The server asks mavio.dev for a claim request and returns the page
-	// where an account confirms it; mavio.dev then claims the server for the
-	// account, which becomes the administrator, and sends the browser to the
-	// redirect URI with an authorization code for the device key, which
-	// signs the account in. The server asks mavio.dev for the request's
-	// outcome until it is claimed or the request expires; a later StartClaim
-	// replaces an earlier request. It fails with FAILED_PRECONDITION when the
-	// server is standalone or claimed and UNAVAILABLE when mavio.dev cannot
-	// be reached.
-	StartClaim(context.Context, *v1.StartClaimRequest) (*v1.StartClaimResponse, error)
+	// StartSignIn starts signing a Mavio account in to the server's web UI
+	// (docs/accounts.md §6): the server pushes the web UI's authorization
+	// request to mavio.dev, signed with its identity key, and returns the
+	// page where the account approves it, which sends the browser to the
+	// redirect URI with an authorization code for the device key. While the
+	// server's mode is unset, or it is unclaimed in mavio.dev mode, signing
+	// in claims it (docs/accounts.md §3.2): the account that approves
+	// becomes the administrator, and the server learns of it when the
+	// account signs in with SignInWithAssertion. It fails with
+	// FAILED_PRECONDITION when the server is standalone and UNAVAILABLE when
+	// mavio.dev cannot be reached.
+	StartSignIn(context.Context, *v1.StartSignInRequest) (*v1.StartSignInResponse, error)
 	// SignInWithAssertion signs a device in to a server in mavio.dev mode
 	// with a sign-in assertion mavio.dev issued for the server and the
 	// device's key, replacing the device's previous session. The device
 	// signs, with its key, "mavio-sign-in-assertion-v1", a zero byte and the
 	// assertion. A wrong, expired or used assertion, a wrong signature and
 	// an account without access to the server fail with UNAUTHENTICATED; a
-	// server not in mavio.dev mode fails with FAILED_PRECONDITION.
+	// server not in mavio.dev mode fails with FAILED_PRECONDITION. On a
+	// server that a sign-in is claiming, it first asks mavio.dev for the
+	// account that approved it, and fails with UNAVAILABLE when mavio.dev
+	// cannot be reached.
 	SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error)
 }
 
@@ -950,10 +956,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("SwitchUser")),
 		connect.WithHandlerOptions(opts...),
 	)
-	authServiceStartClaimHandler := connect.NewUnaryHandlerSimple(
-		AuthServiceStartClaimProcedure,
-		svc.StartClaim,
-		connect.WithSchema(authServiceMethods.ByName("StartClaim")),
+	authServiceStartSignInHandler := connect.NewUnaryHandlerSimple(
+		AuthServiceStartSignInProcedure,
+		svc.StartSignIn,
+		connect.WithSchema(authServiceMethods.ByName("StartSignIn")),
 		connect.WithHandlerOptions(opts...),
 	)
 	authServiceSignInWithAssertionHandler := connect.NewUnaryHandlerSimple(
@@ -1012,8 +1018,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceListSwitchableUsersHandler.ServeHTTP(w, r)
 		case AuthServiceSwitchUserProcedure:
 			authServiceSwitchUserHandler.ServeHTTP(w, r)
-		case AuthServiceStartClaimProcedure:
-			authServiceStartClaimHandler.ServeHTTP(w, r)
+		case AuthServiceStartSignInProcedure:
+			authServiceStartSignInHandler.ServeHTTP(w, r)
 		case AuthServiceSignInWithAssertionProcedure:
 			authServiceSignInWithAssertionHandler.ServeHTTP(w, r)
 		default:
@@ -1121,8 +1127,8 @@ func (UnimplementedAuthServiceHandler) SwitchUser(context.Context, *v1.SwitchUse
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.SwitchUser is not implemented"))
 }
 
-func (UnimplementedAuthServiceHandler) StartClaim(context.Context, *v1.StartClaimRequest) (*v1.StartClaimResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartClaim is not implemented"))
+func (UnimplementedAuthServiceHandler) StartSignIn(context.Context, *v1.StartSignInRequest) (*v1.StartSignInResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.StartSignIn is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) SignInWithAssertion(context.Context, *v1.SignInWithAssertionRequest) (*v1.SignInWithAssertionResponse, error) {

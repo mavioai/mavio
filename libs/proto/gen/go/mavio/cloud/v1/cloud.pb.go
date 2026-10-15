@@ -548,7 +548,7 @@ func (b0 Access_builder) Build() *Access {
 	return m0
 }
 
-type CreateClaimRequestRequest struct {
+type CreateAuthorizationRequestRequest struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_PublicKey     []byte                 `protobuf:"bytes,1,opt,name=public_key,json=publicKey"`
 	xxx_hidden_Name          *string                `protobuf:"bytes,2,opt,name=name"`
@@ -557,26 +557,27 @@ type CreateClaimRequestRequest struct {
 	xxx_hidden_CodeChallenge *string                `protobuf:"bytes,5,opt,name=code_challenge,json=codeChallenge"`
 	xxx_hidden_DeviceKey     []byte                 `protobuf:"bytes,6,opt,name=device_key,json=deviceKey"`
 	xxx_hidden_State         *string                `protobuf:"bytes,7,opt,name=state"`
+	xxx_hidden_Claim         bool                   `protobuf:"varint,8,opt,name=claim"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
 
-func (x *CreateClaimRequestRequest) Reset() {
-	*x = CreateClaimRequestRequest{}
+func (x *CreateAuthorizationRequestRequest) Reset() {
+	*x = CreateAuthorizationRequestRequest{}
 	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateClaimRequestRequest) String() string {
+func (x *CreateAuthorizationRequestRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateClaimRequestRequest) ProtoMessage() {}
+func (*CreateAuthorizationRequestRequest) ProtoMessage() {}
 
-func (x *CreateClaimRequestRequest) ProtoReflect() protoreflect.Message {
+func (x *CreateAuthorizationRequestRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -588,14 +589,14 @@ func (x *CreateClaimRequestRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *CreateClaimRequestRequest) GetPublicKey() []byte {
+func (x *CreateAuthorizationRequestRequest) GetPublicKey() []byte {
 	if x != nil {
 		return x.xxx_hidden_PublicKey
 	}
 	return nil
 }
 
-func (x *CreateClaimRequestRequest) GetName() string {
+func (x *CreateAuthorizationRequestRequest) GetName() string {
 	if x != nil {
 		if x.xxx_hidden_Name != nil {
 			return *x.xxx_hidden_Name
@@ -605,7 +606,7 @@ func (x *CreateClaimRequestRequest) GetName() string {
 	return ""
 }
 
-func (x *CreateClaimRequestRequest) GetVersion() string {
+func (x *CreateAuthorizationRequestRequest) GetVersion() string {
 	if x != nil {
 		if x.xxx_hidden_Version != nil {
 			return *x.xxx_hidden_Version
@@ -615,7 +616,7 @@ func (x *CreateClaimRequestRequest) GetVersion() string {
 	return ""
 }
 
-func (x *CreateClaimRequestRequest) GetRedirectUri() string {
+func (x *CreateAuthorizationRequestRequest) GetRedirectUri() string {
 	if x != nil {
 		if x.xxx_hidden_RedirectUri != nil {
 			return *x.xxx_hidden_RedirectUri
@@ -625,7 +626,7 @@ func (x *CreateClaimRequestRequest) GetRedirectUri() string {
 	return ""
 }
 
-func (x *CreateClaimRequestRequest) GetCodeChallenge() string {
+func (x *CreateAuthorizationRequestRequest) GetCodeChallenge() string {
 	if x != nil {
 		if x.xxx_hidden_CodeChallenge != nil {
 			return *x.xxx_hidden_CodeChallenge
@@ -635,14 +636,14 @@ func (x *CreateClaimRequestRequest) GetCodeChallenge() string {
 	return ""
 }
 
-func (x *CreateClaimRequestRequest) GetDeviceKey() []byte {
+func (x *CreateAuthorizationRequestRequest) GetDeviceKey() []byte {
 	if x != nil {
 		return x.xxx_hidden_DeviceKey
 	}
 	return nil
 }
 
-func (x *CreateClaimRequestRequest) GetState() string {
+func (x *CreateAuthorizationRequestRequest) GetState() string {
 	if x != nil {
 		if x.xxx_hidden_State != nil {
 			return *x.xxx_hidden_State
@@ -652,132 +653,156 @@ func (x *CreateClaimRequestRequest) GetState() string {
 	return ""
 }
 
-func (x *CreateClaimRequestRequest) SetPublicKey(v []byte) {
+func (x *CreateAuthorizationRequestRequest) GetClaim() bool {
+	if x != nil {
+		return x.xxx_hidden_Claim
+	}
+	return false
+}
+
+func (x *CreateAuthorizationRequestRequest) SetPublicKey(v []byte) {
 	if v == nil {
 		v = []byte{}
 	}
 	x.xxx_hidden_PublicKey = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetName(v string) {
+func (x *CreateAuthorizationRequestRequest) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetVersion(v string) {
+func (x *CreateAuthorizationRequestRequest) SetVersion(v string) {
 	x.xxx_hidden_Version = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetRedirectUri(v string) {
+func (x *CreateAuthorizationRequestRequest) SetRedirectUri(v string) {
 	x.xxx_hidden_RedirectUri = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetCodeChallenge(v string) {
+func (x *CreateAuthorizationRequestRequest) SetCodeChallenge(v string) {
 	x.xxx_hidden_CodeChallenge = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetDeviceKey(v []byte) {
+func (x *CreateAuthorizationRequestRequest) SetDeviceKey(v []byte) {
 	if v == nil {
 		v = []byte{}
 	}
 	x.xxx_hidden_DeviceKey = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
-func (x *CreateClaimRequestRequest) SetState(v string) {
+func (x *CreateAuthorizationRequestRequest) SetState(v string) {
 	x.xxx_hidden_State = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
 }
 
-func (x *CreateClaimRequestRequest) HasPublicKey() bool {
+func (x *CreateAuthorizationRequestRequest) SetClaim(v bool) {
+	x.xxx_hidden_Claim = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+}
+
+func (x *CreateAuthorizationRequestRequest) HasPublicKey() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *CreateClaimRequestRequest) HasName() bool {
+func (x *CreateAuthorizationRequestRequest) HasName() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *CreateClaimRequestRequest) HasVersion() bool {
+func (x *CreateAuthorizationRequestRequest) HasVersion() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *CreateClaimRequestRequest) HasRedirectUri() bool {
+func (x *CreateAuthorizationRequestRequest) HasRedirectUri() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *CreateClaimRequestRequest) HasCodeChallenge() bool {
+func (x *CreateAuthorizationRequestRequest) HasCodeChallenge() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
-func (x *CreateClaimRequestRequest) HasDeviceKey() bool {
+func (x *CreateAuthorizationRequestRequest) HasDeviceKey() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
-func (x *CreateClaimRequestRequest) HasState() bool {
+func (x *CreateAuthorizationRequestRequest) HasState() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
 }
 
-func (x *CreateClaimRequestRequest) ClearPublicKey() {
+func (x *CreateAuthorizationRequestRequest) HasClaim() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *CreateAuthorizationRequestRequest) ClearPublicKey() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_PublicKey = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearName() {
+func (x *CreateAuthorizationRequestRequest) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Name = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearVersion() {
+func (x *CreateAuthorizationRequestRequest) ClearVersion() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Version = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearRedirectUri() {
+func (x *CreateAuthorizationRequestRequest) ClearRedirectUri() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_RedirectUri = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearCodeChallenge() {
+func (x *CreateAuthorizationRequestRequest) ClearCodeChallenge() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
 	x.xxx_hidden_CodeChallenge = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearDeviceKey() {
+func (x *CreateAuthorizationRequestRequest) ClearDeviceKey() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
 	x.xxx_hidden_DeviceKey = nil
 }
 
-func (x *CreateClaimRequestRequest) ClearState() {
+func (x *CreateAuthorizationRequestRequest) ClearState() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
 	x.xxx_hidden_State = nil
 }
 
-type CreateClaimRequestRequest_builder struct {
+func (x *CreateAuthorizationRequestRequest) ClearClaim() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_Claim = false
+}
+
+type CreateAuthorizationRequestRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// The server's Ed25519 identity public key, whose fingerprint is the ID
@@ -786,8 +811,8 @@ type CreateClaimRequestRequest_builder struct {
 	// The name the server shows.
 	Name    *string
 	Version *string
-	// Where the browser goes once the account confirms or declines: an
-	// HTTP or HTTPS URL of the web UI that started the claim.
+	// Where the browser goes once the account approves or declines: an
+	// HTTP or HTTPS URL of the web UI that started signing in.
 	RedirectUri *string
 	// The S256 PKCE challenge of the authorization code.
 	CodeChallenge *string
@@ -795,68 +820,75 @@ type CreateClaimRequestRequest_builder struct {
 	DeviceKey []byte
 	// Sent back with the code.
 	State *string
+	// Whether the request claims the server: its mode is unset, or it is
+	// unclaimed in mavio.dev mode.
+	Claim *bool
 }
 
-func (b0 CreateClaimRequestRequest_builder) Build() *CreateClaimRequestRequest {
-	m0 := &CreateClaimRequestRequest{}
+func (b0 CreateAuthorizationRequestRequest_builder) Build() *CreateAuthorizationRequestRequest {
+	m0 := &CreateAuthorizationRequestRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.PublicKey != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_PublicKey = b.PublicKey
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Version != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Version = b.Version
 	}
 	if b.RedirectUri != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_RedirectUri = b.RedirectUri
 	}
 	if b.CodeChallenge != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_CodeChallenge = b.CodeChallenge
 	}
 	if b.DeviceKey != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_DeviceKey = b.DeviceKey
 	}
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
 		x.xxx_hidden_State = b.State
+	}
+	if b.Claim != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		x.xxx_hidden_Claim = *b.Claim
 	}
 	return m0
 }
 
-type CreateClaimRequestResponse struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ClaimRequest *string                `protobuf:"bytes,1,opt,name=claim_request,json=claimRequest"`
-	xxx_hidden_Url          *string                `protobuf:"bytes,2,opt,name=url"`
-	xxx_hidden_ExpireTime   *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_time,json=expireTime"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+type CreateAuthorizationRequestResponse struct {
+	state                           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AuthorizationRequest *string                `protobuf:"bytes,1,opt,name=authorization_request,json=authorizationRequest"`
+	xxx_hidden_Url                  *string                `protobuf:"bytes,2,opt,name=url"`
+	xxx_hidden_ExpireTime           *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=expire_time,json=expireTime"`
+	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
+	XXX_presence                    [1]uint32
+	unknownFields                   protoimpl.UnknownFields
+	sizeCache                       protoimpl.SizeCache
 }
 
-func (x *CreateClaimRequestResponse) Reset() {
-	*x = CreateClaimRequestResponse{}
+func (x *CreateAuthorizationRequestResponse) Reset() {
+	*x = CreateAuthorizationRequestResponse{}
 	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CreateClaimRequestResponse) String() string {
+func (x *CreateAuthorizationRequestResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateClaimRequestResponse) ProtoMessage() {}
+func (*CreateAuthorizationRequestResponse) ProtoMessage() {}
 
-func (x *CreateClaimRequestResponse) ProtoReflect() protoreflect.Message {
+func (x *CreateAuthorizationRequestResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_cloud_v1_cloud_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -868,17 +900,17 @@ func (x *CreateClaimRequestResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *CreateClaimRequestResponse) GetClaimRequest() string {
+func (x *CreateAuthorizationRequestResponse) GetAuthorizationRequest() string {
 	if x != nil {
-		if x.xxx_hidden_ClaimRequest != nil {
-			return *x.xxx_hidden_ClaimRequest
+		if x.xxx_hidden_AuthorizationRequest != nil {
+			return *x.xxx_hidden_AuthorizationRequest
 		}
 		return ""
 	}
 	return ""
 }
 
-func (x *CreateClaimRequestResponse) GetUrl() string {
+func (x *CreateAuthorizationRequestResponse) GetUrl() string {
 	if x != nil {
 		if x.xxx_hidden_Url != nil {
 			return *x.xxx_hidden_Url
@@ -888,79 +920,79 @@ func (x *CreateClaimRequestResponse) GetUrl() string {
 	return ""
 }
 
-func (x *CreateClaimRequestResponse) GetExpireTime() *timestamppb.Timestamp {
+func (x *CreateAuthorizationRequestResponse) GetExpireTime() *timestamppb.Timestamp {
 	if x != nil {
 		return x.xxx_hidden_ExpireTime
 	}
 	return nil
 }
 
-func (x *CreateClaimRequestResponse) SetClaimRequest(v string) {
-	x.xxx_hidden_ClaimRequest = &v
+func (x *CreateAuthorizationRequestResponse) SetAuthorizationRequest(v string) {
+	x.xxx_hidden_AuthorizationRequest = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
-func (x *CreateClaimRequestResponse) SetUrl(v string) {
+func (x *CreateAuthorizationRequestResponse) SetUrl(v string) {
 	x.xxx_hidden_Url = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
 }
 
-func (x *CreateClaimRequestResponse) SetExpireTime(v *timestamppb.Timestamp) {
+func (x *CreateAuthorizationRequestResponse) SetExpireTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_ExpireTime = v
 }
 
-func (x *CreateClaimRequestResponse) HasClaimRequest() bool {
+func (x *CreateAuthorizationRequestResponse) HasAuthorizationRequest() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *CreateClaimRequestResponse) HasUrl() bool {
+func (x *CreateAuthorizationRequestResponse) HasUrl() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *CreateClaimRequestResponse) HasExpireTime() bool {
+func (x *CreateAuthorizationRequestResponse) HasExpireTime() bool {
 	if x == nil {
 		return false
 	}
 	return x.xxx_hidden_ExpireTime != nil
 }
 
-func (x *CreateClaimRequestResponse) ClearClaimRequest() {
+func (x *CreateAuthorizationRequestResponse) ClearAuthorizationRequest() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_ClaimRequest = nil
+	x.xxx_hidden_AuthorizationRequest = nil
 }
 
-func (x *CreateClaimRequestResponse) ClearUrl() {
+func (x *CreateAuthorizationRequestResponse) ClearUrl() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Url = nil
 }
 
-func (x *CreateClaimRequestResponse) ClearExpireTime() {
+func (x *CreateAuthorizationRequestResponse) ClearExpireTime() {
 	x.xxx_hidden_ExpireTime = nil
 }
 
-type CreateClaimRequestResponse_builder struct {
+type CreateAuthorizationRequestResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// The request's ID, which ClaimServer takes.
-	ClaimRequest *string
-	// The page where an account confirms it.
+	AuthorizationRequest *string
+	// The page where the account approves it.
 	Url        *string
 	ExpireTime *timestamppb.Timestamp
 }
 
-func (b0 CreateClaimRequestResponse_builder) Build() *CreateClaimRequestResponse {
-	m0 := &CreateClaimRequestResponse{}
+func (b0 CreateAuthorizationRequestResponse_builder) Build() *CreateAuthorizationRequestResponse {
+	m0 := &CreateAuthorizationRequestResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.ClaimRequest != nil {
+	if b.AuthorizationRequest != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
-		x.xxx_hidden_ClaimRequest = b.ClaimRequest
+		x.xxx_hidden_AuthorizationRequest = b.AuthorizationRequest
 	}
 	if b.Url != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
@@ -971,16 +1003,16 @@ func (b0 CreateClaimRequestResponse_builder) Build() *CreateClaimRequestResponse
 }
 
 type ClaimServerRequest struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ClaimCode    *string                `protobuf:"bytes,1,opt,name=claim_code,json=claimCode"`
-	xxx_hidden_PublicKey    []byte                 `protobuf:"bytes,2,opt,name=public_key,json=publicKey"`
-	xxx_hidden_Name         *string                `protobuf:"bytes,3,opt,name=name"`
-	xxx_hidden_Version      *string                `protobuf:"bytes,4,opt,name=version"`
-	xxx_hidden_ClaimRequest *string                `protobuf:"bytes,5,opt,name=claim_request,json=claimRequest"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ClaimCode            *string                `protobuf:"bytes,1,opt,name=claim_code,json=claimCode"`
+	xxx_hidden_PublicKey            []byte                 `protobuf:"bytes,2,opt,name=public_key,json=publicKey"`
+	xxx_hidden_Name                 *string                `protobuf:"bytes,3,opt,name=name"`
+	xxx_hidden_Version              *string                `protobuf:"bytes,4,opt,name=version"`
+	xxx_hidden_AuthorizationRequest *string                `protobuf:"bytes,5,opt,name=authorization_request,json=authorizationRequest"`
+	XXX_raceDetectHookData          protoimpl.RaceDetectHookData
+	XXX_presence                    [1]uint32
+	unknownFields                   protoimpl.UnknownFields
+	sizeCache                       protoimpl.SizeCache
 }
 
 func (x *ClaimServerRequest) Reset() {
@@ -1045,10 +1077,10 @@ func (x *ClaimServerRequest) GetVersion() string {
 	return ""
 }
 
-func (x *ClaimServerRequest) GetClaimRequest() string {
+func (x *ClaimServerRequest) GetAuthorizationRequest() string {
 	if x != nil {
-		if x.xxx_hidden_ClaimRequest != nil {
-			return *x.xxx_hidden_ClaimRequest
+		if x.xxx_hidden_AuthorizationRequest != nil {
+			return *x.xxx_hidden_AuthorizationRequest
 		}
 		return ""
 	}
@@ -1078,8 +1110,8 @@ func (x *ClaimServerRequest) SetVersion(v string) {
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
 }
 
-func (x *ClaimServerRequest) SetClaimRequest(v string) {
-	x.xxx_hidden_ClaimRequest = &v
+func (x *ClaimServerRequest) SetAuthorizationRequest(v string) {
+	x.xxx_hidden_AuthorizationRequest = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
@@ -1111,7 +1143,7 @@ func (x *ClaimServerRequest) HasVersion() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *ClaimServerRequest) HasClaimRequest() bool {
+func (x *ClaimServerRequest) HasAuthorizationRequest() bool {
 	if x == nil {
 		return false
 	}
@@ -1138,15 +1170,15 @@ func (x *ClaimServerRequest) ClearVersion() {
 	x.xxx_hidden_Version = nil
 }
 
-func (x *ClaimServerRequest) ClearClaimRequest() {
+func (x *ClaimServerRequest) ClearAuthorizationRequest() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_ClaimRequest = nil
+	x.xxx_hidden_AuthorizationRequest = nil
 }
 
 type ClaimServerRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// A claim code, or a claim_request; exactly one is set.
+	// A claim code, or an authorization_request; exactly one is set.
 	ClaimCode *string
 	// The server's Ed25519 identity public key, whose fingerprint is the ID
 	// in the request's JWT.
@@ -1154,8 +1186,9 @@ type ClaimServerRequest_builder struct {
 	// The name the server shows.
 	Name    *string
 	Version *string
-	// A claim request's ID from CreateClaimRequest.
-	ClaimRequest *string
+	// The ID of an authorization request that claims the server, from
+	// CreateAuthorizationRequest.
+	AuthorizationRequest *string
 }
 
 func (b0 ClaimServerRequest_builder) Build() *ClaimServerRequest {
@@ -1178,9 +1211,9 @@ func (b0 ClaimServerRequest_builder) Build() *ClaimServerRequest {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
 		x.xxx_hidden_Version = b.Version
 	}
-	if b.ClaimRequest != nil {
+	if b.AuthorizationRequest != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
-		x.xxx_hidden_ClaimRequest = b.ClaimRequest
+		x.xxx_hidden_AuthorizationRequest = b.AuthorizationRequest
 	}
 	return m0
 }
@@ -3253,8 +3286,8 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\rblock_unrated\x18\x04 \x01(\bR\fblockUnrated\x12%\n" +
 	"\x0eallowed_labels\x18\x05 \x03(\tR\rallowedLabels\x12%\n" +
 	"\x0eblocked_labels\x18\x06 \x03(\tR\rblockedLabels\x12%\n" +
-	"\x0eallow_download\x18\a \x01(\bR\rallowDownload\"\xb9\x02\n" +
-	"\x19CreateClaimRequestRequest\x12)\n" +
+	"\x0eallow_download\x18\a \x01(\bR\rallowDownload\"\xd7\x02\n" +
+	"!CreateAuthorizationRequestRequest\x12)\n" +
 	"\n" +
 	"public_key\x18\x01 \x01(\fB\n" +
 	"\xbaH\a\xc8\x01\x01z\x02h R\tpublicKey\x12\x1c\n" +
@@ -3265,12 +3298,13 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\n" +
 	"device_key\x18\x06 \x01(\fB\n" +
 	"\xbaH\a\xc8\x01\x01z\x02h R\tdeviceKey\x12\x1e\n" +
-	"\x05state\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x05state\"\x90\x01\n" +
-	"\x1aCreateClaimRequestResponse\x12#\n" +
-	"\rclaim_request\x18\x01 \x01(\tR\fclaimRequest\x12\x10\n" +
+	"\x05state\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x05state\x12\x14\n" +
+	"\x05claim\x18\b \x01(\bR\x05claim\"\xa8\x01\n" +
+	"\"CreateAuthorizationRequestResponse\x123\n" +
+	"\x15authorization_request\x18\x01 \x01(\tR\x14authorizationRequest\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12;\n" +
 	"\vexpire_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"expireTime\"\xd6\x01\n" +
+	"expireTime\"\xe6\x01\n" +
 	"\x12ClaimServerRequest\x12&\n" +
 	"\n" +
 	"claim_code\x18\x01 \x01(\tB\a\xbaH\x04r\x02\x18@R\tclaimCode\x12)\n" +
@@ -3278,8 +3312,8 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"public_key\x18\x02 \x01(\fB\n" +
 	"\xbaH\a\xc8\x01\x01z\x02h R\tpublicKey\x12\x1c\n" +
 	"\x04name\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x04name\x12!\n" +
-	"\aversion\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\aversion\x12,\n" +
-	"\rclaim_request\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x18@R\fclaimRequest\"l\n" +
+	"\aversion\x18\x04 \x01(\tB\a\xbaH\x04r\x02\x18@R\aversion\x12<\n" +
+	"\x15authorization_request\x18\x05 \x01(\tB\a\xbaH\x04r\x02\x18@R\x14authorizationRequest\"l\n" +
 	"\x13ClaimServerResponse\x12=\n" +
 	"\radministrator\x18\x01 \x01(\v2\x17.mavio.cloud.v1.AccountR\radministrator\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\x03R\x06cursor\"\\\n" +
@@ -3348,9 +3382,9 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 	"\vAccountKind\x12\x1c\n" +
 	"\x18ACCOUNT_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11ACCOUNT_KIND_FULL\x10\x01\x12\x18\n" +
-	"\x14ACCOUNT_KIND_MANAGED\x10\x022\x97\b\n" +
-	"\rServerService\x12k\n" +
-	"\x12CreateClaimRequest\x12).mavio.cloud.v1.CreateClaimRequestRequest\x1a*.mavio.cloud.v1.CreateClaimRequestResponse\x12V\n" +
+	"\x14ACCOUNT_KIND_MANAGED\x10\x022\xb0\b\n" +
+	"\rServerService\x12\x83\x01\n" +
+	"\x1aCreateAuthorizationRequest\x121.mavio.cloud.v1.CreateAuthorizationRequestRequest\x1a2.mavio.cloud.v1.CreateAuthorizationRequestResponse\x12V\n" +
 	"\vClaimServer\x12\".mavio.cloud.v1.ClaimServerRequest\x1a#.mavio.cloud.v1.ClaimServerResponse\x12[\n" +
 	"\vListChanges\x12\".mavio.cloud.v1.ListChangesRequest\x1a#.mavio.cloud.v1.ListChangesResponse\"\x03\x90\x02\x01\x12j\n" +
 	"\x10PublishLibraries\x12'.mavio.cloud.v1.PublishLibrariesRequest\x1a(.mavio.cloud.v1.PublishLibrariesResponse\"\x03\x90\x02\x02\x12p\n" +
@@ -3367,44 +3401,44 @@ const file_mavio_cloud_v1_cloud_proto_rawDesc = "" +
 var file_mavio_cloud_v1_cloud_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_mavio_cloud_v1_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_mavio_cloud_v1_cloud_proto_goTypes = []any{
-	(AccountKind)(0),                   // 0: mavio.cloud.v1.AccountKind
-	(AccountRevoked_Reason)(0),         // 1: mavio.cloud.v1.AccountRevoked.Reason
-	(*Account)(nil),                    // 2: mavio.cloud.v1.Account
-	(*Access)(nil),                     // 3: mavio.cloud.v1.Access
-	(*CreateClaimRequestRequest)(nil),  // 4: mavio.cloud.v1.CreateClaimRequestRequest
-	(*CreateClaimRequestResponse)(nil), // 5: mavio.cloud.v1.CreateClaimRequestResponse
-	(*ClaimServerRequest)(nil),         // 6: mavio.cloud.v1.ClaimServerRequest
-	(*ClaimServerResponse)(nil),        // 7: mavio.cloud.v1.ClaimServerResponse
-	(*ListChangesRequest)(nil),         // 8: mavio.cloud.v1.ListChangesRequest
-	(*ListChangesResponse)(nil),        // 9: mavio.cloud.v1.ListChangesResponse
-	(*Change)(nil),                     // 10: mavio.cloud.v1.Change
-	(*AccessGranted)(nil),              // 11: mavio.cloud.v1.AccessGranted
-	(*AccessRevoked)(nil),              // 12: mavio.cloud.v1.AccessRevoked
-	(*AccountRevoked)(nil),             // 13: mavio.cloud.v1.AccountRevoked
-	(*Library)(nil),                    // 14: mavio.cloud.v1.Library
-	(*PublishLibrariesRequest)(nil),    // 15: mavio.cloud.v1.PublishLibrariesRequest
-	(*PublishLibrariesResponse)(nil),   // 16: mavio.cloud.v1.PublishLibrariesResponse
-	(*PublishConnectionsRequest)(nil),  // 17: mavio.cloud.v1.PublishConnectionsRequest
-	(*PublishConnectionsResponse)(nil), // 18: mavio.cloud.v1.PublishConnectionsResponse
-	(*Notice)(nil),                     // 19: mavio.cloud.v1.Notice
-	(*SetAcmeChallengeRequest)(nil),    // 20: mavio.cloud.v1.SetAcmeChallengeRequest
-	(*SetAcmeChallengeResponse)(nil),   // 21: mavio.cloud.v1.SetAcmeChallengeResponse
-	(*ClearAcmeChallengeRequest)(nil),  // 22: mavio.cloud.v1.ClearAcmeChallengeRequest
-	(*ClearAcmeChallengeResponse)(nil), // 23: mavio.cloud.v1.ClearAcmeChallengeResponse
-	(*CreateAcmeBindingRequest)(nil),   // 24: mavio.cloud.v1.CreateAcmeBindingRequest
-	(*CreateAcmeBindingResponse)(nil),  // 25: mavio.cloud.v1.CreateAcmeBindingResponse
-	(*ListRelaysRequest)(nil),          // 26: mavio.cloud.v1.ListRelaysRequest
-	(*ListRelaysResponse)(nil),         // 27: mavio.cloud.v1.ListRelaysResponse
-	(*Relay)(nil),                      // 28: mavio.cloud.v1.Relay
-	(*SetRelayRegionRequest)(nil),      // 29: mavio.cloud.v1.SetRelayRegionRequest
-	(*SetRelayRegionResponse)(nil),     // 30: mavio.cloud.v1.SetRelayRegionResponse
-	(v1.RestrictionProfile)(0),         // 31: mavio.user.v1.RestrictionProfile
-	(*timestamppb.Timestamp)(nil),      // 32: google.protobuf.Timestamp
+	(AccountKind)(0),                           // 0: mavio.cloud.v1.AccountKind
+	(AccountRevoked_Reason)(0),                 // 1: mavio.cloud.v1.AccountRevoked.Reason
+	(*Account)(nil),                            // 2: mavio.cloud.v1.Account
+	(*Access)(nil),                             // 3: mavio.cloud.v1.Access
+	(*CreateAuthorizationRequestRequest)(nil),  // 4: mavio.cloud.v1.CreateAuthorizationRequestRequest
+	(*CreateAuthorizationRequestResponse)(nil), // 5: mavio.cloud.v1.CreateAuthorizationRequestResponse
+	(*ClaimServerRequest)(nil),                 // 6: mavio.cloud.v1.ClaimServerRequest
+	(*ClaimServerResponse)(nil),                // 7: mavio.cloud.v1.ClaimServerResponse
+	(*ListChangesRequest)(nil),                 // 8: mavio.cloud.v1.ListChangesRequest
+	(*ListChangesResponse)(nil),                // 9: mavio.cloud.v1.ListChangesResponse
+	(*Change)(nil),                             // 10: mavio.cloud.v1.Change
+	(*AccessGranted)(nil),                      // 11: mavio.cloud.v1.AccessGranted
+	(*AccessRevoked)(nil),                      // 12: mavio.cloud.v1.AccessRevoked
+	(*AccountRevoked)(nil),                     // 13: mavio.cloud.v1.AccountRevoked
+	(*Library)(nil),                            // 14: mavio.cloud.v1.Library
+	(*PublishLibrariesRequest)(nil),            // 15: mavio.cloud.v1.PublishLibrariesRequest
+	(*PublishLibrariesResponse)(nil),           // 16: mavio.cloud.v1.PublishLibrariesResponse
+	(*PublishConnectionsRequest)(nil),          // 17: mavio.cloud.v1.PublishConnectionsRequest
+	(*PublishConnectionsResponse)(nil),         // 18: mavio.cloud.v1.PublishConnectionsResponse
+	(*Notice)(nil),                             // 19: mavio.cloud.v1.Notice
+	(*SetAcmeChallengeRequest)(nil),            // 20: mavio.cloud.v1.SetAcmeChallengeRequest
+	(*SetAcmeChallengeResponse)(nil),           // 21: mavio.cloud.v1.SetAcmeChallengeResponse
+	(*ClearAcmeChallengeRequest)(nil),          // 22: mavio.cloud.v1.ClearAcmeChallengeRequest
+	(*ClearAcmeChallengeResponse)(nil),         // 23: mavio.cloud.v1.ClearAcmeChallengeResponse
+	(*CreateAcmeBindingRequest)(nil),           // 24: mavio.cloud.v1.CreateAcmeBindingRequest
+	(*CreateAcmeBindingResponse)(nil),          // 25: mavio.cloud.v1.CreateAcmeBindingResponse
+	(*ListRelaysRequest)(nil),                  // 26: mavio.cloud.v1.ListRelaysRequest
+	(*ListRelaysResponse)(nil),                 // 27: mavio.cloud.v1.ListRelaysResponse
+	(*Relay)(nil),                              // 28: mavio.cloud.v1.Relay
+	(*SetRelayRegionRequest)(nil),              // 29: mavio.cloud.v1.SetRelayRegionRequest
+	(*SetRelayRegionResponse)(nil),             // 30: mavio.cloud.v1.SetRelayRegionResponse
+	(v1.RestrictionProfile)(0),                 // 31: mavio.user.v1.RestrictionProfile
+	(*timestamppb.Timestamp)(nil),              // 32: google.protobuf.Timestamp
 }
 var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	0,  // 0: mavio.cloud.v1.Account.kind:type_name -> mavio.cloud.v1.AccountKind
 	31, // 1: mavio.cloud.v1.Account.restriction:type_name -> mavio.user.v1.RestrictionProfile
-	32, // 2: mavio.cloud.v1.CreateClaimRequestResponse.expire_time:type_name -> google.protobuf.Timestamp
+	32, // 2: mavio.cloud.v1.CreateAuthorizationRequestResponse.expire_time:type_name -> google.protobuf.Timestamp
 	2,  // 3: mavio.cloud.v1.ClaimServerResponse.administrator:type_name -> mavio.cloud.v1.Account
 	10, // 4: mavio.cloud.v1.ListChangesResponse.changes:type_name -> mavio.cloud.v1.Change
 	32, // 5: mavio.cloud.v1.Change.create_time:type_name -> google.protobuf.Timestamp
@@ -3417,7 +3451,7 @@ var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	1,  // 12: mavio.cloud.v1.AccountRevoked.reason:type_name -> mavio.cloud.v1.AccountRevoked.Reason
 	14, // 13: mavio.cloud.v1.PublishLibrariesRequest.libraries:type_name -> mavio.cloud.v1.Library
 	28, // 14: mavio.cloud.v1.ListRelaysResponse.relays:type_name -> mavio.cloud.v1.Relay
-	4,  // 15: mavio.cloud.v1.ServerService.CreateClaimRequest:input_type -> mavio.cloud.v1.CreateClaimRequestRequest
+	4,  // 15: mavio.cloud.v1.ServerService.CreateAuthorizationRequest:input_type -> mavio.cloud.v1.CreateAuthorizationRequestRequest
 	6,  // 16: mavio.cloud.v1.ServerService.ClaimServer:input_type -> mavio.cloud.v1.ClaimServerRequest
 	8,  // 17: mavio.cloud.v1.ServerService.ListChanges:input_type -> mavio.cloud.v1.ListChangesRequest
 	15, // 18: mavio.cloud.v1.ServerService.PublishLibraries:input_type -> mavio.cloud.v1.PublishLibrariesRequest
@@ -3427,7 +3461,7 @@ var file_mavio_cloud_v1_cloud_proto_depIdxs = []int32{
 	24, // 22: mavio.cloud.v1.ServerService.CreateAcmeBinding:input_type -> mavio.cloud.v1.CreateAcmeBindingRequest
 	26, // 23: mavio.cloud.v1.ServerService.ListRelays:input_type -> mavio.cloud.v1.ListRelaysRequest
 	29, // 24: mavio.cloud.v1.ServerService.SetRelayRegion:input_type -> mavio.cloud.v1.SetRelayRegionRequest
-	5,  // 25: mavio.cloud.v1.ServerService.CreateClaimRequest:output_type -> mavio.cloud.v1.CreateClaimRequestResponse
+	5,  // 25: mavio.cloud.v1.ServerService.CreateAuthorizationRequest:output_type -> mavio.cloud.v1.CreateAuthorizationRequestResponse
 	7,  // 26: mavio.cloud.v1.ServerService.ClaimServer:output_type -> mavio.cloud.v1.ClaimServerResponse
 	9,  // 27: mavio.cloud.v1.ServerService.ListChanges:output_type -> mavio.cloud.v1.ListChangesResponse
 	16, // 28: mavio.cloud.v1.ServerService.PublishLibraries:output_type -> mavio.cloud.v1.PublishLibrariesResponse

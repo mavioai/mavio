@@ -360,12 +360,6 @@
     <string name="auth_mode_standalone">Standalone Server</string>
     <!-- Explanation of standalone mode at setup. -->
     <string name="auth_mode_standalone_message">The server keeps its own users and never contacts mavio.dev.</string>
-    <!-- Title of the screen claiming a server for a Mavio account; server is its name. -->
-    <string name="auth_claim">Claim %s</string>
-    <!-- Explanation of claiming a server. -->
-    <string name="auth_claim_message">Sign in at mavio.dev and confirm there. Your Mavio account becomes this server\'s administrator.</string>
-    <!-- Goes to mavio.dev to claim the server. -->
-    <string name="auth_claim_server">Continue at mavio.dev</string>
     <!-- Signs in to a server with a Mavio account at mavio.dev. -->
     <string name="auth_sign_in_with_mavio">Sign In with Mavio</string>
     <!-- Shown while a sign-in through mavio.dev completes. -->

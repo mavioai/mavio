@@ -16,6 +16,12 @@ import (
 // SignInWithAssertion signs a device in with a sign-in assertion of
 // mavio.dev, for an account with access to the server.
 func (s *AuthService) SignInWithAssertion(ctx context.Context, req *authv1.SignInWithAssertionRequest) (*authv1.SignInWithAssertionResponse, error) {
+	// A sign-in claiming the server completes the claim first.
+	if s.SignIn != nil {
+		if err := s.SignIn.Complete(ctx); err != nil {
+			return nil, connect.NewError(connect.CodeUnavailable, err)
+		}
+	}
 	mavioDev, err := inMavioDevMode(ctx, s.store)
 	if err != nil {
 		return nil, connectError(ctx, err)

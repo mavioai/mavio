@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/cloud/v1/account.proto.
  */
 export const file_mavio_cloud_v1_account: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9jbG91ZC92MS9hY2NvdW50LnByb3RvEg5tYXZpby5jbG91ZC52MSKQAgoGU2VydmVyEgoKAmlkGAEgASgJEhIKCnB1YmxpY19rZXkYAiABKAwSDAoEbmFtZRgDIAEoCRIPCgd2ZXJzaW9uGAQgASgJEi4KDWFkbWluaXN0cmF0b3IYBSABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgGIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcxIqCglsaWJyYXJpZXMYByADKAsyFy5tYXZpby5jbG91ZC52MS5MaWJyYXJ5Ei4KCmNsYWltX3RpbWUYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKC2Nvbm5lY3Rpb25zGAkgAygJItYBCgxBY2Nlc3NSZWNvcmQSKAoHYWNjb3VudBgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAIgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzEhIKCmludml0YXRpb24YAyABKAgSLwoLY3JlYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCK9AQoKSW52aXRhdGlvbhIRCglzZXJ2ZXJfaWQYASABKAkSEwoLc2VydmVyX25hbWUYAiABKAkSLgoNYWRtaW5pc3RyYXRvchgDIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAQgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzEi8KC2NyZWF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCITChFHZXRBY2NvdW50UmVxdWVzdCKsAQoSR2V0QWNjb3VudFJlc3BvbnNlEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg0KBWVtYWlsGAIgASgJEjQKEHBhc3NfZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhYKDmVmZmVjdGl2ZV9wYXNzGAQgASgIEg8KB2hhc19waW4YBSABKAgiGgoYUmVwb3J0Q29tcHJvbWlzZWRSZXF1ZXN0IhsKGVJlcG9ydENvbXByb21pc2VkUmVzcG9uc2UiGAoWQ3JlYXRlQ2xhaW1Db2RlUmVxdWVzdCJeChdDcmVhdGVDbGFpbUNvZGVSZXNwb25zZRISCgpjbGFpbV9jb2RlGAEgASgJEi8KC2V4cGlyZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIUChJMaXN0U2VydmVyc1JlcXVlc3QiPgoTTGlzdFNlcnZlcnNSZXNwb25zZRInCgdzZXJ2ZXJzGAEgAygLMhYubWF2aW8uY2xvdWQudjEuU2VydmVyIjAKE1JlbW92ZVNlcnZlclJlcXVlc3QSGQoJc2VydmVyX2lkGAEgASgJQga6SAPIAQEiFgoUUmVtb3ZlU2VydmVyUmVzcG9uc2UiUwoWQ3JlYXRlQXNzZXJ0aW9uUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIeCgpkZXZpY2Vfa2V5GAIgASgMQgq6SAfIAQF6AmggIl0KF0NyZWF0ZUFzc2VydGlvblJlc3BvbnNlEhEKCWFzc2VydGlvbhgBIAEoCRIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAingEKHkNyZWF0ZUF1dGhvcml6YXRpb25Db2RlUmVxdWVzdBIRCglzZXJ2ZXJfaWQYASABKAkSJAoMcmVkaXJlY3RfdXJpGAIgASgJQg66SAvIAQFyBhiAEIgBARIjCg5jb2RlX2NoYWxsZW5nZRgDIAEoCUILukgIyAEBcgOYASsSHgoKZGV2aWNlX2tleRgEIAEoDEIKukgHyAEBegJoICIvCh9DcmVhdGVBdXRob3JpemF0aW9uQ29kZVJlc3BvbnNlEgwKBGNvZGUYASABKAkiNwoWR2V0Q2xhaW1SZXF1ZXN0UmVxdWVzdBIdCg1jbGFpbV9yZXF1ZXN0GAEgASgJQga6SAPIAQEimQEKF0dldENsYWltUmVxdWVzdFJlc3BvbnNlEhEKCXNlcnZlcl9pZBgBIAEoCRITCgtzZXJ2ZXJfbmFtZRgCIAEoCRIUCgxyZWRpcmVjdF91cmkYAyABKAkSDwoHY2xhaW1lZBgEIAEoCBIvCgtleHBpcmVfdGltZRgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiSwoZQW5zd2VyQ2xhaW1SZXF1ZXN0UmVxdWVzdBIdCg1jbGFpbV9yZXF1ZXN0GAEgASgJQga6SAPIAQESDwoHY29uZmlybRgCIAEoCCIyChpBbnN3ZXJDbGFpbVJlcXVlc3RSZXNwb25zZRIUCgxyZWRpcmVjdF91cmwYASABKAkiLwoSR2V0TGlua0NvZGVSZXF1ZXN0EhkKCXVzZXJfY29kZRgBIAEoCUIGukgDyAEBIlAKE0dldExpbmtDb2RlUmVzcG9uc2USEQoJc2VydmVyX2lkGAEgASgJEhMKC3NlcnZlcl9uYW1lGAIgASgJEhEKCWNsaWVudF9pZBgDIAEoCSJDChVBbnN3ZXJMaW5rQ29kZVJlcXVlc3QSGQoJdXNlcl9jb2RlGAEgASgJQga6SAPIAQESDwoHYXBwcm92ZRgCIAEoCCIYChZBbnN3ZXJMaW5rQ29kZVJlc3BvbnNlIjUKGENyZWF0ZVJlbGF5VGlja2V0UmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASJaChlDcmVhdGVSZWxheVRpY2tldFJlc3BvbnNlEgwKBGhvc3QYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIi4KEUxpc3RBY2Nlc3NSZXF1ZXN0EhkKCXNlcnZlcl9pZBgBIAEoCUIGukgDyAEBIkMKEkxpc3RBY2Nlc3NSZXNwb25zZRItCgdyZWNvcmRzGAEgAygLMhwubWF2aW8uY2xvdWQudjEuQWNjZXNzUmVjb3JkIn4KEkdyYW50QWNjZXNzUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIdCgl1c2VyX25hbWUYAiABKAlCCrpIB8gBAXICGEASLgoGYWNjZXNzGAMgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzQga6SAPIAQEiQwoTR3JhbnRBY2Nlc3NSZXNwb25zZRIsCgZyZWNvcmQYASABKAsyHC5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZWNvcmQiTAoTUmV2b2tlQWNjZXNzUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIaCgphY2NvdW50X2lkGAIgASgJQga6SAPIAQEiFgoUUmV2b2tlQWNjZXNzUmVzcG9uc2UiGAoWTGlzdEludml0YXRpb25zUmVxdWVzdCJKChdMaXN0SW52aXRhdGlvbnNSZXNwb25zZRIvCgtpbnZpdGF0aW9ucxgBIAMoCzIaLm1hdmlvLmNsb3VkLnYxLkludml0YXRpb24iNAoXQWNjZXB0SW52aXRhdGlvblJlcXVlc3QSGQoJc2VydmVyX2lkGAEgASgJQga6SAPIAQEiGgoYQWNjZXB0SW52aXRhdGlvblJlc3BvbnNlIjUKGERlY2xpbmVJbnZpdGF0aW9uUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASIbChlEZWNsaW5lSW52aXRhdGlvblJlc3BvbnNlIi8KEkxlYXZlU2VydmVyUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASIVChNMZWF2ZVNlcnZlclJlc3BvbnNlMu0OCg5BY2NvdW50U2VydmljZRJYCgpHZXRBY2NvdW50EiEubWF2aW8uY2xvdWQudjEuR2V0QWNjb3VudFJlcXVlc3QaIi5tYXZpby5jbG91ZC52MS5HZXRBY2NvdW50UmVzcG9uc2UiA5ACARJoChFSZXBvcnRDb21wcm9taXNlZBIoLm1hdmlvLmNsb3VkLnYxLlJlcG9ydENvbXByb21pc2VkUmVxdWVzdBopLm1hdmlvLmNsb3VkLnYxLlJlcG9ydENvbXByb21pc2VkUmVzcG9uc2USYgoPQ3JlYXRlQ2xhaW1Db2RlEiYubWF2aW8uY2xvdWQudjEuQ3JlYXRlQ2xhaW1Db2RlUmVxdWVzdBonLm1hdmlvLmNsb3VkLnYxLkNyZWF0ZUNsYWltQ29kZVJlc3BvbnNlElsKC0xpc3RTZXJ2ZXJzEiIubWF2aW8uY2xvdWQudjEuTGlzdFNlcnZlcnNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdFNlcnZlcnNSZXNwb25zZSIDkAIBElkKDFJlbW92ZVNlcnZlchIjLm1hdmlvLmNsb3VkLnYxLlJlbW92ZVNlcnZlclJlcXVlc3QaJC5tYXZpby5jbG91ZC52MS5SZW1vdmVTZXJ2ZXJSZXNwb25zZRJiCg9DcmVhdGVBc3NlcnRpb24SJi5tYXZpby5jbG91ZC52MS5DcmVhdGVBc3NlcnRpb25SZXF1ZXN0GicubWF2aW8uY2xvdWQudjEuQ3JlYXRlQXNzZXJ0aW9uUmVzcG9uc2USegoXQ3JlYXRlQXV0aG9yaXphdGlvbkNvZGUSLi5tYXZpby5jbG91ZC52MS5DcmVhdGVBdXRob3JpemF0aW9uQ29kZVJlcXVlc3QaLy5tYXZpby5jbG91ZC52MS5DcmVhdGVBdXRob3JpemF0aW9uQ29kZVJlc3BvbnNlEmcKD0dldENsYWltUmVxdWVzdBImLm1hdmlvLmNsb3VkLnYxLkdldENsYWltUmVxdWVzdFJlcXVlc3QaJy5tYXZpby5jbG91ZC52MS5HZXRDbGFpbVJlcXVlc3RSZXNwb25zZSIDkAIBEmsKEkFuc3dlckNsYWltUmVxdWVzdBIpLm1hdmlvLmNsb3VkLnYxLkFuc3dlckNsYWltUmVxdWVzdFJlcXVlc3QaKi5tYXZpby5jbG91ZC52MS5BbnN3ZXJDbGFpbVJlcXVlc3RSZXNwb25zZRJbCgtHZXRMaW5rQ29kZRIiLm1hdmlvLmNsb3VkLnYxLkdldExpbmtDb2RlUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkdldExpbmtDb2RlUmVzcG9uc2UiA5ACARJfCg5BbnN3ZXJMaW5rQ29kZRIlLm1hdmlvLmNsb3VkLnYxLkFuc3dlckxpbmtDb2RlUmVxdWVzdBomLm1hdmlvLmNsb3VkLnYxLkFuc3dlckxpbmtDb2RlUmVzcG9uc2USaAoRQ3JlYXRlUmVsYXlUaWNrZXQSKC5tYXZpby5jbG91ZC52MS5DcmVhdGVSZWxheVRpY2tldFJlcXVlc3QaKS5tYXZpby5jbG91ZC52MS5DcmVhdGVSZWxheVRpY2tldFJlc3BvbnNlElgKCkxpc3RBY2Nlc3MSIS5tYXZpby5jbG91ZC52MS5MaXN0QWNjZXNzUmVxdWVzdBoiLm1hdmlvLmNsb3VkLnYxLkxpc3RBY2Nlc3NSZXNwb25zZSIDkAIBElYKC0dyYW50QWNjZXNzEiIubWF2aW8uY2xvdWQudjEuR3JhbnRBY2Nlc3NSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuR3JhbnRBY2Nlc3NSZXNwb25zZRJZCgxSZXZva2VBY2Nlc3MSIy5tYXZpby5jbG91ZC52MS5SZXZva2VBY2Nlc3NSZXF1ZXN0GiQubWF2aW8uY2xvdWQudjEuUmV2b2tlQWNjZXNzUmVzcG9uc2USZwoPTGlzdEludml0YXRpb25zEiYubWF2aW8uY2xvdWQudjEuTGlzdEludml0YXRpb25zUmVxdWVzdBonLm1hdmlvLmNsb3VkLnYxLkxpc3RJbnZpdGF0aW9uc1Jlc3BvbnNlIgOQAgESZQoQQWNjZXB0SW52aXRhdGlvbhInLm1hdmlvLmNsb3VkLnYxLkFjY2VwdEludml0YXRpb25SZXF1ZXN0GigubWF2aW8uY2xvdWQudjEuQWNjZXB0SW52aXRhdGlvblJlc3BvbnNlEmgKEURlY2xpbmVJbnZpdGF0aW9uEigubWF2aW8uY2xvdWQudjEuRGVjbGluZUludml0YXRpb25SZXF1ZXN0GikubWF2aW8uY2xvdWQudjEuRGVjbGluZUludml0YXRpb25SZXNwb25zZRJWCgtMZWF2ZVNlcnZlchIiLm1hdmlvLmNsb3VkLnYxLkxlYXZlU2VydmVyUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkxlYXZlU2VydmVyUmVzcG9uc2VCvwEKEmNvbS5tYXZpby5jbG91ZC52MUIMQWNjb3VudFByb3RvUAFaQWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9jbG91ZC92MTtjbG91ZHYxogIDTUNYqgIOTWF2aW8uQ2xvdWQuVjHKAg5NYXZpb1xDbG91ZFxWMeICGk1hdmlvXENsb3VkXFYxXEdQQk1ldGFkYXRh6gIQTWF2aW86OkNsb3VkOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_cloud_v1_cloud]);
+  fileDesc("ChxtYXZpby9jbG91ZC92MS9hY2NvdW50LnByb3RvEg5tYXZpby5jbG91ZC52MSKQAgoGU2VydmVyEgoKAmlkGAEgASgJEhIKCnB1YmxpY19rZXkYAiABKAwSDAoEbmFtZRgDIAEoCRIPCgd2ZXJzaW9uGAQgASgJEi4KDWFkbWluaXN0cmF0b3IYBSABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50EiYKBmFjY2VzcxgGIAEoCzIWLm1hdmlvLmNsb3VkLnYxLkFjY2VzcxIqCglsaWJyYXJpZXMYByADKAsyFy5tYXZpby5jbG91ZC52MS5MaWJyYXJ5Ei4KCmNsYWltX3RpbWUYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhMKC2Nvbm5lY3Rpb25zGAkgAygJItYBCgxBY2Nlc3NSZWNvcmQSKAoHYWNjb3VudBgBIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAIgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzEhIKCmludml0YXRpb24YAyABKAgSLwoLY3JlYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC3VwZGF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCK9AQoKSW52aXRhdGlvbhIRCglzZXJ2ZXJfaWQYASABKAkSEwoLc2VydmVyX25hbWUYAiABKAkSLgoNYWRtaW5pc3RyYXRvchgDIAEoCzIXLm1hdmlvLmNsb3VkLnYxLkFjY291bnQSJgoGYWNjZXNzGAQgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzEi8KC2NyZWF0ZV90aW1lGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCITChFHZXRBY2NvdW50UmVxdWVzdCKsAQoSR2V0QWNjb3VudFJlc3BvbnNlEigKB2FjY291bnQYASABKAsyFy5tYXZpby5jbG91ZC52MS5BY2NvdW50Eg0KBWVtYWlsGAIgASgJEjQKEHBhc3NfZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhYKDmVmZmVjdGl2ZV9wYXNzGAQgASgIEg8KB2hhc19waW4YBSABKAgiGgoYUmVwb3J0Q29tcHJvbWlzZWRSZXF1ZXN0IhsKGVJlcG9ydENvbXByb21pc2VkUmVzcG9uc2UiGAoWQ3JlYXRlQ2xhaW1Db2RlUmVxdWVzdCJeChdDcmVhdGVDbGFpbUNvZGVSZXNwb25zZRISCgpjbGFpbV9jb2RlGAEgASgJEi8KC2V4cGlyZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIUChJMaXN0U2VydmVyc1JlcXVlc3QiPgoTTGlzdFNlcnZlcnNSZXNwb25zZRInCgdzZXJ2ZXJzGAEgAygLMhYubWF2aW8uY2xvdWQudjEuU2VydmVyIjAKE1JlbW92ZVNlcnZlclJlcXVlc3QSGQoJc2VydmVyX2lkGAEgASgJQga6SAPIAQEiFgoUUmVtb3ZlU2VydmVyUmVzcG9uc2UiUwoWQ3JlYXRlQXNzZXJ0aW9uUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIeCgpkZXZpY2Vfa2V5GAIgASgMQgq6SAfIAQF6AmggIl0KF0NyZWF0ZUFzc2VydGlvblJlc3BvbnNlEhEKCWFzc2VydGlvbhgBIAEoCRIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAinAEKHkNyZWF0ZUF1dGhvcml6YXRpb25Db2RlUmVxdWVzdBIkCgxyZWRpcmVjdF91cmkYAiABKAlCDrpIC8gBAXIGGIAQiAEBEiMKDmNvZGVfY2hhbGxlbmdlGAMgASgJQgu6SAjIAQFyA5gBKxIeCgpkZXZpY2Vfa2V5GAQgASgMQgq6SAfIAQF6AmggSgQIARACUglzZXJ2ZXJfaWQiLwofQ3JlYXRlQXV0aG9yaXphdGlvbkNvZGVSZXNwb25zZRIMCgRjb2RlGAEgASgJIkcKHkdldEF1dGhvcml6YXRpb25SZXF1ZXN0UmVxdWVzdBIlChVhdXRob3JpemF0aW9uX3JlcXVlc3QYASABKAlCBrpIA8gBASLHAQofR2V0QXV0aG9yaXphdGlvblJlcXVlc3RSZXNwb25zZRIRCglzZXJ2ZXJfaWQYASABKAkSEwoLc2VydmVyX25hbWUYAiABKAkSFAoMcmVkaXJlY3RfdXJpGAMgASgJEg0KBWNsYWltGAQgASgIEg8KB2NsYWltZWQYBSABKAgSFQoNYWRtaW5pc3RyYXRvchgGIAEoCBIvCgtleHBpcmVfdGltZRgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiWwohQW5zd2VyQXV0aG9yaXphdGlvblJlcXVlc3RSZXF1ZXN0EiUKFWF1dGhvcml6YXRpb25fcmVxdWVzdBgBIAEoCUIGukgDyAEBEg8KB2FwcHJvdmUYAiABKAgiOgoiQW5zd2VyQXV0aG9yaXphdGlvblJlcXVlc3RSZXNwb25zZRIUCgxyZWRpcmVjdF91cmwYASABKAkiLwoSR2V0TGlua0NvZGVSZXF1ZXN0EhkKCXVzZXJfY29kZRgBIAEoCUIGukgDyAEBIlAKE0dldExpbmtDb2RlUmVzcG9uc2USEQoJc2VydmVyX2lkGAEgASgJEhMKC3NlcnZlcl9uYW1lGAIgASgJEhEKCWNsaWVudF9pZBgDIAEoCSJDChVBbnN3ZXJMaW5rQ29kZVJlcXVlc3QSGQoJdXNlcl9jb2RlGAEgASgJQga6SAPIAQESDwoHYXBwcm92ZRgCIAEoCCIYChZBbnN3ZXJMaW5rQ29kZVJlc3BvbnNlIjUKGENyZWF0ZVJlbGF5VGlja2V0UmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASJaChlDcmVhdGVSZWxheVRpY2tldFJlc3BvbnNlEgwKBGhvc3QYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIi4KEUxpc3RBY2Nlc3NSZXF1ZXN0EhkKCXNlcnZlcl9pZBgBIAEoCUIGukgDyAEBIkMKEkxpc3RBY2Nlc3NSZXNwb25zZRItCgdyZWNvcmRzGAEgAygLMhwubWF2aW8uY2xvdWQudjEuQWNjZXNzUmVjb3JkIn4KEkdyYW50QWNjZXNzUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIdCgl1c2VyX25hbWUYAiABKAlCCrpIB8gBAXICGEASLgoGYWNjZXNzGAMgASgLMhYubWF2aW8uY2xvdWQudjEuQWNjZXNzQga6SAPIAQEiQwoTR3JhbnRBY2Nlc3NSZXNwb25zZRIsCgZyZWNvcmQYASABKAsyHC5tYXZpby5jbG91ZC52MS5BY2Nlc3NSZWNvcmQiTAoTUmV2b2tlQWNjZXNzUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBARIaCgphY2NvdW50X2lkGAIgASgJQga6SAPIAQEiFgoUUmV2b2tlQWNjZXNzUmVzcG9uc2UiGAoWTGlzdEludml0YXRpb25zUmVxdWVzdCJKChdMaXN0SW52aXRhdGlvbnNSZXNwb25zZRIvCgtpbnZpdGF0aW9ucxgBIAMoCzIaLm1hdmlvLmNsb3VkLnYxLkludml0YXRpb24iNAoXQWNjZXB0SW52aXRhdGlvblJlcXVlc3QSGQoJc2VydmVyX2lkGAEgASgJQga6SAPIAQEiGgoYQWNjZXB0SW52aXRhdGlvblJlc3BvbnNlIjUKGERlY2xpbmVJbnZpdGF0aW9uUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASIbChlEZWNsaW5lSW52aXRhdGlvblJlc3BvbnNlIi8KEkxlYXZlU2VydmVyUmVxdWVzdBIZCglzZXJ2ZXJfaWQYASABKAlCBrpIA8gBASIVChNMZWF2ZVNlcnZlclJlc3BvbnNlMp4PCg5BY2NvdW50U2VydmljZRJYCgpHZXRBY2NvdW50EiEubWF2aW8uY2xvdWQudjEuR2V0QWNjb3VudFJlcXVlc3QaIi5tYXZpby5jbG91ZC52MS5HZXRBY2NvdW50UmVzcG9uc2UiA5ACARJoChFSZXBvcnRDb21wcm9taXNlZBIoLm1hdmlvLmNsb3VkLnYxLlJlcG9ydENvbXByb21pc2VkUmVxdWVzdBopLm1hdmlvLmNsb3VkLnYxLlJlcG9ydENvbXByb21pc2VkUmVzcG9uc2USYgoPQ3JlYXRlQ2xhaW1Db2RlEiYubWF2aW8uY2xvdWQudjEuQ3JlYXRlQ2xhaW1Db2RlUmVxdWVzdBonLm1hdmlvLmNsb3VkLnYxLkNyZWF0ZUNsYWltQ29kZVJlc3BvbnNlElsKC0xpc3RTZXJ2ZXJzEiIubWF2aW8uY2xvdWQudjEuTGlzdFNlcnZlcnNSZXF1ZXN0GiMubWF2aW8uY2xvdWQudjEuTGlzdFNlcnZlcnNSZXNwb25zZSIDkAIBElkKDFJlbW92ZVNlcnZlchIjLm1hdmlvLmNsb3VkLnYxLlJlbW92ZVNlcnZlclJlcXVlc3QaJC5tYXZpby5jbG91ZC52MS5SZW1vdmVTZXJ2ZXJSZXNwb25zZRJiCg9DcmVhdGVBc3NlcnRpb24SJi5tYXZpby5jbG91ZC52MS5DcmVhdGVBc3NlcnRpb25SZXF1ZXN0GicubWF2aW8uY2xvdWQudjEuQ3JlYXRlQXNzZXJ0aW9uUmVzcG9uc2USegoXQ3JlYXRlQXV0aG9yaXphdGlvbkNvZGUSLi5tYXZpby5jbG91ZC52MS5DcmVhdGVBdXRob3JpemF0aW9uQ29kZVJlcXVlc3QaLy5tYXZpby5jbG91ZC52MS5DcmVhdGVBdXRob3JpemF0aW9uQ29kZVJlc3BvbnNlEn8KF0dldEF1dGhvcml6YXRpb25SZXF1ZXN0Ei4ubWF2aW8uY2xvdWQudjEuR2V0QXV0aG9yaXphdGlvblJlcXVlc3RSZXF1ZXN0Gi8ubWF2aW8uY2xvdWQudjEuR2V0QXV0aG9yaXphdGlvblJlcXVlc3RSZXNwb25zZSIDkAIBEoMBChpBbnN3ZXJBdXRob3JpemF0aW9uUmVxdWVzdBIxLm1hdmlvLmNsb3VkLnYxLkFuc3dlckF1dGhvcml6YXRpb25SZXF1ZXN0UmVxdWVzdBoyLm1hdmlvLmNsb3VkLnYxLkFuc3dlckF1dGhvcml6YXRpb25SZXF1ZXN0UmVzcG9uc2USWwoLR2V0TGlua0NvZGUSIi5tYXZpby5jbG91ZC52MS5HZXRMaW5rQ29kZVJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5HZXRMaW5rQ29kZVJlc3BvbnNlIgOQAgESXwoOQW5zd2VyTGlua0NvZGUSJS5tYXZpby5jbG91ZC52MS5BbnN3ZXJMaW5rQ29kZVJlcXVlc3QaJi5tYXZpby5jbG91ZC52MS5BbnN3ZXJMaW5rQ29kZVJlc3BvbnNlEmgKEUNyZWF0ZVJlbGF5VGlja2V0EigubWF2aW8uY2xvdWQudjEuQ3JlYXRlUmVsYXlUaWNrZXRSZXF1ZXN0GikubWF2aW8uY2xvdWQudjEuQ3JlYXRlUmVsYXlUaWNrZXRSZXNwb25zZRJYCgpMaXN0QWNjZXNzEiEubWF2aW8uY2xvdWQudjEuTGlzdEFjY2Vzc1JlcXVlc3QaIi5tYXZpby5jbG91ZC52MS5MaXN0QWNjZXNzUmVzcG9uc2UiA5ACARJWCgtHcmFudEFjY2VzcxIiLm1hdmlvLmNsb3VkLnYxLkdyYW50QWNjZXNzUmVxdWVzdBojLm1hdmlvLmNsb3VkLnYxLkdyYW50QWNjZXNzUmVzcG9uc2USWQoMUmV2b2tlQWNjZXNzEiMubWF2aW8uY2xvdWQudjEuUmV2b2tlQWNjZXNzUmVxdWVzdBokLm1hdmlvLmNsb3VkLnYxLlJldm9rZUFjY2Vzc1Jlc3BvbnNlEmcKD0xpc3RJbnZpdGF0aW9ucxImLm1hdmlvLmNsb3VkLnYxLkxpc3RJbnZpdGF0aW9uc1JlcXVlc3QaJy5tYXZpby5jbG91ZC52MS5MaXN0SW52aXRhdGlvbnNSZXNwb25zZSIDkAIBEmUKEEFjY2VwdEludml0YXRpb24SJy5tYXZpby5jbG91ZC52MS5BY2NlcHRJbnZpdGF0aW9uUmVxdWVzdBooLm1hdmlvLmNsb3VkLnYxLkFjY2VwdEludml0YXRpb25SZXNwb25zZRJoChFEZWNsaW5lSW52aXRhdGlvbhIoLm1hdmlvLmNsb3VkLnYxLkRlY2xpbmVJbnZpdGF0aW9uUmVxdWVzdBopLm1hdmlvLmNsb3VkLnYxLkRlY2xpbmVJbnZpdGF0aW9uUmVzcG9uc2USVgoLTGVhdmVTZXJ2ZXISIi5tYXZpby5jbG91ZC52MS5MZWF2ZVNlcnZlclJlcXVlc3QaIy5tYXZpby5jbG91ZC52MS5MZWF2ZVNlcnZlclJlc3BvbnNlQr8BChJjb20ubWF2aW8uY2xvdWQudjFCDEFjY291bnRQcm90b1ABWkFnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vY2xvdWQvdjE7Y2xvdWR2MaICA01DWKoCDk1hdmlvLkNsb3VkLlYxygIOTWF2aW9cQ2xvdWRcVjHiAhpNYXZpb1xDbG91ZFxWMVxHUEJNZXRhZGF0YeoCEE1hdmlvOjpDbG91ZDo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_cloud_v1_cloud]);
 
 /**
  * Server is a claimed server as its administrator and members see it.
@@ -400,13 +400,6 @@ export const CreateAssertionResponseSchema: GenMessage<CreateAssertionResponse> 
  */
 export type CreateAuthorizationCodeRequest = Message<"mavio.cloud.v1.CreateAuthorizationCodeRequest"> & {
   /**
-   * The server whose web UI signs in; empty for app.mavio.dev.
-   *
-   * @generated from field: string server_id = 1;
-   */
-  serverId: string;
-
-  /**
    * Where the web interface receives the code: an HTTP or HTTPS URL.
    *
    * @generated from field: string redirect_uri = 2;
@@ -453,26 +446,26 @@ export const CreateAuthorizationCodeResponseSchema: GenMessage<CreateAuthorizati
   messageDesc(file_mavio_cloud_v1_account, 16);
 
 /**
- * @generated from message mavio.cloud.v1.GetClaimRequestRequest
+ * @generated from message mavio.cloud.v1.GetAuthorizationRequestRequest
  */
-export type GetClaimRequestRequest = Message<"mavio.cloud.v1.GetClaimRequestRequest"> & {
+export type GetAuthorizationRequestRequest = Message<"mavio.cloud.v1.GetAuthorizationRequestRequest"> & {
   /**
-   * @generated from field: string claim_request = 1;
+   * @generated from field: string authorization_request = 1;
    */
-  claimRequest: string;
+  authorizationRequest: string;
 };
 
 /**
- * Describes the message mavio.cloud.v1.GetClaimRequestRequest.
- * Use `create(GetClaimRequestRequestSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.GetAuthorizationRequestRequest.
+ * Use `create(GetAuthorizationRequestRequestSchema)` to create a new message.
  */
-export const GetClaimRequestRequestSchema: GenMessage<GetClaimRequestRequest> = /*@__PURE__*/
+export const GetAuthorizationRequestRequestSchema: GenMessage<GetAuthorizationRequestRequest> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_account, 17);
 
 /**
- * @generated from message mavio.cloud.v1.GetClaimRequestResponse
+ * @generated from message mavio.cloud.v1.GetAuthorizationRequestResponse
  */
-export type GetClaimRequestResponse = Message<"mavio.cloud.v1.GetClaimRequestResponse"> & {
+export type GetAuthorizationRequestResponse = Message<"mavio.cloud.v1.GetAuthorizationRequestResponse"> & {
   /**
    * @generated from field: string server_id = 1;
    */
@@ -484,58 +477,73 @@ export type GetClaimRequestResponse = Message<"mavio.cloud.v1.GetClaimRequestRes
   serverName: string;
 
   /**
-   * The redirect URI of the web UI that started the claim.
+   * The redirect URI of the web UI that started signing in.
    *
    * @generated from field: string redirect_uri = 3;
    */
   redirectUri: string;
 
   /**
-   * Whether the server is claimed now, by this account or another.
+   * Whether approving claims the server.
    *
-   * @generated from field: bool claimed = 4;
+   * @generated from field: bool claim = 4;
+   */
+  claim: boolean;
+
+  /**
+   * Whether the server is registered at mavio.dev, by this account or
+   * another: claiming it again takes it over.
+   *
+   * @generated from field: bool claimed = 5;
    */
   claimed: boolean;
 
   /**
-   * @generated from field: google.protobuf.Timestamp expire_time = 5;
+   * Whether the account administers the server.
+   *
+   * @generated from field: bool administrator = 6;
+   */
+  administrator: boolean;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp expire_time = 7;
    */
   expireTime?: Timestamp | undefined;
 };
 
 /**
- * Describes the message mavio.cloud.v1.GetClaimRequestResponse.
- * Use `create(GetClaimRequestResponseSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.GetAuthorizationRequestResponse.
+ * Use `create(GetAuthorizationRequestResponseSchema)` to create a new message.
  */
-export const GetClaimRequestResponseSchema: GenMessage<GetClaimRequestResponse> = /*@__PURE__*/
+export const GetAuthorizationRequestResponseSchema: GenMessage<GetAuthorizationRequestResponse> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_account, 18);
 
 /**
- * @generated from message mavio.cloud.v1.AnswerClaimRequestRequest
+ * @generated from message mavio.cloud.v1.AnswerAuthorizationRequestRequest
  */
-export type AnswerClaimRequestRequest = Message<"mavio.cloud.v1.AnswerClaimRequestRequest"> & {
+export type AnswerAuthorizationRequestRequest = Message<"mavio.cloud.v1.AnswerAuthorizationRequestRequest"> & {
   /**
-   * @generated from field: string claim_request = 1;
+   * @generated from field: string authorization_request = 1;
    */
-  claimRequest: string;
+  authorizationRequest: string;
 
   /**
-   * @generated from field: bool confirm = 2;
+   * @generated from field: bool approve = 2;
    */
-  confirm: boolean;
+  approve: boolean;
 };
 
 /**
- * Describes the message mavio.cloud.v1.AnswerClaimRequestRequest.
- * Use `create(AnswerClaimRequestRequestSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.AnswerAuthorizationRequestRequest.
+ * Use `create(AnswerAuthorizationRequestRequestSchema)` to create a new message.
  */
-export const AnswerClaimRequestRequestSchema: GenMessage<AnswerClaimRequestRequest> = /*@__PURE__*/
+export const AnswerAuthorizationRequestRequestSchema: GenMessage<AnswerAuthorizationRequestRequest> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_account, 19);
 
 /**
- * @generated from message mavio.cloud.v1.AnswerClaimRequestResponse
+ * @generated from message mavio.cloud.v1.AnswerAuthorizationRequestResponse
  */
-export type AnswerClaimRequestResponse = Message<"mavio.cloud.v1.AnswerClaimRequestResponse"> & {
+export type AnswerAuthorizationRequestResponse = Message<"mavio.cloud.v1.AnswerAuthorizationRequestResponse"> & {
   /**
    * Where the browser goes next.
    *
@@ -545,10 +553,10 @@ export type AnswerClaimRequestResponse = Message<"mavio.cloud.v1.AnswerClaimRequ
 };
 
 /**
- * Describes the message mavio.cloud.v1.AnswerClaimRequestResponse.
- * Use `create(AnswerClaimRequestResponseSchema)` to create a new message.
+ * Describes the message mavio.cloud.v1.AnswerAuthorizationRequestResponse.
+ * Use `create(AnswerAuthorizationRequestResponseSchema)` to create a new message.
  */
-export const AnswerClaimRequestResponseSchema: GenMessage<AnswerClaimRequestResponse> = /*@__PURE__*/
+export const AnswerAuthorizationRequestResponseSchema: GenMessage<AnswerAuthorizationRequestResponse> = /*@__PURE__*/
   messageDesc(file_mavio_cloud_v1_account, 20);
 
 /**
@@ -994,12 +1002,11 @@ export const AccountService: GenService<{
     output: typeof CreateAssertionResponseSchema;
   },
   /**
-   * CreateAuthorizationCode approves a web UI signing the account in
+   * CreateAuthorizationCode approves app.mavio.dev signing the account in
    * (docs/accounts.md §6): the code it gives, sent back to the redirect
    * URI, is exchanged within a minute at /api/oauth/token with the PKCE
    * verifier for a session of the device key. A server's web UI signs in
-   * only the server's administrator, and other accounts are
-   * PERMISSION_DENIED; app.mavio.dev signs in any account.
+   * with an authorization request the server pushed instead.
    *
    * @generated from rpc mavio.cloud.v1.AccountService.CreateAuthorizationCode
    */
@@ -1009,28 +1016,33 @@ export const AccountService: GenService<{
     output: typeof CreateAuthorizationCodeResponseSchema;
   },
   /**
-   * GetClaimRequest gives the server and the web UI of a claim request
-   * for the account to confirm.
+   * GetAuthorizationRequest gives the server and the web UI of an
+   * authorization request a server pushed (ServerService.CreateAuthorizationRequest)
+   * for the account to approve. An unknown, answered or expired request
+   * is NOT_FOUND.
    *
-   * @generated from rpc mavio.cloud.v1.AccountService.GetClaimRequest
+   * @generated from rpc mavio.cloud.v1.AccountService.GetAuthorizationRequest
    */
-  getClaimRequest: {
+  getAuthorizationRequest: {
     methodKind: "unary";
-    input: typeof GetClaimRequestRequestSchema;
-    output: typeof GetClaimRequestResponseSchema;
+    input: typeof GetAuthorizationRequestRequestSchema;
+    output: typeof GetAuthorizationRequestResponseSchema;
   },
   /**
-   * AnswerClaimRequest confirms a claim request, claiming its server for
-   * the account, or declines it, and gives the URL the browser goes to
-   * next: the request's redirect URI with an authorization code, or with
-   * an error. An unknown, answered or expired request is NOT_FOUND.
+   * AnswerAuthorizationRequest approves an authorization request, or
+   * declines it, and gives the URL the browser goes to next: the
+   * request's redirect URI with an authorization code, or with an error.
+   * Approving a request that claims its server claims it for the account,
+   * which must be a full account; any other request signs in only the
+   * server's administrator, and other accounts are PERMISSION_DENIED. An
+   * unknown, answered or expired request is NOT_FOUND.
    *
-   * @generated from rpc mavio.cloud.v1.AccountService.AnswerClaimRequest
+   * @generated from rpc mavio.cloud.v1.AccountService.AnswerAuthorizationRequest
    */
-  answerClaimRequest: {
+  answerAuthorizationRequest: {
     methodKind: "unary";
-    input: typeof AnswerClaimRequestRequestSchema;
-    output: typeof AnswerClaimRequestResponseSchema;
+    input: typeof AnswerAuthorizationRequestRequestSchema;
+    output: typeof AnswerAuthorizationRequestResponseSchema;
   },
   /**
    * GetLinkCode gives what the device showing a code at mavio.dev/link

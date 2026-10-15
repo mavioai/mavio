@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -16,21 +18,18 @@ import (
 )
 
 var (
+	// ErrStandalone is returned when a standalone server is asked to sign
+	// in with a Mavio account.
+	ErrStandalone = errors.New("the server is standalone")
 	// ErrNotClaimable is returned when the server is standalone or
 	// claimed.
 	ErrNotClaimable = errors.New("the server is standalone or already claimed")
 	// ErrCodeRefused is returned when mavio.dev refuses a claim code.
 	ErrCodeRefused = errors.New("mavio.dev refused the claim code")
-	// errUnconfirmed is returned while a claim request waits for an
-	// account to confirm it.
-	errUnconfirmed = errors.New("the claim request is not confirmed yet")
-	// errReplaced is returned for a claim request a later one replaced.
-	errReplaced = errors.New("a later claim request replaced this one")
+	// errUnapproved is returned while an authorization request that claims
+	// the server waits for an account to approve it.
+	errUnapproved = errors.New("the authorization request is not approved yet")
 )
-
-// ClaimPollInterval is how often the server asks mavio.dev for the
-// outcome of its claim request.
-const ClaimPollInterval = 2 * time.Second
 
 // Claimable reports whether a server with these settings may be claimed:
 // its mode is unset, or it is an unclaimed server in mavio.dev mode.
@@ -38,7 +37,8 @@ func Claimable(a core.AccountSettings) bool {
 	return a.Mode == core.AccountModeUnset || a.Mode == core.AccountModeMavioDev && !a.Claimed()
 }
 
-// Claimer claims the server at mavio.dev.
+// Claimer signs Mavio accounts in to the server's web UI and claims the
+// server at mavio.dev.
 type Claimer struct {
 	Store  core.Store
 	Client *Client
@@ -50,121 +50,105 @@ type Claimer struct {
 	// Claimed is called after a claim, to start the link; nil calls
 	// nothing.
 	Claimed func()
-	// PollInterval overrides ClaimPollInterval when not zero.
-	PollInterval time.Duration
 	// mu serializes claims, so that one code's administrator is in place
 	// before another claim checks the settings.
 	mu sync.Mutex
 
-	// pending is the claim request waiting for its confirmation, with its
-	// expiry; wake tells Run of a new one.
+	// pending are the authorization requests that claim the server, by
+	// their expiry, until one is approved.
 	pmu     sync.Mutex
-	pending string
-	expires time.Time
-	wake    chan struct{}
+	pending map[string]time.Time
 }
 
-// ClaimRequest is what the web UI that starts a claim passes on to
+// SignInRequest is what the web UI that starts signing in passes on to
 // mavio.dev: where the browser comes back to, and the PKCE challenge and
 // device key of the authorization code that signs it in.
-type ClaimRequest struct {
+type SignInRequest struct {
 	RedirectURI   string
 	CodeChallenge string
 	DeviceKey     []byte
 	State         string
 }
 
-// Start asks mavio.dev for a claim request, which replaces any earlier
-// one, and returns the page where an account confirms it and when it
-// expires; Run then claims the server once it is confirmed. It returns
-// ErrNotClaimable, or another error when mavio.dev cannot be reached.
-func (c *Claimer) Start(ctx context.Context, r ClaimRequest) (string, time.Time, error) {
+// StartSignIn pushes the authorization request of a web UI to mavio.dev
+// and returns the page where the account approves it and when it
+// expires. While the server is claimable the request claims it, and
+// Complete then claims the server once it is approved. It returns
+// ErrStandalone, or another error when mavio.dev cannot be reached.
+func (c *Claimer) StartSignIn(ctx context.Context, r SignInRequest) (string, time.Time, error) {
 	settings, err := c.Store.Settings().Accounts(ctx)
 	if err != nil {
 		return "", time.Time{}, err
 	}
-	if !Claimable(settings) {
-		return "", time.Time{}, ErrNotClaimable
+	if settings.Mode == core.AccountModeStandalone {
+		return "", time.Time{}, ErrStandalone
 	}
-	req := cloudv1.CreateClaimRequestRequest_builder{
+	claim := Claimable(settings)
+	req := cloudv1.CreateAuthorizationRequestRequest_builder{
 		PublicKey: c.Client.key.Public(), Version: &c.Version,
-		RedirectUri: &r.RedirectURI, CodeChallenge: &r.CodeChallenge, DeviceKey: r.DeviceKey, State: &r.State,
+		RedirectUri: &r.RedirectURI, CodeChallenge: &r.CodeChallenge, DeviceKey: r.DeviceKey, State: &r.State, Claim: &claim,
 	}.Build()
 	if c.Name != nil {
 		req.SetName(c.Name())
 	}
-	resp, err := c.Client.CreateClaimRequest(ctx, req)
+	resp, err := c.Client.CreateAuthorizationRequest(ctx, req)
 	if err != nil {
-		return "", time.Time{}, fmt.Errorf("ask mavio.dev for a claim request: %w", err)
+		return "", time.Time{}, fmt.Errorf("push the authorization request to mavio.dev: %w", err)
 	}
 	expires := resp.GetExpireTime().AsTime()
-	c.pmu.Lock()
-	c.pending, c.expires = resp.GetClaimRequest(), expires
-	if c.wake == nil {
-		c.wake = make(chan struct{}, 1)
-	}
-	wake := c.wake
-	c.pmu.Unlock()
-	select {
-	case wake <- struct{}{}:
-	default:
+	if claim {
+		c.pmu.Lock()
+		if c.pending == nil {
+			c.pending = map[string]time.Time{}
+		}
+		c.pending[resp.GetAuthorizationRequest()] = expires
+		c.pmu.Unlock()
 	}
 	return resp.GetUrl(), expires, nil
 }
 
-// Run claims the server once an account confirms its claim request,
-// asking mavio.dev every PollInterval while one waits, until ctx ends.
-func (c *Claimer) Run(ctx context.Context) {
+// Complete claims the server when an account approved one of its
+// authorization requests that claim it, the latest first; it does
+// nothing when none was approved or the server is not claimable. It
+// returns an error when mavio.dev cannot be reached.
+func (c *Claimer) Complete(ctx context.Context) error {
 	c.pmu.Lock()
-	if c.wake == nil {
-		c.wake = make(chan struct{}, 1)
-	}
-	wake := c.wake
+	now := time.Now()
+	maps.DeleteFunc(c.pending, func(_ string, expires time.Time) bool { return now.After(expires) })
+	requests := slices.SortedFunc(maps.Keys(c.pending), func(a, b string) int { return c.pending[b].Compare(c.pending[a]) })
 	c.pmu.Unlock()
-	ticker := time.NewTicker(or(c.PollInterval, ClaimPollInterval))
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-wake:
-		case <-ticker.C:
-		}
-		c.pmu.Lock()
-		request, expires := c.pending, c.expires
-		c.pmu.Unlock()
-		if request == "" {
-			continue
-		}
-		if time.Now().After(expires) {
-			c.drop(request)
-			continue
-		}
-		_, err := c.claim(ctx, cloudv1.ClaimServerRequest_builder{ClaimRequest: &request}.Build())
+	for _, id := range requests {
+		_, err := c.claim(ctx, cloudv1.ClaimServerRequest_builder{AuthorizationRequest: &id}.Build())
 		switch {
-		case errors.Is(err, errUnconfirmed), errors.Is(err, errReplaced):
-		case err == nil, errors.Is(err, ErrNotClaimable), errors.Is(err, ErrCodeRefused):
-			c.drop(request)
-		default:
-			slog.WarnContext(ctx, "ask mavio.dev for the claim request's outcome", "err", err)
+		case errors.Is(err, errUnapproved):
+			continue
+		case errors.Is(err, ErrCodeRefused):
+			c.drop(id)
+			continue
+		case errors.Is(err, ErrNotClaimable):
+			c.dropAll()
+			return nil
+		case err != nil:
+			return err
 		}
+		c.dropAll()
+		return nil
 	}
+	return nil
 }
 
-// current reports whether a claim request is the one waiting.
-func (c *Claimer) current(request string) bool {
+// drop forgets an authorization request.
+func (c *Claimer) drop(id string) {
 	c.pmu.Lock()
 	defer c.pmu.Unlock()
-	return c.pending == request
+	delete(c.pending, id)
 }
 
-// drop forgets a claim request unless another replaced it.
-func (c *Claimer) drop(request string) {
+// dropAll forgets every authorization request, once the server is claimed.
+func (c *Claimer) dropAll() {
 	c.pmu.Lock()
 	defer c.pmu.Unlock()
-	if c.pending == request {
-		c.pending = ""
-	}
+	clear(c.pending)
 }
 
 // Claim claims the server with a claim code, making its account the
@@ -177,7 +161,7 @@ func (c *Claimer) Claim(ctx context.Context, code string) (core.User, error) {
 	return c.claim(ctx, cloudv1.ClaimServerRequest_builder{ClaimCode: &code}.Build())
 }
 
-// claim claims the server with a claim code or a claim request.
+// claim claims the server with a claim code or an authorization request.
 func (c *Claimer) claim(ctx context.Context, req *cloudv1.ClaimServerRequest) (core.User, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -195,10 +179,8 @@ func (c *Claimer) claim(ctx context.Context, req *cloudv1.ClaimServerRequest) (c
 		req.SetName(c.Name())
 	}
 	resp, err := c.Client.ClaimServer(ctx, req)
-	if code := connect.CodeOf(err); code == connect.CodeFailedPrecondition && req.GetClaimRequest() != "" {
-		return core.User{}, errUnconfirmed
-	} else if r := req.GetClaimRequest(); err == nil && r != "" && !c.current(r) {
-		return core.User{}, errReplaced
+	if code := connect.CodeOf(err); code == connect.CodeFailedPrecondition && req.GetAuthorizationRequest() != "" {
+		return core.User{}, errUnapproved
 	} else if code == connect.CodeInvalidArgument || code == connect.CodeNotFound || code == connect.CodePermissionDenied {
 		return core.User{}, fmt.Errorf("%w: %w", ErrCodeRefused, err)
 	} else if err != nil {

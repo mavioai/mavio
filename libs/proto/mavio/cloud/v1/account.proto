@@ -37,23 +37,27 @@ service AccountService {
   // server the account neither administers nor has access to is
   // PERMISSION_DENIED.
   rpc CreateAssertion(CreateAssertionRequest) returns (CreateAssertionResponse);
-  // CreateAuthorizationCode approves a web UI signing the account in
+  // CreateAuthorizationCode approves app.mavio.dev signing the account in
   // (docs/accounts.md §6): the code it gives, sent back to the redirect
   // URI, is exchanged within a minute at /api/oauth/token with the PKCE
   // verifier for a session of the device key. A server's web UI signs in
-  // only the server's administrator, and other accounts are
-  // PERMISSION_DENIED; app.mavio.dev signs in any account.
+  // with an authorization request the server pushed instead.
   rpc CreateAuthorizationCode(CreateAuthorizationCodeRequest) returns (CreateAuthorizationCodeResponse);
-  // GetClaimRequest gives the server and the web UI of a claim request
-  // for the account to confirm.
-  rpc GetClaimRequest(GetClaimRequestRequest) returns (GetClaimRequestResponse) {
+  // GetAuthorizationRequest gives the server and the web UI of an
+  // authorization request a server pushed (ServerService.CreateAuthorizationRequest)
+  // for the account to approve. An unknown, answered or expired request
+  // is NOT_FOUND.
+  rpc GetAuthorizationRequest(GetAuthorizationRequestRequest) returns (GetAuthorizationRequestResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // AnswerClaimRequest confirms a claim request, claiming its server for
-  // the account, or declines it, and gives the URL the browser goes to
-  // next: the request's redirect URI with an authorization code, or with
-  // an error. An unknown, answered or expired request is NOT_FOUND.
-  rpc AnswerClaimRequest(AnswerClaimRequestRequest) returns (AnswerClaimRequestResponse);
+  // AnswerAuthorizationRequest approves an authorization request, or
+  // declines it, and gives the URL the browser goes to next: the
+  // request's redirect URI with an authorization code, or with an error.
+  // Approving a request that claims its server claims it for the account,
+  // which must be a full account; any other request signs in only the
+  // server's administrator, and other accounts are PERMISSION_DENIED. An
+  // unknown, answered or expired request is NOT_FOUND.
+  rpc AnswerAuthorizationRequest(AnswerAuthorizationRequestRequest) returns (AnswerAuthorizationRequestResponse);
   // GetLinkCode gives what the device showing a code at mavio.dev/link
   // signs in to. An unknown or expired code is NOT_FOUND.
   rpc GetLinkCode(GetLinkCodeRequest) returns (GetLinkCodeResponse) {
@@ -186,8 +190,8 @@ message CreateAssertionResponse {
 }
 
 message CreateAuthorizationCodeRequest {
-  // The server whose web UI signs in; empty for app.mavio.dev.
-  string server_id = 1;
+  reserved 1;
+  reserved server_id;
   // Where the web interface receives the code: an HTTP or HTTPS URL.
   string redirect_uri = 2 [
     (buf.validate.field).required = true,
@@ -212,26 +216,31 @@ message CreateAuthorizationCodeResponse {
   string code = 1;
 }
 
-message GetClaimRequestRequest {
-  string claim_request = 1 [(buf.validate.field).required = true];
+message GetAuthorizationRequestRequest {
+  string authorization_request = 1 [(buf.validate.field).required = true];
 }
 
-message GetClaimRequestResponse {
+message GetAuthorizationRequestResponse {
   string server_id = 1;
   string server_name = 2;
-  // The redirect URI of the web UI that started the claim.
+  // The redirect URI of the web UI that started signing in.
   string redirect_uri = 3;
-  // Whether the server is claimed now, by this account or another.
-  bool claimed = 4;
-  google.protobuf.Timestamp expire_time = 5;
+  // Whether approving claims the server.
+  bool claim = 4;
+  // Whether the server is registered at mavio.dev, by this account or
+  // another: claiming it again takes it over.
+  bool claimed = 5;
+  // Whether the account administers the server.
+  bool administrator = 6;
+  google.protobuf.Timestamp expire_time = 7;
 }
 
-message AnswerClaimRequestRequest {
-  string claim_request = 1 [(buf.validate.field).required = true];
-  bool confirm = 2;
+message AnswerAuthorizationRequestRequest {
+  string authorization_request = 1 [(buf.validate.field).required = true];
+  bool approve = 2;
 }
 
-message AnswerClaimRequestResponse {
+message AnswerAuthorizationRequestResponse {
   // Where the browser goes next.
   string redirect_url = 1;
 }

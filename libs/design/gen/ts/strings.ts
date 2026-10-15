@@ -172,9 +172,6 @@ export type MessageKey =
   | 'auth.modeMavioDevMessage'
   | 'auth.modeStandalone'
   | 'auth.modeStandaloneMessage'
-  | 'auth.claim'
-  | 'auth.claimMessage'
-  | 'auth.claimServer'
   | 'auth.signInWithMavio'
   | 'auth.signingIn'
   | 'auth.tryAgain'
@@ -397,9 +394,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.modeMavioDevMessage": "Sign in to your Mavio account to share libraries with friends and family and to reach them away from home.",
     "auth.modeStandalone": "Standalone Server",
     "auth.modeStandaloneMessage": "The server keeps its own users and never contacts mavio.dev.",
-    "auth.claim": "Claim {server}",
-    "auth.claimMessage": "Sign in at mavio.dev and confirm there. Your Mavio account becomes this server's administrator.",
-    "auth.claimServer": "Continue at mavio.dev",
     "auth.signInWithMavio": "Sign In with Mavio",
     "auth.signingIn": "Signing in…",
     "auth.tryAgain": "Try Again",
@@ -620,9 +614,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.modeMavioDevMessage": "登录您的 Mavio 账户，可以与亲友共享媒体库，离家时也能访问。",
     "auth.modeStandalone": "独立服务器",
     "auth.modeStandaloneMessage": "服务器自己保存用户，从不联系 mavio.dev。",
-    "auth.claim": "认领 {server}",
-    "auth.claimMessage": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。",
-    "auth.claimServer": "前往 mavio.dev 继续",
     "auth.signInWithMavio": "使用 Mavio 账户登录",
     "auth.signingIn": "正在登录…",
     "auth.tryAgain": "重试",

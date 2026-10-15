@@ -584,17 +584,6 @@ public enum MavioStrings {
     /// Explanation of standalone mode at setup.
     public static var authModeStandaloneMessage: String { NSLocalizedString("auth.modeStandaloneMessage", bundle: .module, comment: "") }
 
-    /// Title of the screen claiming a server for a Mavio account; server is its name.
-    public static func authClaim(server: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("auth.claim", bundle: .module, comment: ""), server)
-    }
-
-    /// Explanation of claiming a server.
-    public static var authClaimMessage: String { NSLocalizedString("auth.claimMessage", bundle: .module, comment: "") }
-
-    /// Goes to mavio.dev to claim the server.
-    public static var authClaimServer: String { NSLocalizedString("auth.claimServer", bundle: .module, comment: "") }
-
     /// Signs in to a server with a Mavio account at mavio.dev.
     public static var authSignInWithMavio: String { NSLocalizedString("auth.signInWithMavio", bundle: .module, comment: "") }
 

@@ -14187,7 +14187,7 @@ impl ::buffa::HasMessageView for super::super::SwitchUserResponse {
     type ViewHandle = SwitchUserResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct StartClaimRequestView<'a> {
+pub struct StartSignInRequestView<'a> {
     /// Where mavio.dev sends the browser back with the authorization code:
     /// the web UI's own page, at whatever address it was opened.
     ///
@@ -14207,8 +14207,8 @@ pub struct StartClaimRequestView<'a> {
     pub state: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for StartClaimRequestView<'a> {
-    type Owned = super::super::StartClaimRequest;
+impl<'a> ::buffa::MessageView<'a> for StartSignInRequestView<'a> {
+    type Owned = super::super::StartSignInRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -14275,18 +14275,18 @@ impl<'a> ::buffa::MessageView<'a> for StartClaimRequestView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::StartClaimRequest, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<super::super::StartSignInRequest, ::buffa::DecodeError> {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::StartClaimRequest, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<super::super::StartSignInRequest, ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::StartClaimRequest {
+        ::core::result::Result::Ok(super::super::StartSignInRequest {
             redirect_uri: self.redirect_uri.map(|s| s.to_string()),
             code_challenge: self.code_challenge.map(|s| s.to_string()),
             device_key: self.device_key.map(|b| (b).to_vec()),
@@ -14296,7 +14296,7 @@ impl<'a> ::buffa::MessageView<'a> for StartClaimRequestView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for StartClaimRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for StartSignInRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -14340,24 +14340,24 @@ impl<'a> ::buffa::ViewEncode<'a> for StartClaimRequestView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for StartClaimRequestView<'a> {
+impl<'a> ::buffa::MessageName for StartSignInRequestView<'a> {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "StartClaimRequest";
-    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimRequest";
+    const NAME: &'static str = "StartSignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartSignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInRequest";
 }
-::buffa::impl_default_view_instance!(StartClaimRequestView);
-::buffa::impl_view_reborrow!(StartClaimRequestView);
-/** Self-contained, `'static` owned view of a `StartClaimRequest` message.
+::buffa::impl_default_view_instance!(StartSignInRequestView);
+::buffa::impl_view_reborrow!(StartSignInRequestView);
+/** Self-contained, `'static` owned view of a `StartSignInRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`StartClaimRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`StartSignInRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartClaimRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartSignInRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct StartClaimRequestOwnedView(
-    ::buffa::OwnedView<StartClaimRequestView<'static>>,
+pub struct StartSignInRequestOwnedView(
+    ::buffa::OwnedView<StartSignInRequestView<'static>>,
 );
-impl StartClaimRequestOwnedView {
+impl StartSignInRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -14371,7 +14371,7 @@ impl StartClaimRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            StartSignInRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -14386,7 +14386,7 @@ impl StartClaimRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimRequestOwnedView(
+            StartSignInRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -14400,15 +14400,15 @@ impl StartClaimRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::StartClaimRequest,
+        msg: &super::super::StartSignInRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            StartSignInRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`StartClaimRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`StartSignInRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &StartClaimRequestView<'_> {
+    pub fn view(&self) -> &StartSignInRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -14419,7 +14419,7 @@ impl StartClaimRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::StartClaimRequest {
+    pub fn to_owned_message(&self) -> super::super::StartSignInRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -14462,31 +14462,31 @@ impl StartClaimRequestOwnedView {
         self.0.reborrow().state
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<StartClaimRequestView<'static>>>
-for StartClaimRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<StartClaimRequestView<'static>>) -> Self {
-        StartClaimRequestOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<StartSignInRequestView<'static>>>
+for StartSignInRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<StartSignInRequestView<'static>>) -> Self {
+        StartSignInRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<StartClaimRequestOwnedView>
-for ::buffa::OwnedView<StartClaimRequestView<'static>> {
-    fn from(wrapper: StartClaimRequestOwnedView) -> Self {
+impl ::core::convert::From<StartSignInRequestOwnedView>
+for ::buffa::OwnedView<StartSignInRequestView<'static>> {
+    fn from(wrapper: StartSignInRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<StartClaimRequestView<'static>>>
-for StartClaimRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<StartClaimRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<StartSignInRequestView<'static>>>
+for StartSignInRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<StartSignInRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::StartClaimRequest {
-    type View<'a> = StartClaimRequestView<'a>;
-    type ViewHandle = StartClaimRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::StartSignInRequest {
+    type View<'a> = StartSignInRequestView<'a>;
+    type ViewHandle = StartSignInRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct StartClaimResponseView<'a> {
-    /// The page at mavio.dev where an account confirms the claim.
+pub struct StartSignInResponseView<'a> {
+    /// The page at mavio.dev where the account approves signing in.
     ///
     /// Field 1: `url`
     pub url: ::core::option::Option<&'a str>,
@@ -14496,8 +14496,8 @@ pub struct StartClaimResponseView<'a> {
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for StartClaimResponseView<'a> {
-    type Owned = super::super::StartClaimResponse;
+impl<'a> ::buffa::MessageView<'a> for StartSignInResponseView<'a> {
+    type Owned = super::super::StartSignInResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -14564,18 +14564,24 @@ impl<'a> ::buffa::MessageView<'a> for StartClaimResponseView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::StartClaimResponse, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::StartSignInResponse,
+        ::buffa::DecodeError,
+    > {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::StartClaimResponse, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::StartSignInResponse,
+        ::buffa::DecodeError,
+    > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::StartClaimResponse {
+        ::core::result::Result::Ok(super::super::StartSignInResponse {
             url: self.url.map(|s| s.to_string()),
             expire_time: match self.expire_time.as_option() {
                 Some(v) => {
@@ -14591,7 +14597,7 @@ impl<'a> ::buffa::MessageView<'a> for StartClaimResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for StartClaimResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for StartSignInResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -14633,24 +14639,24 @@ impl<'a> ::buffa::ViewEncode<'a> for StartClaimResponseView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for StartClaimResponseView<'a> {
+impl<'a> ::buffa::MessageName for StartSignInResponseView<'a> {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "StartClaimResponse";
-    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimResponse";
+    const NAME: &'static str = "StartSignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartSignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInResponse";
 }
-::buffa::impl_default_view_instance!(StartClaimResponseView);
-::buffa::impl_view_reborrow!(StartClaimResponseView);
-/** Self-contained, `'static` owned view of a `StartClaimResponse` message.
+::buffa::impl_default_view_instance!(StartSignInResponseView);
+::buffa::impl_view_reborrow!(StartSignInResponseView);
+/** Self-contained, `'static` owned view of a `StartSignInResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`StartClaimResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`StartSignInResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartClaimResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`StartSignInResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct StartClaimResponseOwnedView(
-    ::buffa::OwnedView<StartClaimResponseView<'static>>,
+pub struct StartSignInResponseOwnedView(
+    ::buffa::OwnedView<StartSignInResponseView<'static>>,
 );
-impl StartClaimResponseOwnedView {
+impl StartSignInResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -14664,7 +14670,7 @@ impl StartClaimResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            StartSignInResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -14679,7 +14685,7 @@ impl StartClaimResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimResponseOwnedView(
+            StartSignInResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -14693,15 +14699,15 @@ impl StartClaimResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::StartClaimResponse,
+        msg: &super::super::StartSignInResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            StartClaimResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            StartSignInResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`StartClaimResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`StartSignInResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &StartClaimResponseView<'_> {
+    pub fn view(&self) -> &StartSignInResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -14712,7 +14718,7 @@ impl StartClaimResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::StartClaimResponse {
+    pub fn to_owned_message(&self) -> super::super::StartSignInResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -14725,7 +14731,7 @@ impl StartClaimResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The page at mavio.dev where an account confirms the claim.
+    /// The page at mavio.dev where the account approves signing in.
     ///
     /// Field 1: `url`
     #[must_use]
@@ -14742,27 +14748,27 @@ impl StartClaimResponseOwnedView {
         &self.0.reborrow().expire_time
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<StartClaimResponseView<'static>>>
-for StartClaimResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<StartClaimResponseView<'static>>) -> Self {
-        StartClaimResponseOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<StartSignInResponseView<'static>>>
+for StartSignInResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<StartSignInResponseView<'static>>) -> Self {
+        StartSignInResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<StartClaimResponseOwnedView>
-for ::buffa::OwnedView<StartClaimResponseView<'static>> {
-    fn from(wrapper: StartClaimResponseOwnedView) -> Self {
+impl ::core::convert::From<StartSignInResponseOwnedView>
+for ::buffa::OwnedView<StartSignInResponseView<'static>> {
+    fn from(wrapper: StartSignInResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<StartClaimResponseView<'static>>>
-for StartClaimResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<StartClaimResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<StartSignInResponseView<'static>>>
+for StartSignInResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<StartSignInResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::StartClaimResponse {
-    type View<'a> = StartClaimResponseView<'a>;
-    type ViewHandle = StartClaimResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::StartSignInResponse {
+    type View<'a> = StartSignInResponseView<'a>;
+    type ViewHandle = StartSignInResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct SignInWithAssertionRequestView<'a> {

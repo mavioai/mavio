@@ -58,21 +58,27 @@ pub type OwnedCreateAuthorizationCodeResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
-///Shorthand for `OwnedView<GetClaimRequestRequestView<'static>>`.
-pub type OwnedGetClaimRequestRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<'static>,
+///Shorthand for `OwnedView<GetAuthorizationRequestRequestView<'static>>`.
+pub type OwnedGetAuthorizationRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<GetClaimRequestResponseView<'static>>`.
-pub type OwnedGetClaimRequestResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'static>,
+///Shorthand for `OwnedView<GetAuthorizationRequestResponseView<'static>>`.
+pub type OwnedGetAuthorizationRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestResponseView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<AnswerClaimRequestRequestView<'static>>`.
-pub type OwnedAnswerClaimRequestRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<'static>,
+///Shorthand for `OwnedView<AnswerAuthorizationRequestRequestView<'static>>`.
+pub type OwnedAnswerAuthorizationRequestRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<AnswerClaimRequestResponseView<'static>>`.
-pub type OwnedAnswerClaimRequestResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+///Shorthand for `OwnedView<AnswerAuthorizationRequestResponseView<'static>>`.
+pub type OwnedAnswerAuthorizationRequestResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestResponseView<
         'static,
     >,
 >;
@@ -402,8 +408,12 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetClaimRequestResponse>
-for crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::GetAuthorizationRequestResponse,
+>
+for crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -411,9 +421,13 @@ for crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::GetClaimRequestResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::GetAuthorizationRequestResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<'static>,
+    crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -436,8 +450,12 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse>
-for crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestResponse,
+>
+for crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -445,9 +463,11 @@ for crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseVie
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+    crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestResponseView<
         'static,
     >,
 > {
@@ -856,15 +876,15 @@ pub const ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC: ::connectrpc::Spec = :
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `GetClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.cloud.v1.AccountService/GetClaimRequest",
+/// Static [`Spec`](::connectrpc::Spec) for the `GetAuthorizationRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_GET_AUTHORIZATION_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/GetAuthorizationRequest",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `AnswerClaimRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.cloud.v1.AccountService/AnswerClaimRequest",
+/// Static [`Spec`](::connectrpc::Spec) for the `AnswerAuthorizationRequest` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const ACCOUNT_SERVICE_ANSWER_AUTHORIZATION_REQUEST_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.cloud.v1.AccountService/AnswerAuthorizationRequest",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -1130,12 +1150,11 @@ pub trait AccountService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// CreateAuthorizationCode approves a web UI signing the account in
+    /// CreateAuthorizationCode approves app.mavio.dev signing the account in
     /// (docs/accounts.md §6): the code it gives, sent back to the redirect
     /// URI, is exchanged within a minute at /api/oauth/token with the PKCE
     /// verifier for a session of the device key. A server's web UI signs in
-    /// only the server's administrator, and other accounts are
-    /// PERMISSION_DENIED; app.mavio.dev signs in any account.
+    /// with an authorization request the server pushed instead.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1158,8 +1177,10 @@ pub trait AccountService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// GetClaimRequest gives the server and the web UI of a claim request
-    /// for the account to confirm.
+    /// GetAuthorizationRequest gives the server and the web UI of an
+    /// authorization request a server pushed (ServerService.CreateAuthorizationRequest)
+    /// for the account to approve. An unknown, answered or expired request
+    /// is NOT_FOUND.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1168,24 +1189,27 @@ pub trait AccountService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn get_claim_request<'a>(
+    fn get_authorization_request<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+            crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+                crate::proto::mavio::cloud::v1::GetAuthorizationRequestResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// AnswerClaimRequest confirms a claim request, claiming its server for
-    /// the account, or declines it, and gives the URL the browser goes to
-    /// next: the request's redirect URI with an authorization code, or with
-    /// an error. An unknown, answered or expired request is NOT_FOUND.
+    /// AnswerAuthorizationRequest approves an authorization request, or
+    /// declines it, and gives the URL the browser goes to next: the
+    /// request's redirect URI with an authorization code, or with an error.
+    /// Approving a request that claims its server claims it for the account,
+    /// which must be a full account; any other request signs in only the
+    /// server's administrator, and other accounts are PERMISSION_DENIED. An
+    /// unknown, answered or expired request is NOT_FOUND.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1194,17 +1218,17 @@ pub trait AccountService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn answer_claim_request<'a>(
+    fn answer_authorization_request<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+            crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+                crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1687,13 +1711,13 @@ impl<S: AccountService> AccountServiceExt for S {
             .with_spec(ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC)
             .route_view_idempotent(
                 ACCOUNT_SERVICE_SERVICE_NAME,
-                "GetClaimRequest",
+                "GetAuthorizationRequest",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestRequestView<
                                 'static,
                             >,
                         >,
@@ -1702,27 +1726,27 @@ impl<S: AccountService> AccountServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                                crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.get_claim_request(ctx, sreq)
+                            svc.get_authorization_request(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+                                    crate::proto::mavio::cloud::v1::GetAuthorizationRequestResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC)
+            .with_spec(ACCOUNT_SERVICE_GET_AUTHORIZATION_REQUEST_SPEC)
             .route_view(
                 ACCOUNT_SERVICE_SERVICE_NAME,
-                "AnswerClaimRequest",
+                "AnswerAuthorizationRequest",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<
+                            crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestRequestView<
                                 'static,
                             >,
                         >,
@@ -1731,18 +1755,18 @@ impl<S: AccountService> AccountServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                                crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.answer_claim_request(ctx, sreq)
+                            svc.answer_authorization_request(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+                                    crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC)
+            .with_spec(ACCOUNT_SERVICE_ANSWER_AUTHORIZATION_REQUEST_SPEC)
             .route_view_idempotent(
                 ACCOUNT_SERVICE_SERVICE_NAME,
                 "GetLinkCode",
@@ -2129,16 +2153,16 @@ impl<T: AccountService> ::connectrpc::Dispatcher for AccountServiceServer<T> {
                         .with_spec(ACCOUNT_SERVICE_CREATE_AUTHORIZATION_CODE_SPEC),
                 )
             }
-            "GetClaimRequest" => {
+            "GetAuthorizationRequest" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC),
+                        .with_spec(ACCOUNT_SERVICE_GET_AUTHORIZATION_REQUEST_SPEC),
                 )
             }
-            "AnswerClaimRequest" => {
+            "AnswerAuthorizationRequest" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC),
+                        .with_spec(ACCOUNT_SERVICE_ANSWER_AUTHORIZATION_REQUEST_SPEC),
                 )
             }
             "GetLinkCode" => {
@@ -2370,47 +2394,47 @@ impl<T: AccountService> ::connectrpc::Dispatcher for AccountServiceServer<T> {
                         >(format)
                 })
             }
-            "GetClaimRequest" => {
+            "GetAuthorizationRequest" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestRequestView<
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
                     >::from_parts(&req, &body);
-                    svc.get_claim_request(ctx, req)
+                    svc.get_authorization_request(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::cloud::v1::GetClaimRequestResponse,
+                            crate::proto::mavio::cloud::v1::GetAuthorizationRequestResponse,
                         >(format)
                 })
             }
-            "AnswerClaimRequest" => {
+            "AnswerAuthorizationRequest" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestRequestView<
+                    let req: crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+                        crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
                     >::from_parts(&req, &body);
-                    svc.answer_claim_request(ctx, req)
+                    svc.answer_authorization_request(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::cloud::v1::AnswerClaimRequestResponse,
+                            crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestResponse,
                         >(format)
                 })
             }
@@ -3077,35 +3101,35 @@ where
             )
             .await
     }
-    /// Call the GetClaimRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/GetClaimRequest.
-    pub async fn get_claim_request(
+    /// Call the GetAuthorizationRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/GetAuthorizationRequest.
+    pub async fn get_authorization_request(
         &self,
-        request: crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.get_claim_request_with_options(
+        self.get_authorization_request_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the GetClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn get_claim_request_with_options(
+    /// Call the GetAuthorizationRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_authorization_request_with_options(
         &self,
-        request: crate::proto::mavio::cloud::v1::GetClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::GetAuthorizationRequestRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::GetClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::GetAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
@@ -3115,42 +3139,42 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                ACCOUNT_SERVICE_GET_CLAIM_REQUEST_SPEC
+                ACCOUNT_SERVICE_GET_AUTHORIZATION_REQUEST_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
             .await
     }
-    /// Call the AnswerClaimRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/AnswerClaimRequest.
-    pub async fn answer_claim_request(
+    /// Call the AnswerAuthorizationRequest RPC. Sends a request to /mavio.cloud.v1.AccountService/AnswerAuthorizationRequest.
+    pub async fn answer_authorization_request(
         &self,
-        request: crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.answer_claim_request_with_options(
+        self.answer_authorization_request_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the AnswerClaimRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn answer_claim_request_with_options(
+    /// Call the AnswerAuthorizationRequest RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn answer_authorization_request_with_options(
         &self,
-        request: crate::proto::mavio::cloud::v1::AnswerClaimRequestRequest,
+        request: crate::proto::mavio::cloud::v1::AnswerAuthorizationRequestRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::cloud::v1::__buffa::view::AnswerClaimRequestResponseView<
+                crate::proto::mavio::cloud::v1::__buffa::view::AnswerAuthorizationRequestResponseView<
                     'static,
                 >,
             >,
@@ -3160,7 +3184,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                ACCOUNT_SERVICE_ANSWER_CLAIM_REQUEST_SPEC
+                ACCOUNT_SERVICE_ANSWER_AUTHORIZATION_REQUEST_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

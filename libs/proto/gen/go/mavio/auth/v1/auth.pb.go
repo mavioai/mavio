@@ -5617,7 +5617,7 @@ func (b0 SwitchUserResponse_builder) Build() *SwitchUserResponse {
 	return m0
 }
 
-type StartClaimRequest struct {
+type StartSignInRequest struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_RedirectUri   *string                `protobuf:"bytes,1,opt,name=redirect_uri,json=redirectUri"`
 	xxx_hidden_CodeChallenge *string                `protobuf:"bytes,2,opt,name=code_challenge,json=codeChallenge"`
@@ -5629,20 +5629,20 @@ type StartClaimRequest struct {
 	sizeCache                protoimpl.SizeCache
 }
 
-func (x *StartClaimRequest) Reset() {
-	*x = StartClaimRequest{}
+func (x *StartSignInRequest) Reset() {
+	*x = StartSignInRequest{}
 	mi := &file_mavio_auth_v1_auth_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StartClaimRequest) String() string {
+func (x *StartSignInRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartClaimRequest) ProtoMessage() {}
+func (*StartSignInRequest) ProtoMessage() {}
 
-func (x *StartClaimRequest) ProtoReflect() protoreflect.Message {
+func (x *StartSignInRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_auth_v1_auth_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -5654,7 +5654,7 @@ func (x *StartClaimRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *StartClaimRequest) GetRedirectUri() string {
+func (x *StartSignInRequest) GetRedirectUri() string {
 	if x != nil {
 		if x.xxx_hidden_RedirectUri != nil {
 			return *x.xxx_hidden_RedirectUri
@@ -5664,7 +5664,7 @@ func (x *StartClaimRequest) GetRedirectUri() string {
 	return ""
 }
 
-func (x *StartClaimRequest) GetCodeChallenge() string {
+func (x *StartSignInRequest) GetCodeChallenge() string {
 	if x != nil {
 		if x.xxx_hidden_CodeChallenge != nil {
 			return *x.xxx_hidden_CodeChallenge
@@ -5674,14 +5674,14 @@ func (x *StartClaimRequest) GetCodeChallenge() string {
 	return ""
 }
 
-func (x *StartClaimRequest) GetDeviceKey() []byte {
+func (x *StartSignInRequest) GetDeviceKey() []byte {
 	if x != nil {
 		return x.xxx_hidden_DeviceKey
 	}
 	return nil
 }
 
-func (x *StartClaimRequest) GetState() string {
+func (x *StartSignInRequest) GetState() string {
 	if x != nil {
 		if x.xxx_hidden_State != nil {
 			return *x.xxx_hidden_State
@@ -5691,17 +5691,17 @@ func (x *StartClaimRequest) GetState() string {
 	return ""
 }
 
-func (x *StartClaimRequest) SetRedirectUri(v string) {
+func (x *StartSignInRequest) SetRedirectUri(v string) {
 	x.xxx_hidden_RedirectUri = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
-func (x *StartClaimRequest) SetCodeChallenge(v string) {
+func (x *StartSignInRequest) SetCodeChallenge(v string) {
 	x.xxx_hidden_CodeChallenge = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
 }
 
-func (x *StartClaimRequest) SetDeviceKey(v []byte) {
+func (x *StartSignInRequest) SetDeviceKey(v []byte) {
 	if v == nil {
 		v = []byte{}
 	}
@@ -5709,60 +5709,60 @@ func (x *StartClaimRequest) SetDeviceKey(v []byte) {
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
 }
 
-func (x *StartClaimRequest) SetState(v string) {
+func (x *StartSignInRequest) SetState(v string) {
 	x.xxx_hidden_State = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
-func (x *StartClaimRequest) HasRedirectUri() bool {
+func (x *StartSignInRequest) HasRedirectUri() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *StartClaimRequest) HasCodeChallenge() bool {
+func (x *StartSignInRequest) HasCodeChallenge() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *StartClaimRequest) HasDeviceKey() bool {
+func (x *StartSignInRequest) HasDeviceKey() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *StartClaimRequest) HasState() bool {
+func (x *StartSignInRequest) HasState() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *StartClaimRequest) ClearRedirectUri() {
+func (x *StartSignInRequest) ClearRedirectUri() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_RedirectUri = nil
 }
 
-func (x *StartClaimRequest) ClearCodeChallenge() {
+func (x *StartSignInRequest) ClearCodeChallenge() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_CodeChallenge = nil
 }
 
-func (x *StartClaimRequest) ClearDeviceKey() {
+func (x *StartSignInRequest) ClearDeviceKey() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_DeviceKey = nil
 }
 
-func (x *StartClaimRequest) ClearState() {
+func (x *StartSignInRequest) ClearState() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_State = nil
 }
 
-type StartClaimRequest_builder struct {
+type StartSignInRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// Where mavio.dev sends the browser back with the authorization code:
@@ -5776,8 +5776,8 @@ type StartClaimRequest_builder struct {
 	State *string
 }
 
-func (b0 StartClaimRequest_builder) Build() *StartClaimRequest {
-	m0 := &StartClaimRequest{}
+func (b0 StartSignInRequest_builder) Build() *StartSignInRequest {
+	m0 := &StartSignInRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.RedirectUri != nil {
@@ -5799,7 +5799,7 @@ func (b0 StartClaimRequest_builder) Build() *StartClaimRequest {
 	return m0
 }
 
-type StartClaimResponse struct {
+type StartSignInResponse struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Url         *string                `protobuf:"bytes,1,opt,name=url"`
 	xxx_hidden_ExpireTime  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expire_time,json=expireTime"`
@@ -5809,20 +5809,20 @@ type StartClaimResponse struct {
 	sizeCache              protoimpl.SizeCache
 }
 
-func (x *StartClaimResponse) Reset() {
-	*x = StartClaimResponse{}
+func (x *StartSignInResponse) Reset() {
+	*x = StartSignInResponse{}
 	mi := &file_mavio_auth_v1_auth_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *StartClaimResponse) String() string {
+func (x *StartSignInResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*StartClaimResponse) ProtoMessage() {}
+func (*StartSignInResponse) ProtoMessage() {}
 
-func (x *StartClaimResponse) ProtoReflect() protoreflect.Message {
+func (x *StartSignInResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_auth_v1_auth_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -5834,7 +5834,7 @@ func (x *StartClaimResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *StartClaimResponse) GetUrl() string {
+func (x *StartSignInResponse) GetUrl() string {
 	if x != nil {
 		if x.xxx_hidden_Url != nil {
 			return *x.xxx_hidden_Url
@@ -5844,55 +5844,55 @@ func (x *StartClaimResponse) GetUrl() string {
 	return ""
 }
 
-func (x *StartClaimResponse) GetExpireTime() *timestamppb.Timestamp {
+func (x *StartSignInResponse) GetExpireTime() *timestamppb.Timestamp {
 	if x != nil {
 		return x.xxx_hidden_ExpireTime
 	}
 	return nil
 }
 
-func (x *StartClaimResponse) SetUrl(v string) {
+func (x *StartSignInResponse) SetUrl(v string) {
 	x.xxx_hidden_Url = &v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
 }
 
-func (x *StartClaimResponse) SetExpireTime(v *timestamppb.Timestamp) {
+func (x *StartSignInResponse) SetExpireTime(v *timestamppb.Timestamp) {
 	x.xxx_hidden_ExpireTime = v
 }
 
-func (x *StartClaimResponse) HasUrl() bool {
+func (x *StartSignInResponse) HasUrl() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *StartClaimResponse) HasExpireTime() bool {
+func (x *StartSignInResponse) HasExpireTime() bool {
 	if x == nil {
 		return false
 	}
 	return x.xxx_hidden_ExpireTime != nil
 }
 
-func (x *StartClaimResponse) ClearUrl() {
+func (x *StartSignInResponse) ClearUrl() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Url = nil
 }
 
-func (x *StartClaimResponse) ClearExpireTime() {
+func (x *StartSignInResponse) ClearExpireTime() {
 	x.xxx_hidden_ExpireTime = nil
 }
 
-type StartClaimResponse_builder struct {
+type StartSignInResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The page at mavio.dev where an account confirms the claim.
+	// The page at mavio.dev where the account approves signing in.
 	Url        *string
 	ExpireTime *timestamppb.Timestamp
 }
 
-func (b0 StartClaimResponse_builder) Build() *StartClaimResponse {
-	m0 := &StartClaimResponse{}
+func (b0 StartSignInResponse_builder) Build() *StartSignInResponse {
+	m0 := &StartSignInResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Url != nil {
@@ -6393,15 +6393,15 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\x03pin\x18\x02 \x01(\tB\x11\xbaH\x0er\f2\n" +
 	"^[0-9]{4}$R\x03pin\"=\n" +
 	"\x12SwitchUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\xc5\x01\n" +
-	"\x11StartClaimRequest\x121\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\xc6\x01\n" +
+	"\x12StartSignInRequest\x121\n" +
 	"\fredirect_uri\x18\x01 \x01(\tB\x0e\xbaH\v\xc8\x01\x01r\x06\x18\x80\x10\x88\x01\x01R\vredirectUri\x122\n" +
 	"\x0ecode_challenge\x18\x02 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\x98\x01+R\rcodeChallenge\x12)\n" +
 	"\n" +
 	"device_key\x18\x03 \x01(\fB\n" +
 	"\xbaH\a\xc8\x01\x01z\x02h R\tdeviceKey\x12\x1e\n" +
-	"\x05state\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x05state\"c\n" +
-	"\x12StartClaimResponse\x12\x10\n" +
+	"\x05state\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x01R\x05state\"d\n" +
+	"\x13StartSignInResponse\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12;\n" +
 	"\vexpire_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"expireTime\"\xa8\x01\n" +
@@ -6418,7 +6418,7 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\vAccountMode\x12\x1c\n" +
 	"\x18ACCOUNT_MODE_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17ACCOUNT_MODE_STANDALONE\x10\x01\x12\x1a\n" +
-	"\x16ACCOUNT_MODE_MAVIO_DEV\x10\x022\xf2\x13\n" +
+	"\x16ACCOUNT_MODE_MAVIO_DEV\x10\x022\xf5\x13\n" +
 	"\vAuthService\x12Y\n" +
 	"\vGetAuthInfo\x12!.mavio.auth.v1.GetAuthInfoRequest\x1a\".mavio.auth.v1.GetAuthInfoResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\x0fCreateFirstUser\x12%.mavio.auth.v1.CreateFirstUserRequest\x1a&.mavio.auth.v1.CreateFirstUserResponse\x12B\n" +
@@ -6444,9 +6444,8 @@ const file_mavio_auth_v1_auth_proto_rawDesc = "" +
 	"\x10AcceptInvitation\x12&.mavio.auth.v1.AcceptInvitationRequest\x1a'.mavio.auth.v1.AcceptInvitationResponse\x12q\n" +
 	"\x13ListSwitchableUsers\x12).mavio.auth.v1.ListSwitchableUsersRequest\x1a*.mavio.auth.v1.ListSwitchableUsersResponse\"\x03\x90\x02\x01\x12Q\n" +
 	"\n" +
-	"SwitchUser\x12 .mavio.auth.v1.SwitchUserRequest\x1a!.mavio.auth.v1.SwitchUserResponse\x12Q\n" +
-	"\n" +
-	"StartClaim\x12 .mavio.auth.v1.StartClaimRequest\x1a!.mavio.auth.v1.StartClaimResponse\x12l\n" +
+	"SwitchUser\x12 .mavio.auth.v1.SwitchUserRequest\x1a!.mavio.auth.v1.SwitchUserResponse\x12T\n" +
+	"\vStartSignIn\x12!.mavio.auth.v1.StartSignInRequest\x1a\".mavio.auth.v1.StartSignInResponse\x12l\n" +
 	"\x13SignInWithAssertion\x12).mavio.auth.v1.SignInWithAssertionRequest\x1a*.mavio.auth.v1.SignInWithAssertionResponseB\xb5\x01\n" +
 	"\x11com.mavio.auth.v1B\tAuthProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1;authv1\xa2\x02\x03MAX\xaa\x02\rMavio.Auth.V1\xca\x02\rMavio\\Auth\\V1\xe2\x02\x19Mavio\\Auth\\V1\\GPBMetadata\xea\x02\x0fMavio::Auth::V1b\beditionsp\xe8\a"
 
@@ -6506,8 +6505,8 @@ var file_mavio_auth_v1_auth_proto_goTypes = []any{
 	(*SwitchableUser)(nil),                 // 50: mavio.auth.v1.SwitchableUser
 	(*SwitchUserRequest)(nil),              // 51: mavio.auth.v1.SwitchUserRequest
 	(*SwitchUserResponse)(nil),             // 52: mavio.auth.v1.SwitchUserResponse
-	(*StartClaimRequest)(nil),              // 53: mavio.auth.v1.StartClaimRequest
-	(*StartClaimResponse)(nil),             // 54: mavio.auth.v1.StartClaimResponse
+	(*StartSignInRequest)(nil),             // 53: mavio.auth.v1.StartSignInRequest
+	(*StartSignInResponse)(nil),            // 54: mavio.auth.v1.StartSignInResponse
 	(*SignInWithAssertionRequest)(nil),     // 55: mavio.auth.v1.SignInWithAssertionRequest
 	(*SignInWithAssertionResponse)(nil),    // 56: mavio.auth.v1.SignInWithAssertionResponse
 	(*timestamppb.Timestamp)(nil),          // 57: google.protobuf.Timestamp
@@ -6552,7 +6551,7 @@ var file_mavio_auth_v1_auth_proto_depIdxs = []int32{
 	57, // 35: mavio.auth.v1.AcceptInvitationResponse.access_token_expire_time:type_name -> google.protobuf.Timestamp
 	50, // 36: mavio.auth.v1.ListSwitchableUsersResponse.users:type_name -> mavio.auth.v1.SwitchableUser
 	58, // 37: mavio.auth.v1.SwitchUserResponse.user:type_name -> mavio.user.v1.User
-	57, // 38: mavio.auth.v1.StartClaimResponse.expire_time:type_name -> google.protobuf.Timestamp
+	57, // 38: mavio.auth.v1.StartSignInResponse.expire_time:type_name -> google.protobuf.Timestamp
 	1,  // 39: mavio.auth.v1.SignInWithAssertionRequest.device:type_name -> mavio.auth.v1.Device
 	58, // 40: mavio.auth.v1.SignInWithAssertionResponse.user:type_name -> mavio.user.v1.User
 	2,  // 41: mavio.auth.v1.SignInWithAssertionResponse.session:type_name -> mavio.auth.v1.Session
@@ -6581,7 +6580,7 @@ var file_mavio_auth_v1_auth_proto_depIdxs = []int32{
 	46, // 64: mavio.auth.v1.AuthService.AcceptInvitation:input_type -> mavio.auth.v1.AcceptInvitationRequest
 	48, // 65: mavio.auth.v1.AuthService.ListSwitchableUsers:input_type -> mavio.auth.v1.ListSwitchableUsersRequest
 	51, // 66: mavio.auth.v1.AuthService.SwitchUser:input_type -> mavio.auth.v1.SwitchUserRequest
-	53, // 67: mavio.auth.v1.AuthService.StartClaim:input_type -> mavio.auth.v1.StartClaimRequest
+	53, // 67: mavio.auth.v1.AuthService.StartSignIn:input_type -> mavio.auth.v1.StartSignInRequest
 	55, // 68: mavio.auth.v1.AuthService.SignInWithAssertion:input_type -> mavio.auth.v1.SignInWithAssertionRequest
 	4,  // 69: mavio.auth.v1.AuthService.GetAuthInfo:output_type -> mavio.auth.v1.GetAuthInfoResponse
 	6,  // 70: mavio.auth.v1.AuthService.CreateFirstUser:output_type -> mavio.auth.v1.CreateFirstUserResponse
@@ -6607,7 +6606,7 @@ var file_mavio_auth_v1_auth_proto_depIdxs = []int32{
 	47, // 90: mavio.auth.v1.AuthService.AcceptInvitation:output_type -> mavio.auth.v1.AcceptInvitationResponse
 	49, // 91: mavio.auth.v1.AuthService.ListSwitchableUsers:output_type -> mavio.auth.v1.ListSwitchableUsersResponse
 	52, // 92: mavio.auth.v1.AuthService.SwitchUser:output_type -> mavio.auth.v1.SwitchUserResponse
-	54, // 93: mavio.auth.v1.AuthService.StartClaim:output_type -> mavio.auth.v1.StartClaimResponse
+	54, // 93: mavio.auth.v1.AuthService.StartSignIn:output_type -> mavio.auth.v1.StartSignInResponse
 	56, // 94: mavio.auth.v1.AuthService.SignInWithAssertion:output_type -> mavio.auth.v1.SignInWithAssertionResponse
 	69, // [69:95] is the sub-list for method output_type
 	43, // [43:69] is the sub-list for method input_type

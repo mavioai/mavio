@@ -48,7 +48,7 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetInvitationProcedure,
 	authv1connect.AuthServiceStartInvitationPasskeyProcedure,
 	authv1connect.AuthServiceAcceptInvitationProcedure,
-	authv1connect.AuthServiceStartClaimProcedure,
+	authv1connect.AuthServiceStartSignInProcedure,
 	authv1connect.AuthServiceSignInWithAssertionProcedure,
 }
 
@@ -121,9 +121,9 @@ type AuthService struct {
 	// Requests returns the request settings, whose default permissions
 	// members joining through invitations get; nil uses the defaults.
 	Requests func() core.RequestSettings
-	// StartClaim asks mavio.dev for a claim request (cloud.Claimer.Start);
-	// nil claims nothing.
-	RequestClaim func(ctx context.Context, r cloud.ClaimRequest) (string, time.Time, error)
+	// SignIn signs Mavio accounts in to the web UI and claims the server
+	// (cloud.Claimer); nil signs no one in with them.
+	SignIn MavioSignIn
 	// Assertions checks the sign-in assertions of mavio.dev, whose API is
 	// at MavioDevURL; nil signs no one in with them.
 	Assertions  *cloud.Verifier
@@ -132,6 +132,17 @@ type AuthService struct {
 }
 
 var _ authv1connect.AuthServiceHandler = (*AuthService)(nil)
+
+// MavioSignIn signs Mavio accounts in to the web UI through mavio.dev,
+// claiming the server while it is claimable (cloud.Claimer).
+type MavioSignIn interface {
+	// StartSignIn pushes a web UI's authorization request to mavio.dev and
+	// returns the page where the account approves it.
+	StartSignIn(ctx context.Context, r cloud.SignInRequest) (string, time.Time, error)
+	// Complete claims the server once an account approved a request that
+	// claims it.
+	Complete(ctx context.Context) error
+}
 
 // NewAuthService returns an AuthService backed by store, issuing access
 // tokens with tokens.

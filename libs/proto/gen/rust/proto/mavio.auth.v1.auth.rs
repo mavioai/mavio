@@ -7723,7 +7723,7 @@ impl ::buffa::ExtensionSet for SwitchUserResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct StartClaimRequest {
+pub struct StartSignInRequest {
     /// Where mavio.dev sends the browser back with the authorization code:
     /// the web UI's own page, at whatever address it was opened.
     ///
@@ -7744,9 +7744,9 @@ pub struct StartClaimRequest {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for StartClaimRequest {
+impl ::core::fmt::Debug for StartSignInRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("StartClaimRequest")
+        f.debug_struct("StartSignInRequest")
             .field("redirect_uri", &self.redirect_uri)
             .field("code_challenge", &self.code_challenge)
             .field("device_key", &self.device_key)
@@ -7754,14 +7754,14 @@ impl ::core::fmt::Debug for StartClaimRequest {
             .finish()
     }
 }
-impl StartClaimRequest {
+impl StartSignInRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInRequest";
 }
-impl StartClaimRequest {
+impl StartSignInRequest {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::redirect_uri`] to `Some(value)`, consuming and returning `self`.
@@ -7803,14 +7803,14 @@ impl StartClaimRequest {
         self
     }
 }
-::buffa::impl_default_instance!(StartClaimRequest);
-impl ::buffa::MessageName for StartClaimRequest {
+::buffa::impl_default_instance!(StartSignInRequest);
+impl ::buffa::MessageName for StartSignInRequest {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "StartClaimRequest";
-    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimRequest";
+    const NAME: &'static str = "StartSignInRequest";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartSignInRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInRequest";
 }
-impl ::buffa::Message for StartClaimRequest {
+impl ::buffa::Message for StartSignInRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -7929,8 +7929,8 @@ impl ::buffa::Message for StartClaimRequest {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for StartClaimRequest {
-    const PROTO_FQN: &'static str = "mavio.auth.v1.StartClaimRequest";
+impl ::buffa::ExtensionSet for StartSignInRequest {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartSignInRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -7939,8 +7939,8 @@ impl ::buffa::ExtensionSet for StartClaimRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct StartClaimResponse {
-    /// The page at mavio.dev where an account confirms the claim.
+pub struct StartSignInResponse {
+    /// The page at mavio.dev where the account approves signing in.
     ///
     /// Field 1: `url`
     pub url: ::core::option::Option<::buffa::alloc::string::String>,
@@ -7952,22 +7952,22 @@ pub struct StartClaimResponse {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for StartClaimResponse {
+impl ::core::fmt::Debug for StartSignInResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("StartClaimResponse")
+        f.debug_struct("StartSignInResponse")
             .field("url", &self.url)
             .field("expire_time", &self.expire_time)
             .finish()
     }
 }
-impl StartClaimResponse {
+impl StartSignInResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInResponse";
 }
-impl StartClaimResponse {
+impl StartSignInResponse {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::url`] to `Some(value)`, consuming and returning `self`.
@@ -7976,14 +7976,14 @@ impl StartClaimResponse {
         self
     }
 }
-::buffa::impl_default_instance!(StartClaimResponse);
-impl ::buffa::MessageName for StartClaimResponse {
+::buffa::impl_default_instance!(StartSignInResponse);
+impl ::buffa::MessageName for StartSignInResponse {
     const PACKAGE: &'static str = "mavio.auth.v1";
-    const NAME: &'static str = "StartClaimResponse";
-    const FULL_NAME: &'static str = "mavio.auth.v1.StartClaimResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartClaimResponse";
+    const NAME: &'static str = "StartSignInResponse";
+    const FULL_NAME: &'static str = "mavio.auth.v1.StartSignInResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.auth.v1.StartSignInResponse";
 }
-impl ::buffa::Message for StartClaimResponse {
+impl ::buffa::Message for StartSignInResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -8075,8 +8075,8 @@ impl ::buffa::Message for StartClaimResponse {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for StartClaimResponse {
-    const PROTO_FQN: &'static str = "mavio.auth.v1.StartClaimResponse";
+impl ::buffa::ExtensionSet for StartSignInResponse {
+    const PROTO_FQN: &'static str = "mavio.auth.v1.StartSignInResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

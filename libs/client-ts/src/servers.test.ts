@@ -114,7 +114,9 @@ test("signs a Mavio account in through mavio.dev to each of its servers", async 
   const key = memoryDeviceKey();
   let exchanged: Record<string, string> = {};
   const signed: { assertion: string; signature: string }[] = [];
+  const started: Record<string, unknown>[] = [];
   const calls = world({
+    StartSignIn: (b) => (started.push(b as Record<string, unknown>), { url: `https://mavio.dev/authorize?request_uri=r${started.length}` }),
     GetAuthInfo: (_, __, url) => (url.includes("attic") ? { ...den, serverId: "attic", serverName: "Attic" } : den),
     "oauth/token": (b) => ((exchanged = b as Record<string, string>), token()),
     ListServers: () => ({
@@ -127,15 +129,14 @@ test("signs a Mavio account in through mavio.dev to each of its servers", async 
     SignInWithAssertion: (b, init, url) => (signed.push(b as (typeof signed)[0]), signedInWithAssertion(b, init, url)),
   });
   const servers = new Servers(memory(), "http://den:8686", { key });
-  const page = new URL(await servers.startSignIn("/library"));
-  expect(page.origin + page.pathname).toBe("https://mavio.dev/authorize");
-  expect(page.searchParams.get("client_id")).toBe("den");
-  expect(page.searchParams.get("redirect_uri")).toBe("http://den:8686/auth/callback");
-  expect(page.searchParams.get("code_challenge_method")).toBe("S256");
+  // The serving server pushes the request to mavio.dev.
+  expect(await servers.startSignIn("/library")).toBe("https://mavio.dev/authorize?request_uri=r1");
+  expect(started[0]).toMatchObject({ redirectUri: "http://den:8686/auth/callback" });
+  expect(calls).toContain("den:8686 StartSignIn");
 
   await expect(servers.finishCallback(new URLSearchParams({ code: "c", state: "another" }))).rejects.toThrow(/not started here/);
-  const again = new URL(await servers.startSignIn("/library"));
-  const back = await servers.finishCallback(new URLSearchParams({ code: "the code", state: again.searchParams.get("state")! }));
+  await servers.startSignIn("/library");
+  const back = await servers.finishCallback(new URLSearchParams({ code: "the code", state: started[1].state as string }));
   expect(back).toBe("/library");
   expect(exchanged).toMatchObject({ grant_type: "authorization_code", code: "the code", client_id: "den" });
   expect(servers.account()).toEqual({ id: "acct-1", name: "Ann" });
@@ -174,26 +175,6 @@ test("app.mavio.dev signs in as the app and reaches servers over HTTPS only", as
   await servers.finishCallback(new URLSearchParams({ code: "c", state: page.searchParams.get("state")! }));
   expect(client).toBe("app");
   expect(servers.snapshot().map((s) => [s.id, s.url, !!s.token])).toEqual([["den", "", false]]);
-});
-
-test("claims the serving server and signs in once it learns of its administrator", async () => {
-  let attempts = 0;
-  let claim: Record<string, unknown> = {};
-  world({
-    GetAuthInfo: () => den,
-    StartClaim: (b) => ((claim = b as Record<string, unknown>), { url: "https://mavio.dev/claim?request=r1" }),
-    "oauth/token": () => token(),
-    ListServers: () => ({ servers: [{ id: "den", name: "Den" }] }),
-    CreateAssertion: () => ({ assertion: "a" }),
-    SignInWithAssertion: (b, init, url) =>
-      ++attempts < 2 ? Response.json({ code: "failed_precondition", message: "not claimed yet" }, { status: 400 }) : signedInWithAssertion(b, init, url),
-  });
-  const servers = new Servers(memory(), "http://den:8686", { key: memoryDeviceKey() });
-  expect(await servers.startClaim()).toBe("https://mavio.dev/claim?request=r1");
-  expect(claim.redirectUri).toBe("http://den:8686/auth/callback");
-  await servers.finishCallback(new URLSearchParams({ code: "c", state: claim.state as string }));
-  expect(attempts).toBe(2);
-  expect(servers.get("den")?.token).toBe("den-token");
 });
 
 test("a television signs in with a link code", async () => {

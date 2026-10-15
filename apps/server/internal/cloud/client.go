@@ -51,9 +51,10 @@ func NewClient(base string, key *identity.Key, hc *http.Client) *Client {
 
 func (c *Client) token() string { return Token(c.key, c.base, c.now()) }
 
-// CreateClaimRequest asks for a claim request an account confirms.
-func (c *Client) CreateClaimRequest(ctx context.Context, req *cloudv1.CreateClaimRequestRequest) (*cloudv1.CreateClaimRequestResponse, error) {
-	return c.api.CreateClaimRequest(ctx, req)
+// CreateAuthorizationRequest pushes the authorization request of the
+// server's web UI, which an account approves.
+func (c *Client) CreateAuthorizationRequest(ctx context.Context, req *cloudv1.CreateAuthorizationRequestRequest) (*cloudv1.CreateAuthorizationRequestResponse, error) {
+	return c.api.CreateAuthorizationRequest(ctx, req)
 }
 
 // PublishConnections replaces the URLs mavio.dev gives clients of the
@@ -64,7 +65,7 @@ func (c *Client) PublishConnections(ctx context.Context, urls []string) error {
 }
 
 // ClaimServer registers the server under the account of a claim code or
-// a claim request.
+// of an authorization request that claims it.
 func (c *Client) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerRequest) (*cloudv1.ClaimServerResponse, error) {
 	return c.api.ClaimServer(ctx, req)
 }

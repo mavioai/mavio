@@ -9,7 +9,7 @@ import {
   ClaimServerResponseSchema,
   ClearAcmeChallengeResponseSchema,
   CreateAcmeBindingResponseSchema,
-  CreateClaimRequestResponseSchema,
+  CreateAuthorizationRequestResponseSchema,
   ListChangesResponseSchema,
   PublishConnectionsResponseSchema,
   PublishLibrariesResponseSchema,
@@ -99,16 +99,19 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
   const authenticate = (ctx: HandlerContext) => authenticateServer(deps, ctx.requestHeader);
 
   return {
-    async createClaimRequest(req, ctx) {
+    async createAuthorizationRequest(req, ctx) {
       const at = now();
       const serverId = await verifyServerToken(db, bearer(ctx.requestHeader), req.publicKey, apiURL, at);
       if (!redirectURI(req.redirectUri)) {
         throw new ConnectError("the redirect URI is not an HTTP or HTTPS URL", Code.InvalidArgument);
       }
-      await db.delete(schema.claimRequests).where(lt(schema.claimRequests.expiresAt, at));
+      if (!req.claim && !(await db.query.servers.findFirst({ where: eq(schema.servers.id, serverId) }))) {
+        throw new ConnectError("the server is not claimed", Code.FailedPrecondition);
+      }
+      await db.delete(schema.authorizationRequests).where(lt(schema.authorizationRequests.expiresAt, at));
       const id = base64url(crypto.getRandomValues(new Uint8Array(18)));
       const expiresAt = new Date(at.getTime() + claimCodeLifetime);
-      await db.insert(schema.claimRequests).values({
+      await db.insert(schema.authorizationRequests).values({
         id,
         serverId,
         publicKey: req.publicKey,
@@ -118,11 +121,12 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
         codeChallenge: req.codeChallenge,
         deviceKey: req.deviceKey,
         state: req.state,
+        claim: req.claim,
         expiresAt,
       });
-      return create(CreateClaimRequestResponseSchema, {
-        claimRequest: id,
-        url: `${siteURL(apiURL)}/claim?request=${id}`,
+      return create(CreateAuthorizationRequestResponseSchema, {
+        authorizationRequest: id,
+        url: `${siteURL(apiURL)}/authorize?request_uri=${id}`,
         expireTime: timestampFromDate(expiresAt),
       });
     },
@@ -130,20 +134,24 @@ export function serverService(deps: Deps): ServiceImpl<typeof ServerService> {
     async claimServer(req, ctx) {
       const at = now();
       const id = await verifyServerToken(db, bearer(ctx.requestHeader), req.publicKey, apiURL, at);
-      if (!req.claimCode === !req.claimRequest) {
-        throw new ConnectError("a claim code or a claim request, not both", Code.InvalidArgument);
+      if (!req.claimCode === !req.authorizationRequest) {
+        throw new ConnectError("a claim code or an authorization request, not both", Code.InvalidArgument);
       }
-      if (req.claimRequest) {
-        // A confirmed request claimed the server already; the server learns its administrator once.
-        const key = and(eq(schema.claimRequests.id, req.claimRequest), eq(schema.claimRequests.serverId, id));
-        const r = await db.query.claimRequests.findFirst({ where: key });
+      if (req.authorizationRequest) {
+        // An approved request claimed the server already; the server learns its administrator once.
+        const key = and(
+          eq(schema.authorizationRequests.id, req.authorizationRequest),
+          eq(schema.authorizationRequests.serverId, id),
+          eq(schema.authorizationRequests.claim, true),
+        );
+        const r = await db.query.authorizationRequests.findFirst({ where: key });
         if (!r || r.declined || r.expiresAt <= at) {
-          throw new ConnectError("unknown, declined or expired claim request", Code.InvalidArgument);
+          throw new ConnectError("unknown, declined or expired authorization request", Code.InvalidArgument);
         }
-        if (!r.accountId) throw new ConnectError("the claim request is not confirmed yet", Code.FailedPrecondition);
+        if (!r.accountId) throw new ConnectError("the authorization request is not approved yet", Code.FailedPrecondition);
         const server = await db.query.servers.findFirst({ where: eq(schema.servers.id, id), with: { administrator: true } });
-        if (!server) throw new ConnectError("unknown, declined or expired claim request", Code.InvalidArgument);
-        await db.delete(schema.claimRequests).where(key);
+        if (!server) throw new ConnectError("unknown, declined or expired authorization request", Code.InvalidArgument);
+        await db.delete(schema.authorizationRequests).where(key);
         return create(ClaimServerResponseSchema, { administrator: accountOf(server.administrator), cursor: BigInt(server.cursor) });
       }
       const codeHash = await claimCodeHash(req.claimCode);

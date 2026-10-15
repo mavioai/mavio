@@ -230,13 +230,13 @@ pub use self::__buffa::view::SwitchUserResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SwitchUserResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::StartClaimRequestView;
+pub use self::__buffa::view::StartSignInRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::StartClaimRequestOwnedView;
+pub use self::__buffa::view::StartSignInRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::StartClaimResponseView;
+pub use self::__buffa::view::StartSignInResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::StartClaimResponseOwnedView;
+pub use self::__buffa::view::StartSignInResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SignInWithAssertionRequestView;
 #[doc(inline)]

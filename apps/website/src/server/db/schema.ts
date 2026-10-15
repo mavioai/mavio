@@ -49,13 +49,16 @@ export const claimCodes = pgTable("claim_codes", {
 });
 
 /**
- * claimRequests are the claims servers asked for, which an account
- * confirms at /claim (docs/accounts.md §3.2), by a random ID: the server's
- * key, and the redirect URI, PKCE challenge, device key and state of the
- * web UI that started it. accountId is the account that confirmed it.
+ * authorizationRequests are the authorization requests servers pushed for
+ * their web UIs (docs/accounts.md §6), which an account approves at
+ * /authorize, by a random ID: the server's key, and the redirect URI,
+ * PKCE challenge, device key and state of the web UI that started
+ * signing in. A request that claims the server registers it for the
+ * account that approves it (docs/accounts.md §3.2), and stays until the
+ * server learns of it. accountId is the account that approved it.
  */
-export const claimRequests = pgTable(
-  "claim_requests",
+export const authorizationRequests = pgTable(
+  "authorization_requests",
   {
     id: text("id").primaryKey(),
     serverId: text("server_id").notNull(),
@@ -66,11 +69,12 @@ export const claimRequests = pgTable(
     codeChallenge: text("code_challenge").notNull(),
     deviceKey: bytea("device_key").notNull(),
     state: text("state").notNull().default(""),
+    claim: boolean("claim").notNull().default(false),
     accountId: text("account_id").references(() => user.id, { onDelete: "cascade" }),
     declined: boolean("declined").notNull().default(false),
     expiresAt: time("expires_at").notNull(),
   },
-  (t) => [index("claim_requests_expires_at_idx").on(t.expiresAt)],
+  (t) => [index("authorization_requests_expires_at_idx").on(t.expiresAt)],
 );
 
 /**
