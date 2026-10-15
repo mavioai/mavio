@@ -11,5 +11,5 @@
     "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
-  "include": ["src", "test", "scripts", "vite.config.ts", "vitest.config.ts", "drizzle.config.ts"]
+  "include": ["src", "test", "scripts", "cloudflare.config.ts", "vite.config.ts", "vitest.config.ts", "drizzle.config.ts"]
 }

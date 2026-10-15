@@ -1,4 +1,4 @@
-// The bindings of mavio.dev's Worker (wrangler.jsonc), and the parts of the
+// The bindings of mavio.dev's Worker (cloudflare.config.ts), and the parts of the
 // Workers runtime it uses.
 declare module "cloudflare:workers" {
   export const env: {

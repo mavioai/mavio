@@ -5,12 +5,13 @@
   "license": "GPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "dev": "cf dev",
+    "build": "cf build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "generate-auth-schema": "auth generate --config scripts/auth-schema.ts --output src/server/db/auth-schema.ts --yes",
-    "generate-migration": "drizzle-kit generate"
+    "generate-migration": "drizzle-kit generate",
+    "deploy": "cf deploy"
   },
   "dependencies": {
     "@better-auth/passkey": "1.7.7",
@@ -33,7 +34,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.63.1",
+    "@cloudflare/vite-plugin": "2.0.0-beta.sha-8c6014f9a",
     "@electric-sql/pglite": "0.5.9",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "26.6.3",
@@ -42,12 +43,12 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
     "auth": "1.7.7",
+    "cf": "1.0.0-beta.16",
     "drizzle-kit": "0.31.11",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "vite": "8.3.4",
-    "vitest": "5.0.3",
-    "wrangler": "4.149.0"
+    "vitest": "5.0.3"
   },
   "nx": {
     "name": "website"

@@ -34,5 +34,5 @@ xcuserdata/
 local.properties
 
 # Cloudflare Workers (apps/website)
-.wrangler/
+.cloudflare/
 .dev.vars
