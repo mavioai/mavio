@@ -648,6 +648,9 @@ flowchart TD
 - [ ] 在每个客户端实现[客户端 §6.3](clients.zh-CN.md) 的导航，Web UI 优先：按窗口宽度选择的三种布局、桌面布局的侧边栏及其用户菜单、电视布局的顶部导航与遥控器焦点，以及两种模式的登录页面；Apple 与 Android 应用还要把主按钮改为以 `color.button` 填充，强调色只用于进度、选中、链接与开关
   - [x] Web UI：三种布局、带用户菜单的侧边栏与图标栏、方向键移动焦点的电视模式、分部分的设置、分步登录、首页头图、媒体库页头、按 `libs/design/components.zh-CN.md` 规定的详情页（接下来要看的一集、各季与各集、版本菜单、演职人员、信息与媒体），以及带画质与下一集的播放器侧面板
   - [ ] Web UI 的管理功能：设置中用户管理的服务器，及其媒体库、用户与任务
+    - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`SystemService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以及插件目录
+    - [ ] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
+    - [ ] 插件分区加入 Web UI 的快照测试
   - [ ] Web UI：在 mavio.dev 模式的服务器上切换 Home 的成员，目前在 mavio.dev 上进行
   - [ ] Web UI 的详情页：预告片与其他附加内容，以及人物页面及其作品，由演职人员卡片打开
   - [x] Web UI 的发现页（`apps/web/src/screens/discover.tsx`、`libs/client-ts/src/discover.ts`）：第一台提供发现的服务器的目录按行显示，每个目录的网格，作品及其各季，观看，以及请求电影或剧集的若干季；首页热门趋势中没有服务器拥有的作品打开作品页

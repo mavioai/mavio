@@ -11,6 +11,7 @@ import {
   serverKey,
   useServers,
   useServersStore,
+  useAdminServers,
   useSignedIn,
 } from "@mavio/client-ts";
 import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
@@ -24,9 +25,10 @@ import { Icon, type IconName } from "../icon.tsx";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
+import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices" | "plugins";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -35,12 +37,20 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   servers: { icon: "server", color: "#8E8E93", title: () => t("auth.servers") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
+  plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins") },
 };
 
-const groups: { title: () => string; ids: SectionId[] }[] = [
+const allGroups: { title: () => string; ids: SectionId[]; admin?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountAndServers"), ids: ["servers", "account", "devices"] },
+  { title: () => t("settings.administration"), ids: ["plugins"], admin: true },
 ];
+
+/** The groups of sections, Administration only for a user who administers a server. */
+function useGroups() {
+  const admin = useAdminServers().length > 0;
+  return allGroups.filter((g) => !g.admin || admin);
+}
 
 function isSection(s: string | undefined): s is SectionId {
   return s !== undefined && s in sections;
@@ -50,6 +60,7 @@ export function SettingsScreen() {
   const { section } = useParams({ strict: false }) as { section?: string };
   const width = useWidthClass();
   const prefs = usePrefs();
+  const groups = useGroups();
   if (section !== undefined && !isSection(section)) return <Navigate to="/settings" />;
   if (width === "compact" && !prefs.tv) {
     return section ? <CompactSection id={section} /> : <ProfileList />;
@@ -121,6 +132,7 @@ function ProfileList() {
   const servers = useServersStore();
   const account = useAccount();
   const shown = account.shown;
+  const groups = useGroups();
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
       <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
@@ -218,6 +230,8 @@ function SectionView({ id }: { id: SectionId }) {
       return <AccountSection />;
     case "devices":
       return <DevicesSection />;
+    case "plugins":
+      return <PluginsSection />;
   }
 }
 
