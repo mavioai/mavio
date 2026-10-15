@@ -2605,4 +2605,90 @@
     <string name="lists_remove_named">Remove %s</string>
     <!-- Starts removing a collection's members. -->
     <string name="lists_edit">Edit</string>
+    <!-- Heading of the subtitles panel on an item's details. -->
+    <string name="itemsubs_title">Subtitles</string>
+    <!-- A subtitle whose language is not known. -->
+    <string name="itemsubs_unknown">Unknown language</string>
+    <!-- A forced subtitle's language. -->
+    <string name="itemsubs_forced_language">%s (Forced)</string>
+    <!-- A subtitle for the hearing impaired. -->
+    <string name="itemsubs_hi_language">%s (SDH)</string>
+    <!-- The subtitle profile the item uses. -->
+    <string name="itemsubs_profile">Subtitle Profile</string>
+    <!-- The item uses no subtitle profile. -->
+    <string name="itemsubs_no_profile">None</string>
+    <!-- Footer of the item's subtitle profile. -->
+    <string name="itemsubs_profile_footer">The profile decides which languages the item should have; subtitles are searched for the missing ones automatically.</string>
+    <!-- Languages the item's profile wants but it lacks. -->
+    <string name="itemsubs_missing">Missing</string>
+    <!-- Searches the providers for the item's subtitles. -->
+    <string name="itemsubs_search">Search</string>
+    <!-- Opens the upload of a subtitle file. -->
+    <string name="itemsubs_upload">Upload</string>
+    <!-- The subtitles the item has. -->
+    <string name="itemsubs_present">Present</string>
+    <!-- Shown when an item has no subtitles. -->
+    <string name="itemsubs_none">The item has no subtitles.</string>
+    <!-- A subtitle stream embedded in the media file. -->
+    <string name="itemsubs_embedded">Embedded #%s</string>
+    <!-- The subtitle does not satisfy the profile. -->
+    <string name="itemsubs_not_counted">Not counted</string>
+    <!-- Synchronizes a subtitle with the audio or another subtitle. -->
+    <string name="itemsubs_sync">Sync</string>
+    <!-- Shown while a subtitle is synchronized. -->
+    <string name="itemsubs_syncing">Syncing…</string>
+    <!-- The result of synchronizing a subtitle. -->
+    <string name="itemsubs_synced">Shifted by %1$s ms, speed ratio %2$s.</string>
+    <!-- What a subtitle is synchronized against. -->
+    <string name="itemsubs_reference">Reference</string>
+    <!-- Synchronizes a subtitle against the audio. -->
+    <string name="itemsubs_audio">The audio</string>
+    <!-- Applies modifications to a subtitle file. -->
+    <string name="itemsubs_modify">Modify</string>
+    <!-- Applies the chosen modifications. -->
+    <string name="itemsubs_apply">Apply</string>
+    <!-- Translates a subtitle into another language. -->
+    <string name="itemsubs_translate">Translate</string>
+    <!-- The language a subtitle is translated into. -->
+    <string name="itemsubs_into">Into</string>
+    <!-- Translates with the translator of the subtitle settings. -->
+    <string name="itemsubs_settings_translator">The default translator</string>
+    <!-- The translation was queued. -->
+    <string name="itemsubs_translation_queued">Queued</string>
+    <!-- Shown after a translation was queued. -->
+    <string name="itemsubs_translation_footer">The translation runs as a job; the subtitle appears here when it finishes.</string>
+    <!-- Extracts an embedded subtitle into a file. -->
+    <string name="itemsubs_extract">Extract</string>
+    <!-- Deletes a subtitle file. -->
+    <string name="itemsubs_delete">Delete</string>
+    <!-- Confirms deleting a subtitle file. -->
+    <string name="itemsubs_delete_title">Delete %s\?</string>
+    <!-- The subtitle file to upload. -->
+    <string name="itemsubs_file">Subtitle file</string>
+    <!-- The chosen file is not a subtitle format. -->
+    <string name="itemsubs_bad_format">Choose an SRT, ASS, SSA, VTT or SUB file.</string>
+    <!-- A subtitle's language. -->
+    <string name="itemsubs_language">Language</string>
+    <!-- Uploads the chosen subtitle file. -->
+    <string name="itemsubs_upload_action">Upload</string>
+    <!-- Title of the subtitle search. -->
+    <string name="itemsubs_search_title">Subtitles for %s</string>
+    <!-- Searches in the languages the profile wants. -->
+    <string name="itemsubs_wanted_languages">The profile\'s languages</string>
+    <!-- A provider that failed to search. -->
+    <string name="itemsubs_provider_failed">%s failed</string>
+    <!-- Shown while the providers are searched. -->
+    <string name="itemsubs_searching">Searching…</string>
+    <!-- The search found nothing. -->
+    <string name="itemsubs_no_results">No subtitles found.</string>
+    <!-- How well a found subtitle matches. -->
+    <string name="itemsubs_score">%s%% match</string>
+    <!-- Properties a found subtitle does not match. -->
+    <string name="itemsubs_not_matched">Not matched: %s</string>
+    <!-- The found subtitle is on the blocklist. -->
+    <string name="itemsubs_blocklisted">Blocklisted</string>
+    <!-- Downloads a found subtitle. -->
+    <string name="itemsubs_download">Download</string>
+    <!-- The subtitle was downloaded. -->
+    <string name="itemsubs_downloaded">Downloaded</string>
 </resources>

@@ -4089,4 +4089,151 @@ public enum MavioStrings {
 
     /// Starts removing a collection's members.
     public static var listsEdit: String { NSLocalizedString("lists.edit", bundle: .module, comment: "") }
+
+    /// Heading of the subtitles panel on an item's details.
+    public static var itemsubsTitle: String { NSLocalizedString("itemsubs.title", bundle: .module, comment: "") }
+
+    /// A subtitle whose language is not known.
+    public static var itemsubsUnknown: String { NSLocalizedString("itemsubs.unknown", bundle: .module, comment: "") }
+
+    /// A forced subtitle's language.
+    public static func itemsubsForcedLanguage(language: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.forcedLanguage", bundle: .module, comment: ""), language)
+    }
+
+    /// A subtitle for the hearing impaired.
+    public static func itemsubsHiLanguage(language: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.hiLanguage", bundle: .module, comment: ""), language)
+    }
+
+    /// The subtitle profile the item uses.
+    public static var itemsubsProfile: String { NSLocalizedString("itemsubs.profile", bundle: .module, comment: "") }
+
+    /// The item uses no subtitle profile.
+    public static var itemsubsNoProfile: String { NSLocalizedString("itemsubs.noProfile", bundle: .module, comment: "") }
+
+    /// Footer of the item's subtitle profile.
+    public static var itemsubsProfileFooter: String { NSLocalizedString("itemsubs.profileFooter", bundle: .module, comment: "") }
+
+    /// Languages the item's profile wants but it lacks.
+    public static var itemsubsMissing: String { NSLocalizedString("itemsubs.missing", bundle: .module, comment: "") }
+
+    /// Searches the providers for the item's subtitles.
+    public static var itemsubsSearch: String { NSLocalizedString("itemsubs.search", bundle: .module, comment: "") }
+
+    /// Opens the upload of a subtitle file.
+    public static var itemsubsUpload: String { NSLocalizedString("itemsubs.upload", bundle: .module, comment: "") }
+
+    /// The subtitles the item has.
+    public static var itemsubsPresent: String { NSLocalizedString("itemsubs.present", bundle: .module, comment: "") }
+
+    /// Shown when an item has no subtitles.
+    public static var itemsubsNone: String { NSLocalizedString("itemsubs.none", bundle: .module, comment: "") }
+
+    /// A subtitle stream embedded in the media file.
+    public static func itemsubsEmbedded(index: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.embedded", bundle: .module, comment: ""), index)
+    }
+
+    /// The subtitle does not satisfy the profile.
+    public static var itemsubsNotCounted: String { NSLocalizedString("itemsubs.notCounted", bundle: .module, comment: "") }
+
+    /// Synchronizes a subtitle with the audio or another subtitle.
+    public static var itemsubsSync: String { NSLocalizedString("itemsubs.sync", bundle: .module, comment: "") }
+
+    /// Shown while a subtitle is synchronized.
+    public static var itemsubsSyncing: String { NSLocalizedString("itemsubs.syncing", bundle: .module, comment: "") }
+
+    /// The result of synchronizing a subtitle.
+    public static func itemsubsSynced(offset: String, ratio: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.synced", bundle: .module, comment: ""), offset, ratio)
+    }
+
+    /// What a subtitle is synchronized against.
+    public static var itemsubsReference: String { NSLocalizedString("itemsubs.reference", bundle: .module, comment: "") }
+
+    /// Synchronizes a subtitle against the audio.
+    public static var itemsubsAudio: String { NSLocalizedString("itemsubs.audio", bundle: .module, comment: "") }
+
+    /// Applies modifications to a subtitle file.
+    public static var itemsubsModify: String { NSLocalizedString("itemsubs.modify", bundle: .module, comment: "") }
+
+    /// Applies the chosen modifications.
+    public static var itemsubsApply: String { NSLocalizedString("itemsubs.apply", bundle: .module, comment: "") }
+
+    /// Translates a subtitle into another language.
+    public static var itemsubsTranslate: String { NSLocalizedString("itemsubs.translate", bundle: .module, comment: "") }
+
+    /// The language a subtitle is translated into.
+    public static var itemsubsInto: String { NSLocalizedString("itemsubs.into", bundle: .module, comment: "") }
+
+    /// Translates with the translator of the subtitle settings.
+    public static var itemsubsSettingsTranslator: String { NSLocalizedString("itemsubs.settingsTranslator", bundle: .module, comment: "") }
+
+    /// The translation was queued.
+    public static var itemsubsTranslationQueued: String { NSLocalizedString("itemsubs.translationQueued", bundle: .module, comment: "") }
+
+    /// Shown after a translation was queued.
+    public static var itemsubsTranslationFooter: String { NSLocalizedString("itemsubs.translationFooter", bundle: .module, comment: "") }
+
+    /// Extracts an embedded subtitle into a file.
+    public static var itemsubsExtract: String { NSLocalizedString("itemsubs.extract", bundle: .module, comment: "") }
+
+    /// Deletes a subtitle file.
+    public static var itemsubsDelete: String { NSLocalizedString("itemsubs.delete", bundle: .module, comment: "") }
+
+    /// Confirms deleting a subtitle file.
+    public static func itemsubsDeleteTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.deleteTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// The subtitle file to upload.
+    public static var itemsubsFile: String { NSLocalizedString("itemsubs.file", bundle: .module, comment: "") }
+
+    /// The chosen file is not a subtitle format.
+    public static var itemsubsBadFormat: String { NSLocalizedString("itemsubs.badFormat", bundle: .module, comment: "") }
+
+    /// A subtitle's language.
+    public static var itemsubsLanguage: String { NSLocalizedString("itemsubs.language", bundle: .module, comment: "") }
+
+    /// Uploads the chosen subtitle file.
+    public static var itemsubsUploadAction: String { NSLocalizedString("itemsubs.uploadAction", bundle: .module, comment: "") }
+
+    /// Title of the subtitle search.
+    public static func itemsubsSearchTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.searchTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Searches in the languages the profile wants.
+    public static var itemsubsWantedLanguages: String { NSLocalizedString("itemsubs.wantedLanguages", bundle: .module, comment: "") }
+
+    /// A provider that failed to search.
+    public static func itemsubsProviderFailed(provider: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.providerFailed", bundle: .module, comment: ""), provider)
+    }
+
+    /// Shown while the providers are searched.
+    public static var itemsubsSearching: String { NSLocalizedString("itemsubs.searching", bundle: .module, comment: "") }
+
+    /// The search found nothing.
+    public static var itemsubsNoResults: String { NSLocalizedString("itemsubs.noResults", bundle: .module, comment: "") }
+
+    /// How well a found subtitle matches.
+    public static func itemsubsScore(percent: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.score", bundle: .module, comment: ""), percent)
+    }
+
+    /// Properties a found subtitle does not match.
+    public static func itemsubsNotMatched(fields: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("itemsubs.notMatched", bundle: .module, comment: ""), fields)
+    }
+
+    /// The found subtitle is on the blocklist.
+    public static var itemsubsBlocklisted: String { NSLocalizedString("itemsubs.blocklisted", bundle: .module, comment: "") }
+
+    /// Downloads a found subtitle.
+    public static var itemsubsDownload: String { NSLocalizedString("itemsubs.download", bundle: .module, comment: "") }
+
+    /// The subtitle was downloaded.
+    public static var itemsubsDownloaded: String { NSLocalizedString("itemsubs.downloaded", bundle: .module, comment: "") }
 }

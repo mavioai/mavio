@@ -44,7 +44,7 @@ export function SubtitleSettingsPage({ server, page }: { server: ServerEntry; pa
 }
 
 /** The mods a download can have applied, as Bazarr names them; those taking arguments are kept as they are. */
-const mods: [string, () => string][] = [
+export const mods: [string, () => string][] = [
   ["OCR_fixes", () => t("subtitles.modOcr")],
   ["remove_HI", () => t("subtitles.modRemoveHi")],
   ["common", () => t("subtitles.modCommon")],

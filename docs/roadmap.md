@@ -685,6 +685,8 @@ flowchart TD
   - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
     - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)
+    - [x] An item's subtitles on its details: searched, downloaded, uploaded, extracted, synced, modified, translated and deleted (§6.3.21)
+    - [ ] Subtitles searched and downloaded from the player's subtitle panel
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
   - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title

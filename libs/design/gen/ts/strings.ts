@@ -1277,7 +1277,50 @@ export type MessageKey =
   | 'lists.moveDown'
   | 'lists.remove'
   | 'lists.removeNamed'
-  | 'lists.edit';
+  | 'lists.edit'
+  | 'itemsubs.title'
+  | 'itemsubs.unknown'
+  | 'itemsubs.forcedLanguage'
+  | 'itemsubs.hiLanguage'
+  | 'itemsubs.profile'
+  | 'itemsubs.noProfile'
+  | 'itemsubs.profileFooter'
+  | 'itemsubs.missing'
+  | 'itemsubs.search'
+  | 'itemsubs.upload'
+  | 'itemsubs.present'
+  | 'itemsubs.none'
+  | 'itemsubs.embedded'
+  | 'itemsubs.notCounted'
+  | 'itemsubs.sync'
+  | 'itemsubs.syncing'
+  | 'itemsubs.synced'
+  | 'itemsubs.reference'
+  | 'itemsubs.audio'
+  | 'itemsubs.modify'
+  | 'itemsubs.apply'
+  | 'itemsubs.translate'
+  | 'itemsubs.into'
+  | 'itemsubs.settingsTranslator'
+  | 'itemsubs.translationQueued'
+  | 'itemsubs.translationFooter'
+  | 'itemsubs.extract'
+  | 'itemsubs.delete'
+  | 'itemsubs.deleteTitle'
+  | 'itemsubs.file'
+  | 'itemsubs.badFormat'
+  | 'itemsubs.language'
+  | 'itemsubs.uploadAction'
+  | 'itemsubs.searchTitle'
+  | 'itemsubs.wantedLanguages'
+  | 'itemsubs.providerFailed'
+  | 'itemsubs.searching'
+  | 'itemsubs.noResults'
+  | 'itemsubs.score'
+  | 'itemsubs.notMatched'
+  | 'itemsubs.blocklisted'
+  | 'itemsubs.download'
+  | 'itemsubs.downloaded';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2547,7 +2590,50 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "lists.moveDown": "Move Down",
     "lists.remove": "Remove",
     "lists.removeNamed": "Remove {name}",
-    "lists.edit": "Edit"
+    "lists.edit": "Edit",
+    "itemsubs.title": "Subtitles",
+    "itemsubs.unknown": "Unknown language",
+    "itemsubs.forcedLanguage": "{language} (Forced)",
+    "itemsubs.hiLanguage": "{language} (SDH)",
+    "itemsubs.profile": "Subtitle Profile",
+    "itemsubs.noProfile": "None",
+    "itemsubs.profileFooter": "The profile decides which languages the item should have; subtitles are searched for the missing ones automatically.",
+    "itemsubs.missing": "Missing",
+    "itemsubs.search": "Search",
+    "itemsubs.upload": "Upload",
+    "itemsubs.present": "Present",
+    "itemsubs.none": "The item has no subtitles.",
+    "itemsubs.embedded": "Embedded #{index}",
+    "itemsubs.notCounted": "Not counted",
+    "itemsubs.sync": "Sync",
+    "itemsubs.syncing": "Syncing…",
+    "itemsubs.synced": "Shifted by {offset} ms, speed ratio {ratio}.",
+    "itemsubs.reference": "Reference",
+    "itemsubs.audio": "The audio",
+    "itemsubs.modify": "Modify",
+    "itemsubs.apply": "Apply",
+    "itemsubs.translate": "Translate",
+    "itemsubs.into": "Into",
+    "itemsubs.settingsTranslator": "The default translator",
+    "itemsubs.translationQueued": "Queued",
+    "itemsubs.translationFooter": "The translation runs as a job; the subtitle appears here when it finishes.",
+    "itemsubs.extract": "Extract",
+    "itemsubs.delete": "Delete",
+    "itemsubs.deleteTitle": "Delete {name}?",
+    "itemsubs.file": "Subtitle file",
+    "itemsubs.badFormat": "Choose an SRT, ASS, SSA, VTT or SUB file.",
+    "itemsubs.language": "Language",
+    "itemsubs.uploadAction": "Upload",
+    "itemsubs.searchTitle": "Subtitles for {name}",
+    "itemsubs.wantedLanguages": "The profile's languages",
+    "itemsubs.providerFailed": "{provider} failed",
+    "itemsubs.searching": "Searching…",
+    "itemsubs.noResults": "No subtitles found.",
+    "itemsubs.score": "{percent}% match",
+    "itemsubs.notMatched": "Not matched: {fields}",
+    "itemsubs.blocklisted": "Blocklisted",
+    "itemsubs.download": "Download",
+    "itemsubs.downloaded": "Downloaded"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3815,6 +3901,49 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "lists.moveDown": "下移",
     "lists.remove": "移除",
     "lists.removeNamed": "移除 {name}",
-    "lists.edit": "编辑"
+    "lists.edit": "编辑",
+    "itemsubs.title": "字幕",
+    "itemsubs.unknown": "未知语言",
+    "itemsubs.forcedLanguage": "{language}（强制）",
+    "itemsubs.hiLanguage": "{language}（听障）",
+    "itemsubs.profile": "字幕配置",
+    "itemsubs.noProfile": "无",
+    "itemsubs.profileFooter": "配置决定该条目应有哪些语言；缺少的语言会自动搜索字幕。",
+    "itemsubs.missing": "缺少",
+    "itemsubs.search": "搜索",
+    "itemsubs.upload": "上传",
+    "itemsubs.present": "现有字幕",
+    "itemsubs.none": "该条目没有字幕。",
+    "itemsubs.embedded": "内嵌 #{index}",
+    "itemsubs.notCounted": "不计入",
+    "itemsubs.sync": "同步",
+    "itemsubs.syncing": "正在同步…",
+    "itemsubs.synced": "已偏移 {offset} 毫秒，速度比 {ratio}。",
+    "itemsubs.reference": "参照",
+    "itemsubs.audio": "音频",
+    "itemsubs.modify": "修改",
+    "itemsubs.apply": "应用",
+    "itemsubs.translate": "翻译",
+    "itemsubs.into": "译为",
+    "itemsubs.settingsTranslator": "默认翻译器",
+    "itemsubs.translationQueued": "已排队",
+    "itemsubs.translationFooter": "翻译作为任务运行，完成后字幕会出现在这里。",
+    "itemsubs.extract": "提取",
+    "itemsubs.delete": "删除",
+    "itemsubs.deleteTitle": "删除 {name}？",
+    "itemsubs.file": "字幕文件",
+    "itemsubs.badFormat": "请选择 SRT、ASS、SSA、VTT 或 SUB 文件。",
+    "itemsubs.language": "语言",
+    "itemsubs.uploadAction": "上传",
+    "itemsubs.searchTitle": "{name} 的字幕",
+    "itemsubs.wantedLanguages": "配置的语言",
+    "itemsubs.providerFailed": "{provider} 失败",
+    "itemsubs.searching": "正在搜索…",
+    "itemsubs.noResults": "未找到字幕。",
+    "itemsubs.score": "匹配 {percent}%",
+    "itemsubs.notMatched": "未匹配：{fields}",
+    "itemsubs.blocklisted": "已拉黑",
+    "itemsubs.download": "下载",
+    "itemsubs.downloaded": "已下载"
   }
 };

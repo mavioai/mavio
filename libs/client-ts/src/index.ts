@@ -132,8 +132,11 @@ export {
   useRemotePathMappings,
 } from "./profiles.ts";
 export {
+  useItemSubtitleActions,
+  useItemSubtitles,
   useSubtitleAssignments,
   useSubtitleProfiles,
+  useSubtitleSearch,
   useSubtitleProviders,
   useSubtitleSettings,
   useSubtitleTranslators,
