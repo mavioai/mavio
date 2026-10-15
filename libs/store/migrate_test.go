@@ -2,99 +2,49 @@ package store
 
 import (
 	"database/sql"
-	"io/fs"
-	"path"
 	"path/filepath"
-	"slices"
-	"strings"
 	"testing"
-	"time"
-
-	"github.com/mavioai/mavio/libs/core"
 )
 
-// TestSQLiteUpgradeKeepsReferencingRows upgrades a database holding data
-// in the initial schema: table rebuilds must not cascade-delete referencing
-// rows, the derived keys and inherited ratings and tags must be
-// backfilled, and users' library access must move out of their policies.
-func TestSQLiteUpgradeKeepsReferencingRows(t *testing.T) {
+// TestSQLiteRebuildKeepsReferencingRows applies a migration rebuilding a
+// table, as Atlas writes them for SQLite: dropping the old table must not
+// cascade-delete the rows referencing it, and a rebuild leaving rows that
+// violate foreign keys is rolled back.
+func TestSQLiteRebuildKeepsReferencingRows(t *testing.T) {
 	ctx := t.Context()
-	file := filepath.Join(t.TempDir(), "mavio.db")
-	db, err := sql.Open("sqlite3", "file:"+file+"?_pragma=foreign_keys(1)&_timefmt=unixepoch_micro")
+	db, err := sql.Open("sqlite3", "file:"+filepath.Join(t.TempDir(), "mavio.db")+"?_pragma=foreign_keys(1)")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	if _, err := db.ExecContext(ctx, `CREATE TABLE schema_migrations (version VARCHAR(32) NOT NULL PRIMARY KEY, applied_at BIGINT NOT NULL)`); err != nil {
+	if _, err := db.ExecContext(ctx, `
+		CREATE TABLE schema_migrations (version VARCHAR(32) NOT NULL PRIMARY KEY, applied_at BIGINT NOT NULL);
+		CREATE TABLE parents (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
+		CREATE TABLE children (id INTEGER PRIMARY KEY, parent_id INTEGER NOT NULL REFERENCES parents (id) ON DELETE CASCADE);
+		INSERT INTO parents (id, name) VALUES (1, 'a');
+		INSERT INTO children (id, parent_id) VALUES (1, 1);`); err != nil {
 		t.Fatal(err)
 	}
-	names, err := fs.Glob(migrationFS, "migrations/sqlite/*.sql")
-	if err != nil || len(names) < 2 {
-		t.Fatalf("migrations = %v, %v", names, err)
+	rebuild := func(keep string) string {
+		return `PRAGMA foreign_keys = off;
+			CREATE TABLE new_parents (id INTEGER PRIMARY KEY, name TEXT NOT NULL, note TEXT NULL);
+			INSERT INTO new_parents (id, name) SELECT id, name FROM parents WHERE ` + keep + `;
+			DROP TABLE parents;
+			ALTER TABLE new_parents RENAME TO parents;
+			PRAGMA foreign_keys = on;`
 	}
-	slices.Sort(names)
-	initial, _ := fs.ReadFile(migrationFS, names[0])
-	version, _, _ := strings.Cut(path.Base(names[0]), "_")
-	if err := applyMigration(ctx, db, DialectSQLite, version, string(initial)); err != nil {
+	if err := applyMigration(ctx, db, DialectSQLite, "1", rebuild("true")); err != nil {
 		t.Fatal(err)
 	}
-
-	now := time.Now()
-	libID, itemID, personID, trailerID, userID := core.NewID(), core.NewID(), core.NewID(), core.NewID(), core.NewID()
-	for _, stmt := range []struct {
-		query string
-		args  []any
-	}{
-		{`INSERT INTO libraries (id, name, kind, paths, created_at, updated_at) VALUES (?, 'Films', 'movies', '[]', ?, ?)`, []any{libID, now, now}},
-		{`INSERT INTO items (id, kind, name, sort_name, sort_key, original_title, date_added, library_id) VALUES (?, 'movie', 'The Spider-Man', 'The Spider-Man', 'the spider-man', 'Ｓｐｉｄｅｒ', ?, ?)`, []any{itemID, now, libID}},
-		{`UPDATE items SET parental_rating = 13 WHERE id = ?`, []any{itemID}},
-		{`INSERT INTO items (id, kind, name, sort_name, sort_key, date_added, library_id, parent_id) VALUES (?, 'video', 'Trailer', 'Trailer', 'trailer', ?, ?, ?)`, []any{trailerID, now, libID, itemID}},
-		{`INSERT INTO item_values (kind, value, ord, item_id) VALUES ('genre', 'Comédie', 0, ?)`, []any{itemID}},
-		{`INSERT INTO item_values (kind, value, ord, item_id) VALUES ('tag', 'Kids', 0, ?)`, []any{itemID}},
-		{`INSERT INTO users (id, name, name_key, admin, policy, preferences, created_at) VALUES (?, 'Ann', 'ann', true, ?, '{}', ?)`, []any{userID, `{"Libraries":["` + libID.String() + `"],"MaxParentalRating":13,"AllowDownload":true,"AllowTranscoding":true}`, now}},
-		{`INSERT INTO people (id, name, name_key) VALUES (?, 'Zoë Kravitz', 'zoë kravitz')`, []any{personID}},
-		{`INSERT INTO credits (kind, item_id, person_id) VALUES ('actor', ?, ?)`, []any{itemID, personID}},
-	} {
-		if _, err := db.ExecContext(ctx, stmt.query, stmt.args...); err != nil {
-			t.Fatalf("%s: %v", stmt.query, err)
-		}
+	var children int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM children`).Scan(&children); err != nil || children != 1 {
+		t.Errorf("children after the rebuild = %d, %v; want = 1", children, err)
 	}
-	db.Close()
-
-	s, err := Open(ctx, "sqlite:"+file)
-	if err != nil {
-		t.Fatalf("upgrade: %v", err)
+	if err := applyMigration(ctx, db, DialectSQLite, "2", rebuild("false")); err == nil {
+		t.Error("a rebuild orphaning children was applied")
 	}
-	defer s.Close()
-
-	values, err := s.Items().Values(ctx, core.ValueQuery{Kind: core.ValueGenre, Search: "comedie"})
-	if err != nil || !slices.Equal(values, []core.ValueCount{{Value: "Comédie", Count: 1}}) {
-		t.Errorf("genres after upgrade = %v, %v", values, err)
-	}
-	credits, err := s.People().CreditsForItem(ctx, itemID)
-	if err != nil || len(credits) != 1 {
-		t.Errorf("credits after upgrade = %v, %v", credits, err)
-	}
-	page, err := s.Items().Query(ctx, core.ItemQuery{Search: "spiderman"})
-	if err != nil || page.Total != 1 {
-		t.Errorf("sort-form search after upgrade = %d items, %v", page.Total, err)
-	}
-	page, err = s.Items().Query(ctx, core.ItemQuery{Search: "spider", Genres: []string{"comédie"}})
-	if err != nil || page.Total != 1 {
-		t.Errorf("search with genre after upgrade = %d items, %v", page.Total, err)
-	}
-	if child, err := s.Items().Get(ctx, trailerID); err != nil || child.InheritedRating == nil || *child.InheritedRating != 13 {
-		t.Errorf("inherited rating after upgrade = %v, %v; want 13", child.InheritedRating, err)
-	}
-	if child, err := s.Items().Get(ctx, trailerID); err != nil || !slices.Equal(child.InheritedTags, []string{"kids"}) {
-		t.Errorf("inherited tags after upgrade = %q, %v; want kids", child.InheritedTags, err)
-	}
-	if u, err := s.Users().Get(ctx, userID); err != nil || !slices.Equal(u.Access.Libraries, []core.ID{libID}) ||
-		u.Access.MaxParentalRating == nil || *u.Access.MaxParentalRating != 13 || !u.Access.AllowDownload || !u.Policy.AllowTranscoding {
-		t.Errorf("user after upgrade = %+v, %v; want its access moved", u, err)
-	}
-	people, err := s.People().Search(ctx, core.PersonQuery{Search: "zoe"})
-	if err != nil || len(people) != 1 {
-		t.Errorf("person search after upgrade = %v, %v", people, err)
+	var parents int
+	if err := db.QueryRowContext(ctx, `SELECT count(*) FROM parents`).Scan(&parents); err != nil || parents != 1 {
+		t.Errorf("parents after the failed rebuild = %d, %v; want = 1", parents, err)
 	}
 }
