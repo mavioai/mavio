@@ -298,16 +298,18 @@ export function Button({
   className,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "secondary" | "plain" }) {
-  const styles = {
-    primary: "bg-button text-on-button hover:opacity-85",
-    secondary: "bg-fill text-on-background hover:bg-fill-selected",
-    plain: "text-on-background hover:bg-surface-raised",
+  const [styles, text] = {
+    primary: ["bg-button hover:opacity-85", "text-on-button"],
+    secondary: ["bg-fill hover:bg-fill-selected", "text-on-background"],
+    plain: ["hover:bg-surface-raised", "text-on-background"],
   }[variant];
+  // A destructive action's red takes the place of the variant's text color.
+  const color = className?.split(" ").includes("text-danger") ? "" : text;
   return (
     <button
       type="button"
       {...props}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 type-headline transition active:opacity-80 disabled:text-text-disabled disabled:opacity-60 ${styles} ${className ?? ""}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 type-headline transition active:opacity-80 disabled:text-text-disabled disabled:opacity-60 ${styles} ${color} ${className ?? ""}`}
     />
   );
 }
