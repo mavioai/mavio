@@ -612,6 +612,8 @@
     <string name="settings_general">General</string>
     <!-- Settings section of how a server transcodes. -->
     <string name="settings_transcoding">Transcoding</string>
+    <!-- The settings section of a server's rclone remotes and offline downloads -->
+    <string name="settings_storage">Storage</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -1325,4 +1327,116 @@
     <string name="transcoding_folder_default">The server\'s default</string>
     <!-- Footer of the transcode folder. -->
     <string name="transcoding_folder_footer">An absolute folder on the server with room for running transcodes.</string>
+    <!-- The line under the Storage page's title -->
+    <string name="storage_message">Remotes of cloud drives and object storage the server reaches through rclone, for libraries and downloads.</string>
+    <!-- Button adding an rclone remote -->
+    <string name="storage_add">Add Remote</string>
+    <!-- Title of the group of the server's rclone -->
+    <string name="storage_rclone">rclone</string>
+    <!-- Row of whether the server reaches rclone -->
+    <string name="storage_status">Status</string>
+    <!-- Status when the server reaches rclone -->
+    <string name="storage_available">Running</string>
+    <!-- Status when the server does not reach rclone -->
+    <string name="storage_unavailable">Not reached</string>
+    <!-- Row of rclone's version -->
+    <string name="storage_version">Version</string>
+    <!-- Row of whether the server runs rclone rcd itself -->
+    <string name="storage_rcd">rcd</string>
+    <!-- The server runs rclone rcd itself -->
+    <string name="storage_managed">Run by the server</string>
+    <!-- Detail of a managed rcd -->
+    <string name="storage_managed_detail">The server starts the rclone bundled with it.</string>
+    <!-- The server reaches an rclone rcd run elsewhere -->
+    <string name="storage_external">External</string>
+    <!-- Detail of an external rcd -->
+    <string name="storage_external_detail">The server reaches an rclone rcd run elsewhere.</string>
+    <!-- Title of the list of rclone remotes -->
+    <string name="storage_remotes">Remotes</string>
+    <!-- Footer of the remotes -->
+    <string name="storage_remotes_footer">A library\'s folder on a remote is written rclone:remote:path, as rclone:gdrive:Movies.</string>
+    <!-- Shown when no remote is configured -->
+    <string name="storage_no_remotes">No remotes yet.</string>
+    <!-- Shown when the remote opened is gone -->
+    <string name="storage_no_remote">This remote no longer exists.</string>
+    <!-- Title of the page adding a remote -->
+    <string name="storage_new">New Remote</string>
+    <!-- The remote's name -->
+    <string name="storage_name">Name</string>
+    <!-- What a remote's name may contain -->
+    <string name="storage_name_detail">Letters, digits and _ . + @ -</string>
+    <!-- Shown when the name is taken -->
+    <string name="storage_name_taken">A remote of this name exists.</string>
+    <!-- The kind of remote, an rclone backend -->
+    <string name="storage_kind">Kind</string>
+    <!-- Placeholder of the kind -->
+    <string name="storage_choose_kind">Choose…</string>
+    <!-- Title of a remote's options -->
+    <string name="storage_settings">Settings</string>
+    <!-- Footer of a remote's options -->
+    <string name="storage_settings_footer">Settings left empty take their defaults; those marked * are required.</string>
+    <!-- Switch showing rclone's advanced options -->
+    <string name="storage_advanced">Show advanced settings</string>
+    <!-- Expands an option's full help -->
+    <string name="storage_more">More</string>
+    <!-- Button creating the remote -->
+    <string name="storage_create">Add</string>
+    <!-- The line over the questions of a remote's configuration -->
+    <string name="storage_question_message">The remote needs a few more answers, such as authorizing the account.</string>
+    <!-- Footer of a configuration question -->
+    <string name="storage_question_footer">To authorize a cloud drive, run the command its help gives on a computer with a browser and paste the token it prints.</string>
+    <!-- Shown for a question without an option -->
+    <string name="storage_question_none">Continue to finish the configuration.</string>
+    <!-- Button answering a configuration question -->
+    <string name="storage_continue">Continue</string>
+    <!-- Button leaving the configuration's questions -->
+    <string name="storage_later">Later</string>
+    <!-- Placeholder of a secret already set -->
+    <string name="storage_secret_kept">Unchanged</string>
+    <!-- Notice after saving a remote -->
+    <string name="storage_saved">Saved.</string>
+    <!-- Title of a remote's folders -->
+    <string name="storage_folders">Folders</string>
+    <!-- Footer of a remote's folders -->
+    <string name="storage_folders_footer">Listing the folders checks that the server reaches the remote.</string>
+    <!-- Button deleting a remote -->
+    <string name="storage_remove">Delete Remote</string>
+    <!-- Asks before deleting a remote -->
+    <string name="storage_remove_confirm">Delete %s\?</string>
+    <!-- What deleting a remote does -->
+    <string name="storage_remove_detail">Libraries and downloads on it stop working; its files stay.</string>
+    <!-- Title of the offline download clients -->
+    <string name="storage_offline">Offline Downloads</string>
+    <!-- Footer of the offline download clients -->
+    <string name="storage_offline_footer">A cloud drive that downloads magnet links itself acts as a download client: movies go to movies and series to series below its folder.</string>
+    <!-- Button adding an offline download client -->
+    <string name="storage_add_offline">Add</string>
+    <!-- Shown when there is no offline download client -->
+    <string name="storage_no_offline">No offline download clients.</string>
+    <!-- Marks a disabled offline download client -->
+    <string name="storage_disabled">Off</string>
+    <!-- An offline download client's name -->
+    <string name="storage_offline_name">Name</string>
+    <!-- The folder offline downloads go to -->
+    <string name="storage_offline_folder">Folder</string>
+    <!-- Detail of the offline downloads' folder -->
+    <string name="storage_offline_folder_detail">On a remote whose drive makes offline downloads</string>
+    <!-- An offline download client's tags -->
+    <string name="storage_offline_tags">Tags</string>
+    <!-- Detail of the tags -->
+    <string name="storage_offline_tags_detail">Separated by commas</string>
+    <!-- An offline download client's priority -->
+    <string name="storage_offline_priority">Priority</string>
+    <!-- Detail of the priority -->
+    <string name="storage_offline_priority_detail">Lower first among the torrent clients</string>
+    <!-- Switch enabling an offline download client -->
+    <string name="storage_offline_enabled">On</string>
+    <!-- Switch removing imported downloads from the drive's list -->
+    <string name="storage_remove_completed">Remove imported downloads</string>
+    <!-- Switch removing failed downloads from the drive's list -->
+    <string name="storage_remove_failed">Remove failed downloads</string>
+    <!-- Button removing an offline download client -->
+    <string name="storage_remove_offline">Remove</string>
+    <!-- Confirms removing an offline download client -->
+    <string name="storage_remove_offline_confirm">Remove for Good</string>
 </resources>

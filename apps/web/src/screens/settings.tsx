@@ -3,8 +3,8 @@
 // languages, the servers in their order and the account's credentials;
 // and those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
-// overview, general settings, libraries, users, transcoding, plugins and
-// tasks. Wide windows show them beside their own sidebar; phones list
+// overview, general settings, libraries, users, transcoding, storage,
+// plugins and tasks. Wide windows show them beside their own sidebar; phones list
 // them first, as the profile.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
@@ -32,12 +32,13 @@ import { GeneralSection } from "./admin/general.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
 import { OverviewSection } from "./admin/overview.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
+import { StorageSection } from "./admin/storage.tsx";
 import { TranscodingSection } from "./admin/transcoding.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "plugins" | "tasks";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "plugins" | "tasks";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -51,6 +52,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   libraries: { icon: "folder", color: "#007AFF", title: () => t("settings.libraries"), admin: true },
   users: { icon: "users", color: "#FF9500", title: () => t("settings.users"), admin: true },
   transcoding: { icon: "quality", color: "#FF2D55", title: () => t("settings.transcoding"), admin: true },
+  storage: { icon: "server", color: "#30B0C7", title: () => t("settings.storage"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
@@ -58,7 +60,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "plugins", "tasks"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "libraries", "users", "transcoding", "storage", "plugins", "tasks"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -76,6 +78,8 @@ export interface SettingsSearch {
   library?: string;
   /** Users: the user shown, "new" for one to add. */
   user?: string;
+  /** Storage: the remote shown, "new" for one to add. */
+  remote?: string;
 }
 
 export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
@@ -88,6 +92,7 @@ export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
     catalogs: s.catalogs === true ? true : undefined,
     library: str(s.library),
     user: str(s.user),
+    remote: str(s.remote),
   };
 }
 
@@ -338,6 +343,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <OverviewSection key={chosen.server.id} server={chosen.server} />;
     case "general":
       return chosen?.admin && <GeneralSection key={chosen.server.id} server={chosen.server} />;
+    case "storage":
+      return chosen?.admin && <StorageSection key={chosen.server.id} server={chosen.server} />;
     case "transcoding":
       return chosen?.admin && <TranscodingSection key={chosen.server.id} server={chosen.server} />;
     case "tasks":

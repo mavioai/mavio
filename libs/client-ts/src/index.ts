@@ -112,3 +112,12 @@ export {
   type SignIn,
   type Storage,
 } from "./servers.ts";
+export {
+  useOfflineClients,
+  useRemoteActions,
+  useRemoteFolders,
+  useRemotes,
+  useSetOfflineClients,
+  useStorageProviders,
+  useStorageStatus,
+} from "./storage.ts";

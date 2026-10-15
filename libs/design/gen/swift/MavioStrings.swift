@@ -983,6 +983,9 @@ public enum MavioStrings {
     /// Settings section of how a server transcodes.
     public static var settingsTranscoding: String { NSLocalizedString("settings.transcoding", bundle: .module, comment: "") }
 
+    /// The settings section of a server's rclone remotes and offline downloads
+    public static var settingsStorage: String { NSLocalizedString("settings.storage", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -2101,4 +2104,174 @@ public enum MavioStrings {
 
     /// Footer of the transcode folder.
     public static var transcodingFolderFooter: String { NSLocalizedString("transcoding.folderFooter", bundle: .module, comment: "") }
+
+    /// The line under the Storage page's title
+    public static var storageMessage: String { NSLocalizedString("storage.message", bundle: .module, comment: "") }
+
+    /// Button adding an rclone remote
+    public static var storageAdd: String { NSLocalizedString("storage.add", bundle: .module, comment: "") }
+
+    /// Title of the group of the server's rclone
+    public static var storageRclone: String { NSLocalizedString("storage.rclone", bundle: .module, comment: "") }
+
+    /// Row of whether the server reaches rclone
+    public static var storageStatus: String { NSLocalizedString("storage.status", bundle: .module, comment: "") }
+
+    /// Status when the server reaches rclone
+    public static var storageAvailable: String { NSLocalizedString("storage.available", bundle: .module, comment: "") }
+
+    /// Status when the server does not reach rclone
+    public static var storageUnavailable: String { NSLocalizedString("storage.unavailable", bundle: .module, comment: "") }
+
+    /// Row of rclone's version
+    public static var storageVersion: String { NSLocalizedString("storage.version", bundle: .module, comment: "") }
+
+    /// Row of whether the server runs rclone rcd itself
+    public static var storageRcd: String { NSLocalizedString("storage.rcd", bundle: .module, comment: "") }
+
+    /// The server runs rclone rcd itself
+    public static var storageManaged: String { NSLocalizedString("storage.managed", bundle: .module, comment: "") }
+
+    /// Detail of a managed rcd
+    public static var storageManagedDetail: String { NSLocalizedString("storage.managedDetail", bundle: .module, comment: "") }
+
+    /// The server reaches an rclone rcd run elsewhere
+    public static var storageExternal: String { NSLocalizedString("storage.external", bundle: .module, comment: "") }
+
+    /// Detail of an external rcd
+    public static var storageExternalDetail: String { NSLocalizedString("storage.externalDetail", bundle: .module, comment: "") }
+
+    /// Title of the list of rclone remotes
+    public static var storageRemotes: String { NSLocalizedString("storage.remotes", bundle: .module, comment: "") }
+
+    /// Footer of the remotes
+    public static var storageRemotesFooter: String { NSLocalizedString("storage.remotesFooter", bundle: .module, comment: "") }
+
+    /// Shown when no remote is configured
+    public static var storageNoRemotes: String { NSLocalizedString("storage.noRemotes", bundle: .module, comment: "") }
+
+    /// Shown when the remote opened is gone
+    public static var storageNoRemote: String { NSLocalizedString("storage.noRemote", bundle: .module, comment: "") }
+
+    /// Title of the page adding a remote
+    public static var storageNew: String { NSLocalizedString("storage.new", bundle: .module, comment: "") }
+
+    /// The remote's name
+    public static var storageName: String { NSLocalizedString("storage.name", bundle: .module, comment: "") }
+
+    /// What a remote's name may contain
+    public static var storageNameDetail: String { NSLocalizedString("storage.nameDetail", bundle: .module, comment: "") }
+
+    /// Shown when the name is taken
+    public static var storageNameTaken: String { NSLocalizedString("storage.nameTaken", bundle: .module, comment: "") }
+
+    /// The kind of remote, an rclone backend
+    public static var storageKind: String { NSLocalizedString("storage.kind", bundle: .module, comment: "") }
+
+    /// Placeholder of the kind
+    public static var storageChooseKind: String { NSLocalizedString("storage.chooseKind", bundle: .module, comment: "") }
+
+    /// Title of a remote's options
+    public static var storageSettings: String { NSLocalizedString("storage.settings", bundle: .module, comment: "") }
+
+    /// Footer of a remote's options
+    public static var storageSettingsFooter: String { NSLocalizedString("storage.settingsFooter", bundle: .module, comment: "") }
+
+    /// Switch showing rclone's advanced options
+    public static var storageAdvanced: String { NSLocalizedString("storage.advanced", bundle: .module, comment: "") }
+
+    /// Expands an option's full help
+    public static var storageMore: String { NSLocalizedString("storage.more", bundle: .module, comment: "") }
+
+    /// Button creating the remote
+    public static var storageCreate: String { NSLocalizedString("storage.create", bundle: .module, comment: "") }
+
+    /// The line over the questions of a remote's configuration
+    public static var storageQuestionMessage: String { NSLocalizedString("storage.questionMessage", bundle: .module, comment: "") }
+
+    /// Footer of a configuration question
+    public static var storageQuestionFooter: String { NSLocalizedString("storage.questionFooter", bundle: .module, comment: "") }
+
+    /// Shown for a question without an option
+    public static var storageQuestionNone: String { NSLocalizedString("storage.questionNone", bundle: .module, comment: "") }
+
+    /// Button answering a configuration question
+    public static var storageContinue: String { NSLocalizedString("storage.continue", bundle: .module, comment: "") }
+
+    /// Button leaving the configuration's questions
+    public static var storageLater: String { NSLocalizedString("storage.later", bundle: .module, comment: "") }
+
+    /// Placeholder of a secret already set
+    public static var storageSecretKept: String { NSLocalizedString("storage.secretKept", bundle: .module, comment: "") }
+
+    /// Notice after saving a remote
+    public static var storageSaved: String { NSLocalizedString("storage.saved", bundle: .module, comment: "") }
+
+    /// Title of a remote's folders
+    public static var storageFolders: String { NSLocalizedString("storage.folders", bundle: .module, comment: "") }
+
+    /// Footer of a remote's folders
+    public static var storageFoldersFooter: String { NSLocalizedString("storage.foldersFooter", bundle: .module, comment: "") }
+
+    /// Button deleting a remote
+    public static var storageRemove: String { NSLocalizedString("storage.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a remote
+    public static func storageRemoveConfirm(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("storage.removeConfirm", bundle: .module, comment: ""), name)
+    }
+
+    /// What deleting a remote does
+    public static var storageRemoveDetail: String { NSLocalizedString("storage.removeDetail", bundle: .module, comment: "") }
+
+    /// Title of the offline download clients
+    public static var storageOffline: String { NSLocalizedString("storage.offline", bundle: .module, comment: "") }
+
+    /// Footer of the offline download clients
+    public static var storageOfflineFooter: String { NSLocalizedString("storage.offlineFooter", bundle: .module, comment: "") }
+
+    /// Button adding an offline download client
+    public static var storageAddOffline: String { NSLocalizedString("storage.addOffline", bundle: .module, comment: "") }
+
+    /// Shown when there is no offline download client
+    public static var storageNoOffline: String { NSLocalizedString("storage.noOffline", bundle: .module, comment: "") }
+
+    /// Marks a disabled offline download client
+    public static var storageDisabled: String { NSLocalizedString("storage.disabled", bundle: .module, comment: "") }
+
+    /// An offline download client's name
+    public static var storageOfflineName: String { NSLocalizedString("storage.offlineName", bundle: .module, comment: "") }
+
+    /// The folder offline downloads go to
+    public static var storageOfflineFolder: String { NSLocalizedString("storage.offlineFolder", bundle: .module, comment: "") }
+
+    /// Detail of the offline downloads' folder
+    public static var storageOfflineFolderDetail: String { NSLocalizedString("storage.offlineFolderDetail", bundle: .module, comment: "") }
+
+    /// An offline download client's tags
+    public static var storageOfflineTags: String { NSLocalizedString("storage.offlineTags", bundle: .module, comment: "") }
+
+    /// Detail of the tags
+    public static var storageOfflineTagsDetail: String { NSLocalizedString("storage.offlineTagsDetail", bundle: .module, comment: "") }
+
+    /// An offline download client's priority
+    public static var storageOfflinePriority: String { NSLocalizedString("storage.offlinePriority", bundle: .module, comment: "") }
+
+    /// Detail of the priority
+    public static var storageOfflinePriorityDetail: String { NSLocalizedString("storage.offlinePriorityDetail", bundle: .module, comment: "") }
+
+    /// Switch enabling an offline download client
+    public static var storageOfflineEnabled: String { NSLocalizedString("storage.offlineEnabled", bundle: .module, comment: "") }
+
+    /// Switch removing imported downloads from the drive's list
+    public static var storageRemoveCompleted: String { NSLocalizedString("storage.removeCompleted", bundle: .module, comment: "") }
+
+    /// Switch removing failed downloads from the drive's list
+    public static var storageRemoveFailed: String { NSLocalizedString("storage.removeFailed", bundle: .module, comment: "") }
+
+    /// Button removing an offline download client
+    public static var storageRemoveOffline: String { NSLocalizedString("storage.removeOffline", bundle: .module, comment: "") }
+
+    /// Confirms removing an offline download client
+    public static var storageRemoveOfflineConfirm: String { NSLocalizedString("storage.removeOfflineConfirm", bundle: .module, comment: "") }
 }

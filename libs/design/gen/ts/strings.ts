@@ -295,6 +295,7 @@ export type MessageKey =
   | 'settings.tasks'
   | 'settings.general'
   | 'settings.transcoding'
+  | 'settings.storage'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -649,7 +650,63 @@ export type MessageKey =
   | 'transcoding.downmixBoostDetail'
   | 'transcoding.folder'
   | 'transcoding.folderDefault'
-  | 'transcoding.folderFooter';
+  | 'transcoding.folderFooter'
+  | 'storage.message'
+  | 'storage.add'
+  | 'storage.rclone'
+  | 'storage.status'
+  | 'storage.available'
+  | 'storage.unavailable'
+  | 'storage.version'
+  | 'storage.rcd'
+  | 'storage.managed'
+  | 'storage.managedDetail'
+  | 'storage.external'
+  | 'storage.externalDetail'
+  | 'storage.remotes'
+  | 'storage.remotesFooter'
+  | 'storage.noRemotes'
+  | 'storage.noRemote'
+  | 'storage.new'
+  | 'storage.name'
+  | 'storage.nameDetail'
+  | 'storage.nameTaken'
+  | 'storage.kind'
+  | 'storage.chooseKind'
+  | 'storage.settings'
+  | 'storage.settingsFooter'
+  | 'storage.advanced'
+  | 'storage.more'
+  | 'storage.create'
+  | 'storage.questionMessage'
+  | 'storage.questionFooter'
+  | 'storage.questionNone'
+  | 'storage.continue'
+  | 'storage.later'
+  | 'storage.secretKept'
+  | 'storage.saved'
+  | 'storage.folders'
+  | 'storage.foldersFooter'
+  | 'storage.remove'
+  | 'storage.removeConfirm'
+  | 'storage.removeDetail'
+  | 'storage.offline'
+  | 'storage.offlineFooter'
+  | 'storage.addOffline'
+  | 'storage.noOffline'
+  | 'storage.disabled'
+  | 'storage.offlineName'
+  | 'storage.offlineFolder'
+  | 'storage.offlineFolderDetail'
+  | 'storage.offlineTags'
+  | 'storage.offlineTagsDetail'
+  | 'storage.offlinePriority'
+  | 'storage.offlinePriorityDetail'
+  | 'storage.offlineEnabled'
+  | 'storage.removeCompleted'
+  | 'storage.removeFailed'
+  | 'storage.removeOffline'
+  | 'storage.removeOfflineConfirm';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -937,6 +994,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.tasks": "Tasks",
     "settings.general": "General",
     "settings.transcoding": "Transcoding",
+    "settings.storage": "Storage",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -1291,7 +1349,63 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "transcoding.downmixBoostDetail": "Raises the volume of surround sound downmixed to stereo, 0.5 to 3",
     "transcoding.folder": "Transcode folder",
     "transcoding.folderDefault": "The server's default",
-    "transcoding.folderFooter": "An absolute folder on the server with room for running transcodes."
+    "transcoding.folderFooter": "An absolute folder on the server with room for running transcodes.",
+    "storage.message": "Remotes of cloud drives and object storage the server reaches through rclone, for libraries and downloads.",
+    "storage.add": "Add Remote",
+    "storage.rclone": "rclone",
+    "storage.status": "Status",
+    "storage.available": "Running",
+    "storage.unavailable": "Not reached",
+    "storage.version": "Version",
+    "storage.rcd": "rcd",
+    "storage.managed": "Run by the server",
+    "storage.managedDetail": "The server starts the rclone bundled with it.",
+    "storage.external": "External",
+    "storage.externalDetail": "The server reaches an rclone rcd run elsewhere.",
+    "storage.remotes": "Remotes",
+    "storage.remotesFooter": "A library's folder on a remote is written rclone:remote:path, as rclone:gdrive:Movies.",
+    "storage.noRemotes": "No remotes yet.",
+    "storage.noRemote": "This remote no longer exists.",
+    "storage.new": "New Remote",
+    "storage.name": "Name",
+    "storage.nameDetail": "Letters, digits and _ . + @ -",
+    "storage.nameTaken": "A remote of this name exists.",
+    "storage.kind": "Kind",
+    "storage.chooseKind": "Choose…",
+    "storage.settings": "Settings",
+    "storage.settingsFooter": "Settings left empty take their defaults; those marked * are required.",
+    "storage.advanced": "Show advanced settings",
+    "storage.more": "More",
+    "storage.create": "Add",
+    "storage.questionMessage": "The remote needs a few more answers, such as authorizing the account.",
+    "storage.questionFooter": "To authorize a cloud drive, run the command its help gives on a computer with a browser and paste the token it prints.",
+    "storage.questionNone": "Continue to finish the configuration.",
+    "storage.continue": "Continue",
+    "storage.later": "Later",
+    "storage.secretKept": "Unchanged",
+    "storage.saved": "Saved.",
+    "storage.folders": "Folders",
+    "storage.foldersFooter": "Listing the folders checks that the server reaches the remote.",
+    "storage.remove": "Delete Remote",
+    "storage.removeConfirm": "Delete {name}?",
+    "storage.removeDetail": "Libraries and downloads on it stop working; its files stay.",
+    "storage.offline": "Offline Downloads",
+    "storage.offlineFooter": "A cloud drive that downloads magnet links itself acts as a download client: movies go to movies and series to series below its folder.",
+    "storage.addOffline": "Add",
+    "storage.noOffline": "No offline download clients.",
+    "storage.disabled": "Off",
+    "storage.offlineName": "Name",
+    "storage.offlineFolder": "Folder",
+    "storage.offlineFolderDetail": "On a remote whose drive makes offline downloads",
+    "storage.offlineTags": "Tags",
+    "storage.offlineTagsDetail": "Separated by commas",
+    "storage.offlinePriority": "Priority",
+    "storage.offlinePriorityDetail": "Lower first among the torrent clients",
+    "storage.offlineEnabled": "On",
+    "storage.removeCompleted": "Remove imported downloads",
+    "storage.removeFailed": "Remove failed downloads",
+    "storage.removeOffline": "Remove",
+    "storage.removeOfflineConfirm": "Remove for Good"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1577,6 +1691,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.tasks": "任务",
     "settings.general": "通用",
     "settings.transcoding": "转码",
+    "settings.storage": "存储",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -1931,6 +2046,62 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "transcoding.downmixBoostDetail": "提高环绕声缩混为立体声后的音量，范围 0.5 至 3",
     "transcoding.folder": "转码文件夹",
     "transcoding.folderDefault": "服务器默认",
-    "transcoding.folderFooter": "服务器上的绝对路径，需有足够空间存放进行中的转码。"
+    "transcoding.folderFooter": "服务器上的绝对路径，需有足够空间存放进行中的转码。",
+    "storage.message": "服务器通过 rclone 访问的云盘和对象存储远端，可用于媒体库和下载。",
+    "storage.add": "添加远端",
+    "storage.rclone": "rclone",
+    "storage.status": "状态",
+    "storage.available": "运行中",
+    "storage.unavailable": "无法访问",
+    "storage.version": "版本",
+    "storage.rcd": "rcd",
+    "storage.managed": "由服务器运行",
+    "storage.managedDetail": "服务器启动随附的 rclone。",
+    "storage.external": "外部",
+    "storage.externalDetail": "服务器访问在别处运行的 rclone rcd。",
+    "storage.remotes": "远端",
+    "storage.remotesFooter": "远端上的媒体库文件夹写作 rclone:远端:路径，如 rclone:gdrive:Movies。",
+    "storage.noRemotes": "还没有远端。",
+    "storage.noRemote": "该远端已不存在。",
+    "storage.new": "新建远端",
+    "storage.name": "名称",
+    "storage.nameDetail": "字母、数字以及 _ . + @ -",
+    "storage.nameTaken": "已有同名远端。",
+    "storage.kind": "类型",
+    "storage.chooseKind": "请选择…",
+    "storage.settings": "设置",
+    "storage.settingsFooter": "留空的设置使用默认值；标 * 的为必填。",
+    "storage.advanced": "显示高级设置",
+    "storage.more": "更多",
+    "storage.create": "添加",
+    "storage.questionMessage": "该远端还需要几项回答，例如授权账户。",
+    "storage.questionFooter": "要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。",
+    "storage.questionNone": "继续以完成配置。",
+    "storage.continue": "继续",
+    "storage.later": "稍后",
+    "storage.secretKept": "保持不变",
+    "storage.saved": "已保存。",
+    "storage.folders": "文件夹",
+    "storage.foldersFooter": "列出文件夹可以检查服务器能否访问该远端。",
+    "storage.remove": "删除远端",
+    "storage.removeConfirm": "删除 {name}？",
+    "storage.removeDetail": "其上的媒体库和下载将无法使用；文件本身不受影响。",
+    "storage.offline": "离线下载",
+    "storage.offlineFooter": "能自行下载磁力链接的云盘可作为下载客户端：电影放在其文件夹下的 movies，剧集放在 series。",
+    "storage.addOffline": "添加",
+    "storage.noOffline": "没有离线下载客户端。",
+    "storage.disabled": "已停用",
+    "storage.offlineName": "名称",
+    "storage.offlineFolder": "文件夹",
+    "storage.offlineFolderDetail": "须位于支持离线下载的云盘远端上",
+    "storage.offlineTags": "标签",
+    "storage.offlineTagsDetail": "用逗号分隔",
+    "storage.offlinePriority": "优先级",
+    "storage.offlinePriorityDetail": "在种子下载客户端中数值越小越优先",
+    "storage.offlineEnabled": "启用",
+    "storage.removeCompleted": "移除已导入的下载",
+    "storage.removeFailed": "移除失败的下载",
+    "storage.removeOffline": "移除",
+    "storage.removeOfflineConfirm": "确认移除"
   }
 };

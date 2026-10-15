@@ -9,6 +9,9 @@ import {
   errorMessage,
   type ServerEntry,
   useDirectory,
+  useRemoteFolders,
+  useRemotes,
+  useStorageStatus,
   useLibraryActions,
   useLocalization,
   useServerLibraries,
@@ -435,12 +438,23 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
   );
 }
 
-/** The folders of the server's file system, to walk and choose from. */
+/** The folders of the server's file system and of its rclone remotes, to walk and choose from. */
 function FolderPicker({ server, chosen, onChoose }: { server: ServerEntry; chosen: string[]; onChoose: (path: string) => void }) {
   const [path, setPath] = useState("");
-  const dir = useDirectory(server, path);
-  const folders = (dir.data?.entries ?? []).filter((e) => e.isDir);
-  const here = dir.data?.path ?? path;
+  const remote = path.startsWith("rclone:");
+  const dir = useDirectory(server, path, !remote);
+  const storage = useStorageStatus(server);
+  const remotes = useRemotes(server, path === "" && (storage.data?.available ?? false));
+  const remoteFolders = useRemoteFolders(server, path, remote);
+  const listing = remote ? remoteFolders : dir;
+  const folders = remote
+    ? (remoteFolders.data ?? []).map((f) => ({ path: f, name: f.slice(f.lastIndexOf(f.includes("/") ? "/" : ":") + 1) }))
+    : [
+        ...(dir.data?.entries ?? []).filter((e) => e.isDir),
+        ...(path === "" ? (remotes.data ?? []).map((r) => ({ path: `rclone:${r.name}:`, name: `rclone:${r.name}:` })) : []),
+      ];
+  const here = remote ? path : (dir.data?.path ?? path);
+  const parent = remote ? (/^rclone:[^:]*:$/.test(path) ? "" : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : path.slice(0, path.indexOf(":", 7) + 1)) : (dir.data?.parent ?? "");
   const row = (key: string, label: ReactNode, onClick: () => void, icon: "back" | "folder") => (
     <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:bg-surface-raised">
       <Icon name={icon} size={18} className="shrink-0 text-text-secondary" />
@@ -456,10 +470,10 @@ function FolderPicker({ server, chosen, onChoose }: { server: ServerEntry; chose
         </Button>
       </div>
       <div className="max-h-80 divide-y divide-border overflow-y-auto border-t border-border">
-        {here && row("..", t("libraries.parentFolder"), () => setPath(dir.data?.parent ?? ""), "back")}
+        {here && row("..", t("libraries.parentFolder"), () => setPath(parent), "back")}
         {folders.map((f) => row(f.path, f.name, () => setPath(f.path), "folder"))}
-        {dir.isSuccess && folders.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.noFolders")}</p>}
-        {dir.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(dir.error)}</p>}
+        {listing.isSuccess && folders.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("libraries.noFolders")}</p>}
+        {listing.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(listing.error)}</p>}
       </div>
     </div>
   );
