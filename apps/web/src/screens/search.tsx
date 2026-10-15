@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { CardPlaceholder, ItemCard, Shelf, StatusView } from "../ui.tsx";
 
 const route = getRouteApi("/search");
@@ -13,6 +14,8 @@ const route = getRouteApi("/search");
 export function SearchScreen() {
   const { q = "" } = route.useSearch();
   const navigate = useNavigate();
+  // On the television focus stays on the tabs, which open as it moves.
+  const { tv } = usePrefs();
   const [text, setText] = useState(q);
   // The URL follows the field after a pause, so that results are linkable.
   useEffect(() => {
@@ -36,7 +39,7 @@ export function SearchScreen() {
             onChange={(e) => setText(e.target.value)}
             placeholder={t("search.placeholder")}
             aria-label={t("nav.search")}
-            autoFocus
+            autoFocus={!tv}
             className="w-full bg-transparent type-body outline-none placeholder:text-text-tertiary"
           />
         </label>

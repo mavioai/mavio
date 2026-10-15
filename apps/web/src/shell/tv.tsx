@@ -1,7 +1,7 @@
 // The television layout (docs/clients.md §6.3), the same as on tvOS and
 // Android TV: tabs in a pill at the top, the user's avatar beside them,
 // and focus moved with the arrow keys.
-import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useSyncExternalStore } from "react";
 
 import { toggleFullScreen } from "../fullscreen.ts";
@@ -19,6 +19,10 @@ export function TvShell() {
   useSpatialNavigation();
   useFullScreenKey();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  // On a tab's own page, as on tvOS, focusing another tab opens it; deeper
+  // pages leave the tabs to select, so that moving up does not leave them.
+  const onTab = tabs.some((d) => d.to === pathname);
   // Home's hero reaches the top of the screen, behind the tabs.
   const behind = pathname === "/" || pathname.includes("/item/");
   const scrolled = useScrolled();
@@ -37,6 +41,7 @@ export function TvShell() {
                 key={d.to}
                 to={d.to}
                 activeOptions={{ exact: d.to === "/" }}
+              onFocus={() => onTab && d.to !== pathname && void navigate({ to: d.to })}
                 className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
               >
                 {d.label()}
