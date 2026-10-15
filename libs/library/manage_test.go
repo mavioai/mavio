@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -236,6 +237,49 @@ func TestIdentifyEditAndSaveLocal(t *testing.T) {
 	}
 	if exists(f.root, "Heat (1995)/poster.png") || f.images(heat)[core.ImagePrimary] != "" {
 		t.Error("the deleted poster remains")
+	}
+}
+
+// failingProvider fails every lookup, as a plugin stopped during a refresh.
+type failingProvider struct{}
+
+func (failingProvider) Name() string { return "failing" }
+
+func (failingProvider) Metadata(context.Context, Lookup) (*metadata.Result, error) {
+	return nil, errors.New("plugin stopped")
+}
+
+func TestReplaceWithoutProviders(t *testing.T) {
+	f := newManage(t, false)
+	ctx := t.Context()
+	it := f.refresh(RefreshOptions{})
+	if it.Overview == "" {
+		t.Fatalf("first refresh: %+v", it)
+	}
+	credits := len(f.store.credits[it.ID])
+	tests := []struct {
+		name      string
+		providers []Provider
+	}{
+		{"none", nil},
+		{"every one failing", []Provider{failingProvider{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f.r.Providers = tt.providers
+			if _, err := f.r.RefreshWith(ctx, f.lib, it.ID, RefreshOptions{ReplaceMetadata: true}); !errors.Is(err, ErrNoProvider) {
+				t.Errorf("RefreshWith = %v, want = %v", err, ErrNoProvider)
+			}
+			if _, err := f.r.Identify(ctx, f.lib, it.ID, map[core.Provider]string{core.ProviderTMDB: "949"}); tt.providers == nil && !errors.Is(err, ErrNoProvider) {
+				t.Errorf("Identify = %v, want = %v", err, ErrNoProvider)
+			}
+			got, _ := f.store.Items().Get(ctx, it.ID)
+			if got.Overview != it.Overview || got.ExternalIDs[core.ProviderTMDB] != it.ExternalIDs[core.ProviderTMDB] ||
+				len(f.store.credits[it.ID]) != credits {
+				t.Errorf("item = %q %v with %d credits, want = %q %v with %d", got.Overview, got.ExternalIDs,
+					len(f.store.credits[it.ID]), it.Overview, it.ExternalIDs, credits)
+			}
+		})
 	}
 }
 

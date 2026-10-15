@@ -126,8 +126,8 @@ func TestManager(t *testing.T) {
 	if len(providers) != 1 {
 		t.Fatalf("MetadataProviders() = %d, want 1", len(providers))
 	}
-	if res, err := providers[0].Metadata(ctx, concubine); res != nil || err != nil {
-		t.Errorf("unconfigured provider: Metadata = %v, %v; want nothing", res, err)
+	if res, err := providers[0].Metadata(ctx, concubine); res != nil || !errors.Is(err, library.ErrProviderUnavailable) {
+		t.Errorf("unconfigured provider: Metadata = %v, %v; want = %v", res, err, library.ErrProviderUnavailable)
 	}
 
 	if _, err := m.SetConfig(ctx, "org.mavio.smoke", `{"api_key":""}`); !errors.Is(err, core.ErrInvalid) {

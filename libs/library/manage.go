@@ -104,14 +104,29 @@ func (r *Refresher) Identify(ctx context.Context, lib core.Library, itemID core.
 	if err != nil {
 		return it, err
 	}
+	stored := it
 	it.ExternalIDs = mergeIDs(nil, ids)
 	if len(it.ExternalIDs) == 0 {
 		return it, fmt.Errorf("%w: no external IDs to identify the item by", core.ErrInvalid)
 	}
+	if len(r.providers(lib)) == 0 {
+		// Taking the IDs without a provider to replace the metadata
+		// from would leave the item named as one title and described as
+		// another.
+		return it, fmt.Errorf("identify item %s: %w", itemID, ErrNoProvider)
+	}
 	if err := r.Store.Items().Upsert(ctx, it); err != nil {
 		return it, err
 	}
-	return r.RefreshWith(ctx, lib, itemID, RefreshOptions{ReplaceMetadata: true})
+	it, err = r.RefreshWith(ctx, lib, itemID, RefreshOptions{ReplaceMetadata: true})
+	if errors.Is(err, ErrNoProvider) {
+		// The item is not taken for another title without its metadata.
+		if undo := r.Store.Items().Upsert(ctx, stored); undo != nil {
+			err = errors.Join(err, fmt.Errorf("restore the external IDs: %w", undo))
+		}
+		return stored, err
+	}
+	return it, err
 }
 
 // RemoteImages lists the images the metadata and image providers have of
@@ -128,6 +143,9 @@ func (r *Refresher) RemoteImages(ctx context.Context, lib core.Library, itemID c
 	var out []RemoteImage
 	for _, p := range r.providers(lib) {
 		res, err := p.Metadata(ctx, l)
+		if errors.Is(err, ErrProviderUnavailable) {
+			continue
+		}
 		if err != nil {
 			r.logger().WarnContext(ctx, "metadata provider failed", "provider", p.Name(), "item", it.ID, "err", err)
 			continue

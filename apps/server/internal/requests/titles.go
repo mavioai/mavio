@@ -3,6 +3,7 @@ package requests
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -123,6 +124,9 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 			Kind: kind, ExternalIDs: map[core.Provider]string{core.ProviderTMDB: strconv.Itoa(tmdbID)},
 			Language: language, Country: country,
 		})
+		if errors.Is(err, library.ErrProviderUnavailable) {
+			continue
+		}
 		if err != nil {
 			if ctx.Err() != nil {
 				return Title{}, ctx.Err()

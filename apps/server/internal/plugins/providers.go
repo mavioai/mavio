@@ -55,7 +55,9 @@ func (p *provider) plugin() (*providers.Plugin, bool) {
 func (p *provider) Metadata(ctx context.Context, l library.Lookup) (*metadata.Result, error) {
 	pl, ok := p.plugin()
 	if !ok {
-		return nil, nil
+		// Not configured, or stopped since it was listed: a refresh
+		// replacing metadata must not take it for an answer.
+		return nil, fmt.Errorf("plugin %s: %w", p.id, library.ErrProviderUnavailable)
 	}
 	return pl.Metadata(ctx, l)
 }

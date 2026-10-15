@@ -106,6 +106,16 @@ type Refresher struct {
 	Now    func() time.Time
 }
 
+// ErrNoProvider means that metadata was to be replaced while no metadata
+// provider could give it, such as when the library's providers are
+// disabled or uninstalled; the item is left as it was.
+var ErrNoProvider = errors.New("no metadata provider to replace the metadata from")
+
+// ErrProviderUnavailable is returned by a provider that cannot look items
+// up, such as a plugin not configured or stopped since it was listed. A
+// refresh passes over it quietly, and does not take it for an answer.
+var ErrProviderUnavailable = errors.New("metadata provider unavailable")
+
 // RefreshOptions changes how Refresh works.
 type RefreshOptions struct {
 	// ReplaceMetadata forgets what providers gave before, except external
@@ -188,6 +198,18 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		}
 		it.Locked = it.Locked || local.Item.Locked
 	}
+	// Replacing metadata forgets what the item has before the providers
+	// are asked, so that it is not replaced when none can be: a library
+	// whose providers are disabled or uninstalled keeps its metadata.
+	var providers []Provider
+	if it.Extra == "" && !it.Locked {
+		providers = r.providers(lib)
+	}
+	replace := opts.ReplaceMetadata && it.Extra == "" && !it.Locked
+	if replace && len(providers) == 0 {
+		return it, fmt.Errorf("item %s: %w", it.ID, ErrNoProvider)
+	}
+	stored := it
 	if opts.ReplaceMetadata {
 		clearMetadata(&it)
 	}
@@ -196,20 +218,26 @@ func (r *Refresher) RefreshWith(ctx context.Context, lib core.Library, itemID co
 		return it, err
 	}
 	var results []*metadata.Result
-	if it.Extra == "" && !it.Locked {
-		for _, p := range r.providers(lib) {
-			res, err := p.Metadata(ctx, lookup)
-			if err != nil {
-				// One provider failing leaves the others' metadata.
-				r.logger().WarnContext(ctx, "metadata provider failed", "provider", p.Name(), "item", it.ID, "err", err)
-				continue
-			}
-			if res != nil {
-				results = append(results, res)
-				// Later providers see what earlier ones found.
-				lookup.ExternalIDs = mergeIDs(lookup.ExternalIDs, res.Item.ExternalIDs)
-			}
+	answered := false
+	for _, p := range providers {
+		res, err := p.Metadata(ctx, lookup)
+		switch {
+		case errors.Is(err, ErrProviderUnavailable):
+			continue
+		case err != nil:
+			// One provider failing leaves the others' metadata.
+			r.logger().WarnContext(ctx, "metadata provider failed", "provider", p.Name(), "item", it.ID, "err", err)
+			continue
 		}
+		answered = true
+		if res != nil {
+			results = append(results, res)
+			// Later providers see what earlier ones found.
+			lookup.ExternalIDs = mergeIDs(lookup.ExternalIDs, res.Item.ExternalIDs)
+		}
+	}
+	if replace && !answered {
+		return stored, fmt.Errorf("item %s: every provider failed: %w", it.ID, ErrNoProvider)
 	}
 	if !opts.ReplaceMetadata && it.Extra == "" && !it.Locked {
 		results = append(results, r.readLocal(ctx, lib, it, lookup)...)

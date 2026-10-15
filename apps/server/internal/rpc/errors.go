@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library"
 )
 
 // connectError maps domain errors to Connect codes. Unexpected errors are
@@ -23,6 +24,8 @@ func connectError(ctx context.Context, err error) error {
 		return connect.NewError(connect.CodeAlreadyExists, err)
 	case errors.Is(err, core.ErrInvalid):
 		return connect.NewError(connect.CodeInvalidArgument, err)
+	case errors.Is(err, library.ErrNoProvider):
+		return connect.NewError(connect.CodeFailedPrecondition, err)
 	case errors.Is(err, context.Canceled):
 		return connect.NewError(connect.CodeCanceled, err)
 	case errors.Is(err, context.DeadlineExceeded):
