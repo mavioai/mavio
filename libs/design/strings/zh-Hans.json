@@ -173,7 +173,6 @@
   "auth.claimMessage": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。",
   "auth.claimServer": "前往 mavio.dev 继续",
   "auth.signInWithMavio": "用 Mavio 账户登录",
-  "auth.mavioDevMessage": "这台服务器的管理员使用 Mavio 账户登录。",
   "auth.signingIn": "正在登录…",
   "auth.tryAgain": "重试",
   "auth.mavioAccount": "Mavio 账户",
@@ -227,7 +226,7 @@
   "settings.manageAtMavio": "在 mavio.dev 管理",
   "settings.admin": "管理员",
   "auth.unreachable": "无法连接",
-  "auth.othersUseApp": "其他人请在 {host} 观看。",
+  "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
   "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
   "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
   "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。"

@@ -3080,7 +3080,7 @@
       }
     },
     "auth.welcome": {
-      "comment": "Title of the setup screen choosing a new server's mode.",
+      "comment": "Title of the setup screen choosing a new server's mode, and of signing in with a Mavio account.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -3255,24 +3255,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "用 Mavio 账户登录"
-          }
-        }
-      }
-    },
-    "auth.mavioDevMessage": {
-      "comment": "Explanation on the sign-in screen of a server in mavio.dev mode.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This server signs in its administrator with their Mavio account."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这台服务器的管理员使用 Mavio 账户登录。"
           }
         }
       }
@@ -4256,13 +4238,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Everyone else watches at %@."
+            "value": "Only the administrator signs in here. Everyone else watches at %@."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "其他人请在 %@ 观看。"
+            "value": "只有管理员可以登录，其他人请在 %@ 观看。"
           }
         }
       }

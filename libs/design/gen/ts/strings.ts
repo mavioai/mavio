@@ -176,7 +176,6 @@ export type MessageKey =
   | 'auth.claimMessage'
   | 'auth.claimServer'
   | 'auth.signInWithMavio'
-  | 'auth.mavioDevMessage'
   | 'auth.signingIn'
   | 'auth.tryAgain'
   | 'auth.mavioAccount'
@@ -402,7 +401,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.claimMessage": "Sign in at mavio.dev and confirm there. Your Mavio account becomes this server's administrator.",
     "auth.claimServer": "Continue at mavio.dev",
     "auth.signInWithMavio": "Sign In with Mavio",
-    "auth.mavioDevMessage": "This server signs in its administrator with their Mavio account.",
     "auth.signingIn": "Signing in…",
     "auth.tryAgain": "Try Again",
     "auth.mavioAccount": "Mavio account",
@@ -456,7 +454,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.manageAtMavio": "Manage at mavio.dev",
     "settings.admin": "Administrator",
     "auth.unreachable": "Can't be reached",
-    "auth.othersUseApp": "Everyone else watches at {host}.",
+    "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
     "auth.setUpElsewhereMessage": "Open this address in a browser:",
     "auth.linkMessage": "On your phone or computer, go to {url} and enter this code."
@@ -626,7 +624,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.claimMessage": "在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。",
     "auth.claimServer": "前往 mavio.dev 继续",
     "auth.signInWithMavio": "用 Mavio 账户登录",
-    "auth.mavioDevMessage": "这台服务器的管理员使用 Mavio 账户登录。",
     "auth.signingIn": "正在登录…",
     "auth.tryAgain": "重试",
     "auth.mavioAccount": "Mavio 账户",
@@ -680,7 +677,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.manageAtMavio": "在 mavio.dev 管理",
     "settings.admin": "管理员",
     "auth.unreachable": "无法连接",
-    "auth.othersUseApp": "其他人请在 {host} 观看。",
+    "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
     "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
     "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。"

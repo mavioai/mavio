@@ -348,7 +348,7 @@
     <string name="auth_remove_pin">Remove PIN</string>
     <!-- State of a user who has a PIN. -->
     <string name="auth_pin_on">On</string>
-    <!-- Title of the setup screen choosing a new server's mode. -->
+    <!-- Title of the setup screen choosing a new server's mode, and of signing in with a Mavio account. -->
     <string name="auth_welcome">Welcome to Mavio</string>
     <!-- Line under the title of the setup screen choosing a new server's mode; server is its name. -->
     <string name="auth_set_up_new_server">Set up the new server %s</string>
@@ -368,8 +368,6 @@
     <string name="auth_claim_server">Continue at mavio.dev</string>
     <!-- Signs in to a server with a Mavio account at mavio.dev. -->
     <string name="auth_sign_in_with_mavio">Sign In with Mavio</string>
-    <!-- Explanation on the sign-in screen of a server in mavio.dev mode. -->
-    <string name="auth_mavio_dev_message">This server signs in its administrator with their Mavio account.</string>
     <!-- Shown while a sign-in through mavio.dev completes. -->
     <string name="auth_signing_in">Signing in…</string>
     <!-- Starts signing in again after a failure. -->
@@ -480,7 +478,7 @@
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
-    <string name="auth_others_use_app">Everyone else watches at %s.</string>
+    <string name="auth_others_use_app">Only the administrator signs in here. Everyone else watches at %s.</string>
     <!-- Title on a television of a server not set up yet; server is its name. -->
     <string name="auth_set_up_elsewhere">Set Up %s on a Computer or Phone</string>
     <!-- Above the address of the server, on a television of a server not set up yet. -->

@@ -188,7 +188,6 @@
     <string name="auth_claim_message">在 mavio.dev 登录并确认。你的 Mavio 账户将成为这台服务器的管理员。</string>
     <string name="auth_claim_server">前往 mavio.dev 继续</string>
     <string name="auth_sign_in_with_mavio">用 Mavio 账户登录</string>
-    <string name="auth_mavio_dev_message">这台服务器的管理员使用 Mavio 账户登录。</string>
     <string name="auth_signing_in">正在登录…</string>
     <string name="auth_try_again">重试</string>
     <string name="auth_mavio_account">Mavio 账户</string>
@@ -244,7 +243,7 @@
     <string name="settings_manage_at_mavio">在 mavio.dev 管理</string>
     <string name="settings_admin">管理员</string>
     <string name="auth_unreachable">无法连接</string>
-    <string name="auth_others_use_app">其他人请在 %s 观看。</string>
+    <string name="auth_others_use_app">只有管理员可以登录，其他人请在 %s 观看。</string>
     <string name="auth_set_up_elsewhere">请在电脑或手机上设置 %s</string>
     <string name="auth_set_up_elsewhere_message">在浏览器中打开这个地址：</string>
     <string name="auth_link_message">在手机或电脑上访问 %s，输入这个代码。</string>

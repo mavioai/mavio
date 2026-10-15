@@ -286,8 +286,7 @@ function MavioSignIn({ info }: { info?: ServerInfo }) {
   return (
     <div className={`flex flex-col ${phone ? "items-start gap-3" : "items-center gap-3 text-center"}`}>
       <Wordmark height={phone ? 40 : 36} className={phone ? "mb-1" : "mb-3"} />
-      {info && <h1 className={look.title}>{info.name}</h1>}
-      {info && <p className={`mb-4 ${look.body}`}>{t("auth.mavioDevMessage")}</p>}
+      <h1 className={`mb-4 ${look.title}`}>{t("auth.welcome")}</h1>
       {error && <p className="text-[15px] text-danger">{error}</p>}
       <Action
         disabled={busy}
