@@ -536,3 +536,16 @@ func (m *Manager) AIGateway() (string, pluginv1connect.AiGatewayServiceClient, b
 	}
 	return "", nil, false
 }
+
+// AgentSessions returns the ready plugin keeping conversations with models,
+// the first by ID when several are, or false when none is.
+func (m *Manager) AgentSessions() (pluginv1connect.AgentSessionServiceClient, bool) {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_AGENT_SESSION)
+	slices.Sort(ids)
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.Agents() != nil {
+			return pl.Agents(), true
+		}
+	}
+	return nil, false
+}

@@ -5617,6 +5617,24 @@
         }
       }
     },
+    "settings.conversations": {
+      "comment": "Settings section of the administrators' conversations with AI models.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Conversations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 对话"
+          }
+        }
+      }
+    },
     "plugins.installed": {
       "comment": "Tab of the plugins installed on the server, and the mark of an installed plugin.",
       "extractionState": "manual",
@@ -26523,6 +26541,402 @@
           "stringUnit": {
             "state": "translated",
             "value": "对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。"
+          }
+        }
+      }
+    },
+    "conversations.message": {
+      "comment": "Message of the AI conversations section.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Talk with the models of the AI providers. Conversations are kept on the server, shared by its administrators."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与 AI 提供商的模型对话。对话保存在服务器上，由服务器的管理员共享。"
+          }
+        }
+      }
+    },
+    "conversations.noPlugin": {
+      "comment": "Row when no plugin keeping conversations runs on the server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No AI agent plugin"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有 AI 助手插件"
+          }
+        }
+      }
+    },
+    "conversations.noPluginFooter": {
+      "comment": "Footer explaining why an AI agent plugin is needed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversations are kept by an AI agent plugin and use the providers of an AI gateway plugin."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对话由 AI 助手插件保存，并使用 AI 网关插件提供的提供商。"
+          }
+        }
+      }
+    },
+    "conversations.new": {
+      "comment": "Title of the form starting a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Conversation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新对话"
+          }
+        }
+      }
+    },
+    "conversations.newFooter": {
+      "comment": "Footer of the form starting a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The instructions tell the model how to answer throughout the conversation."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令告诉模型在整个对话中如何回答。"
+          }
+        }
+      }
+    },
+    "conversations.model": {
+      "comment": "Label of the model a conversation talks with.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型"
+          }
+        }
+      }
+    },
+    "conversations.noModels": {
+      "comment": "Shown when no AI model can be used to start a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No model can be used: sign in to an AI provider first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可用的模型：请先登录 AI 提供商。"
+          }
+        }
+      }
+    },
+    "conversations.instructions": {
+      "comment": "Label of the instructions the model follows.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instructions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指令"
+          }
+        }
+      }
+    },
+    "conversations.instructionsPlaceholder": {
+      "comment": "Placeholder of the optional instructions.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可选"
+          }
+        }
+      }
+    },
+    "conversations.start": {
+      "comment": "Button starting a conversation with its first message.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始"
+          }
+        }
+      }
+    },
+    "conversations.list": {
+      "comment": "Title of the list of conversations.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对话"
+          }
+        }
+      }
+    },
+    "conversations.none": {
+      "comment": "Empty state of the conversations.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No conversations yet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有对话。"
+          }
+        }
+      }
+    },
+    "conversations.untitled": {
+      "comment": "Title of a conversation without one.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untitled"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未命名"
+          }
+        }
+      }
+    },
+    "conversations.usage": {
+      "comment": "What a conversation used: tokens and cost in US dollars.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ tokens in, %2$@ out · %3$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入 %1$@ 个词元，输出 %2$@ 个 · %3$@"
+          }
+        }
+      }
+    },
+    "conversations.send": {
+      "comment": "Button sending a message.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送"
+          }
+        }
+      }
+    },
+    "conversations.placeholder": {
+      "comment": "Placeholder of the message field, with the model's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "给 %@ 发消息"
+          }
+        }
+      }
+    },
+    "conversations.you": {
+      "comment": "Who wrote a message the user sent.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你"
+          }
+        }
+      }
+    },
+    "conversations.retry": {
+      "comment": "Button sending a failed message again.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "conversations.delete": {
+      "comment": "Button deleting a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Conversation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除对话"
+          }
+        }
+      }
+    },
+    "conversations.deleteConfirm": {
+      "comment": "Confirmation of deleting a conversation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this conversation?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除此对话？"
+          }
+        }
+      }
+    },
+    "conversations.deleteMessage": {
+      "comment": "What deleting a conversation does.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its messages are deleted for every administrator."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其消息将对所有管理员删除。"
+          }
+        }
+      }
+    },
+    "conversations.gone": {
+      "comment": "Shown when the conversation chosen no longer exists.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This conversation was deleted."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此对话已被删除。"
           }
         }
       }

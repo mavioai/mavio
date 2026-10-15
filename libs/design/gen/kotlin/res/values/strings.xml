@@ -632,6 +632,8 @@
     <string name="settings_downloads">Downloads</string>
     <!-- Settings section of the problems reported with items. -->
     <string name="settings_issues">Issues</string>
+    <!-- Settings section of the administrators' conversations with AI models. -->
+    <string name="settings_conversations">AI Conversations</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2966,4 +2968,48 @@
     <string name="issues_administrator">Administrator</string>
     <!-- Explains the settings' issues. -->
     <string name="issues_intro">Problems reported with the server\'s movies and shows: your own, or everyone\'s for administrators.</string>
+    <!-- Message of the AI conversations section. -->
+    <string name="conversations_message">Talk with the models of the AI providers. Conversations are kept on the server, shared by its administrators.</string>
+    <!-- Row when no plugin keeping conversations runs on the server. -->
+    <string name="conversations_no_plugin">No AI agent plugin</string>
+    <!-- Footer explaining why an AI agent plugin is needed. -->
+    <string name="conversations_no_plugin_footer">Conversations are kept by an AI agent plugin and use the providers of an AI gateway plugin.</string>
+    <!-- Title of the form starting a conversation. -->
+    <string name="conversations_new">New Conversation</string>
+    <!-- Footer of the form starting a conversation. -->
+    <string name="conversations_new_footer">The instructions tell the model how to answer throughout the conversation.</string>
+    <!-- Label of the model a conversation talks with. -->
+    <string name="conversations_model">Model</string>
+    <!-- Shown when no AI model can be used to start a conversation. -->
+    <string name="conversations_no_models">No model can be used: sign in to an AI provider first.</string>
+    <!-- Label of the instructions the model follows. -->
+    <string name="conversations_instructions">Instructions</string>
+    <!-- Placeholder of the optional instructions. -->
+    <string name="conversations_instructions_placeholder">Optional</string>
+    <!-- Button starting a conversation with its first message. -->
+    <string name="conversations_start">Start</string>
+    <!-- Title of the list of conversations. -->
+    <string name="conversations_list">Conversations</string>
+    <!-- Empty state of the conversations. -->
+    <string name="conversations_none">No conversations yet.</string>
+    <!-- Title of a conversation without one. -->
+    <string name="conversations_untitled">Untitled</string>
+    <!-- What a conversation used: tokens and cost in US dollars. -->
+    <string name="conversations_usage">%1$s tokens in, %2$s out · %3$s</string>
+    <!-- Button sending a message. -->
+    <string name="conversations_send">Send</string>
+    <!-- Placeholder of the message field, with the model's name. -->
+    <string name="conversations_placeholder">Message %s</string>
+    <!-- Who wrote a message the user sent. -->
+    <string name="conversations_you">You</string>
+    <!-- Button sending a failed message again. -->
+    <string name="conversations_retry">Try Again</string>
+    <!-- Button deleting a conversation. -->
+    <string name="conversations_delete">Delete Conversation</string>
+    <!-- Confirmation of deleting a conversation. -->
+    <string name="conversations_delete_confirm">Delete this conversation?</string>
+    <!-- What deleting a conversation does. -->
+    <string name="conversations_delete_message">Its messages are deleted for every administrator.</string>
+    <!-- Shown when the conversation chosen no longer exists. -->
+    <string name="conversations_gone">This conversation was deleted.</string>
 </resources>

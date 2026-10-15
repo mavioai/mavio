@@ -70,6 +70,60 @@ pub type OwnedLogoutAiRequestView = ::buffa::view::OwnedView<
 pub type OwnedLogoutAiResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::LogoutAiResponseView<'static>,
 >;
+///Shorthand for `OwnedView<CreateAiConversationRequestView<'static>>`.
+pub type OwnedCreateAiConversationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<CreateAiConversationResponseView<'static>>`.
+pub type OwnedCreateAiConversationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListAiConversationsRequestView<'static>>`.
+pub type OwnedListAiConversationsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListAiConversationsResponseView<'static>>`.
+pub type OwnedListAiConversationsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<GetAiConversationRequestView<'static>>`.
+pub type OwnedGetAiConversationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetAiConversationResponseView<'static>>`.
+pub type OwnedGetAiConversationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SendAiMessageRequestView<'static>>`.
+pub type OwnedSendAiMessageRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SendAiMessageRequestView<'static>,
+>;
+///Shorthand for `OwnedView<SendAiMessageResponseView<'static>>`.
+pub type OwnedSendAiMessageResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SendAiMessageResponseView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteAiConversationRequestView<'static>>`.
+pub type OwnedDeleteAiConversationRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<DeleteAiConversationResponseView<'static>>`.
+pub type OwnedDeleteAiConversationResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::ListAiProvidersResponse>
 for crate::proto::mavio::system::v1::__buffa::view::ListAiProvidersResponseView<'_> {
     fn encode(
@@ -376,6 +430,200 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::CreateAiConversationResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::CreateAiConversationResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListAiConversationsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListAiConversationsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetAiConversationResponse>
+for crate::proto::mavio::system::v1::__buffa::view::GetAiConversationResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetAiConversationResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetAiConversationResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SendAiMessageResponse>
+for crate::proto::mavio::system::v1::__buffa::view::SendAiMessageResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SendAiMessageResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::SendAiMessageResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::DeleteAiConversationResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::DeleteAiConversationResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const AI_SERVICE_SERVICE_NAME: &str = "mavio.system.v1.AiService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListAiProviders` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -432,11 +680,44 @@ pub const AI_SERVICE_LOGOUT_AI_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::se
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `CreateAiConversation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_CREATE_AI_CONVERSATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/CreateAiConversation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListAiConversations` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_LIST_AI_CONVERSATIONS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/ListAiConversations",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetAiConversation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_GET_AI_CONVERSATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/GetAiConversation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SendAiMessage` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_SEND_AI_MESSAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/SendAiMessage",
+        ::connectrpc::StreamType::ServerStream,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `DeleteAiConversation` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AI_SERVICE_DELETE_AI_CONVERSATION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.AiService/DeleteAiConversation",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AiService administers the AI model providers the server's features use,
 /// through the plugin with the AI_GATEWAY capability, which keeps their
 /// credentials: API keys, and OAuth logins relayed to the administrator.
-/// Every RPC requires an administrator; without a started AI gateway
-/// plugin they fail with failed precondition.
+/// It also keeps the administrators' conversations with the models, through
+/// the plugin with the AGENT_SESSION capability. Every RPC requires an
+/// administrator; without a started AI gateway plugin, or for the
+/// conversations one with the AGENT_SESSION capability, they fail with
+/// failed precondition.
 ///
 /// # Implementing handlers
 ///
@@ -696,6 +977,122 @@ pub trait AiService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::LogoutAiResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// CreateAiConversation starts a conversation with a model.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn create_ai_conversation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::CreateAiConversationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::CreateAiConversationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListAiConversations lists the conversations, newest first.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_ai_conversations<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::ListAiConversationsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::ListAiConversationsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetAiConversation returns a conversation with its messages.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_ai_conversation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::GetAiConversationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::GetAiConversationResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// SendAiMessage sends a message to a conversation and streams the answer
+    /// as the model writes it, ending with the answer.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn send_ai_message(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::SendAiMessageRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::system::v1::SendAiMessageResponse,
+                > + Send + use<Self>,
+            >,
+        >,
+    > + Send;
+    /// DeleteAiConversation deletes a conversation.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn delete_ai_conversation<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::DeleteAiConversationResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -991,6 +1388,150 @@ impl<S: AiService> AiServiceExt for S {
                 },
             )
             .with_spec(AI_SERVICE_LOGOUT_AI_SPEC)
+            .route_view(
+                AI_SERVICE_SERVICE_NAME,
+                "CreateAiConversation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::CreateAiConversationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.create_ai_conversation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::CreateAiConversationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_SERVICE_CREATE_AI_CONVERSATION_SPEC)
+            .route_view_idempotent(
+                AI_SERVICE_SERVICE_NAME,
+                "ListAiConversations",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::ListAiConversationsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_ai_conversations(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::ListAiConversationsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_SERVICE_LIST_AI_CONVERSATIONS_SPEC)
+            .route_view_idempotent(
+                AI_SERVICE_SERVICE_NAME,
+                "GetAiConversation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::GetAiConversationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::GetAiConversationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_ai_conversation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::GetAiConversationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_SERVICE_GET_AI_CONVERSATION_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::system::v1::SendAiMessageResponse,
+            >(
+                AI_SERVICE_SERVICE_NAME,
+                "SendAiMessage",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::SendAiMessageRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::SendAiMessageRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.send_ai_message(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AI_SERVICE_SEND_AI_MESSAGE_SPEC)
+            .route_view(
+                AI_SERVICE_SERVICE_NAME,
+                "DeleteAiConversation",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.delete_ai_conversation(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::DeleteAiConversationResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AI_SERVICE_DELETE_AI_CONVERSATION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -1097,6 +1638,36 @@ impl<T: AiService> ::connectrpc::Dispatcher for AiServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AI_SERVICE_LOGOUT_AI_SPEC),
+                )
+            }
+            "CreateAiConversation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AI_SERVICE_CREATE_AI_CONVERSATION_SPEC),
+                )
+            }
+            "ListAiConversations" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(AI_SERVICE_LIST_AI_CONVERSATIONS_SPEC),
+                )
+            }
+            "GetAiConversation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(AI_SERVICE_GET_AI_CONVERSATION_SPEC),
+                )
+            }
+            "SendAiMessage" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AI_SERVICE_SEND_AI_MESSAGE_SPEC),
+                )
+            }
+            "DeleteAiConversation" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AI_SERVICE_DELETE_AI_CONVERSATION_SPEC),
                 )
             }
             _ => None,
@@ -1290,6 +1861,94 @@ impl<T: AiService> ::connectrpc::Dispatcher for AiServiceServer<T> {
                         >(format)
                 })
             }
+            "CreateAiConversation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::CreateAiConversationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::CreateAiConversationRequest,
+                    >::from_parts(&req, &body);
+                    svc.create_ai_conversation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::CreateAiConversationResponse,
+                        >(format)
+                })
+            }
+            "ListAiConversations" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::ListAiConversationsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::ListAiConversationsRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_ai_conversations(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::ListAiConversationsResponse,
+                        >(format)
+                })
+            }
+            "GetAiConversation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::GetAiConversationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::GetAiConversationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::GetAiConversationRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_ai_conversation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::GetAiConversationResponse,
+                        >(format)
+                })
+            }
+            "DeleteAiConversation" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+                    >::from_parts(&req, &body);
+                    svc.delete_ai_conversation(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::DeleteAiConversationResponse,
+                        >(format)
+                })
+            }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_unary(path),
         }
     }
@@ -1325,6 +1984,32 @@ impl<T: AiService> ::connectrpc::Dispatcher for AiServiceServer<T> {
                         resp
                             .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
                                 crate::proto::mavio::system::v1::WatchAiLoginResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
+            "SendAiMessage" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::SendAiMessageRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::SendAiMessageRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::SendAiMessageRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.send_ai_message(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::system::v1::SendAiMessageResponse,
                                 _,
                                 _,
                             >(s, format)),
@@ -1841,6 +2526,229 @@ where
                 &self.transport,
                 &self.config,
                 AI_SERVICE_LOGOUT_AI_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the CreateAiConversation RPC. Sends a request to /mavio.system.v1.AiService/CreateAiConversation.
+    pub async fn create_ai_conversation(
+        &self,
+        request: crate::proto::mavio::system::v1::CreateAiConversationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.create_ai_conversation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the CreateAiConversation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn create_ai_conversation_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::CreateAiConversationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::CreateAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_CREATE_AI_CONVERSATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListAiConversations RPC. Sends a request to /mavio.system.v1.AiService/ListAiConversations.
+    pub async fn list_ai_conversations(
+        &self,
+        request: crate::proto::mavio::system::v1::ListAiConversationsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_ai_conversations_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListAiConversations RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_ai_conversations_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListAiConversationsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListAiConversationsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_LIST_AI_CONVERSATIONS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetAiConversation RPC. Sends a request to /mavio.system.v1.AiService/GetAiConversation.
+    pub async fn get_ai_conversation(
+        &self,
+        request: crate::proto::mavio::system::v1::GetAiConversationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_ai_conversation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetAiConversation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_ai_conversation_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::GetAiConversationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_GET_AI_CONVERSATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SendAiMessage RPC. Sends a request to /mavio.system.v1.AiService/SendAiMessage.
+    pub async fn send_ai_message(
+        &self,
+        request: crate::proto::mavio::system::v1::SendAiMessageRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::system::v1::__buffa::view::SendAiMessageResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.send_ai_message_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SendAiMessage RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn send_ai_message_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::SendAiMessageRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::system::v1::__buffa::view::SendAiMessageResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_SEND_AI_MESSAGE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the DeleteAiConversation RPC. Sends a request to /mavio.system.v1.AiService/DeleteAiConversation.
+    pub async fn delete_ai_conversation(
+        &self,
+        request: crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.delete_ai_conversation_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the DeleteAiConversation RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn delete_ai_conversation_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::DeleteAiConversationRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::DeleteAiConversationResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AI_SERVICE_DELETE_AI_CONVERSATION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

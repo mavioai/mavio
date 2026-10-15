@@ -305,6 +305,7 @@ export type MessageKey =
   | 'settings.wanted'
   | 'settings.downloads'
   | 'settings.issues'
+  | 'settings.conversations'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1456,7 +1457,29 @@ export type MessageKey =
   | 'issues.commentSend'
   | 'issues.reportedBy'
   | 'issues.administrator'
-  | 'issues.intro';
+  | 'issues.intro'
+  | 'conversations.message'
+  | 'conversations.noPlugin'
+  | 'conversations.noPluginFooter'
+  | 'conversations.new'
+  | 'conversations.newFooter'
+  | 'conversations.model'
+  | 'conversations.noModels'
+  | 'conversations.instructions'
+  | 'conversations.instructionsPlaceholder'
+  | 'conversations.start'
+  | 'conversations.list'
+  | 'conversations.none'
+  | 'conversations.untitled'
+  | 'conversations.usage'
+  | 'conversations.send'
+  | 'conversations.placeholder'
+  | 'conversations.you'
+  | 'conversations.retry'
+  | 'conversations.delete'
+  | 'conversations.deleteConfirm'
+  | 'conversations.deleteMessage'
+  | 'conversations.gone';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1754,6 +1777,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.wanted": "Wanted",
     "settings.downloads": "Downloads",
     "settings.issues": "Issues",
+    "settings.conversations": "AI Conversations",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2905,7 +2929,29 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "issues.commentSend": "Comment",
     "issues.reportedBy": "Reported by {name}",
     "issues.administrator": "Administrator",
-    "issues.intro": "Problems reported with the server's movies and shows: your own, or everyone's for administrators."
+    "issues.intro": "Problems reported with the server's movies and shows: your own, or everyone's for administrators.",
+    "conversations.message": "Talk with the models of the AI providers. Conversations are kept on the server, shared by its administrators.",
+    "conversations.noPlugin": "No AI agent plugin",
+    "conversations.noPluginFooter": "Conversations are kept by an AI agent plugin and use the providers of an AI gateway plugin.",
+    "conversations.new": "New Conversation",
+    "conversations.newFooter": "The instructions tell the model how to answer throughout the conversation.",
+    "conversations.model": "Model",
+    "conversations.noModels": "No model can be used: sign in to an AI provider first.",
+    "conversations.instructions": "Instructions",
+    "conversations.instructionsPlaceholder": "Optional",
+    "conversations.start": "Start",
+    "conversations.list": "Conversations",
+    "conversations.none": "No conversations yet.",
+    "conversations.untitled": "Untitled",
+    "conversations.usage": "{input} tokens in, {output} out · {cost}",
+    "conversations.send": "Send",
+    "conversations.placeholder": "Message {model}",
+    "conversations.you": "You",
+    "conversations.retry": "Try Again",
+    "conversations.delete": "Delete Conversation",
+    "conversations.deleteConfirm": "Delete this conversation?",
+    "conversations.deleteMessage": "Its messages are deleted for every administrator.",
+    "conversations.gone": "This conversation was deleted."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3201,6 +3247,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.wanted": "想要",
     "settings.downloads": "下载",
     "settings.issues": "问题",
+    "settings.conversations": "AI 对话",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -4352,6 +4399,28 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "issues.commentSend": "评论",
     "issues.reportedBy": "由 {name} 报告",
     "issues.administrator": "管理员",
-    "issues.intro": "对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。"
+    "issues.intro": "对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。",
+    "conversations.message": "与 AI 提供商的模型对话。对话保存在服务器上，由服务器的管理员共享。",
+    "conversations.noPlugin": "没有 AI 助手插件",
+    "conversations.noPluginFooter": "对话由 AI 助手插件保存，并使用 AI 网关插件提供的提供商。",
+    "conversations.new": "新对话",
+    "conversations.newFooter": "指令告诉模型在整个对话中如何回答。",
+    "conversations.model": "模型",
+    "conversations.noModels": "没有可用的模型：请先登录 AI 提供商。",
+    "conversations.instructions": "指令",
+    "conversations.instructionsPlaceholder": "可选",
+    "conversations.start": "开始",
+    "conversations.list": "对话",
+    "conversations.none": "还没有对话。",
+    "conversations.untitled": "未命名",
+    "conversations.usage": "输入 {input} 个词元，输出 {output} 个 · {cost}",
+    "conversations.send": "发送",
+    "conversations.placeholder": "给 {model} 发消息",
+    "conversations.you": "你",
+    "conversations.retry": "重试",
+    "conversations.delete": "删除对话",
+    "conversations.deleteConfirm": "删除此对话？",
+    "conversations.deleteMessage": "其消息将对所有管理员删除。",
+    "conversations.gone": "此对话已被删除。"
   }
 };

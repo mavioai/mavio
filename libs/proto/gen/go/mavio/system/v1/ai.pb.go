@@ -1533,6 +1533,953 @@ func (b0 LogoutAiResponse_builder) Build() *LogoutAiResponse {
 	return m0
 }
 
+type CreateAiConversationRequest struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Provider     *string                `protobuf:"bytes,1,opt,name=provider"`
+	xxx_hidden_Model        *string                `protobuf:"bytes,2,opt,name=model"`
+	xxx_hidden_Instructions *string                `protobuf:"bytes,3,opt,name=instructions"`
+	xxx_hidden_Title        *string                `protobuf:"bytes,4,opt,name=title"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *CreateAiConversationRequest) Reset() {
+	*x = CreateAiConversationRequest{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAiConversationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAiConversationRequest) ProtoMessage() {}
+
+func (x *CreateAiConversationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateAiConversationRequest) GetProvider() string {
+	if x != nil {
+		if x.xxx_hidden_Provider != nil {
+			return *x.xxx_hidden_Provider
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateAiConversationRequest) GetModel() string {
+	if x != nil {
+		if x.xxx_hidden_Model != nil {
+			return *x.xxx_hidden_Model
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateAiConversationRequest) GetInstructions() string {
+	if x != nil {
+		if x.xxx_hidden_Instructions != nil {
+			return *x.xxx_hidden_Instructions
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateAiConversationRequest) GetTitle() string {
+	if x != nil {
+		if x.xxx_hidden_Title != nil {
+			return *x.xxx_hidden_Title
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *CreateAiConversationRequest) SetProvider(v string) {
+	x.xxx_hidden_Provider = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *CreateAiConversationRequest) SetModel(v string) {
+	x.xxx_hidden_Model = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *CreateAiConversationRequest) SetInstructions(v string) {
+	x.xxx_hidden_Instructions = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *CreateAiConversationRequest) SetTitle(v string) {
+	x.xxx_hidden_Title = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *CreateAiConversationRequest) HasProvider() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CreateAiConversationRequest) HasModel() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CreateAiConversationRequest) HasInstructions() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *CreateAiConversationRequest) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *CreateAiConversationRequest) ClearProvider() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Provider = nil
+}
+
+func (x *CreateAiConversationRequest) ClearModel() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Model = nil
+}
+
+func (x *CreateAiConversationRequest) ClearInstructions() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Instructions = nil
+}
+
+func (x *CreateAiConversationRequest) ClearTitle() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Title = nil
+}
+
+type CreateAiConversationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Provider *string
+	Model    *string
+	// The instructions the model follows.
+	Instructions *string
+	Title        *string
+}
+
+func (b0 CreateAiConversationRequest_builder) Build() *CreateAiConversationRequest {
+	m0 := &CreateAiConversationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Provider != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_Provider = b.Provider
+	}
+	if b.Model != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_Model = b.Model
+	}
+	if b.Instructions != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_Instructions = b.Instructions
+	}
+	if b.Title != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_Title = b.Title
+	}
+	return m0
+}
+
+type CreateAiConversationResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Conversation *v1.AgentSession       `protobuf:"bytes,1,opt,name=conversation"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *CreateAiConversationResponse) Reset() {
+	*x = CreateAiConversationResponse{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAiConversationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAiConversationResponse) ProtoMessage() {}
+
+func (x *CreateAiConversationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CreateAiConversationResponse) GetConversation() *v1.AgentSession {
+	if x != nil {
+		return x.xxx_hidden_Conversation
+	}
+	return nil
+}
+
+func (x *CreateAiConversationResponse) SetConversation(v *v1.AgentSession) {
+	x.xxx_hidden_Conversation = v
+}
+
+func (x *CreateAiConversationResponse) HasConversation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Conversation != nil
+}
+
+func (x *CreateAiConversationResponse) ClearConversation() {
+	x.xxx_hidden_Conversation = nil
+}
+
+type CreateAiConversationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Conversation *v1.AgentSession
+}
+
+func (b0 CreateAiConversationResponse_builder) Build() *CreateAiConversationResponse {
+	m0 := &CreateAiConversationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Conversation = b.Conversation
+	return m0
+}
+
+type ListAiConversationsRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAiConversationsRequest) Reset() {
+	*x = ListAiConversationsRequest{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAiConversationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAiConversationsRequest) ProtoMessage() {}
+
+func (x *ListAiConversationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ListAiConversationsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ListAiConversationsRequest_builder) Build() *ListAiConversationsRequest {
+	m0 := &ListAiConversationsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type ListAiConversationsResponse struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Conversations *[]*v1.AgentSession    `protobuf:"bytes,1,rep,name=conversations"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *ListAiConversationsResponse) Reset() {
+	*x = ListAiConversationsResponse{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAiConversationsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAiConversationsResponse) ProtoMessage() {}
+
+func (x *ListAiConversationsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListAiConversationsResponse) GetConversations() []*v1.AgentSession {
+	if x != nil {
+		if x.xxx_hidden_Conversations != nil {
+			return *x.xxx_hidden_Conversations
+		}
+	}
+	return nil
+}
+
+func (x *ListAiConversationsResponse) SetConversations(v []*v1.AgentSession) {
+	x.xxx_hidden_Conversations = &v
+}
+
+type ListAiConversationsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Conversations []*v1.AgentSession
+}
+
+func (b0 ListAiConversationsResponse_builder) Build() *ListAiConversationsResponse {
+	m0 := &ListAiConversationsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Conversations = &b.Conversations
+	return m0
+}
+
+type GetAiConversationRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetAiConversationRequest) Reset() {
+	*x = GetAiConversationRequest{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAiConversationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAiConversationRequest) ProtoMessage() {}
+
+func (x *GetAiConversationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetAiConversationRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetAiConversationRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *GetAiConversationRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetAiConversationRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type GetAiConversationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 GetAiConversationRequest_builder) Build() *GetAiConversationRequest {
+	m0 := &GetAiConversationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type GetAiConversationResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Conversation *v1.AgentSession       `protobuf:"bytes,1,opt,name=conversation"`
+	xxx_hidden_Messages     *[]*v1.AgentMessage    `protobuf:"bytes,2,rep,name=messages"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *GetAiConversationResponse) Reset() {
+	*x = GetAiConversationResponse{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAiConversationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAiConversationResponse) ProtoMessage() {}
+
+func (x *GetAiConversationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetAiConversationResponse) GetConversation() *v1.AgentSession {
+	if x != nil {
+		return x.xxx_hidden_Conversation
+	}
+	return nil
+}
+
+func (x *GetAiConversationResponse) GetMessages() []*v1.AgentMessage {
+	if x != nil {
+		if x.xxx_hidden_Messages != nil {
+			return *x.xxx_hidden_Messages
+		}
+	}
+	return nil
+}
+
+func (x *GetAiConversationResponse) SetConversation(v *v1.AgentSession) {
+	x.xxx_hidden_Conversation = v
+}
+
+func (x *GetAiConversationResponse) SetMessages(v []*v1.AgentMessage) {
+	x.xxx_hidden_Messages = &v
+}
+
+func (x *GetAiConversationResponse) HasConversation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Conversation != nil
+}
+
+func (x *GetAiConversationResponse) ClearConversation() {
+	x.xxx_hidden_Conversation = nil
+}
+
+type GetAiConversationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Conversation *v1.AgentSession
+	Messages     []*v1.AgentMessage
+}
+
+func (b0 GetAiConversationResponse_builder) Build() *GetAiConversationResponse {
+	m0 := &GetAiConversationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Conversation = b.Conversation
+	x.xxx_hidden_Messages = &b.Messages
+	return m0
+}
+
+type SendAiMessageRequest struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ConversationId *string                `protobuf:"bytes,1,opt,name=conversation_id,json=conversationId"`
+	xxx_hidden_Text           *string                `protobuf:"bytes,2,opt,name=text"`
+	xxx_hidden_RequestId      *string                `protobuf:"bytes,3,opt,name=request_id,json=requestId"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *SendAiMessageRequest) Reset() {
+	*x = SendAiMessageRequest{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendAiMessageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendAiMessageRequest) ProtoMessage() {}
+
+func (x *SendAiMessageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SendAiMessageRequest) GetConversationId() string {
+	if x != nil {
+		if x.xxx_hidden_ConversationId != nil {
+			return *x.xxx_hidden_ConversationId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SendAiMessageRequest) GetText() string {
+	if x != nil {
+		if x.xxx_hidden_Text != nil {
+			return *x.xxx_hidden_Text
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SendAiMessageRequest) GetRequestId() string {
+	if x != nil {
+		if x.xxx_hidden_RequestId != nil {
+			return *x.xxx_hidden_RequestId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *SendAiMessageRequest) SetConversationId(v string) {
+	x.xxx_hidden_ConversationId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *SendAiMessageRequest) SetText(v string) {
+	x.xxx_hidden_Text = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *SendAiMessageRequest) SetRequestId(v string) {
+	x.xxx_hidden_RequestId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *SendAiMessageRequest) HasConversationId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SendAiMessageRequest) HasText() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SendAiMessageRequest) HasRequestId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *SendAiMessageRequest) ClearConversationId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ConversationId = nil
+}
+
+func (x *SendAiMessageRequest) ClearText() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Text = nil
+}
+
+func (x *SendAiMessageRequest) ClearRequestId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_RequestId = nil
+}
+
+type SendAiMessageRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ConversationId *string
+	Text           *string
+	// Makes a retried message the same message instead of a second one.
+	RequestId *string
+}
+
+func (b0 SendAiMessageRequest_builder) Build() *SendAiMessageRequest {
+	m0 := &SendAiMessageRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ConversationId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_ConversationId = b.ConversationId
+	}
+	if b.Text != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Text = b.Text
+	}
+	if b.RequestId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_RequestId = b.RequestId
+	}
+	return m0
+}
+
+type SendAiMessageResponse struct {
+	state            protoimpl.MessageState        `protogen:"opaque.v1"`
+	xxx_hidden_Event isSendAiMessageResponse_Event `protobuf_oneof:"event"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *SendAiMessageResponse) Reset() {
+	*x = SendAiMessageResponse{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendAiMessageResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendAiMessageResponse) ProtoMessage() {}
+
+func (x *SendAiMessageResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SendAiMessageResponse) GetText() string {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Text); ok {
+			return x.Text
+		}
+	}
+	return ""
+}
+
+func (x *SendAiMessageResponse) GetDone() *v1.SendAgentMessageResponse {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Done); ok {
+			return x.Done
+		}
+	}
+	return nil
+}
+
+func (x *SendAiMessageResponse) SetText(v string) {
+	x.xxx_hidden_Event = &sendAiMessageResponse_Text{v}
+}
+
+func (x *SendAiMessageResponse) SetDone(v *v1.SendAgentMessageResponse) {
+	if v == nil {
+		x.xxx_hidden_Event = nil
+		return
+	}
+	x.xxx_hidden_Event = &sendAiMessageResponse_Done{v}
+}
+
+func (x *SendAiMessageResponse) HasEvent() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Event != nil
+}
+
+func (x *SendAiMessageResponse) HasText() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Text)
+	return ok
+}
+
+func (x *SendAiMessageResponse) HasDone() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Done)
+	return ok
+}
+
+func (x *SendAiMessageResponse) ClearEvent() {
+	x.xxx_hidden_Event = nil
+}
+
+func (x *SendAiMessageResponse) ClearText() {
+	if _, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Text); ok {
+		x.xxx_hidden_Event = nil
+	}
+}
+
+func (x *SendAiMessageResponse) ClearDone() {
+	if _, ok := x.xxx_hidden_Event.(*sendAiMessageResponse_Done); ok {
+		x.xxx_hidden_Event = nil
+	}
+}
+
+const SendAiMessageResponse_Event_not_set_case case_SendAiMessageResponse_Event = 0
+const SendAiMessageResponse_Text_case case_SendAiMessageResponse_Event = 1
+const SendAiMessageResponse_Done_case case_SendAiMessageResponse_Event = 2
+
+func (x *SendAiMessageResponse) WhichEvent() case_SendAiMessageResponse_Event {
+	if x == nil {
+		return SendAiMessageResponse_Event_not_set_case
+	}
+	switch x.xxx_hidden_Event.(type) {
+	case *sendAiMessageResponse_Text:
+		return SendAiMessageResponse_Text_case
+	case *sendAiMessageResponse_Done:
+		return SendAiMessageResponse_Done_case
+	default:
+		return SendAiMessageResponse_Event_not_set_case
+	}
+}
+
+type SendAiMessageResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Fields of oneof xxx_hidden_Event:
+	// The answer so far; a retried attempt starts it again.
+	Text *string
+	// The answer, last.
+	Done *v1.SendAgentMessageResponse
+	// -- end of xxx_hidden_Event
+}
+
+func (b0 SendAiMessageResponse_builder) Build() *SendAiMessageResponse {
+	m0 := &SendAiMessageResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Text != nil {
+		x.xxx_hidden_Event = &sendAiMessageResponse_Text{*b.Text}
+	}
+	if b.Done != nil {
+		x.xxx_hidden_Event = &sendAiMessageResponse_Done{b.Done}
+	}
+	return m0
+}
+
+type case_SendAiMessageResponse_Event protoreflect.FieldNumber
+
+func (x case_SendAiMessageResponse_Event) String() string {
+	md := file_mavio_system_v1_ai_proto_msgTypes[25].Descriptor()
+	if x == 0 {
+		return "not set"
+	}
+	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
+}
+
+type isSendAiMessageResponse_Event interface {
+	isSendAiMessageResponse_Event()
+}
+
+type sendAiMessageResponse_Text struct {
+	// The answer so far; a retried attempt starts it again.
+	Text string `protobuf:"bytes,1,opt,name=text,oneof"`
+}
+
+type sendAiMessageResponse_Done struct {
+	// The answer, last.
+	Done *v1.SendAgentMessageResponse `protobuf:"bytes,2,opt,name=done,oneof"`
+}
+
+func (*sendAiMessageResponse_Text) isSendAiMessageResponse_Event() {}
+
+func (*sendAiMessageResponse_Done) isSendAiMessageResponse_Event() {}
+
+type DeleteAiConversationRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *DeleteAiConversationRequest) Reset() {
+	*x = DeleteAiConversationRequest{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAiConversationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAiConversationRequest) ProtoMessage() {}
+
+func (x *DeleteAiConversationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteAiConversationRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *DeleteAiConversationRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *DeleteAiConversationRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DeleteAiConversationRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+type DeleteAiConversationRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id *string
+}
+
+func (b0 DeleteAiConversationRequest_builder) Build() *DeleteAiConversationRequest {
+	m0 := &DeleteAiConversationRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Id = b.Id
+	}
+	return m0
+}
+
+type DeleteAiConversationResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAiConversationResponse) Reset() {
+	*x = DeleteAiConversationResponse{}
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAiConversationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAiConversationResponse) ProtoMessage() {}
+
+func (x *DeleteAiConversationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_ai_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DeleteAiConversationResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 DeleteAiConversationResponse_builder) Build() *DeleteAiConversationResponse {
+	m0 := &DeleteAiConversationResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_mavio_system_v1_ai_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_ai_proto_rawDesc = "" +
@@ -1579,7 +2526,34 @@ const file_mavio_system_v1_ai_proto_rawDesc = "" +
 	"\x15CancelAiLoginResponse\"5\n" +
 	"\x0fLogoutAiRequest\x12\"\n" +
 	"\bprovider\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\"\x12\n" +
-	"\x10LogoutAiResponse2\xe0\x06\n" +
+	"\x10LogoutAiResponse\"\xae\x01\n" +
+	"\x1bCreateAiConversationRequest\x12\"\n" +
+	"\bprovider\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\x12\x1c\n" +
+	"\x05model\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x05model\x12-\n" +
+	"\finstructions\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x18\xa0\x9c\x01R\finstructions\x12\x1e\n" +
+	"\x05title\x18\x04 \x01(\tB\b\xbaH\x05r\x03\x18\xc8\x01R\x05title\"a\n" +
+	"\x1cCreateAiConversationResponse\x12A\n" +
+	"\fconversation\x18\x01 \x01(\v2\x1d.mavio.plugin.v1.AgentSessionR\fconversation\"\x1c\n" +
+	"\x1aListAiConversationsRequest\"b\n" +
+	"\x1bListAiConversationsResponse\x12C\n" +
+	"\rconversations\x18\x01 \x03(\v2\x1d.mavio.plugin.v1.AgentSessionR\rconversations\"2\n" +
+	"\x18GetAiConversationRequest\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"\x99\x01\n" +
+	"\x19GetAiConversationResponse\x12A\n" +
+	"\fconversation\x18\x01 \x01(\v2\x1d.mavio.plugin.v1.AgentSessionR\fconversation\x129\n" +
+	"\bmessages\x18\x02 \x03(\v2\x1d.mavio.plugin.v1.AgentMessageR\bmessages\"\x91\x01\n" +
+	"\x14SendAiMessageRequest\x12/\n" +
+	"\x0fconversation_id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x0econversationId\x12 \n" +
+	"\x04text\x18\x02 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x18\xa0\x8d\x06R\x04text\x12&\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tB\a\xbaH\x04r\x02\x18dR\trequestId\"w\n" +
+	"\x15SendAiMessageResponse\x12\x14\n" +
+	"\x04text\x18\x01 \x01(\tH\x00R\x04text\x12?\n" +
+	"\x04done\x18\x02 \x01(\v2).mavio.plugin.v1.SendAgentMessageResponseH\x00R\x04doneB\a\n" +
+	"\x05event\"5\n" +
+	"\x1bDeleteAiConversationRequest\x12\x16\n" +
+	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"\x1e\n" +
+	"\x1cDeleteAiConversationResponse2\x94\v\n" +
 	"\tAiService\x12i\n" +
 	"\x0fListAiProviders\x12'.mavio.system.v1.ListAiProvidersRequest\x1a(.mavio.system.v1.ListAiProvidersResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\fListAiModels\x12$.mavio.system.v1.ListAiModelsRequest\x1a%.mavio.system.v1.ListAiModelsResponse\"\x03\x90\x02\x01\x12X\n" +
@@ -1590,67 +2564,100 @@ const file_mavio_system_v1_ai_proto_rawDesc = "" +
 	"\fWatchAiLogin\x12$.mavio.system.v1.WatchAiLoginRequest\x1a%.mavio.system.v1.WatchAiLoginResponse\"\x03\x90\x02\x010\x01\x12^\n" +
 	"\rAnswerAiLogin\x12%.mavio.system.v1.AnswerAiLoginRequest\x1a&.mavio.system.v1.AnswerAiLoginResponse\x12^\n" +
 	"\rCancelAiLogin\x12%.mavio.system.v1.CancelAiLoginRequest\x1a&.mavio.system.v1.CancelAiLoginResponse\x12O\n" +
-	"\bLogoutAi\x12 .mavio.system.v1.LogoutAiRequest\x1a!.mavio.system.v1.LogoutAiResponseB\xc1\x01\n" +
+	"\bLogoutAi\x12 .mavio.system.v1.LogoutAiRequest\x1a!.mavio.system.v1.LogoutAiResponse\x12s\n" +
+	"\x14CreateAiConversation\x12,.mavio.system.v1.CreateAiConversationRequest\x1a-.mavio.system.v1.CreateAiConversationResponse\x12u\n" +
+	"\x13ListAiConversations\x12+.mavio.system.v1.ListAiConversationsRequest\x1a,.mavio.system.v1.ListAiConversationsResponse\"\x03\x90\x02\x01\x12o\n" +
+	"\x11GetAiConversation\x12).mavio.system.v1.GetAiConversationRequest\x1a*.mavio.system.v1.GetAiConversationResponse\"\x03\x90\x02\x01\x12`\n" +
+	"\rSendAiMessage\x12%.mavio.system.v1.SendAiMessageRequest\x1a&.mavio.system.v1.SendAiMessageResponse0\x01\x12s\n" +
+	"\x14DeleteAiConversation\x12,.mavio.system.v1.DeleteAiConversationRequest\x1a-.mavio.system.v1.DeleteAiConversationResponseB\xc1\x01\n" +
 	"\x13com.mavio.system.v1B\aAiProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
-var file_mavio_system_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_mavio_system_v1_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_mavio_system_v1_ai_proto_goTypes = []any{
-	(*ListAiProvidersRequest)(nil),  // 0: mavio.system.v1.ListAiProvidersRequest
-	(*ListAiProvidersResponse)(nil), // 1: mavio.system.v1.ListAiProvidersResponse
-	(*ListAiModelsRequest)(nil),     // 2: mavio.system.v1.ListAiModelsRequest
-	(*ListAiModelsResponse)(nil),    // 3: mavio.system.v1.ListAiModelsResponse
-	(*SetAiApiKeyRequest)(nil),      // 4: mavio.system.v1.SetAiApiKeyRequest
-	(*SetAiApiKeyResponse)(nil),     // 5: mavio.system.v1.SetAiApiKeyResponse
-	(*StartAiLoginRequest)(nil),     // 6: mavio.system.v1.StartAiLoginRequest
-	(*StartAiLoginResponse)(nil),    // 7: mavio.system.v1.StartAiLoginResponse
-	(*GetAiLoginRequest)(nil),       // 8: mavio.system.v1.GetAiLoginRequest
-	(*GetAiLoginResponse)(nil),      // 9: mavio.system.v1.GetAiLoginResponse
-	(*WatchAiLoginRequest)(nil),     // 10: mavio.system.v1.WatchAiLoginRequest
-	(*WatchAiLoginResponse)(nil),    // 11: mavio.system.v1.WatchAiLoginResponse
-	(*AnswerAiLoginRequest)(nil),    // 12: mavio.system.v1.AnswerAiLoginRequest
-	(*AnswerAiLoginResponse)(nil),   // 13: mavio.system.v1.AnswerAiLoginResponse
-	(*CancelAiLoginRequest)(nil),    // 14: mavio.system.v1.CancelAiLoginRequest
-	(*CancelAiLoginResponse)(nil),   // 15: mavio.system.v1.CancelAiLoginResponse
-	(*LogoutAiRequest)(nil),         // 16: mavio.system.v1.LogoutAiRequest
-	(*LogoutAiResponse)(nil),        // 17: mavio.system.v1.LogoutAiResponse
-	(*v1.AiProvider)(nil),           // 18: mavio.plugin.v1.AiProvider
-	(*v1.AiModel)(nil),              // 19: mavio.plugin.v1.AiModel
-	(v1.AiLoginState)(0),            // 20: mavio.plugin.v1.AiLoginState
-	(*v1.AiLoginEvent)(nil),         // 21: mavio.plugin.v1.AiLoginEvent
-	(*v1.AiLoginPrompt)(nil),        // 22: mavio.plugin.v1.AiLoginPrompt
+	(*ListAiProvidersRequest)(nil),       // 0: mavio.system.v1.ListAiProvidersRequest
+	(*ListAiProvidersResponse)(nil),      // 1: mavio.system.v1.ListAiProvidersResponse
+	(*ListAiModelsRequest)(nil),          // 2: mavio.system.v1.ListAiModelsRequest
+	(*ListAiModelsResponse)(nil),         // 3: mavio.system.v1.ListAiModelsResponse
+	(*SetAiApiKeyRequest)(nil),           // 4: mavio.system.v1.SetAiApiKeyRequest
+	(*SetAiApiKeyResponse)(nil),          // 5: mavio.system.v1.SetAiApiKeyResponse
+	(*StartAiLoginRequest)(nil),          // 6: mavio.system.v1.StartAiLoginRequest
+	(*StartAiLoginResponse)(nil),         // 7: mavio.system.v1.StartAiLoginResponse
+	(*GetAiLoginRequest)(nil),            // 8: mavio.system.v1.GetAiLoginRequest
+	(*GetAiLoginResponse)(nil),           // 9: mavio.system.v1.GetAiLoginResponse
+	(*WatchAiLoginRequest)(nil),          // 10: mavio.system.v1.WatchAiLoginRequest
+	(*WatchAiLoginResponse)(nil),         // 11: mavio.system.v1.WatchAiLoginResponse
+	(*AnswerAiLoginRequest)(nil),         // 12: mavio.system.v1.AnswerAiLoginRequest
+	(*AnswerAiLoginResponse)(nil),        // 13: mavio.system.v1.AnswerAiLoginResponse
+	(*CancelAiLoginRequest)(nil),         // 14: mavio.system.v1.CancelAiLoginRequest
+	(*CancelAiLoginResponse)(nil),        // 15: mavio.system.v1.CancelAiLoginResponse
+	(*LogoutAiRequest)(nil),              // 16: mavio.system.v1.LogoutAiRequest
+	(*LogoutAiResponse)(nil),             // 17: mavio.system.v1.LogoutAiResponse
+	(*CreateAiConversationRequest)(nil),  // 18: mavio.system.v1.CreateAiConversationRequest
+	(*CreateAiConversationResponse)(nil), // 19: mavio.system.v1.CreateAiConversationResponse
+	(*ListAiConversationsRequest)(nil),   // 20: mavio.system.v1.ListAiConversationsRequest
+	(*ListAiConversationsResponse)(nil),  // 21: mavio.system.v1.ListAiConversationsResponse
+	(*GetAiConversationRequest)(nil),     // 22: mavio.system.v1.GetAiConversationRequest
+	(*GetAiConversationResponse)(nil),    // 23: mavio.system.v1.GetAiConversationResponse
+	(*SendAiMessageRequest)(nil),         // 24: mavio.system.v1.SendAiMessageRequest
+	(*SendAiMessageResponse)(nil),        // 25: mavio.system.v1.SendAiMessageResponse
+	(*DeleteAiConversationRequest)(nil),  // 26: mavio.system.v1.DeleteAiConversationRequest
+	(*DeleteAiConversationResponse)(nil), // 27: mavio.system.v1.DeleteAiConversationResponse
+	(*v1.AiProvider)(nil),                // 28: mavio.plugin.v1.AiProvider
+	(*v1.AiModel)(nil),                   // 29: mavio.plugin.v1.AiModel
+	(v1.AiLoginState)(0),                 // 30: mavio.plugin.v1.AiLoginState
+	(*v1.AiLoginEvent)(nil),              // 31: mavio.plugin.v1.AiLoginEvent
+	(*v1.AiLoginPrompt)(nil),             // 32: mavio.plugin.v1.AiLoginPrompt
+	(*v1.AgentSession)(nil),              // 33: mavio.plugin.v1.AgentSession
+	(*v1.AgentMessage)(nil),              // 34: mavio.plugin.v1.AgentMessage
+	(*v1.SendAgentMessageResponse)(nil),  // 35: mavio.plugin.v1.SendAgentMessageResponse
 }
 var file_mavio_system_v1_ai_proto_depIdxs = []int32{
-	18, // 0: mavio.system.v1.ListAiProvidersResponse.providers:type_name -> mavio.plugin.v1.AiProvider
-	19, // 1: mavio.system.v1.ListAiModelsResponse.models:type_name -> mavio.plugin.v1.AiModel
-	20, // 2: mavio.system.v1.GetAiLoginResponse.state:type_name -> mavio.plugin.v1.AiLoginState
-	21, // 3: mavio.system.v1.GetAiLoginResponse.events:type_name -> mavio.plugin.v1.AiLoginEvent
-	22, // 4: mavio.system.v1.GetAiLoginResponse.prompt:type_name -> mavio.plugin.v1.AiLoginPrompt
-	20, // 5: mavio.system.v1.WatchAiLoginResponse.state:type_name -> mavio.plugin.v1.AiLoginState
-	21, // 6: mavio.system.v1.WatchAiLoginResponse.events:type_name -> mavio.plugin.v1.AiLoginEvent
-	22, // 7: mavio.system.v1.WatchAiLoginResponse.prompt:type_name -> mavio.plugin.v1.AiLoginPrompt
-	0,  // 8: mavio.system.v1.AiService.ListAiProviders:input_type -> mavio.system.v1.ListAiProvidersRequest
-	2,  // 9: mavio.system.v1.AiService.ListAiModels:input_type -> mavio.system.v1.ListAiModelsRequest
-	4,  // 10: mavio.system.v1.AiService.SetAiApiKey:input_type -> mavio.system.v1.SetAiApiKeyRequest
-	6,  // 11: mavio.system.v1.AiService.StartAiLogin:input_type -> mavio.system.v1.StartAiLoginRequest
-	8,  // 12: mavio.system.v1.AiService.GetAiLogin:input_type -> mavio.system.v1.GetAiLoginRequest
-	10, // 13: mavio.system.v1.AiService.WatchAiLogin:input_type -> mavio.system.v1.WatchAiLoginRequest
-	12, // 14: mavio.system.v1.AiService.AnswerAiLogin:input_type -> mavio.system.v1.AnswerAiLoginRequest
-	14, // 15: mavio.system.v1.AiService.CancelAiLogin:input_type -> mavio.system.v1.CancelAiLoginRequest
-	16, // 16: mavio.system.v1.AiService.LogoutAi:input_type -> mavio.system.v1.LogoutAiRequest
-	1,  // 17: mavio.system.v1.AiService.ListAiProviders:output_type -> mavio.system.v1.ListAiProvidersResponse
-	3,  // 18: mavio.system.v1.AiService.ListAiModels:output_type -> mavio.system.v1.ListAiModelsResponse
-	5,  // 19: mavio.system.v1.AiService.SetAiApiKey:output_type -> mavio.system.v1.SetAiApiKeyResponse
-	7,  // 20: mavio.system.v1.AiService.StartAiLogin:output_type -> mavio.system.v1.StartAiLoginResponse
-	9,  // 21: mavio.system.v1.AiService.GetAiLogin:output_type -> mavio.system.v1.GetAiLoginResponse
-	11, // 22: mavio.system.v1.AiService.WatchAiLogin:output_type -> mavio.system.v1.WatchAiLoginResponse
-	13, // 23: mavio.system.v1.AiService.AnswerAiLogin:output_type -> mavio.system.v1.AnswerAiLoginResponse
-	15, // 24: mavio.system.v1.AiService.CancelAiLogin:output_type -> mavio.system.v1.CancelAiLoginResponse
-	17, // 25: mavio.system.v1.AiService.LogoutAi:output_type -> mavio.system.v1.LogoutAiResponse
-	17, // [17:26] is the sub-list for method output_type
-	8,  // [8:17] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	28, // 0: mavio.system.v1.ListAiProvidersResponse.providers:type_name -> mavio.plugin.v1.AiProvider
+	29, // 1: mavio.system.v1.ListAiModelsResponse.models:type_name -> mavio.plugin.v1.AiModel
+	30, // 2: mavio.system.v1.GetAiLoginResponse.state:type_name -> mavio.plugin.v1.AiLoginState
+	31, // 3: mavio.system.v1.GetAiLoginResponse.events:type_name -> mavio.plugin.v1.AiLoginEvent
+	32, // 4: mavio.system.v1.GetAiLoginResponse.prompt:type_name -> mavio.plugin.v1.AiLoginPrompt
+	30, // 5: mavio.system.v1.WatchAiLoginResponse.state:type_name -> mavio.plugin.v1.AiLoginState
+	31, // 6: mavio.system.v1.WatchAiLoginResponse.events:type_name -> mavio.plugin.v1.AiLoginEvent
+	32, // 7: mavio.system.v1.WatchAiLoginResponse.prompt:type_name -> mavio.plugin.v1.AiLoginPrompt
+	33, // 8: mavio.system.v1.CreateAiConversationResponse.conversation:type_name -> mavio.plugin.v1.AgentSession
+	33, // 9: mavio.system.v1.ListAiConversationsResponse.conversations:type_name -> mavio.plugin.v1.AgentSession
+	33, // 10: mavio.system.v1.GetAiConversationResponse.conversation:type_name -> mavio.plugin.v1.AgentSession
+	34, // 11: mavio.system.v1.GetAiConversationResponse.messages:type_name -> mavio.plugin.v1.AgentMessage
+	35, // 12: mavio.system.v1.SendAiMessageResponse.done:type_name -> mavio.plugin.v1.SendAgentMessageResponse
+	0,  // 13: mavio.system.v1.AiService.ListAiProviders:input_type -> mavio.system.v1.ListAiProvidersRequest
+	2,  // 14: mavio.system.v1.AiService.ListAiModels:input_type -> mavio.system.v1.ListAiModelsRequest
+	4,  // 15: mavio.system.v1.AiService.SetAiApiKey:input_type -> mavio.system.v1.SetAiApiKeyRequest
+	6,  // 16: mavio.system.v1.AiService.StartAiLogin:input_type -> mavio.system.v1.StartAiLoginRequest
+	8,  // 17: mavio.system.v1.AiService.GetAiLogin:input_type -> mavio.system.v1.GetAiLoginRequest
+	10, // 18: mavio.system.v1.AiService.WatchAiLogin:input_type -> mavio.system.v1.WatchAiLoginRequest
+	12, // 19: mavio.system.v1.AiService.AnswerAiLogin:input_type -> mavio.system.v1.AnswerAiLoginRequest
+	14, // 20: mavio.system.v1.AiService.CancelAiLogin:input_type -> mavio.system.v1.CancelAiLoginRequest
+	16, // 21: mavio.system.v1.AiService.LogoutAi:input_type -> mavio.system.v1.LogoutAiRequest
+	18, // 22: mavio.system.v1.AiService.CreateAiConversation:input_type -> mavio.system.v1.CreateAiConversationRequest
+	20, // 23: mavio.system.v1.AiService.ListAiConversations:input_type -> mavio.system.v1.ListAiConversationsRequest
+	22, // 24: mavio.system.v1.AiService.GetAiConversation:input_type -> mavio.system.v1.GetAiConversationRequest
+	24, // 25: mavio.system.v1.AiService.SendAiMessage:input_type -> mavio.system.v1.SendAiMessageRequest
+	26, // 26: mavio.system.v1.AiService.DeleteAiConversation:input_type -> mavio.system.v1.DeleteAiConversationRequest
+	1,  // 27: mavio.system.v1.AiService.ListAiProviders:output_type -> mavio.system.v1.ListAiProvidersResponse
+	3,  // 28: mavio.system.v1.AiService.ListAiModels:output_type -> mavio.system.v1.ListAiModelsResponse
+	5,  // 29: mavio.system.v1.AiService.SetAiApiKey:output_type -> mavio.system.v1.SetAiApiKeyResponse
+	7,  // 30: mavio.system.v1.AiService.StartAiLogin:output_type -> mavio.system.v1.StartAiLoginResponse
+	9,  // 31: mavio.system.v1.AiService.GetAiLogin:output_type -> mavio.system.v1.GetAiLoginResponse
+	11, // 32: mavio.system.v1.AiService.WatchAiLogin:output_type -> mavio.system.v1.WatchAiLoginResponse
+	13, // 33: mavio.system.v1.AiService.AnswerAiLogin:output_type -> mavio.system.v1.AnswerAiLoginResponse
+	15, // 34: mavio.system.v1.AiService.CancelAiLogin:output_type -> mavio.system.v1.CancelAiLoginResponse
+	17, // 35: mavio.system.v1.AiService.LogoutAi:output_type -> mavio.system.v1.LogoutAiResponse
+	19, // 36: mavio.system.v1.AiService.CreateAiConversation:output_type -> mavio.system.v1.CreateAiConversationResponse
+	21, // 37: mavio.system.v1.AiService.ListAiConversations:output_type -> mavio.system.v1.ListAiConversationsResponse
+	23, // 38: mavio.system.v1.AiService.GetAiConversation:output_type -> mavio.system.v1.GetAiConversationResponse
+	25, // 39: mavio.system.v1.AiService.SendAiMessage:output_type -> mavio.system.v1.SendAiMessageResponse
+	27, // 40: mavio.system.v1.AiService.DeleteAiConversation:output_type -> mavio.system.v1.DeleteAiConversationResponse
+	27, // [27:41] is the sub-list for method output_type
+	13, // [13:27] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_ai_proto_init() }
@@ -1658,13 +2665,17 @@ func file_mavio_system_v1_ai_proto_init() {
 	if File_mavio_system_v1_ai_proto != nil {
 		return
 	}
+	file_mavio_system_v1_ai_proto_msgTypes[25].OneofWrappers = []any{
+		(*sendAiMessageResponse_Text)(nil),
+		(*sendAiMessageResponse_Done)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_ai_proto_rawDesc), len(file_mavio_system_v1_ai_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

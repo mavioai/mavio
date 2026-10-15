@@ -321,6 +321,7 @@
     <string name="settings_wanted">想要</string>
     <string name="settings_downloads">下载</string>
     <string name="settings_issues">问题</string>
+    <string name="settings_conversations">AI 对话</string>
     <string name="plugins_installed">已安装</string>
     <string name="plugins_available">可用</string>
     <string name="plugins_none_installed">尚未安装插件。</string>
@@ -1491,4 +1492,26 @@
     <string name="issues_reported_by">由 %s 报告</string>
     <string name="issues_administrator">管理员</string>
     <string name="issues_intro">对此服务器上的电影和剧集报告的问题：你自己的，管理员则可看到所有人的。</string>
+    <string name="conversations_message">与 AI 提供商的模型对话。对话保存在服务器上，由服务器的管理员共享。</string>
+    <string name="conversations_no_plugin">没有 AI 助手插件</string>
+    <string name="conversations_no_plugin_footer">对话由 AI 助手插件保存，并使用 AI 网关插件提供的提供商。</string>
+    <string name="conversations_new">新对话</string>
+    <string name="conversations_new_footer">指令告诉模型在整个对话中如何回答。</string>
+    <string name="conversations_model">模型</string>
+    <string name="conversations_no_models">没有可用的模型：请先登录 AI 提供商。</string>
+    <string name="conversations_instructions">指令</string>
+    <string name="conversations_instructions_placeholder">可选</string>
+    <string name="conversations_start">开始</string>
+    <string name="conversations_list">对话</string>
+    <string name="conversations_none">还没有对话。</string>
+    <string name="conversations_untitled">未命名</string>
+    <string name="conversations_usage">输入 %1$s 个词元，输出 %2$s 个 · %3$s</string>
+    <string name="conversations_send">发送</string>
+    <string name="conversations_placeholder">给 %s 发消息</string>
+    <string name="conversations_you">你</string>
+    <string name="conversations_retry">重试</string>
+    <string name="conversations_delete">删除对话</string>
+    <string name="conversations_delete_confirm">删除此对话？</string>
+    <string name="conversations_delete_message">其消息将对所有管理员删除。</string>
+    <string name="conversations_gone">此对话已被删除。</string>
 </resources>

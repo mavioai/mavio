@@ -18,11 +18,17 @@ import (
 // false when none is started.
 type AIGateway func() (string, pluginv1connect.AiGatewayServiceClient, bool)
 
+// AgentSessions returns the started plugin keeping conversations with
+// models, or false when none is started.
+type AgentSessions func() (pluginv1connect.AgentSessionServiceClient, bool)
+
 // AiService implements systemv1connect.AiServiceHandler over the AI gateway
 // plugin.
 type AiService struct {
 	// Gateway finds the AI gateway plugin; nil finds none.
 	Gateway AIGateway
+	// Sessions finds the plugin keeping conversations; nil finds none.
+	Sessions AgentSessions
 	// Activity records credential changes; nil records none.
 	Activity *activity.Log
 }
@@ -195,4 +201,104 @@ func (s *AiService) LogoutAi(ctx context.Context, req *systemv1.LogoutAiRequest)
 	}
 	s.record(ctx, "ai.credential_changed", "%s logged out of %s", req.GetProvider())
 	return &systemv1.LogoutAiResponse{}, nil
+}
+
+// sessions checks the caller is an administrator and returns the plugin
+// keeping conversations.
+func (s *AiService) sessions(ctx context.Context) (pluginv1connect.AgentSessionServiceClient, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Sessions != nil {
+		if c, ok := s.Sessions(); ok {
+			return c, nil
+		}
+	}
+	return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("no AI agent session plugin is running"))
+}
+
+// CreateAiConversation starts a conversation with a model.
+func (s *AiService) CreateAiConversation(ctx context.Context, req *systemv1.CreateAiConversationRequest) (*systemv1.CreateAiConversationResponse, error) {
+	c, err := s.sessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.CreateAgentSession(ctx, pluginv1.CreateAgentSessionRequest_builder{
+		Provider: new(req.GetProvider()), Model: new(req.GetModel()), Instructions: new(req.GetInstructions()), Title: new(req.GetTitle()),
+	}.Build())
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	return systemv1.CreateAiConversationResponse_builder{Conversation: resp.GetSession()}.Build(), nil
+}
+
+// ListAiConversations lists the conversations, newest first.
+func (s *AiService) ListAiConversations(ctx context.Context, _ *systemv1.ListAiConversationsRequest) (*systemv1.ListAiConversationsResponse, error) {
+	c, err := s.sessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.ListAgentSessions(ctx, &pluginv1.ListAgentSessionsRequest{})
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	return systemv1.ListAiConversationsResponse_builder{Conversations: resp.GetSessions()}.Build(), nil
+}
+
+// GetAiConversation returns a conversation with its messages.
+func (s *AiService) GetAiConversation(ctx context.Context, req *systemv1.GetAiConversationRequest) (*systemv1.GetAiConversationResponse, error) {
+	c, err := s.sessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.GetAgentSession(ctx, pluginv1.GetAgentSessionRequest_builder{Id: new(req.GetId())}.Build())
+	if err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	return systemv1.GetAiConversationResponse_builder{Conversation: resp.GetSession(), Messages: resp.GetMessages()}.Build(), nil
+}
+
+// SendAiMessage sends a message and streams the answer from the plugin.
+func (s *AiService) SendAiMessage(ctx context.Context, req *systemv1.SendAiMessageRequest, stream *connect.ServerStream[systemv1.SendAiMessageResponse]) error {
+	c, err := s.sessions(ctx)
+	if err != nil {
+		return err
+	}
+	answer, err := c.StreamAgentMessage(ctx, pluginv1.StreamAgentMessageRequest_builder{
+		Message: pluginv1.SendAgentMessageRequest_builder{
+			SessionId: new(req.GetConversationId()), Text: new(req.GetText()), RequestId: new(req.GetRequestId()),
+		}.Build(),
+	}.Build())
+	if err != nil {
+		return gatewayError(ctx, err)
+	}
+	defer func() { _ = answer.Close() }()
+	for answer.Receive() {
+		m := answer.Msg()
+		out := &systemv1.SendAiMessageResponse{}
+		if m.HasDone() {
+			out.SetDone(m.GetDone())
+		} else {
+			out.SetText(m.GetText())
+		}
+		if err := stream.Send(out); err != nil {
+			return err
+		}
+	}
+	if err := answer.Err(); err != nil {
+		return gatewayError(ctx, err)
+	}
+	return nil
+}
+
+// DeleteAiConversation deletes a conversation.
+func (s *AiService) DeleteAiConversation(ctx context.Context, req *systemv1.DeleteAiConversationRequest) (*systemv1.DeleteAiConversationResponse, error) {
+	c, err := s.sessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := c.DeleteAgentSession(ctx, pluginv1.DeleteAgentSessionRequest_builder{Id: new(req.GetId())}.Build()); err != nil {
+		return nil, gatewayError(ctx, err)
+	}
+	return &systemv1.DeleteAiConversationResponse{}, nil
 }

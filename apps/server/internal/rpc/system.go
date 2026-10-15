@@ -55,6 +55,8 @@ type PluginManager interface {
 	SetEnabled(ctx context.Context, id string, enabled bool) (plugins.Info, error)
 	// AIGateway returns the ready AI gateway plugin.
 	AIGateway() (string, pluginv1connect.AiGatewayServiceClient, bool)
+	// AgentSessions returns the ready plugin keeping conversations with models.
+	AgentSessions() (pluginv1connect.AgentSessionServiceClient, bool)
 	Tasks() []plugins.Task
 }
 

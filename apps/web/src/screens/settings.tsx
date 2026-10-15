@@ -38,6 +38,7 @@ import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
+import { ConversationsSection } from "./admin/conversations.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
 import { WantedSection } from "./admin/wanted.tsx";
 import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx";
@@ -47,7 +48,7 @@ import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -68,6 +69,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   downloads: { icon: "downloads", color: "#34C759", title: () => t("settings.downloads"), admin: true },
   subtitles: { icon: "subtitles", color: "#FF9500", title: () => t("settings.subtitles"), admin: true },
   ai: { icon: "key", color: "#BF5AF2", title: () => t("settings.ai"), admin: true },
+  conversations: { icon: "info", color: "#5E5CE6", title: () => t("settings.conversations"), admin: true },
   backups: { icon: "folder", color: "#5856D6", title: () => t("settings.backups"), admin: true },
   logs: { icon: "info", color: "#8E8E93", title: () => t("settings.logs"), admin: true },
   "api-keys": { icon: "lock", color: "#636366", title: () => t("settings.apiKeys"), admin: true },
@@ -78,7 +80,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "conversations", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -379,6 +381,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <SubtitlesSection key={chosen.server.id} server={chosen.server} />;
     case "ai":
       return chosen?.admin && <AiSection key={chosen.server.id} server={chosen.server} />;
+    case "conversations":
+      return chosen?.admin && <ConversationsSection key={chosen.server.id} server={chosen.server} />;
     case "backups":
       return chosen?.admin && <BackupsSection key={chosen.server.id} server={chosen.server} />;
     case "logs":

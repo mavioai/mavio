@@ -29,6 +29,16 @@ pub mod __buffa {
         include!("mavio.system.v1.backup.__view.rs");
         include!("mavio.system.v1.localization.__view.rs");
         include!("mavio.system.v1.task.__view.rs");
+        pub mod oneof {
+            #[allow(unused_imports)]
+            use super::*;
+            include!("mavio.system.v1.ai.__view_oneof.rs");
+        }
+    }
+    pub mod oneof {
+        #[allow(unused_imports)]
+        use super::*;
+        include!("mavio.system.v1.ai.__oneof.rs");
     }
 }
 #[doc(inline)]
@@ -271,6 +281,46 @@ pub use self::__buffa::view::LogoutAiRequestOwnedView;
 pub use self::__buffa::view::LogoutAiResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LogoutAiResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAiConversationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAiConversationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAiConversationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::CreateAiConversationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListAiConversationsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAiConversationResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAiMessageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAiMessageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAiMessageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SendAiMessageResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAiConversationRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAiConversationRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAiConversationResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::DeleteAiConversationResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::BackupView;
 #[doc(inline)]

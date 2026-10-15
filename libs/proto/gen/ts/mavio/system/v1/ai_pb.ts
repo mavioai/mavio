@@ -5,7 +5,7 @@
 import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
-import type { AiLoginEvent, AiLoginPrompt, AiLoginState, AiModel, AiProvider } from "../../plugin/v1/ai_pb";
+import type { AgentMessage, AgentSession, AiLoginEvent, AiLoginPrompt, AiLoginState, AiModel, AiProvider, SendAgentMessageResponse } from "../../plugin/v1/ai_pb";
 import { file_mavio_plugin_v1_ai } from "../../plugin/v1/ai_pb";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/ai.proto.
  */
 export const file_mavio_system_v1_ai: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYXZpby9zeXN0ZW0vdjEvYWkucHJvdG8SD21hdmlvLnN5c3RlbS52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IlwKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEhEKCXBsdWdpbl9pZBgBIAEoCRIuCglwcm92aWRlcnMYAiADKAsyGy5tYXZpby5wbHVnaW4udjEuQWlQcm92aWRlciI6ChNMaXN0QWlNb2RlbHNSZXF1ZXN0EhAKCHByb3ZpZGVyGAEgASgJEhEKCWF2YWlsYWJsZRgCIAEoCCJAChRMaXN0QWlNb2RlbHNSZXNwb25zZRIoCgZtb2RlbHMYASADKAsyGC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbCI7ChJTZXRBaUFwaUtleVJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARILCgNrZXkYAiABKAkiFQoTU2V0QWlBcGlLZXlSZXNwb25zZSIvChNTdGFydEFpTG9naW5SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiKAoUU3RhcnRBaUxvZ2luUmVzcG9uc2USEAoIbG9naW5faWQYASABKAkiLQoRR2V0QWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKwAQoSR2V0QWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIi8KE1dhdGNoQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKyAQoUV2F0Y2hBaUxvZ2luUmVzcG9uc2USLAoFc3RhdGUYASABKA4yHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpblN0YXRlEi0KBmV2ZW50cxgCIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luRXZlbnQSLgoGcHJvbXB0GAMgASgLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5Qcm9tcHQSDQoFZXJyb3IYBCABKAkiWgoUQW5zd2VyQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBARIZCglwcm9tcHRfaWQYAiABKAlCBrpIA8gBARINCgV2YWx1ZRgDIAEoCSIXChVBbnN3ZXJBaUxvZ2luUmVzcG9uc2UiMAoUQ2FuY2VsQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASIXChVDYW5jZWxBaUxvZ2luUmVzcG9uc2UiKwoPTG9nb3V0QWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiEgoQTG9nb3V0QWlSZXNwb25zZTLgBgoJQWlTZXJ2aWNlEmkKD0xpc3RBaVByb3ZpZGVycxInLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlQcm92aWRlcnNSZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLkxpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlIgOQAgESYAoMTGlzdEFpTW9kZWxzEiQubWF2aW8uc3lzdGVtLnYxLkxpc3RBaU1vZGVsc1JlcXVlc3QaJS5tYXZpby5zeXN0ZW0udjEuTGlzdEFpTW9kZWxzUmVzcG9uc2UiA5ACARJYCgtTZXRBaUFwaUtleRIjLm1hdmlvLnN5c3RlbS52MS5TZXRBaUFwaUtleVJlcXVlc3QaJC5tYXZpby5zeXN0ZW0udjEuU2V0QWlBcGlLZXlSZXNwb25zZRJbCgxTdGFydEFpTG9naW4SJC5tYXZpby5zeXN0ZW0udjEuU3RhcnRBaUxvZ2luUmVxdWVzdBolLm1hdmlvLnN5c3RlbS52MS5TdGFydEFpTG9naW5SZXNwb25zZRJaCgpHZXRBaUxvZ2luEiIubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXF1ZXN0GiMubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXNwb25zZSIDkAIBEmIKDFdhdGNoQWlMb2dpbhIkLm1hdmlvLnN5c3RlbS52MS5XYXRjaEFpTG9naW5SZXF1ZXN0GiUubWF2aW8uc3lzdGVtLnYxLldhdGNoQWlMb2dpblJlc3BvbnNlIgOQAgEwARJeCg1BbnN3ZXJBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXNwb25zZRJeCg1DYW5jZWxBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXNwb25zZRJPCghMb2dvdXRBaRIgLm1hdmlvLnN5c3RlbS52MS5Mb2dvdXRBaVJlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTG9nb3V0QWlSZXNwb25zZULBAQoTY29tLm1hdmlvLnN5c3RlbS52MUIHQWlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_mavio_plugin_v1_ai]);
+  fileDesc("ChhtYXZpby9zeXN0ZW0vdjEvYWkucHJvdG8SD21hdmlvLnN5c3RlbS52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IlwKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEhEKCXBsdWdpbl9pZBgBIAEoCRIuCglwcm92aWRlcnMYAiADKAsyGy5tYXZpby5wbHVnaW4udjEuQWlQcm92aWRlciI6ChNMaXN0QWlNb2RlbHNSZXF1ZXN0EhAKCHByb3ZpZGVyGAEgASgJEhEKCWF2YWlsYWJsZRgCIAEoCCJAChRMaXN0QWlNb2RlbHNSZXNwb25zZRIoCgZtb2RlbHMYASADKAsyGC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbCI7ChJTZXRBaUFwaUtleVJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARILCgNrZXkYAiABKAkiFQoTU2V0QWlBcGlLZXlSZXNwb25zZSIvChNTdGFydEFpTG9naW5SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiKAoUU3RhcnRBaUxvZ2luUmVzcG9uc2USEAoIbG9naW5faWQYASABKAkiLQoRR2V0QWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKwAQoSR2V0QWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIi8KE1dhdGNoQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKyAQoUV2F0Y2hBaUxvZ2luUmVzcG9uc2USLAoFc3RhdGUYASABKA4yHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpblN0YXRlEi0KBmV2ZW50cxgCIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luRXZlbnQSLgoGcHJvbXB0GAMgASgLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5Qcm9tcHQSDQoFZXJyb3IYBCABKAkiWgoUQW5zd2VyQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBARIZCglwcm9tcHRfaWQYAiABKAlCBrpIA8gBARINCgV2YWx1ZRgDIAEoCSIXChVBbnN3ZXJBaUxvZ2luUmVzcG9uc2UiMAoUQ2FuY2VsQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASIXChVDYW5jZWxBaUxvZ2luUmVzcG9uc2UiKwoPTG9nb3V0QWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiEgoQTG9nb3V0QWlSZXNwb25zZSKIAQobQ3JlYXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESFQoFbW9kZWwYAiABKAlCBrpIA8gBARIfCgxpbnN0cnVjdGlvbnMYAyABKAlCCbpIBnIEGKCcARIXCgV0aXRsZRgEIAEoCUIIukgFcgMYyAEiUwocQ3JlYXRlQWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uIhwKGkxpc3RBaUNvbnZlcnNhdGlvbnNSZXF1ZXN0IlMKG0xpc3RBaUNvbnZlcnNhdGlvbnNSZXNwb25zZRI0Cg1jb252ZXJzYXRpb25zGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50U2Vzc2lvbiIuChhHZXRBaUNvbnZlcnNhdGlvblJlcXVlc3QSEgoCaWQYASABKAlCBrpIA8gBASKBAQoZR2V0QWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uEi8KCG1lc3NhZ2VzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZSJwChRTZW5kQWlNZXNzYWdlUmVxdWVzdBIfCg9jb252ZXJzYXRpb25faWQYASABKAlCBrpIA8gBARIaCgR0ZXh0GAIgASgJQgy6SAnIAQFyBBigjQYSGwoKcmVxdWVzdF9pZBgDIAEoCUIHukgEcgIYZCJrChVTZW5kQWlNZXNzYWdlUmVzcG9uc2USDgoEdGV4dBgBIAEoCUgAEjkKBGRvbmUYAiABKAsyKS5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlc3BvbnNlSABCBwoFZXZlbnQiMQobRGVsZXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhIKAmlkGAEgASgJQga6SAPIAQEiHgocRGVsZXRlQWlDb252ZXJzYXRpb25SZXNwb25zZTKUCwoJQWlTZXJ2aWNlEmkKD0xpc3RBaVByb3ZpZGVycxInLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlQcm92aWRlcnNSZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLkxpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlIgOQAgESYAoMTGlzdEFpTW9kZWxzEiQubWF2aW8uc3lzdGVtLnYxLkxpc3RBaU1vZGVsc1JlcXVlc3QaJS5tYXZpby5zeXN0ZW0udjEuTGlzdEFpTW9kZWxzUmVzcG9uc2UiA5ACARJYCgtTZXRBaUFwaUtleRIjLm1hdmlvLnN5c3RlbS52MS5TZXRBaUFwaUtleVJlcXVlc3QaJC5tYXZpby5zeXN0ZW0udjEuU2V0QWlBcGlLZXlSZXNwb25zZRJbCgxTdGFydEFpTG9naW4SJC5tYXZpby5zeXN0ZW0udjEuU3RhcnRBaUxvZ2luUmVxdWVzdBolLm1hdmlvLnN5c3RlbS52MS5TdGFydEFpTG9naW5SZXNwb25zZRJaCgpHZXRBaUxvZ2luEiIubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXF1ZXN0GiMubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXNwb25zZSIDkAIBEmIKDFdhdGNoQWlMb2dpbhIkLm1hdmlvLnN5c3RlbS52MS5XYXRjaEFpTG9naW5SZXF1ZXN0GiUubWF2aW8uc3lzdGVtLnYxLldhdGNoQWlMb2dpblJlc3BvbnNlIgOQAgEwARJeCg1BbnN3ZXJBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXNwb25zZRJeCg1DYW5jZWxBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXNwb25zZRJPCghMb2dvdXRBaRIgLm1hdmlvLnN5c3RlbS52MS5Mb2dvdXRBaVJlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTG9nb3V0QWlSZXNwb25zZRJzChRDcmVhdGVBaUNvbnZlcnNhdGlvbhIsLm1hdmlvLnN5c3RlbS52MS5DcmVhdGVBaUNvbnZlcnNhdGlvblJlcXVlc3QaLS5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlQWlDb252ZXJzYXRpb25SZXNwb25zZRJ1ChNMaXN0QWlDb252ZXJzYXRpb25zEisubWF2aW8uc3lzdGVtLnYxLkxpc3RBaUNvbnZlcnNhdGlvbnNSZXF1ZXN0GiwubWF2aW8uc3lzdGVtLnYxLkxpc3RBaUNvbnZlcnNhdGlvbnNSZXNwb25zZSIDkAIBEm8KEUdldEFpQ29udmVyc2F0aW9uEikubWF2aW8uc3lzdGVtLnYxLkdldEFpQ29udmVyc2F0aW9uUmVxdWVzdBoqLm1hdmlvLnN5c3RlbS52MS5HZXRBaUNvbnZlcnNhdGlvblJlc3BvbnNlIgOQAgESYAoNU2VuZEFpTWVzc2FnZRIlLm1hdmlvLnN5c3RlbS52MS5TZW5kQWlNZXNzYWdlUmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5TZW5kQWlNZXNzYWdlUmVzcG9uc2UwARJzChREZWxldGVBaUNvbnZlcnNhdGlvbhIsLm1hdmlvLnN5c3RlbS52MS5EZWxldGVBaUNvbnZlcnNhdGlvblJlcXVlc3QaLS5tYXZpby5zeXN0ZW0udjEuRGVsZXRlQWlDb252ZXJzYXRpb25SZXNwb25zZULBAQoTY29tLm1hdmlvLnN5c3RlbS52MUIHQWlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_mavio_plugin_v1_ai]);
 
 /**
  * @generated from message mavio.system.v1.ListAiProvidersRequest
@@ -377,11 +377,226 @@ export const LogoutAiResponseSchema: GenMessage<LogoutAiResponse> = /*@__PURE__*
   messageDesc(file_mavio_system_v1_ai, 17);
 
 /**
+ * @generated from message mavio.system.v1.CreateAiConversationRequest
+ */
+export type CreateAiConversationRequest = Message<"mavio.system.v1.CreateAiConversationRequest"> & {
+  /**
+   * @generated from field: string provider = 1;
+   */
+  provider: string;
+
+  /**
+   * @generated from field: string model = 2;
+   */
+  model: string;
+
+  /**
+   * The instructions the model follows.
+   *
+   * @generated from field: string instructions = 3;
+   */
+  instructions: string;
+
+  /**
+   * @generated from field: string title = 4;
+   */
+  title: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.CreateAiConversationRequest.
+ * Use `create(CreateAiConversationRequestSchema)` to create a new message.
+ */
+export const CreateAiConversationRequestSchema: GenMessage<CreateAiConversationRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 18);
+
+/**
+ * @generated from message mavio.system.v1.CreateAiConversationResponse
+ */
+export type CreateAiConversationResponse = Message<"mavio.system.v1.CreateAiConversationResponse"> & {
+  /**
+   * @generated from field: mavio.plugin.v1.AgentSession conversation = 1;
+   */
+  conversation?: AgentSession | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.CreateAiConversationResponse.
+ * Use `create(CreateAiConversationResponseSchema)` to create a new message.
+ */
+export const CreateAiConversationResponseSchema: GenMessage<CreateAiConversationResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 19);
+
+/**
+ * @generated from message mavio.system.v1.ListAiConversationsRequest
+ */
+export type ListAiConversationsRequest = Message<"mavio.system.v1.ListAiConversationsRequest"> & {
+};
+
+/**
+ * Describes the message mavio.system.v1.ListAiConversationsRequest.
+ * Use `create(ListAiConversationsRequestSchema)` to create a new message.
+ */
+export const ListAiConversationsRequestSchema: GenMessage<ListAiConversationsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 20);
+
+/**
+ * @generated from message mavio.system.v1.ListAiConversationsResponse
+ */
+export type ListAiConversationsResponse = Message<"mavio.system.v1.ListAiConversationsResponse"> & {
+  /**
+   * @generated from field: repeated mavio.plugin.v1.AgentSession conversations = 1;
+   */
+  conversations: AgentSession[];
+};
+
+/**
+ * Describes the message mavio.system.v1.ListAiConversationsResponse.
+ * Use `create(ListAiConversationsResponseSchema)` to create a new message.
+ */
+export const ListAiConversationsResponseSchema: GenMessage<ListAiConversationsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 21);
+
+/**
+ * @generated from message mavio.system.v1.GetAiConversationRequest
+ */
+export type GetAiConversationRequest = Message<"mavio.system.v1.GetAiConversationRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.GetAiConversationRequest.
+ * Use `create(GetAiConversationRequestSchema)` to create a new message.
+ */
+export const GetAiConversationRequestSchema: GenMessage<GetAiConversationRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 22);
+
+/**
+ * @generated from message mavio.system.v1.GetAiConversationResponse
+ */
+export type GetAiConversationResponse = Message<"mavio.system.v1.GetAiConversationResponse"> & {
+  /**
+   * @generated from field: mavio.plugin.v1.AgentSession conversation = 1;
+   */
+  conversation?: AgentSession | undefined;
+
+  /**
+   * @generated from field: repeated mavio.plugin.v1.AgentMessage messages = 2;
+   */
+  messages: AgentMessage[];
+};
+
+/**
+ * Describes the message mavio.system.v1.GetAiConversationResponse.
+ * Use `create(GetAiConversationResponseSchema)` to create a new message.
+ */
+export const GetAiConversationResponseSchema: GenMessage<GetAiConversationResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 23);
+
+/**
+ * @generated from message mavio.system.v1.SendAiMessageRequest
+ */
+export type SendAiMessageRequest = Message<"mavio.system.v1.SendAiMessageRequest"> & {
+  /**
+   * @generated from field: string conversation_id = 1;
+   */
+  conversationId: string;
+
+  /**
+   * @generated from field: string text = 2;
+   */
+  text: string;
+
+  /**
+   * Makes a retried message the same message instead of a second one.
+   *
+   * @generated from field: string request_id = 3;
+   */
+  requestId: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.SendAiMessageRequest.
+ * Use `create(SendAiMessageRequestSchema)` to create a new message.
+ */
+export const SendAiMessageRequestSchema: GenMessage<SendAiMessageRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 24);
+
+/**
+ * @generated from message mavio.system.v1.SendAiMessageResponse
+ */
+export type SendAiMessageResponse = Message<"mavio.system.v1.SendAiMessageResponse"> & {
+  /**
+   * @generated from oneof mavio.system.v1.SendAiMessageResponse.event
+   */
+  event: {
+    /**
+     * The answer so far; a retried attempt starts it again.
+     *
+     * @generated from field: string text = 1;
+     */
+    value: string;
+    case: "text";
+  } | {
+    /**
+     * The answer, last.
+     *
+     * @generated from field: mavio.plugin.v1.SendAgentMessageResponse done = 2;
+     */
+    value: SendAgentMessageResponse;
+    case: "done";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message mavio.system.v1.SendAiMessageResponse.
+ * Use `create(SendAiMessageResponseSchema)` to create a new message.
+ */
+export const SendAiMessageResponseSchema: GenMessage<SendAiMessageResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 25);
+
+/**
+ * @generated from message mavio.system.v1.DeleteAiConversationRequest
+ */
+export type DeleteAiConversationRequest = Message<"mavio.system.v1.DeleteAiConversationRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.DeleteAiConversationRequest.
+ * Use `create(DeleteAiConversationRequestSchema)` to create a new message.
+ */
+export const DeleteAiConversationRequestSchema: GenMessage<DeleteAiConversationRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 26);
+
+/**
+ * @generated from message mavio.system.v1.DeleteAiConversationResponse
+ */
+export type DeleteAiConversationResponse = Message<"mavio.system.v1.DeleteAiConversationResponse"> & {
+};
+
+/**
+ * Describes the message mavio.system.v1.DeleteAiConversationResponse.
+ * Use `create(DeleteAiConversationResponseSchema)` to create a new message.
+ */
+export const DeleteAiConversationResponseSchema: GenMessage<DeleteAiConversationResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_ai, 27);
+
+/**
  * AiService administers the AI model providers the server's features use,
  * through the plugin with the AI_GATEWAY capability, which keeps their
  * credentials: API keys, and OAuth logins relayed to the administrator.
- * Every RPC requires an administrator; without a started AI gateway
- * plugin they fail with failed precondition.
+ * It also keeps the administrators' conversations with the models, through
+ * the plugin with the AGENT_SESSION capability. Every RPC requires an
+ * administrator; without a started AI gateway plugin, or for the
+ * conversations one with the AGENT_SESSION capability, they fail with
+ * failed precondition.
  *
  * @generated from service mavio.system.v1.AiService
  */
@@ -480,6 +695,57 @@ export const AiService: GenService<{
     methodKind: "unary";
     input: typeof LogoutAiRequestSchema;
     output: typeof LogoutAiResponseSchema;
+  },
+  /**
+   * CreateAiConversation starts a conversation with a model.
+   *
+   * @generated from rpc mavio.system.v1.AiService.CreateAiConversation
+   */
+  createAiConversation: {
+    methodKind: "unary";
+    input: typeof CreateAiConversationRequestSchema;
+    output: typeof CreateAiConversationResponseSchema;
+  },
+  /**
+   * ListAiConversations lists the conversations, newest first.
+   *
+   * @generated from rpc mavio.system.v1.AiService.ListAiConversations
+   */
+  listAiConversations: {
+    methodKind: "unary";
+    input: typeof ListAiConversationsRequestSchema;
+    output: typeof ListAiConversationsResponseSchema;
+  },
+  /**
+   * GetAiConversation returns a conversation with its messages.
+   *
+   * @generated from rpc mavio.system.v1.AiService.GetAiConversation
+   */
+  getAiConversation: {
+    methodKind: "unary";
+    input: typeof GetAiConversationRequestSchema;
+    output: typeof GetAiConversationResponseSchema;
+  },
+  /**
+   * SendAiMessage sends a message to a conversation and streams the answer
+   * as the model writes it, ending with the answer.
+   *
+   * @generated from rpc mavio.system.v1.AiService.SendAiMessage
+   */
+  sendAiMessage: {
+    methodKind: "server_streaming";
+    input: typeof SendAiMessageRequestSchema;
+    output: typeof SendAiMessageResponseSchema;
+  },
+  /**
+   * DeleteAiConversation deletes a conversation.
+   *
+   * @generated from rpc mavio.system.v1.AiService.DeleteAiConversation
+   */
+  deleteAiConversation: {
+    methodKind: "unary";
+    input: typeof DeleteAiConversationRequestSchema;
+    output: typeof DeleteAiConversationResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_system_v1_ai, 0);

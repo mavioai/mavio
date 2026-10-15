@@ -202,6 +202,7 @@ func Handler(opts Options) (http.Handler, error) {
 	aiService := &rpc.AiService{Activity: opts.Activity}
 	if opts.Plugins != nil {
 		aiService.Gateway = opts.Plugins.AIGateway
+		aiService.Sessions = opts.Plugins.AgentSessions
 	}
 	mux.Handle(systemv1connect.NewAiServiceHandler(aiService, interceptors))
 	remotes := opts.Remotes

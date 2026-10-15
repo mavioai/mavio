@@ -1013,6 +1013,9 @@ public enum MavioStrings {
     /// Settings section of the problems reported with items.
     public static var settingsIssues: String { NSLocalizedString("settings.issues", bundle: .module, comment: "") }
 
+    /// Settings section of the administrators' conversations with AI models.
+    public static var settingsConversations: String { NSLocalizedString("settings.conversations", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -4676,4 +4679,74 @@ public enum MavioStrings {
 
     /// Explains the settings' issues.
     public static var issuesIntro: String { NSLocalizedString("issues.intro", bundle: .module, comment: "") }
+
+    /// Message of the AI conversations section.
+    public static var conversationsMessage: String { NSLocalizedString("conversations.message", bundle: .module, comment: "") }
+
+    /// Row when no plugin keeping conversations runs on the server.
+    public static var conversationsNoPlugin: String { NSLocalizedString("conversations.noPlugin", bundle: .module, comment: "") }
+
+    /// Footer explaining why an AI agent plugin is needed.
+    public static var conversationsNoPluginFooter: String { NSLocalizedString("conversations.noPluginFooter", bundle: .module, comment: "") }
+
+    /// Title of the form starting a conversation.
+    public static var conversationsNew: String { NSLocalizedString("conversations.new", bundle: .module, comment: "") }
+
+    /// Footer of the form starting a conversation.
+    public static var conversationsNewFooter: String { NSLocalizedString("conversations.newFooter", bundle: .module, comment: "") }
+
+    /// Label of the model a conversation talks with.
+    public static var conversationsModel: String { NSLocalizedString("conversations.model", bundle: .module, comment: "") }
+
+    /// Shown when no AI model can be used to start a conversation.
+    public static var conversationsNoModels: String { NSLocalizedString("conversations.noModels", bundle: .module, comment: "") }
+
+    /// Label of the instructions the model follows.
+    public static var conversationsInstructions: String { NSLocalizedString("conversations.instructions", bundle: .module, comment: "") }
+
+    /// Placeholder of the optional instructions.
+    public static var conversationsInstructionsPlaceholder: String { NSLocalizedString("conversations.instructionsPlaceholder", bundle: .module, comment: "") }
+
+    /// Button starting a conversation with its first message.
+    public static var conversationsStart: String { NSLocalizedString("conversations.start", bundle: .module, comment: "") }
+
+    /// Title of the list of conversations.
+    public static var conversationsList: String { NSLocalizedString("conversations.list", bundle: .module, comment: "") }
+
+    /// Empty state of the conversations.
+    public static var conversationsNone: String { NSLocalizedString("conversations.none", bundle: .module, comment: "") }
+
+    /// Title of a conversation without one.
+    public static var conversationsUntitled: String { NSLocalizedString("conversations.untitled", bundle: .module, comment: "") }
+
+    /// What a conversation used: tokens and cost in US dollars.
+    public static func conversationsUsage(input: String, output: String, cost: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("conversations.usage", bundle: .module, comment: ""), input, output, cost)
+    }
+
+    /// Button sending a message.
+    public static var conversationsSend: String { NSLocalizedString("conversations.send", bundle: .module, comment: "") }
+
+    /// Placeholder of the message field, with the model's name.
+    public static func conversationsPlaceholder(model: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("conversations.placeholder", bundle: .module, comment: ""), model)
+    }
+
+    /// Who wrote a message the user sent.
+    public static var conversationsYou: String { NSLocalizedString("conversations.you", bundle: .module, comment: "") }
+
+    /// Button sending a failed message again.
+    public static var conversationsRetry: String { NSLocalizedString("conversations.retry", bundle: .module, comment: "") }
+
+    /// Button deleting a conversation.
+    public static var conversationsDelete: String { NSLocalizedString("conversations.delete", bundle: .module, comment: "") }
+
+    /// Confirmation of deleting a conversation.
+    public static var conversationsDeleteConfirm: String { NSLocalizedString("conversations.deleteConfirm", bundle: .module, comment: "") }
+
+    /// What deleting a conversation does.
+    public static var conversationsDeleteMessage: String { NSLocalizedString("conversations.deleteMessage", bundle: .module, comment: "") }
+
+    /// Shown when the conversation chosen no longer exists.
+    public static var conversationsGone: String { NSLocalizedString("conversations.gone", bundle: .module, comment: "") }
 }

@@ -8,8 +8,11 @@ import "mavio/plugin/v1/ai.proto";
 // AiService administers the AI model providers the server's features use,
 // through the plugin with the AI_GATEWAY capability, which keeps their
 // credentials: API keys, and OAuth logins relayed to the administrator.
-// Every RPC requires an administrator; without a started AI gateway
-// plugin they fail with failed precondition.
+// It also keeps the administrators' conversations with the models, through
+// the plugin with the AGENT_SESSION capability. Every RPC requires an
+// administrator; without a started AI gateway plugin, or for the
+// conversations one with the AGENT_SESSION capability, they fail with
+// failed precondition.
 service AiService {
   // ListAiProviders lists the providers with how they authenticate and
   // whether they can be used.
@@ -42,6 +45,21 @@ service AiService {
   rpc CancelAiLogin(CancelAiLoginRequest) returns (CancelAiLoginResponse);
   // LogoutAi removes a provider's stored credential.
   rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
+  // CreateAiConversation starts a conversation with a model.
+  rpc CreateAiConversation(CreateAiConversationRequest) returns (CreateAiConversationResponse);
+  // ListAiConversations lists the conversations, newest first.
+  rpc ListAiConversations(ListAiConversationsRequest) returns (ListAiConversationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetAiConversation returns a conversation with its messages.
+  rpc GetAiConversation(GetAiConversationRequest) returns (GetAiConversationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SendAiMessage sends a message to a conversation and streams the answer
+  // as the model writes it, ending with the answer.
+  rpc SendAiMessage(SendAiMessageRequest) returns (stream SendAiMessageResponse);
+  // DeleteAiConversation deletes a conversation.
+  rpc DeleteAiConversation(DeleteAiConversationRequest) returns (DeleteAiConversationResponse);
 }
 
 message ListAiProvidersRequest {}
@@ -126,3 +144,55 @@ message LogoutAiRequest {
 }
 
 message LogoutAiResponse {}
+
+message CreateAiConversationRequest {
+  string provider = 1 [(buf.validate.field).required = true];
+  string model = 2 [(buf.validate.field).required = true];
+  // The instructions the model follows.
+  string instructions = 3 [(buf.validate.field).string.max_len = 20000];
+  string title = 4 [(buf.validate.field).string.max_len = 200];
+}
+
+message CreateAiConversationResponse {
+  mavio.plugin.v1.AgentSession conversation = 1;
+}
+
+message ListAiConversationsRequest {}
+
+message ListAiConversationsResponse {
+  repeated mavio.plugin.v1.AgentSession conversations = 1;
+}
+
+message GetAiConversationRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message GetAiConversationResponse {
+  mavio.plugin.v1.AgentSession conversation = 1;
+  repeated mavio.plugin.v1.AgentMessage messages = 2;
+}
+
+message SendAiMessageRequest {
+  string conversation_id = 1 [(buf.validate.field).required = true];
+  string text = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 100000
+  ];
+  // Makes a retried message the same message instead of a second one.
+  string request_id = 3 [(buf.validate.field).string.max_len = 100];
+}
+
+message SendAiMessageResponse {
+  oneof event {
+    // The answer so far; a retried attempt starts it again.
+    string text = 1;
+    // The answer, last.
+    mavio.plugin.v1.SendAgentMessageResponse done = 2;
+  }
+}
+
+message DeleteAiConversationRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message DeleteAiConversationResponse {}
