@@ -157,6 +157,7 @@
   "player.source": "来源",
   "player.method": "播放方式",
   "player.options": "播放选项",
+  "player.lyrics": "歌词",
   "state.loading": "正在载入…",
   "state.empty": "这里还没有内容",
   "state.error": "出了点问题",

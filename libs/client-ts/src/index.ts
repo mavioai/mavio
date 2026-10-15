@@ -141,6 +141,7 @@ export {
   useSubtitleSettings,
   useSubtitleTranslators,
 } from "./subtitles.ts";
+export { lyricLineAt, lyricSungLength, useLyrics } from "./lyrics.ts";
 export {
   type AiExchange,
   isNoAiGateway,

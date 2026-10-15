@@ -554,6 +554,9 @@ public enum MavioStrings {
     /// Accessible label of the player's side panel.
     public static var playerOptions: String { NSLocalizedString("player.options", bundle: .module, comment: "") }
 
+    /// Button showing or hiding a track's lyrics in the player, and their accessible label.
+    public static var playerLyrics: String { NSLocalizedString("player.lyrics", bundle: .module, comment: "") }
+
     /// Shown while content loads.
     public static var stateLoading: String { NSLocalizedString("state.loading", bundle: .module, comment: "") }
 

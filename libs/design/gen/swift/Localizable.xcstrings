@@ -2989,6 +2989,24 @@
         }
       }
     },
+    "player.lyrics": {
+      "comment": "Button showing or hiding a track's lyrics in the player, and their accessible label.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyrics"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歌词"
+          }
+        }
+      }
+    },
     "state.loading": {
       "comment": "Shown while content loads.",
       "extractionState": "manual",

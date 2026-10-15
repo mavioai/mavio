@@ -4,7 +4,8 @@
 // and on pause, seek and stop. A side panel picks the audio, subtitles and
 // quality and tells how the item plays; an episode's end starts the next.
 // Other devices of the user control it remotely (§6.3.23), and it follows
-// the SyncPlay group playing its item (§6.3.24).
+// the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
+// (§6.3.27).
 import {
   capabilities,
   errorMessage,
@@ -13,6 +14,7 @@ import {
   type ServerEntry,
   urlOf,
   useItem,
+  useLyrics,
   useNextEpisode,
   useServer,
   useServersStore,
@@ -33,6 +35,7 @@ import { Icon, type IconName } from "../icon.tsx";
 import { prefs, type Quality, qualities, qualityBitrates } from "../prefs.ts";
 import { useGroupPlayer } from "../syncplay.tsx";
 import { StatusView } from "../ui.tsx";
+import { LyricsView } from "./lyrics.tsx";
 import { GroupChip } from "./syncplay.tsx";
 
 const route = getRouteApi("/s/$serverId/play/$itemId");
@@ -111,6 +114,8 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const [full, setFull] = useState(false);
   const [controls, setControls] = useState(true);
   const [panel, setPanel] = useState<Tab>();
+  const lyrics = useLyrics(server, itemId, item.data?.item?.kind === ItemKind.TRACK);
+  const [showLyrics, setShowLyrics] = useState(true);
 
   const back = useCallback(() => {
     if (router.history.length > 1) router.history.back();
@@ -372,6 +377,10 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
         ))}
       </video>
 
+      {lyrics.data && showLyrics && (
+        <LyricsView lyrics={lyrics.data} time={time} onSeek={seekTo} onBackground={() => (panel !== undefined ? setPanel(undefined) : toggle())} />
+      )}
+
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70">
           <div className="max-w-md p-6 text-center">
@@ -431,6 +440,11 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                   <Icon name="next" fill size={16} />
                   {t("player.nextEpisode")}
                 </button>
+              )}
+              {lyrics.data && (
+                <PlayerButton label={t("player.lyrics")} onClick={() => setShowLyrics(!showLyrics)} active={showLyrics}>
+                  <Icon name="music" fill={showLyrics} />
+                </PlayerButton>
               )}
               {subtitleTracks.length > 0 && (
                 <PlayerButton label={t("player.subtitles")} onClick={() => openPanel("subtitles")} active={panel === "subtitles"}>

@@ -161,6 +161,7 @@ export type MessageKey =
   | 'player.source'
   | 'player.method'
   | 'player.options'
+  | 'player.lyrics'
   | 'state.loading'
   | 'state.empty'
   | 'state.error'
@@ -1633,6 +1634,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.source": "Source",
     "player.method": "Playback",
     "player.options": "Playback Options",
+    "player.lyrics": "Lyrics",
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
     "state.error": "Something went wrong",
@@ -3103,6 +3105,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.source": "来源",
     "player.method": "播放方式",
     "player.options": "播放选项",
+    "player.lyrics": "歌词",
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",
     "state.error": "出了点问题",

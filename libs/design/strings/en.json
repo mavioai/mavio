@@ -158,6 +158,7 @@
   "player.source": { "message": "Source", "description": "Label of the file playing." },
   "player.method": { "message": "Playback", "description": "Label of how the item plays." },
   "player.options": { "message": "Playback Options", "description": "Accessible label of the player's side panel." },
+  "player.lyrics": { "message": "Lyrics", "description": "Button showing or hiding a track's lyrics in the player, and their accessible label." },
   "state.loading": { "message": "Loading…", "description": "Shown while content loads." },
   "state.empty": { "message": "Nothing here yet", "description": "Title of an empty list or library." },
   "state.error": { "message": "Something went wrong", "description": "Title of a screen that failed to load." },

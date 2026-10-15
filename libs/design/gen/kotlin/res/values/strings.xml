@@ -339,6 +339,8 @@
     <string name="player_method">Playback</string>
     <!-- Accessible label of the player's side panel. -->
     <string name="player_options">Playback Options</string>
+    <!-- Button showing or hiding a track's lyrics in the player, and their accessible label. -->
+    <string name="player_lyrics">Lyrics</string>
     <!-- Shown while content loads. -->
     <string name="state_loading">Loading…</string>
     <!-- Title of an empty list or library. -->

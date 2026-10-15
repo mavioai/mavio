@@ -687,6 +687,8 @@ flowchart TD
     - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)
     - [x] An item's subtitles on its details: searched, downloaded, uploaded, extracted, synced, modified, translated and deleted (§6.3.21)
     - [ ] Subtitles searched and downloaded from the player's subtitle panel
+    - [x] A track's lyrics in the player, synced ones following the song word by word (§6.3.27)
+    - [ ] Lyrics searched and downloaded by administrators (`SearchRemoteLyrics`, `DownloadRemoteLyrics`)
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
     - [x] Controlling the user's other devices: Play On from an item's More menu and the control from the Devices settings; the browser carries out the commands sent to it (§6.3.23)
     - [ ] A Play command's items after its first, queued in the player
