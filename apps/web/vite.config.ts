@@ -16,6 +16,6 @@ export default defineConfig({
     chunkSizeWarningLimit: 1024,
   },
   server: {
-    proxy: { "/mavio.": server, "/images/": server, "/media/": server },
+    proxy: { "/mavio.": server, "/signed/": server, "/images/": server, "/media/": server },
   },
 });
