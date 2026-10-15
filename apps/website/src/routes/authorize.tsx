@@ -1,11 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 
 import { accounts, config, message } from "../lib/api.ts";
+import { authClient } from "../lib/auth-client.ts";
 import { expectedOrigin } from "../lib/origins.ts";
 import { useAccount } from "../lib/session.ts";
-import { Button, Card, ErrorText, Muted, Page } from "../ui.tsx";
+import { Wordmark } from "../logo.tsx";
+import { Button, ErrorText, Muted } from "../ui.tsx";
 
 // A web UI signs the account in (docs/accounts.md §6): an authorization
 // request with PKCE, carrying the key of the device whose session it
@@ -53,12 +55,25 @@ function redirectTo(uri: string, params: Record<string, string | undefined>) {
   window.location.href = u.toString();
 }
 
+type Me = { name: string; email: string; username?: string | null };
+
 function Authorize() {
   const me = useAccount();
   const q = Route.useSearch();
   if (!me) return null;
-  if (q.request_uri) return <ServerRequest request={q.request_uri} name={me.name} />;
+  if (q.request_uri) return <ServerRequest request={q.request_uri} me={me} />;
   return <AppRequest q={q} />;
+}
+
+/** The page of its own that asks the account, centered under the logo. */
+function Frame({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col items-center justify-center gap-6 px-4 py-10 text-center">
+      <Wordmark height={36} />
+      <h1 className="type-title2">{title}</h1>
+      {children}
+    </main>
+  );
 }
 
 /** app.mavio.dev's request, which is mavio.dev's own: it signs in without asking. */
@@ -84,25 +99,21 @@ function AppRequest({ q }: { q: Search }) {
   }, [toApp, isIdle, mutate]);
   if (!complete) {
     return (
-      <Page title="Sign in to a server">
-        <Card>
-          <ErrorText error="This sign-in request is incomplete. Start signing in again." />
-        </Card>
-      </Page>
+      <Frame title="Sign in to Mavio">
+        <ErrorText error="This sign-in request is incomplete. Start signing in again." />
+      </Frame>
     );
   }
   return (
-    <Page title="Sign in to Mavio">
-      <Card>
-        {site.isPending || toApp ? <Muted>Signing in…</Muted> : <ErrorText error="This sign-in request does not come from Mavio on the web." />}
-        <ErrorText error={site.error ? message(site.error) : approve.error ? message(approve.error) : undefined} />
-      </Card>
-    </Page>
+    <Frame title="Sign in to Mavio">
+      {site.isPending || toApp ? <Muted>Signing in…</Muted> : <ErrorText error="This sign-in request does not come from Mavio on the web." />}
+      <ErrorText error={site.error ? message(site.error) : approve.error ? message(approve.error) : undefined} />
+    </Frame>
   );
 }
 
 /** A server's web UI signing in its administrator, or claiming the server. */
-function ServerRequest({ request, name }: { request: string; name: string }) {
+function ServerRequest({ request, me }: { request: string; me: Me }) {
   const site = useQuery({ queryKey: ["config"], queryFn: config });
   const r = useQuery({
     queryKey: ["authorizationRequest", request],
@@ -115,67 +126,97 @@ function ServerRequest({ request, name }: { request: string; name: string }) {
       window.location.href = redirectUrl;
     },
   });
+  // Another account signs in on mavio.dev and comes back here.
+  const switchAccount = async () => {
+    const back = window.location.pathname + window.location.search;
+    await authClient.signOut();
+    window.location.href = `/sign-in?${new URLSearchParams({ next: back })}`;
+  };
   const c = r.data;
-  const server = c?.serverName || "this server";
+  const server = <span className="font-mono font-semibold text-on-background">{c?.serverName || "this server"}</span>;
   const origin = c && URL.canParse(c.redirectUri) ? new URL(c.redirectUri).origin : undefined;
+  const at = <span className="font-mono font-semibold text-on-background">{origin}</span>;
   const appOrigin = site.data && new URL(site.data.appURL).origin;
-  const buttons = (approve: string) => (
-    <div className="flex gap-3">
+  const elsewhere = c && !expectedOrigin(c.redirectUri, c.serverId) && (
+    <ErrorText error="This address is neither one of the server's mavio.site names nor on your local network. Continue only if you reach the server there." />
+  );
+  // A managed account's e-mail address is a placeholder, never shown.
+  const email = me.email.startsWith("managed:") ? undefined : me.email;
+  const detail = me.username && me.username !== me.name ? `@${me.username}` : email;
+  const signedInAs = (
+    <div className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-left">
+      <span className="type-headline flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent">
+        {(me.name || me.username || "?").slice(0, 1).toUpperCase()}
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="type-callout truncate font-semibold">{me.name || me.username}</span>
+        {detail && <span className="type-footnote truncate text-text-secondary">{detail}</span>}
+      </span>
+    </div>
+  );
+  const differentAccount = (
+    <p className="type-footnote text-text-secondary">
+      Or{" "}
+      <button type="button" className="text-accent hover:underline" onClick={() => void switchAccount()}>
+        use a different account
+      </button>
+      .
+    </p>
+  );
+  const buttons = (
+    <div className="flex w-full flex-col gap-3">
       <Button onClick={() => answer.mutate(true)} disabled={answer.isPending}>
-        {approve}
+        Sign in
       </Button>
       <Button kind="secondary" onClick={() => answer.mutate(false)} disabled={answer.isPending}>
         Cancel
       </Button>
     </div>
   );
-  const at = <span className="font-mono text-text-primary">{origin}</span>;
-  const elsewhere = c && !expectedOrigin(c.redirectUri, c.serverId) && (
-    <ErrorText error="This address is neither one of the server's mavio.site names nor on your local network. Continue only if you reach the server there." />
-  );
   return (
-    <Page title={c ? `Sign in to ${server}` : "Sign in to a server"}>
-      <Card>
-        {c &&
-          (c.claim ? (
-            <>
-              <Muted>
-                Sign in as {name} in the web UI of {server} at {at}? You become its administrator, and your account reaches
-                it everywhere.
-              </Muted>
-              {c.claimed && !c.administrator && (
-                <ErrorText error="Another account claimed this server before. Signing in takes it over." />
+    <Frame title="Mavio Web would like to sign in to your Mavio account">
+      {c &&
+        (c.claim || c.administrator ? (
+          <>
+            <Muted>
+              {c.claim ? (
+                <>
+                  You become the administrator of {server} at {at}, and your account reaches it everywhere.
+                </>
+              ) : (
+                <>
+                  You sign in to the web UI of {server} at {at}, which reaches your account's servers.
+                </>
               )}
-              {elsewhere}
-              {buttons("Sign in")}
-            </>
-          ) : !c.administrator ? (
-            <>
-              <Muted>
-                Only the administrator of {server} signs in to its web UI with a Mavio account. Watch the servers your account
-                reaches on Mavio on the web.
-              </Muted>
-              {appOrigin && (
-                <a className="type-callout text-accent" href={appOrigin}>
-                  Open Mavio on the web
-                </a>
-              )}
-            </>
-          ) : (
-            <>
-              <Muted>
-                Sign in as {name} in the web UI of {server} at {at}? It reaches your account's servers.
-              </Muted>
-              {elsewhere}
-              {buttons("Sign in")}
-            </>
-          ))}
-        <ErrorText
-          error={
-            r.error ? "This sign-in request is unknown or expired. Start signing in again from the server." : answer.error ? message(answer.error) : undefined
-          }
-        />
-      </Card>
-    </Page>
+            </Muted>
+            {c.claim && c.claimed && !c.administrator && (
+              <ErrorText error="Another account claimed this server before. Signing in takes it over." />
+            )}
+            {elsewhere}
+            {signedInAs}
+            {buttons}
+            {differentAccount}
+          </>
+        ) : (
+          <>
+            <Muted>
+              Only the administrator of {server} signs in to its web UI with a Mavio account. Watch the servers your account reaches on
+              Mavio on the web.
+            </Muted>
+            {signedInAs}
+            {appOrigin && (
+              <a className="type-callout font-semibold text-accent" href={appOrigin}>
+                Open Mavio on the web
+              </a>
+            )}
+            {differentAccount}
+          </>
+        ))}
+      <ErrorText
+        error={
+          r.error ? "This sign-in request is unknown or expired. Start signing in again from the server." : answer.error ? message(answer.error) : undefined
+        }
+      />
+    </Frame>
   );
 }

@@ -1,5 +1,5 @@
 import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRootRouteWithContext, HeadContent, Link, Outlet, Scripts, useRouter } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Link, Outlet, Scripts, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { authClient } from "../lib/auth-client.ts";
@@ -19,10 +19,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function Root() {
   const { queryClient } = Route.useRouteContext();
+  // Authorizing a client is a page of its own, without the site's navigation.
+  const bare = useRouterState({ select: (s) => s.location.pathname === "/authorize" });
   return (
     <Document>
       <QueryClientProvider client={queryClient}>
-        <Header />
+        {!bare && <Header />}
         <Outlet />
       </QueryClientProvider>
     </Document>
