@@ -4,6 +4,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { EventHub, EventHubProvider } from "./events.tsx";
 import { locale } from "./i18n.ts";
 import { applyTheme } from "./prefs.ts";
 import { router } from "./router.tsx";
@@ -23,6 +24,8 @@ const queryClient = new QueryClient({
 // by no server, built with mavio.dev's API (docs/clients.md §4.1).
 const servers = new Servers(localStorage, location.origin, { mavioDevUrl: import.meta.env.VITE_MAVIO_DEV_URL || undefined });
 
+const events = new EventHub();
+
 document.documentElement.lang = locale;
 applyTheme();
 
@@ -30,7 +33,9 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ServersProvider value={servers}>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
+        <EventHubProvider value={events}>
+          <RouterProvider router={router} />
+        </EventHubProvider>
       </QueryClientProvider>
     </ServersProvider>
   </StrictMode>,

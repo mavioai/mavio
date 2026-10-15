@@ -1,10 +1,11 @@
 // The event stream of each server (docs/clients.md §3): changes refresh the
-// server's queries, so that the screens never poll. Streams reconnect with
-// backoff and end when the user signs out of their server.
+// server's queries, so that the screens never poll, and every event reaches
+// the app, which carries out remote commands and SyncPlay. Streams
+// reconnect with backoff and end when the user signs out of their server.
 import { Code, ConnectError } from "@connectrpc/connect";
 import { type Event, EventService } from "@mavio/proto/mavio/session/v1/session_pb";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { serverKey, useServersStore, useSignedIn } from "./hooks.ts";
 import type { ServerEntry, Servers } from "./servers.ts";
@@ -65,17 +66,35 @@ export async function follow(
 
 function refresh(qc: QueryClient, serverId: string, event: Event) {
   if (refreshes(event)) void qc.invalidateQueries({ queryKey: serverKey(serverId) });
+  else if (event.kind.case === "sessionsChanged") void qc.invalidateQueries({ queryKey: serverKey(serverId, "sessions") });
 }
 
-/** Follows the events of every server the user is signed in to, for as long as the component is mounted. */
-export function useEvents() {
+/**
+ * Follows the events of every server the user is signed in to, for as long
+ * as the component is mounted, and hands each to onEvent.
+ */
+export function useEvents(onEvent?: (server: ServerEntry, event: Event) => void) {
   const servers = useServersStore();
   const list = useSignedIn();
   const qc = useQueryClient();
+  const handler = useRef(onEvent);
+  useEffect(() => {
+    handler.current = onEvent;
+  });
   const key = list.map((s) => `${s.id} ${s.url} ${s.sessionId}`).join("\n");
   useEffect(() => {
     const abort = new AbortController();
-    for (const s of list) void follow(servers, s, (e) => refresh(qc, s.id, e), abort.signal);
+    for (const s of list) {
+      void follow(
+        servers,
+        s,
+        (e) => {
+          refresh(qc, s.id, e);
+          handler.current?.(s, e);
+        },
+        abort.signal,
+      );
+    }
     return () => abort.abort();
     // The streams restart only when a server, its address or its session changes.
   }, [servers, qc, key]);

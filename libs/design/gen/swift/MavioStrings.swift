@@ -4448,4 +4448,67 @@ public enum MavioStrings {
 
     /// Confirms deleting an image, and its file in the library's folder.
     public static var metadataConfirmDelete: String { NSLocalizedString("metadata.confirmDelete", bundle: .module, comment: "") }
+
+    /// More menu item playing an item on another device.
+    public static var remotePlayOn: String { NSLocalizedString("remote.playOn", bundle: .module, comment: "") }
+
+    /// Title of the dialog choosing a device to play an item on.
+    public static func remotePlayOnTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("remote.playOnTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// What a device plays.
+    public static func remotePlaying(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("remote.playing", bundle: .module, comment: ""), name)
+    }
+
+    /// A device with its event stream open.
+    public static var remoteOnline: String { NSLocalizedString("remote.online", bundle: .module, comment: "") }
+
+    /// Shown when no other device is online.
+    public static var remoteNoDevices: String { NSLocalizedString("remote.noDevices", bundle: .module, comment: "") }
+
+    /// Opens the remote control of a device.
+    public static var remoteControl: String { NSLocalizedString("remote.control", bundle: .module, comment: "") }
+
+    /// Title of the remote control.
+    public static var remoteTitle: String { NSLocalizedString("remote.title", bundle: .module, comment: "") }
+
+    /// The controlled device went offline.
+    public static var remoteOffline: String { NSLocalizedString("remote.offline", bundle: .module, comment: "") }
+
+    /// The controlled device plays nothing.
+    public static var remoteIdle: String { NSLocalizedString("remote.idle", bundle: .module, comment: "") }
+
+    /// The controlled playback's position.
+    public static var remotePosition: String { NSLocalizedString("remote.position", bundle: .module, comment: "") }
+
+    /// Plays the previous item, or from the start.
+    public static var remotePrevious: String { NSLocalizedString("remote.previous", bundle: .module, comment: "") }
+
+    /// Plays the next item.
+    public static var remoteNext: String { NSLocalizedString("remote.next", bundle: .module, comment: "") }
+
+    /// Stops the controlled playback.
+    public static var remoteStop: String { NSLocalizedString("remote.stop", bundle: .module, comment: "") }
+
+    /// The controlled device's volume.
+    public static var remoteVolume: String { NSLocalizedString("remote.volume", bundle: .module, comment: "") }
+
+    /// A message shown on the controlled device.
+    public static var remoteMessage: String { NSLocalizedString("remote.message", bundle: .module, comment: "") }
+
+    /// Sends the message.
+    public static var remoteSend: String { NSLocalizedString("remote.send", bundle: .module, comment: "") }
+
+    /// The message was sent.
+    public static var remoteSent: String { NSLocalizedString("remote.sent", bundle: .module, comment: "") }
+
+    /// Who sent the message shown.
+    public static func remoteMessageFrom(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("remote.messageFrom", bundle: .module, comment: ""), name)
+    }
+
+    /// Dismisses a message.
+    public static var remoteDismiss: String { NSLocalizedString("remote.dismiss", bundle: .module, comment: "") }
 }

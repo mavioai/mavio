@@ -688,6 +688,8 @@ flowchart TD
     - [x] An item's subtitles on its details: searched, downloaded, uploaded, extracted, synced, modified, translated and deleted (§6.3.21)
     - [ ] Subtitles searched and downloaded from the player's subtitle panel
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
+    - [x] Controlling the user's other devices: Play On from an item's More menu and the control from the Devices settings; the browser carries out the commands sent to it (§6.3.23)
+    - [ ] A Play command's items after its first, queued in the player
   - [ ] The web UI's AI agent sessions (`AgentSessionService`)
   - [ ] The Apple and Android apps, whose shelves also take the spacing of [the shelf](../libs/design/components.md#shelf) and, on the Mac, the arrows at the end of its title
 - [ ] Slices: the Android phone and tablet app, the Apple TV and Android TV apps, and the Mac app

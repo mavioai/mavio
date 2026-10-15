@@ -1388,7 +1388,26 @@ export type MessageKey =
   | 'metadata.fromProviders'
   | 'metadata.noRemoteImages'
   | 'metadata.deleteImage'
-  | 'metadata.confirmDelete';
+  | 'metadata.confirmDelete'
+  | 'remote.playOn'
+  | 'remote.playOnTitle'
+  | 'remote.playing'
+  | 'remote.online'
+  | 'remote.noDevices'
+  | 'remote.control'
+  | 'remote.title'
+  | 'remote.offline'
+  | 'remote.idle'
+  | 'remote.position'
+  | 'remote.previous'
+  | 'remote.next'
+  | 'remote.stop'
+  | 'remote.volume'
+  | 'remote.message'
+  | 'remote.send'
+  | 'remote.sent'
+  | 'remote.messageFrom'
+  | 'remote.dismiss';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2769,7 +2788,26 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "metadata.fromProviders": "From the Providers",
     "metadata.noRemoteImages": "The providers have no images of this type.",
     "metadata.deleteImage": "Delete",
-    "metadata.confirmDelete": "Delete the image"
+    "metadata.confirmDelete": "Delete the image",
+    "remote.playOn": "Play On…",
+    "remote.playOnTitle": "Play {name} On",
+    "remote.playing": "Playing {name}",
+    "remote.online": "Online",
+    "remote.noDevices": "None of your other devices is online. Open Mavio on one to play there.",
+    "remote.control": "Control",
+    "remote.title": "Remote Control",
+    "remote.offline": "The device is offline.",
+    "remote.idle": "The device plays nothing.",
+    "remote.position": "Position",
+    "remote.previous": "Previous",
+    "remote.next": "Next",
+    "remote.stop": "Stop",
+    "remote.volume": "Volume",
+    "remote.message": "Message to show",
+    "remote.send": "Send",
+    "remote.sent": "Sent",
+    "remote.messageFrom": "From {name}",
+    "remote.dismiss": "Dismiss"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4148,6 +4186,25 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "metadata.fromProviders": "来自提供方",
     "metadata.noRemoteImages": "提供方没有此类型的图片。",
     "metadata.deleteImage": "删除",
-    "metadata.confirmDelete": "删除图片"
+    "metadata.confirmDelete": "删除图片",
+    "remote.playOn": "在其他设备上播放…",
+    "remote.playOnTitle": "在何处播放 {name}",
+    "remote.playing": "正在播放 {name}",
+    "remote.online": "在线",
+    "remote.noDevices": "你的其他设备都不在线。在设备上打开 Mavio 即可在那里播放。",
+    "remote.control": "控制",
+    "remote.title": "远程控制",
+    "remote.offline": "该设备已离线。",
+    "remote.idle": "该设备没有在播放。",
+    "remote.position": "进度",
+    "remote.previous": "上一个",
+    "remote.next": "下一个",
+    "remote.stop": "停止",
+    "remote.volume": "音量",
+    "remote.message": "要显示的消息",
+    "remote.send": "发送",
+    "remote.sent": "已发送",
+    "remote.messageFrom": "来自 {name}",
+    "remote.dismiss": "关闭"
   }
 };

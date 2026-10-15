@@ -3,6 +3,7 @@
 // exist, Safari plays it natively. Progress is reported every 10 seconds
 // and on pause, seek and stop. A side panel picks the audio, subtitles and
 // quality and tells how the item plays; an episode's end starts the next.
+// Other devices of the user control it remotely (§6.3.23).
 import {
   capabilities,
   errorMessage,
@@ -17,12 +18,15 @@ import {
 } from "@mavio/client-ts";
 import { ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { type MediaStream, StreamKind } from "@mavio/proto/mavio/library/v1/media_pb";
+import { durationMs } from "@bufbuild/protobuf/wkt";
 import { PlayMethod, SubtitleMethod } from "@mavio/proto/mavio/playback/v1/playback_pb";
+import { PlayStateCommand } from "@mavio/proto/mavio/session/v1/session_pb";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type Hls from "hls.js";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { prefs, type Quality, qualities, qualityBitrates } from "../prefs.ts";
@@ -246,6 +250,29 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void shell.current?.requestFullscreen();
   }, []);
+
+  // What other devices of the user ask of the playback.
+  useServerEvents((s, e) => {
+    const v = video.current;
+    if (s.id !== server.id || e.kind.case !== "command" || !v) return;
+    const c = e.kind.value.command?.kind;
+    if (c?.case === "playState") {
+      const commands: Partial<Record<PlayStateCommand, () => void>> = {
+        [PlayStateCommand.PAUSE]: () => v.pause(),
+        [PlayStateCommand.UNPAUSE]: () => void v.play(),
+        [PlayStateCommand.STOP]: back,
+        [PlayStateCommand.NEXT]: playNext,
+        [PlayStateCommand.PREVIOUS]: () => (v.currentTime = 0),
+      };
+      commands[c.value.command]?.();
+    } else if (c?.case === "seek" && c.value.position) {
+      v.currentTime = durationMs(c.value.position) / 1000;
+    } else if (c?.case === "volume") {
+      if (c.value.level !== undefined) v.volume = c.value.level / 100;
+      if (c.value.muted !== undefined) v.muted = c.value.muted;
+    } else return;
+    poke();
+  });
 
   // Keyboard shortcuts: space and k, arrows and j/l, f, m; Escape closes the panel, then leaves.
   useEffect(() => {

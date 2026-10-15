@@ -2,8 +2,8 @@
 // the More menu adding the item to a playlist, or for administrators to a
 // collection, and renaming or deleting a playlist or collection; a
 // playlist's entries in order, moved and removed; a collection's members
-// removed by its administrators. For administrators the menu also opens
-// the item's metadata (§6.3.22).
+// removed by its administrators. The menu also plays the item on another
+// device (§6.3.23) and, for administrators, opens its metadata (§6.3.22).
 import {
   errorMessage,
   type ServerEntry,
@@ -25,8 +25,9 @@ import { Icon } from "../icon.tsx";
 import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf, useDismiss } from "../ui.tsx";
 import { EditDialog, IdentifyDialog, identifiable, ImagesDialog, RefreshDialog } from "./metadata.tsx";
 import { field, Modal } from "./modal.tsx";
+import { playable, PlayOnDialog } from "./remote.tsx";
 
-type Dialog = "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
+type Dialog = "playOn" | "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
 
 /** Kinds that can be put in a playlist or a collection. */
 const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== ItemKind.COLLECTION && kind !== ItemKind.FOLDER;
@@ -41,6 +42,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
   useDismiss(ref, open, close);
   const own = item.kind === ItemKind.PLAYLIST || (item.kind === ItemKind.COLLECTION && admin);
   const entries: [Dialog, string][] = [
+    ...(playable(item.kind) ? ([["playOn", t("remote.playOn")]] as [Dialog, string][]) : []),
     ...(listable(item.kind) ? ([["playlist", t("lists.addToPlaylist")]] as [Dialog, string][]) : []),
     ...(listable(item.kind) && admin ? ([["collection", t("lists.addToCollection")]] as [Dialog, string][]) : []),
     ...(admin && item.kind !== ItemKind.PLAYLIST
@@ -83,6 +85,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
         </div>
       )}
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
+      {dialog === "playOn" && <PlayOnDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "edit" && <EditDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "identify" && <IdentifyDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "refresh" && <RefreshDialog server={server} item={item} onClose={() => setDialog(undefined)} />}

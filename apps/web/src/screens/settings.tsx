@@ -14,6 +14,7 @@ import {
   useAdminServers,
   useServers,
   useServersStore,
+  useSessions,
   useSignedIn,
   useSignIn,
 } from "@mavio/client-ts";
@@ -42,6 +43,7 @@ import { ApiKeysSection, BackupsSection, LogsSection } from "./admin/backups.tsx
 import { TranscodingSection } from "./admin/transcoding.tsx";
 import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
+import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
 type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
@@ -748,9 +750,11 @@ function AuthorizeDevice({ server }: { server: ServerEntry }) {
 
 const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
 
-/** The sessions of the user on the server chosen, to sign one out. */
+/** The sessions of the user on the server chosen, to sign one out or control one online (§6.3.23). */
 function DevicesSection({ server }: { server: ServerEntry }) {
   const servers = useServersStore();
+  const remote = useSessions(server);
+  const [controlling, setControlling] = useState<string>();
   const queryClient = useQueryClient();
   const key = serverKey(server.id, "sessions", server.userId);
   const sessions = useQuery({
@@ -761,6 +765,16 @@ function DevicesSection({ server }: { server: ServerEntry }) {
     mutationFn: (id: string) => servers.client(AuthService, server).revokeSession({ id }),
     onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
   });
+  const online = (id: string) => remote.data?.some((r) => r.id === id && r.online);
+  const detailOf = (s: NonNullable<typeof sessions.data>[number]) => {
+    const playing = remote.data?.find((r) => r.id === s.id)?.nowPlaying?.item;
+    return [
+      s.device?.client,
+      playing ? t("remote.playing", { name: playing.name }) : online(s.id) ? t("remote.online") : s.lastSeenTime && when.format(timestampDate(s.lastSeenTime)),
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  };
   return (
     <Section title={t("settings.devices")} message={t("settings.devicesMessage")}>
       <Group>
@@ -773,18 +787,26 @@ function DevicesSection({ server }: { server: ServerEntry }) {
                 <Icon name="devices" size={20} />
               </span>
             }
-            detail={[s.device?.client, s.lastSeenTime && when.format(timestampDate(s.lastSeenTime))].filter(Boolean).join(" · ")}
+            detail={detailOf(s)}
           >
             {s.current ? (
               <span className="type-callout text-text-secondary">{t("settings.thisBrowser")}</span>
             ) : (
-              <Button variant="plain" className="text-danger" disabled={revoke.isPending} onClick={() => revoke.mutate(s.id)}>
-                {t("auth.signOut")}
-              </Button>
+              <>
+                {online(s.id) && (
+                  <Button variant="plain" onClick={() => setControlling(s.id)}>
+                    {t("remote.control")}
+                  </Button>
+                )}
+                <Button variant="plain" className="text-danger" disabled={revoke.isPending} onClick={() => revoke.mutate(s.id)}>
+                  {t("auth.signOut")}
+                </Button>
+              </>
             )}
           </Row>
         ))}
       </Group>
+      {controlling && <RemoteDialog server={server} sessionId={controlling} onClose={() => setControlling(undefined)} />}
       {(sessions.error || revoke.error) && <p className="type-callout text-danger">{errorMessage(sessions.error ?? revoke.error)}</p>}
     </Section>
   );

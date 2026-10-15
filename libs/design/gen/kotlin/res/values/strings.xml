@@ -2827,4 +2827,42 @@
     <string name="metadata_delete_image">Delete</string>
     <!-- Confirms deleting an image, and its file in the library's folder. -->
     <string name="metadata_confirm_delete">Delete the image</string>
+    <!-- More menu item playing an item on another device. -->
+    <string name="remote_play_on">Play On…</string>
+    <!-- Title of the dialog choosing a device to play an item on. -->
+    <string name="remote_play_on_title">Play %s On</string>
+    <!-- What a device plays. -->
+    <string name="remote_playing">Playing %s</string>
+    <!-- A device with its event stream open. -->
+    <string name="remote_online">Online</string>
+    <!-- Shown when no other device is online. -->
+    <string name="remote_no_devices">None of your other devices is online. Open Mavio on one to play there.</string>
+    <!-- Opens the remote control of a device. -->
+    <string name="remote_control">Control</string>
+    <!-- Title of the remote control. -->
+    <string name="remote_title">Remote Control</string>
+    <!-- The controlled device went offline. -->
+    <string name="remote_offline">The device is offline.</string>
+    <!-- The controlled device plays nothing. -->
+    <string name="remote_idle">The device plays nothing.</string>
+    <!-- The controlled playback's position. -->
+    <string name="remote_position">Position</string>
+    <!-- Plays the previous item, or from the start. -->
+    <string name="remote_previous">Previous</string>
+    <!-- Plays the next item. -->
+    <string name="remote_next">Next</string>
+    <!-- Stops the controlled playback. -->
+    <string name="remote_stop">Stop</string>
+    <!-- The controlled device's volume. -->
+    <string name="remote_volume">Volume</string>
+    <!-- A message shown on the controlled device. -->
+    <string name="remote_message">Message to show</string>
+    <!-- Sends the message. -->
+    <string name="remote_send">Send</string>
+    <!-- The message was sent. -->
+    <string name="remote_sent">Sent</string>
+    <!-- Who sent the message shown. -->
+    <string name="remote_message_from">From %s</string>
+    <!-- Dismisses a message. -->
+    <string name="remote_dismiss">Dismiss</string>
 </resources>

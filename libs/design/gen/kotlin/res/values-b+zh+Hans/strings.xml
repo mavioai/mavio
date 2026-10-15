@@ -1421,4 +1421,23 @@
     <string name="metadata_no_remote_images">提供方没有此类型的图片。</string>
     <string name="metadata_delete_image">删除</string>
     <string name="metadata_confirm_delete">删除图片</string>
+    <string name="remote_play_on">在其他设备上播放…</string>
+    <string name="remote_play_on_title">在何处播放 %s</string>
+    <string name="remote_playing">正在播放 %s</string>
+    <string name="remote_online">在线</string>
+    <string name="remote_no_devices">你的其他设备都不在线。在设备上打开 Mavio 即可在那里播放。</string>
+    <string name="remote_control">控制</string>
+    <string name="remote_title">远程控制</string>
+    <string name="remote_offline">该设备已离线。</string>
+    <string name="remote_idle">该设备没有在播放。</string>
+    <string name="remote_position">进度</string>
+    <string name="remote_previous">上一个</string>
+    <string name="remote_next">下一个</string>
+    <string name="remote_stop">停止</string>
+    <string name="remote_volume">音量</string>
+    <string name="remote_message">要显示的消息</string>
+    <string name="remote_send">发送</string>
+    <string name="remote_sent">已发送</string>
+    <string name="remote_message_from">来自 %s</string>
+    <string name="remote_dismiss">关闭</string>
 </resources>

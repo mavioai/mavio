@@ -7,6 +7,7 @@ import { useDiscovery, useEvents, useServersStore, useSignIn } from "@mavio/clie
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import { useEventHub } from "../events.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { toggleFullScreen } from "../fullscreen.ts";
 import { Icon, type IconName } from "../icon.tsx";
@@ -14,17 +15,27 @@ import { shortcutOf } from "../keys.ts";
 import { Wordmark } from "../logo.tsx";
 import { setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { Avatar } from "../ui.tsx";
+import { RemoteCommands } from "../screens/remote.tsx";
 import { SidebarPanel } from "./sidebar.tsx";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
 
 export function Shell() {
+  return (
+    <>
+      <Content />
+      <RemoteCommands />
+    </>
+  );
+}
+
+function Content() {
   const servers = useServersStore();
   const signIn = useSignIn();
   const { pathname } = useLocation();
   const prefs = usePrefs();
   const width = useWidthClass();
-  useEvents();
+  useEvents(useEventHub().emit);
   useShortcuts(prefs.tv);
 
   // A Mavio account follows the servers it reaches, as it opens.
