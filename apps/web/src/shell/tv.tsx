@@ -30,20 +30,23 @@ export function TvShell() {
           aria-hidden
           className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
         />
-        <nav aria-label={t("nav.navigation")} className="pointer-events-auto relative flex gap-1 rounded-full bg-surface/60 p-1.5 backdrop-blur-xl">
-          {tabs.map((d) => (
-            <Link
-              key={d.to}
-              to={d.to}
-              activeOptions={{ exact: d.to === "/" }}
-              className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
-            >
-              {d.label()}
-            </Link>
-          ))}
-        </nav>
-        <div className="pointer-events-auto absolute top-8 right-margin">
-          <UserButton compact placement="below" />
+        <div className="relative flex w-full items-center justify-center">
+          <nav aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface/60 p-1.5 backdrop-blur-xl">
+            {tabs.map((d) => (
+              <Link
+                key={d.to}
+                to={d.to}
+                activeOptions={{ exact: d.to === "/" }}
+                className="tv-pill rounded-full px-7 py-2.5 type-headline text-text-secondary data-[status=active]:bg-fill-selected data-[status=active]:text-on-background"
+              >
+                {d.label()}
+              </Link>
+            ))}
+          </nav>
+          {/* The avatar, centered on the tabs. */}
+          <div className="pointer-events-auto absolute -right-10">
+            <UserButton compact placement="below" />
+          </div>
         </div>
       </header>
       <main className={behind ? "pb-16" : "pt-32 pb-16"}>
