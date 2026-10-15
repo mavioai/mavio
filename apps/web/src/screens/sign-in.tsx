@@ -696,16 +696,24 @@ export function CallbackScreen() {
   const servers = useServersStore();
   const navigate = useNavigate();
   const [error, setError] = useState<string>();
+  // Signing in usually takes a moment, which shows nothing; a slow one says so.
+  const [slow, setSlow] = useState(false);
   useEffect(() => {
-    servers.finishCallback(new URLSearchParams(location.search)).then(
-      (to) => void navigate({ to, replace: true }),
-      (err: unknown) => setError(errorMessage(err)),
-    );
+    const timer = setTimeout(() => setSlow(true), 800);
+    servers
+      .finishCallback(new URLSearchParams(location.search))
+      .then(
+        (to) => void navigate({ to, replace: true }),
+        (err: unknown) => setError(errorMessage(err)),
+      )
+      .finally(() => clearTimeout(timer));
+    return () => clearTimeout(timer);
     // Once: the code is spent.
   }, []);
+  if (!error && !slow) return null;
   return (
     <Screen>
-      <div className="flex flex-col items-center gap-4 text-center">
+      <div className="flex animate-[fade_300ms_ease-out] flex-col items-center gap-4 text-center">
         <Wordmark height={32} />
         {error ? (
           <>
