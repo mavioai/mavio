@@ -54,6 +54,13 @@ export {
   useSimilar,
   useUserData,
 } from "./hooks.ts";
+export {
+  useAdminServers,
+  useCatalogPlugins,
+  usePluginActions,
+  usePluginCatalogs,
+  usePlugins,
+} from "./plugins.ts";
 export { type Artwork, artwork, imageOf, imageUrl, libraryImageUrl, thumbOf } from "./images.ts";
 export {
   browserDecoders,
