@@ -968,6 +968,9 @@ public enum MavioStrings {
     /// Settings section of a server's libraries.
     public static var settingsLibraries: String { NSLocalizedString("settings.libraries", bundle: .module, comment: "") }
 
+    /// Settings section of a server's users and invitations.
+    public static var settingsUsers: String { NSLocalizedString("settings.users", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -1146,6 +1149,28 @@ public enum MavioStrings {
     public static func authLinkMessage(url: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("auth.linkMessage", bundle: .module, comment: ""), url)
     }
+
+    /// Title of the screen where an invitee accepts an invitation to a server.
+    public static func authJoinServer(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.joinServer", bundle: .module, comment: ""), server)
+    }
+
+    /// Line on the invitation screen for a new member.
+    public static var authInvitationMessage: String { NSLocalizedString("auth.invitationMessage", bundle: .module, comment: "") }
+
+    /// Line on the invitation screen for a managed user becoming a member.
+    public static func authInvitationConvertMessage(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("auth.invitationConvertMessage", bundle: .module, comment: ""), name)
+    }
+
+    /// Title when an invitation link has expired, was used up or revoked.
+    public static var authInvitationInvalid: String { NSLocalizedString("auth.invitationInvalid", bundle: .module, comment: "") }
+
+    /// Message when an invitation link is not valid.
+    public static var authInvitationInvalidMessage: String { NSLocalizedString("auth.invitationInvalidMessage", bundle: .module, comment: "") }
+
+    /// Button that creates an account with a passkey instead of a password.
+    public static var authCreateWithPasskey: String { NSLocalizedString("auth.createWithPasskey", bundle: .module, comment: "") }
 
     /// Button adding an entry to a list in a plugin's configuration.
     public static var schemaAdd: String { NSLocalizedString("schema.add", bundle: .module, comment: "") }
@@ -1380,4 +1405,332 @@ public enum MavioStrings {
 
     /// Explains what deleting a library removes.
     public static var librariesDeleteMessage: String { NSLocalizedString("libraries.deleteMessage", bundle: .module, comment: "") }
+
+    /// Line under the Users title in standalone mode.
+    public static var usersMessage: String { NSLocalizedString("users.message", bundle: .module, comment: "") }
+
+    /// Line under the Users title in mavio.dev mode.
+    public static var usersMessageMavioDev: String { NSLocalizedString("users.messageMavioDev", bundle: .module, comment: "") }
+
+    /// Button that adds a user to a server.
+    public static var usersAdd: String { NSLocalizedString("users.add", bundle: .module, comment: "") }
+
+    /// Button that creates the user filled in.
+    public static var usersCreate: String { NSLocalizedString("users.create", bundle: .module, comment: "") }
+
+    /// Badge of the server's administrator.
+    public static var usersAdmin: String { NSLocalizedString("users.admin", bundle: .module, comment: "") }
+
+    /// Badge and kind of a managed user, without credentials of their own.
+    public static var usersManaged: String { NSLocalizedString("users.managed", bundle: .module, comment: "") }
+
+    /// Kind of a user who signs in with credentials.
+    public static var usersMember: String { NSLocalizedString("users.member", bundle: .module, comment: "") }
+
+    /// Badge of a disabled user.
+    public static var usersDisabled: String { NSLocalizedString("users.disabled", bundle: .module, comment: "") }
+
+    /// When a user last signed in.
+    public static func usersLastSignIn(date: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.lastSignIn", bundle: .module, comment: ""), date)
+    }
+
+    /// A user who has never signed in.
+    public static var usersNeverSignedIn: String { NSLocalizedString("users.neverSignedIn", bundle: .module, comment: "") }
+
+    /// Whether a new user is a member or managed.
+    public static var usersKind: String { NSLocalizedString("users.kind", bundle: .module, comment: "") }
+
+    /// A user's name.
+    public static var usersName: String { NSLocalizedString("users.name", bundle: .module, comment: "") }
+
+    /// Footer explaining members.
+    public static var usersMemberFooter: String { NSLocalizedString("users.memberFooter", bundle: .module, comment: "") }
+
+    /// Footer explaining managed users.
+    public static var usersManagedFooter: String { NSLocalizedString("users.managedFooter", bundle: .module, comment: "") }
+
+    /// A user's four-digit PIN.
+    public static var usersPin: String { NSLocalizedString("users.pin", bundle: .module, comment: "") }
+
+    /// Detail of a managed user's PIN.
+    public static var usersPinDetail: String { NSLocalizedString("users.pinDetail", bundle: .module, comment: "") }
+
+    /// State of a managed user's PIN.
+    public static var usersPinOn: String { NSLocalizedString("users.pinOn", bundle: .module, comment: "") }
+
+    /// State of a managed user without a PIN.
+    public static var usersPinOff: String { NSLocalizedString("users.pinOff", bundle: .module, comment: "") }
+
+    /// Notice after setting a PIN.
+    public static var usersPinSet: String { NSLocalizedString("users.pinSet", bundle: .module, comment: "") }
+
+    /// Notice after clearing a PIN.
+    public static var usersPinCleared: String { NSLocalizedString("users.pinCleared", bundle: .module, comment: "") }
+
+    /// A managed user's restriction profile.
+    public static var usersRestriction: String { NSLocalizedString("users.restriction", bundle: .module, comment: "") }
+
+    /// Detail of the restriction profile.
+    public static var usersRestrictionDetail: String { NSLocalizedString("users.restrictionDetail", bundle: .module, comment: "") }
+
+    /// No restriction profile.
+    public static var usersRestrictionNone: String { NSLocalizedString("users.restrictionNone", bundle: .module, comment: "") }
+
+    /// Restriction profile for younger children.
+    public static var usersRestrictionYoungerChild: String { NSLocalizedString("users.restrictionYoungerChild", bundle: .module, comment: "") }
+
+    /// Restriction profile for older children.
+    public static var usersRestrictionOlderChild: String { NSLocalizedString("users.restrictionOlderChild", bundle: .module, comment: "") }
+
+    /// Restriction profile for teenagers.
+    public static var usersRestrictionTeen: String { NSLocalizedString("users.restrictionTeen", bundle: .module, comment: "") }
+
+    /// Shown when a user's page is opened for a user that does not exist.
+    public static var usersNotFound: String { NSLocalizedString("users.notFound", bundle: .module, comment: "") }
+
+    /// Line under a user's name in mavio.dev mode.
+    public static var usersMavioDevNote: String { NSLocalizedString("users.mavioDevNote", bundle: .module, comment: "") }
+
+    /// Title asking to confirm deleting a user.
+    public static func usersDeleteTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.deleteTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Message when confirming deleting a user.
+    public static var usersDeleteMessage: String { NSLocalizedString("users.deleteMessage", bundle: .module, comment: "") }
+
+    /// Toggle that disables a user.
+    public static var usersDisable: String { NSLocalizedString("users.disable", bundle: .module, comment: "") }
+
+    /// Detail of disabling a user.
+    public static var usersDisableDetail: String { NSLocalizedString("users.disableDetail", bundle: .module, comment: "") }
+
+    /// A setting that is on, shown read-only.
+    public static var usersOn: String { NSLocalizedString("users.on", bundle: .module, comment: "") }
+
+    /// A setting that is off, shown read-only.
+    public static var usersOff: String { NSLocalizedString("users.off", bundle: .module, comment: "") }
+
+    /// Group of what a user may see.
+    public static var usersAccess: String { NSLocalizedString("users.access", bundle: .module, comment: "") }
+
+    /// Footer of access in mavio.dev mode.
+    public static var usersAccessMavioDev: String { NSLocalizedString("users.accessMavioDev", bundle: .module, comment: "") }
+
+    /// Toggle giving access to every library.
+    public static var usersAllLibraries: String { NSLocalizedString("users.allLibraries", bundle: .module, comment: "") }
+
+    /// The highest content rating a user may see.
+    public static var usersMaxRating: String { NSLocalizedString("users.maxRating", bundle: .module, comment: "") }
+
+    /// Detail of the highest rating.
+    public static var usersMaxRatingDetail: String { NSLocalizedString("users.maxRatingDetail", bundle: .module, comment: "") }
+
+    /// No limit on ratings.
+    public static var usersNoLimit: String { NSLocalizedString("users.noLimit", bundle: .module, comment: "") }
+
+    /// A rating limit given as a minimum age.
+    public static func usersRatingAge(age: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.ratingAge", bundle: .module, comment: ""), age)
+    }
+
+    /// Toggle that hides items without a rating.
+    public static var usersBlockUnrated: String { NSLocalizedString("users.blockUnrated", bundle: .module, comment: "") }
+
+    /// Labels an item must have to be shown.
+    public static var usersAllowedLabels: String { NSLocalizedString("users.allowedLabels", bundle: .module, comment: "") }
+
+    /// Detail of allowed labels.
+    public static var usersAllowedLabelsDetail: String { NSLocalizedString("users.allowedLabelsDetail", bundle: .module, comment: "") }
+
+    /// Labels whose items are hidden.
+    public static var usersBlockedLabels: String { NSLocalizedString("users.blockedLabels", bundle: .module, comment: "") }
+
+    /// Detail of blocked labels.
+    public static var usersBlockedLabelsDetail: String { NSLocalizedString("users.blockedLabelsDetail", bundle: .module, comment: "") }
+
+    /// Toggle letting a user download media.
+    public static var usersAllowDownload: String { NSLocalizedString("users.allowDownload", bundle: .module, comment: "") }
+
+    /// Group of a user's playback policy.
+    public static var usersPlayback: String { NSLocalizedString("users.playback", bundle: .module, comment: "") }
+
+    /// Toggle letting the server transcode for a user.
+    public static var usersAllowTranscoding: String { NSLocalizedString("users.allowTranscoding", bundle: .module, comment: "") }
+
+    /// Detail of allowing transcoding.
+    public static var usersAllowTranscodingDetail: String { NSLocalizedString("users.allowTranscodingDetail", bundle: .module, comment: "") }
+
+    /// A user's maximum streaming bitrate.
+    public static var usersMaxBitrate: String { NSLocalizedString("users.maxBitrate", bundle: .module, comment: "") }
+
+    /// No bitrate limit.
+    public static var usersUnlimited: String { NSLocalizedString("users.unlimited", bundle: .module, comment: "") }
+
+    /// A bitrate in megabits per second.
+    public static func usersMbps(mbps: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.mbps", bundle: .module, comment: ""), mbps)
+    }
+
+    /// How many streams a user may play at once.
+    public static var usersMaxSessions: String { NSLocalizedString("users.maxSessions", bundle: .module, comment: "") }
+
+    /// Detail of simultaneous streams.
+    public static var usersMaxSessionsDetail: String { NSLocalizedString("users.maxSessionsDetail", bundle: .module, comment: "") }
+
+    /// Group of what a user may request.
+    public static var usersRequests: String { NSLocalizedString("users.requests", bundle: .module, comment: "") }
+
+    /// Toggle letting a user request movies.
+    public static var usersRequestMovies: String { NSLocalizedString("users.requestMovies", bundle: .module, comment: "") }
+
+    /// Toggle letting a user request shows.
+    public static var usersRequestSeries: String { NSLocalizedString("users.requestSeries", bundle: .module, comment: "") }
+
+    /// Toggle approving a user's movie requests automatically.
+    public static var usersAutoApproveMovies: String { NSLocalizedString("users.autoApproveMovies", bundle: .module, comment: "") }
+
+    /// Toggle approving a user's show requests automatically.
+    public static var usersAutoApproveSeries: String { NSLocalizedString("users.autoApproveSeries", bundle: .module, comment: "") }
+
+    /// Toggle letting a user report issues.
+    public static var usersReportIssues: String { NSLocalizedString("users.reportIssues", bundle: .module, comment: "") }
+
+    /// A user's quota of movie requests.
+    public static var usersMovieQuota: String { NSLocalizedString("users.movieQuota", bundle: .module, comment: "") }
+
+    /// A user's quota of show requests.
+    public static var usersSeriesQuota: String { NSLocalizedString("users.seriesQuota", bundle: .module, comment: "") }
+
+    /// A quota taken from the server's settings.
+    public static var usersQuotaServer: String { NSLocalizedString("users.quotaServer", bundle: .module, comment: "") }
+
+    /// Toggle giving a user their own quota.
+    public static var usersQuotaCustom: String { NSLocalizedString("users.quotaCustom", bundle: .module, comment: "") }
+
+    /// Number of requests of a quota.
+    public static var usersQuotaLimit: String { NSLocalizedString("users.quotaLimit", bundle: .module, comment: "") }
+
+    /// Between a quota's number of requests and its days.
+    public static var usersQuotaEvery: String { NSLocalizedString("users.quotaEvery", bundle: .module, comment: "") }
+
+    /// Days of a quota.
+    public static var usersQuotaDays: String { NSLocalizedString("users.quotaDays", bundle: .module, comment: "") }
+
+    /// Unit after a quota's days.
+    public static var usersQuotaDaysUnit: String { NSLocalizedString("users.quotaDaysUnit", bundle: .module, comment: "") }
+
+    /// Notice after saving a user.
+    public static var usersSaved: String { NSLocalizedString("users.saved", bundle: .module, comment: "") }
+
+    /// Group of a user's credentials.
+    public static var usersSignIns: String { NSLocalizedString("users.signIns", bundle: .module, comment: "") }
+
+    /// Row setting a member's password.
+    public static var usersSetPassword: String { NSLocalizedString("users.setPassword", bundle: .module, comment: "") }
+
+    /// Detail of setting a member's password.
+    public static var usersSetPasswordDetail: String { NSLocalizedString("users.setPasswordDetail", bundle: .module, comment: "") }
+
+    /// Detail of setting the administrator's own password.
+    public static var usersSetPasswordSelf: String { NSLocalizedString("users.setPasswordSelf", bundle: .module, comment: "") }
+
+    /// Row giving a managed user a password.
+    public static var usersGivePassword: String { NSLocalizedString("users.givePassword", bundle: .module, comment: "") }
+
+    /// Detail of giving a managed user a password.
+    public static var usersGivePasswordDetail: String { NSLocalizedString("users.givePasswordDetail", bundle: .module, comment: "") }
+
+    /// Button that sets a password or PIN.
+    public static var usersSet: String { NSLocalizedString("users.set", bundle: .module, comment: "") }
+
+    /// Button that clears a PIN.
+    public static var usersClear: String { NSLocalizedString("users.clear", bundle: .module, comment: "") }
+
+    /// Notice after setting a password.
+    public static var usersPasswordSet: String { NSLocalizedString("users.passwordSet", bundle: .module, comment: "") }
+
+    /// Notice after converting a managed user.
+    public static var usersConverted: String { NSLocalizedString("users.converted", bundle: .module, comment: "") }
+
+    /// Row making a link that converts a managed user.
+    public static var usersInviteManaged: String { NSLocalizedString("users.inviteManaged", bundle: .module, comment: "") }
+
+    /// Detail of a managed user's invitation link.
+    public static var usersInviteManagedDetail: String { NSLocalizedString("users.inviteManagedDetail", bundle: .module, comment: "") }
+
+    /// Button that creates an invitation link.
+    public static var usersCreateLink: String { NSLocalizedString("users.createLink", bundle: .module, comment: "") }
+
+    /// Button that copies an invitation link.
+    public static var usersCopyLink: String { NSLocalizedString("users.copyLink", bundle: .module, comment: "") }
+
+    /// Shown after copying an invitation link.
+    public static var usersCopied: String { NSLocalizedString("users.copied", bundle: .module, comment: "") }
+
+    /// A user's TOTP authenticator.
+    public static var usersTotp: String { NSLocalizedString("users.totp", bundle: .module, comment: "") }
+
+    /// Detail of the authenticator row.
+    public static var usersTotpDetail: String { NSLocalizedString("users.totpDetail", bundle: .module, comment: "") }
+
+    /// Button that turns a user's authenticator off.
+    public static var usersTurnOff: String { NSLocalizedString("users.turnOff", bundle: .module, comment: "") }
+
+    /// A passkey without a name.
+    public static var usersPasskey: String { NSLocalizedString("users.passkey", bundle: .module, comment: "") }
+
+    /// When a passkey was last used.
+    public static func usersLastUsed(date: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.lastUsed", bundle: .module, comment: ""), date)
+    }
+
+    /// Group of the server's invitation links.
+    public static var usersInvitations: String { NSLocalizedString("users.invitations", bundle: .module, comment: "") }
+
+    /// Button that starts making an invitation link.
+    public static var usersInvite: String { NSLocalizedString("users.invite", bundle: .module, comment: "") }
+
+    /// Footer of invitation links.
+    public static var usersInvitationsFooter: String { NSLocalizedString("users.invitationsFooter", bundle: .module, comment: "") }
+
+    /// Row showing a link just made.
+    public static var usersLinkMade: String { NSLocalizedString("users.linkMade", bundle: .module, comment: "") }
+
+    /// How many people may use an invitation link.
+    public static var usersMaxUses: String { NSLocalizedString("users.maxUses", bundle: .module, comment: "") }
+
+    /// How many days an invitation link is valid.
+    public static var usersValidDays: String { NSLocalizedString("users.validDays", bundle: .module, comment: "") }
+
+    /// Shown when there are no invitation links.
+    public static var usersNoInvitations: String { NSLocalizedString("users.noInvitations", bundle: .module, comment: "") }
+
+    /// How many times an invitation link was used.
+    public static func usersInvitationUses(uses: String, max: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.invitationUses", bundle: .module, comment: ""), uses, max)
+    }
+
+    /// When an invitation link expires.
+    public static func usersExpires(date: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.expires", bundle: .module, comment: ""), date)
+    }
+
+    /// When an invitation link was made.
+    public static func usersCreated(date: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("users.created", bundle: .module, comment: ""), date)
+    }
+
+    /// Button that revokes an invitation link.
+    public static var usersRevoke: String { NSLocalizedString("users.revoke", bundle: .module, comment: "") }
+
+    /// Group of links that convert managed users.
+    public static var usersConversionLinks: String { NSLocalizedString("users.conversionLinks", bundle: .module, comment: "") }
+
+    /// A rating limit allowing only content for all ages.
+    public static var usersRatingAll: String { NSLocalizedString("users.ratingAll", bundle: .module, comment: "") }
+
+    /// A rating limit allowing adult content.
+    public static var usersRatingAdult: String { NSLocalizedString("users.ratingAdult", bundle: .module, comment: "") }
 }

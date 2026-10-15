@@ -602,6 +602,8 @@
     <string name="settings_plugins_message">Plugins bring the server metadata, subtitles, downloads and more.</string>
     <!-- Settings section of a server's libraries. -->
     <string name="settings_libraries">Libraries</string>
+    <!-- Settings section of a server's users and invitations. -->
+    <string name="settings_users">Users</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -712,6 +714,18 @@
     <string name="auth_set_up_elsewhere_message">Open this address in a browser:</string>
     <!-- Instruction on a television signing in with a Mavio account; url is mavio.dev's link page. -->
     <string name="auth_link_message">On your phone or computer, go to %s and enter this code.</string>
+    <!-- Title of the screen where an invitee accepts an invitation to a server. -->
+    <string name="auth_join_server">Join %s</string>
+    <!-- Line on the invitation screen for a new member. -->
+    <string name="auth_invitation_message">Choose a name and a password or a passkey to sign in with.</string>
+    <!-- Line on the invitation screen for a managed user becoming a member. -->
+    <string name="auth_invitation_convert_message">You were invited to sign in as %s. Choose a password or a passkey; what %s watched stays.</string>
+    <!-- Title when an invitation link has expired, was used up or revoked. -->
+    <string name="auth_invitation_invalid">Invitation Not Valid</string>
+    <!-- Message when an invitation link is not valid. -->
+    <string name="auth_invitation_invalid_message">This invitation has expired, been used or been revoked. Ask the server\'s administrator for a new link.</string>
+    <!-- Button that creates an account with a passkey instead of a password. -->
+    <string name="auth_create_with_passkey">Create with a Passkey</string>
     <!-- Button adding an entry to a list in a plugin's configuration. -->
     <string name="schema_add">Add</string>
     <!-- Button removing an entry from a list in a plugin's configuration. -->
@@ -863,4 +877,212 @@
     <string name="libraries_delete_title">Delete %s\?</string>
     <!-- Explains what deleting a library removes. -->
     <string name="libraries_delete_message">Its items leave the server. The media files stay.</string>
+    <!-- Line under the Users title in standalone mode. -->
+    <string name="users_message">The people who use this server. Add members with a password, or managed users for children, chosen from a profile list.</string>
+    <!-- Line under the Users title in mavio.dev mode. -->
+    <string name="users_message_mavio_dev">The Mavio accounts with access to this server. Give and revoke access at mavio.dev.</string>
+    <!-- Button that adds a user to a server. -->
+    <string name="users_add">Add User</string>
+    <!-- Button that creates the user filled in. -->
+    <string name="users_create">Add</string>
+    <!-- Badge of the server's administrator. -->
+    <string name="users_admin">Admin</string>
+    <!-- Badge and kind of a managed user, without credentials of their own. -->
+    <string name="users_managed">Managed</string>
+    <!-- Kind of a user who signs in with credentials. -->
+    <string name="users_member">Member</string>
+    <!-- Badge of a disabled user. -->
+    <string name="users_disabled">Disabled</string>
+    <!-- When a user last signed in. -->
+    <string name="users_last_sign_in">Last signed in %s</string>
+    <!-- A user who has never signed in. -->
+    <string name="users_never_signed_in">Never signed in</string>
+    <!-- Whether a new user is a member or managed. -->
+    <string name="users_kind">Kind</string>
+    <!-- A user's name. -->
+    <string name="users_name">Name</string>
+    <!-- Footer explaining members. -->
+    <string name="users_member_footer">Members sign in with their password, and can add passkeys and an authenticator.</string>
+    <!-- Footer explaining managed users. -->
+    <string name="users_managed_footer">Managed users have no password: they are picked from the profile list of a signed-in device, with a PIN if they have one.</string>
+    <!-- A user's four-digit PIN. -->
+    <string name="users_pin">PIN</string>
+    <!-- Detail of a managed user's PIN. -->
+    <string name="users_pin_detail">Four digits, asked for when switching to the user</string>
+    <!-- State of a managed user's PIN. -->
+    <string name="users_pin_on">A PIN is set</string>
+    <!-- State of a managed user without a PIN. -->
+    <string name="users_pin_off">No PIN</string>
+    <!-- Notice after setting a PIN. -->
+    <string name="users_pin_set">The PIN is set.</string>
+    <!-- Notice after clearing a PIN. -->
+    <string name="users_pin_cleared">The PIN is cleared.</string>
+    <!-- A managed user's restriction profile. -->
+    <string name="users_restriction">Restriction</string>
+    <!-- Detail of the restriction profile. -->
+    <string name="users_restriction_detail">Caps the ratings shown and hides unrated items</string>
+    <!-- No restriction profile. -->
+    <string name="users_restriction_none">None</string>
+    <!-- Restriction profile for younger children. -->
+    <string name="users_restriction_younger_child">Younger child</string>
+    <!-- Restriction profile for older children. -->
+    <string name="users_restriction_older_child">Older child</string>
+    <!-- Restriction profile for teenagers. -->
+    <string name="users_restriction_teen">Teen</string>
+    <!-- Shown when a user's page is opened for a user that does not exist. -->
+    <string name="users_not_found">This user is no longer on the server.</string>
+    <!-- Line under a user's name in mavio.dev mode. -->
+    <string name="users_mavio_dev_note">This server uses Mavio accounts: the user\'s name, access and state are set at mavio.dev.</string>
+    <!-- Title asking to confirm deleting a user. -->
+    <string name="users_delete_title">Delete %s\?</string>
+    <!-- Message when confirming deleting a user. -->
+    <string name="users_delete_message">Their watch history, favorites and sessions go with them.</string>
+    <!-- Toggle that disables a user. -->
+    <string name="users_disable">Disabled</string>
+    <!-- Detail of disabling a user. -->
+    <string name="users_disable_detail">Signs the user out and keeps them from signing in</string>
+    <!-- A setting that is on, shown read-only. -->
+    <string name="users_on">On</string>
+    <!-- A setting that is off, shown read-only. -->
+    <string name="users_off">Off</string>
+    <!-- Group of what a user may see. -->
+    <string name="users_access">Access</string>
+    <!-- Footer of access in mavio.dev mode. -->
+    <string name="users_access_mavio_dev">Access is set at mavio.dev.</string>
+    <!-- Toggle giving access to every library. -->
+    <string name="users_all_libraries">All libraries</string>
+    <!-- The highest content rating a user may see. -->
+    <string name="users_max_rating">Highest rating</string>
+    <!-- Detail of the highest rating. -->
+    <string name="users_max_rating_detail">Items rated above it are hidden</string>
+    <!-- No limit on ratings. -->
+    <string name="users_no_limit">No limit</string>
+    <!-- A rating limit given as a minimum age. -->
+    <string name="users_rating_age">Ages %s+</string>
+    <!-- Toggle that hides items without a rating. -->
+    <string name="users_block_unrated">Hide unrated items</string>
+    <!-- Labels an item must have to be shown. -->
+    <string name="users_allowed_labels">Only labels</string>
+    <!-- Detail of allowed labels. -->
+    <string name="users_allowed_labels_detail">When any, only items with one of them are shown; separate with commas</string>
+    <!-- Labels whose items are hidden. -->
+    <string name="users_blocked_labels">Hidden labels</string>
+    <!-- Detail of blocked labels. -->
+    <string name="users_blocked_labels_detail">Items with any of them are hidden; separate with commas</string>
+    <!-- Toggle letting a user download media. -->
+    <string name="users_allow_download">Allow downloads</string>
+    <!-- Group of a user's playback policy. -->
+    <string name="users_playback">Playback</string>
+    <!-- Toggle letting the server transcode for a user. -->
+    <string name="users_allow_transcoding">Allow transcoding</string>
+    <!-- Detail of allowing transcoding. -->
+    <string name="users_allow_transcoding_detail">Off plays only what devices play directly</string>
+    <!-- A user's maximum streaming bitrate. -->
+    <string name="users_max_bitrate">Streaming limit</string>
+    <!-- No bitrate limit. -->
+    <string name="users_unlimited">Unlimited</string>
+    <!-- A bitrate in megabits per second. -->
+    <string name="users_mbps">%s Mbps</string>
+    <!-- How many streams a user may play at once. -->
+    <string name="users_max_sessions">Simultaneous streams</string>
+    <!-- Detail of simultaneous streams. -->
+    <string name="users_max_sessions_detail">0 for no limit</string>
+    <!-- Group of what a user may request. -->
+    <string name="users_requests">Requests</string>
+    <!-- Toggle letting a user request movies. -->
+    <string name="users_request_movies">Request movies</string>
+    <!-- Toggle letting a user request shows. -->
+    <string name="users_request_series">Request shows</string>
+    <!-- Toggle approving a user's movie requests automatically. -->
+    <string name="users_auto_approve_movies">Approve movie requests at once</string>
+    <!-- Toggle approving a user's show requests automatically. -->
+    <string name="users_auto_approve_series">Approve show requests at once</string>
+    <!-- Toggle letting a user report issues. -->
+    <string name="users_report_issues">Report issues</string>
+    <!-- A user's quota of movie requests. -->
+    <string name="users_movie_quota">Movie quota</string>
+    <!-- A user's quota of show requests. -->
+    <string name="users_series_quota">Show quota</string>
+    <!-- A quota taken from the server's settings. -->
+    <string name="users_quota_server">The server\'s</string>
+    <!-- Toggle giving a user their own quota. -->
+    <string name="users_quota_custom">Own quota</string>
+    <!-- Number of requests of a quota. -->
+    <string name="users_quota_limit">Requests</string>
+    <!-- Between a quota's number of requests and its days. -->
+    <string name="users_quota_every">every</string>
+    <!-- Days of a quota. -->
+    <string name="users_quota_days">Days</string>
+    <!-- Unit after a quota's days. -->
+    <string name="users_quota_days_unit">days</string>
+    <!-- Notice after saving a user. -->
+    <string name="users_saved">Saved.</string>
+    <!-- Group of a user's credentials. -->
+    <string name="users_sign_ins">Sign-Ins</string>
+    <!-- Row setting a member's password. -->
+    <string name="users_set_password">Password</string>
+    <!-- Detail of setting a member's password. -->
+    <string name="users_set_password_detail">Sets a new password and signs the user out elsewhere</string>
+    <!-- Detail of setting the administrator's own password. -->
+    <string name="users_set_password_self">Sets a new password and signs you out elsewhere</string>
+    <!-- Row giving a managed user a password. -->
+    <string name="users_give_password">Make a member</string>
+    <!-- Detail of giving a managed user a password. -->
+    <string name="users_give_password_detail">A password lets the user sign in on their own; the restriction profile is removed</string>
+    <!-- Button that sets a password or PIN. -->
+    <string name="users_set">Set</string>
+    <!-- Button that clears a PIN. -->
+    <string name="users_clear">Clear</string>
+    <!-- Notice after setting a password. -->
+    <string name="users_password_set">The password is set.</string>
+    <!-- Notice after converting a managed user. -->
+    <string name="users_converted">The user is now a member.</string>
+    <!-- Row making a link that converts a managed user. -->
+    <string name="users_invite_managed">Invitation link</string>
+    <!-- Detail of a managed user's invitation link. -->
+    <string name="users_invite_managed_detail">A link, valid for 7 days, through which the person chooses their own password</string>
+    <!-- Button that creates an invitation link. -->
+    <string name="users_create_link">Create Link</string>
+    <!-- Button that copies an invitation link. -->
+    <string name="users_copy_link">Copy Link</string>
+    <!-- Shown after copying an invitation link. -->
+    <string name="users_copied">Copied</string>
+    <!-- A user's TOTP authenticator. -->
+    <string name="users_totp">Authenticator</string>
+    <!-- Detail of the authenticator row. -->
+    <string name="users_totp_detail">Turn it off when the user lost their authenticator</string>
+    <!-- Button that turns a user's authenticator off. -->
+    <string name="users_turn_off">Turn Off</string>
+    <!-- A passkey without a name. -->
+    <string name="users_passkey">Passkey</string>
+    <!-- When a passkey was last used. -->
+    <string name="users_last_used">Last used %s</string>
+    <!-- Group of the server's invitation links. -->
+    <string name="users_invitations">Invitation Links</string>
+    <!-- Button that starts making an invitation link. -->
+    <string name="users_invite">Invite</string>
+    <!-- Footer of invitation links. -->
+    <string name="users_invitations_footer">Anyone with a link can create a member until it expires or is used up. A link is shown only when it is made.</string>
+    <!-- Row showing a link just made. -->
+    <string name="users_link_made">New link</string>
+    <!-- How many people may use an invitation link. -->
+    <string name="users_max_uses">Uses</string>
+    <!-- How many days an invitation link is valid. -->
+    <string name="users_valid_days">Valid for days</string>
+    <!-- Shown when there are no invitation links. -->
+    <string name="users_no_invitations">No invitation links.</string>
+    <!-- How many times an invitation link was used. -->
+    <string name="users_invitation_uses">Used %1$s of %2$s</string>
+    <!-- When an invitation link expires. -->
+    <string name="users_expires">Expires %s</string>
+    <!-- When an invitation link was made. -->
+    <string name="users_created">made %s</string>
+    <!-- Button that revokes an invitation link. -->
+    <string name="users_revoke">Revoke</string>
+    <!-- Group of links that convert managed users. -->
+    <string name="users_conversion_links">Links for Managed Users</string>
+    <!-- A rating limit allowing only content for all ages. -->
+    <string name="users_rating_all">All ages</string>
+    <!-- A rating limit allowing adult content. -->
+    <string name="users_rating_adult">Adult content</string>
 </resources>

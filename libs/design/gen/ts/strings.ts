@@ -290,6 +290,7 @@ export type MessageKey =
   | 'settings.plugins'
   | 'settings.pluginsMessage'
   | 'settings.libraries'
+  | 'settings.users'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -345,6 +346,12 @@ export type MessageKey =
   | 'auth.setUpElsewhere'
   | 'auth.setUpElsewhereMessage'
   | 'auth.linkMessage'
+  | 'auth.joinServer'
+  | 'auth.invitationMessage'
+  | 'auth.invitationConvertMessage'
+  | 'auth.invitationInvalid'
+  | 'auth.invitationInvalidMessage'
+  | 'auth.createWithPasskey'
   | 'schema.add'
   | 'schema.remove'
   | 'schema.item'
@@ -418,7 +425,111 @@ export type MessageKey =
   | 'libraries.graceDays'
   | 'libraries.graceDaysDetail'
   | 'libraries.deleteTitle'
-  | 'libraries.deleteMessage';
+  | 'libraries.deleteMessage'
+  | 'users.message'
+  | 'users.messageMavioDev'
+  | 'users.add'
+  | 'users.create'
+  | 'users.admin'
+  | 'users.managed'
+  | 'users.member'
+  | 'users.disabled'
+  | 'users.lastSignIn'
+  | 'users.neverSignedIn'
+  | 'users.kind'
+  | 'users.name'
+  | 'users.memberFooter'
+  | 'users.managedFooter'
+  | 'users.pin'
+  | 'users.pinDetail'
+  | 'users.pinOn'
+  | 'users.pinOff'
+  | 'users.pinSet'
+  | 'users.pinCleared'
+  | 'users.restriction'
+  | 'users.restrictionDetail'
+  | 'users.restrictionNone'
+  | 'users.restrictionYoungerChild'
+  | 'users.restrictionOlderChild'
+  | 'users.restrictionTeen'
+  | 'users.notFound'
+  | 'users.mavioDevNote'
+  | 'users.deleteTitle'
+  | 'users.deleteMessage'
+  | 'users.disable'
+  | 'users.disableDetail'
+  | 'users.on'
+  | 'users.off'
+  | 'users.access'
+  | 'users.accessMavioDev'
+  | 'users.allLibraries'
+  | 'users.maxRating'
+  | 'users.maxRatingDetail'
+  | 'users.noLimit'
+  | 'users.ratingAge'
+  | 'users.blockUnrated'
+  | 'users.allowedLabels'
+  | 'users.allowedLabelsDetail'
+  | 'users.blockedLabels'
+  | 'users.blockedLabelsDetail'
+  | 'users.allowDownload'
+  | 'users.playback'
+  | 'users.allowTranscoding'
+  | 'users.allowTranscodingDetail'
+  | 'users.maxBitrate'
+  | 'users.unlimited'
+  | 'users.mbps'
+  | 'users.maxSessions'
+  | 'users.maxSessionsDetail'
+  | 'users.requests'
+  | 'users.requestMovies'
+  | 'users.requestSeries'
+  | 'users.autoApproveMovies'
+  | 'users.autoApproveSeries'
+  | 'users.reportIssues'
+  | 'users.movieQuota'
+  | 'users.seriesQuota'
+  | 'users.quotaServer'
+  | 'users.quotaCustom'
+  | 'users.quotaLimit'
+  | 'users.quotaEvery'
+  | 'users.quotaDays'
+  | 'users.quotaDaysUnit'
+  | 'users.saved'
+  | 'users.signIns'
+  | 'users.setPassword'
+  | 'users.setPasswordDetail'
+  | 'users.setPasswordSelf'
+  | 'users.givePassword'
+  | 'users.givePasswordDetail'
+  | 'users.set'
+  | 'users.clear'
+  | 'users.passwordSet'
+  | 'users.converted'
+  | 'users.inviteManaged'
+  | 'users.inviteManagedDetail'
+  | 'users.createLink'
+  | 'users.copyLink'
+  | 'users.copied'
+  | 'users.totp'
+  | 'users.totpDetail'
+  | 'users.turnOff'
+  | 'users.passkey'
+  | 'users.lastUsed'
+  | 'users.invitations'
+  | 'users.invite'
+  | 'users.invitationsFooter'
+  | 'users.linkMade'
+  | 'users.maxUses'
+  | 'users.validDays'
+  | 'users.noInvitations'
+  | 'users.invitationUses'
+  | 'users.expires'
+  | 'users.created'
+  | 'users.revoke'
+  | 'users.conversionLinks'
+  | 'users.ratingAll'
+  | 'users.ratingAdult';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -701,6 +812,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.plugins": "Plugins",
     "settings.pluginsMessage": "Plugins bring the server metadata, subtitles, downloads and more.",
     "settings.libraries": "Libraries",
+    "settings.users": "Users",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -756,6 +868,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
     "auth.setUpElsewhereMessage": "Open this address in a browser:",
     "auth.linkMessage": "On your phone or computer, go to {url} and enter this code.",
+    "auth.joinServer": "Join {server}",
+    "auth.invitationMessage": "Choose a name and a password or a passkey to sign in with.",
+    "auth.invitationConvertMessage": "You were invited to sign in as {name}. Choose a password or a passkey; what {name} watched stays.",
+    "auth.invitationInvalid": "Invitation Not Valid",
+    "auth.invitationInvalidMessage": "This invitation has expired, been used or been revoked. Ask the server's administrator for a new link.",
+    "auth.createWithPasskey": "Create with a Passkey",
     "schema.add": "Add",
     "schema.remove": "Remove",
     "schema.item": "Item {number}",
@@ -829,7 +947,111 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.graceDays": "Keep for Days",
     "libraries.graceDaysDetail": "Days an aired episode stays listed for its file to arrive.",
     "libraries.deleteTitle": "Delete {name}?",
-    "libraries.deleteMessage": "Its items leave the server. The media files stay."
+    "libraries.deleteMessage": "Its items leave the server. The media files stay.",
+    "users.message": "The people who use this server. Add members with a password, or managed users for children, chosen from a profile list.",
+    "users.messageMavioDev": "The Mavio accounts with access to this server. Give and revoke access at mavio.dev.",
+    "users.add": "Add User",
+    "users.create": "Add",
+    "users.admin": "Admin",
+    "users.managed": "Managed",
+    "users.member": "Member",
+    "users.disabled": "Disabled",
+    "users.lastSignIn": "Last signed in {date}",
+    "users.neverSignedIn": "Never signed in",
+    "users.kind": "Kind",
+    "users.name": "Name",
+    "users.memberFooter": "Members sign in with their password, and can add passkeys and an authenticator.",
+    "users.managedFooter": "Managed users have no password: they are picked from the profile list of a signed-in device, with a PIN if they have one.",
+    "users.pin": "PIN",
+    "users.pinDetail": "Four digits, asked for when switching to the user",
+    "users.pinOn": "A PIN is set",
+    "users.pinOff": "No PIN",
+    "users.pinSet": "The PIN is set.",
+    "users.pinCleared": "The PIN is cleared.",
+    "users.restriction": "Restriction",
+    "users.restrictionDetail": "Caps the ratings shown and hides unrated items",
+    "users.restrictionNone": "None",
+    "users.restrictionYoungerChild": "Younger child",
+    "users.restrictionOlderChild": "Older child",
+    "users.restrictionTeen": "Teen",
+    "users.notFound": "This user is no longer on the server.",
+    "users.mavioDevNote": "This server uses Mavio accounts: the user's name, access and state are set at mavio.dev.",
+    "users.deleteTitle": "Delete {name}?",
+    "users.deleteMessage": "Their watch history, favorites and sessions go with them.",
+    "users.disable": "Disabled",
+    "users.disableDetail": "Signs the user out and keeps them from signing in",
+    "users.on": "On",
+    "users.off": "Off",
+    "users.access": "Access",
+    "users.accessMavioDev": "Access is set at mavio.dev.",
+    "users.allLibraries": "All libraries",
+    "users.maxRating": "Highest rating",
+    "users.maxRatingDetail": "Items rated above it are hidden",
+    "users.noLimit": "No limit",
+    "users.ratingAge": "Ages {age}+",
+    "users.blockUnrated": "Hide unrated items",
+    "users.allowedLabels": "Only labels",
+    "users.allowedLabelsDetail": "When any, only items with one of them are shown; separate with commas",
+    "users.blockedLabels": "Hidden labels",
+    "users.blockedLabelsDetail": "Items with any of them are hidden; separate with commas",
+    "users.allowDownload": "Allow downloads",
+    "users.playback": "Playback",
+    "users.allowTranscoding": "Allow transcoding",
+    "users.allowTranscodingDetail": "Off plays only what devices play directly",
+    "users.maxBitrate": "Streaming limit",
+    "users.unlimited": "Unlimited",
+    "users.mbps": "{mbps} Mbps",
+    "users.maxSessions": "Simultaneous streams",
+    "users.maxSessionsDetail": "0 for no limit",
+    "users.requests": "Requests",
+    "users.requestMovies": "Request movies",
+    "users.requestSeries": "Request shows",
+    "users.autoApproveMovies": "Approve movie requests at once",
+    "users.autoApproveSeries": "Approve show requests at once",
+    "users.reportIssues": "Report issues",
+    "users.movieQuota": "Movie quota",
+    "users.seriesQuota": "Show quota",
+    "users.quotaServer": "The server's",
+    "users.quotaCustom": "Own quota",
+    "users.quotaLimit": "Requests",
+    "users.quotaEvery": "every",
+    "users.quotaDays": "Days",
+    "users.quotaDaysUnit": "days",
+    "users.saved": "Saved.",
+    "users.signIns": "Sign-Ins",
+    "users.setPassword": "Password",
+    "users.setPasswordDetail": "Sets a new password and signs the user out elsewhere",
+    "users.setPasswordSelf": "Sets a new password and signs you out elsewhere",
+    "users.givePassword": "Make a member",
+    "users.givePasswordDetail": "A password lets the user sign in on their own; the restriction profile is removed",
+    "users.set": "Set",
+    "users.clear": "Clear",
+    "users.passwordSet": "The password is set.",
+    "users.converted": "The user is now a member.",
+    "users.inviteManaged": "Invitation link",
+    "users.inviteManagedDetail": "A link, valid for 7 days, through which the person chooses their own password",
+    "users.createLink": "Create Link",
+    "users.copyLink": "Copy Link",
+    "users.copied": "Copied",
+    "users.totp": "Authenticator",
+    "users.totpDetail": "Turn it off when the user lost their authenticator",
+    "users.turnOff": "Turn Off",
+    "users.passkey": "Passkey",
+    "users.lastUsed": "Last used {date}",
+    "users.invitations": "Invitation Links",
+    "users.invite": "Invite",
+    "users.invitationsFooter": "Anyone with a link can create a member until it expires or is used up. A link is shown only when it is made.",
+    "users.linkMade": "New link",
+    "users.maxUses": "Uses",
+    "users.validDays": "Valid for days",
+    "users.noInvitations": "No invitation links.",
+    "users.invitationUses": "Used {uses} of {max}",
+    "users.expires": "Expires {date}",
+    "users.created": "made {date}",
+    "users.revoke": "Revoke",
+    "users.conversionLinks": "Links for Managed Users",
+    "users.ratingAll": "All ages",
+    "users.ratingAdult": "Adult content"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1110,6 +1332,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.plugins": "插件",
     "settings.pluginsMessage": "插件为服务器提供元数据、字幕、下载等功能。",
     "settings.libraries": "媒体库",
+    "settings.users": "用户",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -1165,6 +1388,12 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
     "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
     "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。",
+    "auth.joinServer": "加入 {server}",
+    "auth.invitationMessage": "选择一个用户名，以及登录用的密码或通行密钥。",
+    "auth.invitationConvertMessage": "你受邀以 {name} 的身份登录。请选择密码或通行密钥；{name} 的观看记录会保留。",
+    "auth.invitationInvalid": "邀请无效",
+    "auth.invitationInvalidMessage": "此邀请已过期、已用完或已被撤销。请向服务器管理员索取新的链接。",
+    "auth.createWithPasskey": "使用通行密钥创建",
     "schema.add": "添加",
     "schema.remove": "移除",
     "schema.item": "第 {number} 项",
@@ -1238,6 +1467,110 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.graceDays": "保留天数",
     "libraries.graceDaysDetail": "单集播出后继续列出、等待其文件的天数。",
     "libraries.deleteTitle": "删除“{name}”？",
-    "libraries.deleteMessage": "其条目将从服务器移除，媒体文件保留。"
+    "libraries.deleteMessage": "其条目将从服务器移除，媒体文件保留。",
+    "users.message": "使用此服务器的人。可以添加用密码登录的成员，或为孩子添加托管用户，从资料列表中选择。",
+    "users.messageMavioDev": "有权访问此服务器的 Mavio 账户。请在 mavio.dev 授予和撤销访问权限。",
+    "users.add": "添加用户",
+    "users.create": "添加",
+    "users.admin": "管理员",
+    "users.managed": "托管",
+    "users.member": "成员",
+    "users.disabled": "已停用",
+    "users.lastSignIn": "上次登录：{date}",
+    "users.neverSignedIn": "从未登录",
+    "users.kind": "类型",
+    "users.name": "用户名",
+    "users.memberFooter": "成员使用密码登录，并可添加通行密钥和身份验证器。",
+    "users.managedFooter": "托管用户没有密码：在已登录设备的资料列表中选择即可，若设置了 PIN 则需输入 PIN。",
+    "users.pin": "PIN",
+    "users.pinDetail": "四位数字，切换到此用户时需要输入",
+    "users.pinOn": "已设置 PIN",
+    "users.pinOff": "未设置 PIN",
+    "users.pinSet": "PIN 已设置。",
+    "users.pinCleared": "PIN 已清除。",
+    "users.restriction": "内容限制",
+    "users.restrictionDetail": "限制可看的分级并隐藏未分级内容",
+    "users.restrictionNone": "无",
+    "users.restrictionYoungerChild": "低龄儿童",
+    "users.restrictionOlderChild": "大龄儿童",
+    "users.restrictionTeen": "青少年",
+    "users.notFound": "此用户已不在服务器上。",
+    "users.mavioDevNote": "此服务器使用 Mavio 账户：用户名、访问权限和状态在 mavio.dev 设置。",
+    "users.deleteTitle": "删除“{name}”？",
+    "users.deleteMessage": "其观看记录、收藏和会话将一并删除。",
+    "users.disable": "停用",
+    "users.disableDetail": "注销此用户并阻止其登录",
+    "users.on": "开",
+    "users.off": "关",
+    "users.access": "访问权限",
+    "users.accessMavioDev": "访问权限在 mavio.dev 设置。",
+    "users.allLibraries": "所有媒体库",
+    "users.maxRating": "最高分级",
+    "users.maxRatingDetail": "高于此分级的内容将被隐藏",
+    "users.noLimit": "不限",
+    "users.ratingAge": "{age} 岁以上",
+    "users.blockUnrated": "隐藏未分级内容",
+    "users.allowedLabels": "仅限标签",
+    "users.allowedLabelsDetail": "如填写，则只显示带有其中任一标签的内容；用逗号分隔",
+    "users.blockedLabels": "隐藏标签",
+    "users.blockedLabelsDetail": "带有其中任一标签的内容将被隐藏；用逗号分隔",
+    "users.allowDownload": "允许下载",
+    "users.playback": "播放",
+    "users.allowTranscoding": "允许转码",
+    "users.allowTranscodingDetail": "关闭后仅播放设备可直接播放的内容",
+    "users.maxBitrate": "串流上限",
+    "users.unlimited": "不限",
+    "users.mbps": "{mbps} Mbps",
+    "users.maxSessions": "同时串流数",
+    "users.maxSessionsDetail": "0 表示不限",
+    "users.requests": "请求",
+    "users.requestMovies": "请求电影",
+    "users.requestSeries": "请求剧集",
+    "users.autoApproveMovies": "自动批准电影请求",
+    "users.autoApproveSeries": "自动批准剧集请求",
+    "users.reportIssues": "报告问题",
+    "users.movieQuota": "电影配额",
+    "users.seriesQuota": "剧集配额",
+    "users.quotaServer": "使用服务器设置",
+    "users.quotaCustom": "单独配额",
+    "users.quotaLimit": "请求数",
+    "users.quotaEvery": "每",
+    "users.quotaDays": "天数",
+    "users.quotaDaysUnit": "天",
+    "users.saved": "已保存。",
+    "users.signIns": "登录方式",
+    "users.setPassword": "密码",
+    "users.setPasswordDetail": "设置新密码并注销其他设备上的登录",
+    "users.setPasswordSelf": "设置新密码并注销你在其他设备上的登录",
+    "users.givePassword": "转为成员",
+    "users.givePasswordDetail": "设置密码后用户可自行登录；内容限制将被移除",
+    "users.set": "设置",
+    "users.clear": "清除",
+    "users.passwordSet": "密码已设置。",
+    "users.converted": "该用户现在是成员了。",
+    "users.inviteManaged": "邀请链接",
+    "users.inviteManagedDetail": "一个 7 天内有效的链接，此人可通过它设置自己的密码",
+    "users.createLink": "创建链接",
+    "users.copyLink": "复制链接",
+    "users.copied": "已复制",
+    "users.totp": "身份验证器",
+    "users.totpDetail": "用户丢失身份验证器时可将其关闭",
+    "users.turnOff": "关闭",
+    "users.passkey": "通行密钥",
+    "users.lastUsed": "上次使用：{date}",
+    "users.invitations": "邀请链接",
+    "users.invite": "邀请",
+    "users.invitationsFooter": "任何持有链接的人都可以创建成员，直到链接过期或用完。链接仅在创建时显示一次。",
+    "users.linkMade": "新链接",
+    "users.maxUses": "可用次数",
+    "users.validDays": "有效天数",
+    "users.noInvitations": "没有邀请链接。",
+    "users.invitationUses": "已使用 {uses}/{max}",
+    "users.expires": "{date} 过期",
+    "users.created": "创建于 {date}",
+    "users.revoke": "撤销",
+    "users.conversionLinks": "托管用户的链接",
+    "users.ratingAll": "所有年龄",
+    "users.ratingAdult": "成人内容"
   }
 };

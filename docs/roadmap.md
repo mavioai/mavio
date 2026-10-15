@@ -656,7 +656,7 @@ flowchart TD
     - [x] Libraries (`apps/web/src/screens/admin/libraries.tsx`, `libs/client-ts/src/admin.ts`): adding, editing, removing and scanning libraries, with a folder picker (`LibraryService`, `ListDirectory`)
     - [ ] A library's providers in order and its hubs on Home and Recommended (`ProviderOrder`, `LibraryHubs`), and walking the folders of rclone remotes in the folder picker
     - [ ] Storage: rclone remotes with their authorization steps, and the offline clients (`StorageService`)
-    - [ ] Users: adding, editing and removing users, invitations, their libraries and parental ratings (`UserService`, `ListRatings`)
+    - [x] Users (`apps/web/src/screens/admin/users.tsx`, `InviteScreen` in `sign-in.tsx`): adding, editing and removing users, their sign-ins, invitation links and the invitation screen at `/invite`, their libraries and parental ratings (`UserService`, `ListRatings`, `AuthService.GetInvitation`, `AcceptInvitation`)
     - [ ] Acquisition: quality definitions and profiles, custom formats, delay and release profiles, remote path mappings, and the indexers and download clients (`ProfileService`, `ListIndexers`, `ListDownloadClients`)
     - [ ] Subtitles: subtitle profiles and the libraries they apply to, the providers and the settings (`SubtitleService`)
     - [ ] AI: providers, API keys, subscription logins and models (`AiService`)

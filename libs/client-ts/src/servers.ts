@@ -480,6 +480,45 @@ export class Servers {
     return this.added(i, r);
   }
 
+  /** What an invitation of the serving server offers: the managed user it converts, if any, and when it expires. */
+  async getInvitation(token: string) {
+    return createClient(AuthService, transport({ url: normalizeUrl(this.homeUrl()) })).getInvitation({ token });
+  }
+
+  /**
+   * Accepts an invitation of the serving server, creating a member with a
+   * name and password, or converting the invitation's managed user, and
+   * signs in as them.
+   */
+  async acceptInvitation(token: string, name: string, password: string): Promise<ServerEntry> {
+    const i = await this.probe(this.homeUrl());
+    const r = await createClient(AuthService, transport({ url: i.url })).acceptInvitation({
+      token,
+      name: name || undefined,
+      password,
+      device: await device(this.storage, this.key),
+    });
+    return this.added(i, r);
+  }
+
+  /** Accepts an invitation of the serving server with a new passkey instead of a password. */
+  async acceptInvitationWithPasskey(token: string, name: string): Promise<ServerEntry> {
+    const i = await this.probe(this.homeUrl());
+    const auth = createClient(AuthService, transport({ url: i.url }));
+    const start = await auth.startInvitationPasskey({ token, name: name || undefined });
+    const publicKey = PublicKeyCredential.parseCreationOptionsFromJSON(JSON.parse(start.optionsJson));
+    const credential = (await navigator.credentials.create({ publicKey })) as PublicKeyCredential | null;
+    if (!credential) throw new Error("no passkey was made");
+    const r = await auth.acceptInvitation({
+      token,
+      name: name || undefined,
+      ceremonyId: start.ceremonyId,
+      credentialJson: JSON.stringify(credential.toJSON()),
+      device: await device(this.storage, this.key),
+    });
+    return this.added(i, r);
+  }
+
   /** Sets the serving server up in standalone mode: creates its first user and signs in as them. */
   async createFirstUser(name: string, password: string): Promise<ServerEntry> {
     const i = await this.probe(this.homeUrl());

@@ -12,6 +12,7 @@ import { SearchScreen } from "./screens/search.tsx";
 import { SettingsScreen, settingsSearch } from "./screens/settings.tsx";
 import {
   CallbackScreen,
+  InviteScreen,
   type SetupSearch,
   SetupScreen,
   setupSteps,
@@ -45,6 +46,9 @@ const setup = createRoute({
 
 // Where mavio.dev comes back to (docs/accounts.md §6).
 const callback = createRoute({ getParentRoute: () => root, path: "/auth/callback", component: CallbackScreen });
+
+// An invitation link, its token in the fragment (docs/accounts.md §4.3).
+const invite = createRoute({ getParentRoute: () => root, path: "/invite", component: InviteScreen });
 
 const libraries = createRoute({ getParentRoute: () => root, path: "/libraries", component: LibrariesScreen });
 
@@ -123,6 +127,7 @@ export const router = createRouter({
     signIn,
     setup,
     callback,
+    invite,
     libraries,
     search,
     discover,

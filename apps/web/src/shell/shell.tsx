@@ -33,7 +33,7 @@ export function Shell() {
     if (account) servers.sync().catch(() => {});
   }, [servers, account]);
 
-  const bare = ["/sign-in", "/setup", "/auth/callback"].includes(pathname);
+  const bare = ["/sign-in", "/setup", "/auth/callback", "/invite"].includes(pathname);
   if (!signIn && !bare) return <Navigate to="/sign-in" />;
   if (bare || pathname.includes("/play/")) return <Outlet />;
   if (pathname.startsWith("/settings")) return <Outlet />;

@@ -28,10 +28,11 @@ import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from ".
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
+import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices" | "libraries" | "plugins";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "devices" | "libraries" | "users" | "plugins";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -41,13 +42,14 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
   libraries: { icon: "folder", color: "#007AFF", title: () => t("settings.libraries"), admin: true },
+  users: { icon: "users", color: "#FF9500", title: () => t("settings.users"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
 };
 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
   { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
-  { title: () => t("settings.serverGroup"), ids: ["devices", "libraries", "plugins"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["devices", "libraries", "users", "plugins"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -63,6 +65,8 @@ export interface SettingsSearch {
   catalogs?: true;
   /** Libraries: the library shown, "new" for one to add. */
   library?: string;
+  /** Users: the user shown, "new" for one to add. */
+  user?: string;
 }
 
 export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
@@ -74,6 +78,7 @@ export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
     plugin: str(s.plugin),
     catalogs: s.catalogs === true ? true : undefined,
     library: str(s.library),
+    user: str(s.user),
   };
 }
 
@@ -324,6 +329,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen && <DevicesSection key={chosen.server.id} server={chosen.server} />;
     case "libraries":
       return chosen?.admin && <LibrariesSection key={chosen.server.id} server={chosen.server} />;
+    case "users":
+      return chosen?.admin && <UsersSection key={chosen.server.id} server={chosen.server} />;
     case "plugins":
       return chosen?.admin && <PluginsSection key={chosen.server.id} server={chosen.server} />;
   }

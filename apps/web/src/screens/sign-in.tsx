@@ -691,6 +691,102 @@ function Setup({ info }: { info: ServerInfo }) {
   );
 }
 
+/**
+ * An invitation of the serving server (docs/accounts.md §4.3), its token
+ * in the address's fragment: the invitee chooses a name, unless it
+ * converts a managed user, and a password or a passkey, and is signed in
+ * as the member made.
+ */
+export function InviteScreen() {
+  const servers = useServersStore();
+  const navigate = useNavigate();
+  const home = useHomeInfo();
+  const look = useLayoutLook();
+  const token = decodeURIComponent(location.hash.replace(/^#/, ""));
+  const invitation = useQuery({
+    queryKey: ["invitation", servers.home, token],
+    queryFn: () => servers.getInvitation(token),
+    enabled: !!token && !servers.app,
+    retry: false,
+  });
+  const { busy, error, run } = useRun();
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const info = home.data;
+  if (servers.app) return <Navigate to="/" replace />;
+  if (!info || (token && invitation.isPending)) {
+    return (
+      <Screen>
+        <Pending error={home.error} onRetry={() => void home.refetch()} />
+      </Screen>
+    );
+  }
+  const subtitle = `${t("auth.standaloneServer")} · ${info.url}`;
+  if (!token || invitation.isError) {
+    return (
+      <Screen>
+        <Steps title={t("auth.invitationInvalid")} subtitle={subtitle}>
+          <p className={look.body}>{t("auth.invitationInvalidMessage")}</p>
+          <Action onClick={() => void navigate({ to: "/sign-in" })}>{t("auth.signIn")}</Action>
+        </Steps>
+      </Screen>
+    );
+  }
+  const converting = invitation.data?.userName ?? "";
+  const done = () => void navigate({ to: "/", replace: true });
+  return (
+    <Screen>
+      <Steps title={t("auth.joinServer", { server: info.name })} subtitle={subtitle}>
+        <form
+          className={`flex flex-col ${look.stack}`}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run(async () => (await servers.acceptInvitation(token, converting ? "" : name.trim(), password), done()));
+          }}
+        >
+          <p className={look.body}>
+            {converting ? t("auth.invitationConvertMessage", { name: converting }) : t("auth.invitationMessage")}
+          </p>
+          {converting ? (
+            <Fields
+              fields={[
+                {
+                  label: t("auth.password"),
+                  type: "password",
+                  value: password,
+                  onChange: (e) => setPassword(e.target.value),
+                  autoComplete: "new-password",
+                  autoFocus: look.layout !== "tv",
+                  required: true,
+                },
+              ]}
+            />
+          ) : (
+            <Credentials name={name} password={password} setName={setName} setPassword={setPassword} creating />
+          )}
+          {error && <p className="text-[15px] text-danger">{error}</p>}
+          <Action type="submit" disabled={busy || (!converting && !name.trim()) || !password}>
+            {t("auth.createAccount")}
+          </Action>
+          {passkeysHere(info.url) && (
+            <>
+              <Or />
+              <Action
+                variant="secondary"
+                icon="key"
+                disabled={busy || (!converting && !name.trim())}
+                onClick={() => run(async () => (await servers.acceptInvitationWithPasskey(token, converting ? "" : name.trim()), done()))}
+              >
+                {t("auth.createWithPasskey")}
+              </Action>
+            </>
+          )}
+        </form>
+      </Steps>
+    </Screen>
+  );
+}
+
 /** Where mavio.dev comes back to with the code of a sign-in. */
 export function CallbackScreen() {
   const servers = useServersStore();
