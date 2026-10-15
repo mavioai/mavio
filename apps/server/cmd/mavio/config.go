@@ -86,6 +86,7 @@ var settings = []setting{
 	{key: "certificate-dir", path: true, usage: "directory of the server's mavio.site certificate in mavio.dev mode; empty obtains none", def: under("certificates")},
 	{key: "acme-directories", usage: "comma-separated ACME directory URLs the mavio.site certificate is obtained from, tried in order", def: constant(certs.LetsEncrypt + "," + certs.GoogleTrustServices)},
 	{key: "claim-token", usage: "claim code from mavio.dev/claim, which claims an unclaimed server when it starts", def: constant("")},
+	{key: "open-browser", usage: "open the setup in the default browser when a new server starts on a desktop", def: constant("true")},
 	{key: "dev", usage: "serve the development player at /dev/player", def: constant("false")},
 	{key: "dev-library", path: true, usage: "add the Movies and Shows folders of this directory as libraries, e.g. .fixtures/dev-library", def: constant("")},
 }
@@ -111,8 +112,8 @@ type options struct {
 func defineFlags(flags *pflag.FlagSet) {
 	flags.String("home", "", "Mavio home holding "+configName+", the database, plugins, metadata, backups and cache (default ~/"+homeName+")")
 	for _, s := range settings {
-		if s.key == "dev" {
-			flags.Bool(s.key, false, s.usage)
+		if s.key == "dev" || s.key == "open-browser" {
+			flags.Bool(s.key, s.def("", &server.Config{}) == "true", s.usage)
 			continue
 		}
 		flags.String(s.key, "", s.usage+defaultHelp(s))
@@ -253,14 +254,14 @@ func assign(o *options, key, value string) error {
 		}
 		return nil
 	}
-	if key == "dev" {
+	if b := map[string]*bool{"dev": &cfg.Dev, "open-browser": &cfg.OpenBrowser}[key]; b != nil {
 		switch strings.ToLower(value) {
 		case "true", "1", "yes":
-			cfg.Dev = true
+			*b = true
 		case "false", "0", "no", "":
-			cfg.Dev = false
+			*b = false
 		default:
-			return fmt.Errorf("dev: %q is not a boolean", value)
+			return fmt.Errorf("%s: %q is not a boolean", key, value)
 		}
 		return nil
 	}

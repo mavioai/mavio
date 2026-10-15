@@ -25,7 +25,7 @@ func TestMavioDevMode(t *testing.T) {
 	dev := cloudtest.New(t)
 	key := identity.Generate()
 	h, st := newHandler(t, nil, func(o *httpserver.Options) {
-		o.Claim = (&cloud.Claimer{Store: o.Store, Client: cloud.NewClient(dev.URL, key, nil)}).Claim
+		claimer(t, o, dev, key)
 		o.Assertions = cloud.NewVerifier(dev.URL, key.ID(), cloud.NewKeySet(dev.URL, nil))
 		o.MavioDevURL = dev.URL
 	})
@@ -41,17 +41,14 @@ func TestMavioDevMode(t *testing.T) {
 	}
 
 	// A server whose setup has not chosen a mode takes no assertions, and
-	// tells where its setup gets claim codes.
+	// tells where its setup claims it.
 	_, err := signIn("acct-1", "phone")
 	wantCode(t, "assertion before setup", err, connect.CodeFailedPrecondition)
 	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetMavioDevUrl() != dev.URL {
 		t.Errorf("GetAuthInfo before setup = %v, %v; want the mavio.dev URL", info, err)
 	}
 
-	dev.AddClaimCode("code", cloudv1.Account_builder{Id: new("acct-1"), UserName: new("alice")}.Build())
-	if _, err := public.ClaimServer(ctx, authv1.ClaimServerRequest_builder{ClaimCode: new("code")}.Build()); err != nil {
-		t.Fatal(err)
-	}
+	claim(t, public, dev, cloudv1.Account_builder{Id: new("acct-1"), UserName: new("alice")}.Build())
 	if info, err := public.GetAuthInfo(ctx, &authv1.GetAuthInfoRequest{}); err != nil || info.GetMavioDevUrl() != dev.URL {
 		t.Errorf("GetAuthInfo in mavio.dev mode = %v, %v; want the mavio.dev URL", info, err)
 	}

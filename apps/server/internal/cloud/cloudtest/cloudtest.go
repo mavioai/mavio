@@ -1,6 +1,6 @@
 // Package cloudtest simulates mavio.dev's API for servers in tests: it
-// checks the JWTs servers sign, claims servers with claim codes, keeps
-// their changes and libraries, sends notices on their WebSockets, and
+// checks the JWTs servers sign, claims servers with claim codes and claim
+// requests, keeps their changes, libraries and connections, sends notices on their WebSockets, and
 // signs sign-in assertions with the key it publishes.
 package cloudtest
 
@@ -36,16 +36,26 @@ type Server struct {
 
 	key ed25519.PrivateKey
 
-	mu      sync.Mutex
-	codes   map[string]*cloudv1.Account
-	servers map[string]*server
-	relays  []*cloudv1.Relay
+	mu       sync.Mutex
+	codes    map[string]*cloudv1.Account
+	requests map[string]*claimRequest
+	servers  map[string]*server
+	relays   []*cloudv1.Relay
+}
+
+// claimRequest is a claim request, with the account that confirmed it.
+type claimRequest struct {
+	serverID string
+	key      ed25519.PublicKey
+	request  *cloudv1.CreateClaimRequestRequest
+	account  *cloudv1.Account
 }
 
 type server struct {
 	key       ed25519.PublicKey
 	changes   []*cloudv1.Change
 	libraries []*cloudv1.Library
+	urls      []string
 	txt       []string
 	region    string
 	conns     map[*websocket.Conn]struct{}
@@ -63,7 +73,7 @@ type tokenKey struct{}
 // New starts a simulated mavio.dev, stopped at the end of the test.
 func New(t testing.TB) *Server {
 	_, key, _ := ed25519.GenerateKey(rand.Reader)
-	s := &Server{key: key, codes: map[string]*cloudv1.Account{}, servers: map[string]*server{}}
+	s := &Server{key: key, codes: map[string]*cloudv1.Account{}, requests: map[string]*claimRequest{}, servers: map[string]*server{}}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api"+cloud.JWKSPath, s.jwks)
 	path, h := cloudv1connect.NewServerServiceHandler(s)
@@ -83,6 +93,41 @@ func (s *Server) AddClaimCode(code string, account *cloudv1.Account) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.codes[code] = account
+}
+
+// ClaimRequest returns the claim request with an ID, as the server asked
+// for it, and whether it exists.
+func (s *Server) ClaimRequest(id string) (*cloudv1.CreateClaimRequestRequest, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	r, ok := s.requests[id]
+	if !ok {
+		return nil, false
+	}
+	return r.request, true
+}
+
+// ConfirmClaimRequest confirms the claim request with an ID for account,
+// reporting whether it exists.
+func (s *Server) ConfirmClaimRequest(id string, account *cloudv1.Account) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	r, ok := s.requests[id]
+	if ok {
+		r.account = account
+		s.register(r.serverID, r.key)
+	}
+	return ok
+}
+
+// URLs returns the connections the server with an ID published.
+func (s *Server) URLs(serverID string) []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if srv := s.servers[serverID]; srv != nil {
+		return srv.urls
+	}
+	return nil
 }
 
 // AddChange adds a change for the server with an ID, nil for one of no
@@ -158,6 +203,18 @@ func (s *Server) PublishLibraries(ctx context.Context, req *cloudv1.PublishLibra
 	defer s.mu.Unlock()
 	srv.libraries = req.GetLibraries()
 	return &cloudv1.PublishLibrariesResponse{}, nil
+}
+
+// PublishConnections replaces a claimed server's URLs.
+func (s *Server) PublishConnections(ctx context.Context, req *cloudv1.PublishConnectionsRequest) (*cloudv1.PublishConnectionsResponse, error) {
+	srv, err := s.claimed(ctx)
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	srv.urls = req.GetUrls()
+	return &cloudv1.PublishConnectionsResponse{}, nil
 }
 
 // SetAcmeChallenge keeps a claimed server's TXT values.
@@ -270,7 +327,25 @@ func (s *Server) Disconnect(serverID string) {
 	}
 }
 
-// ClaimServer claims a server with a claim code.
+// CreateClaimRequest keeps a claim request until a test confirms it.
+func (s *Server) CreateClaimRequest(ctx context.Context, req *cloudv1.CreateClaimRequestRequest) (*cloudv1.CreateClaimRequestResponse, error) {
+	id, err := s.verify(ctx, req.GetPublicKey())
+	if err != nil {
+		return nil, err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	requestID := rand.Text()
+	s.requests[requestID] = &claimRequest{serverID: id, key: req.GetPublicKey(), request: req}
+	return cloudv1.CreateClaimRequestResponse_builder{
+		ClaimRequest: &requestID,
+		Url:          new(strings.TrimSuffix(s.URL, "/api") + "/claim?request=" + requestID),
+		ExpireTime:   timestamppb.New(time.Now().Add(15 * time.Minute)),
+	}.Build(), nil
+}
+
+// ClaimServer claims a server with a claim code or a confirmed claim
+// request.
 func (s *Server) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerRequest) (*cloudv1.ClaimServerResponse, error) {
 	id, err := s.verify(ctx, req.GetPublicKey())
 	if err != nil {
@@ -278,18 +353,36 @@ func (s *Server) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerReques
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	account, ok := s.codes[req.GetClaimCode()]
-	if !ok {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("unknown claim code"))
+	var account *cloudv1.Account
+	if r := req.GetClaimRequest(); r != "" {
+		cr, ok := s.requests[r]
+		if !ok || cr.serverID != id {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("unknown claim request"))
+		}
+		if cr.account == nil {
+			return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("the claim request is not confirmed yet"))
+		}
+		account = cr.account
+	} else {
+		var ok bool
+		if account, ok = s.codes[req.GetClaimCode()]; !ok {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("unknown claim code"))
+		}
+		delete(s.codes, req.GetClaimCode())
 	}
-	delete(s.codes, req.GetClaimCode())
-	srv := s.servers[id]
-	if srv == nil {
-		srv = &server{key: req.GetPublicKey(), conns: map[*websocket.Conn]struct{}{}}
-		s.servers[id] = srv
-	}
+	srv := s.register(id, req.GetPublicKey())
 	cursor := int64(len(srv.changes))
 	return cloudv1.ClaimServerResponse_builder{Administrator: account, Cursor: &cursor}.Build(), nil
+}
+
+// register returns the server with an ID, registering it first.
+func (s *Server) register(id string, key ed25519.PublicKey) *server {
+	srv := s.servers[id]
+	if srv == nil {
+		srv = &server{key: key, conns: map[*websocket.Conn]struct{}{}}
+		s.servers[id] = srv
+	}
+	return srv
 }
 
 // ListChanges gives a claimed server's changes after a cursor.

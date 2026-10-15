@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -130,6 +131,49 @@ func TestClaimUnreachable(t *testing.T) {
 	}
 }
 
+func TestClaimRequest(t *testing.T) {
+	ctx := t.Context()
+	st := openStore(t)
+	dev := cloudtest.New(t)
+	key := identity.Generate()
+	claims := 0
+	c := &cloud.Claimer{Store: st, Client: cloud.NewClient(dev.URL, key, nil), PollInterval: 10 * time.Millisecond, Claimed: func() { claims++ }}
+	go c.Run(ctx)
+	r := cloud.ClaimRequest{RedirectURI: "http://localhost:8686/auth/callback", CodeChallenge: "challenge", DeviceKey: make([]byte, 32), State: "s"}
+	start := func() string {
+		t.Helper()
+		u, _, err := c.Start(ctx, r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		request, ok := strings.CutPrefix(u, strings.TrimSuffix(dev.URL, "/api")+"/claim?request=")
+		if !ok {
+			t.Fatalf("Start = %q, want mavio.dev's claim page", u)
+		}
+		return request
+	}
+
+	// A later request replaces an earlier one, which is no longer asked for.
+	first := start()
+	second := start()
+	dev.ConfirmClaimRequest(first, account("acct-9", "mallory"))
+	time.Sleep(50 * time.Millisecond)
+	if a, _ := st.Settings().Accounts(ctx); a.Claimed() {
+		t.Fatalf("settings = %+v, want unclaimed while the current request waits", a)
+	}
+	dev.ConfirmClaimRequest(second, account("acct-1", "alice"))
+	eventually(t, "the server is claimed", func() bool {
+		a, _ := st.Settings().Accounts(ctx)
+		return a.Claimed() && a.Administrator == "acct-1"
+	})
+	if u, err := st.Users().GetByAccountID(ctx, "acct-1"); err != nil || u.Kind != core.UserAdmin {
+		t.Errorf("alice = %+v, %v; want the administrator", u, err)
+	}
+	if _, _, err := c.Start(ctx, r); !errors.Is(err, cloud.ErrNotClaimable) {
+		t.Errorf("Start of a claimed server: %v, want ErrNotClaimable", err)
+	}
+}
+
 func TestLink(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
@@ -150,6 +194,7 @@ func TestLink(t *testing.T) {
 	link := cloud.NewLink(st, client, nil)
 	link.MinBackoff, link.MaxBackoff, link.PingInterval = 10*time.Millisecond, 50*time.Millisecond, 10*time.Millisecond
 	link.LibrariesInterval = 10 * time.Millisecond
+	link.Connections = func() []string { return []string{"http://192.168.1.10:8686"} }
 	link.Apply = func(_ context.Context, _ core.Store, c *cloudv1.Change) error {
 		mu.Lock()
 		defer mu.Unlock()
@@ -176,6 +221,7 @@ func TestLink(t *testing.T) {
 		t.Fatal(err)
 	}
 	eventually(t, "the new library is published", func() bool { return len(dev.Libraries(key.ID())) == 2 })
+	eventually(t, "the connections are published", func() bool { return len(dev.URLs(key.ID())) == 1 })
 
 	// A notice fetches the change it announces.
 	dev.AddChange(key.ID(), nil)

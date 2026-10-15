@@ -82,9 +82,8 @@ type Options struct {
 	// ServerInfo names the server to clients and tells plugins how it is
 	// reached.
 	ServerInfo func() rpc.ServerInfo
-	// Claim claims the server at mavio.dev with a claim code; nil claims
-	// nothing.
-	Claim func(ctx context.Context, code string) (core.User, error)
+	// StartClaim asks mavio.dev for a claim request; nil claims nothing.
+	StartClaim func(ctx context.Context, r cloud.ClaimRequest) (string, time.Time, error)
 	// Assertions checks mavio.dev's sign-in assertions, and MavioDevURL is
 	// mavio.dev's API; nil signs no one in with assertions.
 	Assertions  *cloud.Verifier
@@ -184,7 +183,7 @@ func Handler(opts Options) (http.Handler, error) {
 	authService.Activity, authService.Authenticate, authService.Requests = opts.Activity, opts.Authenticate, requestSettings
 	authService.Passkeys, authService.TOTP = passkeys, totp
 	authService.ResetPlugin, authService.StartReset = opts.ResetPlugin, opts.StartReset
-	authService.Info, authService.Claim = opts.ServerInfo, opts.Claim
+	authService.Info, authService.RequestClaim = opts.ServerInfo, opts.StartClaim
 	authService.Assertions, authService.MavioDevURL = opts.Assertions, opts.MavioDevURL
 	mux.Handle(authv1connect.NewAuthServiceHandler(authService, interceptors))
 	tasks := rpc.NewTaskService(opts.Store)

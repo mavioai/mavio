@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"sync/atomic"
 	"time"
@@ -117,6 +118,9 @@ type Config struct {
 	// ClaimToken is a claim code from mavio.dev/claim, which claims the
 	// server when it starts unclaimed; empty claims nothing.
 	ClaimToken string
+	// OpenBrowser opens the setup in the default browser when the server
+	// starts without a mode or unclaimed, on a desktop.
+	OpenBrowser bool
 	// Dev serves the development player at /dev/player.
 	Dev bool
 	// DevLibrary adds the Movies and Shows folders of the sample library
@@ -355,6 +359,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	acq.Imported = reqs.Imported
 	// The network settings decide the base URL, HTTPS and discovery.
 	https := &network.HTTPS{Host: cfg.HTTPSHost, Logger: log}
+	// mavio.dev gives the accounts that reach the server where it is.
+	link.Connections = func() []string {
+		return connections(serverID, localAddresses(), port, https.Port(), certificates != nil && certificates.Ready(), set.Get().Network.BaseURL)
+	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
@@ -366,7 +374,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			n := set.Get().Network
 			return rpc.ServerInfo{ID: serverID, Name: serverName(), Version: cfg.Version, BaseURL: n.BaseURL, HTTPPort: port, HTTPSPort: https.Port()}
 		},
-		Claim: claimer.Claim, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
+		StartClaim: claimer.Start, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
 		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})
@@ -424,6 +432,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		link.Run(ctx)
 		return nil
 	})
+	g.Go(func() error {
+		claimer.Run(ctx)
+		return nil
+	})
 	if certificates != nil {
 		g.Go(func() error {
 			certificates.Run(ctx)
@@ -444,6 +456,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			claimOnStart(ctx, log, db, claimer, cfg.ClaimToken)
 			return nil
 		})
+	} else if cfg.OpenBrowser {
+		openSetup(ctx, log, db, port)
 	}
 	g.Go(func() error {
 		if err := activityLog.Run(ctx); !errors.Is(err, context.Canceled) {
@@ -530,6 +544,35 @@ func claimOnStart(ctx context.Context, log *slog.Logger, db core.Store, claimer 
 	if _, err := claimer.Claim(ctx, code); err != nil {
 		log.ErrorContext(ctx, "claim the server with claim-token", "err", err)
 	}
+}
+
+// openSetup opens the web UI's setup in the default browser of a desktop
+// when the server needs setting up, as a new server does.
+func openSetup(ctx context.Context, log *slog.Logger, db core.Store, port int) {
+	settings, err := db.Settings().Accounts(ctx)
+	if err != nil || !cloud.Claimable(settings) || port == 0 {
+		return
+	}
+	url := fmt.Sprintf("http://localhost:%d/setup", port)
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = exec.CommandContext(ctx, "open", url)
+	case "windows":
+		cmd = exec.CommandContext(ctx, "rundll32", "url.dll,FileProtocolHandler", url)
+	default:
+		// Only a graphical session has a browser to open.
+		if os.Getenv("DISPLAY") == "" && os.Getenv("WAYLAND_DISPLAY") == "" {
+			return
+		}
+		cmd = exec.CommandContext(ctx, "xdg-open", url)
+	}
+	if err := cmd.Start(); err != nil {
+		log.DebugContext(ctx, "open the setup in a browser", "err", err)
+		return
+	}
+	log.InfoContext(ctx, "opened the setup in the browser", "url", url)
+	go func() { _ = cmd.Wait() }()
 }
 
 // addDevLibraries adds the Movies and Shows folders of dir as libraries,

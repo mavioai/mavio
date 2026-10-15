@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand/v2"
+	"strings"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -25,7 +26,7 @@ const (
 	// PingInterval is how often the server pings mavio.dev.
 	PingInterval = 30 * time.Second
 	// LibrariesInterval is how often the server checks whether its
-	// libraries changed since it published them.
+	// libraries and connections changed since it published them.
 	LibrariesInterval = time.Minute
 	// changesPage is how many changes the server fetches at a time.
 	changesPage = 500
@@ -40,8 +41,11 @@ type Link struct {
 	Client *Client
 	// Apply applies one change in the transaction that advances the
 	// cursor; nil applies nothing.
-	Apply  func(ctx context.Context, tx core.Store, c *cloudv1.Change) error
-	Logger *slog.Logger
+	Apply func(ctx context.Context, tx core.Store, c *cloudv1.Change) error
+	// Connections returns the URLs clients reach the server at, best
+	// first; nil publishes none.
+	Connections func() []string
+	Logger      *slog.Logger
 	// MinBackoff and MaxBackoff bound the wait before reconnecting,
 	// doubled after every failure, with jitter; zero uses a second and
 	// five minutes.
@@ -131,6 +135,10 @@ func (l *Link) connect(ctx context.Context) (synced bool, err error) {
 	if err != nil {
 		return true, err
 	}
+	urls, err := l.publishConnections(ctx, "")
+	if err != nil {
+		return true, err
+	}
 	ticker := time.NewTicker(or(l.SyncInterval, SyncInterval))
 	defer ticker.Stop()
 	libraries := time.NewTicker(or(l.LibrariesInterval, LibrariesInterval))
@@ -146,6 +154,9 @@ func (l *Link) connect(ctx context.Context) (synced bool, err error) {
 		case <-ticker.C:
 		case <-libraries.C:
 			if published, err = l.publish(ctx, published); err != nil {
+				return true, err
+			}
+			if urls, err = l.publishConnections(ctx, urls); err != nil {
 				return true, err
 			}
 			continue
@@ -263,6 +274,23 @@ func (l *Link) publish(ctx context.Context, last string) (string, error) {
 		return last, fmt.Errorf("publish the libraries: %w", err)
 	}
 	return fingerprint, nil
+}
+
+// publishConnections publishes the server's URLs unless they are those
+// last published, which it is given joined and returns.
+func (l *Link) publishConnections(ctx context.Context, last string) (string, error) {
+	if l.Connections == nil {
+		return last, nil
+	}
+	urls := l.Connections()
+	joined := strings.Join(urls, "\n")
+	if joined == last {
+		return last, nil
+	}
+	if err := l.Client.PublishConnections(ctx, urls); err != nil {
+		return last, fmt.Errorf("publish the connections: %w", err)
+	}
+	return joined, nil
 }
 
 func or(d, def time.Duration) time.Duration {

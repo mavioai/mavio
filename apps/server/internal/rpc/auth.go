@@ -48,7 +48,7 @@ var AuthPublicProcedures = []string{
 	authv1connect.AuthServiceGetInvitationProcedure,
 	authv1connect.AuthServiceStartInvitationPasskeyProcedure,
 	authv1connect.AuthServiceAcceptInvitationProcedure,
-	authv1connect.AuthServiceClaimServerProcedure,
+	authv1connect.AuthServiceStartClaimProcedure,
 	authv1connect.AuthServiceSignInWithAssertionProcedure,
 }
 
@@ -121,9 +121,9 @@ type AuthService struct {
 	// Requests returns the request settings, whose default permissions
 	// members joining through invitations get; nil uses the defaults.
 	Requests func() core.RequestSettings
-	// Claim claims the server at mavio.dev with a claim code (cloud.Claimer);
+	// StartClaim asks mavio.dev for a claim request (cloud.Claimer.Start);
 	// nil claims nothing.
-	Claim func(ctx context.Context, code string) (core.User, error)
+	RequestClaim func(ctx context.Context, r cloud.ClaimRequest) (string, time.Time, error)
 	// Assertions checks the sign-in assertions of mavio.dev, whose API is
 	// at MavioDevURL; nil signs no one in with them.
 	Assertions  *cloud.Verifier

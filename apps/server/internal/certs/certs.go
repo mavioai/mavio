@@ -19,8 +19,10 @@ import (
 	"log/slog"
 	mrand "math/rand/v2"
 	"net/http"
+	"net/netip"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -38,6 +40,14 @@ const Zone = "mavio.site"
 
 // Name returns the certificate name of the server whose ID is id.
 func Name(id string) string { return "*." + id + "." + Zone }
+
+// Host returns the name of an address of the server whose ID is id
+// (docs/mavio-dev.md §4.1): the address with dashes for dots and colons,
+// under the server's ID.
+func Host(id string, addr netip.Addr) string {
+	label := strings.NewReplacer(".", "-", ":", "-").Replace(addr.Unmap().WithZone("").String())
+	return label + "." + id + "." + Zone
+}
 
 // Defaults of the Manager.
 const (

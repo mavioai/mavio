@@ -64,6 +64,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.Dev {
 		t.Error("dev = true, want false")
 	}
+	if !cfg.OpenBrowser {
+		t.Error("open-browser = false, want true")
+	}
 	if cfg.RcloneCacheSize != 10<<30 {
 		t.Errorf("rclone-cache-size = %d, want %d", cfg.RcloneCacheSize, 10<<30)
 	}

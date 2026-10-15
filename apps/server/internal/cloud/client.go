@@ -51,7 +51,20 @@ func NewClient(base string, key *identity.Key, hc *http.Client) *Client {
 
 func (c *Client) token() string { return Token(c.key, c.base, c.now()) }
 
-// ClaimServer registers the server under the account of a claim code.
+// CreateClaimRequest asks for a claim request an account confirms.
+func (c *Client) CreateClaimRequest(ctx context.Context, req *cloudv1.CreateClaimRequestRequest) (*cloudv1.CreateClaimRequestResponse, error) {
+	return c.api.CreateClaimRequest(ctx, req)
+}
+
+// PublishConnections replaces the URLs mavio.dev gives clients of the
+// server.
+func (c *Client) PublishConnections(ctx context.Context, urls []string) error {
+	_, err := c.api.PublishConnections(ctx, cloudv1.PublishConnectionsRequest_builder{Urls: urls}.Build())
+	return err
+}
+
+// ClaimServer registers the server under the account of a claim code or
+// a claim request.
 func (c *Client) ClaimServer(ctx context.Context, req *cloudv1.ClaimServerRequest) (*cloudv1.ClaimServerResponse, error) {
 	return c.api.ClaimServer(ctx, req)
 }
