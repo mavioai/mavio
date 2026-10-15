@@ -104,7 +104,7 @@ function TvSearch() {
   const key = "tv-pill flex items-center justify-center rounded-lg bg-fill type-headline";
   return (
     <div className="flex items-start gap-gutter pl-margin">
-      <div role="search" onKeyDown={onKeyDown} className="sticky top-12 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
+      <div role="search" data-focus-region onKeyDown={onKeyDown} className="sticky top-12 flex w-[clamp(300px,30vw,480px)] shrink-0 flex-col gap-4">
         <div aria-live="polite" className="flex min-h-16 items-center gap-3 rounded-lg bg-surface-raised px-5">
           <Icon name="search" className="shrink-0 text-text-secondary" />
           {/* The caret shows where the keyboard types, wherever focus is. */}
@@ -135,7 +135,7 @@ function TvSearch() {
         </div>
       </div>
       {/* Its rows and grids keep only a little room for a focused card to grow. */}
-      <div className="min-w-0 flex-1" style={{ "--mavio-layout-margin": "24px" } as CSSProperties}>
+      <div data-focus-region className="min-w-0 flex-1" style={{ "--mavio-layout-margin": "24px" } as CSSProperties}>
         {q === "" ? <Suggestions /> : <Results q={q} results={results} grid />}
       </div>
     </div>

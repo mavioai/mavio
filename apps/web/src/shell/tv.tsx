@@ -40,7 +40,7 @@ export function TvShell() {
             aria-hidden
             className={`absolute inset-0 bg-background transition-opacity duration-200 ${scrolled ? "opacity-100" : "opacity-0"}`}
           />
-          <div className="relative flex w-full items-center justify-center">
+          <div data-focus-region="tabs" className="relative flex w-full items-center justify-center">
             <nav data-tv-tabs aria-label={t("nav.navigation")} className="pointer-events-auto flex gap-1 rounded-full bg-surface-raised/60 p-1.5 backdrop-blur-xl">
               {tabs.map((d) => (
                 <Link

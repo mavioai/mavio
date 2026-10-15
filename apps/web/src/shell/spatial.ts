@@ -1,5 +1,6 @@
-// Focus that moves with the arrow keys to the nearest element in their
-// direction, as a remote moves it on a television (docs/tv.md).
+// Focus that moves with the arrow keys by rows, as a remote moves it on a
+// television (docs/tv.md §4); where it cannot move, the focused element
+// shakes.
 import { useEffect } from "react";
 
 type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
@@ -65,6 +66,103 @@ export function nearest(from: DOMRect, dir: Direction, candidates: HTMLElement[]
   return best;
 }
 
+type Box = { el: HTMLElement; r: DOMRect };
+
+/** Whether two boxes lie side by side, overlapping by half the smaller's height. */
+function sideBySide(a: DOMRect, b: DOMRect): boolean {
+  return Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) >= Math.min(a.height, b.height) / 2;
+}
+
+/**
+ * The rows the elements form, from the top: the elements side by side,
+ * each row from left to right, those a row scrolls out of view included.
+ */
+export function rowsOf(els: HTMLElement[]): Box[][] {
+  const boxes = els.map((el) => ({ el, r: el.getBoundingClientRect() })).sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
+  const rows: Box[][] = [];
+  for (const b of boxes) {
+    const row = rows.find((row) => sideBySide(row[0].r, b.r));
+    if (row) row.push(b);
+    else rows.push([b]);
+  }
+  return rows.map((row) => row.sort((a, b) => a.r.left - b.r.left));
+}
+
+/** Whether an element is in view across its row, which may scroll it out. */
+function shown(b: Box): boolean {
+  const box = b.el.closest(".scroll-row")?.getBoundingClientRect() ?? { left: 0, right: innerWidth };
+  const x = (b.r.left + b.r.right) / 2;
+  return x >= box.left && x <= box.right;
+}
+
+/** Of a row's elements in view, the one nearest x across. */
+function closestTo(row: Box[], x: number): HTMLElement {
+  const pool = row.some(shown) ? row.filter(shown) : row;
+  const at = (b: Box) => Math.abs((b.r.left + b.r.right) / 2 - x);
+  return pool.reduce((a, b) => (at(b) < at(a) ? b : a)).el;
+}
+
+/** A row's first or last element in view. */
+function endOf(row: Box[], last: boolean): HTMLElement {
+  const pool = row.some(shown) ? row.filter(shown) : row;
+  return (last ? pool[pool.length - 1] : pool[0]).el;
+}
+
+/** The part of the screen focus moves within: a marked region, else the page. */
+function regionOf(el: HTMLElement): Element {
+  return el.closest("[data-focus-region]") ?? el.closest("main") ?? document.body;
+}
+
+/**
+ * Where focus goes from active (docs/tv.md §4). Up and down go to the
+ * row above or below, to its element nearest across; left and right move
+ * along the row, and from its ends to the last element in view of the row
+ * above or the first of the row below, unless another region lies beside,
+ * as the search's keyboard beside its results. Above the first row are the
+ * tabs, at the current one. Undefined when there is nowhere to go.
+ */
+export function moveFrom(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: Element): HTMLElement | undefined {
+  const region = regionOf(active);
+  const rows = rowsOf(all.filter((el) => regionOf(el) === region));
+  const ri = rows.findIndex((row) => row.some((b) => b.el === active));
+  const row = rows[ri];
+  const i = row.findIndex((b) => b.el === active);
+  const here = row[i].r;
+  const x = (here.left + here.right) / 2;
+  const inTabs = tabs !== undefined && region === tabs;
+  // Below the tabs is the page.
+  const below = inTabs ? rowsOf(all.filter((el) => !tabs.contains(el)))[0] : rows[ri + 1];
+  const above = () => {
+    if (!tabs || inTabs) return undefined;
+    const items = all.filter((el) => tabs.contains(el));
+    return items.find((el) => el.matches("[data-status=active]")) ?? (items.length ? closestTo(rowsOf(items)[0], x) : undefined);
+  };
+  switch (dir) {
+    case "ArrowUp":
+      return rows[ri - 1] ? closestTo(rows[ri - 1], x) : above();
+    case "ArrowDown":
+      return below && closestTo(below, x);
+    case "ArrowLeft":
+    case "ArrowRight": {
+      const right = dir === "ArrowRight";
+      const along = row[i + (right ? 1 : -1)];
+      if (along) return along.el;
+      const beside = !inTabs && nearest(here, dir, all.filter((el) => regionOf(el) !== region && !tabs?.contains(el)));
+      if (beside) return beside;
+      if (right) return below && endOf(below, false);
+      return rows[ri - 1] ? endOf(rows[ri - 1], true) : above();
+    }
+  }
+}
+
+/** Shakes an element briefly, where focus cannot move. */
+function shake(el: HTMLElement) {
+  el.classList.remove("tv-shake");
+  void el.offsetWidth;
+  el.classList.add("tv-shake");
+  el.addEventListener("animationend", () => el.classList.remove("tv-shake"), { once: true });
+}
+
 /** Moves focus with the arrow keys; Back is the shell's (back.ts). */
 export function useSpatialNavigation() {
   useEffect(() => {
@@ -85,15 +183,14 @@ export function useSpatialNavigation() {
         (scope ? all[0] : (document.querySelector<HTMLElement>("main " + focusable.split(",")[0]) ?? all[0]))?.focus();
         return;
       }
-      const next = nearest(
-        active.getBoundingClientRect(),
-        e.key as Direction,
-        all.filter((el) => el !== active && !el.contains(active) && !active.contains(el)),
-      );
-      if (next) {
-        next.focus({ preventScroll: true });
-        next.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+      const tabs = scope ? undefined : (document.querySelector("[data-focus-region=tabs]") ?? undefined);
+      const next = moveFrom(active, e.key as Direction, all, tabs);
+      if (!next) {
+        shake(active);
+        return;
       }
+      next.focus({ preventScroll: true });
+      next.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);

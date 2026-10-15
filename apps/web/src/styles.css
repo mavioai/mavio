@@ -130,6 +130,21 @@
   animation: blink 1s step-end infinite;
 }
 
+@keyframes shake {
+  20% {
+    translate: -10px 0;
+  }
+  40% {
+    translate: 8px 0;
+  }
+  60% {
+    translate: -5px 0;
+  }
+  80% {
+    translate: 3px 0;
+  }
+}
+
 @keyframes fade {
   from {
     opacity: 0;
@@ -215,6 +230,11 @@ body {
     outline: 3px solid var(--mavio-color-accent);
     outline-offset: 1.5px;
     box-shadow: 0 12px 32px var(--mavio-color-tv-focus-shadow);
+  }
+  /* Focus that cannot move shakes the focused element, by translate so
+     that a card keeps its scale. */
+  & .tv-shake {
+    animation: shake 320ms ease-out;
   }
   & :is(input, select, textarea):focus {
     box-shadow: 0 0 0 3px #fff;
