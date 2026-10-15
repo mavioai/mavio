@@ -7,6 +7,8 @@
     <string name="nav_libraries">Libraries</string>
     <!-- Top-level destination searching every library. -->
     <string name="nav_search">Search</string>
+    <!-- Top-level destination of titles to discover and request, which the user's servers may not have. -->
+    <string name="nav_discover">Discover</string>
     <!-- Top-level destination of the items downloaded for offline playback. -->
     <string name="nav_downloads">Downloads</string>
     <!-- Top-level destination of the signed-in user, with settings. -->
@@ -61,6 +63,63 @@
     <string name="home_more">See All</string>
     <!-- Line beside the Trending shelf: titles the user's servers do not have. -->
     <string name="home_not_on_servers">Not on your servers yet</string>
+    <!-- Row of Discover: movies and series of current interest. -->
+    <string name="discover_trending">Trending</string>
+    <!-- Row of Discover: popular movies. -->
+    <string name="discover_popular_movies">Popular Movies</string>
+    <!-- Row of Discover: popular series. -->
+    <string name="discover_popular_series">Popular Series</string>
+    <!-- Row of Discover: movies to be released. -->
+    <string name="discover_upcoming_movies">Upcoming Movies</string>
+    <!-- Row of Discover: series to premiere. -->
+    <string name="discover_upcoming_series">Upcoming Series</string>
+    <!-- Row of Discover: the best rated movies. -->
+    <string name="discover_top_rated_movies">Top Rated Movies</string>
+    <!-- Row of Discover: the best rated series. -->
+    <string name="discover_top_rated_series">Top Rated Series</string>
+    <!-- Row of a discovered title: titles recommended to those who liked it. -->
+    <string name="discover_recommendations">Recommendations</string>
+    <!-- Row of a discovered title: titles like it. -->
+    <string name="discover_similar">Similar Titles</string>
+    <!-- Kind of a discovered title, under its name on a card. -->
+    <string name="discover_movie">Movie</string>
+    <!-- Kind of a discovered title, under its name on a card. -->
+    <string name="discover_series">Series</string>
+    <!-- Title shown when no server offers titles to discover. -->
+    <string name="discover_not_set_up">Discovery Isn\'t Set Up</string>
+    <!-- Shown under discover.notSetUp. -->
+    <string name="discover_not_set_up_message">Install a discovery plugin, such as TMDB, on your server.</string>
+    <!-- Status of a title the server has. -->
+    <string name="discover_available">Available</string>
+    <!-- Status of a series some of whose requested episodes the server has. -->
+    <string name="discover_partially_available">Partially Available</string>
+    <!-- Status of a title whose request waits for approval. -->
+    <string name="discover_requested">Requested</string>
+    <!-- Status of a title approved and being found and downloaded. -->
+    <string name="discover_processing">Processing</string>
+    <!-- Status of a title administrators blocked from being requested. -->
+    <string name="discover_blocklisted">Blocklisted</string>
+    <!-- Button requesting a movie, or the seasons of a series, for the server to find and download. -->
+    <string name="discover_request">Request</string>
+    <!-- Button requesting more seasons of a series some of which are requested or available. -->
+    <string name="discover_request_more">Request More</string>
+    <!-- Title of the dialog choosing the seasons of a series to request; name is the series'. -->
+    <string name="discover_request_title">Request %s</string>
+    <!-- Choice of the request dialog: every season not requested yet. -->
+    <string name="discover_all_seasons">All Seasons</string>
+    <!-- Name of a season of a discovered series. -->
+    <string name="discover_season">Season %s</string>
+    <!-- Name of the season of a series' specials. -->
+    <string name="discover_specials">Specials</string>
+    <!-- Button of the request dialog requesting the seasons chosen. -->
+    <plurals name="discover_request_seasons">
+        <item quantity="one">Request %d Season</item>
+        <item quantity="other">Request %d Seasons</item>
+    </plurals>
+    <!-- Button opening a discovered title in its library. -->
+    <string name="discover_watch">Watch</string>
+    <!-- Shown when a request fails; reason is the server's. -->
+    <string name="discover_request_failed">Couldn\'t request it: %s</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->

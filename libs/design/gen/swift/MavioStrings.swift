@@ -15,6 +15,9 @@ public enum MavioStrings {
     /// Top-level destination searching every library.
     public static var navSearch: String { NSLocalizedString("nav.search", bundle: .module, comment: "") }
 
+    /// Top-level destination of titles to discover and request, which the user's servers may not have.
+    public static var navDiscover: String { NSLocalizedString("nav.discover", bundle: .module, comment: "") }
+
     /// Top-level destination of the items downloaded for offline playback.
     public static var navDownloads: String { NSLocalizedString("nav.downloads", bundle: .module, comment: "") }
 
@@ -123,6 +126,95 @@ public enum MavioStrings {
 
     /// Line beside the Trending shelf: titles the user's servers do not have.
     public static var homeNotOnServers: String { NSLocalizedString("home.notOnServers", bundle: .module, comment: "") }
+
+    /// Row of Discover: movies and series of current interest.
+    public static var discoverTrending: String { NSLocalizedString("discover.trending", bundle: .module, comment: "") }
+
+    /// Row of Discover: popular movies.
+    public static var discoverPopularMovies: String { NSLocalizedString("discover.popularMovies", bundle: .module, comment: "") }
+
+    /// Row of Discover: popular series.
+    public static var discoverPopularSeries: String { NSLocalizedString("discover.popularSeries", bundle: .module, comment: "") }
+
+    /// Row of Discover: movies to be released.
+    public static var discoverUpcomingMovies: String { NSLocalizedString("discover.upcomingMovies", bundle: .module, comment: "") }
+
+    /// Row of Discover: series to premiere.
+    public static var discoverUpcomingSeries: String { NSLocalizedString("discover.upcomingSeries", bundle: .module, comment: "") }
+
+    /// Row of Discover: the best rated movies.
+    public static var discoverTopRatedMovies: String { NSLocalizedString("discover.topRatedMovies", bundle: .module, comment: "") }
+
+    /// Row of Discover: the best rated series.
+    public static var discoverTopRatedSeries: String { NSLocalizedString("discover.topRatedSeries", bundle: .module, comment: "") }
+
+    /// Row of a discovered title: titles recommended to those who liked it.
+    public static var discoverRecommendations: String { NSLocalizedString("discover.recommendations", bundle: .module, comment: "") }
+
+    /// Row of a discovered title: titles like it.
+    public static var discoverSimilar: String { NSLocalizedString("discover.similar", bundle: .module, comment: "") }
+
+    /// Kind of a discovered title, under its name on a card.
+    public static var discoverMovie: String { NSLocalizedString("discover.movie", bundle: .module, comment: "") }
+
+    /// Kind of a discovered title, under its name on a card.
+    public static var discoverSeries: String { NSLocalizedString("discover.series", bundle: .module, comment: "") }
+
+    /// Title shown when no server offers titles to discover.
+    public static var discoverNotSetUp: String { NSLocalizedString("discover.notSetUp", bundle: .module, comment: "") }
+
+    /// Shown under discover.notSetUp.
+    public static var discoverNotSetUpMessage: String { NSLocalizedString("discover.notSetUpMessage", bundle: .module, comment: "") }
+
+    /// Status of a title the server has.
+    public static var discoverAvailable: String { NSLocalizedString("discover.available", bundle: .module, comment: "") }
+
+    /// Status of a series some of whose requested episodes the server has.
+    public static var discoverPartiallyAvailable: String { NSLocalizedString("discover.partiallyAvailable", bundle: .module, comment: "") }
+
+    /// Status of a title whose request waits for approval.
+    public static var discoverRequested: String { NSLocalizedString("discover.requested", bundle: .module, comment: "") }
+
+    /// Status of a title approved and being found and downloaded.
+    public static var discoverProcessing: String { NSLocalizedString("discover.processing", bundle: .module, comment: "") }
+
+    /// Status of a title administrators blocked from being requested.
+    public static var discoverBlocklisted: String { NSLocalizedString("discover.blocklisted", bundle: .module, comment: "") }
+
+    /// Button requesting a movie, or the seasons of a series, for the server to find and download.
+    public static var discoverRequest: String { NSLocalizedString("discover.request", bundle: .module, comment: "") }
+
+    /// Button requesting more seasons of a series some of which are requested or available.
+    public static var discoverRequestMore: String { NSLocalizedString("discover.requestMore", bundle: .module, comment: "") }
+
+    /// Title of the dialog choosing the seasons of a series to request; name is the series'.
+    public static func discoverRequestTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.requestTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Choice of the request dialog: every season not requested yet.
+    public static var discoverAllSeasons: String { NSLocalizedString("discover.allSeasons", bundle: .module, comment: "") }
+
+    /// Name of a season of a discovered series.
+    public static func discoverSeason(number: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.season", bundle: .module, comment: ""), number)
+    }
+
+    /// Name of the season of a series' specials.
+    public static var discoverSpecials: String { NSLocalizedString("discover.specials", bundle: .module, comment: "") }
+
+    /// Button of the request dialog requesting the seasons chosen.
+    public static func discoverRequestSeasons(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.requestSeasons", bundle: .module, comment: ""), count)
+    }
+
+    /// Button opening a discovered title in its library.
+    public static var discoverWatch: String { NSLocalizedString("discover.watch", bundle: .module, comment: "") }
+
+    /// Shown when a request fails; reason is the server's.
+    public static func discoverRequestFailed(reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.requestFailed", bundle: .module, comment: ""), reason)
+    }
 
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }

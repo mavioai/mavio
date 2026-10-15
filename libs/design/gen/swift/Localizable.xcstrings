@@ -55,6 +55,24 @@
         }
       }
     },
+    "nav.discover": {
+      "comment": "Top-level destination of titles to discover and request, which the user's servers may not have.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discover"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现"
+          }
+        }
+      }
+    },
     "nav.downloads": {
       "comment": "Top-level destination of the items downloaded for offline playback.",
       "extractionState": "manual",
@@ -537,6 +555,510 @@
           "stringUnit": {
             "state": "translated",
             "value": "还不在你的服务器上"
+          }
+        }
+      }
+    },
+    "discover.trending": {
+      "comment": "Row of Discover: movies and series of current interest.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trending"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门趋势"
+          }
+        }
+      }
+    },
+    "discover.popularMovies": {
+      "comment": "Row of Discover: popular movies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popular Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门电影"
+          }
+        }
+      }
+    },
+    "discover.popularSeries": {
+      "comment": "Row of Discover: popular series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Popular Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门剧集"
+          }
+        }
+      }
+    },
+    "discover.upcomingMovies": {
+      "comment": "Row of Discover: movies to be released.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upcoming Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即将上映"
+          }
+        }
+      }
+    },
+    "discover.upcomingSeries": {
+      "comment": "Row of Discover: series to premiere.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upcoming Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即将开播"
+          }
+        }
+      }
+    },
+    "discover.topRatedMovies": {
+      "comment": "Row of Discover: the best rated movies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Rated Movies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高分电影"
+          }
+        }
+      }
+    },
+    "discover.topRatedSeries": {
+      "comment": "Row of Discover: the best rated series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top Rated Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高分剧集"
+          }
+        }
+      }
+    },
+    "discover.recommendations": {
+      "comment": "Row of a discovered title: titles recommended to those who liked it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recommendations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐"
+          }
+        }
+      }
+    },
+    "discover.similar": {
+      "comment": "Row of a discovered title: titles like it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar Titles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类似作品"
+          }
+        }
+      }
+    },
+    "discover.movie": {
+      "comment": "Kind of a discovered title, under its name on a card.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movie"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "电影"
+          }
+        }
+      }
+    },
+    "discover.series": {
+      "comment": "Kind of a discovered title, under its name on a card.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Series"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剧集"
+          }
+        }
+      }
+    },
+    "discover.notSetUp": {
+      "comment": "Title shown when no server offers titles to discover.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discovery Isn't Set Up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未设置发现"
+          }
+        }
+      }
+    },
+    "discover.notSetUpMessage": {
+      "comment": "Shown under discover.notSetUp.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install a discovery plugin, such as TMDB, on your server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在服务器上安装 TMDB 等发现插件后即可使用。"
+          }
+        }
+      }
+    },
+    "discover.available": {
+      "comment": "Status of a title the server has.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可观看"
+          }
+        }
+      }
+    },
+    "discover.partiallyAvailable": {
+      "comment": "Status of a series some of whose requested episodes the server has.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partially Available"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分可观看"
+          }
+        }
+      }
+    },
+    "discover.requested": {
+      "comment": "Status of a title whose request waits for approval.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requested"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已请求"
+          }
+        }
+      }
+    },
+    "discover.processing": {
+      "comment": "Status of a title approved and being found and downloaded.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processing"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "处理中"
+          }
+        }
+      }
+    },
+    "discover.blocklisted": {
+      "comment": "Status of a title administrators blocked from being requested.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocklisted"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已屏蔽"
+          }
+        }
+      }
+    },
+    "discover.request": {
+      "comment": "Button requesting a movie, or the seasons of a series, for the server to find and download.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求"
+          }
+        }
+      }
+    },
+    "discover.requestMore": {
+      "comment": "Button requesting more seasons of a series some of which are requested or available.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request More"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求更多"
+          }
+        }
+      }
+    },
+    "discover.requestTitle": {
+      "comment": "Title of the dialog choosing the seasons of a series to request; name is the series'.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求《%@》"
+          }
+        }
+      }
+    },
+    "discover.allSeasons": {
+      "comment": "Choice of the request dialog: every season not requested yet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Seasons"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部季"
+          }
+        }
+      }
+    },
+    "discover.season": {
+      "comment": "Name of a season of a discovered series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Season %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %@ 季"
+          }
+        }
+      }
+    },
+    "discover.specials": {
+      "comment": "Name of the season of a series' specials.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Specials"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "特别篇"
+          }
+        }
+      }
+    },
+    "discover.requestSeasons": {
+      "comment": "Button of the request dialog requesting the seasons chosen.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Request %lld Season"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Request %lld Seasons"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "请求 %lld 季"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "discover.watch": {
+      "comment": "Button opening a discovered title in its library.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "观看"
+          }
+        }
+      }
+    },
+    "discover.requestFailed": {
+      "comment": "Shown when a request fails; reason is the server's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't request it: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法请求：%@"
           }
         }
       }

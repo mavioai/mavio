@@ -15,6 +15,7 @@ export type MessageKey =
   | 'nav.home'
   | 'nav.libraries'
   | 'nav.search'
+  | 'nav.discover'
   | 'nav.profile'
   | 'nav.settings'
   | 'nav.collapseSidebar'
@@ -41,6 +42,33 @@ export type MessageKey =
   | 'home.serverUnreachable'
   | 'home.more'
   | 'home.notOnServers'
+  | 'discover.trending'
+  | 'discover.popularMovies'
+  | 'discover.popularSeries'
+  | 'discover.upcomingMovies'
+  | 'discover.upcomingSeries'
+  | 'discover.topRatedMovies'
+  | 'discover.topRatedSeries'
+  | 'discover.recommendations'
+  | 'discover.similar'
+  | 'discover.movie'
+  | 'discover.series'
+  | 'discover.notSetUp'
+  | 'discover.notSetUpMessage'
+  | 'discover.available'
+  | 'discover.partiallyAvailable'
+  | 'discover.requested'
+  | 'discover.processing'
+  | 'discover.blocklisted'
+  | 'discover.request'
+  | 'discover.requestMore'
+  | 'discover.requestTitle'
+  | 'discover.allSeasons'
+  | 'discover.season'
+  | 'discover.specials'
+  | 'discover.requestSeasons'
+  | 'discover.watch'
+  | 'discover.requestFailed'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -268,6 +296,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.home": "Home",
     "nav.libraries": "Libraries",
     "nav.search": "Search",
+    "nav.discover": "Discover",
     "nav.profile": "Profile",
     "nav.settings": "Settings",
     "nav.collapseSidebar": "Hide Sidebar",
@@ -294,6 +323,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.serverUnreachable": "{server} is unreachable",
     "home.more": "See All",
     "home.notOnServers": "Not on your servers yet",
+    "discover.trending": "Trending",
+    "discover.popularMovies": "Popular Movies",
+    "discover.popularSeries": "Popular Series",
+    "discover.upcomingMovies": "Upcoming Movies",
+    "discover.upcomingSeries": "Upcoming Series",
+    "discover.topRatedMovies": "Top Rated Movies",
+    "discover.topRatedSeries": "Top Rated Series",
+    "discover.recommendations": "Recommendations",
+    "discover.similar": "Similar Titles",
+    "discover.movie": "Movie",
+    "discover.series": "Series",
+    "discover.notSetUp": "Discovery Isn't Set Up",
+    "discover.notSetUpMessage": "Install a discovery plugin, such as TMDB, on your server.",
+    "discover.available": "Available",
+    "discover.partiallyAvailable": "Partially Available",
+    "discover.requested": "Requested",
+    "discover.processing": "Processing",
+    "discover.blocklisted": "Blocklisted",
+    "discover.request": "Request",
+    "discover.requestMore": "Request More",
+    "discover.requestTitle": "Request {name}",
+    "discover.allSeasons": "All Seasons",
+    "discover.season": "Season {number}",
+    "discover.specials": "Specials",
+    "discover.requestSeasons": "{count, plural, one {Request # Season} other {Request # Seasons}}",
+    "discover.watch": "Watch",
+    "discover.requestFailed": "Couldn't request it: {reason}",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -519,6 +575,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.home": "首页",
     "nav.libraries": "媒体库",
     "nav.search": "搜索",
+    "nav.discover": "发现",
     "nav.profile": "个人资料",
     "nav.settings": "设置",
     "nav.collapseSidebar": "收起边栏",
@@ -545,6 +602,33 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "home.serverUnreachable": "无法连接 {server}",
     "home.more": "查看全部",
     "home.notOnServers": "还不在你的服务器上",
+    "discover.trending": "热门趋势",
+    "discover.popularMovies": "热门电影",
+    "discover.popularSeries": "热门剧集",
+    "discover.upcomingMovies": "即将上映",
+    "discover.upcomingSeries": "即将开播",
+    "discover.topRatedMovies": "高分电影",
+    "discover.topRatedSeries": "高分剧集",
+    "discover.recommendations": "推荐",
+    "discover.similar": "类似作品",
+    "discover.movie": "电影",
+    "discover.series": "剧集",
+    "discover.notSetUp": "尚未设置发现",
+    "discover.notSetUpMessage": "在服务器上安装 TMDB 等发现插件后即可使用。",
+    "discover.available": "可观看",
+    "discover.partiallyAvailable": "部分可观看",
+    "discover.requested": "已请求",
+    "discover.processing": "处理中",
+    "discover.blocklisted": "已屏蔽",
+    "discover.request": "请求",
+    "discover.requestMore": "请求更多",
+    "discover.requestTitle": "请求《{name}》",
+    "discover.allSeasons": "全部季",
+    "discover.season": "第 {number} 季",
+    "discover.specials": "特别篇",
+    "discover.requestSeasons": "{count, plural, other {请求 # 季}}",
+    "discover.watch": "观看",
+    "discover.requestFailed": "无法请求：{reason}",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",
