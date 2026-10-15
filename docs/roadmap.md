@@ -682,7 +682,7 @@ flowchart TD
     - [ ] A series' monitoring choices (`MonitorSeries`) and its other wanted settings: tags, minimum availability, new items, season folders
     - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
     - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
-  - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)
+  - [x] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`, §6.3.22)
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
     - [x] Playlists and collections from an item's More menu, a playlist's entries and a collection's members (§6.3.20)
     - [x] An item's subtitles on its details: searched, downloaded, uploaded, extracted, synced, modified, translated and deleted (§6.3.21)

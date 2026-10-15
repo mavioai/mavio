@@ -2691,4 +2691,140 @@
     <string name="itemsubs_download">Download</string>
     <!-- The subtitle was downloaded. -->
     <string name="itemsubs_downloaded">Downloaded</string>
+    <!-- More menu item editing an item's metadata. -->
+    <string name="metadata_edit">Edit Metadata</string>
+    <!-- Identifies an item from the providers' search results. -->
+    <string name="metadata_identify">Identify</string>
+    <!-- Refreshes an item's metadata. -->
+    <string name="metadata_refresh">Refresh Metadata</string>
+    <!-- More menu item editing an item's images. -->
+    <string name="metadata_images">Edit Images</string>
+    <!-- Title of the metadata editor. -->
+    <string name="metadata_edit_title">Edit %s</string>
+    <!-- An item's name. -->
+    <string name="metadata_name">Name</string>
+    <!-- An item's original title. -->
+    <string name="metadata_original_title">Original Title</string>
+    <!-- The name an item is sorted by. -->
+    <string name="metadata_sort_name">Sort Name</string>
+    <!-- An item's overview. -->
+    <string name="metadata_overview">Overview</string>
+    <!-- An item's tagline. -->
+    <string name="metadata_tagline">Tagline</string>
+    <!-- A season's or episode's season number. -->
+    <string name="metadata_season_number">Season Number</string>
+    <!-- An episode's number. -->
+    <string name="metadata_episode_number">Episode Number</string>
+    <!-- A track's number. -->
+    <string name="metadata_track_number">Track Number</string>
+    <!-- An episode's number across seasons. -->
+    <string name="metadata_absolute_number">Absolute Number</string>
+    <!-- An item's production year. -->
+    <string name="metadata_year">Year</string>
+    <!-- An item's premiere date. -->
+    <string name="metadata_release_date">Release Date</string>
+    <!-- A series' premiere date. -->
+    <string name="metadata_first_aired">First Aired</string>
+    <!-- A series' end date. -->
+    <string name="metadata_end_date">End Date</string>
+    <!-- A series' status. -->
+    <string name="metadata_status">Status</string>
+    <!-- A series' status is unknown. -->
+    <string name="metadata_status_unknown">Unknown</string>
+    <!-- A series still airing. -->
+    <string name="metadata_continuing">Continuing</string>
+    <!-- A series that ended. -->
+    <string name="metadata_ended">Ended</string>
+    <!-- A series not yet released. -->
+    <string name="metadata_unreleased">Unreleased</string>
+    <!-- An item's runtime in minutes. -->
+    <string name="metadata_runtime_minutes">Runtime (minutes)</string>
+    <!-- Locks an item's runtime. -->
+    <string name="metadata_runtime">Runtime</string>
+    <!-- An item's official parental rating. -->
+    <string name="metadata_official_rating">Parental Rating</string>
+    <!-- A parental rating set by the administrator. -->
+    <string name="metadata_custom_rating">Custom Rating</string>
+    <!-- An item's community rating. -->
+    <string name="metadata_community_rating">Community Rating (0–10)</string>
+    <!-- An item's critic rating. -->
+    <string name="metadata_critic_rating">Critic Rating (0–100)</string>
+    <!-- An item's artists. -->
+    <string name="metadata_artists">Artists</string>
+    <!-- An album's artists. -->
+    <string name="metadata_album_artists">Album Artists</string>
+    <!-- An item's genres. -->
+    <string name="metadata_genres">Genres</string>
+    <!-- An item's tags. -->
+    <string name="metadata_tags">Tags</string>
+    <!-- An item's studios. -->
+    <string name="metadata_studios">Studios</string>
+    <!-- An item's production locations. -->
+    <string name="metadata_locations">Production Locations</string>
+    <!-- Placeholder of a field holding several values. -->
+    <string name="metadata_commas">Separated by commas</string>
+    <!-- Heading of an item's external IDs. -->
+    <string name="metadata_external_ids">External IDs</string>
+    <!-- Heading of an item's locked fields. -->
+    <string name="metadata_locks">Locks</string>
+    <!-- Keeps refreshes from changing the item. -->
+    <string name="metadata_lock_all">Lock All Metadata</string>
+    <!-- Locks an item's name, original title and sort name. -->
+    <string name="metadata_lock_name">Names</string>
+    <!-- Locks an item's cast and crew. -->
+    <string name="metadata_cast">Cast and Crew</string>
+    <!-- Footer of an item's locks. -->
+    <string name="metadata_locks_footer">Refreshes leave locked fields as they are.</string>
+    <!-- Saves an item's metadata. -->
+    <string name="metadata_save">Save</string>
+    <!-- Title of the identify dialog. -->
+    <string name="metadata_identify_title">Identify %s</string>
+    <!-- Searches the providers. -->
+    <string name="metadata_search">Search</string>
+    <!-- Shown while the providers are searched. -->
+    <string name="metadata_searching">Searching…</string>
+    <!-- The providers found nothing. -->
+    <string name="metadata_no_results">The providers found nothing.</string>
+    <!-- Title of the refresh dialog. -->
+    <string name="metadata_refresh_title">Refresh %s</string>
+    <!-- Refreshes replacing what the providers gave before. -->
+    <string name="metadata_replace">Replace All Metadata</string>
+    <!-- What a refresh does. -->
+    <string name="metadata_refresh_footer">Reads the item\'s files and the providers again, keeping what it has and filling what is missing.</string>
+    <!-- What replacing all metadata does. -->
+    <string name="metadata_replace_footer">Forgets what the providers gave before, other than external IDs, and reads it again; locked fields are kept.</string>
+    <!-- Shown while an item is refreshed. -->
+    <string name="metadata_refreshing">Refreshing…</string>
+    <!-- Title of the images dialog. -->
+    <string name="metadata_images_title">Images of %s</string>
+    <!-- The kind of image shown. -->
+    <string name="metadata_image_kind">Image type</string>
+    <!-- The primary image kind. -->
+    <string name="metadata_primary">Primary</string>
+    <!-- The backdrop image kind. -->
+    <string name="metadata_backdrop">Backdrop</string>
+    <!-- The logo image kind. -->
+    <string name="metadata_logo">Logo</string>
+    <!-- The thumbnail image kind. -->
+    <string name="metadata_thumb">Thumbnail</string>
+    <!-- The banner image kind. -->
+    <string name="metadata_banner">Banner</string>
+    <!-- The art image kind. -->
+    <string name="metadata_art">Art</string>
+    <!-- The disc image kind. -->
+    <string name="metadata_disc">Disc</string>
+    <!-- Uploads an image file. -->
+    <string name="metadata_upload_image">Upload</string>
+    <!-- The item's current images. -->
+    <string name="metadata_current">Current</string>
+    <!-- The item has no image of the kind. -->
+    <string name="metadata_no_image">None</string>
+    <!-- Images the providers have. -->
+    <string name="metadata_from_providers">From the Providers</string>
+    <!-- The providers have no images of the kind. -->
+    <string name="metadata_no_remote_images">The providers have no images of this type.</string>
+    <!-- Deletes an image. -->
+    <string name="metadata_delete_image">Delete</string>
+    <!-- Confirms deleting an image, and its file in the library's folder. -->
+    <string name="metadata_confirm_delete">Delete the image</string>
 </resources>

@@ -2,7 +2,8 @@
 // the More menu adding the item to a playlist, or for administrators to a
 // collection, and renaming or deleting a playlist or collection; a
 // playlist's entries in order, moved and removed; a collection's members
-// removed by its administrators.
+// removed by its administrators. For administrators the menu also opens
+// the item's metadata (§6.3.22).
 import {
   errorMessage,
   type ServerEntry,
@@ -17,13 +18,15 @@ import {
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import type { PlaylistEntry } from "@mavio/proto/mavio/library/v1/playlist_pb";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf, useDismiss } from "../ui.tsx";
+import { EditDialog, IdentifyDialog, identifiable, ImagesDialog, RefreshDialog } from "./metadata.tsx";
+import { field, Modal } from "./modal.tsx";
 
-type Dialog = "playlist" | "collection" | "rename" | "delete";
+type Dialog = "playlist" | "collection" | "edit" | "identify" | "refresh" | "images" | "rename" | "delete";
 
 /** Kinds that can be put in a playlist or a collection. */
 const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== ItemKind.COLLECTION && kind !== ItemKind.FOLDER;
@@ -40,6 +43,14 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
   const entries: [Dialog, string][] = [
     ...(listable(item.kind) ? ([["playlist", t("lists.addToPlaylist")]] as [Dialog, string][]) : []),
     ...(listable(item.kind) && admin ? ([["collection", t("lists.addToCollection")]] as [Dialog, string][]) : []),
+    ...(admin && item.kind !== ItemKind.PLAYLIST
+      ? ([
+          ["edit", t("metadata.edit")],
+          ...(identifiable(item.kind) ? [["identify", t("metadata.identify")]] : []),
+          ...(item.kind !== ItemKind.COLLECTION ? [["refresh", t("metadata.refresh")]] : []),
+          ["images", t("metadata.images")],
+        ] as [Dialog, string][])
+      : []),
     ...(own
       ? ([
           ["rename", t("lists.rename")],
@@ -72,48 +83,15 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
         </div>
       )}
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
+      {dialog === "edit" && <EditDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
+      {dialog === "identify" && <IdentifyDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
+      {dialog === "refresh" && <RefreshDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
+      {dialog === "images" && <ImagesDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "rename" && <RenameDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "delete" && <DeleteDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
     </div>
   );
 }
-
-/** A modal dialog, closed by Escape or a click outside it. */
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
-  useEffect(() => {
-    if (!ref.current?.open) ref.current?.showModal();
-    return () => opener?.focus({ preventScroll: true });
-  }, [opener]);
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== "Escape") return;
-    e.preventDefault();
-    e.stopPropagation();
-    onClose();
-  };
-  return (
-    <dialog
-      ref={ref}
-      aria-modal
-      aria-labelledby="list-dialog-title"
-      onClose={onClose}
-      onKeyDown={onKeyDown}
-      onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto max-h-[80vh] w-[min(440px,calc(100vw-32px))] rounded-[18px] border border-border bg-surface-overlay p-0 text-on-background shadow-level3 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <div className="flex max-h-[80vh] flex-col gap-3 p-6">
-        <h2 id="list-dialog-title" className="type-title2">
-          {title}
-        </h2>
-        {children}
-      </div>
-    </dialog>
-  );
-}
-
-const field =
-  "min-h-11 min-w-0 flex-1 rounded-[10px] border border-border bg-surface px-3 type-body placeholder:text-text-tertiary focus:border-focus focus:outline-none";
 
 /** Adds the item to a playlist or collection, or to a new one. */
 function AddDialog({ server, item, kind, onClose }: { server: ServerEntry; item: Item; kind: "playlist" | "collection"; onClose: () => void }) {

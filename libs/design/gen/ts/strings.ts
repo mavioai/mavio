@@ -1320,7 +1320,75 @@ export type MessageKey =
   | 'itemsubs.notMatched'
   | 'itemsubs.blocklisted'
   | 'itemsubs.download'
-  | 'itemsubs.downloaded';
+  | 'itemsubs.downloaded'
+  | 'metadata.edit'
+  | 'metadata.identify'
+  | 'metadata.refresh'
+  | 'metadata.images'
+  | 'metadata.editTitle'
+  | 'metadata.name'
+  | 'metadata.originalTitle'
+  | 'metadata.sortName'
+  | 'metadata.overview'
+  | 'metadata.tagline'
+  | 'metadata.seasonNumber'
+  | 'metadata.episodeNumber'
+  | 'metadata.trackNumber'
+  | 'metadata.absoluteNumber'
+  | 'metadata.year'
+  | 'metadata.releaseDate'
+  | 'metadata.firstAired'
+  | 'metadata.endDate'
+  | 'metadata.status'
+  | 'metadata.statusUnknown'
+  | 'metadata.continuing'
+  | 'metadata.ended'
+  | 'metadata.unreleased'
+  | 'metadata.runtimeMinutes'
+  | 'metadata.runtime'
+  | 'metadata.officialRating'
+  | 'metadata.customRating'
+  | 'metadata.communityRating'
+  | 'metadata.criticRating'
+  | 'metadata.artists'
+  | 'metadata.albumArtists'
+  | 'metadata.genres'
+  | 'metadata.tags'
+  | 'metadata.studios'
+  | 'metadata.locations'
+  | 'metadata.commas'
+  | 'metadata.externalIds'
+  | 'metadata.locks'
+  | 'metadata.lockAll'
+  | 'metadata.lockName'
+  | 'metadata.cast'
+  | 'metadata.locksFooter'
+  | 'metadata.save'
+  | 'metadata.identifyTitle'
+  | 'metadata.search'
+  | 'metadata.searching'
+  | 'metadata.noResults'
+  | 'metadata.refreshTitle'
+  | 'metadata.replace'
+  | 'metadata.refreshFooter'
+  | 'metadata.replaceFooter'
+  | 'metadata.refreshing'
+  | 'metadata.imagesTitle'
+  | 'metadata.imageKind'
+  | 'metadata.primary'
+  | 'metadata.backdrop'
+  | 'metadata.logo'
+  | 'metadata.thumb'
+  | 'metadata.banner'
+  | 'metadata.art'
+  | 'metadata.disc'
+  | 'metadata.uploadImage'
+  | 'metadata.current'
+  | 'metadata.noImage'
+  | 'metadata.fromProviders'
+  | 'metadata.noRemoteImages'
+  | 'metadata.deleteImage'
+  | 'metadata.confirmDelete';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -2633,7 +2701,75 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.notMatched": "Not matched: {fields}",
     "itemsubs.blocklisted": "Blocklisted",
     "itemsubs.download": "Download",
-    "itemsubs.downloaded": "Downloaded"
+    "itemsubs.downloaded": "Downloaded",
+    "metadata.edit": "Edit Metadata",
+    "metadata.identify": "Identify",
+    "metadata.refresh": "Refresh Metadata",
+    "metadata.images": "Edit Images",
+    "metadata.editTitle": "Edit {name}",
+    "metadata.name": "Name",
+    "metadata.originalTitle": "Original Title",
+    "metadata.sortName": "Sort Name",
+    "metadata.overview": "Overview",
+    "metadata.tagline": "Tagline",
+    "metadata.seasonNumber": "Season Number",
+    "metadata.episodeNumber": "Episode Number",
+    "metadata.trackNumber": "Track Number",
+    "metadata.absoluteNumber": "Absolute Number",
+    "metadata.year": "Year",
+    "metadata.releaseDate": "Release Date",
+    "metadata.firstAired": "First Aired",
+    "metadata.endDate": "End Date",
+    "metadata.status": "Status",
+    "metadata.statusUnknown": "Unknown",
+    "metadata.continuing": "Continuing",
+    "metadata.ended": "Ended",
+    "metadata.unreleased": "Unreleased",
+    "metadata.runtimeMinutes": "Runtime (minutes)",
+    "metadata.runtime": "Runtime",
+    "metadata.officialRating": "Parental Rating",
+    "metadata.customRating": "Custom Rating",
+    "metadata.communityRating": "Community Rating (0–10)",
+    "metadata.criticRating": "Critic Rating (0–100)",
+    "metadata.artists": "Artists",
+    "metadata.albumArtists": "Album Artists",
+    "metadata.genres": "Genres",
+    "metadata.tags": "Tags",
+    "metadata.studios": "Studios",
+    "metadata.locations": "Production Locations",
+    "metadata.commas": "Separated by commas",
+    "metadata.externalIds": "External IDs",
+    "metadata.locks": "Locks",
+    "metadata.lockAll": "Lock All Metadata",
+    "metadata.lockName": "Names",
+    "metadata.cast": "Cast and Crew",
+    "metadata.locksFooter": "Refreshes leave locked fields as they are.",
+    "metadata.save": "Save",
+    "metadata.identifyTitle": "Identify {name}",
+    "metadata.search": "Search",
+    "metadata.searching": "Searching…",
+    "metadata.noResults": "The providers found nothing.",
+    "metadata.refreshTitle": "Refresh {name}",
+    "metadata.replace": "Replace All Metadata",
+    "metadata.refreshFooter": "Reads the item's files and the providers again, keeping what it has and filling what is missing.",
+    "metadata.replaceFooter": "Forgets what the providers gave before, other than external IDs, and reads it again; locked fields are kept.",
+    "metadata.refreshing": "Refreshing…",
+    "metadata.imagesTitle": "Images of {name}",
+    "metadata.imageKind": "Image type",
+    "metadata.primary": "Primary",
+    "metadata.backdrop": "Backdrop",
+    "metadata.logo": "Logo",
+    "metadata.thumb": "Thumbnail",
+    "metadata.banner": "Banner",
+    "metadata.art": "Art",
+    "metadata.disc": "Disc",
+    "metadata.uploadImage": "Upload",
+    "metadata.current": "Current",
+    "metadata.noImage": "None",
+    "metadata.fromProviders": "From the Providers",
+    "metadata.noRemoteImages": "The providers have no images of this type.",
+    "metadata.deleteImage": "Delete",
+    "metadata.confirmDelete": "Delete the image"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3944,6 +4080,74 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.notMatched": "未匹配：{fields}",
     "itemsubs.blocklisted": "已拉黑",
     "itemsubs.download": "下载",
-    "itemsubs.downloaded": "已下载"
+    "itemsubs.downloaded": "已下载",
+    "metadata.edit": "编辑元数据",
+    "metadata.identify": "识别",
+    "metadata.refresh": "刷新元数据",
+    "metadata.images": "编辑图片",
+    "metadata.editTitle": "编辑 {name}",
+    "metadata.name": "名称",
+    "metadata.originalTitle": "原始标题",
+    "metadata.sortName": "排序名称",
+    "metadata.overview": "简介",
+    "metadata.tagline": "标语",
+    "metadata.seasonNumber": "季号",
+    "metadata.episodeNumber": "集号",
+    "metadata.trackNumber": "曲目编号",
+    "metadata.absoluteNumber": "绝对集号",
+    "metadata.year": "年份",
+    "metadata.releaseDate": "发行日期",
+    "metadata.firstAired": "首播日期",
+    "metadata.endDate": "完结日期",
+    "metadata.status": "状态",
+    "metadata.statusUnknown": "未知",
+    "metadata.continuing": "连载中",
+    "metadata.ended": "已完结",
+    "metadata.unreleased": "未发布",
+    "metadata.runtimeMinutes": "片长（分钟）",
+    "metadata.runtime": "片长",
+    "metadata.officialRating": "分级",
+    "metadata.customRating": "自定义分级",
+    "metadata.communityRating": "观众评分（0–10）",
+    "metadata.criticRating": "影评人评分（0–100）",
+    "metadata.artists": "艺术家",
+    "metadata.albumArtists": "专辑艺术家",
+    "metadata.genres": "类型",
+    "metadata.tags": "标签",
+    "metadata.studios": "制片公司",
+    "metadata.locations": "制片地区",
+    "metadata.commas": "以逗号分隔",
+    "metadata.externalIds": "外部 ID",
+    "metadata.locks": "锁定",
+    "metadata.lockAll": "锁定所有元数据",
+    "metadata.lockName": "名称",
+    "metadata.cast": "演职人员",
+    "metadata.locksFooter": "刷新不会改变已锁定的字段。",
+    "metadata.save": "保存",
+    "metadata.identifyTitle": "识别 {name}",
+    "metadata.search": "搜索",
+    "metadata.searching": "正在搜索…",
+    "metadata.noResults": "提供方未找到结果。",
+    "metadata.refreshTitle": "刷新 {name}",
+    "metadata.replace": "替换所有元数据",
+    "metadata.refreshFooter": "重新读取条目的文件与提供方，保留已有内容并补全缺失项。",
+    "metadata.replaceFooter": "忘记提供方此前给出的内容（外部 ID 除外）并重新读取；锁定的字段保持不变。",
+    "metadata.refreshing": "正在刷新…",
+    "metadata.imagesTitle": "{name} 的图片",
+    "metadata.imageKind": "图片类型",
+    "metadata.primary": "主图",
+    "metadata.backdrop": "背景",
+    "metadata.logo": "标志",
+    "metadata.thumb": "缩略图",
+    "metadata.banner": "横幅",
+    "metadata.art": "艺术图",
+    "metadata.disc": "光盘",
+    "metadata.uploadImage": "上传",
+    "metadata.current": "当前",
+    "metadata.noImage": "无",
+    "metadata.fromProviders": "来自提供方",
+    "metadata.noRemoteImages": "提供方没有此类型的图片。",
+    "metadata.deleteImage": "删除",
+    "metadata.confirmDelete": "删除图片"
   }
 };

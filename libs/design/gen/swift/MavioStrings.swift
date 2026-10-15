@@ -4236,4 +4236,216 @@ public enum MavioStrings {
 
     /// The subtitle was downloaded.
     public static var itemsubsDownloaded: String { NSLocalizedString("itemsubs.downloaded", bundle: .module, comment: "") }
+
+    /// More menu item editing an item's metadata.
+    public static var metadataEdit: String { NSLocalizedString("metadata.edit", bundle: .module, comment: "") }
+
+    /// Identifies an item from the providers' search results.
+    public static var metadataIdentify: String { NSLocalizedString("metadata.identify", bundle: .module, comment: "") }
+
+    /// Refreshes an item's metadata.
+    public static var metadataRefresh: String { NSLocalizedString("metadata.refresh", bundle: .module, comment: "") }
+
+    /// More menu item editing an item's images.
+    public static var metadataImages: String { NSLocalizedString("metadata.images", bundle: .module, comment: "") }
+
+    /// Title of the metadata editor.
+    public static func metadataEditTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("metadata.editTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// An item's name.
+    public static var metadataName: String { NSLocalizedString("metadata.name", bundle: .module, comment: "") }
+
+    /// An item's original title.
+    public static var metadataOriginalTitle: String { NSLocalizedString("metadata.originalTitle", bundle: .module, comment: "") }
+
+    /// The name an item is sorted by.
+    public static var metadataSortName: String { NSLocalizedString("metadata.sortName", bundle: .module, comment: "") }
+
+    /// An item's overview.
+    public static var metadataOverview: String { NSLocalizedString("metadata.overview", bundle: .module, comment: "") }
+
+    /// An item's tagline.
+    public static var metadataTagline: String { NSLocalizedString("metadata.tagline", bundle: .module, comment: "") }
+
+    /// A season's or episode's season number.
+    public static var metadataSeasonNumber: String { NSLocalizedString("metadata.seasonNumber", bundle: .module, comment: "") }
+
+    /// An episode's number.
+    public static var metadataEpisodeNumber: String { NSLocalizedString("metadata.episodeNumber", bundle: .module, comment: "") }
+
+    /// A track's number.
+    public static var metadataTrackNumber: String { NSLocalizedString("metadata.trackNumber", bundle: .module, comment: "") }
+
+    /// An episode's number across seasons.
+    public static var metadataAbsoluteNumber: String { NSLocalizedString("metadata.absoluteNumber", bundle: .module, comment: "") }
+
+    /// An item's production year.
+    public static var metadataYear: String { NSLocalizedString("metadata.year", bundle: .module, comment: "") }
+
+    /// An item's premiere date.
+    public static var metadataReleaseDate: String { NSLocalizedString("metadata.releaseDate", bundle: .module, comment: "") }
+
+    /// A series' premiere date.
+    public static var metadataFirstAired: String { NSLocalizedString("metadata.firstAired", bundle: .module, comment: "") }
+
+    /// A series' end date.
+    public static var metadataEndDate: String { NSLocalizedString("metadata.endDate", bundle: .module, comment: "") }
+
+    /// A series' status.
+    public static var metadataStatus: String { NSLocalizedString("metadata.status", bundle: .module, comment: "") }
+
+    /// A series' status is unknown.
+    public static var metadataStatusUnknown: String { NSLocalizedString("metadata.statusUnknown", bundle: .module, comment: "") }
+
+    /// A series still airing.
+    public static var metadataContinuing: String { NSLocalizedString("metadata.continuing", bundle: .module, comment: "") }
+
+    /// A series that ended.
+    public static var metadataEnded: String { NSLocalizedString("metadata.ended", bundle: .module, comment: "") }
+
+    /// A series not yet released.
+    public static var metadataUnreleased: String { NSLocalizedString("metadata.unreleased", bundle: .module, comment: "") }
+
+    /// An item's runtime in minutes.
+    public static var metadataRuntimeMinutes: String { NSLocalizedString("metadata.runtimeMinutes", bundle: .module, comment: "") }
+
+    /// Locks an item's runtime.
+    public static var metadataRuntime: String { NSLocalizedString("metadata.runtime", bundle: .module, comment: "") }
+
+    /// An item's official parental rating.
+    public static var metadataOfficialRating: String { NSLocalizedString("metadata.officialRating", bundle: .module, comment: "") }
+
+    /// A parental rating set by the administrator.
+    public static var metadataCustomRating: String { NSLocalizedString("metadata.customRating", bundle: .module, comment: "") }
+
+    /// An item's community rating.
+    public static var metadataCommunityRating: String { NSLocalizedString("metadata.communityRating", bundle: .module, comment: "") }
+
+    /// An item's critic rating.
+    public static var metadataCriticRating: String { NSLocalizedString("metadata.criticRating", bundle: .module, comment: "") }
+
+    /// An item's artists.
+    public static var metadataArtists: String { NSLocalizedString("metadata.artists", bundle: .module, comment: "") }
+
+    /// An album's artists.
+    public static var metadataAlbumArtists: String { NSLocalizedString("metadata.albumArtists", bundle: .module, comment: "") }
+
+    /// An item's genres.
+    public static var metadataGenres: String { NSLocalizedString("metadata.genres", bundle: .module, comment: "") }
+
+    /// An item's tags.
+    public static var metadataTags: String { NSLocalizedString("metadata.tags", bundle: .module, comment: "") }
+
+    /// An item's studios.
+    public static var metadataStudios: String { NSLocalizedString("metadata.studios", bundle: .module, comment: "") }
+
+    /// An item's production locations.
+    public static var metadataLocations: String { NSLocalizedString("metadata.locations", bundle: .module, comment: "") }
+
+    /// Placeholder of a field holding several values.
+    public static var metadataCommas: String { NSLocalizedString("metadata.commas", bundle: .module, comment: "") }
+
+    /// Heading of an item's external IDs.
+    public static var metadataExternalIds: String { NSLocalizedString("metadata.externalIds", bundle: .module, comment: "") }
+
+    /// Heading of an item's locked fields.
+    public static var metadataLocks: String { NSLocalizedString("metadata.locks", bundle: .module, comment: "") }
+
+    /// Keeps refreshes from changing the item.
+    public static var metadataLockAll: String { NSLocalizedString("metadata.lockAll", bundle: .module, comment: "") }
+
+    /// Locks an item's name, original title and sort name.
+    public static var metadataLockName: String { NSLocalizedString("metadata.lockName", bundle: .module, comment: "") }
+
+    /// Locks an item's cast and crew.
+    public static var metadataCast: String { NSLocalizedString("metadata.cast", bundle: .module, comment: "") }
+
+    /// Footer of an item's locks.
+    public static var metadataLocksFooter: String { NSLocalizedString("metadata.locksFooter", bundle: .module, comment: "") }
+
+    /// Saves an item's metadata.
+    public static var metadataSave: String { NSLocalizedString("metadata.save", bundle: .module, comment: "") }
+
+    /// Title of the identify dialog.
+    public static func metadataIdentifyTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("metadata.identifyTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Searches the providers.
+    public static var metadataSearch: String { NSLocalizedString("metadata.search", bundle: .module, comment: "") }
+
+    /// Shown while the providers are searched.
+    public static var metadataSearching: String { NSLocalizedString("metadata.searching", bundle: .module, comment: "") }
+
+    /// The providers found nothing.
+    public static var metadataNoResults: String { NSLocalizedString("metadata.noResults", bundle: .module, comment: "") }
+
+    /// Title of the refresh dialog.
+    public static func metadataRefreshTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("metadata.refreshTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Refreshes replacing what the providers gave before.
+    public static var metadataReplace: String { NSLocalizedString("metadata.replace", bundle: .module, comment: "") }
+
+    /// What a refresh does.
+    public static var metadataRefreshFooter: String { NSLocalizedString("metadata.refreshFooter", bundle: .module, comment: "") }
+
+    /// What replacing all metadata does.
+    public static var metadataReplaceFooter: String { NSLocalizedString("metadata.replaceFooter", bundle: .module, comment: "") }
+
+    /// Shown while an item is refreshed.
+    public static var metadataRefreshing: String { NSLocalizedString("metadata.refreshing", bundle: .module, comment: "") }
+
+    /// Title of the images dialog.
+    public static func metadataImagesTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("metadata.imagesTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// The kind of image shown.
+    public static var metadataImageKind: String { NSLocalizedString("metadata.imageKind", bundle: .module, comment: "") }
+
+    /// The primary image kind.
+    public static var metadataPrimary: String { NSLocalizedString("metadata.primary", bundle: .module, comment: "") }
+
+    /// The backdrop image kind.
+    public static var metadataBackdrop: String { NSLocalizedString("metadata.backdrop", bundle: .module, comment: "") }
+
+    /// The logo image kind.
+    public static var metadataLogo: String { NSLocalizedString("metadata.logo", bundle: .module, comment: "") }
+
+    /// The thumbnail image kind.
+    public static var metadataThumb: String { NSLocalizedString("metadata.thumb", bundle: .module, comment: "") }
+
+    /// The banner image kind.
+    public static var metadataBanner: String { NSLocalizedString("metadata.banner", bundle: .module, comment: "") }
+
+    /// The art image kind.
+    public static var metadataArt: String { NSLocalizedString("metadata.art", bundle: .module, comment: "") }
+
+    /// The disc image kind.
+    public static var metadataDisc: String { NSLocalizedString("metadata.disc", bundle: .module, comment: "") }
+
+    /// Uploads an image file.
+    public static var metadataUploadImage: String { NSLocalizedString("metadata.uploadImage", bundle: .module, comment: "") }
+
+    /// The item's current images.
+    public static var metadataCurrent: String { NSLocalizedString("metadata.current", bundle: .module, comment: "") }
+
+    /// The item has no image of the kind.
+    public static var metadataNoImage: String { NSLocalizedString("metadata.noImage", bundle: .module, comment: "") }
+
+    /// Images the providers have.
+    public static var metadataFromProviders: String { NSLocalizedString("metadata.fromProviders", bundle: .module, comment: "") }
+
+    /// The providers have no images of the kind.
+    public static var metadataNoRemoteImages: String { NSLocalizedString("metadata.noRemoteImages", bundle: .module, comment: "") }
+
+    /// Deletes an image.
+    public static var metadataDeleteImage: String { NSLocalizedString("metadata.deleteImage", bundle: .module, comment: "") }
+
+    /// Confirms deleting an image, and its file in the library's folder.
+    public static var metadataConfirmDelete: String { NSLocalizedString("metadata.confirmDelete", bundle: .module, comment: "") }
 }
