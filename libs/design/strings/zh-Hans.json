@@ -333,9 +333,20 @@
   "plugins.networkAccess": "网络访问",
   "plugins.versions": "版本",
   "plugins.installThis": "安装此版本",
+  "plugins.configuration": "配置",
+  "plugins.configurationSaved": "已保存，插件已使用新配置。",
+  "plugins.openSettingsPage": "打开设置页面",
   "auth.unreachable": "无法连接",
   "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
   "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
   "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
-  "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。"
+  "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。",
+  "schema.add": "添加",
+  "schema.remove": "移除",
+  "schema.item": "第 {number} 项",
+  "schema.onePerLine": "每行一项",
+  "schema.invalidJson": "不是有效的 JSON",
+  "schema.default": "默认（{value}）",
+  "schema.show": "显示",
+  "schema.hide": "隐藏"
 }

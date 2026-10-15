@@ -10,6 +10,7 @@ import {
   useCatalogPlugins,
   usePluginActions,
   usePluginCatalogs,
+  usePluginConfig,
   usePlugins,
 } from "@mavio/client-ts";
 import { Category } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
@@ -19,6 +20,7 @@ import { type FormEvent, type ReactNode, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { type Schema, SchemaForm } from "../schema-form.tsx";
 import { Button, Group, Row, Select, Toggle } from "../ui.tsx";
 import type { SettingsSearch } from "./settings.tsx";
 
@@ -369,6 +371,9 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
       )}
       {failure && <p className="type-callout text-danger">{errorMessage(failure)}</p>}
       {e.description && <p className="type-body">{e.description}</p>}
+      {e.installed && m && (m.configSchema || m.configPage) && (
+        <Configuration server={server} id={id} schema={m.configSchema} page={m.configPage} />
+      )}
       <Group title={t("plugins.information")}>
         {info.map(([label, value]) => (
           <div key={label} className="flex min-h-11 flex-wrap items-baseline gap-x-6 gap-y-1 px-4 py-2.5">
@@ -399,6 +404,66 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
         </Group>
       )}
     </div>
+  );
+}
+
+/** The schema of a manifest, undefined when it has none the form can draw. */
+function parseSchema(s: string): Schema | undefined {
+  try {
+    const schema = JSON.parse(s) as Schema;
+    return schema.properties && Object.keys(schema.properties).length > 0 ? schema : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** An installed plugin's configuration: the form of its schema, or a link to its own page. */
+function Configuration({ server, id, schema, page }: { server: ServerEntry; id: string; schema: string; page: string }) {
+  const parsed = parseSchema(schema);
+  const config = usePluginConfig(server, id, !!parsed);
+  const own = page && `${server.url.replace(/\/$/, "")}/plugins/${encodeURIComponent(id)}/${page}`;
+  return (
+    <section className="flex flex-col gap-2">
+      <div className="flex items-center gap-3 px-1">
+        <h2 className="flex-1 type-headline">{t("plugins.configuration")}</h2>
+        {own && (
+          <a href={own} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 type-callout text-accent-text">
+            {t("plugins.openSettingsPage")}
+            <Icon name="external" size={14} />
+          </a>
+        )}
+      </div>
+      {parsed && config.isSuccess && <ConfigForm server={server} id={id} schema={parsed} saved={config.data} />}
+      {config.isError && <p className="type-callout text-danger">{errorMessage(config.error)}</p>}
+    </section>
+  );
+}
+
+function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: string; schema: Schema; saved: string }) {
+  const actions = usePluginActions(server);
+  const [value, setValue] = useState<unknown>(() => (saved ? JSON.parse(saved) : {}));
+  const [done, setDone] = useState(false);
+  const text = JSON.stringify(value);
+  // Saving refreshes saved, which the form then matches.
+  const changed = text !== JSON.stringify(saved ? JSON.parse(saved) : {});
+  return (
+    <form
+      className="flex flex-col gap-3"
+      onSubmit={(ev) => {
+        ev.preventDefault();
+        setDone(false);
+        actions.configure.mutate({ id, config: text }, { onSuccess: () => setDone(true) });
+      }}
+    >
+      <SchemaForm schema={schema} value={value} onChange={(v) => (setValue(v), setDone(false))} />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" disabled={!changed || actions.configure.isPending}>
+          {actions.configure.isPending ? "…" : t("action.save")}
+        </Button>
+        {done && !changed && <span className="type-callout text-text-secondary">{t("plugins.configurationSaved")}</span>}
+        {actions.configure.isError && <span className="type-callout text-danger">{errorMessage(actions.configure.error)}</span>}
+      </div>
+    </form>
   );
 }
 

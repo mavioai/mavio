@@ -334,9 +334,20 @@
   "plugins.networkAccess": { "message": "Network Access", "description": "The hosts a plugin may reach." },
   "plugins.versions": { "message": "Versions", "description": "Group of the versions a catalog offers of a plugin." },
   "plugins.installThis": { "message": "Install This Version", "description": "Button installing an older or newer version of an installed plugin." },
+  "plugins.configuration": { "message": "Configuration", "description": "Heading of an installed plugin's configuration form." },
+  "plugins.configurationSaved": { "message": "Saved. The plugin uses the new configuration.", "description": "Note after a plugin's configuration was saved and accepted." },
+  "plugins.openSettingsPage": { "message": "Open Settings Page", "description": "Link opening a plugin's own settings page in a new tab." },
   "auth.unreachable": { "message": "Can't be reached", "description": "State of a server of the account that does not answer at any of its addresses." },
   "auth.othersUseApp": { "message": "Only the administrator signs in here. Everyone else watches at {host}.", "description": "Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's." },
   "auth.setUpElsewhere": { "message": "Set Up {server} on a Computer or Phone", "description": "Title on a television of a server not set up yet; server is its name." },
   "auth.setUpElsewhereMessage": { "message": "Open this address in a browser:", "description": "Above the address of the server, on a television of a server not set up yet." },
-  "auth.linkMessage": { "message": "On your phone or computer, go to {url} and enter this code.", "description": "Instruction on a television signing in with a Mavio account; url is mavio.dev's link page." }
+  "auth.linkMessage": { "message": "On your phone or computer, go to {url} and enter this code.", "description": "Instruction on a television signing in with a Mavio account; url is mavio.dev's link page." },
+  "schema.add": { "message": "Add", "description": "Button adding an entry to a list in a plugin's configuration." },
+  "schema.remove": { "message": "Remove", "description": "Button removing an entry from a list in a plugin's configuration." },
+  "schema.item": { "message": "Item {number}", "description": "Title of an unnamed entry of a list in a plugin's configuration; number is its place." },
+  "schema.onePerLine": { "message": "One per line", "description": "Placeholder of a field taking a list, one value per line." },
+  "schema.invalidJson": { "message": "Not valid JSON", "description": "Error under a field edited as JSON when its text does not parse." },
+  "schema.default": { "message": "Default ({value})", "description": "Choice leaving a setting at its default; value is the default." },
+  "schema.show": { "message": "Show", "description": "Button revealing a secret typed in a field." },
+  "schema.hide": { "message": "Hide", "description": "Button hiding a secret revealed in a field." }
 }

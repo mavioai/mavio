@@ -230,6 +230,7 @@ Discover finds films and shows to request, after Seerr, from the discovery catal
 Plugins, in the settings' Server group, shown to the administrators of the server chosen, follow Jellyfin's plugin pages ([Plugins](plugins.md)).
 * **List**: two tabs of cards, Available, every plugin the server's catalogs offer, installed or not, and Installed; a card shows the plugin's category, name, description and its version or state, and marks an update. Beside the tabs a picker shows one category, among those of the tab's plugins, and Manage Catalogs opens the catalogs. A catalog that cannot be reached is reported on Available.
 * **A plugin**: opened from its card, with a link back to the list as it was left: its description; its state, version, the newest version, category, author, license, website, catalog and the hosts it may reach; Install, or Update to the newest version, a switch enabling and disabling it, and Uninstall, which asks to confirm first; and the versions its catalog offers, each with its release date and changes, to install another.
+* **Configuration**: on an installed plugin's page, a form built from its manifest's schema — text, secrets with a button revealing them, numbers, switches, choices, lists one item per line, optional groups behind a switch, and lists of groups to add and remove — saved with the server's validation reported; a plugin with its own settings page also links to it.
 * **Catalogs**: the addresses of the plugin catalogs, to add and remove, with a link back to the list.
 
 ### 6.4 Components

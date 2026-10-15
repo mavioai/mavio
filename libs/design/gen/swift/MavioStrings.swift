@@ -1114,6 +1114,15 @@ public enum MavioStrings {
     /// Button installing an older or newer version of an installed plugin.
     public static var pluginsInstallThis: String { NSLocalizedString("plugins.installThis", bundle: .module, comment: "") }
 
+    /// Heading of an installed plugin's configuration form.
+    public static var pluginsConfiguration: String { NSLocalizedString("plugins.configuration", bundle: .module, comment: "") }
+
+    /// Note after a plugin's configuration was saved and accepted.
+    public static var pluginsConfigurationSaved: String { NSLocalizedString("plugins.configurationSaved", bundle: .module, comment: "") }
+
+    /// Link opening a plugin's own settings page in a new tab.
+    public static var pluginsOpenSettingsPage: String { NSLocalizedString("plugins.openSettingsPage", bundle: .module, comment: "") }
+
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 
@@ -1134,4 +1143,32 @@ public enum MavioStrings {
     public static func authLinkMessage(url: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("auth.linkMessage", bundle: .module, comment: ""), url)
     }
+
+    /// Button adding an entry to a list in a plugin's configuration.
+    public static var schemaAdd: String { NSLocalizedString("schema.add", bundle: .module, comment: "") }
+
+    /// Button removing an entry from a list in a plugin's configuration.
+    public static var schemaRemove: String { NSLocalizedString("schema.remove", bundle: .module, comment: "") }
+
+    /// Title of an unnamed entry of a list in a plugin's configuration; number is its place.
+    public static func schemaItem(number: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.item", bundle: .module, comment: ""), number)
+    }
+
+    /// Placeholder of a field taking a list, one value per line.
+    public static var schemaOnePerLine: String { NSLocalizedString("schema.onePerLine", bundle: .module, comment: "") }
+
+    /// Error under a field edited as JSON when its text does not parse.
+    public static var schemaInvalidJson: String { NSLocalizedString("schema.invalidJson", bundle: .module, comment: "") }
+
+    /// Choice leaving a setting at its default; value is the default.
+    public static func schemaDefault(value: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.default", bundle: .module, comment: ""), value)
+    }
+
+    /// Button revealing a secret typed in a field.
+    public static var schemaShow: String { NSLocalizedString("schema.show", bundle: .module, comment: "") }
+
+    /// Button hiding a secret revealed in a field.
+    public static var schemaHide: String { NSLocalizedString("schema.hide", bundle: .module, comment: "") }
 }

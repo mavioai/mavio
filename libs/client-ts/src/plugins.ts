@@ -54,6 +54,16 @@ export function usePluginCatalogs(server: ServerEntry | undefined) {
   });
 }
 
+/** A plugin's configuration as JSON, empty when never configured. */
+export function usePluginConfig(server: ServerEntry, id: string, enabled = true) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "plugins", "config", id),
+    queryFn: async () => (await servers.client(SystemService, server).getPluginConfig({ pluginId: id })).configJson,
+    enabled,
+  });
+}
+
 /** What can be done to a server's plugins, each refreshing them when done. */
 export function usePluginActions(server: ServerEntry) {
   const servers = useServersStore();
@@ -66,6 +76,11 @@ export function usePluginActions(server: ServerEntry) {
     uninstall: useMutation({ mutationFn: (id: string) => client().uninstallPlugin({ pluginId: id }), onSettled }),
     setEnabled: useMutation({
       mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => client().setPluginEnabled({ pluginId: id, enabled }),
+      onSettled,
+    }),
+    /** Sets a plugin's configuration, JSON its schema accepts. */
+    configure: useMutation({
+      mutationFn: ({ id, config }: { id: string; config: string }) => client().setPluginConfig({ pluginId: id, configJson: config }),
       onSettled,
     }),
     /** Replaces the catalogs' URLs, keeping the other settings. */

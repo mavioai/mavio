@@ -6175,6 +6175,60 @@
         }
       }
     },
+    "plugins.configuration": {
+      "comment": "Heading of an installed plugin's configuration form.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置"
+          }
+        }
+      }
+    },
+    "plugins.configurationSaved": {
+      "comment": "Note after a plugin's configuration was saved and accepted.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved. The plugin uses the new configuration."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存，插件已使用新配置。"
+          }
+        }
+      }
+    },
+    "plugins.openSettingsPage": {
+      "comment": "Link opening a plugin's own settings page in a new tab.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings Page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开设置页面"
+          }
+        }
+      }
+    },
     "auth.unreachable": {
       "comment": "State of a server of the account that does not answer at any of its addresses.",
       "extractionState": "manual",
@@ -6261,6 +6315,150 @@
           "stringUnit": {
             "state": "translated",
             "value": "在手机或电脑上访问 %@，输入这个代码。"
+          }
+        }
+      }
+    },
+    "schema.add": {
+      "comment": "Button adding an entry to a list in a plugin's configuration.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
+          }
+        }
+      }
+    },
+    "schema.remove": {
+      "comment": "Button removing an entry from a list in a plugin's configuration.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
+          }
+        }
+      }
+    },
+    "schema.item": {
+      "comment": "Title of an unnamed entry of a list in a plugin's configuration; number is its place.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %@ 项"
+          }
+        }
+      }
+    },
+    "schema.onePerLine": {
+      "comment": "Placeholder of a field taking a list, one value per line.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One per line"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每行一项"
+          }
+        }
+      }
+    },
+    "schema.invalidJson": {
+      "comment": "Error under a field edited as JSON when its text does not parse.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not valid JSON"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不是有效的 JSON"
+          }
+        }
+      }
+    },
+    "schema.default": {
+      "comment": "Choice leaving a setting at its default; value is the default.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (%@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认（%@）"
+          }
+        }
+      }
+    },
+    "schema.show": {
+      "comment": "Button revealing a secret typed in a field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示"
+          }
+        }
+      }
+    },
+    "schema.hide": {
+      "comment": "Button hiding a secret revealed in a field.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏"
           }
         }
       }

@@ -59,6 +59,7 @@ export {
   useCatalogPlugins,
   usePluginActions,
   usePluginCatalogs,
+  usePluginConfig,
   usePlugins,
 } from "./plugins.ts";
 export { type Artwork, artwork, imageOf, imageUrl, libraryImageUrl, thumbOf } from "./images.ts";

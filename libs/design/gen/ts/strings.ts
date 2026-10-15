@@ -336,11 +336,22 @@ export type MessageKey =
   | 'plugins.networkAccess'
   | 'plugins.versions'
   | 'plugins.installThis'
+  | 'plugins.configuration'
+  | 'plugins.configurationSaved'
+  | 'plugins.openSettingsPage'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
   | 'auth.setUpElsewhereMessage'
-  | 'auth.linkMessage';
+  | 'auth.linkMessage'
+  | 'schema.add'
+  | 'schema.remove'
+  | 'schema.item'
+  | 'schema.onePerLine'
+  | 'schema.invalidJson'
+  | 'schema.default'
+  | 'schema.show'
+  | 'schema.hide';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -669,11 +680,22 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.networkAccess": "Network Access",
     "plugins.versions": "Versions",
     "plugins.installThis": "Install This Version",
+    "plugins.configuration": "Configuration",
+    "plugins.configurationSaved": "Saved. The plugin uses the new configuration.",
+    "plugins.openSettingsPage": "Open Settings Page",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
     "auth.setUpElsewhereMessage": "Open this address in a browser:",
-    "auth.linkMessage": "On your phone or computer, go to {url} and enter this code."
+    "auth.linkMessage": "On your phone or computer, go to {url} and enter this code.",
+    "schema.add": "Add",
+    "schema.remove": "Remove",
+    "schema.item": "Item {number}",
+    "schema.onePerLine": "One per line",
+    "schema.invalidJson": "Not valid JSON",
+    "schema.default": "Default ({value})",
+    "schema.show": "Show",
+    "schema.hide": "Hide"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -1000,10 +1022,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.networkAccess": "网络访问",
     "plugins.versions": "版本",
     "plugins.installThis": "安装此版本",
+    "plugins.configuration": "配置",
+    "plugins.configurationSaved": "已保存，插件已使用新配置。",
+    "plugins.openSettingsPage": "打开设置页面",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
     "auth.setUpElsewhereMessage": "在浏览器中打开这个地址：",
-    "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。"
+    "auth.linkMessage": "在手机或电脑上访问 {url}，输入这个代码。",
+    "schema.add": "添加",
+    "schema.remove": "移除",
+    "schema.item": "第 {number} 项",
+    "schema.onePerLine": "每行一项",
+    "schema.invalidJson": "不是有效的 JSON",
+    "schema.default": "默认（{value}）",
+    "schema.show": "显示",
+    "schema.hide": "隐藏"
   }
 };

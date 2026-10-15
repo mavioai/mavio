@@ -649,7 +649,7 @@ flowchart TD
   - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details as `libs/design/components.md` specifies them (the episode to watch next, seasons and episodes, the version menu, cast and crew, the facts and media), and the player's side panel with quality and the next episode
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
     - [x] Plugins (`apps/web/src/screens/plugins.tsx`, `libs/client-ts/src/plugins.ts`): the installed plugins with their state, enabled and disabled (`SystemService.SetPluginEnabled`), updated and uninstalled; those the catalogs offer, to install; as cards under Available and Installed tabs, filtered by category, each opening a page of its details and versions; and a Catalogs page to add and remove catalogs; under the Server group of the settings, which in mavio.dev mode chooses the server
-    - [ ] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
+    - [x] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
     - [ ] Overview: the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
     - [ ] General: the server's name, the metadata's language and country and the other server settings (`UpdateServerSettings`, `LocalizationService`)

@@ -694,6 +694,12 @@
     <string name="plugins_versions">Versions</string>
     <!-- Button installing an older or newer version of an installed plugin. -->
     <string name="plugins_install_this">Install This Version</string>
+    <!-- Heading of an installed plugin's configuration form. -->
+    <string name="plugins_configuration">Configuration</string>
+    <!-- Note after a plugin's configuration was saved and accepted. -->
+    <string name="plugins_configuration_saved">Saved. The plugin uses the new configuration.</string>
+    <!-- Link opening a plugin's own settings page in a new tab. -->
+    <string name="plugins_open_settings_page">Open Settings Page</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
@@ -704,4 +710,20 @@
     <string name="auth_set_up_elsewhere_message">Open this address in a browser:</string>
     <!-- Instruction on a television signing in with a Mavio account; url is mavio.dev's link page. -->
     <string name="auth_link_message">On your phone or computer, go to %s and enter this code.</string>
+    <!-- Button adding an entry to a list in a plugin's configuration. -->
+    <string name="schema_add">Add</string>
+    <!-- Button removing an entry from a list in a plugin's configuration. -->
+    <string name="schema_remove">Remove</string>
+    <!-- Title of an unnamed entry of a list in a plugin's configuration; number is its place. -->
+    <string name="schema_item">Item %s</string>
+    <!-- Placeholder of a field taking a list, one value per line. -->
+    <string name="schema_one_per_line">One per line</string>
+    <!-- Error under a field edited as JSON when its text does not parse. -->
+    <string name="schema_invalid_json">Not valid JSON</string>
+    <!-- Choice leaving a setting at its default; value is the default. -->
+    <string name="schema_default">Default (%s)</string>
+    <!-- Button revealing a secret typed in a field. -->
+    <string name="schema_show">Show</string>
+    <!-- Button hiding a secret revealed in a field. -->
+    <string name="schema_hide">Hide</string>
 </resources>
