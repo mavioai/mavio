@@ -590,6 +590,54 @@
     <string name="settings_manage_at_mavio">Manage at mavio.dev</string>
     <!-- Marks the user as the server's administrator. -->
     <string name="settings_admin">Administrator</string>
+    <!-- Group of the settings of the servers the user administers. -->
+    <string name="settings_administration">Administration</string>
+    <!-- Settings section of a server's plugins. -->
+    <string name="settings_plugins">Plugins</string>
+    <!-- Explanation under the Plugins title; server is its name. -->
+    <string name="settings_plugins_message">The plugins of %s, which bring it metadata, discovery, downloads and more.</string>
+    <!-- Group of the plugins installed on the server. -->
+    <string name="plugins_installed">Installed</string>
+    <!-- Group of the catalogs' plugins not installed. -->
+    <string name="plugins_available">Available</string>
+    <!-- Empty state of the installed plugins. -->
+    <string name="plugins_none_installed">No plugins are installed.</string>
+    <!-- Empty state of the plugins available to install. -->
+    <string name="plugins_none_available">The catalogs offer no other plugins.</string>
+    <!-- State of a plugin that runs. -->
+    <string name="plugins_state_ready">Running</string>
+    <!-- State of a plugin waiting for its configuration. -->
+    <string name="plugins_state_unconfigured">Needs configuration</string>
+    <!-- State of a plugin that could not start. -->
+    <string name="plugins_state_failed">Failed</string>
+    <!-- State of a plugin an administrator disabled. -->
+    <string name="plugins_state_disabled">Disabled</string>
+    <!-- Label of the switch enabling a plugin. -->
+    <string name="plugins_enabled">Enabled</string>
+    <!-- Button installing a plugin. -->
+    <string name="plugins_install">Install</string>
+    <!-- Button updating a plugin; version is the newest. -->
+    <string name="plugins_update">Update to %s</string>
+    <!-- Button uninstalling a plugin. -->
+    <string name="plugins_uninstall">Uninstall</string>
+    <!-- Title of the confirmation of uninstalling a plugin; name is the plugin's. -->
+    <string name="plugins_uninstall_title">Uninstall %s\?</string>
+    <!-- Message of the confirmation of uninstalling a plugin. -->
+    <string name="plugins_uninstall_message">Its configuration and data are deleted.</string>
+    <!-- The author of a plugin. -->
+    <string name="plugins_by">By %s</string>
+    <!-- Group of the URLs of the plugin catalogs. -->
+    <string name="plugins_catalogs">Catalogs</string>
+    <!-- Footer of the plugin catalogs. -->
+    <string name="plugins_catalogs_footer">Plugins are installed from the catalogs at these addresses.</string>
+    <!-- Button adding a plugin catalog's URL. -->
+    <string name="plugins_add_catalog">Add</string>
+    <!-- Placeholder and label of the field of a new catalog's URL. -->
+    <string name="plugins_catalog_address">Catalog address</string>
+    <!-- Button removing a plugin catalog. -->
+    <string name="plugins_remove_catalog">Remove</string>
+    <!-- Error listing the catalogs' plugins; reason is the error. -->
+    <string name="plugins_catalogs_unreachable">The catalogs can\'t be reached: %s</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->

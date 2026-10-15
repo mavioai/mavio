@@ -950,6 +950,88 @@ public enum MavioStrings {
     /// Marks the user as the server's administrator.
     public static var settingsAdmin: String { NSLocalizedString("settings.admin", bundle: .module, comment: "") }
 
+    /// Group of the settings of the servers the user administers.
+    public static var settingsAdministration: String { NSLocalizedString("settings.administration", bundle: .module, comment: "") }
+
+    /// Settings section of a server's plugins.
+    public static var settingsPlugins: String { NSLocalizedString("settings.plugins", bundle: .module, comment: "") }
+
+    /// Explanation under the Plugins title; server is its name.
+    public static func settingsPluginsMessage(server: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("settings.pluginsMessage", bundle: .module, comment: ""), server)
+    }
+
+    /// Group of the plugins installed on the server.
+    public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
+
+    /// Group of the catalogs' plugins not installed.
+    public static var pluginsAvailable: String { NSLocalizedString("plugins.available", bundle: .module, comment: "") }
+
+    /// Empty state of the installed plugins.
+    public static var pluginsNoneInstalled: String { NSLocalizedString("plugins.noneInstalled", bundle: .module, comment: "") }
+
+    /// Empty state of the plugins available to install.
+    public static var pluginsNoneAvailable: String { NSLocalizedString("plugins.noneAvailable", bundle: .module, comment: "") }
+
+    /// State of a plugin that runs.
+    public static var pluginsStateReady: String { NSLocalizedString("plugins.stateReady", bundle: .module, comment: "") }
+
+    /// State of a plugin waiting for its configuration.
+    public static var pluginsStateUnconfigured: String { NSLocalizedString("plugins.stateUnconfigured", bundle: .module, comment: "") }
+
+    /// State of a plugin that could not start.
+    public static var pluginsStateFailed: String { NSLocalizedString("plugins.stateFailed", bundle: .module, comment: "") }
+
+    /// State of a plugin an administrator disabled.
+    public static var pluginsStateDisabled: String { NSLocalizedString("plugins.stateDisabled", bundle: .module, comment: "") }
+
+    /// Label of the switch enabling a plugin.
+    public static var pluginsEnabled: String { NSLocalizedString("plugins.enabled", bundle: .module, comment: "") }
+
+    /// Button installing a plugin.
+    public static var pluginsInstall: String { NSLocalizedString("plugins.install", bundle: .module, comment: "") }
+
+    /// Button updating a plugin; version is the newest.
+    public static func pluginsUpdate(version: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.update", bundle: .module, comment: ""), version)
+    }
+
+    /// Button uninstalling a plugin.
+    public static var pluginsUninstall: String { NSLocalizedString("plugins.uninstall", bundle: .module, comment: "") }
+
+    /// Title of the confirmation of uninstalling a plugin; name is the plugin's.
+    public static func pluginsUninstallTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.uninstallTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Message of the confirmation of uninstalling a plugin.
+    public static var pluginsUninstallMessage: String { NSLocalizedString("plugins.uninstallMessage", bundle: .module, comment: "") }
+
+    /// The author of a plugin.
+    public static func pluginsBy(author: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.by", bundle: .module, comment: ""), author)
+    }
+
+    /// Group of the URLs of the plugin catalogs.
+    public static var pluginsCatalogs: String { NSLocalizedString("plugins.catalogs", bundle: .module, comment: "") }
+
+    /// Footer of the plugin catalogs.
+    public static var pluginsCatalogsFooter: String { NSLocalizedString("plugins.catalogsFooter", bundle: .module, comment: "") }
+
+    /// Button adding a plugin catalog's URL.
+    public static var pluginsAddCatalog: String { NSLocalizedString("plugins.addCatalog", bundle: .module, comment: "") }
+
+    /// Placeholder and label of the field of a new catalog's URL.
+    public static var pluginsCatalogAddress: String { NSLocalizedString("plugins.catalogAddress", bundle: .module, comment: "") }
+
+    /// Button removing a plugin catalog.
+    public static var pluginsRemoveCatalog: String { NSLocalizedString("plugins.removeCatalog", bundle: .module, comment: "") }
+
+    /// Error listing the catalogs' plugins; reason is the error.
+    public static func pluginsCatalogsUnreachable(reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.catalogsUnreachable", bundle: .module, comment: ""), reason)
+    }
+
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 

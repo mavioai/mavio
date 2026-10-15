@@ -57,6 +57,7 @@
   "server": "hard-drives",
   "devices": "devices",
   "admin": "shield-check",
+  "plugins": "puzzle-piece",
   "appearance": "circle-half",
   "lightMode": "sun",
   "darkMode": "moon",

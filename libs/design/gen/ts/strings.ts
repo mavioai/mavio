@@ -284,6 +284,30 @@ export type MessageKey =
   | 'settings.standaloneAccountMessage'
   | 'settings.manageAtMavio'
   | 'settings.admin'
+  | 'settings.administration'
+  | 'settings.plugins'
+  | 'settings.pluginsMessage'
+  | 'plugins.installed'
+  | 'plugins.available'
+  | 'plugins.noneInstalled'
+  | 'plugins.noneAvailable'
+  | 'plugins.stateReady'
+  | 'plugins.stateUnconfigured'
+  | 'plugins.stateFailed'
+  | 'plugins.stateDisabled'
+  | 'plugins.enabled'
+  | 'plugins.install'
+  | 'plugins.update'
+  | 'plugins.uninstall'
+  | 'plugins.uninstallTitle'
+  | 'plugins.uninstallMessage'
+  | 'plugins.by'
+  | 'plugins.catalogs'
+  | 'plugins.catalogsFooter'
+  | 'plugins.addCatalog'
+  | 'plugins.catalogAddress'
+  | 'plugins.removeCatalog'
+  | 'plugins.catalogsUnreachable'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -565,6 +589,30 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.standaloneAccountMessage": "User {name} of {server}.",
     "settings.manageAtMavio": "Manage at mavio.dev",
     "settings.admin": "Administrator",
+    "settings.administration": "Administration",
+    "settings.plugins": "Plugins",
+    "settings.pluginsMessage": "The plugins of {server}, which bring it metadata, discovery, downloads and more.",
+    "plugins.installed": "Installed",
+    "plugins.available": "Available",
+    "plugins.noneInstalled": "No plugins are installed.",
+    "plugins.noneAvailable": "The catalogs offer no other plugins.",
+    "plugins.stateReady": "Running",
+    "plugins.stateUnconfigured": "Needs configuration",
+    "plugins.stateFailed": "Failed",
+    "plugins.stateDisabled": "Disabled",
+    "plugins.enabled": "Enabled",
+    "plugins.install": "Install",
+    "plugins.update": "Update to {version}",
+    "plugins.uninstall": "Uninstall",
+    "plugins.uninstallTitle": "Uninstall {name}?",
+    "plugins.uninstallMessage": "Its configuration and data are deleted.",
+    "plugins.by": "By {author}",
+    "plugins.catalogs": "Catalogs",
+    "plugins.catalogsFooter": "Plugins are installed from the catalogs at these addresses.",
+    "plugins.addCatalog": "Add",
+    "plugins.catalogAddress": "Catalog address",
+    "plugins.removeCatalog": "Remove",
+    "plugins.catalogsUnreachable": "The catalogs can't be reached: {reason}",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -844,6 +892,30 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.standaloneAccountMessage": "{server} 上的用户 {name}。",
     "settings.manageAtMavio": "在 mavio.dev 管理",
     "settings.admin": "管理员",
+    "settings.administration": "管理",
+    "settings.plugins": "插件",
+    "settings.pluginsMessage": "{server} 的插件，为它提供元数据、发现、下载等功能。",
+    "plugins.installed": "已安装",
+    "plugins.available": "可安装",
+    "plugins.noneInstalled": "尚未安装插件。",
+    "plugins.noneAvailable": "插件目录中没有其他插件。",
+    "plugins.stateReady": "运行中",
+    "plugins.stateUnconfigured": "需要配置",
+    "plugins.stateFailed": "失败",
+    "plugins.stateDisabled": "已停用",
+    "plugins.enabled": "启用",
+    "plugins.install": "安装",
+    "plugins.update": "更新到 {version}",
+    "plugins.uninstall": "卸载",
+    "plugins.uninstallTitle": "卸载 {name}？",
+    "plugins.uninstallMessage": "其配置与数据将被删除。",
+    "plugins.by": "作者：{author}",
+    "plugins.catalogs": "插件目录",
+    "plugins.catalogsFooter": "插件从这些地址上的插件目录安装。",
+    "plugins.addCatalog": "添加",
+    "plugins.catalogAddress": "插件目录地址",
+    "plugins.removeCatalog": "移除",
+    "plugins.catalogsUnreachable": "无法访问插件目录：{reason}",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
