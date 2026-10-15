@@ -626,6 +626,10 @@
     <string name="settings_logs">Logs</string>
     <!-- Settings section of a server's API keys. -->
     <string name="settings_api_keys">API Keys</string>
+    <!-- Settings section of the monitored movies and episodes still to acquire. -->
+    <string name="settings_wanted">Wanted</string>
+    <!-- Settings section of the server's downloads: queue, history, blocklist and manual import. -->
+    <string name="settings_downloads">Downloads</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->
@@ -2365,4 +2369,150 @@
     <string name="requests_remove">Delete</string>
     <!-- Asks before deleting a request. -->
     <string name="requests_remove_title">Delete this request?</string>
+    <!-- Description of the Wanted settings. -->
+    <string name="wanted_message">Monitored movies and episodes without a file, or whose file is below their quality profile\'s cutoff.</string>
+    <!-- Label of the choice between missing and cutoff unmet. -->
+    <string name="wanted_filter">Show</string>
+    <!-- Wanted items without a file. -->
+    <string name="wanted_missing">Missing</string>
+    <!-- Wanted items whose file is below their profile's cutoff. -->
+    <string name="wanted_cutoff_unmet">Cutoff Unmet</string>
+    <!-- Label of the choice between movies and episodes. -->
+    <string name="wanted_kind">Kind</string>
+    <!-- Wanted movies. -->
+    <string name="wanted_movies">Movies</string>
+    <!-- Wanted episodes. -->
+    <string name="wanted_episodes">Episodes</string>
+    <!-- Button checking the indexers' recent releases. -->
+    <string name="wanted_rss_sync">RSS Sync</string>
+    <!-- Button searching for every item listed. -->
+    <string name="wanted_search_all">Search All</string>
+    <!-- Number of searches queued. -->
+    <plurals name="wanted_queued">
+        <item quantity="one">%d search queued</item>
+        <item quantity="other">%d searches queued</item>
+    </plurals>
+    <!-- Shown after an RSS sync is queued. -->
+    <string name="wanted_rss_queued">RSS sync queued</string>
+    <!-- Number of wanted items. -->
+    <plurals name="wanted_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <!-- Shown when nothing is wanted. -->
+    <string name="wanted_none">Nothing is wanted.</string>
+    <!-- Stops monitoring a wanted item. -->
+    <string name="wanted_unmonitor">Unmonitor</string>
+    <!-- Searches for one wanted item. -->
+    <string name="wanted_search">Search</string>
+    <!-- Shown after a search of an item is queued. -->
+    <string name="wanted_searching">Searching</string>
+    <!-- The quality of a wanted item's current file. -->
+    <string name="wanted_has">Has %s</string>
+    <!-- A movie not yet at its minimum availability. -->
+    <string name="wanted_not_available">Not available yet</string>
+    <!-- An episode's absolute number. -->
+    <string name="wanted_absolute">Absolute %s</string>
+    <!-- Description of the Downloads settings. -->
+    <string name="downloads_message">What the download clients are fetching for the server, what happened, and the releases not to grab again.</string>
+    <!-- Tab of the tracked downloads. -->
+    <string name="downloads_queue">Queue</string>
+    <!-- Tab of the acquisition history. -->
+    <string name="downloads_history">History</string>
+    <!-- Tab of the blocklisted releases. -->
+    <string name="downloads_blocklist">Blocklist</string>
+    <!-- Tab importing the files of a folder. -->
+    <string name="downloads_import">Manual Import</string>
+    <!-- State of a download. -->
+    <string name="downloads_downloading">Downloading</string>
+    <!-- State of a download that cannot be imported. -->
+    <string name="downloads_import_blocked">Import blocked</string>
+    <!-- State of a finished download waiting to be imported. -->
+    <string name="downloads_import_pending">Waiting to import</string>
+    <!-- State of a download being imported. -->
+    <string name="downloads_importing">Importing</string>
+    <!-- State of an imported download, and a history event. -->
+    <string name="downloads_imported">Imported</string>
+    <!-- State of a failed download, and a history event. -->
+    <string name="downloads_failed">Failed</string>
+    <!-- State of an ignored download, and a history event. -->
+    <string name="downloads_ignored">Ignored</string>
+    <!-- The client has queued a download. -->
+    <string name="downloads_queued">Queued in client</string>
+    <!-- The client has paused a download. -->
+    <string name="downloads_paused">Paused in client</string>
+    <!-- The client warns about a download. -->
+    <string name="downloads_warning">Client warning</string>
+    <!-- Link to the item of a download or event. -->
+    <string name="downloads_item">Open item</string>
+    <!-- Toggle listing finished downloads too. -->
+    <string name="downloads_show_finished">Show finished downloads</string>
+    <!-- Number of downloads. -->
+    <plurals name="downloads_count">
+        <item quantity="one">%d download</item>
+        <item quantity="other">%d downloads</item>
+    </plurals>
+    <!-- Shown when the queue is empty. -->
+    <string name="downloads_queue_empty">Nothing is downloading.</string>
+    <!-- Time left of a download. -->
+    <string name="downloads_left">%s left</string>
+    <!-- Opens the files of a download to import. -->
+    <string name="downloads_manual_import">Import Manually</string>
+    <!-- Stops tracking a download. -->
+    <string name="downloads_remove">Remove</string>
+    <!-- Option removing a download and its files from its client. -->
+    <string name="downloads_remove_from_client">Remove from the download client</string>
+    <!-- Option blocklisting a removed download's release. -->
+    <string name="downloads_blocklist_release">Blocklist the release</string>
+    <!-- Option searching again after blocklisting. -->
+    <string name="downloads_search_again">Search for another release</string>
+    <!-- Title of the files of a manual import. -->
+    <string name="downloads_files">Files</string>
+    <!-- Label of how files are imported. -->
+    <string name="downloads_mode">Import mode</string>
+    <!-- Import mode chosen by the client. -->
+    <string name="downloads_mode_auto">Move or copy as the client allows</string>
+    <!-- Import mode moving files. -->
+    <string name="downloads_mode_move">Move</string>
+    <!-- Import mode copying files. -->
+    <string name="downloads_mode_copy">Copy or hard link</string>
+    <!-- Shown when a manual import finds no video files. -->
+    <string name="downloads_no_files">No video files.</string>
+    <!-- Imports one file. -->
+    <string name="downloads_import_file">Import</string>
+    <!-- Shown after a file was imported. -->
+    <string name="downloads_imported_file">Imported</string>
+    <!-- History event of a grabbed release. -->
+    <string name="downloads_grabbed">Grabbed</string>
+    <!-- History event of a deleted file. -->
+    <string name="downloads_file_deleted">File deleted</string>
+    <!-- History event of a renamed file. -->
+    <string name="downloads_file_renamed">File renamed</string>
+    <!-- Label of the history's event filter. -->
+    <string name="downloads_event_type">Events</string>
+    <!-- History filter showing every event. -->
+    <string name="downloads_all_events">All events</string>
+    <!-- Number of history events. -->
+    <plurals name="downloads_event_count">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <!-- Shown when the history is empty. -->
+    <string name="downloads_history_empty">No history yet.</string>
+    <!-- Marks a grab's download as failed. -->
+    <string name="downloads_mark_failed">Mark Failed</string>
+    <!-- Asks before marking a grab failed. -->
+    <string name="downloads_mark_failed_title">Blocklist this release and search again?</string>
+    <!-- Footer of the blocklist. -->
+    <string name="downloads_blocklist_footer">Blocklisted releases are not grabbed again for their item.</string>
+    <!-- Shown when the blocklist is empty. -->
+    <string name="downloads_blocklist_empty">The blocklist is empty.</string>
+    <!-- Takes a release off the blocklist. -->
+    <string name="downloads_unblock">Remove</string>
+    <!-- Footer of importing a folder. -->
+    <string name="downloads_import_footer">Files are matched to wanted movies by their names; files no movie matches cannot be imported here.</string>
+    <!-- Label of the folder to import. -->
+    <string name="downloads_folder">Folder on the server</string>
+    <!-- Lists the files of a folder to import. -->
+    <string name="downloads_scan">Scan</string>
 </resources>

@@ -302,6 +302,8 @@ export type MessageKey =
   | 'settings.backups'
   | 'settings.logs'
   | 'settings.apiKeys'
+  | 'settings.wanted'
+  | 'settings.downloads'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1163,7 +1165,74 @@ export type MessageKey =
   | 'requests.editSeasons'
   | 'requests.editTitle'
   | 'requests.remove'
-  | 'requests.removeTitle';
+  | 'requests.removeTitle'
+  | 'wanted.message'
+  | 'wanted.filter'
+  | 'wanted.missing'
+  | 'wanted.cutoffUnmet'
+  | 'wanted.kind'
+  | 'wanted.movies'
+  | 'wanted.episodes'
+  | 'wanted.rssSync'
+  | 'wanted.searchAll'
+  | 'wanted.queued'
+  | 'wanted.rssQueued'
+  | 'wanted.count'
+  | 'wanted.none'
+  | 'wanted.unmonitor'
+  | 'wanted.search'
+  | 'wanted.searching'
+  | 'wanted.has'
+  | 'wanted.notAvailable'
+  | 'wanted.absolute'
+  | 'downloads.message'
+  | 'downloads.queue'
+  | 'downloads.history'
+  | 'downloads.blocklist'
+  | 'downloads.import'
+  | 'downloads.downloading'
+  | 'downloads.importBlocked'
+  | 'downloads.importPending'
+  | 'downloads.importing'
+  | 'downloads.imported'
+  | 'downloads.failed'
+  | 'downloads.ignored'
+  | 'downloads.queued'
+  | 'downloads.paused'
+  | 'downloads.warning'
+  | 'downloads.item'
+  | 'downloads.showFinished'
+  | 'downloads.count'
+  | 'downloads.queueEmpty'
+  | 'downloads.left'
+  | 'downloads.manualImport'
+  | 'downloads.remove'
+  | 'downloads.removeFromClient'
+  | 'downloads.blocklistRelease'
+  | 'downloads.searchAgain'
+  | 'downloads.files'
+  | 'downloads.mode'
+  | 'downloads.modeAuto'
+  | 'downloads.modeMove'
+  | 'downloads.modeCopy'
+  | 'downloads.noFiles'
+  | 'downloads.importFile'
+  | 'downloads.importedFile'
+  | 'downloads.grabbed'
+  | 'downloads.fileDeleted'
+  | 'downloads.fileRenamed'
+  | 'downloads.eventType'
+  | 'downloads.allEvents'
+  | 'downloads.eventCount'
+  | 'downloads.historyEmpty'
+  | 'downloads.markFailed'
+  | 'downloads.markFailedTitle'
+  | 'downloads.blocklistFooter'
+  | 'downloads.blocklistEmpty'
+  | 'downloads.unblock'
+  | 'downloads.importFooter'
+  | 'downloads.folder'
+  | 'downloads.scan';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1458,6 +1527,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "Backups",
     "settings.logs": "Logs",
     "settings.apiKeys": "API Keys",
+    "settings.wanted": "Wanted",
+    "settings.downloads": "Downloads",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -2319,7 +2390,74 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requests.editSeasons": "Change Seasons",
     "requests.editTitle": "Seasons of {name}",
     "requests.remove": "Delete",
-    "requests.removeTitle": "Delete this request?"
+    "requests.removeTitle": "Delete this request?",
+    "wanted.message": "Monitored movies and episodes without a file, or whose file is below their quality profile's cutoff.",
+    "wanted.filter": "Show",
+    "wanted.missing": "Missing",
+    "wanted.cutoffUnmet": "Cutoff Unmet",
+    "wanted.kind": "Kind",
+    "wanted.movies": "Movies",
+    "wanted.episodes": "Episodes",
+    "wanted.rssSync": "RSS Sync",
+    "wanted.searchAll": "Search All",
+    "wanted.queued": "{count, plural, one {# search queued} other {# searches queued}}",
+    "wanted.rssQueued": "RSS sync queued",
+    "wanted.count": "{count, plural, one {# item} other {# items}}",
+    "wanted.none": "Nothing is wanted.",
+    "wanted.unmonitor": "Unmonitor",
+    "wanted.search": "Search",
+    "wanted.searching": "Searching",
+    "wanted.has": "Has {quality}",
+    "wanted.notAvailable": "Not available yet",
+    "wanted.absolute": "Absolute {number}",
+    "downloads.message": "What the download clients are fetching for the server, what happened, and the releases not to grab again.",
+    "downloads.queue": "Queue",
+    "downloads.history": "History",
+    "downloads.blocklist": "Blocklist",
+    "downloads.import": "Manual Import",
+    "downloads.downloading": "Downloading",
+    "downloads.importBlocked": "Import blocked",
+    "downloads.importPending": "Waiting to import",
+    "downloads.importing": "Importing",
+    "downloads.imported": "Imported",
+    "downloads.failed": "Failed",
+    "downloads.ignored": "Ignored",
+    "downloads.queued": "Queued in client",
+    "downloads.paused": "Paused in client",
+    "downloads.warning": "Client warning",
+    "downloads.item": "Open item",
+    "downloads.showFinished": "Show finished downloads",
+    "downloads.count": "{count, plural, one {# download} other {# downloads}}",
+    "downloads.queueEmpty": "Nothing is downloading.",
+    "downloads.left": "{time} left",
+    "downloads.manualImport": "Import Manually",
+    "downloads.remove": "Remove",
+    "downloads.removeFromClient": "Remove from the download client",
+    "downloads.blocklistRelease": "Blocklist the release",
+    "downloads.searchAgain": "Search for another release",
+    "downloads.files": "Files",
+    "downloads.mode": "Import mode",
+    "downloads.modeAuto": "Move or copy as the client allows",
+    "downloads.modeMove": "Move",
+    "downloads.modeCopy": "Copy or hard link",
+    "downloads.noFiles": "No video files.",
+    "downloads.importFile": "Import",
+    "downloads.importedFile": "Imported",
+    "downloads.grabbed": "Grabbed",
+    "downloads.fileDeleted": "File deleted",
+    "downloads.fileRenamed": "File renamed",
+    "downloads.eventType": "Events",
+    "downloads.allEvents": "All events",
+    "downloads.eventCount": "{count, plural, one {# event} other {# events}}",
+    "downloads.historyEmpty": "No history yet.",
+    "downloads.markFailed": "Mark Failed",
+    "downloads.markFailedTitle": "Blocklist this release and search again?",
+    "downloads.blocklistFooter": "Blocklisted releases are not grabbed again for their item.",
+    "downloads.blocklistEmpty": "The blocklist is empty.",
+    "downloads.unblock": "Remove",
+    "downloads.importFooter": "Files are matched to wanted movies by their names; files no movie matches cannot be imported here.",
+    "downloads.folder": "Folder on the server",
+    "downloads.scan": "Scan"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -2612,6 +2750,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "备份",
     "settings.logs": "日志",
     "settings.apiKeys": "API 密钥",
+    "settings.wanted": "想要",
+    "settings.downloads": "下载",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",
@@ -3473,6 +3613,73 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "requests.editSeasons": "更改季",
     "requests.editTitle": "{name} 的季",
     "requests.remove": "删除",
-    "requests.removeTitle": "删除此请求？"
+    "requests.removeTitle": "删除此请求？",
+    "wanted.message": "受监控但没有文件，或文件未达到质量配置截止质量的电影与剧集。",
+    "wanted.filter": "显示",
+    "wanted.missing": "缺失",
+    "wanted.cutoffUnmet": "未达截止质量",
+    "wanted.kind": "类型",
+    "wanted.movies": "电影",
+    "wanted.episodes": "剧集分集",
+    "wanted.rssSync": "RSS 同步",
+    "wanted.searchAll": "全部搜索",
+    "wanted.queued": "{count, plural, other {已排队 # 个搜索}}",
+    "wanted.rssQueued": "已排队 RSS 同步",
+    "wanted.count": "{count, plural, other {# 项}}",
+    "wanted.none": "没有想要的内容。",
+    "wanted.unmonitor": "取消监控",
+    "wanted.search": "搜索",
+    "wanted.searching": "正在搜索",
+    "wanted.has": "现有 {quality}",
+    "wanted.notAvailable": "尚未上映",
+    "wanted.absolute": "绝对集数 {number}",
+    "downloads.message": "下载客户端正在为服务器获取的内容、发生过的事件，以及不再抓取的发布。",
+    "downloads.queue": "队列",
+    "downloads.history": "历史",
+    "downloads.blocklist": "黑名单",
+    "downloads.import": "手动导入",
+    "downloads.downloading": "下载中",
+    "downloads.importBlocked": "导入受阻",
+    "downloads.importPending": "等待导入",
+    "downloads.importing": "导入中",
+    "downloads.imported": "已导入",
+    "downloads.failed": "失败",
+    "downloads.ignored": "已忽略",
+    "downloads.queued": "客户端排队中",
+    "downloads.paused": "客户端已暂停",
+    "downloads.warning": "客户端警告",
+    "downloads.item": "打开条目",
+    "downloads.showFinished": "显示已完成的下载",
+    "downloads.count": "{count, plural, other {# 个下载}}",
+    "downloads.queueEmpty": "没有正在进行的下载。",
+    "downloads.left": "剩余 {time}",
+    "downloads.manualImport": "手动导入",
+    "downloads.remove": "移除",
+    "downloads.removeFromClient": "从下载客户端移除",
+    "downloads.blocklistRelease": "将该发布加入黑名单",
+    "downloads.searchAgain": "搜索其他发布",
+    "downloads.files": "文件",
+    "downloads.mode": "导入方式",
+    "downloads.modeAuto": "按客户端允许移动或复制",
+    "downloads.modeMove": "移动",
+    "downloads.modeCopy": "复制或硬链接",
+    "downloads.noFiles": "没有视频文件。",
+    "downloads.importFile": "导入",
+    "downloads.importedFile": "已导入",
+    "downloads.grabbed": "已抓取",
+    "downloads.fileDeleted": "文件已删除",
+    "downloads.fileRenamed": "文件已重命名",
+    "downloads.eventType": "事件",
+    "downloads.allEvents": "全部事件",
+    "downloads.eventCount": "{count, plural, other {# 个事件}}",
+    "downloads.historyEmpty": "暂无历史。",
+    "downloads.markFailed": "标记为失败",
+    "downloads.markFailedTitle": "将此发布加入黑名单并重新搜索？",
+    "downloads.blocklistFooter": "黑名单中的发布不会再为其条目抓取。",
+    "downloads.blocklistEmpty": "黑名单为空。",
+    "downloads.unblock": "移除",
+    "downloads.importFooter": "文件按名称匹配想要的电影；无法匹配电影的文件不能在此导入。",
+    "downloads.folder": "服务器上的文件夹",
+    "downloads.scan": "扫描"
   }
 };

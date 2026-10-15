@@ -180,6 +180,15 @@ const units: [Intl.RelativeTimeFormatUnit, number][] = [
   ["minute", 60_000],
 ];
 
+const megabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "megabyte", maximumFractionDigits: 1 });
+const gigabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "gigabyte", maximumFractionDigits: 2 });
+
+/** A file's size in megabytes, or gigabytes from a thousand megabytes. */
+export function sizeOf(bytes: bigint | number): string {
+  const n = Number(bytes);
+  return n >= 1e9 ? gigabytes.format(n / 1e9) : megabytes.format(n / 1e6);
+}
+
 /** When a time is from now, as "5 minutes ago" or "in 2 hours", in the UI's language. */
 export function fromNow(date: Date, now = Date.now()): string {
   const ms = date.getTime() - now;

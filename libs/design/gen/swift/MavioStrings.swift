@@ -1004,6 +1004,12 @@ public enum MavioStrings {
     /// Settings section of a server's API keys.
     public static var settingsApiKeys: String { NSLocalizedString("settings.apiKeys", bundle: .module, comment: "") }
 
+    /// Settings section of the monitored movies and episodes still to acquire.
+    public static var settingsWanted: String { NSLocalizedString("settings.wanted", bundle: .module, comment: "") }
+
+    /// Settings section of the server's downloads: queue, history, blocklist and manual import.
+    public static var settingsDownloads: String { NSLocalizedString("settings.downloads", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 
@@ -3715,4 +3721,219 @@ public enum MavioStrings {
 
     /// Asks before deleting a request.
     public static var requestsRemoveTitle: String { NSLocalizedString("requests.removeTitle", bundle: .module, comment: "") }
+
+    /// Description of the Wanted settings.
+    public static var wantedMessage: String { NSLocalizedString("wanted.message", bundle: .module, comment: "") }
+
+    /// Label of the choice between missing and cutoff unmet.
+    public static var wantedFilter: String { NSLocalizedString("wanted.filter", bundle: .module, comment: "") }
+
+    /// Wanted items without a file.
+    public static var wantedMissing: String { NSLocalizedString("wanted.missing", bundle: .module, comment: "") }
+
+    /// Wanted items whose file is below their profile's cutoff.
+    public static var wantedCutoffUnmet: String { NSLocalizedString("wanted.cutoffUnmet", bundle: .module, comment: "") }
+
+    /// Label of the choice between movies and episodes.
+    public static var wantedKind: String { NSLocalizedString("wanted.kind", bundle: .module, comment: "") }
+
+    /// Wanted movies.
+    public static var wantedMovies: String { NSLocalizedString("wanted.movies", bundle: .module, comment: "") }
+
+    /// Wanted episodes.
+    public static var wantedEpisodes: String { NSLocalizedString("wanted.episodes", bundle: .module, comment: "") }
+
+    /// Button checking the indexers' recent releases.
+    public static var wantedRssSync: String { NSLocalizedString("wanted.rssSync", bundle: .module, comment: "") }
+
+    /// Button searching for every item listed.
+    public static var wantedSearchAll: String { NSLocalizedString("wanted.searchAll", bundle: .module, comment: "") }
+
+    /// Number of searches queued.
+    public static func wantedQueued(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("wanted.queued", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown after an RSS sync is queued.
+    public static var wantedRssQueued: String { NSLocalizedString("wanted.rssQueued", bundle: .module, comment: "") }
+
+    /// Number of wanted items.
+    public static func wantedCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("wanted.count", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when nothing is wanted.
+    public static var wantedNone: String { NSLocalizedString("wanted.none", bundle: .module, comment: "") }
+
+    /// Stops monitoring a wanted item.
+    public static var wantedUnmonitor: String { NSLocalizedString("wanted.unmonitor", bundle: .module, comment: "") }
+
+    /// Searches for one wanted item.
+    public static var wantedSearch: String { NSLocalizedString("wanted.search", bundle: .module, comment: "") }
+
+    /// Shown after a search of an item is queued.
+    public static var wantedSearching: String { NSLocalizedString("wanted.searching", bundle: .module, comment: "") }
+
+    /// The quality of a wanted item's current file.
+    public static func wantedHas(quality: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("wanted.has", bundle: .module, comment: ""), quality)
+    }
+
+    /// A movie not yet at its minimum availability.
+    public static var wantedNotAvailable: String { NSLocalizedString("wanted.notAvailable", bundle: .module, comment: "") }
+
+    /// An episode's absolute number.
+    public static func wantedAbsolute(number: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("wanted.absolute", bundle: .module, comment: ""), number)
+    }
+
+    /// Description of the Downloads settings.
+    public static var downloadsMessage: String { NSLocalizedString("downloads.message", bundle: .module, comment: "") }
+
+    /// Tab of the tracked downloads.
+    public static var downloadsQueue: String { NSLocalizedString("downloads.queue", bundle: .module, comment: "") }
+
+    /// Tab of the acquisition history.
+    public static var downloadsHistory: String { NSLocalizedString("downloads.history", bundle: .module, comment: "") }
+
+    /// Tab of the blocklisted releases.
+    public static var downloadsBlocklist: String { NSLocalizedString("downloads.blocklist", bundle: .module, comment: "") }
+
+    /// Tab importing the files of a folder.
+    public static var downloadsImport: String { NSLocalizedString("downloads.import", bundle: .module, comment: "") }
+
+    /// State of a download.
+    public static var downloadsDownloading: String { NSLocalizedString("downloads.downloading", bundle: .module, comment: "") }
+
+    /// State of a download that cannot be imported.
+    public static var downloadsImportBlocked: String { NSLocalizedString("downloads.importBlocked", bundle: .module, comment: "") }
+
+    /// State of a finished download waiting to be imported.
+    public static var downloadsImportPending: String { NSLocalizedString("downloads.importPending", bundle: .module, comment: "") }
+
+    /// State of a download being imported.
+    public static var downloadsImporting: String { NSLocalizedString("downloads.importing", bundle: .module, comment: "") }
+
+    /// State of an imported download, and a history event.
+    public static var downloadsImported: String { NSLocalizedString("downloads.imported", bundle: .module, comment: "") }
+
+    /// State of a failed download, and a history event.
+    public static var downloadsFailed: String { NSLocalizedString("downloads.failed", bundle: .module, comment: "") }
+
+    /// State of an ignored download, and a history event.
+    public static var downloadsIgnored: String { NSLocalizedString("downloads.ignored", bundle: .module, comment: "") }
+
+    /// The client has queued a download.
+    public static var downloadsQueued: String { NSLocalizedString("downloads.queued", bundle: .module, comment: "") }
+
+    /// The client has paused a download.
+    public static var downloadsPaused: String { NSLocalizedString("downloads.paused", bundle: .module, comment: "") }
+
+    /// The client warns about a download.
+    public static var downloadsWarning: String { NSLocalizedString("downloads.warning", bundle: .module, comment: "") }
+
+    /// Link to the item of a download or event.
+    public static var downloadsItem: String { NSLocalizedString("downloads.item", bundle: .module, comment: "") }
+
+    /// Toggle listing finished downloads too.
+    public static var downloadsShowFinished: String { NSLocalizedString("downloads.showFinished", bundle: .module, comment: "") }
+
+    /// Number of downloads.
+    public static func downloadsCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("downloads.count", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when the queue is empty.
+    public static var downloadsQueueEmpty: String { NSLocalizedString("downloads.queueEmpty", bundle: .module, comment: "") }
+
+    /// Time left of a download.
+    public static func downloadsLeft(time: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("downloads.left", bundle: .module, comment: ""), time)
+    }
+
+    /// Opens the files of a download to import.
+    public static var downloadsManualImport: String { NSLocalizedString("downloads.manualImport", bundle: .module, comment: "") }
+
+    /// Stops tracking a download.
+    public static var downloadsRemove: String { NSLocalizedString("downloads.remove", bundle: .module, comment: "") }
+
+    /// Option removing a download and its files from its client.
+    public static var downloadsRemoveFromClient: String { NSLocalizedString("downloads.removeFromClient", bundle: .module, comment: "") }
+
+    /// Option blocklisting a removed download's release.
+    public static var downloadsBlocklistRelease: String { NSLocalizedString("downloads.blocklistRelease", bundle: .module, comment: "") }
+
+    /// Option searching again after blocklisting.
+    public static var downloadsSearchAgain: String { NSLocalizedString("downloads.searchAgain", bundle: .module, comment: "") }
+
+    /// Title of the files of a manual import.
+    public static var downloadsFiles: String { NSLocalizedString("downloads.files", bundle: .module, comment: "") }
+
+    /// Label of how files are imported.
+    public static var downloadsMode: String { NSLocalizedString("downloads.mode", bundle: .module, comment: "") }
+
+    /// Import mode chosen by the client.
+    public static var downloadsModeAuto: String { NSLocalizedString("downloads.modeAuto", bundle: .module, comment: "") }
+
+    /// Import mode moving files.
+    public static var downloadsModeMove: String { NSLocalizedString("downloads.modeMove", bundle: .module, comment: "") }
+
+    /// Import mode copying files.
+    public static var downloadsModeCopy: String { NSLocalizedString("downloads.modeCopy", bundle: .module, comment: "") }
+
+    /// Shown when a manual import finds no video files.
+    public static var downloadsNoFiles: String { NSLocalizedString("downloads.noFiles", bundle: .module, comment: "") }
+
+    /// Imports one file.
+    public static var downloadsImportFile: String { NSLocalizedString("downloads.importFile", bundle: .module, comment: "") }
+
+    /// Shown after a file was imported.
+    public static var downloadsImportedFile: String { NSLocalizedString("downloads.importedFile", bundle: .module, comment: "") }
+
+    /// History event of a grabbed release.
+    public static var downloadsGrabbed: String { NSLocalizedString("downloads.grabbed", bundle: .module, comment: "") }
+
+    /// History event of a deleted file.
+    public static var downloadsFileDeleted: String { NSLocalizedString("downloads.fileDeleted", bundle: .module, comment: "") }
+
+    /// History event of a renamed file.
+    public static var downloadsFileRenamed: String { NSLocalizedString("downloads.fileRenamed", bundle: .module, comment: "") }
+
+    /// Label of the history's event filter.
+    public static var downloadsEventType: String { NSLocalizedString("downloads.eventType", bundle: .module, comment: "") }
+
+    /// History filter showing every event.
+    public static var downloadsAllEvents: String { NSLocalizedString("downloads.allEvents", bundle: .module, comment: "") }
+
+    /// Number of history events.
+    public static func downloadsEventCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("downloads.eventCount", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when the history is empty.
+    public static var downloadsHistoryEmpty: String { NSLocalizedString("downloads.historyEmpty", bundle: .module, comment: "") }
+
+    /// Marks a grab's download as failed.
+    public static var downloadsMarkFailed: String { NSLocalizedString("downloads.markFailed", bundle: .module, comment: "") }
+
+    /// Asks before marking a grab failed.
+    public static var downloadsMarkFailedTitle: String { NSLocalizedString("downloads.markFailedTitle", bundle: .module, comment: "") }
+
+    /// Footer of the blocklist.
+    public static var downloadsBlocklistFooter: String { NSLocalizedString("downloads.blocklistFooter", bundle: .module, comment: "") }
+
+    /// Shown when the blocklist is empty.
+    public static var downloadsBlocklistEmpty: String { NSLocalizedString("downloads.blocklistEmpty", bundle: .module, comment: "") }
+
+    /// Takes a release off the blocklist.
+    public static var downloadsUnblock: String { NSLocalizedString("downloads.unblock", bundle: .module, comment: "") }
+
+    /// Footer of importing a folder.
+    public static var downloadsImportFooter: String { NSLocalizedString("downloads.importFooter", bundle: .module, comment: "") }
+
+    /// Label of the folder to import.
+    public static var downloadsFolder: String { NSLocalizedString("downloads.folder", bundle: .module, comment: "") }
+
+    /// Lists the files of a folder to import.
+    public static var downloadsScan: String { NSLocalizedString("downloads.scan", bundle: .module, comment: "") }
 }

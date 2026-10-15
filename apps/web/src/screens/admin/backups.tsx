@@ -10,16 +10,7 @@ import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row, Select } from "../../ui.tsx";
-import { Confirm, fromNow, input, Page } from "./common.tsx";
-
-const megabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "megabyte", maximumFractionDigits: 1 });
-const gigabytes = new Intl.NumberFormat([locale], { style: "unit", unit: "gigabyte", maximumFractionDigits: 2 });
-
-/** A file's size in megabytes, or gigabytes from a thousand megabytes. */
-function sizeOf(bytes: bigint) {
-  const n = Number(bytes);
-  return n >= 1e9 ? gigabytes.format(n / 1e9) : megabytes.format(n / 1e6);
-}
+import { Confirm, fromNow, input, Page, sizeOf } from "./common.tsx";
 
 /** The section of the server chosen in the settings. */
 export function BackupsSection({ server }: { server: ServerEntry }) {

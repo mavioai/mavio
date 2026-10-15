@@ -141,3 +141,15 @@ export {
 export { isNoAiGateway, useAiActions, useAiLogin, useAiModels, useAiProviders } from "./ai.ts";
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
 export { useQuota, useRequestActions, useRequests } from "./requests.ts";
+export {
+  useBlocklist,
+  useDownloadActions,
+  useGrab,
+  useHistory,
+  useManualImport,
+  useQueue,
+  useReleases,
+  useWanted,
+  useWantedActions,
+  useWantedList,
+} from "./acquisition.ts";

@@ -675,6 +675,9 @@ flowchart TD
     - [ ] Administrators requesting for another user or outside their quota (`CreateRequest`'s `user_id` and `ignore_quota`)
     - [ ] Discover's screens among the web UI's snapshot tests
   - [ ] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
+    - [x] Wanted and Downloads in the settings (`apps/web/src/screens/admin/wanted.tsx`, `apps/web/src/screens/admin/downloads.tsx`, `libs/client-ts/src/acquisition.ts`): the missing and cutoff unmet movies and episodes, searched, unmonitored and synced by RSS; the queue, history, blocklist and a folder's manual import
+    - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
+    - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
   - [ ] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`)
   - [ ] The web UI's playback and library: playlists and collections (`PlaylistService`, `CollectionService`); subtitles searched, downloaded, uploaded, extracted, synced and translated from details and the player (`SubtitleService`); and the lyrics of music (`GetLyrics`)
   - [ ] The web UI together: SyncPlay groups (`SyncPlayService`), controlling the other sessions (`SessionService.SendCommand`), and issues reported on a title and handled by administrators (`IssueService`)
