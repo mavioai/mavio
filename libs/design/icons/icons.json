@@ -28,6 +28,7 @@
   "speed": "gauge",
   "cast": "screencast",
   "more": "dots-three",
+  "moreVertical": "dots-three-vertical",
   "close": "x",
   "back": "caret-left",
   "forward": "caret-right",
