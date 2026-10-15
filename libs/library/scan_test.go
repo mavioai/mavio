@@ -258,3 +258,22 @@ func TestScanFullReconciliation(t *testing.T) {
 		t.Errorf("no pruning: %+v", st)
 	}
 }
+
+func TestVersionName(t *testing.T) {
+	tests := []struct {
+		primary, file, want string
+	}{
+		{"/m/Up (2009)/Up (2009) - 2160p.mkv", "/m/Up (2009)/Up (2009) - 2160p.mkv", "2160p"},
+		{"/m/Up (2009)/Up (2009) - 2160p.mkv", "/m/Up (2009)/Up (2009) - 1080p.mkv", "1080p"},
+		{"/m/Up (2009)/up (2009) - [Director's Cut].mkv", "/m/Up (2009)/up (2009) - [Director's Cut].mkv", "[Director's Cut]"},
+		{"/m/Up (2009)/Up (2009).mkv", "/m/Up (2009)/Up (2009).mkv", "Up (2009)"},
+		{"/m/Up (2009)/Up (2009).mkv", "/m/Up (2009)/Up (2009) - 1080p.mkv", "1080p"},
+		{"/m/Up/Movie.mkv", "/m/Up/Movie.mkv", "Movie"},
+		{"/m/Up/Movie.mkv", "/m/Up/Movie - 4K.mkv", "4K"},
+	}
+	for _, tt := range tests {
+		if got := versionName(tt.primary, tt.file); got != tt.want {
+			t.Errorf("versionName(%q, %q) = %q, want = %q", tt.primary, tt.file, got, tt.want)
+		}
+	}
+}

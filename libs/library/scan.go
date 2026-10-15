@@ -859,6 +859,8 @@ func (p *saver) sources(ctx context.Context, n Node, itemID core.ID, isNew bool)
 		reused := false
 		for _, k := range known {
 			if k.Path == v.Path && k.Size == src.Size && k.Modified.Equal(src.Modified) && !k.ProbedAt.IsZero() {
+				// A version's name changes with its siblings.
+				same = same && k.Name == src.Name
 				k.Parts, k.Disc, k.Name = src.Parts, src.Disc, src.Name
 				src, reused = k, true
 				break
@@ -882,10 +884,17 @@ func (p *saver) sources(ctx context.Context, n Node, itemID core.ID, isNew bool)
 	return sources, probe, nil
 }
 
-// versionName labels an alternate version by what its file name adds to
-// the primary's, e.g. "1080p" for "Movie - 1080p.mkv".
+// versionName labels one of a title's versions by what its file name
+// adds to its folder's name, as Jellyfin does, e.g. "1080p" for
+// "Movie (2020)/Movie (2020) - 1080p.mkv"; otherwise an alternate by what
+// its file name adds to the primary's.
 func versionName(primary, file string) string {
 	base := fileNameWithoutExt(file)
+	if folder := path.Base(path.Dir(file)); len(base) > len(folder) && strings.EqualFold(base[:len(folder)], folder) {
+		if label := strings.TrimLeft(base[len(folder):], " -"); label != "" {
+			return label
+		}
+	}
 	if file == primary {
 		return base
 	}
