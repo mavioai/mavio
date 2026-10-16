@@ -139,6 +139,18 @@ function xcstrings(s) {
 
 const camel = (key) => key.split(/[._]/).map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join('');
 
+// Swift's keywords, which a parameter named after an argument escapes.
+const swiftKeywords = new Set([
+  'associatedtype', 'class', 'deinit', 'enum', 'extension', 'fileprivate', 'func', 'import', 'init', 'inout',
+  'internal', 'let', 'open', 'operator', 'private', 'protocol', 'public', 'rethrows', 'static', 'struct',
+  'subscript', 'typealias', 'var', 'break', 'case', 'continue', 'default', 'defer', 'do', 'else', 'fallthrough',
+  'for', 'guard', 'if', 'in', 'repeat', 'return', 'switch', 'where', 'while', 'as', 'catch', 'false', 'is',
+  'nil', 'self', 'super', 'throw', 'throws', 'true', 'try',
+]);
+
+// swiftName is an argument's parameter name, escaped when it is a keyword.
+const swiftName = (arg) => (swiftKeywords.has(camel(arg)) ? `\`${camel(arg)}\`` : camel(arg));
+
 // An accessor per string: a property for a constant one, a function taking
 // its arguments for one with arguments, the count as an Int.
 function stringsSwift(s) {
@@ -160,10 +172,10 @@ function stringsSwift(s) {
       lines.push(`    public static var ${camel(key)}: String { ${lookup} }`);
       continue;
     }
-    const params = args.map((a) => `${camel(a)}: ${msg.plural === a ? 'Int' : 'String'}`).join(', ');
+    const params = args.map((a) => `${swiftName(a)}: ${msg.plural === a ? 'Int' : 'String'}`).join(', ');
     lines.push(
       `    public static func ${camel(key)}(${params}) -> String {`,
-      `        String.localizedStringWithFormat(${lookup}, ${args.map(camel).join(', ')})`,
+      `        String.localizedStringWithFormat(${lookup}, ${args.map(swiftName).join(', ')})`,
       '    }',
     );
   }

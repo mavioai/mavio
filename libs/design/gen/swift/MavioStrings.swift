@@ -3326,8 +3326,8 @@ public enum MavioStrings {
     public static var rulesDefaultDelay: String { NSLocalizedString("rules.defaultDelay", bundle: .module, comment: "") }
 
     /// A delay profile's preferred protocol
-    public static func rulesPrefers(protocol: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("rules.prefers", bundle: .module, comment: ""), protocol)
+    public static func rulesPrefers(`protocol`: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.prefers", bundle: .module, comment: ""), `protocol`)
     }
 
     /// A delay profile's usenet delay
