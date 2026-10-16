@@ -159,6 +159,8 @@ message Metadata {
   int32 secondary_year = 31;
   // For movies: the countries the movie was produced in, by name.
   repeated string production_locations = 36;
+  // URLs of trailers hosted elsewhere, such as on YouTube.
+  repeated string remote_trailers = 37;
 
   // What a title's page tells of it beyond the item, which the host does
   // not store, as Seerr shows of a movie or series.

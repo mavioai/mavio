@@ -482,6 +482,10 @@ pub use self::__buffa::view::TitleView;
 #[doc(inline)]
 pub use self::__buffa::view::TitleOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::TitleCreditView;
+#[doc(inline)]
+pub use self::__buffa::view::TitleCreditOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SeasonStatusView;
 #[doc(inline)]
 pub use self::__buffa::view::SeasonStatusOwnedView;

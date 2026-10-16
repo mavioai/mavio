@@ -579,6 +579,12 @@ func (s *DiscoverService) Discover(ctx context.Context, req *acquisitionv1.Disco
 	if req.GetTmdbId() > 0 {
 		pr.ExternalIds = map[string]string{string(core.ProviderTMDB): strconv.Itoa(int(req.GetTmdbId()))}
 	}
+	if req.GetTmdbCollectionId() > 0 {
+		if pr.ExternalIds == nil {
+			pr.ExternalIds = map[string]string{}
+		}
+		pr.ExternalIds[string(core.ProviderTMDBCollection)] = strconv.Itoa(int(req.GetTmdbCollectionId()))
+	}
 	if req.GetPage() > 0 {
 		pr.Page = new(req.GetPage())
 	}
@@ -661,7 +667,7 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 	if err != nil {
 		return nil, err
 	}
-	d, err := s.requests.GetTitle(ctx, p.User, kind, int(req.GetTmdbId()))
+	d, err := s.requests.GetTitle(ctx, p.User, kind, int(req.GetTmdbId()), req.GetLanguage())
 	if err != nil {
 		return nil, requestError(ctx, err)
 	}
@@ -684,6 +690,14 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 		}
 		seasons[i] = b.Build()
 	}
+	credits := make([]*acquisitionv1.TitleCredit, len(d.People))
+	for i, pc := range d.People {
+		b := acquisitionv1.TitleCredit_builder{Name: new(pc.Name), Kind: new(creditKinds[pc.Kind]), Role: new(pc.Role), ImageUrl: new(pc.ImageURL)}
+		if pc.Order != nil {
+			b.Order = new(int32(*pc.Order))
+		}
+		credits[i] = b.Build()
+	}
 	watch := make([]*pluginv1.WatchProvider, len(d.WatchProviders))
 	for i, w := range d.WatchProviders {
 		watch[i] = pluginv1.WatchProvider_builder{Name: new(w.Name), LogoUrl: new(w.LogoURL)}.Build()
@@ -700,6 +714,7 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 		RuntimeMinutes: new(int32(d.Runtime / time.Minute)), Budget: new(d.Budget), Revenue: new(d.Revenue),
 		DigitalReleaseDate: isoDate(d.DigitalReleaseDate), PhysicalReleaseDate: isoDate(d.PhysicalReleaseDate),
 		EndDate: isoDate(d.EndDate), NextAirDate: isoDate(d.NextAirDate), WatchProviders: watch,
+		Tagline: new(d.Tagline), Keywords: d.Tags, Credits: credits, TrailerUrls: d.Trailers, CollectionName: new(d.CollectionName),
 	}.Build()
 	return acquisitionv1.GetTitleResponse_builder{Title: t}.Build(), nil
 }

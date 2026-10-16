@@ -1550,6 +1550,10 @@ pub struct Item {
         ::buffa_types::google::protobuf::Timestamp,
         ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
     >,
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 54: `remote_trailers`
+    pub remote_trailers: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1609,6 +1613,7 @@ impl ::core::fmt::Debug for Item {
             .field("original_language", &self.original_language)
             .field("digital_release_date", &self.digital_release_date)
             .field("physical_release_date", &self.physical_release_date)
+            .field("remote_trailers", &self.remote_trailers)
             .finish()
     }
 }
@@ -2174,6 +2179,9 @@ impl ::buffa::Message for Item {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        for v in &self.remote_trailers {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2397,6 +2405,9 @@ impl ::buffa::Message for Item {
                 buf,
             );
             self.physical_release_date.write_to(__cache, buf);
+        }
+        for v in &self.remote_trailers {
+            ::buffa::types::put_string_field(54u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3003,6 +3014,17 @@ impl ::buffa::Message for Item {
                     ctx,
                 )?;
             }
+            54u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.remote_trailers.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3064,6 +3086,7 @@ impl ::buffa::Message for Item {
         self.original_language = ::core::option::Option::None;
         self.digital_release_date = ::buffa::MessageField::none();
         self.physical_release_date = ::buffa::MessageField::none();
+        self.remote_trailers.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

@@ -151,7 +151,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 文件包含多集的单集，其查询以 `episode_number_end` 带上最后一集的集号；元数据提供者随后把这些单集作为一个条目描述，名称与简介以 ` / ` 连接，与 Jellyfin 的 TmdbEpisodeProvider 相同。`scraper-tmdb` 和 `scraper-servarr` 都这样做。
 
-在条目保存的内容之外，元数据提供者还给出作品页显示的信息，与 Seerr 相同：电影的预算与票房、剧集下一集的播出日期，以及在查询所在国家以订阅方式播放该作品的流媒体服务。主机不保存这些信息，由 `DiscoverService.GetTitle` 返回。`scraper-tmdb` 从 TMDB 的详情与观看提供方中取得它们。
+在条目保存的内容之外，元数据提供者还给出作品页显示的信息，与 Seerr 相同：电影的预算与票房、剧集下一集的播出日期，以及在查询所在国家以订阅方式播放该作品的流媒体服务。主机不保存这些信息，由 `DiscoverService.GetTitle` 返回。`scraper-tmdb` 从 TMDB 的详情与观看提供方中取得它们。它还在 `remote_trailers` 中给出作品在 YouTube 上的预告片，由条目保存，取自 TMDB 中查询语言与英语的视频。
 
 ### 8.12 资源获取提供者
 资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增五种提供者类型，都由服务端汇集，彼此之间从不互相调用：

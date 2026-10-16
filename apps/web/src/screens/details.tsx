@@ -33,7 +33,7 @@ import type { MessageKey } from "@mavio/design/strings";
 import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
 import { CatalogShelf } from "./discover.tsx";
-import { crewLabels, isCast, PersonTile } from "./credits.tsx";
+import { CastShelf, libraryCredits } from "./credits.tsx";
 import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
@@ -237,6 +237,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
           onSource={setSource}
           copies={copies}
           trailer={trailer}
+          trailerUrl={item.remoteTrailers[0]}
           tv={tv}
           phone={false}
         />
@@ -258,6 +259,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
             onSource={setSource}
             copies={copies}
             trailer={trailer}
+            trailerUrl={item.remoteTrailers[0]}
             tv={false}
             phone
           />
@@ -277,7 +279,15 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
         {item.kind !== ItemKind.SERIES && item.kind !== ItemKind.SEASON && item.kind !== ItemKind.PLAYLIST && item.kind !== ItemKind.COLLECTION && (
           <Children server={server} item={item} items={children.data ?? []} />
         )}
-        <Cast server={server} item={item} credits={credits} />
+        <CastShelf
+          serverId={server.id}
+          credits={libraryCredits(server, credits)}
+          all={
+            <Link to="/s/$serverId/item/$itemId/credits" params={{ serverId: server.id, itemId: item.id }}>
+              {t("credits.all")}
+            </Link>
+          }
+        />
         <Extras server={server} items={extras} fallback={artwork(server, item, ImageKind.BACKDROP, 640)?.url} />
         {item.collectionName && <CollectionBanner server={server} item={item} fallback={backdrop?.url} />}
         {(similar.data?.length ?? 0) > 0 && (
@@ -483,6 +493,7 @@ function Actions({
   onSource,
   copies,
   trailer,
+  trailerUrl,
   tv,
   phone,
 }: {
@@ -494,6 +505,8 @@ function Actions({
   onSource: (id: string) => void;
   copies: Copy[];
   trailer?: Item;
+  /** A trailer on the web, opened when the library has none of its own. */
+  trailerUrl?: string;
   tv: boolean;
   phone: boolean;
 }) {
@@ -569,7 +582,7 @@ function Actions({
             </Link>
           </Tip>
         )}
-        {trailer && (
+        {trailer ? (
           <Tip label={t("item.trailer")}>
             <Link
               to="/s/$serverId/play/$itemId"
@@ -581,6 +594,14 @@ function Actions({
               <Icon name="movies" size={icon} />
             </Link>
           </Tip>
+        ) : (
+          trailerUrl && (
+            <Tip label={t("item.trailer")}>
+              <a href={trailerUrl} target="_blank" rel="noreferrer" aria-label={t("item.trailer")} data-tv-button className={circle}>
+                <Icon name="movies" size={icon} />
+              </a>
+            </Tip>
+          )
         )}
         <Tip label={t("item.favorite")}>
           <ToggleButton on={favorite} label={t("item.favorite")} onChange={(on) => userData.mutate({ itemId: item.id, favorite: on })} className={circle}>
@@ -868,36 +889,6 @@ function Children({ server, item, items }: { server: ServerEntry; item: Item; it
   );
 }
 
-const shelfCrew = new Set([CreditKind.CREATOR, CreditKind.DIRECTOR, CreditKind.WRITER]);
-
-/** The cast in billing order, then the creators, directors and writers; the whole cast and crew are a page of their own. */
-function Cast({ server, item, credits }: { server: ServerEntry; item: Item; credits: Credit[] }) {
-  const shown = credits.filter((c) => c.person && (isCast(c) || shelfCrew.has(c.kind)));
-  if (shown.length === 0) return null;
-  const sorted = shown.toSorted((a, b) => Number(!isCast(a)) - Number(!isCast(b)) || a.order - b.order);
-  const label = (c: Credit) => (isCast(c) ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1]));
-  return (
-    <Shelf
-      title={t("item.cast")}
-      more={
-        <Link to="/s/$serverId/item/$itemId/credits" params={{ serverId: server.id, itemId: item.id }}>
-          {t("credits.all")}
-        </Link>
-      }
-    >
-      {sorted.map((c, i) => (
-        <PersonTile
-          key={`${c.person!.id}-${i}`}
-          server={server}
-          credit={c}
-          label={label(c)}
-          className="w-28 shrink-0 snap-start [[data-tv]_&]:w-40"
-        />
-      ))}
-    </Shelf>
-  );
-}
-
 const extraLabels: Partial<Record<ExtraKind, MessageKey>> = {
   [ExtraKind.TRAILER]: "extra.trailer",
   [ExtraKind.CLIP]: "extra.clip",
@@ -1010,7 +1001,7 @@ function About({
   // library keeps, as Seerr shows: its budget and takings, its next
   // episode and the services streaming it.
   const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : item.kind === ItemKind.SERIES ? MediaKind.SERIES : MediaKind.UNSPECIFIED;
-  const title = useTitle(kind ? server : undefined, kind, Number(item.externalIds.tmdb) || 0).data;
+  const title = useTitle(kind ? server : undefined, kind, Number(item.externalIds.tmdb) || 0, discoverLanguage).data;
   const day = (ts?: Timestamp) => (ts ? dateFormat.format(timestampDate(ts)) : undefined);
   const names = (kind: CreditKind) =>
     credits

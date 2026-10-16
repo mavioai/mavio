@@ -49,13 +49,13 @@ func TestSearch(t *testing.T) {
 func TestGetTitle(t *testing.T) {
 	e := newEnv(t)
 	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
-	if _, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 2); !errors.Is(err, ErrRating) {
+	if _, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 2, ""); !errors.Is(err, ErrRating) {
 		t.Errorf("GetTitle() above the limit: error = %v, want ErrRating", err)
 	}
-	if _, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 404); !errors.Is(err, core.ErrNotFound) {
+	if _, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 404, ""); !errors.Is(err, core.ErrNotFound) {
 		t.Errorf("GetTitle() of an unknown title: error = %v, want ErrNotFound", err)
 	}
-	m, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 1)
+	m, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 1, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,13 +67,20 @@ func TestGetTitle(t *testing.T) {
 		len(m.WatchProviders) != 1 || m.WatchProviders[0].Name != "Stream" {
 		t.Errorf("GetTitle(movie) facts = %+v", m)
 	}
+	if m.Tagline != "In en" || len(m.People) != 1 || m.People[0].Name != "Lead" {
+		t.Errorf("GetTitle(movie) tagline, people = %q, %v, want = In en, [Lead]", m.Tagline, m.People)
+	}
+	// Another language is looked up apart.
+	if fr, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 1, "fr"); err != nil || fr.Tagline != "In fr" {
+		t.Errorf("GetTitle(movie, fr) tagline = %q, %v, want = In fr", fr.Tagline, err)
+	}
 
 	// Season 1 is requested and available, season 2 requested by
 	// another user and pending.
 	r := e.must(e.svc.Create(e.ctx, e.admin, NewRequest{Kind: core.KindSeries, TmdbID: 9, Seasons: []int{1}}))
 	e.giveFiles(r.ItemID, 1)
 	pending := e.must(e.svc.Create(e.ctx, pg, NewRequest{Kind: core.KindSeries, TmdbID: 9, Seasons: []int{2}}))
-	s, err := e.svc.GetTitle(e.ctx, pg, core.KindSeries, 9)
+	s, err := e.svc.GetTitle(e.ctx, pg, core.KindSeries, 9, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +112,7 @@ func TestGetTitle(t *testing.T) {
 	}
 	// Specials are listed when the settings allow requesting them.
 	e.settings.Specials = true
-	if s, err = e.svc.GetTitle(e.ctx, pg, core.KindSeries, 9); err != nil || s.Seasons[0].Number != 0 {
+	if s, err = e.svc.GetTitle(e.ctx, pg, core.KindSeries, 9, ""); err != nil || s.Seasons[0].Number != 0 {
 		t.Errorf("GetTitle(series) with specials = %+v, %v", s.Seasons, err)
 	}
 }
@@ -133,7 +140,7 @@ func TestBlocklist(t *testing.T) {
 	if _, err := e.movie(e.admin, 5); !errors.Is(err, ErrPermission) {
 		t.Errorf("an administrator requesting a blocked title: error = %v, want ErrPermission", err)
 	}
-	d, err := e.svc.GetTitle(e.ctx, u, core.KindMovie, 5)
+	d, err := e.svc.GetTitle(e.ctx, u, core.KindMovie, 5, "")
 	if err != nil || d.Status != StatusBlocklisted || d.Requestable {
 		t.Errorf("GetTitle(blocked) = %v, requestable %v, %v", d.Status, d.Requestable, err)
 	}
@@ -172,17 +179,17 @@ func TestDeletedTitles(t *testing.T) {
 	if err := e.db.Items().Delete(e.ctx, movie.ItemID, series.ItemID); err != nil {
 		t.Fatal(err)
 	}
-	m, err := e.svc.GetTitle(e.ctx, u, core.KindMovie, 1)
+	m, err := e.svc.GetTitle(e.ctx, u, core.KindMovie, 1, "")
 	if err != nil || m.Status != StatusDeleted || !m.Requestable {
 		t.Errorf("GetTitle(deleted movie) = %v, requestable %v, %v", m.Status, m.Requestable, err)
 	}
-	s, err := e.svc.GetTitle(e.ctx, u, core.KindSeries, 9)
+	s, err := e.svc.GetTitle(e.ctx, u, core.KindSeries, 9, "")
 	if err != nil || s.Status != StatusDeleted || s.Seasons[0].Status != StatusDeleted || !s.Seasons[0].Requestable || s.Seasons[1].Status != StatusNone {
 		t.Errorf("GetTitle(deleted series) = %v, seasons %+v, %v", s.Status, s.Seasons, err)
 	}
 	// Deleted titles are requested again.
 	e.must(e.movie(u, 1))
-	if m, err = e.svc.GetTitle(e.ctx, u, core.KindMovie, 1); err != nil || m.Status != StatusRequested {
+	if m, err = e.svc.GetTitle(e.ctx, u, core.KindMovie, 1, ""); err != nil || m.Status != StatusRequested {
 		t.Errorf("GetTitle(requested again) = %v, %v", m.Status, err)
 	}
 }

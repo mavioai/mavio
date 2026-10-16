@@ -2177,6 +2177,10 @@ pub struct MetadataView<'a> {
     ///
     /// Field 36: `production_locations`
     pub production_locations: ::buffa::RepeatedView<'a, &'a str>,
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 37: `remote_trailers`
+    pub remote_trailers: ::buffa::RepeatedView<'a, &'a str>,
     /// What a title's page tells of it beyond the item, which the host does
     /// not store, as Seerr shows of a movie or series.
     /// For movies: its budget and box office takings, in US dollars.
@@ -2542,6 +2546,17 @@ impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
                 )?;
                 view.production_locations.push(__elem);
             }
+            37u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.remote_trailers.push(__elem);
+            }
             35u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -2686,6 +2701,11 @@ impl<'a> ::buffa::MessageView<'a> for MetadataView<'a> {
             secondary_year: self.secondary_year,
             production_locations: self
                 .production_locations
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            remote_trailers: self
+                .remote_trailers
                 .iter()
                 .map(|s| s.to_string())
                 .collect(),
@@ -2837,6 +2857,9 @@ impl<'a> ::buffa::ViewEncode<'a> for MetadataView<'a> {
                     + inner_size as u64;
         }
         for v in &self.production_locations {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.remote_trailers {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -2996,6 +3019,9 @@ impl<'a> ::buffa::ViewEncode<'a> for MetadataView<'a> {
         }
         for v in &self.production_locations {
             ::buffa::types::put_string_field(36u32, v, buf);
+        }
+        for v in &self.remote_trailers {
+            ::buffa::types::put_string_field(37u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3281,6 +3307,13 @@ impl MetadataOwnedView {
     #[must_use]
     pub fn production_locations(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
         &self.0.reborrow().production_locations
+    }
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 37: `remote_trailers`
+    #[must_use]
+    pub fn remote_trailers(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().remote_trailers
     }
     /// What a title's page tells of it beyond the item, which the host does
     /// not store, as Seerr shows of a movie or series.

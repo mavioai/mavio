@@ -130,13 +130,13 @@ func (c *client) find(ctx context.Context, id, source string) (tmdbFind, error) 
 
 func (c *client) movie(ctx context.Context, id int, language, country string) (tmdbMovie, error) {
 	var m tmdbMovie
-	q := detailsQuery(language, country, "credits,images,keywords,release_dates,alternative_titles,translations,watch/providers")
+	q := detailsQuery(language, country, "credits,images,keywords,release_dates,alternative_titles,translations,watch/providers,videos")
 	return m, c.get(ctx, "/movie/"+strconv.Itoa(id), q, &m)
 }
 
 func (c *client) series(ctx context.Context, id int, language, country string) (tmdbSeries, error) {
 	var s tmdbSeries
-	q := detailsQuery(language, country, "aggregate_credits,images,keywords,external_ids,content_ratings,watch/providers")
+	q := detailsQuery(language, country, "aggregate_credits,images,keywords,external_ids,content_ratings,watch/providers,videos")
 	return s, c.get(ctx, "/tv/"+strconv.Itoa(id), q, &s)
 }
 
@@ -160,6 +160,9 @@ func setLanguage(q url.Values, language string) {
 
 func detailsQuery(language, country, appends string) url.Values {
 	q := url.Values{"append_to_response": {appends}, "include_image_language": {imageLanguages(language, country)}}
+	if strings.Contains(appends, "videos") {
+		q.Set("include_video_language", videoLanguages(language))
+	}
 	setLanguage(q, language)
 	return q
 }
@@ -296,6 +299,7 @@ type (
 			} `json:"translations"`
 		} `json:"translations"`
 		WatchProviders tmdbWatchProviders `json:"watch/providers"`
+		Videos         tmdbVideos         `json:"videos"`
 	}
 
 	tmdbSeries struct {
@@ -317,6 +321,7 @@ type (
 			AirDate string `json:"air_date"`
 		} `json:"next_episode_to_air"`
 		WatchProviders tmdbWatchProviders `json:"watch/providers"`
+		Videos         tmdbVideos         `json:"videos"`
 		Credits        struct {
 			Cast []tmdbAggregateCast `json:"cast"`
 			Crew []tmdbCrew          `json:"crew"`
@@ -341,6 +346,16 @@ type (
 				Name string `json:"provider_name"`
 				Logo string `json:"logo_path"`
 			} `json:"flatrate"`
+		} `json:"results"`
+	}
+
+	// tmdbVideos are a title's videos hosted elsewhere, such as trailers
+	// on YouTube.
+	tmdbVideos struct {
+		Results []struct {
+			Site string `json:"site"`
+			Key  string `json:"key"`
+			Type string `json:"type"`
 		} `json:"results"`
 	}
 

@@ -43,8 +43,10 @@ type SeasonStatus struct {
 // GetTitle returns a title's page for a user: titles above the user's
 // rating limit fail with ErrRating, as Seerr's movie and series routes
 // hide them, and titles no metadata provider knows with core.ErrNotFound.
-func (s *Service) GetTitle(ctx context.Context, caller core.User, kind core.ItemKind, tmdbID int) (TitleDetails, error) {
-	t, err := s.Title(ctx, kind, tmdbID)
+// Its names, overview and credits are in a language (ISO 639-1), the
+// server's metadata language when empty.
+func (s *Service) GetTitle(ctx context.Context, caller core.User, kind core.ItemKind, tmdbID int, language string) (TitleDetails, error) {
+	t, err := s.titleIn(ctx, kind, tmdbID, language)
 	if err != nil {
 		return TitleDetails{}, err
 	}

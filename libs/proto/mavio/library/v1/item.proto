@@ -295,6 +295,8 @@ message Item {
   string original_language = 51;
   google.protobuf.Timestamp digital_release_date = 52;
   google.protobuf.Timestamp physical_release_date = 53;
+  // URLs of trailers hosted elsewhere, such as on YouTube.
+  repeated string remote_trailers = 54;
 }
 
 // ExternalUrl is the page of an item or person on an external site.

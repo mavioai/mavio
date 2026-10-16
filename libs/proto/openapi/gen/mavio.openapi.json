@@ -1632,6 +1632,13 @@
             "minimum": 0,
             "format": "int32",
             "description": "From 1; unset for the first page."
+          },
+          "tmdbCollectionId": {
+            "type": "integer",
+            "title": "tmdb_collection_id",
+            "minimum": 0,
+            "format": "int32",
+            "description": "The collection of a collection catalog, by its TMDB ID."
           }
         },
         "title": "DiscoverRequest",
@@ -2261,6 +2268,11 @@
             "type": "integer",
             "title": "tmdb_id",
             "format": "int32"
+          },
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "ISO 639-1 language of its names, overview, keywords and credits;\n unset for the server's metadata language."
           }
         },
         "title": "GetTitleRequest",
@@ -6940,11 +6952,79 @@
             },
             "title": "watch_providers",
             "description": "The services streaming it by subscription in rating_country."
+          },
+          "tagline": {
+            "type": "string",
+            "title": "tagline"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "keywords",
+            "description": "Its keywords, such as TMDB's."
+          },
+          "credits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.acquisition.v1.TitleCredit"
+            },
+            "title": "credits",
+            "description": "Its cast and crew, the cast in billing order."
+          },
+          "trailerUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "trailer_urls",
+            "description": "URLs of its trailers, such as on YouTube."
+          },
+          "collectionName": {
+            "type": "string",
+            "title": "collection_name",
+            "description": "The collection (movie set) a movie belongs to; its TMDB ID is the\n external ID \"tmdb_collection\"."
           }
         },
         "title": "Title",
         "additionalProperties": false,
         "description": "Title is a movie or series as the metadata providers tell it, in the\n server's metadata language and country, with what the server has of it."
+      },
+      "mavio.acquisition.v1.TitleCredit": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.library.v1.CreditKind"
+              }
+            ],
+            "title": "kind"
+          },
+          "role": {
+            "type": "string",
+            "title": "role",
+            "description": "Character played, or a more specific job title."
+          },
+          "order": {
+            "type": "integer",
+            "title": "order",
+            "format": "int32"
+          },
+          "imageUrl": {
+            "type": "string",
+            "title": "image_url",
+            "description": "Their photo, if any."
+          }
+        },
+        "title": "TitleCredit",
+        "additionalProperties": false,
+        "description": "TitleCredit is a person credited on a title, as the metadata providers\n tell it."
       },
       "mavio.acquisition.v1.TranslateSubtitleRequest": {
         "type": "object",
@@ -10287,6 +10367,14 @@
               }
             ],
             "title": "physical_release_date"
+          },
+          "remoteTrailers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "remote_trailers",
+            "description": "URLs of trailers hosted elsewhere, such as on YouTube."
           }
         },
         "title": "Item",
@@ -20521,6 +20609,18 @@
       "description": "RequestService takes users' requests of movies and seasons of series,\n as Seerr's: administrators approve or decline them, unless the user's\n requests are approved at once, and approved requests are acquired.\n Signed-in users request what their policy allows, within their quotas\n and their rating limit, and see their own requests; administrators\n manage all."
     },
     {
+      "name": "UserService",
+      "description": "UserService manages accounts: the server's one administrator, members\n and managed users (docs/accounts.md §4.1), and invitation links (§4.3).\n All methods except GetCurrentUser, UpdatePreferences, and managing one's\n own password, PIN, passkeys and TOTP require the administrator. Managed users have no\n passwords, passkeys or TOTP.\n In mavio.dev mode the users are Mavio accounts, which mavio.dev keeps:\n CreateUser, SetPassword, SetPin, StartPasskeyRegistration,\n FinishPasskeyRegistration, StartTotp, ConfirmTotp and CreateInvitation\n fail with FAILED_PRECONDITION; UpdateUser changes only the server's own\n policy, keeping the access record, and fails with FAILED_PRECONDITION\n for a change of name, disabling or restriction; and DeleteUser purges\n only accounts without access, which are disabled."
+    },
+    {
+      "name": "UserDataService",
+      "description": "UserDataService reads and updates the calling user's per-item state."
+    },
+    {
+      "name": "ItemService",
+      "description": "ItemService browses and searches library items."
+    },
+    {
       "name": "DiscoverService",
       "description": "DiscoverService lists the movies and series the discovery providers\n offer, such as trending or popular titles, and those they find by name,\n marked with what the server has of them: available, wanted or\n requested; it details a title with the status of each of its seasons.\n Titles rated above the caller's rating limit are left out. Signed-in\n users."
     },
@@ -20535,18 +20635,6 @@
     {
       "name": "SubtitleService",
       "description": "SubtitleService acquires the subtitles movies and episodes lack, as\n Bazarr does: subtitle profiles and their assignments, the subtitle\n settings, wanted subtitles and their searches, manual search,\n download, upload, deletion, modification and synchronization, history\n and the blocklist. Administrators only."
-    },
-    {
-      "name": "UserService",
-      "description": "UserService manages accounts: the server's one administrator, members\n and managed users (docs/accounts.md §4.1), and invitation links (§4.3).\n All methods except GetCurrentUser, UpdatePreferences, and managing one's\n own password, PIN, passkeys and TOTP require the administrator. Managed users have no\n passwords, passkeys or TOTP.\n In mavio.dev mode the users are Mavio accounts, which mavio.dev keeps:\n CreateUser, SetPassword, SetPin, StartPasskeyRegistration,\n FinishPasskeyRegistration, StartTotp, ConfirmTotp and CreateInvitation\n fail with FAILED_PRECONDITION; UpdateUser changes only the server's own\n policy, keeping the access record, and fails with FAILED_PRECONDITION\n for a change of name, disabling or restriction; and DeleteUser purges\n only accounts without access, which are disabled."
-    },
-    {
-      "name": "UserDataService",
-      "description": "UserDataService reads and updates the calling user's per-item state."
-    },
-    {
-      "name": "ItemService",
-      "description": "ItemService browses and searches library items."
     },
     {
       "name": "WantedService",

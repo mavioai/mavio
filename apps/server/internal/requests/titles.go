@@ -49,6 +49,12 @@ type Title struct {
 	// EndDate is an ended series' last air date.
 	EndDate                                 *time.Time
 	DigitalReleaseDate, PhysicalReleaseDate *time.Time
+	Tagline                                 string
+	CollectionName                          string
+	// People are its cast and crew, in the provider's order.
+	People []metadata.Person
+	// Trailers are URLs of its trailers, such as on YouTube.
+	Trailers []string
 	metadata.Facts
 }
 
@@ -114,10 +120,17 @@ func (s *Service) region() (country, language string) {
 // provider knowing it names it, the first giving a rating rates it.
 // Unknown titles fail with core.ErrNotFound.
 func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Title, error) {
+	return s.titleIn(ctx, kind, tmdbID, "")
+}
+
+// titleIn looks a title up as Title does, in a language (ISO 639-1),
+// the server's metadata language when empty.
+func (s *Service) titleIn(ctx context.Context, kind core.ItemKind, tmdbID int, lang string) (Title, error) {
 	if kind != core.KindMovie && kind != core.KindSeries {
 		return Title{}, fmt.Errorf("%w: request of kind %q", core.ErrInvalid, kind)
 	}
 	country, language := s.region()
+	language = cmp.Or(lang, language)
 	key := fmt.Sprintf("%s:%d:%s:%s", kind, tmdbID, country, language)
 	if t, ok := s.cache.get(key, s.now()); ok {
 		return t, nil
@@ -172,6 +185,10 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 			t.Tags = it.Tags
 		}
 		t.OriginalLanguage = cmp.Or(t.OriginalLanguage, it.OriginalLanguage)
+		t.Tagline = cmp.Or(t.Tagline, it.Tagline)
+		t.CollectionName = cmp.Or(t.CollectionName, it.CollectionName)
+		t.People = orList(t.People, res.People)
+		t.Trailers = orList(t.Trailers, it.RemoteTrailers)
 		t.Studios = orList(t.Studios, it.Studios)
 		t.ProductionLocations = orList(t.ProductionLocations, it.ProductionLocations)
 		t.Runtime = cmp.Or(t.Runtime, it.Runtime)

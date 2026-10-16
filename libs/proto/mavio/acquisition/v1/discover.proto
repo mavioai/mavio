@@ -5,6 +5,7 @@ package mavio.acquisition.v1;
 import "buf/validate/validate.proto";
 import "mavio/acquisition/v1/profile.proto";
 import "mavio/acquisition/v1/request.proto";
+import "mavio/library/v1/item.proto";
 import "mavio/plugin/v1/discovery.proto";
 import "mavio/plugin/v1/metadata.proto";
 
@@ -119,6 +120,8 @@ message DiscoverRequest {
     gte: 0
     lte: 500
   }];
+  // The collection of a collection catalog, by its TMDB ID.
+  int32 tmdb_collection_id = 24 [(buf.validate.field).int32.gte = 0];
 }
 
 // DiscoverResponse is a page of a catalog. Its pages are the provider's:
@@ -263,6 +266,9 @@ message GetTitleRequest {
     not_in: [0]
   }];
   int32 tmdb_id = 2 [(buf.validate.field).int32.gt = 0];
+  // ISO 639-1 language of its names, overview, keywords and credits;
+  // unset for the server's metadata language.
+  string language = 3;
 }
 
 message GetTitleResponse {
@@ -331,6 +337,28 @@ message Title {
   string next_air_date = 31;
   // The services streaming it by subscription in rating_country.
   repeated mavio.plugin.v1.WatchProvider watch_providers = 32;
+  string tagline = 33;
+  // Its keywords, such as TMDB's.
+  repeated string keywords = 34;
+  // Its cast and crew, the cast in billing order.
+  repeated TitleCredit credits = 35;
+  // URLs of its trailers, such as on YouTube.
+  repeated string trailer_urls = 36;
+  // The collection (movie set) a movie belongs to; its TMDB ID is the
+  // external ID "tmdb_collection".
+  string collection_name = 37;
+}
+
+// TitleCredit is a person credited on a title, as the metadata providers
+// tell it.
+message TitleCredit {
+  string name = 1;
+  mavio.library.v1.CreditKind kind = 2;
+  // Character played, or a more specific job title.
+  string role = 3;
+  int32 order = 4;
+  // Their photo, if any.
+  string image_url = 5;
 }
 
 // SeasonStatus is a season of a series with what the server has of it, as

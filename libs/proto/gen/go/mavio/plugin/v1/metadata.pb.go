@@ -1295,6 +1295,7 @@ type Metadata struct {
 	xxx_hidden_TranslatedTitles    []string               `protobuf:"bytes,30,rep,name=translated_titles,json=translatedTitles"`
 	xxx_hidden_SecondaryYear       int32                  `protobuf:"varint,31,opt,name=secondary_year,json=secondaryYear"`
 	xxx_hidden_ProductionLocations []string               `protobuf:"bytes,36,rep,name=production_locations,json=productionLocations"`
+	xxx_hidden_RemoteTrailers      []string               `protobuf:"bytes,37,rep,name=remote_trailers,json=remoteTrailers"`
 	xxx_hidden_Budget              int64                  `protobuf:"varint,32,opt,name=budget"`
 	xxx_hidden_Revenue             int64                  `protobuf:"varint,33,opt,name=revenue"`
 	xxx_hidden_NextAirDate         *string                `protobuf:"bytes,34,opt,name=next_air_date,json=nextAirDate"`
@@ -1605,6 +1606,13 @@ func (x *Metadata) GetProductionLocations() []string {
 	return nil
 }
 
+func (x *Metadata) GetRemoteTrailers() []string {
+	if x != nil {
+		return x.xxx_hidden_RemoteTrailers
+	}
+	return nil
+}
+
 func (x *Metadata) GetBudget() int64 {
 	if x != nil {
 		return x.xxx_hidden_Budget
@@ -1640,42 +1648,42 @@ func (x *Metadata) GetWatchProviders() []*WatchProvider {
 
 func (x *Metadata) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 37)
 }
 
 func (x *Metadata) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 37)
 }
 
 func (x *Metadata) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 37)
 }
 
 func (x *Metadata) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 37)
 }
 
 func (x *Metadata) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 37)
 }
 
 func (x *Metadata) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 37)
 }
 
 func (x *Metadata) SetPremiereDate(v string) {
 	x.xxx_hidden_PremiereDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 37)
 }
 
 func (x *Metadata) SetEndDate(v string) {
 	x.xxx_hidden_EndDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 37)
 }
 
 func (x *Metadata) SetRuntime(v *durationpb.Duration) {
@@ -1684,17 +1692,17 @@ func (x *Metadata) SetRuntime(v *durationpb.Duration) {
 
 func (x *Metadata) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 37)
 }
 
 func (x *Metadata) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 37)
 }
 
 func (x *Metadata) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 37)
 }
 
 func (x *Metadata) SetGenres(v []string) {
@@ -1715,7 +1723,7 @@ func (x *Metadata) SetExternalIds(v map[string]string) {
 
 func (x *Metadata) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 37)
 }
 
 func (x *Metadata) SetArtists(v []string) {
@@ -1736,37 +1744,37 @@ func (x *Metadata) SetImages(v []*RemoteImage) {
 
 func (x *Metadata) SetBirthDate(v string) {
 	x.xxx_hidden_BirthDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 37)
 }
 
 func (x *Metadata) SetDeathDate(v string) {
 	x.xxx_hidden_DeathDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 37)
 }
 
 func (x *Metadata) SetBirthPlace(v string) {
 	x.xxx_hidden_BirthPlace = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 37)
 }
 
 func (x *Metadata) SetCollectionName(v string) {
 	x.xxx_hidden_CollectionName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 37)
 }
 
 func (x *Metadata) SetOriginalLanguage(v string) {
 	x.xxx_hidden_OriginalLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 37)
 }
 
 func (x *Metadata) SetDigitalReleaseDate(v string) {
 	x.xxx_hidden_DigitalReleaseDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 37)
 }
 
 func (x *Metadata) SetPhysicalReleaseDate(v string) {
 	x.xxx_hidden_PhysicalReleaseDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 37)
 }
 
 func (x *Metadata) SetAlternativeTitles(v []string) {
@@ -1779,26 +1787,30 @@ func (x *Metadata) SetTranslatedTitles(v []string) {
 
 func (x *Metadata) SetSecondaryYear(v int32) {
 	x.xxx_hidden_SecondaryYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 37)
 }
 
 func (x *Metadata) SetProductionLocations(v []string) {
 	x.xxx_hidden_ProductionLocations = v
 }
 
+func (x *Metadata) SetRemoteTrailers(v []string) {
+	x.xxx_hidden_RemoteTrailers = v
+}
+
 func (x *Metadata) SetBudget(v int64) {
 	x.xxx_hidden_Budget = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 37)
 }
 
 func (x *Metadata) SetRevenue(v int64) {
 	x.xxx_hidden_Revenue = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 37)
 }
 
 func (x *Metadata) SetNextAirDate(v string) {
 	x.xxx_hidden_NextAirDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 36)
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 35, 37)
 }
 
 func (x *Metadata) SetWatchProviders(v []*WatchProvider) {
@@ -1956,21 +1968,21 @@ func (x *Metadata) HasBudget() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[1]), 32)
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 33)
 }
 
 func (x *Metadata) HasRevenue() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[1]), 33)
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 34)
 }
 
 func (x *Metadata) HasNextAirDate() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[1]), 34)
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 35)
 }
 
 func (x *Metadata) ClearName() {
@@ -2078,17 +2090,17 @@ func (x *Metadata) ClearSecondaryYear() {
 }
 
 func (x *Metadata) ClearBudget() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 32)
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 33)
 	x.xxx_hidden_Budget = 0
 }
 
 func (x *Metadata) ClearRevenue() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 33)
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 34)
 	x.xxx_hidden_Revenue = 0
 }
 
 func (x *Metadata) ClearNextAirDate() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 34)
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 35)
 	x.xxx_hidden_NextAirDate = nil
 }
 
@@ -2142,6 +2154,8 @@ type Metadata_builder struct {
 	SecondaryYear *int32
 	// For movies: the countries the movie was produced in, by name.
 	ProductionLocations []string
+	// URLs of trailers hosted elsewhere, such as on YouTube.
+	RemoteTrailers []string
 	// What a title's page tells of it beyond the item, which the host does
 	// not store, as Seerr shows of a movie or series.
 	// For movies: its budget and box office takings, in US dollars.
@@ -2160,48 +2174,48 @@ func (b0 Metadata_builder) Build() *Metadata {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 37)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 37)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 37)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 37)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 37)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 37)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	if b.PremiereDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 37)
 		x.xxx_hidden_PremiereDate = b.PremiereDate
 	}
 	if b.EndDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 37)
 		x.xxx_hidden_EndDate = b.EndDate
 	}
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 37)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 37)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 37)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -2209,7 +2223,7 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_Studios = b.Studios
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 37)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	x.xxx_hidden_Artists = b.Artists
@@ -2217,50 +2231,51 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_People = &b.People
 	x.xxx_hidden_Images = &b.Images
 	if b.BirthDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 37)
 		x.xxx_hidden_BirthDate = b.BirthDate
 	}
 	if b.DeathDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 37)
 		x.xxx_hidden_DeathDate = b.DeathDate
 	}
 	if b.BirthPlace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 37)
 		x.xxx_hidden_BirthPlace = b.BirthPlace
 	}
 	if b.CollectionName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 37)
 		x.xxx_hidden_CollectionName = b.CollectionName
 	}
 	if b.OriginalLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 37)
 		x.xxx_hidden_OriginalLanguage = b.OriginalLanguage
 	}
 	if b.DigitalReleaseDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 37)
 		x.xxx_hidden_DigitalReleaseDate = b.DigitalReleaseDate
 	}
 	if b.PhysicalReleaseDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 37)
 		x.xxx_hidden_PhysicalReleaseDate = b.PhysicalReleaseDate
 	}
 	x.xxx_hidden_AlternativeTitles = b.AlternativeTitles
 	x.xxx_hidden_TranslatedTitles = b.TranslatedTitles
 	if b.SecondaryYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 37)
 		x.xxx_hidden_SecondaryYear = *b.SecondaryYear
 	}
 	x.xxx_hidden_ProductionLocations = b.ProductionLocations
+	x.xxx_hidden_RemoteTrailers = b.RemoteTrailers
 	if b.Budget != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 37)
 		x.xxx_hidden_Budget = *b.Budget
 	}
 	if b.Revenue != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 37)
 		x.xxx_hidden_Revenue = *b.Revenue
 	}
 	if b.NextAirDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 36)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 35, 37)
 		x.xxx_hidden_NextAirDate = b.NextAirDate
 	}
 	x.xxx_hidden_WatchProviders = &b.WatchProviders
@@ -2880,7 +2895,7 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x06lookup\x18\x01 \x01(\v2\x17.mavio.plugin.v1.LookupR\x06lookup\"b\n" +
 	"\x13GetMetadataResponse\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x125\n" +
-	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\xe4\v\n" +
+	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\x8d\f\n" +
 	"\bMetadata\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x0eoriginal_title\x18\x02 \x01(\tR\roriginalTitle\x12\x1b\n" +
@@ -2917,7 +2932,8 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x12alternative_titles\x18\x1d \x03(\tR\x11alternativeTitles\x12+\n" +
 	"\x11translated_titles\x18\x1e \x03(\tR\x10translatedTitles\x12%\n" +
 	"\x0esecondary_year\x18\x1f \x01(\x05R\rsecondaryYear\x121\n" +
-	"\x14production_locations\x18$ \x03(\tR\x13productionLocations\x12\x16\n" +
+	"\x14production_locations\x18$ \x03(\tR\x13productionLocations\x12'\n" +
+	"\x0fremote_trailers\x18% \x03(\tR\x0eremoteTrailers\x12\x16\n" +
 	"\x06budget\x18  \x01(\x03R\x06budget\x12\x18\n" +
 	"\arevenue\x18! \x01(\x03R\arevenue\x12\"\n" +
 	"\rnext_air_date\x18\" \x01(\tR\vnextAirDate\x12G\n" +

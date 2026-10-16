@@ -139,17 +139,6 @@ function xcstrings(s) {
 
 const camel = (key) => key.split(/[._]/).map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w)).join('');
 
-// Swift's reserved words, which an identifier takes in backticks.
-const KEYWORDS = new Set(
-  (
-    'associatedtype borrowing class consuming deinit enum extension fileprivate func import init inout internal let ' +
-    'nonisolated open operator private precedencegroup protocol public rethrows static struct subscript typealias var ' +
-    'break case catch continue default defer do else fallthrough for guard if in repeat return throw switch where while ' +
-    'Any as await false is nil self Self super throws true try _'
-  ).split(' '),
-);
-const ident = (name) => (KEYWORDS.has(name) ? `\`${name}\`` : name);
-
 // An accessor per string: a property for a constant one, a function taking
 // its arguments for one with arguments, the count as an Int.
 function stringsSwift(s) {
@@ -171,10 +160,10 @@ function stringsSwift(s) {
       lines.push(`    public static var ${camel(key)}: String { ${lookup} }`);
       continue;
     }
-    const params = args.map((a) => `${ident(camel(a))}: ${msg.plural === a ? 'Int' : 'String'}`).join(', ');
+    const params = args.map((a) => `${camel(a)}: ${msg.plural === a ? 'Int' : 'String'}`).join(', ');
     lines.push(
       `    public static func ${camel(key)}(${params}) -> String {`,
-      `        String.localizedStringWithFormat(${lookup}, ${args.map((a) => ident(camel(a))).join(', ')})`,
+      `        String.localizedStringWithFormat(${lookup}, ${args.map(camel).join(', ')})`,
       '    }',
     );
   }

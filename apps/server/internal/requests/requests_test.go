@@ -61,7 +61,7 @@ func (f *fakeMetadata) Metadata(_ context.Context, l library.Lookup) (*metadata.
 	}
 	it := core.Item{
 		Name: t.name, ProductionYear: t.year, OfficialRating: t.rating, Overview: "About " + t.name, Tags: t.tags,
-		OriginalLanguage: "en", Studios: []string{"Studio " + t.name},
+		OriginalLanguage: "en", Studios: []string{"Studio " + t.name}, Tagline: "In " + l.Language,
 		ExternalIDs: map[core.Provider]string{core.ProviderIMDb: "tt" + l.ExternalIDs[core.ProviderTMDB]},
 	}
 	if t.tvdb > 0 {
@@ -69,7 +69,8 @@ func (f *fakeMetadata) Metadata(_ context.Context, l library.Lookup) (*metadata.
 	}
 	return &metadata.Result{
 		Item: it, RemoteImages: []metadata.RemoteImage{{Kind: core.ImagePrimary, URL: "https://img/" + t.name}},
-		Facts: metadata.Facts{Budget: 1000, WatchProviders: []metadata.WatchProvider{{Name: "Stream"}}},
+		People: []metadata.Person{{Name: "Lead", Kind: core.CreditActor, Role: "Hero"}},
+		Facts:  metadata.Facts{Budget: 1000, WatchProviders: []metadata.WatchProvider{{Name: "Stream"}}},
 	}, nil
 }
 

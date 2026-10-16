@@ -151,6 +151,16 @@ func imageLanguages(preferred, country string) string {
 	return strings.Join(langs, ",")
 }
 
+// videoLanguages lists the languages of videos to ask for: the preferred
+// language and English.
+func videoLanguages(preferred string) string {
+	base, _, _ := strings.Cut(preferred, "-")
+	if base == "" || strings.EqualFold(base, "en") {
+		return "en"
+	}
+	return strings.ToLower(base) + ",en"
+}
+
 // imageLanguage returns the language of an image as the request names it:
 // the requested regional variant when the image's region matches or is
 // unknown, the image's own region otherwise, and "" for images without

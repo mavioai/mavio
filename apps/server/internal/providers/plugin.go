@@ -202,6 +202,7 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		TranslatedTitles:    md.GetTranslatedTitles(),
 		SecondaryYear:       int(md.GetSecondaryYear()),
 		ProductionLocations: md.GetProductionLocations(),
+		RemoteTrailers:      md.GetRemoteTrailers(),
 	}
 	if md.HasRuntime() {
 		it.Runtime = md.GetRuntime().AsDuration()

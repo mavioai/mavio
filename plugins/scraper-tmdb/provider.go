@@ -262,6 +262,7 @@ func (s session) movieMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugin
 	md.SetBudget(m.Budget)
 	md.SetRevenue(m.Revenue)
 	md.SetWatchProviders(watchProviders(m.WatchProviders, r))
+	md.SetRemoteTrailers(trailers(m.Videos))
 	people := castCredits(mapCast(m.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	people = append(people, crewCredits(m.Credits.Crew)...)
 	md.SetPeople(people)
@@ -311,6 +312,7 @@ func (s session) seriesMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugi
 		}
 	}
 	md.SetWatchProviders(watchProviders(t.WatchProviders, r))
+	md.SetRemoteTrailers(trailers(t.Videos))
 	ratings := map[string]string{}
 	for _, cr := range t.ContentRatings.Results {
 		if cr.Rating != "" {
@@ -486,6 +488,18 @@ func watchProviders(w tmdbWatchProviders, r request) []*pluginv1.WatchProvider {
 			b.LogoUrl = proto.String(imageBaseURL + logoSize + p.Logo)
 		}
 		out = append(out, b.Build())
+	}
+	return out
+}
+
+// trailers lists a title's trailers on YouTube, as Jellyfin's TMDB
+// providers do, in the requested language first.
+func trailers(v tmdbVideos) []string {
+	var out []string
+	for _, video := range v.Results {
+		if video.Type == "Trailer" && strings.EqualFold(video.Site, "YouTube") && video.Key != "" {
+			out = append(out, "https://www.youtube.com/watch?v="+video.Key)
+		}
 	}
 	return out
 }

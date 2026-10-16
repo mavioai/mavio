@@ -28,6 +28,12 @@ test.each<{ name: string; f: CatalogFilters; want: Record<string, unknown>; coun
     want: { watchProviders: ["8"], watchRegion: "US", runtimeMin: 0, runtimeMax: 120 },
     count: 2,
   },
+  {
+    name: "a collection, which is not a filter",
+    f: { collectionId: 1166519 },
+    want: { tmdbCollectionId: 1166519 },
+    count: 0,
+  },
 ])("discoverRequestOf: $name", ({ f, want, count }) => {
   expect(discoverRequestOf(f)).toMatchObject(want);
   expect(filterCount(f)).toBe(count);

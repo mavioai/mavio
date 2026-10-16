@@ -849,6 +849,10 @@ pub struct DiscoverRequest {
     ///
     /// Field 23: `page`
     pub page: ::core::option::Option<i32>,
+    /// The collection of a collection catalog, by its TMDB ID.
+    ///
+    /// Field 24: `tmdb_collection_id`
+    pub tmdb_collection_id: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -878,6 +882,7 @@ impl ::core::fmt::Debug for DiscoverRequest {
             .field("ascending", &self.ascending)
             .field("language", &self.language)
             .field("page", &self.page)
+            .field("tmdb_collection_id", &self.tmdb_collection_id)
             .finish()
     }
 }
@@ -1025,6 +1030,13 @@ impl DiscoverRequest {
         self.page = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_collection_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_collection_id(mut self, value: i32) -> Self {
+        self.tmdb_collection_id = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(DiscoverRequest);
 impl ::buffa::MessageName for DiscoverRequest {
@@ -1115,6 +1127,9 @@ impl ::buffa::Message for DiscoverRequest {
         if let Some(v) = self.page {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(v) = self.tmdb_collection_id {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1193,6 +1208,9 @@ impl ::buffa::Message for DiscoverRequest {
         }
         if let Some(v) = self.page {
             ::buffa::types::put_int32_field(23u32, v, buf);
+        }
+        if let Some(v) = self.tmdb_collection_id {
+            ::buffa::types::put_int32_field(24u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1444,6 +1462,15 @@ impl ::buffa::Message for DiscoverRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_collection_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -1475,6 +1502,7 @@ impl ::buffa::Message for DiscoverRequest {
         self.ascending = ::core::option::Option::None;
         self.language = ::core::option::Option::None;
         self.page = ::core::option::Option::None;
+        self.tmdb_collection_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -3319,6 +3347,11 @@ pub struct GetTitleRequest {
     pub media_kind: ::core::option::Option<::buffa::EnumValue<MediaKind>>,
     /// Field 2: `tmdb_id`
     pub tmdb_id: ::core::option::Option<i32>,
+    /// ISO 639-1 language of its names, overview, keywords and credits;
+    /// unset for the server's metadata language.
+    ///
+    /// Field 3: `language`
+    pub language: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3327,6 +3360,7 @@ impl ::core::fmt::Debug for GetTitleRequest {
         f.debug_struct("GetTitleRequest")
             .field("media_kind", &self.media_kind)
             .field("tmdb_id", &self.tmdb_id)
+            .field("language", &self.language)
             .finish()
     }
 }
@@ -3353,6 +3387,16 @@ impl GetTitleRequest {
     ///Sets [`Self::tmdb_id`] to `Some(value)`, consuming and returning `self`.
     pub fn with_tmdb_id(mut self, value: i32) -> Self {
         self.tmdb_id = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.language = Some(value.into());
         self
     }
 }
@@ -3382,6 +3426,9 @@ impl ::buffa::Message for GetTitleRequest {
         if let Some(v) = self.tmdb_id {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3397,6 +3444,9 @@ impl ::buffa::Message for GetTitleRequest {
         }
         if let Some(v) = self.tmdb_id {
             ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.language {
+            ::buffa::types::put_string_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3429,6 +3479,18 @@ impl ::buffa::Message for GetTitleRequest {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3439,6 +3501,7 @@ impl ::buffa::Message for GetTitleRequest {
     fn clear(&mut self) {
         self.media_kind = ::core::option::Option::None;
         self.tmdb_id = ::core::option::Option::None;
+        self.language = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -3679,6 +3742,25 @@ pub struct Title {
     pub watch_providers: ::buffa::alloc::vec::Vec<
         super::super::plugin::v1::WatchProvider,
     >,
+    /// Field 33: `tagline`
+    pub tagline: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Its keywords, such as TMDB's.
+    ///
+    /// Field 34: `keywords`
+    pub keywords: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Its cast and crew, the cast in billing order.
+    ///
+    /// Field 35: `credits`
+    pub credits: ::buffa::alloc::vec::Vec<TitleCredit>,
+    /// URLs of its trailers, such as on YouTube.
+    ///
+    /// Field 36: `trailer_urls`
+    pub trailer_urls: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The collection (movie set) a movie belongs to; its TMDB ID is the
+    /// external ID "tmdb_collection".
+    ///
+    /// Field 37: `collection_name`
+    pub collection_name: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3717,6 +3799,11 @@ impl ::core::fmt::Debug for Title {
             .field("end_date", &self.end_date)
             .field("next_air_date", &self.next_air_date)
             .field("watch_providers", &self.watch_providers)
+            .field("tagline", &self.tagline)
+            .field("keywords", &self.keywords)
+            .field("credits", &self.credits)
+            .field("trailer_urls", &self.trailer_urls)
+            .field("collection_name", &self.collection_name)
             .finish()
     }
 }
@@ -3951,6 +4038,26 @@ impl Title {
         self.next_air_date = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tagline`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tagline(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.tagline = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::collection_name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_collection_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.collection_name = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Title);
 impl ::buffa::MessageName for Title {
@@ -4086,6 +4193,26 @@ impl ::buffa::Message for Title {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.tagline {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.keywords {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.credits {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.trailer_urls {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.collection_name {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4208,6 +4335,26 @@ impl ::buffa::Message for Title {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.tagline {
+            ::buffa::types::put_string_field(33u32, v, buf);
+        }
+        for v in &self.keywords {
+            ::buffa::types::put_string_field(34u32, v, buf);
+        }
+        for v in &self.credits {
+            ::buffa::types::put_len_delimited_header(
+                35u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.trailer_urls {
+            ::buffa::types::put_string_field(36u32, v, buf);
+        }
+        if let Some(ref v) = self.collection_name {
+            ::buffa::types::put_string_field(37u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4565,6 +4712,62 @@ impl ::buffa::Message for Title {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.watch_providers.push(elem);
             }
+            33u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.tagline.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            34u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.keywords.push(__elem);
+            }
+            35u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.credits.push(elem);
+            }
+            36u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.trailer_urls.push(__elem);
+            }
+            37u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .collection_name
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4605,11 +4808,254 @@ impl ::buffa::Message for Title {
         self.end_date = ::core::option::Option::None;
         self.next_air_date = ::core::option::Option::None;
         self.watch_providers.clear();
+        self.tagline = ::core::option::Option::None;
+        self.keywords.clear();
+        self.credits.clear();
+        self.trailer_urls.clear();
+        self.collection_name = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for Title {
     const PROTO_FQN: &'static str = "mavio.acquisition.v1.Title";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// TitleCredit is a person credited on a title, as the metadata providers
+/// tell it.
+#[derive(Clone, PartialEq, Default)]
+pub struct TitleCredit {
+    /// Field 1: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `kind`
+    pub kind: ::core::option::Option<
+        ::buffa::EnumValue<super::super::library::v1::CreditKind>,
+    >,
+    /// Character played, or a more specific job title.
+    ///
+    /// Field 3: `role`
+    pub role: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 4: `order`
+    pub order: ::core::option::Option<i32>,
+    /// Their photo, if any.
+    ///
+    /// Field 5: `image_url`
+    pub image_url: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for TitleCredit {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("TitleCredit")
+            .field("name", &self.name)
+            .field("kind", &self.kind)
+            .field("role", &self.role)
+            .field("order", &self.order)
+            .field("image_url", &self.image_url)
+            .finish()
+    }
+}
+impl TitleCredit {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TitleCredit";
+}
+impl TitleCredit {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::kind`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_kind(
+        mut self,
+        value: impl Into<::buffa::EnumValue<super::super::library::v1::CreditKind>>,
+    ) -> Self {
+        self.kind = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::role`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_role(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.role = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::order`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_order(mut self, value: i32) -> Self {
+        self.order = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::image_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_image_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.image_url = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(TitleCredit);
+impl ::buffa::MessageName for TitleCredit {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "TitleCredit";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.TitleCredit";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TitleCredit";
+}
+impl ::buffa::Message for TitleCredit {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.role {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.order {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.image_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.kind {
+            ::buffa::types::put_int32_field(2u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.role {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.order {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.image_url {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.kind = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.role.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.order = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .image_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.name = ::core::option::Option::None;
+        self.kind = ::core::option::Option::None;
+        self.role = ::core::option::Option::None;
+        self.order = ::core::option::Option::None;
+        self.image_url = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for TitleCredit {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.TitleCredit";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

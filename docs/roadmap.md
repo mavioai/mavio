@@ -592,6 +592,7 @@ flowchart TD
 - [x] Web details as rich as Seerr's: extras, the collection's banner, the discovery providers' recommendations, ratings, keywords, more crew and genres, keywords and studios opening the library's items of them
   - [x] Seerr's facts: original language and digital and physical release dates from the items, networks as a series' studios, and budget and revenue, a series' next air date and the streaming services in the server's country from the metadata providers through `GetTitle`, also on a discovered title
   - [x] A page of the whole cast and crew, as Seerr's View Full Crew, opened from the cast
+  - [x] A discovered title as rich as an item's details, in the client's language: cast and crew with their page, trailer, collection, tagline, keywords and crew facts; an item without a trailer among its extras opens its trailer on the web
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
 - [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers

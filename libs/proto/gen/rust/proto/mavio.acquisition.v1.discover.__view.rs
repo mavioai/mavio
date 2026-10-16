@@ -1076,6 +1076,10 @@ pub struct DiscoverRequestView<'a> {
     ///
     /// Field 23: `page`
     pub page: ::core::option::Option<i32>,
+    /// The collection of a collection catalog, by its TMDB ID.
+    ///
+    /// Field 24: `tmdb_collection_id`
+    pub tmdb_collection_id: ::core::option::Option<i32>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
@@ -1224,6 +1228,13 @@ impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
                 )?;
                 view.page = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.tmdb_collection_id = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
             4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -1354,6 +1365,7 @@ impl<'a> ::buffa::MessageView<'a> for DiscoverRequestView<'a> {
             ascending: self.ascending,
             language: self.language.map(|s| s.to_string()),
             page: self.page,
+            tmdb_collection_id: self.tmdb_collection_id,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1432,6 +1444,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DiscoverRequestView<'a> {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(v) = self.page {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.tmdb_collection_id {
             size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -1513,6 +1528,9 @@ impl<'a> ::buffa::ViewEncode<'a> for DiscoverRequestView<'a> {
         }
         if let Some(v) = self.page {
             ::buffa::types::put_int32_field(23u32, v, buf);
+        }
+        if let Some(v) = self.tmdb_collection_id {
+            ::buffa::types::put_int32_field(24u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1753,6 +1771,13 @@ impl DiscoverRequestOwnedView {
     #[must_use]
     pub fn page(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().page
+    }
+    /// The collection of a collection catalog, by its TMDB ID.
+    ///
+    /// Field 24: `tmdb_collection_id`
+    #[must_use]
+    pub fn tmdb_collection_id(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().tmdb_collection_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<DiscoverRequestView<'static>>>
@@ -4231,6 +4256,11 @@ pub struct GetTitleRequestView<'a> {
     pub media_kind: ::core::option::Option<::buffa::EnumValue<super::super::MediaKind>>,
     /// Field 2: `tmdb_id`
     pub tmdb_id: ::core::option::Option<i32>,
+    /// ISO 639-1 language of its names, overview, keywords and credits;
+    /// unset for the server's metadata language.
+    ///
+    /// Field 3: `language`
+    pub language: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GetTitleRequestView<'a> {
@@ -4279,6 +4309,13 @@ impl<'a> ::buffa::MessageView<'a> for GetTitleRequestView<'a> {
                 )?;
                 view.tmdb_id = Some(::buffa::types::decode_int32(&mut cur)?);
             }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -4303,6 +4340,7 @@ impl<'a> ::buffa::MessageView<'a> for GetTitleRequestView<'a> {
         ::core::result::Result::Ok(super::super::GetTitleRequest {
             media_kind: self.media_kind,
             tmdb_id: self.tmdb_id,
+            language: self.language.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -4320,6 +4358,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetTitleRequestView<'a> {
         if let Some(v) = self.tmdb_id {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4336,6 +4377,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GetTitleRequestView<'a> {
         }
         if let Some(v) = self.tmdb_id {
             ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.language {
+            ::buffa::types::put_string_field(3u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4443,6 +4487,14 @@ impl GetTitleRequestOwnedView {
     #[must_use]
     pub fn tmdb_id(&self) -> ::core::option::Option<i32> {
         self.0.reborrow().tmdb_id
+    }
+    /// ISO 639-1 language of its names, overview, keywords and credits;
+    /// unset for the server's metadata language.
+    ///
+    /// Field 3: `language`
+    #[must_use]
+    pub fn language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().language
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<GetTitleRequestView<'static>>>
@@ -4838,6 +4890,28 @@ pub struct TitleView<'a> {
         'a,
         super::super::super::super::plugin::v1::__buffa::view::WatchProviderView<'a>,
     >,
+    /// Field 33: `tagline`
+    pub tagline: ::core::option::Option<&'a str>,
+    /// Its keywords, such as TMDB's.
+    ///
+    /// Field 34: `keywords`
+    pub keywords: ::buffa::RepeatedView<'a, &'a str>,
+    /// Its cast and crew, the cast in billing order.
+    ///
+    /// Field 35: `credits`
+    pub credits: ::buffa::RepeatedView<
+        'a,
+        super::super::__buffa::view::TitleCreditView<'a>,
+    >,
+    /// URLs of its trailers, such as on YouTube.
+    ///
+    /// Field 36: `trailer_urls`
+    pub trailer_urls: ::buffa::RepeatedView<'a, &'a str>,
+    /// The collection (movie set) a movie belongs to; its TMDB ID is the
+    /// external ID "tmdb_collection".
+    ///
+    /// Field 37: `collection_name`
+    pub collection_name: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
@@ -5049,6 +5123,20 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                 )?;
                 view.next_air_date = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            33u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.tagline = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            37u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.collection_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -5139,6 +5227,48 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                             __sub_ctx,
                         )?,
                     );
+            }
+            34u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.keywords.push(__elem);
+            }
+            35u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::__buffa::view::TitleCreditView,
+                    >(),
+                )?;
+                view.credits
+                    .push(
+                        <super::super::__buffa::view::TitleCreditView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
+            36u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.trailer_urls.push(__elem);
             }
             13u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -5255,6 +5385,15 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            tagline: self.tagline.map(|s| s.to_string()),
+            keywords: self.keywords.iter().map(|s| s.to_string()).collect(),
+            credits: self
+                .credits
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            trailer_urls: self.trailer_urls.iter().map(|s| s.to_string()).collect(),
+            collection_name: self.collection_name.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5379,6 +5518,26 @@ impl<'a> ::buffa::ViewEncode<'a> for TitleView<'a> {
             size
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
+        }
+        if let Some(ref v) = self.tagline {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.keywords {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.credits {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.trailer_urls {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.collection_name {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -5520,6 +5679,26 @@ impl<'a> ::buffa::ViewEncode<'a> for TitleView<'a> {
                 buf,
             );
             v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.tagline {
+            ::buffa::types::put_string_field(33u32, v, buf);
+        }
+        for v in &self.keywords {
+            ::buffa::types::put_string_field(34u32, v, buf);
+        }
+        for v in &self.credits {
+            ::buffa::types::put_len_delimited_header(
+                35u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.trailer_urls {
+            ::buffa::types::put_string_field(36u32, v, buf);
+        }
+        if let Some(ref v) = self.collection_name {
+            ::buffa::types::put_string_field(37u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5826,6 +6005,42 @@ impl TitleOwnedView {
     > {
         &self.0.reborrow().watch_providers
     }
+    /// Field 33: `tagline`
+    #[must_use]
+    pub fn tagline(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().tagline
+    }
+    /// Its keywords, such as TMDB's.
+    ///
+    /// Field 34: `keywords`
+    #[must_use]
+    pub fn keywords(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().keywords
+    }
+    /// Its cast and crew, the cast in billing order.
+    ///
+    /// Field 35: `credits`
+    #[must_use]
+    pub fn credits(
+        &self,
+    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::TitleCreditView<'_>> {
+        &self.0.reborrow().credits
+    }
+    /// URLs of its trailers, such as on YouTube.
+    ///
+    /// Field 36: `trailer_urls`
+    #[must_use]
+    pub fn trailer_urls(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().trailer_urls
+    }
+    /// The collection (movie set) a movie belongs to; its TMDB ID is the
+    /// external ID "tmdb_collection".
+    ///
+    /// Field 37: `collection_name`
+    #[must_use]
+    pub fn collection_name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().collection_name
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<TitleView<'static>>> for TitleOwnedView {
     fn from(inner: ::buffa::OwnedView<TitleView<'static>>) -> Self {
@@ -5845,6 +6060,321 @@ impl ::core::convert::AsRef<::buffa::OwnedView<TitleView<'static>>> for TitleOwn
 impl ::buffa::HasMessageView for super::super::Title {
     type View<'a> = TitleView<'a>;
     type ViewHandle = TitleOwnedView;
+}
+/// TitleCredit is a person credited on a title, as the metadata providers
+/// tell it.
+#[derive(Clone, Debug, Default)]
+pub struct TitleCreditView<'a> {
+    /// Field 1: `name`
+    pub name: ::core::option::Option<&'a str>,
+    /// Field 2: `kind`
+    pub kind: ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::library::v1::CreditKind>,
+    >,
+    /// Character played, or a more specific job title.
+    ///
+    /// Field 3: `role`
+    pub role: ::core::option::Option<&'a str>,
+    /// Field 4: `order`
+    pub order: ::core::option::Option<i32>,
+    /// Their photo, if any.
+    ///
+    /// Field 5: `image_url`
+    pub image_url: ::core::option::Option<&'a str>,
+    pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
+}
+impl<'a> ::buffa::MessageView<'a> for TitleCreditView<'a> {
+    type Owned = super::super::TitleCredit;
+    fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
+        let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
+        <Self as ::buffa::MessageView>::decode_view_ctx(
+            buf,
+            ::buffa::DecodeContext::new(::buffa::RECURSION_LIMIT, &__limit)
+                .with_element_memory(&__elem),
+        )
+    }
+    fn decode_view_with_ctx(
+        buf: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        <Self as ::buffa::MessageView>::decode_view_ctx(buf, ctx)
+    }
+    #[inline]
+    fn merge_view_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        cur: &'a [u8],
+        before_tag: &'a [u8],
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<&'a [u8], ::buffa::DecodeError> {
+        let _ = ctx;
+        #[allow(unused_variables)]
+        let view = self;
+        let mut cur = cur;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.kind = Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(&mut cur)?),
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.role = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.order = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.image_url = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            _ => {
+                ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
+                let span_len = before_tag.len() - cur.len();
+                view.__buffa_unknown_fields.push_record(before_tag, span_len, ctx)?;
+            }
+        }
+        ::core::result::Result::Ok(cur)
+    }
+    fn to_owned_message(
+        &self,
+    ) -> ::core::result::Result<super::super::TitleCredit, ::buffa::DecodeError> {
+        self.to_owned_from_source(None)
+    }
+    #[allow(clippy::useless_conversion, clippy::needless_update)]
+    fn to_owned_from_source(
+        &self,
+        __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
+    ) -> ::core::result::Result<super::super::TitleCredit, ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::alloc::string::ToString as _;
+        let _ = __buffa_src;
+        ::core::result::Result::Ok(super::super::TitleCredit {
+            name: self.name.map(|s| s.to_string()),
+            kind: self.kind,
+            role: self.role.map(|s| s.to_string()),
+            order: self.order,
+            image_url: self.image_url.map(|s| s.to_string()),
+            __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
+            ..::core::default::Default::default()
+        })
+    }
+}
+impl<'a> ::buffa::ViewEncode<'a> for TitleCreditView<'a> {
+    #[allow(clippy::needless_borrow, clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.kind {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.role {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.order {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.image_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    #[allow(clippy::needless_borrow)]
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.kind {
+            ::buffa::types::put_int32_field(2u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.role {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(v) = self.order {
+            ::buffa::types::put_int32_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.image_url {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+}
+impl<'a> ::buffa::MessageName for TitleCreditView<'a> {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "TitleCredit";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.TitleCredit";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.TitleCredit";
+}
+::buffa::impl_default_view_instance!(TitleCreditView);
+::buffa::impl_view_reborrow!(TitleCreditView);
+/** Self-contained, `'static` owned view of a `TitleCredit` message.
+
+ Wraps [`::buffa::OwnedView`]`<`[`TitleCreditView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`TitleCreditView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+#[derive(Clone, Debug)]
+pub struct TitleCreditOwnedView(::buffa::OwnedView<TitleCreditView<'static>>);
+impl TitleCreditOwnedView {
+    /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
+    ///
+    /// The view borrows directly from the buffer's data; the buffer is
+    /// retained inside the returned handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer contains invalid
+    /// protobuf data.
+    pub fn decode(
+        bytes: ::buffa::bytes::Bytes,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TitleCreditOwnedView(::buffa::OwnedView::decode(bytes)?),
+        )
+    }
+    /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
+    /// max message size).
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError`] if the buffer is invalid or
+    /// exceeds the configured limits.
+    pub fn decode_with_options(
+        bytes: ::buffa::bytes::Bytes,
+        opts: &::buffa::DecodeOptions,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TitleCreditOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
+        )
+    }
+    /// Build from an owned message via an encode → decode round-trip.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`::buffa::DecodeError::MessageTooLarge`] if the
+    /// message's encoded size exceeds the 2 GiB protobuf limit, or
+    /// another [`::buffa::DecodeError`] if the re-encoded bytes are
+    /// somehow invalid (should not happen for well-formed messages).
+    pub fn from_owned(
+        msg: &super::super::TitleCredit,
+    ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
+        ::core::result::Result::Ok(
+            TitleCreditOwnedView(::buffa::OwnedView::from_owned(msg)?),
+        )
+    }
+    /// Borrow the full [`TitleCreditView`] with its lifetime tied to `&self`.
+    #[must_use]
+    pub fn view(&self) -> &TitleCreditView<'_> {
+        self.0.reborrow()
+    }
+    /// Convert to the owned message type.
+    ///
+    /// Infallible: this type's constructors wire-decode their
+    /// buffer, and a view produced by wire decoding always
+    /// converts. Delegates to [`::buffa::OwnedView::to_owned_message`],
+    /// whose contract also governs handles converted from a raw
+    /// [`::buffa::OwnedView`].
+    #[must_use]
+    pub fn to_owned_message(&self) -> super::super::TitleCredit {
+        self.0.to_owned_message()
+    }
+    /// The underlying bytes buffer.
+    #[must_use]
+    pub fn bytes(&self) -> &::buffa::bytes::Bytes {
+        self.0.bytes()
+    }
+    /// Consume the handle, returning the underlying bytes buffer.
+    #[must_use]
+    pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
+        self.0.into_bytes()
+    }
+    /// Field 1: `name`
+    #[must_use]
+    pub fn name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().name
+    }
+    /// Field 2: `kind`
+    #[must_use]
+    pub fn kind(
+        &self,
+    ) -> ::core::option::Option<
+        ::buffa::EnumValue<super::super::super::super::library::v1::CreditKind>,
+    > {
+        self.0.reborrow().kind
+    }
+    /// Character played, or a more specific job title.
+    ///
+    /// Field 3: `role`
+    #[must_use]
+    pub fn role(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().role
+    }
+    /// Field 4: `order`
+    #[must_use]
+    pub fn order(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().order
+    }
+    /// Their photo, if any.
+    ///
+    /// Field 5: `image_url`
+    #[must_use]
+    pub fn image_url(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().image_url
+    }
+}
+impl ::core::convert::From<::buffa::OwnedView<TitleCreditView<'static>>>
+for TitleCreditOwnedView {
+    fn from(inner: ::buffa::OwnedView<TitleCreditView<'static>>) -> Self {
+        TitleCreditOwnedView(inner)
+    }
+}
+impl ::core::convert::From<TitleCreditOwnedView>
+for ::buffa::OwnedView<TitleCreditView<'static>> {
+    fn from(wrapper: TitleCreditOwnedView) -> Self {
+        wrapper.0
+    }
+}
+impl ::core::convert::AsRef<::buffa::OwnedView<TitleCreditView<'static>>>
+for TitleCreditOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<TitleCreditView<'static>> {
+        &self.0
+    }
+}
+impl ::buffa::HasMessageView for super::super::TitleCredit {
+    type View<'a> = TitleCreditView<'a>;
+    type ViewHandle = TitleCreditOwnedView;
 }
 /// SeasonStatus is a season of a series with what the server has of it, as
 /// Seerr's season statuses.

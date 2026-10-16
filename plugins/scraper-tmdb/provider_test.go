@@ -91,7 +91,9 @@ var routes = map[string]string{
 		"translations":{"translations":[{"iso_639_1":"zh","data":{"title":"花木兰"}},{"iso_639_1":"de","data":{"title":""}}]},
 		"budget":200000000,"revenue":69965374,"production_countries":[{"iso_3166_1":"US","name":"United States of America"}],
 		"watch/providers":{"results":{"DE":{"flatrate":[{"provider_name":"Disney Plus","logo_path":"/dp.jpg"}]},
-			"US":{"flatrate":[{"provider_name":"Netflix","logo_path":"/nf.jpg"}]}}}}`,
+			"US":{"flatrate":[{"provider_name":"Netflix","logo_path":"/nf.jpg"}]}}},
+		"videos":{"results":[{"site":"YouTube","key":"KK8FHdFluOQ","type":"Trailer"},{"site":"YouTube","key":"clip","type":"Clip"},
+			{"site":"Vimeo","key":"v1","type":"Trailer"}]}}`,
 	"/3/find/tt0120762": `{"movie_results":[{"id":10674}],"tv_results":[]}`,
 	"/3/movie/10674":    `{"id":10674,"title":"Mulan","release_date":"1998-06-18"}`,
 	"/3/find/81189":     `{"movie_results":[],"tv_results":[{"id":1396}]}`,
@@ -204,11 +206,17 @@ func TestMovieBySearch(t *testing.T) {
 	if got, want := md.GetProductionLocations(), []string{"United States of America"}; !slices.Equal(got, want) {
 		t.Errorf("production locations = %v, want = %v", got, want)
 	}
+	if got, want := md.GetRemoteTrailers(), []string{"https://www.youtube.com/watch?v=KK8FHdFluOQ"}; !slices.Equal(got, want) {
+		t.Errorf("trailers = %v, want = %v", got, want)
+	}
 	// The services of the lookup's country.
 	if w := md.GetWatchProviders(); len(w) != 1 || w[0].GetName() != "Disney Plus" || w[0].GetLogoUrl() != "https://image.tmdb.org/t/p/w92/dp.jpg" {
 		t.Errorf("watch providers = %v, want = [Disney Plus]", w)
 	}
 	q := fake.requests[1].URL.Query()
+	if got, want := q.Get("include_video_language"), "de,en"; got != want {
+		t.Errorf("include_video_language = %q, want = %q", got, want)
+	}
 	if got, want := q.Get("include_image_language"), "de,null,en"; got != want {
 		t.Errorf("include_image_language = %q, want = %q", got, want)
 	}

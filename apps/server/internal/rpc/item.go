@@ -815,6 +815,7 @@ func itemToProto(ctx context.Context, it *core.Item, images []core.Image, admin 
 
 		ProductionLocations: it.ProductionLocations,
 		OriginalLanguage:    &it.OriginalLanguage,
+		RemoteTrailers:      it.RemoteTrailers,
 	}
 	if it.CustomRating != "" {
 		b.OfficialRating = &it.CustomRating

@@ -219,7 +219,7 @@ func TestToResultMovieAcquisition(t *testing.T) {
 func TestToResultFacts(t *testing.T) {
 	md := pluginv1.Metadata_builder{
 		Budget: proto.Int64(150_000_000), Revenue: proto.Int64(400_000_000), NextAirDate: proto.String("2026-11-02"),
-		ProductionLocations: []string{"France"},
+		ProductionLocations: []string{"France"}, RemoteTrailers: []string{"https://www.youtube.com/watch?v=t"},
 		WatchProviders: []*pluginv1.WatchProvider{
 			pluginv1.WatchProvider_builder{Name: proto.String("Netflix"), LogoUrl: proto.String("https://image.tmdb.org/n.png")}.Build(),
 			pluginv1.WatchProvider_builder{LogoUrl: proto.String("https://image.tmdb.org/x.png")}.Build(),
@@ -239,5 +239,8 @@ func TestToResultFacts(t *testing.T) {
 	}
 	if !slices.Equal(res.Item.ProductionLocations, []string{"France"}) {
 		t.Errorf("production locations = %v, want = [France]", res.Item.ProductionLocations)
+	}
+	if want := []string{"https://www.youtube.com/watch?v=t"}; !slices.Equal(res.Item.RemoteTrailers, want) {
+		t.Errorf("trailers = %v, want = %v", res.Item.RemoteTrailers, want)
 	}
 }

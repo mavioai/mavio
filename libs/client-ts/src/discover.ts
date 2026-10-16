@@ -90,6 +90,8 @@ export interface CatalogFilters {
   /** 0–10. */
   ratingMin?: number;
   votesMin?: number;
+  /** The TMDB collection of a collection catalog. */
+  collectionId?: number;
 }
 
 /** How many filters are set, the sort aside. */
@@ -125,6 +127,7 @@ export function discoverRequestOf(f: CatalogFilters): MessageInitShape<typeof Di
     runtimeMax: f.runtimeMax ?? 0,
     ratingMin: f.ratingMin ?? 0,
     votesMin: f.votesMin ?? 0,
+    tmdbCollectionId: f.collectionId ?? 0,
   };
 }
 
@@ -197,13 +200,17 @@ export function titlesOf(pages: { titles: DiscoveredTitle[] }[] | undefined): Di
   );
 }
 
-/** A movie or series by its TMDB ID, with what the server has of it and of its seasons. */
-export function useTitle(server: ServerEntry | undefined, mediaKind: MediaKind, tmdbId: number) {
+/**
+ * A movie or series by its TMDB ID, with what the server has of it and of
+ * its seasons, in a language (ISO 639-1), the server's metadata language
+ * when empty.
+ */
+export function useTitle(server: ServerEntry | undefined, mediaKind: MediaKind, tmdbId: number, language = "") {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server?.id ?? "", "discover", "title", mediaKind, tmdbId),
+    queryKey: serverKey(server?.id ?? "", "discover", "title", mediaKind, tmdbId, language),
     queryFn: async (): Promise<Title | undefined> =>
-      (await servers.client(DiscoverService, server!).getTitle({ mediaKind, tmdbId })).title,
+      (await servers.client(DiscoverService, server!).getTitle({ mediaKind, tmdbId, language })).title,
     enabled: !!server && tmdbId > 0,
   });
 }

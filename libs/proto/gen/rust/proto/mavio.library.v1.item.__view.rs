@@ -174,6 +174,10 @@ pub struct ItemView<'a> {
     pub physical_release_date: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
     >,
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 54: `remote_trailers`
+    pub remote_trailers: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
@@ -749,6 +753,17 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                         )?,
                     );
             }
+            54u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.remote_trailers.push(__elem);
+            }
             24u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -937,6 +952,11 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            remote_trailers: self
+                .remote_trailers
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1159,6 +1179,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
             size
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
+        }
+        for v in &self.remote_trailers {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -1401,6 +1424,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
                 buf,
             );
             self.physical_release_date.write_to(__cache, buf);
+        }
+        for v in &self.remote_trailers {
+            ::buffa::types::put_string_field(54u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1834,6 +1860,13 @@ impl ItemOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
     > {
         &self.0.reborrow().physical_release_date
+    }
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 54: `remote_trailers`
+    #[must_use]
+    pub fn remote_trailers(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().remote_trailers
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ItemView<'static>>> for ItemOwnedView {

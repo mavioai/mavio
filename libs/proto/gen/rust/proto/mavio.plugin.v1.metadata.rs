@@ -1870,6 +1870,10 @@ pub struct Metadata {
     ///
     /// Field 36: `production_locations`
     pub production_locations: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// URLs of trailers hosted elsewhere, such as on YouTube.
+    ///
+    /// Field 37: `remote_trailers`
+    pub remote_trailers: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     /// What a title's page tells of it beyond the item, which the host does
     /// not store, as Seerr shows of a movie or series.
     /// For movies: its budget and box office takings, in US dollars.
@@ -1926,6 +1930,7 @@ impl ::core::fmt::Debug for Metadata {
             .field("translated_titles", &self.translated_titles)
             .field("secondary_year", &self.secondary_year)
             .field("production_locations", &self.production_locations)
+            .field("remote_trailers", &self.remote_trailers)
             .field("budget", &self.budget)
             .field("revenue", &self.revenue)
             .field("next_air_date", &self.next_air_date)
@@ -2305,6 +2310,9 @@ impl ::buffa::Message for Metadata {
         for v in &self.production_locations {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.remote_trailers {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2444,6 +2452,9 @@ impl ::buffa::Message for Metadata {
         }
         for v in &self.production_locations {
             ::buffa::types::put_string_field(36u32, v, buf);
+        }
+        for v in &self.remote_trailers {
+            ::buffa::types::put_string_field(37u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2855,6 +2866,17 @@ impl ::buffa::Message for Metadata {
                 )?;
                 self.production_locations.push(__elem);
             }
+            37u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.remote_trailers.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2899,6 +2921,7 @@ impl ::buffa::Message for Metadata {
         self.next_air_date = ::core::option::Option::None;
         self.watch_providers.clear();
         self.production_locations.clear();
+        self.remote_trailers.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
