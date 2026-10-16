@@ -413,7 +413,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 媒体库路径 `rclone:<remote>:<path>` 位于 rclone 的某个远端上，经 `rclone rcd` 的 HTTP API（rc API）访问；服务端不链接 rclone 的任何代码，rcd 可以运行在其他机器上。
 
-* **托管的 rcd**：默认由服务端自己运行 `rclone rcd`（`rclone` 设置可执行文件；找不到时远端不可用，服务端其余部分照常工作）。它监听私有目录中的 Unix 套接字，用户名和密码在每次启动时随机生成；以 `rc/noopauth` 判断就绪；退出后延迟重启，延迟逐次翻倍、最长一分钟，运行满一分钟后重置；关闭时先请求其退出（`core/quit`），再终止，最后强制结束。它的日志按级别写入服务端日志。
+* **托管的 rcd**：默认由服务端自己运行 `rclone rcd`（`rclone` 设置可执行文件，默认为服务端可执行文件旁的那个，即发布包所附带的（§12），否则为 `PATH` 中的 `rclone`；找不到时远端不可用，存储设置会说明原因，服务端其余部分照常工作）。它监听私有目录中的 Unix 套接字，用户名和密码在每次启动时随机生成；以 `rc/noopauth` 判断就绪；退出后延迟重启，延迟逐次翻倍、最长一分钟，运行满一分钟后重置；关闭时先请求其退出（`core/quit`），再终止，最后强制结束。它的日志按级别写入服务端日志。
 * **外部 rcd**：`rclone-url` 连同 `rclone-user` 与 `rclone-pass` 连接不由服务端运行的 rcd，只允许 HTTPS、Unix 套接字，或仅限本机回环接口的 HTTP，因此凭证不会以明文穿过网络。
 * **版本**：rcd 必须运行 `rclone.Version` 指定的 mavioai/rclone 版本，即 `mise.toml` 与容器镜像锁定的版本，因为服务端依赖 fork 对 rcd 的修改。客户端在第一个请求前询问 `core/version`，托管的 rcd 在每次启动时检查；其他版本的 rcd（包括上游 rclone）被拒绝，远端随之不可用。一项测试保证三处锁定一致。
 * **配置**：托管的 rcd 把远端保存在 `<home>/rclone/rclone.conf`。该文件由服务端创建时会被加密，随机口令保存在旁边的 `rclone.pass`（权限 0600），并以 `RCLONE_CONFIG_PASS` 交给 rcd；不是服务端创建的文件按原样读取。`mavio.storage.v1.StorageService`（仅管理员）列出提供者及其选项，供客户端生成表单（`config/providers`）；创建、更新与删除远端；回答 rclone 非交互式配置提出的问题，包括 OAuth（`config/create`、带 `continue` 的 `config/update`）；并列出目录供选择媒体库路径。列表中不含密码、敏感选项与令牌。
@@ -478,7 +478,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 ## 12. 分发
 
-* **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。
+* **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。每个平台的二进制与 Mavio 的 rclone 分支放在一起，即 `mise.toml` 锁定版本中该平台的构建，按其 SHA-256 摘要校验，位于 `apps/server/dist/mavio-<os>-<arch>/`，Windows 打包为 `.zip`，其余为 `.tar.gz`；下载的 rclone 保存在 `~/.cache/mavio-dist`（`MAVIO_DIST_CACHE`）。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据；镜像还在 `/usr/local/bin/rclone` 内置 Mavio 的 rclone fork，即 `mise.toml` 锁定的发布版本的 Linux 构建，并按其 SHA-256 摘要校验，服务端将其作为 rcd 运行（§9.2），配置位于 `/config/rclone/rclone.conf`。
 * **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器、下载客户端、字幕与智能体插件同样从此播种，智能体插件由 Bun 为镜像的平台编译；未配置索引器时第一个只每日拉取 Cardigann 定义，未配置客户端、提供者或凭据时其他插件什么也不做。健康检查调用 `SystemService.GetHealth`。
 

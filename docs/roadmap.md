@@ -763,7 +763,7 @@ flowchart TD
 - [x] `libs/rclone`: rc client and storage over `rclone rcd`, media bytes through a loopback proxy
 - [x] Managed and external `rclone rcd`; remote configuration API (`mavio.storage.v1`)
 - [x] Offline downloads as a built-in download client, with their jobs recorded in the database
-- [x] Distribution of the mavioai/rclone binary: release builds for Linux, macOS and Windows on amd64 and arm64 by the fork's CI, pinned in `mise.toml` and bundled into the container image
+- [x] Distribution of the mavioai/rclone binary: release builds for Linux, macOS and Windows on amd64 and arm64 by the fork's CI, pinned in `mise.toml`, bundled into the container image and packaged beside the server's binaries (`server:dist`), whose default `rclone` is the one beside it
 - [ ] Web UI: remotes in the server settings, rclone folders in the library form's folder picker (`StorageService.ListFolders`), and the offline download clients in the download client settings
 - [ ] Manual imports from folders on remotes in the web UI's folder picker
 - [ ] Reads of rclone remotes ([Optimization §3](optimization.md#3-reading-remote-storage-through-rclone)), in this order:

@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -66,7 +67,7 @@ var settings = []setting{
 	{key: "identity-key", path: true, usage: "the server's identity key, created when missing; it signs the server's sessions", def: under("identity.key")},
 	{key: "ffmpeg", usage: "ffmpeg binary; without it media is only played directly", def: constant("ffmpeg")},
 	{key: "ffprobe", usage: "ffprobe binary; without it libraries are not scanned", def: constant("ffprobe")},
-	{key: "rclone", usage: "rclone binary run as an rcd for libraries on rclone remotes; empty runs none", def: constant("rclone")},
+	{key: "rclone", usage: "rclone binary run as an rcd for libraries on rclone remotes, the one beside the server's executable as releases ship it, else rclone on PATH; empty runs none", def: bundled("rclone")},
 	{key: "rclone-config", path: true, usage: "rclone.conf of the rcd the server runs, created encrypted when missing", def: func(home string, _ *server.Config) string {
 		return filepath.Join(home, "rclone", "rclone.conf")
 	}},
@@ -96,6 +97,34 @@ var settings = []setting{
 
 func constant(s string) func(string, *server.Config) string {
 	return func(string, *server.Config) string { return s }
+}
+
+// bundled is the default of a tool releases ship beside the server's
+// executable: that file where it is, else name, looked up on PATH.
+func bundled(name string) func(string, *server.Config) string {
+	return func(string, *server.Config) string {
+		exe, err := os.Executable()
+		if err != nil {
+			return name
+		}
+		return beside(exe, name)
+	}
+}
+
+// beside returns the executable name in the folder of exe, following a
+// link to exe, or name when there is none.
+func beside(exe, name string) string {
+	if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+		exe = resolved
+	}
+	p := filepath.Join(filepath.Dir(exe), name)
+	if runtime.GOOS == "windows" {
+		p += ".exe"
+	}
+	if fi, err := os.Stat(p); err == nil && fi.Mode().IsRegular() {
+		return p
+	}
+	return name
 }
 
 func under(name string) func(string, *server.Config) string {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -168,6 +169,34 @@ func TestParseSize(t *testing.T) {
 		got, err := parseSize(tc.in)
 		if (err == nil) != tc.ok || got != tc.want {
 			t.Errorf("parseSize(%q) = %d, %v, want = %d, ok %t", tc.in, got, err, tc.want, tc.ok)
+		}
+	}
+}
+
+func TestBesideExecutable(t *testing.T) {
+	// The temporary folder may be a link, as on macOS, which beside follows.
+	dir, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	exe := filepath.Join(dir, "mavio")
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+	for _, f := range []string{exe, filepath.Join(dir, "rclone"+ext)} {
+		if err := os.WriteFile(f, nil, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cases := []struct{ name, want string }{
+		{"rclone", filepath.Join(dir, "rclone"+ext)},
+		// What releases do not ship is looked up on PATH.
+		{"ffmpeg", "ffmpeg"},
+	}
+	for _, c := range cases {
+		if got := beside(exe, c.name); got != c.want {
+			t.Errorf("beside(%s) = %q, want = %q", c.name, got, c.want)
 		}
 	}
 }

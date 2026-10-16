@@ -208,7 +208,7 @@ go build -o plugin .                                                     # 子�
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建；上传不一致快照的图片。
 * **web-snapshots**（linux arm64，因为参考图在 Apple silicon 上录制），在 Web UI 受影响时运行：`nx run web:snapshot`，然后运行 `design:gallery`，上传画廊与比对结果。
 * **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg 与 rclone，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming`、`rclone` 与 `server` 的测试，使 ffmpeg 与 rclone 的集成测试与冒烟测试在 runner 的硬件上执行。
-* **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台；各平台并行构建。
+* **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台，并与锁定版本的 rclone 一起打包；各平台并行构建。
 * **image**（Linux），在服务端受影响时运行：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
 CI 中的工具链同样来自 `mise.toml`（`jdx/mise-action`）；**media** 以外的任务不安装 jellyfin-ffmpeg 与 rclone，**android** 以外的任务不安装 Java 与 Gradle（`MISE_DISABLE_TOOLS`）。Rust 来自 `rust-toolchain.toml`，由 runner 上的 rustup 安装；**check**、**test**、**apple** 与 **android** 缓存 Cargo 的构建（`Swatinem/rust-cache`），**apple** 与 **android** 以其核心的 profile 作为缓存键的一部分，**apple** 还加上其平台。**apple** 缓存 SwiftPM 与 `xcodebuild` 共用的 Swift 包克隆（`~/Library/Caches/org.swift.swiftpm`），以 `Package.resolved` 文件作为缓存键；**android** 缓存 Gradle 的用户目录，包括其依赖与构建缓存（`gradle/actions/setup-gradle`）。**check**、**test**、**media** 与 **dist** 缓存 Go 的构建与模块，**check** 另缓存 golangci-lint 的结果（`.github/actions/go-cache`）：缓存只在推送到 `main` 时保存，PR 恢复其中最新的一份。**media** 以 `-count=1` 运行 Go 的测试，避免重放缓存的测试结果。缓存只在推送到 `main` 时保存；这类推送的任务结束后，**caches** 删除 `main` 上已被更新缓存取代的缓存，即为较早提交或较早工具链保存的缓存；`.github/workflows/pr-caches.yml` 在 PR 关闭后删除其缓存。
