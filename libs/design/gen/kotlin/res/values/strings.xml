@@ -1539,9 +1539,31 @@
     <!-- Footer of the transcode folder. -->
     <string name="transcoding_folder_footer">An absolute folder on the server with room for running transcodes.</string>
     <!-- The line under the Storage page's title -->
-    <string name="storage_message">Remotes of cloud drives and object storage the server reaches through rclone, for libraries and downloads.</string>
+    <string name="storage_message">The server\'s disks, and the cloud drives and object storage it reaches through rclone, for libraries and downloads.</string>
     <!-- Button adding an rclone remote -->
     <string name="storage_add">Add Remote</string>
+    <!-- Group of the disks of the server's computer -->
+    <string name="storage_disks">Disks</string>
+    <!-- Footer of the disks -->
+    <string name="storage_disks_footer">The drives of the server\'s computer and the shares and cloud drives mounted on it.</string>
+    <!-- Shown when the server reads no disks -->
+    <string name="storage_no_disks">No disks are read on this system.</string>
+    <!-- Kind of a disk: a solid-state drive -->
+    <string name="storage_disk_ssd">SSD</string>
+    <!-- Kind of a disk: a hard disk or an external drive -->
+    <string name="storage_disk_hdd">Hard disk</string>
+    <!-- Kind of a disk: a share mounted from the network -->
+    <string name="storage_disk_network">Network share</string>
+    <!-- Kind of a disk: a cloud drive mounted -->
+    <string name="storage_disk_cloud">Cloud drive</string>
+    <!-- Kind of a disk that did not answer -->
+    <string name="storage_disk_unknown">Disk</string>
+    <!-- Shown for a disk whose size did not come in time -->
+    <string name="storage_no_answer">Did not answer</string>
+    <!-- How much of a disk or remote is used; used and total are sizes -->
+    <string name="storage_usage">%1$s of %2$s used</string>
+    <!-- How much of a remote is used, where its size is not told -->
+    <string name="storage_used">%s used</string>
     <!-- Title of the group of the server's rclone -->
     <string name="storage_rclone">rclone</string>
     <!-- Row of whether the server reaches rclone -->

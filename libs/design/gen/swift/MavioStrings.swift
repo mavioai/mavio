@@ -2443,6 +2443,43 @@ public enum MavioStrings {
     /// Button adding an rclone remote
     public static var storageAdd: String { NSLocalizedString("storage.add", bundle: .module, comment: "") }
 
+    /// Group of the disks of the server's computer
+    public static var storageDisks: String { NSLocalizedString("storage.disks", bundle: .module, comment: "") }
+
+    /// Footer of the disks
+    public static var storageDisksFooter: String { NSLocalizedString("storage.disksFooter", bundle: .module, comment: "") }
+
+    /// Shown when the server reads no disks
+    public static var storageNoDisks: String { NSLocalizedString("storage.noDisks", bundle: .module, comment: "") }
+
+    /// Kind of a disk: a solid-state drive
+    public static var storageDiskSsd: String { NSLocalizedString("storage.diskSsd", bundle: .module, comment: "") }
+
+    /// Kind of a disk: a hard disk or an external drive
+    public static var storageDiskHdd: String { NSLocalizedString("storage.diskHdd", bundle: .module, comment: "") }
+
+    /// Kind of a disk: a share mounted from the network
+    public static var storageDiskNetwork: String { NSLocalizedString("storage.diskNetwork", bundle: .module, comment: "") }
+
+    /// Kind of a disk: a cloud drive mounted
+    public static var storageDiskCloud: String { NSLocalizedString("storage.diskCloud", bundle: .module, comment: "") }
+
+    /// Kind of a disk that did not answer
+    public static var storageDiskUnknown: String { NSLocalizedString("storage.diskUnknown", bundle: .module, comment: "") }
+
+    /// Shown for a disk whose size did not come in time
+    public static var storageNoAnswer: String { NSLocalizedString("storage.noAnswer", bundle: .module, comment: "") }
+
+    /// How much of a disk or remote is used; used and total are sizes
+    public static func storageUsage(used: String, total: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("storage.usage", bundle: .module, comment: ""), used, total)
+    }
+
+    /// How much of a remote is used, where its size is not told
+    public static func storageUsed(used: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("storage.used", bundle: .module, comment: ""), used)
+    }
+
     /// Title of the group of the server's rclone
     public static var storageRclone: String { NSLocalizedString("storage.rclone", bundle: .module, comment: "") }
 

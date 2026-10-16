@@ -1,5 +1,5 @@
-// A server's storage (docs/clients.md §6.3.10): the rclone rcd it runs or
-// reaches, the kinds of remotes and their settings, the remotes configured,
+// A server's storage (docs/clients.md §6.3.10): the disks of its computer,
+// the rclone rcd it runs or reaches, the kinds of remotes and their settings, the remotes configured,
 // with the questions their configuration asks, their folders, and the
 // download clients of cloud drives' offline downloads.
 import { type OfflineClient, StorageService } from "@mavio/proto/mavio/storage/v1/storage_pb";
@@ -14,6 +14,26 @@ export function useStorageStatus(server: ServerEntry) {
   return useQuery({
     queryKey: serverKey(server.id, "storage", "status"),
     queryFn: () => servers.client(StorageService, server).getStatus({}),
+  });
+}
+
+/** The disks of the server's computer, with their sizes. */
+export function useDisks(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "storage", "disks"),
+    queryFn: async () => (await servers.client(StorageService, server).listDisks({})).disks,
+  });
+}
+
+/** How much of a remote is used; an error for a remote whose backend does not tell. */
+export function useRemoteUsage(server: ServerEntry, remote: string) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "storage", "usage", remote),
+    queryFn: () => servers.client(StorageService, server).getRemoteUsage({ remote }),
+    retry: false,
+    staleTime: 60_000,
   });
 }
 

@@ -127,9 +127,11 @@ export {
   type Storage,
 } from "./servers.ts";
 export {
+  useDisks,
   useOfflineClients,
   useRemoteActions,
   useRemoteFolders,
+  useRemoteUsage,
   useRemotes,
   useSetOfflineClients,
   useStorageProviders,

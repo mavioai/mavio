@@ -156,6 +156,14 @@ export function sizeOf(bytes: bigint | number): string {
   return n >= 1e9 ? gigabytes.format(n / 1e9) : megabytes.format(n / 1e6);
 }
 
+const capacities = (["terabyte", "gigabyte", "megabyte"] as const).map((unit) => new Intl.NumberFormat([locale], { style: "unit", unit, maximumFractionDigits: 1 }));
+
+/** A disk's or a remote's size, in terabytes, gigabytes or megabytes as it is large, as file managers tell them. */
+export function capacityOf(bytes: bigint | number): string {
+  const n = Number(bytes);
+  return n >= 1e12 ? capacities[0].format(n / 1e12) : n >= 1e9 ? capacities[1].format(n / 1e9) : capacities[2].format(n / 1e6);
+}
+
 /** When a time is from now, as "5 minutes ago" or "in 2 hours", in the UI's language. */
 export function fromNow(date: Date, now = Date.now()): string {
   const ms = date.getTime() - now;

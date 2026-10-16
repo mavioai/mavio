@@ -1,16 +1,18 @@
-// The settings' Storage (docs/clients.md §6.3.10): the rclone the server
-// runs or reaches, its remotes — added with a kind's settings and the
-// questions their configuration asks, such as authorizing a cloud drive —
-// their folders, and the download clients of cloud drives' offline
-// downloads.
+// The settings' Storage (docs/clients.md §6.3.10): the disks of the
+// server's computer, the rclone the server runs or reaches, its remotes —
+// added with a kind's settings and the questions their configuration asks,
+// such as authorizing a cloud drive — their folders, and the download
+// clients of cloud drives' offline downloads.
 import { create } from "@bufbuild/protobuf";
 import { type MessageKey, messages } from "@mavio/design/strings";
 import {
   errorMessage,
   type ServerEntry,
+  useDisks,
   useOfflineClients,
   useRemoteActions,
   useRemoteFolders,
+  useRemoteUsage,
   useRemotes,
   useSetOfflineClients,
   useStorageProviders,
@@ -18,6 +20,8 @@ import {
 } from "@mavio/client-ts";
 import {
   type ConfigQuestion,
+  type Disk,
+  DiskKind,
   type OfflineClient,
   OfflineClientSchema,
   type Option,
@@ -28,12 +32,12 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Icon } from "../../icon.tsx";
+import { Icon, type IconName } from "../../icon.tsx";
 import { Button, Group, Row } from "../../ui.tsx";
 import { NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, ColorTile, Page } from "./common.tsx";
+import { BackLink, capacityOf, ColorTile, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 
@@ -51,6 +55,7 @@ function StorageList({ server }: { server: ServerEntry }) {
   const available = status.data?.available ?? false;
   const remotes = useRemotes(server, available);
   const providers = useStorageProviders(server, available);
+  const disks = useDisks(server);
   const s = status.data;
   return (
     <Page
@@ -70,6 +75,22 @@ function StorageList({ server }: { server: ServerEntry }) {
         )
       }
     >
+      <Group title={t("storage.disks")} footer={t("storage.disksFooter")}>
+        {disks.data?.map((d) => <DiskRow key={d.path} disk={d} />)}
+        {disks.isSuccess && disks.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noDisks")}</p>}
+        {disks.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(disks.error)}</p>}
+      </Group>
+      {available && (
+        <Group title={t("storage.remotes")} footer={t("storage.remotesFooter")}>
+          {(remotes.data ?? [])
+            .toSorted((a, b) => a.name.localeCompare(b.name, locale))
+            .map((r) => (
+              <RemoteRow key={r.name} server={server} remote={r} kind={kindOf(providers.data, r.type)} />
+            ))}
+          {remotes.isSuccess && remotes.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noRemotes")}</p>}
+          {remotes.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(remotes.error)}</p>}
+        </Group>
+      )}
       <Group title={t("storage.rclone")}>
         <Row label={t("storage.status")}>
           <span className="flex min-w-0 items-center gap-2 type-callout text-text-secondary">
@@ -91,17 +112,6 @@ function StorageList({ server }: { server: ServerEntry }) {
           </Row>
         )}
       </Group>
-      {available && (
-        <Group title={t("storage.remotes")} footer={t("storage.remotesFooter")}>
-          {(remotes.data ?? [])
-            .toSorted((a, b) => a.name.localeCompare(b.name, locale))
-            .map((r) => (
-              <RemoteRow key={r.name} server={server} remote={r} kind={kindOf(providers.data, r.type)} />
-            ))}
-          {remotes.isSuccess && remotes.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noRemotes")}</p>}
-          {remotes.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(remotes.error)}</p>}
-        </Group>
-      )}
       <OfflineClients server={server} remotes={available ? (remotes.data ?? []) : []} />
     </Page>
   );
@@ -110,11 +120,15 @@ function StorageList({ server }: { server: ServerEntry }) {
 /**
  * A remote in the list, with a dot telling whether the server reaches it:
  * listing its root, green when that succeeds and red, with the error, when
- * it fails, as a remote whose login expired does.
+ * it fails, as a remote whose login expired does; and how much of it is
+ * used, where its backend tells.
  */
 function RemoteRow({ server, remote, kind }: { server: ServerEntry; remote: Remote; kind: string }) {
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const root = useRemoteFolders(server, `rclone:${remote.name}:`);
+  const usage = useRemoteUsage(server, remote.name);
+  const u = usage.data;
+  const used = u?.usedBytes ?? (u?.totalBytes !== undefined && u.freeBytes !== undefined ? u.totalBytes - u.freeBytes : undefined);
   const state = root.isPending ? t("storage.checking") : root.isError ? t("storage.unreached") : t("storage.reached");
   return (
     <Link
@@ -123,7 +137,7 @@ function RemoteRow({ server, remote, kind }: { server: ServerEntry; remote: Remo
       search={{ server: cur.server, remote: remote.name }}
       className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:tint"
     >
-      <ColorTile icon="folder" color="#30B0C7" />
+      <ColorTile icon="cloud" color="#30B0C7" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate type-body">{remote.name}</span>
@@ -134,10 +148,73 @@ function RemoteRow({ server, remote, kind }: { server: ServerEntry; remote: Remo
           />
         </div>
         <div className="truncate type-footnote text-text-secondary">{kind}</div>
+        {!root.isError && used !== undefined &&
+          (u?.totalBytes ? (
+            <UsageBar used={used} total={u.totalBytes} />
+          ) : (
+            <div className="type-footnote text-text-secondary">{t("storage.used", { used: capacityOf(used) })}</div>
+          ))}
         {root.isError && <div className="line-clamp-2 type-footnote text-danger">{errorMessage(root.error)}</div>}
       </div>
       <Icon name="forward" size={16} className="shrink-0 text-text-tertiary" />
     </Link>
+  );
+}
+
+/** The tile and name of each kind of disk. */
+const diskKinds: Record<DiskKind, { icon: IconName; color: string; label: MessageKey }> = {
+  [DiskKind.UNSPECIFIED]: { icon: "disk", color: "#8E8E93", label: "storage.diskUnknown" },
+  [DiskKind.SSD]: { icon: "disk", color: "#5E5CE6", label: "storage.diskSsd" },
+  [DiskKind.HDD]: { icon: "disk", color: "#5E5CE6", label: "storage.diskHdd" },
+  [DiskKind.NETWORK]: { icon: "network", color: "#007AFF", label: "storage.diskNetwork" },
+  [DiskKind.CLOUD]: { icon: "cloud", color: "#30B0C7", label: "storage.diskCloud" },
+};
+
+/** A disk of the server's computer: its name or path, its kind and file system, and how much of it is used. */
+function DiskRow({ disk }: { disk: Disk }) {
+  const kind = diskKinds[disk.kind];
+  return (
+    <div className="flex min-h-13 items-center gap-3 px-4 py-2.5">
+      <ColorTile icon={kind.icon} color={kind.color} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-3">
+          <span className="min-w-0 truncate type-body">{disk.name || disk.path}</span>
+          <span className="ml-auto shrink-0 type-footnote text-text-secondary">
+            {[t(kind.label), disk.fileSystem].filter(Boolean).join(" · ")}
+          </span>
+        </div>
+        {disk.name && <div className="truncate type-footnote text-text-secondary">{disk.path}</div>}
+        {disk.totalBytes !== undefined ? (
+          <UsageBar used={disk.usedBytes ?? 0n} total={disk.totalBytes} />
+        ) : (
+          <div className="type-footnote text-text-tertiary">{t("storage.noAnswer")}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** A bar of how much of a disk or a remote is used, orange when nearly full and red when full, and its sizes. */
+function UsageBar({ used, total }: { used: bigint; total: bigint }) {
+  const share = total > 0n ? Math.min(1, Number(used) / Number(total)) : 0;
+  const text = t("storage.usage", { used: capacityOf(used), total: capacityOf(total) });
+  return (
+    <div className="mt-1.5 flex flex-col gap-1">
+      <div
+        role="meter"
+        aria-label={text}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(share * 100)}
+        className="h-1.5 overflow-hidden rounded-full bg-fill"
+      >
+        <div
+          className={`h-full rounded-full ${share >= 0.95 ? "bg-danger" : share >= 0.85 ? "bg-[#FF9500]" : "bg-[#007AFF]"}`}
+          style={{ width: `${share * 100}%` }}
+        />
+      </div>
+      <div className="type-footnote text-text-secondary">{text}</div>
+    </div>
   );
 }
 

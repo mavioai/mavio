@@ -757,6 +757,17 @@ export type MessageKey =
   | 'transcoding.folderFooter'
   | 'storage.message'
   | 'storage.add'
+  | 'storage.disks'
+  | 'storage.disksFooter'
+  | 'storage.noDisks'
+  | 'storage.diskSsd'
+  | 'storage.diskHdd'
+  | 'storage.diskNetwork'
+  | 'storage.diskCloud'
+  | 'storage.diskUnknown'
+  | 'storage.noAnswer'
+  | 'storage.usage'
+  | 'storage.used'
   | 'storage.rclone'
   | 'storage.status'
   | 'storage.checking'
@@ -2439,8 +2450,19 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "transcoding.folder": "Transcode folder",
     "transcoding.folderDefault": "The server's default",
     "transcoding.folderFooter": "An absolute folder on the server with room for running transcodes.",
-    "storage.message": "Remotes of cloud drives and object storage the server reaches through rclone, for libraries and downloads.",
+    "storage.message": "The server's disks, and the cloud drives and object storage it reaches through rclone, for libraries and downloads.",
     "storage.add": "Add Remote",
+    "storage.disks": "Disks",
+    "storage.disksFooter": "The drives of the server's computer and the shares and cloud drives mounted on it.",
+    "storage.noDisks": "No disks are read on this system.",
+    "storage.diskSsd": "SSD",
+    "storage.diskHdd": "Hard disk",
+    "storage.diskNetwork": "Network share",
+    "storage.diskCloud": "Cloud drive",
+    "storage.diskUnknown": "Disk",
+    "storage.noAnswer": "Did not answer",
+    "storage.usage": "{used} of {total} used",
+    "storage.used": "{used} used",
     "storage.rclone": "rclone",
     "storage.status": "Status",
     "storage.checking": "Checking",
@@ -4121,8 +4143,19 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "transcoding.folder": "转码文件夹",
     "transcoding.folderDefault": "服务器默认",
     "transcoding.folderFooter": "服务器上的绝对路径，需有足够空间存放进行中的转码。",
-    "storage.message": "服务器通过 rclone 访问的云盘和对象存储远端，可用于媒体库和下载。",
+    "storage.message": "服务器的磁盘，以及通过 rclone 访问的云盘和对象存储，可用于媒体库和下载。",
     "storage.add": "添加远端",
+    "storage.disks": "磁盘",
+    "storage.disksFooter": "服务器所在电脑的硬盘，以及挂载在其上的网络共享和云盘。",
+    "storage.noDisks": "此系统上无法读取磁盘。",
+    "storage.diskSsd": "固态硬盘",
+    "storage.diskHdd": "机械硬盘",
+    "storage.diskNetwork": "网络共享",
+    "storage.diskCloud": "云盘",
+    "storage.diskUnknown": "磁盘",
+    "storage.noAnswer": "未响应",
+    "storage.usage": "已用 {used}，共 {total}",
+    "storage.used": "已用 {used}",
     "storage.rclone": "rclone",
     "storage.status": "状态",
     "storage.checking": "正在检查",
