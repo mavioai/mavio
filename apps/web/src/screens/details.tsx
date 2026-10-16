@@ -19,11 +19,13 @@ import {
   useServer,
   useSignedIn,
   useSimilar,
+  useAdminServers,
+  useRequestTitle,
   useTitle,
   useUserData,
 } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
-import { CreditKind, type Credit, ExtraKind, ImageKind, type Item, ItemKind, SeriesStatus } from "@mavio/proto/mavio/library/v1/item_pb";
+import { type Credit, ExtraKind, ImageKind, type Item, ItemKind, SeriesStatus } from "@mavio/proto/mavio/library/v1/item_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { type MediaSource, type MediaStream, StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -32,8 +34,19 @@ import { Fragment, type ReactNode, useEffect, useLayoutEffect, useRef, useState 
 import type { MessageKey } from "@mavio/design/strings";
 import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
-import { CatalogShelf } from "./discover.tsx";
-import { CastShelf, libraryCredits } from "./credits.tsx";
+import { CatalogShelf, DownloadBadge, RequestDialog } from "./discover.tsx";
+import {
+  countryText,
+  CrewList,
+  crewMoreClass,
+  Dated,
+  ExternalLinks,
+  minStudios,
+  statusNames,
+  TitleRatings,
+  useTitleLinks,
+} from "./discover-overview.tsx";
+import { CastShelf, isCast, libraryCredits } from "./credits.tsx";
 import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
@@ -197,15 +210,8 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
     item.kind !== ItemKind.SERIES ? runtimeOf(item) : undefined,
     item.kind === ItemKind.EPISODE ? undefined : item.genres.slice(0, 3).join(" / ") || undefined,
   ].filter(Boolean);
-  const ratings: ReactNode[] = [
-    item.communityRating > 0 && (
-      <span key="c" className="inline-flex items-center gap-1">
-        <Icon name="rating" fill size={14} className="text-[#FFD60A]" />
-        {item.communityRating.toFixed(1)}
-      </span>
-    ),
-    item.criticRating > 0 && <span key="r">{t("item.critics", { score: Math.round(item.criticRating) })}</span>,
-  ].filter(Boolean);
+  const admin = useAdminServers().some((s) => s.id === server.id);
+  const tmdbId = Number(item.externalIds.tmdb) || 0;
   const subtitles = selected?.streams.some((s) => s.kind === StreamKind.SUBTITLE);
   const badges = [item.officialRating, resolutionOf(selected), rangeOf(selected), surroundOf(selected), subtitles ? "CC" : undefined].filter(
     (b): b is string => !!b,
@@ -221,7 +227,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
       image={(backdrop ?? still)?.url}
       poster={backdrop || still ? undefined : poster?.url}
       facts={facts}
-      ratings={ratings}
+      status={admin && (item.kind === ItemKind.MOVIE || item.kind === ItemKind.SERIES) ? <DownloadBadge server={server} itemId={item.id} /> : undefined}
       badges={badges}
       serverName={several ? server.name : undefined}
       phone={phone}
@@ -268,7 +274,14 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
       )}
       <div className="pt-6">
         {item.kind === ItemKind.SERIES && (
-          <Seasons server={server} seasons={children.data ?? []} episodesOf={seasonEpisodes} current={next} tv={tv} />
+          <Seasons
+            server={server}
+            seasons={children.data ?? []}
+            episodesOf={seasonEpisodes}
+            current={next}
+            tv={tv}
+            more={tmdbId > 0 && <RequestMore server={server} tmdbId={tmdbId} />}
+          />
         )}
         {item.kind === ItemKind.SEASON && <EpisodeList server={server} items={children.data ?? []} current={next?.id} />}
         {item.kind === ItemKind.EPISODE && item.seasonId && (
@@ -321,7 +334,7 @@ function Header({
   image,
   poster,
   facts,
-  ratings,
+  status,
   badges,
   serverName,
   phone,
@@ -336,7 +349,7 @@ function Header({
   image?: string;
   poster?: string;
   facts: ReactNode[];
-  ratings: ReactNode[];
+  status?: ReactNode;
   badges: string[];
   serverName?: string;
   phone: boolean;
@@ -391,7 +404,7 @@ function Header({
           ) : (
             <h1 className={title}>{item.name}</h1>
           )}
-          {/* The facts, then the ratings and badges, on a row of their own. */}
+          {/* The facts, then the badges, on a row of their own. */}
           {facts.length > 0 && (
             // Each separator keeps to the fact before it, so that a line ends with one rather than starts with it.
             <p className="type-callout text-white/80">
@@ -405,15 +418,15 @@ function Header({
               ))}
             </p>
           )}
-          {ratings.length + badges.length > 0 || serverName ? (
+          {badges.length > 0 || status || serverName ? (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 type-callout text-white/80">
-              {ratings}
               {badges.map((b) => (
                 <span key={b} className="rounded-[4px] border border-white/50 px-1.5 type-caption font-semibold text-white/90">
                   {b}
                 </span>
               ))}
               {serverName && <span className="rounded-[4px] bg-white/20 px-1.5 type-caption">{serverName}</span>}
+              {status}
             </div>
           ) : null}
           {/* The television keeps to two lines of overview, under the logo, with room for the actions. */}
@@ -698,12 +711,14 @@ function Seasons({
   episodesOf,
   current,
   tv,
+  more,
 }: {
   server: ServerEntry;
   seasons: Item[];
   episodesOf: (seasonId: string) => Item[];
   current?: Item;
   tv: boolean;
+  more?: ReactNode;
 }) {
   // The season of the episode to watch next comes first.
   const [chosen, setChosen] = useState<string>();
@@ -725,16 +740,38 @@ function Seasons({
           />
         )}
         {seasons.length === 1 && <span className="type-callout text-text-secondary">{season.name}</span>}
-        <Link
-          to="/s/$serverId/item/$itemId"
-          params={{ serverId: server.id, itemId: season.id }}
-          className="ml-auto shrink-0 type-callout text-accent-text hover:opacity-80"
-        >
-          {t("home.more")}
-        </Link>
+        <div className="ml-auto flex shrink-0 items-center gap-4">
+          {more}
+          <Link to="/s/$serverId/item/$itemId" params={{ serverId: server.id, itemId: season.id }} className="type-callout text-accent-text hover:opacity-80">
+            {t("home.more")}
+          </Link>
+        </div>
       </div>
       <EpisodeRow server={server} items={items} current={current?.id} />
     </section>
+  );
+}
+
+/** Request More of a series, as on its discovered title, while it has seasons to request. */
+function RequestMore({ server, tmdbId }: { server: ServerEntry; tmdbId: number }) {
+  const title = useTitle(server, MediaKind.SERIES, tmdbId, discoverLanguage).data;
+  const request = useRequestTitle(server);
+  const [asking, setAsking] = useState(false);
+  if (!title?.requestable || !title.seasons.some((s) => s.requestable)) return null;
+  return (
+    <>
+      <button type="button" disabled={request.isPending} onClick={() => setAsking(true)} className="type-callout text-accent-text hover:opacity-80">
+        {t("discover.requestMore")}
+      </button>
+      {asking && (
+        <RequestDialog
+          title={title}
+          busy={request.isPending}
+          onCancel={() => setAsking(false)}
+          onRequest={(seasons) => request.mutate({ mediaKind: MediaKind.SERIES, tmdbId, seasons }, { onSettled: () => setAsking(false) })}
+        />
+      )}
+    </>
   );
 }
 
@@ -1002,13 +1039,32 @@ function About({
   // episode and the services streaming it.
   const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : item.kind === ItemKind.SERIES ? MediaKind.SERIES : MediaKind.UNSPECIFIED;
   const title = useTitle(kind ? server : undefined, kind, Number(item.externalIds.tmdb) || 0, discoverLanguage).data;
+  const [allStudios, setAllStudios] = useState(false);
   const day = (ts?: Timestamp) => (ts ? dateFormat.format(timestampDate(ts)) : undefined);
-  const names = (kind: CreditKind) =>
-    credits
-      .filter((c) => c.kind === kind && c.person)
-      .map((c) => c.person!.name)
-      .join(", ");
+  const iso = (ts?: Timestamp) => (ts ? timestampDate(ts).toISOString().slice(0, 10) : "");
   const date = item.premiereDate ? dateFormat.format(timestampDate(item.premiereDate)) : undefined;
+  // A movie's releases on one row, as on its discovered title, what the
+  // library keeps first.
+  const releases =
+    item.kind === ItemKind.MOVIE
+      ? [
+          ["t", "movies", t("discover.theatricalRelease"), iso(item.premiereDate) || (title?.theatricalReleaseDate ?? "")] as const,
+          ["d", "devices", t("item.digitalRelease"), iso(item.digitalReleaseDate) || (title?.digitalReleaseDate ?? "")] as const,
+          ["p", "collections", t("item.physicalRelease"), iso(item.physicalReleaseDate) || (title?.physicalReleaseDate ?? "")] as const,
+        ].flatMap(([key, icon, label, d]) => (d ? [<Dated key={key} icon={icon} label={label} date={d} />] : []))
+      : [];
+  const status =
+    item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.CONTINUING
+      ? t("item.continuing")
+      : item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.ENDED
+        ? t("item.ended")
+        : title && statusNames[title.productionStatus]?.();
+  // The countries with their flags when the library keeps those the
+  // metadata providers tell, else as the library keeps them.
+  const stored = item.productionLocations;
+  const told = title?.productionLocations ?? [];
+  const flagged = (stored.length === 0 || (stored.length === told.length && stored.every((c) => told.includes(c)))) && (title?.productionCountries.length ?? 0) > 0;
+  const countries = flagged ? title!.productionCountries.map(countryText) : stored.length ? stored : told;
   // An episode or season shows its series' genres and studios, whose library it shares.
   const genres = item.genres.length ? item.genres : (series?.genres ?? []);
   const studios = item.studios.length ? item.studios : (series?.studios ?? []);
@@ -1031,30 +1087,32 @@ function About({
         ))}
       </>
     );
+  const shownStudios = allStudios ? studios : studios.slice(0, minStudios);
   const facts: [string, ReactNode][] = [
-    [item.kind === ItemKind.SERIES ? t("item.firstAired") : item.kind === ItemKind.EPISODE ? t("item.aired") : t("item.released"), date],
-    [
-      t("item.status"),
-      item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.CONTINUING
-        ? t("item.continuing")
-        : item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.ENDED
-          ? t("item.ended")
-          : undefined,
-    ],
-    [t("item.digitalRelease"), day(item.digitalReleaseDate) ?? dayText(title?.digitalReleaseDate ?? "")],
-    [t("item.physicalRelease"), day(item.physicalReleaseDate) ?? dayText(title?.physicalReleaseDate ?? "")],
+    releases.length > 0
+      ? [t("discover.releaseDates", { count: releases.length }), <span className="flex flex-col gap-0.5">{releases}</span>]
+      : [item.kind === ItemKind.SERIES ? t("item.firstAired") : item.kind === ItemKind.EPISODE ? t("item.aired") : t("item.released"), date],
+    [t("item.status"), status],
     [t("item.lastAired"), item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.ENDED ? day(item.endDate) : undefined],
     [t("item.nextAirDate"), item.kind === ItemKind.SERIES ? dayText(title?.nextAirDate ?? "") : undefined],
     [t("item.runtime"), runtimeOf(item)],
     [t("item.rated"), item.officialRating],
     [t("item.genres"), values("genre", genres)],
-    [t("item.creators"), names(CreditKind.CREATOR)],
-    [t("item.director"), names(CreditKind.DIRECTOR)],
-    [t("item.writers"), names(CreditKind.WRITER)],
-    [t("item.producers"), names(CreditKind.PRODUCER)],
-    [t("item.music"), names(CreditKind.COMPOSER)],
-    [[ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE].includes(item.kind) ? t("item.networks") : t("item.studio"), values("studio", studios)],
-    [t("item.country"), (item.productionLocations.length ? item.productionLocations : (title?.productionLocations ?? [])).join(", ")],
+    [
+      [ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE].includes(item.kind) ? t("item.networks") : t("item.studio"),
+      studios.length > 0 && (
+        <>
+          {values("studio", shownStudios)}
+          {studios.length > minStudios && (
+            <button type="button" onClick={() => setAllStudios(!allStudios)} className="ml-2 inline-flex items-center gap-1 text-text-secondary hover:text-on-background">
+              {allStudios ? t("action.showLess") : t("discover.showMore")}
+              <Icon name="expand" size={14} className={allStudios ? "rotate-180" : ""} />
+            </button>
+          )}
+        </>
+      ),
+    ],
+    [t("item.country"), countries.join("\n")],
     [t("item.originalLanguage"), languageText(item.originalLanguage || (title?.originalLanguage ?? ""))],
     [t("item.originalTitle"), item.originalTitle && item.originalTitle !== item.name ? item.originalTitle : undefined],
     [t("item.budget"), moneyText(title?.budget ?? 0n)],
@@ -1075,17 +1133,24 @@ function About({
   const shownFacts = facts.filter(([, v]) => v);
   const shownMedia = media.filter(([, v]) => v);
   const text = overview && item.overview;
-  const links = item.externalUrls;
-  const ratings = item.communityRating > 0 || item.criticRating > 0;
+  // A movie or series links elsewhere with the logos of its discovered
+  // title; anything else as the library tells.
+  const tmdbId = kind ? Number(item.externalIds.tmdb) || 0 : 0;
+  const titled = tmdbId > 0;
+  const logos = useTitleLinks(server, kind || MediaKind.MOVIE, tmdbId, item.externalIds.imdb ?? "", item.externalIds.tvdb ?? "");
+  const links = titled ? [] : item.externalUrls;
+  const ratings = titled || item.communityRating > 0 || item.criticRating > 0;
+  const crew = libraryCredits(server, credits);
+  const leading = crew.some((c) => !isCast(c));
   const streaming = title?.watchProviders ?? [];
-  if (!text && !ratings && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0 && streaming.length === 0) {
+  if (!text && !ratings && !leading && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0 && streaming.length === 0) {
     return null;
   }
   return (
     <section className="px-margin pt-8 pb-4">
       <h2 className="mb-4 type-title3">{t("item.details")}</h2>
       <div className="flex flex-col gap-x-16 gap-y-8 lg:flex-row">
-        {(text || tags.length > 0 || links.length > 0) && (
+        {(text || leading || tags.length > 0 || links.length > 0 || titled) && (
           <div className="flex min-w-0 flex-col gap-5 lg:w-[44%] lg:shrink-0">
             {text && (
               <div className="flex flex-col gap-2">
@@ -1093,6 +1158,16 @@ function About({
                 <p className="type-body whitespace-pre-line text-text-secondary">{item.overview}</p>
               </div>
             )}
+            <CrewList
+              serverId={server.id}
+              credits={crew}
+              more={
+                <Link to="/s/$serverId/item/$itemId/crew" params={{ serverId: server.id, itemId: item.id }} className={crewMoreClass}>
+                  {t("discover.fullCrew")}
+                  <Icon name="forward" size={16} />
+                </Link>
+              }
+            />
             {tags.length > 0 && (
               <div className="flex flex-col gap-2">
                 <h3 className="type-footnote font-semibold text-text-secondary">{t("item.tags")}</h3>
@@ -1127,10 +1202,22 @@ function About({
                 ))}
               </div>
             )}
+            {titled && <ExternalLinks links={logos} className="justify-start pt-2" />}
           </div>
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-8">
-          {ratings && <Ratings item={item} />}
+          {titled ? (
+            <TitleRatings
+              server={server}
+              kind={kind}
+              tmdbId={tmdbId}
+              score={title && title.voteCount > 0 ? title.communityRating : undefined}
+              fallback={(item.communityRating > 0 || item.criticRating > 0) && <Ratings item={item} />}
+              className="items-center"
+            />
+          ) : (
+            ratings && <Ratings item={item} />
+          )}
           <FactList rows={shownFacts} />
           <WatchProviders providers={streaming} />
           {shownMedia.length > 0 && <FactList rows={shownMedia} />}

@@ -13,6 +13,8 @@ import {
   useQualityProfiles,
   useQueue,
   useReleases,
+  useTitle,
+  useUsers,
   useWanted,
   useWantedActions,
 } from "@mavio/client-ts";
@@ -22,13 +24,14 @@ import { type Wanted, WantedSchema } from "@mavio/proto/mavio/acquisition/v1/wan
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { useState } from "react";
 
-import { t } from "../i18n.ts";
+import { discoverLanguage, t } from "../i18n.ts";
 import { Button, Group } from "../ui.tsx";
 import { Sheet } from "../controls/dialog.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import { fromNow, sizeOf } from "./admin/common.tsx";
 import { HistoryRow, QueueRow } from "./admin/downloads.tsx";
+import { RequestRow } from "./requests.tsx";
 
 const acquirable = new Set([ItemKind.MOVIE, ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE]);
 
@@ -37,6 +40,22 @@ export function Acquisition({ server, item }: { server: ServerEntry; item: Item 
   const admin = useAdminServers().some((s) => s.id === server.id);
   if (!admin || !acquirable.has(item.kind)) return null;
   return <AcquisitionPanel server={server} item={item} />;
+}
+
+/** The requests of a movie or series, to approve or decline, as on its discovered title's manage panel. */
+function TitleRequests({ server, item }: { server: ServerEntry; item: Item }) {
+  const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : MediaKind.SERIES;
+  const tmdbId = Number(item.externalIds.tmdb) || 0;
+  const requests = useTitle(tmdbId > 0 ? server : undefined, kind, tmdbId, discoverLanguage).data?.requests ?? [];
+  const users = useUsers(server, requests.length > 0);
+  if (requests.length === 0) return null;
+  return (
+    <Group title={t("requests.title")}>
+      {requests.map((r) => (
+        <RequestRow key={r.id} server={server} request={r} admin userName={users.data?.find((u) => u.id === r.requestedBy)?.name ?? ""} />
+      ))}
+    </Group>
+  );
 }
 
 function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item }) {
@@ -99,6 +118,7 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
             {wanted.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(wanted.error)}</p>}
           </Group>
         )}
+        {whole && <TitleRequests server={server} item={item} />}
         {downloads.length > 0 && (
           <Group title={t("downloads.queue")}>
             {downloads.map((d) => (

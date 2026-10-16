@@ -1,7 +1,7 @@
 // The cast and crew of an item or a discovered title (libs/design/
 // components.md, Credits Screen): the shelf on their details, and the page
 // of the whole cast and crew it opens, the cast in billing order, then the
-// crew by job; and a discovered title's crew alone, by job.
+// crew by job; and an item's or a discovered title's crew alone, by job.
 import { artwork, errorMessage, type ServerEntry, useItem, useServer, useTitle } from "@mavio/client-ts";
 import type { TitleCredit } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
@@ -16,6 +16,7 @@ import { Loading, Shelf, StatusView } from "../ui.tsx";
 import { initialsOf } from "./person.tsx";
 
 const itemRoute = getRouteApi("/s/$serverId/item/$itemId/credits");
+const itemCrewRoute = getRouteApi("/s/$serverId/item/$itemId/crew");
 const titleRoute = getRouteApi("/s/$serverId/title/$kind/$tmdbId/credits");
 const crewRoute = getRouteApi("/s/$serverId/title/$kind/$tmdbId/crew");
 
@@ -31,10 +32,21 @@ export interface CreditEntry {
   tmdbId?: string;
 }
 
-/** An item's credits, of people of the server. */
+/**
+ * An item's credits, of people of the server. An actor credited for
+ * several characters is listed once, as a discovered title's, as the first
+ * of them, the one the metadata providers tell they play the longest.
+ */
 export function libraryCredits(server: ServerEntry, credits: Credit[]): CreditEntry[] {
+  const seen = new Set<string>();
   return credits
-    .filter((c) => c.person)
+    .filter((c) => {
+      if (!c.person) return false;
+      if (!isCast(c)) return true;
+      if (seen.has(c.person.id)) return false;
+      seen.add(c.person.id);
+      return true;
+    })
     .map((c) => ({
       name: c.person!.name,
       photo: artwork(server, c.person!, ImageKind.PRIMARY, 240)?.url,
@@ -111,7 +123,15 @@ export function CastShelf({ serverId, credits, all }: { serverId: string; credit
 }
 
 export function CreditsScreen() {
-  const { serverId, itemId } = itemRoute.useParams();
+  return <ItemCredits params={itemRoute.useParams()} />;
+}
+
+/** An item's crew alone, which View Full Crew opens. */
+export function ItemCrewScreen() {
+  return <ItemCredits params={itemCrewRoute.useParams()} crew />;
+}
+
+function ItemCredits({ params: { serverId, itemId }, crew = false }: { params: { serverId: string; itemId: string }; crew?: boolean }) {
   const server = useServer(serverId);
   const q = useItem(server?.token ? server : undefined, itemId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
@@ -119,10 +139,12 @@ export function CreditsScreen() {
   if (q.isError || !q.data.item) {
     return <StatusView icon="error" title={t("state.error")} action={{ label: t("action.retry"), onClick: () => void q.refetch() }} />;
   }
+  const credits = libraryCredits(server, q.data.credits);
   return (
     <CreditsPage
       serverId={serverId}
-      credits={libraryCredits(server, q.data.credits)}
+      title={crew ? t("credits.fullCrew") : undefined}
+      credits={crew ? credits.filter((c) => !isCast(c)) : credits}
       back={
         <Link to="/s/$serverId/item/$itemId" params={{ serverId, itemId }} className={backClass}>
           <Icon name="back" size={16} />

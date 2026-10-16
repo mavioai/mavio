@@ -28,14 +28,14 @@ import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { Wordmark } from "../logo.tsx";
 import { minutesText } from "../ui.tsx";
-import { crewLabels, isCast } from "./credits.tsx";
+import { type CreditEntry, crewLabels, isCast, titleCredits } from "./credits.tsx";
 import { kindParam, sized } from "./discover.tsx";
 import { dayText, languageText, moneyText } from "./facts.tsx";
 
 const regions = new Intl.DisplayNames(locale, { type: "region" });
 
 /** The name of an ISO 3166-1 country in the UI's language, after its flag. */
-function countryText(code: string): string {
+export function countryText(code: string): string {
   const flag = /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 0x1f1a5 + c.charCodeAt(0))) : "";
   let name = code;
   try {
@@ -46,7 +46,7 @@ function countryText(code: string): string {
   return flag ? `${flag} ${name}` : name;
 }
 
-const statusNames: Partial<Record<ProductionStatus, () => string>> = {
+export const statusNames: Partial<Record<ProductionStatus, () => string>> = {
   [ProductionStatus.RUMORED]: () => t("discover.statusRumored"),
   [ProductionStatus.PLANNED]: () => t("discover.statusPlanned"),
   [ProductionStatus.IN_PRODUCTION]: () => t("discover.statusInProduction"),
@@ -68,7 +68,7 @@ const kindJobs: Partial<Record<CreditKind, string>> = {
   [CreditKind.COMPOSER]: "Composer",
   [CreditKind.PRODUCER]: "Producer",
 };
-const crewRank = (c: { role: string; kind: CreditKind }) => {
+export const crewRank = (c: { role: string; kind: CreditKind }) => {
   if (c.kind === CreditKind.CREATOR) return -1;
   const i = crewJobs.indexOf(c.role || (kindJobs[c.kind] ?? ""));
   return i < 0 ? crewJobs.length : i;
@@ -120,48 +120,26 @@ export function TitleOverview({ server, title }: { server: ServerEntry; title: T
 
 function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) {
   const alike = useAlike(server, title.mediaKind);
-  const crew = title.credits
-    .filter((c) => !isCast(c) && crewLabels.some(([k]) => k === c.kind))
-    .map((c, i) => ({ c, i }))
-    .toSorted((a, b) => crewRank(a.c) - crewRank(b.c) || a.i - b.i)
-    .slice(0, 6)
-    .map(({ c }) => c);
   const keywords = title.keywordRefs.length > 0 ? title.keywordRefs : title.keywords.map((name) => ({ id: "", name }));
   return (
     <div className="flex min-w-0 flex-col gap-4">
       {title.tagline && <p className="type-title3 font-normal text-text-secondary italic">{title.tagline}</p>}
       <h2 className="type-title3">{t("discover.overview")}</h2>
       <p className="type-body whitespace-pre-line">{title.overview || t("discover.noOverview")}</p>
-      {crew.length > 0 && (
-        <>
-          <ul className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
-            {crew.map((c, i) => (
-              <li key={`${c.name}-${i}`} className="flex min-w-0 flex-col">
-                <span className="type-headline">{c.kind === CreditKind.OTHER && c.role ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1])}</span>
-                {c.externalIds.tmdb ? (
-                  <Link
-                    to="/s/$serverId/discover/person/$tmdbId"
-                    params={{ serverId: server.id, tmdbId: c.externalIds.tmdb }}
-                    className="truncate type-callout text-text-secondary hover:text-on-background hover:underline"
-                  >
-                    {c.name}
-                  </Link>
-                ) : (
-                  <span className="truncate type-callout text-text-secondary">{c.name}</span>
-                )}
-              </li>
-            ))}
-          </ul>
+      <CrewList
+        serverId={server.id}
+        credits={titleCredits(title.credits)}
+        more={
           <Link
             to="/s/$serverId/title/$kind/$tmdbId/crew"
             params={{ serverId: server.id, kind: kindParam(title.mediaKind), tmdbId: String(title.tmdbId) }}
-            className="inline-flex items-center gap-1 self-end type-callout text-text-secondary hover:text-on-background"
+            className={crewMoreClass}
           >
             {t("discover.fullCrew")}
             <Icon name="forward" size={16} />
           </Link>
-        </>
-      )}
+        }
+      />
       {keywords.length > 0 && (
         <ul className="flex flex-wrap gap-2 pt-2">
           {keywords.map((k) => (
@@ -176,6 +154,52 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
         </ul>
       )}
     </div>
+  );
+}
+
+/** The class of the link under the leading crew opening the whole crew. */
+export const crewMoreClass = "inline-flex items-center gap-1 self-end type-callout text-text-secondary hover:text-on-background";
+
+/**
+ * The leading crew, as Seerr's: six of them, a series' creators first,
+ * then by the jobs Seerr shows first, each opening their page; and under
+ * them the link to the whole crew.
+ */
+export function CrewList({ serverId, credits, more }: { serverId: string; credits: CreditEntry[]; more: ReactNode }) {
+  const crew = credits
+    .filter((c) => !isCast(c) && crewLabels.some(([k]) => k === c.kind))
+    .map((c, i) => ({ c, i }))
+    .toSorted((a, b) => crewRank(a.c) - crewRank(b.c) || a.i - b.i)
+    .slice(0, 6)
+    .map(({ c }) => c);
+  if (crew.length === 0) return null;
+  const name = "truncate type-callout text-text-secondary";
+  return (
+    <>
+      <ul className="grid grid-cols-2 gap-x-6 gap-y-4 pt-2 sm:grid-cols-3">
+        {crew.map((c, i) => (
+          <li key={`${c.personId ?? c.name}-${i}`} className="flex min-w-0 flex-col">
+            <span className="type-headline">{c.kind === CreditKind.OTHER && c.role ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1])}</span>
+            {c.personId ? (
+              <Link to="/s/$serverId/person/$personId" params={{ serverId, personId: c.personId }} className={`${name} hover:text-on-background hover:underline`}>
+                {c.name}
+              </Link>
+            ) : c.tmdbId ? (
+              <Link
+                to="/s/$serverId/discover/person/$tmdbId"
+                params={{ serverId, tmdbId: c.tmdbId }}
+                className={`${name} hover:text-on-background hover:underline`}
+              >
+                {c.name}
+              </Link>
+            ) : (
+              <span className={name}>{c.name}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {more}
+    </>
   );
 }
 
@@ -209,7 +233,7 @@ function Fact({ label, children }: { label: ReactNode; children: ReactNode }) {
 }
 
 /** A date with the icon of how it was released, named on hover. */
-function Dated({ icon, label, date }: { icon: IconName; label: string; date: string }) {
+export function Dated({ icon, label, date }: { icon: IconName; label: string; date: string }) {
   return (
     <span className="inline-flex items-center gap-1.5" title={label}>
       <Icon name={icon} size={14} label={label} />
@@ -243,6 +267,70 @@ function RatingLink({ rating: r }: { rating: Rating }) {
       {score}
     </a>
   );
+}
+
+/** A title's page on TMDB, in the UI's language. */
+function tmdbUrl(kind: MediaKind, tmdbId: number): string {
+  return `https://www.themoviedb.org/${kind === MediaKind.SERIES ? "tv" : "movie"}/${tmdbId}?language=${locale}`;
+}
+
+/**
+ * A title's ratings as Seerr's: Rotten Tomatoes' and IMDb's, then TMDB's
+ * score when given, out of 10, each linking to its page; else the fallback
+ * once there are none.
+ */
+export function TitleRatings({
+  server,
+  kind,
+  tmdbId,
+  score,
+  fallback = null,
+  className,
+}: {
+  server: ServerEntry;
+  kind: MediaKind;
+  tmdbId: number;
+  score?: number;
+  fallback?: ReactNode;
+  className: string;
+}) {
+  const q = useTitleRatings(server, kind, tmdbId);
+  const shown = ratingOrder.flatMap((source) => q.data?.find((r) => r.source === source) ?? []);
+  if (shown.length === 0 && score === undefined) return q.isPending ? null : fallback;
+  return (
+    <div className={`flex flex-wrap gap-x-4 gap-y-1 ${className}`}>
+      {shown.map((r) => (
+        <RatingLink key={r.source} rating={r} />
+      ))}
+      {score !== undefined && (
+        <a
+          href={tmdbUrl(kind, tmdbId)}
+          target="_blank"
+          rel="noreferrer"
+          title={t("discover.tmdbScore")}
+          className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline"
+        >
+          <img src={tmdbWideLogo} alt="TMDB" className="h-4 w-auto" />
+          {Math.round(score * 10)}%
+        </a>
+      )}
+    </div>
+  );
+}
+
+/** The logos linking a title elsewhere, as Seerr's, Rotten Tomatoes' once its ratings tell its page. */
+export function useTitleLinks(server: ServerEntry, kind: MediaKind, tmdbId: number, imdb: string, tvdb: string): ExternalLink[] {
+  const series = kind === MediaKind.SERIES;
+  const rt = useTitleRatings(server, kind, tmdbId).data?.find((r) => r.source !== RatingSource.IMDB && r.url)?.url;
+  return [
+    { name: "TMDB", url: tmdbUrl(kind, tmdbId), logo: tmdbLogo, width: "w-8" },
+    series && tvdb && { name: "TVDB", url: `https://www.thetvdb.com/dereferrer/series/${tvdb}`, logo: tvdbLogo, width: "w-9", mono: true },
+    imdb && { name: "IMDb", url: `https://www.imdb.com/title/${imdb}`, logo: imdbLogo, width: "w-8" },
+    rt && { name: "Rotten Tomatoes", url: rt, logo: rtLogo, width: "w-14" },
+    imdb && { name: "Trakt", url: `https://trakt.tv/${series ? "shows" : "movies"}/${imdb}`, logo: traktLogo, width: "w-8" },
+    imdb && { name: "Simkl", url: `https://api.simkl.com/redirect?to=Simkl&imdb=${encodeURIComponent(imdb)}`, logo: simklLogo, width: "w-8", mono: true },
+    !series && { name: "Letterboxd", url: `https://letterboxd.com/tmdb/${tmdbId}`, logo: letterboxdLogo, width: "w-8" },
+  ].filter((l) => !!l);
 }
 
 /** A link to a title or person elsewhere, with the site's logo. */
@@ -296,7 +384,8 @@ export function ExternalLinks({
   );
 }
 
-const minStudios = 5;
+/** The studios shown before Show More. */
+export const minStudios = 5;
 
 function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   const series = title.mediaKind === MediaKind.SERIES;
@@ -313,42 +402,16 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   const studios = title.studioRefs.length > 0 ? title.studioRefs : title.studios.map((name) => ({ id: "", name }));
   const shownStudios = allStudios ? studios : studios.slice(0, minStudios);
   const countries = title.productionCountries.length > 0 ? title.productionCountries.map(countryText) : title.productionLocations;
-  const tmdbPath = `https://www.themoviedb.org/${series ? "tv" : "movie"}/${title.tmdbId}`;
-  const ratings = useTitleRatings(server, title.mediaKind, title.tmdbId).data ?? [];
-  const shownRatings = ratingOrder.flatMap((source) => ratings.find((r) => r.source === source) ?? []);
-  const imdb = title.externalIds.imdb;
-  const tvdb = title.externalIds.tvdb || (title.tvdbId > 0 ? String(title.tvdbId) : "");
-  const rt = shownRatings.find((r) => r.source !== RatingSource.IMDB)?.url;
-  const links: ExternalLink[] = [
-    { name: "TMDB", url: `${tmdbPath}?language=${locale}`, logo: tmdbLogo, width: "w-8" },
-    series && tvdb && { name: "TVDB", url: `https://www.thetvdb.com/dereferrer/series/${tvdb}`, logo: tvdbLogo, width: "w-9", mono: true },
-    imdb && { name: "IMDb", url: `https://www.imdb.com/title/${imdb}`, logo: imdbLogo, width: "w-8" },
-    rt && { name: "Rotten Tomatoes", url: rt, logo: rtLogo, width: "w-14" },
-    imdb && { name: "Trakt", url: `https://trakt.tv/${series ? "shows" : "movies"}/${imdb}`, logo: traktLogo, width: "w-8" },
-    imdb && { name: "Simkl", url: `https://api.simkl.com/redirect?to=Simkl&imdb=${encodeURIComponent(imdb)}`, logo: simklLogo, width: "w-8", mono: true },
-    !series && { name: "Letterboxd", url: `https://letterboxd.com/tmdb/${title.tmdbId}`, logo: letterboxdLogo, width: "w-8" },
-  ].filter((l) => !!l);
+  const links = useTitleLinks(server, title.mediaKind, title.tmdbId, title.externalIds.imdb ?? "", title.externalIds.tvdb || (title.tvdbId > 0 ? String(title.tvdbId) : ""));
   return (
     <dl className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] border border-border">
-      {(title.voteCount > 0 || shownRatings.length > 0) && (
-        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4 py-2.5">
-          {shownRatings.map((r) => (
-            <RatingLink key={r.source} rating={r} />
-          ))}
-          {title.voteCount > 0 && (
-            <a
-              href={`${tmdbPath}?language=${locale}`}
-              target="_blank"
-              rel="noreferrer"
-              title={t("discover.tmdbScore")}
-              className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline"
-            >
-              <img src={tmdbWideLogo} alt="TMDB" className="h-4 w-auto" />
-              {Math.round(title.communityRating * 10)}%
-            </a>
-          )}
-        </div>
-      )}
+      <TitleRatings
+        server={server}
+        kind={title.mediaKind}
+        tmdbId={title.tmdbId}
+        score={title.voteCount > 0 ? title.communityRating : undefined}
+        className="justify-center px-4 py-2.5"
+      />
       {title.originalTitle && title.originalLanguage !== discoverLanguage && (
         <Fact label={t("item.originalTitle")}>{title.originalTitle}</Fact>
       )}

@@ -1,7 +1,7 @@
 import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
 import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 
-import { CreditsScreen, TitleCreditsScreen, TitleCrewScreen } from "./screens/credits.tsx";
+import { CreditsScreen, ItemCrewScreen, TitleCreditsScreen, TitleCrewScreen } from "./screens/credits.tsx";
 import { Details } from "./screens/details.tsx";
 import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
 import { CollectionScreen } from "./screens/discover-collection.tsx";
@@ -134,6 +134,7 @@ const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$h
 const details = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId", component: Details });
 
 const credits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/credits", component: CreditsScreen });
+const crew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/crew", component: ItemCrewScreen });
 const titleCredits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/credits", component: TitleCreditsScreen });
 const titleCrew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/crew", component: TitleCrewScreen });
 
@@ -175,6 +176,7 @@ export const router = createRouter({
     hub,
     details,
     credits,
+    crew,
     titleCredits,
     titleCrew,
     person,

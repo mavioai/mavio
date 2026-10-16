@@ -506,7 +506,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
 }
 
 /** How far the title's downloads have come, for administrators, as Seerr's status badge. */
-function DownloadBadge({ server, itemId }: { server: ServerEntry; itemId: string }) {
+export function DownloadBadge({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const queue = useQueue(server, itemId);
   const downloading = (queue.data?.pages.flatMap((p) => p.items) ?? []).filter((d) => d.state === DownloadState.DOWNLOADING && Number(d.size) > 0);
   if (downloading.length === 0) return null;
