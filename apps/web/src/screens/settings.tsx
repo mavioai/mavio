@@ -465,7 +465,7 @@ function Section({ title, message, children }: { title: string; message?: ReactN
   return (
     <div className="flex flex-col gap-7">
       <header>
-        <h2 className="type-title1">{title}</h2>
+        <h2 data-title className="type-title1">{title}</h2>
         {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
       </header>
       {children}

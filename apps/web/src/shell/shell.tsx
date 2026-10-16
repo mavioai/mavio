@@ -21,14 +21,18 @@ import { SyncPlayProvider } from "../syncplay.tsx";
 import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
+import { PageTitle } from "./page-title.tsx";
 import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
 
 export function Shell() {
+  const { tv } = usePrefs();
   return (
     <SyncPlayProvider>
+      {/* The television's focus is kept by its own rules (focus.ts). */}
+      <PageTitle moveFocus={!tv} />
       <Content />
       <RemoteCommands />
       <GroupIndicator />

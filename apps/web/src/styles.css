@@ -356,3 +356,8 @@ input[type="search"]::-webkit-search-cancel-button {
     animation: none;
   }
 }
+
+/* A page's heading takes focus as the page opens (shell/page-title.tsx), showing no ring. */
+:is(h1, h2)[tabindex="-1"]:focus {
+  outline: none;
+}

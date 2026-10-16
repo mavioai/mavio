@@ -29,7 +29,7 @@ export function Page({
       {back}
       <header className="flex flex-wrap items-center gap-4">
         <div className="min-w-0 flex-1">
-          <h2 className="type-title1">{title}</h2>
+          <h2 data-title className="type-title1">{title}</h2>
           {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
