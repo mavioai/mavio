@@ -21,6 +21,7 @@ import { SyncPlayProvider } from "../syncplay.tsx";
 import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
 import { useTvFocus } from "./focus.ts";
+import { useUpScroll } from "./up.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
@@ -49,6 +50,7 @@ function Content() {
   // player's included.
   useSpatialNavigation(prefs.tv);
   useTvFocus(prefs.tv);
+  useUpScroll();
   useTvBack(prefs.tv && !bare);
 
   // A Mavio account follows the servers it reaches, as it opens.

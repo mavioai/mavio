@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { locale } from "../../i18n.ts";
 import { Icon, type IconName } from "../../icon.tsx";
+import { up } from "../../shell/up.ts";
 import type { SettingsSearch } from "../settings.tsx";
 
 /** A page's title, the line under it, the buttons beside it, and its groups. */
@@ -65,6 +66,7 @@ export function BackLink({ section, label }: { section: string; label: string })
       to="/settings/$section"
       params={{ section }}
       search={{ server: cur.server }}
+      {...up}
       className="inline-flex items-center gap-1 self-start type-body text-accent-text"
     >
       <Icon name="back" size={18} />

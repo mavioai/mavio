@@ -20,6 +20,7 @@ import { type FormEvent, type ReactNode, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { up } from "../shell/up.ts";
 import { type Schema, SchemaForm } from "../schema-form.tsx";
 import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
@@ -266,6 +267,7 @@ function BackToList() {
       to="/settings/$section"
       params={{ section: "plugins" }}
       search={{ server: cur.server, tab: cur.tab, category: cur.category }}
+      {...up}
       className="inline-flex items-center gap-1 self-start type-body text-accent-text"
     >
       <Icon name="back" size={18} />

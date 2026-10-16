@@ -24,12 +24,13 @@ import { locales } from "@mavio/design/strings";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { type ReactNode, useLayoutEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
+import { up } from "../shell/up.ts";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { searchText } from "../search-params.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
@@ -293,13 +294,6 @@ function AccountCard({ active = false }: { active?: boolean }) {
   );
 }
 
-/**
- * Where the phone's list of sections was scrolled when a section was
- * opened from it, for the section's link back to return there: the link
- * goes to the list anew, which the router would show from its top.
- */
-const listScroll = { top: 0, returning: false };
-
 /** The phone's settings: the account, the users to switch to, the sections and signing out. */
 function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const servers = useServersStore();
@@ -308,17 +302,6 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const chosen = useChosen();
   const search = useSearch({ strict: false }) as SettingsSearch;
   const tv = usePrefs().tv;
-  useLayoutEffect(() => {
-    if (!listScroll.returning) return;
-    listScroll.returning = false;
-    // The list may still grow as its servers and users come from the cache.
-    let tries = 30;
-    const restore = () => {
-      window.scrollTo({ top: listScroll.top });
-      if (Math.abs(window.scrollY - listScroll.top) > 1 && --tries > 0) requestAnimationFrame(restore);
-    };
-    restore();
-  }, []);
   return (
     <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
       {/* The remote's Back leaves the settings on the television. */}
@@ -340,7 +323,6 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
               to="/settings/$section"
               params={{ section: s }}
               search={{ server: search.server }}
-              onClick={() => (listScroll.top = window.scrollY)}
               className="hover:tint"
             >
               <Row label={sections[s].title()} leading={<Tile id={s} />}>
@@ -413,8 +395,7 @@ function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefi
         <Link
           to="/settings"
           search={{ server: search.server }}
-          resetScroll={false}
-          onClick={() => (listScroll.returning = true)}
+          {...up}
           className="inline-flex items-center gap-1 self-start type-body text-accent-text"
         >
           <Icon name="back" size={18} />

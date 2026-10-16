@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { up } from "../shell/up.ts";
 import { usePrefs } from "../prefs.ts";
 import { Loading, Shelf, StatusView } from "../ui.tsx";
 import { initialsOf } from "./person.tsx";
@@ -147,7 +148,7 @@ function ItemCredits({ params: { serverId, itemId }, crew = false }: { params: {
       title={crew ? t("credits.fullCrew") : undefined}
       credits={crew ? credits.filter((c) => !isCast(c)) : credits}
       back={
-        <Link to="/s/$serverId/item/$itemId" params={{ serverId, itemId }} className={backClass}>
+        <Link to="/s/$serverId/item/$itemId" params={{ serverId, itemId }} {...up} className={backClass}>
           <Icon name="back" size={16} />
           {q.data.item.name}
         </Link>
@@ -180,7 +181,7 @@ function TitleCredits({ params: { serverId, kind, tmdbId }, crew = false }: { pa
       title={crew ? t("credits.fullCrew") : undefined}
       credits={crew ? credits.filter((c) => !isCast(c)) : credits}
       back={
-        <Link to="/s/$serverId/title/$kind/$tmdbId" params={{ serverId, kind, tmdbId }} className={backClass}>
+        <Link to="/s/$serverId/title/$kind/$tmdbId" params={{ serverId, kind, tmdbId }} {...up} className={backClass}>
           <Icon name="back" size={16} />
           {q.data.name}
         </Link>
