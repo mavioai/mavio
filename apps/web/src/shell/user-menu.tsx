@@ -273,7 +273,7 @@ export function PinPad({
               key="cancel"
               type="button"
               onClick={onCancel}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-fill type-callout text-accent-text hover:bg-fill-selected active:opacity-70"
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-fill type-callout hover:bg-fill-selected active:opacity-70"
             >
               {t("action.cancel")}
             </button>
