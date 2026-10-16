@@ -150,6 +150,49 @@ function helpOf(o: Option): [string, string] {
   return [first, rest.join("\n").trim()];
 }
 
+/**
+ * A help split around a QR code drawn in it, as rclone's configuration
+ * questions draw one for a terminal: rows of half blocks, each character two
+ * modules high, a block where a module is light. dark holds its modules,
+ * true where dark.
+ */
+interface HelpQR {
+  before: string;
+  dark: boolean[][];
+  after: string;
+}
+
+/** The QR code an option's help draws, if it draws one. */
+function qrOf(help: string): HelpQR | undefined {
+  const lines = help.split("\n");
+  const art = (l: string) => l.length >= 21 && /^[ █▀▄]+$/.test(l) && /[█▀▄]/.test(l);
+  const start = lines.findIndex(art);
+  if (start < 0) return undefined;
+  let end = start;
+  while (end < lines.length && art(lines[end])) end++;
+  const dark: boolean[][] = [];
+  for (const [i, l] of lines.slice(start, end).entries()) {
+    const chars = [...l];
+    dark.push(chars.map((c) => c !== "█" && c !== "▀"));
+    // An odd last row is drawn as the top halves of its line alone.
+    if (i < end - start - 1 || /[█▄]/.test(l)) dark.push(chars.map((c) => c !== "█" && c !== "▄"));
+  }
+  if (dark.length < 21) return undefined;
+  return { before: lines.slice(0, start).join("\n").trim(), dark, after: lines.slice(end).join("\n").trim() };
+}
+
+/** A QR code, drawn dark on light whatever the theme, for a phone to scan. */
+function QRCode({ dark }: { dark: boolean[][] }) {
+  const width = Math.max(...dark.map((r) => r.length));
+  const d = dark.flatMap((row, y) => row.flatMap((on, x) => (on ? [`M${x} ${y}h1v1h-1z`] : []))).join("");
+  return (
+    <svg viewBox={`0 0 ${width} ${dark.length}`} role="img" aria-label="QR" className="my-2 w-56 max-w-full rounded-lg" shapeRendering="crispEdges">
+      <rect width={width} height={dark.length} fill="#fff" />
+      <path d={d} fill="#000" />
+    </svg>
+  );
+}
+
 /** The control of an option's value. */
 function OptionField({
   option: o,
@@ -165,6 +208,7 @@ function OptionField({
   onChange: (v: string) => void;
 }) {
   const [first, rest] = helpOf(o);
+  const qr = qrOf(o.help);
   const examples = o.examples.filter((e) => providerMatches(e.provider, provider));
   const current = value ?? o.defaultValue;
   let control: ReactNode;
@@ -203,8 +247,16 @@ function OptionField({
           <code>{o.name}</code>
           {o.required && <span className="text-danger"> *</span>}
         </div>
-        {first && <div className="type-footnote text-text-secondary">{first}</div>}
-        {rest && (
+        {qr ? (
+          <div className="type-footnote text-text-secondary">
+            {qr.before && <p className="whitespace-pre-wrap">{qr.before}</p>}
+            <QRCode dark={qr.dark} />
+            {qr.after && <p className="whitespace-pre-wrap">{qr.after}</p>}
+          </div>
+        ) : (
+          first && <div className="type-footnote text-text-secondary">{first}</div>
+        )}
+        {!qr && rest && (
           <div className="type-footnote text-text-secondary">
             <More label={t("storage.more")}>
               <p className="mt-1 whitespace-pre-wrap">{rest}</p>
