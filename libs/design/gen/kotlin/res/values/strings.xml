@@ -1732,8 +1732,6 @@
     <string name="storage_settings_footer">Settings left empty take their defaults; those marked * are required.</string>
     <!-- Switch showing rclone's advanced options -->
     <string name="storage_advanced">Show advanced settings</string>
-    <!-- Expands an option's full help -->
-    <string name="storage_more">More</string>
     <!-- Button creating the remote -->
     <string name="storage_create">Add</string>
     <!-- The line over the questions of a remote's configuration -->

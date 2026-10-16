@@ -850,7 +850,6 @@
   "storage.settings": { "message": "Settings", "description": "Title of a remote's options" },
   "storage.settingsFooter": { "message": "Settings left empty take their defaults; those marked * are required.", "description": "Footer of a remote's options" },
   "storage.advanced": { "message": "Show advanced settings", "description": "Switch showing rclone's advanced options" },
-  "storage.more": { "message": "More", "description": "Expands an option's full help" },
   "storage.create": { "message": "Add", "description": "Button creating the remote" },
   "storage.questionMessage": { "message": "The remote needs a few more answers, such as authorizing the account.", "description": "The line over the questions of a remote's configuration" },
   "storage.questionFooter": { "message": "To authorize a cloud drive, run the command its help gives on a computer with a browser and paste the token it prints.", "description": "Footer of a configuration question" },

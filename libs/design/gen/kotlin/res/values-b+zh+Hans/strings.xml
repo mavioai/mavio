@@ -870,7 +870,6 @@
     <string name="storage_settings">设置</string>
     <string name="storage_settings_footer">留空的设置使用默认值；标 * 的为必填。</string>
     <string name="storage_advanced">显示高级设置</string>
-    <string name="storage_more">更多</string>
     <string name="storage_create">添加</string>
     <string name="storage_question_message">该远端还需要几项回答，例如授权账户。</string>
     <string name="storage_question_footer">要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。</string>

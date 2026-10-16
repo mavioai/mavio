@@ -15493,24 +15493,6 @@
         }
       }
     },
-    "storage.more": {
-      "comment": "Expands an option's full help",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "More"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "更多"
-          }
-        }
-      }
-    },
     "storage.create": {
       "comment": "Button creating the remote",
       "extractionState": "manual",

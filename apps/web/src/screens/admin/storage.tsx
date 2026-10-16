@@ -30,7 +30,7 @@ import { type ReactNode, useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
 import { Button, Group, Row } from "../../ui.tsx";
-import { More, NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
+import { NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, ColorTile, Page } from "./common.tsx";
@@ -144,12 +144,6 @@ function shownOptions(options: Option[], values: Record<string, string>, advance
   return options.filter((o) => (advanced || !o.advanced || o.required) && providerMatches(o.provider, provider));
 }
 
-/** The first line of an option's help, and the rest. */
-function helpOf(o: Option): [string, string] {
-  const [first = "", ...rest] = o.help.trim().split("\n");
-  return [first, rest.join("\n").trim()];
-}
-
 /**
  * A help split around a QR code drawn in it, as rclone's configuration
  * questions draw one for a terminal: rows of half blocks, each character two
@@ -207,7 +201,7 @@ function OptionField({
   placeholder?: string;
   onChange: (v: string) => void;
 }) {
-  const [first, rest] = helpOf(o);
+  const help = o.help.trim();
   const qr = qrOf(o.help);
   const examples = o.examples.filter((e) => providerMatches(e.provider, provider));
   const current = value ?? o.defaultValue;
@@ -248,20 +242,13 @@ function OptionField({
           {o.required && <span className="text-danger"> *</span>}
         </div>
         {qr ? (
-          <div className="type-footnote text-text-secondary">
+          <div className="type-caption font-normal text-text-secondary">
             {qr.before && <p className="whitespace-pre-wrap">{qr.before}</p>}
             <QRCode dark={qr.dark} />
             {qr.after && <p className="whitespace-pre-wrap">{qr.after}</p>}
           </div>
         ) : (
-          first && <div className="type-footnote text-text-secondary">{first}</div>
-        )}
-        {!qr && rest && (
-          <div className="type-footnote text-text-secondary">
-            <More label={t("storage.more")}>
-              <p className="mt-1 whitespace-pre-wrap">{rest}</p>
-            </More>
-          </div>
+          help && <p className="mt-0.5 type-caption font-normal whitespace-pre-wrap text-text-secondary">{help}</p>
         )}
       </div>
       {control}

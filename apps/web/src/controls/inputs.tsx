@@ -4,7 +4,6 @@
 // in every browser.
 import { Autocomplete } from "@base-ui/react/autocomplete";
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
-import { Collapsible } from "@base-ui/react/collapsible";
 import { NumberField as BaseNumberField } from "@base-ui/react/number-field";
 import { Progress as BaseProgress } from "@base-ui/react/progress";
 import { Radio } from "@base-ui/react/radio";
@@ -417,19 +416,6 @@ export function Progress({ value, label, className }: { value: number; label: st
         <BaseProgress.Indicator className="h-full rounded-full bg-accent transition-[width]" />
       </BaseProgress.Track>
     </BaseProgress.Root>
-  );
-}
-
-/** Text shown only once label, a link, is pressed, as a long help's rest is. */
-export function More({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <Collapsible.Root>
-      <Collapsible.Trigger className="group inline-flex items-center gap-1 text-accent-text">
-        {label}
-        <Icon name="expand" size={12} className="transition-transform group-data-panel-open:rotate-180" />
-      </Collapsible.Trigger>
-      <Collapsible.Panel>{children}</Collapsible.Panel>
-    </Collapsible.Root>
   );
 }
 

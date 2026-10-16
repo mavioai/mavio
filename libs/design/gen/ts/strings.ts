@@ -852,7 +852,6 @@ export type MessageKey =
   | 'storage.settings'
   | 'storage.settingsFooter'
   | 'storage.advanced'
-  | 'storage.more'
   | 'storage.create'
   | 'storage.questionMessage'
   | 'storage.questionFooter'
@@ -2525,7 +2524,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.settings": "Settings",
     "storage.settingsFooter": "Settings left empty take their defaults; those marked * are required.",
     "storage.advanced": "Show advanced settings",
-    "storage.more": "More",
     "storage.create": "Add",
     "storage.questionMessage": "The remote needs a few more answers, such as authorizing the account.",
     "storage.questionFooter": "To authorize a cloud drive, run the command its help gives on a computer with a browser and paste the token it prints.",
@@ -4196,7 +4194,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.settings": "设置",
     "storage.settingsFooter": "留空的设置使用默认值；标 * 的为必填。",
     "storage.advanced": "显示高级设置",
-    "storage.more": "更多",
     "storage.create": "添加",
     "storage.questionMessage": "该远端还需要几项回答，例如授权账户。",
     "storage.questionFooter": "要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。",

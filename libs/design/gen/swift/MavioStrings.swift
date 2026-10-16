@@ -2728,9 +2728,6 @@ public enum MavioStrings {
     /// Switch showing rclone's advanced options
     public static var storageAdvanced: String { NSLocalizedString("storage.advanced", bundle: .module, comment: "") }
 
-    /// Expands an option's full help
-    public static var storageMore: String { NSLocalizedString("storage.more", bundle: .module, comment: "") }
-
     /// Button creating the remote
     public static var storageCreate: String { NSLocalizedString("storage.create", bundle: .module, comment: "") }
 
