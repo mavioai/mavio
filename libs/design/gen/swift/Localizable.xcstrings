@@ -14071,6 +14071,1374 @@
         }
       }
     },
+    "storage.provider.alias": {
+      "comment": "Name of the kind of remote rclone calls alias",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alias of a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "远端别名"
+          }
+        }
+      }
+    },
+    "storage.provider.aliyundrive": {
+      "comment": "Name of the kind of remote rclone calls aliyundrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aliyun Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阿里云盘"
+          }
+        }
+      }
+    },
+    "storage.provider.amazon": {
+      "comment": "Name of the kind of remote rclone calls s3",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amazon S3 and Compatible Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amazon S3 及兼容存储"
+          }
+        }
+      }
+    },
+    "storage.provider.archive": {
+      "comment": "Name of the kind of remote rclone calls archive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read Archives"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读取压缩包"
+          }
+        }
+      }
+    },
+    "storage.provider.azureblob": {
+      "comment": "Name of the kind of remote rclone calls azureblob",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Azure Blob Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微软 Azure Blob 存储"
+          }
+        }
+      }
+    },
+    "storage.provider.azurefiles": {
+      "comment": "Name of the kind of remote rclone calls azurefiles",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft Azure Files"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微软 Azure 文件存储"
+          }
+        }
+      }
+    },
+    "storage.provider.backblaze": {
+      "comment": "Name of the kind of remote rclone calls b2",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backblaze B2"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backblaze B2"
+          }
+        }
+      }
+    },
+    "storage.provider.baidunetdisk": {
+      "comment": "Name of the kind of remote rclone calls baidunetdisk",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baidu Netdisk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "百度网盘"
+          }
+        }
+      }
+    },
+    "storage.provider.box": {
+      "comment": "Name of the kind of remote rclone calls box",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Box"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Box"
+          }
+        }
+      }
+    },
+    "storage.provider.cache": {
+      "comment": "Name of the kind of remote rclone calls cache",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缓存远端"
+          }
+        }
+      }
+    },
+    "storage.provider.chunker": {
+      "comment": "Name of the kind of remote rclone calls chunker",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Split Large Files of a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拆分远端的大文件"
+          }
+        }
+      }
+    },
+    "storage.provider.cloudOneFifteen": {
+      "comment": "Name of the kind of remote rclone calls cloud115",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "115 Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "115 网盘"
+          }
+        }
+      }
+    },
+    "storage.provider.cloudOneTwentyThree": {
+      "comment": "Name of the kind of remote rclone calls cloud123",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "123 Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "123 云盘"
+          }
+        }
+      }
+    },
+    "storage.provider.cloudinary": {
+      "comment": "Name of the kind of remote rclone calls cloudinary",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloudinary"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cloudinary"
+          }
+        }
+      }
+    },
+    "storage.provider.combine": {
+      "comment": "Name of the kind of remote rclone calls combine",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Combine Remotes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "合并多个远端"
+          }
+        }
+      }
+    },
+    "storage.provider.compress": {
+      "comment": "Name of the kind of remote rclone calls compress",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compress a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "压缩远端"
+          }
+        }
+      }
+    },
+    "storage.provider.crypt": {
+      "comment": "Name of the kind of remote rclone calls crypt",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encrypt a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加密远端"
+          }
+        }
+      }
+    },
+    "storage.provider.doi": {
+      "comment": "Name of the kind of remote rclone calls doi",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DOI Datasets"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DOI 数据集"
+          }
+        }
+      }
+    },
+    "storage.provider.drime": {
+      "comment": "Name of the kind of remote rclone calls drime",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drime"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drime"
+          }
+        }
+      }
+    },
+    "storage.provider.drive": {
+      "comment": "Name of the kind of remote rclone calls drive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google 云端硬盘"
+          }
+        }
+      }
+    },
+    "storage.provider.dropbox": {
+      "comment": "Name of the kind of remote rclone calls dropbox",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropbox"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dropbox"
+          }
+        }
+      }
+    },
+    "storage.provider.fichier": {
+      "comment": "Name of the kind of remote rclone calls fichier",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1Fichier"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1Fichier"
+          }
+        }
+      }
+    },
+    "storage.provider.filefabric": {
+      "comment": "Name of the kind of remote rclone calls filefabric",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enterprise File Fabric"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enterprise File Fabric"
+          }
+        }
+      }
+    },
+    "storage.provider.filelu": {
+      "comment": "Name of the kind of remote rclone calls filelu",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FileLu"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FileLu"
+          }
+        }
+      }
+    },
+    "storage.provider.filen": {
+      "comment": "Name of the kind of remote rclone calls filen",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filen"
+          }
+        }
+      }
+    },
+    "storage.provider.filescom": {
+      "comment": "Name of the kind of remote rclone calls filescom",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files.com"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files.com"
+          }
+        }
+      }
+    },
+    "storage.provider.ftp": {
+      "comment": "Name of the kind of remote rclone calls ftp",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FTP"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FTP"
+          }
+        }
+      }
+    },
+    "storage.provider.gofile": {
+      "comment": "Name of the kind of remote rclone calls gofile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gofile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gofile"
+          }
+        }
+      }
+    },
+    "storage.provider.googleCloudStorage": {
+      "comment": "Name of the kind of remote rclone calls google cloud storage",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Cloud Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Cloud 存储"
+          }
+        }
+      }
+    },
+    "storage.provider.googlePhotos": {
+      "comment": "Name of the kind of remote rclone calls google photos",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google Photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Google 相册"
+          }
+        }
+      }
+    },
+    "storage.provider.guangyadrive": {
+      "comment": "Name of the kind of remote rclone calls guangyadrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GuangYa Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "光鸭云盘"
+          }
+        }
+      }
+    },
+    "storage.provider.hasher": {
+      "comment": "Name of the kind of remote rclone calls hasher",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checksums for a Remote"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为远端补充校验和"
+          }
+        }
+      }
+    },
+    "storage.provider.hdfs": {
+      "comment": "Name of the kind of remote rclone calls hdfs",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hadoop Distributed File System"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hadoop 分布式文件系统"
+          }
+        }
+      }
+    },
+    "storage.provider.hidrive": {
+      "comment": "Name of the kind of remote rclone calls hidrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HiDrive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HiDrive"
+          }
+        }
+      }
+    },
+    "storage.provider.http": {
+      "comment": "Name of the kind of remote rclone calls http",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTP"
+          }
+        }
+      }
+    },
+    "storage.provider.huaweidrive": {
+      "comment": "Name of the kind of remote rclone calls huaweidrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Huawei Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "华为云空间"
+          }
+        }
+      }
+    },
+    "storage.provider.iclouddrive": {
+      "comment": "Name of the kind of remote rclone calls iclouddrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud Drive and Photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud 云盘与照片"
+          }
+        }
+      }
+    },
+    "storage.provider.imagekit": {
+      "comment": "Name of the kind of remote rclone calls imagekit",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ImageKit.io"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ImageKit.io"
+          }
+        }
+      }
+    },
+    "storage.provider.internetarchive": {
+      "comment": "Name of the kind of remote rclone calls internetarchive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internet Archive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "互联网档案馆"
+          }
+        }
+      }
+    },
+    "storage.provider.internxt": {
+      "comment": "Name of the kind of remote rclone calls internxt",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internxt Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Internxt Drive"
+          }
+        }
+      }
+    },
+    "storage.provider.jottacloud": {
+      "comment": "Name of the kind of remote rclone calls jottacloud",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jottacloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jottacloud"
+          }
+        }
+      }
+    },
+    "storage.provider.koofr": {
+      "comment": "Name of the kind of remote rclone calls koofr",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koofr and Digi Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koofr 与 Digi Storage"
+          }
+        }
+      }
+    },
+    "storage.provider.linkbox": {
+      "comment": "Name of the kind of remote rclone calls linkbox",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linkbox"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linkbox"
+          }
+        }
+      }
+    },
+    "storage.provider.local": {
+      "comment": "Name of the kind of remote rclone calls local",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Disk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地磁盘"
+          }
+        }
+      }
+    },
+    "storage.provider.mailru": {
+      "comment": "Name of the kind of remote rclone calls mailru",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail.ru Cloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mail.ru 云盘"
+          }
+        }
+      }
+    },
+    "storage.provider.mega": {
+      "comment": "Name of the kind of remote rclone calls mega",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MEGA"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MEGA"
+          }
+        }
+      }
+    },
+    "storage.provider.memory": {
+      "comment": "Name of the kind of remote rclone calls memory",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In-Memory Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内存存储"
+          }
+        }
+      }
+    },
+    "storage.provider.netstorage": {
+      "comment": "Name of the kind of remote rclone calls netstorage",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akamai NetStorage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Akamai NetStorage"
+          }
+        }
+      }
+    },
+    "storage.provider.onedrive": {
+      "comment": "Name of the kind of remote rclone calls onedrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microsoft OneDrive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "微软 OneDrive"
+          }
+        }
+      }
+    },
+    "storage.provider.opendrive": {
+      "comment": "Name of the kind of remote rclone calls opendrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenDrive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenDrive"
+          }
+        }
+      }
+    },
+    "storage.provider.oracleobjectstorage": {
+      "comment": "Name of the kind of remote rclone calls oracleobjectstorage",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oracle Cloud Object Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "甲骨文云对象存储"
+          }
+        }
+      }
+    },
+    "storage.provider.pcloud": {
+      "comment": "Name of the kind of remote rclone calls pcloud",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pCloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "pCloud"
+          }
+        }
+      }
+    },
+    "storage.provider.pikpak": {
+      "comment": "Name of the kind of remote rclone calls pikpak",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PikPak"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PikPak"
+          }
+        }
+      }
+    },
+    "storage.provider.pixeldrain": {
+      "comment": "Name of the kind of remote rclone calls pixeldrain",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pixeldrain"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pixeldrain"
+          }
+        }
+      }
+    },
+    "storage.provider.premiumizeme": {
+      "comment": "Name of the kind of remote rclone calls premiumizeme",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "premiumize.me"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "premiumize.me"
+          }
+        }
+      }
+    },
+    "storage.provider.protondrive": {
+      "comment": "Name of the kind of remote rclone calls protondrive",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proton Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proton Drive"
+          }
+        }
+      }
+    },
+    "storage.provider.putio": {
+      "comment": "Name of the kind of remote rclone calls putio",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put.io"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Put.io"
+          }
+        }
+      }
+    },
+    "storage.provider.qingstor": {
+      "comment": "Name of the kind of remote rclone calls qingstor",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QingStor Object Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "青云对象存储"
+          }
+        }
+      }
+    },
+    "storage.provider.quark": {
+      "comment": "Name of the kind of remote rclone calls quark",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quark Drive / UC Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "夸克网盘 / UC 网盘"
+          }
+        }
+      }
+    },
+    "storage.provider.quatrix": {
+      "comment": "Name of the kind of remote rclone calls quatrix",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quatrix by Maytech"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quatrix"
+          }
+        }
+      }
+    },
+    "storage.provider.seafile": {
+      "comment": "Name of the kind of remote rclone calls seafile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seafile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seafile"
+          }
+        }
+      }
+    },
+    "storage.provider.sftp": {
+      "comment": "Name of the kind of remote rclone calls sftp",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH/SFTP"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH/SFTP"
+          }
+        }
+      }
+    },
+    "storage.provider.shade": {
+      "comment": "Name of the kind of remote rclone calls shade",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shade"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shade"
+          }
+        }
+      }
+    },
+    "storage.provider.sharefile": {
+      "comment": "Name of the kind of remote rclone calls sharefile",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Citrix ShareFile"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Citrix ShareFile"
+          }
+        }
+      }
+    },
+    "storage.provider.sia": {
+      "comment": "Name of the kind of remote rclone calls sia",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sia Decentralized Cloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sia 去中心化云"
+          }
+        }
+      }
+    },
+    "storage.provider.smb": {
+      "comment": "Name of the kind of remote rclone calls smb",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SMB/CIFS"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SMB/CIFS"
+          }
+        }
+      }
+    },
+    "storage.provider.storj": {
+      "comment": "Name of the kind of remote rclone calls storj",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storj Decentralized Cloud Storage"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storj 去中心化云存储"
+          }
+        }
+      }
+    },
+    "storage.provider.sugarsync": {
+      "comment": "Name of the kind of remote rclone calls sugarsync",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SugarSync"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SugarSync"
+          }
+        }
+      }
+    },
+    "storage.provider.swift": {
+      "comment": "Name of the kind of remote rclone calls swift",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenStack Swift"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenStack Swift"
+          }
+        }
+      }
+    },
+    "storage.provider.thunder": {
+      "comment": "Name of the kind of remote rclone calls thunder",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xunlei Drive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "迅雷云盘"
+          }
+        }
+      }
+    },
+    "storage.provider.ulozto": {
+      "comment": "Name of the kind of remote rclone calls ulozto",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uloz.to"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uloz.to"
+          }
+        }
+      }
+    },
+    "storage.provider.union": {
+      "comment": "Name of the kind of remote rclone calls union",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Union of Remotes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "联合多个远端"
+          }
+        }
+      }
+    },
+    "storage.provider.webdav": {
+      "comment": "Name of the kind of remote rclone calls webdav",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebDAV"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebDAV"
+          }
+        }
+      }
+    },
+    "storage.provider.weiyun": {
+      "comment": "Name of the kind of remote rclone calls weiyun",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tencent Weiyun"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "腾讯微云"
+          }
+        }
+      }
+    },
+    "storage.provider.yandex": {
+      "comment": "Name of the kind of remote rclone calls yandex",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yandex Disk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yandex 网盘"
+          }
+        }
+      }
+    },
+    "storage.provider.zoho": {
+      "comment": "Name of the kind of remote rclone calls zoho",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoho WorkDrive"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoho WorkDrive"
+          }
+        }
+      }
+    },
     "storage.settings": {
       "comment": "Title of a remote's options",
       "extractionState": "manual",

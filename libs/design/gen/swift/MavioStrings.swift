@@ -2491,6 +2491,234 @@ public enum MavioStrings {
     /// Placeholder of the kind
     public static var storageChooseKind: String { NSLocalizedString("storage.chooseKind", bundle: .module, comment: "") }
 
+    /// Name of the kind of remote rclone calls alias
+    public static var storageProviderAlias: String { NSLocalizedString("storage.provider.alias", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls aliyundrive
+    public static var storageProviderAliyundrive: String { NSLocalizedString("storage.provider.aliyundrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls s3
+    public static var storageProviderAmazon: String { NSLocalizedString("storage.provider.amazon", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls archive
+    public static var storageProviderArchive: String { NSLocalizedString("storage.provider.archive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls azureblob
+    public static var storageProviderAzureblob: String { NSLocalizedString("storage.provider.azureblob", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls azurefiles
+    public static var storageProviderAzurefiles: String { NSLocalizedString("storage.provider.azurefiles", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls b2
+    public static var storageProviderBackblaze: String { NSLocalizedString("storage.provider.backblaze", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls baidunetdisk
+    public static var storageProviderBaidunetdisk: String { NSLocalizedString("storage.provider.baidunetdisk", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls box
+    public static var storageProviderBox: String { NSLocalizedString("storage.provider.box", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls cache
+    public static var storageProviderCache: String { NSLocalizedString("storage.provider.cache", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls chunker
+    public static var storageProviderChunker: String { NSLocalizedString("storage.provider.chunker", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls cloud115
+    public static var storageProviderCloudOneFifteen: String { NSLocalizedString("storage.provider.cloudOneFifteen", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls cloud123
+    public static var storageProviderCloudOneTwentyThree: String { NSLocalizedString("storage.provider.cloudOneTwentyThree", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls cloudinary
+    public static var storageProviderCloudinary: String { NSLocalizedString("storage.provider.cloudinary", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls combine
+    public static var storageProviderCombine: String { NSLocalizedString("storage.provider.combine", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls compress
+    public static var storageProviderCompress: String { NSLocalizedString("storage.provider.compress", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls crypt
+    public static var storageProviderCrypt: String { NSLocalizedString("storage.provider.crypt", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls doi
+    public static var storageProviderDoi: String { NSLocalizedString("storage.provider.doi", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls drime
+    public static var storageProviderDrime: String { NSLocalizedString("storage.provider.drime", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls drive
+    public static var storageProviderDrive: String { NSLocalizedString("storage.provider.drive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls dropbox
+    public static var storageProviderDropbox: String { NSLocalizedString("storage.provider.dropbox", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls fichier
+    public static var storageProviderFichier: String { NSLocalizedString("storage.provider.fichier", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls filefabric
+    public static var storageProviderFilefabric: String { NSLocalizedString("storage.provider.filefabric", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls filelu
+    public static var storageProviderFilelu: String { NSLocalizedString("storage.provider.filelu", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls filen
+    public static var storageProviderFilen: String { NSLocalizedString("storage.provider.filen", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls filescom
+    public static var storageProviderFilescom: String { NSLocalizedString("storage.provider.filescom", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls ftp
+    public static var storageProviderFtp: String { NSLocalizedString("storage.provider.ftp", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls gofile
+    public static var storageProviderGofile: String { NSLocalizedString("storage.provider.gofile", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls google cloud storage
+    public static var storageProviderGoogleCloudStorage: String { NSLocalizedString("storage.provider.googleCloudStorage", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls google photos
+    public static var storageProviderGooglePhotos: String { NSLocalizedString("storage.provider.googlePhotos", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls guangyadrive
+    public static var storageProviderGuangyadrive: String { NSLocalizedString("storage.provider.guangyadrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls hasher
+    public static var storageProviderHasher: String { NSLocalizedString("storage.provider.hasher", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls hdfs
+    public static var storageProviderHdfs: String { NSLocalizedString("storage.provider.hdfs", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls hidrive
+    public static var storageProviderHidrive: String { NSLocalizedString("storage.provider.hidrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls http
+    public static var storageProviderHttp: String { NSLocalizedString("storage.provider.http", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls huaweidrive
+    public static var storageProviderHuaweidrive: String { NSLocalizedString("storage.provider.huaweidrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls iclouddrive
+    public static var storageProviderIclouddrive: String { NSLocalizedString("storage.provider.iclouddrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls imagekit
+    public static var storageProviderImagekit: String { NSLocalizedString("storage.provider.imagekit", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls internetarchive
+    public static var storageProviderInternetarchive: String { NSLocalizedString("storage.provider.internetarchive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls internxt
+    public static var storageProviderInternxt: String { NSLocalizedString("storage.provider.internxt", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls jottacloud
+    public static var storageProviderJottacloud: String { NSLocalizedString("storage.provider.jottacloud", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls koofr
+    public static var storageProviderKoofr: String { NSLocalizedString("storage.provider.koofr", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls linkbox
+    public static var storageProviderLinkbox: String { NSLocalizedString("storage.provider.linkbox", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls local
+    public static var storageProviderLocal: String { NSLocalizedString("storage.provider.local", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls mailru
+    public static var storageProviderMailru: String { NSLocalizedString("storage.provider.mailru", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls mega
+    public static var storageProviderMega: String { NSLocalizedString("storage.provider.mega", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls memory
+    public static var storageProviderMemory: String { NSLocalizedString("storage.provider.memory", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls netstorage
+    public static var storageProviderNetstorage: String { NSLocalizedString("storage.provider.netstorage", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls onedrive
+    public static var storageProviderOnedrive: String { NSLocalizedString("storage.provider.onedrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls opendrive
+    public static var storageProviderOpendrive: String { NSLocalizedString("storage.provider.opendrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls oracleobjectstorage
+    public static var storageProviderOracleobjectstorage: String { NSLocalizedString("storage.provider.oracleobjectstorage", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls pcloud
+    public static var storageProviderPcloud: String { NSLocalizedString("storage.provider.pcloud", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls pikpak
+    public static var storageProviderPikpak: String { NSLocalizedString("storage.provider.pikpak", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls pixeldrain
+    public static var storageProviderPixeldrain: String { NSLocalizedString("storage.provider.pixeldrain", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls premiumizeme
+    public static var storageProviderPremiumizeme: String { NSLocalizedString("storage.provider.premiumizeme", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls protondrive
+    public static var storageProviderProtondrive: String { NSLocalizedString("storage.provider.protondrive", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls putio
+    public static var storageProviderPutio: String { NSLocalizedString("storage.provider.putio", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls qingstor
+    public static var storageProviderQingstor: String { NSLocalizedString("storage.provider.qingstor", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls quark
+    public static var storageProviderQuark: String { NSLocalizedString("storage.provider.quark", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls quatrix
+    public static var storageProviderQuatrix: String { NSLocalizedString("storage.provider.quatrix", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls seafile
+    public static var storageProviderSeafile: String { NSLocalizedString("storage.provider.seafile", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls sftp
+    public static var storageProviderSftp: String { NSLocalizedString("storage.provider.sftp", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls shade
+    public static var storageProviderShade: String { NSLocalizedString("storage.provider.shade", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls sharefile
+    public static var storageProviderSharefile: String { NSLocalizedString("storage.provider.sharefile", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls sia
+    public static var storageProviderSia: String { NSLocalizedString("storage.provider.sia", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls smb
+    public static var storageProviderSmb: String { NSLocalizedString("storage.provider.smb", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls storj
+    public static var storageProviderStorj: String { NSLocalizedString("storage.provider.storj", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls sugarsync
+    public static var storageProviderSugarsync: String { NSLocalizedString("storage.provider.sugarsync", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls swift
+    public static var storageProviderSwift: String { NSLocalizedString("storage.provider.swift", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls thunder
+    public static var storageProviderThunder: String { NSLocalizedString("storage.provider.thunder", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls ulozto
+    public static var storageProviderUlozto: String { NSLocalizedString("storage.provider.ulozto", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls union
+    public static var storageProviderUnion: String { NSLocalizedString("storage.provider.union", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls webdav
+    public static var storageProviderWebdav: String { NSLocalizedString("storage.provider.webdav", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls weiyun
+    public static var storageProviderWeiyun: String { NSLocalizedString("storage.provider.weiyun", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls yandex
+    public static var storageProviderYandex: String { NSLocalizedString("storage.provider.yandex", bundle: .module, comment: "") }
+
+    /// Name of the kind of remote rclone calls zoho
+    public static var storageProviderZoho: String { NSLocalizedString("storage.provider.zoho", bundle: .module, comment: "") }
+
     /// Title of a remote's options
     public static var storageSettings: String { NSLocalizedString("storage.settings", bundle: .module, comment: "") }
 

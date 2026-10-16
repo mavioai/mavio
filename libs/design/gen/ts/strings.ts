@@ -773,6 +773,82 @@ export type MessageKey =
   | 'storage.nameTaken'
   | 'storage.kind'
   | 'storage.chooseKind'
+  | 'storage.provider.alias'
+  | 'storage.provider.aliyundrive'
+  | 'storage.provider.amazon'
+  | 'storage.provider.archive'
+  | 'storage.provider.azureblob'
+  | 'storage.provider.azurefiles'
+  | 'storage.provider.backblaze'
+  | 'storage.provider.baidunetdisk'
+  | 'storage.provider.box'
+  | 'storage.provider.cache'
+  | 'storage.provider.chunker'
+  | 'storage.provider.cloudOneFifteen'
+  | 'storage.provider.cloudOneTwentyThree'
+  | 'storage.provider.cloudinary'
+  | 'storage.provider.combine'
+  | 'storage.provider.compress'
+  | 'storage.provider.crypt'
+  | 'storage.provider.doi'
+  | 'storage.provider.drime'
+  | 'storage.provider.drive'
+  | 'storage.provider.dropbox'
+  | 'storage.provider.fichier'
+  | 'storage.provider.filefabric'
+  | 'storage.provider.filelu'
+  | 'storage.provider.filen'
+  | 'storage.provider.filescom'
+  | 'storage.provider.ftp'
+  | 'storage.provider.gofile'
+  | 'storage.provider.googleCloudStorage'
+  | 'storage.provider.googlePhotos'
+  | 'storage.provider.guangyadrive'
+  | 'storage.provider.hasher'
+  | 'storage.provider.hdfs'
+  | 'storage.provider.hidrive'
+  | 'storage.provider.http'
+  | 'storage.provider.huaweidrive'
+  | 'storage.provider.iclouddrive'
+  | 'storage.provider.imagekit'
+  | 'storage.provider.internetarchive'
+  | 'storage.provider.internxt'
+  | 'storage.provider.jottacloud'
+  | 'storage.provider.koofr'
+  | 'storage.provider.linkbox'
+  | 'storage.provider.local'
+  | 'storage.provider.mailru'
+  | 'storage.provider.mega'
+  | 'storage.provider.memory'
+  | 'storage.provider.netstorage'
+  | 'storage.provider.onedrive'
+  | 'storage.provider.opendrive'
+  | 'storage.provider.oracleobjectstorage'
+  | 'storage.provider.pcloud'
+  | 'storage.provider.pikpak'
+  | 'storage.provider.pixeldrain'
+  | 'storage.provider.premiumizeme'
+  | 'storage.provider.protondrive'
+  | 'storage.provider.putio'
+  | 'storage.provider.qingstor'
+  | 'storage.provider.quark'
+  | 'storage.provider.quatrix'
+  | 'storage.provider.seafile'
+  | 'storage.provider.sftp'
+  | 'storage.provider.shade'
+  | 'storage.provider.sharefile'
+  | 'storage.provider.sia'
+  | 'storage.provider.smb'
+  | 'storage.provider.storj'
+  | 'storage.provider.sugarsync'
+  | 'storage.provider.swift'
+  | 'storage.provider.thunder'
+  | 'storage.provider.ulozto'
+  | 'storage.provider.union'
+  | 'storage.provider.webdav'
+  | 'storage.provider.weiyun'
+  | 'storage.provider.yandex'
+  | 'storage.provider.zoho'
   | 'storage.settings'
   | 'storage.settingsFooter'
   | 'storage.advanced'
@@ -2370,6 +2446,82 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.nameTaken": "A remote of this name exists.",
     "storage.kind": "Kind",
     "storage.chooseKind": "Choose…",
+    "storage.provider.alias": "Alias of a Remote",
+    "storage.provider.aliyundrive": "Aliyun Drive",
+    "storage.provider.amazon": "Amazon S3 and Compatible Storage",
+    "storage.provider.archive": "Read Archives",
+    "storage.provider.azureblob": "Microsoft Azure Blob Storage",
+    "storage.provider.azurefiles": "Microsoft Azure Files",
+    "storage.provider.backblaze": "Backblaze B2",
+    "storage.provider.baidunetdisk": "Baidu Netdisk",
+    "storage.provider.box": "Box",
+    "storage.provider.cache": "Cache a Remote",
+    "storage.provider.chunker": "Split Large Files of a Remote",
+    "storage.provider.cloudOneFifteen": "115 Drive",
+    "storage.provider.cloudOneTwentyThree": "123 Drive",
+    "storage.provider.cloudinary": "Cloudinary",
+    "storage.provider.combine": "Combine Remotes",
+    "storage.provider.compress": "Compress a Remote",
+    "storage.provider.crypt": "Encrypt a Remote",
+    "storage.provider.doi": "DOI Datasets",
+    "storage.provider.drime": "Drime",
+    "storage.provider.drive": "Google Drive",
+    "storage.provider.dropbox": "Dropbox",
+    "storage.provider.fichier": "1Fichier",
+    "storage.provider.filefabric": "Enterprise File Fabric",
+    "storage.provider.filelu": "FileLu",
+    "storage.provider.filen": "Filen",
+    "storage.provider.filescom": "Files.com",
+    "storage.provider.ftp": "FTP",
+    "storage.provider.gofile": "Gofile",
+    "storage.provider.googleCloudStorage": "Google Cloud Storage",
+    "storage.provider.googlePhotos": "Google Photos",
+    "storage.provider.guangyadrive": "GuangYa Drive",
+    "storage.provider.hasher": "Checksums for a Remote",
+    "storage.provider.hdfs": "Hadoop Distributed File System",
+    "storage.provider.hidrive": "HiDrive",
+    "storage.provider.http": "HTTP",
+    "storage.provider.huaweidrive": "Huawei Drive",
+    "storage.provider.iclouddrive": "iCloud Drive and Photos",
+    "storage.provider.imagekit": "ImageKit.io",
+    "storage.provider.internetarchive": "Internet Archive",
+    "storage.provider.internxt": "Internxt Drive",
+    "storage.provider.jottacloud": "Jottacloud",
+    "storage.provider.koofr": "Koofr and Digi Storage",
+    "storage.provider.linkbox": "Linkbox",
+    "storage.provider.local": "Local Disk",
+    "storage.provider.mailru": "Mail.ru Cloud",
+    "storage.provider.mega": "MEGA",
+    "storage.provider.memory": "In-Memory Storage",
+    "storage.provider.netstorage": "Akamai NetStorage",
+    "storage.provider.onedrive": "Microsoft OneDrive",
+    "storage.provider.opendrive": "OpenDrive",
+    "storage.provider.oracleobjectstorage": "Oracle Cloud Object Storage",
+    "storage.provider.pcloud": "pCloud",
+    "storage.provider.pikpak": "PikPak",
+    "storage.provider.pixeldrain": "Pixeldrain",
+    "storage.provider.premiumizeme": "premiumize.me",
+    "storage.provider.protondrive": "Proton Drive",
+    "storage.provider.putio": "Put.io",
+    "storage.provider.qingstor": "QingStor Object Storage",
+    "storage.provider.quark": "Quark Drive / UC Drive",
+    "storage.provider.quatrix": "Quatrix by Maytech",
+    "storage.provider.seafile": "Seafile",
+    "storage.provider.sftp": "SSH/SFTP",
+    "storage.provider.shade": "Shade",
+    "storage.provider.sharefile": "Citrix ShareFile",
+    "storage.provider.sia": "Sia Decentralized Cloud",
+    "storage.provider.smb": "SMB/CIFS",
+    "storage.provider.storj": "Storj Decentralized Cloud Storage",
+    "storage.provider.sugarsync": "SugarSync",
+    "storage.provider.swift": "OpenStack Swift",
+    "storage.provider.thunder": "Xunlei Drive",
+    "storage.provider.ulozto": "Uloz.to",
+    "storage.provider.union": "Union of Remotes",
+    "storage.provider.webdav": "WebDAV",
+    "storage.provider.weiyun": "Tencent Weiyun",
+    "storage.provider.yandex": "Yandex Disk",
+    "storage.provider.zoho": "Zoho WorkDrive",
     "storage.settings": "Settings",
     "storage.settingsFooter": "Settings left empty take their defaults; those marked * are required.",
     "storage.advanced": "Show advanced settings",
@@ -3965,6 +4117,82 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.nameTaken": "已有同名远端。",
     "storage.kind": "类型",
     "storage.chooseKind": "请选择…",
+    "storage.provider.alias": "远端别名",
+    "storage.provider.aliyundrive": "阿里云盘",
+    "storage.provider.amazon": "Amazon S3 及兼容存储",
+    "storage.provider.archive": "读取压缩包",
+    "storage.provider.azureblob": "微软 Azure Blob 存储",
+    "storage.provider.azurefiles": "微软 Azure 文件存储",
+    "storage.provider.backblaze": "Backblaze B2",
+    "storage.provider.baidunetdisk": "百度网盘",
+    "storage.provider.box": "Box",
+    "storage.provider.cache": "缓存远端",
+    "storage.provider.chunker": "拆分远端的大文件",
+    "storage.provider.cloudOneFifteen": "115 网盘",
+    "storage.provider.cloudOneTwentyThree": "123 云盘",
+    "storage.provider.cloudinary": "Cloudinary",
+    "storage.provider.combine": "合并多个远端",
+    "storage.provider.compress": "压缩远端",
+    "storage.provider.crypt": "加密远端",
+    "storage.provider.doi": "DOI 数据集",
+    "storage.provider.drime": "Drime",
+    "storage.provider.drive": "Google 云端硬盘",
+    "storage.provider.dropbox": "Dropbox",
+    "storage.provider.fichier": "1Fichier",
+    "storage.provider.filefabric": "Enterprise File Fabric",
+    "storage.provider.filelu": "FileLu",
+    "storage.provider.filen": "Filen",
+    "storage.provider.filescom": "Files.com",
+    "storage.provider.ftp": "FTP",
+    "storage.provider.gofile": "Gofile",
+    "storage.provider.googleCloudStorage": "Google Cloud 存储",
+    "storage.provider.googlePhotos": "Google 相册",
+    "storage.provider.guangyadrive": "光鸭云盘",
+    "storage.provider.hasher": "为远端补充校验和",
+    "storage.provider.hdfs": "Hadoop 分布式文件系统",
+    "storage.provider.hidrive": "HiDrive",
+    "storage.provider.http": "HTTP",
+    "storage.provider.huaweidrive": "华为云空间",
+    "storage.provider.iclouddrive": "iCloud 云盘与照片",
+    "storage.provider.imagekit": "ImageKit.io",
+    "storage.provider.internetarchive": "互联网档案馆",
+    "storage.provider.internxt": "Internxt Drive",
+    "storage.provider.jottacloud": "Jottacloud",
+    "storage.provider.koofr": "Koofr 与 Digi Storage",
+    "storage.provider.linkbox": "Linkbox",
+    "storage.provider.local": "本地磁盘",
+    "storage.provider.mailru": "Mail.ru 云盘",
+    "storage.provider.mega": "MEGA",
+    "storage.provider.memory": "内存存储",
+    "storage.provider.netstorage": "Akamai NetStorage",
+    "storage.provider.onedrive": "微软 OneDrive",
+    "storage.provider.opendrive": "OpenDrive",
+    "storage.provider.oracleobjectstorage": "甲骨文云对象存储",
+    "storage.provider.pcloud": "pCloud",
+    "storage.provider.pikpak": "PikPak",
+    "storage.provider.pixeldrain": "Pixeldrain",
+    "storage.provider.premiumizeme": "premiumize.me",
+    "storage.provider.protondrive": "Proton Drive",
+    "storage.provider.putio": "Put.io",
+    "storage.provider.qingstor": "青云对象存储",
+    "storage.provider.quark": "夸克网盘 / UC 网盘",
+    "storage.provider.quatrix": "Quatrix",
+    "storage.provider.seafile": "Seafile",
+    "storage.provider.sftp": "SSH/SFTP",
+    "storage.provider.shade": "Shade",
+    "storage.provider.sharefile": "Citrix ShareFile",
+    "storage.provider.sia": "Sia 去中心化云",
+    "storage.provider.smb": "SMB/CIFS",
+    "storage.provider.storj": "Storj 去中心化云存储",
+    "storage.provider.sugarsync": "SugarSync",
+    "storage.provider.swift": "OpenStack Swift",
+    "storage.provider.thunder": "迅雷云盘",
+    "storage.provider.ulozto": "Uloz.to",
+    "storage.provider.union": "联合多个远端",
+    "storage.provider.webdav": "WebDAV",
+    "storage.provider.weiyun": "腾讯微云",
+    "storage.provider.yandex": "Yandex 网盘",
+    "storage.provider.zoho": "Zoho WorkDrive",
     "storage.settings": "设置",
     "storage.settingsFooter": "留空的设置使用默认值；标 * 的为必填。",
     "storage.advanced": "显示高级设置",

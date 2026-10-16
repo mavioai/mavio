@@ -1574,6 +1574,158 @@
     <string name="storage_kind">Kind</string>
     <!-- Placeholder of the kind -->
     <string name="storage_choose_kind">Choose…</string>
+    <!-- Name of the kind of remote rclone calls alias -->
+    <string name="storage_provider_alias">Alias of a Remote</string>
+    <!-- Name of the kind of remote rclone calls aliyundrive -->
+    <string name="storage_provider_aliyundrive">Aliyun Drive</string>
+    <!-- Name of the kind of remote rclone calls s3 -->
+    <string name="storage_provider_amazon">Amazon S3 and Compatible Storage</string>
+    <!-- Name of the kind of remote rclone calls archive -->
+    <string name="storage_provider_archive">Read Archives</string>
+    <!-- Name of the kind of remote rclone calls azureblob -->
+    <string name="storage_provider_azureblob">Microsoft Azure Blob Storage</string>
+    <!-- Name of the kind of remote rclone calls azurefiles -->
+    <string name="storage_provider_azurefiles">Microsoft Azure Files</string>
+    <!-- Name of the kind of remote rclone calls b2 -->
+    <string name="storage_provider_backblaze">Backblaze B2</string>
+    <!-- Name of the kind of remote rclone calls baidunetdisk -->
+    <string name="storage_provider_baidunetdisk">Baidu Netdisk</string>
+    <!-- Name of the kind of remote rclone calls box -->
+    <string name="storage_provider_box">Box</string>
+    <!-- Name of the kind of remote rclone calls cache -->
+    <string name="storage_provider_cache">Cache a Remote</string>
+    <!-- Name of the kind of remote rclone calls chunker -->
+    <string name="storage_provider_chunker">Split Large Files of a Remote</string>
+    <!-- Name of the kind of remote rclone calls cloud115 -->
+    <string name="storage_provider_cloud_one_fifteen">115 Drive</string>
+    <!-- Name of the kind of remote rclone calls cloud123 -->
+    <string name="storage_provider_cloud_one_twenty_three">123 Drive</string>
+    <!-- Name of the kind of remote rclone calls cloudinary -->
+    <string name="storage_provider_cloudinary">Cloudinary</string>
+    <!-- Name of the kind of remote rclone calls combine -->
+    <string name="storage_provider_combine">Combine Remotes</string>
+    <!-- Name of the kind of remote rclone calls compress -->
+    <string name="storage_provider_compress">Compress a Remote</string>
+    <!-- Name of the kind of remote rclone calls crypt -->
+    <string name="storage_provider_crypt">Encrypt a Remote</string>
+    <!-- Name of the kind of remote rclone calls doi -->
+    <string name="storage_provider_doi">DOI Datasets</string>
+    <!-- Name of the kind of remote rclone calls drime -->
+    <string name="storage_provider_drime">Drime</string>
+    <!-- Name of the kind of remote rclone calls drive -->
+    <string name="storage_provider_drive">Google Drive</string>
+    <!-- Name of the kind of remote rclone calls dropbox -->
+    <string name="storage_provider_dropbox">Dropbox</string>
+    <!-- Name of the kind of remote rclone calls fichier -->
+    <string name="storage_provider_fichier">1Fichier</string>
+    <!-- Name of the kind of remote rclone calls filefabric -->
+    <string name="storage_provider_filefabric">Enterprise File Fabric</string>
+    <!-- Name of the kind of remote rclone calls filelu -->
+    <string name="storage_provider_filelu">FileLu</string>
+    <!-- Name of the kind of remote rclone calls filen -->
+    <string name="storage_provider_filen">Filen</string>
+    <!-- Name of the kind of remote rclone calls filescom -->
+    <string name="storage_provider_filescom">Files.com</string>
+    <!-- Name of the kind of remote rclone calls ftp -->
+    <string name="storage_provider_ftp">FTP</string>
+    <!-- Name of the kind of remote rclone calls gofile -->
+    <string name="storage_provider_gofile">Gofile</string>
+    <!-- Name of the kind of remote rclone calls google cloud storage -->
+    <string name="storage_provider_google_cloud_storage">Google Cloud Storage</string>
+    <!-- Name of the kind of remote rclone calls google photos -->
+    <string name="storage_provider_google_photos">Google Photos</string>
+    <!-- Name of the kind of remote rclone calls guangyadrive -->
+    <string name="storage_provider_guangyadrive">GuangYa Drive</string>
+    <!-- Name of the kind of remote rclone calls hasher -->
+    <string name="storage_provider_hasher">Checksums for a Remote</string>
+    <!-- Name of the kind of remote rclone calls hdfs -->
+    <string name="storage_provider_hdfs">Hadoop Distributed File System</string>
+    <!-- Name of the kind of remote rclone calls hidrive -->
+    <string name="storage_provider_hidrive">HiDrive</string>
+    <!-- Name of the kind of remote rclone calls http -->
+    <string name="storage_provider_http">HTTP</string>
+    <!-- Name of the kind of remote rclone calls huaweidrive -->
+    <string name="storage_provider_huaweidrive">Huawei Drive</string>
+    <!-- Name of the kind of remote rclone calls iclouddrive -->
+    <string name="storage_provider_iclouddrive">iCloud Drive and Photos</string>
+    <!-- Name of the kind of remote rclone calls imagekit -->
+    <string name="storage_provider_imagekit">ImageKit.io</string>
+    <!-- Name of the kind of remote rclone calls internetarchive -->
+    <string name="storage_provider_internetarchive">Internet Archive</string>
+    <!-- Name of the kind of remote rclone calls internxt -->
+    <string name="storage_provider_internxt">Internxt Drive</string>
+    <!-- Name of the kind of remote rclone calls jottacloud -->
+    <string name="storage_provider_jottacloud">Jottacloud</string>
+    <!-- Name of the kind of remote rclone calls koofr -->
+    <string name="storage_provider_koofr">Koofr and Digi Storage</string>
+    <!-- Name of the kind of remote rclone calls linkbox -->
+    <string name="storage_provider_linkbox">Linkbox</string>
+    <!-- Name of the kind of remote rclone calls local -->
+    <string name="storage_provider_local">Local Disk</string>
+    <!-- Name of the kind of remote rclone calls mailru -->
+    <string name="storage_provider_mailru">Mail.ru Cloud</string>
+    <!-- Name of the kind of remote rclone calls mega -->
+    <string name="storage_provider_mega">MEGA</string>
+    <!-- Name of the kind of remote rclone calls memory -->
+    <string name="storage_provider_memory">In-Memory Storage</string>
+    <!-- Name of the kind of remote rclone calls netstorage -->
+    <string name="storage_provider_netstorage">Akamai NetStorage</string>
+    <!-- Name of the kind of remote rclone calls onedrive -->
+    <string name="storage_provider_onedrive">Microsoft OneDrive</string>
+    <!-- Name of the kind of remote rclone calls opendrive -->
+    <string name="storage_provider_opendrive">OpenDrive</string>
+    <!-- Name of the kind of remote rclone calls oracleobjectstorage -->
+    <string name="storage_provider_oracleobjectstorage">Oracle Cloud Object Storage</string>
+    <!-- Name of the kind of remote rclone calls pcloud -->
+    <string name="storage_provider_pcloud">pCloud</string>
+    <!-- Name of the kind of remote rclone calls pikpak -->
+    <string name="storage_provider_pikpak">PikPak</string>
+    <!-- Name of the kind of remote rclone calls pixeldrain -->
+    <string name="storage_provider_pixeldrain">Pixeldrain</string>
+    <!-- Name of the kind of remote rclone calls premiumizeme -->
+    <string name="storage_provider_premiumizeme">premiumize.me</string>
+    <!-- Name of the kind of remote rclone calls protondrive -->
+    <string name="storage_provider_protondrive">Proton Drive</string>
+    <!-- Name of the kind of remote rclone calls putio -->
+    <string name="storage_provider_putio">Put.io</string>
+    <!-- Name of the kind of remote rclone calls qingstor -->
+    <string name="storage_provider_qingstor">QingStor Object Storage</string>
+    <!-- Name of the kind of remote rclone calls quark -->
+    <string name="storage_provider_quark">Quark Drive / UC Drive</string>
+    <!-- Name of the kind of remote rclone calls quatrix -->
+    <string name="storage_provider_quatrix">Quatrix by Maytech</string>
+    <!-- Name of the kind of remote rclone calls seafile -->
+    <string name="storage_provider_seafile">Seafile</string>
+    <!-- Name of the kind of remote rclone calls sftp -->
+    <string name="storage_provider_sftp">SSH/SFTP</string>
+    <!-- Name of the kind of remote rclone calls shade -->
+    <string name="storage_provider_shade">Shade</string>
+    <!-- Name of the kind of remote rclone calls sharefile -->
+    <string name="storage_provider_sharefile">Citrix ShareFile</string>
+    <!-- Name of the kind of remote rclone calls sia -->
+    <string name="storage_provider_sia">Sia Decentralized Cloud</string>
+    <!-- Name of the kind of remote rclone calls smb -->
+    <string name="storage_provider_smb">SMB/CIFS</string>
+    <!-- Name of the kind of remote rclone calls storj -->
+    <string name="storage_provider_storj">Storj Decentralized Cloud Storage</string>
+    <!-- Name of the kind of remote rclone calls sugarsync -->
+    <string name="storage_provider_sugarsync">SugarSync</string>
+    <!-- Name of the kind of remote rclone calls swift -->
+    <string name="storage_provider_swift">OpenStack Swift</string>
+    <!-- Name of the kind of remote rclone calls thunder -->
+    <string name="storage_provider_thunder">Xunlei Drive</string>
+    <!-- Name of the kind of remote rclone calls ulozto -->
+    <string name="storage_provider_ulozto">Uloz.to</string>
+    <!-- Name of the kind of remote rclone calls union -->
+    <string name="storage_provider_union">Union of Remotes</string>
+    <!-- Name of the kind of remote rclone calls webdav -->
+    <string name="storage_provider_webdav">WebDAV</string>
+    <!-- Name of the kind of remote rclone calls weiyun -->
+    <string name="storage_provider_weiyun">Tencent Weiyun</string>
+    <!-- Name of the kind of remote rclone calls yandex -->
+    <string name="storage_provider_yandex">Yandex Disk</string>
+    <!-- Name of the kind of remote rclone calls zoho -->
+    <string name="storage_provider_zoho">Zoho WorkDrive</string>
     <!-- Title of a remote's options -->
     <string name="storage_settings">Settings</string>
     <!-- Footer of a remote's options -->

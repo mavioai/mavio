@@ -4,6 +4,7 @@
 // their folders, and the download clients of cloud drives' offline
 // downloads.
 import { create } from "@bufbuild/protobuf";
+import { type MessageKey, messages } from "@mavio/design/strings";
 import {
   errorMessage,
   type ServerEntry,
@@ -119,8 +120,13 @@ function StorageList({ server }: { server: ServerEntry }) {
   );
 }
 
-/** A kind of remote's name, as its description says it. */
+/** The keys of the kinds of remotes whose names are not camelCase as they are. */
+const kindKeys: Record<string, string> = { b2: "backblaze", cloud115: "cloudOneFifteen", cloud123: "cloudOneTwentyThree", s3: "amazon" };
+
+/** A kind of remote's name in the UI's language, else as rclone describes it. */
 function kindOf(providers: Provider[] | undefined, type: string) {
+  const key = `storage.provider.${kindKeys[type] ?? type.replace(/ (\w)/g, (_, c: string) => c.toUpperCase())}`;
+  if (key in messages.en) return t(key as MessageKey);
   return providers?.find((p) => p.name === type)?.description || type;
 }
 
@@ -260,7 +266,8 @@ function NewRemote({ server }: { server: ServerEntry }) {
   const [type, setType] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [question, setQuestion] = useState<ConfigQuestion>();
-  const sorted = (providers.data ?? []).toSorted((a, b) => (a.description || a.name).localeCompare(b.description || b.name, locale));
+  const named = (providers.data ?? []).map((p) => ({ provider: p, name: kindOf(providers.data, p.name) }));
+  const sorted = named.toSorted((a, b) => a.name.localeCompare(b.name, locale)).map((p) => p.provider);
   const provider = sorted.find((p) => p.name === type);
   const taken = remotes.data?.some((r) => r.name === name.trim());
   const valid = /^[A-Za-z0-9_][A-Za-z0-9_.+@-]*$/.test(name.trim()) && !taken;
@@ -284,7 +291,7 @@ function NewRemote({ server }: { server: ServerEntry }) {
             value={type}
             label={t("storage.kind")}
             className="w-full sm:w-72"
-            options={[{ value: "", label: t("storage.chooseKind") }, ...sorted.map((p) => ({ value: p.name, label: p.description ? `${p.description} (${p.name})` : p.name }))]}
+            options={[{ value: "", label: t("storage.chooseKind") }, ...sorted.map((p) => ({ value: p.name, label: `${kindOf(providers.data, p.name)} (${p.name})` }))]}
             onChange={(v) => (setType(v), setValues({}))}
           />
         </Row>
