@@ -55,6 +55,12 @@ service DiscoverService {
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetCollection tells of a collection of movies by its TMDB ID with its
+  // parts marked as Discover's titles, as Seerr's collection page. It
+  // fails with NOT_FOUND when no discovery provider knows it.
+  rpc GetCollection(GetCollectionRequest) returns (GetCollectionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message ListCatalogsRequest {
@@ -358,6 +364,35 @@ message PersonTitle {
   DiscoveredTitle title = 1;
   // The characters they play, or their jobs.
   string role = 2;
+}
+
+message GetCollectionRequest {
+  int32 tmdb_collection_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
+  // ISO 639-1 language of names and overviews; unset for English.
+  string language = 2;
+}
+
+message GetCollectionResponse {
+  Collection collection = 1;
+}
+
+// Collection is a collection of movies as a discovery provider tells of
+// it.
+message Collection {
+  string name = 1;
+  string overview = 2;
+  string poster_url = 3;
+  string backdrop_url = 4;
+  // Such as "tmdb_collection".
+  map<string, string> external_ids = 5;
+  // Its movies in release order, without adult movies and those above the
+  // caller's rating limit.
+  repeated DiscoveredTitle parts = 6;
+  // The number of movies left out.
+  int32 hidden_results = 7;
 }
 
 // Title is a movie or series as the metadata providers tell it, in the

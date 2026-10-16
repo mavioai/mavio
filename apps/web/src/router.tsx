@@ -4,6 +4,7 @@ import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 import { CreditsScreen, TitleCreditsScreen } from "./screens/credits.tsx";
 import { Details } from "./screens/details.tsx";
 import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
+import { CollectionScreen } from "./screens/discover-collection.tsx";
 import { parseFilters } from "./screens/discover-filters.tsx";
 import { DiscoveredPersonScreen } from "./screens/discover-person.tsx";
 import { HomeScreen } from "./screens/home.tsx";
@@ -141,6 +142,7 @@ const discoveredPerson = createRoute({
   path: "/s/$serverId/discover/person/$tmdbId",
   component: DiscoveredPersonScreen,
 });
+const collection = createRoute({ getParentRoute: () => root, path: "/s/$serverId/discover/collection/$tmdbId", component: CollectionScreen });
 
 const player = createRoute({
   getParentRoute: () => root,
@@ -175,6 +177,7 @@ export const router = createRouter({
     titleCredits,
     person,
     discoveredPerson,
+    collection,
     player,
   ]),
   scrollRestoration: true,

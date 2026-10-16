@@ -733,7 +733,7 @@ type fakeDiscovery struct {
 	titles     []*pluginv1.DiscoveredTitle
 	last       *pluginv1.DiscoverRequest
 	lastSearch *pluginv1.SearchTitlesRequest
-	// noSearch answers searches and people unimplemented.
+	// noSearch answers searches, people and collections unimplemented.
 	noSearch bool
 }
 
@@ -763,6 +763,19 @@ func (f *fakeDiscovery) GetPerson(_ context.Context, req *pluginv1.GetPersonRequ
 	crew := []*pluginv1.PersonTitle{pluginv1.PersonTitle_builder{Title: f.titles[0], Role: new("Producer")}.Build()}
 	return pluginv1.GetPersonResponse_builder{
 		Found: new(true), Person: pluginv1.Person_builder{Name: new("Star"), Cast: cast, Crew: crew}.Build(),
+	}.Build(), nil
+}
+
+// GetCollection tells of collection 5, of the titles.
+func (f *fakeDiscovery) GetCollection(_ context.Context, req *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	if f.noSearch {
+		return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no collections"))
+	}
+	if req.GetExternalIds()["tmdb_collection"] != "5" {
+		return pluginv1.GetCollectionResponse_builder{Found: new(false)}.Build(), nil
+	}
+	return pluginv1.GetCollectionResponse_builder{
+		Found: new(true), Collection: pluginv1.Collection_builder{Name: new("Saga"), Parts: f.titles}.Build(),
 	}.Build(), nil
 }
 

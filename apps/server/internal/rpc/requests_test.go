@@ -65,6 +65,13 @@ func (stubDiscovery) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*pl
 	return pluginv1.GetPersonResponse_builder{Found: new(true), Person: pluginv1.Person_builder{Name: new("Star"), Cast: cast}.Build()}.Build(), nil
 }
 
+func (stubDiscovery) GetCollection(context.Context, *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	page, _ := stubDiscovery{}.Discover(context.Background(), nil)
+	return pluginv1.GetCollectionResponse_builder{
+		Found: new(true), Collection: pluginv1.Collection_builder{Name: new("Saga"), Parts: page.GetTitles()}.Build(),
+	}.Build(), nil
+}
+
 func (stubDiscovery) Discover(context.Context, *pluginv1.DiscoverRequest) (*pluginv1.DiscoverResponse, error) {
 	var titles []*pluginv1.DiscoveredTitle
 	for _, id := range []int{1, 2} {
@@ -182,6 +189,11 @@ func TestRequestServices(t *testing.T) {
 	}
 	_, err = discover.GetPerson(ctx, &acquisitionv1.GetPersonRequest{})
 	wantCode(t, "GetPerson without an ID", err, connect.CodeInvalidArgument)
+	col, err := discover.GetCollection(ctx, acquisitionv1.GetCollectionRequest_builder{TmdbCollectionId: new(int32(5))}.Build())
+	if parts := col.GetCollection().GetParts(); err != nil || col.GetCollection().GetName() != "Saga" || len(parts) != 1 ||
+		parts[0].GetName() != "Movie 1" || col.GetCollection().GetHiddenResults() != 1 {
+		t.Errorf("GetCollection() = %v, %v", col, err)
+	}
 	title, err := discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(1))}.Build())
 	if err != nil || title.GetTitle().GetName() != "Movie 1" || title.GetTitle().GetOfficialRating() != "PG" || !title.GetTitle().GetRequestable() ||
 		title.GetTitle().GetExternalIds()["tmdb"] != "1" {

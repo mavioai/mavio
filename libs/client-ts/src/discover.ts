@@ -3,7 +3,7 @@
 // sorted (§6.3.28), the values of their filters, titles found by name, a
 // title with its seasons, and requests of it.
 import type { MessageInitShape } from "@bufbuild/protobuf";
-import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Person, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
+import { type Catalog, type Collection, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Person, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
@@ -241,6 +241,20 @@ export function useDiscoveredPerson(server: ServerEntry | undefined, tmdbId: num
     queryKey: serverKey(server?.id ?? "", "discover", "person", tmdbId, language),
     queryFn: async (): Promise<Person | undefined> => (await servers.client(DiscoverService, server!).getPerson({ tmdbId, language })).person,
     enabled: !!server && tmdbId > 0,
+  });
+}
+
+/**
+ * A collection of movies by its TMDB ID with its parts, marked as
+ * Discover's, in a language (ISO 639-1), English when empty.
+ */
+export function useCollection(server: ServerEntry | undefined, tmdbCollectionId: number, language = "") {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "collection", tmdbCollectionId, language),
+    queryFn: async (): Promise<Collection | undefined> =>
+      (await servers.client(DiscoverService, server!).getCollection({ tmdbCollectionId, language })).collection,
+    enabled: !!server && tmdbCollectionId > 0,
   });
 }
 

@@ -5010,4 +5010,32 @@ public enum MavioStrings {
 
     /// Shown on the credits page when an item credits no one.
     public static var creditsNone: String { NSLocalizedString("credits.none", bundle: .module, comment: "") }
+
+    /// Number of movies of a discovered collection.
+    public static func collectionMovieCount(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("collection.movieCount", bundle: .module, comment: ""), count)
+    }
+
+    /// Section of a discovered collection's page with its movies.
+    public static var collectionMovies: String { NSLocalizedString("collection.movies", bundle: .module, comment: "") }
+
+    /// Button of a discovered collection's page requesting its movies.
+    public static var collectionRequest: String { NSLocalizedString("collection.request", bundle: .module, comment: "") }
+
+    /// Button of the dialog requesting the movies of a collection chosen.
+    public static func collectionRequestMovies(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("collection.requestMovies", bundle: .module, comment: ""), count)
+    }
+
+    /// Chooses every movie of a collection not requested yet.
+    public static var collectionAllMovies: String { NSLocalizedString("collection.allMovies", bundle: .module, comment: "") }
+
+    /// Button of a discovered collection's page, for administrators, blocklisting its movies so that nobody can request them.
+    public static var collectionBlock: String { NSLocalizedString("collection.block", bundle: .module, comment: "") }
+
+    /// Button of a discovered collection's page, for administrators, taking its movies off the blocklist.
+    public static var collectionUnblock: String { NSLocalizedString("collection.unblock", bundle: .module, comment: "") }
+
+    /// Link from a movie's page to the page of the collection it belongs to.
+    public static var collectionView: String { NSLocalizedString("collection.view", bundle: .module, comment: "") }
 }

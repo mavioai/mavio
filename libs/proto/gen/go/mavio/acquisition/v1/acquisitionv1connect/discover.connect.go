@@ -54,6 +54,9 @@ const (
 	// DiscoverServiceGetPersonProcedure is the fully-qualified name of the DiscoverService's GetPerson
 	// RPC.
 	DiscoverServiceGetPersonProcedure = "/mavio.acquisition.v1.DiscoverService/GetPerson"
+	// DiscoverServiceGetCollectionProcedure is the fully-qualified name of the DiscoverService's
+	// GetCollection RPC.
+	DiscoverServiceGetCollectionProcedure = "/mavio.acquisition.v1.DiscoverService/GetCollection"
 )
 
 // DiscoverServiceClient is a client for the mavio.acquisition.v1.DiscoverService service.
@@ -83,6 +86,10 @@ type DiscoverServiceClient interface {
 	// person page. It fails with NOT_FOUND when no discovery provider knows
 	// them.
 	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
+	// GetCollection tells of a collection of movies by its TMDB ID with its
+	// parts marked as Discover's titles, as Seerr's collection page. It
+	// fails with NOT_FOUND when no discovery provider knows it.
+	GetCollection(context.Context, *v1.GetCollectionRequest) (*v1.GetCollectionResponse, error)
 }
 
 // NewDiscoverServiceClient constructs a client for the mavio.acquisition.v1.DiscoverService
@@ -145,6 +152,13 @@ func NewDiscoverServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getCollection: connect.NewClient[v1.GetCollectionRequest, v1.GetCollectionResponse](
+			httpClient,
+			baseURL+DiscoverServiceGetCollectionProcedure,
+			connect.WithSchema(discoverServiceMethods.ByName("GetCollection")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -157,6 +171,7 @@ type discoverServiceClient struct {
 	getTitle         *connect.Client[v1.GetTitleRequest, v1.GetTitleResponse]
 	getSeason        *connect.Client[v1.GetSeasonRequest, v1.GetSeasonResponse]
 	getPerson        *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
+	getCollection    *connect.Client[v1.GetCollectionRequest, v1.GetCollectionResponse]
 }
 
 // ListCatalogs calls mavio.acquisition.v1.DiscoverService.ListCatalogs.
@@ -222,6 +237,15 @@ func (c *discoverServiceClient) GetPerson(ctx context.Context, req *v1.GetPerson
 	return nil, err
 }
 
+// GetCollection calls mavio.acquisition.v1.DiscoverService.GetCollection.
+func (c *discoverServiceClient) GetCollection(ctx context.Context, req *v1.GetCollectionRequest) (*v1.GetCollectionResponse, error) {
+	response, err := c.getCollection.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoverServiceHandler is an implementation of the mavio.acquisition.v1.DiscoverService service.
 type DiscoverServiceHandler interface {
 	// ListCatalogs lists the catalogs of every discovery provider.
@@ -249,6 +273,10 @@ type DiscoverServiceHandler interface {
 	// person page. It fails with NOT_FOUND when no discovery provider knows
 	// them.
 	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
+	// GetCollection tells of a collection of movies by its TMDB ID with its
+	// parts marked as Discover's titles, as Seerr's collection page. It
+	// fails with NOT_FOUND when no discovery provider knows it.
+	GetCollection(context.Context, *v1.GetCollectionRequest) (*v1.GetCollectionResponse, error)
 }
 
 // NewDiscoverServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -307,6 +335,13 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoverServiceGetCollectionHandler := connect.NewUnaryHandlerSimple(
+		DiscoverServiceGetCollectionProcedure,
+		svc.GetCollection,
+		connect.WithSchema(discoverServiceMethods.ByName("GetCollection")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DiscoverService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoverServiceListCatalogsProcedure:
@@ -323,6 +358,8 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 			discoverServiceGetSeasonHandler.ServeHTTP(w, r)
 		case DiscoverServiceGetPersonProcedure:
 			discoverServiceGetPersonHandler.ServeHTTP(w, r)
+		case DiscoverServiceGetCollectionProcedure:
+			discoverServiceGetCollectionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -358,4 +395,8 @@ func (UnimplementedDiscoverServiceHandler) GetSeason(context.Context, *v1.GetSea
 
 func (UnimplementedDiscoverServiceHandler) GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetPerson is not implemented"))
+}
+
+func (UnimplementedDiscoverServiceHandler) GetCollection(context.Context, *v1.GetCollectionRequest) (*v1.GetCollectionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetCollection is not implemented"))
 }

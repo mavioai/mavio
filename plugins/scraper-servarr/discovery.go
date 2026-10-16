@@ -163,6 +163,12 @@ func (p *plugin) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*plugin
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scraper-servarr does not know people"))
 }
 
+// GetCollection is not offered: collections are told by providers knowing
+// TMDB.
+func (p *plugin) GetCollection(context.Context, *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scraper-servarr does not know collections"))
+}
+
 // ListFilterValues lists no values: the catalogs take no filters with
 // values.
 func (p *plugin) ListFilterValues(context.Context, *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {

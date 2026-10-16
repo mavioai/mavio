@@ -1562,7 +1562,15 @@ export type MessageKey =
   | 'credits.artists'
   | 'credits.narrators'
   | 'credits.other'
-  | 'credits.none';
+  | 'credits.none'
+  | 'collection.movieCount'
+  | 'collection.movies'
+  | 'collection.request'
+  | 'collection.requestMovies'
+  | 'collection.allMovies'
+  | 'collection.block'
+  | 'collection.unblock'
+  | 'collection.view';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -3117,7 +3125,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "credits.artists": "Artists",
     "credits.narrators": "Narrators",
     "credits.other": "Other Crew",
-    "credits.none": "No cast or crew is known."
+    "credits.none": "No cast or crew is known.",
+    "collection.movieCount": "{count, plural, one {# movie} other {# movies}}",
+    "collection.movies": "Movies",
+    "collection.request": "Request Collection",
+    "collection.requestMovies": "{count, plural, one {Request # Movie} other {Request # Movies}}",
+    "collection.allMovies": "All Movies",
+    "collection.block": "Blocklist",
+    "collection.unblock": "Remove from Blocklist",
+    "collection.view": "View"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4670,6 +4686,14 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "credits.artists": "艺术家",
     "credits.narrators": "旁白",
     "credits.other": "其他职员",
-    "credits.none": "暂无演职人员信息。"
+    "credits.none": "暂无演职人员信息。",
+    "collection.movieCount": "{count, plural, other {# 部电影}}",
+    "collection.movies": "电影",
+    "collection.request": "请求合集",
+    "collection.requestMovies": "{count, plural, other {请求 # 部电影}}",
+    "collection.allMovies": "全部电影",
+    "collection.block": "屏蔽",
+    "collection.unblock": "取消屏蔽",
+    "collection.view": "查看"
   }
 };

@@ -249,3 +249,38 @@ func TestListFilterValues(t *testing.T) {
 		t.Errorf("network lookup query = %v", q)
 	}
 }
+
+func TestGetCollection(t *testing.T) {
+	p, fake := newDiscoveryPlugin(t)
+	fake.routes["/3/collection/10"] = `{"id":10,"name":"Star Wars Collection","overview":"A galaxy.","poster_path":"/p.jpg","backdrop_path":"/b.jpg","parts":[
+		{"id":3,"title":"Unannounced"},
+		{"id":2,"title":"The Empire Strikes Back","release_date":"1980-05-20"},
+		{"id":9,"title":"Adult","adult":true,"release_date":"1970-01-01"},
+		{"id":1,"title":"Star Wars","release_date":"1977-05-25"}]}`
+	resp, err := p.GetCollection(t.Context(), pluginv1.GetCollectionRequest_builder{
+		ExternalIds: map[string]string{keyTMDBCollection: "10"}, Language: proto.String("fr"),
+	}.Build())
+	if err != nil || !resp.GetFound() {
+		t.Fatalf("GetCollection() = %v, %v", resp, err)
+	}
+	c := resp.GetCollection()
+	if c.GetName() != "Star Wars Collection" || c.GetOverview() != "A galaxy." || c.GetPosterUrl() != "https://image.tmdb.org/t/p/original/p.jpg" ||
+		c.GetBackdropUrl() != "https://image.tmdb.org/t/p/original/b.jpg" || c.GetExternalIds()[keyTMDBCollection] != "10" {
+		t.Errorf("GetCollection() = %v", c)
+	}
+	var parts []string
+	for _, pt := range c.GetParts() {
+		parts = append(parts, pt.GetExternalIds()[keyTMDB])
+	}
+	// In release order, those without a date last; adult movies left out.
+	if want := []string{"1", "2", "3"}; !slices.Equal(parts, want) {
+		t.Errorf("parts = %q, want = %q", parts, want)
+	}
+	if got := fake.queries()["/3/collection/10"].Get("language"); got != "fr" {
+		t.Errorf("language = %q, want = fr", got)
+	}
+	resp, err = p.GetCollection(t.Context(), pluginv1.GetCollectionRequest_builder{ExternalIds: map[string]string{keyTMDBCollection: "404"}}.Build())
+	if err != nil || resp.GetFound() {
+		t.Errorf("GetCollection(unknown) = %v, %v, want not found", resp, err)
+	}
+}

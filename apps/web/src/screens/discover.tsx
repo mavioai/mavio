@@ -73,7 +73,7 @@ export function tmdbOf(title: DiscoveredTitle): number {
 }
 
 /** The status a title's card and header show, if any. */
-function statusLabel(status: MediaStatus): string | undefined {
+export function statusLabel(status: MediaStatus): string | undefined {
   switch (status) {
     case MediaStatus.AVAILABLE:
       return t("discover.available");
@@ -167,6 +167,7 @@ export function CatalogShelf({
   title,
   tmdbId = 0,
   filters,
+  more,
 }: {
   server: ServerEntry;
   row: CatalogRow;
@@ -174,6 +175,8 @@ export function CatalogShelf({
   tmdbId?: number;
   /** Filters of the row, which then has no See All. */
   filters?: CatalogFilters;
+  /** A link of the row's own, in place of See All. */
+  more?: ReactNode;
 }) {
   const { tv } = usePrefs();
   const q = useCatalog(server, row.catalog.id, row.mediaKind, discoverLanguage, tmdbId, filters);
@@ -193,7 +196,7 @@ export function CatalogShelf({
       </Link>
     ) : undefined;
   return (
-    <Shelf title={title} more={tv ? undefined : all()}>
+    <Shelf title={title} more={tv ? undefined : (more ?? all())}>
       {q.isPending
         ? Array.from({ length: 8 }, (_, i) => <CardPlaceholder key={i} />)
         : titles.map((title) => <TitleCard key={`${title.mediaKind}/${tmdbOf(title)}`} serverId={server.id} title={title} />)}
@@ -418,6 +421,14 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           row={{ catalog: collection, mediaKind: title.mediaKind }}
           filters={{ collectionId: Number(title.externalIds.tmdb_collection) }}
           title={title.collectionName || t("item.collection")}
+          more={
+            <Link
+              to="/s/$serverId/discover/collection/$tmdbId"
+              params={{ serverId: server.id, tmdbId: title.externalIds.tmdb_collection }}
+            >
+              {t("collection.view")}
+            </Link>
+          }
         />
       )}
       <TitleFacts title={title} />

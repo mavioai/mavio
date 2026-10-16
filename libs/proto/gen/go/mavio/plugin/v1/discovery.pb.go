@@ -3437,6 +3437,440 @@ func (b0 PersonTitle_builder) Build() *PersonTitle {
 	return m0
 }
 
+type GetCollectionRequest struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ExternalIds  map[string]string      `protobuf:"bytes,1,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Language     *string                `protobuf:"bytes,2,opt,name=language"`
+	xxx_hidden_IncludeAdult bool                   `protobuf:"varint,3,opt,name=include_adult,json=includeAdult"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *GetCollectionRequest) Reset() {
+	*x = GetCollectionRequest{}
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCollectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCollectionRequest) ProtoMessage() {}
+
+func (x *GetCollectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetCollectionRequest) GetExternalIds() map[string]string {
+	if x != nil {
+		return x.xxx_hidden_ExternalIds
+	}
+	return nil
+}
+
+func (x *GetCollectionRequest) GetLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_Language != nil {
+			return *x.xxx_hidden_Language
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetCollectionRequest) GetIncludeAdult() bool {
+	if x != nil {
+		return x.xxx_hidden_IncludeAdult
+	}
+	return false
+}
+
+func (x *GetCollectionRequest) SetExternalIds(v map[string]string) {
+	x.xxx_hidden_ExternalIds = v
+}
+
+func (x *GetCollectionRequest) SetLanguage(v string) {
+	x.xxx_hidden_Language = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *GetCollectionRequest) SetIncludeAdult(v bool) {
+	x.xxx_hidden_IncludeAdult = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *GetCollectionRequest) HasLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetCollectionRequest) HasIncludeAdult() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *GetCollectionRequest) ClearLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Language = nil
+}
+
+func (x *GetCollectionRequest) ClearIncludeAdult() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_IncludeAdult = false
+}
+
+type GetCollectionRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Such as "tmdb_collection".
+	ExternalIds map[string]string
+	// ISO 639-1 language of names and overviews.
+	Language     *string
+	IncludeAdult *bool
+}
+
+func (b0 GetCollectionRequest_builder) Build() *GetCollectionRequest {
+	m0 := &GetCollectionRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_ExternalIds = b.ExternalIds
+	if b.Language != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Language = b.Language
+	}
+	if b.IncludeAdult != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_IncludeAdult = *b.IncludeAdult
+	}
+	return m0
+}
+
+type GetCollectionResponse struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Found       bool                   `protobuf:"varint,1,opt,name=found"`
+	xxx_hidden_Collection  *Collection            `protobuf:"bytes,2,opt,name=collection"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetCollectionResponse) Reset() {
+	*x = GetCollectionResponse{}
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCollectionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCollectionResponse) ProtoMessage() {}
+
+func (x *GetCollectionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetCollectionResponse) GetFound() bool {
+	if x != nil {
+		return x.xxx_hidden_Found
+	}
+	return false
+}
+
+func (x *GetCollectionResponse) GetCollection() *Collection {
+	if x != nil {
+		return x.xxx_hidden_Collection
+	}
+	return nil
+}
+
+func (x *GetCollectionResponse) SetFound(v bool) {
+	x.xxx_hidden_Found = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *GetCollectionResponse) SetCollection(v *Collection) {
+	x.xxx_hidden_Collection = v
+}
+
+func (x *GetCollectionResponse) HasFound() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetCollectionResponse) HasCollection() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Collection != nil
+}
+
+func (x *GetCollectionResponse) ClearFound() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Found = false
+}
+
+func (x *GetCollectionResponse) ClearCollection() {
+	x.xxx_hidden_Collection = nil
+}
+
+type GetCollectionResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Found      *bool
+	Collection *Collection
+}
+
+func (b0 GetCollectionResponse_builder) Build() *GetCollectionResponse {
+	m0 := &GetCollectionResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Found != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Found = *b.Found
+	}
+	x.xxx_hidden_Collection = b.Collection
+	return m0
+}
+
+// Collection is a collection of movies, such as a film series.
+type Collection struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Overview    *string                `protobuf:"bytes,2,opt,name=overview"`
+	xxx_hidden_PosterUrl   *string                `protobuf:"bytes,3,opt,name=poster_url,json=posterUrl"`
+	xxx_hidden_BackdropUrl *string                `protobuf:"bytes,4,opt,name=backdrop_url,json=backdropUrl"`
+	xxx_hidden_ExternalIds map[string]string      `protobuf:"bytes,5,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Parts       *[]*DiscoveredTitle    `protobuf:"bytes,6,rep,name=parts"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *Collection) Reset() {
+	*x = Collection{}
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Collection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Collection) ProtoMessage() {}
+
+func (x *Collection) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_discovery_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Collection) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Collection) GetOverview() string {
+	if x != nil {
+		if x.xxx_hidden_Overview != nil {
+			return *x.xxx_hidden_Overview
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Collection) GetPosterUrl() string {
+	if x != nil {
+		if x.xxx_hidden_PosterUrl != nil {
+			return *x.xxx_hidden_PosterUrl
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Collection) GetBackdropUrl() string {
+	if x != nil {
+		if x.xxx_hidden_BackdropUrl != nil {
+			return *x.xxx_hidden_BackdropUrl
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Collection) GetExternalIds() map[string]string {
+	if x != nil {
+		return x.xxx_hidden_ExternalIds
+	}
+	return nil
+}
+
+func (x *Collection) GetParts() []*DiscoveredTitle {
+	if x != nil {
+		if x.xxx_hidden_Parts != nil {
+			return *x.xxx_hidden_Parts
+		}
+	}
+	return nil
+}
+
+func (x *Collection) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+}
+
+func (x *Collection) SetOverview(v string) {
+	x.xxx_hidden_Overview = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+}
+
+func (x *Collection) SetPosterUrl(v string) {
+	x.xxx_hidden_PosterUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+}
+
+func (x *Collection) SetBackdropUrl(v string) {
+	x.xxx_hidden_BackdropUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *Collection) SetExternalIds(v map[string]string) {
+	x.xxx_hidden_ExternalIds = v
+}
+
+func (x *Collection) SetParts(v []*DiscoveredTitle) {
+	x.xxx_hidden_Parts = &v
+}
+
+func (x *Collection) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Collection) HasOverview() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Collection) HasPosterUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Collection) HasBackdropUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Collection) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *Collection) ClearOverview() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Overview = nil
+}
+
+func (x *Collection) ClearPosterUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_PosterUrl = nil
+}
+
+func (x *Collection) ClearBackdropUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_BackdropUrl = nil
+}
+
+type Collection_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Name        *string
+	Overview    *string
+	PosterUrl   *string
+	BackdropUrl *string
+	// Such as "tmdb_collection".
+	ExternalIds map[string]string
+	// Its movies, in release order.
+	Parts []*DiscoveredTitle
+}
+
+func (b0 Collection_builder) Build() *Collection {
+	m0 := &Collection{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Overview != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_Overview = b.Overview
+	}
+	if b.PosterUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
+		x.xxx_hidden_PosterUrl = b.PosterUrl
+	}
+	if b.BackdropUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_BackdropUrl = b.BackdropUrl
+	}
+	x.xxx_hidden_ExternalIds = b.ExternalIds
+	x.xxx_hidden_Parts = &b.Parts
+	return m0
+}
+
 var File_mavio_plugin_v1_discovery_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
@@ -3580,7 +4014,31 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"Y\n" +
 	"\vPersonTitle\x126\n" +
 	"\x05title\x18\x01 \x01(\v2 .mavio.plugin.v1.DiscoveredTitleR\x05title\x12\x12\n" +
-	"\x04role\x18\x02 \x01(\tR\x04role*\x87\x02\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\"\xfc\x01\n" +
+	"\x14GetCollectionRequest\x12c\n" +
+	"\fexternal_ids\x18\x01 \x03(\v26.mavio.plugin.v1.GetCollectionRequest.ExternalIdsEntryB\b\xbaH\x05\x9a\x01\x02\b\x01R\vexternalIds\x12\x1a\n" +
+	"\blanguage\x18\x02 \x01(\tR\blanguage\x12#\n" +
+	"\rinclude_adult\x18\x03 \x01(\bR\fincludeAdult\x1a>\n" +
+	"\x10ExternalIdsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"j\n" +
+	"\x15GetCollectionResponse\x12\x14\n" +
+	"\x05found\x18\x01 \x01(\bR\x05found\x12;\n" +
+	"\n" +
+	"collection\x18\x02 \x01(\v2\x1b.mavio.plugin.v1.CollectionR\n" +
+	"collection\"\xc7\x02\n" +
+	"\n" +
+	"Collection\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
+	"\boverview\x18\x02 \x01(\tR\boverview\x12\x1d\n" +
+	"\n" +
+	"poster_url\x18\x03 \x01(\tR\tposterUrl\x12!\n" +
+	"\fbackdrop_url\x18\x04 \x01(\tR\vbackdropUrl\x12O\n" +
+	"\fexternal_ids\x18\x05 \x03(\v2,.mavio.plugin.v1.Collection.ExternalIdsEntryR\vexternalIds\x126\n" +
+	"\x05parts\x18\x06 \x03(\v2 .mavio.plugin.v1.DiscoveredTitleR\x05parts\x1a>\n" +
+	"\x10ExternalIdsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*\x87\x02\n" +
 	"\vCatalogKind\x12\x1c\n" +
 	"\x18CATALOG_KIND_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15CATALOG_KIND_TRENDING\x10\x01\x12\x18\n" +
@@ -3611,17 +4069,18 @@ const file_mavio_plugin_v1_discovery_proto_rawDesc = "" +
 	"\x1aDISCOVER_SORT_RELEASE_DATE\x10\x02\x12\x18\n" +
 	"\x14DISCOVER_SORT_RATING\x10\x03\x12\x1c\n" +
 	"\x18DISCOVER_SORT_VOTE_COUNT\x10\x04\x12\x17\n" +
-	"\x13DISCOVER_SORT_TITLE\x10\x052\xfb\x03\n" +
+	"\x13DISCOVER_SORT_TITLE\x10\x052\xe0\x04\n" +
 	"\x18DiscoveryProviderService\x12`\n" +
 	"\fListCatalogs\x12$.mavio.plugin.v1.ListCatalogsRequest\x1a%.mavio.plugin.v1.ListCatalogsResponse\"\x03\x90\x02\x01\x12T\n" +
 	"\bDiscover\x12 .mavio.plugin.v1.DiscoverRequest\x1a!.mavio.plugin.v1.DiscoverResponse\"\x03\x90\x02\x01\x12l\n" +
 	"\x10ListFilterValues\x12(.mavio.plugin.v1.ListFilterValuesRequest\x1a).mavio.plugin.v1.ListFilterValuesResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\fSearchTitles\x12$.mavio.plugin.v1.SearchTitlesRequest\x1a%.mavio.plugin.v1.SearchTitlesResponse\"\x03\x90\x02\x01\x12W\n" +
-	"\tGetPerson\x12!.mavio.plugin.v1.GetPersonRequest\x1a\".mavio.plugin.v1.GetPersonResponse\"\x03\x90\x02\x01B\xc8\x01\n" +
+	"\tGetPerson\x12!.mavio.plugin.v1.GetPersonRequest\x1a\".mavio.plugin.v1.GetPersonResponse\"\x03\x90\x02\x01\x12c\n" +
+	"\rGetCollection\x12%.mavio.plugin.v1.GetCollectionRequest\x1a&.mavio.plugin.v1.GetCollectionResponse\"\x03\x90\x02\x01B\xc8\x01\n" +
 	"\x13com.mavio.plugin.v1B\x0eDiscoveryProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_discovery_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mavio_plugin_v1_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_mavio_plugin_v1_discovery_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_mavio_plugin_v1_discovery_proto_goTypes = []any{
 	(CatalogKind)(0),                 // 0: mavio.plugin.v1.CatalogKind
 	(DiscoverFilter)(0),              // 1: mavio.plugin.v1.DiscoverFilter
@@ -3641,50 +4100,61 @@ var file_mavio_plugin_v1_discovery_proto_goTypes = []any{
 	(*GetPersonResponse)(nil),        // 15: mavio.plugin.v1.GetPersonResponse
 	(*Person)(nil),                   // 16: mavio.plugin.v1.Person
 	(*PersonTitle)(nil),              // 17: mavio.plugin.v1.PersonTitle
-	nil,                              // 18: mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
-	nil,                              // 19: mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
-	nil,                              // 20: mavio.plugin.v1.GetPersonRequest.ExternalIdsEntry
-	nil,                              // 21: mavio.plugin.v1.Person.ExternalIdsEntry
-	(MediaKind)(0),                   // 22: mavio.plugin.v1.MediaKind
+	(*GetCollectionRequest)(nil),     // 18: mavio.plugin.v1.GetCollectionRequest
+	(*GetCollectionResponse)(nil),    // 19: mavio.plugin.v1.GetCollectionResponse
+	(*Collection)(nil),               // 20: mavio.plugin.v1.Collection
+	nil,                              // 21: mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
+	nil,                              // 22: mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
+	nil,                              // 23: mavio.plugin.v1.GetPersonRequest.ExternalIdsEntry
+	nil,                              // 24: mavio.plugin.v1.Person.ExternalIdsEntry
+	nil,                              // 25: mavio.plugin.v1.GetCollectionRequest.ExternalIdsEntry
+	nil,                              // 26: mavio.plugin.v1.Collection.ExternalIdsEntry
+	(MediaKind)(0),                   // 27: mavio.plugin.v1.MediaKind
 }
 var file_mavio_plugin_v1_discovery_proto_depIdxs = []int32{
 	5,  // 0: mavio.plugin.v1.ListCatalogsResponse.catalogs:type_name -> mavio.plugin.v1.Catalog
 	0,  // 1: mavio.plugin.v1.Catalog.kind:type_name -> mavio.plugin.v1.CatalogKind
-	22, // 2: mavio.plugin.v1.Catalog.media_kinds:type_name -> mavio.plugin.v1.MediaKind
+	27, // 2: mavio.plugin.v1.Catalog.media_kinds:type_name -> mavio.plugin.v1.MediaKind
 	1,  // 3: mavio.plugin.v1.Catalog.filters:type_name -> mavio.plugin.v1.DiscoverFilter
 	2,  // 4: mavio.plugin.v1.Catalog.sorts:type_name -> mavio.plugin.v1.DiscoverSort
-	22, // 5: mavio.plugin.v1.DiscoverRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
-	18, // 6: mavio.plugin.v1.DiscoverRequest.external_ids:type_name -> mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
+	27, // 5: mavio.plugin.v1.DiscoverRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	21, // 6: mavio.plugin.v1.DiscoverRequest.external_ids:type_name -> mavio.plugin.v1.DiscoverRequest.ExternalIdsEntry
 	2,  // 7: mavio.plugin.v1.DiscoverRequest.sort:type_name -> mavio.plugin.v1.DiscoverSort
 	8,  // 8: mavio.plugin.v1.DiscoverResponse.titles:type_name -> mavio.plugin.v1.DiscoveredTitle
-	22, // 9: mavio.plugin.v1.DiscoveredTitle.media_kind:type_name -> mavio.plugin.v1.MediaKind
-	19, // 10: mavio.plugin.v1.DiscoveredTitle.external_ids:type_name -> mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
+	27, // 9: mavio.plugin.v1.DiscoveredTitle.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	22, // 10: mavio.plugin.v1.DiscoveredTitle.external_ids:type_name -> mavio.plugin.v1.DiscoveredTitle.ExternalIdsEntry
 	1,  // 11: mavio.plugin.v1.ListFilterValuesRequest.filter:type_name -> mavio.plugin.v1.DiscoverFilter
-	22, // 12: mavio.plugin.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	27, // 12: mavio.plugin.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
 	11, // 13: mavio.plugin.v1.ListFilterValuesResponse.values:type_name -> mavio.plugin.v1.FilterValue
-	22, // 14: mavio.plugin.v1.SearchTitlesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
+	27, // 14: mavio.plugin.v1.SearchTitlesRequest.media_kind:type_name -> mavio.plugin.v1.MediaKind
 	8,  // 15: mavio.plugin.v1.SearchTitlesResponse.titles:type_name -> mavio.plugin.v1.DiscoveredTitle
-	20, // 16: mavio.plugin.v1.GetPersonRequest.external_ids:type_name -> mavio.plugin.v1.GetPersonRequest.ExternalIdsEntry
+	23, // 16: mavio.plugin.v1.GetPersonRequest.external_ids:type_name -> mavio.plugin.v1.GetPersonRequest.ExternalIdsEntry
 	16, // 17: mavio.plugin.v1.GetPersonResponse.person:type_name -> mavio.plugin.v1.Person
-	21, // 18: mavio.plugin.v1.Person.external_ids:type_name -> mavio.plugin.v1.Person.ExternalIdsEntry
+	24, // 18: mavio.plugin.v1.Person.external_ids:type_name -> mavio.plugin.v1.Person.ExternalIdsEntry
 	17, // 19: mavio.plugin.v1.Person.cast:type_name -> mavio.plugin.v1.PersonTitle
 	17, // 20: mavio.plugin.v1.Person.crew:type_name -> mavio.plugin.v1.PersonTitle
 	8,  // 21: mavio.plugin.v1.PersonTitle.title:type_name -> mavio.plugin.v1.DiscoveredTitle
-	3,  // 22: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:input_type -> mavio.plugin.v1.ListCatalogsRequest
-	6,  // 23: mavio.plugin.v1.DiscoveryProviderService.Discover:input_type -> mavio.plugin.v1.DiscoverRequest
-	9,  // 24: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:input_type -> mavio.plugin.v1.ListFilterValuesRequest
-	12, // 25: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:input_type -> mavio.plugin.v1.SearchTitlesRequest
-	14, // 26: mavio.plugin.v1.DiscoveryProviderService.GetPerson:input_type -> mavio.plugin.v1.GetPersonRequest
-	4,  // 27: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:output_type -> mavio.plugin.v1.ListCatalogsResponse
-	7,  // 28: mavio.plugin.v1.DiscoveryProviderService.Discover:output_type -> mavio.plugin.v1.DiscoverResponse
-	10, // 29: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:output_type -> mavio.plugin.v1.ListFilterValuesResponse
-	13, // 30: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:output_type -> mavio.plugin.v1.SearchTitlesResponse
-	15, // 31: mavio.plugin.v1.DiscoveryProviderService.GetPerson:output_type -> mavio.plugin.v1.GetPersonResponse
-	27, // [27:32] is the sub-list for method output_type
-	22, // [22:27] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	25, // 22: mavio.plugin.v1.GetCollectionRequest.external_ids:type_name -> mavio.plugin.v1.GetCollectionRequest.ExternalIdsEntry
+	20, // 23: mavio.plugin.v1.GetCollectionResponse.collection:type_name -> mavio.plugin.v1.Collection
+	26, // 24: mavio.plugin.v1.Collection.external_ids:type_name -> mavio.plugin.v1.Collection.ExternalIdsEntry
+	8,  // 25: mavio.plugin.v1.Collection.parts:type_name -> mavio.plugin.v1.DiscoveredTitle
+	3,  // 26: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:input_type -> mavio.plugin.v1.ListCatalogsRequest
+	6,  // 27: mavio.plugin.v1.DiscoveryProviderService.Discover:input_type -> mavio.plugin.v1.DiscoverRequest
+	9,  // 28: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:input_type -> mavio.plugin.v1.ListFilterValuesRequest
+	12, // 29: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:input_type -> mavio.plugin.v1.SearchTitlesRequest
+	14, // 30: mavio.plugin.v1.DiscoveryProviderService.GetPerson:input_type -> mavio.plugin.v1.GetPersonRequest
+	18, // 31: mavio.plugin.v1.DiscoveryProviderService.GetCollection:input_type -> mavio.plugin.v1.GetCollectionRequest
+	4,  // 32: mavio.plugin.v1.DiscoveryProviderService.ListCatalogs:output_type -> mavio.plugin.v1.ListCatalogsResponse
+	7,  // 33: mavio.plugin.v1.DiscoveryProviderService.Discover:output_type -> mavio.plugin.v1.DiscoverResponse
+	10, // 34: mavio.plugin.v1.DiscoveryProviderService.ListFilterValues:output_type -> mavio.plugin.v1.ListFilterValuesResponse
+	13, // 35: mavio.plugin.v1.DiscoveryProviderService.SearchTitles:output_type -> mavio.plugin.v1.SearchTitlesResponse
+	15, // 36: mavio.plugin.v1.DiscoveryProviderService.GetPerson:output_type -> mavio.plugin.v1.GetPersonResponse
+	19, // 37: mavio.plugin.v1.DiscoveryProviderService.GetCollection:output_type -> mavio.plugin.v1.GetCollectionResponse
+	32, // [32:38] is the sub-list for method output_type
+	26, // [26:32] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_discovery_proto_init() }
@@ -3699,7 +4169,7 @@ func file_mavio_plugin_v1_discovery_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_discovery_proto_rawDesc), len(file_mavio_plugin_v1_discovery_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   19,
+			NumMessages:   24,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

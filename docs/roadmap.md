@@ -595,6 +595,7 @@ flowchart TD
   - [x] A discovered title as rich as an item's details, in the client's language: cast and crew with their page, trailer, collection, tagline, keywords and crew facts; an item without a trailer among its extras opens its trailer on the web
   - [x] A discovered series' seasons expanding to their episodes (`DiscoverService.GetSeason`), as Seerr's, episode lists kept for six hours
   - [x] A person's page as Seerr's (`DiscoverService.GetPerson`, the discovery providers' `GetPerson`), opened from the cast and crew of a discovered title
+  - [x] A collection's page as Seerr's (`DiscoverService.GetCollection`, the discovery providers' `GetCollection`): requesting its movies, and blocklisting them for administrators
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
 - [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers

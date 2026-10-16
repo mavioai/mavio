@@ -1560,5 +1560,13 @@
   "credits.artists": { "message": "Artists", "description": "Section of the credits page: the artists." },
   "credits.narrators": { "message": "Narrators", "description": "Section of the credits page: the narrators." },
   "credits.other": { "message": "Other Crew", "description": "Section of the credits page: the crew of other jobs." },
-  "credits.none": { "message": "No cast or crew is known.", "description": "Shown on the credits page when an item credits no one." }
+  "credits.none": { "message": "No cast or crew is known.", "description": "Shown on the credits page when an item credits no one." },
+  "collection.movieCount": { "message": "{count, plural, one {# movie} other {# movies}}", "description": "Number of movies of a discovered collection." },
+  "collection.movies": { "message": "Movies", "description": "Section of a discovered collection's page with its movies." },
+  "collection.request": { "message": "Request Collection", "description": "Button of a discovered collection's page requesting its movies." },
+  "collection.requestMovies": { "message": "{count, plural, one {Request # Movie} other {Request # Movies}}", "description": "Button of the dialog requesting the movies of a collection chosen." },
+  "collection.allMovies": { "message": "All Movies", "description": "Chooses every movie of a collection not requested yet." },
+  "collection.block": { "message": "Blocklist", "description": "Button of a discovered collection's page, for administrators, blocklisting its movies so that nobody can request them." },
+  "collection.unblock": { "message": "Remove from Blocklist", "description": "Button of a discovered collection's page, for administrators, taking its movies off the blocklist." },
+  "collection.view": { "message": "View", "description": "Link from a movie's page to the page of the collection it belongs to." }
 }

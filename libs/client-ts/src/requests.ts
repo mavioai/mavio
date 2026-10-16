@@ -35,7 +35,7 @@ export function useQuota(server: ServerEntry | undefined) {
   });
 }
 
-/** What can be done to a request, each refreshing the requests and what discovery shows. */
+/** What can be done to a request or the blocklist, each refreshing the requests and what discovery shows. */
 export function useRequestActions(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
@@ -51,5 +51,7 @@ export function useRequestActions(server: ServerEntry) {
     retry: useMutation({ mutationFn: (id: string) => c().retryRequest({ id }), onSuccess }),
     update: useMutation({ mutationFn: (v: { id: string; seasons: number[] }) => c().updateRequest(v), onSuccess }),
     remove: useMutation({ mutationFn: (id: string) => c().deleteRequest({ id }), onSuccess }),
+    blockCollection: useMutation({ mutationFn: (tmdbCollectionId: number) => c().blockCollection({ tmdbCollectionId }), onSuccess }),
+    unblockCollection: useMutation({ mutationFn: (tmdbCollectionId: number) => c().unblockCollection({ tmdbCollectionId }), onSuccess }),
   };
 }

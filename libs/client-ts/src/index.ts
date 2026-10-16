@@ -11,6 +11,7 @@ export {
   rowsOf,
   titlesOf,
   useCatalog,
+  useCollection,
   useDiscoveredPerson,
   useDiscovery,
   useFilterValues,

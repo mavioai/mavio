@@ -255,6 +255,19 @@ func (discovery) GetPerson(_ context.Context, req *pluginv1.GetPersonRequest) (*
 	}.Build(), nil
 }
 
+// GetCollection tells of a collection named after its ID, of one movie.
+func (discovery) GetCollection(_ context.Context, req *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	return pluginv1.GetCollectionResponse_builder{
+		Found: proto.Bool(true),
+		Collection: pluginv1.Collection_builder{
+			Name: proto.String("Collection " + req.GetExternalIds()["tmdb_collection"]), ExternalIds: req.GetExternalIds(),
+			Parts: []*pluginv1.DiscoveredTitle{pluginv1.DiscoveredTitle_builder{
+				MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Name: proto.String("Movie"), ExternalIds: map[string]string{"tmdb": "1"},
+			}.Build()},
+		}.Build(),
+	}.Build(), nil
+}
+
 // ListFilterValues lists the query as the filter's only value.
 func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
 	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{

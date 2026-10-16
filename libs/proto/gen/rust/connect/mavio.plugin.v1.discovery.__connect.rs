@@ -38,6 +38,14 @@ pub type OwnedGetPersonRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetPersonResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::GetPersonResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetCollectionRequestView<'static>>`.
+pub type OwnedGetCollectionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetCollectionResponseView<'static>>`.
+pub type OwnedGetCollectionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListCatalogsResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::ListCatalogsResponseView<'_> {
     fn encode(
@@ -208,6 +216,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::GetCollectionResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::GetCollectionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const DISCOVERY_PROVIDER_SERVICE_SERVICE_NAME: &str = "mavio.plugin.v1.DiscoveryProviderService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -237,6 +279,12 @@ pub const DISCOVERY_PROVIDER_SERVICE_SEARCH_TITLES_SPEC: ::connectrpc::Spec = ::
 /// Static [`Spec`](::connectrpc::Spec) for the `GetPerson` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const DISCOVERY_PROVIDER_SERVICE_GET_PERSON_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.plugin.v1.DiscoveryProviderService/GetPerson",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetCollection` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DISCOVERY_PROVIDER_SERVICE_GET_COLLECTION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.DiscoveryProviderService/GetCollection",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -409,6 +457,31 @@ pub trait DiscoveryProviderService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::GetPersonResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetCollection tells of a collection of movies by its external IDs,
+    /// with its parts, as Seerr's collection page. A provider that does not
+    /// know collections answers UNIMPLEMENTED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_collection<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::GetCollectionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::GetCollectionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -589,6 +662,35 @@ impl<S: DiscoveryProviderService> DiscoveryProviderServiceExt for S {
                 },
             )
             .with_spec(DISCOVERY_PROVIDER_SERVICE_GET_PERSON_SPEC)
+            .route_view_idempotent(
+                DISCOVERY_PROVIDER_SERVICE_SERVICE_NAME,
+                "GetCollection",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::GetCollectionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_collection(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::GetCollectionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DISCOVERY_PROVIDER_SERVICE_GET_COLLECTION_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -674,6 +776,12 @@ for DiscoveryProviderServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(DISCOVERY_PROVIDER_SERVICE_GET_PERSON_SPEC),
+                )
+            }
+            "GetCollection" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(DISCOVERY_PROVIDER_SERVICE_GET_COLLECTION_SPEC),
                 )
             }
             _ => None,
@@ -799,6 +907,28 @@ for DiscoveryProviderServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::plugin::v1::GetPersonResponse,
+                        >(format)
+                })
+            }
+            "GetCollection" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::GetCollectionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::GetCollectionRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_collection(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::GetCollectionResponse,
                         >(format)
                 })
             }
@@ -1149,6 +1279,51 @@ where
                 &self.transport,
                 &self.config,
                 DISCOVERY_PROVIDER_SERVICE_GET_PERSON_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetCollection RPC. Sends a request to /mavio.plugin.v1.DiscoveryProviderService/GetCollection.
+    pub async fn get_collection(
+        &self,
+        request: crate::proto::mavio::plugin::v1::GetCollectionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_collection_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetCollection RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_collection_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::GetCollectionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::GetCollectionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DISCOVERY_PROVIDER_SERVICE_GET_COLLECTION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

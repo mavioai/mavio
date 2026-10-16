@@ -3178,4 +3178,26 @@
     <string name="credits_other">Other Crew</string>
     <!-- Shown on the credits page when an item credits no one. -->
     <string name="credits_none">No cast or crew is known.</string>
+    <!-- Number of movies of a discovered collection. -->
+    <plurals name="collection_movie_count">
+        <item quantity="one">%d movie</item>
+        <item quantity="other">%d movies</item>
+    </plurals>
+    <!-- Section of a discovered collection's page with its movies. -->
+    <string name="collection_movies">Movies</string>
+    <!-- Button of a discovered collection's page requesting its movies. -->
+    <string name="collection_request">Request Collection</string>
+    <!-- Button of the dialog requesting the movies of a collection chosen. -->
+    <plurals name="collection_request_movies">
+        <item quantity="one">Request %d Movie</item>
+        <item quantity="other">Request %d Movies</item>
+    </plurals>
+    <!-- Chooses every movie of a collection not requested yet. -->
+    <string name="collection_all_movies">All Movies</string>
+    <!-- Button of a discovered collection's page, for administrators, blocklisting its movies so that nobody can request them. -->
+    <string name="collection_block">Blocklist</string>
+    <!-- Button of a discovered collection's page, for administrators, taking its movies off the blocklist. -->
+    <string name="collection_unblock">Remove from Blocklist</string>
+    <!-- Link from a movie's page to the page of the collection it belongs to. -->
+    <string name="collection_view">View</string>
 </resources>

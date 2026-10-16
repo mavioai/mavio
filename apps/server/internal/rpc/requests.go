@@ -767,6 +767,23 @@ func (s *DiscoverService) GetPerson(ctx context.Context, req *acquisitionv1.GetP
 	}.Build()}.Build(), nil
 }
 
+// GetCollection tells of a collection of movies with its parts.
+func (s *DiscoverService) GetCollection(ctx context.Context, req *acquisitionv1.GetCollectionRequest) (*acquisitionv1.GetCollectionResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	d, err := s.requests.Collection(ctx, p.User, int(req.GetTmdbCollectionId()), req.GetLanguage())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	c := d.Collection
+	return acquisitionv1.GetCollectionResponse_builder{Collection: acquisitionv1.Collection_builder{
+		Name: new(c.GetName()), Overview: new(c.GetOverview()), PosterUrl: new(c.GetPosterUrl()), BackdropUrl: new(c.GetBackdropUrl()),
+		ExternalIds: c.GetExternalIds(), Parts: discoveredToProto(d.Parts), HiddenResults: new(int32(d.Hidden)),
+	}.Build()}.Build(), nil
+}
+
 // productionStatuses maps production statuses to the contract's.
 var productionStatuses = map[metadata.ProductionStatus]pluginv1.ProductionStatus{
 	metadata.ProductionRumored:        pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED,

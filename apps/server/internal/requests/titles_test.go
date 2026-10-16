@@ -334,3 +334,30 @@ func TestPerson(t *testing.T) {
 		t.Errorf("Person() crew = %q, hidden %d, want = %q, 2", got, p.Hidden, want)
 	}
 }
+
+func TestCollection(t *testing.T) {
+	e := newEnv(t)
+	movie := pluginv1.MediaKind_MEDIA_KIND_MOVIE
+	d := &fakeDiscovery{titles: []*pluginv1.DiscoveredTitle{
+		discovered(movie, 1, false), discovered(movie, 2, false), discovered(movie, 66, true),
+	}}
+	e.svc.Discovery = func() []DiscoveryProvider {
+		return []DiscoveryProvider{{ID: "servarr", Client: &fakeDiscovery{noSearch: true}}, {ID: "tmdb", Client: d}}
+	}
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
+	if _, err := e.svc.Collection(e.ctx, pg, 6, ""); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Collection() of an unknown collection: error = %v, want ErrNotFound", err)
+	}
+	c, err := e.svc.Collection(e.ctx, pg, 5, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []int
+	for _, p := range c.Parts {
+		got = append(got, p.TmdbID)
+	}
+	// The R-rated and adult movies are left out.
+	if c.Collection.GetName() != "Saga" || !slices.Equal(got, []int{1}) || c.Hidden != 2 || !c.Parts[0].Requestable {
+		t.Errorf("Collection() = %q %v, hidden %d, want = Saga [1], 2", c.Collection.GetName(), got, c.Hidden)
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -142,23 +143,75 @@ func (s session) collection(ctx context.Context, id string, q url.Values) (*plug
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("collection catalog without a %s ID", keyTMDBCollection))
 	}
 	q.Del("page")
-	var c struct {
-		Parts []tmdbListResult `json:"parts"`
-	}
+	var c tmdbCollection
 	switch err := s.get(ctx, fmt.Sprintf("/collection/%d", n), q, &c); {
 	case errors.Is(err, errNotFound):
 		return &pluginv1.DiscoverResponse{}, nil
 	case err != nil:
 		return nil, err
 	}
-	resp := pluginv1.DiscoverResponse_builder{Page: proto.Int32(1), TotalPages: proto.Int32(1)}.Build()
-	for _, r := range c.Parts {
-		if t := r.title("movie"); t != nil && (s.adult || !r.Adult) {
-			resp.SetTitles(append(resp.GetTitles(), t))
-		}
-	}
+	resp := pluginv1.DiscoverResponse_builder{Page: proto.Int32(1), TotalPages: proto.Int32(1), Titles: c.titles(s.adult)}.Build()
 	resp.SetTotalResults(int32(len(resp.GetTitles())))
 	return resp, nil
+}
+
+// tmdbCollection is a collection of TMDB with its movies.
+type tmdbCollection struct {
+	ID           int              `json:"id"`
+	Name         string           `json:"name"`
+	Overview     string           `json:"overview"`
+	PosterPath   string           `json:"poster_path"`
+	BackdropPath string           `json:"backdrop_path"`
+	Parts        []tmdbListResult `json:"parts"`
+}
+
+// titles returns a collection's movies, adult movies only when adult.
+func (c tmdbCollection) titles(adult bool) []*pluginv1.DiscoveredTitle {
+	var out []*pluginv1.DiscoveredTitle
+	for _, r := range c.Parts {
+		if t := r.title("movie"); t != nil && (adult || !r.Adult) {
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+// GetCollection tells of a TMDB collection with its movies in release
+// order, those without a date last, as Seerr's collection page.
+func (p *plugin) GetCollection(ctx context.Context, req *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	s, err := p.session()
+	if err != nil {
+		return nil, err
+	}
+	n, ok := parseTMDBID(req.GetExternalIds()[keyTMDBCollection])
+	if !ok {
+		return pluginv1.GetCollectionResponse_builder{Found: proto.Bool(false)}.Build(), nil
+	}
+	q := url.Values{}
+	setLanguage(q, req.GetLanguage())
+	var c tmdbCollection
+	switch err := s.get(ctx, fmt.Sprintf("/collection/%d", n), q, &c); {
+	case errors.Is(err, errNotFound):
+		return pluginv1.GetCollectionResponse_builder{Found: proto.Bool(false)}.Build(), nil
+	case err != nil:
+		return nil, err
+	}
+	parts := c.titles(req.GetIncludeAdult() && s.adult)
+	slices.SortStableFunc(parts, func(a, b *pluginv1.DiscoveredTitle) int {
+		da, db := cmp.Or(a.GetPremiereDate(), "9999"), cmp.Or(b.GetPremiereDate(), "9999")
+		return strings.Compare(da, db)
+	})
+	col := pluginv1.Collection_builder{
+		Name: proto.String(c.Name), Overview: proto.String(c.Overview), Parts: parts,
+		ExternalIds: map[string]string{keyTMDBCollection: strconv.Itoa(n)},
+	}.Build()
+	if c.PosterPath != "" {
+		col.SetPosterUrl(imageURL(c.PosterPath))
+	}
+	if c.BackdropPath != "" {
+		col.SetBackdropUrl(imageURL(c.BackdropPath))
+	}
+	return pluginv1.GetCollectionResponse_builder{Found: proto.Bool(true), Collection: col}.Build(), nil
 }
 
 // titleID returns the TMDB ID of a movie or series named by its external

@@ -33,6 +33,12 @@ service DiscoveryProviderService {
   rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetCollection tells of a collection of movies by its external IDs,
+  // with its parts, as Seerr's collection page. A provider that does not
+  // know collections answers UNIMPLEMENTED.
+  rpc GetCollection(GetCollectionRequest) returns (GetCollectionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message ListCatalogsRequest {
@@ -298,4 +304,29 @@ message PersonTitle {
   DiscoveredTitle title = 1;
   // The characters they play, or their jobs.
   string role = 2;
+}
+
+message GetCollectionRequest {
+  // Such as "tmdb_collection".
+  map<string, string> external_ids = 1 [(buf.validate.field).map.min_pairs = 1];
+  // ISO 639-1 language of names and overviews.
+  string language = 2;
+  bool include_adult = 3;
+}
+
+message GetCollectionResponse {
+  bool found = 1;
+  Collection collection = 2;
+}
+
+// Collection is a collection of movies, such as a film series.
+message Collection {
+  string name = 1;
+  string overview = 2;
+  string poster_url = 3;
+  string backdrop_url = 4;
+  // Such as "tmdb_collection".
+  map<string, string> external_ids = 5;
+  // Its movies, in release order.
+  repeated DiscoveredTitle parts = 6;
 }

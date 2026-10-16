@@ -184,6 +184,18 @@ pub use self::__buffa::view::PersonTitleView;
 #[doc(inline)]
 pub use self::__buffa::view::PersonTitleOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetCollectionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCollectionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCollectionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetCollectionResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CollectionView;
+#[doc(inline)]
+pub use self::__buffa::view::CollectionOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestOwnedView;

@@ -43,6 +43,10 @@ func (f *fakeTags) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*plug
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no people"))
 }
 
+func (f *fakeTags) GetCollection(context.Context, *pluginv1.GetCollectionRequest) (*pluginv1.GetCollectionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no collections"))
+}
+
 func (f *fakeTags) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*pluginv1.ListCatalogsResponse, error) {
 	catalogs := []*pluginv1.Catalog{
 		pluginv1.Catalog_builder{
