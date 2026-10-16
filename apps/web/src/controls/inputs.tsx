@@ -322,7 +322,7 @@ export function Pictures<T extends string>({
 
 /** A chosen one of several, filled as a button is. */
 const pill =
-  "min-h-9 rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected data-active:bg-button data-active:text-on-button data-checked:bg-button data-checked:text-on-button";
+  "inline-flex min-h-9 items-center justify-center rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected data-active:bg-button data-active:text-on-button data-checked:bg-button data-checked:text-on-button";
 
 const chip =
   "inline-flex min-h-8 items-center gap-1.5 rounded-full bg-fill px-3 type-footnote font-semibold hover:bg-fill-selected data-checked:bg-accent data-checked:text-on-accent data-pressed:bg-accent data-pressed:text-on-accent";
