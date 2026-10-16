@@ -380,10 +380,11 @@ public enum MavioStrings {
     /// Names a title's TMDB rating on hover
     public static var discoverTmdbScore: String { NSLocalizedString("discover.tmdbScore", bundle: .module, comment: "") }
 
-    /// Fact of a discovered movie: its release dates
-    public static func discoverReleaseDates(count: Int) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("discover.releaseDates", bundle: .module, comment: ""), count)
-    }
+    /// Fact of a discovered movie with one release date
+    public static var discoverReleaseDate: String { NSLocalizedString("discover.releaseDate", bundle: .module, comment: "") }
+
+    /// Fact of a discovered movie with several release dates
+    public static var discoverReleaseDates: String { NSLocalizedString("discover.releaseDates", bundle: .module, comment: "") }
 
     /// Fact of a discovered series: how long an episode runs
     public static var discoverEpisodeRuntime: String { NSLocalizedString("discover.episodeRuntime", bundle: .module, comment: "") }

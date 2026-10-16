@@ -1101,7 +1101,7 @@ function About({
   const shownStudios = allStudios ? studios : studios.slice(0, minStudios);
   const facts: [string, ReactNode][] = [
     releases.length > 0
-      ? [t("discover.releaseDates", { count: releases.length }), <span className="flex flex-col gap-0.5">{releases}</span>]
+      ? [t(releases.length === 1 ? "discover.releaseDate" : "discover.releaseDates"), <span className="flex flex-col gap-0.5">{releases}</span>]
       : [item.kind === ItemKind.SERIES ? t("item.firstAired") : item.kind === ItemKind.EPISODE ? t("item.aired") : t("item.released"), date],
     [t("item.status"), status],
     [t("item.lastAired"), item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.ENDED ? day(item.endDate) : undefined],

@@ -1999,38 +1999,38 @@
         }
       }
     },
-    "discover.releaseDates": {
-      "comment": "Fact of a discovered movie: its release dates",
+    "discover.releaseDate": {
+      "comment": "Fact of a discovered movie with one release date",
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "variations": {
-            "plural": {
-              "one": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Release Date"
-                }
-              },
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "Release Dates"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release Date"
           }
         },
         "zh-Hans": {
-          "variations": {
-            "plural": {
-              "other": {
-                "stringUnit": {
-                  "state": "translated",
-                  "value": "上映日期"
-                }
-              }
-            }
+          "stringUnit": {
+            "state": "translated",
+            "value": "上映日期"
+          }
+        }
+      }
+    },
+    "discover.releaseDates": {
+      "comment": "Fact of a discovered movie with several release dates",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Release Dates"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上映日期"
           }
         }
       }

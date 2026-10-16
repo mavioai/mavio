@@ -224,11 +224,10 @@
     <string name="discover_theatrical_release">Theatrical Release</string>
     <!-- Names a title's TMDB rating on hover -->
     <string name="discover_tmdb_score">TMDB User Score</string>
-    <!-- Fact of a discovered movie: its release dates -->
-    <plurals name="discover_release_dates">
-        <item quantity="one">Release Date</item>
-        <item quantity="other">Release Dates</item>
-    </plurals>
+    <!-- Fact of a discovered movie with one release date -->
+    <string name="discover_release_date">Release Date</string>
+    <!-- Fact of a discovered movie with several release dates -->
+    <string name="discover_release_dates">Release Dates</string>
     <!-- Fact of a discovered series: how long an episode runs -->
     <string name="discover_episode_runtime">Episode Runtime</string>
     <!-- Shows the rest of a discovered title's studios or networks -->

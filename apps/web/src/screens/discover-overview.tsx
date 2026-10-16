@@ -418,7 +418,7 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
       )}
       {status && <Fact label={t("item.status")}>{status}</Fact>}
       {releases.length > 0 ? (
-        <Fact label={t("discover.releaseDates", { count: releases.length })}>{releases}</Fact>
+        <Fact label={t(releases.length === 1 ? "discover.releaseDate" : "discover.releaseDates")}>{releases}</Fact>
       ) : (
         title.premiereDate && <Fact label={series ? t("item.firstAired") : t("item.released")}>{dayText(title.premiereDate)}</Fact>
       )}

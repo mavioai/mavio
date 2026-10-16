@@ -113,9 +113,8 @@
     <string name="discover_full_crew">查看全部职员</string>
     <string name="discover_theatrical_release">影院上映</string>
     <string name="discover_tmdb_score">TMDB 用户评分</string>
-    <plurals name="discover_release_dates">
-        <item quantity="other">上映日期</item>
-    </plurals>
+    <string name="discover_release_date">上映日期</string>
+    <string name="discover_release_dates">上映日期</string>
     <string name="discover_episode_runtime">单集时长</string>
     <string name="discover_show_more">显示更多</string>
     <string name="discover_tomatometer">烂番茄新鲜度</string>

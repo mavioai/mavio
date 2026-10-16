@@ -121,6 +121,7 @@ export type MessageKey =
   | 'discover.fullCrew'
   | 'discover.theatricalRelease'
   | 'discover.tmdbScore'
+  | 'discover.releaseDate'
   | 'discover.releaseDates'
   | 'discover.episodeRuntime'
   | 'discover.showMore'
@@ -1850,7 +1851,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.fullCrew": "View Full Crew",
     "discover.theatricalRelease": "Theatrical Release",
     "discover.tmdbScore": "TMDB User Score",
-    "discover.releaseDates": "{count, plural, one {Release Date} other {Release Dates}}",
+    "discover.releaseDate": "Release Date",
+    "discover.releaseDates": "Release Dates",
     "discover.episodeRuntime": "Episode Runtime",
     "discover.showMore": "Show More",
     "discover.tomatometer": "Rotten Tomatoes Tomatometer",
@@ -3577,7 +3579,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.fullCrew": "查看全部职员",
     "discover.theatricalRelease": "影院上映",
     "discover.tmdbScore": "TMDB 用户评分",
-    "discover.releaseDates": "{count, plural, other {上映日期}}",
+    "discover.releaseDate": "上映日期",
+    "discover.releaseDates": "上映日期",
     "discover.episodeRuntime": "单集时长",
     "discover.showMore": "显示更多",
     "discover.tomatometer": "烂番茄新鲜度",
