@@ -123,7 +123,7 @@ flowchart TD
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
 | P28 | Accounts | In progress |
-| P29 | Assistant | Not started |
+| P29 | Assistant | In progress |
 
 ---
 
@@ -910,17 +910,22 @@ flowchart TD
 **Done when**: an end-to-end test through the API: with no AI gateway plugin, requests in Chinese and English pause, seek and switch the subtitles of a fake device, play a title named by a homophone of its name, and a request requiring confirmation is confirmed and another canceled by voice; with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface, a request the grammar does not match runs tools as the user through code mode, a tool call interrupted by restarting the plugin is run once, and a memory learned in one conversation is used in the next; listening through the built `plugins/voice` with a fake whisper-asr-webservice gives the text of a recording, and the same recognizer transcribes an episode's subtitles; in the web UI, a spoken request plays a title.
 
 **Progress**:
-- [ ] `mavio.assistant.v1` in `libs/proto`: `Intent`, `ParseIntentRequest` and `AssistantService`
-- [ ] `libs/intent`: the grammar format, normalization, the Chinese and English grammars, the dialog state and their cases; the WASM build (`intent:wasm`), run by the server on wazero and by `libs/client-ts`, each against the cases
-- [ ] `AssistantService` and the tools in `apps/server`: slot resolution with pinyin, client actions, other devices through `SendCommand`, the activity log; the assistant settings in the server settings and who may use the AI path ([Domain Model](domain.md))
-- [ ] Remote tools in `AGENT_SESSION` and `plugins/agent`: declarations, `WatchAgentToolCalls`, `SubmitAgentToolResult`, the server's record of calls by ID, `AddAgentMessages`
-- [ ] Code mode in `plugins/agent`, its QuickJS sandbox checked in the Bun executable on every platform
-- [ ] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
-- [ ] `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` in `libs/proto`; `plugins/voice` with whisper-asr-webservice, moved from `plugins/subtitles` with its test cases, and the OpenAI-compatible transcription and speech APIs
-- [ ] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
-- [ ] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
-- [ ] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the Assistant settings and the assistant's part of the AI settings
-- [ ] Deciding which tools require confirmation
+- [x] `mavio.intent.v1` (`Intent`, `ParseIntentRequest`) and `mavio.assistant.v1` (`AssistantService`) in `libs/proto`
+- [x] `libs/intent`: the grammar format, normalization, the grammars of Chinese (Simplified and Traditional), English, Japanese, Korean, German, French and Spanish with their replies and examples, the dialog state and their cases; the WASM build (`intent:wasm`), run by the server on wazero and by `libs/client-ts`, each against the cases
+- [x] `AssistantService` and the tools in `apps/server`: slot resolution with pinyin, client actions, other devices through `SendCommand`, the activity log; the assistant settings in the server settings and who may use the AI path ([Domain Model](domain.md))
+- [x] Remote tools in `AGENT_SESSION` and `plugins/agent`: declarations, `WatchAgentToolCalls`, `SubmitAgentToolResult`, the server's record of calls by ID, `AddAgentMessages`
+- [x] Code mode in `plugins/agent`, tested under `bun test`
+- [ ] Code mode's QuickJS sandbox checked in the built Bun executable on every platform
+- [x] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
+- [x] `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` in `libs/proto`; `plugins/voice` with whisper-asr-webservice, moved from `plugins/subtitles` with its test cases, and the OpenAI-compatible transcription and speech APIs
+- [x] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
+- [x] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
+- [x] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
+- [ ] The end-to-end test of **Done when**
+- [ ] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
+- [ ] Deciding which tools require confirmation beyond `request_title`
+- [ ] Streaming recognition: a bidirectional `StreamSpeech` giving partial text as the user speaks, and the streaming services reached over their WebSockets
+- [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
 - [ ] More speech services in `plugins/voice`: Deepgram, Azure Speech, Google Cloud, Volcengine, Alibaba Cloud, ElevenLabs
 - [ ] The Apple apps: on-device recognition with hints, `AVSpeechSynthesizer`, App Intents; dictation on tvOS
 - [ ] The Android apps: `SpeechRecognizer` with hints, `TextToSpeech`, search intents and play-from-search on Android TV

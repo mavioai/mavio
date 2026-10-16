@@ -63,7 +63,7 @@ Nx 只做编排与缓存：每个 Go 模块仍然可以独立地 `go build` / `g
 
 需要覆盖默认目标时，在 `go.mod` 旁放一个 `project.json`；例如 `plugins/scraper-tmdb/project.json` 把构建改为 `wasip1` WASM 模块。
 
-`tools/nx-cargo` 为每个 Cargo workspace 生成 `build`（`cargo build --locked --all-targets`）、`test`（`cargo test --locked`）、`bench`（`cargo bench --locked`，不缓存）与 `lint`（`cargo fmt --check` 与 `cargo clippy --locked --all-targets -- -D warnings`）。
+`tools/nx-cargo` 为每个 Cargo workspace 生成 `build`（`cargo build --locked --all-targets`）、`test`（`cargo test --locked`）、`bench`（`cargo bench --locked`，不缓存）与 `lint`（`cargo fmt --check` 与 `cargo clippy --locked --all-targets -- -D warnings`）。`libs/intent` 另有 `wasm`：把语法构建为 `wasm32-unknown-unknown`，并把模块复制到 `libs/intent/dist`（npm 包 `@mavio/intent`，由 Web UI 打包）与 `apps/server/internal/assistant/intent/dist`（由服务端嵌入）；两份都不提交入库，因此服务端与 Web UI 的 `build` 以及 `libs/client-ts` 的 `test` 依赖它。
 
 `package.json` 的脚本同样是目标：`libs/proto` 与 `libs/design` 有 `typecheck`（`tsc -p tsconfig.json`，TypeScript 7），`libs/design` 还有 `generate`（§4.4）。同时含 `go.mod` 与 `package.json` 的目录（如 `libs/design`）是一个项目，具有两者的目标。`libs/plugin` 也是如此：其 TypeScript SDK `@mavio/plugin` 有 `typecheck` 与 `test-ts`（Vitest），其 Go 的 `test` 依赖后者，因为名为 `test` 的脚本会取代推断出的目标。
 

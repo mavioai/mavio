@@ -67,15 +67,16 @@ flowchart LR
 | 对话 | 是、不、取消、“第二个”、“最后一个”、“更多” | 待确认的动作或上次的结果 |
 
 ### 4.2 语法
-* **数据而非代码**：每种语言的语法是一个文件，由带类型槽位（`title`、`person`、`genre`、`year`、`duration`、`position`、`ordinal`、`language`、`device`、`season`、`episode`、`number`）的模式与同义词列表组成，在构建模块时编译进去。先做中文与英文；增加一种语言就是增加它的文件与用例。
+* **数据而非代码**：每种语言的语法是一个文件，由带类型槽位（`title`、`person`、`genre`、`year`、`duration`、`position`、`ordinal`、`language`、`device`、`season`、`episode`、`number`）的模式与同义词列表组成，在构建模块时编译进去。现有中文（简体与繁体）、英文、日文、韩文、德文、法文与西班牙文的语法；增加一种语言就是增加它的文件与用例。
 * **匹配前的规范化**：全角与半角、繁体与简体中文、标点与语气词、中英文数字（“三十秒”“一分半”“two and a half minutes”“第二季第三集”）、时刻与位置（“一小时二十分”）以及序数。
 * **匹配**使用请求语言的全部模式，再加上英文的（混合语言的请求常用英文片名）；最佳匹配是覆盖文本最多、自由槽位最少的那个。自由槽位（`title`、`person`）吸收剩余文本，由服务端解析（§4.4）；类型槽位必须能解析。
 * **对话状态**随每次解析一起给出：是否有待确认的动作、上次显示了多少个结果、正在播放什么。对话模式只在其状态成立时匹配：“是”只在有待确认的动作时有意义，“第二个”只在显示过结果之后有意义。
 * **结果**：一个带槽位与置信度的意图；整段文本都匹配时为 `full`，某个模式匹配但剩余文本时为 `partial`，否则为空。
+* **回复与示例**：每种语言的语法还包含快速路径在该语言下的回答（“正在播放沙丘。”“已暂停。”），可填入参数并用该语言读出时长，以及面板与 §4.5 给出的示例，因此各处运行环境都用请求的语言回答，而无需自带字符串。
 
 ### 4.3 一份实现，三处运行
 * `libs/intent` 是一个不依赖 I/O 的 Rust crate。原生客户端经由 `libs/client-rust` 链接它（UniFFI 与 C ABI 暴露 `parse_intent`）。
-* 它还构建为一个没有导入项的 WASM 模块（`wasm32-unknown-unknown`），导出内存分配与 `parse`，请求与回答都是 `mavio.assistant.v1` 的 protobuf 消息（`ParseIntentRequest`、`Intent`）。Web UI 通过 `libs/client-ts` 实例化它，服务端像运行 WASM 插件那样在 wazero 上运行同一个文件，因此语法永远不会有第二份实现。
+* 它还构建为一个没有导入项的 WASM 模块（`wasm32-unknown-unknown`），导出其内存、内存分配、`intent_parse`、`intent_reply`、`intent_examples` 与 `intent_languages`，请求与回答都是 `mavio.intent.v1` 的 protobuf 消息（`ParseIntentRequest`、`Intent`）；每次调用把回答的地址与长度打包在一个 64 位整数中返回。Web UI 通过 `libs/client-ts`（`Grammar`）实例化它，服务端像运行 WASM 插件那样在 wazero 上运行同一个文件，因此语法永远不会有第二份实现。
 * 模块由 Nx 构建（`intent:wasm`），不提交到仓库；服务端的 `build` 嵌入它，Web 的 `build` 打包它，就像服务端嵌入 Web UI 一样。
 
 ### 4.4 服务端的槽位
@@ -93,7 +94,7 @@ AI 路径不可用时，未匹配的请求按作品或人物搜索，因此只�
 ## 5. 工具与动作
 
 ### 5.1 工具
-服务端的工具是 `apps/server/internal/assistant/tools` 中的 Go 函数，每个都有名称、给模型看的描述、参数与结果的 JSON Schema，以及由它们生成、供代码模式（§6.2）使用的 TypeScript 声明。
+服务端的工具是 `apps/server/internal/assistant` 中的 Go 函数，每个都有名称、给模型看的描述，以及参数与结果的 JSON Schema，代码模式（§6.2）据此把它们声明给脚本。
 
 | 工具 | 作用 |
 | :--- | :--- |
@@ -161,8 +162,8 @@ AI 路径不可用时，未匹配的请求按作品或人物搜索，因此只�
 
 ### 8.2 在服务端收听
 * `AssistantService.StartListening` 返回一个为会话签名、一分钟内有效的 WebSocket URL，并带上所选的识别器（设置中的，否则为第一个就绪的 `SPEECH_TO_TEXT` 识别器）与语言。
-* 客户端以二进制帧发送 16 kHz 单声道 16 位 PCM，在用户松开按键时发送结束消息；服务端把它以流的形式连同用户的提示转给识别器，并回传部分文本与最终文本。没有松开时，Silero VAD（`libs/media/vad`）检测到一秒静音即结束语音；一段话最长 30 秒。
-* 不支持流式的识别器在一段话结束后一次性收到它。音频从不保存。
+* 客户端以二进制帧发送 16 kHz 单声道 16 位 PCM，在用户松开按键时发送文本 `end`；没有松开时，Silero VAD（`libs/media/vad`）检测到一秒静音即结束这段话，一段话最长 30 秒。随后服务端把这段话交给识别器，识别器接受提示且设置允许时一并附上用户的提示，再以 JSON 回传最终文本及其语言。
+* 音频从不保存。
 
 ### 8.3 合成
 * **优先使用设备的语音**：浏览器的 `speechSynthesis`、`AVSpeechSynthesizer`、Android 的 `TextToSpeech`，选用回答语言的语音。
@@ -170,14 +171,14 @@ AI 路径不可用时，未匹配的请求按作品或人物搜索，因此只�
 * 回答随文本到达逐句朗读，因此在回答结束之前就开始说话；用户开口或再次按下按钮时停止朗读。
 
 ### 8.4 语音插件
-`SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）由 `plugins/voice` 提供。它是一个 Go 子进程插件，连接管理员配置的服务，每个服务是一个识别器或一组语音，命名为 `<plugin>/<id>`：
-* 识别：whisper-asr-webservice、OpenAI 兼容的转写 API（OpenAI、Groq、搭配 faster-whisper 的 speaches，以及其他提供该 API 的服务器）、Deepgram、Azure Speech、Google Cloud Speech-to-Text，以及面向中文的火山引擎与阿里云识别；
-* 合成：OpenAI 兼容的语音 API（OpenAI、搭配 Kokoro 或 Piper 的 speaches）、ElevenLabs、Azure Speech、Google Cloud Text-to-Speech，以及火山引擎与阿里云的合成。
+`SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）由 `plugins/voice` 提供。它是一个 Go 子进程插件，管理员在其设置中启用并配置它的识别器与合成器；服务端把识别器命名为 `<plugin>/<recognizer>`，把语音命名为 `<plugin>/<synthesizer>/<voice>`：
+* 识别：whisper-asr-webservice，以及 OpenAI 兼容的转写 API（OpenAI、Groq、搭配 faster-whisper 的 speaches，以及其他提供该 API 的服务器）；
+* 合成：OpenAI 兼容的语音 API（OpenAI、搭配 Kokoro 或 Piper 的 speaches），使用其设置中列出的语音。
 
-每个识别器说明它是否支持流式、是否给出时间戳、是否检测语言、是否翻译为英文、是否接受提示，以及它的语言与最长音频；服务端只让每个识别器做它能做的事。
+每个识别器说明它的语言与最长音频，以及是否给出时间戳、是否检测语言、是否翻译为英文、是否接受提示；服务端只让每个识别器做它能做的事。
 
 ### 8.5 字幕
-字幕转写使用同样的识别器（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）：给出时间戳的识别器把视频的音频转写为字幕，因此为助手配置的任何服务也能转写字幕，Whisper 是其中之一，而不再是单独的字幕提供者。
+字幕转写使用同样的识别器（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）：管理员允许转写字幕（其 `subtitles` 设置）且给出时间戳的识别器把视频的音频转写为字幕，因此为助手配置的任何服务也能转写字幕，Whisper 是其中之一，而不再是单独的字幕提供者。服务端的字幕来源 `transcription` 提供名为 `transcription/<recognizer>` 的提供者的字幕。
 
 ## 9. 客户端
 
@@ -191,7 +192,8 @@ AI 路径不可用时，未匹配的请求按作品或人物搜索，因此只�
 * **麦克风**：`getUserMedia`，浏览器只允许安全页面使用——服务端的 HTTPS 地址（其 `mavio.site` 证书，见[账户](accounts.zh-CN.md)）、app.mavio.dev 或 `localhost`。通过普通 HTTP 访问时，面板只接受打字输入，并说明原因。
 * **识别**：`SPEECH_TO_TEXT` 插件就绪时使用服务端的识别器，否则使用浏览器的 `SpeechRecognition`（如果存在；多数浏览器在其厂商的服务器上运行它）；用户可以把浏览器的识别器排在前面。音频由 `AudioWorklet` 采集，并重采样为 16 kHz PCM 发往 WebSocket。
 * **合成**：`speechSynthesis`，或从语音路由逐句获取并播放服务端语音。
-* **输入**：顶栏与播放器控制器中的助手按钮，以及按住说话的按键，它与播放器的快捷键列在一起；电视模式下，该按钮和其他按钮一样可获得焦点。
+* **输入**：助手按钮位于侧边栏（其标题栏，或收起时搜索之后）、紧凑标题栏、电视的顶栏与播放器控制器中，在服务端的助手开启时显示；在文本框之外按住 V 说话。电视模式下，该按钮和其他按钮一样可获得焦点。
+* **快速路径**在 `Ask` 之前运行随 UI 打包的语法 WASM 模块：回到首页、返回与打开设置，以及播放器打开时的暂停、继续、停止、跳转、从头播放、倍速、音量、静音、全屏与关闭字幕，并以语法的回复作答。
 
 ### 9.3 Apple（`apps/ios`、`apps/macos`、`apps/tvos`）
 * **iPhone、iPad 与 Mac**：语音框架的设备端识别，提示作为上下文字符串；`AVSpeechSynthesizer`；以及 App Intents，使 Siri、快捷指令与聚焦搜索经由 `Ask` 在 Mavio 中播放作品与控制播放。

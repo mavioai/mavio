@@ -67,15 +67,16 @@ flowchart LR
 | Dialog | yes, no, cancel, "the second one", "the last one", "more" | the pending confirmation or the last results |
 
 ### 4.2 Grammar
-* **Data, not code**: each language's grammar is a file of patterns with typed slots (`title`, `person`, `genre`, `year`, `duration`, `position`, `ordinal`, `language`, `device`, `season`, `episode`, `number`) and lists of synonyms, compiled into the module when it is built. Chinese and English come first; a language is added by adding its file and its cases.
+* **Data, not code**: each language's grammar is a file of patterns with typed slots (`title`, `person`, `genre`, `year`, `duration`, `position`, `ordinal`, `language`, `device`, `season`, `episode`, `number`) and lists of synonyms, compiled into the module when it is built. There are grammars for Chinese (Simplified and Traditional), English, Japanese, Korean, German, French and Spanish; a language is added by adding its file and its cases.
 * **Normalization** before matching: full-width and half-width forms, Traditional and Simplified Chinese, punctuation and filler words, Chinese and English numbers ("三十秒", "一分半", "two and a half minutes", "第二季第三集"), times of day and positions ("一小时二十分"), and ordinals.
 * **Matching** takes every pattern of the request's language and of English, which mixed requests use for titles; the best match covers the most text with the fewest free slots. A free slot (`title`, `person`) takes the text left, which the server resolves (§4.4); a typed slot must parse.
 * **Dialog state**, given with each parse: whether a confirmation is pending, how many results were last shown, and what plays. Dialog patterns match only when their state holds: "yes" means something only while a confirmation is pending, "the second one" only after results.
 * **Outcome**: an intent with its slots and a confidence, `full` when the whole text matched, `partial` when a pattern matched with text left over, or nothing.
+* **Replies and examples**: each grammar also holds the fast path's answers in its language ("Playing Dune.", "Paused."), filled with their arguments, durations spoken in the language, and the examples the panel and §4.5 suggest, so that a host answers in the request's language with no strings of its own.
 
 ### 4.3 One Implementation, Three Hosts
 * `libs/intent` is a Rust crate with no dependencies on I/O. The native clients link it through `libs/client-rust` (UniFFI and the C ABI expose `parse_intent`).
-* It also builds as one WASM module (`wasm32-unknown-unknown`) with no imports, exporting allocation and `parse`, whose request and answer are protobuf messages of `mavio.assistant.v1` (`ParseIntentRequest`, `Intent`). The web UI instantiates it through `libs/client-ts`, and the server runs the same file on wazero, as it runs WASM plugins, so the grammar never has a second implementation.
+* It also builds as one WASM module (`wasm32-unknown-unknown`) with no imports, exporting its memory, allocation, `intent_parse`, `intent_reply`, `intent_examples` and `intent_languages`, whose requests and answers are protobuf messages of `mavio.intent.v1` (`ParseIntentRequest`, `Intent`); a call returns the answer's address and length packed in one 64-bit integer. The web UI instantiates it through `libs/client-ts` (`Grammar`), and the server runs the same file on wazero, as it runs WASM plugins, so the grammar never has a second implementation.
 * The module is built by Nx (`intent:wasm`) and is not committed; the server's `build` embeds it and the web's `build` bundles it, as the server embeds the web UI.
 
 ### 4.4 Slots on the Server
@@ -93,7 +94,7 @@ The cases of each language (`libs/intent/testdata/cases/<language>.yaml`: text, 
 ## 5. Tools and Actions
 
 ### 5.1 Tools
-The server's tools are Go functions in `apps/server/internal/assistant/tools`, each with a name, a description for models, a JSON Schema of its arguments and one of its results, and a TypeScript declaration generated from them for code mode (§6.2).
+The server's tools are Go functions of `apps/server/internal/assistant`, each with a name, a description for models, and JSON Schemas of its arguments and of its result, from which code mode (§6.2) declares them to scripts.
 
 | Tool | What it does |
 | :--- | :--- |
@@ -161,8 +162,8 @@ For models that write code well, a conversation also offers pi-durable's code mo
 
 ### 8.2 Listening on the Server
 * `AssistantService.StartListening` returns a WebSocket URL signed for the session, valid for a minute, with the recognizer chosen (the settings', else the first ready `SPEECH_TO_TEXT` recognizer) and the language.
-* The client sends 16 kHz mono 16-bit PCM in binary frames and a final message when the user releases the key; the server forwards it to the recognizer as a stream with the user's hints and sends back partial and final text. Without a release, the speech ends after a second of silence detected by Silero VAD (`libs/media/vad`), and an utterance lasts at most 30 seconds.
-* Recognizers that do not stream are given the utterance once it ends. Audio is never stored.
+* The client sends 16 kHz mono 16-bit PCM in binary frames and the text `end` when the user releases the key; without a release, the utterance ends after a second of silence detected by Silero VAD (`libs/media/vad`), and it lasts at most 30 seconds. The server then gives the utterance to the recognizer with the user's hints, when the recognizer takes them and the settings allow, and sends back the final text and its language as JSON.
+* Audio is never stored.
 
 ### 8.3 Synthesis
 * **The device's voices first**: the browser's `speechSynthesis`, `AVSpeechSynthesizer`, Android's `TextToSpeech`, with a voice of the answer's language.
@@ -170,14 +171,14 @@ For models that write code well, a conversation also offers pi-durable's code mo
 * Answers are spoken a sentence at a time as the text arrives, so speech starts before the answer ends; speaking stops when the user talks or presses the button again.
 
 ### 8.4 Speech Plugins
-`SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)) are provided by `plugins/voice`, a Go process plugin connecting to the services the administrator configures, each a recognizer or voices named `<plugin>/<id>`:
-* recognition: whisper-asr-webservice, the OpenAI-compatible transcription API (OpenAI, Groq, speaches with faster-whisper, and other servers serving it), Deepgram, Azure Speech, Google Cloud Speech-to-Text, and Volcengine's and Alibaba Cloud's recognition for Chinese;
-* synthesis: the OpenAI-compatible speech API (OpenAI, speaches with Kokoro or Piper), ElevenLabs, Azure Speech, Google Cloud Text-to-Speech, and Volcengine's and Alibaba Cloud's.
+`SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)) are provided by `plugins/voice`, a Go process plugin whose recognizers and synthesizers the administrator enables and configures in its settings; the server names a recognizer `<plugin>/<recognizer>` and a voice `<plugin>/<synthesizer>/<voice>`:
+* recognition: whisper-asr-webservice, and the OpenAI-compatible transcription API (OpenAI, Groq, speaches with faster-whisper, and other servers serving it);
+* synthesis: the OpenAI-compatible speech API (OpenAI, speaches with Kokoro or Piper), with the voices its settings list.
 
-Each recognizer tells whether it streams, gives timestamps, detects the language, translates to English and takes hints, and its languages and longest audio; the server uses each only for what it can do.
+Each recognizer tells its languages and longest audio, and whether it gives timestamps, detects the language, translates to English and takes hints; the server uses each only for what it can do.
 
 ### 8.5 Subtitles
-Transcribing subtitles uses the same recognizers ([Architecture §14.5](architecture.md#145-translation-and-transcription)): a recognizer with timestamps transcribes a video's audio into a subtitle, so that any service configured for the assistant also transcribes subtitles, and Whisper is one of them rather than a subtitle provider of its own.
+Transcribing subtitles uses the same recognizers ([Architecture §14.5](architecture.md#145-translation-and-transcription)): a recognizer with timestamps that the administrator lets transcribe subtitles (its `subtitles` setting) transcribes a video's audio into a subtitle, so that any service configured for the assistant also transcribes subtitles, and Whisper is one of them rather than a subtitle provider of its own. The server's subtitle source `transcription` offers the subtitles of providers `transcription/<recognizer>`.
 
 ## 9. Clients
 
@@ -191,7 +192,8 @@ Transcribing subtitles uses the same recognizers ([Architecture §14.5](architec
 * **Microphone**: `getUserMedia`, which browsers grant only to secure pages — a server's HTTPS address (its `mavio.site` certificate, [Accounts](accounts.md)), app.mavio.dev or `localhost`. Over plain HTTP the panel takes typed requests only and says why.
 * **Recognition**: the server's when a `SPEECH_TO_TEXT` plugin is ready, else the browser's `SpeechRecognition` where it exists, which most browsers run on their maker's servers; the user may put the browser's first. Audio is captured by an `AudioWorklet` that resamples it to 16 kHz PCM for the WebSocket.
 * **Synthesis**: `speechSynthesis`, or server voices played from the speech route a sentence at a time.
-* **Input**: the assistant button in the top bar and in the player's controller, and a key held to talk, listed with the player's shortcuts; in television mode the button is focusable like any other.
+* **Input**: the assistant button in the sidebar (its header, or the rail after search), the compact header, the television's top bar and the player's controller, shown when the server's assistant is on; and V held to talk outside text fields. In television mode the button is focusable like any other.
+* **The fast path** runs the grammar's WASM module, bundled with the UI, before `Ask`: going home, back and to the settings, and, while the player is open, pausing, resuming, stopping, seeking, restarting, speed, volume, mute, full screen and subtitles off, answered with the grammar's replies.
 
 ### 9.3 Apple (`apps/ios`, `apps/macos`, `apps/tvos`)
 * **iPhone, iPad and Mac**: the speech framework's on-device recognition with the hints as contextual strings, `AVSpeechSynthesizer`, and App Intents, so that Siri, Shortcuts and Spotlight play titles and control playback in Mavio through `Ask`.

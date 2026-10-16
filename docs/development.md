@@ -63,7 +63,7 @@ Nx only orchestrates and caches: every Go module still works on its own with `go
 
 A project overrides a default target with a `project.json` next to its `go.mod`; for example `plugins/scraper-tmdb/project.json` builds a `wasip1` WASM module.
 
-`tools/nx-cargo` gives every Cargo workspace `build` (`cargo build --locked --all-targets`), `test` (`cargo test --locked`), `bench` (`cargo bench --locked`, not cached) and `lint` (`cargo fmt --check` and `cargo clippy --locked --all-targets -- -D warnings`).
+`tools/nx-cargo` gives every Cargo workspace `build` (`cargo build --locked --all-targets`), `test` (`cargo test --locked`), `bench` (`cargo bench --locked`, not cached) and `lint` (`cargo fmt --check` and `cargo clippy --locked --all-targets -- -D warnings`). `libs/intent` adds `wasm`, which builds the grammar for `wasm32-unknown-unknown` and copies the module into `libs/intent/dist` (the npm package `@mavio/intent`, which the web UI bundles) and `apps/server/internal/assistant/intent/dist` (which the server embeds); neither copy is committed, so the server's and the web UI's `build` and `libs/client-ts`'s `test` depend on it.
 
 The scripts of a `package.json` are targets too: `libs/proto` and `libs/design` have `typecheck` (`tsc -p tsconfig.json`, TypeScript 7), and `libs/design` has `generate` (§4.4). A directory with both a `go.mod` and a `package.json`, such as `libs/design`, is one project with the targets of both. `libs/plugin` is one too: its TypeScript SDK `@mavio/plugin` has `typecheck` and `test-ts` (Vitest), on which its Go `test` depends, since a script named `test` would replace the inferred one.
 

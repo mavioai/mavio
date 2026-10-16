@@ -123,7 +123,7 @@ flowchart TD
 | P26 | 字幕获取 | ✅ 完成 |
 | P27 | AI 网关与字幕翻译 | 进行中 |
 | P28 | 账户 | 进行中 |
-| P29 | 助手 | 未开始 |
+| P29 | 助手 | 进行中 |
 
 ---
 
@@ -910,17 +910,22 @@ flowchart TD
 **完成标准**：一个经由 API 的端到端测试：没有 AI 网关插件时，中英文请求暂停假设备、跳转并切换其字幕，播放以名称的同音字说出的作品，一个需要确认的请求以语音确认、另一个以语音取消；使用构建好的 `plugins/agent` 与回环接口上的假 OpenAI 兼容 API 提供的模型时，语法未匹配的请求经由代码模式以用户身份运行工具，重启插件时被中断的工具调用只运行一次，在一个会话中学到的记忆在下一个会话中被使用；通过构建好的 `plugins/voice` 与假 whisper-asr-webservice 收听，得到一段录音的文本，同一个识别器转写一集的字幕；在 Web UI 中，一个说出的请求播放一部作品。
 
 **进展**：
-- [ ] `libs/proto` 中的 `mavio.assistant.v1`：`Intent`、`ParseIntentRequest` 与 `AssistantService`
-- [ ] `libs/intent`：语法格式、规范化、中文与英文语法、对话状态及其用例；WASM 构建（`intent:wasm`），由服务端在 wazero 上运行、由 `libs/client-ts` 运行，各自对照用例
-- [ ] `apps/server` 中的 `AssistantService` 与工具：带拼音的槽位解析、客户端动作、经 `SendCommand` 控制其他设备、活动日志；服务端设置中的助手设置与可使用 AI 路径的用户（[领域模型](domain.zh-CN.md)）
-- [ ] `AGENT_SESSION` 与 `plugins/agent` 中的远程工具：声明、`WatchAgentToolCalls`、`SubmitAgentToolResult`、服务端按 ID 记录的调用、`AddAgentMessages`
-- [ ] `plugins/agent` 中的代码模式，在各平台的 Bun 可执行文件中验证其 QuickJS 沙箱
-- [ ] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
-- [ ] `libs/proto` 中的 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`；`plugins/voice`，包括从 `plugins/subtitles` 连同测试用例移来的 whisper-asr-webservice，以及 OpenAI 兼容的转写与语音 API
-- [ ] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
-- [ ] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
-- [ ] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、“助手”设置以及 AI 设置中的助手部分
-- [ ] 决定哪些工具需要确认
+- [x] `libs/proto` 中的 `mavio.intent.v1`（`Intent`、`ParseIntentRequest`）与 `mavio.assistant.v1`（`AssistantService`）
+- [x] `libs/intent`：语法格式、规范化、中文（简体与繁体）、英文、日文、韩文、德文、法文与西班牙文的语法及其回复与示例、对话状态及其用例；WASM 构建（`intent:wasm`），由服务端在 wazero 上运行、由 `libs/client-ts` 运行，各自对照用例
+- [x] `apps/server` 中的 `AssistantService` 与工具：带拼音的槽位解析、客户端动作、经 `SendCommand` 控制其他设备、活动日志；服务端设置中的助手设置与可使用 AI 路径的用户（[领域模型](domain.zh-CN.md)）
+- [x] `AGENT_SESSION` 与 `plugins/agent` 中的远程工具：声明、`WatchAgentToolCalls`、`SubmitAgentToolResult`、服务端按 ID 记录的调用、`AddAgentMessages`
+- [x] `plugins/agent` 中的代码模式，由 `bun test` 测试
+- [ ] 在各平台构建好的 Bun 可执行文件中验证代码模式的 QuickJS 沙箱
+- [x] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
+- [x] `libs/proto` 中的 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`；`plugins/voice`，包括从 `plugins/subtitles` 连同测试用例移来的 whisper-asr-webservice，以及 OpenAI 兼容的转写与语音 API
+- [x] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
+- [x] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
+- [x] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
+- [ ] **完成标准**中的端到端测试
+- [ ] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
+- [ ] 决定 `request_title` 之外还有哪些工具需要确认
+- [ ] 流式识别：双向的 `StreamSpeech` 在用户说话时给出部分文本，并经由 WebSocket 连接流式服务
+- [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V
 - [ ] `plugins/voice` 中更多的语音服务：Deepgram、Azure Speech、Google Cloud、火山引擎、阿里云、ElevenLabs
 - [ ] Apple 应用：带提示的设备端识别、`AVSpeechSynthesizer`、App Intents；tvOS 上的听写
 - [ ] Android 应用：带提示的 `SpeechRecognizer`、`TextToSpeech`、Android TV 上的搜索 intent 与按搜索播放
