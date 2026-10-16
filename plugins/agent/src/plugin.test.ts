@@ -345,3 +345,133 @@ describe("sessions", () => {
 		expect(readFileSync(join(dir, "deleted-sessions.json"), "utf8")).toBe("[]");
 	});
 });
+
+describe("host tools", () => {
+	const searchTool = {
+		name: "search_library",
+		description: "Search the library.",
+		parametersJson: JSON.stringify({ type: "object", properties: { query: { type: "string" } }, required: ["query"] }),
+	};
+
+	test("are run by the host", async () => {
+		const faux = fauxProvider();
+		faux.setResponses([
+			fauxAssistantMessage([fauxToolCall("search_library", { query: "inception" })], { stopReason: "toolUse" }),
+			fauxAssistantMessage("It is in your library."),
+		]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({
+			provider: "faux",
+			model: "faux-1",
+			tools: [searchTool],
+			owner: "u1",
+			labels: { device: "d1" },
+		});
+		const watching = new AbortController();
+		const seen: { tool: string; owner: string; sessionId: string; args: unknown }[] = [];
+		const host = (async () => {
+			for await (const r of agents.watchAgentToolCalls({}, { signal: watching.signal })) {
+				const call = r.call!;
+				seen.push({ tool: call.tool, owner: call.owner, sessionId: call.sessionId, args: JSON.parse(call.argumentsJson) });
+				await agents.submitAgentToolResult({ callId: call.id, text: "Inception (2010)" });
+			}
+		})().catch(() => {});
+		const sent = await agents.sendAgentMessage({ sessionId: session!.id, text: "Do I have Inception?" });
+		watching.abort();
+		await host;
+		expect(sent.answer?.text).toBe("It is in your library.");
+		expect(seen).toEqual([{ tool: "search_library", owner: "u1", sessionId: session!.id, args: { query: "inception" } }]);
+		const mine = await agents.listAgentSessions({ owner: "u1" });
+		expect(mine.sessions.map((s) => [s.id, s.labels])).toEqual([[session!.id, { device: "d1" }]]);
+		expect((await agents.listAgentSessions({ owner: "u2" })).sessions).toEqual([]);
+	});
+
+	test("are called by scripts in code mode", async () => {
+		const faux = fauxProvider();
+		let result = "";
+		faux.setResponses([
+			fauxAssistantMessage(
+				[fauxToolCall("codemode", { code: 'const r = await tools.search_library({ query: "alien" }); text(`found: ${r}`);' })],
+				{ stopReason: "toolUse" },
+			),
+			(context) => {
+				result = JSON.stringify(context.messages.at(-1));
+				return fauxAssistantMessage("Found it.");
+			},
+		]);
+		const { agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [searchTool], codeMode: true });
+		const watching = new AbortController();
+		const host = (async () => {
+			for await (const r of agents.watchAgentToolCalls({}, { signal: watching.signal })) {
+				await agents.submitAgentToolResult({ callId: r.call!.id, text: "Alien (1979)" });
+			}
+		})().catch(() => {});
+		const sent = await agents.sendAgentMessage({ sessionId: session!.id, text: "Find Alien" });
+		watching.abort();
+		await host;
+		expect(sent.answer?.text).toBe("Found it.");
+		expect(result).toContain("Alien (1979)");
+	});
+
+	test("are declared with JSON Schemas", async () => {
+		const { agents } = await start([fauxProvider().provider]);
+		const bad = { ...searchTool, parametersJson: "not json" };
+		expect(await code(agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [bad] }))).toBe(Code.InvalidArgument);
+		expect(await code(agents.createAgentSession({ provider: "faux", model: "faux-1", tools: [searchTool, searchTool] }))).toBe(
+			Code.InvalidArgument,
+		);
+	});
+});
+
+describe("memory", () => {
+	test("is learned, shown, consolidated and edited", async () => {
+		const faux = fauxProvider();
+		let seen = "";
+		faux.setResponses([
+			fauxAssistantMessage([fauxToolCall("remember", { text: "Has a daughter called Mia." })], { stopReason: "toolUse" }),
+			fauxAssistantMessage("Noted."),
+			// Consolidation.
+			fauxAssistantMessage('{"add": ["Prefers the original audio."]}'),
+			(context) => {
+				seen = JSON.stringify(context);
+				return fauxAssistantMessage("Hello again.");
+			},
+		]);
+		const { plugin, agents } = await start([faux.provider]);
+		const { session } = await agents.createAgentSession({ provider: "faux", model: "faux-1", owner: "u1", memory: true });
+		const id = session!.id;
+		expect((await agents.sendAgentMessage({ sessionId: id, text: "My daughter is Mia." })).answer?.text).toBe("Noted.");
+		const texts = async () => (await agents.listAgentMemories({ owner: "u1" })).memories.map((m) => m.text).sort();
+		expect(await texts()).toEqual(["Has a daughter called Mia."]);
+
+		await agents.addAgentMessages({
+			sessionId: id,
+			messages: [
+				{ role: AiRole.USER, text: "Switch to the original audio" },
+				{ role: AiRole.ASSISTANT, text: "Switched to Japanese." },
+			],
+		});
+		const got = await agents.getAgentSession({ id });
+		expect(got.messages.map((m) => m.text).slice(-2)).toEqual(["Switch to the original audio", "Switched to Japanese."]);
+
+		await agents.endAgentSession({ id });
+		await plugin.idle();
+		expect(await texts()).toEqual(["Has a daughter called Mia.", "Prefers the original audio."]);
+		expect((await agents.getAgentSession({ id })).session?.ended).toBe(true);
+		expect(await code(agents.sendAgentMessage({ sessionId: id, text: "Hi" }))).toBe(Code.FailedPrecondition);
+
+		const next = await agents.createAgentSession({ provider: "faux", model: "faux-1", owner: "u1", memory: true });
+		await agents.sendAgentMessage({ sessionId: next.session!.id, text: "Hi" });
+		expect(seen).toContain("Has a daughter called Mia.");
+
+		const { memory } = await agents.putAgentMemory({ owner: "u1", text: "Watches the Bake Off on Saturdays." });
+		await agents.putAgentMemory({ owner: "u1", id: memory!.id, text: "Watches the Bake Off on Sundays." });
+		expect(await texts()).toContain("Watches the Bake Off on Sundays.");
+		expect(await code(agents.putAgentMemory({ owner: "u1", id: "nope", text: "x" }))).toBe(Code.NotFound);
+		await agents.deleteAgentMemories({ owner: "u1", ids: [memory!.id] });
+		expect(await texts()).toHaveLength(2);
+		await agents.deleteAgentMemories({ owner: "u1" });
+		expect(await texts()).toEqual([]);
+	});
+});

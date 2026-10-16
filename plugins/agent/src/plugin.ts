@@ -8,7 +8,9 @@ import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { createModels, type MutableModels, type Provider } from "@earendil-works/pi-ai";
 import { registerBunOAuthFlows } from "@earendil-works/pi-ai/bun-oauth";
 import { builtinModels } from "@earendil-works/pi-ai/providers/all";
-import { createRegistry, Harness, MemoryStorage, type Storage } from "@earendil-works/pi-durable";
+import { InlineCodemodeSandbox, loadQuickJSWasm } from "@earendil-works/pi-codemode";
+import { createRegistry, type Extension, Harness, MemoryStorage, type Storage } from "@earendil-works/pi-durable";
+import { createCodemodeExtension } from "@earendil-works/pi-durable/codemode";
 import { openNodeSqliteStorage } from "@earendil-works/pi-durable/storage/sqlite/node";
 import { AgentSessionService, AiGatewayService } from "@mavio/proto/mavio/plugin/v1/ai_pb";
 import { HealthResponseSchema, ManifestSchema, PluginService } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
@@ -16,9 +18,12 @@ import manifest from "../manifest.json" with { type: "json" };
 import { customProvider, parseConfig } from "./config.ts";
 import { FileCredentialStore } from "./credentials.ts";
 import { gateway } from "./gateway.ts";
+import { HostCalls } from "./host.ts";
 import { Logins } from "./logins.ts";
 import { Deleted } from "./purge.ts";
+import { memoryExtension } from "./memory.ts";
 import { sessions } from "./sessions.ts";
+import quickjs from "quickjs-wasi/quickjs.wasm" with { type: "file" };
 
 /** The plugin's ID and version, as its manifest gives them. */
 export const id = manifest.id;
@@ -36,6 +41,8 @@ export interface PluginOptions {
 export interface Plugin {
 	readonly models: MutableModels;
 	routes(router: ConnectRouter): void;
+	/** idle resolves when the plugin's background work is done. */
+	idle(): Promise<void>;
 	close(): Promise<void>;
 }
 
@@ -61,7 +68,24 @@ export async function openPlugin(o: PluginOptions = {}): Promise<Plugin> {
 		await deleted.purge(db);
 		storage = await openNodeSqliteStorage(db);
 	}
-	const harness = await Harness.open(storage, { models, registry: createRegistry() }, BACKGROUND_CONTEXT);
+	// Conversations offer only the extensions they are created with.
+	const registry = createRegistry();
+	const memory = memoryExtension();
+	registry.install(memory);
+	// Scripts of code mode run in QuickJS on the plugin's thread: they
+	// mostly wait for the host's tools.
+	let codemode: Extension | undefined;
+	try {
+		codemode = createCodemodeExtension({ sandbox: new InlineCodemodeSandbox({ wasm: await loadQuickJSWasm(quickjs) }) });
+		registry.install(codemode);
+	} catch (e) {
+		console.error("agent: code mode is not available:", e);
+	}
+	const harness = await Harness.open(storage, { models, registry, settings: { extensions: [] } }, BACKGROUND_CONTEXT);
+	const agentSessions = sessions({ harness, deleted, registry, models, calls: new HostCalls(), memory, codemode });
+	// The host's tools are installed before the calls the last process left
+	// unfinished run again.
+	await agentSessions.restore();
 	// Answers the last process left unfinished go on.
 	harness.resume();
 
@@ -87,9 +111,11 @@ export async function openPlugin(o: PluginOptions = {}): Promise<Plugin> {
 				shutdown: () => ({}),
 			});
 			router.service(AiGatewayService, gateway({ models, credentials, logins, custom: () => custom }));
-			router.service(AgentSessionService, sessions(harness, deleted));
+			router.service(AgentSessionService, agentSessions.service);
 		},
+		idle: () => agentSessions.idle(),
 		async close() {
+			await agentSessions.idle();
 			logins.close();
 			await harness.close(BACKGROUND_CONTEXT);
 		},
