@@ -13,17 +13,30 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/net"
 	"github.com/shirou/gopsutil/v4/process"
+
+	"github.com/mavioai/mavio/libs/library/storage"
 )
 
 // reader reads this computer's counters, logging each part it cannot read
 // once.
 type reader struct {
-	self   *process.Process
-	failed sync.Map
+	volumes func(context.Context) ([]storage.Volume, error)
+	self    *process.Process
+	failed  sync.Map
+
+	mu       sync.Mutex
+	space    *Space
+	spaceAt  time.Time
+	spaceRun bool
 }
 
-func newReader() *reader {
-	r := &reader{}
+// spaceAge is how long the disks' space is kept before it is read again:
+// it changes slowly, and a share that does not answer holds its reading
+// up for seconds.
+const spaceAge = 30 * time.Second
+
+func newReader(volumes func(context.Context) ([]storage.Volume, error)) *reader {
+	r := &reader{volumes: volumes}
 	if p, err := process.NewProcess(int32(os.Getpid())); err == nil {
 		r.self = p
 	}
@@ -66,6 +79,7 @@ func (r *reader) read(ctx context.Context) Reading {
 		}
 		out.Disk = c
 	}
+	out.Space = r.diskSpace(ctx)
 	if ns, err := net.IOCountersWithContext(ctx, true); r.ok(ctx, "network", err) {
 		c := &Counters{}
 		for _, n := range counted(ns) {
@@ -75,6 +89,61 @@ func (r *reader) read(ctx context.Context) Reading {
 		out.Network = c
 	}
 	return out
+}
+
+// diskSpace returns the space of the computer's own disks: read at first,
+// then kept, and read again in the background once older than spaceAge.
+func (r *reader) diskSpace(ctx context.Context) *Space {
+	r.mu.Lock()
+	first, stale := r.spaceAt.IsZero(), time.Since(r.spaceAt) > spaceAge && !r.spaceRun
+	if stale {
+		r.spaceRun = true
+	}
+	r.mu.Unlock()
+	refresh := func(ctx context.Context) {
+		vs, err := r.volumes(ctx)
+		var s *Space
+		if r.ok(ctx, "space", err) {
+			s = spaceOf(vs)
+		}
+		r.mu.Lock()
+		r.space, r.spaceAt, r.spaceRun = s, time.Now(), false
+		r.mu.Unlock()
+	}
+	switch {
+	case first:
+		refresh(ctx)
+	case stale:
+		go refresh(context.WithoutCancel(ctx))
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.space
+}
+
+// spaceOf adds up the space of the computer's own disks, those of known
+// size; shares and cloud drives are other computers'. Volumes of one
+// container, as APFS's, tell its size and free space each, so volumes
+// telling the same are counted once.
+func spaceOf(vs []storage.Volume) *Space {
+	var s *Space
+	seen := map[[2]uint64]bool{}
+	for _, v := range vs {
+		if v.Kind != storage.KindLocalSSD && v.Kind != storage.KindLocalHDD || v.Total == 0 {
+			continue
+		}
+		key := [2]uint64{v.Total, v.Available}
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		if s == nil {
+			s = &Space{}
+		}
+		s.Total += v.Total
+		s.Available += v.Available
+	}
+	return s
 }
 
 // ok tells whether err is nil, logging the first error of each part.

@@ -8,6 +8,8 @@ import (
 	"testing"
 	"testing/synctest"
 	"time"
+
+	"github.com/mavioai/mavio/libs/library/storage"
 )
 
 func TestSince(t *testing.T) {
@@ -99,7 +101,7 @@ func TestReadThisComputer(t *testing.T) {
 	default:
 		t.Skipf("load is not read on %s", runtime.GOOS)
 	}
-	r := newReader()
+	r := newReader(storage.Volumes)
 	ctx := context.Background()
 	r0 := r.read(ctx)
 	time.Sleep(100 * time.Millisecond)
@@ -110,7 +112,28 @@ func TestReadThisComputer(t *testing.T) {
 	if s.Memory == nil || s.Memory.Total == 0 || s.Memory.Used > s.Memory.Total || s.Memory.Server == 0 {
 		t.Errorf("Memory = %+v, want = read", s.Memory)
 	}
+	if s.Space == nil || s.Space.Total == 0 || s.Space.Available > s.Space.Total {
+		t.Errorf("Space = %+v, want = read", s.Space)
+	}
 	if s.Network == nil {
 		t.Errorf("Network = nil, want = read")
+	}
+}
+
+func TestSpaceOf(t *testing.T) {
+	got := spaceOf([]storage.Volume{
+		{Path: "/", Kind: storage.KindLocalSSD, Total: 1000, Available: 300},
+		// Another volume of the same APFS container.
+		{Path: "/Volumes/Work", Kind: storage.KindLocalSSD, Total: 1000, Available: 300},
+		{Path: "/mnt/usb", Kind: storage.KindLocalHDD, Total: 500, Available: 100},
+		{Path: "/mnt/nas", Kind: storage.KindRemoteNAS, Total: 9000, Available: 9000},
+		{Path: "/mnt/drive", Kind: storage.KindCloudMount, Total: 9000, Available: 9000},
+		{Path: "/mnt/gone", Kind: storage.KindUnknown},
+	})
+	if want := (Space{Total: 1500, Available: 400}); got == nil || *got != want {
+		t.Errorf("spaceOf = %v, want = %+v", got, want)
+	}
+	if got := spaceOf([]storage.Volume{{Path: "/mnt/nas", Kind: storage.KindRemoteNAS, Total: 1}}); got != nil {
+		t.Errorf("spaceOf of shares = %+v, want = nil", got)
 	}
 }

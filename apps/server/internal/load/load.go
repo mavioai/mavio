@@ -6,6 +6,8 @@ import (
 	"slices"
 	"sync"
 	"time"
+
+	"github.com/mavioai/mavio/libs/library/storage"
 )
 
 // Sample is the load over the interval ending at Time. A part is nil
@@ -16,6 +18,13 @@ type Sample struct {
 	Memory  *Memory
 	Disk    *Throughput
 	Network *Throughput
+	// Space is that of the computer's own disks.
+	Space *Space
+}
+
+// Space is disks' size and what is free on them, in bytes.
+type Space struct {
+	Total, Available uint64
 }
 
 // CPU is the share of all the computer's cores busy, from 0 to 1.
@@ -66,7 +75,7 @@ type Sampler struct {
 
 // New samples the load of this computer.
 func New() *Sampler {
-	return NewFrom(newReader().read)
+	return NewFrom(newReader(storage.Volumes).read)
 }
 
 // NewFrom samples the readings read takes, as tests give.
@@ -124,6 +133,8 @@ type Reading struct {
 	Memory *Memory
 	// Disk and Network are the bytes since the computer started.
 	Disk, Network *Counters
+	// Space is read as is.
+	Space *Space
 }
 
 // CPUTimes are seconds of CPU time, summed over the cores.
@@ -138,7 +149,7 @@ type Counters struct {
 
 // since is the load over the interval from r0 to r.
 func (r Reading) since(r0 Reading) Sample {
-	s := Sample{Time: r.Time, Memory: r.Memory}
+	s := Sample{Time: r.Time, Memory: r.Memory, Space: r.Space}
 	secs := r.Time.Sub(r0.Time).Seconds()
 	if r.CPU != nil && r0.CPU != nil {
 		if total := r.CPU.Total - r0.CPU.Total; total > 0 {

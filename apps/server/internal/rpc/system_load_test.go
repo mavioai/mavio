@@ -24,6 +24,7 @@ func TestGetSystemLoad(t *testing.T) {
 				CPU:    &load.CPUTimes{User: float64(n), Total: float64(4 * n)},
 				Memory: &load.Memory{Total: 1000, Used: 400, Server: 10},
 				Disk:   &load.Counters{In: uint64(2000 * n), Out: 0},
+				Space:  &load.Space{Total: 500, Available: 200},
 			}
 		})}
 		member := auth.WithPrincipal(t.Context(), auth.Principal{User: core.User{Kind: core.UserMember}})
@@ -52,6 +53,9 @@ func TestGetSystemLoad(t *testing.T) {
 		}
 		if got := s.GetDisk().GetReadRate(); got != 1000 {
 			t.Errorf("disk read rate = %v, want = 1000", got)
+		}
+		if got := s.GetDisk().GetAvailableBytes(); got != 200 {
+			t.Errorf("disk available = %v, want = 200", got)
 		}
 		if s.HasNetwork() {
 			t.Errorf("network = %v, want = unset", s.GetNetwork())

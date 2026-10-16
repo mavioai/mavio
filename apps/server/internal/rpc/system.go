@@ -85,10 +85,15 @@ func (s *SystemService) GetSystemLoad(ctx context.Context, _ *systemv1.GetSystem
 				ServerBytes: new(bytesOf(m.Server)),
 			}.Build()
 		}
-		if d := l.Disk; d != nil {
-			b.Disk = systemv1.DiskLoad_builder{
-				ReadRate: &d.In, WriteRate: &d.Out, ReadBytes: new(bytesOf(d.InTotal)), WrittenBytes: new(bytesOf(d.OutTotal)),
-			}.Build()
+		if l.Disk != nil || l.Space != nil {
+			var d systemv1.DiskLoad_builder
+			if t := l.Disk; t != nil {
+				d.ReadRate, d.WriteRate, d.ReadBytes, d.WrittenBytes = &t.In, &t.Out, new(bytesOf(t.InTotal)), new(bytesOf(t.OutTotal))
+			}
+			if sp := l.Space; sp != nil {
+				d.TotalBytes, d.AvailableBytes = new(bytesOf(sp.Total)), new(bytesOf(sp.Available))
+			}
+			b.Disk = d.Build()
 		}
 		if n := l.Network; n != nil {
 			b.Network = systemv1.NetworkLoad_builder{
