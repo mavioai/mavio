@@ -1,4 +1,4 @@
-import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
+import { createRootRoute, createRoute, createRouter, notFound, redirect } from "@tanstack/react-router";
 import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 
 import { CreditsScreen, ItemCrewScreen, TitleCreditsScreen, TitleCrewScreen } from "./screens/credits.tsx";
@@ -28,6 +28,7 @@ import {
   signInSteps,
 } from "./screens/sign-in.tsx";
 import { searchText } from "./search-params.ts";
+import { NotFoundView } from "./ui.tsx";
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -130,7 +131,13 @@ const requests = createRoute({
   component: RequestsScreen,
 });
 
-const title = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId", component: TitleScreen });
+/** An address of a discovered title, person or collection that names none is not found. */
+function checkTitle(params: { kind?: string; tmdbId: string }) {
+  const kindOk = params.kind === undefined || params.kind === "movie" || params.kind === "series";
+  if (!kindOk || !/^[1-9]\d*$/.test(params.tmdbId)) throw notFound();
+}
+
+const title = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId", beforeLoad: ({ params }) => checkTitle(params), component: TitleScreen });
 
 const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$hubId", component: HubScreen });
 
@@ -147,20 +154,31 @@ const details = createRoute({
 
 const credits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/credits", component: CreditsScreen });
 const crew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/crew", component: ItemCrewScreen });
-const titleCredits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/credits", component: TitleCreditsScreen });
-const titleCrew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/crew", component: TitleCrewScreen });
+const titleCredits = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/title/$kind/$tmdbId/credits",
+  beforeLoad: ({ params }) => checkTitle(params),
+  component: TitleCreditsScreen,
+});
+const titleCrew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/crew", beforeLoad: ({ params }) => checkTitle(params), component: TitleCrewScreen });
 
 const person = createRoute({ getParentRoute: () => root, path: "/s/$serverId/person/$personId", component: PersonScreen });
 const discoveredPerson = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/discover/person/$tmdbId",
+  beforeLoad: ({ params }) => checkTitle(params),
   // The kind of titles shown, all when none.
   validateSearch: (s: Record<string, unknown>): { kind?: "movie" | "series" } => ({
     kind: s.kind === "movie" || s.kind === "series" ? s.kind : undefined,
   }),
   component: DiscoveredPersonScreen,
 });
-const collection = createRoute({ getParentRoute: () => root, path: "/s/$serverId/discover/collection/$tmdbId", component: CollectionScreen });
+const collection = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/discover/collection/$tmdbId",
+  beforeLoad: ({ params }) => checkTitle(params),
+  component: CollectionScreen,
+});
 
 const player = createRoute({
   getParentRoute: () => root,
@@ -201,6 +219,7 @@ export const router = createRouter({
     player,
   ]),
   scrollRestoration: true,
+  defaultNotFoundComponent: NotFoundView,
 });
 
 declare module "@tanstack/react-router" {

@@ -2,7 +2,7 @@
 // components.md, Credits Screen): the shelf on their details, and the page
 // of the whole cast and crew it opens, the cast in billing order, then the
 // crew by job; and an item's or a discovered title's crew alone, by job.
-import { artwork, errorMessage, type ServerEntry, useItem, useServer, useTitle } from "@mavio/client-ts";
+import { artwork, errorMessage, isNotFound, type ServerEntry, useItem, useServer, useTitle } from "@mavio/client-ts";
 import type { TitleCredit } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { CreditKind, type Credit, ImageKind } from "@mavio/proto/mavio/library/v1/item_pb";
@@ -14,7 +14,7 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { up } from "../shell/up.ts";
 import { usePrefs } from "../prefs.ts";
-import { Loading, Shelf, StatusView } from "../ui.tsx";
+import { Loading, NotFoundView, Shelf, StatusView } from "../ui.tsx";
 import { initialsOf } from "./person.tsx";
 
 const itemRoute = getRouteApi("/s/$serverId/item/$itemId/credits");
@@ -138,6 +138,7 @@ function ItemCredits({ params: { serverId, itemId }, crew = false }: { params: {
   const q = useItem(server?.token ? server : undefined, itemId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data.item)) return <NotFoundView />;
   if (q.isError || !q.data.item) {
     return <StatusView icon="error" title={t("state.error")} action={{ label: t("action.retry"), onClick: () => void q.refetch() }} />;
   }
@@ -171,6 +172,7 @@ function TitleCredits({ params: { serverId, kind, tmdbId }, crew = false }: { pa
   const q = useTitle(server?.token ? server : undefined, kind === "series" ? MediaKind.SERIES : MediaKind.MOVIE, Number(tmdbId), discoverLanguage);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data)) return <NotFoundView />;
   if (q.isError || !q.data) {
     return <StatusView icon="error" title={t("state.error")} message={q.error ? errorMessage(q.error) : undefined} />;
   }

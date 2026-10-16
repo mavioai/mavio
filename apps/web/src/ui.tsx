@@ -5,7 +5,7 @@ import type { Item } from "@mavio/proto/mavio/library/v1/item_pb";
 import { ImageKind, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { artwork, type Server, thumbOf, usePrefetchItem } from "@mavio/client-ts";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { t } from "./i18n.ts";
@@ -296,6 +296,19 @@ export function StatusView({
         </Button>
       )}
     </div>
+  );
+}
+
+/** What shows where an address names nothing, or what it showed is no longer there. */
+export function NotFoundView() {
+  const navigate = useNavigate();
+  return (
+    <StatusView
+      icon="search"
+      title={t("state.notFound")}
+      message={t("state.notFoundMessage")}
+      action={{ label: t("nav.home"), onClick: () => void navigate({ to: "/" }) }}
+    />
   );
 }
 

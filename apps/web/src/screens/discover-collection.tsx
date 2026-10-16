@@ -3,7 +3,7 @@
 // name and overview, Request asking for the movies of it chosen, and for
 // administrators Blocklist, then its movies marked with what the server
 // has of each.
-import { errorMessage, type ServerEntry, useAdminServers, useCollection, useRequestActions, useRequestTitle, useServer } from "@mavio/client-ts";
+import { errorMessage, isNotFound, type ServerEntry, useAdminServers, useCollection, useRequestActions, useRequestTitle, useServer } from "@mavio/client-ts";
 import { type Collection, type DiscoveredTitle, MediaStatus } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { getRouteApi } from "@tanstack/react-router";
@@ -12,7 +12,7 @@ import { useState } from "react";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Button, Grid, Loading, StatusView } from "../ui.tsx";
+import { Button, Grid, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
 import { sized, statusLabel, TitleCard, tmdbOf } from "./discover.tsx";
@@ -25,6 +25,7 @@ export function CollectionScreen() {
   const q = useCollection(server?.token ? server : undefined, Number(tmdbId), discoverLanguage);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data)) return <NotFoundView />;
   if (q.isError || !q.data) {
     return <StatusView icon="error" title={t("state.error")} message={q.error ? errorMessage(q.error) : undefined} />;
   }

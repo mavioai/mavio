@@ -6,6 +6,7 @@ import {
   type CatalogRow,
   errorMessage,
   filterCount,
+  isNotFound,
   rowsOf,
   type ServerEntry,
   titlesOf,
@@ -35,7 +36,7 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, Group, LoadMore, Loading, minutesText, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, Loading, LoadMore, minutesText, NotFoundView, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
 import { CastShelf, isCast, titleCredits } from "./credits.tsx";
 import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
 import { dayText } from "./facts.tsx";
@@ -302,6 +303,7 @@ export function TitleScreen() {
   const q = useTitle(server?.token ? server : undefined, mediaKindOf(kind as KindParam), Number(tmdbId), discoverLanguage);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data)) return <NotFoundView />;
   if (q.isError || !q.data) {
     return <StatusView icon="error" title={t("state.error")} message={q.error ? errorMessage(q.error) : undefined} />;
   }

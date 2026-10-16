@@ -34,6 +34,7 @@ export {
 export {
   type Copy,
   errorMessage,
+  isNotFound,
   isTotpRequired,
   isUnauthenticated,
   type Filter,

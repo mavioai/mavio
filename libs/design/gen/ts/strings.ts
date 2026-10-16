@@ -250,6 +250,8 @@ export type MessageKey =
   | 'state.loading'
   | 'state.empty'
   | 'state.error'
+  | 'state.notFound'
+  | 'state.notFoundMessage'
   | 'state.offline'
   | 'action.retry'
   | 'action.cancel'
@@ -1973,6 +1975,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
     "state.error": "Something went wrong",
+    "state.notFound": "Not Found",
+    "state.notFoundMessage": "There is nothing at this address, or what was here has been removed.",
     "state.offline": "You're offline",
     "action.retry": "Try Again",
     "action.cancel": "Cancel",
@@ -3694,6 +3698,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",
     "state.error": "出了点问题",
+    "state.notFound": "找不到页面",
+    "state.notFoundMessage": "此地址没有内容，或这里的内容已被移除。",
     "state.offline": "你已离线",
     "action.retry": "重试",
     "action.cancel": "取消",

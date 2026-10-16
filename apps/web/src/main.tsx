@@ -1,4 +1,4 @@
-import { Servers, ServersProvider } from "@mavio/client-ts";
+import { isNotFound, Servers, ServersProvider } from "@mavio/client-ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -14,8 +14,9 @@ import "./styles.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // An unreachable server fails fast: Home shows the others meanwhile.
-      retry: 1,
+      // An unreachable server fails fast: Home shows the others meanwhile;
+      // what is not there is not asked for again.
+      retry: (count, err) => count < 1 && !isNotFound(err),
       refetchOnWindowFocus: false,
     },
   },

@@ -247,6 +247,8 @@
   "state.loading": { "message": "Loading…", "description": "Shown while content loads." },
   "state.empty": { "message": "Nothing here yet", "description": "Title of an empty list or library." },
   "state.error": { "message": "Something went wrong", "description": "Title of a screen that failed to load." },
+  "state.notFound": { "message": "Not Found", "description": "Title of a page whose address names nothing, or what it showed that is no longer there.", "platforms": ["web"] },
+  "state.notFoundMessage": { "message": "There is nothing at this address, or what was here has been removed.", "description": "Explains a page that is not found.", "platforms": ["web"] },
   "state.offline": { "message": "You're offline", "description": "Title shown when the server cannot be reached; downloaded items stay available." },
   "action.retry": { "message": "Try Again", "description": "Retries a failed action." },
   "action.cancel": { "message": "Cancel", "description": "Cancels a dialog or an action." },

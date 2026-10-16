@@ -3,7 +3,7 @@
 // names, biography and links, then the movies and series they play in and
 // work on, marked with what the server has of each, the department they
 // are known for first.
-import { errorMessage, type ServerEntry, useDiscoveredPerson, useServer } from "@mavio/client-ts";
+import { errorMessage, isNotFound, type ServerEntry, useDiscoveredPerson, useServer } from "@mavio/client-ts";
 import type { Person, PersonTitle } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { getRouteApi } from "@tanstack/react-router";
@@ -12,7 +12,7 @@ import { useState } from "react";
 import imdbLogo from "../assets/services/imdb.svg";
 import tmdbLogo from "../assets/services/tmdb.svg";
 import { discoverLanguage, locale, t } from "../i18n.ts";
-import { Grid, Loading, StatusView } from "../ui.tsx";
+import { Grid, Loading, NotFoundView, StatusView } from "../ui.tsx";
 import { Segmented } from "../controls/inputs.tsx";
 import { sized, TitleCard } from "./discover.tsx";
 import { type ExternalLink, ExternalLinks } from "./discover-overview.tsx";
@@ -30,6 +30,7 @@ export function DiscoveredPersonScreen() {
   const q = useDiscoveredPerson(server?.token ? server : undefined, Number(tmdbId), discoverLanguage);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data)) return <NotFoundView />;
   if (q.isError || !q.data) {
     return <StatusView icon="error" title={t("state.error")} message={q.error ? errorMessage(q.error) : undefined} />;
   }

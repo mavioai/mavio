@@ -87,6 +87,11 @@ export function isTotpRequired(err: unknown): boolean {
   return err instanceof ConnectError && err.code === Code.FailedPrecondition;
 }
 
+/** Whether a call failed for what it asked for not being there, as an item deleted. */
+export function isNotFound(err: unknown): boolean {
+  return err instanceof ConnectError && err.code === Code.NotFound;
+}
+
 /** Whether a call failed for lack of a valid sign-in, such as a wrong password. */
 export function isUnauthenticated(err: unknown): boolean {
   return err instanceof ConnectError && err.code === Code.Unauthenticated;

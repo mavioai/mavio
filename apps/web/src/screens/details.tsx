@@ -5,10 +5,12 @@ import { durationMs, type Timestamp, timestampDate } from "@bufbuild/protobuf/wk
 import {
   artwork,
   type Copy,
+  isNotFound,
   type ItemValue,
-  type ServerEntry,
   seriesNextUp,
+  type ServerEntry,
   thumbOf,
+  useAdminServers,
   useChildren,
   useCollections,
   useDiscovery,
@@ -16,11 +18,10 @@ import {
   useExtras,
   useItem,
   useOtherCopies,
+  useRequestTitle,
   useServer,
   useSignedIn,
   useSimilar,
-  useAdminServers,
-  useRequestTitle,
   useTitle,
   useUserData,
 } from "@mavio/client-ts";
@@ -53,7 +54,7 @@ import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
 import { Dismiss, Sheet } from "../controls/dialog.tsx";
 import { Tabs, ToggleButton } from "../controls/inputs.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -67,6 +68,7 @@ export function Details() {
   const q = useItem(server?.token ? server : undefined, itemId);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   if (q.isPending) return <Loading />;
+  if ((q.isError && isNotFound(q.error)) || (q.isSuccess && !q.data.item)) return <NotFoundView />;
   if (q.isError || !q.data.item) {
     return (
       <StatusView

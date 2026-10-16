@@ -2,7 +2,7 @@
 // item's details: their photo, dates, biography and links, and the movies,
 // series and episodes of the server crediting them.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
-import { artwork, errorMessage, type ServerEntry, usePerson, usePersonItems, useServer } from "@mavio/client-ts";
+import { artwork, errorMessage, isNotFound, type ServerEntry, usePerson, usePersonItems, useServer } from "@mavio/client-ts";
 import { ImageKind, type Item, ItemKind, type Person } from "@mavio/proto/mavio/library/v1/item_pb";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { useState } from "react";
 import { locale, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { Grid, ItemCard, Loading, StatusView } from "../ui.tsx";
+import { Grid, ItemCard, Loading, NotFoundView, StatusView } from "../ui.tsx";
 
 const route = getRouteApi("/s/$serverId/person/$personId");
 
@@ -43,6 +43,7 @@ function PersonPage({ server, personId }: { server: ServerEntry; personId: strin
   const person = usePerson(server, personId);
   const items = usePersonItems(server, personId);
   if (person.isPending) return <Loading />;
+  if ((person.isError && isNotFound(person.error)) || (person.isSuccess && !person.data)) return <NotFoundView />;
   if (person.isError || !person.data) {
     return <StatusView icon="error" title={t("state.error")} action={{ label: t("action.retry"), onClick: () => void person.refetch() }} />;
   }
