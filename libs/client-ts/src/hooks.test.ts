@@ -1,8 +1,17 @@
 import { create, toJson } from "@bufbuild/protobuf";
 import { type Item, ItemSchema, ListItemsRequestSchema } from "@mavio/proto/mavio/library/v1/item_pb";
+import { UserDataSchema } from "@mavio/proto/mavio/user/v1/user_pb";
 import { expect, test } from "vitest";
 
-import { type Filter, type ItemValue, libraryItemsRequest, nextEpisode, seriesNextUp } from "./hooks.ts";
+import {
+  type Filter,
+  type ItemValue,
+  libraryItemsRequest,
+  markedUserData,
+  nextEpisode,
+  seriesNextUp,
+  withUserData,
+} from "./hooks.ts";
 
 test("the next episode follows by season and number", () => {
   const ep = (id: string, season: number, episode: number) =>
@@ -78,4 +87,20 @@ test("a library's grid shows a genre's, tag's or studio's items", () => {
     const got = toJson(ListItemsRequestSchema, libraryItemsRequest("lib", "name", "all", 0, value));
     expect(got, value.kind).toEqual({ libraryIds: ["lib"], topLevel: true, offset: 0, limit: 60, sort: [{ field: "SORT_FIELD_NAME", descending: false }], ...want });
   }
+});
+
+test("user data reaches the items wherever they are cached", () => {
+  const item = (id: string) => create(ItemSchema, { id, userData: { itemId: id, favorite: true, position: { seconds: 60n } } });
+  const a = item("a");
+  const b = item("b");
+  const data = { pages: [{ items: [a, b], total: 2 }], pageParams: [0] };
+  const got = withUserData(data, new Map([["a", markedUserData({ itemId: "a", played: true })]]));
+  const u = got.pages[0].items[0].userData;
+  expect(u?.played, "played").toBe(true);
+  expect(u?.favorite, "favorite").toBe(true);
+  expect(u?.position, "position").toBeUndefined();
+  // What holds no changed item stays as it was, and the cache is not changed in place.
+  expect(got.pages[0].items[1], "b").toBe(b);
+  expect(a.userData?.played, "a in place").toBe(false);
+  expect(withUserData(data, new Map([["c", () => create(UserDataSchema)]])), "unchanged").toBe(data);
 });

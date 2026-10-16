@@ -1,13 +1,13 @@
 // The event stream of each server (docs/clients.md §3): changes refresh the
-// server's queries, so that the screens never poll, and every event reaches
+// server's queries they touch, so that the screens never poll, and every event reaches
 // the app, which carries out remote commands and SyncPlay. Streams
 // reconnect with backoff and end when the user signs out of their server.
 import { Code, ConnectError } from "@connectrpc/connect";
 import { type Event, EventService } from "@mavio/proto/mavio/session/v1/session_pb";
-import { type QueryClient, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, type QueryKey, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 
-import { serverKey, useServersStore, useSignedIn } from "./hooks.ts";
+import { applyUserData, serverKey, useServersStore, useSignedIn } from "./hooks.ts";
 import type { ServerEntry, Servers } from "./servers.ts";
 
 /** The delay before the attempt-th reconnection: doubling from 1 s to 30 s, with jitter. */
@@ -17,13 +17,50 @@ export function backoff(attempt: number, random = Math.random): number {
 }
 
 /**
- * Whether an event refreshes its server's queries: library and user data
- * changes touch items in every list of the server, and a new stream may
- * follow missed events.
+ * The kinds of a server's queries that show its libraries' items, or what
+ * their items make, such as whether a discovered title is in a library.
  */
-export function refreshes(event: Event): boolean {
-  const k = event.kind.case;
-  return k === "connected" || k === "libraryChanged" || k === "userDataChanged";
+const libraryKinds = new Set([
+  "acquisition",
+  "children",
+  "collections",
+  "copies",
+  "discover",
+  "episodes",
+  "extras",
+  "home",
+  "hub",
+  "item",
+  "items",
+  "libraries",
+  "library",
+  "lyrics",
+  "person",
+  "playlists",
+  "recommended",
+  "requests",
+  "search",
+  "similar",
+]);
+
+/**
+ * Of a server's query keys, which an event refreshes: a library change
+ * those of its items (a title's ratings are not of the library), a new
+ * stream all of them, since it may follow missed events, and the sessions'
+ * a change of sessions. Changes of user data are put into the cache
+ * instead (applyUserData).
+ */
+export function refreshes(event: Event, key: QueryKey): boolean {
+  switch (event.kind.case) {
+    case "connected":
+      return true;
+    case "libraryChanged":
+      return libraryKinds.has(key[2] as string) && !(key[2] === "discover" && key[3] === "ratings");
+    case "sessionsChanged":
+      return key[2] === "sessions";
+    default:
+      return false;
+  }
 }
 
 function sleep(ms: number, signal: AbortSignal) {
@@ -65,8 +102,8 @@ export async function follow(
 }
 
 function refresh(qc: QueryClient, serverId: string, event: Event) {
-  if (refreshes(event)) void qc.invalidateQueries({ queryKey: serverKey(serverId) });
-  else if (event.kind.case === "sessionsChanged") void qc.invalidateQueries({ queryKey: serverKey(serverId, "sessions") });
+  if (event.kind.case === "userDataChanged") applyUserData(qc, serverId, event.kind.value.userData);
+  else void qc.invalidateQueries({ queryKey: serverKey(serverId), predicate: (q) => refreshes(event, q.queryKey) });
 }
 
 /**

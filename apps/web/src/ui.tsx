@@ -4,7 +4,7 @@ import { durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
 import type { Item } from "@mavio/proto/mavio/library/v1/item_pb";
 import { ImageKind, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
-import { artwork, type Server, thumbOf } from "@mavio/client-ts";
+import { artwork, type Server, thumbOf, usePrefetchItem } from "@mavio/client-ts";
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
@@ -137,10 +137,12 @@ export function ItemCard({
     s === "thumb" ? thumbOf(server, item, width) : artwork(server, item, ImageKind.PRIMARY, width);
   const progress = progressOf(item);
   const subtitle = subtitleOf(item);
+  const prefetch = usePrefetchItem(serverId, item.id);
   return (
     <Link
       to="/s/$serverId/item/$itemId"
       params={{ serverId, itemId: item.id }}
+      {...prefetch}
       data-card
       className={`group block shrink-0 snap-start ${fluid ? "w-full" : widths[s]}`}
     >

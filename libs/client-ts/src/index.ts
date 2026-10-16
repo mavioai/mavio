@@ -56,6 +56,7 @@ export {
   useLibraryItems,
   useNextEpisode,
   useOtherCopies,
+  usePrefetchItem,
   useRecommended,
   useSearch,
   useServer,

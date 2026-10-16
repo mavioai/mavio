@@ -13,8 +13,10 @@ import {
   SortField,
 } from "@mavio/proto/mavio/library/v1/item_pb";
 import { type Library, LibraryService } from "@mavio/proto/mavio/library/v1/library_pb";
-import { UserDataService } from "@mavio/proto/mavio/user/v1/user_pb";
+import { type UserData, UserDataSchema, UserDataService } from "@mavio/proto/mavio/user/v1/user_pb";
 import {
+  keepPreviousData,
+  type QueryClient,
   type QueryKey,
   type UseQueryResult,
   useInfiniteQuery,
@@ -23,7 +25,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useSyncExternalStore } from "react";
 
 import { type Hubs, merge, type Section } from "./home.ts";
 import type { ServerEntry, Servers, SignIn } from "./servers.ts";
@@ -67,6 +69,13 @@ export function useServer(id: string): ServerEntry | undefined {
 export function serverKey(serverId: string, ...rest: unknown[]): QueryKey {
   return ["mavio", serverId, ...rest];
 }
+
+/**
+ * How long a library's items, lists and people stay fresh. The server's
+ * events refresh them as they change (events.ts), so they are fetched
+ * again only after a while, in case an event was missed.
+ */
+export const libraryStaleTime = 5 * 60_000;
 
 /** A message for an error of a call. */
 export function errorMessage(err: unknown): string {
@@ -137,6 +146,7 @@ export function useHubItems(server: ServerEntry, hubId: string) {
     },
     initialPageParam: 0,
     getNextPageParam: (last) => last.next,
+    staleTime: libraryStaleTime,
   });
 }
 
@@ -232,17 +242,49 @@ export function useLibraryItems(server: ServerEntry, libraryId: string, sort: So
     },
     initialPageParam: 0,
     getNextPageParam: (last) => last.next,
+    staleTime: libraryStaleTime,
+    // Another order or filter keeps showing the grid until its items arrive.
+    placeholderData: keepPreviousData,
   });
+}
+
+function itemQuery(servers: Servers, server: ServerEntry, itemId: string) {
+  return {
+    queryKey: serverKey(server.id, "item", itemId),
+    queryFn: () => servers.client(ItemService, server).getItem({ id: itemId }),
+    staleTime: libraryStaleTime,
+  };
 }
 
 /** An item with its media sources and credits. */
 export function useItem(server: ServerEntry | undefined, itemId: string) {
   const servers = useServersStore();
   return useQuery({
-    queryKey: serverKey(server?.id ?? "", "item", itemId),
-    queryFn: () => servers.client(ItemService, server!).getItem({ id: itemId }),
+    ...itemQuery(servers, server ?? ({ id: "" } as ServerEntry), itemId),
     enabled: !!server,
   });
+}
+
+const prefetchDelay = 150;
+
+/**
+ * Handlers that fetch an item ahead of its page while the pointer rests on
+ * a link to it, so that the page opens at once.
+ */
+export function usePrefetchItem(serverId: string, itemId: string) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const onPointerEnter = useCallback(
+    (e: { pointerType: string }) => {
+      const server = servers.get(serverId);
+      if (e.pointerType !== "mouse" || !server?.token) return;
+      timer.current = setTimeout(() => void qc.prefetchQuery(itemQuery(servers, server, itemId)), prefetchDelay);
+    },
+    [servers, qc, serverId, itemId],
+  );
+  const onPointerLeave = useCallback(() => clearTimeout(timer.current), []);
+  return { onPointerEnter, onPointerLeave };
 }
 
 /** An item's seasons, episodes, tracks or members. */
@@ -261,6 +303,7 @@ export function useChildren(server: ServerEntry, item: Item | undefined) {
           })
       ).items,
     enabled: !!item,
+    staleTime: libraryStaleTime,
   });
 }
 
@@ -276,6 +319,7 @@ export function useEpisodes(server: ServerEntry, seriesId: string | undefined) {
       return items.toSorted(byEpisode);
     },
     enabled: !!seriesId,
+    staleTime: libraryStaleTime,
   });
 }
 
@@ -428,13 +472,110 @@ export function useSearch(query: string): SearchResults[] {
   });
 }
 
-/** Marks items played or favorite, refreshing the server's queries. */
+/** The kinds of a server's queries whose lists the user's data chooses or orders, or sums up for a series. */
+const userDataKinds = new Set(["item", "children", "items", "episodes", "home", "hub", "recommended"]);
+
+/** A change of an item's user data, given what it was. */
+export type UserDataChange = (old: UserData | undefined) => UserData;
+
+function userDataQueries(serverId: string) {
+  return { queryKey: serverKey(serverId), predicate: (q: { queryKey: QueryKey }) => userDataKinds.has(q.queryKey[2] as string) };
+}
+
+/**
+ * Changes the user data of the items in every cached query of a server,
+ * leaving the others be, and returns the queries changed as they were.
+ */
+function patchUserData(qc: QueryClient, serverId: string, change: ReadonlyMap<string, UserDataChange>) {
+  const before: [QueryKey, unknown][] = [];
+  for (const [key, data] of qc.getQueriesData({ queryKey: serverKey(serverId) })) {
+    const next = withUserData(data, change);
+    if (next === data) continue;
+    before.push([key, data]);
+    qc.setQueryData(key, next);
+  }
+  return before;
+}
+
+/**
+ * Data with the user data of the items in it changed by change, keyed by
+ * item ID; what holds no such item is returned as it was.
+ */
+export function withUserData<T>(data: T, change: ReadonlyMap<string, UserDataChange>): T {
+  if (Array.isArray(data)) {
+    let changed = false;
+    const out = data.map((v) => {
+      const w = withUserData(v, change);
+      if (w !== v) changed = true;
+      return w;
+    });
+    return (changed ? out : data) as T;
+  }
+  if (typeof data !== "object" || data === null) return data;
+  const o = data as Record<string, unknown>;
+  // Plain objects and messages, whose prototype may hold their defaults.
+  if (Object.getPrototypeOf(o) !== Object.prototype && typeof o.$typeName !== "string") return data;
+  let out: Record<string, unknown> | undefined;
+  for (const [k, v] of Object.entries(o)) {
+    const w = withUserData(v, change);
+    if (w !== v) (out ??= copy(o))[k] = w;
+  }
+  const c = o.$typeName === "mavio.library.v1.Item" ? change.get(o.id as string) : undefined;
+  if (c) (out ??= copy(o)).userData = c(o.userData as UserData | undefined);
+  return (out ?? data) as T;
+}
+
+/** A shallow copy of an object with its prototype. */
+function copy<T extends object>(o: T): T {
+  return Object.assign(Object.create(Object.getPrototypeOf(o) as object | null) as T, o);
+}
+
+/**
+ * Puts user data into the cached items of a server and refreshes the lists
+ * it may change, such as the unplayed and Continue Watching; a refresh
+ * already under way is not started again, so that the server's answer and
+ * its event refresh them once.
+ */
+export function applyUserData(qc: QueryClient, serverId: string, list: UserData[]) {
+  if (list.length === 0) return;
+  patchUserData(qc, serverId, new Map(list.map((u): [string, UserDataChange] => [u.itemId, () => u])));
+  void qc.invalidateQueries(userDataQueries(serverId), { cancelRefetch: false });
+}
+
+/** An item's user data as the server will make it: marked, played or not, it has no position. */
+export function markedUserData(u: { itemId: string; played?: boolean; favorite?: boolean }): UserDataChange {
+  return (old) => {
+    const next = old ? copy(old) : create(UserDataSchema, { itemId: u.itemId });
+    if (u.favorite !== undefined) next.favorite = u.favorite;
+    if (u.played !== undefined) {
+      next.played = u.played;
+      next.position = undefined;
+    }
+    return next;
+  };
+}
+
+/**
+ * Marks items played or favorite. The cached items show the change at
+ * once, and return to what they were should the server refuse it.
+ */
 export function useUserData(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
+  const filters = userDataQueries(server.id);
   return useMutation({
     mutationFn: (u: { itemId: string; played?: boolean; favorite?: boolean }) =>
       servers.client(UserDataService, server).updateUserData(u),
-    onSettled: () => qc.invalidateQueries({ queryKey: serverKey(server.id) }),
+    onMutate: async (u) => {
+      // A refresh under way would bring back what is being changed.
+      await qc.cancelQueries(filters);
+      return { before: patchUserData(qc, server.id, new Map([[u.itemId, markedUserData(u)]])) };
+    },
+    onError: (_err, _u, context) => {
+      for (const [key, data] of context?.before ?? []) qc.setQueryData(key, data);
+    },
+    onSuccess: (r) => {
+      if (r.userData) applyUserData(qc, server.id, [r.userData]);
+    },
   });
 }

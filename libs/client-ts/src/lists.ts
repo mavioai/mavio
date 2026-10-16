@@ -6,7 +6,7 @@ import { ItemKind, ItemService, SortField } from "@mavio/proto/mavio/library/v1/
 import { PlaylistService } from "@mavio/proto/mavio/library/v1/playlist_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { serverKey, useServersStore } from "./hooks.ts";
+import { libraryStaleTime, serverKey, useServersStore } from "./hooks.ts";
 import type { ServerEntry } from "./servers.ts";
 
 /** The caller's playlists. */
@@ -16,6 +16,7 @@ export function usePlaylists(server: ServerEntry, enabled = true) {
     queryKey: serverKey(server.id, "playlists"),
     queryFn: async () => (await servers.client(PlaylistService, server).listPlaylists({})).playlists,
     enabled,
+    staleTime: libraryStaleTime,
   });
 }
 
@@ -25,6 +26,7 @@ export function usePlaylistEntries(server: ServerEntry, playlistId: string) {
   return useQuery({
     queryKey: serverKey(server.id, "playlists", playlistId, "entries"),
     queryFn: async () => (await servers.client(PlaylistService, server).listPlaylistEntries({ id: playlistId })).entries,
+    staleTime: libraryStaleTime,
   });
 }
 
@@ -36,6 +38,7 @@ export function useCollections(server: ServerEntry, enabled = true) {
     queryFn: async () =>
       (await servers.client(ItemService, server).listItems({ kinds: [ItemKind.COLLECTION], sort: [{ field: SortField.NAME }] })).items,
     enabled,
+    staleTime: libraryStaleTime,
   });
 }
 
