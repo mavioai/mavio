@@ -79,7 +79,8 @@ func (s *StorageService) GetStatus(ctx context.Context, _ *storagev1.GetStatusRe
 	return out, nil
 }
 
-// ListProviders lists the kinds of remotes.
+// ListProviders lists the kinds of remotes, without the other names of
+// some, which rclone hides.
 func (s *StorageService) ListProviders(ctx context.Context, _ *storagev1.ListProvidersRequest) (*storagev1.ListProvidersResponse, error) {
 	c, err := s.client(ctx)
 	if err != nil {
@@ -89,13 +90,16 @@ func (s *StorageService) ListProviders(ctx context.Context, _ *storagev1.ListPro
 	if err != nil {
 		return nil, rcloneError(ctx, err)
 	}
-	out := make([]*storagev1.Provider, len(providers))
-	for i, p := range providers {
+	out := make([]*storagev1.Provider, 0, len(providers))
+	for _, p := range providers {
+		if p.Hide {
+			continue
+		}
 		opts := make([]*storagev1.Option, len(p.Options))
 		for j, o := range p.Options {
 			opts[j] = optionToProto(o)
 		}
-		out[i] = storagev1.Provider_builder{Name: &p.Name, Description: &p.Description, Options: opts}.Build()
+		out = append(out, storagev1.Provider_builder{Name: &p.Name, Description: &p.Description, Options: opts}.Build())
 	}
 	return storagev1.ListProvidersResponse_builder{Providers: out}.Build(), nil
 }

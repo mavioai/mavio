@@ -12,6 +12,8 @@ type Provider struct {
 	Description string   `json:"Description"`
 	Prefix      string   `json:"Prefix"`
 	Options     []Option `json:"Options"`
+	// Hide is set on another name of a provider, which is not offered.
+	Hide bool `json:"Hide"`
 }
 
 // Option is a setting of a provider, or a question of its configuration.
