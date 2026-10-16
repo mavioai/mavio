@@ -7,11 +7,16 @@ import { useEffect, useState } from "react";
 /** How long a page is given to show its heading, as what it shows comes. */
 const headingWait = 3000;
 
-/** The page's heading: a section's named with data-title, else the first h1, outside dialogs. */
-function headingOf(): HTMLElement | undefined {
+/**
+ * The page's heading: a section's named with data-title, else the first
+ * h1, outside dialogs; an h1 marked data-title-later only once waited for
+ * the section's.
+ */
+function headingOf(waited: boolean): HTMLElement | undefined {
   const outside = (el: Element) => !el.closest("[role=dialog],[role=alertdialog]");
   const named = [...document.querySelectorAll<HTMLElement>("[data-title]")].find(outside);
-  return named ?? [...document.querySelectorAll<HTMLElement>("h1")].find(outside);
+  const h1 = [...document.querySelectorAll<HTMLElement>("h1")].find(outside);
+  return named ?? (h1?.hasAttribute("data-title-later") && !waited ? undefined : h1);
 }
 
 /** The page's title: its heading's text, else the destination of the navigation it is. */
@@ -31,11 +36,11 @@ export function PageTitle({ moveFocus }: { moveFocus: boolean }) {
       clearInterval(timer);
       const start = performance.now();
       const step = () => {
-        const heading = headingOf();
+        const waited = performance.now() - start >= headingWait;
+        const heading = headingOf(waited);
         const title = titleOf(heading);
         document.title = title ? `${title} · Mavio` : "Mavio";
-        const waited = performance.now() - start;
-        if (!heading?.textContent?.trim() && waited < headingWait) return;
+        if (!heading?.textContent?.trim() && !waited) return;
         clearInterval(timer);
         if (!opened || !moveFocus) return;
         // Focus left inside the page, as a field typed in, stays.

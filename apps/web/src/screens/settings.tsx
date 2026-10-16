@@ -198,7 +198,8 @@ export function SettingsScreen() {
             <Icon name="back" size={18} />
             {t("nav.home")}
           </Link>
-          <h1 className="px-1 type-title1">{t("nav.settings")}</h1>
+          {/* The section's own title names the page, once it shows. */}
+          <h1 data-title-later className="px-1 type-title1">{t("nav.settings")}</h1>
           <AccountCard active={id === "account"} />
           {groups.map((g) => (
             <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
@@ -211,6 +212,7 @@ export function SettingsScreen() {
                   params={{ section: s }}
                   search={{ server: search.server }}
                   data-status={s === id ? "active" : undefined}
+                  aria-current={s === id ? "page" : undefined}
                   className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
                 >
                   <Tile id={s} />
