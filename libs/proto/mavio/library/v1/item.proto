@@ -513,6 +513,9 @@ message ListItemsRequest {
   // Only items with any of these IDs, keyed by provider as Item's: the same
   // title as another server's.
   map<string, string> external_ids = 22 [(buf.validate.field).map.max_pairs = 10];
+  // Only the extras of this item, such as its trailers; extras are
+  // included without include_extras.
+  string owner_id = 23 [(buf.validate.field).string.uuid = true];
 }
 
 message ListItemsResponse {

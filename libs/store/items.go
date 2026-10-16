@@ -502,7 +502,9 @@ func (r items) predicates(q core.ItemQuery) []predicate.Item {
 		}
 		ps = append(ps, item.KindIn(kinds...))
 	}
-	if !q.IncludeExtras {
+	if !q.OwnerID.IsZero() {
+		ps = append(ps, item.OwnerID(q.OwnerID))
+	} else if !q.IncludeExtras {
 		ps = append(ps, item.Extra(""))
 	}
 	if !q.IncludeMissing {

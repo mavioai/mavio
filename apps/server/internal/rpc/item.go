@@ -404,6 +404,9 @@ func (s *ItemService) ListItems(ctx context.Context, req *libraryv1.ListItemsReq
 	if req.HasPersonId() {
 		q.PersonID = core.MustParseID(req.GetPersonId())
 	}
+	if req.HasOwnerId() {
+		q.OwnerID = core.MustParseID(req.GetOwnerId())
+	}
 	for p, id := range req.GetExternalIds() {
 		if q.ExternalIDs == nil {
 			q.ExternalIDs = map[core.Provider]string{}

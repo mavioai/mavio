@@ -5058,6 +5058,7 @@ type ListItemsRequest struct {
 	xxx_hidden_IncludeVirtual bool                   `protobuf:"varint,20,opt,name=include_virtual,json=includeVirtual"`
 	xxx_hidden_Monitored      bool                   `protobuf:"varint,21,opt,name=monitored"`
 	xxx_hidden_ExternalIds    map[string]string      `protobuf:"bytes,22,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_OwnerId        *string                `protobuf:"bytes,23,opt,name=owner_id,json=ownerId"`
 	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
 	XXX_presence              [1]uint32
 	unknownFields             protoimpl.UnknownFields
@@ -5254,18 +5255,28 @@ func (x *ListItemsRequest) GetExternalIds() map[string]string {
 	return nil
 }
 
+func (x *ListItemsRequest) GetOwnerId() string {
+	if x != nil {
+		if x.xxx_hidden_OwnerId != nil {
+			return *x.xxx_hidden_OwnerId
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *ListItemsRequest) SetLibraryIds(v []string) {
 	x.xxx_hidden_LibraryIds = v
 }
 
 func (x *ListItemsRequest) SetParentId(v string) {
 	x.xxx_hidden_ParentId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 23)
 }
 
 func (x *ListItemsRequest) SetRecursive(v bool) {
 	x.xxx_hidden_Recursive = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 23)
 }
 
 func (x *ListItemsRequest) SetKinds(v []ItemKind) {
@@ -5274,12 +5285,12 @@ func (x *ListItemsRequest) SetKinds(v []ItemKind) {
 
 func (x *ListItemsRequest) SetIncludeExtras(v bool) {
 	x.xxx_hidden_IncludeExtras = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 23)
 }
 
 func (x *ListItemsRequest) SetSearch(v string) {
 	x.xxx_hidden_Search = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 23)
 }
 
 func (x *ListItemsRequest) SetGenres(v []string) {
@@ -5296,32 +5307,32 @@ func (x *ListItemsRequest) SetStudios(v []string) {
 
 func (x *ListItemsRequest) SetPersonId(v string) {
 	x.xxx_hidden_PersonId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 23)
 }
 
 func (x *ListItemsRequest) SetYearFrom(v int32) {
 	x.xxx_hidden_YearFrom = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 23)
 }
 
 func (x *ListItemsRequest) SetYearTo(v int32) {
 	x.xxx_hidden_YearTo = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 23)
 }
 
 func (x *ListItemsRequest) SetPlayed(v bool) {
 	x.xxx_hidden_Played = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 23)
 }
 
 func (x *ListItemsRequest) SetFavorite(v bool) {
 	x.xxx_hidden_Favorite = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 23)
 }
 
 func (x *ListItemsRequest) SetResumable(v bool) {
 	x.xxx_hidden_Resumable = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 14, 23)
 }
 
 func (x *ListItemsRequest) SetSort(v []*SortSpec) {
@@ -5330,31 +5341,36 @@ func (x *ListItemsRequest) SetSort(v []*SortSpec) {
 
 func (x *ListItemsRequest) SetLimit(v int32) {
 	x.xxx_hidden_Limit = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 23)
 }
 
 func (x *ListItemsRequest) SetOffset(v int32) {
 	x.xxx_hidden_Offset = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 17, 23)
 }
 
 func (x *ListItemsRequest) SetTopLevel(v bool) {
 	x.xxx_hidden_TopLevel = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 18, 23)
 }
 
 func (x *ListItemsRequest) SetIncludeVirtual(v bool) {
 	x.xxx_hidden_IncludeVirtual = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 19, 23)
 }
 
 func (x *ListItemsRequest) SetMonitored(v bool) {
 	x.xxx_hidden_Monitored = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 22)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 20, 23)
 }
 
 func (x *ListItemsRequest) SetExternalIds(v map[string]string) {
 	x.xxx_hidden_ExternalIds = v
+}
+
+func (x *ListItemsRequest) SetOwnerId(v string) {
+	x.xxx_hidden_OwnerId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 23)
 }
 
 func (x *ListItemsRequest) HasParentId() bool {
@@ -5462,6 +5478,13 @@ func (x *ListItemsRequest) HasMonitored() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 20)
 }
 
+func (x *ListItemsRequest) HasOwnerId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 22)
+}
+
 func (x *ListItemsRequest) ClearParentId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_ParentId = nil
@@ -5537,6 +5560,11 @@ func (x *ListItemsRequest) ClearMonitored() {
 	x.xxx_hidden_Monitored = false
 }
 
+func (x *ListItemsRequest) ClearOwnerId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 22)
+	x.xxx_hidden_OwnerId = nil
+}
+
 type ListItemsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -5571,6 +5599,9 @@ type ListItemsRequest_builder struct {
 	// Only items with any of these IDs, keyed by provider as Item's: the same
 	// title as another server's.
 	ExternalIds map[string]string
+	// Only the extras of this item, such as its trailers; extras are
+	// included without include_extras.
+	OwnerId *string
 }
 
 func (b0 ListItemsRequest_builder) Build() *ListItemsRequest {
@@ -5579,71 +5610,75 @@ func (b0 ListItemsRequest_builder) Build() *ListItemsRequest {
 	_, _ = b, x
 	x.xxx_hidden_LibraryIds = b.LibraryIds
 	if b.ParentId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 23)
 		x.xxx_hidden_ParentId = b.ParentId
 	}
 	if b.Recursive != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 23)
 		x.xxx_hidden_Recursive = *b.Recursive
 	}
 	x.xxx_hidden_Kinds = b.Kinds
 	if b.IncludeExtras != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 23)
 		x.xxx_hidden_IncludeExtras = *b.IncludeExtras
 	}
 	if b.Search != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 23)
 		x.xxx_hidden_Search = b.Search
 	}
 	x.xxx_hidden_Genres = b.Genres
 	x.xxx_hidden_Tags = b.Tags
 	x.xxx_hidden_Studios = b.Studios
 	if b.PersonId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 23)
 		x.xxx_hidden_PersonId = b.PersonId
 	}
 	if b.YearFrom != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 23)
 		x.xxx_hidden_YearFrom = *b.YearFrom
 	}
 	if b.YearTo != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 23)
 		x.xxx_hidden_YearTo = *b.YearTo
 	}
 	if b.Played != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 23)
 		x.xxx_hidden_Played = *b.Played
 	}
 	if b.Favorite != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 23)
 		x.xxx_hidden_Favorite = *b.Favorite
 	}
 	if b.Resumable != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 14, 23)
 		x.xxx_hidden_Resumable = *b.Resumable
 	}
 	x.xxx_hidden_Sort = &b.Sort
 	if b.Limit != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 23)
 		x.xxx_hidden_Limit = *b.Limit
 	}
 	if b.Offset != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 17, 23)
 		x.xxx_hidden_Offset = *b.Offset
 	}
 	if b.TopLevel != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 18, 23)
 		x.xxx_hidden_TopLevel = *b.TopLevel
 	}
 	if b.IncludeVirtual != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 19, 23)
 		x.xxx_hidden_IncludeVirtual = *b.IncludeVirtual
 	}
 	if b.Monitored != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 22)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 20, 23)
 		x.xxx_hidden_Monitored = *b.Monitored
 	}
 	x.xxx_hidden_ExternalIds = b.ExternalIds
+	if b.OwnerId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 23)
+		x.xxx_hidden_OwnerId = b.OwnerId
+	}
 	return m0
 }
 
@@ -7478,7 +7513,7 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\xc8\x01\x01\x82\x01\x04\x10\x01 \x00R\x05field\x12\x1e\n" +
 	"\n" +
 	"descending\x18\x02 \x01(\bR\n" +
-	"descending\"\x81\a\n" +
+	"descending\"\xa6\a\n" +
 	"\x10ListItemsRequest\x12.\n" +
 	"\vlibrary_ids\x18\x01 \x03(\tB\r\xbaH\n" +
 	"\x92\x01\a\"\x05r\x03\xb0\x01\x01R\n" +
@@ -7506,7 +7541,8 @@ const file_mavio_library_v1_item_proto_rawDesc = "" +
 	"\x0finclude_virtual\x18\x14 \x01(\bR\x0eincludeVirtual\x12\x1c\n" +
 	"\tmonitored\x18\x15 \x01(\bR\tmonitored\x12`\n" +
 	"\fexternal_ids\x18\x16 \x03(\v23.mavio.library.v1.ListItemsRequest.ExternalIdsEntryB\b\xbaH\x05\x9a\x01\x02\x10\n" +
-	"R\vexternalIds\x1a>\n" +
+	"R\vexternalIds\x12#\n" +
+	"\bowner_id\x18\x17 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\aownerId\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"W\n" +

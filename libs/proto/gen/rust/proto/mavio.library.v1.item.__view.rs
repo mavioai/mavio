@@ -7580,6 +7580,11 @@ pub struct ListItemsRequestView<'a> {
     ///
     /// Field 22: `external_ids` (map)
     pub external_ids: ::buffa::MapView<'a, &'a str, &'a str>,
+    /// Only the extras of this item, such as its trailers; extras are
+    /// included without include_extras.
+    ///
+    /// Field 23: `owner_id`
+    pub owner_id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
@@ -7716,6 +7721,13 @@ impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 view.monitored = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.owner_id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             1u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -7901,6 +7913,7 @@ impl<'a> ::buffa::MessageView<'a> for ListItemsRequestView<'a> {
                 .iter()
                 .map(|(k, v)| (k.to_string(), v.to_string()))
                 .collect(),
+            owner_id: self.owner_id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -7990,6 +8003,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListItemsRequestView<'a> {
             let entry_size: u64 = 1u64 + ::buffa::types::string_encoded_len(k) as u64
                 + 1u64 + ::buffa::types::string_encoded_len(v) as u64;
             size += 2u64 + ::buffa::encoding::varint_len(entry_size) as u64 + entry_size;
+        }
+        if let Some(ref v) = self.owner_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -8099,6 +8115,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ListItemsRequestView<'a> {
                 )
                 .encode(buf);
             ::buffa::types::encode_string(v, buf);
+        }
+        if let Some(ref v) = self.owner_id {
+            ::buffa::types::put_string_field(23u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -8321,6 +8340,14 @@ impl ListItemsRequestOwnedView {
     #[must_use]
     pub fn external_ids(&self) -> &::buffa::MapView<'_, &'_ str, &'_ str> {
         &self.0.reborrow().external_ids
+    }
+    /// Only the extras of this item, such as its trailers; extras are
+    /// included without include_extras.
+    ///
+    /// Field 23: `owner_id`
+    #[must_use]
+    pub fn owner_id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().owner_id
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ListItemsRequestView<'static>>>

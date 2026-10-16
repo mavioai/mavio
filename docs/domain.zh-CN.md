@@ -153,7 +153,7 @@ erDiagram
 * `ItemKind.HasMedia()` 对有可播放文件的种类返回 true（电影、单集、视频、音轨、音乐视频、有声书）；这些条目拥有媒体源。
 
 ### 4.4 附加内容
-预告片、花絮、主题曲等附加内容是普通条目：设置 `Extra`，并用 `OwnerID` 指向所属条目。查询默认排除附加内容，除非设置 `ItemQuery.IncludeExtras`。
+预告片、花絮、主题曲等附加内容是普通条目：设置 `Extra`，并用 `OwnerID` 指向所属条目。查询默认排除附加内容，除非设置 `ItemQuery.IncludeExtras`；`ItemQuery.OwnerID` 列出某个条目的附加内容。
 
 ### 4.5 规则（`Item.Validate`）
 * 必须有 `ID`、`LibraryID`、合法的 `Kind` 和非空的 `Name`；条目不能是自己的父级。
@@ -294,7 +294,7 @@ erDiagram
 ### 9.1 条目查询
 `ItemQuery` 中零值字段表示"不过滤"：
 
-* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`Kinds`、`IncludeExtras`、`IncludeMissing`、`IncludeVirtual` 或 `OnlyVirtual`（§4.8）。
+* 范围：`LibraryIDs`（调用方在此应用用户的媒体库权限）、`ParentID` 及可选的 `Recursive`（全部后代）、`MemberOf`（链接进合集或播放列表的条目，每个一次）或 `TopLevel`（没有父级的条目）、`OwnerID`（某个条目的附加内容）、`Kinds`、`IncludeExtras`、`IncludeMissing`、`IncludeVirtual` 或 `OnlyVirtual`（§4.8）。
 * 内容：`Search`（见 §9.2）；`Monitored`（nil 表示不限）；`IndexNumber` 与 `ParentIndexNumber`（如某季的某一集）；`Genres`、`Tags`、`Studios`（匹配任意一个，按清洗形式比较，见 §9.2）；`PersonID`；`ExternalIDs`（匹配任意一个，即另一个服务端上的同一作品）；`YearFrom`–`YearTo`；`Limits`（`ContentLimits`），即媒体库访问记录的分级与标签限制，不作用于 `UserID` 自己的播放列表。
 * 名称按排序名以 Jellyfin 的方式排序：不区分大小写和重音，忽略开头、中间和结尾的冠词（"the"、"a"、"an"），去掉标点 `,&-{}'` 并把 `.+%` 视为空格，数字按数值排序（"Rocky 2" 在 "Rocky 10" 之前），非拉丁文字转写为拉丁字母（中文按拼音排序）。按首映日期排序时无日期的条目排在最后，按最近播放排序时从未播放的条目排在最后。
 * 按用户（需要 `UserID`）：`Played`、`Favorite`、`Resumable`、`Started`（用户是否播放过该条目）、`PlayedAfter` 与 `PlayedBefore`（最后播放时间在该范围内，两端均不含），以及 `last_played` / `play_count` 排序。对于 `Started`、`PlayedAfter` 与 `PlayedBefore`，剧集与季按其各集的播放计算。设置了 `UserID` 时，其他用户的播放列表不在结果中。

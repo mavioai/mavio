@@ -21,6 +21,9 @@ type ItemQuery struct {
 	// MemberOf restricts results to the items linked into a collection or
 	// playlist, each once.
 	MemberOf ID
+	// OwnerID restricts results to the extras of an item, which it
+	// includes without IncludeExtras.
+	OwnerID ID
 	// TopLevel restricts results to items without a parent: those at the
 	// top of their libraries' hierarchies.
 	TopLevel bool

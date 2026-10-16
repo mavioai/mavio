@@ -10924,6 +10924,12 @@
               "title": "value"
             },
             "description": "Only items with any of these IDs, keyed by provider as Item's: the same\n title as another server's."
+          },
+          "ownerId": {
+            "type": "string",
+            "title": "owner_id",
+            "format": "uuid",
+            "description": "Only the extras of this item, such as its trailers; extras are\n included without include_extras."
           }
         },
         "title": "ListItemsRequest",

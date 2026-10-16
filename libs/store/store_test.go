@@ -262,6 +262,8 @@ func TestItemQuery(t *testing.T) {
 			{"search original title", core.ItemQuery{Search: "spirited"}, []string{"千と千尋の神隠し"}},
 			{"extras excluded", core.ItemQuery{Search: "brazil"}, []string{"Brazil"}},
 			{"extras included", core.ItemQuery{Search: "brazil", IncludeExtras: true, Sort: byName}, []string{"Brazil", "Brazil Trailer"}},
+			{"extras of an item", core.ItemQuery{OwnerID: movies[1].ID}, []string{"Brazil Trailer"}},
+			{"extras of an item without them", core.ItemQuery{OwnerID: movies[0].ID}, nil},
 			{"genres any of", core.ItemQuery{Genres: []string{"Drama", "Animation"}, Sort: byName}, []string{"Brazil", "千と千尋の神隠し"}},
 			{"external IDs any of", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTMDB: "68", core.ProviderIMDb: "tt0211915"}, Sort: byName}, []string{"amélie", "Brazil"}},
 			{"external ID of another provider", core.ItemQuery{ExternalIDs: map[core.Provider]string{core.ProviderTVDB: "194"}}, nil},

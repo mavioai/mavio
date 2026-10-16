@@ -153,7 +153,7 @@ Hierarchies use `ParentID`; numbering uses `IndexNumber` / `ParentIndexNumber`:
 * `ItemKind.HasMedia()` is true for kinds backed by a playable file (movie, episode, video, track, music video, audiobook); these have media sources.
 
 ### 4.4 Extras
-Trailers, featurettes, theme songs and other extras are ordinary items with `Extra` set and `OwnerID` pointing to the item they belong to. Queries exclude extras unless `ItemQuery.IncludeExtras` is set.
+Trailers, featurettes, theme songs and other extras are ordinary items with `Extra` set and `OwnerID` pointing to the item they belong to. Queries exclude extras unless `ItemQuery.IncludeExtras` is set; `ItemQuery.OwnerID` lists the extras of one item.
 
 ### 4.5 Rules (`Item.Validate`)
 * `ID`, `LibraryID`, a valid `Kind` and a non-empty `Name` are required; an item cannot be its own parent.
@@ -294,7 +294,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 ### 9.1 Item Queries
 `ItemQuery` filters with zero values meaning "no filter":
 
-* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `MemberOf` (the items linked into a collection or playlist, each once), or `TopLevel` (items without a parent), `Kinds`, `IncludeExtras`, `IncludeMissing`, `IncludeVirtual` or `OnlyVirtual` (§4.8).
+* Scope: `LibraryIDs` (callers apply the user's library policy here), `ParentID` with optional `Recursive` (all descendants), `MemberOf` (the items linked into a collection or playlist, each once), or `TopLevel` (items without a parent), `OwnerID` (the extras of an item), `Kinds`, `IncludeExtras`, `IncludeMissing`, `IncludeVirtual` or `OnlyVirtual` (§4.8).
 * Content: `Search` (see §9.2); `Monitored` (nil meaning either); `IndexNumber` and `ParentIndexNumber` (e.g. an episode of a season); `Genres`, `Tags`, `Studios` (match any, compared in clean form, see §9.2); `PersonID`; `ExternalIDs` (any of them, the same title as another server's); `YearFrom`–`YearTo`; `Limits` (`ContentLimits`), the rating and label limits of a library access record, which leave the playlists of `UserID` alone.
 * Names sort by sort name the way Jellyfin sorts them: case- and accent-insensitive, leading, inner and trailing articles ("the", "a", "an") ignored, the punctuation `,&-{}'` removed and `.+%` treated as spaces, numbers in numeric order ("Rocky 2" before "Rocky 10"), and non-Latin text transliterated (Chinese sorts by pinyin). Undated items sort last by premiere date, and items never played sort last by last-played time.
 * Per user (require `UserID`): `Played`, `Favorite`, `Resumable`, `Started` (whether the user played the item at all), `PlayedAfter` and `PlayedBefore` (the item last played within the range, both exclusive), and the `last_played` / `play_count` sorts. For `Started`, `PlayedAfter` and `PlayedBefore`, a series or season counts the plays of its episodes. With a `UserID`, other users' playlists are left out.

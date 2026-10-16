@@ -6650,6 +6650,11 @@ pub struct ListItemsRequest {
         ::buffa::alloc::string::String,
         ::buffa::alloc::string::String,
     >,
+    /// Only the extras of this item, such as its trailers; extras are
+    /// included without include_extras.
+    ///
+    /// Field 23: `owner_id`
+    pub owner_id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -6678,6 +6683,7 @@ impl ::core::fmt::Debug for ListItemsRequest {
             .field("include_virtual", &self.include_virtual)
             .field("monitored", &self.monitored)
             .field("external_ids", &self.external_ids)
+            .field("owner_id", &self.owner_id)
             .finish()
     }
 }
@@ -6803,6 +6809,16 @@ impl ListItemsRequest {
         self.monitored = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::owner_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_owner_id(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.owner_id = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(ListItemsRequest);
 impl ::buffa::MessageName for ListItemsRequest {
@@ -6903,6 +6919,9 @@ impl ::buffa::Message for ListItemsRequest {
                 ::buffa::map_codec::Str,
                 _,
             >(&self.external_ids, 2u64);
+        if let Some(ref v) = self.owner_id {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -6994,6 +7013,9 @@ impl ::buffa::Message for ListItemsRequest {
             ::buffa::map_codec::Str,
             _,
         >(&self.external_ids, 22u32, buf);
+        if let Some(ref v) = self.owner_id {
+            ::buffa::types::put_string_field(23u32, v, buf);
+        }
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -7254,6 +7276,18 @@ impl ::buffa::Message for ListItemsRequest {
                     _,
                 >(&mut self.external_ids, buf, ctx)?;
             }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .owner_id
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -7284,6 +7318,7 @@ impl ::buffa::Message for ListItemsRequest {
         self.include_virtual = ::core::option::Option::None;
         self.monitored = ::core::option::Option::None;
         self.external_ids.clear();
+        self.owner_id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
