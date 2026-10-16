@@ -329,8 +329,8 @@ func TestReleases(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.indexers"), ConfigJson: new(string(cfg)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)

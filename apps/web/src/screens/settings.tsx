@@ -13,14 +13,14 @@ import {
   serverKey,
   useAdminServers,
   useServers,
+  useRevokeSession,
   useServersStore,
   useSessions,
   useSignedIn,
   useSignIn,
 } from "@mavio/client-ts";
-import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
@@ -535,7 +535,7 @@ function LanguagesSection() {
     queryFn: async () => (await servers.client(UserService, first!).getCurrentUser({})).user,
     enabled: !!first,
   });
-  const prefs = me.data?.preferences;
+  const prefs = me.data?.playbackPreferences;
   return (
     <Section title={t("settings.subtitlesAudio")} message={t("settings.subtitlesAudioMessage")}>
       {me.data && (
@@ -547,8 +547,8 @@ function LanguagesSection() {
           save={async (p) => {
             await Promise.all(
               signedIn.map((s) =>
-                servers.client(UserService, s).updatePreferences({
-                  preferences: { ...p, playDefaultAudioTrack: prefs?.playDefaultAudioTrack ?? true },
+                servers.client(UserService, s).updatePlaybackPreferences({
+                  playbackPreferences: { ...p, playDefaultAudioTrack: prefs?.playDefaultAudioTrack ?? true },
                 }),
               ),
             );
@@ -759,25 +759,14 @@ const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "
 
 /** The sessions of the user on the server chosen, to sign one out or control one online (§6.3.23). */
 function DevicesSection({ server }: { server: ServerEntry }) {
-  const servers = useServersStore();
-  const remote = useSessions(server);
+  const sessions = useSessions(server);
+  const revoke = useRevokeSession(server);
   const [controlling, setControlling] = useState<string>();
-  const queryClient = useQueryClient();
-  const key = serverKey(server.id, "sessions", server.userId);
-  const sessions = useQuery({
-    queryKey: key,
-    queryFn: async () => (await servers.client(AuthService, server).listSessions({})).sessions,
-  });
-  const revoke = useMutation({
-    mutationFn: (id: string) => servers.client(AuthService, server).revokeSession({ id }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: key }),
-  });
-  const online = (id: string) => remote.data?.some((r) => r.id === id && r.online);
   const detailOf = (s: NonNullable<typeof sessions.data>[number]) => {
-    const playing = remote.data?.find((r) => r.id === s.id)?.nowPlaying?.item;
+    const playing = s.nowPlaying?.item;
     return [
-      s.device?.client,
-      playing ? t("remote.playing", { name: playing.name }) : online(s.id) ? t("remote.online") : s.lastSeenTime && when.format(timestampDate(s.lastSeenTime)),
+      s.client,
+      playing ? t("remote.playing", { name: playing.name }) : s.online ? t("remote.online") : s.lastSeenTime && when.format(timestampDate(s.lastSeenTime)),
     ]
       .filter(Boolean)
       .join(" · ");
@@ -788,7 +777,7 @@ function DevicesSection({ server }: { server: ServerEntry }) {
         {(sessions.data ?? []).map((s) => (
           <Row
             key={s.id}
-            label={s.device?.name || s.device?.client || "—"}
+            label={s.deviceName || s.client || "—"}
             leading={
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-fill">
                 <Icon name="devices" size={20} />
@@ -800,7 +789,7 @@ function DevicesSection({ server }: { server: ServerEntry }) {
               <span className="type-callout text-text-secondary">{t("settings.thisBrowser")}</span>
             ) : (
               <>
-                {online(s.id) && (
+                {s.online && (
                   <Button variant="plain" onClick={() => setControlling(s.id)}>
                     {t("remote.control")}
                   </Button>

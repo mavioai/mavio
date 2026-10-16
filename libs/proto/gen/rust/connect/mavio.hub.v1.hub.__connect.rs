@@ -1,21 +1,37 @@
 ///Shorthand for `OwnedView<ListHubsRequestView<'static>>`.
 pub type OwnedListHubsRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::ListHubsRequestView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::ListHubsRequestView<'static>,
 >;
 ///Shorthand for `OwnedView<ListHubsResponseView<'static>>`.
 pub type OwnedListHubsResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::ListHubsResponseView<'static>,
 >;
 ///Shorthand for `OwnedView<GetHubRequestView<'static>>`.
 pub type OwnedGetHubRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::GetHubRequestView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::GetHubRequestView<'static>,
 >;
 ///Shorthand for `OwnedView<GetHubResponseView<'static>>`.
 pub type OwnedGetHubResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::GetHubResponseView<'static>,
 >;
-impl ::connectrpc::Encodable<crate::proto::mavio::home::v1::ListHubsResponse>
-for crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<'_> {
+///Shorthand for `OwnedView<GetHomeLayoutRequestView<'static>>`.
+pub type OwnedGetHomeLayoutRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetHomeLayoutResponseView<'static>>`.
+pub type OwnedGetHomeLayoutResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutResponseView<'static>,
+>;
+///Shorthand for `OwnedView<UpdateHomeLayoutRequestView<'static>>`.
+pub type OwnedUpdateHomeLayoutRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutRequestView<'static>,
+>;
+///Shorthand for `OwnedView<UpdateHomeLayoutResponseView<'static>>`.
+pub type OwnedUpdateHomeLayoutResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutResponseView<'static>,
+>;
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::ListHubsResponse>
+for crate::proto::mavio::hub::v1::__buffa::view::ListHubsResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -23,9 +39,9 @@ for crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<'_> {
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::home::v1::ListHubsResponse>
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::ListHubsResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::ListHubsResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -48,8 +64,8 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::home::v1::GetHubResponse>
-for crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'_> {
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::GetHubResponse>
+for crate::proto::mavio::hub::v1::__buffa::view::GetHubResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -57,9 +73,77 @@ for crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'_> {
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::home::v1::GetHubResponse>
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::GetHubResponse>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'static>,
+    crate::proto::mavio::hub::v1::__buffa::view::GetHubResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::GetHomeLayoutResponse>
+for crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::GetHomeLayoutResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::UpdateHomeLayoutResponse>
+for crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::hub::v1::UpdateHomeLayoutResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -83,30 +167,39 @@ for ::buffa::view::OwnedView<
     }
 }
 /// Full service name for this service.
-pub const HOME_SERVICE_SERVICE_NAME: &str = "mavio.home.v1.HomeService";
+pub const HUB_SERVICE_SERVICE_NAME: &str = "mavio.hub.v1.HubService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListHubs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const HOME_SERVICE_LIST_HUBS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.home.v1.HomeService/ListHubs",
+pub const HUB_SERVICE_LIST_HUBS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.hub.v1.HubService/ListHubs",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `GetHub` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const HOME_SERVICE_GET_HUB_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.home.v1.HomeService/GetHub",
+pub const HUB_SERVICE_GET_HUB_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.hub.v1.HubService/GetHub",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// HomeService lists the hubs of Home and of the libraries' Recommended
+/// Static [`Spec`](::connectrpc::Spec) for the `GetHomeLayout` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const HUB_SERVICE_GET_HOME_LAYOUT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.hub.v1.HubService/GetHomeLayout",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdateHomeLayout` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const HUB_SERVICE_UPDATE_HOME_LAYOUT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.hub.v1.HubService/UpdateHomeLayout",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
+/// HubService lists the hubs of Home and of the libraries' Recommended
 /// tabs: rows of items, each a reason to watch something, chosen per
 /// library by administrators. Home starts with continue watching across
 /// the libraries and the requests that became available, follows with the
 /// Home hubs of each library the user pinned, in their order, and ends with
-/// trending titles. Hubs the user hid and hubs without items are left out.
-/// The user's choices are display preferences of client "mavio", view
-/// "home": "libraries" lists the pinned library IDs in order, comma
-/// separated, all libraries in name order when unset; "hidden" lists the
-/// IDs of hidden hubs, which cannot hide continue watching. Items are those
-/// the caller may access. Signed-in users.
+/// trending titles. Hubs the user hid and hubs without items are left out;
+/// the user chooses both with UpdateHomeLayout. Items are those the caller
+/// may access. Signed-in users.
 ///
 /// # Implementing handlers
 ///
@@ -156,7 +249,7 @@ pub const HOME_SERVICE_GET_HUB_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::se
 /// [`PreEncoded`](::connectrpc::PreEncoded) — see its `# Streaming
 /// example` doc.
 #[allow(clippy::type_complexity)]
-pub trait HomeService: Send + Sync + 'static {
+pub trait HubService: Send + Sync + 'static {
     /// ListHubs lists the hubs of Home, or of a library's Recommended tab,
     /// with their first items.
     ///
@@ -172,12 +265,12 @@ pub trait HomeService: Send + Sync + 'static {
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::home::v1::ListHubsRequest,
+            crate::proto::mavio::hub::v1::ListHubsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::home::v1::ListHubsResponse,
+                crate::proto::mavio::hub::v1::ListHubsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -195,12 +288,61 @@ pub trait HomeService: Send + Sync + 'static {
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::home::v1::GetHubRequest,
+            crate::proto::mavio::hub::v1::GetHubRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::home::v1::GetHubResponse,
+                crate::proto::mavio::hub::v1::GetHubResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetHomeLayout returns the calling user's choice of Home's libraries
+    /// and hidden hubs.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_home_layout<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::hub::v1::GetHomeLayoutResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// UpdateHomeLayout replaces the calling user's choice of Home's
+    /// libraries and hidden hubs. Libraries the user may not access fail
+    /// with INVALID_ARGUMENT.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn update_home_layout<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::hub::v1::UpdateHomeLayoutResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -220,7 +362,7 @@ pub trait HomeService: Send + Sync + 'static {
 /// let service = Arc::new(MyServiceImpl);
 /// let router = service.register(Router::new());
 /// ```
-pub trait HomeServiceExt: HomeService {
+pub trait HubServiceExt: HubService {
     /// Register this service implementation with a Router.
     ///
     /// Takes ownership of the `Arc<Self>` and returns a new Router with
@@ -230,21 +372,21 @@ pub trait HomeServiceExt: HomeService {
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router;
 }
-impl<S: HomeService> HomeServiceExt for S {
+impl<S: HubService> HubServiceExt for S {
     fn register(
         self: ::std::sync::Arc<Self>,
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router {
         router
             .route_view_idempotent(
-                HOME_SERVICE_SERVICE_NAME,
+                HUB_SERVICE_SERVICE_NAME,
                 "ListHubs",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::home::v1::__buffa::view::ListHubsRequestView<
+                            crate::proto::mavio::hub::v1::__buffa::view::ListHubsRequestView<
                                 'static,
                             >,
                         >,
@@ -253,27 +395,27 @@ impl<S: HomeService> HomeServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::home::v1::ListHubsRequest,
+                                crate::proto::mavio::hub::v1::ListHubsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
                             svc.list_hubs(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::home::v1::ListHubsResponse,
+                                    crate::proto::mavio::hub::v1::ListHubsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(HOME_SERVICE_LIST_HUBS_SPEC)
+            .with_spec(HUB_SERVICE_LIST_HUBS_SPEC)
             .route_view_idempotent(
-                HOME_SERVICE_SERVICE_NAME,
+                HUB_SERVICE_SERVICE_NAME,
                 "GetHub",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::home::v1::__buffa::view::GetHubRequestView<
+                            crate::proto::mavio::hub::v1::__buffa::view::GetHubRequestView<
                                 'static,
                             >,
                         >,
@@ -282,30 +424,88 @@ impl<S: HomeService> HomeServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::home::v1::GetHubRequest,
+                                crate::proto::mavio::hub::v1::GetHubRequest,
                             >::from_parts(req.reborrow(), req.bytes());
                             svc.get_hub(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::home::v1::GetHubResponse,
+                                    crate::proto::mavio::hub::v1::GetHubResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(HOME_SERVICE_GET_HUB_SPEC)
+            .with_spec(HUB_SERVICE_GET_HUB_SPEC)
+            .route_view_idempotent(
+                HUB_SERVICE_SERVICE_NAME,
+                "GetHomeLayout",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_home_layout(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::hub::v1::GetHomeLayoutResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(HUB_SERVICE_GET_HOME_LAYOUT_SPEC)
+            .route_view(
+                HUB_SERVICE_SERVICE_NAME,
+                "UpdateHomeLayout",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.update_home_layout(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::hub::v1::UpdateHomeLayoutResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(HUB_SERVICE_UPDATE_HOME_LAYOUT_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
 #[doc(hidden)]
-pub struct HomeServiceRegisterMarker;
-impl<S: HomeService> ::connectrpc::ServiceRegister<HomeServiceRegisterMarker>
+pub struct HubServiceRegisterMarker;
+impl<S: HubService> ::connectrpc::ServiceRegister<HubServiceRegisterMarker>
 for ::std::sync::Arc<S> {
     fn register_service(self, router: ::connectrpc::Router) -> ::connectrpc::Router {
-        <S as HomeServiceExt>::register(self, router)
+        <S as HubServiceExt>::register(self, router)
     }
 }
-/// Monomorphic dispatcher for `HomeService`.
+/// Monomorphic dispatcher for `HubService`.
 ///
 /// Unlike `.register(Router)` which type-erases each method into an `Arc<dyn ErasedHandler>` stored in a `HashMap`, this struct dispatches via a compile-time `match` on method name: no vtable, no hash lookup.
 ///
@@ -314,14 +514,14 @@ for ::std::sync::Arc<S> {
 /// ```rust,ignore
 /// use connectrpc::ConnectRpcService;
 ///
-/// let server = HomeServiceServer::new(MyImpl);
+/// let server = HubServiceServer::new(MyImpl);
 /// let service = ConnectRpcService::new(server);
 /// // hand `service` to axum/hyper as a fallback_service
 /// ```
-pub struct HomeServiceServer<T> {
+pub struct HubServiceServer<T> {
     inner: ::std::sync::Arc<T>,
 }
-impl<T: HomeService> HomeServiceServer<T> {
+impl<T: HubService> HubServiceServer<T> {
     /// Wrap a service implementation in a monomorphic dispatcher.
     pub fn new(service: T) -> Self {
         Self {
@@ -333,31 +533,43 @@ impl<T: HomeService> HomeServiceServer<T> {
         Self { inner }
     }
 }
-impl<T> Clone for HomeServiceServer<T> {
+impl<T> Clone for HubServiceServer<T> {
     fn clone(&self) -> Self {
         Self {
             inner: ::std::sync::Arc::clone(&self.inner),
         }
     }
 }
-impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
+impl<T: HubService> ::connectrpc::Dispatcher for HubServiceServer<T> {
     #[inline]
     fn lookup(
         &self,
         path: &str,
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
-        let method = path.strip_prefix("mavio.home.v1.HomeService/")?;
+        let method = path.strip_prefix("mavio.hub.v1.HubService/")?;
         match method {
             "ListHubs" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(HOME_SERVICE_LIST_HUBS_SPEC),
+                        .with_spec(HUB_SERVICE_LIST_HUBS_SPEC),
                 )
             }
             "GetHub" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(HOME_SERVICE_GET_HUB_SPEC),
+                        .with_spec(HUB_SERVICE_GET_HUB_SPEC),
+                )
+            }
+            "GetHomeLayout" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(HUB_SERVICE_GET_HOME_LAYOUT_SPEC),
+                )
+            }
+            "UpdateHomeLayout" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(HUB_SERVICE_UPDATE_HOME_LAYOUT_SPEC),
                 )
             }
             _ => None,
@@ -370,7 +582,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
         request: ::connectrpc::Payload,
         format: ::connectrpc::CodecFormat,
     ) -> ::connectrpc::dispatcher::codegen::UnaryResult {
-        let Some(method) = path.strip_prefix("mavio.home.v1.HomeService/") else {
+        let Some(method) = path.strip_prefix("mavio.hub.v1.HubService/") else {
             return ::connectrpc::dispatcher::codegen::unimplemented_unary(path);
         };
         let _ = (&ctx, &request, &format);
@@ -379,42 +591,84 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::home::v1::ListHubsRequest,
+                        crate::proto::mavio::hub::v1::ListHubsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::home::v1::__buffa::view::ListHubsRequestView<
+                    let req: crate::proto::mavio::hub::v1::__buffa::view::ListHubsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::home::v1::ListHubsRequest,
+                        crate::proto::mavio::hub::v1::ListHubsRequest,
                     >::from_parts(&req, &body);
                     svc.list_hubs(ctx, req)
                         .await?
-                        .encode::<
-                            crate::proto::mavio::home::v1::ListHubsResponse,
-                        >(format)
+                        .encode::<crate::proto::mavio::hub::v1::ListHubsResponse>(format)
                 })
             }
             "GetHub" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::home::v1::GetHubRequest,
+                        crate::proto::mavio::hub::v1::GetHubRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::home::v1::__buffa::view::GetHubRequestView<
+                    let req: crate::proto::mavio::hub::v1::__buffa::view::GetHubRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::home::v1::GetHubRequest,
+                        crate::proto::mavio::hub::v1::GetHubRequest,
                     >::from_parts(&req, &body);
                     svc.get_hub(ctx, req)
                         .await?
-                        .encode::<crate::proto::mavio::home::v1::GetHubResponse>(format)
+                        .encode::<crate::proto::mavio::hub::v1::GetHubResponse>(format)
+                })
+            }
+            "GetHomeLayout" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_home_layout(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::hub::v1::GetHomeLayoutResponse,
+                        >(format)
+                })
+            }
+            "UpdateHomeLayout" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+                    >::from_parts(&req, &body);
+                    svc.update_home_layout(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::hub::v1::UpdateHomeLayoutResponse,
+                        >(format)
                 })
             }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_unary(path),
@@ -427,7 +681,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
         request: ::buffa::bytes::Bytes,
         format: ::connectrpc::CodecFormat,
     ) -> ::connectrpc::dispatcher::codegen::StreamingResult {
-        let Some(method) = path.strip_prefix("mavio.home.v1.HomeService/") else {
+        let Some(method) = path.strip_prefix("mavio.hub.v1.HubService/") else {
             return ::connectrpc::dispatcher::codegen::unimplemented_streaming(path);
         };
         let _ = (&ctx, &request, &format);
@@ -442,7 +696,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
         requests: ::connectrpc::dispatcher::codegen::RequestStream,
         format: ::connectrpc::CodecFormat,
     ) -> ::connectrpc::dispatcher::codegen::UnaryResult {
-        let Some(method) = path.strip_prefix("mavio.home.v1.HomeService/") else {
+        let Some(method) = path.strip_prefix("mavio.hub.v1.HubService/") else {
             return ::connectrpc::dispatcher::codegen::unimplemented_unary(path);
         };
         let _ = (&ctx, &requests, &format);
@@ -457,7 +711,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
         requests: ::connectrpc::dispatcher::codegen::RequestStream,
         format: ::connectrpc::CodecFormat,
     ) -> ::connectrpc::dispatcher::codegen::StreamingResult {
-        let Some(method) = path.strip_prefix("mavio.home.v1.HomeService/") else {
+        let Some(method) = path.strip_prefix("mavio.hub.v1.HubService/") else {
             return ::connectrpc::dispatcher::codegen::unimplemented_streaming(path);
         };
         let _ = (&ctx, &requests, &format);
@@ -483,7 +737,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
 /// let conn = Http2Connection::connect_plaintext(uri.clone()).await?.shared(1024);
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
-/// let client = HomeServiceClient::new(conn, config);
+/// let client = HubServiceClient::new(conn, config);
 /// let response = client.list_hubs(request).await?;
 /// ```
 ///
@@ -495,7 +749,7 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
 /// let http = HttpClient::plaintext();  // cleartext http:// only
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
-/// let client = HomeServiceClient::new(http, config);
+/// let client = HubServiceClient::new(http, config);
 /// let response = client.list_hubs(request).await?;
 /// ```
 ///
@@ -524,11 +778,11 @@ impl<T: HomeService> ::connectrpc::Dispatcher for HomeServiceServer<T> {
 /// `.message().await` — read fields zero-copy through the generated accessor
 /// methods (`msg.name()`) or `.view()`, or convert with `.to_owned_message()`.
 #[derive(Clone)]
-pub struct HomeServiceClient<T> {
+pub struct HubServiceClient<T> {
     transport: T,
     config: ::connectrpc::client::ClientConfig,
 }
-impl<T> HomeServiceClient<T>
+impl<T> HubServiceClient<T>
 where
     T: ::connectrpc::client::ClientTransport,
     <T::ResponseBody as ::connectrpc::http_body::Body>::Error: ::std::fmt::Display,
@@ -545,14 +799,14 @@ where
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
     }
-    /// Call the ListHubs RPC. Sends a request to /mavio.home.v1.HomeService/ListHubs.
+    /// Call the ListHubs RPC. Sends a request to /mavio.hub.v1.HubService/ListHubs.
     pub async fn list_hubs(
         &self,
-        request: crate::proto::mavio::home::v1::ListHubsRequest,
+        request: crate::proto::mavio::hub::v1::ListHubsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<
+                crate::proto::mavio::hub::v1::__buffa::view::ListHubsResponseView<
                     'static,
                 >,
             >,
@@ -568,12 +822,12 @@ where
     /// Call the ListHubs RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
     pub async fn list_hubs_with_options(
         &self,
-        request: crate::proto::mavio::home::v1::ListHubsRequest,
+        request: crate::proto::mavio::hub::v1::ListHubsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::home::v1::__buffa::view::ListHubsResponseView<
+                crate::proto::mavio::hub::v1::__buffa::view::ListHubsResponseView<
                     'static,
                 >,
             >,
@@ -583,21 +837,20 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                HOME_SERVICE_LIST_HUBS_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
+                HUB_SERVICE_LIST_HUBS_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
             .await
     }
-    /// Call the GetHub RPC. Sends a request to /mavio.home.v1.HomeService/GetHub.
+    /// Call the GetHub RPC. Sends a request to /mavio.hub.v1.HubService/GetHub.
     pub async fn get_hub(
         &self,
-        request: crate::proto::mavio::home::v1::GetHubRequest,
+        request: crate::proto::mavio::hub::v1::GetHubRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'static>,
+                crate::proto::mavio::hub::v1::__buffa::view::GetHubResponseView<'static>,
             >,
         >,
         ::connectrpc::ConnectError,
@@ -608,12 +861,12 @@ where
     /// Call the GetHub RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
     pub async fn get_hub_with_options(
         &self,
-        request: crate::proto::mavio::home::v1::GetHubRequest,
+        request: crate::proto::mavio::hub::v1::GetHubRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::home::v1::__buffa::view::GetHubResponseView<'static>,
+                crate::proto::mavio::hub::v1::__buffa::view::GetHubResponseView<'static>,
             >,
         >,
         ::connectrpc::ConnectError,
@@ -621,7 +874,97 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                HOME_SERVICE_GET_HUB_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                HUB_SERVICE_GET_HUB_SPEC.with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetHomeLayout RPC. Sends a request to /mavio.hub.v1.HubService/GetHomeLayout.
+    pub async fn get_home_layout(
+        &self,
+        request: crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_home_layout_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetHomeLayout RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_home_layout_with_options(
+        &self,
+        request: crate::proto::mavio::hub::v1::GetHomeLayoutRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::hub::v1::__buffa::view::GetHomeLayoutResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                HUB_SERVICE_GET_HOME_LAYOUT_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the UpdateHomeLayout RPC. Sends a request to /mavio.hub.v1.HubService/UpdateHomeLayout.
+    pub async fn update_home_layout(
+        &self,
+        request: crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.update_home_layout_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the UpdateHomeLayout RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_home_layout_with_options(
+        &self,
+        request: crate::proto::mavio::hub::v1::UpdateHomeLayoutRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::hub::v1::__buffa::view::UpdateHomeLayoutResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                HUB_SERVICE_UPDATE_HOME_LAYOUT_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )

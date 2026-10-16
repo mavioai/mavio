@@ -58,13 +58,6 @@ service AuthService {
   rpc RefreshSession(RefreshSessionRequest) returns (RefreshSessionResponse);
   // Logout ends the calling session.
   rpc Logout(LogoutRequest) returns (LogoutResponse);
-  // ListSessions lists the calling user's signed-in devices, most recently
-  // seen first.
-  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  // RevokeSession signs one of the calling user's devices out.
-  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
   // StartQuickConnect begins signing a device in from a signed-in one
   // (Quick Connect): the new device shows the code, a signed-in user
   // enters it with AuthorizeQuickConnect, and the new device, polling
@@ -331,21 +324,6 @@ message RefreshSessionResponse {
 message LogoutRequest {}
 
 message LogoutResponse {}
-
-message ListSessionsRequest {}
-
-message ListSessionsResponse {
-  repeated Session sessions = 1;
-}
-
-message RevokeSessionRequest {
-  string id = 1 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.uuid = true
-  ];
-}
-
-message RevokeSessionResponse {}
 
 message StartQuickConnectRequest {
   Device device = 1 [(buf.validate.field).required = true];

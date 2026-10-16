@@ -67,9 +67,9 @@ const (
 	UserServiceConfirmTotpProcedure = "/mavio.user.v1.UserService/ConfirmTotp"
 	// UserServiceDeleteTotpProcedure is the fully-qualified name of the UserService's DeleteTotp RPC.
 	UserServiceDeleteTotpProcedure = "/mavio.user.v1.UserService/DeleteTotp"
-	// UserServiceUpdatePreferencesProcedure is the fully-qualified name of the UserService's
-	// UpdatePreferences RPC.
-	UserServiceUpdatePreferencesProcedure = "/mavio.user.v1.UserService/UpdatePreferences"
+	// UserServiceUpdatePlaybackPreferencesProcedure is the fully-qualified name of the UserService's
+	// UpdatePlaybackPreferences RPC.
+	UserServiceUpdatePlaybackPreferencesProcedure = "/mavio.user.v1.UserService/UpdatePlaybackPreferences"
 	// UserServiceCreateInvitationProcedure is the fully-qualified name of the UserService's
 	// CreateInvitation RPC.
 	UserServiceCreateInvitationProcedure = "/mavio.user.v1.UserService/CreateInvitation"
@@ -123,8 +123,8 @@ type UserServiceClient interface {
 	// DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
 	// for the administrator.
 	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
-	// UpdatePreferences changes the calling user's playback preferences.
-	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
+	// UpdatePlaybackPreferences changes the calling user's playback preferences.
+	UpdatePlaybackPreferences(context.Context, *v1.UpdatePlaybackPreferencesRequest) (*v1.UpdatePlaybackPreferencesResponse, error)
 	// CreateInvitation makes an invitation link, whose token is returned
 	// once: the invitee opens it in a client, which accepts it with
 	// AuthService.AcceptInvitation. An invitation either creates members, up
@@ -235,10 +235,10 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("DeleteTotp")),
 			connect.WithClientOptions(opts...),
 		),
-		updatePreferences: connect.NewClient[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse](
+		updatePlaybackPreferences: connect.NewClient[v1.UpdatePlaybackPreferencesRequest, v1.UpdatePlaybackPreferencesResponse](
 			httpClient,
-			baseURL+UserServiceUpdatePreferencesProcedure,
-			connect.WithSchema(userServiceMethods.ByName("UpdatePreferences")),
+			baseURL+UserServiceUpdatePlaybackPreferencesProcedure,
+			connect.WithSchema(userServiceMethods.ByName("UpdatePlaybackPreferences")),
 			connect.WithClientOptions(opts...),
 		),
 		createInvitation: connect.NewClient[v1.CreateInvitationRequest, v1.CreateInvitationResponse](
@@ -279,7 +279,7 @@ type userServiceClient struct {
 	startTotp                 *connect.Client[v1.StartTotpRequest, v1.StartTotpResponse]
 	confirmTotp               *connect.Client[v1.ConfirmTotpRequest, v1.ConfirmTotpResponse]
 	deleteTotp                *connect.Client[v1.DeleteTotpRequest, v1.DeleteTotpResponse]
-	updatePreferences         *connect.Client[v1.UpdatePreferencesRequest, v1.UpdatePreferencesResponse]
+	updatePlaybackPreferences *connect.Client[v1.UpdatePlaybackPreferencesRequest, v1.UpdatePlaybackPreferencesResponse]
 	createInvitation          *connect.Client[v1.CreateInvitationRequest, v1.CreateInvitationResponse]
 	listInvitations           *connect.Client[v1.ListInvitationsRequest, v1.ListInvitationsResponse]
 	deleteInvitation          *connect.Client[v1.DeleteInvitationRequest, v1.DeleteInvitationResponse]
@@ -411,9 +411,9 @@ func (c *userServiceClient) DeleteTotp(ctx context.Context, req *v1.DeleteTotpRe
 	return nil, err
 }
 
-// UpdatePreferences calls mavio.user.v1.UserService.UpdatePreferences.
-func (c *userServiceClient) UpdatePreferences(ctx context.Context, req *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
-	response, err := c.updatePreferences.CallUnary(ctx, connect.NewRequest(req))
+// UpdatePlaybackPreferences calls mavio.user.v1.UserService.UpdatePlaybackPreferences.
+func (c *userServiceClient) UpdatePlaybackPreferences(ctx context.Context, req *v1.UpdatePlaybackPreferencesRequest) (*v1.UpdatePlaybackPreferencesResponse, error) {
+	response, err := c.updatePlaybackPreferences.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -483,8 +483,8 @@ type UserServiceHandler interface {
 	// DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
 	// for the administrator.
 	DeleteTotp(context.Context, *v1.DeleteTotpRequest) (*v1.DeleteTotpResponse, error)
-	// UpdatePreferences changes the calling user's playback preferences.
-	UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error)
+	// UpdatePlaybackPreferences changes the calling user's playback preferences.
+	UpdatePlaybackPreferences(context.Context, *v1.UpdatePlaybackPreferencesRequest) (*v1.UpdatePlaybackPreferencesResponse, error)
 	// CreateInvitation makes an invitation link, whose token is returned
 	// once: the invitee opens it in a client, which accepts it with
 	// AuthService.AcceptInvitation. An invitation either creates members, up
@@ -591,10 +591,10 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("DeleteTotp")),
 		connect.WithHandlerOptions(opts...),
 	)
-	userServiceUpdatePreferencesHandler := connect.NewUnaryHandlerSimple(
-		UserServiceUpdatePreferencesProcedure,
-		svc.UpdatePreferences,
-		connect.WithSchema(userServiceMethods.ByName("UpdatePreferences")),
+	userServiceUpdatePlaybackPreferencesHandler := connect.NewUnaryHandlerSimple(
+		UserServiceUpdatePlaybackPreferencesProcedure,
+		svc.UpdatePlaybackPreferences,
+		connect.WithSchema(userServiceMethods.ByName("UpdatePlaybackPreferences")),
 		connect.WithHandlerOptions(opts...),
 	)
 	userServiceCreateInvitationHandler := connect.NewUnaryHandlerSimple(
@@ -646,8 +646,8 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceConfirmTotpHandler.ServeHTTP(w, r)
 		case UserServiceDeleteTotpProcedure:
 			userServiceDeleteTotpHandler.ServeHTTP(w, r)
-		case UserServiceUpdatePreferencesProcedure:
-			userServiceUpdatePreferencesHandler.ServeHTTP(w, r)
+		case UserServiceUpdatePlaybackPreferencesProcedure:
+			userServiceUpdatePlaybackPreferencesHandler.ServeHTTP(w, r)
 		case UserServiceCreateInvitationProcedure:
 			userServiceCreateInvitationHandler.ServeHTTP(w, r)
 		case UserServiceListInvitationsProcedure:
@@ -719,8 +719,8 @@ func (UnimplementedUserServiceHandler) DeleteTotp(context.Context, *v1.DeleteTot
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.DeleteTotp is not implemented"))
 }
 
-func (UnimplementedUserServiceHandler) UpdatePreferences(context.Context, *v1.UpdatePreferencesRequest) (*v1.UpdatePreferencesResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.UpdatePreferences is not implemented"))
+func (UnimplementedUserServiceHandler) UpdatePlaybackPreferences(context.Context, *v1.UpdatePlaybackPreferencesRequest) (*v1.UpdatePlaybackPreferencesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.user.v1.UserService.UpdatePlaybackPreferences is not implemented"))
 }
 
 func (UnimplementedUserServiceHandler) CreateInvitation(context.Context, *v1.CreateInvitationRequest) (*v1.CreateInvitationResponse, error) {

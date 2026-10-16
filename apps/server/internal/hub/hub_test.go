@@ -1,4 +1,4 @@
-package home
+package hub
 
 import (
 	"errors"
@@ -125,12 +125,13 @@ func TestHome(t *testing.T) {
 	}
 
 	// The user pins the shows only and hides one of their hubs.
-	prefs := core.DisplayPreferences{UserID: e.user.ID, Client: Client, View: View, Values: map[string]string{
-		Pinned: shows, Hidden: "recently_added/" + shows + ",continue_watching",
-	}}
-	if err := e.store.DisplayPreferences().Put(ctx, &prefs); err != nil {
+	layout, err := e.svc.SetLayout(ctx, e.user.ID, core.HomeLayout{
+		Pinned: true, Libraries: []core.ID{e.shows.ID}, HiddenHubs: []string{"recently_added/" + shows, "continue_watching"},
+	})
+	if err != nil {
 		t.Fatal(err)
 	}
+	e.user.Home = layout
 	hubs, err = e.svc.Home(ctx, &e.user, 10)
 	if err != nil {
 		t.Fatal(err)
@@ -145,8 +146,7 @@ func TestHome(t *testing.T) {
 	if err := e.store.Libraries().Update(ctx, &e.films); err != nil {
 		t.Fatal(err)
 	}
-	prefs.Values = map[string]string{Pinned: films}
-	if err := e.store.DisplayPreferences().Put(ctx, &prefs); err != nil {
+	if e.user.Home, err = e.svc.SetLayout(ctx, e.user.ID, core.HomeLayout{Pinned: true, Libraries: []core.ID{e.films.ID}}); err != nil {
 		t.Fatal(err)
 	}
 	hubs, err = e.svc.Home(ctx, &e.user, 2)
@@ -262,5 +262,22 @@ func TestAvailableRequests(t *testing.T) {
 	e.svc.Now = func() time.Time { return time.Now().Add(31 * 24 * time.Hour) }
 	if h, err := e.svc.Get(ctx, &e.user, "available_requests", 10, 0); err != nil || len(h.Items) != 0 {
 		t.Errorf("a month later: got = %d items, %v; want none", len(h.Items), err)
+	}
+}
+
+func TestSetLayout(t *testing.T) {
+	e := newEnv(t)
+	ctx := t.Context()
+	if _, err := e.svc.SetLayout(ctx, e.user.ID, core.HomeLayout{Pinned: true, Libraries: []core.ID{core.NewID()}}); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("unknown library: got = %v, want = %v", err, core.ErrInvalid)
+	}
+	// Unpinned layouts keep no libraries.
+	got, err := e.svc.SetLayout(ctx, e.user.ID, core.HomeLayout{Libraries: []core.ID{e.films.ID}, HiddenHubs: []string{"trending"}})
+	if err != nil || got.Pinned || got.Libraries != nil || !slices.Equal(got.HiddenHubs, []string{"trending"}) {
+		t.Errorf("unpinned: got = %+v, %v; want = hidden trending", got, err)
+	}
+	stored, err := e.store.Users().Get(ctx, e.user.ID)
+	if err != nil || !slices.Equal(stored.Home.HiddenHubs, []string{"trending"}) {
+		t.Errorf("stored: got = %+v, %v; want = hidden trending", stored.Home, err)
 	}
 }

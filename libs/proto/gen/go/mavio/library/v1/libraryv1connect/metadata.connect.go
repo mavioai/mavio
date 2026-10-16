@@ -54,12 +54,12 @@ const (
 	// MetadataServiceDeleteItemImageProcedure is the fully-qualified name of the MetadataService's
 	// DeleteItemImage RPC.
 	MetadataServiceDeleteItemImageProcedure = "/mavio.library.v1.MetadataService/DeleteItemImage"
-	// MetadataServiceSearchSubtitlesProcedure is the fully-qualified name of the MetadataService's
-	// SearchSubtitles RPC.
-	MetadataServiceSearchSubtitlesProcedure = "/mavio.library.v1.MetadataService/SearchSubtitles"
-	// MetadataServiceDownloadSubtitleProcedure is the fully-qualified name of the MetadataService's
-	// DownloadSubtitle RPC.
-	MetadataServiceDownloadSubtitleProcedure = "/mavio.library.v1.MetadataService/DownloadSubtitle"
+	// MetadataServiceSearchRemoteLyricsProcedure is the fully-qualified name of the MetadataService's
+	// SearchRemoteLyrics RPC.
+	MetadataServiceSearchRemoteLyricsProcedure = "/mavio.library.v1.MetadataService/SearchRemoteLyrics"
+	// MetadataServiceDownloadRemoteLyricsProcedure is the fully-qualified name of the MetadataService's
+	// DownloadRemoteLyrics RPC.
+	MetadataServiceDownloadRemoteLyricsProcedure = "/mavio.library.v1.MetadataService/DownloadRemoteLyrics"
 	// MetadataServiceListExternalIdKindsProcedure is the fully-qualified name of the MetadataService's
 	// ListExternalIdKinds RPC.
 	MetadataServiceListExternalIdKindsProcedure = "/mavio.library.v1.MetadataService/ListExternalIdKinds"
@@ -86,12 +86,13 @@ type MetadataServiceClient interface {
 	// DeleteItemImage removes an image of an item, and its file when it lies
 	// in the library's folders.
 	DeleteItemImage(context.Context, *v1.DeleteItemImageRequest) (*v1.DeleteItemImageResponse, error)
-	// SearchSubtitles searches the subtitle providers for subtitles of a
-	// video in one language.
-	SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error)
-	// DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
-	// video, where it becomes one of the video's subtitle streams.
-	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
+	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+	// administrators only.
+	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+	// track, as .lrc when synced and .txt otherwise, replacing its other
+	// lyric files; administrators only.
+	DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error)
 	// ListExternalIdKinds lists the kinds of external IDs items and persons
 	// carry: the built-in ones and those plugins declare.
 	ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error)
@@ -152,17 +153,17 @@ func NewMetadataServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(metadataServiceMethods.ByName("DeleteItemImage")),
 			connect.WithClientOptions(opts...),
 		),
-		searchSubtitles: connect.NewClient[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse](
+		searchRemoteLyrics: connect.NewClient[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse](
 			httpClient,
-			baseURL+MetadataServiceSearchSubtitlesProcedure,
-			connect.WithSchema(metadataServiceMethods.ByName("SearchSubtitles")),
+			baseURL+MetadataServiceSearchRemoteLyricsProcedure,
+			connect.WithSchema(metadataServiceMethods.ByName("SearchRemoteLyrics")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
-		downloadSubtitle: connect.NewClient[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse](
+		downloadRemoteLyrics: connect.NewClient[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse](
 			httpClient,
-			baseURL+MetadataServiceDownloadSubtitleProcedure,
-			connect.WithSchema(metadataServiceMethods.ByName("DownloadSubtitle")),
+			baseURL+MetadataServiceDownloadRemoteLyricsProcedure,
+			connect.WithSchema(metadataServiceMethods.ByName("DownloadRemoteLyrics")),
 			connect.WithClientOptions(opts...),
 		),
 		listExternalIdKinds: connect.NewClient[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse](
@@ -177,16 +178,16 @@ func NewMetadataServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 
 // metadataServiceClient implements MetadataServiceClient.
 type metadataServiceClient struct {
-	updateItem          *connect.Client[v1.UpdateItemRequest, v1.UpdateItemResponse]
-	refreshItem         *connect.Client[v1.RefreshItemRequest, v1.RefreshItemResponse]
-	searchRemote        *connect.Client[v1.SearchRemoteRequest, v1.SearchRemoteResponse]
-	identifyItem        *connect.Client[v1.IdentifyItemRequest, v1.IdentifyItemResponse]
-	listRemoteImages    *connect.Client[v1.ListRemoteImagesRequest, v1.ListRemoteImagesResponse]
-	setItemImage        *connect.Client[v1.SetItemImageRequest, v1.SetItemImageResponse]
-	deleteItemImage     *connect.Client[v1.DeleteItemImageRequest, v1.DeleteItemImageResponse]
-	searchSubtitles     *connect.Client[v1.SearchSubtitlesRequest, v1.SearchSubtitlesResponse]
-	downloadSubtitle    *connect.Client[v1.DownloadSubtitleRequest, v1.DownloadSubtitleResponse]
-	listExternalIdKinds *connect.Client[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse]
+	updateItem           *connect.Client[v1.UpdateItemRequest, v1.UpdateItemResponse]
+	refreshItem          *connect.Client[v1.RefreshItemRequest, v1.RefreshItemResponse]
+	searchRemote         *connect.Client[v1.SearchRemoteRequest, v1.SearchRemoteResponse]
+	identifyItem         *connect.Client[v1.IdentifyItemRequest, v1.IdentifyItemResponse]
+	listRemoteImages     *connect.Client[v1.ListRemoteImagesRequest, v1.ListRemoteImagesResponse]
+	setItemImage         *connect.Client[v1.SetItemImageRequest, v1.SetItemImageResponse]
+	deleteItemImage      *connect.Client[v1.DeleteItemImageRequest, v1.DeleteItemImageResponse]
+	searchRemoteLyrics   *connect.Client[v1.SearchRemoteLyricsRequest, v1.SearchRemoteLyricsResponse]
+	downloadRemoteLyrics *connect.Client[v1.DownloadRemoteLyricsRequest, v1.DownloadRemoteLyricsResponse]
+	listExternalIdKinds  *connect.Client[v1.ListExternalIdKindsRequest, v1.ListExternalIdKindsResponse]
 }
 
 // UpdateItem calls mavio.library.v1.MetadataService.UpdateItem.
@@ -252,18 +253,18 @@ func (c *metadataServiceClient) DeleteItemImage(ctx context.Context, req *v1.Del
 	return nil, err
 }
 
-// SearchSubtitles calls mavio.library.v1.MetadataService.SearchSubtitles.
-func (c *metadataServiceClient) SearchSubtitles(ctx context.Context, req *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error) {
-	response, err := c.searchSubtitles.CallUnary(ctx, connect.NewRequest(req))
+// SearchRemoteLyrics calls mavio.library.v1.MetadataService.SearchRemoteLyrics.
+func (c *metadataServiceClient) SearchRemoteLyrics(ctx context.Context, req *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error) {
+	response, err := c.searchRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
 	return nil, err
 }
 
-// DownloadSubtitle calls mavio.library.v1.MetadataService.DownloadSubtitle.
-func (c *metadataServiceClient) DownloadSubtitle(ctx context.Context, req *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error) {
-	response, err := c.downloadSubtitle.CallUnary(ctx, connect.NewRequest(req))
+// DownloadRemoteLyrics calls mavio.library.v1.MetadataService.DownloadRemoteLyrics.
+func (c *metadataServiceClient) DownloadRemoteLyrics(ctx context.Context, req *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {
+	response, err := c.downloadRemoteLyrics.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -300,12 +301,13 @@ type MetadataServiceHandler interface {
 	// DeleteItemImage removes an image of an item, and its file when it lies
 	// in the library's folders.
 	DeleteItemImage(context.Context, *v1.DeleteItemImageRequest) (*v1.DeleteItemImageResponse, error)
-	// SearchSubtitles searches the subtitle providers for subtitles of a
-	// video in one language.
-	SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error)
-	// DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
-	// video, where it becomes one of the video's subtitle streams.
-	DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error)
+	// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+	// administrators only.
+	SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error)
+	// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+	// track, as .lrc when synced and .txt otherwise, replacing its other
+	// lyric files; administrators only.
+	DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error)
 	// ListExternalIdKinds lists the kinds of external IDs items and persons
 	// carry: the built-in ones and those plugins declare.
 	ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error)
@@ -362,17 +364,17 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 		connect.WithSchema(metadataServiceMethods.ByName("DeleteItemImage")),
 		connect.WithHandlerOptions(opts...),
 	)
-	metadataServiceSearchSubtitlesHandler := connect.NewUnaryHandlerSimple(
-		MetadataServiceSearchSubtitlesProcedure,
-		svc.SearchSubtitles,
-		connect.WithSchema(metadataServiceMethods.ByName("SearchSubtitles")),
+	metadataServiceSearchRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
+		MetadataServiceSearchRemoteLyricsProcedure,
+		svc.SearchRemoteLyrics,
+		connect.WithSchema(metadataServiceMethods.ByName("SearchRemoteLyrics")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	metadataServiceDownloadSubtitleHandler := connect.NewUnaryHandlerSimple(
-		MetadataServiceDownloadSubtitleProcedure,
-		svc.DownloadSubtitle,
-		connect.WithSchema(metadataServiceMethods.ByName("DownloadSubtitle")),
+	metadataServiceDownloadRemoteLyricsHandler := connect.NewUnaryHandlerSimple(
+		MetadataServiceDownloadRemoteLyricsProcedure,
+		svc.DownloadRemoteLyrics,
+		connect.WithSchema(metadataServiceMethods.ByName("DownloadRemoteLyrics")),
 		connect.WithHandlerOptions(opts...),
 	)
 	metadataServiceListExternalIdKindsHandler := connect.NewUnaryHandlerSimple(
@@ -398,10 +400,10 @@ func NewMetadataServiceHandler(svc MetadataServiceHandler, opts ...connect.Handl
 			metadataServiceSetItemImageHandler.ServeHTTP(w, r)
 		case MetadataServiceDeleteItemImageProcedure:
 			metadataServiceDeleteItemImageHandler.ServeHTTP(w, r)
-		case MetadataServiceSearchSubtitlesProcedure:
-			metadataServiceSearchSubtitlesHandler.ServeHTTP(w, r)
-		case MetadataServiceDownloadSubtitleProcedure:
-			metadataServiceDownloadSubtitleHandler.ServeHTTP(w, r)
+		case MetadataServiceSearchRemoteLyricsProcedure:
+			metadataServiceSearchRemoteLyricsHandler.ServeHTTP(w, r)
+		case MetadataServiceDownloadRemoteLyricsProcedure:
+			metadataServiceDownloadRemoteLyricsHandler.ServeHTTP(w, r)
 		case MetadataServiceListExternalIdKindsProcedure:
 			metadataServiceListExternalIdKindsHandler.ServeHTTP(w, r)
 		default:
@@ -441,12 +443,12 @@ func (UnimplementedMetadataServiceHandler) DeleteItemImage(context.Context, *v1.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.DeleteItemImage is not implemented"))
 }
 
-func (UnimplementedMetadataServiceHandler) SearchSubtitles(context.Context, *v1.SearchSubtitlesRequest) (*v1.SearchSubtitlesResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.SearchSubtitles is not implemented"))
+func (UnimplementedMetadataServiceHandler) SearchRemoteLyrics(context.Context, *v1.SearchRemoteLyricsRequest) (*v1.SearchRemoteLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.SearchRemoteLyrics is not implemented"))
 }
 
-func (UnimplementedMetadataServiceHandler) DownloadSubtitle(context.Context, *v1.DownloadSubtitleRequest) (*v1.DownloadSubtitleResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.DownloadSubtitle is not implemented"))
+func (UnimplementedMetadataServiceHandler) DownloadRemoteLyrics(context.Context, *v1.DownloadRemoteLyricsRequest) (*v1.DownloadRemoteLyricsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.library.v1.MetadataService.DownloadRemoteLyrics is not implemented"))
 }
 
 func (UnimplementedMetadataServiceHandler) ListExternalIdKinds(context.Context, *v1.ListExternalIdKindsRequest) (*v1.ListExternalIdKindsResponse, error) {

@@ -5700,25 +5700,13 @@ impl ::buffa::HasMessageView for super::super::DeleteItemImageResponse {
     type ViewHandle = DeleteItemImageResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct SearchSubtitlesRequestView<'a> {
+pub struct SearchRemoteLyricsRequestView<'a> {
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<&'a str>,
-    /// ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-    ///
-    /// Field 2: `language`
-    pub language: ::core::option::Option<&'a str>,
-    /// The media source; unset means the item's first.
-    ///
-    /// Field 3: `media_source_id`
-    pub media_source_id: ::core::option::Option<&'a str>,
-    /// Field 4: `hearing_impaired`
-    pub hearing_impaired: ::core::option::Option<bool>,
-    /// Field 5: `forced`
-    pub forced: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesRequestView<'a> {
-    type Owned = super::super::SearchSubtitlesRequest;
+impl<'a> ::buffa::MessageView<'a> for SearchRemoteLyricsRequestView<'a> {
+    type Owned = super::super::SearchRemoteLyricsRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -5754,34 +5742,6 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesRequestView<'a> {
                 )?;
                 view.item_id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.language = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.media_source_id = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.hearing_impaired = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                view.forced = Some(::buffa::types::decode_bool(&mut cur)?);
-            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -5793,7 +5753,7 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::SearchSubtitlesRequest,
+        super::super::SearchRemoteLyricsRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -5803,24 +5763,20 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::SearchSubtitlesRequest,
+        super::super::SearchRemoteLyricsRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::SearchSubtitlesRequest {
+        ::core::result::Result::Ok(super::super::SearchRemoteLyricsRequest {
             item_id: self.item_id.map(|s| s.to_string()),
-            language: self.language.map(|s| s.to_string()),
-            media_source_id: self.media_source_id.map(|s| s.to_string()),
-            hearing_impaired: self.hearing_impaired,
-            forced: self.forced,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for SearchRemoteLyricsRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -5828,18 +5784,6 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesRequestView<'a> {
         let mut size = 0u64;
         if let Some(ref v) = self.item_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.language {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.media_source_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.hearing_impaired.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.forced.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -5855,39 +5799,27 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesRequestView<'a> {
         if let Some(ref v) = self.item_id {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
-        if let Some(ref v) = self.language {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.media_source_id {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(v) = self.hearing_impaired {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.forced {
-            ::buffa::types::put_bool_field(5u32, v, buf);
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for SearchSubtitlesRequestView<'a> {
+impl<'a> ::buffa::MessageName for SearchRemoteLyricsRequestView<'a> {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "SearchSubtitlesRequest";
-    const FULL_NAME: &'static str = "mavio.library.v1.SearchSubtitlesRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesRequest";
+    const NAME: &'static str = "SearchRemoteLyricsRequest";
+    const FULL_NAME: &'static str = "mavio.library.v1.SearchRemoteLyricsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsRequest";
 }
-::buffa::impl_default_view_instance!(SearchSubtitlesRequestView);
-::buffa::impl_view_reborrow!(SearchSubtitlesRequestView);
-/** Self-contained, `'static` owned view of a `SearchSubtitlesRequest` message.
+::buffa::impl_default_view_instance!(SearchRemoteLyricsRequestView);
+::buffa::impl_view_reborrow!(SearchRemoteLyricsRequestView);
+/** Self-contained, `'static` owned view of a `SearchRemoteLyricsRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`SearchSubtitlesRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`SearchRemoteLyricsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SearchSubtitlesRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SearchRemoteLyricsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct SearchSubtitlesRequestOwnedView(
-    ::buffa::OwnedView<SearchSubtitlesRequestView<'static>>,
+pub struct SearchRemoteLyricsRequestOwnedView(
+    ::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>>,
 );
-impl SearchSubtitlesRequestOwnedView {
+impl SearchRemoteLyricsRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -5901,7 +5833,7 @@ impl SearchSubtitlesRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            SearchRemoteLyricsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -5916,7 +5848,7 @@ impl SearchSubtitlesRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesRequestOwnedView(
+            SearchRemoteLyricsRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -5930,15 +5862,15 @@ impl SearchSubtitlesRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::SearchSubtitlesRequest,
+        msg: &super::super::SearchRemoteLyricsRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            SearchRemoteLyricsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`SearchSubtitlesRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`SearchRemoteLyricsRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &SearchSubtitlesRequestView<'_> {
+    pub fn view(&self) -> &SearchRemoteLyricsRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -5949,7 +5881,7 @@ impl SearchSubtitlesRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::SearchSubtitlesRequest {
+    pub fn to_owned_message(&self) -> super::super::SearchRemoteLyricsRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -5967,82 +5899,56 @@ impl SearchSubtitlesRequestOwnedView {
     pub fn item_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().item_id
     }
-    /// ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-    ///
-    /// Field 2: `language`
-    #[must_use]
-    pub fn language(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().language
-    }
-    /// The media source; unset means the item's first.
-    ///
-    /// Field 3: `media_source_id`
-    #[must_use]
-    pub fn media_source_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().media_source_id
-    }
-    /// Field 4: `hearing_impaired`
-    #[must_use]
-    pub fn hearing_impaired(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().hearing_impaired
-    }
-    /// Field 5: `forced`
-    #[must_use]
-    pub fn forced(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().forced
+}
+impl ::core::convert::From<::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>>>
+for SearchRemoteLyricsRequestOwnedView {
+    fn from(inner: ::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>>) -> Self {
+        SearchRemoteLyricsRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<SearchSubtitlesRequestView<'static>>>
-for SearchSubtitlesRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<SearchSubtitlesRequestView<'static>>) -> Self {
-        SearchSubtitlesRequestOwnedView(inner)
-    }
-}
-impl ::core::convert::From<SearchSubtitlesRequestOwnedView>
-for ::buffa::OwnedView<SearchSubtitlesRequestView<'static>> {
-    fn from(wrapper: SearchSubtitlesRequestOwnedView) -> Self {
+impl ::core::convert::From<SearchRemoteLyricsRequestOwnedView>
+for ::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>> {
+    fn from(wrapper: SearchRemoteLyricsRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<SearchSubtitlesRequestView<'static>>>
-for SearchSubtitlesRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<SearchSubtitlesRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>>>
+for SearchRemoteLyricsRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SearchRemoteLyricsRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::SearchSubtitlesRequest {
-    type View<'a> = SearchSubtitlesRequestView<'a>;
-    type ViewHandle = SearchSubtitlesRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::SearchRemoteLyricsRequest {
+    type View<'a> = SearchRemoteLyricsRequestView<'a>;
+    type ViewHandle = SearchRemoteLyricsRequestOwnedView;
 }
-/// RemoteSubtitle is a subtitle a provider offers.
+/// RemoteLyrics are lyrics a provider has.
 #[derive(Clone, Debug, Default)]
-pub struct RemoteSubtitleView<'a> {
+pub struct RemoteLyricsView<'a> {
+    /// The provider and its ID of the lyrics, for DownloadRemoteLyrics.
+    ///
     /// Field 1: `provider`
     pub provider: ::core::option::Option<&'a str>,
-    /// The provider's ID, passed to DownloadSubtitle.
-    ///
     /// Field 2: `id`
     pub id: ::core::option::Option<&'a str>,
     /// Field 3: `name`
     pub name: ::core::option::Option<&'a str>,
-    /// Field 4: `language`
-    pub language: ::core::option::Option<&'a str>,
-    /// Field 5: `format`
-    pub format: ::core::option::Option<&'a str>,
-    /// Field 6: `hearing_impaired`
-    pub hearing_impaired: ::core::option::Option<bool>,
-    /// Field 7: `forced`
-    pub forced: ::core::option::Option<bool>,
+    /// Field 4: `artists`
+    pub artists: ::buffa::RepeatedView<'a, &'a str>,
+    /// Field 5: `album`
+    pub album: ::core::option::Option<&'a str>,
+    /// Field 6: `duration`
+    pub duration: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
+    >,
+    /// Field 7: `synced`
+    pub synced: ::core::option::Option<bool>,
     /// Field 8: `score`
     pub score: ::core::option::Option<f64>,
-    /// Field 9: `download_count`
-    pub download_count: ::core::option::Option<i32>,
-    /// Field 10: `hash_match`
-    pub hash_match: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for RemoteSubtitleView<'a> {
-    type Owned = super::super::RemoteSubtitle;
+impl<'a> ::buffa::MessageView<'a> for RemoteLyricsView<'a> {
+    type Owned = super::super::RemoteLyrics;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -6092,33 +5998,40 @@ impl<'a> ::buffa::MessageView<'a> for RemoteSubtitleView<'a> {
                 )?;
                 view.name = Some(::buffa::types::borrow_str(&mut cur)?);
             }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.language = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
             5u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.format = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.album = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.hearing_impaired = Some(::buffa::types::decode_bool(&mut cur)?);
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.duration.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.duration = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::DurationView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
             }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                view.forced = Some(::buffa::types::decode_bool(&mut cur)?);
+                view.synced = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             8u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -6127,19 +6040,16 @@ impl<'a> ::buffa::MessageView<'a> for RemoteSubtitleView<'a> {
                 )?;
                 view.score = Some(::buffa::types::decode_double(&mut cur)?);
             }
-            9u32 => {
+            4u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.download_count = Some(::buffa::types::decode_int32(&mut cur)?);
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
                 )?;
-                view.hash_match = Some(::buffa::types::decode_bool(&mut cur)?);
+                view.artists.push(__elem);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -6151,36 +6061,42 @@ impl<'a> ::buffa::MessageView<'a> for RemoteSubtitleView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::RemoteSubtitle, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<super::super::RemoteLyrics, ::buffa::DecodeError> {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::RemoteSubtitle, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<super::super::RemoteLyrics, ::buffa::DecodeError> {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::RemoteSubtitle {
+        ::core::result::Result::Ok(super::super::RemoteLyrics {
             provider: self.provider.map(|s| s.to_string()),
             id: self.id.map(|s| s.to_string()),
             name: self.name.map(|s| s.to_string()),
-            language: self.language.map(|s| s.to_string()),
-            format: self.format.map(|s| s.to_string()),
-            hearing_impaired: self.hearing_impaired,
-            forced: self.forced,
+            artists: self.artists.iter().map(|s| s.to_string()).collect(),
+            album: self.album.map(|s| s.to_string()),
+            duration: match self.duration.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Duration,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            synced: self.synced,
             score: self.score,
-            download_count: self.download_count,
-            hash_match: self.hash_match,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for RemoteSubtitleView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for RemoteLyricsView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -6193,26 +6109,25 @@ impl<'a> ::buffa::ViewEncode<'a> for RemoteSubtitleView<'a> {
         if let Some(ref v) = self.name {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.language {
+        for v in &self.artists {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.format {
+        if let Some(ref v) = self.album {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if self.hearing_impaired.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.duration.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.duration.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.forced.is_some() {
+        if self.synced.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.score.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.download_count {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.hash_match.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
@@ -6220,7 +6135,7 @@ impl<'a> ::buffa::ViewEncode<'a> for RemoteSubtitleView<'a> {
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -6234,46 +6149,45 @@ impl<'a> ::buffa::ViewEncode<'a> for RemoteSubtitleView<'a> {
         if let Some(ref v) = self.name {
             ::buffa::types::put_string_field(3u32, v, buf);
         }
-        if let Some(ref v) = self.language {
+        for v in &self.artists {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if let Some(ref v) = self.format {
+        if let Some(ref v) = self.album {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
-        if let Some(v) = self.hearing_impaired {
-            ::buffa::types::put_bool_field(6u32, v, buf);
+        if self.duration.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                6u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.duration.write_to(__cache, buf);
         }
-        if let Some(v) = self.forced {
+        if let Some(v) = self.synced {
             ::buffa::types::put_bool_field(7u32, v, buf);
         }
         if let Some(v) = self.score {
             ::buffa::types::put_double_field(8u32, v, buf);
         }
-        if let Some(v) = self.download_count {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        if let Some(v) = self.hash_match {
-            ::buffa::types::put_bool_field(10u32, v, buf);
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for RemoteSubtitleView<'a> {
+impl<'a> ::buffa::MessageName for RemoteLyricsView<'a> {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "RemoteSubtitle";
-    const FULL_NAME: &'static str = "mavio.library.v1.RemoteSubtitle";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteSubtitle";
+    const NAME: &'static str = "RemoteLyrics";
+    const FULL_NAME: &'static str = "mavio.library.v1.RemoteLyrics";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteLyrics";
 }
-::buffa::impl_default_view_instance!(RemoteSubtitleView);
-::buffa::impl_view_reborrow!(RemoteSubtitleView);
-/** Self-contained, `'static` owned view of a `RemoteSubtitle` message.
+::buffa::impl_default_view_instance!(RemoteLyricsView);
+::buffa::impl_view_reborrow!(RemoteLyricsView);
+/** Self-contained, `'static` owned view of a `RemoteLyrics` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`RemoteSubtitleView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`RemoteLyricsView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RemoteSubtitleView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`RemoteLyricsView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct RemoteSubtitleOwnedView(::buffa::OwnedView<RemoteSubtitleView<'static>>);
-impl RemoteSubtitleOwnedView {
+pub struct RemoteLyricsOwnedView(::buffa::OwnedView<RemoteLyricsView<'static>>);
+impl RemoteLyricsOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -6287,7 +6201,7 @@ impl RemoteSubtitleOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RemoteSubtitleOwnedView(::buffa::OwnedView::decode(bytes)?),
+            RemoteLyricsOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -6302,9 +6216,7 @@ impl RemoteSubtitleOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RemoteSubtitleOwnedView(
-                ::buffa::OwnedView::decode_with_options(bytes, opts)?,
-            ),
+            RemoteLyricsOwnedView(::buffa::OwnedView::decode_with_options(bytes, opts)?),
         )
     }
     /// Build from an owned message via an encode → decode round-trip.
@@ -6316,15 +6228,15 @@ impl RemoteSubtitleOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::RemoteSubtitle,
+        msg: &super::super::RemoteLyrics,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            RemoteSubtitleOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            RemoteLyricsOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`RemoteSubtitleView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`RemoteLyricsView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &RemoteSubtitleView<'_> {
+    pub fn view(&self) -> &RemoteLyricsView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -6335,7 +6247,7 @@ impl RemoteSubtitleOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::RemoteSubtitle {
+    pub fn to_owned_message(&self) -> super::super::RemoteLyrics {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -6348,13 +6260,13 @@ impl RemoteSubtitleOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// The provider and its ID of the lyrics, for DownloadRemoteLyrics.
+    ///
     /// Field 1: `provider`
     #[must_use]
     pub fn provider(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().provider
     }
-    /// The provider's ID, passed to DownloadSubtitle.
-    ///
     /// Field 2: `id`
     #[must_use]
     pub fn id(&self) -> ::core::option::Option<&'_ str> {
@@ -6365,75 +6277,71 @@ impl RemoteSubtitleOwnedView {
     pub fn name(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().name
     }
-    /// Field 4: `language`
+    /// Field 4: `artists`
     #[must_use]
-    pub fn language(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().language
+    pub fn artists(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().artists
     }
-    /// Field 5: `format`
+    /// Field 5: `album`
     #[must_use]
-    pub fn format(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().format
+    pub fn album(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().album
     }
-    /// Field 6: `hearing_impaired`
+    /// Field 6: `duration`
     #[must_use]
-    pub fn hearing_impaired(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().hearing_impaired
+    pub fn duration(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
+    > {
+        &self.0.reborrow().duration
     }
-    /// Field 7: `forced`
+    /// Field 7: `synced`
     #[must_use]
-    pub fn forced(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().forced
+    pub fn synced(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().synced
     }
     /// Field 8: `score`
     #[must_use]
     pub fn score(&self) -> ::core::option::Option<f64> {
         self.0.reborrow().score
     }
-    /// Field 9: `download_count`
-    #[must_use]
-    pub fn download_count(&self) -> ::core::option::Option<i32> {
-        self.0.reborrow().download_count
-    }
-    /// Field 10: `hash_match`
-    #[must_use]
-    pub fn hash_match(&self) -> ::core::option::Option<bool> {
-        self.0.reborrow().hash_match
+}
+impl ::core::convert::From<::buffa::OwnedView<RemoteLyricsView<'static>>>
+for RemoteLyricsOwnedView {
+    fn from(inner: ::buffa::OwnedView<RemoteLyricsView<'static>>) -> Self {
+        RemoteLyricsOwnedView(inner)
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<RemoteSubtitleView<'static>>>
-for RemoteSubtitleOwnedView {
-    fn from(inner: ::buffa::OwnedView<RemoteSubtitleView<'static>>) -> Self {
-        RemoteSubtitleOwnedView(inner)
-    }
-}
-impl ::core::convert::From<RemoteSubtitleOwnedView>
-for ::buffa::OwnedView<RemoteSubtitleView<'static>> {
-    fn from(wrapper: RemoteSubtitleOwnedView) -> Self {
+impl ::core::convert::From<RemoteLyricsOwnedView>
+for ::buffa::OwnedView<RemoteLyricsView<'static>> {
+    fn from(wrapper: RemoteLyricsOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<RemoteSubtitleView<'static>>>
-for RemoteSubtitleOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<RemoteSubtitleView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<RemoteLyricsView<'static>>>
+for RemoteLyricsOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<RemoteLyricsView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::RemoteSubtitle {
-    type View<'a> = RemoteSubtitleView<'a>;
-    type ViewHandle = RemoteSubtitleOwnedView;
+impl ::buffa::HasMessageView for super::super::RemoteLyrics {
+    type View<'a> = RemoteLyricsView<'a>;
+    type ViewHandle = RemoteLyricsOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct SearchSubtitlesResponseView<'a> {
-    /// Field 1: `subtitles`
-    pub subtitles: ::buffa::RepeatedView<
+pub struct SearchRemoteLyricsResponseView<'a> {
+    /// Each provider's lyrics, best first, in provider order.
+    ///
+    /// Field 1: `lyrics`
+    pub lyrics: ::buffa::RepeatedView<
         'a,
-        super::super::__buffa::view::RemoteSubtitleView<'a>,
+        super::super::__buffa::view::RemoteLyricsView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesResponseView<'a> {
-    type Owned = super::super::SearchSubtitlesResponse;
+impl<'a> ::buffa::MessageView<'a> for SearchRemoteLyricsResponseView<'a> {
+    type Owned = super::super::SearchRemoteLyricsResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -6471,12 +6379,12 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesResponseView<'a> {
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
                 ctx.register_element_memory(
                     ::core::mem::size_of::<
-                        super::super::__buffa::view::RemoteSubtitleView,
+                        super::super::__buffa::view::RemoteLyricsView,
                     >(),
                 )?;
-                view.subtitles
+                view.lyrics
                     .push(
-                        <super::super::__buffa::view::RemoteSubtitleView as ::buffa::MessageView>::decode_view_ctx(
+                        <super::super::__buffa::view::RemoteLyricsView as ::buffa::MessageView>::decode_view_ctx(
                             sub,
                             __sub_ctx,
                         )?,
@@ -6493,7 +6401,7 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::SearchSubtitlesResponse,
+        super::super::SearchRemoteLyricsResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -6503,15 +6411,15 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::SearchSubtitlesResponse,
+        super::super::SearchRemoteLyricsResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::SearchSubtitlesResponse {
-            subtitles: self
-                .subtitles
+        ::core::result::Result::Ok(super::super::SearchRemoteLyricsResponse {
+            lyrics: self
+                .lyrics
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
@@ -6520,13 +6428,13 @@ impl<'a> ::buffa::MessageView<'a> for SearchSubtitlesResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for SearchRemoteLyricsResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        for v in &self.subtitles {
+        for v in &self.lyrics {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -6545,7 +6453,7 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesResponseView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        for v in &self.subtitles {
+        for v in &self.lyrics {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
@@ -6556,24 +6464,24 @@ impl<'a> ::buffa::ViewEncode<'a> for SearchSubtitlesResponseView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for SearchSubtitlesResponseView<'a> {
+impl<'a> ::buffa::MessageName for SearchRemoteLyricsResponseView<'a> {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "SearchSubtitlesResponse";
-    const FULL_NAME: &'static str = "mavio.library.v1.SearchSubtitlesResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesResponse";
+    const NAME: &'static str = "SearchRemoteLyricsResponse";
+    const FULL_NAME: &'static str = "mavio.library.v1.SearchRemoteLyricsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsResponse";
 }
-::buffa::impl_default_view_instance!(SearchSubtitlesResponseView);
-::buffa::impl_view_reborrow!(SearchSubtitlesResponseView);
-/** Self-contained, `'static` owned view of a `SearchSubtitlesResponse` message.
+::buffa::impl_default_view_instance!(SearchRemoteLyricsResponseView);
+::buffa::impl_view_reborrow!(SearchRemoteLyricsResponseView);
+/** Self-contained, `'static` owned view of a `SearchRemoteLyricsResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`SearchSubtitlesResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`SearchRemoteLyricsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SearchSubtitlesResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`SearchRemoteLyricsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct SearchSubtitlesResponseOwnedView(
-    ::buffa::OwnedView<SearchSubtitlesResponseView<'static>>,
+pub struct SearchRemoteLyricsResponseOwnedView(
+    ::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>>,
 );
-impl SearchSubtitlesResponseOwnedView {
+impl SearchRemoteLyricsResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -6587,7 +6495,7 @@ impl SearchSubtitlesResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            SearchRemoteLyricsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -6602,7 +6510,7 @@ impl SearchSubtitlesResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesResponseOwnedView(
+            SearchRemoteLyricsResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -6616,15 +6524,15 @@ impl SearchSubtitlesResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::SearchSubtitlesResponse,
+        msg: &super::super::SearchRemoteLyricsResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            SearchSubtitlesResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            SearchRemoteLyricsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`SearchSubtitlesResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`SearchRemoteLyricsResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &SearchSubtitlesResponseView<'_> {
+    pub fn view(&self) -> &SearchRemoteLyricsResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -6635,7 +6543,7 @@ impl SearchSubtitlesResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::SearchSubtitlesResponse {
+    pub fn to_owned_message(&self) -> super::super::SearchRemoteLyricsResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -6648,53 +6556,50 @@ impl SearchSubtitlesResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `subtitles`
+    /// Each provider's lyrics, best first, in provider order.
+    ///
+    /// Field 1: `lyrics`
     #[must_use]
-    pub fn subtitles(
+    pub fn lyrics(
         &self,
-    ) -> &::buffa::RepeatedView<
-        '_,
-        super::super::__buffa::view::RemoteSubtitleView<'_>,
-    > {
-        &self.0.reborrow().subtitles
+    ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::RemoteLyricsView<'_>> {
+        &self.0.reborrow().lyrics
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<SearchSubtitlesResponseView<'static>>>
-for SearchSubtitlesResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<SearchSubtitlesResponseView<'static>>) -> Self {
-        SearchSubtitlesResponseOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>>>
+for SearchRemoteLyricsResponseOwnedView {
+    fn from(inner: ::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>>) -> Self {
+        SearchRemoteLyricsResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<SearchSubtitlesResponseOwnedView>
-for ::buffa::OwnedView<SearchSubtitlesResponseView<'static>> {
-    fn from(wrapper: SearchSubtitlesResponseOwnedView) -> Self {
+impl ::core::convert::From<SearchRemoteLyricsResponseOwnedView>
+for ::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>> {
+    fn from(wrapper: SearchRemoteLyricsResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<SearchSubtitlesResponseView<'static>>>
-for SearchSubtitlesResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<SearchSubtitlesResponseView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>>>
+for SearchRemoteLyricsResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<SearchRemoteLyricsResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::SearchSubtitlesResponse {
-    type View<'a> = SearchSubtitlesResponseView<'a>;
-    type ViewHandle = SearchSubtitlesResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::SearchRemoteLyricsResponse {
+    type View<'a> = SearchRemoteLyricsResponseView<'a>;
+    type ViewHandle = SearchRemoteLyricsResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct DownloadSubtitleRequestView<'a> {
+pub struct DownloadRemoteLyricsRequestView<'a> {
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<&'a str>,
-    /// Field 2: `media_source_id`
-    pub media_source_id: ::core::option::Option<&'a str>,
-    /// Field 3: `provider`
+    /// Field 2: `provider`
     pub provider: ::core::option::Option<&'a str>,
-    /// Field 4: `subtitle_id`
-    pub subtitle_id: ::core::option::Option<&'a str>,
+    /// Field 3: `id`
+    pub id: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleRequestView<'a> {
-    type Owned = super::super::DownloadSubtitleRequest;
+impl<'a> ::buffa::MessageView<'a> for DownloadRemoteLyricsRequestView<'a> {
+    type Owned = super::super::DownloadRemoteLyricsRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -6735,21 +6640,14 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleRequestView<'a> {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.media_source_id = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.provider = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                view.provider = Some(::buffa::types::borrow_str(&mut cur)?);
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                view.subtitle_id = Some(::buffa::types::borrow_str(&mut cur)?);
+                view.id = Some(::buffa::types::borrow_str(&mut cur)?);
             }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
@@ -6762,7 +6660,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::DownloadSubtitleRequest,
+        super::super::DownloadRemoteLyricsRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -6772,23 +6670,22 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::DownloadSubtitleRequest,
+        super::super::DownloadRemoteLyricsRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::DownloadSubtitleRequest {
+        ::core::result::Result::Ok(super::super::DownloadRemoteLyricsRequest {
             item_id: self.item_id.map(|s| s.to_string()),
-            media_source_id: self.media_source_id.map(|s| s.to_string()),
             provider: self.provider.map(|s| s.to_string()),
-            subtitle_id: self.subtitle_id.map(|s| s.to_string()),
+            id: self.id.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for DownloadSubtitleRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for DownloadRemoteLyricsRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -6797,13 +6694,10 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadSubtitleRequestView<'a> {
         if let Some(ref v) = self.item_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.media_source_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         if let Some(ref v) = self.provider {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.subtitle_id {
+        if let Some(ref v) = self.id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -6820,36 +6714,33 @@ impl<'a> ::buffa::ViewEncode<'a> for DownloadSubtitleRequestView<'a> {
         if let Some(ref v) = self.item_id {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
-        if let Some(ref v) = self.media_source_id {
+        if let Some(ref v) = self.provider {
             ::buffa::types::put_string_field(2u32, v, buf);
         }
-        if let Some(ref v) = self.provider {
+        if let Some(ref v) = self.id {
             ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.subtitle_id {
-            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for DownloadSubtitleRequestView<'a> {
+impl<'a> ::buffa::MessageName for DownloadRemoteLyricsRequestView<'a> {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "DownloadSubtitleRequest";
-    const FULL_NAME: &'static str = "mavio.library.v1.DownloadSubtitleRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleRequest";
+    const NAME: &'static str = "DownloadRemoteLyricsRequest";
+    const FULL_NAME: &'static str = "mavio.library.v1.DownloadRemoteLyricsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsRequest";
 }
-::buffa::impl_default_view_instance!(DownloadSubtitleRequestView);
-::buffa::impl_view_reborrow!(DownloadSubtitleRequestView);
-/** Self-contained, `'static` owned view of a `DownloadSubtitleRequest` message.
+::buffa::impl_default_view_instance!(DownloadRemoteLyricsRequestView);
+::buffa::impl_view_reborrow!(DownloadRemoteLyricsRequestView);
+/** Self-contained, `'static` owned view of a `DownloadRemoteLyricsRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`DownloadSubtitleRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`DownloadRemoteLyricsRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`DownloadSubtitleRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`DownloadRemoteLyricsRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct DownloadSubtitleRequestOwnedView(
-    ::buffa::OwnedView<DownloadSubtitleRequestView<'static>>,
+pub struct DownloadRemoteLyricsRequestOwnedView(
+    ::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>>,
 );
-impl DownloadSubtitleRequestOwnedView {
+impl DownloadRemoteLyricsRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -6863,7 +6754,7 @@ impl DownloadSubtitleRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            DownloadRemoteLyricsRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -6878,7 +6769,7 @@ impl DownloadSubtitleRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleRequestOwnedView(
+            DownloadRemoteLyricsRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -6892,15 +6783,15 @@ impl DownloadSubtitleRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::DownloadSubtitleRequest,
+        msg: &super::super::DownloadRemoteLyricsRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            DownloadRemoteLyricsRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`DownloadSubtitleRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`DownloadRemoteLyricsRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &DownloadSubtitleRequestView<'_> {
+    pub fn view(&self) -> &DownloadRemoteLyricsRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -6911,7 +6802,7 @@ impl DownloadSubtitleRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::DownloadSubtitleRequest {
+    pub fn to_owned_message(&self) -> super::super::DownloadRemoteLyricsRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -6929,56 +6820,47 @@ impl DownloadSubtitleRequestOwnedView {
     pub fn item_id(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().item_id
     }
-    /// Field 2: `media_source_id`
-    #[must_use]
-    pub fn media_source_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().media_source_id
-    }
-    /// Field 3: `provider`
+    /// Field 2: `provider`
     #[must_use]
     pub fn provider(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().provider
     }
-    /// Field 4: `subtitle_id`
+    /// Field 3: `id`
     #[must_use]
-    pub fn subtitle_id(&self) -> ::core::option::Option<&'_ str> {
-        self.0.reborrow().subtitle_id
+    pub fn id(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().id
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<DownloadSubtitleRequestView<'static>>>
-for DownloadSubtitleRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<DownloadSubtitleRequestView<'static>>) -> Self {
-        DownloadSubtitleRequestOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>>>
+for DownloadRemoteLyricsRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>>,
+    ) -> Self {
+        DownloadRemoteLyricsRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<DownloadSubtitleRequestOwnedView>
-for ::buffa::OwnedView<DownloadSubtitleRequestView<'static>> {
-    fn from(wrapper: DownloadSubtitleRequestOwnedView) -> Self {
+impl ::core::convert::From<DownloadRemoteLyricsRequestOwnedView>
+for ::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>> {
+    fn from(wrapper: DownloadRemoteLyricsRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<DownloadSubtitleRequestView<'static>>>
-for DownloadSubtitleRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<DownloadSubtitleRequestView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>>>
+for DownloadRemoteLyricsRequestOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<DownloadRemoteLyricsRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::DownloadSubtitleRequest {
-    type View<'a> = DownloadSubtitleRequestView<'a>;
-    type ViewHandle = DownloadSubtitleRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::DownloadRemoteLyricsRequest {
+    type View<'a> = DownloadRemoteLyricsRequestView<'a>;
+    type ViewHandle = DownloadRemoteLyricsRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct DownloadSubtitleResponseView<'a> {
-    /// The subtitle as a stream of the media source.
-    ///
-    /// Field 1: `stream`
-    pub stream: ::buffa::MessageFieldView<
-        super::super::__buffa::view::MediaStreamView<'a>,
-    >,
+pub struct DownloadRemoteLyricsResponseView<'a> {
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleResponseView<'a> {
-    type Owned = super::super::DownloadSubtitleResponse;
+impl<'a> ::buffa::MessageView<'a> for DownloadRemoteLyricsResponseView<'a> {
+    type Owned = super::super::DownloadRemoteLyricsResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -7007,27 +6889,6 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleResponseView<'a> {
         let view = self;
         let mut cur = cur;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                let __sub_ctx = ctx.descend()?;
-                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.stream.as_mut() {
-                    Some(existing) => {
-                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
-                    }
-                    None => {
-                        view.stream = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::MediaStreamView as ::buffa::MessageView>::decode_view_ctx(
-                                sub,
-                                __sub_ctx,
-                            )?,
-                        );
-                    }
-                }
-            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -7039,7 +6900,7 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::DownloadSubtitleResponse,
+        super::super::DownloadRemoteLyricsResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -7049,81 +6910,56 @@ impl<'a> ::buffa::MessageView<'a> for DownloadSubtitleResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::DownloadSubtitleResponse,
+        super::super::DownloadRemoteLyricsResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::DownloadSubtitleResponse {
-            stream: match self.stream.as_option() {
-                Some(v) => {
-                    ::buffa::MessageField::<
-                        super::super::MediaStream,
-                        ::buffa::Inline<super::super::MediaStream>,
-                    >::some(v.to_owned_from_source(__buffa_src)?)
-                }
-                None => ::buffa::MessageField::none(),
-            },
+        ::core::result::Result::Ok(super::super::DownloadRemoteLyricsResponse {
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for DownloadSubtitleResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for DownloadRemoteLyricsResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.stream.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.stream.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     #[allow(clippy::needless_borrow)]
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.stream.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.stream.write_to(__cache, buf);
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for DownloadSubtitleResponseView<'a> {
+impl<'a> ::buffa::MessageName for DownloadRemoteLyricsResponseView<'a> {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "DownloadSubtitleResponse";
-    const FULL_NAME: &'static str = "mavio.library.v1.DownloadSubtitleResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleResponse";
+    const NAME: &'static str = "DownloadRemoteLyricsResponse";
+    const FULL_NAME: &'static str = "mavio.library.v1.DownloadRemoteLyricsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsResponse";
 }
-::buffa::impl_default_view_instance!(DownloadSubtitleResponseView);
-::buffa::impl_view_reborrow!(DownloadSubtitleResponseView);
-/** Self-contained, `'static` owned view of a `DownloadSubtitleResponse` message.
+::buffa::impl_default_view_instance!(DownloadRemoteLyricsResponseView);
+::buffa::impl_view_reborrow!(DownloadRemoteLyricsResponseView);
+/** Self-contained, `'static` owned view of a `DownloadRemoteLyricsResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`DownloadSubtitleResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`DownloadRemoteLyricsResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`DownloadSubtitleResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`DownloadRemoteLyricsResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct DownloadSubtitleResponseOwnedView(
-    ::buffa::OwnedView<DownloadSubtitleResponseView<'static>>,
+pub struct DownloadRemoteLyricsResponseOwnedView(
+    ::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>>,
 );
-impl DownloadSubtitleResponseOwnedView {
+impl DownloadRemoteLyricsResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -7137,7 +6973,7 @@ impl DownloadSubtitleResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            DownloadRemoteLyricsResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -7152,7 +6988,7 @@ impl DownloadSubtitleResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleResponseOwnedView(
+            DownloadRemoteLyricsResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -7166,15 +7002,15 @@ impl DownloadSubtitleResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::DownloadSubtitleResponse,
+        msg: &super::super::DownloadRemoteLyricsResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            DownloadSubtitleResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            DownloadRemoteLyricsResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`DownloadSubtitleResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`DownloadRemoteLyricsResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &DownloadSubtitleResponseView<'_> {
+    pub fn view(&self) -> &DownloadRemoteLyricsResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -7185,7 +7021,7 @@ impl DownloadSubtitleResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::DownloadSubtitleResponse {
+    pub fn to_owned_message(&self) -> super::super::DownloadRemoteLyricsResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -7198,37 +7034,31 @@ impl DownloadSubtitleResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The subtitle as a stream of the media source.
-    ///
-    /// Field 1: `stream`
-    #[must_use]
-    pub fn stream(
-        &self,
-    ) -> &::buffa::MessageFieldView<super::super::__buffa::view::MediaStreamView<'_>> {
-        &self.0.reborrow().stream
+}
+impl ::core::convert::From<::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>>>
+for DownloadRemoteLyricsResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>>,
+    ) -> Self {
+        DownloadRemoteLyricsResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<DownloadSubtitleResponseView<'static>>>
-for DownloadSubtitleResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<DownloadSubtitleResponseView<'static>>) -> Self {
-        DownloadSubtitleResponseOwnedView(inner)
-    }
-}
-impl ::core::convert::From<DownloadSubtitleResponseOwnedView>
-for ::buffa::OwnedView<DownloadSubtitleResponseView<'static>> {
-    fn from(wrapper: DownloadSubtitleResponseOwnedView) -> Self {
+impl ::core::convert::From<DownloadRemoteLyricsResponseOwnedView>
+for ::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>> {
+    fn from(wrapper: DownloadRemoteLyricsResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<DownloadSubtitleResponseView<'static>>>
-for DownloadSubtitleResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<DownloadSubtitleResponseView<'static>> {
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>>,
+> for DownloadRemoteLyricsResponseOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<DownloadRemoteLyricsResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::DownloadSubtitleResponse {
-    type View<'a> = DownloadSubtitleResponseView<'a>;
-    type ViewHandle = DownloadSubtitleResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::DownloadRemoteLyricsResponse {
+    type View<'a> = DownloadRemoteLyricsResponseView<'a>;
+    type ViewHandle = DownloadRemoteLyricsResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListExternalIdKindsRequestView<'a> {

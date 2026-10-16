@@ -94,7 +94,7 @@ func TestSubtitles(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	tasks := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token)
 	items := libraryv1connect.NewItemServiceClient(http.DefaultClient, srv.url, token)
 	subs := acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token)
@@ -166,7 +166,7 @@ func TestSubtitles(t *testing.T) {
 		}.Build())
 		return err == nil && len(jobs.GetJobs()) == 0
 	})
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId:   new("dev.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}}]}`),
 	}.Build()); err != nil {

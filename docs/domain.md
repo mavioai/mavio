@@ -34,7 +34,7 @@ erDiagram
 | `MediaStream` | One elementary stream (video, audio, subtitle, …) or a sidecar subtitle file |
 | `Image` | An artwork file of an item or person |
 | `Person` / `Credit` | Someone credited on items, and the link with role and billing order |
-| `User` / `LibraryAccess` / `UserPolicy` / `UserPreferences` | An account, its library access record, what else it may do, and its playback defaults |
+| `User` / `LibraryAccess` / `UserPolicy` / `PlaybackPreferences` / `HomeLayout` | An account, its library access record, what else it may do, its playback defaults and its Home layout |
 | `UserData` | One user's state for one item: played, resume position, favorite, … |
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
@@ -215,7 +215,8 @@ A virtual item is a movie, series, season or episode known from metadata whose f
 * `UserPolicy` is what else the user may do: `AllowTranscoding`, `MaxStreamingBitrate` (bits per second, zero means unlimited) and `MaxSessions` (zero means unlimited).
   * `Requests` (`RequestPermissions`): whether the user may request movies and series, whether their requests of each are approved automatically, and whether they may report issues; `MovieQuota` and `SeriesQuota` are their own quotas (§13.6), nil for the server's. Administrators may do all of it, without quotas.
 * `LibraryAccess.CanAccess` allows an item when its library is allowed and its `ContentLimits` allow it (`Allows`): under a maximum rating, its rating score (`ParentalRating`, else `InheritedRating`) is within it, unrated items passing unless `BlockUnrated` is set; and its labels pass, as the limits on item queries do. `User.CanAccess` allows a user their own playlists and nobody else's, whatever the library access, and applies `User.EffectiveAccess` to other items.
-* `UserPreferences`: preferred audio and subtitle languages (ISO 639-2/B, in order), `SubtitleMode`, and whether to prefer the default audio track over the preferred language.
+* `PlaybackPreferences`: preferred audio and subtitle languages (ISO 639-2/B, in order), `SubtitleMode`, and whether to prefer the default audio track over the preferred language.
+* `HomeLayout` (`User.Home`) is how the user's Home shows on every client: with `Pinned`, only the `Libraries` listed, in their order, otherwise every library the user may access; and the hubs whose IDs are in `HiddenHubs` left out.
 * `UserData` is one user's state for one item: `Played`, `PlayCount`, resume `Position`, the last selected audio/subtitle streams (subtitle `-1` means off), `Favorite`, an optional 0–10 `Rating`, and timestamps. Missing state means "never interacted".
 * Playing an item updates its `UserData` (`RecordPosition`) as Jellyfin does. A position in the first 5% of the runtime is not kept; past 90% or within a second of the end the item is played and its position cleared; items shorter than five minutes are played once past the first 5%. Audiobooks use five minutes from the start and from the end instead. Items without a runtime are played by any playback. Only videos, audiobooks and books keep a resume position; tracks are only marked played; other kinds neither. `PlayCount` grows once per playback played to completion.
 * **Next up** (`NextEpisode`), as in Jellyfin: the next episode of a series is its first unplayed regular episode after the last played one by season and episode number (an episode follows it when it is in a later season, or later in the same season), or the first of all when none was played. Specials (season 0) are left out unless placed with `AirsBeforeSeasonNumber` or `AirsAfterSeasonNumber`; those come in between in aired order and are skipped once played. An episode with a resume position is not offered unless asked: it belongs to continue watching.
@@ -327,7 +328,7 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 
 ## 11. Display Preferences
 
-`DisplayPreferences` are a user's settings for how one client application (`Client`, e.g. "mavio-web") shows one view (`View`, e.g. "home" or a library ID): a map of `Values` whose names and contents the client chooses, such as a sort order or the sections of the home screen, with `UpdatedAt`. The server keeps them, so they follow the user across devices.
+`DisplayPreferences` are a user's settings for how one client application (`Client`, e.g. "mavio-web") shows one view (`View`, e.g. a library ID): a map of `Values` whose names and contents the client chooses, such as a sort order or the sections of the home screen, with `UpdatedAt`. The server keeps them, so they follow the user across devices.
 
 * They are kept per user, client and view; putting them again replaces all values. Deleting the user deletes them.
 * `Validate` requires the user, a client and a view name of up to 200 bytes, at most 200 values with non-empty names of up to 200 bytes, and values of up to 8 KiB.

@@ -132,25 +132,25 @@ func (x RestrictionProfile) Number() protoreflect.EnumNumber {
 
 // User is an account. Credentials are never returned.
 type User struct {
-	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id            *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Name          *string                `protobuf:"bytes,2,opt,name=name"`
-	xxx_hidden_AuthProvider  *string                `protobuf:"bytes,3,opt,name=auth_provider,json=authProvider"`
-	xxx_hidden_Admin         bool                   `protobuf:"varint,4,opt,name=admin"`
-	xxx_hidden_Disabled      bool                   `protobuf:"varint,5,opt,name=disabled"`
-	xxx_hidden_Policy        *UserPolicy            `protobuf:"bytes,6,opt,name=policy"`
-	xxx_hidden_Preferences   *UserPreferences       `protobuf:"bytes,7,opt,name=preferences"`
-	xxx_hidden_CreateTime    *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
-	xxx_hidden_LastLoginTime *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=last_login_time,json=lastLoginTime"`
-	xxx_hidden_Managed       bool                   `protobuf:"varint,10,opt,name=managed"`
-	xxx_hidden_HasPin        bool                   `protobuf:"varint,11,opt,name=has_pin,json=hasPin"`
-	xxx_hidden_Restriction   RestrictionProfile     `protobuf:"varint,12,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
-	xxx_hidden_HasTotp       bool                   `protobuf:"varint,13,opt,name=has_totp,json=hasTotp"`
-	xxx_hidden_Passkeys      *[]*Passkey            `protobuf:"bytes,14,rep,name=passkeys"`
-	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
-	XXX_presence             [1]uint32
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id                  *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name                *string                `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_AuthProvider        *string                `protobuf:"bytes,3,opt,name=auth_provider,json=authProvider"`
+	xxx_hidden_Admin               bool                   `protobuf:"varint,4,opt,name=admin"`
+	xxx_hidden_Disabled            bool                   `protobuf:"varint,5,opt,name=disabled"`
+	xxx_hidden_Policy              *UserPolicy            `protobuf:"bytes,6,opt,name=policy"`
+	xxx_hidden_PlaybackPreferences *PlaybackPreferences   `protobuf:"bytes,7,opt,name=playback_preferences,json=playbackPreferences"`
+	xxx_hidden_CreateTime          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime"`
+	xxx_hidden_LastLoginTime       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=last_login_time,json=lastLoginTime"`
+	xxx_hidden_Managed             bool                   `protobuf:"varint,10,opt,name=managed"`
+	xxx_hidden_HasPin              bool                   `protobuf:"varint,11,opt,name=has_pin,json=hasPin"`
+	xxx_hidden_Restriction         RestrictionProfile     `protobuf:"varint,12,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
+	xxx_hidden_HasTotp             bool                   `protobuf:"varint,13,opt,name=has_totp,json=hasTotp"`
+	xxx_hidden_Passkeys            *[]*Passkey            `protobuf:"bytes,14,rep,name=passkeys"`
+	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
+	XXX_presence                   [1]uint32
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -229,9 +229,9 @@ func (x *User) GetPolicy() *UserPolicy {
 	return nil
 }
 
-func (x *User) GetPreferences() *UserPreferences {
+func (x *User) GetPlaybackPreferences() *PlaybackPreferences {
 	if x != nil {
-		return x.xxx_hidden_Preferences
+		return x.xxx_hidden_PlaybackPreferences
 	}
 	return nil
 }
@@ -318,8 +318,8 @@ func (x *User) SetPolicy(v *UserPolicy) {
 	x.xxx_hidden_Policy = v
 }
 
-func (x *User) SetPreferences(v *UserPreferences) {
-	x.xxx_hidden_Preferences = v
+func (x *User) SetPlaybackPreferences(v *PlaybackPreferences) {
+	x.xxx_hidden_PlaybackPreferences = v
 }
 
 func (x *User) SetCreateTime(v *timestamppb.Timestamp) {
@@ -396,11 +396,11 @@ func (x *User) HasPolicy() bool {
 	return x.xxx_hidden_Policy != nil
 }
 
-func (x *User) HasPreferences() bool {
+func (x *User) HasPlaybackPreferences() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_Preferences != nil
+	return x.xxx_hidden_PlaybackPreferences != nil
 }
 
 func (x *User) HasCreateTime() bool {
@@ -474,8 +474,8 @@ func (x *User) ClearPolicy() {
 	x.xxx_hidden_Policy = nil
 }
 
-func (x *User) ClearPreferences() {
-	x.xxx_hidden_Preferences = nil
+func (x *User) ClearPlaybackPreferences() {
+	x.xxx_hidden_PlaybackPreferences = nil
 }
 
 func (x *User) ClearCreateTime() {
@@ -515,12 +515,12 @@ type User_builder struct {
 	// plugin.
 	AuthProvider *string
 	// Whether the user is the server's administrator; exactly one user is.
-	Admin         *bool
-	Disabled      *bool
-	Policy        *UserPolicy
-	Preferences   *UserPreferences
-	CreateTime    *timestamppb.Timestamp
-	LastLoginTime *timestamppb.Timestamp
+	Admin               *bool
+	Disabled            *bool
+	Policy              *UserPolicy
+	PlaybackPreferences *PlaybackPreferences
+	CreateTime          *timestamppb.Timestamp
+	LastLoginTime       *timestamppb.Timestamp
 	// A managed user has no credentials and is reached only by switching to
 	// it.
 	Managed *bool
@@ -558,7 +558,7 @@ func (b0 User_builder) Build() *User {
 		x.xxx_hidden_Disabled = *b.Disabled
 	}
 	x.xxx_hidden_Policy = b.Policy
-	x.xxx_hidden_Preferences = b.Preferences
+	x.xxx_hidden_PlaybackPreferences = b.PlaybackPreferences
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_LastLoginTime = b.LastLoginTime
 	if b.Managed != nil {
@@ -1402,7 +1402,9 @@ func (b0 RequestQuota_builder) Build() *RequestQuota {
 	return m0
 }
 
-type UserPreferences struct {
+// PlaybackPreferences are the user's defaults for choosing the audio and
+// subtitle streams of what they play; the server applies them.
+type PlaybackPreferences struct {
 	state                            protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_AudioLanguages        []string               `protobuf:"bytes,1,rep,name=audio_languages,json=audioLanguages"`
 	xxx_hidden_SubtitleLanguages     []string               `protobuf:"bytes,2,rep,name=subtitle_languages,json=subtitleLanguages"`
@@ -1414,20 +1416,20 @@ type UserPreferences struct {
 	sizeCache                        protoimpl.SizeCache
 }
 
-func (x *UserPreferences) Reset() {
-	*x = UserPreferences{}
+func (x *PlaybackPreferences) Reset() {
+	*x = PlaybackPreferences{}
 	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserPreferences) String() string {
+func (x *PlaybackPreferences) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserPreferences) ProtoMessage() {}
+func (*PlaybackPreferences) ProtoMessage() {}
 
-func (x *UserPreferences) ProtoReflect() protoreflect.Message {
+func (x *PlaybackPreferences) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_user_v1_user_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1439,21 +1441,21 @@ func (x *UserPreferences) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UserPreferences) GetAudioLanguages() []string {
+func (x *PlaybackPreferences) GetAudioLanguages() []string {
 	if x != nil {
 		return x.xxx_hidden_AudioLanguages
 	}
 	return nil
 }
 
-func (x *UserPreferences) GetSubtitleLanguages() []string {
+func (x *PlaybackPreferences) GetSubtitleLanguages() []string {
 	if x != nil {
 		return x.xxx_hidden_SubtitleLanguages
 	}
 	return nil
 }
 
-func (x *UserPreferences) GetSubtitleMode() SubtitleMode {
+func (x *PlaybackPreferences) GetSubtitleMode() SubtitleMode {
 	if x != nil {
 		if protoimpl.X.Present(&(x.XXX_presence[0]), 2) {
 			return x.xxx_hidden_SubtitleMode
@@ -1462,56 +1464,56 @@ func (x *UserPreferences) GetSubtitleMode() SubtitleMode {
 	return SubtitleMode_SUBTITLE_MODE_UNSPECIFIED
 }
 
-func (x *UserPreferences) GetPlayDefaultAudioTrack() bool {
+func (x *PlaybackPreferences) GetPlayDefaultAudioTrack() bool {
 	if x != nil {
 		return x.xxx_hidden_PlayDefaultAudioTrack
 	}
 	return false
 }
 
-func (x *UserPreferences) SetAudioLanguages(v []string) {
+func (x *PlaybackPreferences) SetAudioLanguages(v []string) {
 	x.xxx_hidden_AudioLanguages = v
 }
 
-func (x *UserPreferences) SetSubtitleLanguages(v []string) {
+func (x *PlaybackPreferences) SetSubtitleLanguages(v []string) {
 	x.xxx_hidden_SubtitleLanguages = v
 }
 
-func (x *UserPreferences) SetSubtitleMode(v SubtitleMode) {
+func (x *PlaybackPreferences) SetSubtitleMode(v SubtitleMode) {
 	x.xxx_hidden_SubtitleMode = v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
 }
 
-func (x *UserPreferences) SetPlayDefaultAudioTrack(v bool) {
+func (x *PlaybackPreferences) SetPlayDefaultAudioTrack(v bool) {
 	x.xxx_hidden_PlayDefaultAudioTrack = v
 	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
-func (x *UserPreferences) HasSubtitleMode() bool {
+func (x *PlaybackPreferences) HasSubtitleMode() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *UserPreferences) HasPlayDefaultAudioTrack() bool {
+func (x *PlaybackPreferences) HasPlayDefaultAudioTrack() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
-func (x *UserPreferences) ClearSubtitleMode() {
+func (x *PlaybackPreferences) ClearSubtitleMode() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_SubtitleMode = SubtitleMode_SUBTITLE_MODE_UNSPECIFIED
 }
 
-func (x *UserPreferences) ClearPlayDefaultAudioTrack() {
+func (x *PlaybackPreferences) ClearPlayDefaultAudioTrack() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
 	x.xxx_hidden_PlayDefaultAudioTrack = false
 }
 
-type UserPreferences_builder struct {
+type PlaybackPreferences_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// ISO 639-2/B codes in order of preference.
@@ -1521,8 +1523,8 @@ type UserPreferences_builder struct {
 	PlayDefaultAudioTrack *bool
 }
 
-func (b0 UserPreferences_builder) Build() *UserPreferences {
-	m0 := &UserPreferences{}
+func (b0 PlaybackPreferences_builder) Build() *PlaybackPreferences {
+	m0 := &PlaybackPreferences{}
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_AudioLanguages = b.AudioLanguages
@@ -2210,20 +2212,20 @@ func (b0 GetCurrentUserResponse_builder) Build() *GetCurrentUserResponse {
 }
 
 type CreateUserRequest struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Name         *string                `protobuf:"bytes,1,opt,name=name"`
-	xxx_hidden_Password     *string                `protobuf:"bytes,2,opt,name=password"`
-	xxx_hidden_AuthProvider *string                `protobuf:"bytes,3,opt,name=auth_provider,json=authProvider"`
-	xxx_hidden_Admin        bool                   `protobuf:"varint,4,opt,name=admin"`
-	xxx_hidden_Policy       *UserPolicy            `protobuf:"bytes,5,opt,name=policy"`
-	xxx_hidden_Preferences  *UserPreferences       `protobuf:"bytes,6,opt,name=preferences"`
-	xxx_hidden_Managed      bool                   `protobuf:"varint,7,opt,name=managed"`
-	xxx_hidden_Restriction  RestrictionProfile     `protobuf:"varint,8,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
-	xxx_hidden_Pin          *string                `protobuf:"bytes,9,opt,name=pin"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name                *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Password            *string                `protobuf:"bytes,2,opt,name=password"`
+	xxx_hidden_AuthProvider        *string                `protobuf:"bytes,3,opt,name=auth_provider,json=authProvider"`
+	xxx_hidden_Admin               bool                   `protobuf:"varint,4,opt,name=admin"`
+	xxx_hidden_Policy              *UserPolicy            `protobuf:"bytes,5,opt,name=policy"`
+	xxx_hidden_PlaybackPreferences *PlaybackPreferences   `protobuf:"bytes,6,opt,name=playback_preferences,json=playbackPreferences"`
+	xxx_hidden_Managed             bool                   `protobuf:"varint,7,opt,name=managed"`
+	xxx_hidden_Restriction         RestrictionProfile     `protobuf:"varint,8,opt,name=restriction,enum=mavio.user.v1.RestrictionProfile"`
+	xxx_hidden_Pin                 *string                `protobuf:"bytes,9,opt,name=pin"`
+	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
+	XXX_presence                   [1]uint32
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *CreateUserRequest) Reset() {
@@ -2295,9 +2297,9 @@ func (x *CreateUserRequest) GetPolicy() *UserPolicy {
 	return nil
 }
 
-func (x *CreateUserRequest) GetPreferences() *UserPreferences {
+func (x *CreateUserRequest) GetPlaybackPreferences() *PlaybackPreferences {
 	if x != nil {
-		return x.xxx_hidden_Preferences
+		return x.xxx_hidden_PlaybackPreferences
 	}
 	return nil
 }
@@ -2352,8 +2354,8 @@ func (x *CreateUserRequest) SetPolicy(v *UserPolicy) {
 	x.xxx_hidden_Policy = v
 }
 
-func (x *CreateUserRequest) SetPreferences(v *UserPreferences) {
-	x.xxx_hidden_Preferences = v
+func (x *CreateUserRequest) SetPlaybackPreferences(v *PlaybackPreferences) {
+	x.xxx_hidden_PlaybackPreferences = v
 }
 
 func (x *CreateUserRequest) SetManaged(v bool) {
@@ -2406,11 +2408,11 @@ func (x *CreateUserRequest) HasPolicy() bool {
 	return x.xxx_hidden_Policy != nil
 }
 
-func (x *CreateUserRequest) HasPreferences() bool {
+func (x *CreateUserRequest) HasPlaybackPreferences() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_Preferences != nil
+	return x.xxx_hidden_PlaybackPreferences != nil
 }
 
 func (x *CreateUserRequest) HasManaged() bool {
@@ -2458,8 +2460,8 @@ func (x *CreateUserRequest) ClearPolicy() {
 	x.xxx_hidden_Policy = nil
 }
 
-func (x *CreateUserRequest) ClearPreferences() {
-	x.xxx_hidden_Preferences = nil
+func (x *CreateUserRequest) ClearPlaybackPreferences() {
+	x.xxx_hidden_PlaybackPreferences = nil
 }
 
 func (x *CreateUserRequest) ClearManaged() {
@@ -2485,9 +2487,9 @@ type CreateUserRequest_builder struct {
 	Password     *string
 	AuthProvider *string
 	// Must be false: the server's one administrator is created at setup.
-	Admin       *bool
-	Policy      *UserPolicy
-	Preferences *UserPreferences
+	Admin               *bool
+	Policy              *UserPolicy
+	PlaybackPreferences *PlaybackPreferences
 	// Creates a managed user, without password or auth_provider.
 	Managed *bool
 	// The managed user's restriction profile.
@@ -2517,7 +2519,7 @@ func (b0 CreateUserRequest_builder) Build() *CreateUserRequest {
 		x.xxx_hidden_Admin = *b.Admin
 	}
 	x.xxx_hidden_Policy = b.Policy
-	x.xxx_hidden_Preferences = b.Preferences
+	x.xxx_hidden_PlaybackPreferences = b.PlaybackPreferences
 	if b.Managed != nil {
 		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 9)
 		x.xxx_hidden_Managed = *b.Managed
@@ -4288,27 +4290,27 @@ func (b0 DeleteTotpResponse_builder) Build() *DeleteTotpResponse {
 	return m0
 }
 
-type UpdatePreferencesRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Preferences *UserPreferences       `protobuf:"bytes,1,opt,name=preferences"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+type UpdatePlaybackPreferencesRequest struct {
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PlaybackPreferences *PlaybackPreferences   `protobuf:"bytes,1,opt,name=playback_preferences,json=playbackPreferences"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
-func (x *UpdatePreferencesRequest) Reset() {
-	*x = UpdatePreferencesRequest{}
+func (x *UpdatePlaybackPreferencesRequest) Reset() {
+	*x = UpdatePlaybackPreferencesRequest{}
 	mi := &file_mavio_user_v1_user_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdatePreferencesRequest) String() string {
+func (x *UpdatePlaybackPreferencesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdatePreferencesRequest) ProtoMessage() {}
+func (*UpdatePlaybackPreferencesRequest) ProtoMessage() {}
 
-func (x *UpdatePreferencesRequest) ProtoReflect() protoreflect.Message {
+func (x *UpdatePlaybackPreferencesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_user_v1_user_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4320,63 +4322,63 @@ func (x *UpdatePreferencesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UpdatePreferencesRequest) GetPreferences() *UserPreferences {
+func (x *UpdatePlaybackPreferencesRequest) GetPlaybackPreferences() *PlaybackPreferences {
 	if x != nil {
-		return x.xxx_hidden_Preferences
+		return x.xxx_hidden_PlaybackPreferences
 	}
 	return nil
 }
 
-func (x *UpdatePreferencesRequest) SetPreferences(v *UserPreferences) {
-	x.xxx_hidden_Preferences = v
+func (x *UpdatePlaybackPreferencesRequest) SetPlaybackPreferences(v *PlaybackPreferences) {
+	x.xxx_hidden_PlaybackPreferences = v
 }
 
-func (x *UpdatePreferencesRequest) HasPreferences() bool {
+func (x *UpdatePlaybackPreferencesRequest) HasPlaybackPreferences() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_Preferences != nil
+	return x.xxx_hidden_PlaybackPreferences != nil
 }
 
-func (x *UpdatePreferencesRequest) ClearPreferences() {
-	x.xxx_hidden_Preferences = nil
+func (x *UpdatePlaybackPreferencesRequest) ClearPlaybackPreferences() {
+	x.xxx_hidden_PlaybackPreferences = nil
 }
 
-type UpdatePreferencesRequest_builder struct {
+type UpdatePlaybackPreferencesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Preferences *UserPreferences
+	PlaybackPreferences *PlaybackPreferences
 }
 
-func (b0 UpdatePreferencesRequest_builder) Build() *UpdatePreferencesRequest {
-	m0 := &UpdatePreferencesRequest{}
+func (b0 UpdatePlaybackPreferencesRequest_builder) Build() *UpdatePlaybackPreferencesRequest {
+	m0 := &UpdatePlaybackPreferencesRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Preferences = b.Preferences
+	x.xxx_hidden_PlaybackPreferences = b.PlaybackPreferences
 	return m0
 }
 
-type UpdatePreferencesResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Preferences *UserPreferences       `protobuf:"bytes,1,opt,name=preferences"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+type UpdatePlaybackPreferencesResponse struct {
+	state                          protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_PlaybackPreferences *PlaybackPreferences   `protobuf:"bytes,1,opt,name=playback_preferences,json=playbackPreferences"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
-func (x *UpdatePreferencesResponse) Reset() {
-	*x = UpdatePreferencesResponse{}
+func (x *UpdatePlaybackPreferencesResponse) Reset() {
+	*x = UpdatePlaybackPreferencesResponse{}
 	mi := &file_mavio_user_v1_user_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UpdatePreferencesResponse) String() string {
+func (x *UpdatePlaybackPreferencesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UpdatePreferencesResponse) ProtoMessage() {}
+func (*UpdatePlaybackPreferencesResponse) ProtoMessage() {}
 
-func (x *UpdatePreferencesResponse) ProtoReflect() protoreflect.Message {
+func (x *UpdatePlaybackPreferencesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_user_v1_user_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4388,39 +4390,39 @@ func (x *UpdatePreferencesResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UpdatePreferencesResponse) GetPreferences() *UserPreferences {
+func (x *UpdatePlaybackPreferencesResponse) GetPlaybackPreferences() *PlaybackPreferences {
 	if x != nil {
-		return x.xxx_hidden_Preferences
+		return x.xxx_hidden_PlaybackPreferences
 	}
 	return nil
 }
 
-func (x *UpdatePreferencesResponse) SetPreferences(v *UserPreferences) {
-	x.xxx_hidden_Preferences = v
+func (x *UpdatePlaybackPreferencesResponse) SetPlaybackPreferences(v *PlaybackPreferences) {
+	x.xxx_hidden_PlaybackPreferences = v
 }
 
-func (x *UpdatePreferencesResponse) HasPreferences() bool {
+func (x *UpdatePlaybackPreferencesResponse) HasPlaybackPreferences() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_Preferences != nil
+	return x.xxx_hidden_PlaybackPreferences != nil
 }
 
-func (x *UpdatePreferencesResponse) ClearPreferences() {
-	x.xxx_hidden_Preferences = nil
+func (x *UpdatePlaybackPreferencesResponse) ClearPlaybackPreferences() {
+	x.xxx_hidden_PlaybackPreferences = nil
 }
 
-type UpdatePreferencesResponse_builder struct {
+type UpdatePlaybackPreferencesResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Preferences *UserPreferences
+	PlaybackPreferences *PlaybackPreferences
 }
 
-func (b0 UpdatePreferencesResponse_builder) Build() *UpdatePreferencesResponse {
-	m0 := &UpdatePreferencesResponse{}
+func (b0 UpdatePlaybackPreferencesResponse_builder) Build() *UpdatePlaybackPreferencesResponse {
+	m0 := &UpdatePlaybackPreferencesResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Preferences = b.Preferences
+	x.xxx_hidden_PlaybackPreferences = b.PlaybackPreferences
 	return m0
 }
 
@@ -5550,15 +5552,15 @@ var File_mavio_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xbe\x04\n" +
+	"\x18mavio/user/v1/user.proto\x12\rmavio.user.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd3\x04\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
 	"\rauth_provider\x18\x03 \x01(\tR\fauthProvider\x12\x14\n" +
 	"\x05admin\x18\x04 \x01(\bR\x05admin\x12\x1a\n" +
 	"\bdisabled\x18\x05 \x01(\bR\bdisabled\x121\n" +
-	"\x06policy\x18\x06 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12@\n" +
-	"\vpreferences\x18\a \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\x12;\n" +
+	"\x06policy\x18\x06 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12U\n" +
+	"\x14playback_preferences\x18\a \x01(\v2\".mavio.user.v1.PlaybackPreferencesR\x13playbackPreferences\x12;\n" +
 	"\vcreate_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"createTime\x12B\n" +
 	"\x0flast_login_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\rlastLoginTime\x12\x18\n" +
@@ -5602,8 +5604,8 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x10d\"\x06r\x04\x10\x01\x18dR\rblockedLabels\"J\n" +
 	"\fRequestQuota\x12\x1d\n" +
 	"\x05limit\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x05limit\x12\x1b\n" +
-	"\x04days\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x04days\"\x9e\x02\n" +
-	"\x0fUserPreferences\x12?\n" +
+	"\x04days\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\x04days\"\xa2\x02\n" +
+	"\x13PlaybackPreferences\x12?\n" +
 	"\x0faudio_languages\x18\x01 \x03(\tB\x16\xbaH\x13\x92\x01\x10\"\x0er\f2\n" +
 	"^[a-z]{3}$R\x0eaudioLanguages\x12E\n" +
 	"\x12subtitle_languages\x18\x02 \x03(\tB\x16\xbaH\x13\x92\x01\x10\"\x0er\f2\n" +
@@ -5630,14 +5632,14 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x17\n" +
 	"\x15GetCurrentUserRequest\"A\n" +
 	"\x16GetCurrentUserResponse\x12'\n" +
-	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\x99\x03\n" +
+	"\x04user\x18\x01 \x01(\v2\x13.mavio.user.v1.UserR\x04user\"\xae\x03\n" +
 	"\x11CreateUserRequest\x12 \n" +
 	"\x04name\x18\x01 \x01(\tB\f\xbaH\t\xc8\x01\x01r\x04\x10\x01\x18dR\x04name\x12$\n" +
 	"\bpassword\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\x80\bR\bpassword\x12#\n" +
 	"\rauth_provider\x18\x03 \x01(\tR\fauthProvider\x12\x14\n" +
 	"\x05admin\x18\x04 \x01(\bR\x05admin\x121\n" +
-	"\x06policy\x18\x05 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12@\n" +
-	"\vpreferences\x18\x06 \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\x12\x18\n" +
+	"\x06policy\x18\x05 \x01(\v2\x19.mavio.user.v1.UserPolicyR\x06policy\x12U\n" +
+	"\x14playback_preferences\x18\x06 \x01(\v2\".mavio.user.v1.PlaybackPreferencesR\x13playbackPreferences\x12\x18\n" +
 	"\amanaged\x18\a \x01(\bR\amanaged\x12M\n" +
 	"\vrestriction\x18\b \x01(\x0e2!.mavio.user.v1.RestrictionProfileB\b\xbaH\x05\x82\x01\x02\x10\x01R\vrestriction\x12#\n" +
 	"\x03pin\x18\t \x01(\tB\x11\xbaH\x0er\f2\n" +
@@ -5694,11 +5696,11 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x13ConfirmTotpResponse\"9\n" +
 	"\x11DeleteTotpRequest\x12$\n" +
 	"\auser_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06userId\"\x14\n" +
-	"\x12DeleteTotpResponse\"d\n" +
-	"\x18UpdatePreferencesRequest\x12H\n" +
-	"\vpreferences\x18\x01 \x01(\v2\x1e.mavio.user.v1.UserPreferencesB\x06\xbaH\x03\xc8\x01\x01R\vpreferences\"]\n" +
-	"\x19UpdatePreferencesResponse\x12@\n" +
-	"\vpreferences\x18\x01 \x01(\v2\x1e.mavio.user.v1.UserPreferencesR\vpreferences\"C\n" +
+	"\x12DeleteTotpResponse\"\x81\x01\n" +
+	" UpdatePlaybackPreferencesRequest\x12]\n" +
+	"\x14playback_preferences\x18\x01 \x01(\v2\".mavio.user.v1.PlaybackPreferencesB\x06\xbaH\x03\xc8\x01\x01R\x13playbackPreferences\"z\n" +
+	"!UpdatePlaybackPreferencesResponse\x12U\n" +
+	"\x14playback_preferences\x18\x01 \x01(\v2\".mavio.user.v1.PlaybackPreferencesR\x13playbackPreferences\"C\n" +
 	"\x12GetUserDataRequest\x12-\n" +
 	"\bitem_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\xe8\a\"\x05r\x03\xb0\x01\x01R\aitemIds\"K\n" +
 	"\x13GetUserDataResponse\x124\n" +
@@ -5749,7 +5751,7 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\x1fRESTRICTION_PROFILE_UNSPECIFIED\x10\x00\x12%\n" +
 	"!RESTRICTION_PROFILE_YOUNGER_CHILD\x10\x01\x12#\n" +
 	"\x1fRESTRICTION_PROFILE_OLDER_CHILD\x10\x02\x12\x1c\n" +
-	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\x96\r\n" +
+	"\x18RESTRICTION_PROFILE_TEEN\x10\x032\xae\r\n" +
 	"\vUserService\x12S\n" +
 	"\tListUsers\x12\x1f.mavio.user.v1.ListUsersRequest\x1a .mavio.user.v1.ListUsersResponse\"\x03\x90\x02\x01\x12M\n" +
 	"\aGetUser\x12\x1d.mavio.user.v1.GetUserRequest\x1a\x1e.mavio.user.v1.GetUserResponse\"\x03\x90\x02\x01\x12b\n" +
@@ -5768,8 +5770,8 @@ const file_mavio_user_v1_user_proto_rawDesc = "" +
 	"\tStartTotp\x12\x1f.mavio.user.v1.StartTotpRequest\x1a .mavio.user.v1.StartTotpResponse\x12T\n" +
 	"\vConfirmTotp\x12!.mavio.user.v1.ConfirmTotpRequest\x1a\".mavio.user.v1.ConfirmTotpResponse\x12Q\n" +
 	"\n" +
-	"DeleteTotp\x12 .mavio.user.v1.DeleteTotpRequest\x1a!.mavio.user.v1.DeleteTotpResponse\x12f\n" +
-	"\x11UpdatePreferences\x12'.mavio.user.v1.UpdatePreferencesRequest\x1a(.mavio.user.v1.UpdatePreferencesResponse\x12c\n" +
+	"DeleteTotp\x12 .mavio.user.v1.DeleteTotpRequest\x1a!.mavio.user.v1.DeleteTotpResponse\x12~\n" +
+	"\x19UpdatePlaybackPreferences\x12/.mavio.user.v1.UpdatePlaybackPreferencesRequest\x1a0.mavio.user.v1.UpdatePlaybackPreferencesResponse\x12c\n" +
 	"\x10CreateInvitation\x12&.mavio.user.v1.CreateInvitationRequest\x1a'.mavio.user.v1.CreateInvitationResponse\x12e\n" +
 	"\x0fListInvitations\x12%.mavio.user.v1.ListInvitationsRequest\x1a&.mavio.user.v1.ListInvitationsResponse\"\x03\x90\x02\x01\x12c\n" +
 	"\x10DeleteInvitation\x12&.mavio.user.v1.DeleteInvitationRequest\x1a'.mavio.user.v1.DeleteInvitationResponse2\xcb\x01\n" +
@@ -5787,7 +5789,7 @@ var file_mavio_user_v1_user_proto_goTypes = []any{
 	(*Passkey)(nil),                           // 3: mavio.user.v1.Passkey
 	(*UserPolicy)(nil),                        // 4: mavio.user.v1.UserPolicy
 	(*RequestQuota)(nil),                      // 5: mavio.user.v1.RequestQuota
-	(*UserPreferences)(nil),                   // 6: mavio.user.v1.UserPreferences
+	(*PlaybackPreferences)(nil),               // 6: mavio.user.v1.PlaybackPreferences
 	(*UserData)(nil),                          // 7: mavio.user.v1.UserData
 	(*ListUsersRequest)(nil),                  // 8: mavio.user.v1.ListUsersRequest
 	(*ListUsersResponse)(nil),                 // 9: mavio.user.v1.ListUsersResponse
@@ -5817,8 +5819,8 @@ var file_mavio_user_v1_user_proto_goTypes = []any{
 	(*ConfirmTotpResponse)(nil),               // 33: mavio.user.v1.ConfirmTotpResponse
 	(*DeleteTotpRequest)(nil),                 // 34: mavio.user.v1.DeleteTotpRequest
 	(*DeleteTotpResponse)(nil),                // 35: mavio.user.v1.DeleteTotpResponse
-	(*UpdatePreferencesRequest)(nil),          // 36: mavio.user.v1.UpdatePreferencesRequest
-	(*UpdatePreferencesResponse)(nil),         // 37: mavio.user.v1.UpdatePreferencesResponse
+	(*UpdatePlaybackPreferencesRequest)(nil),  // 36: mavio.user.v1.UpdatePlaybackPreferencesRequest
+	(*UpdatePlaybackPreferencesResponse)(nil), // 37: mavio.user.v1.UpdatePlaybackPreferencesResponse
 	(*GetUserDataRequest)(nil),                // 38: mavio.user.v1.GetUserDataRequest
 	(*GetUserDataResponse)(nil),               // 39: mavio.user.v1.GetUserDataResponse
 	(*UpdateUserDataRequest)(nil),             // 40: mavio.user.v1.UpdateUserDataRequest
@@ -5835,7 +5837,7 @@ var file_mavio_user_v1_user_proto_goTypes = []any{
 }
 var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	4,  // 0: mavio.user.v1.User.policy:type_name -> mavio.user.v1.UserPolicy
-	6,  // 1: mavio.user.v1.User.preferences:type_name -> mavio.user.v1.UserPreferences
+	6,  // 1: mavio.user.v1.User.playback_preferences:type_name -> mavio.user.v1.PlaybackPreferences
 	49, // 2: mavio.user.v1.User.create_time:type_name -> google.protobuf.Timestamp
 	49, // 3: mavio.user.v1.User.last_login_time:type_name -> google.protobuf.Timestamp
 	1,  // 4: mavio.user.v1.User.restriction:type_name -> mavio.user.v1.RestrictionProfile
@@ -5844,22 +5846,22 @@ var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	49, // 7: mavio.user.v1.Passkey.last_use_time:type_name -> google.protobuf.Timestamp
 	5,  // 8: mavio.user.v1.UserPolicy.movie_quota:type_name -> mavio.user.v1.RequestQuota
 	5,  // 9: mavio.user.v1.UserPolicy.series_quota:type_name -> mavio.user.v1.RequestQuota
-	0,  // 10: mavio.user.v1.UserPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
+	0,  // 10: mavio.user.v1.PlaybackPreferences.subtitle_mode:type_name -> mavio.user.v1.SubtitleMode
 	50, // 11: mavio.user.v1.UserData.position:type_name -> google.protobuf.Duration
 	49, // 12: mavio.user.v1.UserData.last_played_time:type_name -> google.protobuf.Timestamp
 	2,  // 13: mavio.user.v1.ListUsersResponse.users:type_name -> mavio.user.v1.User
 	2,  // 14: mavio.user.v1.GetUserResponse.user:type_name -> mavio.user.v1.User
 	2,  // 15: mavio.user.v1.GetCurrentUserResponse.user:type_name -> mavio.user.v1.User
 	4,  // 16: mavio.user.v1.CreateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
-	6,  // 17: mavio.user.v1.CreateUserRequest.preferences:type_name -> mavio.user.v1.UserPreferences
+	6,  // 17: mavio.user.v1.CreateUserRequest.playback_preferences:type_name -> mavio.user.v1.PlaybackPreferences
 	1,  // 18: mavio.user.v1.CreateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
 	2,  // 19: mavio.user.v1.CreateUserResponse.user:type_name -> mavio.user.v1.User
 	4,  // 20: mavio.user.v1.UpdateUserRequest.policy:type_name -> mavio.user.v1.UserPolicy
 	1,  // 21: mavio.user.v1.UpdateUserRequest.restriction:type_name -> mavio.user.v1.RestrictionProfile
 	2,  // 22: mavio.user.v1.UpdateUserResponse.user:type_name -> mavio.user.v1.User
 	3,  // 23: mavio.user.v1.FinishPasskeyRegistrationResponse.passkey:type_name -> mavio.user.v1.Passkey
-	6,  // 24: mavio.user.v1.UpdatePreferencesRequest.preferences:type_name -> mavio.user.v1.UserPreferences
-	6,  // 25: mavio.user.v1.UpdatePreferencesResponse.preferences:type_name -> mavio.user.v1.UserPreferences
+	6,  // 24: mavio.user.v1.UpdatePlaybackPreferencesRequest.playback_preferences:type_name -> mavio.user.v1.PlaybackPreferences
+	6,  // 25: mavio.user.v1.UpdatePlaybackPreferencesResponse.playback_preferences:type_name -> mavio.user.v1.PlaybackPreferences
 	7,  // 26: mavio.user.v1.GetUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
 	50, // 27: mavio.user.v1.UpdateUserDataRequest.position:type_name -> google.protobuf.Duration
 	7,  // 28: mavio.user.v1.UpdateUserDataResponse.user_data:type_name -> mavio.user.v1.UserData
@@ -5884,7 +5886,7 @@ var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	30, // 47: mavio.user.v1.UserService.StartTotp:input_type -> mavio.user.v1.StartTotpRequest
 	32, // 48: mavio.user.v1.UserService.ConfirmTotp:input_type -> mavio.user.v1.ConfirmTotpRequest
 	34, // 49: mavio.user.v1.UserService.DeleteTotp:input_type -> mavio.user.v1.DeleteTotpRequest
-	36, // 50: mavio.user.v1.UserService.UpdatePreferences:input_type -> mavio.user.v1.UpdatePreferencesRequest
+	36, // 50: mavio.user.v1.UserService.UpdatePlaybackPreferences:input_type -> mavio.user.v1.UpdatePlaybackPreferencesRequest
 	43, // 51: mavio.user.v1.UserService.CreateInvitation:input_type -> mavio.user.v1.CreateInvitationRequest
 	45, // 52: mavio.user.v1.UserService.ListInvitations:input_type -> mavio.user.v1.ListInvitationsRequest
 	47, // 53: mavio.user.v1.UserService.DeleteInvitation:input_type -> mavio.user.v1.DeleteInvitationRequest
@@ -5904,7 +5906,7 @@ var file_mavio_user_v1_user_proto_depIdxs = []int32{
 	31, // 67: mavio.user.v1.UserService.StartTotp:output_type -> mavio.user.v1.StartTotpResponse
 	33, // 68: mavio.user.v1.UserService.ConfirmTotp:output_type -> mavio.user.v1.ConfirmTotpResponse
 	35, // 69: mavio.user.v1.UserService.DeleteTotp:output_type -> mavio.user.v1.DeleteTotpResponse
-	37, // 70: mavio.user.v1.UserService.UpdatePreferences:output_type -> mavio.user.v1.UpdatePreferencesResponse
+	37, // 70: mavio.user.v1.UserService.UpdatePlaybackPreferences:output_type -> mavio.user.v1.UpdatePlaybackPreferencesResponse
 	44, // 71: mavio.user.v1.UserService.CreateInvitation:output_type -> mavio.user.v1.CreateInvitationResponse
 	46, // 72: mavio.user.v1.UserService.ListInvitations:output_type -> mavio.user.v1.ListInvitationsResponse
 	48, // 73: mavio.user.v1.UserService.DeleteInvitation:output_type -> mavio.user.v1.DeleteInvitationResponse

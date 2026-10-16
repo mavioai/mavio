@@ -962,7 +962,7 @@ func init() {
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[11].Descriptor()
+	userDescCreatedAt := userFields[12].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.

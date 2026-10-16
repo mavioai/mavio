@@ -19,13 +19,9 @@ service WantedService {
   // list its episodes, monitored with a quality profile; it fails with
   // ALREADY_EXISTS when the library has the series.
   rpc AddSeries(AddSeriesRequest) returns (AddSeriesResponse);
-  // MonitorSeries applies a monitoring option to the seasons and episodes
-  // of wanted series, as Sonarr's season pass.
-  rpc MonitorSeries(MonitorSeriesRequest) returns (MonitorSeriesResponse) {
-    option idempotency_level = IDEMPOTENT;
-  }
-  // SetMonitored monitors or unmonitors seasons and episodes; a season
-  // takes its episodes along.
+  // SetMonitored monitors or unmonitors seasons and episodes, a season
+  // taking its episodes along, or applies a monitoring option to the
+  // seasons and episodes of wanted series, as Sonarr's season pass.
   rpc SetMonitored(SetMonitoredRequest) returns (SetMonitoredResponse) {
     option idempotency_level = IDEMPOTENT;
   }
@@ -160,8 +156,28 @@ message AddSeriesResponse {
   Wanted wanted = 2;
 }
 
-message MonitorSeriesRequest {
-  // Wanted series.
+message SetMonitoredRequest {
+  oneof change {
+    option (buf.validate.oneof).required = true;
+    MonitoredItems items = 1;
+    SeriesMonitoring series = 2;
+  }
+}
+
+// MonitoredItems monitors or unmonitors seasons and episodes.
+message MonitoredItems {
+  repeated string item_ids = 1 [(buf.validate.field).repeated = {
+    min_items: 1
+    max_items: 10000
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  bool monitored = 2;
+}
+
+// SeriesMonitoring applies a monitoring option to wanted series.
+message SeriesMonitoring {
   repeated string item_ids = 1 [(buf.validate.field).repeated = {
     min_items: 1
     max_items: 1000
@@ -175,20 +191,6 @@ message MonitorSeriesRequest {
   }];
   // Unspecified to leave as it is.
   NewItemMonitor monitor_new_items = 3 [(buf.validate.field).enum.defined_only = true];
-}
-
-message MonitorSeriesResponse {}
-
-message SetMonitoredRequest {
-  // Seasons and episodes.
-  repeated string item_ids = 1 [(buf.validate.field).repeated = {
-    min_items: 1
-    max_items: 10000
-    items: {
-      string: {uuid: true}
-    }
-  }];
-  bool monitored = 2;
 }
 
 message SetMonitoredResponse {}

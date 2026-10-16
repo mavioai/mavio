@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/auth/v1/auth.proto.
  */
 export const file_mavio_auth_v1_auth: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYXZpby9hdXRoL3YxL2F1dGgucHJvdG8SDW1hdmlvLmF1dGgudjEikwEKBkRldmljZRIXCgJpZBgBIAEoCUILukgIyAEBcgMYgAESFgoEbmFtZRgCIAEoCUIIukgFcgMYgAESFwoGY2xpZW50GAMgASgJQge6SARyAhhAEh8KDmNsaWVudF92ZXJzaW9uGAQgASgJQge6SARyAhhAEh4KCnB1YmxpY19rZXkYBSABKAxCCrpIB8gBAXoCaCAisgEKB1Nlc3Npb24SCgoCaWQYASABKAkSJQoGZGV2aWNlGAIgASgLMhUubWF2aW8uYXV0aC52MS5EZXZpY2USLwoLY3JlYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjIKDmxhc3Rfc2Vlbl90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIPCgdjdXJyZW50GAUgASgIIhQKEkdldEF1dGhJbmZvUmVxdWVzdCKnAQoTR2V0QXV0aEluZm9SZXNwb25zZRIWCg5zZXR1cF9yZXF1aXJlZBgBIAEoCBIRCglzZXJ2ZXJfaWQYAiABKAkSEwoLc2VydmVyX25hbWUYAyABKAkSDwoHdmVyc2lvbhgEIAEoCRIoCgRtb2RlGAUgASgOMhoubWF2aW8uYXV0aC52MS5BY2NvdW50TW9kZRIVCg1tYXZpb19kZXZfdXJsGAYgASgJIoQBChZDcmVhdGVGaXJzdFVzZXJSZXF1ZXN0EhoKBG5hbWUYASABKAlCDLpICcgBAXIEEAEYZBIfCghwYXNzd29yZBgCIAEoCUINukgKyAEBcgUQARiACBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBIrkBChdDcmVhdGVGaXJzdFVzZXJSZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSIQoEdXNlchgCIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlchInCgdzZXNzaW9uGAMgASgLMhYubWF2aW8uYXV0aC52MS5TZXNzaW9uEjwKGGFjY2Vzc190b2tlbl9leHBpcmVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimQEKDExvZ2luUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhkEhoKCHBhc3N3b3JkGAIgASgJQgi6SAVyAxiACBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBEiQKCXRvdHBfY29kZRgEIAEoCUIRukgOcgwyCl5bMC05XXs2fSQirwEKDUxvZ2luUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhsKGVN0YXJ0UGFzc2tleVNpZ25JblJlcXVlc3QiRwoaU3RhcnRQYXNza2V5U2lnbkluUmVzcG9uc2USEwoLY2VyZW1vbnlfaWQYASABKAkSFAoMb3B0aW9uc19qc29uGAIgASgJIpMBChpGaW5pc2hQYXNza2V5U2lnbkluUmVxdWVzdBIfCgtjZXJlbW9ueV9pZBgBIAEoCUIKukgHyAEBcgIYZBIlCg9jcmVkZW50aWFsX2pzb24YAiABKAlCDLpICcgBAXIEGICABBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBIr0BChtGaW5pc2hQYXNza2V5U2lnbkluUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjYKE1N0YXJ0UmVmcmVzaFJlcXVlc3QSHwoKc2Vzc2lvbl9pZBgBIAEoCUILukgIyAEBcgOwAQEiVgoUU3RhcnRSZWZyZXNoUmVzcG9uc2USDQoFbm9uY2UYASABKAwSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wInIKFVJlZnJlc2hTZXNzaW9uUmVxdWVzdBIfCgpzZXNzaW9uX2lkGAEgASgJQgu6SAjIAQFyA7ABARIZCgVub25jZRgCIAEoDEIKukgHyAEBegJoIBIdCglzaWduYXR1cmUYAyABKAxCCrpIB8gBAXoCaEAibAoWUmVmcmVzaFNlc3Npb25SZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSPAoYYWNjZXNzX3Rva2VuX2V4cGlyZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIPCg1Mb2dvdXRSZXF1ZXN0IhAKDkxvZ291dFJlc3BvbnNlIhUKE0xpc3RTZXNzaW9uc1JlcXVlc3QiQAoUTGlzdFNlc3Npb25zUmVzcG9uc2USKAoIc2Vzc2lvbnMYASADKAsyFi5tYXZpby5hdXRoLnYxLlNlc3Npb24iLwoUUmV2b2tlU2Vzc2lvblJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIhcKFVJldm9rZVNlc3Npb25SZXNwb25zZSJJChhTdGFydFF1aWNrQ29ubmVjdFJlcXVlc3QSLQoGZGV2aWNlGAEgASgLMhUubWF2aW8uYXV0aC52MS5EZXZpY2VCBrpIA8gBASJqChlTdGFydFF1aWNrQ29ubmVjdFJlc3BvbnNlEg4KBnNlY3JldBgBIAEoCRIMCgRjb2RlGAIgASgJEi8KC2V4cGlyZV90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCI6ChtHZXRRdWlja0Nvbm5lY3RTdGF0ZVJlcXVlc3QSGwoGc2VjcmV0GAEgASgJQgu6SAjIAQFyAxiAASJjChxHZXRRdWlja0Nvbm5lY3RTdGF0ZVJlc3BvbnNlEhIKCmF1dGhvcml6ZWQYASABKAgSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIkIKHEF1dGhvcml6ZVF1aWNrQ29ubmVjdFJlcXVlc3QSIgoEY29kZRgBIAEoCUIUukgRyAEBcgwyCl5bMC05XXs2fSQiRgodQXV0aG9yaXplUXVpY2tDb25uZWN0UmVzcG9uc2USJQoGZGV2aWNlGAEgASgLMhUubWF2aW8uYXV0aC52MS5EZXZpY2UiOwocTG9naW5XaXRoUXVpY2tDb25uZWN0UmVxdWVzdBIbCgZzZWNyZXQYASABKAlCC7pICMgBAXIDGIABIr8BCh1Mb2dpbldpdGhRdWlja0Nvbm5lY3RSZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSIQoEdXNlchgCIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlchInCgdzZXNzaW9uGAMgASgLMhYubWF2aW8uYXV0aC52MS5TZXNzaW9uEjwKGGFjY2Vzc190b2tlbl9leHBpcmVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAilwEKBkFwaUtleRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg8KB3VzZXJfaWQYAyABKAkSLwoLY3JlYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjEKDWxhc3RfdXNlX3RpbWUYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjEKE0NyZWF0ZUFwaUtleVJlcXVlc3QSGgoEbmFtZRgBIAEoCUIMukgJyAEBcgQQARhkIk0KFENyZWF0ZUFwaUtleVJlc3BvbnNlEiYKB2FwaV9rZXkYASABKAsyFS5tYXZpby5hdXRoLnYxLkFwaUtleRINCgV0b2tlbhgCIAEoCSIUChJMaXN0QXBpS2V5c1JlcXVlc3QiPgoTTGlzdEFwaUtleXNSZXNwb25zZRInCghhcGlfa2V5cxgBIAMoCzIVLm1hdmlvLmF1dGgudjEuQXBpS2V5Ii4KE1Jldm9rZUFwaUtleVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBIhYKFFJldm9rZUFwaUtleVJlc3BvbnNlIi0KFUZvcmdvdFBhc3N3b3JkUmVxdWVzdBIUCgRuYW1lGAEgASgJQga6SAPIAQEiSQoWRm9yZ290UGFzc3dvcmRSZXNwb25zZRIvCgtleHBpcmVfdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiagoUUmVzZXRQYXNzd29yZFJlcXVlc3QSFAoEbmFtZRgBIAEoCUIGukgDyAEBEhcKA3BpbhgCIAEoCUIKukgHyAEBcgIYQBIjCgxuZXdfcGFzc3dvcmQYAyABKAlCDbpICsgBAXIFEAEYgAgiFwoVUmVzZXRQYXNzd29yZFJlc3BvbnNlIjEKFEdldEludml0YXRpb25SZXF1ZXN0EhkKBXRva2VuGAEgASgJQgq6SAfIAQFyAhhkIlsKFUdldEludml0YXRpb25SZXNwb25zZRIRCgl1c2VyX25hbWUYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIlEKHVN0YXJ0SW52aXRhdGlvblBhc3NrZXlSZXF1ZXN0EhkKBXRva2VuGAEgASgJQgq6SAfIAQFyAhhkEhUKBG5hbWUYAiABKAlCB7pIBHICGGQiSwoeU3RhcnRJbnZpdGF0aW9uUGFzc2tleVJlc3BvbnNlEhMKC2NlcmVtb255X2lkGAEgASgJEhQKDG9wdGlvbnNfanNvbhgCIAEoCSL7AQoXQWNjZXB0SW52aXRhdGlvblJlcXVlc3QSGQoFdG9rZW4YASABKAlCCrpIB8gBAXICGGQSFwoEbmFtZRgCIAEoCUIJukgGcgQQARhkEhwKCHBhc3N3b3JkGAMgASgJQgq6SAdyBRABGIAIEhwKC2NlcmVtb255X2lkGAQgASgJQge6SARyAhhkEiIKD2NyZWRlbnRpYWxfanNvbhgFIAEoCUIJukgGcgQYgIAEEh0KDHBhc3NrZXlfbmFtZRgGIAEoCUIHukgEcgIYZBItCgZkZXZpY2UYByABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBIroBChhBY2NlcHRJbnZpdGF0aW9uUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhwKGkxpc3RTd2l0Y2hhYmxlVXNlcnNSZXF1ZXN0IksKG0xpc3RTd2l0Y2hhYmxlVXNlcnNSZXNwb25zZRIsCgV1c2VycxgBIAMoCzIdLm1hdmlvLmF1dGgudjEuU3dpdGNoYWJsZVVzZXIibAoOU3dpdGNoYWJsZVVzZXISCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRINCgVhZG1pbhgDIAEoCBIPCgdtYW5hZ2VkGAQgASgIEg8KB2hhc19waW4YBSABKAgSDwoHY3VycmVudBgGIAEoCCJRChFTd2l0Y2hVc2VyUmVxdWVzdBIcCgd1c2VyX2lkGAEgASgJQgu6SAjIAQFyA7ABARIeCgNwaW4YAiABKAlCEbpIDnIMMgpeWzAtOV17NH0kIjcKElN3aXRjaFVzZXJSZXNwb25zZRIhCgR1c2VyGAEgASgLMhMubWF2aW8udXNlci52MS5Vc2VyIpgBChJTdGFydFNpZ25JblJlcXVlc3QSJAoMcmVkaXJlY3RfdXJpGAEgASgJQg66SAvIAQFyBhiAEIgBARIjCg5jb2RlX2NoYWxsZW5nZRgCIAEoCUILukgIyAEBcgOYASsSHgoKZGV2aWNlX2tleRgDIAEoDEIKukgHyAEBegJoIBIXCgVzdGF0ZRgEIAEoCUIIukgFcgMYgAEiUwoTU3RhcnRTaWduSW5SZXNwb25zZRILCgN1cmwYASABKAkSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIooBChpTaWduSW5XaXRoQXNzZXJ0aW9uUmVxdWVzdBIeCglhc3NlcnRpb24YASABKAlCC7pICMgBAXIDGIAgEi0KBmRldmljZRgCIAEoCzIVLm1hdmlvLmF1dGgudjEuRGV2aWNlQga6SAPIAQESHQoJc2lnbmF0dXJlGAMgASgMQgq6SAfIAQF6AmhAIr0BChtTaWduSW5XaXRoQXNzZXJ0aW9uUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wKmQKC0FjY291bnRNb2RlEhwKGEFDQ09VTlRfTU9ERV9VTlNQRUNJRklFRBAAEhsKF0FDQ09VTlRfTU9ERV9TVEFOREFMT05FEAESGgoWQUNDT1VOVF9NT0RFX01BVklPX0RFVhACMvUTCgtBdXRoU2VydmljZRJZCgtHZXRBdXRoSW5mbxIhLm1hdmlvLmF1dGgudjEuR2V0QXV0aEluZm9SZXF1ZXN0GiIubWF2aW8uYXV0aC52MS5HZXRBdXRoSW5mb1Jlc3BvbnNlIgOQAgESYAoPQ3JlYXRlRmlyc3RVc2VyEiUubWF2aW8uYXV0aC52MS5DcmVhdGVGaXJzdFVzZXJSZXF1ZXN0GiYubWF2aW8uYXV0aC52MS5DcmVhdGVGaXJzdFVzZXJSZXNwb25zZRJCCgVMb2dpbhIbLm1hdmlvLmF1dGgudjEuTG9naW5SZXF1ZXN0GhwubWF2aW8uYXV0aC52MS5Mb2dpblJlc3BvbnNlEmkKElN0YXJ0UGFzc2tleVNpZ25JbhIoLm1hdmlvLmF1dGgudjEuU3RhcnRQYXNza2V5U2lnbkluUmVxdWVzdBopLm1hdmlvLmF1dGgudjEuU3RhcnRQYXNza2V5U2lnbkluUmVzcG9uc2USbAoTRmluaXNoUGFzc2tleVNpZ25JbhIpLm1hdmlvLmF1dGgudjEuRmluaXNoUGFzc2tleVNpZ25JblJlcXVlc3QaKi5tYXZpby5hdXRoLnYxLkZpbmlzaFBhc3NrZXlTaWduSW5SZXNwb25zZRJXCgxTdGFydFJlZnJlc2gSIi5tYXZpby5hdXRoLnYxLlN0YXJ0UmVmcmVzaFJlcXVlc3QaIy5tYXZpby5hdXRoLnYxLlN0YXJ0UmVmcmVzaFJlc3BvbnNlEl0KDlJlZnJlc2hTZXNzaW9uEiQubWF2aW8uYXV0aC52MS5SZWZyZXNoU2Vzc2lvblJlcXVlc3QaJS5tYXZpby5hdXRoLnYxLlJlZnJlc2hTZXNzaW9uUmVzcG9uc2USRQoGTG9nb3V0EhwubWF2aW8uYXV0aC52MS5Mb2dvdXRSZXF1ZXN0Gh0ubWF2aW8uYXV0aC52MS5Mb2dvdXRSZXNwb25zZRJcCgxMaXN0U2Vzc2lvbnMSIi5tYXZpby5hdXRoLnYxLkxpc3RTZXNzaW9uc1JlcXVlc3QaIy5tYXZpby5hdXRoLnYxLkxpc3RTZXNzaW9uc1Jlc3BvbnNlIgOQAgESWgoNUmV2b2tlU2Vzc2lvbhIjLm1hdmlvLmF1dGgudjEuUmV2b2tlU2Vzc2lvblJlcXVlc3QaJC5tYXZpby5hdXRoLnYxLlJldm9rZVNlc3Npb25SZXNwb25zZRJmChFTdGFydFF1aWNrQ29ubmVjdBInLm1hdmlvLmF1dGgudjEuU3RhcnRRdWlja0Nvbm5lY3RSZXF1ZXN0GigubWF2aW8uYXV0aC52MS5TdGFydFF1aWNrQ29ubmVjdFJlc3BvbnNlEnQKFEdldFF1aWNrQ29ubmVjdFN0YXRlEioubWF2aW8uYXV0aC52MS5HZXRRdWlja0Nvbm5lY3RTdGF0ZVJlcXVlc3QaKy5tYXZpby5hdXRoLnYxLkdldFF1aWNrQ29ubmVjdFN0YXRlUmVzcG9uc2UiA5ACARJyChVBdXRob3JpemVRdWlja0Nvbm5lY3QSKy5tYXZpby5hdXRoLnYxLkF1dGhvcml6ZVF1aWNrQ29ubmVjdFJlcXVlc3QaLC5tYXZpby5hdXRoLnYxLkF1dGhvcml6ZVF1aWNrQ29ubmVjdFJlc3BvbnNlEnIKFUxvZ2luV2l0aFF1aWNrQ29ubmVjdBIrLm1hdmlvLmF1dGgudjEuTG9naW5XaXRoUXVpY2tDb25uZWN0UmVxdWVzdBosLm1hdmlvLmF1dGgudjEuTG9naW5XaXRoUXVpY2tDb25uZWN0UmVzcG9uc2USVwoMQ3JlYXRlQXBpS2V5EiIubWF2aW8uYXV0aC52MS5DcmVhdGVBcGlLZXlSZXF1ZXN0GiMubWF2aW8uYXV0aC52MS5DcmVhdGVBcGlLZXlSZXNwb25zZRJZCgtMaXN0QXBpS2V5cxIhLm1hdmlvLmF1dGgudjEuTGlzdEFwaUtleXNSZXF1ZXN0GiIubWF2aW8uYXV0aC52MS5MaXN0QXBpS2V5c1Jlc3BvbnNlIgOQAgESVwoMUmV2b2tlQXBpS2V5EiIubWF2aW8uYXV0aC52MS5SZXZva2VBcGlLZXlSZXF1ZXN0GiMubWF2aW8uYXV0aC52MS5SZXZva2VBcGlLZXlSZXNwb25zZRJdCg5Gb3Jnb3RQYXNzd29yZBIkLm1hdmlvLmF1dGgudjEuRm9yZ290UGFzc3dvcmRSZXF1ZXN0GiUubWF2aW8uYXV0aC52MS5Gb3Jnb3RQYXNzd29yZFJlc3BvbnNlEloKDVJlc2V0UGFzc3dvcmQSIy5tYXZpby5hdXRoLnYxLlJlc2V0UGFzc3dvcmRSZXF1ZXN0GiQubWF2aW8uYXV0aC52MS5SZXNldFBhc3N3b3JkUmVzcG9uc2USXwoNR2V0SW52aXRhdGlvbhIjLm1hdmlvLmF1dGgudjEuR2V0SW52aXRhdGlvblJlcXVlc3QaJC5tYXZpby5hdXRoLnYxLkdldEludml0YXRpb25SZXNwb25zZSIDkAIBEnUKFlN0YXJ0SW52aXRhdGlvblBhc3NrZXkSLC5tYXZpby5hdXRoLnYxLlN0YXJ0SW52aXRhdGlvblBhc3NrZXlSZXF1ZXN0Gi0ubWF2aW8uYXV0aC52MS5TdGFydEludml0YXRpb25QYXNza2V5UmVzcG9uc2USYwoQQWNjZXB0SW52aXRhdGlvbhImLm1hdmlvLmF1dGgudjEuQWNjZXB0SW52aXRhdGlvblJlcXVlc3QaJy5tYXZpby5hdXRoLnYxLkFjY2VwdEludml0YXRpb25SZXNwb25zZRJxChNMaXN0U3dpdGNoYWJsZVVzZXJzEikubWF2aW8uYXV0aC52MS5MaXN0U3dpdGNoYWJsZVVzZXJzUmVxdWVzdBoqLm1hdmlvLmF1dGgudjEuTGlzdFN3aXRjaGFibGVVc2Vyc1Jlc3BvbnNlIgOQAgESUQoKU3dpdGNoVXNlchIgLm1hdmlvLmF1dGgudjEuU3dpdGNoVXNlclJlcXVlc3QaIS5tYXZpby5hdXRoLnYxLlN3aXRjaFVzZXJSZXNwb25zZRJUCgtTdGFydFNpZ25JbhIhLm1hdmlvLmF1dGgudjEuU3RhcnRTaWduSW5SZXF1ZXN0GiIubWF2aW8uYXV0aC52MS5TdGFydFNpZ25JblJlc3BvbnNlEmwKE1NpZ25JbldpdGhBc3NlcnRpb24SKS5tYXZpby5hdXRoLnYxLlNpZ25JbldpdGhBc3NlcnRpb25SZXF1ZXN0GioubWF2aW8uYXV0aC52MS5TaWduSW5XaXRoQXNzZXJ0aW9uUmVzcG9uc2VCtQEKEWNvbS5tYXZpby5hdXRoLnYxQglBdXRoUHJvdG9QAVo/Z2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2F1dGgvdjE7YXV0aHYxogIDTUFYqgINTWF2aW8uQXV0aC5WMcoCDU1hdmlvXEF1dGhcVjHiAhlNYXZpb1xBdXRoXFYxXEdQQk1ldGFkYXRh6gIPTWF2aW86OkF1dGg6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
+  fileDesc("ChhtYXZpby9hdXRoL3YxL2F1dGgucHJvdG8SDW1hdmlvLmF1dGgudjEikwEKBkRldmljZRIXCgJpZBgBIAEoCUILukgIyAEBcgMYgAESFgoEbmFtZRgCIAEoCUIIukgFcgMYgAESFwoGY2xpZW50GAMgASgJQge6SARyAhhAEh8KDmNsaWVudF92ZXJzaW9uGAQgASgJQge6SARyAhhAEh4KCnB1YmxpY19rZXkYBSABKAxCCrpIB8gBAXoCaCAisgEKB1Nlc3Npb24SCgoCaWQYASABKAkSJQoGZGV2aWNlGAIgASgLMhUubWF2aW8uYXV0aC52MS5EZXZpY2USLwoLY3JlYXRlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjIKDmxhc3Rfc2Vlbl90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIPCgdjdXJyZW50GAUgASgIIhQKEkdldEF1dGhJbmZvUmVxdWVzdCKnAQoTR2V0QXV0aEluZm9SZXNwb25zZRIWCg5zZXR1cF9yZXF1aXJlZBgBIAEoCBIRCglzZXJ2ZXJfaWQYAiABKAkSEwoLc2VydmVyX25hbWUYAyABKAkSDwoHdmVyc2lvbhgEIAEoCRIoCgRtb2RlGAUgASgOMhoubWF2aW8uYXV0aC52MS5BY2NvdW50TW9kZRIVCg1tYXZpb19kZXZfdXJsGAYgASgJIoQBChZDcmVhdGVGaXJzdFVzZXJSZXF1ZXN0EhoKBG5hbWUYASABKAlCDLpICcgBAXIEEAEYZBIfCghwYXNzd29yZBgCIAEoCUINukgKyAEBcgUQARiACBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBIrkBChdDcmVhdGVGaXJzdFVzZXJSZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSIQoEdXNlchgCIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlchInCgdzZXNzaW9uGAMgASgLMhYubWF2aW8uYXV0aC52MS5TZXNzaW9uEjwKGGFjY2Vzc190b2tlbl9leHBpcmVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAimQEKDExvZ2luUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhkEhoKCHBhc3N3b3JkGAIgASgJQgi6SAVyAxiACBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBEiQKCXRvdHBfY29kZRgEIAEoCUIRukgOcgwyCl5bMC05XXs2fSQirwEKDUxvZ2luUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhsKGVN0YXJ0UGFzc2tleVNpZ25JblJlcXVlc3QiRwoaU3RhcnRQYXNza2V5U2lnbkluUmVzcG9uc2USEwoLY2VyZW1vbnlfaWQYASABKAkSFAoMb3B0aW9uc19qc29uGAIgASgJIpMBChpGaW5pc2hQYXNza2V5U2lnbkluUmVxdWVzdBIfCgtjZXJlbW9ueV9pZBgBIAEoCUIKukgHyAEBcgIYZBIlCg9jcmVkZW50aWFsX2pzb24YAiABKAlCDLpICcgBAXIEGICABBItCgZkZXZpY2UYAyABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBIr0BChtGaW5pc2hQYXNza2V5U2lnbkluUmVzcG9uc2USFAoMYWNjZXNzX3Rva2VuGAEgASgJEiEKBHVzZXIYAiABKAsyEy5tYXZpby51c2VyLnYxLlVzZXISJwoHc2Vzc2lvbhgDIAEoCzIWLm1hdmlvLmF1dGgudjEuU2Vzc2lvbhI8ChhhY2Nlc3NfdG9rZW5fZXhwaXJlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjYKE1N0YXJ0UmVmcmVzaFJlcXVlc3QSHwoKc2Vzc2lvbl9pZBgBIAEoCUILukgIyAEBcgOwAQEiVgoUU3RhcnRSZWZyZXNoUmVzcG9uc2USDQoFbm9uY2UYASABKAwSLwoLZXhwaXJlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wInIKFVJlZnJlc2hTZXNzaW9uUmVxdWVzdBIfCgpzZXNzaW9uX2lkGAEgASgJQgu6SAjIAQFyA7ABARIZCgVub25jZRgCIAEoDEIKukgHyAEBegJoIBIdCglzaWduYXR1cmUYAyABKAxCCrpIB8gBAXoCaEAibAoWUmVmcmVzaFNlc3Npb25SZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSPAoYYWNjZXNzX3Rva2VuX2V4cGlyZV90aW1lGAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCIPCg1Mb2dvdXRSZXF1ZXN0IhAKDkxvZ291dFJlc3BvbnNlIkkKGFN0YXJ0UXVpY2tDb25uZWN0UmVxdWVzdBItCgZkZXZpY2UYASABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZUIGukgDyAEBImoKGVN0YXJ0UXVpY2tDb25uZWN0UmVzcG9uc2USDgoGc2VjcmV0GAEgASgJEgwKBGNvZGUYAiABKAkSLwoLZXhwaXJlX3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIjoKG0dldFF1aWNrQ29ubmVjdFN0YXRlUmVxdWVzdBIbCgZzZWNyZXQYASABKAlCC7pICMgBAXIDGIABImMKHEdldFF1aWNrQ29ubmVjdFN0YXRlUmVzcG9uc2USEgoKYXV0aG9yaXplZBgBIAEoCBIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiQgocQXV0aG9yaXplUXVpY2tDb25uZWN0UmVxdWVzdBIiCgRjb2RlGAEgASgJQhS6SBHIAQFyDDIKXlswLTldezZ9JCJGCh1BdXRob3JpemVRdWlja0Nvbm5lY3RSZXNwb25zZRIlCgZkZXZpY2UYASABKAsyFS5tYXZpby5hdXRoLnYxLkRldmljZSI7ChxMb2dpbldpdGhRdWlja0Nvbm5lY3RSZXF1ZXN0EhsKBnNlY3JldBgBIAEoCUILukgIyAEBcgMYgAEivwEKHUxvZ2luV2l0aFF1aWNrQ29ubmVjdFJlc3BvbnNlEhQKDGFjY2Vzc190b2tlbhgBIAEoCRIhCgR1c2VyGAIgASgLMhMubWF2aW8udXNlci52MS5Vc2VyEicKB3Nlc3Npb24YAyABKAsyFi5tYXZpby5hdXRoLnYxLlNlc3Npb24SPAoYYWNjZXNzX3Rva2VuX2V4cGlyZV90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCKXAQoGQXBpS2V5EgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDwoHdXNlcl9pZBgDIAEoCRIvCgtjcmVhdGVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASMQoNbGFzdF91c2VfdGltZRgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiMQoTQ3JlYXRlQXBpS2V5UmVxdWVzdBIaCgRuYW1lGAEgASgJQgy6SAnIAQFyBBABGGQiTQoUQ3JlYXRlQXBpS2V5UmVzcG9uc2USJgoHYXBpX2tleRgBIAEoCzIVLm1hdmlvLmF1dGgudjEuQXBpS2V5Eg0KBXRva2VuGAIgASgJIhQKEkxpc3RBcGlLZXlzUmVxdWVzdCI+ChNMaXN0QXBpS2V5c1Jlc3BvbnNlEicKCGFwaV9rZXlzGAEgAygLMhUubWF2aW8uYXV0aC52MS5BcGlLZXkiLgoTUmV2b2tlQXBpS2V5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiFgoUUmV2b2tlQXBpS2V5UmVzcG9uc2UiLQoVRm9yZ290UGFzc3dvcmRSZXF1ZXN0EhQKBG5hbWUYASABKAlCBrpIA8gBASJJChZGb3Jnb3RQYXNzd29yZFJlc3BvbnNlEi8KC2V4cGlyZV90aW1lGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJqChRSZXNldFBhc3N3b3JkUmVxdWVzdBIUCgRuYW1lGAEgASgJQga6SAPIAQESFwoDcGluGAIgASgJQgq6SAfIAQFyAhhAEiMKDG5ld19wYXNzd29yZBgDIAEoCUINukgKyAEBcgUQARiACCIXChVSZXNldFBhc3N3b3JkUmVzcG9uc2UiMQoUR2V0SW52aXRhdGlvblJlcXVlc3QSGQoFdG9rZW4YASABKAlCCrpIB8gBAXICGGQiWwoVR2V0SW52aXRhdGlvblJlc3BvbnNlEhEKCXVzZXJfbmFtZRgBIAEoCRIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiUQodU3RhcnRJbnZpdGF0aW9uUGFzc2tleVJlcXVlc3QSGQoFdG9rZW4YASABKAlCCrpIB8gBAXICGGQSFQoEbmFtZRgCIAEoCUIHukgEcgIYZCJLCh5TdGFydEludml0YXRpb25QYXNza2V5UmVzcG9uc2USEwoLY2VyZW1vbnlfaWQYASABKAkSFAoMb3B0aW9uc19qc29uGAIgASgJIvsBChdBY2NlcHRJbnZpdGF0aW9uUmVxdWVzdBIZCgV0b2tlbhgBIAEoCUIKukgHyAEBcgIYZBIXCgRuYW1lGAIgASgJQgm6SAZyBBABGGQSHAoIcGFzc3dvcmQYAyABKAlCCrpIB3IFEAEYgAgSHAoLY2VyZW1vbnlfaWQYBCABKAlCB7pIBHICGGQSIgoPY3JlZGVudGlhbF9qc29uGAUgASgJQgm6SAZyBBiAgAQSHQoMcGFzc2tleV9uYW1lGAYgASgJQge6SARyAhhkEi0KBmRldmljZRgHIAEoCzIVLm1hdmlvLmF1dGgudjEuRGV2aWNlQga6SAPIAQEiugEKGEFjY2VwdEludml0YXRpb25SZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSIQoEdXNlchgCIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlchInCgdzZXNzaW9uGAMgASgLMhYubWF2aW8uYXV0aC52MS5TZXNzaW9uEjwKGGFjY2Vzc190b2tlbl9leHBpcmVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiHAoaTGlzdFN3aXRjaGFibGVVc2Vyc1JlcXVlc3QiSwobTGlzdFN3aXRjaGFibGVVc2Vyc1Jlc3BvbnNlEiwKBXVzZXJzGAEgAygLMh0ubWF2aW8uYXV0aC52MS5Td2l0Y2hhYmxlVXNlciJsCg5Td2l0Y2hhYmxlVXNlchIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEg0KBWFkbWluGAMgASgIEg8KB21hbmFnZWQYBCABKAgSDwoHaGFzX3BpbhgFIAEoCBIPCgdjdXJyZW50GAYgASgIIlEKEVN3aXRjaFVzZXJSZXF1ZXN0EhwKB3VzZXJfaWQYASABKAlCC7pICMgBAXIDsAEBEh4KA3BpbhgCIAEoCUIRukgOcgwyCl5bMC05XXs0fSQiNwoSU3dpdGNoVXNlclJlc3BvbnNlEiEKBHVzZXIYASABKAsyEy5tYXZpby51c2VyLnYxLlVzZXIimAEKElN0YXJ0U2lnbkluUmVxdWVzdBIkCgxyZWRpcmVjdF91cmkYASABKAlCDrpIC8gBAXIGGIAQiAEBEiMKDmNvZGVfY2hhbGxlbmdlGAIgASgJQgu6SAjIAQFyA5gBKxIeCgpkZXZpY2Vfa2V5GAMgASgMQgq6SAfIAQF6AmggEhcKBXN0YXRlGAQgASgJQgi6SAVyAxiAASJTChNTdGFydFNpZ25JblJlc3BvbnNlEgsKA3VybBgBIAEoCRIvCgtleHBpcmVfdGltZRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiigEKGlNpZ25JbldpdGhBc3NlcnRpb25SZXF1ZXN0Eh4KCWFzc2VydGlvbhgBIAEoCUILukgIyAEBcgMYgCASLQoGZGV2aWNlGAIgASgLMhUubWF2aW8uYXV0aC52MS5EZXZpY2VCBrpIA8gBARIdCglzaWduYXR1cmUYAyABKAxCCrpIB8gBAXoCaEAivQEKG1NpZ25JbldpdGhBc3NlcnRpb25SZXNwb25zZRIUCgxhY2Nlc3NfdG9rZW4YASABKAkSIQoEdXNlchgCIAEoCzITLm1hdmlvLnVzZXIudjEuVXNlchInCgdzZXNzaW9uGAMgASgLMhYubWF2aW8uYXV0aC52MS5TZXNzaW9uEjwKGGFjY2Vzc190b2tlbl9leHBpcmVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAqZAoLQWNjb3VudE1vZGUSHAoYQUNDT1VOVF9NT0RFX1VOU1BFQ0lGSUVEEAASGwoXQUNDT1VOVF9NT0RFX1NUQU5EQUxPTkUQARIaChZBQ0NPVU5UX01PREVfTUFWSU9fREVWEAIyuxIKC0F1dGhTZXJ2aWNlElkKC0dldEF1dGhJbmZvEiEubWF2aW8uYXV0aC52MS5HZXRBdXRoSW5mb1JlcXVlc3QaIi5tYXZpby5hdXRoLnYxLkdldEF1dGhJbmZvUmVzcG9uc2UiA5ACARJgCg9DcmVhdGVGaXJzdFVzZXISJS5tYXZpby5hdXRoLnYxLkNyZWF0ZUZpcnN0VXNlclJlcXVlc3QaJi5tYXZpby5hdXRoLnYxLkNyZWF0ZUZpcnN0VXNlclJlc3BvbnNlEkIKBUxvZ2luEhsubWF2aW8uYXV0aC52MS5Mb2dpblJlcXVlc3QaHC5tYXZpby5hdXRoLnYxLkxvZ2luUmVzcG9uc2USaQoSU3RhcnRQYXNza2V5U2lnbkluEigubWF2aW8uYXV0aC52MS5TdGFydFBhc3NrZXlTaWduSW5SZXF1ZXN0GikubWF2aW8uYXV0aC52MS5TdGFydFBhc3NrZXlTaWduSW5SZXNwb25zZRJsChNGaW5pc2hQYXNza2V5U2lnbkluEikubWF2aW8uYXV0aC52MS5GaW5pc2hQYXNza2V5U2lnbkluUmVxdWVzdBoqLm1hdmlvLmF1dGgudjEuRmluaXNoUGFzc2tleVNpZ25JblJlc3BvbnNlElcKDFN0YXJ0UmVmcmVzaBIiLm1hdmlvLmF1dGgudjEuU3RhcnRSZWZyZXNoUmVxdWVzdBojLm1hdmlvLmF1dGgudjEuU3RhcnRSZWZyZXNoUmVzcG9uc2USXQoOUmVmcmVzaFNlc3Npb24SJC5tYXZpby5hdXRoLnYxLlJlZnJlc2hTZXNzaW9uUmVxdWVzdBolLm1hdmlvLmF1dGgudjEuUmVmcmVzaFNlc3Npb25SZXNwb25zZRJFCgZMb2dvdXQSHC5tYXZpby5hdXRoLnYxLkxvZ291dFJlcXVlc3QaHS5tYXZpby5hdXRoLnYxLkxvZ291dFJlc3BvbnNlEmYKEVN0YXJ0UXVpY2tDb25uZWN0EicubWF2aW8uYXV0aC52MS5TdGFydFF1aWNrQ29ubmVjdFJlcXVlc3QaKC5tYXZpby5hdXRoLnYxLlN0YXJ0UXVpY2tDb25uZWN0UmVzcG9uc2USdAoUR2V0UXVpY2tDb25uZWN0U3RhdGUSKi5tYXZpby5hdXRoLnYxLkdldFF1aWNrQ29ubmVjdFN0YXRlUmVxdWVzdBorLm1hdmlvLmF1dGgudjEuR2V0UXVpY2tDb25uZWN0U3RhdGVSZXNwb25zZSIDkAIBEnIKFUF1dGhvcml6ZVF1aWNrQ29ubmVjdBIrLm1hdmlvLmF1dGgudjEuQXV0aG9yaXplUXVpY2tDb25uZWN0UmVxdWVzdBosLm1hdmlvLmF1dGgudjEuQXV0aG9yaXplUXVpY2tDb25uZWN0UmVzcG9uc2UScgoVTG9naW5XaXRoUXVpY2tDb25uZWN0EisubWF2aW8uYXV0aC52MS5Mb2dpbldpdGhRdWlja0Nvbm5lY3RSZXF1ZXN0GiwubWF2aW8uYXV0aC52MS5Mb2dpbldpdGhRdWlja0Nvbm5lY3RSZXNwb25zZRJXCgxDcmVhdGVBcGlLZXkSIi5tYXZpby5hdXRoLnYxLkNyZWF0ZUFwaUtleVJlcXVlc3QaIy5tYXZpby5hdXRoLnYxLkNyZWF0ZUFwaUtleVJlc3BvbnNlElkKC0xpc3RBcGlLZXlzEiEubWF2aW8uYXV0aC52MS5MaXN0QXBpS2V5c1JlcXVlc3QaIi5tYXZpby5hdXRoLnYxLkxpc3RBcGlLZXlzUmVzcG9uc2UiA5ACARJXCgxSZXZva2VBcGlLZXkSIi5tYXZpby5hdXRoLnYxLlJldm9rZUFwaUtleVJlcXVlc3QaIy5tYXZpby5hdXRoLnYxLlJldm9rZUFwaUtleVJlc3BvbnNlEl0KDkZvcmdvdFBhc3N3b3JkEiQubWF2aW8uYXV0aC52MS5Gb3Jnb3RQYXNzd29yZFJlcXVlc3QaJS5tYXZpby5hdXRoLnYxLkZvcmdvdFBhc3N3b3JkUmVzcG9uc2USWgoNUmVzZXRQYXNzd29yZBIjLm1hdmlvLmF1dGgudjEuUmVzZXRQYXNzd29yZFJlcXVlc3QaJC5tYXZpby5hdXRoLnYxLlJlc2V0UGFzc3dvcmRSZXNwb25zZRJfCg1HZXRJbnZpdGF0aW9uEiMubWF2aW8uYXV0aC52MS5HZXRJbnZpdGF0aW9uUmVxdWVzdBokLm1hdmlvLmF1dGgudjEuR2V0SW52aXRhdGlvblJlc3BvbnNlIgOQAgESdQoWU3RhcnRJbnZpdGF0aW9uUGFzc2tleRIsLm1hdmlvLmF1dGgudjEuU3RhcnRJbnZpdGF0aW9uUGFzc2tleVJlcXVlc3QaLS5tYXZpby5hdXRoLnYxLlN0YXJ0SW52aXRhdGlvblBhc3NrZXlSZXNwb25zZRJjChBBY2NlcHRJbnZpdGF0aW9uEiYubWF2aW8uYXV0aC52MS5BY2NlcHRJbnZpdGF0aW9uUmVxdWVzdBonLm1hdmlvLmF1dGgudjEuQWNjZXB0SW52aXRhdGlvblJlc3BvbnNlEnEKE0xpc3RTd2l0Y2hhYmxlVXNlcnMSKS5tYXZpby5hdXRoLnYxLkxpc3RTd2l0Y2hhYmxlVXNlcnNSZXF1ZXN0GioubWF2aW8uYXV0aC52MS5MaXN0U3dpdGNoYWJsZVVzZXJzUmVzcG9uc2UiA5ACARJRCgpTd2l0Y2hVc2VyEiAubWF2aW8uYXV0aC52MS5Td2l0Y2hVc2VyUmVxdWVzdBohLm1hdmlvLmF1dGgudjEuU3dpdGNoVXNlclJlc3BvbnNlElQKC1N0YXJ0U2lnbkluEiEubWF2aW8uYXV0aC52MS5TdGFydFNpZ25JblJlcXVlc3QaIi5tYXZpby5hdXRoLnYxLlN0YXJ0U2lnbkluUmVzcG9uc2USbAoTU2lnbkluV2l0aEFzc2VydGlvbhIpLm1hdmlvLmF1dGgudjEuU2lnbkluV2l0aEFzc2VydGlvblJlcXVlc3QaKi5tYXZpby5hdXRoLnYxLlNpZ25JbldpdGhBc3NlcnRpb25SZXNwb25zZUK1AQoRY29tLm1hdmlvLmF1dGgudjFCCUF1dGhQcm90b1ABWj9naXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vYXV0aC92MTthdXRodjGiAgNNQViqAg1NYXZpby5BdXRoLlYxygINTWF2aW9cQXV0aFxWMeICGU1hdmlvXEF1dGhcVjFcR1BCTWV0YWRhdGHqAg9NYXZpbzo6QXV0aDo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_user_v1_user]);
 
 /**
  * Device identifies a client installation.
@@ -528,66 +528,6 @@ export const LogoutResponseSchema: GenMessage<LogoutResponse> = /*@__PURE__*/
   messageDesc(file_mavio_auth_v1_auth, 17);
 
 /**
- * @generated from message mavio.auth.v1.ListSessionsRequest
- */
-export type ListSessionsRequest = Message<"mavio.auth.v1.ListSessionsRequest"> & {
-};
-
-/**
- * Describes the message mavio.auth.v1.ListSessionsRequest.
- * Use `create(ListSessionsRequestSchema)` to create a new message.
- */
-export const ListSessionsRequestSchema: GenMessage<ListSessionsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 18);
-
-/**
- * @generated from message mavio.auth.v1.ListSessionsResponse
- */
-export type ListSessionsResponse = Message<"mavio.auth.v1.ListSessionsResponse"> & {
-  /**
-   * @generated from field: repeated mavio.auth.v1.Session sessions = 1;
-   */
-  sessions: Session[];
-};
-
-/**
- * Describes the message mavio.auth.v1.ListSessionsResponse.
- * Use `create(ListSessionsResponseSchema)` to create a new message.
- */
-export const ListSessionsResponseSchema: GenMessage<ListSessionsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 19);
-
-/**
- * @generated from message mavio.auth.v1.RevokeSessionRequest
- */
-export type RevokeSessionRequest = Message<"mavio.auth.v1.RevokeSessionRequest"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-};
-
-/**
- * Describes the message mavio.auth.v1.RevokeSessionRequest.
- * Use `create(RevokeSessionRequestSchema)` to create a new message.
- */
-export const RevokeSessionRequestSchema: GenMessage<RevokeSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 20);
-
-/**
- * @generated from message mavio.auth.v1.RevokeSessionResponse
- */
-export type RevokeSessionResponse = Message<"mavio.auth.v1.RevokeSessionResponse"> & {
-};
-
-/**
- * Describes the message mavio.auth.v1.RevokeSessionResponse.
- * Use `create(RevokeSessionResponseSchema)` to create a new message.
- */
-export const RevokeSessionResponseSchema: GenMessage<RevokeSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 21);
-
-/**
  * @generated from message mavio.auth.v1.StartQuickConnectRequest
  */
 export type StartQuickConnectRequest = Message<"mavio.auth.v1.StartQuickConnectRequest"> & {
@@ -602,7 +542,7 @@ export type StartQuickConnectRequest = Message<"mavio.auth.v1.StartQuickConnectR
  * Use `create(StartQuickConnectRequestSchema)` to create a new message.
  */
 export const StartQuickConnectRequestSchema: GenMessage<StartQuickConnectRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 22);
+  messageDesc(file_mavio_auth_v1_auth, 18);
 
 /**
  * @generated from message mavio.auth.v1.StartQuickConnectResponse
@@ -633,7 +573,7 @@ export type StartQuickConnectResponse = Message<"mavio.auth.v1.StartQuickConnect
  * Use `create(StartQuickConnectResponseSchema)` to create a new message.
  */
 export const StartQuickConnectResponseSchema: GenMessage<StartQuickConnectResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 23);
+  messageDesc(file_mavio_auth_v1_auth, 19);
 
 /**
  * @generated from message mavio.auth.v1.GetQuickConnectStateRequest
@@ -650,7 +590,7 @@ export type GetQuickConnectStateRequest = Message<"mavio.auth.v1.GetQuickConnect
  * Use `create(GetQuickConnectStateRequestSchema)` to create a new message.
  */
 export const GetQuickConnectStateRequestSchema: GenMessage<GetQuickConnectStateRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 24);
+  messageDesc(file_mavio_auth_v1_auth, 20);
 
 /**
  * @generated from message mavio.auth.v1.GetQuickConnectStateResponse
@@ -672,7 +612,7 @@ export type GetQuickConnectStateResponse = Message<"mavio.auth.v1.GetQuickConnec
  * Use `create(GetQuickConnectStateResponseSchema)` to create a new message.
  */
 export const GetQuickConnectStateResponseSchema: GenMessage<GetQuickConnectStateResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 25);
+  messageDesc(file_mavio_auth_v1_auth, 21);
 
 /**
  * @generated from message mavio.auth.v1.AuthorizeQuickConnectRequest
@@ -689,7 +629,7 @@ export type AuthorizeQuickConnectRequest = Message<"mavio.auth.v1.AuthorizeQuick
  * Use `create(AuthorizeQuickConnectRequestSchema)` to create a new message.
  */
 export const AuthorizeQuickConnectRequestSchema: GenMessage<AuthorizeQuickConnectRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 26);
+  messageDesc(file_mavio_auth_v1_auth, 22);
 
 /**
  * @generated from message mavio.auth.v1.AuthorizeQuickConnectResponse
@@ -708,7 +648,7 @@ export type AuthorizeQuickConnectResponse = Message<"mavio.auth.v1.AuthorizeQuic
  * Use `create(AuthorizeQuickConnectResponseSchema)` to create a new message.
  */
 export const AuthorizeQuickConnectResponseSchema: GenMessage<AuthorizeQuickConnectResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 27);
+  messageDesc(file_mavio_auth_v1_auth, 23);
 
 /**
  * @generated from message mavio.auth.v1.LoginWithQuickConnectRequest
@@ -725,7 +665,7 @@ export type LoginWithQuickConnectRequest = Message<"mavio.auth.v1.LoginWithQuick
  * Use `create(LoginWithQuickConnectRequestSchema)` to create a new message.
  */
 export const LoginWithQuickConnectRequestSchema: GenMessage<LoginWithQuickConnectRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 28);
+  messageDesc(file_mavio_auth_v1_auth, 24);
 
 /**
  * LoginWithQuickConnectResponse is a LoginResponse.
@@ -759,7 +699,7 @@ export type LoginWithQuickConnectResponse = Message<"mavio.auth.v1.LoginWithQuic
  * Use `create(LoginWithQuickConnectResponseSchema)` to create a new message.
  */
 export const LoginWithQuickConnectResponseSchema: GenMessage<LoginWithQuickConnectResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 29);
+  messageDesc(file_mavio_auth_v1_auth, 25);
 
 /**
  * ApiKey is an integration's key, without its token.
@@ -800,7 +740,7 @@ export type ApiKey = Message<"mavio.auth.v1.ApiKey"> & {
  * Use `create(ApiKeySchema)` to create a new message.
  */
 export const ApiKeySchema: GenMessage<ApiKey> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 30);
+  messageDesc(file_mavio_auth_v1_auth, 26);
 
 /**
  * @generated from message mavio.auth.v1.CreateApiKeyRequest
@@ -817,7 +757,7 @@ export type CreateApiKeyRequest = Message<"mavio.auth.v1.CreateApiKeyRequest"> &
  * Use `create(CreateApiKeyRequestSchema)` to create a new message.
  */
 export const CreateApiKeyRequestSchema: GenMessage<CreateApiKeyRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 31);
+  messageDesc(file_mavio_auth_v1_auth, 27);
 
 /**
  * @generated from message mavio.auth.v1.CreateApiKeyResponse
@@ -841,7 +781,7 @@ export type CreateApiKeyResponse = Message<"mavio.auth.v1.CreateApiKeyResponse">
  * Use `create(CreateApiKeyResponseSchema)` to create a new message.
  */
 export const CreateApiKeyResponseSchema: GenMessage<CreateApiKeyResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 32);
+  messageDesc(file_mavio_auth_v1_auth, 28);
 
 /**
  * @generated from message mavio.auth.v1.ListApiKeysRequest
@@ -854,7 +794,7 @@ export type ListApiKeysRequest = Message<"mavio.auth.v1.ListApiKeysRequest"> & {
  * Use `create(ListApiKeysRequestSchema)` to create a new message.
  */
 export const ListApiKeysRequestSchema: GenMessage<ListApiKeysRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 33);
+  messageDesc(file_mavio_auth_v1_auth, 29);
 
 /**
  * @generated from message mavio.auth.v1.ListApiKeysResponse
@@ -871,7 +811,7 @@ export type ListApiKeysResponse = Message<"mavio.auth.v1.ListApiKeysResponse"> &
  * Use `create(ListApiKeysResponseSchema)` to create a new message.
  */
 export const ListApiKeysResponseSchema: GenMessage<ListApiKeysResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 34);
+  messageDesc(file_mavio_auth_v1_auth, 30);
 
 /**
  * @generated from message mavio.auth.v1.RevokeApiKeyRequest
@@ -888,7 +828,7 @@ export type RevokeApiKeyRequest = Message<"mavio.auth.v1.RevokeApiKeyRequest"> &
  * Use `create(RevokeApiKeyRequestSchema)` to create a new message.
  */
 export const RevokeApiKeyRequestSchema: GenMessage<RevokeApiKeyRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 35);
+  messageDesc(file_mavio_auth_v1_auth, 31);
 
 /**
  * @generated from message mavio.auth.v1.RevokeApiKeyResponse
@@ -901,7 +841,7 @@ export type RevokeApiKeyResponse = Message<"mavio.auth.v1.RevokeApiKeyResponse">
  * Use `create(RevokeApiKeyResponseSchema)` to create a new message.
  */
 export const RevokeApiKeyResponseSchema: GenMessage<RevokeApiKeyResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 36);
+  messageDesc(file_mavio_auth_v1_auth, 32);
 
 /**
  * @generated from message mavio.auth.v1.ForgotPasswordRequest
@@ -918,7 +858,7 @@ export type ForgotPasswordRequest = Message<"mavio.auth.v1.ForgotPasswordRequest
  * Use `create(ForgotPasswordRequestSchema)` to create a new message.
  */
 export const ForgotPasswordRequestSchema: GenMessage<ForgotPasswordRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 37);
+  messageDesc(file_mavio_auth_v1_auth, 33);
 
 /**
  * @generated from message mavio.auth.v1.ForgotPasswordResponse
@@ -937,7 +877,7 @@ export type ForgotPasswordResponse = Message<"mavio.auth.v1.ForgotPasswordRespon
  * Use `create(ForgotPasswordResponseSchema)` to create a new message.
  */
 export const ForgotPasswordResponseSchema: GenMessage<ForgotPasswordResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 38);
+  messageDesc(file_mavio_auth_v1_auth, 34);
 
 /**
  * @generated from message mavio.auth.v1.ResetPasswordRequest
@@ -964,7 +904,7 @@ export type ResetPasswordRequest = Message<"mavio.auth.v1.ResetPasswordRequest">
  * Use `create(ResetPasswordRequestSchema)` to create a new message.
  */
 export const ResetPasswordRequestSchema: GenMessage<ResetPasswordRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 39);
+  messageDesc(file_mavio_auth_v1_auth, 35);
 
 /**
  * @generated from message mavio.auth.v1.ResetPasswordResponse
@@ -977,7 +917,7 @@ export type ResetPasswordResponse = Message<"mavio.auth.v1.ResetPasswordResponse
  * Use `create(ResetPasswordResponseSchema)` to create a new message.
  */
 export const ResetPasswordResponseSchema: GenMessage<ResetPasswordResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 40);
+  messageDesc(file_mavio_auth_v1_auth, 36);
 
 /**
  * @generated from message mavio.auth.v1.GetInvitationRequest
@@ -994,7 +934,7 @@ export type GetInvitationRequest = Message<"mavio.auth.v1.GetInvitationRequest">
  * Use `create(GetInvitationRequestSchema)` to create a new message.
  */
 export const GetInvitationRequestSchema: GenMessage<GetInvitationRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 41);
+  messageDesc(file_mavio_auth_v1_auth, 37);
 
 /**
  * @generated from message mavio.auth.v1.GetInvitationResponse
@@ -1019,7 +959,7 @@ export type GetInvitationResponse = Message<"mavio.auth.v1.GetInvitationResponse
  * Use `create(GetInvitationResponseSchema)` to create a new message.
  */
 export const GetInvitationResponseSchema: GenMessage<GetInvitationResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 42);
+  messageDesc(file_mavio_auth_v1_auth, 38);
 
 /**
  * @generated from message mavio.auth.v1.StartInvitationPasskeyRequest
@@ -1044,7 +984,7 @@ export type StartInvitationPasskeyRequest = Message<"mavio.auth.v1.StartInvitati
  * Use `create(StartInvitationPasskeyRequestSchema)` to create a new message.
  */
 export const StartInvitationPasskeyRequestSchema: GenMessage<StartInvitationPasskeyRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 43);
+  messageDesc(file_mavio_auth_v1_auth, 39);
 
 /**
  * @generated from message mavio.auth.v1.StartInvitationPasskeyResponse
@@ -1069,7 +1009,7 @@ export type StartInvitationPasskeyResponse = Message<"mavio.auth.v1.StartInvitat
  * Use `create(StartInvitationPasskeyResponseSchema)` to create a new message.
  */
 export const StartInvitationPasskeyResponseSchema: GenMessage<StartInvitationPasskeyResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 44);
+  messageDesc(file_mavio_auth_v1_auth, 40);
 
 /**
  * @generated from message mavio.auth.v1.AcceptInvitationRequest
@@ -1126,7 +1066,7 @@ export type AcceptInvitationRequest = Message<"mavio.auth.v1.AcceptInvitationReq
  * Use `create(AcceptInvitationRequestSchema)` to create a new message.
  */
 export const AcceptInvitationRequestSchema: GenMessage<AcceptInvitationRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 45);
+  messageDesc(file_mavio_auth_v1_auth, 41);
 
 /**
  * @generated from message mavio.auth.v1.AcceptInvitationResponse
@@ -1162,7 +1102,7 @@ export type AcceptInvitationResponse = Message<"mavio.auth.v1.AcceptInvitationRe
  * Use `create(AcceptInvitationResponseSchema)` to create a new message.
  */
 export const AcceptInvitationResponseSchema: GenMessage<AcceptInvitationResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 46);
+  messageDesc(file_mavio_auth_v1_auth, 42);
 
 /**
  * @generated from message mavio.auth.v1.ListSwitchableUsersRequest
@@ -1175,7 +1115,7 @@ export type ListSwitchableUsersRequest = Message<"mavio.auth.v1.ListSwitchableUs
  * Use `create(ListSwitchableUsersRequestSchema)` to create a new message.
  */
 export const ListSwitchableUsersRequestSchema: GenMessage<ListSwitchableUsersRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 47);
+  messageDesc(file_mavio_auth_v1_auth, 43);
 
 /**
  * @generated from message mavio.auth.v1.ListSwitchableUsersResponse
@@ -1192,7 +1132,7 @@ export type ListSwitchableUsersResponse = Message<"mavio.auth.v1.ListSwitchableU
  * Use `create(ListSwitchableUsersResponseSchema)` to create a new message.
  */
 export const ListSwitchableUsersResponseSchema: GenMessage<ListSwitchableUsersResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 48);
+  messageDesc(file_mavio_auth_v1_auth, 44);
 
 /**
  * SwitchableUser is a user a session can switch to.
@@ -1240,7 +1180,7 @@ export type SwitchableUser = Message<"mavio.auth.v1.SwitchableUser"> & {
  * Use `create(SwitchableUserSchema)` to create a new message.
  */
 export const SwitchableUserSchema: GenMessage<SwitchableUser> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 49);
+  messageDesc(file_mavio_auth_v1_auth, 45);
 
 /**
  * @generated from message mavio.auth.v1.SwitchUserRequest
@@ -1262,7 +1202,7 @@ export type SwitchUserRequest = Message<"mavio.auth.v1.SwitchUserRequest"> & {
  * Use `create(SwitchUserRequestSchema)` to create a new message.
  */
 export const SwitchUserRequestSchema: GenMessage<SwitchUserRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 50);
+  messageDesc(file_mavio_auth_v1_auth, 46);
 
 /**
  * @generated from message mavio.auth.v1.SwitchUserResponse
@@ -1281,7 +1221,7 @@ export type SwitchUserResponse = Message<"mavio.auth.v1.SwitchUserResponse"> & {
  * Use `create(SwitchUserResponseSchema)` to create a new message.
  */
 export const SwitchUserResponseSchema: GenMessage<SwitchUserResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 51);
+  messageDesc(file_mavio_auth_v1_auth, 47);
 
 /**
  * @generated from message mavio.auth.v1.StartSignInRequest
@@ -1322,7 +1262,7 @@ export type StartSignInRequest = Message<"mavio.auth.v1.StartSignInRequest"> & {
  * Use `create(StartSignInRequestSchema)` to create a new message.
  */
 export const StartSignInRequestSchema: GenMessage<StartSignInRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 52);
+  messageDesc(file_mavio_auth_v1_auth, 48);
 
 /**
  * @generated from message mavio.auth.v1.StartSignInResponse
@@ -1346,7 +1286,7 @@ export type StartSignInResponse = Message<"mavio.auth.v1.StartSignInResponse"> &
  * Use `create(StartSignInResponseSchema)` to create a new message.
  */
 export const StartSignInResponseSchema: GenMessage<StartSignInResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 53);
+  messageDesc(file_mavio_auth_v1_auth, 49);
 
 /**
  * @generated from message mavio.auth.v1.SignInWithAssertionRequest
@@ -1380,7 +1320,7 @@ export type SignInWithAssertionRequest = Message<"mavio.auth.v1.SignInWithAssert
  * Use `create(SignInWithAssertionRequestSchema)` to create a new message.
  */
 export const SignInWithAssertionRequestSchema: GenMessage<SignInWithAssertionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 54);
+  messageDesc(file_mavio_auth_v1_auth, 50);
 
 /**
  * @generated from message mavio.auth.v1.SignInWithAssertionResponse
@@ -1416,7 +1356,7 @@ export type SignInWithAssertionResponse = Message<"mavio.auth.v1.SignInWithAsser
  * Use `create(SignInWithAssertionResponseSchema)` to create a new message.
  */
 export const SignInWithAssertionResponseSchema: GenMessage<SignInWithAssertionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_auth_v1_auth, 55);
+  messageDesc(file_mavio_auth_v1_auth, 51);
 
 /**
  * AccountMode is how a server signs people in, chosen when it is set up.
@@ -1569,27 +1509,6 @@ export const AuthService: GenService<{
     methodKind: "unary";
     input: typeof LogoutRequestSchema;
     output: typeof LogoutResponseSchema;
-  },
-  /**
-   * ListSessions lists the calling user's signed-in devices, most recently
-   * seen first.
-   *
-   * @generated from rpc mavio.auth.v1.AuthService.ListSessions
-   */
-  listSessions: {
-    methodKind: "unary";
-    input: typeof ListSessionsRequestSchema;
-    output: typeof ListSessionsResponseSchema;
-  },
-  /**
-   * RevokeSession signs one of the calling user's devices out.
-   *
-   * @generated from rpc mavio.auth.v1.AuthService.RevokeSession
-   */
-  revokeSession: {
-    methodKind: "unary";
-    input: typeof RevokeSessionRequestSchema;
-    output: typeof RevokeSessionResponseSchema;
   },
   /**
    * StartQuickConnect begins signing a device in from a signed-in one

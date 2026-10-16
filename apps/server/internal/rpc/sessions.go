@@ -119,7 +119,7 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 			return nil, connectError(ctx, err)
 		}
 		for _, as := range list {
-			sess, err := s.sessionToProto(ctx, &u, &as, p.User.IsAdmin())
+			sess, err := s.sessionToProto(ctx, &u, &as, p.User.IsAdmin(), p.Session.ID)
 			if err != nil {
 				return nil, connectError(ctx, err)
 			}
@@ -148,11 +148,14 @@ func (s *SessionService) ListSessions(ctx context.Context, req *sessionv1.ListSe
 	return sessionv1.ListSessionsResponse_builder{Sessions: out}.Build(), nil
 }
 
-func (s *SessionService) sessionToProto(ctx context.Context, u *core.User, as *core.AuthSession, admin bool) (*sessionv1.Session, error) {
+// sessionToProto describes a signed-in device; current is the caller's
+// session.
+func (s *SessionService) sessionToProto(ctx context.Context, u *core.User, as *core.AuthSession, admin bool, current core.ID) (*sessionv1.Session, error) {
 	b := sessionv1.Session_builder{
 		Id: new(as.ID.String()), UserId: new(u.ID.String()), UserName: &u.Name,
 		DeviceId: &as.DeviceID, DeviceName: &as.DeviceName, Client: &as.Client, ClientVersion: &as.ClientVersion,
-		LastSeenTime: timestamp(as.LastSeenAt), Online: new(s.hub.Online(as.ID)),
+		CreateTime: timestamp(as.CreatedAt), LastSeenTime: timestamp(as.LastSeenAt), Online: new(s.hub.Online(as.ID)),
+		Current: new(as.ID == current),
 	}
 	var err error
 	b.NowPlaying, err = s.nowPlaying(ctx, as.ID, admin)
@@ -184,6 +187,31 @@ func (s *SessionService) nowPlaying(ctx context.Context, session core.ID, admin 
 		PlaybackId: &pb.ID, Item: items[0], Position: durationpb.New(st.Position), Paused: &st.Paused,
 		Method: new(playMethods[pb.Method]),
 	}.Build(), nil
+}
+
+// RevokeSession signs a device out: the caller's, or anyone's for the
+// administrator.
+func (s *SessionService) RevokeSession(ctx context.Context, req *sessionv1.RevokeSessionRequest) (*sessionv1.RevokeSessionResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	id := core.MustParseID(req.GetId())
+	as, err := s.store.AuthSessions().Get(ctx, id)
+	// Other users' sessions are reported as missing.
+	if err == nil && as.UserID != p.User.ID && !p.User.IsAdmin() {
+		err = core.ErrNotFound
+	}
+	if errors.Is(err, core.ErrNotFound) {
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such session"))
+	}
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if err := s.store.AuthSessions().Delete(ctx, id); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return &sessionv1.RevokeSessionResponse{}, nil
 }
 
 // SendCommand sends a command to an online device.

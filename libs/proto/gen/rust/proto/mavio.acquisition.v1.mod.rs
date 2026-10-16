@@ -37,12 +37,14 @@ pub mod __buffa {
             #[allow(unused_imports)]
             use super::*;
             include!("mavio.acquisition.v1.subtitle.__view_oneof.rs");
+            include!("mavio.acquisition.v1.wanted.__view_oneof.rs");
         }
     }
     pub mod oneof {
         #[allow(unused_imports)]
         use super::*;
         include!("mavio.acquisition.v1.subtitle.__oneof.rs");
+        include!("mavio.acquisition.v1.wanted.__oneof.rs");
     }
 }
 #[doc(inline)]
@@ -1022,17 +1024,17 @@ pub use self::__buffa::view::AddSeriesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::AddSeriesResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::MonitorSeriesRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::MonitorSeriesRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::MonitorSeriesResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::MonitorSeriesResponseOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::SetMonitoredRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::SetMonitoredRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::MonitoredItemsView;
+#[doc(inline)]
+pub use self::__buffa::view::MonitoredItemsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SeriesMonitoringView;
+#[doc(inline)]
+pub use self::__buffa::view::SeriesMonitoringOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::SetMonitoredResponseView;
 #[doc(inline)]

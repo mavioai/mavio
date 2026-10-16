@@ -180,16 +180,36 @@ func (_u *UserUpdate) SetNillablePolicy(v *core.UserPolicy) *UserUpdate {
 }
 
 // SetPreferences sets the "preferences" field.
-func (_u *UserUpdate) SetPreferences(v core.UserPreferences) *UserUpdate {
+func (_u *UserUpdate) SetPreferences(v core.PlaybackPreferences) *UserUpdate {
 	_u.mutation.SetPreferences(v)
 	return _u
 }
 
 // SetNillablePreferences sets the "preferences" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePreferences(v *core.UserPreferences) *UserUpdate {
+func (_u *UserUpdate) SetNillablePreferences(v *core.PlaybackPreferences) *UserUpdate {
 	if v != nil {
 		_u.SetPreferences(*v)
 	}
+	return _u
+}
+
+// SetHome sets the "home" field.
+func (_u *UserUpdate) SetHome(v core.HomeLayout) *UserUpdate {
+	_u.mutation.SetHome(v)
+	return _u
+}
+
+// SetNillableHome sets the "home" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableHome(v *core.HomeLayout) *UserUpdate {
+	if v != nil {
+		_u.SetHome(*v)
+	}
+	return _u
+}
+
+// ClearHome clears the value of the "home" field.
+func (_u *UserUpdate) ClearHome() *UserUpdate {
+	_u.mutation.ClearHome()
 	return _u
 }
 
@@ -709,6 +729,12 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Preferences(); ok {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.Home(); ok {
+		_spec.SetField(user.FieldHome, field.TypeJSON, value)
+	}
+	if _u.mutation.HomeCleared() {
+		_spec.ClearField(user.FieldHome, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.LastLoginAt(); ok {
 		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
@@ -1372,16 +1398,36 @@ func (_u *UserUpdateOne) SetNillablePolicy(v *core.UserPolicy) *UserUpdateOne {
 }
 
 // SetPreferences sets the "preferences" field.
-func (_u *UserUpdateOne) SetPreferences(v core.UserPreferences) *UserUpdateOne {
+func (_u *UserUpdateOne) SetPreferences(v core.PlaybackPreferences) *UserUpdateOne {
 	_u.mutation.SetPreferences(v)
 	return _u
 }
 
 // SetNillablePreferences sets the "preferences" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePreferences(v *core.UserPreferences) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillablePreferences(v *core.PlaybackPreferences) *UserUpdateOne {
 	if v != nil {
 		_u.SetPreferences(*v)
 	}
+	return _u
+}
+
+// SetHome sets the "home" field.
+func (_u *UserUpdateOne) SetHome(v core.HomeLayout) *UserUpdateOne {
+	_u.mutation.SetHome(v)
+	return _u
+}
+
+// SetNillableHome sets the "home" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableHome(v *core.HomeLayout) *UserUpdateOne {
+	if v != nil {
+		_u.SetHome(*v)
+	}
+	return _u
+}
+
+// ClearHome clears the value of the "home" field.
+func (_u *UserUpdateOne) ClearHome() *UserUpdateOne {
+	_u.mutation.ClearHome()
 	return _u
 }
 
@@ -1931,6 +1977,12 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Preferences(); ok {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.Home(); ok {
+		_spec.SetField(user.FieldHome, field.TypeJSON, value)
+	}
+	if _u.mutation.HomeCleared() {
+		_spec.ClearField(user.FieldHome, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.LastLoginAt(); ok {
 		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)

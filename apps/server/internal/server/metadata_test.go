@@ -88,8 +88,8 @@ func TestMetadataManagement(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, url, token)
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, url, token)
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret","image_base":"` + artwork.URL + `"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)

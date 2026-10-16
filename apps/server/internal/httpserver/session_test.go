@@ -239,3 +239,57 @@ func TestSyncPlay(t *testing.T) {
 	_, err = phoneSync.Pause(ctx, &sessionv1.PauseRequest{})
 	wantCode(t, "pause outside a group", err, connect.CodeFailedPrecondition)
 }
+
+func TestRevokeSession(t *testing.T) {
+	ctx := t.Context()
+	url, _ := startServer(t, nil)
+	adminToken := signUp(t, url)
+	if _, err := userv1connect.NewUserServiceClient(http.DefaultClient, url, withToken(adminToken)).CreateUser(ctx, userv1.CreateUserRequest_builder{
+		Name: new("kid"), Password: new("pw"),
+	}.Build()); err != nil {
+		t.Fatal(err)
+	}
+	tabletToken := login(t, url, "kid", "pw", "tablet")
+	login(t, url, "kid", "pw", "laptop")
+	admin := sessionv1connect.NewSessionServiceClient(http.DefaultClient, url, withToken(adminToken))
+	kid := sessionv1connect.NewSessionServiceClient(http.DefaultClient, url, withToken(tabletToken))
+	all, err := admin.ListSessions(ctx, sessionv1.ListSessionsRequest_builder{AllUsers: new(true)}.Build())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := map[string]string{}
+	for _, s := range all.GetSessions() {
+		ids[s.GetDeviceId()] = s.GetId()
+		if s.GetCurrent() != (s.GetUserName() == "admin") || !s.HasCreateTime() {
+			t.Errorf("session = %v", s)
+		}
+	}
+	if len(ids) != 3 {
+		t.Fatalf("sessions = %v", all.GetSessions())
+	}
+	var adminDevice string
+	for device, id := range ids {
+		if device != "tablet" && device != "laptop" {
+			adminDevice = id
+		}
+	}
+
+	// The kid can sign out their own devices only.
+	_, err = kid.RevokeSession(ctx, sessionv1.RevokeSessionRequest_builder{Id: &adminDevice}.Build())
+	wantCode(t, "kid revokes the admin's device", err, connect.CodeNotFound)
+	laptop := ids["laptop"]
+	if _, err := kid.RevokeSession(ctx, sessionv1.RevokeSessionRequest_builder{Id: &laptop}.Build()); err != nil {
+		t.Fatalf("kid revokes their laptop: %v", err)
+	}
+	if list, err := kid.ListSessions(ctx, &sessionv1.ListSessionsRequest{}); err != nil || len(list.GetSessions()) != 1 || !list.GetSessions()[0].GetCurrent() {
+		t.Errorf("kid's sessions = %v, %v", list, err)
+	}
+
+	// The administrator signs out anyone's devices.
+	tablet := ids["tablet"]
+	if _, err := admin.RevokeSession(ctx, sessionv1.RevokeSessionRequest_builder{Id: &tablet}.Build()); err != nil {
+		t.Fatalf("admin revokes the kid's tablet: %v", err)
+	}
+	_, err = kid.ListSessions(ctx, &sessionv1.ListSessionsRequest{})
+	wantCode(t, "revoked tablet lists sessions", err, connect.CodeUnauthenticated)
+}

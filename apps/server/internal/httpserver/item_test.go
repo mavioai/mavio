@@ -201,7 +201,8 @@ func TestItemService(t *testing.T) {
 	}.Build()); err != nil {
 		t.Fatal(err)
 	}
-	asKid := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(login(t, url, "kid", "pw", "tablet")))
+	kidToken := login(t, url, "kid", "pw", "tablet")
+	asKid := libraryv1connect.NewItemServiceClient(http.DefaultClient, url, withToken(kidToken))
 	// The series is rated above the kid's limit.
 	series := []libraryv1.ItemKind{libraryv1.ItemKind_ITEM_KIND_SERIES}
 	if got := list(asKid, libraryv1.ListItemsRequest_builder{Kinds: series}); len(got.GetItems()) != 0 {
@@ -231,12 +232,14 @@ func TestItemService(t *testing.T) {
 	}
 	// Only administrators look for lyrics; without lyrics providers there
 	// are none.
-	_, err = asKid.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build())
+	kidMetadata := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, url, withToken(kidToken))
+	metadata := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, url, withToken(token))
+	_, err = kidMetadata.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build())
 	wantCode(t, "kid searches lyrics", err, connect.CodePermissionDenied)
-	if got, err := asAdmin.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build()); err != nil || len(got.GetLyrics()) != 0 {
+	if got, err := metadata.SearchRemoteLyrics(ctx, libraryv1.SearchRemoteLyricsRequest_builder{ItemId: new(c.pilot.ID.String())}.Build()); err != nil || len(got.GetLyrics()) != 0 {
 		t.Errorf("SearchRemoteLyrics = %v, %v", got, err)
 	}
-	_, err = asAdmin.DownloadRemoteLyrics(ctx, libraryv1.DownloadRemoteLyricsRequest_builder{
+	_, err = metadata.DownloadRemoteLyrics(ctx, libraryv1.DownloadRemoteLyricsRequest_builder{
 		ItemId: new(c.pilot.ID.String()), Provider: new("nobody"), Id: new("1"),
 	}.Build())
 	wantCode(t, "download lyrics from nobody", err, connect.CodeNotFound)

@@ -561,6 +561,16 @@ func AccessNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldAccess))
 }
 
+// HomeIsNil applies the IsNil predicate on the "home" field.
+func HomeIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldHome))
+}
+
+// HomeNotNil applies the NotNil predicate on the "home" field.
+func HomeNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldHome))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))

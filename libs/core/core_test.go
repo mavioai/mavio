@@ -134,7 +134,7 @@ func TestValidate(t *testing.T) {
 		{"storage class auto", (&Library{Name: "x", Kind: LibraryMovies, Paths: []string{"/a"}, StorageClasses: map[string]StorageClass{"/a": StorageAuto}}).Validate()},
 		{"storage class unknown", (&Library{Name: "x", Kind: LibraryMovies, Paths: []string{"/a"}, StorageClasses: map[string]StorageClass{"/a": "tape"}}).Validate()},
 		{"user without credentials", (&User{ID: NewID(), Name: "bob"}).Validate()},
-		{"user bad subtitle mode", (&User{ID: NewID(), Name: "bob", AuthProvider: "ldap", Preferences: UserPreferences{SubtitleMode: "sometimes"}}).Validate()},
+		{"user bad subtitle mode", (&User{ID: NewID(), Name: "bob", AuthProvider: "ldap", Preferences: PlaybackPreferences{SubtitleMode: "sometimes"}}).Validate()},
 		{"user data rating", (&UserData{UserID: NewID(), ItemID: NewID(), Rating: &ten}).Validate()},
 		{"user data position", (&UserData{UserID: NewID(), ItemID: NewID(), Position: -time.Second}).Validate()},
 		{"job without attempts", (&Job{ID: NewID(), Kind: "x"}).Validate()},

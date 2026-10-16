@@ -131,13 +131,13 @@ func TestAI(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
-	ai := systemv1connect.NewAiServiceClient(http.DefaultClient, srv.url, token)
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
+	ai := systemv1connect.NewAiProviderServiceClient(http.DefaultClient, srv.url, token)
 	waitFor(t, "the agent plugin started", func() bool {
 		_, err := ai.ListAiProviders(ctx, &systemv1.ListAiProvidersRequest{})
 		return err == nil
 	})
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
@@ -238,7 +238,7 @@ func TestAI(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Login: %v", err)
 	}
-	asGuest := systemv1connect.NewAiServiceClient(http.DefaultClient, srv.url, withToken(guest.GetAccessToken()))
+	asGuest := systemv1connect.NewAiProviderServiceClient(http.DefaultClient, srv.url, withToken(guest.GetAccessToken()))
 	if _, err := asGuest.ListAiProviders(ctx, &systemv1.ListAiProvidersRequest{}); connect.CodeOf(err) != connect.CodePermissionDenied {
 		t.Errorf("ListAiProviders as a guest = %v, want permission denied", err)
 	}

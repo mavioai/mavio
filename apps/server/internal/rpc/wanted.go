@@ -174,41 +174,39 @@ func (s *WantedService) AddSeries(ctx context.Context, req *acquisitionv1.AddSer
 	return acquisitionv1.AddSeriesResponse_builder{ItemId: new(it.ID.String()), Wanted: wantedToProto(w, it.Monitored)}.Build(), nil
 }
 
-// MonitorSeries applies a monitoring option to wanted series.
-func (s *WantedService) MonitorSeries(ctx context.Context, req *acquisitionv1.MonitorSeriesRequest) (*acquisitionv1.MonitorSeriesResponse, error) {
+// SetMonitored monitors or unmonitors seasons and episodes, or applies a
+// monitoring option to wanted series.
+func (s *WantedService) SetMonitored(ctx context.Context, req *acquisitionv1.SetMonitoredRequest) (*acquisitionv1.SetMonitoredResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	ids, err := parseIDs(ctx, req.GetItemIds())
+	if req.HasItems() {
+		items := req.GetItems()
+		ids, err := parseIDs(ctx, items.GetItemIds())
+		if err != nil {
+			return nil, err
+		}
+		if err := s.rt.SetMonitored(ctx, ids, items.GetMonitored()); err != nil {
+			return nil, connectError(ctx, err)
+		}
+		return &acquisitionv1.SetMonitoredResponse{}, nil
+	}
+	series := req.GetSeries()
+	ids, err := parseIDs(ctx, series.GetItemIds())
 	if err != nil {
 		return nil, err
 	}
-	monitor, err := seriesMonitor(req.GetMonitor())
+	monitor, err := seriesMonitor(series.GetMonitor())
 	if err != nil {
 		return nil, err
 	}
 	var newItems core.NewItemMonitor
-	if m := req.GetMonitorNewItems(); m != acquisitionv1.NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED {
+	if m := series.GetMonitorNewItems(); m != acquisitionv1.NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED {
 		if newItems, err = newItemMonitor(m); err != nil {
 			return nil, err
 		}
 	}
 	if err := s.rt.MonitorSeries(ctx, ids, monitor, newItems); err != nil {
-		return nil, connectError(ctx, err)
-	}
-	return &acquisitionv1.MonitorSeriesResponse{}, nil
-}
-
-// SetMonitored monitors or unmonitors seasons and episodes.
-func (s *WantedService) SetMonitored(ctx context.Context, req *acquisitionv1.SetMonitoredRequest) (*acquisitionv1.SetMonitoredResponse, error) {
-	if _, err := admin(ctx); err != nil {
-		return nil, err
-	}
-	ids, err := parseIDs(ctx, req.GetItemIds())
-	if err != nil {
-		return nil, err
-	}
-	if err := s.rt.SetMonitored(ctx, ids, req.GetMonitored()); err != nil {
 		return nil, connectError(ctx, err)
 	}
 	return &acquisitionv1.SetMonitoredResponse{}, nil

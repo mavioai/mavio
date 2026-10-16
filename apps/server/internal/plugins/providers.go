@@ -267,16 +267,6 @@ func (p *imageProvider) Images(ctx context.Context, l library.Lookup) ([]metadat
 	return (&providers.ImagePlugin{ID: p.id, Client: pl.Images()}).Images(ctx, l)
 }
 
-// SubtitleProviders returns the subtitle providers among the started
-// plugins.
-func (m *Manager) SubtitleProviders() []library.SubtitleProvider {
-	var out []library.SubtitleProvider
-	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_SUBTITLE_PROVIDER) {
-		out = append(out, &subtitleProvider{m: m, id: id})
-	}
-	return out
-}
-
 // SubtitlePlugins returns the started subtitle provider plugins for
 // subtitle acquisition.
 func (m *Manager) SubtitlePlugins() []subtitles.Provider {
@@ -298,37 +288,6 @@ func (m *Manager) SubtitleTranslators() []subtitles.Translator {
 		}
 	}
 	return out
-}
-
-type subtitleProvider struct {
-	m  *Manager
-	id string
-}
-
-func (p *subtitleProvider) Name() string { return p.id }
-
-func (p *subtitleProvider) plugin() (*providers.SubtitlePlugin, bool) {
-	pl, ok := p.m.running(p.id)
-	if !ok || pl.Subtitles() == nil {
-		return nil, false
-	}
-	return &providers.SubtitlePlugin{ID: p.id, Client: pl.Subtitles()}, true
-}
-
-func (p *subtitleProvider) SearchSubtitles(ctx context.Context, q library.SubtitleQuery) ([]library.RemoteSubtitle, error) {
-	pl, ok := p.plugin()
-	if !ok {
-		return nil, nil
-	}
-	return pl.SearchSubtitles(ctx, q)
-}
-
-func (p *subtitleProvider) DownloadSubtitle(ctx context.Context, id string) (library.DownloadedSubtitle, error) {
-	pl, ok := p.plugin()
-	if !ok {
-		return library.DownloadedSubtitle{}, fmt.Errorf("plugin %s is not ready: %w", p.id, core.ErrNotFound)
-	}
-	return pl.DownloadSubtitle(ctx, id)
 }
 
 // SegmentProviders returns the media segment providers among the started

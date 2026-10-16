@@ -89,11 +89,11 @@ func TestUserService(t *testing.T) {
 	}
 	login(t, url, "bob", "pw2", "tv")
 
-	prefs, err := asBob.UpdatePreferences(ctx, userv1.UpdatePreferencesRequest_builder{Preferences: userv1.UserPreferences_builder{
+	prefs, err := asBob.UpdatePlaybackPreferences(ctx, userv1.UpdatePlaybackPreferencesRequest_builder{PlaybackPreferences: userv1.PlaybackPreferences_builder{
 		AudioLanguages: []string{"jpn"}, SubtitleLanguages: []string{"eng"}, SubtitleMode: new(userv1.SubtitleMode_SUBTITLE_MODE_SMART),
 	}.Build()}.Build())
-	if err != nil || prefs.GetPreferences().GetSubtitleMode() != userv1.SubtitleMode_SUBTITLE_MODE_SMART || prefs.GetPreferences().GetAudioLanguages()[0] != "jpn" {
-		t.Errorf("UpdatePreferences = %v, %v", prefs, err)
+	if err != nil || prefs.GetPlaybackPreferences().GetSubtitleMode() != userv1.SubtitleMode_SUBTITLE_MODE_SMART || prefs.GetPlaybackPreferences().GetAudioLanguages()[0] != "jpn" {
+		t.Errorf("UpdatePlaybackPreferences = %v, %v", prefs, err)
 	}
 
 	// The server has one administrator, who stays.

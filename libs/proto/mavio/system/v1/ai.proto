@@ -5,15 +5,12 @@ package mavio.system.v1;
 import "buf/validate/validate.proto";
 import "mavio/plugin/v1/ai.proto";
 
-// AiService administers the AI model providers the server's features use,
-// through the plugin with the AI_GATEWAY capability, which keeps their
-// credentials: API keys, and OAuth logins relayed to the administrator.
-// It also keeps the administrators' conversations with the models, through
-// the plugin with the AGENT_SESSION capability. Every RPC requires an
-// administrator; without a started AI gateway plugin, or for the
-// conversations one with the AGENT_SESSION capability, they fail with
-// failed precondition.
-service AiService {
+// AiProviderService administers the AI model providers the server's
+// features use, through the plugin with the AI_GATEWAY capability, which
+// keeps their credentials: API keys, and OAuth logins relayed to the
+// administrator. Every RPC requires an administrator; without a started
+// AI gateway plugin they fail with FAILED_PRECONDITION.
+service AiProviderService {
   // ListAiProviders lists the providers with how they authenticate and
   // whether they can be used.
   rpc ListAiProviders(ListAiProvidersRequest) returns (ListAiProvidersResponse) {
@@ -45,6 +42,13 @@ service AiService {
   rpc CancelAiLogin(CancelAiLoginRequest) returns (CancelAiLoginResponse);
   // LogoutAi removes a provider's stored credential.
   rpc LogoutAi(LogoutAiRequest) returns (LogoutAiResponse);
+}
+
+// AiConversationService keeps the administrators' conversations with the
+// models, through the plugin with the AGENT_SESSION capability. Every RPC
+// requires an administrator; without a started plugin with the
+// AGENT_SESSION capability they fail with FAILED_PRECONDITION.
+service AiConversationService {
   // CreateAiConversation starts a conversation with a model.
   rpc CreateAiConversation(CreateAiConversationRequest) returns (CreateAiConversationResponse);
   // ListAiConversations lists the conversations, newest first.

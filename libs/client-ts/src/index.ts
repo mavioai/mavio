@@ -169,7 +169,7 @@ export {
 export { useApiKeys, useBackupDownload, useBackups, useLogs } from "./backups.ts";
 export { useQuota, useRequestActions, useRequests } from "./requests.ts";
 export { usePerson, usePersonItems } from "./people.ts";
-export { useSendCommand, useSessions } from "./remote.ts";
+export { useRevokeSession, useSendCommand, useSessions } from "./remote.ts";
 export { useExternalIdKinds, useMetadataActions, useRemoteImages, useRemoteSearch } from "./metadata.ts";
 export { useCollectionActions, useCollections, usePlaylistActions, usePlaylistEntries, usePlaylists } from "./lists.ts";
 export {

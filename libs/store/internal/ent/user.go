@@ -38,7 +38,9 @@ type User struct {
 	// Policy holds the value of the "policy" field.
 	Policy core.UserPolicy `json:"policy,omitempty"`
 	// Preferences holds the value of the "preferences" field.
-	Preferences core.UserPreferences `json:"preferences,omitempty"`
+	Preferences core.PlaybackPreferences `json:"preferences,omitempty"`
+	// Home holds the value of the "home" field.
+	Home core.HomeLayout `json:"home,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// LastLoginAt holds the value of the "last_login_at" field.
@@ -182,7 +184,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldAccess, user.FieldPolicy, user.FieldPreferences:
+		case user.FieldAccess, user.FieldPolicy, user.FieldPreferences, user.FieldHome:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(core.ID)
@@ -278,6 +280,14 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &_m.Preferences); err != nil {
 					return fmt.Errorf("unmarshal field preferences: %w", err)
+				}
+			}
+		case user.FieldHome:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field home", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Home); err != nil {
+					return fmt.Errorf("unmarshal field home: %w", err)
 				}
 			}
 		case user.FieldCreatedAt:
@@ -415,6 +425,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("preferences=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Preferences))
+	builder.WriteString(", ")
+	builder.WriteString("home=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Home))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

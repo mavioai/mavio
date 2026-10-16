@@ -21,8 +21,10 @@ import (
 const _ = connect.IsAtLeastVersion1_13_0
 
 const (
-	// AiServiceName is the fully-qualified name of the AiService service.
-	AiServiceName = "mavio.system.v1.AiService"
+	// AiProviderServiceName is the fully-qualified name of the AiProviderService service.
+	AiProviderServiceName = "mavio.system.v1.AiProviderService"
+	// AiConversationServiceName is the fully-qualified name of the AiConversationService service.
+	AiConversationServiceName = "mavio.system.v1.AiConversationService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -33,43 +35,52 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// AiServiceListAiProvidersProcedure is the fully-qualified name of the AiService's ListAiProviders
-	// RPC.
-	AiServiceListAiProvidersProcedure = "/mavio.system.v1.AiService/ListAiProviders"
-	// AiServiceListAiModelsProcedure is the fully-qualified name of the AiService's ListAiModels RPC.
-	AiServiceListAiModelsProcedure = "/mavio.system.v1.AiService/ListAiModels"
-	// AiServiceSetAiApiKeyProcedure is the fully-qualified name of the AiService's SetAiApiKey RPC.
-	AiServiceSetAiApiKeyProcedure = "/mavio.system.v1.AiService/SetAiApiKey"
-	// AiServiceStartAiLoginProcedure is the fully-qualified name of the AiService's StartAiLogin RPC.
-	AiServiceStartAiLoginProcedure = "/mavio.system.v1.AiService/StartAiLogin"
-	// AiServiceGetAiLoginProcedure is the fully-qualified name of the AiService's GetAiLogin RPC.
-	AiServiceGetAiLoginProcedure = "/mavio.system.v1.AiService/GetAiLogin"
-	// AiServiceWatchAiLoginProcedure is the fully-qualified name of the AiService's WatchAiLogin RPC.
-	AiServiceWatchAiLoginProcedure = "/mavio.system.v1.AiService/WatchAiLogin"
-	// AiServiceAnswerAiLoginProcedure is the fully-qualified name of the AiService's AnswerAiLogin RPC.
-	AiServiceAnswerAiLoginProcedure = "/mavio.system.v1.AiService/AnswerAiLogin"
-	// AiServiceCancelAiLoginProcedure is the fully-qualified name of the AiService's CancelAiLogin RPC.
-	AiServiceCancelAiLoginProcedure = "/mavio.system.v1.AiService/CancelAiLogin"
-	// AiServiceLogoutAiProcedure is the fully-qualified name of the AiService's LogoutAi RPC.
-	AiServiceLogoutAiProcedure = "/mavio.system.v1.AiService/LogoutAi"
-	// AiServiceCreateAiConversationProcedure is the fully-qualified name of the AiService's
-	// CreateAiConversation RPC.
-	AiServiceCreateAiConversationProcedure = "/mavio.system.v1.AiService/CreateAiConversation"
-	// AiServiceListAiConversationsProcedure is the fully-qualified name of the AiService's
-	// ListAiConversations RPC.
-	AiServiceListAiConversationsProcedure = "/mavio.system.v1.AiService/ListAiConversations"
-	// AiServiceGetAiConversationProcedure is the fully-qualified name of the AiService's
-	// GetAiConversation RPC.
-	AiServiceGetAiConversationProcedure = "/mavio.system.v1.AiService/GetAiConversation"
-	// AiServiceSendAiMessageProcedure is the fully-qualified name of the AiService's SendAiMessage RPC.
-	AiServiceSendAiMessageProcedure = "/mavio.system.v1.AiService/SendAiMessage"
-	// AiServiceDeleteAiConversationProcedure is the fully-qualified name of the AiService's
-	// DeleteAiConversation RPC.
-	AiServiceDeleteAiConversationProcedure = "/mavio.system.v1.AiService/DeleteAiConversation"
+	// AiProviderServiceListAiProvidersProcedure is the fully-qualified name of the AiProviderService's
+	// ListAiProviders RPC.
+	AiProviderServiceListAiProvidersProcedure = "/mavio.system.v1.AiProviderService/ListAiProviders"
+	// AiProviderServiceListAiModelsProcedure is the fully-qualified name of the AiProviderService's
+	// ListAiModels RPC.
+	AiProviderServiceListAiModelsProcedure = "/mavio.system.v1.AiProviderService/ListAiModels"
+	// AiProviderServiceSetAiApiKeyProcedure is the fully-qualified name of the AiProviderService's
+	// SetAiApiKey RPC.
+	AiProviderServiceSetAiApiKeyProcedure = "/mavio.system.v1.AiProviderService/SetAiApiKey"
+	// AiProviderServiceStartAiLoginProcedure is the fully-qualified name of the AiProviderService's
+	// StartAiLogin RPC.
+	AiProviderServiceStartAiLoginProcedure = "/mavio.system.v1.AiProviderService/StartAiLogin"
+	// AiProviderServiceGetAiLoginProcedure is the fully-qualified name of the AiProviderService's
+	// GetAiLogin RPC.
+	AiProviderServiceGetAiLoginProcedure = "/mavio.system.v1.AiProviderService/GetAiLogin"
+	// AiProviderServiceWatchAiLoginProcedure is the fully-qualified name of the AiProviderService's
+	// WatchAiLogin RPC.
+	AiProviderServiceWatchAiLoginProcedure = "/mavio.system.v1.AiProviderService/WatchAiLogin"
+	// AiProviderServiceAnswerAiLoginProcedure is the fully-qualified name of the AiProviderService's
+	// AnswerAiLogin RPC.
+	AiProviderServiceAnswerAiLoginProcedure = "/mavio.system.v1.AiProviderService/AnswerAiLogin"
+	// AiProviderServiceCancelAiLoginProcedure is the fully-qualified name of the AiProviderService's
+	// CancelAiLogin RPC.
+	AiProviderServiceCancelAiLoginProcedure = "/mavio.system.v1.AiProviderService/CancelAiLogin"
+	// AiProviderServiceLogoutAiProcedure is the fully-qualified name of the AiProviderService's
+	// LogoutAi RPC.
+	AiProviderServiceLogoutAiProcedure = "/mavio.system.v1.AiProviderService/LogoutAi"
+	// AiConversationServiceCreateAiConversationProcedure is the fully-qualified name of the
+	// AiConversationService's CreateAiConversation RPC.
+	AiConversationServiceCreateAiConversationProcedure = "/mavio.system.v1.AiConversationService/CreateAiConversation"
+	// AiConversationServiceListAiConversationsProcedure is the fully-qualified name of the
+	// AiConversationService's ListAiConversations RPC.
+	AiConversationServiceListAiConversationsProcedure = "/mavio.system.v1.AiConversationService/ListAiConversations"
+	// AiConversationServiceGetAiConversationProcedure is the fully-qualified name of the
+	// AiConversationService's GetAiConversation RPC.
+	AiConversationServiceGetAiConversationProcedure = "/mavio.system.v1.AiConversationService/GetAiConversation"
+	// AiConversationServiceSendAiMessageProcedure is the fully-qualified name of the
+	// AiConversationService's SendAiMessage RPC.
+	AiConversationServiceSendAiMessageProcedure = "/mavio.system.v1.AiConversationService/SendAiMessage"
+	// AiConversationServiceDeleteAiConversationProcedure is the fully-qualified name of the
+	// AiConversationService's DeleteAiConversation RPC.
+	AiConversationServiceDeleteAiConversationProcedure = "/mavio.system.v1.AiConversationService/DeleteAiConversation"
 )
 
-// AiServiceClient is a client for the mavio.system.v1.AiService service.
-type AiServiceClient interface {
+// AiProviderServiceClient is a client for the mavio.system.v1.AiProviderService service.
+type AiProviderServiceClient interface {
 	// ListAiProviders lists the providers with how they authenticate and
 	// whether they can be used.
 	ListAiProviders(context.Context, *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error)
@@ -93,143 +104,95 @@ type AiServiceClient interface {
 	CancelAiLogin(context.Context, *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error)
 	// LogoutAi removes a provider's stored credential.
 	LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error)
-	// CreateAiConversation starts a conversation with a model.
-	CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error)
-	// ListAiConversations lists the conversations, newest first.
-	ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error)
-	// GetAiConversation returns a conversation with its messages.
-	GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error)
-	// SendAiMessage sends a message to a conversation and streams the answer
-	// as the model writes it, ending with the answer.
-	SendAiMessage(context.Context, *v1.SendAiMessageRequest) (*connect.ServerStreamForClient[v1.SendAiMessageResponse], error)
-	// DeleteAiConversation deletes a conversation.
-	DeleteAiConversation(context.Context, *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error)
 }
 
-// NewAiServiceClient constructs a client for the mavio.system.v1.AiService service. By default, it
-// uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
-// uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
-// connect.WithGRPCWeb() options.
+// NewAiProviderServiceClient constructs a client for the mavio.system.v1.AiProviderService service.
+// By default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped
+// responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewAiServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AiServiceClient {
+func NewAiProviderServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AiProviderServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	aiServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiService").Methods()
-	return &aiServiceClient{
+	aiProviderServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiProviderService").Methods()
+	return &aiProviderServiceClient{
 		listAiProviders: connect.NewClient[v1.ListAiProvidersRequest, v1.ListAiProvidersResponse](
 			httpClient,
-			baseURL+AiServiceListAiProvidersProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("ListAiProviders")),
+			baseURL+AiProviderServiceListAiProvidersProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("ListAiProviders")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		listAiModels: connect.NewClient[v1.ListAiModelsRequest, v1.ListAiModelsResponse](
 			httpClient,
-			baseURL+AiServiceListAiModelsProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("ListAiModels")),
+			baseURL+AiProviderServiceListAiModelsProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("ListAiModels")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		setAiApiKey: connect.NewClient[v1.SetAiApiKeyRequest, v1.SetAiApiKeyResponse](
 			httpClient,
-			baseURL+AiServiceSetAiApiKeyProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("SetAiApiKey")),
+			baseURL+AiProviderServiceSetAiApiKeyProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("SetAiApiKey")),
 			connect.WithClientOptions(opts...),
 		),
 		startAiLogin: connect.NewClient[v1.StartAiLoginRequest, v1.StartAiLoginResponse](
 			httpClient,
-			baseURL+AiServiceStartAiLoginProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("StartAiLogin")),
+			baseURL+AiProviderServiceStartAiLoginProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("StartAiLogin")),
 			connect.WithClientOptions(opts...),
 		),
 		getAiLogin: connect.NewClient[v1.GetAiLoginRequest, v1.GetAiLoginResponse](
 			httpClient,
-			baseURL+AiServiceGetAiLoginProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("GetAiLogin")),
+			baseURL+AiProviderServiceGetAiLoginProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("GetAiLogin")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		watchAiLogin: connect.NewClient[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse](
 			httpClient,
-			baseURL+AiServiceWatchAiLoginProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("WatchAiLogin")),
+			baseURL+AiProviderServiceWatchAiLoginProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("WatchAiLogin")),
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
 		answerAiLogin: connect.NewClient[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse](
 			httpClient,
-			baseURL+AiServiceAnswerAiLoginProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("AnswerAiLogin")),
+			baseURL+AiProviderServiceAnswerAiLoginProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("AnswerAiLogin")),
 			connect.WithClientOptions(opts...),
 		),
 		cancelAiLogin: connect.NewClient[v1.CancelAiLoginRequest, v1.CancelAiLoginResponse](
 			httpClient,
-			baseURL+AiServiceCancelAiLoginProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("CancelAiLogin")),
+			baseURL+AiProviderServiceCancelAiLoginProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("CancelAiLogin")),
 			connect.WithClientOptions(opts...),
 		),
 		logoutAi: connect.NewClient[v1.LogoutAiRequest, v1.LogoutAiResponse](
 			httpClient,
-			baseURL+AiServiceLogoutAiProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("LogoutAi")),
-			connect.WithClientOptions(opts...),
-		),
-		createAiConversation: connect.NewClient[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse](
-			httpClient,
-			baseURL+AiServiceCreateAiConversationProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("CreateAiConversation")),
-			connect.WithClientOptions(opts...),
-		),
-		listAiConversations: connect.NewClient[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse](
-			httpClient,
-			baseURL+AiServiceListAiConversationsProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("ListAiConversations")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		getAiConversation: connect.NewClient[v1.GetAiConversationRequest, v1.GetAiConversationResponse](
-			httpClient,
-			baseURL+AiServiceGetAiConversationProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("GetAiConversation")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		sendAiMessage: connect.NewClient[v1.SendAiMessageRequest, v1.SendAiMessageResponse](
-			httpClient,
-			baseURL+AiServiceSendAiMessageProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("SendAiMessage")),
-			connect.WithClientOptions(opts...),
-		),
-		deleteAiConversation: connect.NewClient[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse](
-			httpClient,
-			baseURL+AiServiceDeleteAiConversationProcedure,
-			connect.WithSchema(aiServiceMethods.ByName("DeleteAiConversation")),
+			baseURL+AiProviderServiceLogoutAiProcedure,
+			connect.WithSchema(aiProviderServiceMethods.ByName("LogoutAi")),
 			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
-// aiServiceClient implements AiServiceClient.
-type aiServiceClient struct {
-	listAiProviders      *connect.Client[v1.ListAiProvidersRequest, v1.ListAiProvidersResponse]
-	listAiModels         *connect.Client[v1.ListAiModelsRequest, v1.ListAiModelsResponse]
-	setAiApiKey          *connect.Client[v1.SetAiApiKeyRequest, v1.SetAiApiKeyResponse]
-	startAiLogin         *connect.Client[v1.StartAiLoginRequest, v1.StartAiLoginResponse]
-	getAiLogin           *connect.Client[v1.GetAiLoginRequest, v1.GetAiLoginResponse]
-	watchAiLogin         *connect.Client[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse]
-	answerAiLogin        *connect.Client[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse]
-	cancelAiLogin        *connect.Client[v1.CancelAiLoginRequest, v1.CancelAiLoginResponse]
-	logoutAi             *connect.Client[v1.LogoutAiRequest, v1.LogoutAiResponse]
-	createAiConversation *connect.Client[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse]
-	listAiConversations  *connect.Client[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse]
-	getAiConversation    *connect.Client[v1.GetAiConversationRequest, v1.GetAiConversationResponse]
-	sendAiMessage        *connect.Client[v1.SendAiMessageRequest, v1.SendAiMessageResponse]
-	deleteAiConversation *connect.Client[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse]
+// aiProviderServiceClient implements AiProviderServiceClient.
+type aiProviderServiceClient struct {
+	listAiProviders *connect.Client[v1.ListAiProvidersRequest, v1.ListAiProvidersResponse]
+	listAiModels    *connect.Client[v1.ListAiModelsRequest, v1.ListAiModelsResponse]
+	setAiApiKey     *connect.Client[v1.SetAiApiKeyRequest, v1.SetAiApiKeyResponse]
+	startAiLogin    *connect.Client[v1.StartAiLoginRequest, v1.StartAiLoginResponse]
+	getAiLogin      *connect.Client[v1.GetAiLoginRequest, v1.GetAiLoginResponse]
+	watchAiLogin    *connect.Client[v1.WatchAiLoginRequest, v1.WatchAiLoginResponse]
+	answerAiLogin   *connect.Client[v1.AnswerAiLoginRequest, v1.AnswerAiLoginResponse]
+	cancelAiLogin   *connect.Client[v1.CancelAiLoginRequest, v1.CancelAiLoginResponse]
+	logoutAi        *connect.Client[v1.LogoutAiRequest, v1.LogoutAiResponse]
 }
 
-// ListAiProviders calls mavio.system.v1.AiService.ListAiProviders.
-func (c *aiServiceClient) ListAiProviders(ctx context.Context, req *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error) {
+// ListAiProviders calls mavio.system.v1.AiProviderService.ListAiProviders.
+func (c *aiProviderServiceClient) ListAiProviders(ctx context.Context, req *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error) {
 	response, err := c.listAiProviders.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -237,8 +200,8 @@ func (c *aiServiceClient) ListAiProviders(ctx context.Context, req *v1.ListAiPro
 	return nil, err
 }
 
-// ListAiModels calls mavio.system.v1.AiService.ListAiModels.
-func (c *aiServiceClient) ListAiModels(ctx context.Context, req *v1.ListAiModelsRequest) (*v1.ListAiModelsResponse, error) {
+// ListAiModels calls mavio.system.v1.AiProviderService.ListAiModels.
+func (c *aiProviderServiceClient) ListAiModels(ctx context.Context, req *v1.ListAiModelsRequest) (*v1.ListAiModelsResponse, error) {
 	response, err := c.listAiModels.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -246,8 +209,8 @@ func (c *aiServiceClient) ListAiModels(ctx context.Context, req *v1.ListAiModels
 	return nil, err
 }
 
-// SetAiApiKey calls mavio.system.v1.AiService.SetAiApiKey.
-func (c *aiServiceClient) SetAiApiKey(ctx context.Context, req *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error) {
+// SetAiApiKey calls mavio.system.v1.AiProviderService.SetAiApiKey.
+func (c *aiProviderServiceClient) SetAiApiKey(ctx context.Context, req *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error) {
 	response, err := c.setAiApiKey.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -255,8 +218,8 @@ func (c *aiServiceClient) SetAiApiKey(ctx context.Context, req *v1.SetAiApiKeyRe
 	return nil, err
 }
 
-// StartAiLogin calls mavio.system.v1.AiService.StartAiLogin.
-func (c *aiServiceClient) StartAiLogin(ctx context.Context, req *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error) {
+// StartAiLogin calls mavio.system.v1.AiProviderService.StartAiLogin.
+func (c *aiProviderServiceClient) StartAiLogin(ctx context.Context, req *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error) {
 	response, err := c.startAiLogin.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -264,8 +227,8 @@ func (c *aiServiceClient) StartAiLogin(ctx context.Context, req *v1.StartAiLogin
 	return nil, err
 }
 
-// GetAiLogin calls mavio.system.v1.AiService.GetAiLogin.
-func (c *aiServiceClient) GetAiLogin(ctx context.Context, req *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error) {
+// GetAiLogin calls mavio.system.v1.AiProviderService.GetAiLogin.
+func (c *aiProviderServiceClient) GetAiLogin(ctx context.Context, req *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error) {
 	response, err := c.getAiLogin.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -273,13 +236,13 @@ func (c *aiServiceClient) GetAiLogin(ctx context.Context, req *v1.GetAiLoginRequ
 	return nil, err
 }
 
-// WatchAiLogin calls mavio.system.v1.AiService.WatchAiLogin.
-func (c *aiServiceClient) WatchAiLogin(ctx context.Context, req *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error) {
+// WatchAiLogin calls mavio.system.v1.AiProviderService.WatchAiLogin.
+func (c *aiProviderServiceClient) WatchAiLogin(ctx context.Context, req *v1.WatchAiLoginRequest) (*connect.ServerStreamForClient[v1.WatchAiLoginResponse], error) {
 	return c.watchAiLogin.CallServerStream(ctx, connect.NewRequest(req))
 }
 
-// AnswerAiLogin calls mavio.system.v1.AiService.AnswerAiLogin.
-func (c *aiServiceClient) AnswerAiLogin(ctx context.Context, req *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
+// AnswerAiLogin calls mavio.system.v1.AiProviderService.AnswerAiLogin.
+func (c *aiProviderServiceClient) AnswerAiLogin(ctx context.Context, req *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
 	response, err := c.answerAiLogin.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -287,8 +250,8 @@ func (c *aiServiceClient) AnswerAiLogin(ctx context.Context, req *v1.AnswerAiLog
 	return nil, err
 }
 
-// CancelAiLogin calls mavio.system.v1.AiService.CancelAiLogin.
-func (c *aiServiceClient) CancelAiLogin(ctx context.Context, req *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error) {
+// CancelAiLogin calls mavio.system.v1.AiProviderService.CancelAiLogin.
+func (c *aiProviderServiceClient) CancelAiLogin(ctx context.Context, req *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error) {
 	response, err := c.cancelAiLogin.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -296,8 +259,8 @@ func (c *aiServiceClient) CancelAiLogin(ctx context.Context, req *v1.CancelAiLog
 	return nil, err
 }
 
-// LogoutAi calls mavio.system.v1.AiService.LogoutAi.
-func (c *aiServiceClient) LogoutAi(ctx context.Context, req *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error) {
+// LogoutAi calls mavio.system.v1.AiProviderService.LogoutAi.
+func (c *aiProviderServiceClient) LogoutAi(ctx context.Context, req *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error) {
 	response, err := c.logoutAi.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
@@ -305,49 +268,8 @@ func (c *aiServiceClient) LogoutAi(ctx context.Context, req *v1.LogoutAiRequest)
 	return nil, err
 }
 
-// CreateAiConversation calls mavio.system.v1.AiService.CreateAiConversation.
-func (c *aiServiceClient) CreateAiConversation(ctx context.Context, req *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error) {
-	response, err := c.createAiConversation.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// ListAiConversations calls mavio.system.v1.AiService.ListAiConversations.
-func (c *aiServiceClient) ListAiConversations(ctx context.Context, req *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error) {
-	response, err := c.listAiConversations.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// GetAiConversation calls mavio.system.v1.AiService.GetAiConversation.
-func (c *aiServiceClient) GetAiConversation(ctx context.Context, req *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error) {
-	response, err := c.getAiConversation.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// SendAiMessage calls mavio.system.v1.AiService.SendAiMessage.
-func (c *aiServiceClient) SendAiMessage(ctx context.Context, req *v1.SendAiMessageRequest) (*connect.ServerStreamForClient[v1.SendAiMessageResponse], error) {
-	return c.sendAiMessage.CallServerStream(ctx, connect.NewRequest(req))
-}
-
-// DeleteAiConversation calls mavio.system.v1.AiService.DeleteAiConversation.
-func (c *aiServiceClient) DeleteAiConversation(ctx context.Context, req *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error) {
-	response, err := c.deleteAiConversation.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// AiServiceHandler is an implementation of the mavio.system.v1.AiService service.
-type AiServiceHandler interface {
+// AiProviderServiceHandler is an implementation of the mavio.system.v1.AiProviderService service.
+type AiProviderServiceHandler interface {
 	// ListAiProviders lists the providers with how they authenticate and
 	// whether they can be used.
 	ListAiProviders(context.Context, *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error)
@@ -371,6 +293,252 @@ type AiServiceHandler interface {
 	CancelAiLogin(context.Context, *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error)
 	// LogoutAi removes a provider's stored credential.
 	LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error)
+}
+
+// NewAiProviderServiceHandler builds an HTTP handler from the service implementation. It returns
+// the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewAiProviderServiceHandler(svc AiProviderServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	aiProviderServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiProviderService").Methods()
+	aiProviderServiceListAiProvidersHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceListAiProvidersProcedure,
+		svc.ListAiProviders,
+		connect.WithSchema(aiProviderServiceMethods.ByName("ListAiProviders")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceListAiModelsHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceListAiModelsProcedure,
+		svc.ListAiModels,
+		connect.WithSchema(aiProviderServiceMethods.ByName("ListAiModels")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceSetAiApiKeyHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceSetAiApiKeyProcedure,
+		svc.SetAiApiKey,
+		connect.WithSchema(aiProviderServiceMethods.ByName("SetAiApiKey")),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceStartAiLoginHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceStartAiLoginProcedure,
+		svc.StartAiLogin,
+		connect.WithSchema(aiProviderServiceMethods.ByName("StartAiLogin")),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceGetAiLoginHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceGetAiLoginProcedure,
+		svc.GetAiLogin,
+		connect.WithSchema(aiProviderServiceMethods.ByName("GetAiLogin")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceWatchAiLoginHandler := connect.NewServerStreamHandlerSimple(
+		AiProviderServiceWatchAiLoginProcedure,
+		svc.WatchAiLogin,
+		connect.WithSchema(aiProviderServiceMethods.ByName("WatchAiLogin")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceAnswerAiLoginHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceAnswerAiLoginProcedure,
+		svc.AnswerAiLogin,
+		connect.WithSchema(aiProviderServiceMethods.ByName("AnswerAiLogin")),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceCancelAiLoginHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceCancelAiLoginProcedure,
+		svc.CancelAiLogin,
+		connect.WithSchema(aiProviderServiceMethods.ByName("CancelAiLogin")),
+		connect.WithHandlerOptions(opts...),
+	)
+	aiProviderServiceLogoutAiHandler := connect.NewUnaryHandlerSimple(
+		AiProviderServiceLogoutAiProcedure,
+		svc.LogoutAi,
+		connect.WithSchema(aiProviderServiceMethods.ByName("LogoutAi")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/mavio.system.v1.AiProviderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case AiProviderServiceListAiProvidersProcedure:
+			aiProviderServiceListAiProvidersHandler.ServeHTTP(w, r)
+		case AiProviderServiceListAiModelsProcedure:
+			aiProviderServiceListAiModelsHandler.ServeHTTP(w, r)
+		case AiProviderServiceSetAiApiKeyProcedure:
+			aiProviderServiceSetAiApiKeyHandler.ServeHTTP(w, r)
+		case AiProviderServiceStartAiLoginProcedure:
+			aiProviderServiceStartAiLoginHandler.ServeHTTP(w, r)
+		case AiProviderServiceGetAiLoginProcedure:
+			aiProviderServiceGetAiLoginHandler.ServeHTTP(w, r)
+		case AiProviderServiceWatchAiLoginProcedure:
+			aiProviderServiceWatchAiLoginHandler.ServeHTTP(w, r)
+		case AiProviderServiceAnswerAiLoginProcedure:
+			aiProviderServiceAnswerAiLoginHandler.ServeHTTP(w, r)
+		case AiProviderServiceCancelAiLoginProcedure:
+			aiProviderServiceCancelAiLoginHandler.ServeHTTP(w, r)
+		case AiProviderServiceLogoutAiProcedure:
+			aiProviderServiceLogoutAiHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedAiProviderServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedAiProviderServiceHandler struct{}
+
+func (UnimplementedAiProviderServiceHandler) ListAiProviders(context.Context, *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.ListAiProviders is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) ListAiModels(context.Context, *v1.ListAiModelsRequest) (*v1.ListAiModelsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.ListAiModels is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) SetAiApiKey(context.Context, *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.SetAiApiKey is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.StartAiLogin is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.GetAiLogin is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.WatchAiLogin is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.AnswerAiLogin is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) CancelAiLogin(context.Context, *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.CancelAiLogin is not implemented"))
+}
+
+func (UnimplementedAiProviderServiceHandler) LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiProviderService.LogoutAi is not implemented"))
+}
+
+// AiConversationServiceClient is a client for the mavio.system.v1.AiConversationService service.
+type AiConversationServiceClient interface {
+	// CreateAiConversation starts a conversation with a model.
+	CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error)
+	// ListAiConversations lists the conversations, newest first.
+	ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error)
+	// GetAiConversation returns a conversation with its messages.
+	GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error)
+	// SendAiMessage sends a message to a conversation and streams the answer
+	// as the model writes it, ending with the answer.
+	SendAiMessage(context.Context, *v1.SendAiMessageRequest) (*connect.ServerStreamForClient[v1.SendAiMessageResponse], error)
+	// DeleteAiConversation deletes a conversation.
+	DeleteAiConversation(context.Context, *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error)
+}
+
+// NewAiConversationServiceClient constructs a client for the mavio.system.v1.AiConversationService
+// service. By default, it uses the Connect protocol with the binary Protobuf Codec, asks for
+// gzipped responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply
+// the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewAiConversationServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AiConversationServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	aiConversationServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiConversationService").Methods()
+	return &aiConversationServiceClient{
+		createAiConversation: connect.NewClient[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse](
+			httpClient,
+			baseURL+AiConversationServiceCreateAiConversationProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("CreateAiConversation")),
+			connect.WithClientOptions(opts...),
+		),
+		listAiConversations: connect.NewClient[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse](
+			httpClient,
+			baseURL+AiConversationServiceListAiConversationsProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("ListAiConversations")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		getAiConversation: connect.NewClient[v1.GetAiConversationRequest, v1.GetAiConversationResponse](
+			httpClient,
+			baseURL+AiConversationServiceGetAiConversationProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("GetAiConversation")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		sendAiMessage: connect.NewClient[v1.SendAiMessageRequest, v1.SendAiMessageResponse](
+			httpClient,
+			baseURL+AiConversationServiceSendAiMessageProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("SendAiMessage")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteAiConversation: connect.NewClient[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse](
+			httpClient,
+			baseURL+AiConversationServiceDeleteAiConversationProcedure,
+			connect.WithSchema(aiConversationServiceMethods.ByName("DeleteAiConversation")),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// aiConversationServiceClient implements AiConversationServiceClient.
+type aiConversationServiceClient struct {
+	createAiConversation *connect.Client[v1.CreateAiConversationRequest, v1.CreateAiConversationResponse]
+	listAiConversations  *connect.Client[v1.ListAiConversationsRequest, v1.ListAiConversationsResponse]
+	getAiConversation    *connect.Client[v1.GetAiConversationRequest, v1.GetAiConversationResponse]
+	sendAiMessage        *connect.Client[v1.SendAiMessageRequest, v1.SendAiMessageResponse]
+	deleteAiConversation *connect.Client[v1.DeleteAiConversationRequest, v1.DeleteAiConversationResponse]
+}
+
+// CreateAiConversation calls mavio.system.v1.AiConversationService.CreateAiConversation.
+func (c *aiConversationServiceClient) CreateAiConversation(ctx context.Context, req *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error) {
+	response, err := c.createAiConversation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListAiConversations calls mavio.system.v1.AiConversationService.ListAiConversations.
+func (c *aiConversationServiceClient) ListAiConversations(ctx context.Context, req *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error) {
+	response, err := c.listAiConversations.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetAiConversation calls mavio.system.v1.AiConversationService.GetAiConversation.
+func (c *aiConversationServiceClient) GetAiConversation(ctx context.Context, req *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error) {
+	response, err := c.getAiConversation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// SendAiMessage calls mavio.system.v1.AiConversationService.SendAiMessage.
+func (c *aiConversationServiceClient) SendAiMessage(ctx context.Context, req *v1.SendAiMessageRequest) (*connect.ServerStreamForClient[v1.SendAiMessageResponse], error) {
+	return c.sendAiMessage.CallServerStream(ctx, connect.NewRequest(req))
+}
+
+// DeleteAiConversation calls mavio.system.v1.AiConversationService.DeleteAiConversation.
+func (c *aiConversationServiceClient) DeleteAiConversation(ctx context.Context, req *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error) {
+	response, err := c.deleteAiConversation.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// AiConversationServiceHandler is an implementation of the mavio.system.v1.AiConversationService
+// service.
+type AiConversationServiceHandler interface {
 	// CreateAiConversation starts a conversation with a model.
 	CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error)
 	// ListAiConversations lists the conversations, newest first.
@@ -384,194 +552,82 @@ type AiServiceHandler interface {
 	DeleteAiConversation(context.Context, *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error)
 }
 
-// NewAiServiceHandler builds an HTTP handler from the service implementation. It returns the path
-// on which to mount the handler and the handler itself.
+// NewAiConversationServiceHandler builds an HTTP handler from the service implementation. It
+// returns the path on which to mount the handler and the handler itself.
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewAiServiceHandler(svc AiServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	aiServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiService").Methods()
-	aiServiceListAiProvidersHandler := connect.NewUnaryHandlerSimple(
-		AiServiceListAiProvidersProcedure,
-		svc.ListAiProviders,
-		connect.WithSchema(aiServiceMethods.ByName("ListAiProviders")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceListAiModelsHandler := connect.NewUnaryHandlerSimple(
-		AiServiceListAiModelsProcedure,
-		svc.ListAiModels,
-		connect.WithSchema(aiServiceMethods.ByName("ListAiModels")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceSetAiApiKeyHandler := connect.NewUnaryHandlerSimple(
-		AiServiceSetAiApiKeyProcedure,
-		svc.SetAiApiKey,
-		connect.WithSchema(aiServiceMethods.ByName("SetAiApiKey")),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceStartAiLoginHandler := connect.NewUnaryHandlerSimple(
-		AiServiceStartAiLoginProcedure,
-		svc.StartAiLogin,
-		connect.WithSchema(aiServiceMethods.ByName("StartAiLogin")),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceGetAiLoginHandler := connect.NewUnaryHandlerSimple(
-		AiServiceGetAiLoginProcedure,
-		svc.GetAiLogin,
-		connect.WithSchema(aiServiceMethods.ByName("GetAiLogin")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceWatchAiLoginHandler := connect.NewServerStreamHandlerSimple(
-		AiServiceWatchAiLoginProcedure,
-		svc.WatchAiLogin,
-		connect.WithSchema(aiServiceMethods.ByName("WatchAiLogin")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceAnswerAiLoginHandler := connect.NewUnaryHandlerSimple(
-		AiServiceAnswerAiLoginProcedure,
-		svc.AnswerAiLogin,
-		connect.WithSchema(aiServiceMethods.ByName("AnswerAiLogin")),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceCancelAiLoginHandler := connect.NewUnaryHandlerSimple(
-		AiServiceCancelAiLoginProcedure,
-		svc.CancelAiLogin,
-		connect.WithSchema(aiServiceMethods.ByName("CancelAiLogin")),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceLogoutAiHandler := connect.NewUnaryHandlerSimple(
-		AiServiceLogoutAiProcedure,
-		svc.LogoutAi,
-		connect.WithSchema(aiServiceMethods.ByName("LogoutAi")),
-		connect.WithHandlerOptions(opts...),
-	)
-	aiServiceCreateAiConversationHandler := connect.NewUnaryHandlerSimple(
-		AiServiceCreateAiConversationProcedure,
+func NewAiConversationServiceHandler(svc AiConversationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	aiConversationServiceMethods := v1.File_mavio_system_v1_ai_proto.Services().ByName("AiConversationService").Methods()
+	aiConversationServiceCreateAiConversationHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceCreateAiConversationProcedure,
 		svc.CreateAiConversation,
-		connect.WithSchema(aiServiceMethods.ByName("CreateAiConversation")),
+		connect.WithSchema(aiConversationServiceMethods.ByName("CreateAiConversation")),
 		connect.WithHandlerOptions(opts...),
 	)
-	aiServiceListAiConversationsHandler := connect.NewUnaryHandlerSimple(
-		AiServiceListAiConversationsProcedure,
+	aiConversationServiceListAiConversationsHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceListAiConversationsProcedure,
 		svc.ListAiConversations,
-		connect.WithSchema(aiServiceMethods.ByName("ListAiConversations")),
+		connect.WithSchema(aiConversationServiceMethods.ByName("ListAiConversations")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	aiServiceGetAiConversationHandler := connect.NewUnaryHandlerSimple(
-		AiServiceGetAiConversationProcedure,
+	aiConversationServiceGetAiConversationHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceGetAiConversationProcedure,
 		svc.GetAiConversation,
-		connect.WithSchema(aiServiceMethods.ByName("GetAiConversation")),
+		connect.WithSchema(aiConversationServiceMethods.ByName("GetAiConversation")),
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
-	aiServiceSendAiMessageHandler := connect.NewServerStreamHandlerSimple(
-		AiServiceSendAiMessageProcedure,
+	aiConversationServiceSendAiMessageHandler := connect.NewServerStreamHandlerSimple(
+		AiConversationServiceSendAiMessageProcedure,
 		svc.SendAiMessage,
-		connect.WithSchema(aiServiceMethods.ByName("SendAiMessage")),
+		connect.WithSchema(aiConversationServiceMethods.ByName("SendAiMessage")),
 		connect.WithHandlerOptions(opts...),
 	)
-	aiServiceDeleteAiConversationHandler := connect.NewUnaryHandlerSimple(
-		AiServiceDeleteAiConversationProcedure,
+	aiConversationServiceDeleteAiConversationHandler := connect.NewUnaryHandlerSimple(
+		AiConversationServiceDeleteAiConversationProcedure,
 		svc.DeleteAiConversation,
-		connect.WithSchema(aiServiceMethods.ByName("DeleteAiConversation")),
+		connect.WithSchema(aiConversationServiceMethods.ByName("DeleteAiConversation")),
 		connect.WithHandlerOptions(opts...),
 	)
-	return "/mavio.system.v1.AiService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return "/mavio.system.v1.AiConversationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case AiServiceListAiProvidersProcedure:
-			aiServiceListAiProvidersHandler.ServeHTTP(w, r)
-		case AiServiceListAiModelsProcedure:
-			aiServiceListAiModelsHandler.ServeHTTP(w, r)
-		case AiServiceSetAiApiKeyProcedure:
-			aiServiceSetAiApiKeyHandler.ServeHTTP(w, r)
-		case AiServiceStartAiLoginProcedure:
-			aiServiceStartAiLoginHandler.ServeHTTP(w, r)
-		case AiServiceGetAiLoginProcedure:
-			aiServiceGetAiLoginHandler.ServeHTTP(w, r)
-		case AiServiceWatchAiLoginProcedure:
-			aiServiceWatchAiLoginHandler.ServeHTTP(w, r)
-		case AiServiceAnswerAiLoginProcedure:
-			aiServiceAnswerAiLoginHandler.ServeHTTP(w, r)
-		case AiServiceCancelAiLoginProcedure:
-			aiServiceCancelAiLoginHandler.ServeHTTP(w, r)
-		case AiServiceLogoutAiProcedure:
-			aiServiceLogoutAiHandler.ServeHTTP(w, r)
-		case AiServiceCreateAiConversationProcedure:
-			aiServiceCreateAiConversationHandler.ServeHTTP(w, r)
-		case AiServiceListAiConversationsProcedure:
-			aiServiceListAiConversationsHandler.ServeHTTP(w, r)
-		case AiServiceGetAiConversationProcedure:
-			aiServiceGetAiConversationHandler.ServeHTTP(w, r)
-		case AiServiceSendAiMessageProcedure:
-			aiServiceSendAiMessageHandler.ServeHTTP(w, r)
-		case AiServiceDeleteAiConversationProcedure:
-			aiServiceDeleteAiConversationHandler.ServeHTTP(w, r)
+		case AiConversationServiceCreateAiConversationProcedure:
+			aiConversationServiceCreateAiConversationHandler.ServeHTTP(w, r)
+		case AiConversationServiceListAiConversationsProcedure:
+			aiConversationServiceListAiConversationsHandler.ServeHTTP(w, r)
+		case AiConversationServiceGetAiConversationProcedure:
+			aiConversationServiceGetAiConversationHandler.ServeHTTP(w, r)
+		case AiConversationServiceSendAiMessageProcedure:
+			aiConversationServiceSendAiMessageHandler.ServeHTTP(w, r)
+		case AiConversationServiceDeleteAiConversationProcedure:
+			aiConversationServiceDeleteAiConversationHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
 	})
 }
 
-// UnimplementedAiServiceHandler returns CodeUnimplemented from all methods.
-type UnimplementedAiServiceHandler struct{}
+// UnimplementedAiConversationServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedAiConversationServiceHandler struct{}
 
-func (UnimplementedAiServiceHandler) ListAiProviders(context.Context, *v1.ListAiProvidersRequest) (*v1.ListAiProvidersResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.ListAiProviders is not implemented"))
+func (UnimplementedAiConversationServiceHandler) CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.CreateAiConversation is not implemented"))
 }
 
-func (UnimplementedAiServiceHandler) ListAiModels(context.Context, *v1.ListAiModelsRequest) (*v1.ListAiModelsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.ListAiModels is not implemented"))
+func (UnimplementedAiConversationServiceHandler) ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.ListAiConversations is not implemented"))
 }
 
-func (UnimplementedAiServiceHandler) SetAiApiKey(context.Context, *v1.SetAiApiKeyRequest) (*v1.SetAiApiKeyResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.SetAiApiKey is not implemented"))
+func (UnimplementedAiConversationServiceHandler) GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.GetAiConversation is not implemented"))
 }
 
-func (UnimplementedAiServiceHandler) StartAiLogin(context.Context, *v1.StartAiLoginRequest) (*v1.StartAiLoginResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.StartAiLogin is not implemented"))
+func (UnimplementedAiConversationServiceHandler) SendAiMessage(context.Context, *v1.SendAiMessageRequest, *connect.ServerStream[v1.SendAiMessageResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.SendAiMessage is not implemented"))
 }
 
-func (UnimplementedAiServiceHandler) GetAiLogin(context.Context, *v1.GetAiLoginRequest) (*v1.GetAiLoginResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.GetAiLogin is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) WatchAiLogin(context.Context, *v1.WatchAiLoginRequest, *connect.ServerStream[v1.WatchAiLoginResponse]) error {
-	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.WatchAiLogin is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) AnswerAiLogin(context.Context, *v1.AnswerAiLoginRequest) (*v1.AnswerAiLoginResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.AnswerAiLogin is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) CancelAiLogin(context.Context, *v1.CancelAiLoginRequest) (*v1.CancelAiLoginResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.CancelAiLogin is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) LogoutAi(context.Context, *v1.LogoutAiRequest) (*v1.LogoutAiResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.LogoutAi is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) CreateAiConversation(context.Context, *v1.CreateAiConversationRequest) (*v1.CreateAiConversationResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.CreateAiConversation is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) ListAiConversations(context.Context, *v1.ListAiConversationsRequest) (*v1.ListAiConversationsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.ListAiConversations is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) GetAiConversation(context.Context, *v1.GetAiConversationRequest) (*v1.GetAiConversationResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.GetAiConversation is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) SendAiMessage(context.Context, *v1.SendAiMessageRequest, *connect.ServerStream[v1.SendAiMessageResponse]) error {
-	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.SendAiMessage is not implemented"))
-}
-
-func (UnimplementedAiServiceHandler) DeleteAiConversation(context.Context, *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiService.DeleteAiConversation is not implemented"))
+func (UnimplementedAiConversationServiceHandler) DeleteAiConversation(context.Context, *v1.DeleteAiConversationRequest) (*v1.DeleteAiConversationResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.AiConversationService.DeleteAiConversation is not implemented"))
 }

@@ -118,13 +118,17 @@ pub type OwnedDeleteTotpRequestView = ::buffa::view::OwnedView<
 pub type OwnedDeleteTotpResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::user::v1::__buffa::view::DeleteTotpResponseView<'static>,
 >;
-///Shorthand for `OwnedView<UpdatePreferencesRequestView<'static>>`.
-pub type OwnedUpdatePreferencesRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesRequestView<'static>,
+///Shorthand for `OwnedView<UpdatePlaybackPreferencesRequestView<'static>>`.
+pub type OwnedUpdatePlaybackPreferencesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<UpdatePreferencesResponseView<'static>>`.
-pub type OwnedUpdatePreferencesResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'static>,
+///Shorthand for `OwnedView<UpdatePlaybackPreferencesResponseView<'static>>`.
+pub type OwnedUpdatePlaybackPreferencesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesResponseView<
+        'static,
+    >,
 >;
 ///Shorthand for `OwnedView<CreateInvitationRequestView<'static>>`.
 pub type OwnedCreateInvitationRequestView = ::buffa::view::OwnedView<
@@ -658,8 +662,12 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::UpdatePreferencesResponse>
-for crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::UpdatePlaybackPreferencesResponse,
+>
+for crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -667,9 +675,13 @@ for crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::user::v1::UpdatePreferencesResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::user::v1::UpdatePlaybackPreferencesResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<'static>,
+    crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -948,9 +960,9 @@ pub const USER_SERVICE_DELETE_TOTP_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `UpdatePreferences` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const USER_SERVICE_UPDATE_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.user.v1.UserService/UpdatePreferences",
+/// Static [`Spec`](::connectrpc::Spec) for the `UpdatePlaybackPreferences` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const USER_SERVICE_UPDATE_PLAYBACK_PREFERENCES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.user.v1.UserService/UpdatePlaybackPreferences",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -974,9 +986,9 @@ pub const USER_SERVICE_DELETE_INVITATION_SPEC: ::connectrpc::Spec = ::connectrpc
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// UserService manages accounts: the server's one administrator, members
 /// and managed users (docs/accounts.md §4.1), and invitation links (§4.3).
-/// All methods except GetCurrentUser, UpdatePreferences, and managing one's
-/// own password, PIN, passkeys and TOTP require the administrator. Managed users have no
-/// passwords, passkeys or TOTP.
+/// All methods except GetCurrentUser, UpdatePlaybackPreferences, and
+/// managing one's own password, PIN, passkeys and TOTP require the
+/// administrator. Managed users have no passwords, passkeys or TOTP.
 /// In mavio.dev mode the users are Mavio accounts, which mavio.dev keeps:
 /// CreateUser, SetPassword, SetPin, StartPasskeyRegistration,
 /// FinishPasskeyRegistration, StartTotp, ConfirmTotp and CreateInvitation
@@ -1368,7 +1380,7 @@ pub trait UserService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// UpdatePreferences changes the calling user's playback preferences.
+    /// UpdatePlaybackPreferences changes the calling user's playback preferences.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -1377,17 +1389,17 @@ pub trait UserService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn update_preferences<'a>(
+    fn update_playback_preferences<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+            crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::user::v1::UpdatePreferencesResponse,
+                crate::proto::mavio::user::v1::UpdatePlaybackPreferencesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1904,13 +1916,13 @@ impl<S: UserService> UserServiceExt for S {
             .with_spec(USER_SERVICE_DELETE_TOTP_SPEC)
             .route_view(
                 USER_SERVICE_SERVICE_NAME,
-                "UpdatePreferences",
+                "UpdatePlaybackPreferences",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesRequestView<
+                            crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesRequestView<
                                 'static,
                             >,
                         >,
@@ -1919,18 +1931,18 @@ impl<S: UserService> UserServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+                                crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.update_preferences(ctx, sreq)
+                            svc.update_playback_preferences(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::user::v1::UpdatePreferencesResponse,
+                                    crate::proto::mavio::user::v1::UpdatePlaybackPreferencesResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(USER_SERVICE_UPDATE_PREFERENCES_SPEC)
+            .with_spec(USER_SERVICE_UPDATE_PLAYBACK_PREFERENCES_SPEC)
             .route_view(
                 USER_SERVICE_SERVICE_NAME,
                 "CreateInvitation",
@@ -2156,10 +2168,10 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                         .with_spec(USER_SERVICE_DELETE_TOTP_SPEC),
                 )
             }
-            "UpdatePreferences" => {
+            "UpdatePlaybackPreferences" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(USER_SERVICE_UPDATE_PREFERENCES_SPEC),
+                        .with_spec(USER_SERVICE_UPDATE_PLAYBACK_PREFERENCES_SPEC),
                 )
             }
             "CreateInvitation" => {
@@ -2499,25 +2511,25 @@ impl<T: UserService> ::connectrpc::Dispatcher for UserServiceServer<T> {
                         >(format)
                 })
             }
-            "UpdatePreferences" => {
+            "UpdatePlaybackPreferences" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+                        crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesRequestView<
+                    let req: crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+                        crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
                     >::from_parts(&req, &body);
-                    svc.update_preferences(ctx, req)
+                    svc.update_playback_preferences(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::user::v1::UpdatePreferencesResponse,
+                            crate::proto::mavio::user::v1::UpdatePlaybackPreferencesResponse,
                         >(format)
                 })
             }
@@ -3333,35 +3345,35 @@ where
             )
             .await
     }
-    /// Call the UpdatePreferences RPC. Sends a request to /mavio.user.v1.UserService/UpdatePreferences.
-    pub async fn update_preferences(
+    /// Call the UpdatePlaybackPreferences RPC. Sends a request to /mavio.user.v1.UserService/UpdatePlaybackPreferences.
+    pub async fn update_playback_preferences(
         &self,
-        request: crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+        request: crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<
+                crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.update_preferences_with_options(
+        self.update_playback_preferences_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the UpdatePreferences RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn update_preferences_with_options(
+    /// Call the UpdatePlaybackPreferences RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn update_playback_preferences_with_options(
         &self,
-        request: crate::proto::mavio::user::v1::UpdatePreferencesRequest,
+        request: crate::proto::mavio::user::v1::UpdatePlaybackPreferencesRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::user::v1::__buffa::view::UpdatePreferencesResponseView<
+                crate::proto::mavio::user::v1::__buffa::view::UpdatePlaybackPreferencesResponseView<
                     'static,
                 >,
             >,
@@ -3371,7 +3383,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                USER_SERVICE_UPDATE_PREFERENCES_SPEC
+                USER_SERVICE_UPDATE_PLAYBACK_PREFERENCES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

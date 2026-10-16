@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime};
 
-use mavio_api::proto::mavio::home::v1::{GetHubRequest, ListHubsRequest, ListHubsResponse};
+use mavio_api::proto::mavio::hub::v1::{GetHubRequest, ListHubsRequest, ListHubsResponse};
 use mavio_api::proto::mavio::library::v1::{
     CreditKind, GetItemRequest, GetItemResponse, ImageKind, Item, ItemKind, LibraryKind,
     ListItemsRequest, ListLibrariesRequest, ListLibrariesResponse, ListSimilarItemsRequest,
@@ -541,7 +541,7 @@ impl Core {
             let hubs = match (self.servers.connection(&s.id), cached) {
                 (Ok(conn), cached) => {
                     calls.spawn(async move {
-                        let r = conn.home().list_hubs(ListHubsRequest::default()).await;
+                        let r = conn.hub().list_hubs(ListHubsRequest::default()).await;
                         (i, r.map(|r| r.into_owned()).map_err(Error::from))
                     });
                     match cached {
@@ -586,7 +586,7 @@ impl Core {
     ) -> Result<Page> {
         let conn = self.servers.connection(server_id)?;
         let hub = conn
-            .home()
+            .hub()
             .get_hub(GetHubRequest {
                 id: Some(hub_id.to_owned()),
                 offset: Some(offset as i32),
@@ -615,7 +615,7 @@ impl Core {
         let server = self.servers.get(server_id)?;
         let conn = self.servers.connection(server_id)?;
         let r = conn
-            .home()
+            .hub()
             .list_hubs(ListHubsRequest {
                 library_id: Some(library_id.to_owned()),
                 ..Default::default()
@@ -1052,7 +1052,7 @@ impl Core {
 
 #[cfg(test)]
 mod tests {
-    use mavio_api::proto::mavio::home::v1::Hub;
+    use mavio_api::proto::mavio::hub::v1::Hub;
     use mavio_api::proto::mavio::library::v1::{
         HubKind, ItemKind, ListItemsResponse, ListSimilarItemsResponse, MediaSource, MediaStream,
     };
@@ -1134,12 +1134,12 @@ mod tests {
         let (core, store) = core();
         let a = fake_server("sa", "Home");
         a.unary(
-            "/mavio.home.v1.HomeService/ListHubs",
+            "/mavio.hub.v1.HubService/ListHubs",
             |_, _: ListHubsRequest| Ok(hubs(vec![movie("a1", "1")])),
         );
         let b = fake_server("sb", "Friend");
         b.unary(
-            "/mavio.home.v1.HomeService/ListHubs",
+            "/mavio.hub.v1.HubService/ListHubs",
             |_, _: ListHubsRequest| Err::<ListHubsResponse, _>(crate::fake::error("unavailable")),
         );
         let (a, b) = (a.serve().await, b.serve().await);

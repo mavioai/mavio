@@ -6,10 +6,9 @@ import "buf/validate/validate.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/acquisition/v1/wanted.proto";
-import "mavio/plugin/v1/plugin.proto";
 
-// SystemService exposes server-level information and health, and the
-// plugins the server runs.
+// SystemService exposes server-level information and health, the
+// server's settings, its file system and its logs.
 service SystemService {
   // GetHealth reports whether the server is ready to serve requests.
   rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
@@ -19,37 +18,6 @@ service SystemService {
   rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // ListPlugins lists the plugins found in the server's plugin folder, by
-  // ID. Administrators only.
-  rpc ListPlugins(ListPluginsRequest) returns (ListPluginsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  // GetPluginConfig returns a plugin's configuration. Administrators only.
-  rpc GetPluginConfig(GetPluginConfigRequest) returns (GetPluginConfigResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  // SetPluginConfig validates a configuration against the plugin's schema,
-  // delivers it to the running plugin and stores it once the plugin
-  // accepts it. Administrators only.
-  rpc SetPluginConfig(SetPluginConfigRequest) returns (SetPluginConfigResponse);
-  // ListCatalogPlugins lists the plugins of the configured plugin
-  // catalogs, with the versions the server can run. Administrators only.
-  rpc ListCatalogPlugins(ListCatalogPluginsRequest) returns (ListCatalogPluginsResponse) {
-    option idempotency_level = NO_SIDE_EFFECTS;
-  }
-  // InstallPlugin installs a plugin from a catalog, or upgrades or
-  // downgrades it to a version, while the server runs on; the plugin keeps
-  // its configuration. Administrators only.
-  rpc InstallPlugin(InstallPluginRequest) returns (InstallPluginResponse);
-  // UninstallPlugin stops a plugin and removes its folder and
-  // configuration. Administrators only.
-  rpc UninstallPlugin(UninstallPluginRequest) returns (UninstallPluginResponse);
-
-  // SetPluginEnabled stops a plugin, keeping it installed with its
-  // configuration, or starts it again; the server remembers it across
-  // restarts and upgrades. Administrators only.
-  rpc SetPluginEnabled(SetPluginEnabledRequest) returns (SetPluginEnabledResponse);
-
   // GetServerSettings returns the settings administrators change while
   // the server runs. Administrators only.
   rpc GetServerSettings(GetServerSettingsRequest) returns (GetServerSettingsResponse) {
@@ -97,113 +65,6 @@ message GetSystemInfoResponse {
   // First line of `ffmpeg -version`, empty when ffmpeg is unavailable.
   string ffmpeg_version = 5;
   google.protobuf.Timestamp start_time = 6;
-}
-
-// PluginState is whether a plugin is in use.
-enum PluginState {
-  PLUGIN_STATE_UNSPECIFIED = 0;
-  // The plugin runs with its configuration, or needs none.
-  PLUGIN_STATE_READY = 1;
-  // The plugin runs but waits for a configuration its schema requires.
-  PLUGIN_STATE_UNCONFIGURED = 2;
-  // The plugin could not be started or rejected its stored configuration;
-  // see Plugin.error.
-  PLUGIN_STATE_FAILED = 3;
-  // An administrator disabled the plugin: it is installed but not started.
-  PLUGIN_STATE_DISABLED = 4;
-}
-
-// Plugin is a plugin found in the server's plugin folder.
-message Plugin {
-  // The plugin's manifest. For a folder whose manifest cannot be read,
-  // only the ID is set, from the folder's name.
-  mavio.plugin.v1.Manifest manifest = 1;
-  PluginState state = 2;
-  // Why the plugin failed, for PLUGIN_STATE_FAILED.
-  string error = 3;
-}
-
-message ListPluginsRequest {}
-
-message ListPluginsResponse {
-  repeated Plugin plugins = 1;
-}
-
-message GetPluginConfigRequest {
-  string plugin_id = 1 [(buf.validate.field).required = true];
-}
-
-message GetPluginConfigResponse {
-  // JSON matching the manifest's config_schema; empty when the plugin was
-  // never configured.
-  string config_json = 1;
-  // When the configuration was last set; unset when never configured.
-  google.protobuf.Timestamp update_time = 2;
-}
-
-message SetPluginConfigRequest {
-  string plugin_id = 1 [(buf.validate.field).required = true];
-  // JSON matching the manifest's config_schema.
-  string config_json = 2 [(buf.validate.field).required = true];
-}
-
-message SetPluginConfigResponse {
-  Plugin plugin = 1;
-}
-
-// CatalogPlugin is a plugin a catalog offers.
-message CatalogPlugin {
-  string id = 1;
-  string name = 2;
-  string description = 3;
-  string author = 4;
-  string homepage = 5;
-  // The catalog listing it.
-  string catalog_url = 6;
-  // Newest first; only versions the server can run, none when it can run
-  // no version.
-  repeated CatalogVersion versions = 7;
-  // Empty when not installed.
-  string installed_version = 8;
-  mavio.plugin.v1.Category category = 9;
-}
-
-// CatalogVersion is a version of a catalog plugin.
-message CatalogVersion {
-  string version = 1;
-  string changelog = 2;
-  google.protobuf.Timestamp release_time = 3;
-}
-
-message ListCatalogPluginsRequest {}
-
-message ListCatalogPluginsResponse {
-  repeated CatalogPlugin plugins = 1;
-}
-
-message InstallPluginRequest {
-  string plugin_id = 1 [(buf.validate.field).required = true];
-  // Unset means the newest version.
-  string version = 2;
-}
-
-message InstallPluginResponse {
-  Plugin plugin = 1;
-}
-
-message UninstallPluginRequest {
-  string plugin_id = 1 [(buf.validate.field).required = true];
-}
-
-message UninstallPluginResponse {}
-
-message SetPluginEnabledRequest {
-  string plugin_id = 1 [(buf.validate.field).required = true];
-  bool enabled = 2;
-}
-
-message SetPluginEnabledResponse {
-  Plugin plugin = 1;
 }
 
 enum HardwareAcceleration {

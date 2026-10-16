@@ -93,17 +93,17 @@ func TestEndToEnd(t *testing.T) {
 	token := withToken(first.GetAccessToken())
 
 	// The plugin waits for the API key its schema requires.
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, url, token)
-	plugins, err := system.ListPlugins(ctx, &systemv1.ListPluginsRequest{})
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, url, token)
+	plugins, err := pluginAdmin.ListPlugins(ctx, &systemv1.ListPluginsRequest{})
 	if err != nil || len(plugins.GetPlugins()) != 1 || plugins.GetPlugins()[0].GetState() != systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED {
 		t.Fatalf("ListPlugins = %v, %v; want the plugin unconfigured", plugins, err)
 	}
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{}`),
 	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
 		t.Errorf("SetPluginConfig without the key: %v, want invalid_argument", err)
 	}
-	set, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	set, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build())
 	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY {

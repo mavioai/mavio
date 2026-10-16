@@ -14,18 +14,6 @@ pub type OwnedAddSeriesRequestView = ::buffa::view::OwnedView<
 pub type OwnedAddSeriesResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::AddSeriesResponseView<'static>,
 >;
-///Shorthand for `OwnedView<MonitorSeriesRequestView<'static>>`.
-pub type OwnedMonitorSeriesRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesRequestView<
-        'static,
-    >,
->;
-///Shorthand for `OwnedView<MonitorSeriesResponseView<'static>>`.
-pub type OwnedMonitorSeriesResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesResponseView<
-        'static,
-    >,
->;
 ///Shorthand for `OwnedView<SetMonitoredRequestView<'static>>`.
 pub type OwnedSetMonitoredRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::SetMonitoredRequestView<'static>,
@@ -126,42 +114,6 @@ for crate::proto::mavio::acquisition::v1::__buffa::view::AddSeriesResponseView<'
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::AddSeriesResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::AddSeriesResponseView<'static>,
-> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
-    }
-    /// An `OwnedView` still holds the buffer it was decoded from, so
-    /// its large fields can be handed to the response body by
-    /// reference count instead of copied. The bare view impl above
-    /// cannot do this: it has borrows but no buffer to name.
-    fn encode_segments(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body_segments(
-            self.reborrow(),
-            self.bytes(),
-            codec,
-        )
-    }
-}
-impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::MonitorSeriesResponse>
-for crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesResponseView<'_> {
-    fn encode(
-        &self,
-        codec: ::connectrpc::CodecFormat,
-    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
-        ::connectrpc::__codegen::encode_view_body(self, codec)
-    }
-}
-impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::MonitorSeriesResponse>
-for ::buffa::view::OwnedView<
-    crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesResponseView<
-        'static,
-    >,
 > {
     fn encode(
         &self,
@@ -408,12 +360,6 @@ pub const WANTED_SERVICE_ADD_SERIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spe
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `MonitorSeries` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const WANTED_SERVICE_MONITOR_SERIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.acquisition.v1.WantedService/MonitorSeries",
-        ::connectrpc::StreamType::Unary,
-    )
-    .with_idempotency_level(::connectrpc::IdempotencyLevel::Idempotent);
 /// Static [`Spec`](::connectrpc::Spec) for the `SetMonitored` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const WANTED_SERVICE_SET_MONITORED_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.WantedService/SetMonitored",
@@ -554,32 +500,9 @@ pub trait WantedService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// MonitorSeries applies a monitoring option to the seasons and episodes
-    /// of wanted series, as Sonarr's season pass.
-    ///
-    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
-    ///
-    /// `request` is borrowed from the request body and is valid for the
-    /// duration of the call; message fields are read directly on it
-    /// (zero-copy). The response cannot borrow from `request` — use
-    /// `.to_owned_message()` (or copy the specific fields) for anything
-    /// returned, stored, or moved into `tokio::spawn`.
-    fn monitor_series<'a>(
-        &'a self,
-        ctx: ::connectrpc::RequestContext,
-        request: ::connectrpc::ServiceRequest<
-            '_,
-            crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-        >,
-    ) -> impl ::std::future::Future<
-        Output = ::connectrpc::ServiceResult<
-            impl ::connectrpc::Encodable<
-                crate::proto::mavio::acquisition::v1::MonitorSeriesResponse,
-            > + Send + use<'a, Self>,
-        >,
-    > + Send;
-    /// SetMonitored monitors or unmonitors seasons and episodes; a season
-    /// takes its episodes along.
+    /// SetMonitored monitors or unmonitors seasons and episodes, a season
+    /// taking its episodes along, or applies a monitoring option to the
+    /// seasons and episodes of wanted series, as Sonarr's season pass.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -810,35 +733,6 @@ impl<S: WantedService> WantedServiceExt for S {
                 },
             )
             .with_spec(WANTED_SERVICE_ADD_SERIES_SPEC)
-            .route_view(
-                WANTED_SERVICE_SERVICE_NAME,
-                "MonitorSeries",
-                {
-                    let svc = ::std::sync::Arc::clone(&self);
-                    ::connectrpc::view_handler_fn(move |
-                        ctx,
-                        req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesRequestView<
-                                'static,
-                            >,
-                        >,
-                        format|
-                    {
-                        let svc = ::std::sync::Arc::clone(&svc);
-                        async move {
-                            let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-                            >::from_parts(req.reborrow(), req.bytes());
-                            svc.monitor_series(ctx, sreq)
-                                .await?
-                                .encode::<
-                                    crate::proto::mavio::acquisition::v1::MonitorSeriesResponse,
-                                >(format)
-                        }
-                    })
-                },
-            )
-            .with_spec(WANTED_SERVICE_MONITOR_SERIES_SPEC)
             .route_view(
                 WANTED_SERVICE_SERVICE_NAME,
                 "SetMonitored",
@@ -1079,12 +973,6 @@ impl<T: WantedService> ::connectrpc::Dispatcher for WantedServiceServer<T> {
                         .with_spec(WANTED_SERVICE_ADD_SERIES_SPEC),
                 )
             }
-            "MonitorSeries" => {
-                Some(
-                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(WANTED_SERVICE_MONITOR_SERIES_SPEC),
-                )
-            }
             "SetMonitored" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -1177,28 +1065,6 @@ impl<T: WantedService> ::connectrpc::Dispatcher for WantedServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::AddSeriesResponse,
-                        >(format)
-                })
-            }
-            "MonitorSeries" => {
-                let svc = ::std::sync::Arc::clone(&self.inner);
-                Box::pin(async move {
-                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-                    >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesRequestView<
-                        '_,
-                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
-                        &body,
-                        ctx.decode_options(),
-                    )?;
-                    let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-                    >::from_parts(&req, &body);
-                    svc.monitor_series(ctx, req)
-                        .await?
-                        .encode::<
-                            crate::proto::mavio::acquisition::v1::MonitorSeriesResponse,
                         >(format)
                 })
             }
@@ -1546,51 +1412,6 @@ where
                 &self.transport,
                 &self.config,
                 WANTED_SERVICE_ADD_SERIES_SPEC
-                    .with_origin(::connectrpc::SpecOrigin::Client),
-                request,
-                options,
-            )
-            .await
-    }
-    /// Call the MonitorSeries RPC. Sends a request to /mavio.acquisition.v1.WantedService/MonitorSeries.
-    pub async fn monitor_series(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        self.monitor_series_with_options(
-                request,
-                ::connectrpc::client::CallOptions::default(),
-            )
-            .await
-    }
-    /// Call the MonitorSeries RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn monitor_series_with_options(
-        &self,
-        request: crate::proto::mavio::acquisition::v1::MonitorSeriesRequest,
-        options: ::connectrpc::client::CallOptions,
-    ) -> Result<
-        ::connectrpc::client::UnaryResponse<
-            ::buffa::view::OwnedView<
-                crate::proto::mavio::acquisition::v1::__buffa::view::MonitorSeriesResponseView<
-                    'static,
-                >,
-            >,
-        >,
-        ::connectrpc::ConnectError,
-    > {
-        ::connectrpc::client::call_unary(
-                &self.transport,
-                &self.config,
-                WANTED_SERVICE_MONITOR_SERIES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

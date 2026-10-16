@@ -1,24 +1,21 @@
 edition = "2023";
 
-package mavio.home.v1;
+package mavio.hub.v1;
 
 import "buf/validate/validate.proto";
 import "mavio/acquisition/v1/discover.proto";
 import "mavio/library/v1/item.proto";
 import "mavio/library/v1/library.proto";
 
-// HomeService lists the hubs of Home and of the libraries' Recommended
+// HubService lists the hubs of Home and of the libraries' Recommended
 // tabs: rows of items, each a reason to watch something, chosen per
 // library by administrators. Home starts with continue watching across
 // the libraries and the requests that became available, follows with the
 // Home hubs of each library the user pinned, in their order, and ends with
-// trending titles. Hubs the user hid and hubs without items are left out.
-// The user's choices are display preferences of client "mavio", view
-// "home": "libraries" lists the pinned library IDs in order, comma
-// separated, all libraries in name order when unset; "hidden" lists the
-// IDs of hidden hubs, which cannot hide continue watching. Items are those
-// the caller may access. Signed-in users.
-service HomeService {
+// trending titles. Hubs the user hid and hubs without items are left out;
+// the user chooses both with UpdateHomeLayout. Items are those the caller
+// may access. Signed-in users.
+service HubService {
   // ListHubs lists the hubs of Home, or of a library's Recommended tab,
   // with their first items.
   rpc ListHubs(ListHubsRequest) returns (ListHubsResponse) {
@@ -27,6 +24,17 @@ service HomeService {
   // GetHub lists a page of a hub's items.
   rpc GetHub(GetHubRequest) returns (GetHubResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetHomeLayout returns the calling user's choice of Home's libraries
+  // and hidden hubs.
+  rpc GetHomeLayout(GetHomeLayoutRequest) returns (GetHomeLayoutResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateHomeLayout replaces the calling user's choice of Home's
+  // libraries and hidden hubs. Libraries the user may not access fail
+  // with INVALID_ARGUMENT.
+  rpc UpdateHomeLayout(UpdateHomeLayoutRequest) returns (UpdateHomeLayoutResponse) {
+    option idempotency_level = IDEMPOTENT;
   }
 }
 
@@ -87,4 +95,45 @@ message Hub {
   repeated mavio.acquisition.v1.DiscoveredTitle titles = 8;
   // Whether the hub has items after these.
   bool more = 9;
+}
+
+// HomeLayout is a user's choice of what Home shows.
+message HomeLayout {
+  // Whether the user pinned libraries; when not, Home shows every library
+  // in name order and library_ids is empty.
+  bool pinned = 1;
+  // The pinned libraries, in the order Home shows them.
+  repeated string library_ids = 2 [(buf.validate.field).repeated = {
+    max_items: 1000
+    unique: true
+    items: {
+      string: {uuid: true}
+    }
+  }];
+  // The IDs of the hidden hubs, as Hub.id; continue watching cannot be
+  // hidden.
+  repeated string hidden_hub_ids = 3 [(buf.validate.field).repeated = {
+    max_items: 1000
+    unique: true
+    items: {
+      string: {
+        min_len: 1
+        max_len: 128
+      }
+    }
+  }];
+}
+
+message GetHomeLayoutRequest {}
+
+message GetHomeLayoutResponse {
+  HomeLayout layout = 1;
+}
+
+message UpdateHomeLayoutRequest {
+  HomeLayout layout = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateHomeLayoutResponse {
+  HomeLayout layout = 1;
 }

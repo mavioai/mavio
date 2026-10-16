@@ -34,7 +34,7 @@ erDiagram
 | `MediaStream` | 一条基本流（视频、音频、字幕等），或一个外挂字幕文件 |
 | `Image` | 条目或人员的图片 |
 | `Person` / `Credit` | 在条目中署名的人员，以及带角色与署名顺序的关联 |
-| `User` / `LibraryAccess` / `UserPolicy` / `UserPreferences` | 账户、其媒体库访问记录、其他权限及播放偏好 |
+| `User` / `LibraryAccess` / `UserPolicy` / `PlaybackPreferences` / `HomeLayout` | 账户、其媒体库访问记录、其他权限、播放偏好及首页布局 |
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
@@ -215,7 +215,8 @@ erDiagram
 * `UserPolicy` 是用户的其他权限：`AllowTranscoding`、`MaxStreamingBitrate`（比特每秒，为零表示不限）与 `MaxSessions`（为零表示不限）。
   * `Requests`（`RequestPermissions`）：用户能否请求电影与剧集、其各类请求是否自动通过，以及能否报告问题；`MovieQuota` 与 `SeriesQuota` 是用户自己的配额（§13.6），nil 表示使用服务端的配额。管理员可以做所有这些事，且不受配额限制。
 * `LibraryAccess.CanAccess` 在条目所属媒体库被允许、且其 `ContentLimits` 允许（`Allows`）时允许访问：设置了最高分级时，其分级分数（`ParentalRating`，没有时取 `InheritedRating`）不超过该值，未分级条目除非设置了 `BlockUnrated` 否则放行；其标签也须通过，与条目查询的限制一致。`User.CanAccess` 允许用户访问自己的播放列表、不允许访问他人的播放列表，与媒体库访问无关；对其他条目则应用 `User.EffectiveAccess`。
-* `UserPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
+* `PlaybackPreferences`：按偏好顺序排列的音频与字幕语言（ISO 639-2/B）、`SubtitleMode`，以及是否优先选择默认音轨而非偏好语言。
+* `HomeLayout`（`User.Home`）是用户的首页在每个客户端上的显示方式：`Pinned` 时只显示 `Libraries` 所列的媒体库并按其顺序，否则显示用户可访问的每个媒体库；ID 在 `HiddenHubs` 中的推荐行不显示。
 * `UserData` 是某个用户对某个条目的状态：`Played`、`PlayCount`、续播位置 `Position`、上次选择的音频/字幕流（字幕为 `-1` 表示关闭）、`Favorite`、可选的 0–10 分 `Rating` 以及时间戳。没有记录表示"从未交互"。
 * 播放条目时按 Jellyfin 的规则更新其 `UserData`（`RecordPosition`）：位于时长前 5% 的位置不保留；超过 90% 或距结尾不足一秒时标记为已播放并清除位置；短于五分钟的条目越过前 5% 即标记为已播放。有声书改用距开头与距结尾各五分钟。没有时长的条目任何一次播放都算播完。只有视频、有声书与书籍保留续播位置；音乐曲目只标记已播放；其他类型两者都不支持。每次播放到结束，`PlayCount` 加一。
 * **下一集**（`NextEpisode`），与 Jellyfin 相同：剧集的下一集是按季号与集号排在最后一个已播放单集之后的第一个未播放的常规单集（位于更后的季，或同一季中更后的位置即算在其后）；一集都没有播放过时是第一集。特别篇（第 0 季）不参与，除非用 `AirsBeforeSeasonNumber` 或 `AirsAfterSeasonNumber` 标明了位置；这些特别篇按播出顺序插入其间，播放后即被跳过。有续播位置的单集除非明确要求，否则不提供：它属于继续观看。
@@ -327,7 +328,7 @@ erDiagram
 
 ## 11. 显示偏好
 
-`DisplayPreferences` 是用户对某个客户端应用（`Client`，如 "mavio-web"）如何显示某个视图（`View`，如 "home" 或某个媒体库 ID）的设置：一组 `Values`，其名称与内容由客户端决定，例如排序方式或首页显示的栏目，并记录 `UpdatedAt`。服务端保存它们，因此会随用户跨设备。
+`DisplayPreferences` 是用户对某个客户端应用（`Client`，如 "mavio-web"）如何显示某个视图（`View`，如某个媒体库 ID）的设置：一组 `Values`，其名称与内容由客户端决定，例如排序方式或首页显示的栏目，并记录 `UpdatedAt`。服务端保存它们，因此会随用户跨设备。
 
 * 按用户、客户端与视图保存；再次写入会替换全部值。删除用户时一并删除。
 * `Validate` 要求有用户、不超过 200 字节的客户端名与视图名，至多 200 个值，名称非空且不超过 200 字节，值不超过 8 KiB。

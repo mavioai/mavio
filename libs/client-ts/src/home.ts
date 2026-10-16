@@ -6,7 +6,7 @@
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import type { DiscoveredTitle } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
-import type { Hub } from "@mavio/proto/mavio/home/v1/home_pb";
+import type { Hub } from "@mavio/proto/mavio/hub/v1/hub_pb";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind } from "@mavio/proto/mavio/library/v1/library_pb";
 

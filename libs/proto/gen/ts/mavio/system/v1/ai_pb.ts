@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/ai.proto.
  */
 export const file_mavio_system_v1_ai: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYXZpby9zeXN0ZW0vdjEvYWkucHJvdG8SD21hdmlvLnN5c3RlbS52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IlwKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEhEKCXBsdWdpbl9pZBgBIAEoCRIuCglwcm92aWRlcnMYAiADKAsyGy5tYXZpby5wbHVnaW4udjEuQWlQcm92aWRlciI6ChNMaXN0QWlNb2RlbHNSZXF1ZXN0EhAKCHByb3ZpZGVyGAEgASgJEhEKCWF2YWlsYWJsZRgCIAEoCCJAChRMaXN0QWlNb2RlbHNSZXNwb25zZRIoCgZtb2RlbHMYASADKAsyGC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbCI7ChJTZXRBaUFwaUtleVJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARILCgNrZXkYAiABKAkiFQoTU2V0QWlBcGlLZXlSZXNwb25zZSIvChNTdGFydEFpTG9naW5SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiKAoUU3RhcnRBaUxvZ2luUmVzcG9uc2USEAoIbG9naW5faWQYASABKAkiLQoRR2V0QWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKwAQoSR2V0QWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIi8KE1dhdGNoQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKyAQoUV2F0Y2hBaUxvZ2luUmVzcG9uc2USLAoFc3RhdGUYASABKA4yHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpblN0YXRlEi0KBmV2ZW50cxgCIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luRXZlbnQSLgoGcHJvbXB0GAMgASgLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5Qcm9tcHQSDQoFZXJyb3IYBCABKAkiWgoUQW5zd2VyQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBARIZCglwcm9tcHRfaWQYAiABKAlCBrpIA8gBARINCgV2YWx1ZRgDIAEoCSIXChVBbnN3ZXJBaUxvZ2luUmVzcG9uc2UiMAoUQ2FuY2VsQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASIXChVDYW5jZWxBaUxvZ2luUmVzcG9uc2UiKwoPTG9nb3V0QWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiEgoQTG9nb3V0QWlSZXNwb25zZSKIAQobQ3JlYXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESFQoFbW9kZWwYAiABKAlCBrpIA8gBARIfCgxpbnN0cnVjdGlvbnMYAyABKAlCCbpIBnIEGKCcARIXCgV0aXRsZRgEIAEoCUIIukgFcgMYyAEiUwocQ3JlYXRlQWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uIhwKGkxpc3RBaUNvbnZlcnNhdGlvbnNSZXF1ZXN0IlMKG0xpc3RBaUNvbnZlcnNhdGlvbnNSZXNwb25zZRI0Cg1jb252ZXJzYXRpb25zGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50U2Vzc2lvbiIuChhHZXRBaUNvbnZlcnNhdGlvblJlcXVlc3QSEgoCaWQYASABKAlCBrpIA8gBASKBAQoZR2V0QWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uEi8KCG1lc3NhZ2VzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZSJwChRTZW5kQWlNZXNzYWdlUmVxdWVzdBIfCg9jb252ZXJzYXRpb25faWQYASABKAlCBrpIA8gBARIaCgR0ZXh0GAIgASgJQgy6SAnIAQFyBBigjQYSGwoKcmVxdWVzdF9pZBgDIAEoCUIHukgEcgIYZCJrChVTZW5kQWlNZXNzYWdlUmVzcG9uc2USDgoEdGV4dBgBIAEoCUgAEjkKBGRvbmUYAiABKAsyKS5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlc3BvbnNlSABCBwoFZXZlbnQiMQobRGVsZXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhIKAmlkGAEgASgJQga6SAPIAQEiHgocRGVsZXRlQWlDb252ZXJzYXRpb25SZXNwb25zZTKUCwoJQWlTZXJ2aWNlEmkKD0xpc3RBaVByb3ZpZGVycxInLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlQcm92aWRlcnNSZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLkxpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlIgOQAgESYAoMTGlzdEFpTW9kZWxzEiQubWF2aW8uc3lzdGVtLnYxLkxpc3RBaU1vZGVsc1JlcXVlc3QaJS5tYXZpby5zeXN0ZW0udjEuTGlzdEFpTW9kZWxzUmVzcG9uc2UiA5ACARJYCgtTZXRBaUFwaUtleRIjLm1hdmlvLnN5c3RlbS52MS5TZXRBaUFwaUtleVJlcXVlc3QaJC5tYXZpby5zeXN0ZW0udjEuU2V0QWlBcGlLZXlSZXNwb25zZRJbCgxTdGFydEFpTG9naW4SJC5tYXZpby5zeXN0ZW0udjEuU3RhcnRBaUxvZ2luUmVxdWVzdBolLm1hdmlvLnN5c3RlbS52MS5TdGFydEFpTG9naW5SZXNwb25zZRJaCgpHZXRBaUxvZ2luEiIubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXF1ZXN0GiMubWF2aW8uc3lzdGVtLnYxLkdldEFpTG9naW5SZXNwb25zZSIDkAIBEmIKDFdhdGNoQWlMb2dpbhIkLm1hdmlvLnN5c3RlbS52MS5XYXRjaEFpTG9naW5SZXF1ZXN0GiUubWF2aW8uc3lzdGVtLnYxLldhdGNoQWlMb2dpblJlc3BvbnNlIgOQAgEwARJeCg1BbnN3ZXJBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkFuc3dlckFpTG9naW5SZXNwb25zZRJeCg1DYW5jZWxBaUxvZ2luEiUubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkNhbmNlbEFpTG9naW5SZXNwb25zZRJPCghMb2dvdXRBaRIgLm1hdmlvLnN5c3RlbS52MS5Mb2dvdXRBaVJlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTG9nb3V0QWlSZXNwb25zZRJzChRDcmVhdGVBaUNvbnZlcnNhdGlvbhIsLm1hdmlvLnN5c3RlbS52MS5DcmVhdGVBaUNvbnZlcnNhdGlvblJlcXVlc3QaLS5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlQWlDb252ZXJzYXRpb25SZXNwb25zZRJ1ChNMaXN0QWlDb252ZXJzYXRpb25zEisubWF2aW8uc3lzdGVtLnYxLkxpc3RBaUNvbnZlcnNhdGlvbnNSZXF1ZXN0GiwubWF2aW8uc3lzdGVtLnYxLkxpc3RBaUNvbnZlcnNhdGlvbnNSZXNwb25zZSIDkAIBEm8KEUdldEFpQ29udmVyc2F0aW9uEikubWF2aW8uc3lzdGVtLnYxLkdldEFpQ29udmVyc2F0aW9uUmVxdWVzdBoqLm1hdmlvLnN5c3RlbS52MS5HZXRBaUNvbnZlcnNhdGlvblJlc3BvbnNlIgOQAgESYAoNU2VuZEFpTWVzc2FnZRIlLm1hdmlvLnN5c3RlbS52MS5TZW5kQWlNZXNzYWdlUmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5TZW5kQWlNZXNzYWdlUmVzcG9uc2UwARJzChREZWxldGVBaUNvbnZlcnNhdGlvbhIsLm1hdmlvLnN5c3RlbS52MS5EZWxldGVBaUNvbnZlcnNhdGlvblJlcXVlc3QaLS5tYXZpby5zeXN0ZW0udjEuRGVsZXRlQWlDb252ZXJzYXRpb25SZXNwb25zZULBAQoTY29tLm1hdmlvLnN5c3RlbS52MUIHQWlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_mavio_plugin_v1_ai]);
+  fileDesc("ChhtYXZpby9zeXN0ZW0vdjEvYWkucHJvdG8SD21hdmlvLnN5c3RlbS52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IlwKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEhEKCXBsdWdpbl9pZBgBIAEoCRIuCglwcm92aWRlcnMYAiADKAsyGy5tYXZpby5wbHVnaW4udjEuQWlQcm92aWRlciI6ChNMaXN0QWlNb2RlbHNSZXF1ZXN0EhAKCHByb3ZpZGVyGAEgASgJEhEKCWF2YWlsYWJsZRgCIAEoCCJAChRMaXN0QWlNb2RlbHNSZXNwb25zZRIoCgZtb2RlbHMYASADKAsyGC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbCI7ChJTZXRBaUFwaUtleVJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARILCgNrZXkYAiABKAkiFQoTU2V0QWlBcGlLZXlSZXNwb25zZSIvChNTdGFydEFpTG9naW5SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiKAoUU3RhcnRBaUxvZ2luUmVzcG9uc2USEAoIbG9naW5faWQYASABKAkiLQoRR2V0QWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKwAQoSR2V0QWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIi8KE1dhdGNoQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASKyAQoUV2F0Y2hBaUxvZ2luUmVzcG9uc2USLAoFc3RhdGUYASABKA4yHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpblN0YXRlEi0KBmV2ZW50cxgCIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luRXZlbnQSLgoGcHJvbXB0GAMgASgLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5Qcm9tcHQSDQoFZXJyb3IYBCABKAkiWgoUQW5zd2VyQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBARIZCglwcm9tcHRfaWQYAiABKAlCBrpIA8gBARINCgV2YWx1ZRgDIAEoCSIXChVBbnN3ZXJBaUxvZ2luUmVzcG9uc2UiMAoUQ2FuY2VsQWlMb2dpblJlcXVlc3QSGAoIbG9naW5faWQYASABKAlCBrpIA8gBASIXChVDYW5jZWxBaUxvZ2luUmVzcG9uc2UiKwoPTG9nb3V0QWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQEiEgoQTG9nb3V0QWlSZXNwb25zZSKIAQobQ3JlYXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESFQoFbW9kZWwYAiABKAlCBrpIA8gBARIfCgxpbnN0cnVjdGlvbnMYAyABKAlCCbpIBnIEGKCcARIXCgV0aXRsZRgEIAEoCUIIukgFcgMYyAEiUwocQ3JlYXRlQWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uIhwKGkxpc3RBaUNvbnZlcnNhdGlvbnNSZXF1ZXN0IlMKG0xpc3RBaUNvbnZlcnNhdGlvbnNSZXNwb25zZRI0Cg1jb252ZXJzYXRpb25zGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50U2Vzc2lvbiIuChhHZXRBaUNvbnZlcnNhdGlvblJlcXVlc3QSEgoCaWQYASABKAlCBrpIA8gBASKBAQoZR2V0QWlDb252ZXJzYXRpb25SZXNwb25zZRIzCgxjb252ZXJzYXRpb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uEi8KCG1lc3NhZ2VzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZSJwChRTZW5kQWlNZXNzYWdlUmVxdWVzdBIfCg9jb252ZXJzYXRpb25faWQYASABKAlCBrpIA8gBARIaCgR0ZXh0GAIgASgJQgy6SAnIAQFyBBigjQYSGwoKcmVxdWVzdF9pZBgDIAEoCUIHukgEcgIYZCJrChVTZW5kQWlNZXNzYWdlUmVzcG9uc2USDgoEdGV4dBgBIAEoCUgAEjkKBGRvbmUYAiABKAsyKS5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlc3BvbnNlSABCBwoFZXZlbnQiMQobRGVsZXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0EhIKAmlkGAEgASgJQga6SAPIAQEiHgocRGVsZXRlQWlDb252ZXJzYXRpb25SZXNwb25zZTLoBgoRQWlQcm92aWRlclNlcnZpY2USaQoPTGlzdEFpUHJvdmlkZXJzEicubWF2aW8uc3lzdGVtLnYxLkxpc3RBaVByb3ZpZGVyc1JlcXVlc3QaKC5tYXZpby5zeXN0ZW0udjEuTGlzdEFpUHJvdmlkZXJzUmVzcG9uc2UiA5ACARJgCgxMaXN0QWlNb2RlbHMSJC5tYXZpby5zeXN0ZW0udjEuTGlzdEFpTW9kZWxzUmVxdWVzdBolLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlNb2RlbHNSZXNwb25zZSIDkAIBElgKC1NldEFpQXBpS2V5EiMubWF2aW8uc3lzdGVtLnYxLlNldEFpQXBpS2V5UmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5TZXRBaUFwaUtleVJlc3BvbnNlElsKDFN0YXJ0QWlMb2dpbhIkLm1hdmlvLnN5c3RlbS52MS5TdGFydEFpTG9naW5SZXF1ZXN0GiUubWF2aW8uc3lzdGVtLnYxLlN0YXJ0QWlMb2dpblJlc3BvbnNlEloKCkdldEFpTG9naW4SIi5tYXZpby5zeXN0ZW0udjEuR2V0QWlMb2dpblJlcXVlc3QaIy5tYXZpby5zeXN0ZW0udjEuR2V0QWlMb2dpblJlc3BvbnNlIgOQAgESYgoMV2F0Y2hBaUxvZ2luEiQubWF2aW8uc3lzdGVtLnYxLldhdGNoQWlMb2dpblJlcXVlc3QaJS5tYXZpby5zeXN0ZW0udjEuV2F0Y2hBaUxvZ2luUmVzcG9uc2UiA5ACATABEl4KDUFuc3dlckFpTG9naW4SJS5tYXZpby5zeXN0ZW0udjEuQW5zd2VyQWlMb2dpblJlcXVlc3QaJi5tYXZpby5zeXN0ZW0udjEuQW5zd2VyQWlMb2dpblJlc3BvbnNlEl4KDUNhbmNlbEFpTG9naW4SJS5tYXZpby5zeXN0ZW0udjEuQ2FuY2VsQWlMb2dpblJlcXVlc3QaJi5tYXZpby5zeXN0ZW0udjEuQ2FuY2VsQWlMb2dpblJlc3BvbnNlEk8KCExvZ291dEFpEiAubWF2aW8uc3lzdGVtLnYxLkxvZ291dEFpUmVxdWVzdBohLm1hdmlvLnN5c3RlbS52MS5Mb2dvdXRBaVJlc3BvbnNlMssEChVBaUNvbnZlcnNhdGlvblNlcnZpY2UScwoUQ3JlYXRlQWlDb252ZXJzYXRpb24SLC5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLkNyZWF0ZUFpQ29udmVyc2F0aW9uUmVzcG9uc2USdQoTTGlzdEFpQ29udmVyc2F0aW9ucxIrLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlDb252ZXJzYXRpb25zUmVxdWVzdBosLm1hdmlvLnN5c3RlbS52MS5MaXN0QWlDb252ZXJzYXRpb25zUmVzcG9uc2UiA5ACARJvChFHZXRBaUNvbnZlcnNhdGlvbhIpLm1hdmlvLnN5c3RlbS52MS5HZXRBaUNvbnZlcnNhdGlvblJlcXVlc3QaKi5tYXZpby5zeXN0ZW0udjEuR2V0QWlDb252ZXJzYXRpb25SZXNwb25zZSIDkAIBEmAKDVNlbmRBaU1lc3NhZ2USJS5tYXZpby5zeXN0ZW0udjEuU2VuZEFpTWVzc2FnZVJlcXVlc3QaJi5tYXZpby5zeXN0ZW0udjEuU2VuZEFpTWVzc2FnZVJlc3BvbnNlMAEScwoURGVsZXRlQWlDb252ZXJzYXRpb24SLC5tYXZpby5zeXN0ZW0udjEuRGVsZXRlQWlDb252ZXJzYXRpb25SZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLkRlbGV0ZUFpQ29udmVyc2F0aW9uUmVzcG9uc2VCwQEKE2NvbS5tYXZpby5zeXN0ZW0udjFCB0FpUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_mavio_plugin_v1_ai]);
 
 /**
  * @generated from message mavio.system.v1.ListAiProvidersRequest
@@ -589,23 +589,20 @@ export const DeleteAiConversationResponseSchema: GenMessage<DeleteAiConversation
   messageDesc(file_mavio_system_v1_ai, 27);
 
 /**
- * AiService administers the AI model providers the server's features use,
- * through the plugin with the AI_GATEWAY capability, which keeps their
- * credentials: API keys, and OAuth logins relayed to the administrator.
- * It also keeps the administrators' conversations with the models, through
- * the plugin with the AGENT_SESSION capability. Every RPC requires an
- * administrator; without a started AI gateway plugin, or for the
- * conversations one with the AGENT_SESSION capability, they fail with
- * failed precondition.
+ * AiProviderService administers the AI model providers the server's
+ * features use, through the plugin with the AI_GATEWAY capability, which
+ * keeps their credentials: API keys, and OAuth logins relayed to the
+ * administrator. Every RPC requires an administrator; without a started
+ * AI gateway plugin they fail with FAILED_PRECONDITION.
  *
- * @generated from service mavio.system.v1.AiService
+ * @generated from service mavio.system.v1.AiProviderService
  */
-export const AiService: GenService<{
+export const AiProviderService: GenService<{
   /**
    * ListAiProviders lists the providers with how they authenticate and
    * whether they can be used.
    *
-   * @generated from rpc mavio.system.v1.AiService.ListAiProviders
+   * @generated from rpc mavio.system.v1.AiProviderService.ListAiProviders
    */
   listAiProviders: {
     methodKind: "unary";
@@ -615,7 +612,7 @@ export const AiService: GenService<{
   /**
    * ListAiModels lists the providers' models.
    *
-   * @generated from rpc mavio.system.v1.AiService.ListAiModels
+   * @generated from rpc mavio.system.v1.AiProviderService.ListAiModels
    */
   listAiModels: {
     methodKind: "unary";
@@ -625,7 +622,7 @@ export const AiService: GenService<{
   /**
    * SetAiApiKey stores a provider's API key, or removes it.
    *
-   * @generated from rpc mavio.system.v1.AiService.SetAiApiKey
+   * @generated from rpc mavio.system.v1.AiProviderService.SetAiApiKey
    */
   setAiApiKey: {
     methodKind: "unary";
@@ -637,7 +634,7 @@ export const AiService: GenService<{
    * (AiProvider.subscription) may break the provider's terms; clients
    * warn of it and leave the choice to the administrator.
    *
-   * @generated from rpc mavio.system.v1.AiService.StartAiLogin
+   * @generated from rpc mavio.system.v1.AiProviderService.StartAiLogin
    */
   startAiLogin: {
     methodKind: "unary";
@@ -648,7 +645,7 @@ export const AiService: GenService<{
    * GetAiLogin returns a login's state: what to show, what it asks and
    * whether it ended.
    *
-   * @generated from rpc mavio.system.v1.AiService.GetAiLogin
+   * @generated from rpc mavio.system.v1.AiProviderService.GetAiLogin
    */
   getAiLogin: {
     methodKind: "unary";
@@ -659,7 +656,7 @@ export const AiService: GenService<{
    * WatchAiLogin streams a login's state: as it is, then each time it
    * changes, until the login ends. Clients follow a login with it.
    *
-   * @generated from rpc mavio.system.v1.AiService.WatchAiLogin
+   * @generated from rpc mavio.system.v1.AiProviderService.WatchAiLogin
    */
   watchAiLogin: {
     methodKind: "server_streaming";
@@ -669,7 +666,7 @@ export const AiService: GenService<{
   /**
    * AnswerAiLogin answers a login's prompt.
    *
-   * @generated from rpc mavio.system.v1.AiService.AnswerAiLogin
+   * @generated from rpc mavio.system.v1.AiProviderService.AnswerAiLogin
    */
   answerAiLogin: {
     methodKind: "unary";
@@ -679,7 +676,7 @@ export const AiService: GenService<{
   /**
    * CancelAiLogin abandons a login.
    *
-   * @generated from rpc mavio.system.v1.AiService.CancelAiLogin
+   * @generated from rpc mavio.system.v1.AiProviderService.CancelAiLogin
    */
   cancelAiLogin: {
     methodKind: "unary";
@@ -689,17 +686,29 @@ export const AiService: GenService<{
   /**
    * LogoutAi removes a provider's stored credential.
    *
-   * @generated from rpc mavio.system.v1.AiService.LogoutAi
+   * @generated from rpc mavio.system.v1.AiProviderService.LogoutAi
    */
   logoutAi: {
     methodKind: "unary";
     input: typeof LogoutAiRequestSchema;
     output: typeof LogoutAiResponseSchema;
   },
+}> = /*@__PURE__*/
+  serviceDesc(file_mavio_system_v1_ai, 0);
+
+/**
+ * AiConversationService keeps the administrators' conversations with the
+ * models, through the plugin with the AGENT_SESSION capability. Every RPC
+ * requires an administrator; without a started plugin with the
+ * AGENT_SESSION capability they fail with FAILED_PRECONDITION.
+ *
+ * @generated from service mavio.system.v1.AiConversationService
+ */
+export const AiConversationService: GenService<{
   /**
    * CreateAiConversation starts a conversation with a model.
    *
-   * @generated from rpc mavio.system.v1.AiService.CreateAiConversation
+   * @generated from rpc mavio.system.v1.AiConversationService.CreateAiConversation
    */
   createAiConversation: {
     methodKind: "unary";
@@ -709,7 +718,7 @@ export const AiService: GenService<{
   /**
    * ListAiConversations lists the conversations, newest first.
    *
-   * @generated from rpc mavio.system.v1.AiService.ListAiConversations
+   * @generated from rpc mavio.system.v1.AiConversationService.ListAiConversations
    */
   listAiConversations: {
     methodKind: "unary";
@@ -719,7 +728,7 @@ export const AiService: GenService<{
   /**
    * GetAiConversation returns a conversation with its messages.
    *
-   * @generated from rpc mavio.system.v1.AiService.GetAiConversation
+   * @generated from rpc mavio.system.v1.AiConversationService.GetAiConversation
    */
   getAiConversation: {
     methodKind: "unary";
@@ -730,7 +739,7 @@ export const AiService: GenService<{
    * SendAiMessage sends a message to a conversation and streams the answer
    * as the model writes it, ending with the answer.
    *
-   * @generated from rpc mavio.system.v1.AiService.SendAiMessage
+   * @generated from rpc mavio.system.v1.AiConversationService.SendAiMessage
    */
   sendAiMessage: {
     methodKind: "server_streaming";
@@ -740,7 +749,7 @@ export const AiService: GenService<{
   /**
    * DeleteAiConversation deletes a conversation.
    *
-   * @generated from rpc mavio.system.v1.AiService.DeleteAiConversation
+   * @generated from rpc mavio.system.v1.AiConversationService.DeleteAiConversation
    */
   deleteAiConversation: {
     methodKind: "unary";
@@ -748,5 +757,5 @@ export const AiService: GenService<{
     output: typeof DeleteAiConversationResponseSchema;
   },
 }> = /*@__PURE__*/
-  serviceDesc(file_mavio_system_v1_ai, 0);
+  serviceDesc(file_mavio_system_v1_ai, 1);
 

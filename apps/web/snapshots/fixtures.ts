@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 
 import type { MessageInitShape } from "@bufbuild/protobuf";
 import { AuthService } from "@mavio/proto/mavio/auth/v1/auth_pb";
-import { HomeService } from "@mavio/proto/mavio/home/v1/home_pb";
+import { HubService } from "@mavio/proto/mavio/hub/v1/hub_pb";
 import { ImageKind, ItemKind, ItemService, type ItemSchema } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind, LibraryKind, LibraryService } from "@mavio/proto/mavio/library/v1/library_pb";
 import { StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
@@ -53,7 +53,7 @@ export const screens = JSON.parse(
 export const services: Services = Object.fromEntries(
   [
     AuthService,
-    HomeService,
+    HubService,
     ItemService,
     LibraryService,
     EventService,
@@ -145,7 +145,7 @@ export function fixtures(): Fixtures {
         kind: l.kind === "movies" ? LibraryKind.MOVIES : LibraryKind.SHOWS,
       })),
     }))
-    .on(HomeService, "listHubs", () => ({
+    .on(HubService, "listHubs", () => ({
       hubs: screens.home.map((h) => ({
         id: h.library ? `${h.kind}/${h.library}` : h.kind,
         kind: h.kind === "continueWatching" ? HubKind.CONTINUE_WATCHING : HubKind.RECENTLY_ADDED,

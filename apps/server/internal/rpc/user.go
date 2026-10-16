@@ -138,8 +138,8 @@ func (s *UserService) CreateUser(ctx context.Context, req *userv1.CreateUserRequ
 	if req.HasPolicy() {
 		u.Policy, u.Access = policyFromProto(req.GetPolicy(), u.Policy.Requests)
 	}
-	if req.HasPreferences() {
-		u.Preferences = preferencesFromProto(req.GetPreferences())
+	if req.HasPlaybackPreferences() {
+		u.Preferences = preferencesFromProto(req.GetPlaybackPreferences())
 	}
 	var creds []core.Credential
 	err = s.store.InTx(ctx, func(tx core.Store) error {
@@ -361,8 +361,8 @@ func (s *UserService) accountChanged(ctx context.Context, p auth.Principal, even
 	s.Activity.Record(ctx, a)
 }
 
-// UpdatePreferences changes the caller's playback preferences.
-func (s *UserService) UpdatePreferences(ctx context.Context, req *userv1.UpdatePreferencesRequest) (*userv1.UpdatePreferencesResponse, error) {
+// UpdatePlaybackPreferences changes the caller's playback preferences.
+func (s *UserService) UpdatePlaybackPreferences(ctx context.Context, req *userv1.UpdatePlaybackPreferencesRequest) (*userv1.UpdatePlaybackPreferencesResponse, error) {
 	p, err := principal(ctx)
 	if err != nil {
 		return nil, err
@@ -372,13 +372,13 @@ func (s *UserService) UpdatePreferences(ctx context.Context, req *userv1.UpdateP
 		if u, err = tx.Users().Get(ctx, p.User.ID); err != nil {
 			return err
 		}
-		u.Preferences = preferencesFromProto(req.GetPreferences())
+		u.Preferences = preferencesFromProto(req.GetPlaybackPreferences())
 		return tx.Users().Update(ctx, &u)
 	})
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return userv1.UpdatePreferencesResponse_builder{Preferences: userToProto(&u, nil).GetPreferences()}.Build(), nil
+	return userv1.UpdatePlaybackPreferencesResponse_builder{PlaybackPreferences: userToProto(&u, nil).GetPlaybackPreferences()}.Build(), nil
 }
 
 // UserDataService implements mavio.user.v1.UserDataService.
@@ -553,8 +553,8 @@ func policyFromProto(p *userv1.UserPolicy, requests core.RequestPermissions) (co
 	return out, access
 }
 
-func preferencesFromProto(p *userv1.UserPreferences) core.UserPreferences {
-	out := core.UserPreferences{
+func preferencesFromProto(p *userv1.PlaybackPreferences) core.PlaybackPreferences {
+	out := core.PlaybackPreferences{
 		AudioLanguages:        p.GetAudioLanguages(),
 		SubtitleLanguages:     p.GetSubtitleLanguages(),
 		PlayDefaultAudioTrack: p.GetPlayDefaultAudioTrack(),

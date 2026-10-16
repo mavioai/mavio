@@ -109,8 +109,6 @@ type ItemService struct {
 	// ExternalIDKinds lists the kinds of external IDs, to link items and
 	// persons to their pages; nil lists the built-in kinds.
 	ExternalIDKinds func() []metadata.ExternalIDKind
-	// Lyrics finds lyrics through the lyrics providers; nil finds none.
-	Lyrics *library.Lyrics
 	// Storages opens the storage of library paths; nil opens local
 	// folders only.
 	Storages *library.Storages
@@ -262,63 +260,6 @@ func (s *ItemService) GetLyrics(ctx context.Context, req *libraryv1.GetLyricsReq
 		out.SetLines(append(out.GetLines(), pl))
 	}
 	return out, nil
-}
-
-// SearchRemoteLyrics asks the lyrics providers for lyrics of a track.
-func (s *ItemService) SearchRemoteLyrics(ctx context.Context, req *libraryv1.SearchRemoteLyricsRequest) (*libraryv1.SearchRemoteLyricsResponse, error) {
-	if _, err := admin(ctx); err != nil {
-		return nil, err
-	}
-	resp := &libraryv1.SearchRemoteLyricsResponse{}
-	if s.Lyrics == nil {
-		return resp, nil
-	}
-	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	found, err := s.Lyrics.Search(ctx, lib, it.ID)
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	for _, l := range found {
-		rl := libraryv1.RemoteLyrics_builder{
-			Provider: &l.Provider, Id: &l.ID, Name: &l.Name, Artists: l.Artists, Album: &l.Album, Synced: &l.Synced, Score: &l.Score,
-		}.Build()
-		if l.Duration > 0 {
-			rl.SetDuration(durationpb.New(l.Duration))
-		}
-		resp.SetLyrics(append(resp.GetLyrics(), rl))
-	}
-	return resp, nil
-}
-
-// DownloadRemoteLyrics saves lyrics a lyrics provider found beside the
-// track.
-func (s *ItemService) DownloadRemoteLyrics(ctx context.Context, req *libraryv1.DownloadRemoteLyricsRequest) (*libraryv1.DownloadRemoteLyricsResponse, error) {
-	if _, err := admin(ctx); err != nil {
-		return nil, err
-	}
-	notFound := connect.NewError(connect.CodeNotFound, fmt.Errorf("lyrics provider %s: %w", req.GetProvider(), core.ErrNotFound))
-	if s.Lyrics == nil {
-		return nil, notFound
-	}
-	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	if err := s.Lyrics.Download(ctx, lib, it.ID, req.GetProvider(), req.GetId()); err != nil {
-		return nil, connectError(ctx, err)
-	}
-	return &libraryv1.DownloadRemoteLyricsResponse{}, nil
 }
 
 // maxLyrics bounds a lyric file read.

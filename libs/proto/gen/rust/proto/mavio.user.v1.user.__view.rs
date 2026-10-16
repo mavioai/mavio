@@ -23,9 +23,9 @@ pub struct UserView<'a> {
     pub policy: ::buffa::MessageFieldView<
         super::super::__buffa::view::UserPolicyView<'a>,
     >,
-    /// Field 7: `preferences`
-    pub preferences: ::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'a>,
+    /// Field 7: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageFieldView<
+        super::super::__buffa::view::PlaybackPreferencesView<'a>,
     >,
     /// Field 8: `create_time`
     pub create_time: ::buffa::MessageFieldView<
@@ -154,13 +154,13 @@ impl<'a> ::buffa::MessageView<'a> for UserView<'a> {
                 )?;
                 let __sub_ctx = ctx.descend()?;
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.preferences.as_mut() {
+                match view.playback_preferences.as_mut() {
                     Some(existing) => {
                         ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
                     }
                     None => {
-                        view.preferences = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::UserPreferencesView as ::buffa::MessageView>::decode_view_ctx(
+                        view.playback_preferences = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::PlaybackPreferencesView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -294,11 +294,11 @@ impl<'a> ::buffa::MessageView<'a> for UserView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
-            preferences: match self.preferences.as_option() {
+            playback_preferences: match self.playback_preferences.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::UserPreferences,
-                        ::buffa::Inline<super::super::UserPreferences>,
+                        super::super::PlaybackPreferences,
+                        ::buffa::Inline<super::super::PlaybackPreferences>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -364,9 +364,9 @@ impl<'a> ::buffa::ViewEncode<'a> for UserView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -442,13 +442,13 @@ impl<'a> ::buffa::ViewEncode<'a> for UserView<'a> {
             );
             self.policy.write_to(__cache, buf);
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 7u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         if self.create_time.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -610,14 +610,14 @@ impl UserOwnedView {
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::UserPolicyView<'_>> {
         &self.0.reborrow().policy
     }
-    /// Field 7: `preferences`
+    /// Field 7: `playback_preferences`
     #[must_use]
-    pub fn preferences(
+    pub fn playback_preferences(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'_>,
+        super::super::__buffa::view::PlaybackPreferencesView<'_>,
     > {
-        &self.0.reborrow().preferences
+        &self.0.reborrow().playback_preferences
     }
     /// Field 8: `create_time`
     #[must_use]
@@ -2002,8 +2002,10 @@ impl ::buffa::HasMessageView for super::super::RequestQuota {
     type View<'a> = RequestQuotaView<'a>;
     type ViewHandle = RequestQuotaOwnedView;
 }
+/// PlaybackPreferences are the user's defaults for choosing the audio and
+/// subtitle streams of what they play; the server applies them.
 #[derive(Clone, Debug, Default)]
-pub struct UserPreferencesView<'a> {
+pub struct PlaybackPreferencesView<'a> {
     /// ISO 639-2/B codes in order of preference.
     ///
     /// Field 1: `audio_languages`
@@ -2018,8 +2020,8 @@ pub struct UserPreferencesView<'a> {
     pub play_default_audio_track: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for UserPreferencesView<'a> {
-    type Owned = super::super::UserPreferences;
+impl<'a> ::buffa::MessageView<'a> for PlaybackPreferencesView<'a> {
+    type Owned = super::super::PlaybackPreferences;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -2098,18 +2100,24 @@ impl<'a> ::buffa::MessageView<'a> for UserPreferencesView<'a> {
     }
     fn to_owned_message(
         &self,
-    ) -> ::core::result::Result<super::super::UserPreferences, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::PlaybackPreferences,
+        ::buffa::DecodeError,
+    > {
         self.to_owned_from_source(None)
     }
     #[allow(clippy::useless_conversion, clippy::needless_update)]
     fn to_owned_from_source(
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
-    ) -> ::core::result::Result<super::super::UserPreferences, ::buffa::DecodeError> {
+    ) -> ::core::result::Result<
+        super::super::PlaybackPreferences,
+        ::buffa::DecodeError,
+    > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::UserPreferences {
+        ::core::result::Result::Ok(super::super::PlaybackPreferences {
             audio_languages: self
                 .audio_languages
                 .iter()
@@ -2127,7 +2135,7 @@ impl<'a> ::buffa::MessageView<'a> for UserPreferencesView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for UserPreferencesView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for PlaybackPreferencesView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
@@ -2171,22 +2179,24 @@ impl<'a> ::buffa::ViewEncode<'a> for UserPreferencesView<'a> {
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for UserPreferencesView<'a> {
+impl<'a> ::buffa::MessageName for PlaybackPreferencesView<'a> {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UserPreferences";
-    const FULL_NAME: &'static str = "mavio.user.v1.UserPreferences";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UserPreferences";
+    const NAME: &'static str = "PlaybackPreferences";
+    const FULL_NAME: &'static str = "mavio.user.v1.PlaybackPreferences";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.PlaybackPreferences";
 }
-::buffa::impl_default_view_instance!(UserPreferencesView);
-::buffa::impl_view_reborrow!(UserPreferencesView);
-/** Self-contained, `'static` owned view of a `UserPreferences` message.
+::buffa::impl_default_view_instance!(PlaybackPreferencesView);
+::buffa::impl_view_reborrow!(PlaybackPreferencesView);
+/** Self-contained, `'static` owned view of a `PlaybackPreferences` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`UserPreferencesView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`PlaybackPreferencesView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UserPreferencesView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`PlaybackPreferencesView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct UserPreferencesOwnedView(::buffa::OwnedView<UserPreferencesView<'static>>);
-impl UserPreferencesOwnedView {
+pub struct PlaybackPreferencesOwnedView(
+    ::buffa::OwnedView<PlaybackPreferencesView<'static>>,
+);
+impl PlaybackPreferencesOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -2200,7 +2210,7 @@ impl UserPreferencesOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UserPreferencesOwnedView(::buffa::OwnedView::decode(bytes)?),
+            PlaybackPreferencesOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -2215,7 +2225,7 @@ impl UserPreferencesOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UserPreferencesOwnedView(
+            PlaybackPreferencesOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -2229,15 +2239,15 @@ impl UserPreferencesOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::UserPreferences,
+        msg: &super::super::PlaybackPreferences,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UserPreferencesOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            PlaybackPreferencesOwnedView(::buffa::OwnedView::from_owned(msg)?),
         )
     }
-    /// Borrow the full [`UserPreferencesView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`PlaybackPreferencesView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &UserPreferencesView<'_> {
+    pub fn view(&self) -> &PlaybackPreferencesView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -2248,7 +2258,7 @@ impl UserPreferencesOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::UserPreferences {
+    pub fn to_owned_message(&self) -> super::super::PlaybackPreferences {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -2286,27 +2296,27 @@ impl UserPreferencesOwnedView {
         self.0.reborrow().play_default_audio_track
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<UserPreferencesView<'static>>>
-for UserPreferencesOwnedView {
-    fn from(inner: ::buffa::OwnedView<UserPreferencesView<'static>>) -> Self {
-        UserPreferencesOwnedView(inner)
+impl ::core::convert::From<::buffa::OwnedView<PlaybackPreferencesView<'static>>>
+for PlaybackPreferencesOwnedView {
+    fn from(inner: ::buffa::OwnedView<PlaybackPreferencesView<'static>>) -> Self {
+        PlaybackPreferencesOwnedView(inner)
     }
 }
-impl ::core::convert::From<UserPreferencesOwnedView>
-for ::buffa::OwnedView<UserPreferencesView<'static>> {
-    fn from(wrapper: UserPreferencesOwnedView) -> Self {
+impl ::core::convert::From<PlaybackPreferencesOwnedView>
+for ::buffa::OwnedView<PlaybackPreferencesView<'static>> {
+    fn from(wrapper: PlaybackPreferencesOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<UserPreferencesView<'static>>>
-for UserPreferencesOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<UserPreferencesView<'static>> {
+impl ::core::convert::AsRef<::buffa::OwnedView<PlaybackPreferencesView<'static>>>
+for PlaybackPreferencesOwnedView {
+    fn as_ref(&self) -> &::buffa::OwnedView<PlaybackPreferencesView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::UserPreferences {
-    type View<'a> = UserPreferencesView<'a>;
-    type ViewHandle = UserPreferencesOwnedView;
+impl ::buffa::HasMessageView for super::super::PlaybackPreferences {
+    type View<'a> = PlaybackPreferencesView<'a>;
+    type ViewHandle = PlaybackPreferencesOwnedView;
 }
 /// UserData is the calling user's state for one item.
 #[derive(Clone, Debug, Default)]
@@ -4155,9 +4165,9 @@ pub struct CreateUserRequestView<'a> {
     pub policy: ::buffa::MessageFieldView<
         super::super::__buffa::view::UserPolicyView<'a>,
     >,
-    /// Field 6: `preferences`
-    pub preferences: ::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'a>,
+    /// Field 6: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageFieldView<
+        super::super::__buffa::view::PlaybackPreferencesView<'a>,
     >,
     /// Creates a managed user, without password or auth_provider.
     ///
@@ -4261,13 +4271,13 @@ impl<'a> ::buffa::MessageView<'a> for CreateUserRequestView<'a> {
                 )?;
                 let __sub_ctx = ctx.descend()?;
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.preferences.as_mut() {
+                match view.playback_preferences.as_mut() {
                     Some(existing) => {
                         ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
                     }
                     None => {
-                        view.preferences = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::UserPreferencesView as ::buffa::MessageView>::decode_view_ctx(
+                        view.playback_preferences = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::PlaybackPreferencesView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -4333,11 +4343,11 @@ impl<'a> ::buffa::MessageView<'a> for CreateUserRequestView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
-            preferences: match self.preferences.as_option() {
+            playback_preferences: match self.playback_preferences.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::UserPreferences,
-                        ::buffa::Inline<super::super::UserPreferences>,
+                        super::super::PlaybackPreferences,
+                        ::buffa::Inline<super::super::PlaybackPreferences>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -4376,9 +4386,9 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateUserRequestView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -4424,13 +4434,13 @@ impl<'a> ::buffa::ViewEncode<'a> for CreateUserRequestView<'a> {
             );
             self.policy.write_to(__cache, buf);
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 6u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         if let Some(v) = self.managed {
             ::buffa::types::put_bool_field(7u32, v, buf);
@@ -4567,14 +4577,14 @@ impl CreateUserRequestOwnedView {
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::UserPolicyView<'_>> {
         &self.0.reborrow().policy
     }
-    /// Field 6: `preferences`
+    /// Field 6: `playback_preferences`
     #[must_use]
-    pub fn preferences(
+    pub fn playback_preferences(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'_>,
+        super::super::__buffa::view::PlaybackPreferencesView<'_>,
     > {
-        &self.0.reborrow().preferences
+        &self.0.reborrow().playback_preferences
     }
     /// Creates a managed user, without password or auth_provider.
     ///
@@ -9549,15 +9559,15 @@ impl ::buffa::HasMessageView for super::super::DeleteTotpResponse {
     type ViewHandle = DeleteTotpResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct UpdatePreferencesRequestView<'a> {
-    /// Field 1: `preferences`
-    pub preferences: ::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'a>,
+pub struct UpdatePlaybackPreferencesRequestView<'a> {
+    /// Field 1: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageFieldView<
+        super::super::__buffa::view::PlaybackPreferencesView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesRequestView<'a> {
-    type Owned = super::super::UpdatePreferencesRequest;
+impl<'a> ::buffa::MessageView<'a> for UpdatePlaybackPreferencesRequestView<'a> {
+    type Owned = super::super::UpdatePlaybackPreferencesRequest;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -9593,13 +9603,13 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesRequestView<'a> {
                 )?;
                 let __sub_ctx = ctx.descend()?;
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.preferences.as_mut() {
+                match view.playback_preferences.as_mut() {
                     Some(existing) => {
                         ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
                     }
                     None => {
-                        view.preferences = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::UserPreferencesView as ::buffa::MessageView>::decode_view_ctx(
+                        view.playback_preferences = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::PlaybackPreferencesView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -9618,7 +9628,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesRequestView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::UpdatePreferencesRequest,
+        super::super::UpdatePlaybackPreferencesRequest,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -9628,18 +9638,18 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesRequestView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::UpdatePreferencesRequest,
+        super::super::UpdatePlaybackPreferencesRequest,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::UpdatePreferencesRequest {
-            preferences: match self.preferences.as_option() {
+        ::core::result::Result::Ok(super::super::UpdatePlaybackPreferencesRequest {
+            playback_preferences: match self.playback_preferences.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::UserPreferences,
-                        ::buffa::Inline<super::super::UserPreferences>,
+                        super::super::PlaybackPreferences,
+                        ::buffa::Inline<super::super::PlaybackPreferences>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -9649,15 +9659,15 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesRequestView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for UpdatePreferencesRequestView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for UpdatePlaybackPreferencesRequestView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -9674,35 +9684,35 @@ impl<'a> ::buffa::ViewEncode<'a> for UpdatePreferencesRequestView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for UpdatePreferencesRequestView<'a> {
+impl<'a> ::buffa::MessageName for UpdatePlaybackPreferencesRequestView<'a> {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UpdatePreferencesRequest";
-    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePreferencesRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesRequest";
+    const NAME: &'static str = "UpdatePlaybackPreferencesRequest";
+    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesRequest";
 }
-::buffa::impl_default_view_instance!(UpdatePreferencesRequestView);
-::buffa::impl_view_reborrow!(UpdatePreferencesRequestView);
-/** Self-contained, `'static` owned view of a `UpdatePreferencesRequest` message.
+::buffa::impl_default_view_instance!(UpdatePlaybackPreferencesRequestView);
+::buffa::impl_view_reborrow!(UpdatePlaybackPreferencesRequestView);
+/** Self-contained, `'static` owned view of a `UpdatePlaybackPreferencesRequest` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`UpdatePreferencesRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`UpdatePlaybackPreferencesRequestView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdatePreferencesRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdatePlaybackPreferencesRequestView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct UpdatePreferencesRequestOwnedView(
-    ::buffa::OwnedView<UpdatePreferencesRequestView<'static>>,
+pub struct UpdatePlaybackPreferencesRequestOwnedView(
+    ::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>>,
 );
-impl UpdatePreferencesRequestOwnedView {
+impl UpdatePlaybackPreferencesRequestOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -9716,7 +9726,7 @@ impl UpdatePreferencesRequestOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
+            UpdatePlaybackPreferencesRequestOwnedView(::buffa::OwnedView::decode(bytes)?),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -9731,7 +9741,7 @@ impl UpdatePreferencesRequestOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesRequestOwnedView(
+            UpdatePlaybackPreferencesRequestOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -9745,15 +9755,17 @@ impl UpdatePreferencesRequestOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::UpdatePreferencesRequest,
+        msg: &super::super::UpdatePlaybackPreferencesRequest,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesRequestOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            UpdatePlaybackPreferencesRequestOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
         )
     }
-    /// Borrow the full [`UpdatePreferencesRequestView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`UpdatePlaybackPreferencesRequestView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &UpdatePreferencesRequestView<'_> {
+    pub fn view(&self) -> &UpdatePlaybackPreferencesRequestView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -9764,7 +9776,7 @@ impl UpdatePreferencesRequestOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::UpdatePreferencesRequest {
+    pub fn to_owned_message(&self) -> super::super::UpdatePlaybackPreferencesRequest {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -9777,48 +9789,54 @@ impl UpdatePreferencesRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `preferences`
+    /// Field 1: `playback_preferences`
     #[must_use]
-    pub fn preferences(
+    pub fn playback_preferences(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'_>,
+        super::super::__buffa::view::PlaybackPreferencesView<'_>,
     > {
-        &self.0.reborrow().preferences
+        &self.0.reborrow().playback_preferences
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<UpdatePreferencesRequestView<'static>>>
-for UpdatePreferencesRequestOwnedView {
-    fn from(inner: ::buffa::OwnedView<UpdatePreferencesRequestView<'static>>) -> Self {
-        UpdatePreferencesRequestOwnedView(inner)
+impl ::core::convert::From<
+    ::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>>,
+> for UpdatePlaybackPreferencesRequestOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>>,
+    ) -> Self {
+        UpdatePlaybackPreferencesRequestOwnedView(inner)
     }
 }
-impl ::core::convert::From<UpdatePreferencesRequestOwnedView>
-for ::buffa::OwnedView<UpdatePreferencesRequestView<'static>> {
-    fn from(wrapper: UpdatePreferencesRequestOwnedView) -> Self {
+impl ::core::convert::From<UpdatePlaybackPreferencesRequestOwnedView>
+for ::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>> {
+    fn from(wrapper: UpdatePlaybackPreferencesRequestOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<UpdatePreferencesRequestView<'static>>>
-for UpdatePreferencesRequestOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<UpdatePreferencesRequestView<'static>> {
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>>,
+> for UpdatePlaybackPreferencesRequestOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<UpdatePlaybackPreferencesRequestView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::UpdatePreferencesRequest {
-    type View<'a> = UpdatePreferencesRequestView<'a>;
-    type ViewHandle = UpdatePreferencesRequestOwnedView;
+impl ::buffa::HasMessageView for super::super::UpdatePlaybackPreferencesRequest {
+    type View<'a> = UpdatePlaybackPreferencesRequestView<'a>;
+    type ViewHandle = UpdatePlaybackPreferencesRequestOwnedView;
 }
 #[derive(Clone, Debug, Default)]
-pub struct UpdatePreferencesResponseView<'a> {
-    /// Field 1: `preferences`
-    pub preferences: ::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'a>,
+pub struct UpdatePlaybackPreferencesResponseView<'a> {
+    /// Field 1: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageFieldView<
+        super::super::__buffa::view::PlaybackPreferencesView<'a>,
     >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
-impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesResponseView<'a> {
-    type Owned = super::super::UpdatePreferencesResponse;
+impl<'a> ::buffa::MessageView<'a> for UpdatePlaybackPreferencesResponseView<'a> {
+    type Owned = super::super::UpdatePlaybackPreferencesResponse;
     fn decode_view(buf: &'a [u8]) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         let __limit = ::core::cell::Cell::new(::buffa::DEFAULT_UNKNOWN_FIELD_LIMIT);
         let __elem = ::core::cell::Cell::new(::buffa::DEFAULT_ELEMENT_MEMORY_LIMIT);
@@ -9854,13 +9872,13 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesResponseView<'a> {
                 )?;
                 let __sub_ctx = ctx.descend()?;
                 let sub = ::buffa::types::borrow_bytes(&mut cur)?;
-                match view.preferences.as_mut() {
+                match view.playback_preferences.as_mut() {
                     Some(existing) => {
                         ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
                     }
                     None => {
-                        view.preferences = ::buffa::MessageFieldView::set(
-                            <super::super::__buffa::view::UserPreferencesView as ::buffa::MessageView>::decode_view_ctx(
+                        view.playback_preferences = ::buffa::MessageFieldView::set(
+                            <super::super::__buffa::view::PlaybackPreferencesView as ::buffa::MessageView>::decode_view_ctx(
                                 sub,
                                 __sub_ctx,
                             )?,
@@ -9879,7 +9897,7 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesResponseView<'a> {
     fn to_owned_message(
         &self,
     ) -> ::core::result::Result<
-        super::super::UpdatePreferencesResponse,
+        super::super::UpdatePlaybackPreferencesResponse,
         ::buffa::DecodeError,
     > {
         self.to_owned_from_source(None)
@@ -9889,18 +9907,18 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesResponseView<'a> {
         &self,
         __buffa_src: ::core::option::Option<&::buffa::bytes::Bytes>,
     ) -> ::core::result::Result<
-        super::super::UpdatePreferencesResponse,
+        super::super::UpdatePlaybackPreferencesResponse,
         ::buffa::DecodeError,
     > {
         #[allow(unused_imports)]
         use ::buffa::alloc::string::ToString as _;
         let _ = __buffa_src;
-        ::core::result::Result::Ok(super::super::UpdatePreferencesResponse {
-            preferences: match self.preferences.as_option() {
+        ::core::result::Result::Ok(super::super::UpdatePlaybackPreferencesResponse {
+            playback_preferences: match self.playback_preferences.as_option() {
                 Some(v) => {
                     ::buffa::MessageField::<
-                        super::super::UserPreferences,
-                        ::buffa::Inline<super::super::UserPreferences>,
+                        super::super::PlaybackPreferences,
+                        ::buffa::Inline<super::super::PlaybackPreferences>,
                     >::some(v.to_owned_from_source(__buffa_src)?)
                 }
                 None => ::buffa::MessageField::none(),
@@ -9910,15 +9928,15 @@ impl<'a> ::buffa::MessageView<'a> for UpdatePreferencesResponseView<'a> {
         })
     }
 }
-impl<'a> ::buffa::ViewEncode<'a> for UpdatePreferencesResponseView<'a> {
+impl<'a> ::buffa::ViewEncode<'a> for UpdatePlaybackPreferencesResponseView<'a> {
     #[allow(clippy::needless_borrow, clippy::let_and_return)]
     fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -9935,35 +9953,35 @@ impl<'a> ::buffa::ViewEncode<'a> for UpdatePreferencesResponseView<'a> {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
 }
-impl<'a> ::buffa::MessageName for UpdatePreferencesResponseView<'a> {
+impl<'a> ::buffa::MessageName for UpdatePlaybackPreferencesResponseView<'a> {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UpdatePreferencesResponse";
-    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePreferencesResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesResponse";
+    const NAME: &'static str = "UpdatePlaybackPreferencesResponse";
+    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesResponse";
 }
-::buffa::impl_default_view_instance!(UpdatePreferencesResponseView);
-::buffa::impl_view_reborrow!(UpdatePreferencesResponseView);
-/** Self-contained, `'static` owned view of a `UpdatePreferencesResponse` message.
+::buffa::impl_default_view_instance!(UpdatePlaybackPreferencesResponseView);
+::buffa::impl_view_reborrow!(UpdatePlaybackPreferencesResponseView);
+/** Self-contained, `'static` owned view of a `UpdatePlaybackPreferencesResponse` message.
 
- Wraps [`::buffa::OwnedView`]`<`[`UpdatePreferencesResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
+ Wraps [`::buffa::OwnedView`]`<`[`UpdatePlaybackPreferencesResponseView`]`<'static>>`: the decoded view and the [`::buffa::bytes::Bytes`] buffer it borrows from travel together, so the handle is `'static` and `Send + Sync` — suitable for async handlers, spawned tasks, and anywhere a `'static` bound is required.
 
- Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdatePreferencesResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
+ Field accessors return borrows tied to `&self`. Use [`Self::view`] to get the full [`UpdatePlaybackPreferencesResponseView`] when you need struct patterns, iteration helpers, or to pass the view to lifetime-parameterised code.*/
 #[derive(Clone, Debug)]
-pub struct UpdatePreferencesResponseOwnedView(
-    ::buffa::OwnedView<UpdatePreferencesResponseView<'static>>,
+pub struct UpdatePlaybackPreferencesResponseOwnedView(
+    ::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>>,
 );
-impl UpdatePreferencesResponseOwnedView {
+impl UpdatePlaybackPreferencesResponseOwnedView {
     /// Decode an owned view from a [`::buffa::bytes::Bytes`] buffer.
     ///
     /// The view borrows directly from the buffer's data; the buffer is
@@ -9977,7 +9995,9 @@ impl UpdatePreferencesResponseOwnedView {
         bytes: ::buffa::bytes::Bytes,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesResponseOwnedView(::buffa::OwnedView::decode(bytes)?),
+            UpdatePlaybackPreferencesResponseOwnedView(
+                ::buffa::OwnedView::decode(bytes)?,
+            ),
         )
     }
     /// Decode with custom [`::buffa::DecodeOptions`] (recursion limit,
@@ -9992,7 +10012,7 @@ impl UpdatePreferencesResponseOwnedView {
         opts: &::buffa::DecodeOptions,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesResponseOwnedView(
+            UpdatePlaybackPreferencesResponseOwnedView(
                 ::buffa::OwnedView::decode_with_options(bytes, opts)?,
             ),
         )
@@ -10006,15 +10026,17 @@ impl UpdatePreferencesResponseOwnedView {
     /// another [`::buffa::DecodeError`] if the re-encoded bytes are
     /// somehow invalid (should not happen for well-formed messages).
     pub fn from_owned(
-        msg: &super::super::UpdatePreferencesResponse,
+        msg: &super::super::UpdatePlaybackPreferencesResponse,
     ) -> ::core::result::Result<Self, ::buffa::DecodeError> {
         ::core::result::Result::Ok(
-            UpdatePreferencesResponseOwnedView(::buffa::OwnedView::from_owned(msg)?),
+            UpdatePlaybackPreferencesResponseOwnedView(
+                ::buffa::OwnedView::from_owned(msg)?,
+            ),
         )
     }
-    /// Borrow the full [`UpdatePreferencesResponseView`] with its lifetime tied to `&self`.
+    /// Borrow the full [`UpdatePlaybackPreferencesResponseView`] with its lifetime tied to `&self`.
     #[must_use]
-    pub fn view(&self) -> &UpdatePreferencesResponseView<'_> {
+    pub fn view(&self) -> &UpdatePlaybackPreferencesResponseView<'_> {
         self.0.reborrow()
     }
     /// Convert to the owned message type.
@@ -10025,7 +10047,7 @@ impl UpdatePreferencesResponseOwnedView {
     /// whose contract also governs handles converted from a raw
     /// [`::buffa::OwnedView`].
     #[must_use]
-    pub fn to_owned_message(&self) -> super::super::UpdatePreferencesResponse {
+    pub fn to_owned_message(&self) -> super::super::UpdatePlaybackPreferencesResponse {
         self.0.to_owned_message()
     }
     /// The underlying bytes buffer.
@@ -10038,37 +10060,43 @@ impl UpdatePreferencesResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// Field 1: `preferences`
+    /// Field 1: `playback_preferences`
     #[must_use]
-    pub fn preferences(
+    pub fn playback_preferences(
         &self,
     ) -> &::buffa::MessageFieldView<
-        super::super::__buffa::view::UserPreferencesView<'_>,
+        super::super::__buffa::view::PlaybackPreferencesView<'_>,
     > {
-        &self.0.reborrow().preferences
+        &self.0.reborrow().playback_preferences
     }
 }
-impl ::core::convert::From<::buffa::OwnedView<UpdatePreferencesResponseView<'static>>>
-for UpdatePreferencesResponseOwnedView {
-    fn from(inner: ::buffa::OwnedView<UpdatePreferencesResponseView<'static>>) -> Self {
-        UpdatePreferencesResponseOwnedView(inner)
+impl ::core::convert::From<
+    ::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>>,
+> for UpdatePlaybackPreferencesResponseOwnedView {
+    fn from(
+        inner: ::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>>,
+    ) -> Self {
+        UpdatePlaybackPreferencesResponseOwnedView(inner)
     }
 }
-impl ::core::convert::From<UpdatePreferencesResponseOwnedView>
-for ::buffa::OwnedView<UpdatePreferencesResponseView<'static>> {
-    fn from(wrapper: UpdatePreferencesResponseOwnedView) -> Self {
+impl ::core::convert::From<UpdatePlaybackPreferencesResponseOwnedView>
+for ::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>> {
+    fn from(wrapper: UpdatePlaybackPreferencesResponseOwnedView) -> Self {
         wrapper.0
     }
 }
-impl ::core::convert::AsRef<::buffa::OwnedView<UpdatePreferencesResponseView<'static>>>
-for UpdatePreferencesResponseOwnedView {
-    fn as_ref(&self) -> &::buffa::OwnedView<UpdatePreferencesResponseView<'static>> {
+impl ::core::convert::AsRef<
+    ::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>>,
+> for UpdatePlaybackPreferencesResponseOwnedView {
+    fn as_ref(
+        &self,
+    ) -> &::buffa::OwnedView<UpdatePlaybackPreferencesResponseView<'static>> {
         &self.0
     }
 }
-impl ::buffa::HasMessageView for super::super::UpdatePreferencesResponse {
-    type View<'a> = UpdatePreferencesResponseView<'a>;
-    type ViewHandle = UpdatePreferencesResponseOwnedView;
+impl ::buffa::HasMessageView for super::super::UpdatePlaybackPreferencesResponse {
+    type View<'a> = UpdatePlaybackPreferencesResponseView<'a>;
+    type ViewHandle = UpdatePlaybackPreferencesResponseOwnedView;
 }
 #[derive(Clone, Debug, Default)]
 pub struct GetUserDataRequestView<'a> {

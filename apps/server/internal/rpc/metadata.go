@@ -2,14 +2,13 @@ package rpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"time"
 
 	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/durationpb"
 
-	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -51,12 +50,11 @@ var (
 type MetadataService struct {
 	store     core.Store
 	refresher *library.Refresher
-	subtitles *library.Subtitles
 	// fetch downloads images.
 	fetch func(ctx context.Context, url string) ([]byte, error)
 	now   func() time.Time
-	// Activity records subtitle downloads; nil records none.
-	Activity *activity.Log
+	// Lyrics finds lyrics through the lyrics providers; nil finds none.
+	Lyrics *library.Lyrics
 	// ExternalIDKinds lists the kinds of external IDs; nil lists the
 	// built-in kinds.
 	ExternalIDKinds func() []metadata.ExternalIDKind
@@ -65,12 +63,9 @@ type MetadataService struct {
 var _ libraryv1connect.MetadataServiceHandler = (*MetadataService)(nil)
 
 // NewMetadataService returns a MetadataService changing items through
-// refresher and downloading subtitles through subtitles; fetch downloads
-// images.
-func NewMetadataService(store core.Store, refresher *library.Refresher, subtitles *library.Subtitles,
-	fetch func(ctx context.Context, url string) ([]byte, error),
-) *MetadataService {
-	return &MetadataService{store: store, refresher: refresher, subtitles: subtitles, fetch: fetch, now: time.Now}
+// refresher; fetch downloads images.
+func NewMetadataService(store core.Store, refresher *library.Refresher, fetch func(ctx context.Context, url string) ([]byte, error)) *MetadataService {
+	return &MetadataService{store: store, refresher: refresher, fetch: fetch, now: time.Now}
 }
 
 // ListExternalIdKinds lists the kinds of external IDs, of an item kind or
@@ -401,57 +396,59 @@ func (s *MetadataService) DeleteItemImage(ctx context.Context, req *libraryv1.De
 	return &libraryv1.DeleteItemImageResponse{}, nil
 }
 
-// sourceID parses an optional media source ID.
-func sourceID(id string) core.ID {
-	if id == "" {
-		return core.ID{}
-	}
-	return core.MustParseID(id)
-}
-
-// SearchSubtitles searches the subtitle providers.
-func (s *MetadataService) SearchSubtitles(ctx context.Context, req *libraryv1.SearchSubtitlesRequest) (*libraryv1.SearchSubtitlesResponse, error) {
-	it, lib, err := s.target(ctx, req.GetItemId())
-	if err != nil {
+// SearchRemoteLyrics asks the lyrics providers for lyrics of a track.
+func (s *MetadataService) SearchRemoteLyrics(ctx context.Context, req *libraryv1.SearchRemoteLyricsRequest) (*libraryv1.SearchRemoteLyricsResponse, error) {
+	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	found, err := s.subtitles.Search(ctx, lib, it.ID, sourceID(req.GetMediaSourceId()), req.GetLanguage(), req.GetHearingImpaired(), req.GetForced())
+	resp := &libraryv1.SearchRemoteLyricsResponse{}
+	if s.Lyrics == nil {
+		return resp, nil
+	}
+	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*libraryv1.RemoteSubtitle, len(found))
-	for i, f := range found {
-		out[i] = libraryv1.RemoteSubtitle_builder{
-			Provider: &f.Provider, Id: &f.ID, Name: &f.Name, Language: &f.Language, Format: &f.Format,
-			HearingImpaired: &f.HearingImpaired, Forced: &f.Forced, Score: &f.Score,
-			DownloadCount: new(int32(f.DownloadCount)), HashMatch: &f.HashMatch,
+	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	found, err := s.Lyrics.Search(ctx, lib, it.ID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	for _, l := range found {
+		rl := libraryv1.RemoteLyrics_builder{
+			Provider: &l.Provider, Id: &l.ID, Name: &l.Name, Artists: l.Artists, Album: &l.Album, Synced: &l.Synced, Score: &l.Score,
 		}.Build()
+		if l.Duration > 0 {
+			rl.SetDuration(durationpb.New(l.Duration))
+		}
+		resp.SetLyrics(append(resp.GetLyrics(), rl))
 	}
-	return libraryv1.SearchSubtitlesResponse_builder{Subtitles: out}.Build(), nil
+	return resp, nil
 }
 
-// DownloadSubtitle saves a subtitle beside an item's video.
-func (s *MetadataService) DownloadSubtitle(ctx context.Context, req *libraryv1.DownloadSubtitleRequest) (*libraryv1.DownloadSubtitleResponse, error) {
-	it, lib, err := s.target(ctx, req.GetItemId())
-	if err != nil {
+// DownloadRemoteLyrics saves lyrics a lyrics provider found beside the
+// track.
+func (s *MetadataService) DownloadRemoteLyrics(ctx context.Context, req *libraryv1.DownloadRemoteLyricsRequest) (*libraryv1.DownloadRemoteLyricsResponse, error) {
+	if _, err := admin(ctx); err != nil {
 		return nil, err
 	}
-	st, err := s.subtitles.Download(ctx, lib, it.ID, sourceID(req.GetMediaSourceId()), req.GetProvider(), req.GetSubtitleId())
-	a := core.Activity{
-		Type: "subtitle.downloaded", ItemID: it.ID, Title: "Downloaded a subtitle of " + it.Name,
-		Attributes: map[string]string{"provider": req.GetProvider(), "subtitle": req.GetSubtitleId()},
+	notFound := connect.NewError(connect.CodeNotFound, fmt.Errorf("lyrics provider %s: %w", req.GetProvider(), core.ErrNotFound))
+	if s.Lyrics == nil {
+		return nil, notFound
 	}
+	it, err := s.store.Items().Get(ctx, core.MustParseID(req.GetItemId()))
 	if err != nil {
-		a.Type, a.Severity, a.Title, a.Message = "subtitle.download_failed", core.SeverityError, "Failed to download a subtitle of "+it.Name, err.Error()
-		s.Activity.Record(ctx, a)
-	} else {
-		a.Attributes["language"] = st.Language
-		s.Activity.Publish(a)
-	}
-	if errors.Is(err, core.ErrNotFound) {
-		return nil, connect.NewError(connect.CodeNotFound, err)
-	} else if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	return libraryv1.DownloadSubtitleResponse_builder{Stream: streamToProto(&st, true)}.Build(), nil
+	lib, err := s.store.Libraries().Get(ctx, it.LibraryID)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	if err := s.Lyrics.Download(ctx, lib, it.ID, req.GetProvider(), req.GetId()); err != nil {
+		return nil, connectError(ctx, err)
+	}
+	return &libraryv1.DownloadRemoteLyricsResponse{}, nil
 }

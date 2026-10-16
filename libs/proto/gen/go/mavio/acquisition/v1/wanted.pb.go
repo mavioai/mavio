@@ -1344,187 +1344,16 @@ func (b0 AddSeriesResponse_builder) Build() *AddSeriesResponse {
 	return m0
 }
 
-type MonitorSeriesRequest struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ItemIds         []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds"`
-	xxx_hidden_Monitor         SeriesMonitor          `protobuf:"varint,2,opt,name=monitor,enum=mavio.acquisition.v1.SeriesMonitor"`
-	xxx_hidden_MonitorNewItems NewItemMonitor         `protobuf:"varint,3,opt,name=monitor_new_items,json=monitorNewItems,enum=mavio.acquisition.v1.NewItemMonitor"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
-}
-
-func (x *MonitorSeriesRequest) Reset() {
-	*x = MonitorSeriesRequest{}
-	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MonitorSeriesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MonitorSeriesRequest) ProtoMessage() {}
-
-func (x *MonitorSeriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *MonitorSeriesRequest) GetItemIds() []string {
-	if x != nil {
-		return x.xxx_hidden_ItemIds
-	}
-	return nil
-}
-
-func (x *MonitorSeriesRequest) GetMonitor() SeriesMonitor {
-	if x != nil {
-		if protoimpl.X.Present(&(x.XXX_presence[0]), 1) {
-			return x.xxx_hidden_Monitor
-		}
-	}
-	return SeriesMonitor_SERIES_MONITOR_UNSPECIFIED
-}
-
-func (x *MonitorSeriesRequest) GetMonitorNewItems() NewItemMonitor {
-	if x != nil {
-		if protoimpl.X.Present(&(x.XXX_presence[0]), 2) {
-			return x.xxx_hidden_MonitorNewItems
-		}
-	}
-	return NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
-}
-
-func (x *MonitorSeriesRequest) SetItemIds(v []string) {
-	x.xxx_hidden_ItemIds = v
-}
-
-func (x *MonitorSeriesRequest) SetMonitor(v SeriesMonitor) {
-	x.xxx_hidden_Monitor = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
-}
-
-func (x *MonitorSeriesRequest) SetMonitorNewItems(v NewItemMonitor) {
-	x.xxx_hidden_MonitorNewItems = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
-}
-
-func (x *MonitorSeriesRequest) HasMonitor() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *MonitorSeriesRequest) HasMonitorNewItems() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *MonitorSeriesRequest) ClearMonitor() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Monitor = SeriesMonitor_SERIES_MONITOR_UNSPECIFIED
-}
-
-func (x *MonitorSeriesRequest) ClearMonitorNewItems() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_MonitorNewItems = NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
-}
-
-type MonitorSeriesRequest_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// Wanted series.
-	ItemIds []string
-	Monitor *SeriesMonitor
-	// Unspecified to leave as it is.
-	MonitorNewItems *NewItemMonitor
-}
-
-func (b0 MonitorSeriesRequest_builder) Build() *MonitorSeriesRequest {
-	m0 := &MonitorSeriesRequest{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_ItemIds = b.ItemIds
-	if b.Monitor != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
-		x.xxx_hidden_Monitor = *b.Monitor
-	}
-	if b.MonitorNewItems != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
-		x.xxx_hidden_MonitorNewItems = *b.MonitorNewItems
-	}
-	return m0
-}
-
-type MonitorSeriesResponse struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *MonitorSeriesResponse) Reset() {
-	*x = MonitorSeriesResponse{}
-	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MonitorSeriesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MonitorSeriesResponse) ProtoMessage() {}
-
-func (x *MonitorSeriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-type MonitorSeriesResponse_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-}
-
-func (b0 MonitorSeriesResponse_builder) Build() *MonitorSeriesResponse {
-	m0 := &MonitorSeriesResponse{}
-	b, x := &b0, m0
-	_, _ = b, x
-	return m0
-}
-
 type SetMonitoredRequest struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ItemIds     []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds"`
-	xxx_hidden_Monitored   bool                   `protobuf:"varint,2,opt,name=monitored"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state             protoimpl.MessageState       `protogen:"opaque.v1"`
+	xxx_hidden_Change isSetMonitoredRequest_Change `protobuf_oneof:"change"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *SetMonitoredRequest) Reset() {
 	*x = SetMonitoredRequest{}
-	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[7]
+	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1536,6 +1365,272 @@ func (x *SetMonitoredRequest) String() string {
 func (*SetMonitoredRequest) ProtoMessage() {}
 
 func (x *SetMonitoredRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetMonitoredRequest) GetItems() *MonitoredItems {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Items); ok {
+			return x.Items
+		}
+	}
+	return nil
+}
+
+func (x *SetMonitoredRequest) GetSeries() *SeriesMonitoring {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Series); ok {
+			return x.Series
+		}
+	}
+	return nil
+}
+
+func (x *SetMonitoredRequest) SetItems(v *MonitoredItems) {
+	if v == nil {
+		x.xxx_hidden_Change = nil
+		return
+	}
+	x.xxx_hidden_Change = &setMonitoredRequest_Items{v}
+}
+
+func (x *SetMonitoredRequest) SetSeries(v *SeriesMonitoring) {
+	if v == nil {
+		x.xxx_hidden_Change = nil
+		return
+	}
+	x.xxx_hidden_Change = &setMonitoredRequest_Series{v}
+}
+
+func (x *SetMonitoredRequest) HasChange() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Change != nil
+}
+
+func (x *SetMonitoredRequest) HasItems() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Items)
+	return ok
+}
+
+func (x *SetMonitoredRequest) HasSeries() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Series)
+	return ok
+}
+
+func (x *SetMonitoredRequest) ClearChange() {
+	x.xxx_hidden_Change = nil
+}
+
+func (x *SetMonitoredRequest) ClearItems() {
+	if _, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Items); ok {
+		x.xxx_hidden_Change = nil
+	}
+}
+
+func (x *SetMonitoredRequest) ClearSeries() {
+	if _, ok := x.xxx_hidden_Change.(*setMonitoredRequest_Series); ok {
+		x.xxx_hidden_Change = nil
+	}
+}
+
+const SetMonitoredRequest_Change_not_set_case case_SetMonitoredRequest_Change = 0
+const SetMonitoredRequest_Items_case case_SetMonitoredRequest_Change = 1
+const SetMonitoredRequest_Series_case case_SetMonitoredRequest_Change = 2
+
+func (x *SetMonitoredRequest) WhichChange() case_SetMonitoredRequest_Change {
+	if x == nil {
+		return SetMonitoredRequest_Change_not_set_case
+	}
+	switch x.xxx_hidden_Change.(type) {
+	case *setMonitoredRequest_Items:
+		return SetMonitoredRequest_Items_case
+	case *setMonitoredRequest_Series:
+		return SetMonitoredRequest_Series_case
+	default:
+		return SetMonitoredRequest_Change_not_set_case
+	}
+}
+
+type SetMonitoredRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Fields of oneof xxx_hidden_Change:
+	Items  *MonitoredItems
+	Series *SeriesMonitoring
+	// -- end of xxx_hidden_Change
+}
+
+func (b0 SetMonitoredRequest_builder) Build() *SetMonitoredRequest {
+	m0 := &SetMonitoredRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Items != nil {
+		x.xxx_hidden_Change = &setMonitoredRequest_Items{b.Items}
+	}
+	if b.Series != nil {
+		x.xxx_hidden_Change = &setMonitoredRequest_Series{b.Series}
+	}
+	return m0
+}
+
+type case_SetMonitoredRequest_Change protoreflect.FieldNumber
+
+func (x case_SetMonitoredRequest_Change) String() string {
+	md := file_mavio_acquisition_v1_wanted_proto_msgTypes[5].Descriptor()
+	if x == 0 {
+		return "not set"
+	}
+	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
+}
+
+type isSetMonitoredRequest_Change interface {
+	isSetMonitoredRequest_Change()
+}
+
+type setMonitoredRequest_Items struct {
+	Items *MonitoredItems `protobuf:"bytes,1,opt,name=items,oneof"`
+}
+
+type setMonitoredRequest_Series struct {
+	Series *SeriesMonitoring `protobuf:"bytes,2,opt,name=series,oneof"`
+}
+
+func (*setMonitoredRequest_Items) isSetMonitoredRequest_Change() {}
+
+func (*setMonitoredRequest_Series) isSetMonitoredRequest_Change() {}
+
+// MonitoredItems monitors or unmonitors seasons and episodes.
+type MonitoredItems struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemIds     []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds"`
+	xxx_hidden_Monitored   bool                   `protobuf:"varint,2,opt,name=monitored"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *MonitoredItems) Reset() {
+	*x = MonitoredItems{}
+	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MonitoredItems) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MonitoredItems) ProtoMessage() {}
+
+func (x *MonitoredItems) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *MonitoredItems) GetItemIds() []string {
+	if x != nil {
+		return x.xxx_hidden_ItemIds
+	}
+	return nil
+}
+
+func (x *MonitoredItems) GetMonitored() bool {
+	if x != nil {
+		return x.xxx_hidden_Monitored
+	}
+	return false
+}
+
+func (x *MonitoredItems) SetItemIds(v []string) {
+	x.xxx_hidden_ItemIds = v
+}
+
+func (x *MonitoredItems) SetMonitored(v bool) {
+	x.xxx_hidden_Monitored = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *MonitoredItems) HasMonitored() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *MonitoredItems) ClearMonitored() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Monitored = false
+}
+
+type MonitoredItems_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	ItemIds   []string
+	Monitored *bool
+}
+
+func (b0 MonitoredItems_builder) Build() *MonitoredItems {
+	m0 := &MonitoredItems{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_ItemIds = b.ItemIds
+	if b.Monitored != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Monitored = *b.Monitored
+	}
+	return m0
+}
+
+// SeriesMonitoring applies a monitoring option to wanted series.
+type SeriesMonitoring struct {
+	state                      protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemIds         []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds"`
+	xxx_hidden_Monitor         SeriesMonitor          `protobuf:"varint,2,opt,name=monitor,enum=mavio.acquisition.v1.SeriesMonitor"`
+	xxx_hidden_MonitorNewItems NewItemMonitor         `protobuf:"varint,3,opt,name=monitor_new_items,json=monitorNewItems,enum=mavio.acquisition.v1.NewItemMonitor"`
+	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
+	XXX_presence               [1]uint32
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *SeriesMonitoring) Reset() {
+	*x = SeriesMonitoring{}
+	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SeriesMonitoring) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SeriesMonitoring) ProtoMessage() {}
+
+func (x *SeriesMonitoring) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_acquisition_v1_wanted_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1547,57 +1642,90 @@ func (x *SetMonitoredRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *SetMonitoredRequest) GetItemIds() []string {
+func (x *SeriesMonitoring) GetItemIds() []string {
 	if x != nil {
 		return x.xxx_hidden_ItemIds
 	}
 	return nil
 }
 
-func (x *SetMonitoredRequest) GetMonitored() bool {
+func (x *SeriesMonitoring) GetMonitor() SeriesMonitor {
 	if x != nil {
-		return x.xxx_hidden_Monitored
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 1) {
+			return x.xxx_hidden_Monitor
+		}
 	}
-	return false
+	return SeriesMonitor_SERIES_MONITOR_UNSPECIFIED
 }
 
-func (x *SetMonitoredRequest) SetItemIds(v []string) {
+func (x *SeriesMonitoring) GetMonitorNewItems() NewItemMonitor {
+	if x != nil {
+		if protoimpl.X.Present(&(x.XXX_presence[0]), 2) {
+			return x.xxx_hidden_MonitorNewItems
+		}
+	}
+	return NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
+}
+
+func (x *SeriesMonitoring) SetItemIds(v []string) {
 	x.xxx_hidden_ItemIds = v
 }
 
-func (x *SetMonitoredRequest) SetMonitored(v bool) {
-	x.xxx_hidden_Monitored = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+func (x *SeriesMonitoring) SetMonitor(v SeriesMonitor) {
+	x.xxx_hidden_Monitor = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
 }
 
-func (x *SetMonitoredRequest) HasMonitored() bool {
+func (x *SeriesMonitoring) SetMonitorNewItems(v NewItemMonitor) {
+	x.xxx_hidden_MonitorNewItems = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *SeriesMonitoring) HasMonitor() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *SetMonitoredRequest) ClearMonitored() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Monitored = false
+func (x *SeriesMonitoring) HasMonitorNewItems() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-type SetMonitoredRequest_builder struct {
+func (x *SeriesMonitoring) ClearMonitor() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Monitor = SeriesMonitor_SERIES_MONITOR_UNSPECIFIED
+}
+
+func (x *SeriesMonitoring) ClearMonitorNewItems() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_MonitorNewItems = NewItemMonitor_NEW_ITEM_MONITOR_UNSPECIFIED
+}
+
+type SeriesMonitoring_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Seasons and episodes.
-	ItemIds   []string
-	Monitored *bool
+	ItemIds []string
+	Monitor *SeriesMonitor
+	// Unspecified to leave as it is.
+	MonitorNewItems *NewItemMonitor
 }
 
-func (b0 SetMonitoredRequest_builder) Build() *SetMonitoredRequest {
-	m0 := &SetMonitoredRequest{}
+func (b0 SeriesMonitoring_builder) Build() *SeriesMonitoring {
+	m0 := &SeriesMonitoring{}
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_ItemIds = b.ItemIds
-	if b.Monitored != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
-		x.xxx_hidden_Monitored = *b.Monitored
+	if b.Monitor != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Monitor = *b.Monitor
+	}
+	if b.MonitorNewItems != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_MonitorNewItems = *b.MonitorNewItems
 	}
 	return m0
 }
@@ -3121,16 +3249,19 @@ const file_mavio_acquisition_v1_wanted_proto_rawDesc = "" +
 	"\x06search\x18\t \x01(\bR\x06search\"b\n" +
 	"\x11AddSeriesResponse\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x124\n" +
-	"\x06wanted\x18\x02 \x01(\v2\x1c.mavio.acquisition.v1.WantedR\x06wanted\"\xec\x01\n" +
-	"\x14MonitorSeriesRequest\x12-\n" +
+	"\x06wanted\x18\x02 \x01(\v2\x1c.mavio.acquisition.v1.WantedR\x06wanted\"\xa6\x01\n" +
+	"\x13SetMonitoredRequest\x12<\n" +
+	"\x05items\x18\x01 \x01(\v2$.mavio.acquisition.v1.MonitoredItemsH\x00R\x05items\x12@\n" +
+	"\x06series\x18\x02 \x01(\v2&.mavio.acquisition.v1.SeriesMonitoringH\x00R\x06seriesB\x0f\n" +
+	"\x06change\x12\x05\xbaH\x02\b\x01\"]\n" +
+	"\x0eMonitoredItems\x12-\n" +
+	"\bitem_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\x90N\"\x05r\x03\xb0\x01\x01R\aitemIds\x12\x1c\n" +
+	"\tmonitored\x18\x02 \x01(\bR\tmonitored\"\xe8\x01\n" +
+	"\x10SeriesMonitoring\x12-\n" +
 	"\bitem_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\xe8\a\"\x05r\x03\xb0\x01\x01R\aitemIds\x12I\n" +
 	"\amonitor\x18\x02 \x01(\x0e2#.mavio.acquisition.v1.SeriesMonitorB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\amonitor\x12Z\n" +
-	"\x11monitor_new_items\x18\x03 \x01(\x0e2$.mavio.acquisition.v1.NewItemMonitorB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0fmonitorNewItems\"\x17\n" +
-	"\x15MonitorSeriesResponse\"b\n" +
-	"\x13SetMonitoredRequest\x12-\n" +
-	"\bitem_ids\x18\x01 \x03(\tB\x12\xbaH\x0f\x92\x01\f\b\x01\x10\x90N\"\x05r\x03\xb0\x01\x01R\aitemIds\x12\x1c\n" +
-	"\tmonitored\x18\x02 \x01(\bR\tmonitored\"\x16\n" +
+	"\x11monitor_new_items\x18\x03 \x01(\x0e2$.mavio.acquisition.v1.NewItemMonitorB\b\xbaH\x05\x82\x01\x02\x10\x01R\x0fmonitorNewItems\"\x16\n" +
 	"\x14SetMonitoredResponse\"5\n" +
 	"\x10GetWantedRequest\x12!\n" +
 	"\aitem_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06itemId\"I\n" +
@@ -3212,11 +3343,10 @@ const file_mavio_acquisition_v1_wanted_proto_rawDesc = "" +
 	"WantedKind\x12\x1b\n" +
 	"\x17WANTED_KIND_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11WANTED_KIND_MOVIE\x10\x01\x12\x17\n" +
-	"\x13WANTED_KIND_EPISODE\x10\x022\x97\a\n" +
+	"\x13WANTED_KIND_EPISODE\x10\x022\xa8\x06\n" +
 	"\rWantedService\x12Y\n" +
 	"\bAddMovie\x12%.mavio.acquisition.v1.AddMovieRequest\x1a&.mavio.acquisition.v1.AddMovieResponse\x12\\\n" +
-	"\tAddSeries\x12&.mavio.acquisition.v1.AddSeriesRequest\x1a'.mavio.acquisition.v1.AddSeriesResponse\x12m\n" +
-	"\rMonitorSeries\x12*.mavio.acquisition.v1.MonitorSeriesRequest\x1a+.mavio.acquisition.v1.MonitorSeriesResponse\"\x03\x90\x02\x02\x12j\n" +
+	"\tAddSeries\x12&.mavio.acquisition.v1.AddSeriesRequest\x1a'.mavio.acquisition.v1.AddSeriesResponse\x12j\n" +
 	"\fSetMonitored\x12).mavio.acquisition.v1.SetMonitoredRequest\x1a*.mavio.acquisition.v1.SetMonitoredResponse\"\x03\x90\x02\x02\x12a\n" +
 	"\tGetWanted\x12&.mavio.acquisition.v1.GetWantedRequest\x1a'.mavio.acquisition.v1.GetWantedResponse\"\x03\x90\x02\x01\x12j\n" +
 	"\fUpdateWanted\x12).mavio.acquisition.v1.UpdateWantedRequest\x1a*.mavio.acquisition.v1.UpdateWantedResponse\"\x03\x90\x02\x02\x12d\n" +
@@ -3239,9 +3369,9 @@ var file_mavio_acquisition_v1_wanted_proto_goTypes = []any{
 	(*AddMovieResponse)(nil),      // 7: mavio.acquisition.v1.AddMovieResponse
 	(*AddSeriesRequest)(nil),      // 8: mavio.acquisition.v1.AddSeriesRequest
 	(*AddSeriesResponse)(nil),     // 9: mavio.acquisition.v1.AddSeriesResponse
-	(*MonitorSeriesRequest)(nil),  // 10: mavio.acquisition.v1.MonitorSeriesRequest
-	(*MonitorSeriesResponse)(nil), // 11: mavio.acquisition.v1.MonitorSeriesResponse
-	(*SetMonitoredRequest)(nil),   // 12: mavio.acquisition.v1.SetMonitoredRequest
+	(*SetMonitoredRequest)(nil),   // 10: mavio.acquisition.v1.SetMonitoredRequest
+	(*MonitoredItems)(nil),        // 11: mavio.acquisition.v1.MonitoredItems
+	(*SeriesMonitoring)(nil),      // 12: mavio.acquisition.v1.SeriesMonitoring
 	(*SetMonitoredResponse)(nil),  // 13: mavio.acquisition.v1.SetMonitoredResponse
 	(*GetWantedRequest)(nil),      // 14: mavio.acquisition.v1.GetWantedRequest
 	(*GetWantedResponse)(nil),     // 15: mavio.acquisition.v1.GetWantedResponse
@@ -3269,49 +3399,53 @@ var file_mavio_acquisition_v1_wanted_proto_depIdxs = []int32{
 	2,  // 7: mavio.acquisition.v1.AddSeriesRequest.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
 	1,  // 8: mavio.acquisition.v1.AddSeriesRequest.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
 	5,  // 9: mavio.acquisition.v1.AddSeriesResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	2,  // 10: mavio.acquisition.v1.MonitorSeriesRequest.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
-	1,  // 11: mavio.acquisition.v1.MonitorSeriesRequest.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
-	5,  // 12: mavio.acquisition.v1.GetWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 13: mavio.acquisition.v1.UpdateWantedRequest.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 14: mavio.acquisition.v1.UpdateWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
-	3,  // 15: mavio.acquisition.v1.ListWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
-	4,  // 16: mavio.acquisition.v1.ListWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
-	26, // 17: mavio.acquisition.v1.WantedEpisode.air_time:type_name -> google.protobuf.Timestamp
-	5,  // 18: mavio.acquisition.v1.WantedEpisode.wanted:type_name -> mavio.acquisition.v1.Wanted
-	5,  // 19: mavio.acquisition.v1.WantedMovie.wanted:type_name -> mavio.acquisition.v1.Wanted
-	20, // 20: mavio.acquisition.v1.ListWantedResponse.movies:type_name -> mavio.acquisition.v1.WantedMovie
-	19, // 21: mavio.acquisition.v1.ListWantedResponse.episodes:type_name -> mavio.acquisition.v1.WantedEpisode
-	3,  // 22: mavio.acquisition.v1.SearchWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
-	4,  // 23: mavio.acquisition.v1.SearchWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
-	6,  // 24: mavio.acquisition.v1.WantedService.AddMovie:input_type -> mavio.acquisition.v1.AddMovieRequest
-	8,  // 25: mavio.acquisition.v1.WantedService.AddSeries:input_type -> mavio.acquisition.v1.AddSeriesRequest
-	10, // 26: mavio.acquisition.v1.WantedService.MonitorSeries:input_type -> mavio.acquisition.v1.MonitorSeriesRequest
-	12, // 27: mavio.acquisition.v1.WantedService.SetMonitored:input_type -> mavio.acquisition.v1.SetMonitoredRequest
-	14, // 28: mavio.acquisition.v1.WantedService.GetWanted:input_type -> mavio.acquisition.v1.GetWantedRequest
-	16, // 29: mavio.acquisition.v1.WantedService.UpdateWanted:input_type -> mavio.acquisition.v1.UpdateWantedRequest
-	18, // 30: mavio.acquisition.v1.WantedService.ListWanted:input_type -> mavio.acquisition.v1.ListWantedRequest
-	22, // 31: mavio.acquisition.v1.WantedService.SearchWanted:input_type -> mavio.acquisition.v1.SearchWantedRequest
-	24, // 32: mavio.acquisition.v1.WantedService.SyncRSS:input_type -> mavio.acquisition.v1.SyncRSSRequest
-	7,  // 33: mavio.acquisition.v1.WantedService.AddMovie:output_type -> mavio.acquisition.v1.AddMovieResponse
-	9,  // 34: mavio.acquisition.v1.WantedService.AddSeries:output_type -> mavio.acquisition.v1.AddSeriesResponse
-	11, // 35: mavio.acquisition.v1.WantedService.MonitorSeries:output_type -> mavio.acquisition.v1.MonitorSeriesResponse
+	11, // 10: mavio.acquisition.v1.SetMonitoredRequest.items:type_name -> mavio.acquisition.v1.MonitoredItems
+	12, // 11: mavio.acquisition.v1.SetMonitoredRequest.series:type_name -> mavio.acquisition.v1.SeriesMonitoring
+	2,  // 12: mavio.acquisition.v1.SeriesMonitoring.monitor:type_name -> mavio.acquisition.v1.SeriesMonitor
+	1,  // 13: mavio.acquisition.v1.SeriesMonitoring.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	5,  // 14: mavio.acquisition.v1.GetWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 15: mavio.acquisition.v1.UpdateWantedRequest.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 16: mavio.acquisition.v1.UpdateWantedResponse.wanted:type_name -> mavio.acquisition.v1.Wanted
+	3,  // 17: mavio.acquisition.v1.ListWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
+	4,  // 18: mavio.acquisition.v1.ListWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
+	26, // 19: mavio.acquisition.v1.WantedEpisode.air_time:type_name -> google.protobuf.Timestamp
+	5,  // 20: mavio.acquisition.v1.WantedEpisode.wanted:type_name -> mavio.acquisition.v1.Wanted
+	5,  // 21: mavio.acquisition.v1.WantedMovie.wanted:type_name -> mavio.acquisition.v1.Wanted
+	20, // 22: mavio.acquisition.v1.ListWantedResponse.movies:type_name -> mavio.acquisition.v1.WantedMovie
+	19, // 23: mavio.acquisition.v1.ListWantedResponse.episodes:type_name -> mavio.acquisition.v1.WantedEpisode
+	3,  // 24: mavio.acquisition.v1.SearchWantedRequest.filter:type_name -> mavio.acquisition.v1.WantedFilter
+	4,  // 25: mavio.acquisition.v1.SearchWantedRequest.kind:type_name -> mavio.acquisition.v1.WantedKind
+	6,  // 26: mavio.acquisition.v1.WantedService.AddMovie:input_type -> mavio.acquisition.v1.AddMovieRequest
+	8,  // 27: mavio.acquisition.v1.WantedService.AddSeries:input_type -> mavio.acquisition.v1.AddSeriesRequest
+	10, // 28: mavio.acquisition.v1.WantedService.SetMonitored:input_type -> mavio.acquisition.v1.SetMonitoredRequest
+	14, // 29: mavio.acquisition.v1.WantedService.GetWanted:input_type -> mavio.acquisition.v1.GetWantedRequest
+	16, // 30: mavio.acquisition.v1.WantedService.UpdateWanted:input_type -> mavio.acquisition.v1.UpdateWantedRequest
+	18, // 31: mavio.acquisition.v1.WantedService.ListWanted:input_type -> mavio.acquisition.v1.ListWantedRequest
+	22, // 32: mavio.acquisition.v1.WantedService.SearchWanted:input_type -> mavio.acquisition.v1.SearchWantedRequest
+	24, // 33: mavio.acquisition.v1.WantedService.SyncRSS:input_type -> mavio.acquisition.v1.SyncRSSRequest
+	7,  // 34: mavio.acquisition.v1.WantedService.AddMovie:output_type -> mavio.acquisition.v1.AddMovieResponse
+	9,  // 35: mavio.acquisition.v1.WantedService.AddSeries:output_type -> mavio.acquisition.v1.AddSeriesResponse
 	13, // 36: mavio.acquisition.v1.WantedService.SetMonitored:output_type -> mavio.acquisition.v1.SetMonitoredResponse
 	15, // 37: mavio.acquisition.v1.WantedService.GetWanted:output_type -> mavio.acquisition.v1.GetWantedResponse
 	17, // 38: mavio.acquisition.v1.WantedService.UpdateWanted:output_type -> mavio.acquisition.v1.UpdateWantedResponse
 	21, // 39: mavio.acquisition.v1.WantedService.ListWanted:output_type -> mavio.acquisition.v1.ListWantedResponse
 	23, // 40: mavio.acquisition.v1.WantedService.SearchWanted:output_type -> mavio.acquisition.v1.SearchWantedResponse
 	25, // 41: mavio.acquisition.v1.WantedService.SyncRSS:output_type -> mavio.acquisition.v1.SyncRSSResponse
-	33, // [33:42] is the sub-list for method output_type
-	24, // [24:33] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	34, // [34:42] is the sub-list for method output_type
+	26, // [26:34] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_wanted_proto_init() }
 func file_mavio_acquisition_v1_wanted_proto_init() {
 	if File_mavio_acquisition_v1_wanted_proto != nil {
 		return
+	}
+	file_mavio_acquisition_v1_wanted_proto_msgTypes[5].OneofWrappers = []any{
+		(*setMonitoredRequest_Items)(nil),
+		(*setMonitoredRequest_Series)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

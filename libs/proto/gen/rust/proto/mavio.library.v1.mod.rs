@@ -110,26 +110,6 @@ pub use self::__buffa::view::LyricLineView;
 #[doc(inline)]
 pub use self::__buffa::view::LyricLineOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SearchRemoteLyricsRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::SearchRemoteLyricsRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoteLyricsView;
-#[doc(inline)]
-pub use self::__buffa::view::RemoteLyricsOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::SearchRemoteLyricsResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::SearchRemoteLyricsResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DownloadRemoteLyricsRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::DownloadRemoteLyricsRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::DownloadRemoteLyricsResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::DownloadRemoteLyricsResponseOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::GetLyricsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetLyricsResponseOwnedView;
@@ -386,25 +366,25 @@ pub use self::__buffa::view::DeleteItemImageResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteItemImageResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SearchSubtitlesRequestView;
+pub use self::__buffa::view::SearchRemoteLyricsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::SearchSubtitlesRequestOwnedView;
+pub use self::__buffa::view::SearchRemoteLyricsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::RemoteSubtitleView;
+pub use self::__buffa::view::RemoteLyricsView;
 #[doc(inline)]
-pub use self::__buffa::view::RemoteSubtitleOwnedView;
+pub use self::__buffa::view::RemoteLyricsOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::SearchSubtitlesResponseView;
+pub use self::__buffa::view::SearchRemoteLyricsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::SearchSubtitlesResponseOwnedView;
+pub use self::__buffa::view::SearchRemoteLyricsResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::DownloadSubtitleRequestView;
+pub use self::__buffa::view::DownloadRemoteLyricsRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::DownloadSubtitleRequestOwnedView;
+pub use self::__buffa::view::DownloadRemoteLyricsRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::DownloadSubtitleResponseView;
+pub use self::__buffa::view::DownloadRemoteLyricsResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::DownloadSubtitleResponseOwnedView;
+pub use self::__buffa::view::DownloadRemoteLyricsResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListExternalIdKindsRequestView;
 #[doc(inline)]

@@ -21,7 +21,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/devplayer"
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
-	"github.com/mavioai/mavio/apps/server/internal/home"
+	"github.com/mavioai/mavio/apps/server/internal/hub"
 	"github.com/mavioai/mavio/apps/server/internal/identity"
 	"github.com/mavioai/mavio/apps/server/internal/images"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
@@ -39,7 +39,7 @@ import (
 	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
-	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/home/v1/homev1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/hub/v1/hubv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
@@ -169,8 +169,10 @@ func Handler(opts Options) (http.Handler, error) {
 	mux := http.NewServeMux()
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
 		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
-		Plugins: opts.Plugins, Hub: opts.Hub, Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs,
-		Activity: opts.Activity,
+		Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs, Activity: opts.Activity,
+	}, interceptors))
+	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
+		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity,
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))
@@ -199,12 +201,13 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewActivityServiceHandler(rpc.NewActivityService(opts.Store), interceptors))
 	mux.Handle(systemv1connect.NewBackupServiceHandler(rpc.NewBackupService(opts.Backups, opts.Activity), interceptors))
 	mux.Handle(systemv1connect.NewLocalizationServiceHandler(rpc.LocalizationService{}, interceptors))
-	aiService := &rpc.AiService{Activity: opts.Activity}
+	aiProviders, aiConversations := &rpc.AiProviderService{Activity: opts.Activity}, &rpc.AiConversationService{}
 	if opts.Plugins != nil {
-		aiService.Gateway = opts.Plugins.AIGateway
-		aiService.Sessions = opts.Plugins.AgentSessions
+		aiProviders.Gateway = opts.Plugins.AIGateway
+		aiConversations.Sessions = opts.Plugins.AgentSessions
 	}
-	mux.Handle(systemv1connect.NewAiServiceHandler(aiService, interceptors))
+	mux.Handle(systemv1connect.NewAiProviderServiceHandler(aiProviders, interceptors))
+	mux.Handle(systemv1connect.NewAiConversationServiceHandler(aiConversations, interceptors))
 	remotes := opts.Remotes
 	if remotes == nil {
 		remotes = &rpc.StorageService{}
@@ -218,7 +221,7 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	mux.Handle(libraryv1connect.NewLibraryServiceHandler(libraries, interceptors))
 	items := rpc.NewItemService(opts.Store)
-	items.Wake, items.ExternalIDKinds, items.Lyrics, items.Storages = opts.Wake, opts.ExternalIDKinds, opts.Lyrics, opts.Storages
+	items.Wake, items.ExternalIDKinds, items.Storages = opts.Wake, opts.ExternalIDKinds, opts.Storages
 	mux.Handle(libraryv1connect.NewItemServiceHandler(items, interceptors))
 	mux.Handle(libraryv1connect.NewCollectionServiceHandler(rpc.NewCollectionService(opts.Store), interceptors))
 	refresher, subFiles := opts.Refresher, opts.Subtitles
@@ -228,8 +231,8 @@ func Handler(opts Options) (http.Handler, error) {
 	if subFiles == nil {
 		subFiles = &library.Subtitles{Store: opts.Store}
 	}
-	metadataService := rpc.NewMetadataService(opts.Store, refresher, subFiles, opts.Images.Fetch)
-	metadataService.Activity, metadataService.ExternalIDKinds = opts.Activity, opts.ExternalIDKinds
+	metadataService := rpc.NewMetadataService(opts.Store, refresher, opts.Images.Fetch)
+	metadataService.ExternalIDKinds, metadataService.Lyrics = opts.ExternalIDKinds, opts.Lyrics
 	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
 	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
 	users := rpc.NewUserService(opts.Store)
@@ -282,7 +285,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(rpc.NewDiscoverService(reqs), interceptors))
 	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(rpc.NewRequestService(reqs), interceptors))
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(rpc.NewIssueService(reqs), interceptors))
-	mux.Handle(homev1connect.NewHomeServiceHandler(rpc.NewHomeService(opts.Store, home.New(opts.Store, reqs)), interceptors))
+	mux.Handle(hubv1connect.NewHubServiceHandler(rpc.NewHubService(opts.Store, hub.New(opts.Store, reqs)), interceptors))
 	// Media is fetched through signed URLs, or with credentials.
 	media := http.NewServeMux()
 	media.Handle("GET /media/", opts.Playbacks.Handler())
@@ -331,14 +334,14 @@ var services = []string{
 	acquisitionv1connect.WantedServiceName, acquisitionv1connect.DiscoverServiceName, acquisitionv1connect.RequestServiceName,
 	acquisitionv1connect.IssueServiceName, acquisitionv1connect.SubtitleServiceName,
 	authv1connect.AuthServiceName,
-	homev1connect.HomeServiceName,
+	hubv1connect.HubServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,
 	libraryv1connect.MetadataServiceName, libraryv1connect.PlaylistServiceName,
 	playbackv1connect.PlaybackServiceName,
 	sessionv1connect.EventServiceName, sessionv1connect.SessionServiceName, sessionv1connect.SyncPlayServiceName,
 	storagev1connect.StorageServiceName,
-	systemv1connect.SystemServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
-	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName, systemv1connect.AiServiceName,
+	systemv1connect.SystemServiceName, systemv1connect.PluginManagementServiceName, systemv1connect.TaskServiceName, systemv1connect.ActivityServiceName,
+	systemv1connect.BackupServiceName, systemv1connect.LocalizationServiceName, systemv1connect.AiProviderServiceName, systemv1connect.AiConversationServiceName,
 	userv1connect.UserServiceName, userv1connect.UserDataServiceName, userv1connect.DisplayPreferencesServiceName,
 }
 

@@ -2801,33 +2801,29 @@ func (b0 DeleteItemImageResponse_builder) Build() *DeleteItemImageResponse {
 	return m0
 }
 
-type SearchSubtitlesRequest struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ItemId          *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
-	xxx_hidden_Language        *string                `protobuf:"bytes,2,opt,name=language"`
-	xxx_hidden_MediaSourceId   *string                `protobuf:"bytes,3,opt,name=media_source_id,json=mediaSourceId"`
-	xxx_hidden_HearingImpaired bool                   `protobuf:"varint,4,opt,name=hearing_impaired,json=hearingImpaired"`
-	xxx_hidden_Forced          bool                   `protobuf:"varint,5,opt,name=forced"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+type SearchRemoteLyricsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *SearchSubtitlesRequest) Reset() {
-	*x = SearchSubtitlesRequest{}
+func (x *SearchRemoteLyricsRequest) Reset() {
+	*x = SearchRemoteLyricsRequest{}
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SearchSubtitlesRequest) String() string {
+func (x *SearchRemoteLyricsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchSubtitlesRequest) ProtoMessage() {}
+func (*SearchRemoteLyricsRequest) ProtoMessage() {}
 
-func (x *SearchSubtitlesRequest) ProtoReflect() protoreflect.Message {
+func (x *SearchRemoteLyricsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2839,7 +2835,7 @@ func (x *SearchSubtitlesRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *SearchSubtitlesRequest) GetItemId() string {
+func (x *SearchRemoteLyricsRequest) GetItemId() string {
 	if x != nil {
 		if x.xxx_hidden_ItemId != nil {
 			return *x.xxx_hidden_ItemId
@@ -2849,197 +2845,71 @@ func (x *SearchSubtitlesRequest) GetItemId() string {
 	return ""
 }
 
-func (x *SearchSubtitlesRequest) GetLanguage() string {
-	if x != nil {
-		if x.xxx_hidden_Language != nil {
-			return *x.xxx_hidden_Language
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SearchSubtitlesRequest) GetMediaSourceId() string {
-	if x != nil {
-		if x.xxx_hidden_MediaSourceId != nil {
-			return *x.xxx_hidden_MediaSourceId
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *SearchSubtitlesRequest) GetHearingImpaired() bool {
-	if x != nil {
-		return x.xxx_hidden_HearingImpaired
-	}
-	return false
-}
-
-func (x *SearchSubtitlesRequest) GetForced() bool {
-	if x != nil {
-		return x.xxx_hidden_Forced
-	}
-	return false
-}
-
-func (x *SearchSubtitlesRequest) SetItemId(v string) {
+func (x *SearchRemoteLyricsRequest) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
 }
 
-func (x *SearchSubtitlesRequest) SetLanguage(v string) {
-	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
-}
-
-func (x *SearchSubtitlesRequest) SetMediaSourceId(v string) {
-	x.xxx_hidden_MediaSourceId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
-}
-
-func (x *SearchSubtitlesRequest) SetHearingImpaired(v bool) {
-	x.xxx_hidden_HearingImpaired = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
-}
-
-func (x *SearchSubtitlesRequest) SetForced(v bool) {
-	x.xxx_hidden_Forced = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
-}
-
-func (x *SearchSubtitlesRequest) HasItemId() bool {
+func (x *SearchRemoteLyricsRequest) HasItemId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *SearchSubtitlesRequest) HasLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *SearchSubtitlesRequest) HasMediaSourceId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *SearchSubtitlesRequest) HasHearingImpaired() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *SearchSubtitlesRequest) HasForced() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *SearchSubtitlesRequest) ClearItemId() {
+func (x *SearchRemoteLyricsRequest) ClearItemId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ItemId = nil
 }
 
-func (x *SearchSubtitlesRequest) ClearLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Language = nil
-}
-
-func (x *SearchSubtitlesRequest) ClearMediaSourceId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_MediaSourceId = nil
-}
-
-func (x *SearchSubtitlesRequest) ClearHearingImpaired() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_HearingImpaired = false
-}
-
-func (x *SearchSubtitlesRequest) ClearForced() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Forced = false
-}
-
-type SearchSubtitlesRequest_builder struct {
+type SearchRemoteLyricsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	ItemId *string
-	// ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-	Language *string
-	// The media source; unset means the item's first.
-	MediaSourceId   *string
-	HearingImpaired *bool
-	Forced          *bool
 }
 
-func (b0 SearchSubtitlesRequest_builder) Build() *SearchSubtitlesRequest {
-	m0 := &SearchSubtitlesRequest{}
+func (b0 SearchRemoteLyricsRequest_builder) Build() *SearchRemoteLyricsRequest {
+	m0 := &SearchRemoteLyricsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
 		x.xxx_hidden_ItemId = b.ItemId
-	}
-	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
-		x.xxx_hidden_Language = b.Language
-	}
-	if b.MediaSourceId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
-		x.xxx_hidden_MediaSourceId = b.MediaSourceId
-	}
-	if b.HearingImpaired != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
-		x.xxx_hidden_HearingImpaired = *b.HearingImpaired
-	}
-	if b.Forced != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
-		x.xxx_hidden_Forced = *b.Forced
 	}
 	return m0
 }
 
-// RemoteSubtitle is a subtitle a provider offers.
-type RemoteSubtitle struct {
-	state                      protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Provider        *string                `protobuf:"bytes,1,opt,name=provider"`
-	xxx_hidden_Id              *string                `protobuf:"bytes,2,opt,name=id"`
-	xxx_hidden_Name            *string                `protobuf:"bytes,3,opt,name=name"`
-	xxx_hidden_Language        *string                `protobuf:"bytes,4,opt,name=language"`
-	xxx_hidden_Format          *string                `protobuf:"bytes,5,opt,name=format"`
-	xxx_hidden_HearingImpaired bool                   `protobuf:"varint,6,opt,name=hearing_impaired,json=hearingImpaired"`
-	xxx_hidden_Forced          bool                   `protobuf:"varint,7,opt,name=forced"`
-	xxx_hidden_Score           float64                `protobuf:"fixed64,8,opt,name=score"`
-	xxx_hidden_DownloadCount   int32                  `protobuf:"varint,9,opt,name=download_count,json=downloadCount"`
-	xxx_hidden_HashMatch       bool                   `protobuf:"varint,10,opt,name=hash_match,json=hashMatch"`
-	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
-	XXX_presence               [1]uint32
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+// RemoteLyrics are lyrics a provider has.
+type RemoteLyrics struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Provider    *string                `protobuf:"bytes,1,opt,name=provider"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,2,opt,name=id"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,3,opt,name=name"`
+	xxx_hidden_Artists     []string               `protobuf:"bytes,4,rep,name=artists"`
+	xxx_hidden_Album       *string                `protobuf:"bytes,5,opt,name=album"`
+	xxx_hidden_Duration    *durationpb.Duration   `protobuf:"bytes,6,opt,name=duration"`
+	xxx_hidden_Synced      bool                   `protobuf:"varint,7,opt,name=synced"`
+	xxx_hidden_Score       float64                `protobuf:"fixed64,8,opt,name=score"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *RemoteSubtitle) Reset() {
-	*x = RemoteSubtitle{}
+func (x *RemoteLyrics) Reset() {
+	*x = RemoteLyrics{}
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RemoteSubtitle) String() string {
+func (x *RemoteLyrics) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RemoteSubtitle) ProtoMessage() {}
+func (*RemoteLyrics) ProtoMessage() {}
 
-func (x *RemoteSubtitle) ProtoReflect() protoreflect.Message {
+func (x *RemoteLyrics) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3051,7 +2921,7 @@ func (x *RemoteSubtitle) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *RemoteSubtitle) GetProvider() string {
+func (x *RemoteLyrics) GetProvider() string {
 	if x != nil {
 		if x.xxx_hidden_Provider != nil {
 			return *x.xxx_hidden_Provider
@@ -3061,7 +2931,7 @@ func (x *RemoteSubtitle) GetProvider() string {
 	return ""
 }
 
-func (x *RemoteSubtitle) GetId() string {
+func (x *RemoteLyrics) GetId() string {
 	if x != nil {
 		if x.xxx_hidden_Id != nil {
 			return *x.xxx_hidden_Id
@@ -3071,7 +2941,7 @@ func (x *RemoteSubtitle) GetId() string {
 	return ""
 }
 
-func (x *RemoteSubtitle) GetName() string {
+func (x *RemoteLyrics) GetName() string {
 	if x != nil {
 		if x.xxx_hidden_Name != nil {
 			return *x.xxx_hidden_Name
@@ -3081,315 +2951,233 @@ func (x *RemoteSubtitle) GetName() string {
 	return ""
 }
 
-func (x *RemoteSubtitle) GetLanguage() string {
+func (x *RemoteLyrics) GetArtists() []string {
 	if x != nil {
-		if x.xxx_hidden_Language != nil {
-			return *x.xxx_hidden_Language
+		return x.xxx_hidden_Artists
+	}
+	return nil
+}
+
+func (x *RemoteLyrics) GetAlbum() string {
+	if x != nil {
+		if x.xxx_hidden_Album != nil {
+			return *x.xxx_hidden_Album
 		}
 		return ""
 	}
 	return ""
 }
 
-func (x *RemoteSubtitle) GetFormat() string {
+func (x *RemoteLyrics) GetDuration() *durationpb.Duration {
 	if x != nil {
-		if x.xxx_hidden_Format != nil {
-			return *x.xxx_hidden_Format
-		}
-		return ""
+		return x.xxx_hidden_Duration
 	}
-	return ""
+	return nil
 }
 
-func (x *RemoteSubtitle) GetHearingImpaired() bool {
+func (x *RemoteLyrics) GetSynced() bool {
 	if x != nil {
-		return x.xxx_hidden_HearingImpaired
+		return x.xxx_hidden_Synced
 	}
 	return false
 }
 
-func (x *RemoteSubtitle) GetForced() bool {
-	if x != nil {
-		return x.xxx_hidden_Forced
-	}
-	return false
-}
-
-func (x *RemoteSubtitle) GetScore() float64 {
+func (x *RemoteLyrics) GetScore() float64 {
 	if x != nil {
 		return x.xxx_hidden_Score
 	}
 	return 0
 }
 
-func (x *RemoteSubtitle) GetDownloadCount() int32 {
-	if x != nil {
-		return x.xxx_hidden_DownloadCount
-	}
-	return 0
-}
-
-func (x *RemoteSubtitle) GetHashMatch() bool {
-	if x != nil {
-		return x.xxx_hidden_HashMatch
-	}
-	return false
-}
-
-func (x *RemoteSubtitle) SetProvider(v string) {
+func (x *RemoteLyrics) SetProvider(v string) {
 	x.xxx_hidden_Provider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
-func (x *RemoteSubtitle) SetId(v string) {
+func (x *RemoteLyrics) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
-func (x *RemoteSubtitle) SetName(v string) {
+func (x *RemoteLyrics) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
-func (x *RemoteSubtitle) SetLanguage(v string) {
-	x.xxx_hidden_Language = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+func (x *RemoteLyrics) SetArtists(v []string) {
+	x.xxx_hidden_Artists = v
 }
 
-func (x *RemoteSubtitle) SetFormat(v string) {
-	x.xxx_hidden_Format = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
+func (x *RemoteLyrics) SetAlbum(v string) {
+	x.xxx_hidden_Album = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
-func (x *RemoteSubtitle) SetHearingImpaired(v bool) {
-	x.xxx_hidden_HearingImpaired = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+func (x *RemoteLyrics) SetDuration(v *durationpb.Duration) {
+	x.xxx_hidden_Duration = v
 }
 
-func (x *RemoteSubtitle) SetForced(v bool) {
-	x.xxx_hidden_Forced = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+func (x *RemoteLyrics) SetSynced(v bool) {
+	x.xxx_hidden_Synced = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
 }
 
-func (x *RemoteSubtitle) SetScore(v float64) {
+func (x *RemoteLyrics) SetScore(v float64) {
 	x.xxx_hidden_Score = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
 }
 
-func (x *RemoteSubtitle) SetDownloadCount(v int32) {
-	x.xxx_hidden_DownloadCount = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
-}
-
-func (x *RemoteSubtitle) SetHashMatch(v bool) {
-	x.xxx_hidden_HashMatch = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 10)
-}
-
-func (x *RemoteSubtitle) HasProvider() bool {
+func (x *RemoteLyrics) HasProvider() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *RemoteSubtitle) HasId() bool {
+func (x *RemoteLyrics) HasId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *RemoteSubtitle) HasName() bool {
+func (x *RemoteLyrics) HasName() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *RemoteSubtitle) HasLanguage() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *RemoteSubtitle) HasFormat() bool {
+func (x *RemoteLyrics) HasAlbum() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
 }
 
-func (x *RemoteSubtitle) HasHearingImpaired() bool {
+func (x *RemoteLyrics) HasDuration() bool {
 	if x == nil {
 		return false
 	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+	return x.xxx_hidden_Duration != nil
 }
 
-func (x *RemoteSubtitle) HasForced() bool {
+func (x *RemoteLyrics) HasSynced() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
 }
 
-func (x *RemoteSubtitle) HasScore() bool {
+func (x *RemoteLyrics) HasScore() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
-func (x *RemoteSubtitle) HasDownloadCount() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
-}
-
-func (x *RemoteSubtitle) HasHashMatch() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 9)
-}
-
-func (x *RemoteSubtitle) ClearProvider() {
+func (x *RemoteLyrics) ClearProvider() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Provider = nil
 }
 
-func (x *RemoteSubtitle) ClearId() {
+func (x *RemoteLyrics) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
 	x.xxx_hidden_Id = nil
 }
 
-func (x *RemoteSubtitle) ClearName() {
+func (x *RemoteLyrics) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Name = nil
 }
 
-func (x *RemoteSubtitle) ClearLanguage() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Language = nil
-}
-
-func (x *RemoteSubtitle) ClearFormat() {
+func (x *RemoteLyrics) ClearAlbum() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Format = nil
+	x.xxx_hidden_Album = nil
 }
 
-func (x *RemoteSubtitle) ClearHearingImpaired() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
-	x.xxx_hidden_HearingImpaired = false
+func (x *RemoteLyrics) ClearDuration() {
+	x.xxx_hidden_Duration = nil
 }
 
-func (x *RemoteSubtitle) ClearForced() {
+func (x *RemoteLyrics) ClearSynced() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
-	x.xxx_hidden_Forced = false
+	x.xxx_hidden_Synced = false
 }
 
-func (x *RemoteSubtitle) ClearScore() {
+func (x *RemoteLyrics) ClearScore() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
 	x.xxx_hidden_Score = 0
 }
 
-func (x *RemoteSubtitle) ClearDownloadCount() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
-	x.xxx_hidden_DownloadCount = 0
-}
-
-func (x *RemoteSubtitle) ClearHashMatch() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 9)
-	x.xxx_hidden_HashMatch = false
-}
-
-type RemoteSubtitle_builder struct {
+type RemoteLyrics_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// The provider and its ID of the lyrics, for DownloadRemoteLyrics.
 	Provider *string
-	// The provider's ID, passed to DownloadSubtitle.
-	Id              *string
-	Name            *string
-	Language        *string
-	Format          *string
-	HearingImpaired *bool
-	Forced          *bool
-	Score           *float64
-	DownloadCount   *int32
-	HashMatch       *bool
+	Id       *string
+	Name     *string
+	Artists  []string
+	Album    *string
+	Duration *durationpb.Duration
+	Synced   *bool
+	Score    *float64
 }
 
-func (b0 RemoteSubtitle_builder) Build() *RemoteSubtitle {
-	m0 := &RemoteSubtitle{}
+func (b0 RemoteLyrics_builder) Build() *RemoteLyrics {
+	m0 := &RemoteLyrics{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Provider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Provider = b.Provider
 	}
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Name = b.Name
 	}
-	if b.Language != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
-		x.xxx_hidden_Language = b.Language
+	x.xxx_hidden_Artists = b.Artists
+	if b.Album != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		x.xxx_hidden_Album = b.Album
 	}
-	if b.Format != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
-		x.xxx_hidden_Format = b.Format
-	}
-	if b.HearingImpaired != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
-		x.xxx_hidden_HearingImpaired = *b.HearingImpaired
-	}
-	if b.Forced != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
-		x.xxx_hidden_Forced = *b.Forced
+	x.xxx_hidden_Duration = b.Duration
+	if b.Synced != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		x.xxx_hidden_Synced = *b.Synced
 	}
 	if b.Score != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
 		x.xxx_hidden_Score = *b.Score
-	}
-	if b.DownloadCount != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
-		x.xxx_hidden_DownloadCount = *b.DownloadCount
-	}
-	if b.HashMatch != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 10)
-		x.xxx_hidden_HashMatch = *b.HashMatch
 	}
 	return m0
 }
 
-type SearchSubtitlesResponse struct {
-	state                protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Subtitles *[]*RemoteSubtitle     `protobuf:"bytes,1,rep,name=subtitles"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+type SearchRemoteLyricsResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Lyrics *[]*RemoteLyrics       `protobuf:"bytes,1,rep,name=lyrics"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
-func (x *SearchSubtitlesResponse) Reset() {
-	*x = SearchSubtitlesResponse{}
+func (x *SearchRemoteLyricsResponse) Reset() {
+	*x = SearchRemoteLyricsResponse{}
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SearchSubtitlesResponse) String() string {
+func (x *SearchRemoteLyricsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SearchSubtitlesResponse) ProtoMessage() {}
+func (*SearchRemoteLyricsResponse) ProtoMessage() {}
 
-func (x *SearchSubtitlesResponse) ProtoReflect() protoreflect.Message {
+func (x *SearchRemoteLyricsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3401,59 +3189,59 @@ func (x *SearchSubtitlesResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *SearchSubtitlesResponse) GetSubtitles() []*RemoteSubtitle {
+func (x *SearchRemoteLyricsResponse) GetLyrics() []*RemoteLyrics {
 	if x != nil {
-		if x.xxx_hidden_Subtitles != nil {
-			return *x.xxx_hidden_Subtitles
+		if x.xxx_hidden_Lyrics != nil {
+			return *x.xxx_hidden_Lyrics
 		}
 	}
 	return nil
 }
 
-func (x *SearchSubtitlesResponse) SetSubtitles(v []*RemoteSubtitle) {
-	x.xxx_hidden_Subtitles = &v
+func (x *SearchRemoteLyricsResponse) SetLyrics(v []*RemoteLyrics) {
+	x.xxx_hidden_Lyrics = &v
 }
 
-type SearchSubtitlesResponse_builder struct {
+type SearchRemoteLyricsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Subtitles []*RemoteSubtitle
+	// Each provider's lyrics, best first, in provider order.
+	Lyrics []*RemoteLyrics
 }
 
-func (b0 SearchSubtitlesResponse_builder) Build() *SearchSubtitlesResponse {
-	m0 := &SearchSubtitlesResponse{}
+func (b0 SearchRemoteLyricsResponse_builder) Build() *SearchRemoteLyricsResponse {
+	m0 := &SearchRemoteLyricsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Subtitles = &b.Subtitles
+	x.xxx_hidden_Lyrics = &b.Lyrics
 	return m0
 }
 
-type DownloadSubtitleRequest struct {
-	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ItemId        *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
-	xxx_hidden_MediaSourceId *string                `protobuf:"bytes,2,opt,name=media_source_id,json=mediaSourceId"`
-	xxx_hidden_Provider      *string                `protobuf:"bytes,3,opt,name=provider"`
-	xxx_hidden_SubtitleId    *string                `protobuf:"bytes,4,opt,name=subtitle_id,json=subtitleId"`
-	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
-	XXX_presence             [1]uint32
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
+type DownloadRemoteLyricsRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ItemId      *string                `protobuf:"bytes,1,opt,name=item_id,json=itemId"`
+	xxx_hidden_Provider    *string                `protobuf:"bytes,2,opt,name=provider"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,3,opt,name=id"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
-func (x *DownloadSubtitleRequest) Reset() {
-	*x = DownloadSubtitleRequest{}
+func (x *DownloadRemoteLyricsRequest) Reset() {
+	*x = DownloadRemoteLyricsRequest{}
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DownloadSubtitleRequest) String() string {
+func (x *DownloadRemoteLyricsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DownloadSubtitleRequest) ProtoMessage() {}
+func (*DownloadRemoteLyricsRequest) ProtoMessage() {}
 
-func (x *DownloadSubtitleRequest) ProtoReflect() protoreflect.Message {
+func (x *DownloadRemoteLyricsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3465,7 +3253,7 @@ func (x *DownloadSubtitleRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *DownloadSubtitleRequest) GetItemId() string {
+func (x *DownloadRemoteLyricsRequest) GetItemId() string {
 	if x != nil {
 		if x.xxx_hidden_ItemId != nil {
 			return *x.xxx_hidden_ItemId
@@ -3475,17 +3263,7 @@ func (x *DownloadSubtitleRequest) GetItemId() string {
 	return ""
 }
 
-func (x *DownloadSubtitleRequest) GetMediaSourceId() string {
-	if x != nil {
-		if x.xxx_hidden_MediaSourceId != nil {
-			return *x.xxx_hidden_MediaSourceId
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *DownloadSubtitleRequest) GetProvider() string {
+func (x *DownloadRemoteLyricsRequest) GetProvider() string {
 	if x != nil {
 		if x.xxx_hidden_Provider != nil {
 			return *x.xxx_hidden_Provider
@@ -3495,137 +3273,114 @@ func (x *DownloadSubtitleRequest) GetProvider() string {
 	return ""
 }
 
-func (x *DownloadSubtitleRequest) GetSubtitleId() string {
+func (x *DownloadRemoteLyricsRequest) GetId() string {
 	if x != nil {
-		if x.xxx_hidden_SubtitleId != nil {
-			return *x.xxx_hidden_SubtitleId
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
 		}
 		return ""
 	}
 	return ""
 }
 
-func (x *DownloadSubtitleRequest) SetItemId(v string) {
+func (x *DownloadRemoteLyricsRequest) SetItemId(v string) {
 	x.xxx_hidden_ItemId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
-func (x *DownloadSubtitleRequest) SetMediaSourceId(v string) {
-	x.xxx_hidden_MediaSourceId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
-}
-
-func (x *DownloadSubtitleRequest) SetProvider(v string) {
+func (x *DownloadRemoteLyricsRequest) SetProvider(v string) {
 	x.xxx_hidden_Provider = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
 }
 
-func (x *DownloadSubtitleRequest) SetSubtitleId(v string) {
-	x.xxx_hidden_SubtitleId = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+func (x *DownloadRemoteLyricsRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
-func (x *DownloadSubtitleRequest) HasItemId() bool {
+func (x *DownloadRemoteLyricsRequest) HasItemId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *DownloadSubtitleRequest) HasMediaSourceId() bool {
+func (x *DownloadRemoteLyricsRequest) HasProvider() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *DownloadSubtitleRequest) HasProvider() bool {
+func (x *DownloadRemoteLyricsRequest) HasId() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
-func (x *DownloadSubtitleRequest) HasSubtitleId() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *DownloadSubtitleRequest) ClearItemId() {
+func (x *DownloadRemoteLyricsRequest) ClearItemId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ItemId = nil
 }
 
-func (x *DownloadSubtitleRequest) ClearMediaSourceId() {
+func (x *DownloadRemoteLyricsRequest) ClearProvider() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_MediaSourceId = nil
-}
-
-func (x *DownloadSubtitleRequest) ClearProvider() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_Provider = nil
 }
 
-func (x *DownloadSubtitleRequest) ClearSubtitleId() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_SubtitleId = nil
+func (x *DownloadRemoteLyricsRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Id = nil
 }
 
-type DownloadSubtitleRequest_builder struct {
+type DownloadRemoteLyricsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	ItemId        *string
-	MediaSourceId *string
-	Provider      *string
-	SubtitleId    *string
+	ItemId   *string
+	Provider *string
+	Id       *string
 }
 
-func (b0 DownloadSubtitleRequest_builder) Build() *DownloadSubtitleRequest {
-	m0 := &DownloadSubtitleRequest{}
+func (b0 DownloadRemoteLyricsRequest_builder) Build() *DownloadRemoteLyricsRequest {
+	m0 := &DownloadRemoteLyricsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ItemId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_ItemId = b.ItemId
 	}
-	if b.MediaSourceId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
-		x.xxx_hidden_MediaSourceId = b.MediaSourceId
-	}
 	if b.Provider != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
 		x.xxx_hidden_Provider = b.Provider
 	}
-	if b.SubtitleId != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
-		x.xxx_hidden_SubtitleId = b.SubtitleId
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Id = b.Id
 	}
 	return m0
 }
 
-type DownloadSubtitleResponse struct {
-	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Stream *MediaStream           `protobuf:"bytes,1,opt,name=stream"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+type DownloadRemoteLyricsResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DownloadSubtitleResponse) Reset() {
-	*x = DownloadSubtitleResponse{}
+func (x *DownloadRemoteLyricsResponse) Reset() {
+	*x = DownloadRemoteLyricsResponse{}
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DownloadSubtitleResponse) String() string {
+func (x *DownloadRemoteLyricsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DownloadSubtitleResponse) ProtoMessage() {}
+func (*DownloadRemoteLyricsResponse) ProtoMessage() {}
 
-func (x *DownloadSubtitleResponse) ProtoReflect() protoreflect.Message {
+func (x *DownloadRemoteLyricsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_mavio_library_v1_metadata_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3637,40 +3392,15 @@ func (x *DownloadSubtitleResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *DownloadSubtitleResponse) GetStream() *MediaStream {
-	if x != nil {
-		return x.xxx_hidden_Stream
-	}
-	return nil
-}
-
-func (x *DownloadSubtitleResponse) SetStream(v *MediaStream) {
-	x.xxx_hidden_Stream = v
-}
-
-func (x *DownloadSubtitleResponse) HasStream() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_Stream != nil
-}
-
-func (x *DownloadSubtitleResponse) ClearStream() {
-	x.xxx_hidden_Stream = nil
-}
-
-type DownloadSubtitleResponse_builder struct {
+type DownloadRemoteLyricsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The subtitle as a stream of the media source.
-	Stream *MediaStream
 }
 
-func (b0 DownloadSubtitleResponse_builder) Build() *DownloadSubtitleResponse {
-	m0 := &DownloadSubtitleResponse{}
+func (b0 DownloadRemoteLyricsResponse_builder) Build() *DownloadRemoteLyricsResponse {
+	m0 := &DownloadRemoteLyricsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Stream = b.Stream
 	return m0
 }
 
@@ -4009,7 +3739,7 @@ var File_mavio_library_v1_metadata_proto protoreflect.FileDescriptor
 
 const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1cmavio/library/v1/media.proto\"\x94\f\n" +
+	"\x1fmavio/library/v1/metadata.proto\x12\x10mavio.library.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bmavio/library/v1/item.proto\"\x94\f\n" +
 	"\fItemMetadata\x12\x1c\n" +
 	"\x04name\x18\x01 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\x04name\x12%\n" +
 	"\tsort_name\x18\x02 \x01(\tB\b\xbaH\x05r\x03\x18\xf4\x03R\bsortName\x12/\n" +
@@ -4116,36 +3846,25 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\x16DeleteItemImageRequest\x12$\n" +
 	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x12&\n" +
 	"\bimage_id\x18\x02 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\aimageId\"\x19\n" +
-	"\x17DeleteItemImageResponse\"\xf6\x01\n" +
-	"\x16SearchSubtitlesRequest\x12$\n" +
-	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x12A\n" +
-	"\blanguage\x18\x02 \x01(\tB%\xbaH\"\xc8\x01\x01r\x1d2\x1b^[a-z]{2}(-[A-Za-z]{2,4})?$R\blanguage\x120\n" +
-	"\x0fmedia_source_id\x18\x03 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\rmediaSourceId\x12)\n" +
-	"\x10hearing_impaired\x18\x04 \x01(\bR\x0fhearingImpaired\x12\x16\n" +
-	"\x06forced\x18\x05 \x01(\bR\x06forced\"\xa3\x02\n" +
-	"\x0eRemoteSubtitle\x12\x1a\n" +
+	"\x17DeleteItemImageResponse\"A\n" +
+	"\x19SearchRemoteLyricsRequest\x12$\n" +
+	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\"\xe3\x01\n" +
+	"\fRemoteLyrics\x12\x1a\n" +
 	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1a\n" +
-	"\blanguage\x18\x04 \x01(\tR\blanguage\x12\x16\n" +
-	"\x06format\x18\x05 \x01(\tR\x06format\x12)\n" +
-	"\x10hearing_impaired\x18\x06 \x01(\bR\x0fhearingImpaired\x12\x16\n" +
-	"\x06forced\x18\a \x01(\bR\x06forced\x12\x14\n" +
-	"\x05score\x18\b \x01(\x01R\x05score\x12%\n" +
-	"\x0edownload_count\x18\t \x01(\x05R\rdownloadCount\x12\x1d\n" +
-	"\n" +
-	"hash_match\x18\n" +
-	" \x01(\bR\thashMatch\"Y\n" +
-	"\x17SearchSubtitlesResponse\x12>\n" +
-	"\tsubtitles\x18\x01 \x03(\v2 .mavio.library.v1.RemoteSubtitleR\tsubtitles\"\xbe\x01\n" +
-	"\x17DownloadSubtitleRequest\x12$\n" +
-	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x120\n" +
-	"\x0fmedia_source_id\x18\x02 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\rmediaSourceId\x12\"\n" +
-	"\bprovider\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\x12'\n" +
-	"\vsubtitle_id\x18\x04 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\n" +
-	"subtitleId\"Q\n" +
-	"\x18DownloadSubtitleResponse\x125\n" +
-	"\x06stream\x18\x01 \x01(\v2\x1d.mavio.library.v1.MediaStreamR\x06stream\"_\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x18\n" +
+	"\aartists\x18\x04 \x03(\tR\aartists\x12\x14\n" +
+	"\x05album\x18\x05 \x01(\tR\x05album\x125\n" +
+	"\bduration\x18\x06 \x01(\v2\x19.google.protobuf.DurationR\bduration\x12\x16\n" +
+	"\x06synced\x18\a \x01(\bR\x06synced\x12\x14\n" +
+	"\x05score\x18\b \x01(\x01R\x05score\"T\n" +
+	"\x1aSearchRemoteLyricsResponse\x126\n" +
+	"\x06lyrics\x18\x01 \x03(\v2\x1e.mavio.library.v1.RemoteLyricsR\x06lyrics\"\x7f\n" +
+	"\x1bDownloadRemoteLyricsRequest\x12$\n" +
+	"\aitem_id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x06itemId\x12\"\n" +
+	"\bprovider\x18\x02 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\bprovider\x12\x16\n" +
+	"\x02id\x18\x03 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"\x1e\n" +
+	"\x1cDownloadRemoteLyricsResponse\"_\n" +
 	"\x1aListExternalIdKindsRequest\x12A\n" +
 	"\titem_kind\x18\x01 \x01(\x0e2\x1a.mavio.library.v1.ItemKindB\b\xbaH\x05\x82\x01\x02\x10\x01R\bitemKind\"\xa8\x01\n" +
 	"\x0eExternalIdKind\x12\x10\n" +
@@ -4156,7 +3875,7 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\apersons\x18\x04 \x01(\bR\apersons\x12\x1b\n" +
 	"\tplugin_id\x18\x05 \x01(\tR\bpluginId\"U\n" +
 	"\x1bListExternalIdKindsResponse\x126\n" +
-	"\x05kinds\x18\x01 \x03(\v2 .mavio.library.v1.ExternalIdKindR\x05kinds2\x91\b\n" +
+	"\x05kinds\x18\x01 \x03(\v2 .mavio.library.v1.ExternalIdKindR\x05kinds2\xa6\b\n" +
 	"\x0fMetadataService\x12W\n" +
 	"\n" +
 	"UpdateItem\x12#.mavio.library.v1.UpdateItemRequest\x1a$.mavio.library.v1.UpdateItemResponse\x12Z\n" +
@@ -4165,55 +3884,54 @@ const file_mavio_library_v1_metadata_proto_rawDesc = "" +
 	"\fIdentifyItem\x12%.mavio.library.v1.IdentifyItemRequest\x1a&.mavio.library.v1.IdentifyItemResponse\x12n\n" +
 	"\x10ListRemoteImages\x12).mavio.library.v1.ListRemoteImagesRequest\x1a*.mavio.library.v1.ListRemoteImagesResponse\"\x03\x90\x02\x01\x12]\n" +
 	"\fSetItemImage\x12%.mavio.library.v1.SetItemImageRequest\x1a&.mavio.library.v1.SetItemImageResponse\x12f\n" +
-	"\x0fDeleteItemImage\x12(.mavio.library.v1.DeleteItemImageRequest\x1a).mavio.library.v1.DeleteItemImageResponse\x12k\n" +
-	"\x0fSearchSubtitles\x12(.mavio.library.v1.SearchSubtitlesRequest\x1a).mavio.library.v1.SearchSubtitlesResponse\"\x03\x90\x02\x01\x12i\n" +
-	"\x10DownloadSubtitle\x12).mavio.library.v1.DownloadSubtitleRequest\x1a*.mavio.library.v1.DownloadSubtitleResponse\x12w\n" +
+	"\x0fDeleteItemImage\x12(.mavio.library.v1.DeleteItemImageRequest\x1a).mavio.library.v1.DeleteItemImageResponse\x12t\n" +
+	"\x12SearchRemoteLyrics\x12+.mavio.library.v1.SearchRemoteLyricsRequest\x1a,.mavio.library.v1.SearchRemoteLyricsResponse\"\x03\x90\x02\x01\x12u\n" +
+	"\x14DownloadRemoteLyrics\x12-.mavio.library.v1.DownloadRemoteLyricsRequest\x1a..mavio.library.v1.DownloadRemoteLyricsResponse\x12w\n" +
 	"\x13ListExternalIdKinds\x12,.mavio.library.v1.ListExternalIdKindsRequest\x1a-.mavio.library.v1.ListExternalIdKindsResponse\"\x03\x90\x02\x01B\xce\x01\n" +
 	"\x14com.mavio.library.v1B\rMetadataProtoP\x01ZEgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1;libraryv1\xa2\x02\x03MLX\xaa\x02\x10Mavio.Library.V1\xca\x02\x10Mavio\\Library\\V1\xe2\x02\x1cMavio\\Library\\V1\\GPBMetadata\xea\x02\x12Mavio::Library::V1b\beditionsp\xe8\a"
 
 var file_mavio_library_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_mavio_library_v1_metadata_proto_goTypes = []any{
-	(*ItemMetadata)(nil),                // 0: mavio.library.v1.ItemMetadata
-	(*UpdateItemRequest)(nil),           // 1: mavio.library.v1.UpdateItemRequest
-	(*UpdateItemResponse)(nil),          // 2: mavio.library.v1.UpdateItemResponse
-	(*RefreshItemRequest)(nil),          // 3: mavio.library.v1.RefreshItemRequest
-	(*RefreshItemResponse)(nil),         // 4: mavio.library.v1.RefreshItemResponse
-	(*SearchRemoteRequest)(nil),         // 5: mavio.library.v1.SearchRemoteRequest
-	(*RemoteSearchResult)(nil),          // 6: mavio.library.v1.RemoteSearchResult
-	(*SearchRemoteResponse)(nil),        // 7: mavio.library.v1.SearchRemoteResponse
-	(*IdentifyItemRequest)(nil),         // 8: mavio.library.v1.IdentifyItemRequest
-	(*IdentifyItemResponse)(nil),        // 9: mavio.library.v1.IdentifyItemResponse
-	(*ListRemoteImagesRequest)(nil),     // 10: mavio.library.v1.ListRemoteImagesRequest
-	(*RemoteImage)(nil),                 // 11: mavio.library.v1.RemoteImage
-	(*ListRemoteImagesResponse)(nil),    // 12: mavio.library.v1.ListRemoteImagesResponse
-	(*SetItemImageRequest)(nil),         // 13: mavio.library.v1.SetItemImageRequest
-	(*SetItemImageResponse)(nil),        // 14: mavio.library.v1.SetItemImageResponse
-	(*DeleteItemImageRequest)(nil),      // 15: mavio.library.v1.DeleteItemImageRequest
-	(*DeleteItemImageResponse)(nil),     // 16: mavio.library.v1.DeleteItemImageResponse
-	(*SearchSubtitlesRequest)(nil),      // 17: mavio.library.v1.SearchSubtitlesRequest
-	(*RemoteSubtitle)(nil),              // 18: mavio.library.v1.RemoteSubtitle
-	(*SearchSubtitlesResponse)(nil),     // 19: mavio.library.v1.SearchSubtitlesResponse
-	(*DownloadSubtitleRequest)(nil),     // 20: mavio.library.v1.DownloadSubtitleRequest
-	(*DownloadSubtitleResponse)(nil),    // 21: mavio.library.v1.DownloadSubtitleResponse
-	(*ListExternalIdKindsRequest)(nil),  // 22: mavio.library.v1.ListExternalIdKindsRequest
-	(*ExternalIdKind)(nil),              // 23: mavio.library.v1.ExternalIdKind
-	(*ListExternalIdKindsResponse)(nil), // 24: mavio.library.v1.ListExternalIdKindsResponse
-	nil,                                 // 25: mavio.library.v1.ItemMetadata.ExternalIdsEntry
-	nil,                                 // 26: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
-	nil,                                 // 27: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
-	nil,                                 // 28: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
-	(*timestamppb.Timestamp)(nil),       // 29: google.protobuf.Timestamp
-	(*durationpb.Duration)(nil),         // 30: google.protobuf.Duration
-	(SeriesStatus)(0),                   // 31: mavio.library.v1.SeriesStatus
-	(MetadataField)(0),                  // 32: mavio.library.v1.MetadataField
-	(SeriesType)(0),                     // 33: mavio.library.v1.SeriesType
-	(DisplayOrder)(0),                   // 34: mavio.library.v1.DisplayOrder
-	(*fieldmaskpb.FieldMask)(nil),       // 35: google.protobuf.FieldMask
-	(*Item)(nil),                        // 36: mavio.library.v1.Item
-	(ImageKind)(0),                      // 37: mavio.library.v1.ImageKind
-	(*Image)(nil),                       // 38: mavio.library.v1.Image
-	(*MediaStream)(nil),                 // 39: mavio.library.v1.MediaStream
-	(ItemKind)(0),                       // 40: mavio.library.v1.ItemKind
+	(*ItemMetadata)(nil),                 // 0: mavio.library.v1.ItemMetadata
+	(*UpdateItemRequest)(nil),            // 1: mavio.library.v1.UpdateItemRequest
+	(*UpdateItemResponse)(nil),           // 2: mavio.library.v1.UpdateItemResponse
+	(*RefreshItemRequest)(nil),           // 3: mavio.library.v1.RefreshItemRequest
+	(*RefreshItemResponse)(nil),          // 4: mavio.library.v1.RefreshItemResponse
+	(*SearchRemoteRequest)(nil),          // 5: mavio.library.v1.SearchRemoteRequest
+	(*RemoteSearchResult)(nil),           // 6: mavio.library.v1.RemoteSearchResult
+	(*SearchRemoteResponse)(nil),         // 7: mavio.library.v1.SearchRemoteResponse
+	(*IdentifyItemRequest)(nil),          // 8: mavio.library.v1.IdentifyItemRequest
+	(*IdentifyItemResponse)(nil),         // 9: mavio.library.v1.IdentifyItemResponse
+	(*ListRemoteImagesRequest)(nil),      // 10: mavio.library.v1.ListRemoteImagesRequest
+	(*RemoteImage)(nil),                  // 11: mavio.library.v1.RemoteImage
+	(*ListRemoteImagesResponse)(nil),     // 12: mavio.library.v1.ListRemoteImagesResponse
+	(*SetItemImageRequest)(nil),          // 13: mavio.library.v1.SetItemImageRequest
+	(*SetItemImageResponse)(nil),         // 14: mavio.library.v1.SetItemImageResponse
+	(*DeleteItemImageRequest)(nil),       // 15: mavio.library.v1.DeleteItemImageRequest
+	(*DeleteItemImageResponse)(nil),      // 16: mavio.library.v1.DeleteItemImageResponse
+	(*SearchRemoteLyricsRequest)(nil),    // 17: mavio.library.v1.SearchRemoteLyricsRequest
+	(*RemoteLyrics)(nil),                 // 18: mavio.library.v1.RemoteLyrics
+	(*SearchRemoteLyricsResponse)(nil),   // 19: mavio.library.v1.SearchRemoteLyricsResponse
+	(*DownloadRemoteLyricsRequest)(nil),  // 20: mavio.library.v1.DownloadRemoteLyricsRequest
+	(*DownloadRemoteLyricsResponse)(nil), // 21: mavio.library.v1.DownloadRemoteLyricsResponse
+	(*ListExternalIdKindsRequest)(nil),   // 22: mavio.library.v1.ListExternalIdKindsRequest
+	(*ExternalIdKind)(nil),               // 23: mavio.library.v1.ExternalIdKind
+	(*ListExternalIdKindsResponse)(nil),  // 24: mavio.library.v1.ListExternalIdKindsResponse
+	nil,                                  // 25: mavio.library.v1.ItemMetadata.ExternalIdsEntry
+	nil,                                  // 26: mavio.library.v1.SearchRemoteRequest.ExternalIdsEntry
+	nil,                                  // 27: mavio.library.v1.RemoteSearchResult.ExternalIdsEntry
+	nil,                                  // 28: mavio.library.v1.IdentifyItemRequest.ExternalIdsEntry
+	(*timestamppb.Timestamp)(nil),        // 29: google.protobuf.Timestamp
+	(*durationpb.Duration)(nil),          // 30: google.protobuf.Duration
+	(SeriesStatus)(0),                    // 31: mavio.library.v1.SeriesStatus
+	(MetadataField)(0),                   // 32: mavio.library.v1.MetadataField
+	(SeriesType)(0),                      // 33: mavio.library.v1.SeriesType
+	(DisplayOrder)(0),                    // 34: mavio.library.v1.DisplayOrder
+	(*fieldmaskpb.FieldMask)(nil),        // 35: google.protobuf.FieldMask
+	(*Item)(nil),                         // 36: mavio.library.v1.Item
+	(ImageKind)(0),                       // 37: mavio.library.v1.ImageKind
+	(*Image)(nil),                        // 38: mavio.library.v1.Image
+	(ItemKind)(0),                        // 39: mavio.library.v1.ItemKind
 }
 var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	29, // 0: mavio.library.v1.ItemMetadata.premiere_date:type_name -> google.protobuf.Timestamp
@@ -4238,10 +3956,10 @@ var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	11, // 19: mavio.library.v1.ListRemoteImagesResponse.images:type_name -> mavio.library.v1.RemoteImage
 	37, // 20: mavio.library.v1.SetItemImageRequest.kind:type_name -> mavio.library.v1.ImageKind
 	38, // 21: mavio.library.v1.SetItemImageResponse.image:type_name -> mavio.library.v1.Image
-	18, // 22: mavio.library.v1.SearchSubtitlesResponse.subtitles:type_name -> mavio.library.v1.RemoteSubtitle
-	39, // 23: mavio.library.v1.DownloadSubtitleResponse.stream:type_name -> mavio.library.v1.MediaStream
-	40, // 24: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
-	40, // 25: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
+	30, // 22: mavio.library.v1.RemoteLyrics.duration:type_name -> google.protobuf.Duration
+	18, // 23: mavio.library.v1.SearchRemoteLyricsResponse.lyrics:type_name -> mavio.library.v1.RemoteLyrics
+	39, // 24: mavio.library.v1.ListExternalIdKindsRequest.item_kind:type_name -> mavio.library.v1.ItemKind
+	39, // 25: mavio.library.v1.ExternalIdKind.item_kinds:type_name -> mavio.library.v1.ItemKind
 	23, // 26: mavio.library.v1.ListExternalIdKindsResponse.kinds:type_name -> mavio.library.v1.ExternalIdKind
 	1,  // 27: mavio.library.v1.MetadataService.UpdateItem:input_type -> mavio.library.v1.UpdateItemRequest
 	3,  // 28: mavio.library.v1.MetadataService.RefreshItem:input_type -> mavio.library.v1.RefreshItemRequest
@@ -4250,8 +3968,8 @@ var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	10, // 31: mavio.library.v1.MetadataService.ListRemoteImages:input_type -> mavio.library.v1.ListRemoteImagesRequest
 	13, // 32: mavio.library.v1.MetadataService.SetItemImage:input_type -> mavio.library.v1.SetItemImageRequest
 	15, // 33: mavio.library.v1.MetadataService.DeleteItemImage:input_type -> mavio.library.v1.DeleteItemImageRequest
-	17, // 34: mavio.library.v1.MetadataService.SearchSubtitles:input_type -> mavio.library.v1.SearchSubtitlesRequest
-	20, // 35: mavio.library.v1.MetadataService.DownloadSubtitle:input_type -> mavio.library.v1.DownloadSubtitleRequest
+	17, // 34: mavio.library.v1.MetadataService.SearchRemoteLyrics:input_type -> mavio.library.v1.SearchRemoteLyricsRequest
+	20, // 35: mavio.library.v1.MetadataService.DownloadRemoteLyrics:input_type -> mavio.library.v1.DownloadRemoteLyricsRequest
 	22, // 36: mavio.library.v1.MetadataService.ListExternalIdKinds:input_type -> mavio.library.v1.ListExternalIdKindsRequest
 	2,  // 37: mavio.library.v1.MetadataService.UpdateItem:output_type -> mavio.library.v1.UpdateItemResponse
 	4,  // 38: mavio.library.v1.MetadataService.RefreshItem:output_type -> mavio.library.v1.RefreshItemResponse
@@ -4260,8 +3978,8 @@ var file_mavio_library_v1_metadata_proto_depIdxs = []int32{
 	12, // 41: mavio.library.v1.MetadataService.ListRemoteImages:output_type -> mavio.library.v1.ListRemoteImagesResponse
 	14, // 42: mavio.library.v1.MetadataService.SetItemImage:output_type -> mavio.library.v1.SetItemImageResponse
 	16, // 43: mavio.library.v1.MetadataService.DeleteItemImage:output_type -> mavio.library.v1.DeleteItemImageResponse
-	19, // 44: mavio.library.v1.MetadataService.SearchSubtitles:output_type -> mavio.library.v1.SearchSubtitlesResponse
-	21, // 45: mavio.library.v1.MetadataService.DownloadSubtitle:output_type -> mavio.library.v1.DownloadSubtitleResponse
+	19, // 44: mavio.library.v1.MetadataService.SearchRemoteLyrics:output_type -> mavio.library.v1.SearchRemoteLyricsResponse
+	21, // 45: mavio.library.v1.MetadataService.DownloadRemoteLyrics:output_type -> mavio.library.v1.DownloadRemoteLyricsResponse
 	24, // 46: mavio.library.v1.MetadataService.ListExternalIdKinds:output_type -> mavio.library.v1.ListExternalIdKindsResponse
 	37, // [37:47] is the sub-list for method output_type
 	27, // [27:37] is the sub-list for method input_type
@@ -4276,7 +3994,6 @@ func file_mavio_library_v1_metadata_proto_init() {
 		return
 	}
 	file_mavio_library_v1_item_proto_init()
-	file_mavio_library_v1_media_proto_init()
 	file_mavio_library_v1_metadata_proto_msgTypes[13].OneofWrappers = []any{
 		(*setItemImageRequest_Url)(nil),
 		(*setItemImageRequest_Data)(nil),

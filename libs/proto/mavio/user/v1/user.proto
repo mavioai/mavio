@@ -8,9 +8,9 @@ import "google/protobuf/timestamp.proto";
 
 // UserService manages accounts: the server's one administrator, members
 // and managed users (docs/accounts.md §4.1), and invitation links (§4.3).
-// All methods except GetCurrentUser, UpdatePreferences, and managing one's
-// own password, PIN, passkeys and TOTP require the administrator. Managed users have no
-// passwords, passkeys or TOTP.
+// All methods except GetCurrentUser, UpdatePlaybackPreferences, and
+// managing one's own password, PIN, passkeys and TOTP require the
+// administrator. Managed users have no passwords, passkeys or TOTP.
 // In mavio.dev mode the users are Mavio accounts, which mavio.dev keeps:
 // CreateUser, SetPassword, SetPin, StartPasskeyRegistration,
 // FinishPasskeyRegistration, StartTotp, ConfirmTotp and CreateInvitation
@@ -59,8 +59,8 @@ service UserService {
   // DeleteTotp turns a user's TOTP off: the calling user's, or anyone's
   // for the administrator.
   rpc DeleteTotp(DeleteTotpRequest) returns (DeleteTotpResponse);
-  // UpdatePreferences changes the calling user's playback preferences.
-  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse);
+  // UpdatePlaybackPreferences changes the calling user's playback preferences.
+  rpc UpdatePlaybackPreferences(UpdatePlaybackPreferencesRequest) returns (UpdatePlaybackPreferencesResponse);
   // CreateInvitation makes an invitation link, whose token is returned
   // once: the invitee opens it in a client, which accepts it with
   // AuthService.AcceptInvitation. An invitation either creates members, up
@@ -117,7 +117,7 @@ message User {
   bool admin = 4;
   bool disabled = 5;
   UserPolicy policy = 6;
-  UserPreferences preferences = 7;
+  PlaybackPreferences playback_preferences = 7;
   google.protobuf.Timestamp create_time = 8;
   google.protobuf.Timestamp last_login_time = 9;
   // A managed user has no credentials and is reached only by switching to
@@ -206,7 +206,9 @@ message RequestQuota {
   int32 days = 2 [(buf.validate.field).int32.gte = 0];
 }
 
-message UserPreferences {
+// PlaybackPreferences are the user's defaults for choosing the audio and
+// subtitle streams of what they play; the server applies them.
+message PlaybackPreferences {
   // ISO 639-2/B codes in order of preference.
   repeated string audio_languages = 1 [(buf.validate.field).repeated.items.string.pattern = "^[a-z]{3}$"];
   repeated string subtitle_languages = 2 [(buf.validate.field).repeated.items.string.pattern = "^[a-z]{3}$"];
@@ -267,7 +269,7 @@ message CreateUserRequest {
   // Must be false: the server's one administrator is created at setup.
   bool admin = 4;
   UserPolicy policy = 5;
-  UserPreferences preferences = 6;
+  PlaybackPreferences playback_preferences = 6;
   // Creates a managed user, without password or auth_provider.
   bool managed = 7;
   // The managed user's restriction profile.
@@ -415,12 +417,12 @@ message DeleteTotpRequest {
 
 message DeleteTotpResponse {}
 
-message UpdatePreferencesRequest {
-  UserPreferences preferences = 1 [(buf.validate.field).required = true];
+message UpdatePlaybackPreferencesRequest {
+  PlaybackPreferences playback_preferences = 1 [(buf.validate.field).required = true];
 }
 
-message UpdatePreferencesResponse {
-  UserPreferences preferences = 1;
+message UpdatePlaybackPreferencesResponse {
+  PlaybackPreferences playback_preferences = 1;
 }
 
 message GetUserDataRequest {

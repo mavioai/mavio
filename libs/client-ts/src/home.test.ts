@@ -2,7 +2,7 @@ import { create } from "@bufbuild/protobuf";
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { DiscoveredTitleSchema } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
-import { type Hub, HubSchema } from "@mavio/proto/mavio/home/v1/home_pb";
+import { type Hub, HubSchema } from "@mavio/proto/mavio/hub/v1/hub_pb";
 import { type Item, ItemKind, ItemSchema } from "@mavio/proto/mavio/library/v1/item_pb";
 import { HubKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { UserDataSchema } from "@mavio/proto/mavio/user/v1/user_pb";

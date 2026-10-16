@@ -14,6 +14,14 @@ pub type OwnedListSessionsRequestView = ::buffa::view::OwnedView<
 pub type OwnedListSessionsResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::session::v1::__buffa::view::ListSessionsResponseView<'static>,
 >;
+///Shorthand for `OwnedView<RevokeSessionRequestView<'static>>`.
+pub type OwnedRevokeSessionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RevokeSessionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<RevokeSessionResponseView<'static>>`.
+pub type OwnedRevokeSessionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RevokeSessionResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<SendCommandRequestView<'static>>`.
 pub type OwnedSendCommandRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::session::v1::__buffa::view::SendCommandRequestView<'static>,
@@ -68,6 +76,40 @@ for crate::proto::mavio::session::v1::__buffa::view::ListSessionsResponseView<'_
 impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::ListSessionsResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::session::v1::__buffa::view::ListSessionsResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::RevokeSessionResponse>
+for crate::proto::mavio::session::v1::__buffa::view::RevokeSessionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::session::v1::RevokeSessionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::session::v1::__buffa::view::RevokeSessionResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -551,13 +593,20 @@ pub const SESSION_SERVICE_LIST_SESSIONS_SPEC: ::connectrpc::Spec = ::connectrpc:
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `RevokeSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SESSION_SERVICE_REVOKE_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.session.v1.SessionService/RevokeSession",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// Static [`Spec`](::connectrpc::Spec) for the `SendCommand` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SESSION_SERVICE_SEND_COMMAND_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.session.v1.SessionService/SendCommand",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// SessionService lists the signed-in devices and controls them remotely.
+/// SessionService lists the signed-in devices, signs them out and controls
+/// them remotely.
 ///
 /// # Implementing handlers
 ///
@@ -631,6 +680,32 @@ pub trait SessionService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::session::v1::ListSessionsResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// RevokeSession signs a device out: one of the calling user's, or
+    /// anyone's for administrators. Other users' devices and plugins' remote
+    /// devices are NOT_FOUND; the calling device signs out with
+    /// AuthService.Logout.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn revoke_session<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::session::v1::RevokeSessionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::session::v1::RevokeSessionResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -723,6 +798,35 @@ impl<S: SessionService> SessionServiceExt for S {
             .with_spec(SESSION_SERVICE_LIST_SESSIONS_SPEC)
             .route_view(
                 SESSION_SERVICE_SERVICE_NAME,
+                "RevokeSession",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::session::v1::__buffa::view::RevokeSessionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::session::v1::RevokeSessionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.revoke_session(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::session::v1::RevokeSessionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SESSION_SERVICE_REVOKE_SESSION_SPEC)
+            .route_view(
+                SESSION_SERVICE_SERVICE_NAME,
                 "SendCommand",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -810,6 +914,12 @@ impl<T: SessionService> ::connectrpc::Dispatcher for SessionServiceServer<T> {
                         .with_spec(SESSION_SERVICE_LIST_SESSIONS_SPEC),
                 )
             }
+            "RevokeSession" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(SESSION_SERVICE_REVOKE_SESSION_SPEC),
+                )
+            }
             "SendCommand" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
@@ -850,6 +960,28 @@ impl<T: SessionService> ::connectrpc::Dispatcher for SessionServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::session::v1::ListSessionsResponse,
+                        >(format)
+                })
+            }
+            "RevokeSession" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::session::v1::RevokeSessionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::session::v1::__buffa::view::RevokeSessionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::session::v1::RevokeSessionRequest,
+                    >::from_parts(&req, &body);
+                    svc.revoke_session(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::session::v1::RevokeSessionResponse,
                         >(format)
                 })
             }
@@ -1042,6 +1174,51 @@ where
                 &self.transport,
                 &self.config,
                 SESSION_SERVICE_LIST_SESSIONS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the RevokeSession RPC. Sends a request to /mavio.session.v1.SessionService/RevokeSession.
+    pub async fn revoke_session(
+        &self,
+        request: crate::proto::mavio::session::v1::RevokeSessionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::RevokeSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.revoke_session_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the RevokeSession RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn revoke_session_with_options(
+        &self,
+        request: crate::proto::mavio::session::v1::RevokeSessionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::session::v1::__buffa::view::RevokeSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SESSION_SERVICE_REVOKE_SESSION_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

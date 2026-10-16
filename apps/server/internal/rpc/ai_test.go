@@ -44,16 +44,16 @@ func TestAiConversations(t *testing.T) {
 	t.Cleanup(plugin.Close)
 	sessions := pluginv1connect.NewAgentSessionServiceClient(plugin.Client(), plugin.URL)
 
-	serve := func(kind core.UserKind, svc *AiService) systemv1connect.AiServiceClient {
-		_, h := systemv1connect.NewAiServiceHandler(svc)
+	serve := func(kind core.UserKind, svc *AiConversationService) systemv1connect.AiConversationServiceClient {
+		_, h := systemv1connect.NewAiConversationServiceHandler(svc)
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r.WithContext(auth.WithPrincipal(r.Context(), auth.Principal{User: core.User{Kind: kind}})))
 		}))
 		t.Cleanup(srv.Close)
-		return systemv1connect.NewAiServiceClient(srv.Client(), srv.URL)
+		return systemv1connect.NewAiConversationServiceClient(srv.Client(), srv.URL)
 	}
-	running := &AiService{Sessions: func() (pluginv1connect.AgentSessionServiceClient, bool) { return sessions, true }}
-	send := func(c systemv1connect.AiServiceClient) ([]string, error) {
+	running := &AiConversationService{Sessions: func() (pluginv1connect.AgentSessionServiceClient, bool) { return sessions, true }}
+	send := func(c systemv1connect.AiConversationServiceClient) ([]string, error) {
 		stream, err := c.SendAiMessage(t.Context(), systemv1.SendAiMessageRequest_builder{ConversationId: new("c"), Text: new("hello")}.Build())
 		if err != nil {
 			return nil, err
@@ -76,11 +76,11 @@ func TestAiConversations(t *testing.T) {
 	for _, tt := range []struct {
 		name string
 		kind core.UserKind
-		svc  *AiService
+		svc  *AiConversationService
 		want connect.Code
 	}{
 		{"member", core.UserMember, running, connect.CodePermissionDenied},
-		{"no plugin", core.UserAdmin, &AiService{}, connect.CodeFailedPrecondition},
+		{"no plugin", core.UserAdmin, &AiConversationService{}, connect.CodeFailedPrecondition},
 	} {
 		if _, err := send(serve(tt.kind, tt.svc)); connect.CodeOf(err) != tt.want {
 			t.Errorf("SendAiMessage() by %s: got = %v, want = %v", tt.name, err, tt.want)

@@ -81,7 +81,7 @@ func userToProto(u *core.User, creds []core.Credential) *userv1.User {
 		Passkeys:     passkeys,
 		Restriction:  new(restrictions[u.Restriction]),
 		Policy:       policy,
-		Preferences: userv1.UserPreferences_builder{
+		PlaybackPreferences: userv1.PlaybackPreferences_builder{
 			AudioLanguages:        u.Preferences.AudioLanguages,
 			SubtitleLanguages:     u.Preferences.SubtitleLanguages,
 			SubtitleMode:          new(subtitleModes[u.Preferences.SubtitleMode]),

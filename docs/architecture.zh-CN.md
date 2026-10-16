@@ -162,11 +162,14 @@ libs/proto/
 ├── buf.yaml  buf.gen.yaml
 ├── mavio/
 │   ├── library/v1/             # LibraryService、ItemService：媒体库、条目、媒体源与流、人员、扫描；
-│                               #   MetadataService：编辑、重新识别、图片、字幕下载
-│   ├── auth/v1/                # AuthService：首次运行、登录与退出、已登录设备、API 密钥
-│   ├── user/v1/                # UserService、UserDataService：账户、权限、偏好、按条目的用户状态
-│   ├── system/v1/              # SystemService：健康检查、服务端信息、设置、插件、文件夹、日志；
-│                               #   TaskService、ActivityService、BackupService、LocalizationService、AiService
+│                               #   MetadataService：编辑、重新识别、图片、歌词下载
+│   ├── auth/v1/                # AuthService：首次运行、登录与退出、API 密钥
+│   ├── user/v1/                # UserService、UserDataService：账户、权限、播放偏好、按条目的用户状态
+│   ├── hub/v1/                 # HubService：首页与"推荐"标签页的推荐行、用户的首页布局
+│   ├── session/v1/             # SessionService：已登录设备、使其退出、远程控制
+│   ├── system/v1/              # SystemService：健康检查、服务端信息、设置、文件夹、日志；
+│                               #   PluginManagementService、TaskService、ActivityService、BackupService、
+│                               #   LocalizationService、AiProviderService、AiConversationService
 │   ├── playback/v1/            # PlaybackService：客户端能力、播放决策、进度上报
 │   └── plugin/v1/              # 插件契约：PluginService（manifest、配置、生命周期）、
 │                               #   MetadataProviderService、SubtitleProviderService、MediaSegmentProviderService、
@@ -313,18 +316,18 @@ libs/plugin/
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
-* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `SystemService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
-* **热插拔**：`SystemService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
-* **启用与停用**：`SystemService.SetPluginEnabled` 停用插件——停止它而保留其文件夹与配置——或重新启用它，以已保存的配置启动。停用的插件记录在服务端设置中（[领域模型](domain.zh-CN.md) §12.1），因此停用的插件在重启与升级后仍保持停止；卸载插件会清除其停用记录。通过 `UpdateServerSettings` 或 `UpdateSubtitleSettings` 保存的设置从不改变停用的插件（[领域模型](domain.zh-CN.md) §12.1），以免保存设置撤销插件的启用或停用；卸载会等待正在保存的配置，以免为已移除的插件存下配置。
+* **热插拔**：`PluginManagementService.InstallPlugin` 从插件目录安装插件，或将其升级、降级；`UninstallPlugin` 卸载插件；期间服务端照常服务。安装时下载该版本的 zip 包，按插件目录核对其 SHA-256，解压到插件文件夹中的隐藏文件夹并检查清单；随后停止正在运行的版本，将其文件夹移到一旁，移入新版本并以已保存的配置启动；若新版本无法启动，则恢复之前的版本。卸载会停止插件并删除其文件夹与配置。各项能力在使用时查找，因此插件一旦就绪，刷新、搜索与通知即会用到它。
+* **启用与停用**：`PluginManagementService.SetPluginEnabled` 停用插件——停止它而保留其文件夹与配置——或重新启用它，以已保存的配置启动。停用的插件记录在服务端设置中（[领域模型](domain.zh-CN.md) §12.1），因此停用的插件在重启与升级后仍保持停止；卸载插件会清除其停用记录。通过 `UpdateServerSettings` 或 `UpdateSubtitleSettings` 保存的设置从不改变停用的插件（[领域模型](domain.zh-CN.md) §12.1），以免保存设置撤销插件的启用或停用；卸载会等待正在保存的配置，以免为已移除的插件存下配置。
 * **插件目录**：插件目录是服务端设置中某个 http、https 或 file URL 上的 JSON 文档，列出插件及其分类（[插件 §2](plugins.zh-CN.md#2-jellyfin-扩展点及其对应)）与版本：版本号、API 版本、运行时（进程插件还有 os 与 arch）、相对于目录的包 URL、SHA-256、更新说明与发布时间。`ListCatalogPlugins` 列出各目录中的每个插件，附带服务端能运行的版本（最新的在前，服务端一个版本都不能运行的插件则没有版本）以及已安装的版本；同一插件以最先列出它的目录为准，除非只有后面的目录有服务端能运行的版本；无法访问的目录被跳过。
 * **官方插件目录**：第一方插件由 mavioai/plugins 仓库发布，其发布版本包含各插件的包与列出它们的 `catalog.json`，由 `tools/plugindist` 从 Mavio 某个发布版本的源码构建。设置从未保存过的新服务端以其 `plugin-catalog` 设置中的目录开始，默认是 GitHub 上 mavioai/plugins 最新发布版本的 `catalog.json`，因此没有服务端为插件依赖 mavio.dev；开发用服务端把它设为 `tools/plugindist` 在所在检出中构建的 `plugins/catalog.json` 的路径，其中的包是 file URL。
 * **宿主 API**：每个插件的宿主 API 请求带着该插件的授权（`auth.PluginHandler`）进入处理器树；认证拦截器按清单的 `permissions.api` 检查请求，并解析 `Mavio-User`（[插件平台 §3](plugins.zh-CN.md#3-宿主-api)）。
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。消费事件的插件通过各自的队列，分批收到其清单列出的事件，无论是否进入日志（[插件平台 §4](plugins.zh-CN.md#4-事件)）。
 * **任务与数据目录**：插件的任务作为 `plugin.task` 作业在单独的 worker 上运行，并出现在 `TaskService` 中；每个插件在 `--plugin-data-dir` 中有一个数据目录（[插件平台 §6](plugins.zh-CN.md#6-任务与数据目录)）。
 * **片段提供者**：对每个已探测的电影与剧集，以其 ID、时长与章节询问每个已启动的片段插件。
-* **字幕提供者**：`MetadataService.SearchSubtitles` 以视频的 OpenSubtitles 哈希（`subtitle.FileHash`）、名称与 ID 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
+* **字幕提供者**：字幕获取（§14）自动地、并通过 `SubtitleService.SearchItemSubtitles` 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
 
 ---
 
@@ -447,10 +450,10 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **媒体 URL**：播放器并不总能给媒体请求附加请求头（AVPlayer、`<video>`），因此媒体与图片通过为调用者会话签名的 URL 获取（`auth.MediaURLs`，[账户 §5.4](accounts.zh-CN.md#54-媒体-url)）：`/signed/{token}/{path}` 在检查令牌后提供 `/{path}`，不带前缀的路径接受 Bearer 令牌或主机 API 中的插件。Connect 服务通过请求的上下文为其返回的 URL 签名。通过需认证的 `PlaybackService` 开始的播放会获得一个不可猜测的 ID，其媒体在 `/media/{playback}/` 下提供：直接播放时是文件本身（`stream.<ext>`，支持范围请求，在其媒体库文件夹内打开），否则是来自 `libs/streaming` 的 `master.m3u8`、`main.m3u8`、`init.mp4` 与编号分片。客户端停止播放、五分钟内没有进度上报或媒体请求（保留最后上报的位置），或发起播放的登录会话已不存在（每 30 秒检查一次）后，这些 URL 随即失效。
 * **播放**（`internal/playback`）：播放决策会考虑用户记住的或偏好的流、其媒体库与分级限制、转码权限与码率上限，以及用户的并发播放上限。转封装与转码只以 HLS 交付；关键帧尚未提取的媒体源在本次播放中转码视频，并排入一个紧急的关键帧任务；针对渐进式转封装的决策会按客户端的 HLS 配置重新决定，复制视频的播放报告为直接串流。进度上报与停止播放通过 `UserData.RecordPosition` 记录位置（见[领域模型](domain.zh-CN.md)），每次播放至多计一次播完。没有 ffmpeg 时只能直接播放。
 * **事件**（`internal/events`、`EventService`）：每个已登录设备可以保持一条事件流，即一个 Connect 服务端流：以该设备的会话开始，每 30 秒发送一次心跳；同一设备的新流替换旧流，落后超过 256 个事件的流被断开，由客户端重连。服务端在内存中保存这些流。`events.Observe` 包装存储层，写入的内容在其事务提交后到达各流：媒体库与条目的变化先收集五秒，再按各设备用户可见的条目与媒体库发送；用户的条目状态发送到该用户的设备；媒体库扫描的开始与结束发送给管理员。插件配置变化与会话变化由引起它们的服务发送。
-* **会话**（`SessionService`）：设备在事件流打开期间在线。会话列表列出用户的已登录设备（管理员可列出所有用户的），以及各设备正在播放的内容（`playback.Manager.NowPlaying`：条目，以及最近一次上报的位置与暂停状态）。当用户的某个会话上线、下线，或开始、停止、暂停、继续播放时，该用户的设备会得知。命令（播放条目、暂停、继续、停止、下一个、上一个、跳转、显示消息）经事件流发送到调用者的在线设备，管理员可发送到任何人的设备；设备执行命令并照常上报播放。
+* **会话**（`SessionService`）：设备在事件流打开期间在线。会话列表列出用户的已登录设备（管理员可列出所有用户的），以及各设备的登录时间、哪一个是调用者自己的、正在播放的内容（`playback.Manager.NowPlaying`：条目，以及最近一次上报的位置与暂停状态）。当用户的某个会话上线、下线，或开始、停止、暂停、继续播放时，该用户的设备会得知。命令（播放条目、暂停、继续、停止、下一个、上一个、跳转、显示消息）经事件流发送到调用者的在线设备，管理员可发送到任何人的设备；设备执行命令并照常上报播放。`RevokeSession` 使调用者的某台设备退出登录，管理员可使任何人的设备退出；调用的设备自身用 `AuthService.Logout` 退出。
 * **SyncPlay**（`internal/syncplay`、`SyncPlayService`）：在线设备以分组一起观看，分组保存在内存中，遵循 Jellyfin 的 SyncPlay。分组处于空闲、等待、暂停或播放状态。设置队列、跳转、切换队列条目，以及成员缓冲或加入，都会使分组等待；没有成员缓冲后开始播放，原本暂停则保持暂停。分组在最高成员延迟的两倍（至少 500 毫秒）之后开始播放，使每个成员都能及时收到命令。报告就绪的成员若与分组位置相差超过 500 毫秒，会被要求跳转；报告中的时间若与服务端相差超过两秒则被忽略。每次变化都向每个成员发送分组（状态、成员、队列，以及某一时刻所处的位置），成员需要行动时还附带以服务端时间计时的命令；客户端用 `GetTime` 估计其时钟偏差。一个设备至多属于一个分组，下线时离开分组，没有成员的分组随之结束。成员只能加入其可播放队列的分组，队列必须每个成员都可播放。
 * **浏览**（`internal/browse`）：最近添加与下一集由用户媒体库与分级范围内的条目查询构建。最近添加列出叶子条目（电影、单集、曲目等），按添加时间排序；分组时与 Jellyfin 现在的服务端一样，专辑代表其新曲目，剧集代表在其最新一集前一天之内添加的单集：这些单集都在一个多季剧集的同一季时显示该季，剧集只有一季或单集跨越多季时显示剧集，只有一集时显示该集，用户无权看到容器时也显示该集。下一集按最近播放时间遍历用户的单集，按此顺序每部剧集取一次，交给 `NextEpisode`（见[领域模型](domain.zh-CN.md)）求出下一集，直到填满一页，因此最近播放的剧集排在前面。条目响应给出单集所属的剧集与季、曲目所属的专辑。
-* **首页**（`internal/home`，`HomeService`）：首页与媒体库"推荐"标签页的推荐行（[客户端 §6.3.1](clients.zh-CN.md#631-首页)），每行是一页条目，带有其类型，以种子生成的推荐行还带有种子，由客户端以自己的语言命名。它们由用户媒体库与分级范围内的条目查询构建：继续观看（可续播条目与下一集，按最近活动排序）、最近添加（同最近添加条目）、最近上映与最近播出、评分最高与未看的高分作品、开始观看（尚未开始的剧集）、重温（一年多前最后播放的条目，剧集为半年多前），以及最近 30 天内已可观看的请求。以种子生成的推荐行仿照 Jellyfin 的电影推荐——因为你看过、因为你喜欢、同类型更多、主演、导演——种子取自用户最近 90 天的播放或其收藏，按用户、推荐行与日期的散列选取。热门列出发现提供者第一个热门目录中服务器没有的作品。管理员为每个媒体库设置哪些推荐行出现在首页与其标签页（`Library.Hubs`，[领域模型](domain.zh-CN.md) §4.1）；用户在客户端 `mavio`、视图 `home` 的显示偏好中置顶并排序媒体库、隐藏推荐行。
+* **推荐行**（`internal/hub`，`HubService`）：首页与媒体库"推荐"标签页的推荐行（[客户端 §6.3.1](clients.zh-CN.md#631-首页)），每行是一页条目，带有其类型，以种子生成的推荐行还带有种子，由客户端以自己的语言命名。它们由用户媒体库与分级范围内的条目查询构建：继续观看（可续播条目与下一集，按最近活动排序）、最近添加（同最近添加条目）、最近上映与最近播出、评分最高与未看的高分作品、开始观看（尚未开始的剧集）、重温（一年多前最后播放的条目，剧集为半年多前），以及最近 30 天内已可观看的请求。以种子生成的推荐行仿照 Jellyfin 的电影推荐——因为你看过、因为你喜欢、同类型更多、主演、导演——种子取自用户最近 90 天的播放或其收藏，按用户、推荐行与日期的散列选取。热门列出发现提供者第一个热门目录中服务器没有的作品。管理员为每个媒体库设置哪些推荐行出现在首页与其标签页（`Library.Hubs`，[领域模型](domain.zh-CN.md) §4.1）；用户在其首页布局（`User.Home`，[领域模型](domain.zh-CN.md) §5）中置顶并排序媒体库、隐藏推荐行，通过 `GetHomeLayout` 与 `UpdateHomeLayout` 读取与保存；后者拒绝用户无权访问的媒体库。
 * **相似条目**（`ItemService.ListSimilarItems`）：同种类的条目，按 Jellyfin 本地相似条目提供者为电影评分的方式，即与该条目共有的类型（10）、标签（5）、工作室（5）、导演（50）与演员（15）评分（`ItemQuery.SimilarTo`，见[领域模型](domain.zh-CN.md) §9.1），限于用户的媒体库与分级范围；单集与季以其剧集代表。它们用于条目的"更多类似内容"与"因为你看过"推荐行。
 * **合集与播放列表**（`CollectionService`、`PlaylistService`）：管理员整理合集，用户整理自己的播放列表，它们位于服务端在首次需要时创建的整理类媒体库中。每个用户都能看到播放列表媒体库，其中只有自己的播放列表；合集媒体库遵循媒体库权限。以合集或播放列表为 parent 调用 `ItemService.ListItems` 会按用户权限列出其中的条目，每个一次，未指定排序时按其顺序；`ListPlaylistEntries` 列出播放列表的条目项及其 ID。把剧集、季、专辑或合集加入播放列表时，按顺序加入其中可播放的条目。`LibraryService` 不能创建、修改或扫描整理类媒体库，启动时的扫描也跳过它们。
 * **元数据管理**（`MetadataService`，仅限管理员）：`UpdateItem` 设置更新掩码指定的字段（包括锁定），通过 `library.Refresher.Update` 保存条目；`RefreshItem` 立即刷新条目，带 `replace_metadata` 时丢弃提供者此前给出的内容（外部 ID 与锁定字段除外），并忽略条目的 NFO 文件（在保存本地元数据的媒体库中也忽略其旁边的图片，由提供者的图片替换）。替换需要有提供者作答：媒体库没有运行中的提供者（例如其插件已停用、已卸载或未配置），或所有提供者都失败时，刷新以 `FailedPrecondition` 失败，条目保持原样；此时 `IdentifyItem` 也保留条目原有的外部 ID。`SearchRemote` 按条目的名称与年份或给定的名称与年份，询问能搜索的元数据插件该条目可能是什么；`IdentifyItem` 用某个结果的外部 ID 替换条目的外部 ID，并以此刷新条目。`ListRemoteImages` 列出提供者拥有的条目图片；`SetItemImage` 下载其中一张或接收上传的图片，设为该种类的第一张，保存在媒体旁或元数据目录中；`DeleteItemImage` 删除图片及其文件。`SearchSubtitles` 与 `DownloadSubtitle` 通过字幕插件查找字幕，转换为 UTF-8 后保存在视频旁，命名为 `<文件名>.<语言>[.sdh][.forced].<格式>`，立即成为视频的字幕流。保存本地元数据的媒体库中，条目的修改会重写其 NFO 文件；启用自动合集的媒体库中，电影会加入其合集。
@@ -461,7 +464,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 * **活动与日志**（`internal/activity`、`ActivityService`；`internal/logs`、`SystemService.ListLogs`）：活动被保存并排队发送给通知插件，90 天后清除。日志还把它不保存的事件（来自 `events.Observe` 与 hub 的条目、用户数据、任务与扫描事件）发布给事件消费者；插件管理器为每个消费者维护一个队列。活动日志先于 hub 与插件创建，插件启动后事件才到达插件。服务端在内存中保留最近 2,000 条 info 及以上级别的日志供 `ListLogs` 使用，日志照常输出。
 * **文件夹**（`SystemService.ListDirectory`）：管理员浏览服务端的文件夹或根目录（Windows 上为各驱动器）以选择媒体库文件夹；隐藏条目不列出。
 * **本地化数据**（`LocalizationService`）：国家、具有 ISO 639-1 代码的语言，以及某个国家分级体系中的分级，来自 `libs/metadata` 中 Jellyfin 的数据（`Countries`、`Languages`、`ParentalRatings`）。
-* **AI 提供者**（`AiService`，仅管理员）：具有 `AI_GATEWAY` 能力的插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）的提供者、模型、API key 与 OAuth 登录，转发给该插件；服务端不保存任何凭据。登录在插件中运行，经 `WatchAiLogin` 跟随（它以流式传送每次变化，直到登录结束），或以 `GetAiLogin` 读取；插件关于提供者的未认证失败转为前置条件失败。管理员与模型的对话转发给具有 `AGENT_SESSION` 能力的插件：创建、列出、读取和删除，`SendAiMessage` 随模型撰写以流式传送消息的回答。
+* **AI 提供者**（`AiProviderService` 与 `AiConversationService`，仅管理员）：具有 `AI_GATEWAY` 能力的插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）的提供者、模型、API key 与 OAuth 登录，转发给该插件；服务端不保存任何凭据。登录在插件中运行，经 `WatchAiLogin` 跟随（它以流式传送每次变化，直到登录结束），或以 `GetAiLogin` 读取；插件关于提供者的未认证失败转为前置条件失败。管理员与模型的对话（`AiConversationService`）转发给具有 `AGENT_SESSION` 能力的插件：创建、列出、读取和删除，`SendAiMessage` 随模型撰写以流式传送消息的回答。
 * **备份**（`internal/backup`、`BackupService`）：备份是 `--backup-dir` 中的一个 zip 文件，包含 `manifest.json`、数据库的行（`store.Dump`：每张表为一份由带类型值组成的 JSON 行文件，取自同一快照）、元数据目录、插件目录与插件的数据目录。管理员带着自己的 bearer 令牌在 `/system/backups/{name}` 下载。`-restore <文件>` 在新服务端启动前把备份恢复到其空数据库中（`store.Restore`：数据库类型相同，且架构包含备份所含的每个迁移；按外键顺序插入行，条目排在其父条目之后，派生键重新计算），并放回各文件夹。
 * **下载与渐进式流**：请求 `download` 的播放需要用户的下载权限，并以静态场景决策：客户端能播放文件本身时，以附件形式提供文件；否则按客户端的静态配置文件做渐进式转封装或转码，从不使用 HLS。没有 HLS 配置文件的流式客户端也得到渐进式流。ffmpeg 为每个请求把渐进式流（分片 MP4、Matroska 或 MPEG-TS）直接写入响应，因此不能跳转。
 * **媒体附加内容**：`ItemService.GetItem` 列出条目的缩略图拼图与媒体片段；拼图在 `/images/trickplay/{item}/{width}/{sheet}.jpg`、章节图片在 `/images/chapters/{item}/{source}/{index}` 提供（接受图片参数），文件取自元数据目录，通过 `GetItem` 返回的签名 URL 获取。条目带有由其测得响度计算出的归一化增益。`ItemService.GetLyrics` 读取音轨旁的歌词文件（`.elrc`、`.lrc` 或 `.txt`，必要时从旧字符集转换），由 `metadata.ParseLyrics` 解析：LRC 的行及其时间与 ID 标签，增强 LRC 的逐字时间作为以 UTF-16 码元计的提示，与 Jellyfin 的解析器一致。播放会列出其片源附带的文件，例如供客户端渲染 ASS 字幕的字体；ffmpeg 在 `/media/{playback}/attachments/{index}` 处各提取一次。

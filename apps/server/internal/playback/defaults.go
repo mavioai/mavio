@@ -21,7 +21,7 @@ var subtitleModes = map[core.SubtitleMode]decision.SubtitleMode{
 // sourceFor offers a media source with the streams the user plays by
 // default: the ones they last chose, else those their preferences pick,
 // as Jellyfin does.
-func sourceFor(ms *core.MediaSource, prefs *core.UserPreferences, data *core.UserData) *decision.Source {
+func sourceFor(ms *core.MediaSource, prefs *core.PlaybackPreferences, data *core.UserData) *decision.Source {
 	s := &decision.Source{MediaSource: ms}
 	if i := data.AudioStream; i != nil && hasStream(ms, core.StreamAudio, *i) {
 		s.DefaultAudioIndex, s.AudioIndexSource = new(*i), decision.AudioIndexUser

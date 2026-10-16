@@ -2080,6 +2080,17 @@ pub struct Session {
     ///
     /// Field 11: `plugin_id`
     pub plugin_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// When the device signed in; unset for plugins' remote devices.
+    ///
+    /// Field 12: `create_time`
+    pub create_time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    /// Whether this is the device making the request.
+    ///
+    /// Field 13: `current`
+    pub current: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2097,6 +2108,8 @@ impl ::core::fmt::Debug for Session {
             .field("online", &self.online)
             .field("now_playing", &self.now_playing)
             .field("plugin_id", &self.plugin_id)
+            .field("create_time", &self.create_time)
+            .field("current", &self.current)
             .finish()
     }
 }
@@ -2192,6 +2205,13 @@ impl Session {
         self.plugin_id = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::current`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_current(mut self, value: bool) -> Self {
+        self.current = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Session);
 impl ::buffa::MessageName for Session {
@@ -2256,6 +2276,17 @@ impl ::buffa::Message for Session {
         if let Some(ref v) = self.plugin_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.create_time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.create_time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.current.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2308,6 +2339,17 @@ impl ::buffa::Message for Session {
         }
         if let Some(ref v) = self.plugin_id {
             ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if self.create_time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                12u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.create_time.write_to(__cache, buf);
+        }
+        if let Some(v) = self.current {
+            ::buffa::types::put_bool_field(13u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2443,6 +2485,26 @@ impl ::buffa::Message for Session {
                     buf,
                 )?;
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.create_time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            13u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.current = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2462,6 +2524,8 @@ impl ::buffa::Message for Session {
         self.online = ::core::option::Option::None;
         self.now_playing = ::buffa::MessageField::none();
         self.plugin_id = ::core::option::Option::None;
+        self.create_time = ::buffa::MessageField::none();
+        self.current = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -3891,6 +3955,194 @@ impl ::buffa::Message for ListSessionsResponse {
 }
 impl ::buffa::ExtensionSet for ListSessionsResponse {
     const PROTO_FQN: &'static str = "mavio.session.v1.ListSessionsResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct RevokeSessionRequest {
+    /// Field 1: `id`
+    pub id: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RevokeSessionRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RevokeSessionRequest").field("id", &self.id).finish()
+    }
+}
+impl RevokeSessionRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.session.v1.RevokeSessionRequest";
+}
+impl RevokeSessionRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.id = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(RevokeSessionRequest);
+impl ::buffa::MessageName for RevokeSessionRequest {
+    const PACKAGE: &'static str = "mavio.session.v1";
+    const NAME: &'static str = "RevokeSessionRequest";
+    const FULL_NAME: &'static str = "mavio.session.v1.RevokeSessionRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.session.v1.RevokeSessionRequest";
+}
+impl ::buffa::Message for RevokeSessionRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.id = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RevokeSessionRequest {
+    const PROTO_FQN: &'static str = "mavio.session.v1.RevokeSessionRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct RevokeSessionResponse {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for RevokeSessionResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("RevokeSessionResponse").finish()
+    }
+}
+impl RevokeSessionResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.session.v1.RevokeSessionResponse";
+}
+::buffa::impl_default_instance!(RevokeSessionResponse);
+impl ::buffa::MessageName for RevokeSessionResponse {
+    const PACKAGE: &'static str = "mavio.session.v1";
+    const NAME: &'static str = "RevokeSessionResponse";
+    const FULL_NAME: &'static str = "mavio.session.v1.RevokeSessionResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.session.v1.RevokeSessionResponse";
+}
+impl ::buffa::Message for RevokeSessionResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for RevokeSessionResponse {
+    const PROTO_FQN: &'static str = "mavio.session.v1.RevokeSessionResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

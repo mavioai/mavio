@@ -583,7 +583,9 @@ flowchart TD
 - [x] Toolchains and build targets: Rust in `libs/client-rust` with `tools/nx-cargo`; Go, Node.js and pnpm updated
 - [x] TypeScript and Rust generated from `libs/proto` (`@mavio/proto`, `mavio-api`)
 - [x] `libs/design`: tokens, icons, strings, component specifications and the feature parity table, compiled for every client
-- [x] Server: `HomeService` with the hubs of Home and of the library tabs (`apps/server/internal/home`), chosen per library by `Library.Hubs`
+- [x] Server: `HubService` with the hubs of Home and of the library tabs (`apps/server/internal/hub`), chosen per library by `Library.Hubs`
+  - [x] The user's Home layout, pinned libraries in their order and hidden hubs, typed in `User.Home` and set with `UpdateHomeLayout`
+  - [ ] The web UI's editing of the Home layout: pinning and ordering libraries, hiding hubs
   - [ ] A hub of the collections an administrator promoted to Home
   - [ ] Several seeds per seeded hub kind, as Plex shows several Because You Watched rows
 - [x] Server: `ItemService.ListSimilarItems`, scored by `ItemQuery.SimilarTo` (`libs/store/items.go`)
@@ -660,7 +662,7 @@ flowchart TD
 - [ ] The navigation of [Clients §6.3](clients.md) in every client, the web UI first: the three layouts chosen by window width, the desktop layout's sidebar with its user menu, the television layout's top navigation and remote focus, and the sign-in screens of the two modes; the Apple and Android apps also take the primary button filled with `color.button` and the accent only on progress, selection, links and switches
   - [x] The web UI: the three layouts, the sidebar and rail with the user menu, television mode with focus moved by the arrow keys, settings in sections, sign-in by steps, Home's hero, the library's header, details as `libs/design/components.md` specifies them (the episode to watch next, seasons and episodes, the version menu, cast and crew, the facts and media), and the player's side panel with quality and the next episode
   - [ ] The web UI's administration: the servers the user manages in settings, with their libraries, users and tasks
-    - [x] Plugins (`apps/web/src/screens/plugins.tsx`, `libs/client-ts/src/plugins.ts`): the installed plugins with their state, enabled and disabled (`SystemService.SetPluginEnabled`), updated and uninstalled; those the catalogs offer, to install; as cards under Available and Installed tabs, filtered by category, each opening a page of its details and versions; and a Catalogs page to add and remove catalogs; under the Server group of the settings, which in mavio.dev mode chooses the server
+    - [x] Plugins (`apps/web/src/screens/plugins.tsx`, `libs/client-ts/src/plugins.ts`): the installed plugins with their state, enabled and disabled (`PluginManagementService.SetPluginEnabled`), updated and uninstalled; those the catalogs offer, to install; as cards under Available and Installed tabs, filtered by category, each opening a page of its details and versions; and a Catalogs page to add and remove catalogs; under the Server group of the settings, which in mavio.dev mode chooses the server
     - [x] A plugin's configuration, from its manifest's schema or its own page (`GetPluginConfig`, `SetPluginConfig`)
     - [ ] The Plugins section among the web UI's snapshot tests
     - [x] Overview (`apps/web/src/screens/admin/overview.tsx`): the server's version and health, who is playing and the recent activity (`GetSystemInfo`, `GetHealth`, `SessionService.ListSessions`, `ListActivities`)
@@ -674,7 +676,7 @@ flowchart TD
       - [ ] Grouping qualities in a profile and ungrouping them; a profile's qualities are only turned on, off and reordered
     - [x] Subtitles (`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`, `libs/client-ts/src/subtitles.ts`): subtitle profiles and the libraries they apply to, the providers and translators, and the settings of searching and saving, synchronization and translation (`SubtitleService`, `ListSubtitleProfileAssignments`)
       - [ ] A movie's or series' own subtitle profile, assigned from its details (`AssignSubtitleProfile`)
-    - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiService`)
+    - [x] AI (`apps/web/src/screens/admin/ai.tsx`, `libs/client-ts/src/ai.ts`): the AI gateway plugin's providers with their credentials, API keys, sign-ins followed with their questions answered in place, signing out, and the models (`AiProviderService`)
     - [x] Tasks (`apps/web/src/screens/admin/tasks.tsx`): the scheduled tasks, running one, and the jobs (`TaskService`)
     - [x] Backups and logs (`apps/web/src/screens/admin/backups.tsx`, `libs/client-ts/src/backups.ts`): making, downloading and deleting backups, and the recent log records by level, period and words (`BackupService`, `ListLogs`)
     - [x] API keys (`ApiKeysSection` in `apps/web/src/screens/admin/backups.tsx`): a section of the Server group, since keys are the server's and reach it in either mode; making a key with its token shown once, and revoking one (`CreateApiKey`, `ListApiKeys`, `RevokeApiKey`)
@@ -691,7 +693,7 @@ flowchart TD
   - [x] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
     - [x] Wanted and Downloads in the settings (`apps/web/src/screens/admin/wanted.tsx`, `apps/web/src/screens/admin/downloads.tsx`, `libs/client-ts/src/acquisition.ts`): the missing and cutoff unmet movies and episodes, searched, unmonitored and synced by RSS; the queue, history, blocklist and a folder's manual import
     - [x] An item's acquisition on its details (`apps/web/src/screens/acquire.tsx`): monitoring, the quality profile, automatic and interactive searches with grabbing, and the item's downloads and history
-    - [ ] A series' monitoring choices (`MonitorSeries`) and its other wanted settings: tags, minimum availability, new items, season folders
+    - [ ] A series' monitoring choices (`SetMonitored` with `series`) and its other wanted settings: tags, minimum availability, new items, season folders
     - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
     - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)
   - [x] The web UI's items for administrators: editing the metadata, identifying, refreshing and choosing images (`MetadataService`, §6.3.22)
@@ -846,7 +848,7 @@ flowchart TD
 - [x] `AiGatewayService` and `AgentSessionService` in `libs/proto`
 - [x] The TypeScript SDK of process plugins (`libs/plugin/ts`): handshake, token checks, HTTP routes, the host's transport
 - [x] `plugins/agent`: every provider of pi-ai, API keys and OAuth logins relayed as events and prompts, credentials in its data folder, custom OpenAI-compatible providers, completions with output schemas, sessions in SQLite surviving restarts; built by Bun for every platform and seeded in the container image
-- [x] The server's AI administration (`AiService`): providers, models, keys and logins forwarded to the AI gateway plugin; an end-to-end test with the plugin built by Bun and a provider served by a fake OpenAI-compatible API
+- [x] The server's AI administration (`AiProviderService`, `AiConversationService`): providers, models, keys and logins forwarded to the AI gateway plugin; an end-to-end test with the plugin built by Bun and a provider served by a fake OpenAI-compatible API
 - [x] Lingarr's translation in the server: AI models (`ai/<provider>/<model>`) through the gateway, a cue at a time with context or in batches answered as JSON, and plugin translators, chained by language match with fallbacks; retries, line splitting, overlap fixing, validation, proofreading (`ProofreadSubtitle`), automation (`subtitles.translate_wanted`) and statistics (`GetSubtitleTranslationStatistics`) from the translations' records; the end-to-end test translates an episode's subtitles through the built `plugins/agent` with a fake OpenAI-compatible API, retrying a rate-limited request, then proofreads it
 - [x] The translation services in `plugins/subtitles` (DeepL, LibreTranslate, Google, Bing, Microsoft, Yandex) with their languages; the translators of P26 (Google Translate's phone page, Gemini, Lingarr) removed
 - [x] Lingarr's test cases ported by `tools/testport` (translation, language matching, the automation, SSA): vector drawings left out of the text translated, a region's sibling no longer matching a language (pt-PT for pt-BR), empty answers not given as context, malformed batches retried, sources for the hearing impaired after others, dialogue lines without a layer read

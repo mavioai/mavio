@@ -7,12 +7,11 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/library/v1/item.proto";
-import "mavio/library/v1/media.proto";
 
 // MetadataService corrects and completes the metadata of items:
 // administrators edit and lock it, identify items again against the
 // metadata providers, refresh them, choose their images and download
-// subtitles. In libraries saving local metadata, changes are also written
+// lyrics. In libraries saving local metadata, changes are also written
 // next to the media as NFO files and image files.
 service MetadataService {
   // UpdateItem changes the fields of an item named by the update mask.
@@ -38,14 +37,15 @@ service MetadataService {
   // DeleteItemImage removes an image of an item, and its file when it lies
   // in the library's folders.
   rpc DeleteItemImage(DeleteItemImageRequest) returns (DeleteItemImageResponse);
-  // SearchSubtitles searches the subtitle providers for subtitles of a
-  // video in one language.
-  rpc SearchSubtitles(SearchSubtitlesRequest) returns (SearchSubtitlesResponse) {
+  // SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+  // administrators only.
+  rpc SearchRemoteLyrics(SearchRemoteLyricsRequest) returns (SearchRemoteLyricsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  // DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
-  // video, where it becomes one of the video's subtitle streams.
-  rpc DownloadSubtitle(DownloadSubtitleRequest) returns (DownloadSubtitleResponse);
+  // DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+  // track, as .lrc when synced and .txt otherwise, replacing its other
+  // lyric files; administrators only.
+  rpc DownloadRemoteLyrics(DownloadRemoteLyricsRequest) returns (DownloadRemoteLyricsResponse);
   // ListExternalIdKinds lists the kinds of external IDs items and persons
   // carry: the built-in ones and those plugins declare.
   rpc ListExternalIdKinds(ListExternalIdKindsRequest) returns (ListExternalIdKindsResponse) {
@@ -241,55 +241,41 @@ message DeleteItemImageRequest {
 
 message DeleteItemImageResponse {}
 
-message SearchSubtitlesRequest {
+message SearchRemoteLyricsRequest {
   string item_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.uuid = true
   ];
-  // ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-  string language = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.pattern = "^[a-z]{2}(-[A-Za-z]{2,4})?$"
-  ];
-  // The media source; unset means the item's first.
-  string media_source_id = 3 [(buf.validate.field).string.uuid = true];
-  bool hearing_impaired = 4;
-  bool forced = 5;
 }
 
-// RemoteSubtitle is a subtitle a provider offers.
-message RemoteSubtitle {
+// RemoteLyrics are lyrics a provider has.
+message RemoteLyrics {
+  // The provider and its ID of the lyrics, for DownloadRemoteLyrics.
   string provider = 1;
-  // The provider's ID, passed to DownloadSubtitle.
   string id = 2;
   string name = 3;
-  string language = 4;
-  string format = 5;
-  bool hearing_impaired = 6;
-  bool forced = 7;
+  repeated string artists = 4;
+  string album = 5;
+  google.protobuf.Duration duration = 6;
+  bool synced = 7;
   double score = 8;
-  int32 download_count = 9;
-  bool hash_match = 10;
 }
 
-message SearchSubtitlesResponse {
-  repeated RemoteSubtitle subtitles = 1;
+message SearchRemoteLyricsResponse {
+  // Each provider's lyrics, best first, in provider order.
+  repeated RemoteLyrics lyrics = 1;
 }
 
-message DownloadSubtitleRequest {
+message DownloadRemoteLyricsRequest {
   string item_id = 1 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.uuid = true
   ];
-  string media_source_id = 2 [(buf.validate.field).string.uuid = true];
-  string provider = 3 [(buf.validate.field).required = true];
-  string subtitle_id = 4 [(buf.validate.field).required = true];
+  string provider = 2 [(buf.validate.field).required = true];
+  string id = 3 [(buf.validate.field).required = true];
 }
 
-message DownloadSubtitleResponse {
-  // The subtitle as a stream of the media source.
-  MediaStream stream = 1;
-}
+message DownloadRemoteLyricsResponse {}
 
 message ListExternalIdKindsRequest {
   // Unset lists the kinds of every item kind and of persons.

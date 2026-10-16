@@ -35,6 +35,8 @@ const (
 	FieldPolicy = "policy"
 	// FieldPreferences holds the string denoting the preferences field in the database.
 	FieldPreferences = "preferences"
+	// FieldHome holds the string denoting the home field in the database.
+	FieldHome = "home"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldLastLoginAt holds the string denoting the last_login_at field in the database.
@@ -155,6 +157,7 @@ var Columns = []string{
 	FieldAccess,
 	FieldPolicy,
 	FieldPreferences,
+	FieldHome,
 	FieldCreatedAt,
 	FieldLastLoginAt,
 }

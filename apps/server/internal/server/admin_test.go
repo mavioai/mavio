@@ -172,6 +172,7 @@ func TestAdministration(t *testing.T) {
 	}
 	token := withToken(first.GetAccessToken())
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 
 	// Settings: a plugin catalog and another transcode folder.
 	got, err := system.GetServerSettings(ctx, &systemv1.GetServerSettingsRequest{})
@@ -199,7 +200,7 @@ func TestAdministration(t *testing.T) {
 	// Plugins: install an old version, configure it, upgrade, uninstall.
 	plugin := func() *systemv1.Plugin {
 		t.Helper()
-		list, err := system.ListPlugins(ctx, &systemv1.ListPluginsRequest{})
+		list, err := pluginAdmin.ListPlugins(ctx, &systemv1.ListPluginsRequest{})
 		if err != nil {
 			t.Fatalf("ListPlugins: %v", err)
 		}
@@ -208,25 +209,25 @@ func TestAdministration(t *testing.T) {
 		}
 		return list.GetPlugins()[0]
 	}
-	if _, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke"), Version: new("0.1.0")}.Build()); err != nil {
+	if _, err := pluginAdmin.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke"), Version: new("0.1.0")}.Build()); err != nil {
 		t.Fatalf("InstallPlugin 0.1.0: %v", err)
 	}
 	if p := plugin(); p.GetManifest().GetVersion() != "0.1.0" || p.GetState() != systemv1.PluginState_PLUGIN_STATE_UNCONFIGURED {
 		t.Fatalf("installed plugin: %v", p)
 	}
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
 	}
-	installed, err := system.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build())
+	installed, err := pluginAdmin.InstallPlugin(ctx, systemv1.InstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build())
 	if err != nil {
 		t.Fatalf("upgrade: %v", err)
 	}
 	if p := installed.GetPlugin(); p.GetManifest().GetVersion() != "0.2.0" || p.GetState() != systemv1.PluginState_PLUGIN_STATE_READY {
 		t.Errorf("upgraded plugin: %v", p)
 	}
-	cat, err := system.ListCatalogPlugins(ctx, &systemv1.ListCatalogPluginsRequest{})
+	cat, err := pluginAdmin.ListCatalogPlugins(ctx, &systemv1.ListCatalogPluginsRequest{})
 	if err != nil || len(cat.GetPlugins()) != 1 || cat.GetPlugins()[0].GetInstalledVersion() != "0.2.0" ||
 		cat.GetPlugins()[0].GetVersions()[0].GetVersion() != "0.2.0" {
 		t.Errorf("ListCatalogPlugins = %v, %v", cat, err)
@@ -291,7 +292,7 @@ func TestAdministration(t *testing.T) {
 		t.Errorf("StopPlayback: %v", err)
 	}
 
-	if _, err := system.UninstallPlugin(ctx, systemv1.UninstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build()); err != nil {
+	if _, err := pluginAdmin.UninstallPlugin(ctx, systemv1.UninstallPluginRequest_builder{PluginId: new("dev.mavio.smoke")}.Build()); err != nil {
 		t.Fatalf("UninstallPlugin: %v", err)
 	}
 	if p := plugin(); p != nil {

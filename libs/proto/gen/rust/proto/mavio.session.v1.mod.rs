@@ -254,6 +254,14 @@ pub use self::__buffa::view::ListSessionsResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListSessionsResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::RevokeSessionRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::RevokeSessionRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RevokeSessionResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::RevokeSessionResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::SendCommandRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::SendCommandRequestOwnedView;

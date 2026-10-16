@@ -7,7 +7,7 @@ use std::time::Duration;
 use connectrpc::client::{ClientConfig, HttpClient};
 use http::Uri;
 use mavio_api::connect::mavio::auth::v1::AuthServiceClient;
-use mavio_api::connect::mavio::home::v1::HomeServiceClient;
+use mavio_api::connect::mavio::hub::v1::HubServiceClient;
 use mavio_api::connect::mavio::library::v1::{ItemServiceClient, LibraryServiceClient};
 use mavio_api::connect::mavio::playback::v1::PlaybackServiceClient;
 use mavio_api::connect::mavio::session::v1::EventServiceClient;
@@ -182,9 +182,9 @@ impl Connection {
         UserDataServiceClient::new(self.transport(), self.unary())
     }
 
-    /// `HomeService`.
-    pub fn home(&self) -> HomeServiceClient<Transport> {
-        HomeServiceClient::new(self.transport(), self.unary())
+    /// `HubService`.
+    pub fn hub(&self) -> HubServiceClient<Transport> {
+        HubServiceClient::new(self.transport(), self.unary())
     }
 
     /// `LibraryService`.

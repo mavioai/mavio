@@ -37,7 +37,8 @@ func (User) Fields() []ent.Field {
 		field.Bool("disabled").Default(false),
 		field.JSON("access", core.LibraryAccess{}).Optional(),
 		field.JSON("policy", core.UserPolicy{}),
-		field.JSON("preferences", core.UserPreferences{}),
+		field.JSON("preferences", core.PlaybackPreferences{}),
+		field.JSON("home", core.HomeLayout{}).Optional(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("last_login_at").Optional().Nillable(),
 	}

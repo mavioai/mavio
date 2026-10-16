@@ -94,22 +94,6 @@ pub use self::__buffa::view::LogoutResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::LogoutResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::ListSessionsRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::ListSessionsRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::ListSessionsResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::ListSessionsResponseOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RevokeSessionRequestView;
-#[doc(inline)]
-pub use self::__buffa::view::RevokeSessionRequestOwnedView;
-#[doc(inline)]
-pub use self::__buffa::view::RevokeSessionResponseView;
-#[doc(inline)]
-pub use self::__buffa::view::RevokeSessionResponseOwnedView;
-#[doc(inline)]
 pub use self::__buffa::view::StartQuickConnectRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::StartQuickConnectRequestOwnedView;

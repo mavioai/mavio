@@ -39,20 +39,21 @@ type acquisitionServer struct {
 	adminID         string
 	recycleBin      string
 
-	auth      authv1connect.AuthServiceClient
-	system    systemv1connect.SystemServiceClient
-	tasks     systemv1connect.TaskServiceClient
-	activity  systemv1connect.ActivityServiceClient
-	users     userv1connect.UserServiceClient
-	libraries libraryv1connect.LibraryServiceClient
-	items     libraryv1connect.ItemServiceClient
-	playback  playbackv1connect.PlaybackServiceClient
-	profiles  acquisitionv1connect.ProfileServiceClient
-	wanted    acquisitionv1connect.WantedServiceClient
-	downloads acquisitionv1connect.DownloadServiceClient
-	releases  acquisitionv1connect.ReleaseServiceClient
-	requests  acquisitionv1connect.RequestServiceClient
-	subtitles acquisitionv1connect.SubtitleServiceClient
+	auth        authv1connect.AuthServiceClient
+	system      systemv1connect.SystemServiceClient
+	pluginAdmin systemv1connect.PluginManagementServiceClient
+	tasks       systemv1connect.TaskServiceClient
+	activity    systemv1connect.ActivityServiceClient
+	users       userv1connect.UserServiceClient
+	libraries   libraryv1connect.LibraryServiceClient
+	items       libraryv1connect.ItemServiceClient
+	playback    playbackv1connect.PlaybackServiceClient
+	profiles    acquisitionv1connect.ProfileServiceClient
+	wanted      acquisitionv1connect.WantedServiceClient
+	downloads   acquisitionv1connect.DownloadServiceClient
+	releases    acquisitionv1connect.ReleaseServiceClient
+	requests    acquisitionv1connect.RequestServiceClient
+	subtitles   acquisitionv1connect.SubtitleServiceClient
 }
 
 // processPlugin is a process plugin an end-to-end test builds and
@@ -119,20 +120,21 @@ func startAcquisition(t *testing.T, routes map[string]string, processPlugins boo
 	token := withToken(first.GetAccessToken())
 	s := &acquisitionServer{
 		t: t, url: srv.url, ffmpeg: ffmpeg, ffprobe: ffprobe, fake: fake, adminID: first.GetUser().GetId(), recycleBin: t.TempDir(),
-		auth:      auth,
-		system:    systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token),
-		tasks:     systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token),
-		activity:  systemv1connect.NewActivityServiceClient(http.DefaultClient, srv.url, token),
-		users:     userv1connect.NewUserServiceClient(http.DefaultClient, srv.url, token),
-		libraries: libraryv1connect.NewLibraryServiceClient(http.DefaultClient, srv.url, token),
-		items:     libraryv1connect.NewItemServiceClient(http.DefaultClient, srv.url, token),
-		playback:  playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, srv.url, token),
-		profiles:  acquisitionv1connect.NewProfileServiceClient(http.DefaultClient, srv.url, token),
-		wanted:    acquisitionv1connect.NewWantedServiceClient(http.DefaultClient, srv.url, token),
-		downloads: acquisitionv1connect.NewDownloadServiceClient(http.DefaultClient, srv.url, token),
-		releases:  acquisitionv1connect.NewReleaseServiceClient(http.DefaultClient, srv.url, token),
-		requests:  acquisitionv1connect.NewRequestServiceClient(http.DefaultClient, srv.url, token),
-		subtitles: acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token),
+		auth:        auth,
+		system:      systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token),
+		pluginAdmin: systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token),
+		tasks:       systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token),
+		activity:    systemv1connect.NewActivityServiceClient(http.DefaultClient, srv.url, token),
+		users:       userv1connect.NewUserServiceClient(http.DefaultClient, srv.url, token),
+		libraries:   libraryv1connect.NewLibraryServiceClient(http.DefaultClient, srv.url, token),
+		items:       libraryv1connect.NewItemServiceClient(http.DefaultClient, srv.url, token),
+		playback:    playbackv1connect.NewPlaybackServiceClient(http.DefaultClient, srv.url, token),
+		profiles:    acquisitionv1connect.NewProfileServiceClient(http.DefaultClient, srv.url, token),
+		wanted:      acquisitionv1connect.NewWantedServiceClient(http.DefaultClient, srv.url, token),
+		downloads:   acquisitionv1connect.NewDownloadServiceClient(http.DefaultClient, srv.url, token),
+		releases:    acquisitionv1connect.NewReleaseServiceClient(http.DefaultClient, srv.url, token),
+		requests:    acquisitionv1connect.NewRequestServiceClient(http.DefaultClient, srv.url, token),
+		subtitles:   acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token),
 	}
 	s.settings(func(settings *systemv1.ServerSettings) {
 		acq := settings.GetAcquisition()
@@ -221,7 +223,7 @@ func (s *acquisitionServer) plugins(indexers, clients []any) {
 		if err != nil {
 			s.t.Fatal(err)
 		}
-		if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{PluginId: new(id), ConfigJson: new(string(data))}.Build()); err != nil {
+		if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{PluginId: new(id), ConfigJson: new(string(data))}.Build()); err != nil {
 			s.t.Fatalf("SetPluginConfig %s: %v", id, err)
 		}
 	}

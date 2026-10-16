@@ -14,7 +14,7 @@ import {
   usePlugins,
 } from "@mavio/client-ts";
 import { Category } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
-import { type CatalogPlugin, type Plugin, PluginState } from "@mavio/proto/mavio/system/v1/system_pb";
+import { type CatalogPlugin, type Plugin, PluginState } from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { type FormEvent, type ReactNode, useState } from "react";
 

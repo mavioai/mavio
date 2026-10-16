@@ -3,5 +3,6 @@ include!("mavio.system.v1.activity.__connect.rs");
 include!("mavio.system.v1.ai.__connect.rs");
 include!("mavio.system.v1.backup.__connect.rs");
 include!("mavio.system.v1.localization.__connect.rs");
+include!("mavio.system.v1.plugin.__connect.rs");
 include!("mavio.system.v1.system.__connect.rs");
 include!("mavio.system.v1.task.__connect.rs");

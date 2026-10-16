@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::time::SystemTime;
 
 use mavio_api::proto::mavio::acquisition::v1::{DiscoveredTitle, MediaKind};
-use mavio_api::proto::mavio::home::v1::Hub;
+use mavio_api::proto::mavio::hub::v1::Hub;
 use mavio_api::proto::mavio::library::v1::{HubKind, Item, ItemKind};
 
 /// The providers whose IDs tell that two servers have the same title.

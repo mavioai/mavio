@@ -70,6 +70,7 @@ func (r users) Create(ctx context.Context, u *core.User) error {
 		SetAccess(u.Access).
 		SetPolicy(u.Policy).
 		SetPreferences(u.Preferences).
+		SetHome(u.Home).
 		SetCreatedAt(orNow(u.CreatedAt)).
 		SetNillableLastLoginAt(u.LastLoginAt).
 		Save(ctx)
@@ -93,7 +94,8 @@ func (r users) Update(ctx context.Context, u *core.User) error {
 		SetDisabled(u.Disabled).
 		SetAccess(u.Access).
 		SetPolicy(u.Policy).
-		SetPreferences(u.Preferences)
+		SetPreferences(u.Preferences).
+		SetHome(u.Home)
 	if id := accountID(u); id != nil {
 		update.SetAccountID(*id)
 	} else {
@@ -135,6 +137,7 @@ func toUser(u *ent.User) core.User {
 		Access:       u.Access,
 		Policy:       u.Policy,
 		Preferences:  u.Preferences,
+		Home:         u.Home,
 		CreatedAt:    u.CreatedAt.UTC(),
 		LastLoginAt:  utcPtr(u.LastLoginAt),
 	}

@@ -3,7 +3,7 @@
 // so that a server's events invalidate its queries alone.
 import { create } from "@bufbuild/protobuf";
 import { Code, ConnectError } from "@connectrpc/connect";
-import { HomeService } from "@mavio/proto/mavio/home/v1/home_pb";
+import { HubService } from "@mavio/proto/mavio/hub/v1/hub_pb";
 import {
   type Item,
   ItemKind,
@@ -90,7 +90,7 @@ function hubsOf(q: UseQueryResult<Awaited<ReturnType<typeof listHubs>>>): Hubs {
 }
 
 async function listHubs(servers: Servers, server: ServerEntry, libraryId?: string) {
-  const r = await servers.client(HomeService, server).listHubs({ libraryId });
+  const r = await servers.client(HubService, server).listHubs({ libraryId });
   return r.hubs;
 }
 
@@ -132,7 +132,7 @@ export function useHubItems(server: ServerEntry, hubId: string) {
   return useInfiniteQuery({
     queryKey: serverKey(server.id, "hub", hubId),
     queryFn: async ({ pageParam }) => {
-      const r = await servers.client(HomeService, server).getHub({ id: hubId, offset: pageParam, limit: pageSize });
+      const r = await servers.client(HubService, server).getHub({ id: hubId, offset: pageParam, limit: pageSize });
       return { hub: r.hub, next: r.hub?.more ? pageParam + (r.hub.items.length || pageSize) : undefined };
     },
     initialPageParam: 0,

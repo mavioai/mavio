@@ -56,21 +56,27 @@ pub type OwnedDeleteItemImageRequestView = ::buffa::view::OwnedView<
 pub type OwnedDeleteItemImageResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::library::v1::__buffa::view::DeleteItemImageResponseView<'static>,
 >;
-///Shorthand for `OwnedView<SearchSubtitlesRequestView<'static>>`.
-pub type OwnedSearchSubtitlesRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesRequestView<'static>,
+///Shorthand for `OwnedView<SearchRemoteLyricsRequestView<'static>>`.
+pub type OwnedSearchRemoteLyricsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<SearchSubtitlesResponseView<'static>>`.
-pub type OwnedSearchSubtitlesResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView<'static>,
+///Shorthand for `OwnedView<SearchRemoteLyricsResponseView<'static>>`.
+pub type OwnedSearchRemoteLyricsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsResponseView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<DownloadSubtitleRequestView<'static>>`.
-pub type OwnedDownloadSubtitleRequestView = ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleRequestView<'static>,
+///Shorthand for `OwnedView<DownloadRemoteLyricsRequestView<'static>>`.
+pub type OwnedDownloadRemoteLyricsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsRequestView<
+        'static,
+    >,
 >;
-///Shorthand for `OwnedView<DownloadSubtitleResponseView<'static>>`.
-pub type OwnedDownloadSubtitleResponseView = ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseView<
+///Shorthand for `OwnedView<DownloadRemoteLyricsResponseView<'static>>`.
+pub type OwnedDownloadRemoteLyricsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsResponseView<
         'static,
     >,
 >;
@@ -326,8 +332,10 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::SearchSubtitlesResponse>
-for crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
+>
+for crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsResponseView<'_> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -335,9 +343,13 @@ for crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::SearchSubtitlesResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView<'static>,
+    crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -360,8 +372,12 @@ for ::buffa::view::OwnedView<
         )
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::DownloadSubtitleResponse>
-for crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseView<'_> {
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
+>
+for crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsResponseView<
+    '_,
+> {
     fn encode(
         &self,
         codec: ::connectrpc::CodecFormat,
@@ -369,9 +385,11 @@ for crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseVie
         ::connectrpc::__codegen::encode_view_body(self, codec)
     }
 }
-impl ::connectrpc::Encodable<crate::proto::mavio::library::v1::DownloadSubtitleResponse>
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
+>
 for ::buffa::view::OwnedView<
-    crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseView<
+    crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsResponseView<
         'static,
     >,
 > {
@@ -482,15 +500,15 @@ pub const METADATA_SERVICE_DELETE_ITEM_IMAGE_SPEC: ::connectrpc::Spec = ::connec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// Static [`Spec`](::connectrpc::Spec) for the `SearchSubtitles` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const METADATA_SERVICE_SEARCH_SUBTITLES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.library.v1.MetadataService/SearchSubtitles",
+/// Static [`Spec`](::connectrpc::Spec) for the `SearchRemoteLyrics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.library.v1.MetadataService/SearchRemoteLyrics",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// Static [`Spec`](::connectrpc::Spec) for the `DownloadSubtitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
-pub const METADATA_SERVICE_DOWNLOAD_SUBTITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
-        "/mavio.library.v1.MetadataService/DownloadSubtitle",
+/// Static [`Spec`](::connectrpc::Spec) for the `DownloadRemoteLyrics` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const METADATA_SERVICE_DOWNLOAD_REMOTE_LYRICS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.library.v1.MetadataService/DownloadRemoteLyrics",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
@@ -503,7 +521,7 @@ pub const METADATA_SERVICE_LIST_EXTERNAL_ID_KINDS_SPEC: ::connectrpc::Spec = ::c
 /// MetadataService corrects and completes the metadata of items:
 /// administrators edit and lock it, identify items again against the
 /// metadata providers, refresh them, choose their images and download
-/// subtitles. In libraries saving local metadata, changes are also written
+/// lyrics. In libraries saving local metadata, changes are also written
 /// next to the media as NFO files and image files.
 ///
 /// # Implementing handlers
@@ -721,8 +739,8 @@ pub trait MetadataService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// SearchSubtitles searches the subtitle providers for subtitles of a
-    /// video in one language.
+    /// SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+    /// administrators only.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -731,22 +749,23 @@ pub trait MetadataService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn search_subtitles<'a>(
+    fn search_remote_lyrics<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+            crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::library::v1::SearchSubtitlesResponse,
+                crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
-    /// video, where it becomes one of the video's subtitle streams.
+    /// DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+    /// track, as .lrc when synced and .txt otherwise, replacing its other
+    /// lyric files; administrators only.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -755,17 +774,17 @@ pub trait MetadataService: Send + Sync + 'static {
     /// (zero-copy). The response cannot borrow from `request` — use
     /// `.to_owned_message()` (or copy the specific fields) for anything
     /// returned, stored, or moved into `tokio::spawn`.
-    fn download_subtitle<'a>(
+    fn download_remote_lyrics<'a>(
         &'a self,
         ctx: ::connectrpc::RequestContext,
         request: ::connectrpc::ServiceRequest<
             '_,
-            crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+            crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
         >,
     ) -> impl ::std::future::Future<
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
-                crate::proto::mavio::library::v1::DownloadSubtitleResponse,
+                crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -1030,13 +1049,13 @@ impl<S: MetadataService> MetadataServiceExt for S {
             .with_spec(METADATA_SERVICE_DELETE_ITEM_IMAGE_SPEC)
             .route_view_idempotent(
                 METADATA_SERVICE_SERVICE_NAME,
-                "SearchSubtitles",
+                "SearchRemoteLyrics",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesRequestView<
+                            crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsRequestView<
                                 'static,
                             >,
                         >,
@@ -1045,27 +1064,27 @@ impl<S: MetadataService> MetadataServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+                                crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.search_subtitles(ctx, sreq)
+                            svc.search_remote_lyrics(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::library::v1::SearchSubtitlesResponse,
+                                    crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(METADATA_SERVICE_SEARCH_SUBTITLES_SPEC)
+            .with_spec(METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC)
             .route_view(
                 METADATA_SERVICE_SERVICE_NAME,
-                "DownloadSubtitle",
+                "DownloadRemoteLyrics",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
                     ::connectrpc::view_handler_fn(move |
                         ctx,
                         req: ::buffa::view::OwnedView<
-                            crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleRequestView<
+                            crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsRequestView<
                                 'static,
                             >,
                         >,
@@ -1074,18 +1093,18 @@ impl<S: MetadataService> MetadataServiceExt for S {
                         let svc = ::std::sync::Arc::clone(&svc);
                         async move {
                             let sreq = ::connectrpc::ServiceRequest::<
-                                crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+                                crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
                             >::from_parts(req.reborrow(), req.bytes());
-                            svc.download_subtitle(ctx, sreq)
+                            svc.download_remote_lyrics(ctx, sreq)
                                 .await?
                                 .encode::<
-                                    crate::proto::mavio::library::v1::DownloadSubtitleResponse,
+                                    crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
                                 >(format)
                         }
                     })
                 },
             )
-            .with_spec(METADATA_SERVICE_DOWNLOAD_SUBTITLE_SPEC)
+            .with_spec(METADATA_SERVICE_DOWNLOAD_REMOTE_LYRICS_SPEC)
             .route_view_idempotent(
                 METADATA_SERVICE_SERVICE_NAME,
                 "ListExternalIdKinds",
@@ -1211,16 +1230,16 @@ impl<T: MetadataService> ::connectrpc::Dispatcher for MetadataServiceServer<T> {
                         .with_spec(METADATA_SERVICE_DELETE_ITEM_IMAGE_SPEC),
                 )
             }
-            "SearchSubtitles" => {
+            "SearchRemoteLyrics" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
-                        .with_spec(METADATA_SERVICE_SEARCH_SUBTITLES_SPEC),
+                        .with_spec(METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC),
                 )
             }
-            "DownloadSubtitle" => {
+            "DownloadRemoteLyrics" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
-                        .with_spec(METADATA_SERVICE_DOWNLOAD_SUBTITLE_SPEC),
+                        .with_spec(METADATA_SERVICE_DOWNLOAD_REMOTE_LYRICS_SPEC),
                 )
             }
             "ListExternalIdKinds" => {
@@ -1398,47 +1417,47 @@ impl<T: MetadataService> ::connectrpc::Dispatcher for MetadataServiceServer<T> {
                         >(format)
                 })
             }
-            "SearchSubtitles" => {
+            "SearchRemoteLyrics" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+                        crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesRequestView<
+                    let req: crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+                        crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
                     >::from_parts(&req, &body);
-                    svc.search_subtitles(ctx, req)
+                    svc.search_remote_lyrics(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::library::v1::SearchSubtitlesResponse,
+                            crate::proto::mavio::library::v1::SearchRemoteLyricsResponse,
                         >(format)
                 })
             }
-            "DownloadSubtitle" => {
+            "DownloadRemoteLyrics" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
                     let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
-                        crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+                        crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
                     >(request.encoded()?, format)?;
-                    let req: crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleRequestView<
+                    let req: crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsRequestView<
                         '_,
                     > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
                         &body,
                         ctx.decode_options(),
                     )?;
                     let req = ::connectrpc::ServiceRequest::<
-                        crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+                        crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
                     >::from_parts(&req, &body);
-                    svc.download_subtitle(ctx, req)
+                    svc.download_remote_lyrics(ctx, req)
                         .await?
                         .encode::<
-                            crate::proto::mavio::library::v1::DownloadSubtitleResponse,
+                            crate::proto::mavio::library::v1::DownloadRemoteLyricsResponse,
                         >(format)
                 })
             }
@@ -1907,35 +1926,35 @@ where
             )
             .await
     }
-    /// Call the SearchSubtitles RPC. Sends a request to /mavio.library.v1.MetadataService/SearchSubtitles.
-    pub async fn search_subtitles(
+    /// Call the SearchRemoteLyrics RPC. Sends a request to /mavio.library.v1.MetadataService/SearchRemoteLyrics.
+    pub async fn search_remote_lyrics(
         &self,
-        request: crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+        request: crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView<
+                crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.search_subtitles_with_options(
+        self.search_remote_lyrics_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the SearchSubtitles RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn search_subtitles_with_options(
+    /// Call the SearchRemoteLyrics RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn search_remote_lyrics_with_options(
         &self,
-        request: crate::proto::mavio::library::v1::SearchSubtitlesRequest,
+        request: crate::proto::mavio::library::v1::SearchRemoteLyricsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::library::v1::__buffa::view::SearchSubtitlesResponseView<
+                crate::proto::mavio::library::v1::__buffa::view::SearchRemoteLyricsResponseView<
                     'static,
                 >,
             >,
@@ -1945,42 +1964,42 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                METADATA_SERVICE_SEARCH_SUBTITLES_SPEC
+                METADATA_SERVICE_SEARCH_REMOTE_LYRICS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
             )
             .await
     }
-    /// Call the DownloadSubtitle RPC. Sends a request to /mavio.library.v1.MetadataService/DownloadSubtitle.
-    pub async fn download_subtitle(
+    /// Call the DownloadRemoteLyrics RPC. Sends a request to /mavio.library.v1.MetadataService/DownloadRemoteLyrics.
+    pub async fn download_remote_lyrics(
         &self,
-        request: crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+        request: crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseView<
+                crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsResponseView<
                     'static,
                 >,
             >,
         >,
         ::connectrpc::ConnectError,
     > {
-        self.download_subtitle_with_options(
+        self.download_remote_lyrics_with_options(
                 request,
                 ::connectrpc::client::CallOptions::default(),
             )
             .await
     }
-    /// Call the DownloadSubtitle RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
-    pub async fn download_subtitle_with_options(
+    /// Call the DownloadRemoteLyrics RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn download_remote_lyrics_with_options(
         &self,
-        request: crate::proto::mavio::library::v1::DownloadSubtitleRequest,
+        request: crate::proto::mavio::library::v1::DownloadRemoteLyricsRequest,
         options: ::connectrpc::client::CallOptions,
     ) -> Result<
         ::connectrpc::client::UnaryResponse<
             ::buffa::view::OwnedView<
-                crate::proto::mavio::library::v1::__buffa::view::DownloadSubtitleResponseView<
+                crate::proto::mavio::library::v1::__buffa::view::DownloadRemoteLyricsResponseView<
                     'static,
                 >,
             >,
@@ -1990,7 +2009,7 @@ where
         ::connectrpc::client::call_unary(
                 &self.transport,
                 &self.config,
-                METADATA_SERVICE_DOWNLOAD_SUBTITLE_SPEC
+                METADATA_SERVICE_DOWNLOAD_REMOTE_LYRICS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

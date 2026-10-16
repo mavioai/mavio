@@ -631,7 +631,7 @@ func TestUsers(t *testing.T) {
 			Name: "Alice", Kind: core.UserAdmin,
 			Access:      core.LibraryAccess{Libraries: []core.ID{lib.ID}, ContentLimits: core.ContentLimits{MaxParentalRating: ptr(13)}},
 			Policy:      core.UserPolicy{AllowTranscoding: true},
-			Preferences: core.UserPreferences{AudioLanguages: []string{"jpn", "eng"}, SubtitleMode: core.SubtitlesSmart},
+			Preferences: core.PlaybackPreferences{AudioLanguages: []string{"jpn", "eng"}, SubtitleMode: core.SubtitlesSmart},
 		}
 		if err := s.Users().Create(ctx, &u); err != nil {
 			t.Fatal(err)

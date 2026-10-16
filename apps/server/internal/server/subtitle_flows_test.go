@@ -206,7 +206,7 @@ func TestSubtitleFlows(t *testing.T) {
 	// their scores, those of movies synchronized whatever theirs, those of
 	// episodes never.
 	subsarr, whisper, libre := newFakeSubsarr(t), newFakeWhisper(t), newFakeLibreTranslate(t)
-	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.subtitles"),
 		ConfigJson: new(`{"providers": [{"name": "subsarr", "enabled": true, "settings": {"base_url": "` + subsarr.URL + `"}},
 			{"name": "whisperai", "enabled": true, "settings": {"endpoint": "` + whisper.URL + `"}}],
@@ -391,7 +391,7 @@ func TestSubtitleFlows(t *testing.T) {
 		}
 		return strings.ToUpper(last)
 	})
-	if _, err := s.system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := s.pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.agent"), ConfigJson: new(agentConfig(openai.URL)),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)

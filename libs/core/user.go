@@ -25,7 +25,8 @@ type User struct {
 	Disabled    bool
 	Access      LibraryAccess
 	Policy      UserPolicy
-	Preferences UserPreferences
+	Preferences PlaybackPreferences
+	Home        HomeLayout
 	CreatedAt   time.Time
 	LastLoginAt *time.Time
 }
@@ -226,8 +227,8 @@ func (m SubtitleMode) Valid() bool {
 	return slices.Contains([]SubtitleMode{SubtitlesDefault, SubtitlesAlways, SubtitlesForeign, SubtitlesForcedOnly, SubtitlesNone, SubtitlesSmart}, m)
 }
 
-// UserPreferences are playback defaults chosen by the user.
-type UserPreferences struct {
+// PlaybackPreferences are playback defaults chosen by the user.
+type PlaybackPreferences struct {
 	// AudioLanguages and SubtitleLanguages are ISO 639-2/B codes in order of
 	// preference.
 	AudioLanguages    []string
@@ -236,6 +237,17 @@ type UserPreferences struct {
 	// PlayDefaultAudioTrack prefers the stream flagged default over the
 	// preferred language.
 	PlayDefaultAudioTrack bool
+}
+
+// HomeLayout is a user's choice of what Home shows.
+type HomeLayout struct {
+	// Pinned reports whether the user chose Home's libraries; when not,
+	// Home shows every library the user may access, in name order.
+	Pinned bool
+	// Libraries are the pinned libraries, in the order Home shows them.
+	Libraries []ID
+	// HiddenHubs are the IDs of the hubs the user hid.
+	HiddenHubs []string
 }
 
 // UserData is one user's state for one item.

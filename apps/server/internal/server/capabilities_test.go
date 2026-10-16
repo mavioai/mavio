@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/apps/server/internal/server"
+	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	libraryv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1"
@@ -157,8 +159,9 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	}
 	token := withToken(first.GetAccessToken())
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	images := imageServer(t)
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"image_base":"` + images.URL + `"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)
@@ -330,18 +333,21 @@ func testPluginCapabilities(t *testing.T, rt, ffmpeg, ffprobe, video, track stri
 	}
 
 	// Subtitles are found and downloaded through the subtitle provider.
-	meta := libraryv1connect.NewMetadataServiceClient(http.DefaultClient, srv.url, token)
+	subtitleService := acquisitionv1connect.NewSubtitleServiceClient(http.DefaultClient, srv.url, token)
 	filmID := filmItem.GetItem().GetId()
-	subs, err := meta.SearchSubtitles(ctx, libraryv1.SearchSubtitlesRequest_builder{ItemId: new(filmID), Language: new("en")}.Build())
-	if err != nil || len(subs.GetSubtitles()) != 1 || subs.GetSubtitles()[0].GetProvider() != "dev.mavio.smoke" {
-		t.Fatalf("SearchSubtitles = %v, %v", subs, err)
+	english := acquisitionv1.SubtitleLanguageSpec_builder{Language: new("en")}.Build()
+	subs, err := subtitleService.SearchItemSubtitles(ctx, acquisitionv1.SearchItemSubtitlesRequest_builder{
+		ItemId: new(filmID), Languages: []*acquisitionv1.SubtitleLanguageSpec{english},
+	}.Build())
+	if err != nil || len(subs.GetSubtitles()) != 1 || !strings.HasPrefix(subs.GetSubtitles()[0].GetProvider(), "dev.mavio.smoke/") {
+		t.Fatalf("SearchItemSubtitles = %v, %v", subs, err)
 	}
 	sub := subs.GetSubtitles()[0]
-	got, err := meta.DownloadSubtitle(ctx, libraryv1.DownloadSubtitleRequest_builder{
-		ItemId: new(filmID), Provider: new(sub.GetProvider()), SubtitleId: new(sub.GetId()),
+	got, err := subtitleService.DownloadItemSubtitle(ctx, acquisitionv1.DownloadItemSubtitleRequest_builder{
+		ItemId: new(filmID), Provider: new(sub.GetProvider()), SubtitleId: new(sub.GetSubtitleId()), Language: sub.GetLanguage(),
 	}.Build())
-	if err != nil || got.GetStream().GetLanguage() == "" || got.GetStream().GetKind() != libraryv1.StreamKind_STREAM_KIND_SUBTITLE {
-		t.Errorf("DownloadSubtitle = %v, %v", got, err)
+	if err != nil || got.GetPath() == "" {
+		t.Errorf("DownloadItemSubtitle = %v, %v", got, err)
 	}
 
 	// The intro provider picks what plays before the film.

@@ -1,4 +1,4 @@
-package home
+package hub
 
 import (
 	"cmp"
@@ -17,16 +17,6 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
-)
-
-// The display preferences holding a user's choices of Home: Pinned lists
-// the IDs of the libraries shown, in order, and Hidden the IDs of the hubs
-// hidden, both comma separated.
-const (
-	Client = "mavio"
-	View   = "home"
-	Pinned = "libraries"
-	Hidden = "hidden"
 )
 
 const (
@@ -117,11 +107,7 @@ func (sp spec) id() string {
 // hubs of each pinned library, then trending titles. Hidden hubs and
 // empty ones are left out; continue watching cannot be hidden.
 func (s *Service) Home(ctx context.Context, u *core.User, limit int) ([]Hub, error) {
-	prefs, err := s.store.DisplayPreferences().Get(ctx, u.ID, Client, View)
-	if err != nil && !errors.Is(err, core.ErrNotFound) {
-		return nil, fmt.Errorf("get home preferences: %w", err)
-	}
-	libs, err := s.libraries(ctx, u, prefs.Values)
+	libs, err := s.libraries(ctx, u)
 	if err != nil {
 		return nil, err
 	}
@@ -133,11 +119,40 @@ func (s *Service) Home(ctx context.Context, u *core.User, limit int) ([]Hub, err
 		}
 	}
 	specs = append(specs, spec{kind: core.HubTrending})
-	hidden := split(prefs.Values[Hidden])
 	specs = slices.DeleteFunc(specs, func(sp spec) bool {
-		return sp.kind != core.HubContinueWatching && slices.Contains(hidden, sp.id())
+		return sp.kind != core.HubContinueWatching && slices.Contains(u.Home.HiddenHubs, sp.id())
 	})
 	return s.fillAll(ctx, u, specs, limit)
+}
+
+// SetLayout replaces the user's choice of what Home shows, returning the
+// stored layout. Libraries the user may not access are core.ErrInvalid.
+func (s *Service) SetLayout(ctx context.Context, userID core.ID, layout core.HomeLayout) (core.HomeLayout, error) {
+	var u core.User
+	err := s.store.InTx(ctx, func(tx core.Store) error {
+		var err error
+		if u, err = tx.Users().Get(ctx, userID); err != nil {
+			return err
+		}
+		for _, id := range layout.Libraries {
+			_, err := tx.Libraries().Get(ctx, id)
+			if errors.Is(err, core.ErrNotFound) || err == nil && !u.Access.CanAccessLibrary(id) {
+				return fmt.Errorf("%w: no library %s", core.ErrInvalid, id)
+			}
+			if err != nil {
+				return err
+			}
+		}
+		if !layout.Pinned {
+			layout.Libraries = nil
+		}
+		u.Home = layout
+		return tx.Users().Update(ctx, &u)
+	})
+	if err != nil {
+		return core.HomeLayout{}, fmt.Errorf("set home layout: %w", err)
+	}
+	return u.Home, nil
 }
 
 // Recommended lists the hubs of a library's Recommended tab with their
@@ -207,19 +222,18 @@ func (s *Service) library(ctx context.Context, u *core.User, id core.ID) (*core.
 	return &lib, nil
 }
 
-// libraries returns the libraries pinned to the user's Home: those named
-// by the preferences in their order, or every library they may access in
-// name order.
-func (s *Service) libraries(ctx context.Context, u *core.User, prefs map[string]string) ([]*core.Library, error) {
+// libraries returns the libraries pinned to the user's Home: those of its
+// layout in their order, or every library they may access in name order.
+func (s *Service) libraries(ctx context.Context, u *core.User) ([]*core.Library, error) {
 	all, err := s.store.Libraries().List(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("list libraries: %w", err)
 	}
 	all = slices.DeleteFunc(all, func(l core.Library) bool { return !u.Access.CanAccessLibrary(l.ID) })
 	var out []*core.Library
-	if pinned, ok := prefs[Pinned]; ok {
-		for _, id := range split(pinned) {
-			if i := slices.IndexFunc(all, func(l core.Library) bool { return l.ID.String() == id }); i >= 0 {
+	if u.Home.Pinned {
+		for _, id := range u.Home.Libraries {
+			if i := slices.IndexFunc(all, func(l core.Library) bool { return l.ID == id }); i >= 0 {
 				out = append(out, &all[i])
 			}
 		}
@@ -499,15 +513,4 @@ func (s *Service) discoverTrending(ctx context.Context, u *core.User) ([]request
 		return cmp.Compare(b.Title.GetPopularity(), a.Title.GetPopularity())
 	})
 	return titles, nil
-}
-
-// split reads a comma-separated list.
-func split(list string) []string {
-	var out []string
-	for v := range strings.SplitSeq(list, ",") {
-		if v = strings.TrimSpace(v); v != "" {
-			out = append(out, v)
-		}
-	}
-	return out
 }

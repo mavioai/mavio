@@ -2,6 +2,7 @@
 // administers, their plugins and those of their catalogs, installing,
 // updating, uninstalling, enabling and disabling them, and the catalogs.
 import { UserService } from "@mavio/proto/mavio/user/v1/user_pb";
+import { PluginManagementService } from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -28,7 +29,7 @@ export function usePlugins(server: ServerEntry | undefined) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "plugins", "installed"),
-    queryFn: async () => (await servers.client(SystemService, server!).listPlugins({})).plugins,
+    queryFn: async () => (await servers.client(PluginManagementService, server!).listPlugins({})).plugins,
     enabled: !!server,
   });
 }
@@ -38,7 +39,7 @@ export function useCatalogPlugins(server: ServerEntry | undefined) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server?.id ?? "", "plugins", "catalog"),
-    queryFn: async () => (await servers.client(SystemService, server!).listCatalogPlugins({})).plugins,
+    queryFn: async () => (await servers.client(PluginManagementService, server!).listCatalogPlugins({})).plugins,
     enabled: !!server,
     retry: false,
   });
@@ -59,7 +60,7 @@ export function usePluginConfig(server: ServerEntry, id: string, enabled = true)
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "plugins", "config", id),
-    queryFn: async () => (await servers.client(SystemService, server).getPluginConfig({ pluginId: id })).configJson,
+    queryFn: async () => (await servers.client(PluginManagementService, server).getPluginConfig({ pluginId: id })).configJson,
     enabled,
   });
 }
@@ -69,7 +70,8 @@ export function usePluginActions(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
   const onSettled = () => qc.invalidateQueries({ queryKey: serverKey(server.id, "plugins") });
-  const client = () => servers.client(SystemService, server);
+  const client = () => servers.client(PluginManagementService, server);
+  const system = () => servers.client(SystemService, server);
   return {
     /** Installs a plugin, or changes its version; the newest when version is unset. */
     install: useMutation({ mutationFn: ({ id, version }: { id: string; version?: string }) => client().installPlugin({ pluginId: id, version }), onSettled }),
@@ -86,10 +88,10 @@ export function usePluginActions(server: ServerEntry) {
     /** Replaces the catalogs' URLs, keeping the other settings. */
     setCatalogs: useMutation({
       mutationFn: async (urls: string[]) => {
-        const { settings } = await client().getServerSettings({});
+        const { settings } = await system().getServerSettings({});
         if (!settings) throw new Error("the server sent no settings");
         settings.pluginCatalogs = urls;
-        return client().updateServerSettings({ settings });
+        return system().updateServerSettings({ settings });
       },
       onSettled,
     }),

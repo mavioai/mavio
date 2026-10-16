@@ -45,7 +45,7 @@ func TestValidationRules(t *testing.T) {
 		{"create user", userv1.CreateUserRequest_builder{Name: proto.String("alice"), Password: proto.String("pw")}.Build(), true},
 		{"create user without name", userv1.CreateUserRequest_builder{Password: proto.String("pw")}.Build(), false},
 		{"user data rating", userv1.UpdateUserDataRequest_builder{ItemId: proto.String(validID), Rating: proto.Float64(11)}.Build(), false},
-		{"preferences language", userv1.UpdatePreferencesRequest_builder{Preferences: userv1.UserPreferences_builder{AudioLanguages: []string{"en"}}.Build()}.Build(), false},
+		{"preferences language", userv1.UpdatePlaybackPreferencesRequest_builder{PlaybackPreferences: userv1.PlaybackPreferences_builder{AudioLanguages: []string{"en"}}.Build()}.Build(), false},
 	}
 	for _, tt := range tests {
 		err := protovalidate.Validate(tt.msg)

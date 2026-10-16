@@ -140,8 +140,8 @@ func TestDLNA(t *testing.T) {
 	lo := loopbackName()
 	cfg := fmt.Sprintf(`{"user":"admin","server_name":"Mavio Test","ssdp_port":%d,"renderers":[%q]%s}`, ssdpPort, renderer.url+"/description.xml",
 		map[bool]string{true: `,"interfaces":["` + lo + `"]`}[lo != ""])
-	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
-	if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
+	if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.dlna"), ConfigJson: new(cfg),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)

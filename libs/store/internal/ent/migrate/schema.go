@@ -1561,6 +1561,7 @@ var (
 		{Name: "access", Type: field.TypeJSON, Nullable: true},
 		{Name: "policy", Type: field.TypeJSON},
 		{Name: "preferences", Type: field.TypeJSON},
+		{Name: "home", Type: field.TypeJSON, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
 	}

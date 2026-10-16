@@ -97,7 +97,7 @@ func TestMediaExtras(t *testing.T) {
 		t.Fatalf("CreateFirstUser: %v", err)
 	}
 	token := withToken(first.GetAccessToken())
-	if _, err := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token).SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
+	if _, err := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token).SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build()); err != nil {
 		t.Fatalf("SetPluginConfig: %v", err)

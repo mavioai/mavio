@@ -9,15 +9,13 @@ import type { Duration, FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_duration, file_google_protobuf_field_mask, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { DisplayOrder, Image, ImageKind, Item, ItemKind, MetadataField, SeriesStatus, SeriesType } from "./item_pb";
 import { file_mavio_library_v1_item } from "./item_pb";
-import type { MediaStream } from "./media_pb";
-import { file_mavio_library_v1_media } from "./media_pb";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file mavio/library/v1/metadata.proto.
  */
 export const file_mavio_library_v1_metadata: GenFile = /*@__PURE__*/
-  fileDesc("Ch9tYXZpby9saWJyYXJ5L3YxL21ldGFkYXRhLnByb3RvEhBtYXZpby5saWJyYXJ5LnYxIpkJCgxJdGVtTWV0YWRhdGESFgoEbmFtZRgBIAEoCUIIukgFcgMY9AMSGwoJc29ydF9uYW1lGAIgASgJQgi6SAVyAxj0AxIgCg5vcmlnaW5hbF90aXRsZRgDIAEoCUIIukgFcgMY9AMSGwoIb3ZlcnZpZXcYBCABKAlCCbpIBnIEGKCcARIZCgd0YWdsaW5lGAUgASgJQgi6SAVyAxjoBxIjCg9wcm9kdWN0aW9uX3llYXIYBiABKAVCCrpIBxoFGI9OKAASMQoNcHJlbWllcmVfZGF0ZRgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLAoIZW5kX2RhdGUYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjQKB3J1bnRpbWUYCSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAjIAEiAKD29mZmljaWFsX3JhdGluZxgKIAEoCUIHukgEcgIYMhIeCg1jdXN0b21fcmF0aW5nGAsgASgJQge6SARyAhgyEjEKEGNvbW11bml0eV9yYXRpbmcYDCABKAFCF7pIFBISGQAAAAAAACRAKQAAAAAAAAAAEi4KDWNyaXRpY19yYXRpbmcYDSABKAFCF7pIFBISGQAAAAAAAFlAKQAAAAAAAAAAEg4KBmdlbnJlcxgOIAMoCRIMCgR0YWdzGA8gAygJEg8KB3N0dWRpb3MYECADKAkSHAoUcHJvZHVjdGlvbl9sb2NhdGlvbnMYESADKAkSRQoMZXh0ZXJuYWxfaWRzGBIgAygLMi8ubWF2aW8ubGlicmFyeS52MS5JdGVtTWV0YWRhdGEuRXh0ZXJuYWxJZHNFbnRyeRIdCgxpbmRleF9udW1iZXIYEyABKAVCB7pIBBoCKAASJAoTcGFyZW50X2luZGV4X251bWJlchgUIAEoBUIHukgEGgIoABI/Cg1zZXJpZXNfc3RhdHVzGBUgASgOMh4ubWF2aW8ubGlicmFyeS52MS5TZXJpZXNTdGF0dXNCCLpIBYIBAhABEg8KB2FydGlzdHMYFiADKAkSFQoNYWxidW1fYXJ0aXN0cxgXIAMoCRIXCgVhbGJ1bRgYIAEoCUIIukgFcgMY9AMSDgoGbG9ja2VkGBkgASgIEkcKDWxvY2tlZF9maWVsZHMYGiADKA4yHy5tYXZpby5saWJyYXJ5LnYxLk1ldGFkYXRhRmllbGRCD7pIDJIBCSIHggEEEAEgABIRCgltb25pdG9yZWQYGyABKAgSOwoLc2VyaWVzX3R5cGUYHCABKA4yHC5tYXZpby5saWJyYXJ5LnYxLlNlcmllc1R5cGVCCLpIBYIBAhABEj8KDWRpc3BsYXlfb3JkZXIYHSABKA4yHi5tYXZpby5saWJyYXJ5LnYxLkRpc3BsYXlPcmRlckIIukgFggECEAESIAoPYWJzb2x1dGVfbnVtYmVyGB4gASgFQge6SAQaAigAGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKXAQoRVXBkYXRlSXRlbVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBEjgKCG1ldGFkYXRhGAIgASgLMh4ubWF2aW8ubGlicmFyeS52MS5JdGVtTWV0YWRhdGFCBrpIA8gBARIvCgt1cGRhdGVfbWFzaxgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2siOgoSVXBkYXRlSXRlbVJlc3BvbnNlEiQKBGl0ZW0YASABKAsyFi5tYXZpby5saWJyYXJ5LnYxLkl0ZW0iRwoSUmVmcmVzaEl0ZW1SZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABARIYChByZXBsYWNlX21ldGFkYXRhGAIgASgIIjsKE1JlZnJlc2hJdGVtUmVzcG9uc2USJAoEaXRlbRgBIAEoCzIWLm1hdmlvLmxpYnJhcnkudjEuSXRlbSLtAQoTU2VhcmNoUmVtb3RlUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxj0AxIMCgR5ZWFyGAMgASgFEkwKDGV4dGVybmFsX2lkcxgEIAMoCzI2Lm1hdmlvLmxpYnJhcnkudjEuU2VhcmNoUmVtb3RlUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5EhAKCHByb3ZpZGVyGAUgASgJGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASL3AQoSUmVtb3RlU2VhcmNoUmVzdWx0EhAKCHByb3ZpZGVyGAEgASgJEgwKBG5hbWUYAiABKAkSDAoEeWVhchgDIAEoBRIQCghvdmVydmlldxgEIAEoCRJLCgxleHRlcm5hbF9pZHMYBSADKAsyNS5tYXZpby5saWJyYXJ5LnYxLlJlbW90ZVNlYXJjaFJlc3VsdC5FeHRlcm5hbElkc0VudHJ5EhEKCWltYWdlX3VybBgGIAEoCRINCgVzY29yZRgHIAEoARoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiTQoUU2VhcmNoUmVtb3RlUmVzcG9uc2USNQoHcmVzdWx0cxgBIAMoCzIkLm1hdmlvLmxpYnJhcnkudjEuUmVtb3RlU2VhcmNoUmVzdWx0Ir8BChNJZGVudGlmeUl0ZW1SZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBElYKDGV4dGVybmFsX2lkcxgCIAMoCzI2Lm1hdmlvLmxpYnJhcnkudjEuSWRlbnRpZnlJdGVtUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5Qgi6SAWaAQIIARoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiPAoUSWRlbnRpZnlJdGVtUmVzcG9uc2USJAoEaXRlbRgBIAEoCzIWLm1hdmlvLmxpYnJhcnkudjEuSXRlbSJsChdMaXN0UmVtb3RlSW1hZ2VzUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARIzCgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmRCCLpIBYIBAhABIpcBCgtSZW1vdGVJbWFnZRIQCghwcm92aWRlchgBIAEoCRIpCgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmQSCwoDdXJsGAMgASgJEg0KBXdpZHRoGAQgASgFEg4KBmhlaWdodBgFIAEoBRIQCghsYW5ndWFnZRgGIAEoCRINCgVzY29yZRgHIAEoASJJChhMaXN0UmVtb3RlSW1hZ2VzUmVzcG9uc2USLQoGaW1hZ2VzGAEgAygLMh0ubWF2aW8ubGlicmFyeS52MS5SZW1vdGVJbWFnZSKzAQoTU2V0SXRlbUltYWdlUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARI4CgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmRCDbpICsgBAYIBBBABIAASFwoDdXJsGAMgASgJQgi6SAVyA4gBAUgAEhoKBGRhdGEYBCABKAxCCrpIB3oFGICAgApIAEIPCgZzb3VyY2USBbpIAggBIj4KFFNldEl0ZW1JbWFnZVJlc3BvbnNlEiYKBWltYWdlGAEgASgLMhcubWF2aW8ubGlicmFyeS52MS5JbWFnZSJVChZEZWxldGVJdGVtSW1hZ2VSZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBEh0KCGltYWdlX2lkGAIgASgJQgu6SAjIAQFyA7ABASIZChdEZWxldGVJdGVtSW1hZ2VSZXNwb25zZSK8AQoWU2VhcmNoU3VidGl0bGVzUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARI3CghsYW5ndWFnZRgCIAEoCUIlukgiyAEBch0yG15bYS16XXsyfSgtW0EtWmEtel17Miw0fSk/JBIhCg9tZWRpYV9zb3VyY2VfaWQYAyABKAlCCLpIBXIDsAEBEhgKEGhlYXJpbmdfaW1wYWlyZWQYBCABKAgSDgoGZm9yY2VkGAUgASgIIsMBCg5SZW1vdGVTdWJ0aXRsZRIQCghwcm92aWRlchgBIAEoCRIKCgJpZBgCIAEoCRIMCgRuYW1lGAMgASgJEhAKCGxhbmd1YWdlGAQgASgJEg4KBmZvcm1hdBgFIAEoCRIYChBoZWFyaW5nX2ltcGFpcmVkGAYgASgIEg4KBmZvcmNlZBgHIAEoCBINCgVzY29yZRgIIAEoARIWCg5kb3dubG9hZF9jb3VudBgJIAEoBRISCgpoYXNoX21hdGNoGAogASgIIk4KF1NlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlEjMKCXN1YnRpdGxlcxgBIAMoCzIgLm1hdmlvLmxpYnJhcnkudjEuUmVtb3RlU3VidGl0bGUikQEKF0Rvd25sb2FkU3VidGl0bGVSZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBEiEKD21lZGlhX3NvdXJjZV9pZBgCIAEoCUIIukgFcgOwAQESGAoIcHJvdmlkZXIYAyABKAlCBrpIA8gBARIbCgtzdWJ0aXRsZV9pZBgEIAEoCUIGukgDyAEBIkkKGERvd25sb2FkU3VidGl0bGVSZXNwb25zZRItCgZzdHJlYW0YASABKAsyHS5tYXZpby5saWJyYXJ5LnYxLk1lZGlhU3RyZWFtIlUKGkxpc3RFeHRlcm5hbElkS2luZHNSZXF1ZXN0EjcKCWl0ZW1fa2luZBgBIAEoDjIaLm1hdmlvLmxpYnJhcnkudjEuSXRlbUtpbmRCCLpIBYIBAhABIn8KDkV4dGVybmFsSWRLaW5kEgsKA2tleRgBIAEoCRIMCgRuYW1lGAIgASgJEi4KCml0ZW1fa2luZHMYAyADKA4yGi5tYXZpby5saWJyYXJ5LnYxLkl0ZW1LaW5kEg8KB3BlcnNvbnMYBCABKAgSEQoJcGx1Z2luX2lkGAUgASgJIk4KG0xpc3RFeHRlcm5hbElkS2luZHNSZXNwb25zZRIvCgVraW5kcxgBIAMoCzIgLm1hdmlvLmxpYnJhcnkudjEuRXh0ZXJuYWxJZEtpbmQykQgKD01ldGFkYXRhU2VydmljZRJXCgpVcGRhdGVJdGVtEiMubWF2aW8ubGlicmFyeS52MS5VcGRhdGVJdGVtUmVxdWVzdBokLm1hdmlvLmxpYnJhcnkudjEuVXBkYXRlSXRlbVJlc3BvbnNlEloKC1JlZnJlc2hJdGVtEiQubWF2aW8ubGlicmFyeS52MS5SZWZyZXNoSXRlbVJlcXVlc3QaJS5tYXZpby5saWJyYXJ5LnYxLlJlZnJlc2hJdGVtUmVzcG9uc2USYgoMU2VhcmNoUmVtb3RlEiUubWF2aW8ubGlicmFyeS52MS5TZWFyY2hSZW1vdGVSZXF1ZXN0GiYubWF2aW8ubGlicmFyeS52MS5TZWFyY2hSZW1vdGVSZXNwb25zZSIDkAIBEl0KDElkZW50aWZ5SXRlbRIlLm1hdmlvLmxpYnJhcnkudjEuSWRlbnRpZnlJdGVtUmVxdWVzdBomLm1hdmlvLmxpYnJhcnkudjEuSWRlbnRpZnlJdGVtUmVzcG9uc2USbgoQTGlzdFJlbW90ZUltYWdlcxIpLm1hdmlvLmxpYnJhcnkudjEuTGlzdFJlbW90ZUltYWdlc1JlcXVlc3QaKi5tYXZpby5saWJyYXJ5LnYxLkxpc3RSZW1vdGVJbWFnZXNSZXNwb25zZSIDkAIBEl0KDFNldEl0ZW1JbWFnZRIlLm1hdmlvLmxpYnJhcnkudjEuU2V0SXRlbUltYWdlUmVxdWVzdBomLm1hdmlvLmxpYnJhcnkudjEuU2V0SXRlbUltYWdlUmVzcG9uc2USZgoPRGVsZXRlSXRlbUltYWdlEigubWF2aW8ubGlicmFyeS52MS5EZWxldGVJdGVtSW1hZ2VSZXF1ZXN0GikubWF2aW8ubGlicmFyeS52MS5EZWxldGVJdGVtSW1hZ2VSZXNwb25zZRJrCg9TZWFyY2hTdWJ0aXRsZXMSKC5tYXZpby5saWJyYXJ5LnYxLlNlYXJjaFN1YnRpdGxlc1JlcXVlc3QaKS5tYXZpby5saWJyYXJ5LnYxLlNlYXJjaFN1YnRpdGxlc1Jlc3BvbnNlIgOQAgESaQoQRG93bmxvYWRTdWJ0aXRsZRIpLm1hdmlvLmxpYnJhcnkudjEuRG93bmxvYWRTdWJ0aXRsZVJlcXVlc3QaKi5tYXZpby5saWJyYXJ5LnYxLkRvd25sb2FkU3VidGl0bGVSZXNwb25zZRJ3ChNMaXN0RXh0ZXJuYWxJZEtpbmRzEiwubWF2aW8ubGlicmFyeS52MS5MaXN0RXh0ZXJuYWxJZEtpbmRzUmVxdWVzdBotLm1hdmlvLmxpYnJhcnkudjEuTGlzdEV4dGVybmFsSWRLaW5kc1Jlc3BvbnNlIgOQAgFCzgEKFGNvbS5tYXZpby5saWJyYXJ5LnYxQg1NZXRhZGF0YVByb3RvUAFaRWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9saWJyYXJ5L3YxO2xpYnJhcnl2MaICA01MWKoCEE1hdmlvLkxpYnJhcnkuVjHKAhBNYXZpb1xMaWJyYXJ5XFYx4gIcTWF2aW9cTGlicmFyeVxWMVxHUEJNZXRhZGF0YeoCEk1hdmlvOjpMaWJyYXJ5OjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_field_mask, file_google_protobuf_timestamp, file_mavio_library_v1_item, file_mavio_library_v1_media]);
+  fileDesc("Ch9tYXZpby9saWJyYXJ5L3YxL21ldGFkYXRhLnByb3RvEhBtYXZpby5saWJyYXJ5LnYxIpkJCgxJdGVtTWV0YWRhdGESFgoEbmFtZRgBIAEoCUIIukgFcgMY9AMSGwoJc29ydF9uYW1lGAIgASgJQgi6SAVyAxj0AxIgCg5vcmlnaW5hbF90aXRsZRgDIAEoCUIIukgFcgMY9AMSGwoIb3ZlcnZpZXcYBCABKAlCCbpIBnIEGKCcARIZCgd0YWdsaW5lGAUgASgJQgi6SAVyAxjoBxIjCg9wcm9kdWN0aW9uX3llYXIYBiABKAVCCrpIBxoFGI9OKAASMQoNcHJlbWllcmVfZGF0ZRgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLAoIZW5kX2RhdGUYCCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjQKB3J1bnRpbWUYCSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAjIAEiAKD29mZmljaWFsX3JhdGluZxgKIAEoCUIHukgEcgIYMhIeCg1jdXN0b21fcmF0aW5nGAsgASgJQge6SARyAhgyEjEKEGNvbW11bml0eV9yYXRpbmcYDCABKAFCF7pIFBISGQAAAAAAACRAKQAAAAAAAAAAEi4KDWNyaXRpY19yYXRpbmcYDSABKAFCF7pIFBISGQAAAAAAAFlAKQAAAAAAAAAAEg4KBmdlbnJlcxgOIAMoCRIMCgR0YWdzGA8gAygJEg8KB3N0dWRpb3MYECADKAkSHAoUcHJvZHVjdGlvbl9sb2NhdGlvbnMYESADKAkSRQoMZXh0ZXJuYWxfaWRzGBIgAygLMi8ubWF2aW8ubGlicmFyeS52MS5JdGVtTWV0YWRhdGEuRXh0ZXJuYWxJZHNFbnRyeRIdCgxpbmRleF9udW1iZXIYEyABKAVCB7pIBBoCKAASJAoTcGFyZW50X2luZGV4X251bWJlchgUIAEoBUIHukgEGgIoABI/Cg1zZXJpZXNfc3RhdHVzGBUgASgOMh4ubWF2aW8ubGlicmFyeS52MS5TZXJpZXNTdGF0dXNCCLpIBYIBAhABEg8KB2FydGlzdHMYFiADKAkSFQoNYWxidW1fYXJ0aXN0cxgXIAMoCRIXCgVhbGJ1bRgYIAEoCUIIukgFcgMY9AMSDgoGbG9ja2VkGBkgASgIEkcKDWxvY2tlZF9maWVsZHMYGiADKA4yHy5tYXZpby5saWJyYXJ5LnYxLk1ldGFkYXRhRmllbGRCD7pIDJIBCSIHggEEEAEgABIRCgltb25pdG9yZWQYGyABKAgSOwoLc2VyaWVzX3R5cGUYHCABKA4yHC5tYXZpby5saWJyYXJ5LnYxLlNlcmllc1R5cGVCCLpIBYIBAhABEj8KDWRpc3BsYXlfb3JkZXIYHSABKA4yHi5tYXZpby5saWJyYXJ5LnYxLkRpc3BsYXlPcmRlckIIukgFggECEAESIAoPYWJzb2x1dGVfbnVtYmVyGB4gASgFQge6SAQaAigAGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKXAQoRVXBkYXRlSXRlbVJlcXVlc3QSFwoCaWQYASABKAlCC7pICMgBAXIDsAEBEjgKCG1ldGFkYXRhGAIgASgLMh4ubWF2aW8ubGlicmFyeS52MS5JdGVtTWV0YWRhdGFCBrpIA8gBARIvCgt1cGRhdGVfbWFzaxgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE1hc2siOgoSVXBkYXRlSXRlbVJlc3BvbnNlEiQKBGl0ZW0YASABKAsyFi5tYXZpby5saWJyYXJ5LnYxLkl0ZW0iRwoSUmVmcmVzaEl0ZW1SZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABARIYChByZXBsYWNlX21ldGFkYXRhGAIgASgIIjsKE1JlZnJlc2hJdGVtUmVzcG9uc2USJAoEaXRlbRgBIAEoCzIWLm1hdmlvLmxpYnJhcnkudjEuSXRlbSLtAQoTU2VhcmNoUmVtb3RlUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARIWCgRuYW1lGAIgASgJQgi6SAVyAxj0AxIMCgR5ZWFyGAMgASgFEkwKDGV4dGVybmFsX2lkcxgEIAMoCzI2Lm1hdmlvLmxpYnJhcnkudjEuU2VhcmNoUmVtb3RlUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5EhAKCHByb3ZpZGVyGAUgASgJGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASL3AQoSUmVtb3RlU2VhcmNoUmVzdWx0EhAKCHByb3ZpZGVyGAEgASgJEgwKBG5hbWUYAiABKAkSDAoEeWVhchgDIAEoBRIQCghvdmVydmlldxgEIAEoCRJLCgxleHRlcm5hbF9pZHMYBSADKAsyNS5tYXZpby5saWJyYXJ5LnYxLlJlbW90ZVNlYXJjaFJlc3VsdC5FeHRlcm5hbElkc0VudHJ5EhEKCWltYWdlX3VybBgGIAEoCRINCgVzY29yZRgHIAEoARoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiTQoUU2VhcmNoUmVtb3RlUmVzcG9uc2USNQoHcmVzdWx0cxgBIAMoCzIkLm1hdmlvLmxpYnJhcnkudjEuUmVtb3RlU2VhcmNoUmVzdWx0Ir8BChNJZGVudGlmeUl0ZW1SZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBElYKDGV4dGVybmFsX2lkcxgCIAMoCzI2Lm1hdmlvLmxpYnJhcnkudjEuSWRlbnRpZnlJdGVtUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5Qgi6SAWaAQIIARoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiPAoUSWRlbnRpZnlJdGVtUmVzcG9uc2USJAoEaXRlbRgBIAEoCzIWLm1hdmlvLmxpYnJhcnkudjEuSXRlbSJsChdMaXN0UmVtb3RlSW1hZ2VzUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARIzCgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmRCCLpIBYIBAhABIpcBCgtSZW1vdGVJbWFnZRIQCghwcm92aWRlchgBIAEoCRIpCgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmQSCwoDdXJsGAMgASgJEg0KBXdpZHRoGAQgASgFEg4KBmhlaWdodBgFIAEoBRIQCghsYW5ndWFnZRgGIAEoCRINCgVzY29yZRgHIAEoASJJChhMaXN0UmVtb3RlSW1hZ2VzUmVzcG9uc2USLQoGaW1hZ2VzGAEgAygLMh0ubWF2aW8ubGlicmFyeS52MS5SZW1vdGVJbWFnZSKzAQoTU2V0SXRlbUltYWdlUmVxdWVzdBIcCgdpdGVtX2lkGAEgASgJQgu6SAjIAQFyA7ABARI4CgRraW5kGAIgASgOMhsubWF2aW8ubGlicmFyeS52MS5JbWFnZUtpbmRCDbpICsgBAYIBBBABIAASFwoDdXJsGAMgASgJQgi6SAVyA4gBAUgAEhoKBGRhdGEYBCABKAxCCrpIB3oFGICAgApIAEIPCgZzb3VyY2USBbpIAggBIj4KFFNldEl0ZW1JbWFnZVJlc3BvbnNlEiYKBWltYWdlGAEgASgLMhcubWF2aW8ubGlicmFyeS52MS5JbWFnZSJVChZEZWxldGVJdGVtSW1hZ2VSZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBEh0KCGltYWdlX2lkGAIgASgJQgu6SAjIAQFyA7ABASIZChdEZWxldGVJdGVtSW1hZ2VSZXNwb25zZSI5ChlTZWFyY2hSZW1vdGVMeXJpY3NSZXF1ZXN0EhwKB2l0ZW1faWQYASABKAlCC7pICMgBAXIDsAEBIqYBCgxSZW1vdGVMeXJpY3MSEAoIcHJvdmlkZXIYASABKAkSCgoCaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIPCgdhcnRpc3RzGAQgAygJEg0KBWFsYnVtGAUgASgJEisKCGR1cmF0aW9uGAYgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg4KBnN5bmNlZBgHIAEoCBINCgVzY29yZRgIIAEoASJMChpTZWFyY2hSZW1vdGVMeXJpY3NSZXNwb25zZRIuCgZseXJpY3MYASADKAsyHi5tYXZpby5saWJyYXJ5LnYxLlJlbW90ZUx5cmljcyJpChtEb3dubG9hZFJlbW90ZUx5cmljc1JlcXVlc3QSHAoHaXRlbV9pZBgBIAEoCUILukgIyAEBcgOwAQESGAoIcHJvdmlkZXIYAiABKAlCBrpIA8gBARISCgJpZBgDIAEoCUIGukgDyAEBIh4KHERvd25sb2FkUmVtb3RlTHlyaWNzUmVzcG9uc2UiVQoaTGlzdEV4dGVybmFsSWRLaW5kc1JlcXVlc3QSNwoJaXRlbV9raW5kGAEgASgOMhoubWF2aW8ubGlicmFyeS52MS5JdGVtS2luZEIIukgFggECEAEifwoORXh0ZXJuYWxJZEtpbmQSCwoDa2V5GAEgASgJEgwKBG5hbWUYAiABKAkSLgoKaXRlbV9raW5kcxgDIAMoDjIaLm1hdmlvLmxpYnJhcnkudjEuSXRlbUtpbmQSDwoHcGVyc29ucxgEIAEoCBIRCglwbHVnaW5faWQYBSABKAkiTgobTGlzdEV4dGVybmFsSWRLaW5kc1Jlc3BvbnNlEi8KBWtpbmRzGAEgAygLMiAubWF2aW8ubGlicmFyeS52MS5FeHRlcm5hbElkS2luZDKmCAoPTWV0YWRhdGFTZXJ2aWNlElcKClVwZGF0ZUl0ZW0SIy5tYXZpby5saWJyYXJ5LnYxLlVwZGF0ZUl0ZW1SZXF1ZXN0GiQubWF2aW8ubGlicmFyeS52MS5VcGRhdGVJdGVtUmVzcG9uc2USWgoLUmVmcmVzaEl0ZW0SJC5tYXZpby5saWJyYXJ5LnYxLlJlZnJlc2hJdGVtUmVxdWVzdBolLm1hdmlvLmxpYnJhcnkudjEuUmVmcmVzaEl0ZW1SZXNwb25zZRJiCgxTZWFyY2hSZW1vdGUSJS5tYXZpby5saWJyYXJ5LnYxLlNlYXJjaFJlbW90ZVJlcXVlc3QaJi5tYXZpby5saWJyYXJ5LnYxLlNlYXJjaFJlbW90ZVJlc3BvbnNlIgOQAgESXQoMSWRlbnRpZnlJdGVtEiUubWF2aW8ubGlicmFyeS52MS5JZGVudGlmeUl0ZW1SZXF1ZXN0GiYubWF2aW8ubGlicmFyeS52MS5JZGVudGlmeUl0ZW1SZXNwb25zZRJuChBMaXN0UmVtb3RlSW1hZ2VzEikubWF2aW8ubGlicmFyeS52MS5MaXN0UmVtb3RlSW1hZ2VzUmVxdWVzdBoqLm1hdmlvLmxpYnJhcnkudjEuTGlzdFJlbW90ZUltYWdlc1Jlc3BvbnNlIgOQAgESXQoMU2V0SXRlbUltYWdlEiUubWF2aW8ubGlicmFyeS52MS5TZXRJdGVtSW1hZ2VSZXF1ZXN0GiYubWF2aW8ubGlicmFyeS52MS5TZXRJdGVtSW1hZ2VSZXNwb25zZRJmCg9EZWxldGVJdGVtSW1hZ2USKC5tYXZpby5saWJyYXJ5LnYxLkRlbGV0ZUl0ZW1JbWFnZVJlcXVlc3QaKS5tYXZpby5saWJyYXJ5LnYxLkRlbGV0ZUl0ZW1JbWFnZVJlc3BvbnNlEnQKElNlYXJjaFJlbW90ZUx5cmljcxIrLm1hdmlvLmxpYnJhcnkudjEuU2VhcmNoUmVtb3RlTHlyaWNzUmVxdWVzdBosLm1hdmlvLmxpYnJhcnkudjEuU2VhcmNoUmVtb3RlTHlyaWNzUmVzcG9uc2UiA5ACARJ1ChREb3dubG9hZFJlbW90ZUx5cmljcxItLm1hdmlvLmxpYnJhcnkudjEuRG93bmxvYWRSZW1vdGVMeXJpY3NSZXF1ZXN0Gi4ubWF2aW8ubGlicmFyeS52MS5Eb3dubG9hZFJlbW90ZUx5cmljc1Jlc3BvbnNlEncKE0xpc3RFeHRlcm5hbElkS2luZHMSLC5tYXZpby5saWJyYXJ5LnYxLkxpc3RFeHRlcm5hbElkS2luZHNSZXF1ZXN0Gi0ubWF2aW8ubGlicmFyeS52MS5MaXN0RXh0ZXJuYWxJZEtpbmRzUmVzcG9uc2UiA5ACAULOAQoUY29tLm1hdmlvLmxpYnJhcnkudjFCDU1ldGFkYXRhUHJvdG9QAVpFZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL2xpYnJhcnkvdjE7bGlicmFyeXYxogIDTUxYqgIQTWF2aW8uTGlicmFyeS5WMcoCEE1hdmlvXExpYnJhcnlcVjHiAhxNYXZpb1xMaWJyYXJ5XFYxXEdQQk1ldGFkYXRh6gISTWF2aW86OkxpYnJhcnk6OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_field_mask, file_google_protobuf_timestamp, file_mavio_library_v1_item]);
 
 /**
  * ItemMetadata holds the editable fields of an item.
@@ -625,60 +623,36 @@ export const DeleteItemImageResponseSchema: GenMessage<DeleteItemImageResponse> 
   messageDesc(file_mavio_library_v1_metadata, 16);
 
 /**
- * @generated from message mavio.library.v1.SearchSubtitlesRequest
+ * @generated from message mavio.library.v1.SearchRemoteLyricsRequest
  */
-export type SearchSubtitlesRequest = Message<"mavio.library.v1.SearchSubtitlesRequest"> & {
+export type SearchRemoteLyricsRequest = Message<"mavio.library.v1.SearchRemoteLyricsRequest"> & {
   /**
    * @generated from field: string item_id = 1;
    */
   itemId: string;
-
-  /**
-   * ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-   *
-   * @generated from field: string language = 2;
-   */
-  language: string;
-
-  /**
-   * The media source; unset means the item's first.
-   *
-   * @generated from field: string media_source_id = 3;
-   */
-  mediaSourceId: string;
-
-  /**
-   * @generated from field: bool hearing_impaired = 4;
-   */
-  hearingImpaired: boolean;
-
-  /**
-   * @generated from field: bool forced = 5;
-   */
-  forced: boolean;
 };
 
 /**
- * Describes the message mavio.library.v1.SearchSubtitlesRequest.
- * Use `create(SearchSubtitlesRequestSchema)` to create a new message.
+ * Describes the message mavio.library.v1.SearchRemoteLyricsRequest.
+ * Use `create(SearchRemoteLyricsRequestSchema)` to create a new message.
  */
-export const SearchSubtitlesRequestSchema: GenMessage<SearchSubtitlesRequest> = /*@__PURE__*/
+export const SearchRemoteLyricsRequestSchema: GenMessage<SearchRemoteLyricsRequest> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_metadata, 17);
 
 /**
- * RemoteSubtitle is a subtitle a provider offers.
+ * RemoteLyrics are lyrics a provider has.
  *
- * @generated from message mavio.library.v1.RemoteSubtitle
+ * @generated from message mavio.library.v1.RemoteLyrics
  */
-export type RemoteSubtitle = Message<"mavio.library.v1.RemoteSubtitle"> & {
+export type RemoteLyrics = Message<"mavio.library.v1.RemoteLyrics"> & {
   /**
+   * The provider and its ID of the lyrics, for DownloadRemoteLyrics.
+   *
    * @generated from field: string provider = 1;
    */
   provider: string;
 
   /**
-   * The provider's ID, passed to DownloadSubtitle.
-   *
    * @generated from field: string id = 2;
    */
   id: string;
@@ -689,114 +663,95 @@ export type RemoteSubtitle = Message<"mavio.library.v1.RemoteSubtitle"> & {
   name: string;
 
   /**
-   * @generated from field: string language = 4;
+   * @generated from field: repeated string artists = 4;
    */
-  language: string;
+  artists: string[];
 
   /**
-   * @generated from field: string format = 5;
+   * @generated from field: string album = 5;
    */
-  format: string;
+  album: string;
 
   /**
-   * @generated from field: bool hearing_impaired = 6;
+   * @generated from field: google.protobuf.Duration duration = 6;
    */
-  hearingImpaired: boolean;
+  duration?: Duration | undefined;
 
   /**
-   * @generated from field: bool forced = 7;
+   * @generated from field: bool synced = 7;
    */
-  forced: boolean;
+  synced: boolean;
 
   /**
    * @generated from field: double score = 8;
    */
   score: number;
-
-  /**
-   * @generated from field: int32 download_count = 9;
-   */
-  downloadCount: number;
-
-  /**
-   * @generated from field: bool hash_match = 10;
-   */
-  hashMatch: boolean;
 };
 
 /**
- * Describes the message mavio.library.v1.RemoteSubtitle.
- * Use `create(RemoteSubtitleSchema)` to create a new message.
+ * Describes the message mavio.library.v1.RemoteLyrics.
+ * Use `create(RemoteLyricsSchema)` to create a new message.
  */
-export const RemoteSubtitleSchema: GenMessage<RemoteSubtitle> = /*@__PURE__*/
+export const RemoteLyricsSchema: GenMessage<RemoteLyrics> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_metadata, 18);
 
 /**
- * @generated from message mavio.library.v1.SearchSubtitlesResponse
+ * @generated from message mavio.library.v1.SearchRemoteLyricsResponse
  */
-export type SearchSubtitlesResponse = Message<"mavio.library.v1.SearchSubtitlesResponse"> & {
+export type SearchRemoteLyricsResponse = Message<"mavio.library.v1.SearchRemoteLyricsResponse"> & {
   /**
-   * @generated from field: repeated mavio.library.v1.RemoteSubtitle subtitles = 1;
+   * Each provider's lyrics, best first, in provider order.
+   *
+   * @generated from field: repeated mavio.library.v1.RemoteLyrics lyrics = 1;
    */
-  subtitles: RemoteSubtitle[];
+  lyrics: RemoteLyrics[];
 };
 
 /**
- * Describes the message mavio.library.v1.SearchSubtitlesResponse.
- * Use `create(SearchSubtitlesResponseSchema)` to create a new message.
+ * Describes the message mavio.library.v1.SearchRemoteLyricsResponse.
+ * Use `create(SearchRemoteLyricsResponseSchema)` to create a new message.
  */
-export const SearchSubtitlesResponseSchema: GenMessage<SearchSubtitlesResponse> = /*@__PURE__*/
+export const SearchRemoteLyricsResponseSchema: GenMessage<SearchRemoteLyricsResponse> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_metadata, 19);
 
 /**
- * @generated from message mavio.library.v1.DownloadSubtitleRequest
+ * @generated from message mavio.library.v1.DownloadRemoteLyricsRequest
  */
-export type DownloadSubtitleRequest = Message<"mavio.library.v1.DownloadSubtitleRequest"> & {
+export type DownloadRemoteLyricsRequest = Message<"mavio.library.v1.DownloadRemoteLyricsRequest"> & {
   /**
    * @generated from field: string item_id = 1;
    */
   itemId: string;
 
   /**
-   * @generated from field: string media_source_id = 2;
-   */
-  mediaSourceId: string;
-
-  /**
-   * @generated from field: string provider = 3;
+   * @generated from field: string provider = 2;
    */
   provider: string;
 
   /**
-   * @generated from field: string subtitle_id = 4;
+   * @generated from field: string id = 3;
    */
-  subtitleId: string;
+  id: string;
 };
 
 /**
- * Describes the message mavio.library.v1.DownloadSubtitleRequest.
- * Use `create(DownloadSubtitleRequestSchema)` to create a new message.
+ * Describes the message mavio.library.v1.DownloadRemoteLyricsRequest.
+ * Use `create(DownloadRemoteLyricsRequestSchema)` to create a new message.
  */
-export const DownloadSubtitleRequestSchema: GenMessage<DownloadSubtitleRequest> = /*@__PURE__*/
+export const DownloadRemoteLyricsRequestSchema: GenMessage<DownloadRemoteLyricsRequest> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_metadata, 20);
 
 /**
- * @generated from message mavio.library.v1.DownloadSubtitleResponse
+ * @generated from message mavio.library.v1.DownloadRemoteLyricsResponse
  */
-export type DownloadSubtitleResponse = Message<"mavio.library.v1.DownloadSubtitleResponse"> & {
-  /**
-   * The subtitle as a stream of the media source.
-   *
-   * @generated from field: mavio.library.v1.MediaStream stream = 1;
-   */
-  stream?: MediaStream | undefined;
+export type DownloadRemoteLyricsResponse = Message<"mavio.library.v1.DownloadRemoteLyricsResponse"> & {
 };
 
 /**
- * Describes the message mavio.library.v1.DownloadSubtitleResponse.
- * Use `create(DownloadSubtitleResponseSchema)` to create a new message.
+ * Describes the message mavio.library.v1.DownloadRemoteLyricsResponse.
+ * Use `create(DownloadRemoteLyricsResponseSchema)` to create a new message.
  */
-export const DownloadSubtitleResponseSchema: GenMessage<DownloadSubtitleResponse> = /*@__PURE__*/
+export const DownloadRemoteLyricsResponseSchema: GenMessage<DownloadRemoteLyricsResponse> = /*@__PURE__*/
   messageDesc(file_mavio_library_v1_metadata, 21);
 
 /**
@@ -888,7 +843,7 @@ export const ListExternalIdKindsResponseSchema: GenMessage<ListExternalIdKindsRe
  * MetadataService corrects and completes the metadata of items:
  * administrators edit and lock it, identify items again against the
  * metadata providers, refresh them, choose their images and download
- * subtitles. In libraries saving local metadata, changes are also written
+ * lyrics. In libraries saving local metadata, changes are also written
  * next to the media as NFO files and image files.
  *
  * @generated from service mavio.library.v1.MetadataService
@@ -970,26 +925,27 @@ export const MetadataService: GenService<{
     output: typeof DeleteItemImageResponseSchema;
   },
   /**
-   * SearchSubtitles searches the subtitle providers for subtitles of a
-   * video in one language.
+   * SearchRemoteLyrics asks the lyrics providers for lyrics of a track;
+   * administrators only.
    *
-   * @generated from rpc mavio.library.v1.MetadataService.SearchSubtitles
+   * @generated from rpc mavio.library.v1.MetadataService.SearchRemoteLyrics
    */
-  searchSubtitles: {
+  searchRemoteLyrics: {
     methodKind: "unary";
-    input: typeof SearchSubtitlesRequestSchema;
-    output: typeof SearchSubtitlesResponseSchema;
+    input: typeof SearchRemoteLyricsRequestSchema;
+    output: typeof SearchRemoteLyricsResponseSchema;
   },
   /**
-   * DownloadSubtitle saves a subtitle found by SearchSubtitles next to the
-   * video, where it becomes one of the video's subtitle streams.
+   * DownloadRemoteLyrics saves lyrics SearchRemoteLyrics found beside the
+   * track, as .lrc when synced and .txt otherwise, replacing its other
+   * lyric files; administrators only.
    *
-   * @generated from rpc mavio.library.v1.MetadataService.DownloadSubtitle
+   * @generated from rpc mavio.library.v1.MetadataService.DownloadRemoteLyrics
    */
-  downloadSubtitle: {
+  downloadRemoteLyrics: {
     methodKind: "unary";
-    input: typeof DownloadSubtitleRequestSchema;
-    output: typeof DownloadSubtitleResponseSchema;
+    input: typeof DownloadRemoteLyricsRequestSchema;
+    output: typeof DownloadRemoteLyricsResponseSchema;
   },
   /**
    * ListExternalIdKinds lists the kinds of external IDs items and persons

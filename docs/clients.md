@@ -82,7 +82,7 @@ The server owns every decision that depends on the library, the user or other de
 | Live updates | Server pushes | One `EventService` stream per device: item and library changes, user data, sessions, remote-control commands and SyncPlay. Clients reconnect with backoff and do not poll |
 | Media and images | Plain HTTP | The URLs the server signs for the session ([Accounts §5.4](accounts.md#54-media-urls)), so players need no headers |
 | Sign-in | Server | Sessions bound to the device key, with short-lived bearer tokens; televisions sign in Mavio accounts with a code at mavio.dev/link, and standalone servers' users with Quick Connect |
-| Home | Server builds, client merges | Each server builds its hubs for the user with `HomeService` ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)); the client merges the hubs of every server it is signed in to (§5.4) |
+| Home | Server builds, client merges | Each server builds its hubs for the user with `HubService` ([Architecture §11](architecture.md#11-api-and-authentication-appsserver)); the client merges the hubs of every server it is signed in to (§5.4) |
 | Finding servers | Client | UDP discovery on port 7359 on the local network, or an address typed in |
 | Acquisition, discovery and requests | Server | The server's own services; clients call nothing else |
 

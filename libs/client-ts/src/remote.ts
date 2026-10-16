@@ -2,7 +2,7 @@
 // they play, and the commands sent to them through their event streams.
 import type { MessageInitShape } from "@bufbuild/protobuf";
 import { type CommandSchema, SessionService } from "@mavio/proto/mavio/session/v1/session_pb";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore } from "./hooks.ts";
 import type { ServerEntry } from "./servers.ts";
@@ -14,6 +14,16 @@ export function useSessions(server: ServerEntry, enabled = true) {
     queryKey: serverKey(server.id, "sessions", "remote"),
     queryFn: async () => (await servers.client(SessionService, server).listSessions({})).sessions,
     enabled,
+  });
+}
+
+/** Signs one of the user's devices out, refreshing the devices when done. */
+export function useRevokeSession(server: ServerEntry) {
+  const servers = useServersStore();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => servers.client(SessionService, server).revokeSession({ id }),
+    onSettled: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "sessions") }),
   });
 }
 

@@ -81,8 +81,10 @@ export function useWantedActions(server: ServerEntry) {
       onSuccess,
     }),
     syncRss: useMutation({ mutationFn: () => c().syncRSS({}) }),
-    setMonitored: useMutation({ mutationFn: (v: { itemIds: string[]; monitored: boolean }) => c().setMonitored(v), onSuccess }),
-    monitorSeries: useMutation({ mutationFn: (v: { itemIds: string[]; monitor: SeriesMonitor }) => c().monitorSeries(v), onSuccess }),
+    setMonitored: useMutation({ mutationFn: (v: { itemIds: string[]; monitored: boolean }) => c().setMonitored({ change: { case: "items", value: v } }), onSuccess }),
+    monitorSeries: useMutation({ mutationFn: (v: { itemIds: string[]; monitor: SeriesMonitor }) => c().setMonitored({ change: { case: "series", value: v } }),
+      onSuccess,
+     }),
     update: useMutation({ mutationFn: async (wanted: Wanted) => (await c().updateWanted({ wanted })).wanted, onSuccess }),
     // Movies and series are monitored through their wanted; seasons and episodes by setMonitored.
     setWantedMonitored: useMutation({

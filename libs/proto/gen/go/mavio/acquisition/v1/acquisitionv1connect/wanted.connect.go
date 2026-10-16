@@ -37,9 +37,6 @@ const (
 	WantedServiceAddMovieProcedure = "/mavio.acquisition.v1.WantedService/AddMovie"
 	// WantedServiceAddSeriesProcedure is the fully-qualified name of the WantedService's AddSeries RPC.
 	WantedServiceAddSeriesProcedure = "/mavio.acquisition.v1.WantedService/AddSeries"
-	// WantedServiceMonitorSeriesProcedure is the fully-qualified name of the WantedService's
-	// MonitorSeries RPC.
-	WantedServiceMonitorSeriesProcedure = "/mavio.acquisition.v1.WantedService/MonitorSeries"
 	// WantedServiceSetMonitoredProcedure is the fully-qualified name of the WantedService's
 	// SetMonitored RPC.
 	WantedServiceSetMonitoredProcedure = "/mavio.acquisition.v1.WantedService/SetMonitored"
@@ -70,11 +67,9 @@ type WantedServiceClient interface {
 	// list its episodes, monitored with a quality profile; it fails with
 	// ALREADY_EXISTS when the library has the series.
 	AddSeries(context.Context, *v1.AddSeriesRequest) (*v1.AddSeriesResponse, error)
-	// MonitorSeries applies a monitoring option to the seasons and episodes
-	// of wanted series, as Sonarr's season pass.
-	MonitorSeries(context.Context, *v1.MonitorSeriesRequest) (*v1.MonitorSeriesResponse, error)
-	// SetMonitored monitors or unmonitors seasons and episodes; a season
-	// takes its episodes along.
+	// SetMonitored monitors or unmonitors seasons and episodes, a season
+	// taking its episodes along, or applies a monitoring option to the
+	// seasons and episodes of wanted series, as Sonarr's season pass.
 	SetMonitored(context.Context, *v1.SetMonitoredRequest) (*v1.SetMonitoredResponse, error)
 	// GetWanted returns how a movie or series is acquired.
 	GetWanted(context.Context, *v1.GetWantedRequest) (*v1.GetWantedResponse, error)
@@ -112,13 +107,6 @@ func NewWantedServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			httpClient,
 			baseURL+WantedServiceAddSeriesProcedure,
 			connect.WithSchema(wantedServiceMethods.ByName("AddSeries")),
-			connect.WithClientOptions(opts...),
-		),
-		monitorSeries: connect.NewClient[v1.MonitorSeriesRequest, v1.MonitorSeriesResponse](
-			httpClient,
-			baseURL+WantedServiceMonitorSeriesProcedure,
-			connect.WithSchema(wantedServiceMethods.ByName("MonitorSeries")),
-			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
 		setMonitored: connect.NewClient[v1.SetMonitoredRequest, v1.SetMonitoredResponse](
@@ -166,15 +154,14 @@ func NewWantedServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // wantedServiceClient implements WantedServiceClient.
 type wantedServiceClient struct {
-	addMovie      *connect.Client[v1.AddMovieRequest, v1.AddMovieResponse]
-	addSeries     *connect.Client[v1.AddSeriesRequest, v1.AddSeriesResponse]
-	monitorSeries *connect.Client[v1.MonitorSeriesRequest, v1.MonitorSeriesResponse]
-	setMonitored  *connect.Client[v1.SetMonitoredRequest, v1.SetMonitoredResponse]
-	getWanted     *connect.Client[v1.GetWantedRequest, v1.GetWantedResponse]
-	updateWanted  *connect.Client[v1.UpdateWantedRequest, v1.UpdateWantedResponse]
-	listWanted    *connect.Client[v1.ListWantedRequest, v1.ListWantedResponse]
-	searchWanted  *connect.Client[v1.SearchWantedRequest, v1.SearchWantedResponse]
-	syncRSS       *connect.Client[v1.SyncRSSRequest, v1.SyncRSSResponse]
+	addMovie     *connect.Client[v1.AddMovieRequest, v1.AddMovieResponse]
+	addSeries    *connect.Client[v1.AddSeriesRequest, v1.AddSeriesResponse]
+	setMonitored *connect.Client[v1.SetMonitoredRequest, v1.SetMonitoredResponse]
+	getWanted    *connect.Client[v1.GetWantedRequest, v1.GetWantedResponse]
+	updateWanted *connect.Client[v1.UpdateWantedRequest, v1.UpdateWantedResponse]
+	listWanted   *connect.Client[v1.ListWantedRequest, v1.ListWantedResponse]
+	searchWanted *connect.Client[v1.SearchWantedRequest, v1.SearchWantedResponse]
+	syncRSS      *connect.Client[v1.SyncRSSRequest, v1.SyncRSSResponse]
 }
 
 // AddMovie calls mavio.acquisition.v1.WantedService.AddMovie.
@@ -189,15 +176,6 @@ func (c *wantedServiceClient) AddMovie(ctx context.Context, req *v1.AddMovieRequ
 // AddSeries calls mavio.acquisition.v1.WantedService.AddSeries.
 func (c *wantedServiceClient) AddSeries(ctx context.Context, req *v1.AddSeriesRequest) (*v1.AddSeriesResponse, error) {
 	response, err := c.addSeries.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// MonitorSeries calls mavio.acquisition.v1.WantedService.MonitorSeries.
-func (c *wantedServiceClient) MonitorSeries(ctx context.Context, req *v1.MonitorSeriesRequest) (*v1.MonitorSeriesResponse, error) {
-	response, err := c.monitorSeries.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -270,11 +248,9 @@ type WantedServiceHandler interface {
 	// list its episodes, monitored with a quality profile; it fails with
 	// ALREADY_EXISTS when the library has the series.
 	AddSeries(context.Context, *v1.AddSeriesRequest) (*v1.AddSeriesResponse, error)
-	// MonitorSeries applies a monitoring option to the seasons and episodes
-	// of wanted series, as Sonarr's season pass.
-	MonitorSeries(context.Context, *v1.MonitorSeriesRequest) (*v1.MonitorSeriesResponse, error)
-	// SetMonitored monitors or unmonitors seasons and episodes; a season
-	// takes its episodes along.
+	// SetMonitored monitors or unmonitors seasons and episodes, a season
+	// taking its episodes along, or applies a monitoring option to the
+	// seasons and episodes of wanted series, as Sonarr's season pass.
 	SetMonitored(context.Context, *v1.SetMonitoredRequest) (*v1.SetMonitoredResponse, error)
 	// GetWanted returns how a movie or series is acquired.
 	GetWanted(context.Context, *v1.GetWantedRequest) (*v1.GetWantedResponse, error)
@@ -308,13 +284,6 @@ func NewWantedServiceHandler(svc WantedServiceHandler, opts ...connect.HandlerOp
 		WantedServiceAddSeriesProcedure,
 		svc.AddSeries,
 		connect.WithSchema(wantedServiceMethods.ByName("AddSeries")),
-		connect.WithHandlerOptions(opts...),
-	)
-	wantedServiceMonitorSeriesHandler := connect.NewUnaryHandlerSimple(
-		WantedServiceMonitorSeriesProcedure,
-		svc.MonitorSeries,
-		connect.WithSchema(wantedServiceMethods.ByName("MonitorSeries")),
-		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
 	wantedServiceSetMonitoredHandler := connect.NewUnaryHandlerSimple(
@@ -363,8 +332,6 @@ func NewWantedServiceHandler(svc WantedServiceHandler, opts ...connect.HandlerOp
 			wantedServiceAddMovieHandler.ServeHTTP(w, r)
 		case WantedServiceAddSeriesProcedure:
 			wantedServiceAddSeriesHandler.ServeHTTP(w, r)
-		case WantedServiceMonitorSeriesProcedure:
-			wantedServiceMonitorSeriesHandler.ServeHTTP(w, r)
 		case WantedServiceSetMonitoredProcedure:
 			wantedServiceSetMonitoredHandler.ServeHTTP(w, r)
 		case WantedServiceGetWantedProcedure:
@@ -392,10 +359,6 @@ func (UnimplementedWantedServiceHandler) AddMovie(context.Context, *v1.AddMovieR
 
 func (UnimplementedWantedServiceHandler) AddSeries(context.Context, *v1.AddSeriesRequest) (*v1.AddSeriesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.WantedService.AddSeries is not implemented"))
-}
-
-func (UnimplementedWantedServiceHandler) MonitorSeries(context.Context, *v1.MonitorSeriesRequest) (*v1.MonitorSeriesResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.WantedService.MonitorSeries is not implemented"))
 }
 
 func (UnimplementedWantedServiceHandler) SetMonitored(context.Context, *v1.SetMonitoredRequest) (*v1.SetMonitoredResponse, error) {

@@ -9,7 +9,7 @@ import "mavio/library/v1/item.proto";
 import "mavio/playback/v1/playback.proto";
 import "mavio/session/v1/syncplay.proto";
 import "mavio/system/v1/activity.proto";
-import "mavio/system/v1/system.proto";
+import "mavio/system/v1/plugin.proto";
 import "mavio/user/v1/user.proto";
 
 // EventService streams what changes to signed-in devices.
@@ -22,7 +22,8 @@ service EventService {
   rpc Subscribe(SubscribeRequest) returns (stream SubscribeResponse);
 }
 
-// SessionService lists the signed-in devices and controls them remotely.
+// SessionService lists the signed-in devices, signs them out and controls
+// them remotely.
 service SessionService {
   // ListSessions lists the calling user's signed-in devices with what they
   // play, online ones first; administrators may list every user's. The
@@ -31,6 +32,11 @@ service SessionService {
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // RevokeSession signs a device out: one of the calling user's, or
+  // anyone's for administrators. Other users' devices and plugins' remote
+  // devices are NOT_FOUND; the calling device signs out with
+  // AuthService.Logout.
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
   // SendCommand sends a command to an online device of the calling user,
   // or of anyone for administrators, through its event stream, or to a
   // plugin's remote device through its plugin. The device carries it out
@@ -150,6 +156,10 @@ message Session {
   // The plugin controlling a remote device, which has no user and whose
   // client is its product.
   string plugin_id = 11;
+  // When the device signed in; unset for plugins' remote devices.
+  google.protobuf.Timestamp create_time = 12;
+  // Whether this is the device making the request.
+  bool current = 13;
 }
 
 // NowPlaying is what a device plays.
@@ -252,6 +262,15 @@ message ListSessionsRequest {
 message ListSessionsResponse {
   repeated Session sessions = 1;
 }
+
+message RevokeSessionRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message RevokeSessionResponse {}
 
 message SendCommandRequest {
   string session_id = 1 [

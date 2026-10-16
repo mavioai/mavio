@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -22,7 +21,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
-	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/home/v1/homev1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/hub/v1/hubv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/playback/v1/playbackv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
@@ -55,12 +54,11 @@ var AuthPublicProcedures = []string{
 // UserBoundProcedures act on the caller's own state, so a plugin calls them
 // only while acting as a user (auth.Interceptor.RequireUser).
 var UserBoundProcedures = []string{
-	authv1connect.AuthServiceListSessionsProcedure,
-	authv1connect.AuthServiceRevokeSessionProcedure,
+	sessionv1connect.SessionServiceRevokeSessionProcedure,
 	authv1connect.AuthServiceAuthorizeQuickConnectProcedure,
 	authv1connect.AuthServiceCreateApiKeyProcedure,
 	userv1connect.UserServiceGetCurrentUserProcedure,
-	userv1connect.UserServiceUpdatePreferencesProcedure,
+	userv1connect.UserServiceUpdatePlaybackPreferencesProcedure,
 	userv1connect.UserDataServiceName,
 	userv1connect.DisplayPreferencesServiceName,
 	playbackv1connect.PlaybackServiceName,
@@ -70,7 +68,7 @@ var UserBoundProcedures = []string{
 	acquisitionv1connect.IssueServiceCreateIssueProcedure,
 	acquisitionv1connect.IssueServiceAddCommentProcedure,
 	systemv1connect.ActivityServiceListMyActivitiesProcedure,
-	homev1connect.HomeServiceName,
+	hubv1connect.HubServiceName,
 }
 
 // SessionBoundProcedures need the caller's signed-in session, which plugins
@@ -649,47 +647,6 @@ func (s *AuthService) Logout(ctx context.Context, _ *authv1.LogoutRequest) (*aut
 		return nil, connectError(ctx, err)
 	}
 	return &authv1.LogoutResponse{}, nil
-}
-
-// ListSessions lists the calling user's sessions.
-func (s *AuthService) ListSessions(ctx context.Context, _ *authv1.ListSessionsRequest) (*authv1.ListSessionsResponse, error) {
-	p, err := principal(ctx)
-	if err != nil {
-		return nil, err
-	}
-	list, err := s.store.AuthSessions().ListForUser(ctx, p.User.ID)
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	out := make([]*authv1.Session, len(list))
-	for i := range list {
-		out[i] = sessionToProto(&list[i], list[i].ID == p.Session.ID)
-	}
-	return authv1.ListSessionsResponse_builder{Sessions: out}.Build(), nil
-}
-
-// RevokeSession ends one of the calling user's sessions.
-func (s *AuthService) RevokeSession(ctx context.Context, req *authv1.RevokeSessionRequest) (*authv1.RevokeSessionResponse, error) {
-	p, err := principal(ctx)
-	if err != nil {
-		return nil, err
-	}
-	id, err := core.ParseID(req.GetId())
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	}
-	// Other users' sessions are reported as missing.
-	list, err := s.store.AuthSessions().ListForUser(ctx, p.User.ID)
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
-	if !slices.ContainsFunc(list, func(s core.AuthSession) bool { return s.ID == id }) {
-		return nil, connect.NewError(connect.CodeNotFound, errors.New("no such session"))
-	}
-	if err := s.store.AuthSessions().Delete(ctx, id); err != nil {
-		return nil, connectError(ctx, err)
-	}
-	return &authv1.RevokeSessionResponse{}, nil
 }
 
 // principal returns the signed-in caller; the auth interceptor guarantees

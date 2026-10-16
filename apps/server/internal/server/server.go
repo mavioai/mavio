@@ -359,7 +359,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 			return err
 		},
 	}
-	subFiles := &library.Subtitles{Store: db, Source: plugs.SubtitleProviders, Storages: storages, Folder: subtitleFolder(set, metadataDir), Logger: log}
+	subFiles := &library.Subtitles{Store: db, Storages: storages, Folder: subtitleFolder(set, metadataDir)}
 	subs := &subtitles.Runtime{
 		Store: db, Settings: func() core.SubtitleSettings { return set.Get().Subtitles }, Providers: plugs.SubtitlePlugins,
 		Translators: plugs.SubtitleTranslators,

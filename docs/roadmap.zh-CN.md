@@ -583,7 +583,9 @@ flowchart TD
 - [x] 工具链与构建目标：`libs/client-rust` 中的 Rust 与 `tools/nx-cargo`；更新 Go、Node.js 与 pnpm
 - [x] 从 `libs/proto` 生成 TypeScript 与 Rust（`@mavio/proto`、`mavio-api`）
 - [x] `libs/design`：tokens、图标、字符串、组件规范与功能对齐表，为每个客户端编译
-- [x] 服务端：`HomeService`，提供首页与媒体库标签页的推荐行（`apps/server/internal/home`），由 `Library.Hubs` 按媒体库选择
+- [x] 服务端：`HubService`，提供首页与媒体库标签页的推荐行（`apps/server/internal/hub`），由 `Library.Hubs` 按媒体库选择
+  - [x] 用户的首页布局：置顶的媒体库及其顺序、隐藏的推荐行，以类型化的 `User.Home` 保存，通过 `UpdateHomeLayout` 设置
+  - [ ] Web UI 中编辑首页布局：置顶与排序媒体库、隐藏推荐行
   - [ ] 管理员推荐到首页的合集推荐行
   - [ ] 每种以种子生成的推荐行使用多个种子，如 Plex 显示多行"因为你看过"
 - [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
@@ -660,7 +662,7 @@ flowchart TD
 - [ ] 在每个客户端实现[客户端 §6.3](clients.zh-CN.md) 的导航，Web UI 优先：按窗口宽度选择的三种布局、桌面布局的侧边栏及其用户菜单、电视布局的顶部导航与遥控器焦点，以及两种模式的登录页面；Apple 与 Android 应用还要把主按钮改为以 `color.button` 填充，强调色只用于进度、选中、链接与开关
   - [x] Web UI：三种布局、带用户菜单的侧边栏与图标栏、方向键移动焦点的电视模式、分部分的设置、分步登录、首页头图、媒体库页头、按 `libs/design/components.zh-CN.md` 规定的详情页（接下来要看的一集、各季与各集、版本菜单、演职人员、信息与媒体），以及带画质与下一集的播放器侧面板
   - [ ] Web UI 的管理功能：设置中用户管理的服务器，及其媒体库、用户与任务
-    - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`SystemService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以卡片展示于“可用”与“已安装”选项卡，可按分类筛选，点击进入其详情与版本页；以及增删插件目录的插件目录页；位于设置的“服务器”分组，mavio.dev 模式下可选择服务器
+    - [x] 插件（`apps/web/src/screens/plugins.tsx`、`libs/client-ts/src/plugins.ts`）：已安装的插件及其状态，可启用、停用（`PluginManagementService.SetPluginEnabled`）、更新与卸载；插件目录提供的插件，可安装；以卡片展示于“可用”与“已安装”选项卡，可按分类筛选，点击进入其详情与版本页；以及增删插件目录的插件目录页；位于设置的“服务器”分组，mavio.dev 模式下可选择服务器
     - [x] 插件的配置，按其清单的 schema 或其自己的页面（`GetPluginConfig`、`SetPluginConfig`）
     - [ ] 插件分区加入 Web UI 的快照测试
     - [x] 概览（`apps/web/src/screens/admin/overview.tsx`）：服务器的版本与健康状况、正在播放的会话与最近的活动（`GetSystemInfo`、`GetHealth`、`SessionService.ListSessions`、`ListActivities`）
@@ -674,7 +676,7 @@ flowchart TD
       - [ ] 在质量配置中将质量编组与取消编组；目前配置中的质量只能启用、停用与排序
     - [x] 字幕（`apps/web/src/screens/admin/{subtitles,subtitle-settings}.tsx`、`libs/client-ts/src/subtitles.ts`）：字幕配置及其适用的媒体库、提供商与翻译器，以及搜索与保存、同步和翻译的设置（`SubtitleService`、`ListSubtitleProfileAssignments`）
       - [ ] 在详情页为电影或剧集分配其自己的字幕配置（`AssignSubtitleProfile`）
-    - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiService`）
+    - [x] AI（`apps/web/src/screens/admin/ai.tsx`、`libs/client-ts/src/ai.ts`）：AI 网关插件的提供商及其凭据、API 密钥、跟随显示并就地回答问题的登录、退出登录，以及模型（`AiProviderService`）
     - [x] 计划任务（`apps/web/src/screens/admin/tasks.tsx`）：计划任务、立即运行与作业（`TaskService`）
     - [x] 备份与日志（`apps/web/src/screens/admin/backups.tsx`、`libs/client-ts/src/backups.ts`）：创建、下载与删除备份，以及按级别、时间段与词筛选的最近日志记录（`BackupService`、`ListLogs`）
     - [x] API 密钥（`apps/web/src/screens/admin/backups.tsx` 中的 `ApiKeysSection`）：作为“服务器”分组的一个部分，因为密钥属于服务器，在两种模式下都能访问；创建密钥并只显示一次其令牌，以及撤销密钥（`CreateApiKey`、`ListApiKeys`、`RevokeApiKey`）
@@ -691,7 +693,7 @@ flowchart TD
   - [x] Web UI 的获取：想要的电影与剧集，按季或按集添加与监控，搜索与 RSS 同步（`WantedService`）；作品在索引器中的发布，带其质量、自定义格式与拒绝原因，可抓取（`SearchReleases`、`GrabRelease`）；以及下载的队列、历史、黑名单与手动导入（`DownloadService`）
     - [x] 设置中的“想要”与“下载”（`apps/web/src/screens/admin/wanted.tsx`、`apps/web/src/screens/admin/downloads.tsx`、`libs/client-ts/src/acquisition.ts`）：缺失与未达截止质量的电影与分集，可搜索、取消监控与 RSS 同步；队列、历史、黑名单与文件夹的手动导入
     - [x] 详情中条目的获取（`apps/web/src/screens/acquire.tsx`）：监控、质量配置、自动与交互式搜索及抓取，以及该条目的下载与历史
-    - [ ] 剧集的监控选项（`MonitorSeries`）及其他想要设置：标签、最低可用性、新条目、季文件夹
+    - [ ] 剧集的监控选项（带 `series` 的 `SetMonitored`）及其他想要设置：标签、最低可用性、新条目、季文件夹
     - [ ] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集
     - [ ] 从发现的作品将电影与剧集添加到想要（`AddMovie`、`AddSeries`）
   - [x] Web UI 中面向管理员的条目操作：编辑元数据、识别、刷新与选择图片（`MetadataService`，§6.3.22）
@@ -846,7 +848,7 @@ flowchart TD
 - [x] `libs/proto` 中的 `AiGatewayService` 与 `AgentSessionService`
 - [x] 子进程插件的 TypeScript SDK（`libs/plugin/ts`）：握手、令牌校验、HTTP 路由、宿主的传输
 - [x] `plugins/agent`：pi-ai 的所有提供者，API key 与 OAuth 登录（以事件与提示转发），凭据存于其数据目录，自定义 OpenAI 兼容提供者，带输出 schema 的补全，存于 SQLite 且跨重启保留的会话；由 Bun 为所有平台构建并预置在容器镜像中
-- [x] 服务端的 AI 管理（`AiService`）：提供者、模型、key 与登录转发给 AI 网关插件；使用 Bun 构建出的插件与伪造的 OpenAI 兼容 API 所提供的提供者的端到端测试
+- [x] 服务端的 AI 管理（`AiProviderService`、`AiConversationService`）：提供者、模型、key 与登录转发给 AI 网关插件；使用 Bun 构建出的插件与伪造的 OpenAI 兼容 API 所提供的提供者的端到端测试
 - [x] 服务端中 Lingarr 的翻译：AI 模型（`ai/<提供商>/<模型>`）经由网关，逐条附带上下文或以 JSON 回答的批次翻译，以及插件翻译器，按语言匹配排成带后备的链；重试、断行、重叠修正、校验、校对（`ProofreadSubtitle`）、自动化（`subtitles.translate_wanted`）与基于译文记录的统计（`GetSubtitleTranslationStatistics`）；端到端测试通过构建的 `plugins/agent` 与假的 OpenAI 兼容 API 翻译一集的字幕，重试一次被限速的请求，然后校对
 - [x] `plugins/subtitles` 中的翻译服务（DeepL、LibreTranslate、Google、Bing、Microsoft、Yandex）及其语言；移除 P26 的翻译器（Google 翻译的手机页面、Gemini、Lingarr）
 - [x] 由 `tools/testport` 移植 Lingarr 的测试用例（翻译、语言匹配、自动化、SSA）：矢量绘图不再送去翻译，同一语言的其他地区不再匹配（pt-BR 不匹配 pt-PT），空回答不作为上下文，格式错误的批次会重试，听障字幕排在其他字幕之后作为来源，可读取没有层的对白行

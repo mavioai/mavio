@@ -40,9 +40,9 @@ pub use self::__buffa::view::RequestQuotaView;
 #[doc(inline)]
 pub use self::__buffa::view::RequestQuotaOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::UserPreferencesView;
+pub use self::__buffa::view::PlaybackPreferencesView;
 #[doc(inline)]
-pub use self::__buffa::view::UserPreferencesOwnedView;
+pub use self::__buffa::view::PlaybackPreferencesOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::UserDataView;
 #[doc(inline)]
@@ -160,13 +160,13 @@ pub use self::__buffa::view::DeleteTotpResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteTotpResponseOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdatePreferencesRequestView;
+pub use self::__buffa::view::UpdatePlaybackPreferencesRequestView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdatePreferencesRequestOwnedView;
+pub use self::__buffa::view::UpdatePlaybackPreferencesRequestOwnedView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdatePreferencesResponseView;
+pub use self::__buffa::view::UpdatePlaybackPreferencesResponseView;
 #[doc(inline)]
-pub use self::__buffa::view::UpdatePreferencesResponseOwnedView;
+pub use self::__buffa::view::UpdatePlaybackPreferencesResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::GetUserDataRequestView;
 #[doc(inline)]

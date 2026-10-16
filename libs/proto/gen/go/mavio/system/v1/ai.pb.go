@@ -2553,8 +2553,8 @@ const file_mavio_system_v1_ai_proto_rawDesc = "" +
 	"\x05event\"5\n" +
 	"\x1bDeleteAiConversationRequest\x12\x16\n" +
 	"\x02id\x18\x01 \x01(\tB\x06\xbaH\x03\xc8\x01\x01R\x02id\"\x1e\n" +
-	"\x1cDeleteAiConversationResponse2\x94\v\n" +
-	"\tAiService\x12i\n" +
+	"\x1cDeleteAiConversationResponse2\xe8\x06\n" +
+	"\x11AiProviderService\x12i\n" +
 	"\x0fListAiProviders\x12'.mavio.system.v1.ListAiProvidersRequest\x1a(.mavio.system.v1.ListAiProvidersResponse\"\x03\x90\x02\x01\x12`\n" +
 	"\fListAiModels\x12$.mavio.system.v1.ListAiModelsRequest\x1a%.mavio.system.v1.ListAiModelsResponse\"\x03\x90\x02\x01\x12X\n" +
 	"\vSetAiApiKey\x12#.mavio.system.v1.SetAiApiKeyRequest\x1a$.mavio.system.v1.SetAiApiKeyResponse\x12[\n" +
@@ -2564,7 +2564,8 @@ const file_mavio_system_v1_ai_proto_rawDesc = "" +
 	"\fWatchAiLogin\x12$.mavio.system.v1.WatchAiLoginRequest\x1a%.mavio.system.v1.WatchAiLoginResponse\"\x03\x90\x02\x010\x01\x12^\n" +
 	"\rAnswerAiLogin\x12%.mavio.system.v1.AnswerAiLoginRequest\x1a&.mavio.system.v1.AnswerAiLoginResponse\x12^\n" +
 	"\rCancelAiLogin\x12%.mavio.system.v1.CancelAiLoginRequest\x1a&.mavio.system.v1.CancelAiLoginResponse\x12O\n" +
-	"\bLogoutAi\x12 .mavio.system.v1.LogoutAiRequest\x1a!.mavio.system.v1.LogoutAiResponse\x12s\n" +
+	"\bLogoutAi\x12 .mavio.system.v1.LogoutAiRequest\x1a!.mavio.system.v1.LogoutAiResponse2\xcb\x04\n" +
+	"\x15AiConversationService\x12s\n" +
 	"\x14CreateAiConversation\x12,.mavio.system.v1.CreateAiConversationRequest\x1a-.mavio.system.v1.CreateAiConversationResponse\x12u\n" +
 	"\x13ListAiConversations\x12+.mavio.system.v1.ListAiConversationsRequest\x1a,.mavio.system.v1.ListAiConversationsResponse\"\x03\x90\x02\x01\x12o\n" +
 	"\x11GetAiConversation\x12).mavio.system.v1.GetAiConversationRequest\x1a*.mavio.system.v1.GetAiConversationResponse\"\x03\x90\x02\x01\x12`\n" +
@@ -2625,34 +2626,34 @@ var file_mavio_system_v1_ai_proto_depIdxs = []int32{
 	33, // 10: mavio.system.v1.GetAiConversationResponse.conversation:type_name -> mavio.plugin.v1.AgentSession
 	34, // 11: mavio.system.v1.GetAiConversationResponse.messages:type_name -> mavio.plugin.v1.AgentMessage
 	35, // 12: mavio.system.v1.SendAiMessageResponse.done:type_name -> mavio.plugin.v1.SendAgentMessageResponse
-	0,  // 13: mavio.system.v1.AiService.ListAiProviders:input_type -> mavio.system.v1.ListAiProvidersRequest
-	2,  // 14: mavio.system.v1.AiService.ListAiModels:input_type -> mavio.system.v1.ListAiModelsRequest
-	4,  // 15: mavio.system.v1.AiService.SetAiApiKey:input_type -> mavio.system.v1.SetAiApiKeyRequest
-	6,  // 16: mavio.system.v1.AiService.StartAiLogin:input_type -> mavio.system.v1.StartAiLoginRequest
-	8,  // 17: mavio.system.v1.AiService.GetAiLogin:input_type -> mavio.system.v1.GetAiLoginRequest
-	10, // 18: mavio.system.v1.AiService.WatchAiLogin:input_type -> mavio.system.v1.WatchAiLoginRequest
-	12, // 19: mavio.system.v1.AiService.AnswerAiLogin:input_type -> mavio.system.v1.AnswerAiLoginRequest
-	14, // 20: mavio.system.v1.AiService.CancelAiLogin:input_type -> mavio.system.v1.CancelAiLoginRequest
-	16, // 21: mavio.system.v1.AiService.LogoutAi:input_type -> mavio.system.v1.LogoutAiRequest
-	18, // 22: mavio.system.v1.AiService.CreateAiConversation:input_type -> mavio.system.v1.CreateAiConversationRequest
-	20, // 23: mavio.system.v1.AiService.ListAiConversations:input_type -> mavio.system.v1.ListAiConversationsRequest
-	22, // 24: mavio.system.v1.AiService.GetAiConversation:input_type -> mavio.system.v1.GetAiConversationRequest
-	24, // 25: mavio.system.v1.AiService.SendAiMessage:input_type -> mavio.system.v1.SendAiMessageRequest
-	26, // 26: mavio.system.v1.AiService.DeleteAiConversation:input_type -> mavio.system.v1.DeleteAiConversationRequest
-	1,  // 27: mavio.system.v1.AiService.ListAiProviders:output_type -> mavio.system.v1.ListAiProvidersResponse
-	3,  // 28: mavio.system.v1.AiService.ListAiModels:output_type -> mavio.system.v1.ListAiModelsResponse
-	5,  // 29: mavio.system.v1.AiService.SetAiApiKey:output_type -> mavio.system.v1.SetAiApiKeyResponse
-	7,  // 30: mavio.system.v1.AiService.StartAiLogin:output_type -> mavio.system.v1.StartAiLoginResponse
-	9,  // 31: mavio.system.v1.AiService.GetAiLogin:output_type -> mavio.system.v1.GetAiLoginResponse
-	11, // 32: mavio.system.v1.AiService.WatchAiLogin:output_type -> mavio.system.v1.WatchAiLoginResponse
-	13, // 33: mavio.system.v1.AiService.AnswerAiLogin:output_type -> mavio.system.v1.AnswerAiLoginResponse
-	15, // 34: mavio.system.v1.AiService.CancelAiLogin:output_type -> mavio.system.v1.CancelAiLoginResponse
-	17, // 35: mavio.system.v1.AiService.LogoutAi:output_type -> mavio.system.v1.LogoutAiResponse
-	19, // 36: mavio.system.v1.AiService.CreateAiConversation:output_type -> mavio.system.v1.CreateAiConversationResponse
-	21, // 37: mavio.system.v1.AiService.ListAiConversations:output_type -> mavio.system.v1.ListAiConversationsResponse
-	23, // 38: mavio.system.v1.AiService.GetAiConversation:output_type -> mavio.system.v1.GetAiConversationResponse
-	25, // 39: mavio.system.v1.AiService.SendAiMessage:output_type -> mavio.system.v1.SendAiMessageResponse
-	27, // 40: mavio.system.v1.AiService.DeleteAiConversation:output_type -> mavio.system.v1.DeleteAiConversationResponse
+	0,  // 13: mavio.system.v1.AiProviderService.ListAiProviders:input_type -> mavio.system.v1.ListAiProvidersRequest
+	2,  // 14: mavio.system.v1.AiProviderService.ListAiModels:input_type -> mavio.system.v1.ListAiModelsRequest
+	4,  // 15: mavio.system.v1.AiProviderService.SetAiApiKey:input_type -> mavio.system.v1.SetAiApiKeyRequest
+	6,  // 16: mavio.system.v1.AiProviderService.StartAiLogin:input_type -> mavio.system.v1.StartAiLoginRequest
+	8,  // 17: mavio.system.v1.AiProviderService.GetAiLogin:input_type -> mavio.system.v1.GetAiLoginRequest
+	10, // 18: mavio.system.v1.AiProviderService.WatchAiLogin:input_type -> mavio.system.v1.WatchAiLoginRequest
+	12, // 19: mavio.system.v1.AiProviderService.AnswerAiLogin:input_type -> mavio.system.v1.AnswerAiLoginRequest
+	14, // 20: mavio.system.v1.AiProviderService.CancelAiLogin:input_type -> mavio.system.v1.CancelAiLoginRequest
+	16, // 21: mavio.system.v1.AiProviderService.LogoutAi:input_type -> mavio.system.v1.LogoutAiRequest
+	18, // 22: mavio.system.v1.AiConversationService.CreateAiConversation:input_type -> mavio.system.v1.CreateAiConversationRequest
+	20, // 23: mavio.system.v1.AiConversationService.ListAiConversations:input_type -> mavio.system.v1.ListAiConversationsRequest
+	22, // 24: mavio.system.v1.AiConversationService.GetAiConversation:input_type -> mavio.system.v1.GetAiConversationRequest
+	24, // 25: mavio.system.v1.AiConversationService.SendAiMessage:input_type -> mavio.system.v1.SendAiMessageRequest
+	26, // 26: mavio.system.v1.AiConversationService.DeleteAiConversation:input_type -> mavio.system.v1.DeleteAiConversationRequest
+	1,  // 27: mavio.system.v1.AiProviderService.ListAiProviders:output_type -> mavio.system.v1.ListAiProvidersResponse
+	3,  // 28: mavio.system.v1.AiProviderService.ListAiModels:output_type -> mavio.system.v1.ListAiModelsResponse
+	5,  // 29: mavio.system.v1.AiProviderService.SetAiApiKey:output_type -> mavio.system.v1.SetAiApiKeyResponse
+	7,  // 30: mavio.system.v1.AiProviderService.StartAiLogin:output_type -> mavio.system.v1.StartAiLoginResponse
+	9,  // 31: mavio.system.v1.AiProviderService.GetAiLogin:output_type -> mavio.system.v1.GetAiLoginResponse
+	11, // 32: mavio.system.v1.AiProviderService.WatchAiLogin:output_type -> mavio.system.v1.WatchAiLoginResponse
+	13, // 33: mavio.system.v1.AiProviderService.AnswerAiLogin:output_type -> mavio.system.v1.AnswerAiLoginResponse
+	15, // 34: mavio.system.v1.AiProviderService.CancelAiLogin:output_type -> mavio.system.v1.CancelAiLoginResponse
+	17, // 35: mavio.system.v1.AiProviderService.LogoutAi:output_type -> mavio.system.v1.LogoutAiResponse
+	19, // 36: mavio.system.v1.AiConversationService.CreateAiConversation:output_type -> mavio.system.v1.CreateAiConversationResponse
+	21, // 37: mavio.system.v1.AiConversationService.ListAiConversations:output_type -> mavio.system.v1.ListAiConversationsResponse
+	23, // 38: mavio.system.v1.AiConversationService.GetAiConversation:output_type -> mavio.system.v1.GetAiConversationResponse
+	25, // 39: mavio.system.v1.AiConversationService.SendAiMessage:output_type -> mavio.system.v1.SendAiMessageResponse
+	27, // 40: mavio.system.v1.AiConversationService.DeleteAiConversation:output_type -> mavio.system.v1.DeleteAiConversationResponse
 	27, // [27:41] is the sub-list for method output_type
 	13, // [13:27] is the sub-list for method input_type
 	13, // [13:13] is the sub-list for extension type_name
@@ -2677,7 +2678,7 @@ func file_mavio_system_v1_ai_proto_init() {
 			NumEnums:      0,
 			NumMessages:   28,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_mavio_system_v1_ai_proto_goTypes,
 		DependencyIndexes: file_mavio_system_v1_ai_proto_depIdxs,

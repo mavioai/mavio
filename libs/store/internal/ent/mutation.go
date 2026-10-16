@@ -43608,7 +43608,8 @@ type UserMutation struct {
 	disabled                   *bool
 	access                     *core.LibraryAccess
 	policy                     *core.UserPolicy
-	preferences                *core.UserPreferences
+	preferences                *core.PlaybackPreferences
+	home                       *core.HomeLayout
 	created_at                 *time.Time
 	last_login_at              *time.Time
 	clearedFields              map[string]struct{}
@@ -44105,12 +44106,12 @@ func (m *UserMutation) ResetPolicy() {
 }
 
 // SetPreferences sets the "preferences" field.
-func (m *UserMutation) SetPreferences(cp core.UserPreferences) {
+func (m *UserMutation) SetPreferences(cp core.PlaybackPreferences) {
 	m.preferences = &cp
 }
 
 // Preferences returns the value of the "preferences" field in the mutation.
-func (m *UserMutation) Preferences() (r core.UserPreferences, exists bool) {
+func (m *UserMutation) Preferences() (r core.PlaybackPreferences, exists bool) {
 	v := m.preferences
 	if v == nil {
 		return
@@ -44121,7 +44122,7 @@ func (m *UserMutation) Preferences() (r core.UserPreferences, exists bool) {
 // OldPreferences returns the old "preferences" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldPreferences(ctx context.Context) (v core.UserPreferences, err error) {
+func (m *UserMutation) OldPreferences(ctx context.Context) (v core.PlaybackPreferences, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPreferences is only allowed on UpdateOne operations")
 	}
@@ -44138,6 +44139,55 @@ func (m *UserMutation) OldPreferences(ctx context.Context) (v core.UserPreferenc
 // ResetPreferences resets all changes to the "preferences" field.
 func (m *UserMutation) ResetPreferences() {
 	m.preferences = nil
+}
+
+// SetHome sets the "home" field.
+func (m *UserMutation) SetHome(cl core.HomeLayout) {
+	m.home = &cl
+}
+
+// Home returns the value of the "home" field in the mutation.
+func (m *UserMutation) Home() (r core.HomeLayout, exists bool) {
+	v := m.home
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHome returns the old "home" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldHome(ctx context.Context) (v core.HomeLayout, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHome: %w", err)
+	}
+	return oldValue.Home, nil
+}
+
+// ClearHome clears the value of the "home" field.
+func (m *UserMutation) ClearHome() {
+	m.home = nil
+	m.clearedFields[user.FieldHome] = struct{}{}
+}
+
+// HomeCleared returns if the "home" field was cleared in this mutation.
+func (m *UserMutation) HomeCleared() bool {
+	_, ok := m.clearedFields[user.FieldHome]
+	return ok
+}
+
+// ResetHome resets all changes to the "home" field.
+func (m *UserMutation) ResetHome() {
+	m.home = nil
+	delete(m.clearedFields, user.FieldHome)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -44853,7 +44903,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
 	}
@@ -44883,6 +44933,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.preferences != nil {
 		fields = append(fields, user.FieldPreferences)
+	}
+	if m.home != nil {
+		fields = append(fields, user.FieldHome)
 	}
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
@@ -44918,6 +44971,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Policy()
 	case user.FieldPreferences:
 		return m.Preferences()
+	case user.FieldHome:
+		return m.Home()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
 	case user.FieldLastLoginAt:
@@ -44951,6 +45006,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPolicy(ctx)
 	case user.FieldPreferences:
 		return m.OldPreferences(ctx)
+	case user.FieldHome:
+		return m.OldHome(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case user.FieldLastLoginAt:
@@ -45028,11 +45085,18 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetPolicy(v)
 		return nil
 	case user.FieldPreferences:
-		v, ok := value.(core.UserPreferences)
+		v, ok := value.(core.PlaybackPreferences)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPreferences(v)
+		return nil
+	case user.FieldHome:
+		v, ok := value.(core.HomeLayout)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHome(v)
 		return nil
 	case user.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -45084,6 +45148,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldAccess) {
 		fields = append(fields, user.FieldAccess)
 	}
+	if m.FieldCleared(user.FieldHome) {
+		fields = append(fields, user.FieldHome)
+	}
 	if m.FieldCleared(user.FieldLastLoginAt) {
 		fields = append(fields, user.FieldLastLoginAt)
 	}
@@ -45106,6 +45173,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldAccess:
 		m.ClearAccess()
+		return nil
+	case user.FieldHome:
+		m.ClearHome()
 		return nil
 	case user.FieldLastLoginAt:
 		m.ClearLastLoginAt()
@@ -45147,6 +45217,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPreferences:
 		m.ResetPreferences()
+		return nil
+	case user.FieldHome:
+		m.ResetHome()
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()

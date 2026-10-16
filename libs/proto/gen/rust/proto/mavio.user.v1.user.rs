@@ -200,10 +200,10 @@ pub struct User {
     pub disabled: ::core::option::Option<bool>,
     /// Field 6: `policy`
     pub policy: ::buffa::MessageField<UserPolicy, ::buffa::Inline<UserPolicy>>,
-    /// Field 7: `preferences`
-    pub preferences: ::buffa::MessageField<
-        UserPreferences,
-        ::buffa::Inline<UserPreferences>,
+    /// Field 7: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageField<
+        PlaybackPreferences,
+        ::buffa::Inline<PlaybackPreferences>,
     >,
     /// Field 8: `create_time`
     pub create_time: ::buffa::MessageField<
@@ -246,7 +246,7 @@ impl ::core::fmt::Debug for User {
             .field("admin", &self.admin)
             .field("disabled", &self.disabled)
             .field("policy", &self.policy)
-            .field("preferences", &self.preferences)
+            .field("playback_preferences", &self.playback_preferences)
             .field("create_time", &self.create_time)
             .field("last_login_time", &self.last_login_time)
             .field("managed", &self.managed)
@@ -381,9 +381,9 @@ impl ::buffa::Message for User {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -458,13 +458,13 @@ impl ::buffa::Message for User {
             );
             self.policy.write_to(__cache, buf);
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 7u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         if self.create_time.is_set() {
             ::buffa::types::put_len_delimited_header(
@@ -582,7 +582,7 @@ impl ::buffa::Message for User {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.preferences.get_or_insert_default(),
+                    self.playback_preferences.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -671,7 +671,7 @@ impl ::buffa::Message for User {
         self.admin = ::core::option::Option::None;
         self.disabled = ::core::option::Option::None;
         self.policy = ::buffa::MessageField::none();
-        self.preferences = ::buffa::MessageField::none();
+        self.playback_preferences = ::buffa::MessageField::none();
         self.create_time = ::buffa::MessageField::none();
         self.last_login_time = ::buffa::MessageField::none();
         self.managed = ::core::option::Option::None;
@@ -1621,8 +1621,10 @@ impl ::buffa::ExtensionSet for RequestQuota {
         &mut self.__buffa_unknown_fields
     }
 }
+/// PlaybackPreferences are the user's defaults for choosing the audio and
+/// subtitle streams of what they play; the server applies them.
 #[derive(Clone, PartialEq, Default)]
-pub struct UserPreferences {
+pub struct PlaybackPreferences {
     /// ISO 639-2/B codes in order of preference.
     ///
     /// Field 1: `audio_languages`
@@ -1636,9 +1638,9 @@ pub struct UserPreferences {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for UserPreferences {
+impl ::core::fmt::Debug for PlaybackPreferences {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("UserPreferences")
+        f.debug_struct("PlaybackPreferences")
             .field("audio_languages", &self.audio_languages)
             .field("subtitle_languages", &self.subtitle_languages)
             .field("subtitle_mode", &self.subtitle_mode)
@@ -1646,14 +1648,14 @@ impl ::core::fmt::Debug for UserPreferences {
             .finish()
     }
 }
-impl UserPreferences {
+impl PlaybackPreferences {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UserPreferences";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.PlaybackPreferences";
 }
-impl UserPreferences {
+impl PlaybackPreferences {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::subtitle_mode`] to `Some(value)`, consuming and returning `self`.
@@ -1672,14 +1674,14 @@ impl UserPreferences {
         self
     }
 }
-::buffa::impl_default_instance!(UserPreferences);
-impl ::buffa::MessageName for UserPreferences {
+::buffa::impl_default_instance!(PlaybackPreferences);
+impl ::buffa::MessageName for PlaybackPreferences {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UserPreferences";
-    const FULL_NAME: &'static str = "mavio.user.v1.UserPreferences";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UserPreferences";
+    const NAME: &'static str = "PlaybackPreferences";
+    const FULL_NAME: &'static str = "mavio.user.v1.PlaybackPreferences";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.PlaybackPreferences";
 }
-impl ::buffa::Message for UserPreferences {
+impl ::buffa::Message for PlaybackPreferences {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -1794,8 +1796,8 @@ impl ::buffa::Message for UserPreferences {
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for UserPreferences {
-    const PROTO_FQN: &'static str = "mavio.user.v1.UserPreferences";
+impl ::buffa::ExtensionSet for PlaybackPreferences {
+    const PROTO_FQN: &'static str = "mavio.user.v1.PlaybackPreferences";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -2762,10 +2764,10 @@ pub struct CreateUserRequest {
     pub admin: ::core::option::Option<bool>,
     /// Field 5: `policy`
     pub policy: ::buffa::MessageField<UserPolicy, ::buffa::Inline<UserPolicy>>,
-    /// Field 6: `preferences`
-    pub preferences: ::buffa::MessageField<
-        UserPreferences,
-        ::buffa::Inline<UserPreferences>,
+    /// Field 6: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageField<
+        PlaybackPreferences,
+        ::buffa::Inline<PlaybackPreferences>,
     >,
     /// Creates a managed user, without password or auth_provider.
     ///
@@ -2790,7 +2792,7 @@ impl ::core::fmt::Debug for CreateUserRequest {
             .field("auth_provider", &self.auth_provider)
             .field("admin", &self.admin)
             .field("policy", &self.policy)
-            .field("preferences", &self.preferences)
+            .field("playback_preferences", &self.playback_preferences)
             .field("managed", &self.managed)
             .field("restriction", &self.restriction)
             .field("pin", &self.pin)
@@ -2907,9 +2909,9 @@ impl ::buffa::Message for CreateUserRequest {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -2954,13 +2956,13 @@ impl ::buffa::Message for CreateUserRequest {
             );
             self.policy.write_to(__cache, buf);
         }
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 6u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         if let Some(v) = self.managed {
             ::buffa::types::put_bool_field(7u32, v, buf);
@@ -3044,7 +3046,7 @@ impl ::buffa::Message for CreateUserRequest {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.preferences.get_or_insert_default(),
+                    self.playback_preferences.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -3090,7 +3092,7 @@ impl ::buffa::Message for CreateUserRequest {
         self.auth_provider = ::core::option::Option::None;
         self.admin = ::core::option::Option::None;
         self.policy = ::buffa::MessageField::none();
-        self.preferences = ::buffa::MessageField::none();
+        self.playback_preferences = ::buffa::MessageField::none();
         self.managed = ::core::option::Option::None;
         self.restriction = ::core::option::Option::None;
         self.pin = ::core::option::Option::None;
@@ -5605,37 +5607,37 @@ impl ::buffa::ExtensionSet for DeleteTotpResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct UpdatePreferencesRequest {
-    /// Field 1: `preferences`
-    pub preferences: ::buffa::MessageField<
-        UserPreferences,
-        ::buffa::Inline<UserPreferences>,
+pub struct UpdatePlaybackPreferencesRequest {
+    /// Field 1: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageField<
+        PlaybackPreferences,
+        ::buffa::Inline<PlaybackPreferences>,
     >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for UpdatePreferencesRequest {
+impl ::core::fmt::Debug for UpdatePlaybackPreferencesRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("UpdatePreferencesRequest")
-            .field("preferences", &self.preferences)
+        f.debug_struct("UpdatePlaybackPreferencesRequest")
+            .field("playback_preferences", &self.playback_preferences)
             .finish()
     }
 }
-impl UpdatePreferencesRequest {
+impl UpdatePlaybackPreferencesRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesRequest";
 }
-::buffa::impl_default_instance!(UpdatePreferencesRequest);
-impl ::buffa::MessageName for UpdatePreferencesRequest {
+::buffa::impl_default_instance!(UpdatePlaybackPreferencesRequest);
+impl ::buffa::MessageName for UpdatePlaybackPreferencesRequest {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UpdatePreferencesRequest";
-    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePreferencesRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesRequest";
+    const NAME: &'static str = "UpdatePlaybackPreferencesRequest";
+    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesRequest";
 }
-impl ::buffa::Message for UpdatePreferencesRequest {
+impl ::buffa::Message for UpdatePlaybackPreferencesRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -5648,9 +5650,9 @@ impl ::buffa::Message for UpdatePreferencesRequest {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -5666,13 +5668,13 @@ impl ::buffa::Message for UpdatePreferencesRequest {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5693,7 +5695,7 @@ impl ::buffa::Message for UpdatePreferencesRequest {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.preferences.get_or_insert_default(),
+                    self.playback_preferences.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -5706,12 +5708,12 @@ impl ::buffa::Message for UpdatePreferencesRequest {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.preferences = ::buffa::MessageField::none();
+        self.playback_preferences = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for UpdatePreferencesRequest {
-    const PROTO_FQN: &'static str = "mavio.user.v1.UpdatePreferencesRequest";
+impl ::buffa::ExtensionSet for UpdatePlaybackPreferencesRequest {
+    const PROTO_FQN: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -5720,37 +5722,37 @@ impl ::buffa::ExtensionSet for UpdatePreferencesRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct UpdatePreferencesResponse {
-    /// Field 1: `preferences`
-    pub preferences: ::buffa::MessageField<
-        UserPreferences,
-        ::buffa::Inline<UserPreferences>,
+pub struct UpdatePlaybackPreferencesResponse {
+    /// Field 1: `playback_preferences`
+    pub playback_preferences: ::buffa::MessageField<
+        PlaybackPreferences,
+        ::buffa::Inline<PlaybackPreferences>,
     >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for UpdatePreferencesResponse {
+impl ::core::fmt::Debug for UpdatePlaybackPreferencesResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("UpdatePreferencesResponse")
-            .field("preferences", &self.preferences)
+        f.debug_struct("UpdatePlaybackPreferencesResponse")
+            .field("playback_preferences", &self.playback_preferences)
             .finish()
     }
 }
-impl UpdatePreferencesResponse {
+impl UpdatePlaybackPreferencesResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesResponse";
 }
-::buffa::impl_default_instance!(UpdatePreferencesResponse);
-impl ::buffa::MessageName for UpdatePreferencesResponse {
+::buffa::impl_default_instance!(UpdatePlaybackPreferencesResponse);
+impl ::buffa::MessageName for UpdatePlaybackPreferencesResponse {
     const PACKAGE: &'static str = "mavio.user.v1";
-    const NAME: &'static str = "UpdatePreferencesResponse";
-    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePreferencesResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePreferencesResponse";
+    const NAME: &'static str = "UpdatePlaybackPreferencesResponse";
+    const FULL_NAME: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.user.v1.UpdatePlaybackPreferencesResponse";
 }
-impl ::buffa::Message for UpdatePreferencesResponse {
+impl ::buffa::Message for UpdatePlaybackPreferencesResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -5763,9 +5765,9 @@ impl ::buffa::Message for UpdatePreferencesResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             let __slot = __cache.reserve();
-            let inner_size = self.preferences.compute_size(__cache);
+            let inner_size = self.playback_preferences.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -5781,13 +5783,13 @@ impl ::buffa::Message for UpdatePreferencesResponse {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.preferences.is_set() {
+        if self.playback_preferences.is_set() {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
-            self.preferences.write_to(__cache, buf);
+            self.playback_preferences.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -5808,7 +5810,7 @@ impl ::buffa::Message for UpdatePreferencesResponse {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::Message::merge_length_delimited(
-                    self.preferences.get_or_insert_default(),
+                    self.playback_preferences.get_or_insert_default(),
                     buf,
                     ctx,
                 )?;
@@ -5821,12 +5823,12 @@ impl ::buffa::Message for UpdatePreferencesResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.preferences = ::buffa::MessageField::none();
+        self.playback_preferences = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for UpdatePreferencesResponse {
-    const PROTO_FQN: &'static str = "mavio.user.v1.UpdatePreferencesResponse";
+impl ::buffa::ExtensionSet for UpdatePlaybackPreferencesResponse {
+    const PROTO_FQN: &'static str = "mavio.user.v1.UpdatePlaybackPreferencesResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

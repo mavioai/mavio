@@ -3,7 +3,7 @@
 // and their models; and the administrators' conversations with the
 // models (§6.3.26), their answers streamed as the model writes them.
 import { Code, ConnectError } from "@connectrpc/connect";
-import { AiService, type WatchAiLoginResponse } from "@mavio/proto/mavio/system/v1/ai_pb";
+import { AiConversationService, AiProviderService, type WatchAiLoginResponse } from "@mavio/proto/mavio/system/v1/ai_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -20,7 +20,7 @@ export function useAiProviders(server: ServerEntry) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "ai", "providers"),
-    queryFn: async () => (await servers.client(AiService, server).listAiProviders({})).providers,
+    queryFn: async () => (await servers.client(AiProviderService, server).listAiProviders({})).providers,
     retry: (count, err) => !isNoAiGateway(err) && count < 3,
   });
 }
@@ -35,7 +35,7 @@ export function useAiModels(server: ServerEntry, available: boolean, provider = 
     queryKey: serverKey(server.id, "ai", "models", available, provider),
     queryFn: async () => {
       try {
-        return (await servers.client(AiService, server).listAiModels({ available, provider })).models;
+        return (await servers.client(AiProviderService, server).listAiModels({ available, provider })).models;
       } catch (e) {
         if (isNoAiGateway(e)) return [];
         throw e;
@@ -48,7 +48,7 @@ export function useAiModels(server: ServerEntry, available: boolean, provider = 
 export function useAiActions(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
-  const c = () => servers.client(AiService, server);
+  const c = () => servers.client(AiProviderService, server);
   const onSuccess = () => qc.invalidateQueries({ queryKey: serverKey(server.id, "ai") });
   return {
     setApiKey: useMutation({ mutationFn: (v: { provider: string; key: string }) => c().setAiApiKey(v), onSuccess }),
@@ -73,7 +73,7 @@ export function useAiLogin(server: ServerEntry, loginId: string | undefined) {
     const abort = new AbortController();
     void (async () => {
       try {
-        for await (const login of servers.client(AiService, server).watchAiLogin({ loginId }, { signal: abort.signal })) setState({ login });
+        for await (const login of servers.client(AiProviderService, server).watchAiLogin({ loginId }, { signal: abort.signal })) setState({ login });
       } catch (error) {
         if (!abort.signal.aborted) setState((s) => ({ ...s, error }));
       }
@@ -90,7 +90,7 @@ export function useAiConversations(server: ServerEntry) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "ai", "conversations", "list"),
-    queryFn: async () => (await servers.client(AiService, server).listAiConversations({})).conversations,
+    queryFn: async () => (await servers.client(AiConversationService, server).listAiConversations({})).conversations,
     retry: (count, err) => !isNoAiGateway(err) && count < 3,
   });
 }
@@ -100,7 +100,7 @@ export function useAiConversation(server: ServerEntry, id: string) {
   const servers = useServersStore();
   return useQuery({
     queryKey: serverKey(server.id, "ai", "conversations", "one", id),
-    queryFn: async () => servers.client(AiService, server).getAiConversation({ id }),
+    queryFn: async () => servers.client(AiConversationService, server).getAiConversation({ id }),
   });
 }
 
@@ -108,7 +108,7 @@ export function useAiConversation(server: ServerEntry, id: string) {
 export function useAiConversationActions(server: ServerEntry) {
   const servers = useServersStore();
   const qc = useQueryClient();
-  const c = () => servers.client(AiService, server);
+  const c = () => servers.client(AiConversationService, server);
   const list = () => qc.invalidateQueries({ queryKey: serverKey(server.id, "ai", "conversations", "list") });
   return {
     create: useMutation({
@@ -153,7 +153,7 @@ export function useAiSend(server: ServerEntry, id: string) {
       const refresh = () => qc.invalidateQueries({ queryKey: serverKey(server.id, "ai", "conversations") });
       setExchange({ text, answer: "" });
       try {
-        for await (const m of servers.client(AiService, server).sendAiMessage({ conversationId: id, text, requestId }))
+        for await (const m of servers.client(AiConversationService, server).sendAiMessage({ conversationId: id, text, requestId }))
           if (m.event.case === "text" && mine()) setExchange({ text, answer: m.event.value });
         await refresh();
         if (mine()) setExchange(undefined);

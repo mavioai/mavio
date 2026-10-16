@@ -60,7 +60,7 @@ plugins:
       - trim-unused-types
       - services=mavio.acquisition.v1.*
       - services=mavio.auth.v1.*
-      - services=mavio.home.v1.*
+      - services=mavio.hub.v1.*
       - services=mavio.library.v1.*
       - services=mavio.playback.v1.*
       - services=mavio.session.v1.*

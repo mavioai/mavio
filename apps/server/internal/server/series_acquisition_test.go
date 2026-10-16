@@ -170,6 +170,7 @@ func TestSeriesAcquisition(t *testing.T) {
 	}
 	token := withToken(first.GetAccessToken())
 	system := systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token)
+	pluginAdmin := systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token)
 	tasks := systemv1connect.NewTaskServiceClient(http.DefaultClient, srv.url, token)
 	libraries := libraryv1connect.NewLibraryServiceClient(http.DefaultClient, srv.url, token)
 	items := libraryv1connect.NewItemServiceClient(http.DefaultClient, srv.url, token)
@@ -215,7 +216,7 @@ func TestSeriesAcquisition(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if _, err := system.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{PluginId: new(id), ConfigJson: new(string(data))}.Build()); err != nil {
+		if _, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{PluginId: new(id), ConfigJson: new(string(data))}.Build()); err != nil {
 			t.Fatalf("SetPluginConfig %s: %v", id, err)
 		}
 	}

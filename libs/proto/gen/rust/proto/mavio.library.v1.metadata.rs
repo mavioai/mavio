@@ -3453,43 +3453,27 @@ impl ::buffa::ExtensionSet for DeleteItemImageResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct SearchSubtitlesRequest {
+pub struct SearchRemoteLyricsRequest {
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// ISO 639-1 code, or "zh-Hans" and "zh-Hant".
-    ///
-    /// Field 2: `language`
-    pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The media source; unset means the item's first.
-    ///
-    /// Field 3: `media_source_id`
-    pub media_source_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 4: `hearing_impaired`
-    pub hearing_impaired: ::core::option::Option<bool>,
-    /// Field 5: `forced`
-    pub forced: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for SearchSubtitlesRequest {
+impl ::core::fmt::Debug for SearchRemoteLyricsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("SearchSubtitlesRequest")
+        f.debug_struct("SearchRemoteLyricsRequest")
             .field("item_id", &self.item_id)
-            .field("language", &self.language)
-            .field("media_source_id", &self.media_source_id)
-            .field("hearing_impaired", &self.hearing_impaired)
-            .field("forced", &self.forced)
             .finish()
     }
 }
-impl SearchSubtitlesRequest {
+impl SearchRemoteLyricsRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsRequest";
 }
-impl SearchSubtitlesRequest {
+impl SearchRemoteLyricsRequest {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::item_id`] to `Some(value)`, consuming and returning `self`.
@@ -3500,49 +3484,15 @@ impl SearchSubtitlesRequest {
         self.item_id = Some(value.into());
         self
     }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_language(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.language = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::media_source_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_media_source_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.media_source_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::hearing_impaired`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_hearing_impaired(mut self, value: bool) -> Self {
-        self.hearing_impaired = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::forced`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_forced(mut self, value: bool) -> Self {
-        self.forced = Some(value);
-        self
-    }
 }
-::buffa::impl_default_instance!(SearchSubtitlesRequest);
-impl ::buffa::MessageName for SearchSubtitlesRequest {
+::buffa::impl_default_instance!(SearchRemoteLyricsRequest);
+impl ::buffa::MessageName for SearchRemoteLyricsRequest {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "SearchSubtitlesRequest";
-    const FULL_NAME: &'static str = "mavio.library.v1.SearchSubtitlesRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesRequest";
+    const NAME: &'static str = "SearchRemoteLyricsRequest";
+    const FULL_NAME: &'static str = "mavio.library.v1.SearchRemoteLyricsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsRequest";
 }
-impl ::buffa::Message for SearchSubtitlesRequest {
+impl ::buffa::Message for SearchRemoteLyricsRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -3558,18 +3508,6 @@ impl ::buffa::Message for SearchSubtitlesRequest {
         if let Some(ref v) = self.item_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.language {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if let Some(ref v) = self.media_source_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
-        if self.hearing_impaired.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
-        if self.forced.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3582,18 +3520,6 @@ impl ::buffa::Message for SearchSubtitlesRequest {
         use ::buffa::Enumeration as _;
         if let Some(ref v) = self.item_id {
             ::buffa::types::put_string_field(1u32, v, buf);
-        }
-        if let Some(ref v) = self.language {
-            ::buffa::types::put_string_field(2u32, v, buf);
-        }
-        if let Some(ref v) = self.media_source_id {
-            ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(v) = self.hearing_impaired {
-            ::buffa::types::put_bool_field(4u32, v, buf);
-        }
-        if let Some(v) = self.forced {
-            ::buffa::types::put_bool_field(5u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3618,48 +3544,6 @@ impl ::buffa::Message for SearchSubtitlesRequest {
                     buf,
                 )?;
             }
-            2u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .language
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            3u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .media_source_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.hearing_impaired = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
-            5u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.forced = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3669,15 +3553,11 @@ impl ::buffa::Message for SearchSubtitlesRequest {
     }
     fn clear(&mut self) {
         self.item_id = ::core::option::Option::None;
-        self.language = ::core::option::Option::None;
-        self.media_source_id = ::core::option::Option::None;
-        self.hearing_impaired = ::core::option::Option::None;
-        self.forced = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for SearchSubtitlesRequest {
-    const PROTO_FQN: &'static str = "mavio.library.v1.SearchSubtitlesRequest";
+impl ::buffa::ExtensionSet for SearchRemoteLyricsRequest {
+    const PROTO_FQN: &'static str = "mavio.library.v1.SearchRemoteLyricsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -3685,58 +3565,55 @@ impl ::buffa::ExtensionSet for SearchSubtitlesRequest {
         &mut self.__buffa_unknown_fields
     }
 }
-/// RemoteSubtitle is a subtitle a provider offers.
+/// RemoteLyrics are lyrics a provider has.
 #[derive(Clone, PartialEq, Default)]
-pub struct RemoteSubtitle {
+pub struct RemoteLyrics {
+    /// The provider and its ID of the lyrics, for DownloadRemoteLyrics.
+    ///
     /// Field 1: `provider`
     pub provider: ::core::option::Option<::buffa::alloc::string::String>,
-    /// The provider's ID, passed to DownloadSubtitle.
-    ///
     /// Field 2: `id`
     pub id: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 3: `name`
     pub name: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 4: `language`
-    pub language: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 5: `format`
-    pub format: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 6: `hearing_impaired`
-    pub hearing_impaired: ::core::option::Option<bool>,
-    /// Field 7: `forced`
-    pub forced: ::core::option::Option<bool>,
+    /// Field 4: `artists`
+    pub artists: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Field 5: `album`
+    pub album: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 6: `duration`
+    pub duration: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Duration,
+        ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
+    >,
+    /// Field 7: `synced`
+    pub synced: ::core::option::Option<bool>,
     /// Field 8: `score`
     pub score: ::core::option::Option<f64>,
-    /// Field 9: `download_count`
-    pub download_count: ::core::option::Option<i32>,
-    /// Field 10: `hash_match`
-    pub hash_match: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for RemoteSubtitle {
+impl ::core::fmt::Debug for RemoteLyrics {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("RemoteSubtitle")
+        f.debug_struct("RemoteLyrics")
             .field("provider", &self.provider)
             .field("id", &self.id)
             .field("name", &self.name)
-            .field("language", &self.language)
-            .field("format", &self.format)
-            .field("hearing_impaired", &self.hearing_impaired)
-            .field("forced", &self.forced)
+            .field("artists", &self.artists)
+            .field("album", &self.album)
+            .field("duration", &self.duration)
+            .field("synced", &self.synced)
             .field("score", &self.score)
-            .field("download_count", &self.download_count)
-            .field("hash_match", &self.hash_match)
             .finish()
     }
 }
-impl RemoteSubtitle {
+impl RemoteLyrics {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteSubtitle";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteLyrics";
 }
-impl RemoteSubtitle {
+impl RemoteLyrics {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::provider`] to `Some(value)`, consuming and returning `self`.
@@ -3766,36 +3643,19 @@ impl RemoteSubtitle {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_language(
+    ///Sets [`Self::album`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_album(
         mut self,
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
-        self.language = Some(value.into());
+        self.album = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::format`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_format(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.format = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::hearing_impaired`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_hearing_impaired(mut self, value: bool) -> Self {
-        self.hearing_impaired = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::forced`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_forced(mut self, value: bool) -> Self {
-        self.forced = Some(value);
+    ///Sets [`Self::synced`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_synced(mut self, value: bool) -> Self {
+        self.synced = Some(value);
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -3805,29 +3665,15 @@ impl RemoteSubtitle {
         self.score = Some(value);
         self
     }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::download_count`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_download_count(mut self, value: i32) -> Self {
-        self.download_count = Some(value);
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::hash_match`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_hash_match(mut self, value: bool) -> Self {
-        self.hash_match = Some(value);
-        self
-    }
 }
-::buffa::impl_default_instance!(RemoteSubtitle);
-impl ::buffa::MessageName for RemoteSubtitle {
+::buffa::impl_default_instance!(RemoteLyrics);
+impl ::buffa::MessageName for RemoteLyrics {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "RemoteSubtitle";
-    const FULL_NAME: &'static str = "mavio.library.v1.RemoteSubtitle";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteSubtitle";
+    const NAME: &'static str = "RemoteLyrics";
+    const FULL_NAME: &'static str = "mavio.library.v1.RemoteLyrics";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.RemoteLyrics";
 }
-impl ::buffa::Message for RemoteSubtitle {
+impl ::buffa::Message for RemoteLyrics {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -3836,7 +3682,7 @@ impl ::buffa::Message for RemoteSubtitle {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
@@ -3849,33 +3695,32 @@ impl ::buffa::Message for RemoteSubtitle {
         if let Some(ref v) = self.name {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.language {
+        for v in &self.artists {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.format {
+        if let Some(ref v) = self.album {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if self.hearing_impaired.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        if self.duration.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.duration.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
         }
-        if self.forced.is_some() {
+        if self.synced.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.score.is_some() {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
-        }
-        if let Some(v) = self.download_count {
-            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
-        }
-        if self.hash_match.is_some() {
-            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        _cache: &mut ::buffa::SizeCache,
+        __cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
@@ -3889,26 +3734,25 @@ impl ::buffa::Message for RemoteSubtitle {
         if let Some(ref v) = self.name {
             ::buffa::types::put_string_field(3u32, v, buf);
         }
-        if let Some(ref v) = self.language {
+        for v in &self.artists {
             ::buffa::types::put_string_field(4u32, v, buf);
         }
-        if let Some(ref v) = self.format {
+        if let Some(ref v) = self.album {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
-        if let Some(v) = self.hearing_impaired {
-            ::buffa::types::put_bool_field(6u32, v, buf);
+        if self.duration.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                6u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.duration.write_to(__cache, buf);
         }
-        if let Some(v) = self.forced {
+        if let Some(v) = self.synced {
             ::buffa::types::put_bool_field(7u32, v, buf);
         }
         if let Some(v) = self.score {
             ::buffa::types::put_double_field(8u32, v, buf);
-        }
-        if let Some(v) = self.download_count {
-            ::buffa::types::put_int32_field(9u32, v, buf);
-        }
-        if let Some(v) = self.hash_match {
-            ::buffa::types::put_bool_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3960,12 +3804,11 @@ impl ::buffa::Message for RemoteSubtitle {
                     tag,
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                ::buffa::types::merge_string(
-                    self
-                        .language
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
                 )?;
+                self.artists.push(__elem);
             }
             5u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -3973,25 +3816,27 @@ impl ::buffa::Message for RemoteSubtitle {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::types::merge_string(
-                    self.format.get_or_insert_with(::buffa::alloc::string::String::new),
+                    self.album.get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
-                    ::buffa::encoding::WireType::Varint,
+                    ::buffa::encoding::WireType::LengthDelimited,
                 )?;
-                self.hearing_impaired = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
-                );
+                ::buffa::Message::merge_length_delimited(
+                    self.duration.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
             }
             7u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
                     ::buffa::encoding::WireType::Varint,
                 )?;
-                self.forced = ::core::option::Option::Some(
+                self.synced = ::core::option::Option::Some(
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
@@ -4002,24 +3847,6 @@ impl ::buffa::Message for RemoteSubtitle {
                 )?;
                 self.score = ::core::option::Option::Some(
                     ::buffa::types::decode_double(buf)?,
-                );
-            }
-            9u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.download_count = ::core::option::Option::Some(
-                    ::buffa::types::decode_int32(buf)?,
-                );
-            }
-            10u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::Varint,
-                )?;
-                self.hash_match = ::core::option::Option::Some(
-                    ::buffa::types::decode_bool(buf)?,
                 );
             }
             _ => {
@@ -4033,18 +3860,16 @@ impl ::buffa::Message for RemoteSubtitle {
         self.provider = ::core::option::Option::None;
         self.id = ::core::option::Option::None;
         self.name = ::core::option::Option::None;
-        self.language = ::core::option::Option::None;
-        self.format = ::core::option::Option::None;
-        self.hearing_impaired = ::core::option::Option::None;
-        self.forced = ::core::option::Option::None;
+        self.artists.clear();
+        self.album = ::core::option::Option::None;
+        self.duration = ::buffa::MessageField::none();
+        self.synced = ::core::option::Option::None;
         self.score = ::core::option::Option::None;
-        self.download_count = ::core::option::Option::None;
-        self.hash_match = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for RemoteSubtitle {
-    const PROTO_FQN: &'static str = "mavio.library.v1.RemoteSubtitle";
+impl ::buffa::ExtensionSet for RemoteLyrics {
+    const PROTO_FQN: &'static str = "mavio.library.v1.RemoteLyrics";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4053,34 +3878,36 @@ impl ::buffa::ExtensionSet for RemoteSubtitle {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct SearchSubtitlesResponse {
-    /// Field 1: `subtitles`
-    pub subtitles: ::buffa::alloc::vec::Vec<RemoteSubtitle>,
+pub struct SearchRemoteLyricsResponse {
+    /// Each provider's lyrics, best first, in provider order.
+    ///
+    /// Field 1: `lyrics`
+    pub lyrics: ::buffa::alloc::vec::Vec<RemoteLyrics>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for SearchSubtitlesResponse {
+impl ::core::fmt::Debug for SearchRemoteLyricsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("SearchSubtitlesResponse")
-            .field("subtitles", &self.subtitles)
+        f.debug_struct("SearchRemoteLyricsResponse")
+            .field("lyrics", &self.lyrics)
             .finish()
     }
 }
-impl SearchSubtitlesResponse {
+impl SearchRemoteLyricsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsResponse";
 }
-::buffa::impl_default_instance!(SearchSubtitlesResponse);
-impl ::buffa::MessageName for SearchSubtitlesResponse {
+::buffa::impl_default_instance!(SearchRemoteLyricsResponse);
+impl ::buffa::MessageName for SearchRemoteLyricsResponse {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "SearchSubtitlesResponse";
-    const FULL_NAME: &'static str = "mavio.library.v1.SearchSubtitlesResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchSubtitlesResponse";
+    const NAME: &'static str = "SearchRemoteLyricsResponse";
+    const FULL_NAME: &'static str = "mavio.library.v1.SearchRemoteLyricsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.SearchRemoteLyricsResponse";
 }
-impl ::buffa::Message for SearchSubtitlesResponse {
+impl ::buffa::Message for SearchRemoteLyricsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4093,7 +3920,7 @@ impl ::buffa::Message for SearchSubtitlesResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        for v in &self.subtitles {
+        for v in &self.lyrics {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -4111,7 +3938,7 @@ impl ::buffa::Message for SearchSubtitlesResponse {
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        for v in &self.subtitles {
+        for v in &self.lyrics {
             ::buffa::types::put_len_delimited_header(
                 1u32,
                 u64::from(__cache.consume_next()),
@@ -4142,7 +3969,7 @@ impl ::buffa::Message for SearchSubtitlesResponse {
                     ::buffa::__private::element_footprint(&elem),
                 )?;
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
-                self.subtitles.push(elem);
+                self.lyrics.push(elem);
             }
             _ => {
                 self.__buffa_unknown_fields
@@ -4152,12 +3979,12 @@ impl ::buffa::Message for SearchSubtitlesResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.subtitles.clear();
+        self.lyrics.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for SearchSubtitlesResponse {
-    const PROTO_FQN: &'static str = "mavio.library.v1.SearchSubtitlesResponse";
+impl ::buffa::ExtensionSet for SearchRemoteLyricsResponse {
+    const PROTO_FQN: &'static str = "mavio.library.v1.SearchRemoteLyricsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4166,36 +3993,33 @@ impl ::buffa::ExtensionSet for SearchSubtitlesResponse {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct DownloadSubtitleRequest {
+pub struct DownloadRemoteLyricsRequest {
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 2: `media_source_id`
-    pub media_source_id: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 3: `provider`
+    /// Field 2: `provider`
     pub provider: ::core::option::Option<::buffa::alloc::string::String>,
-    /// Field 4: `subtitle_id`
-    pub subtitle_id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `id`
+    pub id: ::core::option::Option<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for DownloadSubtitleRequest {
+impl ::core::fmt::Debug for DownloadRemoteLyricsRequest {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("DownloadSubtitleRequest")
+        f.debug_struct("DownloadRemoteLyricsRequest")
             .field("item_id", &self.item_id)
-            .field("media_source_id", &self.media_source_id)
             .field("provider", &self.provider)
-            .field("subtitle_id", &self.subtitle_id)
+            .field("id", &self.id)
             .finish()
     }
 }
-impl DownloadSubtitleRequest {
+impl DownloadRemoteLyricsRequest {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleRequest";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsRequest";
 }
-impl DownloadSubtitleRequest {
+impl DownloadRemoteLyricsRequest {
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
     ///Sets [`Self::item_id`] to `Some(value)`, consuming and returning `self`.
@@ -4204,16 +4028,6 @@ impl DownloadSubtitleRequest {
         value: impl Into<::buffa::alloc::string::String>,
     ) -> Self {
         self.item_id = Some(value.into());
-        self
-    }
-    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
-    #[inline]
-    ///Sets [`Self::media_source_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_media_source_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.media_source_id = Some(value.into());
         self
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
@@ -4228,23 +4042,20 @@ impl DownloadSubtitleRequest {
     }
     #[must_use = "with_* setters return `self` by value; assign or chain the result"]
     #[inline]
-    ///Sets [`Self::subtitle_id`] to `Some(value)`, consuming and returning `self`.
-    pub fn with_subtitle_id(
-        mut self,
-        value: impl Into<::buffa::alloc::string::String>,
-    ) -> Self {
-        self.subtitle_id = Some(value.into());
+    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.id = Some(value.into());
         self
     }
 }
-::buffa::impl_default_instance!(DownloadSubtitleRequest);
-impl ::buffa::MessageName for DownloadSubtitleRequest {
+::buffa::impl_default_instance!(DownloadRemoteLyricsRequest);
+impl ::buffa::MessageName for DownloadRemoteLyricsRequest {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "DownloadSubtitleRequest";
-    const FULL_NAME: &'static str = "mavio.library.v1.DownloadSubtitleRequest";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleRequest";
+    const NAME: &'static str = "DownloadRemoteLyricsRequest";
+    const FULL_NAME: &'static str = "mavio.library.v1.DownloadRemoteLyricsRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsRequest";
 }
-impl ::buffa::Message for DownloadSubtitleRequest {
+impl ::buffa::Message for DownloadRemoteLyricsRequest {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4260,13 +4071,10 @@ impl ::buffa::Message for DownloadSubtitleRequest {
         if let Some(ref v) = self.item_id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.media_source_id {
-            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
-        }
         if let Some(ref v) = self.provider {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
-        if let Some(ref v) = self.subtitle_id {
+        if let Some(ref v) = self.id {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -4282,14 +4090,11 @@ impl ::buffa::Message for DownloadSubtitleRequest {
         if let Some(ref v) = self.item_id {
             ::buffa::types::put_string_field(1u32, v, buf);
         }
-        if let Some(ref v) = self.media_source_id {
+        if let Some(ref v) = self.provider {
             ::buffa::types::put_string_field(2u32, v, buf);
         }
-        if let Some(ref v) = self.provider {
+        if let Some(ref v) = self.id {
             ::buffa::types::put_string_field(3u32, v, buf);
-        }
-        if let Some(ref v) = self.subtitle_id {
-            ::buffa::types::put_string_field(4u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4321,7 +4126,7 @@ impl ::buffa::Message for DownloadSubtitleRequest {
                 )?;
                 ::buffa::types::merge_string(
                     self
-                        .media_source_id
+                        .provider
                         .get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
@@ -4332,21 +4137,7 @@ impl ::buffa::Message for DownloadSubtitleRequest {
                     ::buffa::encoding::WireType::LengthDelimited,
                 )?;
                 ::buffa::types::merge_string(
-                    self
-                        .provider
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
-                    buf,
-                )?;
-            }
-            4u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::types::merge_string(
-                    self
-                        .subtitle_id
-                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
                     buf,
                 )?;
             }
@@ -4359,14 +4150,13 @@ impl ::buffa::Message for DownloadSubtitleRequest {
     }
     fn clear(&mut self) {
         self.item_id = ::core::option::Option::None;
-        self.media_source_id = ::core::option::Option::None;
         self.provider = ::core::option::Option::None;
-        self.subtitle_id = ::core::option::Option::None;
+        self.id = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for DownloadSubtitleRequest {
-    const PROTO_FQN: &'static str = "mavio.library.v1.DownloadSubtitleRequest";
+impl ::buffa::ExtensionSet for DownloadRemoteLyricsRequest {
+    const PROTO_FQN: &'static str = "mavio.library.v1.DownloadRemoteLyricsRequest";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }
@@ -4375,34 +4165,30 @@ impl ::buffa::ExtensionSet for DownloadSubtitleRequest {
     }
 }
 #[derive(Clone, PartialEq, Default)]
-pub struct DownloadSubtitleResponse {
-    /// The subtitle as a stream of the media source.
-    ///
-    /// Field 1: `stream`
-    pub stream: ::buffa::MessageField<MediaStream, ::buffa::Inline<MediaStream>>,
+pub struct DownloadRemoteLyricsResponse {
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
-impl ::core::fmt::Debug for DownloadSubtitleResponse {
+impl ::core::fmt::Debug for DownloadRemoteLyricsResponse {
     fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-        f.debug_struct("DownloadSubtitleResponse").field("stream", &self.stream).finish()
+        f.debug_struct("DownloadRemoteLyricsResponse").finish()
     }
 }
-impl DownloadSubtitleResponse {
+impl DownloadRemoteLyricsResponse {
     /// Protobuf type URL for this message, for use with `Any::pack` and
     /// `Any::unpack_if`.
     ///
     /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
-    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleResponse";
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsResponse";
 }
-::buffa::impl_default_instance!(DownloadSubtitleResponse);
-impl ::buffa::MessageName for DownloadSubtitleResponse {
+::buffa::impl_default_instance!(DownloadRemoteLyricsResponse);
+impl ::buffa::MessageName for DownloadRemoteLyricsResponse {
     const PACKAGE: &'static str = "mavio.library.v1";
-    const NAME: &'static str = "DownloadSubtitleResponse";
-    const FULL_NAME: &'static str = "mavio.library.v1.DownloadSubtitleResponse";
-    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadSubtitleResponse";
+    const NAME: &'static str = "DownloadRemoteLyricsResponse";
+    const FULL_NAME: &'static str = "mavio.library.v1.DownloadRemoteLyricsResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.library.v1.DownloadRemoteLyricsResponse";
 }
-impl ::buffa::Message for DownloadSubtitleResponse {
+impl ::buffa::Message for DownloadRemoteLyricsResponse {
     /// Returns the total encoded size in bytes.
     ///
     /// Accumulates in `u64` (which cannot overflow for in-memory
@@ -4411,36 +4197,20 @@ impl ::buffa::Message for DownloadSubtitleResponse {
     /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
     /// points reject, never a silently wrapped size.
     #[allow(clippy::let_and_return)]
-    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         let mut size = 0u64;
-        if self.stream.is_set() {
-            let __slot = __cache.reserve();
-            let inner_size = self.stream.compute_size(__cache);
-            __cache.set(__slot, inner_size);
-            size
-                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
-                    + inner_size as u64;
-        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
     fn write_to(
         &self,
-        __cache: &mut ::buffa::SizeCache,
+        _cache: &mut ::buffa::SizeCache,
         buf: &mut impl ::buffa::EncodeSink,
     ) {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
-        if self.stream.is_set() {
-            ::buffa::types::put_len_delimited_header(
-                1u32,
-                u64::from(__cache.consume_next()),
-                buf,
-            );
-            self.stream.write_to(__cache, buf);
-        }
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -4454,17 +4224,6 @@ impl ::buffa::Message for DownloadSubtitleResponse {
         #[allow(unused_imports)]
         use ::buffa::Enumeration as _;
         match tag.field_number() {
-            1u32 => {
-                ::buffa::encoding::check_wire_type(
-                    tag,
-                    ::buffa::encoding::WireType::LengthDelimited,
-                )?;
-                ::buffa::Message::merge_length_delimited(
-                    self.stream.get_or_insert_default(),
-                    buf,
-                    ctx,
-                )?;
-            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4473,12 +4232,11 @@ impl ::buffa::Message for DownloadSubtitleResponse {
         ::core::result::Result::Ok(())
     }
     fn clear(&mut self) {
-        self.stream = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
-impl ::buffa::ExtensionSet for DownloadSubtitleResponse {
-    const PROTO_FQN: &'static str = "mavio.library.v1.DownloadSubtitleResponse";
+impl ::buffa::ExtensionSet for DownloadRemoteLyricsResponse {
+    const PROTO_FQN: &'static str = "mavio.library.v1.DownloadRemoteLyricsResponse";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

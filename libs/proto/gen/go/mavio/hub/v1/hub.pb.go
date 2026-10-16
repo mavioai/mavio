@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        (unknown)
-// source: mavio/home/v1/home.proto
+// source: mavio/hub/v1/hub.proto
 
-package homev1
+package hubv1
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
@@ -35,7 +35,7 @@ type ListHubsRequest struct {
 
 func (x *ListHubsRequest) Reset() {
 	*x = ListHubsRequest{}
-	mi := &file_mavio_home_v1_home_proto_msgTypes[0]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +47,7 @@ func (x *ListHubsRequest) String() string {
 func (*ListHubsRequest) ProtoMessage() {}
 
 func (x *ListHubsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_home_v1_home_proto_msgTypes[0]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -142,7 +142,7 @@ type ListHubsResponse struct {
 
 func (x *ListHubsResponse) Reset() {
 	*x = ListHubsResponse{}
-	mi := &file_mavio_home_v1_home_proto_msgTypes[1]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +154,7 @@ func (x *ListHubsResponse) String() string {
 func (*ListHubsResponse) ProtoMessage() {}
 
 func (x *ListHubsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_home_v1_home_proto_msgTypes[1]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,7 +205,7 @@ type GetHubRequest struct {
 
 func (x *GetHubRequest) Reset() {
 	*x = GetHubRequest{}
-	mi := &file_mavio_home_v1_home_proto_msgTypes[2]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -217,7 +217,7 @@ func (x *GetHubRequest) String() string {
 func (*GetHubRequest) ProtoMessage() {}
 
 func (x *GetHubRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_home_v1_home_proto_msgTypes[2]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -341,7 +341,7 @@ type GetHubResponse struct {
 
 func (x *GetHubResponse) Reset() {
 	*x = GetHubResponse{}
-	mi := &file_mavio_home_v1_home_proto_msgTypes[3]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -353,7 +353,7 @@ func (x *GetHubResponse) String() string {
 func (*GetHubResponse) ProtoMessage() {}
 
 func (x *GetHubResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_home_v1_home_proto_msgTypes[3]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -420,7 +420,7 @@ type Hub struct {
 
 func (x *Hub) Reset() {
 	*x = Hub{}
-	mi := &file_mavio_home_v1_home_proto_msgTypes[4]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -432,7 +432,7 @@ func (x *Hub) String() string {
 func (*Hub) ProtoMessage() {}
 
 func (x *Hub) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_home_v1_home_proto_msgTypes[4]
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -713,26 +713,382 @@ func (b0 Hub_builder) Build() *Hub {
 	return m0
 }
 
-var File_mavio_home_v1_home_proto protoreflect.FileDescriptor
+// HomeLayout is a user's choice of what Home shows.
+type HomeLayout struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Pinned       bool                   `protobuf:"varint,1,opt,name=pinned"`
+	xxx_hidden_LibraryIds   []string               `protobuf:"bytes,2,rep,name=library_ids,json=libraryIds"`
+	xxx_hidden_HiddenHubIds []string               `protobuf:"bytes,3,rep,name=hidden_hub_ids,json=hiddenHubIds"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
 
-const file_mavio_home_v1_home_proto_rawDesc = "" +
+func (x *HomeLayout) Reset() {
+	*x = HomeLayout{}
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HomeLayout) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HomeLayout) ProtoMessage() {}
+
+func (x *HomeLayout) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *HomeLayout) GetPinned() bool {
+	if x != nil {
+		return x.xxx_hidden_Pinned
+	}
+	return false
+}
+
+func (x *HomeLayout) GetLibraryIds() []string {
+	if x != nil {
+		return x.xxx_hidden_LibraryIds
+	}
+	return nil
+}
+
+func (x *HomeLayout) GetHiddenHubIds() []string {
+	if x != nil {
+		return x.xxx_hidden_HiddenHubIds
+	}
+	return nil
+}
+
+func (x *HomeLayout) SetPinned(v bool) {
+	x.xxx_hidden_Pinned = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *HomeLayout) SetLibraryIds(v []string) {
+	x.xxx_hidden_LibraryIds = v
+}
+
+func (x *HomeLayout) SetHiddenHubIds(v []string) {
+	x.xxx_hidden_HiddenHubIds = v
+}
+
+func (x *HomeLayout) HasPinned() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *HomeLayout) ClearPinned() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Pinned = false
+}
+
+type HomeLayout_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Whether the user pinned libraries; when not, Home shows every library
+	// in name order and library_ids is empty.
+	Pinned *bool
+	// The pinned libraries, in the order Home shows them.
+	LibraryIds []string
+	// The IDs of the hidden hubs, as Hub.id; continue watching cannot be
+	// hidden.
+	HiddenHubIds []string
+}
+
+func (b0 HomeLayout_builder) Build() *HomeLayout {
+	m0 := &HomeLayout{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Pinned != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Pinned = *b.Pinned
+	}
+	x.xxx_hidden_LibraryIds = b.LibraryIds
+	x.xxx_hidden_HiddenHubIds = b.HiddenHubIds
+	return m0
+}
+
+type GetHomeLayoutRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHomeLayoutRequest) Reset() {
+	*x = GetHomeLayoutRequest{}
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHomeLayoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHomeLayoutRequest) ProtoMessage() {}
+
+func (x *GetHomeLayoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetHomeLayoutRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetHomeLayoutRequest_builder) Build() *GetHomeLayoutRequest {
+	m0 := &GetHomeLayoutRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetHomeLayoutResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Layout *HomeLayout            `protobuf:"bytes,1,opt,name=layout"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetHomeLayoutResponse) Reset() {
+	*x = GetHomeLayoutResponse{}
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHomeLayoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHomeLayoutResponse) ProtoMessage() {}
+
+func (x *GetHomeLayoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetHomeLayoutResponse) GetLayout() *HomeLayout {
+	if x != nil {
+		return x.xxx_hidden_Layout
+	}
+	return nil
+}
+
+func (x *GetHomeLayoutResponse) SetLayout(v *HomeLayout) {
+	x.xxx_hidden_Layout = v
+}
+
+func (x *GetHomeLayoutResponse) HasLayout() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Layout != nil
+}
+
+func (x *GetHomeLayoutResponse) ClearLayout() {
+	x.xxx_hidden_Layout = nil
+}
+
+type GetHomeLayoutResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Layout *HomeLayout
+}
+
+func (b0 GetHomeLayoutResponse_builder) Build() *GetHomeLayoutResponse {
+	m0 := &GetHomeLayoutResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Layout = b.Layout
+	return m0
+}
+
+type UpdateHomeLayoutRequest struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Layout *HomeLayout            `protobuf:"bytes,1,opt,name=layout"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpdateHomeLayoutRequest) Reset() {
+	*x = UpdateHomeLayoutRequest{}
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateHomeLayoutRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateHomeLayoutRequest) ProtoMessage() {}
+
+func (x *UpdateHomeLayoutRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateHomeLayoutRequest) GetLayout() *HomeLayout {
+	if x != nil {
+		return x.xxx_hidden_Layout
+	}
+	return nil
+}
+
+func (x *UpdateHomeLayoutRequest) SetLayout(v *HomeLayout) {
+	x.xxx_hidden_Layout = v
+}
+
+func (x *UpdateHomeLayoutRequest) HasLayout() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Layout != nil
+}
+
+func (x *UpdateHomeLayoutRequest) ClearLayout() {
+	x.xxx_hidden_Layout = nil
+}
+
+type UpdateHomeLayoutRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Layout *HomeLayout
+}
+
+func (b0 UpdateHomeLayoutRequest_builder) Build() *UpdateHomeLayoutRequest {
+	m0 := &UpdateHomeLayoutRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Layout = b.Layout
+	return m0
+}
+
+type UpdateHomeLayoutResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Layout *HomeLayout            `protobuf:"bytes,1,opt,name=layout"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpdateHomeLayoutResponse) Reset() {
+	*x = UpdateHomeLayoutResponse{}
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateHomeLayoutResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateHomeLayoutResponse) ProtoMessage() {}
+
+func (x *UpdateHomeLayoutResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_hub_v1_hub_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateHomeLayoutResponse) GetLayout() *HomeLayout {
+	if x != nil {
+		return x.xxx_hidden_Layout
+	}
+	return nil
+}
+
+func (x *UpdateHomeLayoutResponse) SetLayout(v *HomeLayout) {
+	x.xxx_hidden_Layout = v
+}
+
+func (x *UpdateHomeLayoutResponse) HasLayout() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Layout != nil
+}
+
+func (x *UpdateHomeLayoutResponse) ClearLayout() {
+	x.xxx_hidden_Layout = nil
+}
+
+type UpdateHomeLayoutResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Layout *HomeLayout
+}
+
+func (b0 UpdateHomeLayoutResponse_builder) Build() *UpdateHomeLayoutResponse {
+	m0 := &UpdateHomeLayoutResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Layout = b.Layout
+	return m0
+}
+
+var File_mavio_hub_v1_hub_proto protoreflect.FileDescriptor
+
+const file_mavio_hub_v1_hub_proto_rawDesc = "" +
 	"\n" +
-	"\x18mavio/home/v1/home.proto\x12\rmavio.home.v1\x1a\x1bbuf/validate/validate.proto\x1a#mavio/acquisition/v1/discover.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1emavio/library/v1/library.proto\"d\n" +
+	"\x16mavio/hub/v1/hub.proto\x12\fmavio.hub.v1\x1a\x1bbuf/validate/validate.proto\x1a#mavio/acquisition/v1/discover.proto\x1a\x1bmavio/library/v1/item.proto\x1a\x1emavio/library/v1/library.proto\"d\n" +
 	"\x0fListHubsRequest\x12'\n" +
 	"\n" +
 	"library_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\tlibraryId\x12(\n" +
 	"\n" +
-	"item_limit\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x182(\x00R\titemLimit\":\n" +
-	"\x10ListHubsResponse\x12&\n" +
-	"\x04hubs\x18\x01 \x03(\v2\x12.mavio.home.v1.HubR\x04hubs\"s\n" +
+	"item_limit\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x182(\x00R\titemLimit\"9\n" +
+	"\x10ListHubsResponse\x12%\n" +
+	"\x04hubs\x18\x01 \x03(\v2\x11.mavio.hub.v1.HubR\x04hubs\"s\n" +
 	"\rGetHubRequest\x12\x1d\n" +
 	"\x02id\x18\x01 \x01(\tB\r\xbaH\n" +
 	"\xc8\x01\x01r\x05\x10\x01\x18\x80\x01R\x02id\x12\x1f\n" +
 	"\x05limit\x18\x02 \x01(\x05B\t\xbaH\x06\x1a\x04\x18d(\x00R\x05limit\x12\"\n" +
 	"\x06offset\x18\x03 \x01(\x05B\n" +
-	"\xbaH\a\x1a\x05\x18\x90N(\x00R\x06offset\"6\n" +
-	"\x0eGetHubResponse\x12$\n" +
-	"\x03hub\x18\x01 \x01(\v2\x12.mavio.home.v1.HubR\x03hub\"\xbd\x02\n" +
+	"\xbaH\a\x1a\x05\x18\x90N(\x00R\x06offset\"5\n" +
+	"\x0eGetHubResponse\x12#\n" +
+	"\x03hub\x18\x01 \x01(\v2\x11.mavio.hub.v1.HubR\x03hub\"\xbd\x02\n" +
 	"\x03Hub\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x04kind\x18\x02 \x01(\x0e2\x19.mavio.library.v1.HubKindR\x04kind\x12\x1d\n" +
@@ -743,60 +1099,88 @@ const file_mavio_home_v1_home_proto_rawDesc = "" +
 	"\tseed_name\x18\x06 \x01(\tR\bseedName\x12,\n" +
 	"\x05items\x18\a \x03(\v2\x16.mavio.library.v1.ItemR\x05items\x12=\n" +
 	"\x06titles\x18\b \x03(\v2%.mavio.acquisition.v1.DiscoveredTitleR\x06titles\x12\x12\n" +
-	"\x04more\x18\t \x01(\bR\x04more2\xab\x01\n" +
-	"\vHomeService\x12P\n" +
-	"\bListHubs\x12\x1e.mavio.home.v1.ListHubsRequest\x1a\x1f.mavio.home.v1.ListHubsResponse\"\x03\x90\x02\x01\x12J\n" +
-	"\x06GetHub\x12\x1c.mavio.home.v1.GetHubRequest\x1a\x1d.mavio.home.v1.GetHubResponse\"\x03\x90\x02\x01B\xb5\x01\n" +
-	"\x11com.mavio.home.v1B\tHomeProtoP\x01Z?github.com/mavioai/mavio/libs/proto/gen/go/mavio/home/v1;homev1\xa2\x02\x03MHX\xaa\x02\rMavio.Home.V1\xca\x02\rMavio\\Home\\V1\xe2\x02\x19Mavio\\Home\\V1\\GPBMetadata\xea\x02\x0fMavio::Home::V1b\beditionsp\xe8\a"
+	"\x04more\x18\t \x01(\bR\x04more\"\x95\x01\n" +
+	"\n" +
+	"HomeLayout\x12\x16\n" +
+	"\x06pinned\x18\x01 \x01(\bR\x06pinned\x123\n" +
+	"\vlibrary_ids\x18\x02 \x03(\tB\x12\xbaH\x0f\x92\x01\f\x10\xe8\a\x18\x01\"\x05r\x03\xb0\x01\x01R\n" +
+	"libraryIds\x12:\n" +
+	"\x0ehidden_hub_ids\x18\x03 \x03(\tB\x14\xbaH\x11\x92\x01\x0e\x10\xe8\a\x18\x01\"\ar\x05\x10\x01\x18\x80\x01R\fhiddenHubIds\"\x16\n" +
+	"\x14GetHomeLayoutRequest\"I\n" +
+	"\x15GetHomeLayoutResponse\x120\n" +
+	"\x06layout\x18\x01 \x01(\v2\x18.mavio.hub.v1.HomeLayoutR\x06layout\"S\n" +
+	"\x17UpdateHomeLayoutRequest\x128\n" +
+	"\x06layout\x18\x01 \x01(\v2\x18.mavio.hub.v1.HomeLayoutB\x06\xbaH\x03\xc8\x01\x01R\x06layout\"L\n" +
+	"\x18UpdateHomeLayoutResponse\x120\n" +
+	"\x06layout\x18\x01 \x01(\v2\x18.mavio.hub.v1.HomeLayoutR\x06layout2\xed\x02\n" +
+	"\n" +
+	"HubService\x12N\n" +
+	"\bListHubs\x12\x1d.mavio.hub.v1.ListHubsRequest\x1a\x1e.mavio.hub.v1.ListHubsResponse\"\x03\x90\x02\x01\x12H\n" +
+	"\x06GetHub\x12\x1b.mavio.hub.v1.GetHubRequest\x1a\x1c.mavio.hub.v1.GetHubResponse\"\x03\x90\x02\x01\x12]\n" +
+	"\rGetHomeLayout\x12\".mavio.hub.v1.GetHomeLayoutRequest\x1a#.mavio.hub.v1.GetHomeLayoutResponse\"\x03\x90\x02\x01\x12f\n" +
+	"\x10UpdateHomeLayout\x12%.mavio.hub.v1.UpdateHomeLayoutRequest\x1a&.mavio.hub.v1.UpdateHomeLayoutResponse\"\x03\x90\x02\x02B\xad\x01\n" +
+	"\x10com.mavio.hub.v1B\bHubProtoP\x01Z=github.com/mavioai/mavio/libs/proto/gen/go/mavio/hub/v1;hubv1\xa2\x02\x03MHX\xaa\x02\fMavio.Hub.V1\xca\x02\fMavio\\Hub\\V1\xe2\x02\x18Mavio\\Hub\\V1\\GPBMetadata\xea\x02\x0eMavio::Hub::V1b\beditionsp\xe8\a"
 
-var file_mavio_home_v1_home_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
-var file_mavio_home_v1_home_proto_goTypes = []any{
-	(*ListHubsRequest)(nil),     // 0: mavio.home.v1.ListHubsRequest
-	(*ListHubsResponse)(nil),    // 1: mavio.home.v1.ListHubsResponse
-	(*GetHubRequest)(nil),       // 2: mavio.home.v1.GetHubRequest
-	(*GetHubResponse)(nil),      // 3: mavio.home.v1.GetHubResponse
-	(*Hub)(nil),                 // 4: mavio.home.v1.Hub
-	(v1.HubKind)(0),             // 5: mavio.library.v1.HubKind
-	(*v1.Item)(nil),             // 6: mavio.library.v1.Item
-	(*v11.DiscoveredTitle)(nil), // 7: mavio.acquisition.v1.DiscoveredTitle
+var file_mavio_hub_v1_hub_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_mavio_hub_v1_hub_proto_goTypes = []any{
+	(*ListHubsRequest)(nil),          // 0: mavio.hub.v1.ListHubsRequest
+	(*ListHubsResponse)(nil),         // 1: mavio.hub.v1.ListHubsResponse
+	(*GetHubRequest)(nil),            // 2: mavio.hub.v1.GetHubRequest
+	(*GetHubResponse)(nil),           // 3: mavio.hub.v1.GetHubResponse
+	(*Hub)(nil),                      // 4: mavio.hub.v1.Hub
+	(*HomeLayout)(nil),               // 5: mavio.hub.v1.HomeLayout
+	(*GetHomeLayoutRequest)(nil),     // 6: mavio.hub.v1.GetHomeLayoutRequest
+	(*GetHomeLayoutResponse)(nil),    // 7: mavio.hub.v1.GetHomeLayoutResponse
+	(*UpdateHomeLayoutRequest)(nil),  // 8: mavio.hub.v1.UpdateHomeLayoutRequest
+	(*UpdateHomeLayoutResponse)(nil), // 9: mavio.hub.v1.UpdateHomeLayoutResponse
+	(v1.HubKind)(0),                  // 10: mavio.library.v1.HubKind
+	(*v1.Item)(nil),                  // 11: mavio.library.v1.Item
+	(*v11.DiscoveredTitle)(nil),      // 12: mavio.acquisition.v1.DiscoveredTitle
 }
-var file_mavio_home_v1_home_proto_depIdxs = []int32{
-	4, // 0: mavio.home.v1.ListHubsResponse.hubs:type_name -> mavio.home.v1.Hub
-	4, // 1: mavio.home.v1.GetHubResponse.hub:type_name -> mavio.home.v1.Hub
-	5, // 2: mavio.home.v1.Hub.kind:type_name -> mavio.library.v1.HubKind
-	6, // 3: mavio.home.v1.Hub.items:type_name -> mavio.library.v1.Item
-	7, // 4: mavio.home.v1.Hub.titles:type_name -> mavio.acquisition.v1.DiscoveredTitle
-	0, // 5: mavio.home.v1.HomeService.ListHubs:input_type -> mavio.home.v1.ListHubsRequest
-	2, // 6: mavio.home.v1.HomeService.GetHub:input_type -> mavio.home.v1.GetHubRequest
-	1, // 7: mavio.home.v1.HomeService.ListHubs:output_type -> mavio.home.v1.ListHubsResponse
-	3, // 8: mavio.home.v1.HomeService.GetHub:output_type -> mavio.home.v1.GetHubResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+var file_mavio_hub_v1_hub_proto_depIdxs = []int32{
+	4,  // 0: mavio.hub.v1.ListHubsResponse.hubs:type_name -> mavio.hub.v1.Hub
+	4,  // 1: mavio.hub.v1.GetHubResponse.hub:type_name -> mavio.hub.v1.Hub
+	10, // 2: mavio.hub.v1.Hub.kind:type_name -> mavio.library.v1.HubKind
+	11, // 3: mavio.hub.v1.Hub.items:type_name -> mavio.library.v1.Item
+	12, // 4: mavio.hub.v1.Hub.titles:type_name -> mavio.acquisition.v1.DiscoveredTitle
+	5,  // 5: mavio.hub.v1.GetHomeLayoutResponse.layout:type_name -> mavio.hub.v1.HomeLayout
+	5,  // 6: mavio.hub.v1.UpdateHomeLayoutRequest.layout:type_name -> mavio.hub.v1.HomeLayout
+	5,  // 7: mavio.hub.v1.UpdateHomeLayoutResponse.layout:type_name -> mavio.hub.v1.HomeLayout
+	0,  // 8: mavio.hub.v1.HubService.ListHubs:input_type -> mavio.hub.v1.ListHubsRequest
+	2,  // 9: mavio.hub.v1.HubService.GetHub:input_type -> mavio.hub.v1.GetHubRequest
+	6,  // 10: mavio.hub.v1.HubService.GetHomeLayout:input_type -> mavio.hub.v1.GetHomeLayoutRequest
+	8,  // 11: mavio.hub.v1.HubService.UpdateHomeLayout:input_type -> mavio.hub.v1.UpdateHomeLayoutRequest
+	1,  // 12: mavio.hub.v1.HubService.ListHubs:output_type -> mavio.hub.v1.ListHubsResponse
+	3,  // 13: mavio.hub.v1.HubService.GetHub:output_type -> mavio.hub.v1.GetHubResponse
+	7,  // 14: mavio.hub.v1.HubService.GetHomeLayout:output_type -> mavio.hub.v1.GetHomeLayoutResponse
+	9,  // 15: mavio.hub.v1.HubService.UpdateHomeLayout:output_type -> mavio.hub.v1.UpdateHomeLayoutResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
-func init() { file_mavio_home_v1_home_proto_init() }
-func file_mavio_home_v1_home_proto_init() {
-	if File_mavio_home_v1_home_proto != nil {
+func init() { file_mavio_hub_v1_hub_proto_init() }
+func file_mavio_hub_v1_hub_proto_init() {
+	if File_mavio_hub_v1_hub_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_home_v1_home_proto_rawDesc), len(file_mavio_home_v1_home_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_hub_v1_hub_proto_rawDesc), len(file_mavio_hub_v1_hub_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_mavio_home_v1_home_proto_goTypes,
-		DependencyIndexes: file_mavio_home_v1_home_proto_depIdxs,
-		MessageInfos:      file_mavio_home_v1_home_proto_msgTypes,
+		GoTypes:           file_mavio_hub_v1_hub_proto_goTypes,
+		DependencyIndexes: file_mavio_hub_v1_hub_proto_depIdxs,
+		MessageInfos:      file_mavio_hub_v1_hub_proto_msgTypes,
 	}.Build()
-	File_mavio_home_v1_home_proto = out.File
-	file_mavio_home_v1_home_proto_goTypes = nil
-	file_mavio_home_v1_home_proto_depIdxs = nil
+	File_mavio_hub_v1_hub_proto = out.File
+	file_mavio_hub_v1_hub_proto_goTypes = nil
+	file_mavio_hub_v1_hub_proto_depIdxs = nil
 }

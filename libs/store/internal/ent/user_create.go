@@ -130,8 +130,22 @@ func (_c *UserCreate) SetPolicy(v core.UserPolicy) *UserCreate {
 }
 
 // SetPreferences sets the "preferences" field.
-func (_c *UserCreate) SetPreferences(v core.UserPreferences) *UserCreate {
+func (_c *UserCreate) SetPreferences(v core.PlaybackPreferences) *UserCreate {
 	_c.mutation.SetPreferences(v)
+	return _c
+}
+
+// SetHome sets the "home" field.
+func (_c *UserCreate) SetHome(v core.HomeLayout) *UserCreate {
+	_c.mutation.SetHome(v)
+	return _c
+}
+
+// SetNillableHome sets the "home" field if the given value is not nil.
+func (_c *UserCreate) SetNillableHome(v *core.HomeLayout) *UserCreate {
+	if v != nil {
+		_c.SetHome(*v)
+	}
 	return _c
 }
 
@@ -514,6 +528,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldPreferences, field.TypeJSON, value)
 		_node.Preferences = value
 	}
+	if value, ok := _c.mutation.Home(); ok {
+		_spec.SetField(user.FieldHome, field.TypeJSON, value)
+		_node.Home = value
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -871,7 +889,7 @@ func (u *UserUpsert) UpdatePolicy() *UserUpsert {
 }
 
 // SetPreferences sets the "preferences" field.
-func (u *UserUpsert) SetPreferences(v core.UserPreferences) *UserUpsert {
+func (u *UserUpsert) SetPreferences(v core.PlaybackPreferences) *UserUpsert {
 	u.Set(user.FieldPreferences, v)
 	return u
 }
@@ -879,6 +897,24 @@ func (u *UserUpsert) SetPreferences(v core.UserPreferences) *UserUpsert {
 // UpdatePreferences sets the "preferences" field to the value that was provided on create.
 func (u *UserUpsert) UpdatePreferences() *UserUpsert {
 	u.SetExcluded(user.FieldPreferences)
+	return u
+}
+
+// SetHome sets the "home" field.
+func (u *UserUpsert) SetHome(v core.HomeLayout) *UserUpsert {
+	u.Set(user.FieldHome, v)
+	return u
+}
+
+// UpdateHome sets the "home" field to the value that was provided on create.
+func (u *UserUpsert) UpdateHome() *UserUpsert {
+	u.SetExcluded(user.FieldHome)
+	return u
+}
+
+// ClearHome clears the value of the "home" field.
+func (u *UserUpsert) ClearHome() *UserUpsert {
+	u.SetNull(user.FieldHome)
 	return u
 }
 
@@ -1092,7 +1128,7 @@ func (u *UserUpsertOne) UpdatePolicy() *UserUpsertOne {
 }
 
 // SetPreferences sets the "preferences" field.
-func (u *UserUpsertOne) SetPreferences(v core.UserPreferences) *UserUpsertOne {
+func (u *UserUpsertOne) SetPreferences(v core.PlaybackPreferences) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetPreferences(v)
 	})
@@ -1102,6 +1138,27 @@ func (u *UserUpsertOne) SetPreferences(v core.UserPreferences) *UserUpsertOne {
 func (u *UserUpsertOne) UpdatePreferences() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdatePreferences()
+	})
+}
+
+// SetHome sets the "home" field.
+func (u *UserUpsertOne) SetHome(v core.HomeLayout) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetHome(v)
+	})
+}
+
+// UpdateHome sets the "home" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateHome() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateHome()
+	})
+}
+
+// ClearHome clears the value of the "home" field.
+func (u *UserUpsertOne) ClearHome() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearHome()
 	})
 }
 
@@ -1485,7 +1542,7 @@ func (u *UserUpsertBulk) UpdatePolicy() *UserUpsertBulk {
 }
 
 // SetPreferences sets the "preferences" field.
-func (u *UserUpsertBulk) SetPreferences(v core.UserPreferences) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetPreferences(v core.PlaybackPreferences) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetPreferences(v)
 	})
@@ -1495,6 +1552,27 @@ func (u *UserUpsertBulk) SetPreferences(v core.UserPreferences) *UserUpsertBulk 
 func (u *UserUpsertBulk) UpdatePreferences() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdatePreferences()
+	})
+}
+
+// SetHome sets the "home" field.
+func (u *UserUpsertBulk) SetHome(v core.HomeLayout) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetHome(v)
+	})
+}
+
+// UpdateHome sets the "home" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateHome() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateHome()
+	})
+}
+
+// ClearHome clears the value of the "home" field.
+func (u *UserUpsertBulk) ClearHome() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearHome()
 	})
 }
 

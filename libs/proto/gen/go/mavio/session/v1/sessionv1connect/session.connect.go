@@ -40,6 +40,9 @@ const (
 	// SessionServiceListSessionsProcedure is the fully-qualified name of the SessionService's
 	// ListSessions RPC.
 	SessionServiceListSessionsProcedure = "/mavio.session.v1.SessionService/ListSessions"
+	// SessionServiceRevokeSessionProcedure is the fully-qualified name of the SessionService's
+	// RevokeSession RPC.
+	SessionServiceRevokeSessionProcedure = "/mavio.session.v1.SessionService/RevokeSession"
 	// SessionServiceSendCommandProcedure is the fully-qualified name of the SessionService's
 	// SendCommand RPC.
 	SessionServiceSendCommandProcedure = "/mavio.session.v1.SessionService/SendCommand"
@@ -132,6 +135,11 @@ type SessionServiceClient interface {
 	// remote devices of plugins, such as DLNA renderers, are listed to
 	// everyone.
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
+	// RevokeSession signs a device out: one of the calling user's, or
+	// anyone's for administrators. Other users' devices and plugins' remote
+	// devices are NOT_FOUND; the calling device signs out with
+	// AuthService.Logout.
+	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
 	// SendCommand sends a command to an online device of the calling user,
 	// or of anyone for administrators, through its event stream, or to a
 	// plugin's remote device through its plugin. The device carries it out
@@ -157,6 +165,12 @@ func NewSessionServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		revokeSession: connect.NewClient[v1.RevokeSessionRequest, v1.RevokeSessionResponse](
+			httpClient,
+			baseURL+SessionServiceRevokeSessionProcedure,
+			connect.WithSchema(sessionServiceMethods.ByName("RevokeSession")),
+			connect.WithClientOptions(opts...),
+		),
 		sendCommand: connect.NewClient[v1.SendCommandRequest, v1.SendCommandResponse](
 			httpClient,
 			baseURL+SessionServiceSendCommandProcedure,
@@ -168,13 +182,23 @@ func NewSessionServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // sessionServiceClient implements SessionServiceClient.
 type sessionServiceClient struct {
-	listSessions *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
-	sendCommand  *connect.Client[v1.SendCommandRequest, v1.SendCommandResponse]
+	listSessions  *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
+	revokeSession *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
+	sendCommand   *connect.Client[v1.SendCommandRequest, v1.SendCommandResponse]
 }
 
 // ListSessions calls mavio.session.v1.SessionService.ListSessions.
 func (c *sessionServiceClient) ListSessions(ctx context.Context, req *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error) {
 	response, err := c.listSessions.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// RevokeSession calls mavio.session.v1.SessionService.RevokeSession.
+func (c *sessionServiceClient) RevokeSession(ctx context.Context, req *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error) {
+	response, err := c.revokeSession.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -197,6 +221,11 @@ type SessionServiceHandler interface {
 	// remote devices of plugins, such as DLNA renderers, are listed to
 	// everyone.
 	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
+	// RevokeSession signs a device out: one of the calling user's, or
+	// anyone's for administrators. Other users' devices and plugins' remote
+	// devices are NOT_FOUND; the calling device signs out with
+	// AuthService.Logout.
+	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
 	// SendCommand sends a command to an online device of the calling user,
 	// or of anyone for administrators, through its event stream, or to a
 	// plugin's remote device through its plugin. The device carries it out
@@ -218,6 +247,12 @@ func NewSessionServiceHandler(svc SessionServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	sessionServiceRevokeSessionHandler := connect.NewUnaryHandlerSimple(
+		SessionServiceRevokeSessionProcedure,
+		svc.RevokeSession,
+		connect.WithSchema(sessionServiceMethods.ByName("RevokeSession")),
+		connect.WithHandlerOptions(opts...),
+	)
 	sessionServiceSendCommandHandler := connect.NewUnaryHandlerSimple(
 		SessionServiceSendCommandProcedure,
 		svc.SendCommand,
@@ -228,6 +263,8 @@ func NewSessionServiceHandler(svc SessionServiceHandler, opts ...connect.Handler
 		switch r.URL.Path {
 		case SessionServiceListSessionsProcedure:
 			sessionServiceListSessionsHandler.ServeHTTP(w, r)
+		case SessionServiceRevokeSessionProcedure:
+			sessionServiceRevokeSessionHandler.ServeHTTP(w, r)
 		case SessionServiceSendCommandProcedure:
 			sessionServiceSendCommandHandler.ServeHTTP(w, r)
 		default:
@@ -241,6 +278,10 @@ type UnimplementedSessionServiceHandler struct{}
 
 func (UnimplementedSessionServiceHandler) ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SessionService.ListSessions is not implemented"))
+}
+
+func (UnimplementedSessionServiceHandler) RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.session.v1.SessionService.RevokeSession is not implemented"))
 }
 
 func (UnimplementedSessionServiceHandler) SendCommand(context.Context, *v1.SendCommandRequest) (*v1.SendCommandResponse, error) {

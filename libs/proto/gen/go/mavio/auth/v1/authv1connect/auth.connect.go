@@ -54,12 +54,6 @@ const (
 	AuthServiceRefreshSessionProcedure = "/mavio.auth.v1.AuthService/RefreshSession"
 	// AuthServiceLogoutProcedure is the fully-qualified name of the AuthService's Logout RPC.
 	AuthServiceLogoutProcedure = "/mavio.auth.v1.AuthService/Logout"
-	// AuthServiceListSessionsProcedure is the fully-qualified name of the AuthService's ListSessions
-	// RPC.
-	AuthServiceListSessionsProcedure = "/mavio.auth.v1.AuthService/ListSessions"
-	// AuthServiceRevokeSessionProcedure is the fully-qualified name of the AuthService's RevokeSession
-	// RPC.
-	AuthServiceRevokeSessionProcedure = "/mavio.auth.v1.AuthService/RevokeSession"
 	// AuthServiceStartQuickConnectProcedure is the fully-qualified name of the AuthService's
 	// StartQuickConnect RPC.
 	AuthServiceStartQuickConnectProcedure = "/mavio.auth.v1.AuthService/StartQuickConnect"
@@ -144,11 +138,6 @@ type AuthServiceClient interface {
 	RefreshSession(context.Context, *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error)
 	// Logout ends the calling session.
 	Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error)
-	// ListSessions lists the calling user's signed-in devices, most recently
-	// seen first.
-	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
-	// RevokeSession signs one of the calling user's devices out.
-	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
 	// StartQuickConnect begins signing a device in from a signed-in one
 	// (Quick Connect): the new device shows the code, a signed-in user
 	// enters it with AuthorizeQuickConnect, and the new device, polling
@@ -293,19 +282,6 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("Logout")),
 			connect.WithClientOptions(opts...),
 		),
-		listSessions: connect.NewClient[v1.ListSessionsRequest, v1.ListSessionsResponse](
-			httpClient,
-			baseURL+AuthServiceListSessionsProcedure,
-			connect.WithSchema(authServiceMethods.ByName("ListSessions")),
-			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-			connect.WithClientOptions(opts...),
-		),
-		revokeSession: connect.NewClient[v1.RevokeSessionRequest, v1.RevokeSessionResponse](
-			httpClient,
-			baseURL+AuthServiceRevokeSessionProcedure,
-			connect.WithSchema(authServiceMethods.ByName("RevokeSession")),
-			connect.WithClientOptions(opts...),
-		),
 		startQuickConnect: connect.NewClient[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse](
 			httpClient,
 			baseURL+AuthServiceStartQuickConnectProcedure,
@@ -419,8 +395,6 @@ type authServiceClient struct {
 	startRefresh           *connect.Client[v1.StartRefreshRequest, v1.StartRefreshResponse]
 	refreshSession         *connect.Client[v1.RefreshSessionRequest, v1.RefreshSessionResponse]
 	logout                 *connect.Client[v1.LogoutRequest, v1.LogoutResponse]
-	listSessions           *connect.Client[v1.ListSessionsRequest, v1.ListSessionsResponse]
-	revokeSession          *connect.Client[v1.RevokeSessionRequest, v1.RevokeSessionResponse]
 	startQuickConnect      *connect.Client[v1.StartQuickConnectRequest, v1.StartQuickConnectResponse]
 	getQuickConnectState   *connect.Client[v1.GetQuickConnectStateRequest, v1.GetQuickConnectStateResponse]
 	authorizeQuickConnect  *connect.Client[v1.AuthorizeQuickConnectRequest, v1.AuthorizeQuickConnectResponse]
@@ -505,24 +479,6 @@ func (c *authServiceClient) RefreshSession(ctx context.Context, req *v1.RefreshS
 // Logout calls mavio.auth.v1.AuthService.Logout.
 func (c *authServiceClient) Logout(ctx context.Context, req *v1.LogoutRequest) (*v1.LogoutResponse, error) {
 	response, err := c.logout.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// ListSessions calls mavio.auth.v1.AuthService.ListSessions.
-func (c *authServiceClient) ListSessions(ctx context.Context, req *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error) {
-	response, err := c.listSessions.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
-}
-
-// RevokeSession calls mavio.auth.v1.AuthService.RevokeSession.
-func (c *authServiceClient) RevokeSession(ctx context.Context, req *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error) {
-	response, err := c.revokeSession.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -710,11 +666,6 @@ type AuthServiceHandler interface {
 	RefreshSession(context.Context, *v1.RefreshSessionRequest) (*v1.RefreshSessionResponse, error)
 	// Logout ends the calling session.
 	Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error)
-	// ListSessions lists the calling user's signed-in devices, most recently
-	// seen first.
-	ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error)
-	// RevokeSession signs one of the calling user's devices out.
-	RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error)
 	// StartQuickConnect begins signing a device in from a signed-in one
 	// (Quick Connect): the new device shows the code, a signed-in user
 	// enters it with AuthorizeQuickConnect, and the new device, polling
@@ -855,19 +806,6 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("Logout")),
 		connect.WithHandlerOptions(opts...),
 	)
-	authServiceListSessionsHandler := connect.NewUnaryHandlerSimple(
-		AuthServiceListSessionsProcedure,
-		svc.ListSessions,
-		connect.WithSchema(authServiceMethods.ByName("ListSessions")),
-		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
-		connect.WithHandlerOptions(opts...),
-	)
-	authServiceRevokeSessionHandler := connect.NewUnaryHandlerSimple(
-		AuthServiceRevokeSessionProcedure,
-		svc.RevokeSession,
-		connect.WithSchema(authServiceMethods.ByName("RevokeSession")),
-		connect.WithHandlerOptions(opts...),
-	)
 	authServiceStartQuickConnectHandler := connect.NewUnaryHandlerSimple(
 		AuthServiceStartQuickConnectProcedure,
 		svc.StartQuickConnect,
@@ -986,10 +924,6 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceRefreshSessionHandler.ServeHTTP(w, r)
 		case AuthServiceLogoutProcedure:
 			authServiceLogoutHandler.ServeHTTP(w, r)
-		case AuthServiceListSessionsProcedure:
-			authServiceListSessionsHandler.ServeHTTP(w, r)
-		case AuthServiceRevokeSessionProcedure:
-			authServiceRevokeSessionHandler.ServeHTTP(w, r)
 		case AuthServiceStartQuickConnectProcedure:
 			authServiceStartQuickConnectHandler.ServeHTTP(w, r)
 		case AuthServiceGetQuickConnectStateProcedure:
@@ -1061,14 +995,6 @@ func (UnimplementedAuthServiceHandler) RefreshSession(context.Context, *v1.Refre
 
 func (UnimplementedAuthServiceHandler) Logout(context.Context, *v1.LogoutRequest) (*v1.LogoutResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.Logout is not implemented"))
-}
-
-func (UnimplementedAuthServiceHandler) ListSessions(context.Context, *v1.ListSessionsRequest) (*v1.ListSessionsResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.ListSessions is not implemented"))
-}
-
-func (UnimplementedAuthServiceHandler) RevokeSession(context.Context, *v1.RevokeSessionRequest) (*v1.RevokeSessionResponse, error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.auth.v1.AuthService.RevokeSession is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) StartQuickConnect(context.Context, *v1.StartQuickConnectRequest) (*v1.StartQuickConnectResponse, error) {
