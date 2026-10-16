@@ -439,6 +439,7 @@
   "plugins.categoryNotifications": "通知",
   "plugins.categoryDevices": "设备",
   "plugins.categoryAi": "AI",
+  "plugins.categorySpeech": "语音",
   "plugins.categoryOther": "其他",
   "plugins.manageCatalogs": "管理插件目录",
   "plugins.noneInCategory": "此分类中没有插件。",

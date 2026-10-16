@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/ai.proto.
  */
 export const file_mavio_plugin_v1_ai: GenFile = /*@__PURE__*/
-  fileDesc("ChhtYXZpby9wbHVnaW4vdjEvYWkucHJvdG8SD21hdmlvLnBsdWdpbi52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IkkKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEi4KCXByb3ZpZGVycxgBIAMoCzIbLm1hdmlvLnBsdWdpbi52MS5BaVByb3ZpZGVyItcBCgpBaVByb3ZpZGVyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDwoHYXBpX2tleRgDIAEoCBINCgVvYXV0aBgEIAEoCBIUCgxzdWJzY3JpcHRpb24YBSABKAgSEwoLb2F1dGhfbGFiZWwYBiABKAkSMQoKY3JlZGVudGlhbBgHIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5BaUNyZWRlbnRpYWwSEQoJYXZhaWxhYmxlGAggASgIEg4KBnNvdXJjZRgJIAEoCRIOCgZjdXN0b20YCiABKAgiOgoTTGlzdEFpTW9kZWxzUmVxdWVzdBIQCghwcm92aWRlchgBIAEoCRIRCglhdmFpbGFibGUYAiABKAgiQAoUTGlzdEFpTW9kZWxzUmVzcG9uc2USKAoGbW9kZWxzGAEgAygLMhgubWF2aW8ucGx1Z2luLnYxLkFpTW9kZWwitwEKB0FpTW9kZWwSEAoIcHJvdmlkZXIYASABKAkSCgoCaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIRCglyZWFzb25pbmcYBCABKAgSDgoGaW1hZ2VzGAUgASgIEhYKDmNvbnRleHRfd2luZG93GAYgASgDEhkKEW1heF9vdXRwdXRfdG9rZW5zGAcgASgDEioKBGNvc3QYCCABKAsyHC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbENvc3QiVQoLQWlNb2RlbENvc3QSDQoFaW5wdXQYASABKAESDgoGb3V0cHV0GAIgASgBEhIKCmNhY2hlX3JlYWQYAyABKAESEwoLY2FjaGVfd3JpdGUYBCABKAEiOwoSU2V0QWlBcGlLZXlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESCwoDa2V5GAIgASgJIhUKE1NldEFpQXBpS2V5UmVzcG9uc2UiLwoTU3RhcnRBaUxvZ2luUmVxdWVzdBIYCghwcm92aWRlchgBIAEoCUIGukgDyAEBIigKFFN0YXJ0QWlMb2dpblJlc3BvbnNlEhAKCGxvZ2luX2lkGAEgASgJIi0KEUdldEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEisAEKEkdldEFpTG9naW5SZXNwb25zZRIsCgVzdGF0ZRgBIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luU3RhdGUSLQoGZXZlbnRzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5FdmVudBIuCgZwcm9tcHQYAyABKAsyHi5tYXZpby5wbHVnaW4udjEuQWlMb2dpblByb21wdBINCgVlcnJvchgEIAEoCSLAAQoMQWlMb2dpbkV2ZW50EiwKBGluZm8YASABKAsyHC5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkluZm9IABIqCgN1cmwYAiABKAsyGy5tYXZpby5wbHVnaW4udjEuQWlMb2dpblVybEgAEjkKC2RldmljZV9jb2RlGAMgASgLMiIubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5EZXZpY2VDb2RlSAASEgoIcHJvZ3Jlc3MYBCABKAlIAEIHCgVldmVudCJLCgtBaUxvZ2luSW5mbxIPCgdtZXNzYWdlGAEgASgJEisKBWxpbmtzGAIgAygLMhwubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5MaW5rIikKC0FpTG9naW5MaW5rEgsKA3VybBgBIAEoCRINCgVsYWJlbBgCIAEoCSIvCgpBaUxvZ2luVXJsEgsKA3VybBgBIAEoCRIUCgxpbnN0cnVjdGlvbnMYAiABKAkiXAoRQWlMb2dpbkRldmljZUNvZGUSEQoJdXNlcl9jb2RlGAEgASgJEhgKEHZlcmlmaWNhdGlvbl91cmkYAiABKAkSGgoSZXhwaXJlc19pbl9zZWNvbmRzGAMgASgFIqQBCg1BaUxvZ2luUHJvbXB0EgoKAmlkGAEgASgJEjAKBGtpbmQYAiABKA4yIi5tYXZpby5wbHVnaW4udjEuQWlMb2dpblByb21wdEtpbmQSDwoHbWVzc2FnZRgDIAEoCRITCgtwbGFjZWhvbGRlchgEIAEoCRIvCgdvcHRpb25zGAUgAygLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5PcHRpb24iPwoNQWlMb2dpbk9wdGlvbhIKCgJpZBgBIAEoCRINCgVsYWJlbBgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCSIvChNXYXRjaEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEisgEKFFdhdGNoQWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIloKFEFuc3dlckFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQESGQoJcHJvbXB0X2lkGAIgASgJQga6SAPIAQESDQoFdmFsdWUYAyABKAkiFwoVQW5zd2VyQWlMb2dpblJlc3BvbnNlIjAKFENhbmNlbEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEiFwoVQ2FuY2VsQWlMb2dpblJlc3BvbnNlIisKD0xvZ291dEFpUmVxdWVzdBIYCghwcm92aWRlchgBIAEoCUIGukgDyAEBIhIKEExvZ291dEFpUmVzcG9uc2Ui+wEKEUNvbXBsZXRlQWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESFQoFbW9kZWwYAiABKAlCBrpIA8gBARIOCgZzeXN0ZW0YAyABKAkSNgoIbWVzc2FnZXMYBCADKAsyGi5tYXZpby5wbHVnaW4udjEuQWlNZXNzYWdlQgi6SAWSAQIIARIVCg1vdXRwdXRfc2NoZW1hGAUgASgJEi0KCHRoaW5raW5nGAYgASgOMhsubWF2aW8ucGx1Z2luLnYxLkFpVGhpbmtpbmcSEgoKbWF4X3Rva2VucxgHIAEoBRITCgt0ZW1wZXJhdHVyZRgIIAEoASJACglBaU1lc3NhZ2USJQoEcm9sZRgBIAEoDjIXLm1hdmlvLnBsdWdpbi52MS5BaVJvbGUSDAoEdGV4dBgCIAEoCSJ1ChJDb21wbGV0ZUFpUmVzcG9uc2USDAoEdGV4dBgBIAEoCRITCgtvdXRwdXRfanNvbhgCIAEoCRInCgV1c2FnZRgDIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlEhMKC3N0b3BfcmVhc29uGAQgASgJIlEKD1N0cmVhbUFpUmVxdWVzdBI+Cgpjb21wbGV0aW9uGAEgASgLMiIubWF2aW8ucGx1Z2luLnYxLkNvbXBsZXRlQWlSZXF1ZXN0Qga6SAPIAQEidAoQU3RyZWFtQWlSZXNwb25zZRIOCgR0ZXh0GAEgASgJSAASEgoIdGhpbmtpbmcYAiABKAlIABIzCgRkb25lGAMgASgLMiMubWF2aW8ucGx1Z2luLnYxLkNvbXBsZXRlQWlSZXNwb25zZUgAQgcKBWV2ZW50InsKB0FpVXNhZ2USFAoMaW5wdXRfdG9rZW5zGAEgASgDEhUKDW91dHB1dF90b2tlbnMYAiABKAMSGQoRY2FjaGVfcmVhZF90b2tlbnMYAyABKAMSGgoSY2FjaGVfd3JpdGVfdG9rZW5zGAQgASgDEgwKBGNvc3QYBSABKAEizQEKDEFnZW50U2Vzc2lvbhIKCgJpZBgBIAEoCRINCgV0aXRsZRgCIAEoCRIQCghwcm92aWRlchgDIAEoCRINCgVtb2RlbBgEIAEoCRIrCgdjcmVhdGVkGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIrCgd1cGRhdGVkGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBInCgV1c2FnZRgHIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlIm0KDEFnZW50TWVzc2FnZRIlCgRyb2xlGAEgASgOMhcubWF2aW8ucGx1Z2luLnYxLkFpUm9sZRIMCgR0ZXh0GAIgASgJEigKBHRpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wInEKGUNyZWF0ZUFnZW50U2Vzc2lvblJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARIVCgVtb2RlbBgCIAEoCUIGukgDyAEBEhQKDGluc3RydWN0aW9ucxgDIAEoCRINCgV0aXRsZRgEIAEoCSJMChpDcmVhdGVBZ2VudFNlc3Npb25SZXNwb25zZRIuCgdzZXNzaW9uGAEgASgLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50U2Vzc2lvbiIaChhMaXN0QWdlbnRTZXNzaW9uc1JlcXVlc3QiTAoZTGlzdEFnZW50U2Vzc2lvbnNSZXNwb25zZRIvCghzZXNzaW9ucxgBIAMoCzIdLm1hdmlvLnBsdWdpbi52MS5BZ2VudFNlc3Npb24iLAoWR2V0QWdlbnRTZXNzaW9uUmVxdWVzdBISCgJpZBgBIAEoCUIGukgDyAEBInoKF0dldEFnZW50U2Vzc2lvblJlc3BvbnNlEi4KB3Nlc3Npb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uEi8KCG1lc3NhZ2VzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZSJfChdTZW5kQWdlbnRNZXNzYWdlUmVxdWVzdBIaCgpzZXNzaW9uX2lkGAEgASgJQga6SAPIAQESFAoEdGV4dBgCIAEoCUIGukgDyAEBEhIKCnJlcXVlc3RfaWQYAyABKAkicgoYU2VuZEFnZW50TWVzc2FnZVJlc3BvbnNlEi0KBmFuc3dlchgBIAEoCzIdLm1hdmlvLnBsdWdpbi52MS5BZ2VudE1lc3NhZ2USJwoFdXNhZ2UYAiABKAsyGC5tYXZpby5wbHVnaW4udjEuQWlVc2FnZSJeChlTdHJlYW1BZ2VudE1lc3NhZ2VSZXF1ZXN0EkEKB21lc3NhZ2UYASABKAsyKC5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlcXVlc3RCBrpIA8gBASJwChpTdHJlYW1BZ2VudE1lc3NhZ2VSZXNwb25zZRIOCgR0ZXh0GAEgASgJSAASOQoEZG9uZRgCIAEoCzIpLm1hdmlvLnBsdWdpbi52MS5TZW5kQWdlbnRNZXNzYWdlUmVzcG9uc2VIAEIHCgVldmVudCIvChlEZWxldGVBZ2VudFNlc3Npb25SZXF1ZXN0EhIKAmlkGAEgASgJQga6SAPIAQEiHAoaRGVsZXRlQWdlbnRTZXNzaW9uUmVzcG9uc2UqYQoMQWlDcmVkZW50aWFsEh0KGUFJX0NSRURFTlRJQUxfVU5TUEVDSUZJRUQQABIZChVBSV9DUkVERU5USUFMX0FQSV9LRVkQARIXChNBSV9DUkVERU5USUFMX09BVVRIEAIqoAEKDEFpTG9naW5TdGF0ZRIeChpBSV9MT0dJTl9TVEFURV9VTlNQRUNJRklFRBAAEhoKFkFJX0xPR0lOX1NUQVRFX1JVTk5JTkcQARIcChhBSV9MT0dJTl9TVEFURV9TVUNDRUVERUQQAhIZChVBSV9MT0dJTl9TVEFURV9GQUlMRUQQAxIbChdBSV9MT0dJTl9TVEFURV9DQU5DRUxFRBAEKsABChFBaUxvZ2luUHJvbXB0S2luZBIkCiBBSV9MT0dJTl9QUk9NUFRfS0lORF9VTlNQRUNJRklFRBAAEh0KGUFJX0xPR0lOX1BST01QVF9LSU5EX1RFWFQQARIfChtBSV9MT0dJTl9QUk9NUFRfS0lORF9TRUNSRVQQAhIfChtBSV9MT0dJTl9QUk9NUFRfS0lORF9TRUxFQ1QQAxIkCiBBSV9MT0dJTl9QUk9NUFRfS0lORF9NQU5VQUxfQ09ERRAEKkoKBkFpUm9sZRIXChNBSV9ST0xFX1VOU1BFQ0lGSUVEEAASEAoMQUlfUk9MRV9VU0VSEAESFQoRQUlfUk9MRV9BU1NJU1RBTlQQAiqaAQoKQWlUaGlua2luZxIbChdBSV9USElOS0lOR19VTlNQRUNJRklFRBAAEhMKD0FJX1RISU5LSU5HX09GRhABEhcKE0FJX1RISU5LSU5HX01JTklNQUwQAhITCg9BSV9USElOS0lOR19MT1cQAxIWChJBSV9USElOS0lOR19NRURJVU0QBBIUChBBSV9USElOS0lOR19ISUdIEAUykQgKEEFpR2F0ZXdheVNlcnZpY2USaQoPTGlzdEFpUHJvdmlkZXJzEicubWF2aW8ucGx1Z2luLnYxLkxpc3RBaVByb3ZpZGVyc1JlcXVlc3QaKC5tYXZpby5wbHVnaW4udjEuTGlzdEFpUHJvdmlkZXJzUmVzcG9uc2UiA5ACARJgCgxMaXN0QWlNb2RlbHMSJC5tYXZpby5wbHVnaW4udjEuTGlzdEFpTW9kZWxzUmVxdWVzdBolLm1hdmlvLnBsdWdpbi52MS5MaXN0QWlNb2RlbHNSZXNwb25zZSIDkAIBElgKC1NldEFpQXBpS2V5EiMubWF2aW8ucGx1Z2luLnYxLlNldEFpQXBpS2V5UmVxdWVzdBokLm1hdmlvLnBsdWdpbi52MS5TZXRBaUFwaUtleVJlc3BvbnNlElsKDFN0YXJ0QWlMb2dpbhIkLm1hdmlvLnBsdWdpbi52MS5TdGFydEFpTG9naW5SZXF1ZXN0GiUubWF2aW8ucGx1Z2luLnYxLlN0YXJ0QWlMb2dpblJlc3BvbnNlEloKCkdldEFpTG9naW4SIi5tYXZpby5wbHVnaW4udjEuR2V0QWlMb2dpblJlcXVlc3QaIy5tYXZpby5wbHVnaW4udjEuR2V0QWlMb2dpblJlc3BvbnNlIgOQAgESYgoMV2F0Y2hBaUxvZ2luEiQubWF2aW8ucGx1Z2luLnYxLldhdGNoQWlMb2dpblJlcXVlc3QaJS5tYXZpby5wbHVnaW4udjEuV2F0Y2hBaUxvZ2luUmVzcG9uc2UiA5ACATABEl4KDUFuc3dlckFpTG9naW4SJS5tYXZpby5wbHVnaW4udjEuQW5zd2VyQWlMb2dpblJlcXVlc3QaJi5tYXZpby5wbHVnaW4udjEuQW5zd2VyQWlMb2dpblJlc3BvbnNlEl4KDUNhbmNlbEFpTG9naW4SJS5tYXZpby5wbHVnaW4udjEuQ2FuY2VsQWlMb2dpblJlcXVlc3QaJi5tYXZpby5wbHVnaW4udjEuQ2FuY2VsQWlMb2dpblJlc3BvbnNlEk8KCExvZ291dEFpEiAubWF2aW8ucGx1Z2luLnYxLkxvZ291dEFpUmVxdWVzdBohLm1hdmlvLnBsdWdpbi52MS5Mb2dvdXRBaVJlc3BvbnNlElUKCkNvbXBsZXRlQWkSIi5tYXZpby5wbHVnaW4udjEuQ29tcGxldGVBaVJlcXVlc3QaIy5tYXZpby5wbHVnaW4udjEuQ29tcGxldGVBaVJlc3BvbnNlElEKCFN0cmVhbUFpEiAubWF2aW8ucGx1Z2luLnYxLlN0cmVhbUFpUmVxdWVzdBohLm1hdmlvLnBsdWdpbi52MS5TdHJlYW1BaVJlc3BvbnNlMAEyqQUKE0FnZW50U2Vzc2lvblNlcnZpY2USbQoSQ3JlYXRlQWdlbnRTZXNzaW9uEioubWF2aW8ucGx1Z2luLnYxLkNyZWF0ZUFnZW50U2Vzc2lvblJlcXVlc3QaKy5tYXZpby5wbHVnaW4udjEuQ3JlYXRlQWdlbnRTZXNzaW9uUmVzcG9uc2USbwoRTGlzdEFnZW50U2Vzc2lvbnMSKS5tYXZpby5wbHVnaW4udjEuTGlzdEFnZW50U2Vzc2lvbnNSZXF1ZXN0GioubWF2aW8ucGx1Z2luLnYxLkxpc3RBZ2VudFNlc3Npb25zUmVzcG9uc2UiA5ACARJpCg9HZXRBZ2VudFNlc3Npb24SJy5tYXZpby5wbHVnaW4udjEuR2V0QWdlbnRTZXNzaW9uUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5HZXRBZ2VudFNlc3Npb25SZXNwb25zZSIDkAIBEmcKEFNlbmRBZ2VudE1lc3NhZ2USKC5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlcXVlc3QaKS5tYXZpby5wbHVnaW4udjEuU2VuZEFnZW50TWVzc2FnZVJlc3BvbnNlEm8KElN0cmVhbUFnZW50TWVzc2FnZRIqLm1hdmlvLnBsdWdpbi52MS5TdHJlYW1BZ2VudE1lc3NhZ2VSZXF1ZXN0GisubWF2aW8ucGx1Z2luLnYxLlN0cmVhbUFnZW50TWVzc2FnZVJlc3BvbnNlMAESbQoSRGVsZXRlQWdlbnRTZXNzaW9uEioubWF2aW8ucGx1Z2luLnYxLkRlbGV0ZUFnZW50U2Vzc2lvblJlcXVlc3QaKy5tYXZpby5wbHVnaW4udjEuRGVsZXRlQWdlbnRTZXNzaW9uUmVzcG9uc2VCwQEKE2NvbS5tYXZpby5wbHVnaW4udjFCB0FpUHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_timestamp]);
+  fileDesc("ChhtYXZpby9wbHVnaW4vdjEvYWkucHJvdG8SD21hdmlvLnBsdWdpbi52MSIYChZMaXN0QWlQcm92aWRlcnNSZXF1ZXN0IkkKF0xpc3RBaVByb3ZpZGVyc1Jlc3BvbnNlEi4KCXByb3ZpZGVycxgBIAMoCzIbLm1hdmlvLnBsdWdpbi52MS5BaVByb3ZpZGVyItcBCgpBaVByb3ZpZGVyEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSDwoHYXBpX2tleRgDIAEoCBINCgVvYXV0aBgEIAEoCBIUCgxzdWJzY3JpcHRpb24YBSABKAgSEwoLb2F1dGhfbGFiZWwYBiABKAkSMQoKY3JlZGVudGlhbBgHIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5BaUNyZWRlbnRpYWwSEQoJYXZhaWxhYmxlGAggASgIEg4KBnNvdXJjZRgJIAEoCRIOCgZjdXN0b20YCiABKAgiOgoTTGlzdEFpTW9kZWxzUmVxdWVzdBIQCghwcm92aWRlchgBIAEoCRIRCglhdmFpbGFibGUYAiABKAgiQAoUTGlzdEFpTW9kZWxzUmVzcG9uc2USKAoGbW9kZWxzGAEgAygLMhgubWF2aW8ucGx1Z2luLnYxLkFpTW9kZWwitwEKB0FpTW9kZWwSEAoIcHJvdmlkZXIYASABKAkSCgoCaWQYAiABKAkSDAoEbmFtZRgDIAEoCRIRCglyZWFzb25pbmcYBCABKAgSDgoGaW1hZ2VzGAUgASgIEhYKDmNvbnRleHRfd2luZG93GAYgASgDEhkKEW1heF9vdXRwdXRfdG9rZW5zGAcgASgDEioKBGNvc3QYCCABKAsyHC5tYXZpby5wbHVnaW4udjEuQWlNb2RlbENvc3QiVQoLQWlNb2RlbENvc3QSDQoFaW5wdXQYASABKAESDgoGb3V0cHV0GAIgASgBEhIKCmNhY2hlX3JlYWQYAyABKAESEwoLY2FjaGVfd3JpdGUYBCABKAEiOwoSU2V0QWlBcGlLZXlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESCwoDa2V5GAIgASgJIhUKE1NldEFpQXBpS2V5UmVzcG9uc2UiLwoTU3RhcnRBaUxvZ2luUmVxdWVzdBIYCghwcm92aWRlchgBIAEoCUIGukgDyAEBIigKFFN0YXJ0QWlMb2dpblJlc3BvbnNlEhAKCGxvZ2luX2lkGAEgASgJIi0KEUdldEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEisAEKEkdldEFpTG9naW5SZXNwb25zZRIsCgVzdGF0ZRgBIAEoDjIdLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luU3RhdGUSLQoGZXZlbnRzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5FdmVudBIuCgZwcm9tcHQYAyABKAsyHi5tYXZpby5wbHVnaW4udjEuQWlMb2dpblByb21wdBINCgVlcnJvchgEIAEoCSLAAQoMQWlMb2dpbkV2ZW50EiwKBGluZm8YASABKAsyHC5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkluZm9IABIqCgN1cmwYAiABKAsyGy5tYXZpby5wbHVnaW4udjEuQWlMb2dpblVybEgAEjkKC2RldmljZV9jb2RlGAMgASgLMiIubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5EZXZpY2VDb2RlSAASEgoIcHJvZ3Jlc3MYBCABKAlIAEIHCgVldmVudCJLCgtBaUxvZ2luSW5mbxIPCgdtZXNzYWdlGAEgASgJEisKBWxpbmtzGAIgAygLMhwubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5MaW5rIikKC0FpTG9naW5MaW5rEgsKA3VybBgBIAEoCRINCgVsYWJlbBgCIAEoCSIvCgpBaUxvZ2luVXJsEgsKA3VybBgBIAEoCRIUCgxpbnN0cnVjdGlvbnMYAiABKAkiXAoRQWlMb2dpbkRldmljZUNvZGUSEQoJdXNlcl9jb2RlGAEgASgJEhgKEHZlcmlmaWNhdGlvbl91cmkYAiABKAkSGgoSZXhwaXJlc19pbl9zZWNvbmRzGAMgASgFIqQBCg1BaUxvZ2luUHJvbXB0EgoKAmlkGAEgASgJEjAKBGtpbmQYAiABKA4yIi5tYXZpby5wbHVnaW4udjEuQWlMb2dpblByb21wdEtpbmQSDwoHbWVzc2FnZRgDIAEoCRITCgtwbGFjZWhvbGRlchgEIAEoCRIvCgdvcHRpb25zGAUgAygLMh4ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5PcHRpb24iPwoNQWlMb2dpbk9wdGlvbhIKCgJpZBgBIAEoCRINCgVsYWJlbBgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCSIvChNXYXRjaEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEisgEKFFdhdGNoQWlMb2dpblJlc3BvbnNlEiwKBXN0YXRlGAEgASgOMh0ubWF2aW8ucGx1Z2luLnYxLkFpTG9naW5TdGF0ZRItCgZldmVudHMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWlMb2dpbkV2ZW50Ei4KBnByb21wdBgDIAEoCzIeLm1hdmlvLnBsdWdpbi52MS5BaUxvZ2luUHJvbXB0Eg0KBWVycm9yGAQgASgJIloKFEFuc3dlckFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQESGQoJcHJvbXB0X2lkGAIgASgJQga6SAPIAQESDQoFdmFsdWUYAyABKAkiFwoVQW5zd2VyQWlMb2dpblJlc3BvbnNlIjAKFENhbmNlbEFpTG9naW5SZXF1ZXN0EhgKCGxvZ2luX2lkGAEgASgJQga6SAPIAQEiFwoVQ2FuY2VsQWlMb2dpblJlc3BvbnNlIisKD0xvZ291dEFpUmVxdWVzdBIYCghwcm92aWRlchgBIAEoCUIGukgDyAEBIhIKEExvZ291dEFpUmVzcG9uc2Ui+wEKEUNvbXBsZXRlQWlSZXF1ZXN0EhgKCHByb3ZpZGVyGAEgASgJQga6SAPIAQESFQoFbW9kZWwYAiABKAlCBrpIA8gBARIOCgZzeXN0ZW0YAyABKAkSNgoIbWVzc2FnZXMYBCADKAsyGi5tYXZpby5wbHVnaW4udjEuQWlNZXNzYWdlQgi6SAWSAQIIARIVCg1vdXRwdXRfc2NoZW1hGAUgASgJEi0KCHRoaW5raW5nGAYgASgOMhsubWF2aW8ucGx1Z2luLnYxLkFpVGhpbmtpbmcSEgoKbWF4X3Rva2VucxgHIAEoBRITCgt0ZW1wZXJhdHVyZRgIIAEoASJACglBaU1lc3NhZ2USJQoEcm9sZRgBIAEoDjIXLm1hdmlvLnBsdWdpbi52MS5BaVJvbGUSDAoEdGV4dBgCIAEoCSJ1ChJDb21wbGV0ZUFpUmVzcG9uc2USDAoEdGV4dBgBIAEoCRITCgtvdXRwdXRfanNvbhgCIAEoCRInCgV1c2FnZRgDIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlEhMKC3N0b3BfcmVhc29uGAQgASgJIlEKD1N0cmVhbUFpUmVxdWVzdBI+Cgpjb21wbGV0aW9uGAEgASgLMiIubWF2aW8ucGx1Z2luLnYxLkNvbXBsZXRlQWlSZXF1ZXN0Qga6SAPIAQEidAoQU3RyZWFtQWlSZXNwb25zZRIOCgR0ZXh0GAEgASgJSAASEgoIdGhpbmtpbmcYAiABKAlIABIzCgRkb25lGAMgASgLMiMubWF2aW8ucGx1Z2luLnYxLkNvbXBsZXRlQWlSZXNwb25zZUgAQgcKBWV2ZW50InsKB0FpVXNhZ2USFAoMaW5wdXRfdG9rZW5zGAEgASgDEhUKDW91dHB1dF90b2tlbnMYAiABKAMSGQoRY2FjaGVfcmVhZF90b2tlbnMYAyABKAMSGgoSY2FjaGVfd3JpdGVfdG9rZW5zGAQgASgDEgwKBGNvc3QYBSABKAEi1QIKDEFnZW50U2Vzc2lvbhIKCgJpZBgBIAEoCRINCgV0aXRsZRgCIAEoCRIQCghwcm92aWRlchgDIAEoCRINCgVtb2RlbBgEIAEoCRIrCgdjcmVhdGVkGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIrCgd1cGRhdGVkGAYgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBInCgV1c2FnZRgHIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlEg0KBW93bmVyGAggASgJEjkKBmxhYmVscxgJIAMoCzIpLm1hdmlvLnBsdWdpbi52MS5BZ2VudFNlc3Npb24uTGFiZWxzRW50cnkSDQoFZW5kZWQYCiABKAgaLQoLTGFiZWxzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKNAQoJQWdlbnRUb29sEisKBG5hbWUYASABKAlCHbpIGnIYMhZeW2Etel1bYS16MC05X117MCw2M30kEhwKC2Rlc2NyaXB0aW9uGAIgASgJQge6SARyAhABEiAKD3BhcmFtZXRlcnNfanNvbhgDIAEoCUIHukgEcgIQARITCgtyZXN1bHRfanNvbhgEIAEoCSKVAQoNQWdlbnRUb29sQ2FsbBIKCgJpZBgBIAEoCRISCgpzZXNzaW9uX2lkGAIgASgJEg0KBW93bmVyGAMgASgJEgwKBHRvb2wYBCABKAkSFgoOYXJndW1lbnRzX2pzb24YBSABKAkSLwoLY3JlYXRlX3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIssBCgtBZ2VudE1lbW9yeRIKCgJpZBgBIAEoCRIMCgR0ZXh0GAIgASgJEi8KC2NyZWF0ZV90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIvCgt1cGRhdGVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLAoIdXNlX3RpbWUYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhIKCnNlc3Npb25faWQYBiABKAkibQoMQWdlbnRNZXNzYWdlEiUKBHJvbGUYASABKA4yFy5tYXZpby5wbHVnaW4udjEuQWlSb2xlEgwKBHRleHQYAiABKAkSKAoEdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAixQIKGUNyZWF0ZUFnZW50U2Vzc2lvblJlcXVlc3QSGAoIcHJvdmlkZXIYASABKAlCBrpIA8gBARIVCgVtb2RlbBgCIAEoCUIGukgDyAEBEhQKDGluc3RydWN0aW9ucxgDIAEoCRINCgV0aXRsZRgEIAEoCRIpCgV0b29scxgFIAMoCzIaLm1hdmlvLnBsdWdpbi52MS5BZ2VudFRvb2wSEQoJY29kZV9tb2RlGAYgASgIEg0KBW93bmVyGAcgASgJEg4KBm1lbW9yeRgIIAEoCBJGCgZsYWJlbHMYCSADKAsyNi5tYXZpby5wbHVnaW4udjEuQ3JlYXRlQWdlbnRTZXNzaW9uUmVxdWVzdC5MYWJlbHNFbnRyeRotCgtMYWJlbHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkwKGkNyZWF0ZUFnZW50U2Vzc2lvblJlc3BvbnNlEi4KB3Nlc3Npb24YASABKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRTZXNzaW9uIikKGExpc3RBZ2VudFNlc3Npb25zUmVxdWVzdBINCgVvd25lchgBIAEoCSJMChlMaXN0QWdlbnRTZXNzaW9uc1Jlc3BvbnNlEi8KCHNlc3Npb25zGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50U2Vzc2lvbiIsChZHZXRBZ2VudFNlc3Npb25SZXF1ZXN0EhIKAmlkGAEgASgJQga6SAPIAQEiegoXR2V0QWdlbnRTZXNzaW9uUmVzcG9uc2USLgoHc2Vzc2lvbhgBIAEoCzIdLm1hdmlvLnBsdWdpbi52MS5BZ2VudFNlc3Npb24SLwoIbWVzc2FnZXMYAiADKAsyHS5tYXZpby5wbHVnaW4udjEuQWdlbnRNZXNzYWdlIl8KF1NlbmRBZ2VudE1lc3NhZ2VSZXF1ZXN0EhoKCnNlc3Npb25faWQYASABKAlCBrpIA8gBARIUCgR0ZXh0GAIgASgJQga6SAPIAQESEgoKcmVxdWVzdF9pZBgDIAEoCSJyChhTZW5kQWdlbnRNZXNzYWdlUmVzcG9uc2USLQoGYW5zd2VyGAEgASgLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZRInCgV1c2FnZRgCIAEoCzIYLm1hdmlvLnBsdWdpbi52MS5BaVVzYWdlIl4KGVN0cmVhbUFnZW50TWVzc2FnZVJlcXVlc3QSQQoHbWVzc2FnZRgBIAEoCzIoLm1hdmlvLnBsdWdpbi52MS5TZW5kQWdlbnRNZXNzYWdlUmVxdWVzdEIGukgDyAEBInAKGlN0cmVhbUFnZW50TWVzc2FnZVJlc3BvbnNlEg4KBHRleHQYASABKAlIABI5CgRkb25lGAIgASgLMikubWF2aW8ucGx1Z2luLnYxLlNlbmRBZ2VudE1lc3NhZ2VSZXNwb25zZUgAQgcKBWV2ZW50Ii8KGURlbGV0ZUFnZW50U2Vzc2lvblJlcXVlc3QSEgoCaWQYASABKAlCBrpIA8gBASIcChpEZWxldGVBZ2VudFNlc3Npb25SZXNwb25zZSKEAQoXQWRkQWdlbnRNZXNzYWdlc1JlcXVlc3QSGgoKc2Vzc2lvbl9pZBgBIAEoCUIGukgDyAEBEjkKCG1lc3NhZ2VzGAIgAygLMh0ubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVzc2FnZUIIukgFkgECCAESEgoKcmVxdWVzdF9pZBgDIAEoCSIaChhBZGRBZ2VudE1lc3NhZ2VzUmVzcG9uc2UiLAoWRW5kQWdlbnRTZXNzaW9uUmVxdWVzdBISCgJpZBgBIAEoCUIGukgDyAEBIhkKF0VuZEFnZW50U2Vzc2lvblJlc3BvbnNlIhwKGldhdGNoQWdlbnRUb29sQ2FsbHNSZXF1ZXN0IksKG1dhdGNoQWdlbnRUb29sQ2FsbHNSZXNwb25zZRIsCgRjYWxsGAEgASgLMh4ubWF2aW8ucGx1Z2luLnYxLkFnZW50VG9vbENhbGwiagocU3VibWl0QWdlbnRUb29sUmVzdWx0UmVxdWVzdBIXCgdjYWxsX2lkGAEgASgJQga6SAPIAQESDAoEdGV4dBgCIAEoCRITCgtyZXN1bHRfanNvbhgDIAEoCRIOCgZmYWlsZWQYBCABKAgiHwodU3VibWl0QWdlbnRUb29sUmVzdWx0UmVzcG9uc2UiMQoYTGlzdEFnZW50TWVtb3JpZXNSZXF1ZXN0EhUKBW93bmVyGAEgASgJQga6SAPIAQEiSwoZTGlzdEFnZW50TWVtb3JpZXNSZXNwb25zZRIuCghtZW1vcmllcxgBIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5BZ2VudE1lbW9yeSJUChVQdXRBZ2VudE1lbW9yeVJlcXVlc3QSFQoFb3duZXIYASABKAlCBrpIA8gBARIKCgJpZBgCIAEoCRIYCgR0ZXh0GAMgASgJQgq6SAdyBRABGOgHIkYKFlB1dEFnZW50TWVtb3J5UmVzcG9uc2USLAoGbWVtb3J5GAEgASgLMhwubWF2aW8ucGx1Z2luLnYxLkFnZW50TWVtb3J5IkAKGkRlbGV0ZUFnZW50TWVtb3JpZXNSZXF1ZXN0EhUKBW93bmVyGAEgASgJQga6SAPIAQESCwoDaWRzGAIgAygJIh0KG0RlbGV0ZUFnZW50TWVtb3JpZXNSZXNwb25zZSphCgxBaUNyZWRlbnRpYWwSHQoZQUlfQ1JFREVOVElBTF9VTlNQRUNJRklFRBAAEhkKFUFJX0NSRURFTlRJQUxfQVBJX0tFWRABEhcKE0FJX0NSRURFTlRJQUxfT0FVVEgQAiqgAQoMQWlMb2dpblN0YXRlEh4KGkFJX0xPR0lOX1NUQVRFX1VOU1BFQ0lGSUVEEAASGgoWQUlfTE9HSU5fU1RBVEVfUlVOTklORxABEhwKGEFJX0xPR0lOX1NUQVRFX1NVQ0NFRURFRBACEhkKFUFJX0xPR0lOX1NUQVRFX0ZBSUxFRBADEhsKF0FJX0xPR0lOX1NUQVRFX0NBTkNFTEVEEAQqwAEKEUFpTG9naW5Qcm9tcHRLaW5kEiQKIEFJX0xPR0lOX1BST01QVF9LSU5EX1VOU1BFQ0lGSUVEEAASHQoZQUlfTE9HSU5fUFJPTVBUX0tJTkRfVEVYVBABEh8KG0FJX0xPR0lOX1BST01QVF9LSU5EX1NFQ1JFVBACEh8KG0FJX0xPR0lOX1BST01QVF9LSU5EX1NFTEVDVBADEiQKIEFJX0xPR0lOX1BST01QVF9LSU5EX01BTlVBTF9DT0RFEAQqSgoGQWlSb2xlEhcKE0FJX1JPTEVfVU5TUEVDSUZJRUQQABIQCgxBSV9ST0xFX1VTRVIQARIVChFBSV9ST0xFX0FTU0lTVEFOVBACKpoBCgpBaVRoaW5raW5nEhsKF0FJX1RISU5LSU5HX1VOU1BFQ0lGSUVEEAASEwoPQUlfVEhJTktJTkdfT0ZGEAESFwoTQUlfVEhJTktJTkdfTUlOSU1BTBACEhMKD0FJX1RISU5LSU5HX0xPVxADEhYKEkFJX1RISU5LSU5HX01FRElVTRAEEhQKEEFJX1RISU5LSU5HX0hJR0gQBTKRCAoQQWlHYXRld2F5U2VydmljZRJpCg9MaXN0QWlQcm92aWRlcnMSJy5tYXZpby5wbHVnaW4udjEuTGlzdEFpUHJvdmlkZXJzUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5MaXN0QWlQcm92aWRlcnNSZXNwb25zZSIDkAIBEmAKDExpc3RBaU1vZGVscxIkLm1hdmlvLnBsdWdpbi52MS5MaXN0QWlNb2RlbHNSZXF1ZXN0GiUubWF2aW8ucGx1Z2luLnYxLkxpc3RBaU1vZGVsc1Jlc3BvbnNlIgOQAgESWAoLU2V0QWlBcGlLZXkSIy5tYXZpby5wbHVnaW4udjEuU2V0QWlBcGlLZXlSZXF1ZXN0GiQubWF2aW8ucGx1Z2luLnYxLlNldEFpQXBpS2V5UmVzcG9uc2USWwoMU3RhcnRBaUxvZ2luEiQubWF2aW8ucGx1Z2luLnYxLlN0YXJ0QWlMb2dpblJlcXVlc3QaJS5tYXZpby5wbHVnaW4udjEuU3RhcnRBaUxvZ2luUmVzcG9uc2USWgoKR2V0QWlMb2dpbhIiLm1hdmlvLnBsdWdpbi52MS5HZXRBaUxvZ2luUmVxdWVzdBojLm1hdmlvLnBsdWdpbi52MS5HZXRBaUxvZ2luUmVzcG9uc2UiA5ACARJiCgxXYXRjaEFpTG9naW4SJC5tYXZpby5wbHVnaW4udjEuV2F0Y2hBaUxvZ2luUmVxdWVzdBolLm1hdmlvLnBsdWdpbi52MS5XYXRjaEFpTG9naW5SZXNwb25zZSIDkAIBMAESXgoNQW5zd2VyQWlMb2dpbhIlLm1hdmlvLnBsdWdpbi52MS5BbnN3ZXJBaUxvZ2luUmVxdWVzdBomLm1hdmlvLnBsdWdpbi52MS5BbnN3ZXJBaUxvZ2luUmVzcG9uc2USXgoNQ2FuY2VsQWlMb2dpbhIlLm1hdmlvLnBsdWdpbi52MS5DYW5jZWxBaUxvZ2luUmVxdWVzdBomLm1hdmlvLnBsdWdpbi52MS5DYW5jZWxBaUxvZ2luUmVzcG9uc2USTwoITG9nb3V0QWkSIC5tYXZpby5wbHVnaW4udjEuTG9nb3V0QWlSZXF1ZXN0GiEubWF2aW8ucGx1Z2luLnYxLkxvZ291dEFpUmVzcG9uc2USVQoKQ29tcGxldGVBaRIiLm1hdmlvLnBsdWdpbi52MS5Db21wbGV0ZUFpUmVxdWVzdBojLm1hdmlvLnBsdWdpbi52MS5Db21wbGV0ZUFpUmVzcG9uc2USUQoIU3RyZWFtQWkSIC5tYXZpby5wbHVnaW4udjEuU3RyZWFtQWlSZXF1ZXN0GiEubWF2aW8ucGx1Z2luLnYxLlN0cmVhbUFpUmVzcG9uc2UwATKvCwoTQWdlbnRTZXNzaW9uU2VydmljZRJtChJDcmVhdGVBZ2VudFNlc3Npb24SKi5tYXZpby5wbHVnaW4udjEuQ3JlYXRlQWdlbnRTZXNzaW9uUmVxdWVzdBorLm1hdmlvLnBsdWdpbi52MS5DcmVhdGVBZ2VudFNlc3Npb25SZXNwb25zZRJvChFMaXN0QWdlbnRTZXNzaW9ucxIpLm1hdmlvLnBsdWdpbi52MS5MaXN0QWdlbnRTZXNzaW9uc1JlcXVlc3QaKi5tYXZpby5wbHVnaW4udjEuTGlzdEFnZW50U2Vzc2lvbnNSZXNwb25zZSIDkAIBEmkKD0dldEFnZW50U2Vzc2lvbhInLm1hdmlvLnBsdWdpbi52MS5HZXRBZ2VudFNlc3Npb25SZXF1ZXN0GigubWF2aW8ucGx1Z2luLnYxLkdldEFnZW50U2Vzc2lvblJlc3BvbnNlIgOQAgESZwoQU2VuZEFnZW50TWVzc2FnZRIoLm1hdmlvLnBsdWdpbi52MS5TZW5kQWdlbnRNZXNzYWdlUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5TZW5kQWdlbnRNZXNzYWdlUmVzcG9uc2USbwoSU3RyZWFtQWdlbnRNZXNzYWdlEioubWF2aW8ucGx1Z2luLnYxLlN0cmVhbUFnZW50TWVzc2FnZVJlcXVlc3QaKy5tYXZpby5wbHVnaW4udjEuU3RyZWFtQWdlbnRNZXNzYWdlUmVzcG9uc2UwARJtChJEZWxldGVBZ2VudFNlc3Npb24SKi5tYXZpby5wbHVnaW4udjEuRGVsZXRlQWdlbnRTZXNzaW9uUmVxdWVzdBorLm1hdmlvLnBsdWdpbi52MS5EZWxldGVBZ2VudFNlc3Npb25SZXNwb25zZRJnChBBZGRBZ2VudE1lc3NhZ2VzEigubWF2aW8ucGx1Z2luLnYxLkFkZEFnZW50TWVzc2FnZXNSZXF1ZXN0GikubWF2aW8ucGx1Z2luLnYxLkFkZEFnZW50TWVzc2FnZXNSZXNwb25zZRJkCg9FbmRBZ2VudFNlc3Npb24SJy5tYXZpby5wbHVnaW4udjEuRW5kQWdlbnRTZXNzaW9uUmVxdWVzdBooLm1hdmlvLnBsdWdpbi52MS5FbmRBZ2VudFNlc3Npb25SZXNwb25zZRJ3ChNXYXRjaEFnZW50VG9vbENhbGxzEisubWF2aW8ucGx1Z2luLnYxLldhdGNoQWdlbnRUb29sQ2FsbHNSZXF1ZXN0GiwubWF2aW8ucGx1Z2luLnYxLldhdGNoQWdlbnRUb29sQ2FsbHNSZXNwb25zZSIDkAIBMAESdgoVU3VibWl0QWdlbnRUb29sUmVzdWx0Ei0ubWF2aW8ucGx1Z2luLnYxLlN1Ym1pdEFnZW50VG9vbFJlc3VsdFJlcXVlc3QaLi5tYXZpby5wbHVnaW4udjEuU3VibWl0QWdlbnRUb29sUmVzdWx0UmVzcG9uc2USbwoRTGlzdEFnZW50TWVtb3JpZXMSKS5tYXZpby5wbHVnaW4udjEuTGlzdEFnZW50TWVtb3JpZXNSZXF1ZXN0GioubWF2aW8ucGx1Z2luLnYxLkxpc3RBZ2VudE1lbW9yaWVzUmVzcG9uc2UiA5ACARJhCg5QdXRBZ2VudE1lbW9yeRImLm1hdmlvLnBsdWdpbi52MS5QdXRBZ2VudE1lbW9yeVJlcXVlc3QaJy5tYXZpby5wbHVnaW4udjEuUHV0QWdlbnRNZW1vcnlSZXNwb25zZRJwChNEZWxldGVBZ2VudE1lbW9yaWVzEisubWF2aW8ucGx1Z2luLnYxLkRlbGV0ZUFnZW50TWVtb3JpZXNSZXF1ZXN0GiwubWF2aW8ucGx1Z2luLnYxLkRlbGV0ZUFnZW50TWVtb3JpZXNSZXNwb25zZULBAQoTY29tLm1hdmlvLnBsdWdpbi52MUIHQWlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_timestamp]);
 
 /**
  * @generated from message mavio.plugin.v1.ListAiProvidersRequest
@@ -1036,6 +1036,27 @@ export type AgentSession = Message<"mavio.plugin.v1.AgentSession"> & {
    * @generated from field: mavio.plugin.v1.AiUsage usage = 7;
    */
   usage?: AiUsage | undefined;
+
+  /**
+   * Whom it is for, as the host names them: memories are kept per owner.
+   *
+   * @generated from field: string owner = 8;
+   */
+  owner: string;
+
+  /**
+   * The host's notes about it, such as the device it started on.
+   *
+   * @generated from field: map<string, string> labels = 9;
+   */
+  labels: { [key: string]: string };
+
+  /**
+   * EndAgentSession ended it.
+   *
+   * @generated from field: bool ended = 10;
+   */
+  ended: boolean;
 };
 
 /**
@@ -1044,6 +1065,146 @@ export type AgentSession = Message<"mavio.plugin.v1.AgentSession"> & {
  */
 export const AgentSessionSchema: GenMessage<AgentSession> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_ai, 34);
+
+/**
+ * AgentTool is a tool of the host offered to a conversation's model: the
+ * model's calls of it are streamed to the host by WatchAgentToolCalls.
+ *
+ * @generated from message mavio.plugin.v1.AgentTool
+ */
+export type AgentTool = Message<"mavio.plugin.v1.AgentTool"> & {
+  /**
+   * Such as "search_library".
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * What it does, for the model.
+   *
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * The JSON Schema of its arguments, an object.
+   *
+   * @generated from field: string parameters_json = 3;
+   */
+  parametersJson: string;
+
+  /**
+   * The JSON Schema of its structured result, which scripts of code mode
+   * receive; empty when it has none.
+   *
+   * @generated from field: string result_json = 4;
+   */
+  resultJson: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.AgentTool.
+ * Use `create(AgentToolSchema)` to create a new message.
+ */
+export const AgentToolSchema: GenMessage<AgentTool> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 35);
+
+/**
+ * AgentToolCall is a call of a host's tool.
+ *
+ * @generated from message mavio.plugin.v1.AgentToolCall
+ */
+export type AgentToolCall = Message<"mavio.plugin.v1.AgentToolCall"> & {
+  /**
+   * Stable across restarts; answers name it.
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string session_id = 2;
+   */
+  sessionId: string;
+
+  /**
+   * @generated from field: string owner = 3;
+   */
+  owner: string;
+
+  /**
+   * @generated from field: string tool = 4;
+   */
+  tool: string;
+
+  /**
+   * The arguments, a JSON object.
+   *
+   * @generated from field: string arguments_json = 5;
+   */
+  argumentsJson: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp create_time = 6;
+   */
+  createTime?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.AgentToolCall.
+ * Use `create(AgentToolCallSchema)` to create a new message.
+ */
+export const AgentToolCallSchema: GenMessage<AgentToolCall> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 36);
+
+/**
+ * AgentMemory is something the model remembers about an owner.
+ *
+ * @generated from message mavio.plugin.v1.AgentMemory
+ */
+export type AgentMemory = Message<"mavio.plugin.v1.AgentMemory"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string text = 2;
+   */
+  text: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp create_time = 3;
+   */
+  createTime?: Timestamp | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp update_time = 4;
+   */
+  updateTime?: Timestamp | undefined;
+
+  /**
+   * When it was last given to the model.
+   *
+   * @generated from field: google.protobuf.Timestamp use_time = 5;
+   */
+  useTime?: Timestamp | undefined;
+
+  /**
+   * The conversation it was learned in.
+   *
+   * @generated from field: string session_id = 6;
+   */
+  sessionId: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.AgentMemory.
+ * Use `create(AgentMemorySchema)` to create a new message.
+ */
+export const AgentMemorySchema: GenMessage<AgentMemory> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 37);
 
 /**
  * AgentMessage is a message of a conversation.
@@ -1072,7 +1233,7 @@ export type AgentMessage = Message<"mavio.plugin.v1.AgentMessage"> & {
  * Use `create(AgentMessageSchema)` to create a new message.
  */
 export const AgentMessageSchema: GenMessage<AgentMessage> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 35);
+  messageDesc(file_mavio_plugin_v1_ai, 38);
 
 /**
  * @generated from message mavio.plugin.v1.CreateAgentSessionRequest
@@ -1099,6 +1260,38 @@ export type CreateAgentSessionRequest = Message<"mavio.plugin.v1.CreateAgentSess
    * @generated from field: string title = 4;
    */
   title: string;
+
+  /**
+   * The host's tools offered to the model.
+   *
+   * @generated from field: repeated mavio.plugin.v1.AgentTool tools = 5;
+   */
+  tools: AgentTool[];
+
+  /**
+   * The model also writes scripts calling the tools.
+   *
+   * @generated from field: bool code_mode = 6;
+   */
+  codeMode: boolean;
+
+  /**
+   * @generated from field: string owner = 7;
+   */
+  owner: string;
+
+  /**
+   * The model remembers what the owner tells about themselves, and is
+   * given the owner's memories.
+   *
+   * @generated from field: bool memory = 8;
+   */
+  memory: boolean;
+
+  /**
+   * @generated from field: map<string, string> labels = 9;
+   */
+  labels: { [key: string]: string };
 };
 
 /**
@@ -1106,7 +1299,7 @@ export type CreateAgentSessionRequest = Message<"mavio.plugin.v1.CreateAgentSess
  * Use `create(CreateAgentSessionRequestSchema)` to create a new message.
  */
 export const CreateAgentSessionRequestSchema: GenMessage<CreateAgentSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 36);
+  messageDesc(file_mavio_plugin_v1_ai, 39);
 
 /**
  * @generated from message mavio.plugin.v1.CreateAgentSessionResponse
@@ -1123,12 +1316,18 @@ export type CreateAgentSessionResponse = Message<"mavio.plugin.v1.CreateAgentSes
  * Use `create(CreateAgentSessionResponseSchema)` to create a new message.
  */
 export const CreateAgentSessionResponseSchema: GenMessage<CreateAgentSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 37);
+  messageDesc(file_mavio_plugin_v1_ai, 40);
 
 /**
  * @generated from message mavio.plugin.v1.ListAgentSessionsRequest
  */
 export type ListAgentSessionsRequest = Message<"mavio.plugin.v1.ListAgentSessionsRequest"> & {
+  /**
+   * Only an owner's; empty for every conversation.
+   *
+   * @generated from field: string owner = 1;
+   */
+  owner: string;
 };
 
 /**
@@ -1136,7 +1335,7 @@ export type ListAgentSessionsRequest = Message<"mavio.plugin.v1.ListAgentSession
  * Use `create(ListAgentSessionsRequestSchema)` to create a new message.
  */
 export const ListAgentSessionsRequestSchema: GenMessage<ListAgentSessionsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 38);
+  messageDesc(file_mavio_plugin_v1_ai, 41);
 
 /**
  * @generated from message mavio.plugin.v1.ListAgentSessionsResponse
@@ -1153,7 +1352,7 @@ export type ListAgentSessionsResponse = Message<"mavio.plugin.v1.ListAgentSessio
  * Use `create(ListAgentSessionsResponseSchema)` to create a new message.
  */
 export const ListAgentSessionsResponseSchema: GenMessage<ListAgentSessionsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 39);
+  messageDesc(file_mavio_plugin_v1_ai, 42);
 
 /**
  * @generated from message mavio.plugin.v1.GetAgentSessionRequest
@@ -1170,7 +1369,7 @@ export type GetAgentSessionRequest = Message<"mavio.plugin.v1.GetAgentSessionReq
  * Use `create(GetAgentSessionRequestSchema)` to create a new message.
  */
 export const GetAgentSessionRequestSchema: GenMessage<GetAgentSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 40);
+  messageDesc(file_mavio_plugin_v1_ai, 43);
 
 /**
  * @generated from message mavio.plugin.v1.GetAgentSessionResponse
@@ -1192,7 +1391,7 @@ export type GetAgentSessionResponse = Message<"mavio.plugin.v1.GetAgentSessionRe
  * Use `create(GetAgentSessionResponseSchema)` to create a new message.
  */
 export const GetAgentSessionResponseSchema: GenMessage<GetAgentSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 41);
+  messageDesc(file_mavio_plugin_v1_ai, 44);
 
 /**
  * @generated from message mavio.plugin.v1.SendAgentMessageRequest
@@ -1221,7 +1420,7 @@ export type SendAgentMessageRequest = Message<"mavio.plugin.v1.SendAgentMessageR
  * Use `create(SendAgentMessageRequestSchema)` to create a new message.
  */
 export const SendAgentMessageRequestSchema: GenMessage<SendAgentMessageRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 42);
+  messageDesc(file_mavio_plugin_v1_ai, 45);
 
 /**
  * @generated from message mavio.plugin.v1.SendAgentMessageResponse
@@ -1243,7 +1442,7 @@ export type SendAgentMessageResponse = Message<"mavio.plugin.v1.SendAgentMessage
  * Use `create(SendAgentMessageResponseSchema)` to create a new message.
  */
 export const SendAgentMessageResponseSchema: GenMessage<SendAgentMessageResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 43);
+  messageDesc(file_mavio_plugin_v1_ai, 46);
 
 /**
  * @generated from message mavio.plugin.v1.StreamAgentMessageRequest
@@ -1260,7 +1459,7 @@ export type StreamAgentMessageRequest = Message<"mavio.plugin.v1.StreamAgentMess
  * Use `create(StreamAgentMessageRequestSchema)` to create a new message.
  */
 export const StreamAgentMessageRequestSchema: GenMessage<StreamAgentMessageRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 44);
+  messageDesc(file_mavio_plugin_v1_ai, 47);
 
 /**
  * @generated from message mavio.plugin.v1.StreamAgentMessageResponse
@@ -1293,7 +1492,7 @@ export type StreamAgentMessageResponse = Message<"mavio.plugin.v1.StreamAgentMes
  * Use `create(StreamAgentMessageResponseSchema)` to create a new message.
  */
 export const StreamAgentMessageResponseSchema: GenMessage<StreamAgentMessageResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 45);
+  messageDesc(file_mavio_plugin_v1_ai, 48);
 
 /**
  * @generated from message mavio.plugin.v1.DeleteAgentSessionRequest
@@ -1310,7 +1509,7 @@ export type DeleteAgentSessionRequest = Message<"mavio.plugin.v1.DeleteAgentSess
  * Use `create(DeleteAgentSessionRequestSchema)` to create a new message.
  */
 export const DeleteAgentSessionRequestSchema: GenMessage<DeleteAgentSessionRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 46);
+  messageDesc(file_mavio_plugin_v1_ai, 49);
 
 /**
  * @generated from message mavio.plugin.v1.DeleteAgentSessionResponse
@@ -1323,7 +1522,279 @@ export type DeleteAgentSessionResponse = Message<"mavio.plugin.v1.DeleteAgentSes
  * Use `create(DeleteAgentSessionResponseSchema)` to create a new message.
  */
 export const DeleteAgentSessionResponseSchema: GenMessage<DeleteAgentSessionResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_ai, 47);
+  messageDesc(file_mavio_plugin_v1_ai, 50);
+
+/**
+ * @generated from message mavio.plugin.v1.AddAgentMessagesRequest
+ */
+export type AddAgentMessagesRequest = Message<"mavio.plugin.v1.AddAgentMessagesRequest"> & {
+  /**
+   * @generated from field: string session_id = 1;
+   */
+  sessionId: string;
+
+  /**
+   * In order; each needs a role and a text.
+   *
+   * @generated from field: repeated mavio.plugin.v1.AgentMessage messages = 2;
+   */
+  messages: AgentMessage[];
+
+  /**
+   * Makes a retried request add the messages once.
+   *
+   * @generated from field: string request_id = 3;
+   */
+  requestId: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.AddAgentMessagesRequest.
+ * Use `create(AddAgentMessagesRequestSchema)` to create a new message.
+ */
+export const AddAgentMessagesRequestSchema: GenMessage<AddAgentMessagesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 51);
+
+/**
+ * @generated from message mavio.plugin.v1.AddAgentMessagesResponse
+ */
+export type AddAgentMessagesResponse = Message<"mavio.plugin.v1.AddAgentMessagesResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.AddAgentMessagesResponse.
+ * Use `create(AddAgentMessagesResponseSchema)` to create a new message.
+ */
+export const AddAgentMessagesResponseSchema: GenMessage<AddAgentMessagesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 52);
+
+/**
+ * @generated from message mavio.plugin.v1.EndAgentSessionRequest
+ */
+export type EndAgentSessionRequest = Message<"mavio.plugin.v1.EndAgentSessionRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.EndAgentSessionRequest.
+ * Use `create(EndAgentSessionRequestSchema)` to create a new message.
+ */
+export const EndAgentSessionRequestSchema: GenMessage<EndAgentSessionRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 53);
+
+/**
+ * @generated from message mavio.plugin.v1.EndAgentSessionResponse
+ */
+export type EndAgentSessionResponse = Message<"mavio.plugin.v1.EndAgentSessionResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.EndAgentSessionResponse.
+ * Use `create(EndAgentSessionResponseSchema)` to create a new message.
+ */
+export const EndAgentSessionResponseSchema: GenMessage<EndAgentSessionResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 54);
+
+/**
+ * @generated from message mavio.plugin.v1.WatchAgentToolCallsRequest
+ */
+export type WatchAgentToolCallsRequest = Message<"mavio.plugin.v1.WatchAgentToolCallsRequest"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.WatchAgentToolCallsRequest.
+ * Use `create(WatchAgentToolCallsRequestSchema)` to create a new message.
+ */
+export const WatchAgentToolCallsRequestSchema: GenMessage<WatchAgentToolCallsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 55);
+
+/**
+ * @generated from message mavio.plugin.v1.WatchAgentToolCallsResponse
+ */
+export type WatchAgentToolCallsResponse = Message<"mavio.plugin.v1.WatchAgentToolCallsResponse"> & {
+  /**
+   * @generated from field: mavio.plugin.v1.AgentToolCall call = 1;
+   */
+  call?: AgentToolCall | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.WatchAgentToolCallsResponse.
+ * Use `create(WatchAgentToolCallsResponseSchema)` to create a new message.
+ */
+export const WatchAgentToolCallsResponseSchema: GenMessage<WatchAgentToolCallsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 56);
+
+/**
+ * @generated from message mavio.plugin.v1.SubmitAgentToolResultRequest
+ */
+export type SubmitAgentToolResultRequest = Message<"mavio.plugin.v1.SubmitAgentToolResultRequest"> & {
+  /**
+   * @generated from field: string call_id = 1;
+   */
+  callId: string;
+
+  /**
+   * What the model reads.
+   *
+   * @generated from field: string text = 2;
+   */
+  text: string;
+
+  /**
+   * The structured result, JSON, as the tool's result_json describes it.
+   *
+   * @generated from field: string result_json = 3;
+   */
+  resultJson: string;
+
+  /**
+   * The call failed; text says why.
+   *
+   * @generated from field: bool failed = 4;
+   */
+  failed: boolean;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubmitAgentToolResultRequest.
+ * Use `create(SubmitAgentToolResultRequestSchema)` to create a new message.
+ */
+export const SubmitAgentToolResultRequestSchema: GenMessage<SubmitAgentToolResultRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 57);
+
+/**
+ * @generated from message mavio.plugin.v1.SubmitAgentToolResultResponse
+ */
+export type SubmitAgentToolResultResponse = Message<"mavio.plugin.v1.SubmitAgentToolResultResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.SubmitAgentToolResultResponse.
+ * Use `create(SubmitAgentToolResultResponseSchema)` to create a new message.
+ */
+export const SubmitAgentToolResultResponseSchema: GenMessage<SubmitAgentToolResultResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 58);
+
+/**
+ * @generated from message mavio.plugin.v1.ListAgentMemoriesRequest
+ */
+export type ListAgentMemoriesRequest = Message<"mavio.plugin.v1.ListAgentMemoriesRequest"> & {
+  /**
+   * @generated from field: string owner = 1;
+   */
+  owner: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListAgentMemoriesRequest.
+ * Use `create(ListAgentMemoriesRequestSchema)` to create a new message.
+ */
+export const ListAgentMemoriesRequestSchema: GenMessage<ListAgentMemoriesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 59);
+
+/**
+ * @generated from message mavio.plugin.v1.ListAgentMemoriesResponse
+ */
+export type ListAgentMemoriesResponse = Message<"mavio.plugin.v1.ListAgentMemoriesResponse"> & {
+  /**
+   * @generated from field: repeated mavio.plugin.v1.AgentMemory memories = 1;
+   */
+  memories: AgentMemory[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.ListAgentMemoriesResponse.
+ * Use `create(ListAgentMemoriesResponseSchema)` to create a new message.
+ */
+export const ListAgentMemoriesResponseSchema: GenMessage<ListAgentMemoriesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 60);
+
+/**
+ * @generated from message mavio.plugin.v1.PutAgentMemoryRequest
+ */
+export type PutAgentMemoryRequest = Message<"mavio.plugin.v1.PutAgentMemoryRequest"> & {
+  /**
+   * @generated from field: string owner = 1;
+   */
+  owner: string;
+
+  /**
+   * Empty adds a memory.
+   *
+   * @generated from field: string id = 2;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string text = 3;
+   */
+  text: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.PutAgentMemoryRequest.
+ * Use `create(PutAgentMemoryRequestSchema)` to create a new message.
+ */
+export const PutAgentMemoryRequestSchema: GenMessage<PutAgentMemoryRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 61);
+
+/**
+ * @generated from message mavio.plugin.v1.PutAgentMemoryResponse
+ */
+export type PutAgentMemoryResponse = Message<"mavio.plugin.v1.PutAgentMemoryResponse"> & {
+  /**
+   * @generated from field: mavio.plugin.v1.AgentMemory memory = 1;
+   */
+  memory?: AgentMemory | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.PutAgentMemoryResponse.
+ * Use `create(PutAgentMemoryResponseSchema)` to create a new message.
+ */
+export const PutAgentMemoryResponseSchema: GenMessage<PutAgentMemoryResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 62);
+
+/**
+ * @generated from message mavio.plugin.v1.DeleteAgentMemoriesRequest
+ */
+export type DeleteAgentMemoriesRequest = Message<"mavio.plugin.v1.DeleteAgentMemoriesRequest"> & {
+  /**
+   * @generated from field: string owner = 1;
+   */
+  owner: string;
+
+  /**
+   * Empty deletes every memory of the owner.
+   *
+   * @generated from field: repeated string ids = 2;
+   */
+  ids: string[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.DeleteAgentMemoriesRequest.
+ * Use `create(DeleteAgentMemoriesRequestSchema)` to create a new message.
+ */
+export const DeleteAgentMemoriesRequestSchema: GenMessage<DeleteAgentMemoriesRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 63);
+
+/**
+ * @generated from message mavio.plugin.v1.DeleteAgentMemoriesResponse
+ */
+export type DeleteAgentMemoriesResponse = Message<"mavio.plugin.v1.DeleteAgentMemoriesResponse"> & {
+};
+
+/**
+ * Describes the message mavio.plugin.v1.DeleteAgentMemoriesResponse.
+ * Use `create(DeleteAgentMemoriesResponseSchema)` to create a new message.
+ */
+export const DeleteAgentMemoriesResponseSchema: GenMessage<DeleteAgentMemoriesResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_ai, 64);
 
 /**
  * AiCredential is a kind of stored credential.
@@ -1714,6 +2185,82 @@ export const AgentSessionService: GenService<{
     methodKind: "unary";
     input: typeof DeleteAgentSessionRequestSchema;
     output: typeof DeleteAgentSessionResponseSchema;
+  },
+  /**
+   * AddAgentMessages adds messages and answers to a conversation without
+   * asking the model, such as requests the host carried out itself, so
+   * that the model knows of them.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.AddAgentMessages
+   */
+  addAgentMessages: {
+    methodKind: "unary";
+    input: typeof AddAgentMessagesRequestSchema;
+    output: typeof AddAgentMessagesResponseSchema;
+  },
+  /**
+   * EndAgentSession ends a conversation: no message is sent to it again,
+   * and its owner's memories are consolidated from it.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.EndAgentSession
+   */
+  endAgentSession: {
+    methodKind: "unary";
+    input: typeof EndAgentSessionRequestSchema;
+    output: typeof EndAgentSessionResponseSchema;
+  },
+  /**
+   * WatchAgentToolCalls streams the calls of the host's tools: those
+   * waiting first, then each new one. A call waits until
+   * SubmitAgentToolResult answers it, across restarts of the plugin and
+   * of the host; a call repeated after the plugin restarts keeps its ID.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls
+   */
+  watchAgentToolCalls: {
+    methodKind: "server_streaming";
+    input: typeof WatchAgentToolCallsRequestSchema;
+    output: typeof WatchAgentToolCallsResponseSchema;
+  },
+  /**
+   * SubmitAgentToolResult answers a call of the host's tools.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult
+   */
+  submitAgentToolResult: {
+    methodKind: "unary";
+    input: typeof SubmitAgentToolResultRequestSchema;
+    output: typeof SubmitAgentToolResultResponseSchema;
+  },
+  /**
+   * ListAgentMemories lists what the model remembers about an owner.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.ListAgentMemories
+   */
+  listAgentMemories: {
+    methodKind: "unary";
+    input: typeof ListAgentMemoriesRequestSchema;
+    output: typeof ListAgentMemoriesResponseSchema;
+  },
+  /**
+   * PutAgentMemory changes a memory's text, or adds a memory.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.PutAgentMemory
+   */
+  putAgentMemory: {
+    methodKind: "unary";
+    input: typeof PutAgentMemoryRequestSchema;
+    output: typeof PutAgentMemoryResponseSchema;
+  },
+  /**
+   * DeleteAgentMemories deletes an owner's memories.
+   *
+   * @generated from rpc mavio.plugin.v1.AgentSessionService.DeleteAgentMemories
+   */
+  deleteAgentMemories: {
+    methodKind: "unary";
+    input: typeof DeleteAgentMemoriesRequestSchema;
+    output: typeof DeleteAgentMemoriesResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_plugin_v1_ai, 1);

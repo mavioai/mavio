@@ -440,6 +440,7 @@
   "plugins.categoryNotifications": { "message": "Notifications", "description": "Category of notification plugins." },
   "plugins.categoryDevices": { "message": "Devices", "description": "Category of plugins for devices the server plays on or serves, such as DLNA." },
   "plugins.categoryAi": { "message": "AI", "description": "Category of AI model and agent plugins." },
+  "plugins.categorySpeech": { "message": "Speech", "description": "Category of plugins recognizing and speaking speech." },
   "plugins.categoryOther": { "message": "Other", "description": "Category of plugins naming none." },
   "plugins.manageCatalogs": { "message": "Manage Catalogs", "description": "Button opening the plugin catalogs." },
   "plugins.noneInCategory": { "message": "No plugins in this category.", "description": "Empty state of a category of plugins." },

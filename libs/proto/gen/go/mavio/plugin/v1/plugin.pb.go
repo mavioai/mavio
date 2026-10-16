@@ -135,6 +135,10 @@ const (
 	Capability_CAPABILITY_AGENT_SESSION Capability = 27
 	// Implements RatingsProviderService.
 	Capability_CAPABILITY_RATINGS_PROVIDER Capability = 28
+	// Implements SpeechToTextService.
+	Capability_CAPABILITY_SPEECH_TO_TEXT Capability = 29
+	// Implements TextToSpeechService.
+	Capability_CAPABILITY_TEXT_TO_SPEECH Capability = 30
 )
 
 // Enum value maps for Capability.
@@ -169,6 +173,8 @@ var (
 		26: "CAPABILITY_AI_GATEWAY",
 		27: "CAPABILITY_AGENT_SESSION",
 		28: "CAPABILITY_RATINGS_PROVIDER",
+		29: "CAPABILITY_SPEECH_TO_TEXT",
+		30: "CAPABILITY_TEXT_TO_SPEECH",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":              0,
@@ -200,6 +206,8 @@ var (
 		"CAPABILITY_AI_GATEWAY":               26,
 		"CAPABILITY_AGENT_SESSION":            27,
 		"CAPABILITY_RATINGS_PROVIDER":         28,
+		"CAPABILITY_SPEECH_TO_TEXT":           29,
+		"CAPABILITY_TEXT_TO_SPEECH":           30,
 	}
 )
 
@@ -244,6 +252,8 @@ const (
 	Category_CATEGORY_DEVICES Category = 6
 	// AI models and agents.
 	Category_CATEGORY_AI Category = 7
+	// Recognizing and speaking speech.
+	Category_CATEGORY_SPEECH Category = 8
 )
 
 // Enum value maps for Category.
@@ -257,6 +267,7 @@ var (
 		5: "CATEGORY_NOTIFICATIONS",
 		6: "CATEGORY_DEVICES",
 		7: "CATEGORY_AI",
+		8: "CATEGORY_SPEECH",
 	}
 	Category_value = map[string]int32{
 		"CATEGORY_UNSPECIFIED":    0,
@@ -267,6 +278,7 @@ var (
 		"CATEGORY_NOTIFICATIONS":  5,
 		"CATEGORY_DEVICES":        6,
 		"CATEGORY_AI":             7,
+		"CATEGORY_SPEECH":         8,
 	}
 )
 
@@ -1672,7 +1684,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\xb3\a\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xf1\a\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1704,7 +1716,9 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x1eCAPABILITY_SUBTITLE_TRANSLATOR\x10\x19\x12\x19\n" +
 	"\x15CAPABILITY_AI_GATEWAY\x10\x1a\x12\x1c\n" +
 	"\x18CAPABILITY_AGENT_SESSION\x10\x1b\x12\x1f\n" +
-	"\x1bCAPABILITY_RATINGS_PROVIDER\x10\x1c*\xcb\x01\n" +
+	"\x1bCAPABILITY_RATINGS_PROVIDER\x10\x1c\x12\x1d\n" +
+	"\x19CAPABILITY_SPEECH_TO_TEXT\x10\x1d\x12\x1d\n" +
+	"\x19CAPABILITY_TEXT_TO_SPEECH\x10\x1e*\xe0\x01\n" +
 	"\bCategory\x12\x18\n" +
 	"\x14CATEGORY_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11CATEGORY_METADATA\x10\x01\x12\x16\n" +
@@ -1713,7 +1727,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x17CATEGORY_AUTHENTICATION\x10\x04\x12\x1a\n" +
 	"\x16CATEGORY_NOTIFICATIONS\x10\x05\x12\x14\n" +
 	"\x10CATEGORY_DEVICES\x10\x06\x12\x0f\n" +
-	"\vCATEGORY_AI\x10\a2\xda\x02\n" +
+	"\vCATEGORY_AI\x10\a\x12\x13\n" +
+	"\x0fCATEGORY_SPEECH\x10\b2\xda\x02\n" +
 	"\rPluginService\x12T\n" +
 	"\bDescribe\x12 .mavio.plugin.v1.DescribeRequest\x1a!.mavio.plugin.v1.DescribeResponse\"\x03\x90\x02\x01\x12R\n" +
 	"\tConfigure\x12!.mavio.plugin.v1.ConfigureRequest\x1a\".mavio.plugin.v1.ConfigureResponse\x12N\n" +

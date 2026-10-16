@@ -1,0 +1,174 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "mavio/plugin/v1/settings.proto";
+
+// SpeechToTextService recognizes speech with the recognition services a
+// plugin implements: what users say to the assistant, and the audio of
+// videos transcribed into subtitles.
+service SpeechToTextService {
+  // ListRecognizers lists the recognizers the plugin implements, with
+  // their settings and state.
+  rpc ListRecognizers(ListRecognizersRequest) returns (ListRecognizersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // RecognizeSpeech recognizes the speech of audio.
+  rpc RecognizeSpeech(RecognizeSpeechRequest) returns (RecognizeSpeechResponse);
+  // DetectSpeechLanguage tells the language spoken in audio; recognizers
+  // with detects_language only.
+  rpc DetectSpeechLanguage(DetectSpeechLanguageRequest) returns (DetectSpeechLanguageResponse);
+}
+
+message ListRecognizersRequest {}
+
+message ListRecognizersResponse {
+  repeated RecognizerInfo recognizers = 1;
+}
+
+// RecognizerInfo is a recognizer a plugin implements.
+message RecognizerInfo {
+  // Stable within the plugin, such as "whisper-asr".
+  string name = 1;
+  string display_name = 2;
+  // The recognizer's settings, under its name in the plugin's settings.
+  repeated SettingField settings = 3;
+  bool enabled = 4;
+  // The languages it recognizes, BCP 47; empty for any.
+  repeated string languages = 5;
+  // It gives the times of what is said, which subtitles need.
+  bool timestamps = 6;
+  // It recognizes audio whose language is not given.
+  bool detects_language = 7;
+  // It translates what is said into English.
+  bool translates = 8;
+  // It takes phrases it is likely to hear.
+  bool hints = 9;
+  // The longest audio it takes at once; unset for any.
+  google.protobuf.Duration max_duration = 10;
+}
+
+// SpeechAudio is audio to recognize.
+message SpeechAudio {
+  oneof source {
+    option (buf.validate.oneof).required = true;
+    // 16 kHz mono 16-bit little-endian PCM.
+    bytes pcm = 1;
+    // A URL of the host API serving the audio, which the plugin fetches
+    // with the host's HTTP client, such as a stream of a video.
+    string url = 2;
+  }
+  // Only the first seconds of a URL's audio; unset for all.
+  google.protobuf.Duration limit = 3;
+}
+
+message RecognizeSpeechRequest {
+  string recognizer = 1 [(buf.validate.field).string.min_len = 1];
+  SpeechAudio audio = 2 [(buf.validate.field).required = true];
+  // The language spoken, BCP 47; empty, the recognizer detects it.
+  string language = 3;
+  // Translates what is said into English.
+  bool translate = 4;
+  // Phrases the recognizer is likely to hear, such as titles.
+  repeated string hints = 5;
+  // Gives the times of what is said.
+  bool timestamps = 6;
+  // What the audio is of, such as a video's file name, for the service's
+  // logs.
+  string name = 7;
+}
+
+message RecognizeSpeechResponse {
+  string text = 1;
+  // The language recognized, BCP 47.
+  string language = 2;
+  // What is said with its times, when they were asked for.
+  repeated SpeechSegment segments = 3;
+}
+
+// SpeechSegment is something said, with its times.
+message SpeechSegment {
+  google.protobuf.Duration start = 1;
+  google.protobuf.Duration end = 2;
+  string text = 3;
+}
+
+message DetectSpeechLanguageRequest {
+  string recognizer = 1 [(buf.validate.field).string.min_len = 1];
+  SpeechAudio audio = 2 [(buf.validate.field).required = true];
+}
+
+message DetectSpeechLanguageResponse {
+  // BCP 47; empty when it cannot be told.
+  string language = 1;
+}
+
+// TextToSpeechService speaks text with the voices of the synthesis
+// services a plugin implements.
+service TextToSpeechService {
+  // ListVoices lists the plugin's voices.
+  rpc ListVoices(ListVoicesRequest) returns (ListVoicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SynthesizeSpeech speaks text.
+  rpc SynthesizeSpeech(SynthesizeSpeechRequest) returns (SynthesizeSpeechResponse);
+}
+
+message ListVoicesRequest {}
+
+message ListVoicesResponse {
+  repeated VoiceInfo voices = 1;
+  // The synthesizers, with their settings and state.
+  repeated SynthesizerInfo synthesizers = 2;
+}
+
+// SynthesizerInfo is a synthesis service a plugin implements.
+message SynthesizerInfo {
+  // Stable within the plugin, such as "openai".
+  string name = 1;
+  string display_name = 2;
+  // The service's settings, under its name in the plugin's settings.
+  repeated SettingField settings = 3;
+  bool enabled = 4;
+}
+
+// VoiceInfo is a voice of a synthesizer.
+message VoiceInfo {
+  // "<synthesizer>/<voice>", stable within the plugin.
+  string id = 1;
+  string name = 2;
+  // The languages it speaks, BCP 47; empty for any.
+  repeated string languages = 3;
+}
+
+// SpeechFormat is the encoding of synthesized audio.
+enum SpeechFormat {
+  SPEECH_FORMAT_UNSPECIFIED = 0;
+  // Opus in Ogg.
+  SPEECH_FORMAT_OGG_OPUS = 1;
+  SPEECH_FORMAT_MP3 = 2;
+}
+
+message SynthesizeSpeechRequest {
+  string voice = 1 [(buf.validate.field).string.min_len = 1];
+  string text = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 4000
+  }];
+  // BCP 47.
+  string language = 3;
+  SpeechFormat format = 4 [(buf.validate.field).enum.defined_only = true];
+  // 0.25–4; 0 for 1.
+  double speed = 5 [(buf.validate.field).double = {
+    gte: 0
+    lte: 4
+  }];
+}
+
+message SynthesizeSpeechResponse {
+  bytes audio = 1;
+  // Such as "audio/ogg" or "audio/mpeg".
+  string content_type = 2;
+}

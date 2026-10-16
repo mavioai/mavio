@@ -442,6 +442,7 @@ export type MessageKey =
   | 'plugins.categoryNotifications'
   | 'plugins.categoryDevices'
   | 'plugins.categoryAi'
+  | 'plugins.categorySpeech'
   | 'plugins.categoryOther'
   | 'plugins.manageCatalogs'
   | 'plugins.noneInCategory'
@@ -2172,6 +2173,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.categoryNotifications": "Notifications",
     "plugins.categoryDevices": "Devices",
     "plugins.categoryAi": "AI",
+    "plugins.categorySpeech": "Speech",
     "plugins.categoryOther": "Other",
     "plugins.manageCatalogs": "Manage Catalogs",
     "plugins.noneInCategory": "No plugins in this category.",
@@ -3900,6 +3902,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.categoryNotifications": "通知",
     "plugins.categoryDevices": "设备",
     "plugins.categoryAi": "AI",
+    "plugins.categorySpeech": "语音",
     "plugins.categoryOther": "其他",
     "plugins.manageCatalogs": "管理插件目录",
     "plugins.noneInCategory": "此分类中没有插件。",

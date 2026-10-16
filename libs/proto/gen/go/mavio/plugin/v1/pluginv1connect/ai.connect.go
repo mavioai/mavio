@@ -86,6 +86,27 @@ const (
 	// AgentSessionServiceDeleteAgentSessionProcedure is the fully-qualified name of the
 	// AgentSessionService's DeleteAgentSession RPC.
 	AgentSessionServiceDeleteAgentSessionProcedure = "/mavio.plugin.v1.AgentSessionService/DeleteAgentSession"
+	// AgentSessionServiceAddAgentMessagesProcedure is the fully-qualified name of the
+	// AgentSessionService's AddAgentMessages RPC.
+	AgentSessionServiceAddAgentMessagesProcedure = "/mavio.plugin.v1.AgentSessionService/AddAgentMessages"
+	// AgentSessionServiceEndAgentSessionProcedure is the fully-qualified name of the
+	// AgentSessionService's EndAgentSession RPC.
+	AgentSessionServiceEndAgentSessionProcedure = "/mavio.plugin.v1.AgentSessionService/EndAgentSession"
+	// AgentSessionServiceWatchAgentToolCallsProcedure is the fully-qualified name of the
+	// AgentSessionService's WatchAgentToolCalls RPC.
+	AgentSessionServiceWatchAgentToolCallsProcedure = "/mavio.plugin.v1.AgentSessionService/WatchAgentToolCalls"
+	// AgentSessionServiceSubmitAgentToolResultProcedure is the fully-qualified name of the
+	// AgentSessionService's SubmitAgentToolResult RPC.
+	AgentSessionServiceSubmitAgentToolResultProcedure = "/mavio.plugin.v1.AgentSessionService/SubmitAgentToolResult"
+	// AgentSessionServiceListAgentMemoriesProcedure is the fully-qualified name of the
+	// AgentSessionService's ListAgentMemories RPC.
+	AgentSessionServiceListAgentMemoriesProcedure = "/mavio.plugin.v1.AgentSessionService/ListAgentMemories"
+	// AgentSessionServicePutAgentMemoryProcedure is the fully-qualified name of the
+	// AgentSessionService's PutAgentMemory RPC.
+	AgentSessionServicePutAgentMemoryProcedure = "/mavio.plugin.v1.AgentSessionService/PutAgentMemory"
+	// AgentSessionServiceDeleteAgentMemoriesProcedure is the fully-qualified name of the
+	// AgentSessionService's DeleteAgentMemories RPC.
+	AgentSessionServiceDeleteAgentMemoriesProcedure = "/mavio.plugin.v1.AgentSessionService/DeleteAgentMemories"
 )
 
 // AiGatewayServiceClient is a client for the mavio.plugin.v1.AiGatewayService service.
@@ -511,6 +532,26 @@ type AgentSessionServiceClient interface {
 	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest) (*connect.ServerStreamForClient[v1.StreamAgentMessageResponse], error)
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
+	// AddAgentMessages adds messages and answers to a conversation without
+	// asking the model, such as requests the host carried out itself, so
+	// that the model knows of them.
+	AddAgentMessages(context.Context, *v1.AddAgentMessagesRequest) (*v1.AddAgentMessagesResponse, error)
+	// EndAgentSession ends a conversation: no message is sent to it again,
+	// and its owner's memories are consolidated from it.
+	EndAgentSession(context.Context, *v1.EndAgentSessionRequest) (*v1.EndAgentSessionResponse, error)
+	// WatchAgentToolCalls streams the calls of the host's tools: those
+	// waiting first, then each new one. A call waits until
+	// SubmitAgentToolResult answers it, across restarts of the plugin and
+	// of the host; a call repeated after the plugin restarts keeps its ID.
+	WatchAgentToolCalls(context.Context, *v1.WatchAgentToolCallsRequest) (*connect.ServerStreamForClient[v1.WatchAgentToolCallsResponse], error)
+	// SubmitAgentToolResult answers a call of the host's tools.
+	SubmitAgentToolResult(context.Context, *v1.SubmitAgentToolResultRequest) (*v1.SubmitAgentToolResultResponse, error)
+	// ListAgentMemories lists what the model remembers about an owner.
+	ListAgentMemories(context.Context, *v1.ListAgentMemoriesRequest) (*v1.ListAgentMemoriesResponse, error)
+	// PutAgentMemory changes a memory's text, or adds a memory.
+	PutAgentMemory(context.Context, *v1.PutAgentMemoryRequest) (*v1.PutAgentMemoryResponse, error)
+	// DeleteAgentMemories deletes an owner's memories.
+	DeleteAgentMemories(context.Context, *v1.DeleteAgentMemoriesRequest) (*v1.DeleteAgentMemoriesResponse, error)
 }
 
 // NewAgentSessionServiceClient constructs a client for the mavio.plugin.v1.AgentSessionService
@@ -562,17 +603,68 @@ func NewAgentSessionServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(agentSessionServiceMethods.ByName("DeleteAgentSession")),
 			connect.WithClientOptions(opts...),
 		),
+		addAgentMessages: connect.NewClient[v1.AddAgentMessagesRequest, v1.AddAgentMessagesResponse](
+			httpClient,
+			baseURL+AgentSessionServiceAddAgentMessagesProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("AddAgentMessages")),
+			connect.WithClientOptions(opts...),
+		),
+		endAgentSession: connect.NewClient[v1.EndAgentSessionRequest, v1.EndAgentSessionResponse](
+			httpClient,
+			baseURL+AgentSessionServiceEndAgentSessionProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("EndAgentSession")),
+			connect.WithClientOptions(opts...),
+		),
+		watchAgentToolCalls: connect.NewClient[v1.WatchAgentToolCallsRequest, v1.WatchAgentToolCallsResponse](
+			httpClient,
+			baseURL+AgentSessionServiceWatchAgentToolCallsProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("WatchAgentToolCalls")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		submitAgentToolResult: connect.NewClient[v1.SubmitAgentToolResultRequest, v1.SubmitAgentToolResultResponse](
+			httpClient,
+			baseURL+AgentSessionServiceSubmitAgentToolResultProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("SubmitAgentToolResult")),
+			connect.WithClientOptions(opts...),
+		),
+		listAgentMemories: connect.NewClient[v1.ListAgentMemoriesRequest, v1.ListAgentMemoriesResponse](
+			httpClient,
+			baseURL+AgentSessionServiceListAgentMemoriesProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("ListAgentMemories")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		putAgentMemory: connect.NewClient[v1.PutAgentMemoryRequest, v1.PutAgentMemoryResponse](
+			httpClient,
+			baseURL+AgentSessionServicePutAgentMemoryProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("PutAgentMemory")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteAgentMemories: connect.NewClient[v1.DeleteAgentMemoriesRequest, v1.DeleteAgentMemoriesResponse](
+			httpClient,
+			baseURL+AgentSessionServiceDeleteAgentMemoriesProcedure,
+			connect.WithSchema(agentSessionServiceMethods.ByName("DeleteAgentMemories")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // agentSessionServiceClient implements AgentSessionServiceClient.
 type agentSessionServiceClient struct {
-	createAgentSession *connect.Client[v1.CreateAgentSessionRequest, v1.CreateAgentSessionResponse]
-	listAgentSessions  *connect.Client[v1.ListAgentSessionsRequest, v1.ListAgentSessionsResponse]
-	getAgentSession    *connect.Client[v1.GetAgentSessionRequest, v1.GetAgentSessionResponse]
-	sendAgentMessage   *connect.Client[v1.SendAgentMessageRequest, v1.SendAgentMessageResponse]
-	streamAgentMessage *connect.Client[v1.StreamAgentMessageRequest, v1.StreamAgentMessageResponse]
-	deleteAgentSession *connect.Client[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse]
+	createAgentSession    *connect.Client[v1.CreateAgentSessionRequest, v1.CreateAgentSessionResponse]
+	listAgentSessions     *connect.Client[v1.ListAgentSessionsRequest, v1.ListAgentSessionsResponse]
+	getAgentSession       *connect.Client[v1.GetAgentSessionRequest, v1.GetAgentSessionResponse]
+	sendAgentMessage      *connect.Client[v1.SendAgentMessageRequest, v1.SendAgentMessageResponse]
+	streamAgentMessage    *connect.Client[v1.StreamAgentMessageRequest, v1.StreamAgentMessageResponse]
+	deleteAgentSession    *connect.Client[v1.DeleteAgentSessionRequest, v1.DeleteAgentSessionResponse]
+	addAgentMessages      *connect.Client[v1.AddAgentMessagesRequest, v1.AddAgentMessagesResponse]
+	endAgentSession       *connect.Client[v1.EndAgentSessionRequest, v1.EndAgentSessionResponse]
+	watchAgentToolCalls   *connect.Client[v1.WatchAgentToolCallsRequest, v1.WatchAgentToolCallsResponse]
+	submitAgentToolResult *connect.Client[v1.SubmitAgentToolResultRequest, v1.SubmitAgentToolResultResponse]
+	listAgentMemories     *connect.Client[v1.ListAgentMemoriesRequest, v1.ListAgentMemoriesResponse]
+	putAgentMemory        *connect.Client[v1.PutAgentMemoryRequest, v1.PutAgentMemoryResponse]
+	deleteAgentMemories   *connect.Client[v1.DeleteAgentMemoriesRequest, v1.DeleteAgentMemoriesResponse]
 }
 
 // CreateAgentSession calls mavio.plugin.v1.AgentSessionService.CreateAgentSession.
@@ -625,6 +717,65 @@ func (c *agentSessionServiceClient) DeleteAgentSession(ctx context.Context, req 
 	return nil, err
 }
 
+// AddAgentMessages calls mavio.plugin.v1.AgentSessionService.AddAgentMessages.
+func (c *agentSessionServiceClient) AddAgentMessages(ctx context.Context, req *v1.AddAgentMessagesRequest) (*v1.AddAgentMessagesResponse, error) {
+	response, err := c.addAgentMessages.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// EndAgentSession calls mavio.plugin.v1.AgentSessionService.EndAgentSession.
+func (c *agentSessionServiceClient) EndAgentSession(ctx context.Context, req *v1.EndAgentSessionRequest) (*v1.EndAgentSessionResponse, error) {
+	response, err := c.endAgentSession.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// WatchAgentToolCalls calls mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls.
+func (c *agentSessionServiceClient) WatchAgentToolCalls(ctx context.Context, req *v1.WatchAgentToolCallsRequest) (*connect.ServerStreamForClient[v1.WatchAgentToolCallsResponse], error) {
+	return c.watchAgentToolCalls.CallServerStream(ctx, connect.NewRequest(req))
+}
+
+// SubmitAgentToolResult calls mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult.
+func (c *agentSessionServiceClient) SubmitAgentToolResult(ctx context.Context, req *v1.SubmitAgentToolResultRequest) (*v1.SubmitAgentToolResultResponse, error) {
+	response, err := c.submitAgentToolResult.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// ListAgentMemories calls mavio.plugin.v1.AgentSessionService.ListAgentMemories.
+func (c *agentSessionServiceClient) ListAgentMemories(ctx context.Context, req *v1.ListAgentMemoriesRequest) (*v1.ListAgentMemoriesResponse, error) {
+	response, err := c.listAgentMemories.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// PutAgentMemory calls mavio.plugin.v1.AgentSessionService.PutAgentMemory.
+func (c *agentSessionServiceClient) PutAgentMemory(ctx context.Context, req *v1.PutAgentMemoryRequest) (*v1.PutAgentMemoryResponse, error) {
+	response, err := c.putAgentMemory.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// DeleteAgentMemories calls mavio.plugin.v1.AgentSessionService.DeleteAgentMemories.
+func (c *agentSessionServiceClient) DeleteAgentMemories(ctx context.Context, req *v1.DeleteAgentMemoriesRequest) (*v1.DeleteAgentMemoriesResponse, error) {
+	response, err := c.deleteAgentMemories.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // AgentSessionServiceHandler is an implementation of the mavio.plugin.v1.AgentSessionService
 // service.
 type AgentSessionServiceHandler interface {
@@ -641,6 +792,26 @@ type AgentSessionServiceHandler interface {
 	StreamAgentMessage(context.Context, *v1.StreamAgentMessageRequest, *connect.ServerStream[v1.StreamAgentMessageResponse]) error
 	// DeleteAgentSession deletes a conversation.
 	DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error)
+	// AddAgentMessages adds messages and answers to a conversation without
+	// asking the model, such as requests the host carried out itself, so
+	// that the model knows of them.
+	AddAgentMessages(context.Context, *v1.AddAgentMessagesRequest) (*v1.AddAgentMessagesResponse, error)
+	// EndAgentSession ends a conversation: no message is sent to it again,
+	// and its owner's memories are consolidated from it.
+	EndAgentSession(context.Context, *v1.EndAgentSessionRequest) (*v1.EndAgentSessionResponse, error)
+	// WatchAgentToolCalls streams the calls of the host's tools: those
+	// waiting first, then each new one. A call waits until
+	// SubmitAgentToolResult answers it, across restarts of the plugin and
+	// of the host; a call repeated after the plugin restarts keeps its ID.
+	WatchAgentToolCalls(context.Context, *v1.WatchAgentToolCallsRequest, *connect.ServerStream[v1.WatchAgentToolCallsResponse]) error
+	// SubmitAgentToolResult answers a call of the host's tools.
+	SubmitAgentToolResult(context.Context, *v1.SubmitAgentToolResultRequest) (*v1.SubmitAgentToolResultResponse, error)
+	// ListAgentMemories lists what the model remembers about an owner.
+	ListAgentMemories(context.Context, *v1.ListAgentMemoriesRequest) (*v1.ListAgentMemoriesResponse, error)
+	// PutAgentMemory changes a memory's text, or adds a memory.
+	PutAgentMemory(context.Context, *v1.PutAgentMemoryRequest) (*v1.PutAgentMemoryResponse, error)
+	// DeleteAgentMemories deletes an owner's memories.
+	DeleteAgentMemories(context.Context, *v1.DeleteAgentMemoriesRequest) (*v1.DeleteAgentMemoriesResponse, error)
 }
 
 // NewAgentSessionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -688,6 +859,50 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 		connect.WithSchema(agentSessionServiceMethods.ByName("DeleteAgentSession")),
 		connect.WithHandlerOptions(opts...),
 	)
+	agentSessionServiceAddAgentMessagesHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceAddAgentMessagesProcedure,
+		svc.AddAgentMessages,
+		connect.WithSchema(agentSessionServiceMethods.ByName("AddAgentMessages")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceEndAgentSessionHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceEndAgentSessionProcedure,
+		svc.EndAgentSession,
+		connect.WithSchema(agentSessionServiceMethods.ByName("EndAgentSession")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceWatchAgentToolCallsHandler := connect.NewServerStreamHandlerSimple(
+		AgentSessionServiceWatchAgentToolCallsProcedure,
+		svc.WatchAgentToolCalls,
+		connect.WithSchema(agentSessionServiceMethods.ByName("WatchAgentToolCalls")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceSubmitAgentToolResultHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceSubmitAgentToolResultProcedure,
+		svc.SubmitAgentToolResult,
+		connect.WithSchema(agentSessionServiceMethods.ByName("SubmitAgentToolResult")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceListAgentMemoriesHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceListAgentMemoriesProcedure,
+		svc.ListAgentMemories,
+		connect.WithSchema(agentSessionServiceMethods.ByName("ListAgentMemories")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServicePutAgentMemoryHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServicePutAgentMemoryProcedure,
+		svc.PutAgentMemory,
+		connect.WithSchema(agentSessionServiceMethods.ByName("PutAgentMemory")),
+		connect.WithHandlerOptions(opts...),
+	)
+	agentSessionServiceDeleteAgentMemoriesHandler := connect.NewUnaryHandlerSimple(
+		AgentSessionServiceDeleteAgentMemoriesProcedure,
+		svc.DeleteAgentMemories,
+		connect.WithSchema(agentSessionServiceMethods.ByName("DeleteAgentMemories")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.AgentSessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AgentSessionServiceCreateAgentSessionProcedure:
@@ -702,6 +917,20 @@ func NewAgentSessionServiceHandler(svc AgentSessionServiceHandler, opts ...conne
 			agentSessionServiceStreamAgentMessageHandler.ServeHTTP(w, r)
 		case AgentSessionServiceDeleteAgentSessionProcedure:
 			agentSessionServiceDeleteAgentSessionHandler.ServeHTTP(w, r)
+		case AgentSessionServiceAddAgentMessagesProcedure:
+			agentSessionServiceAddAgentMessagesHandler.ServeHTTP(w, r)
+		case AgentSessionServiceEndAgentSessionProcedure:
+			agentSessionServiceEndAgentSessionHandler.ServeHTTP(w, r)
+		case AgentSessionServiceWatchAgentToolCallsProcedure:
+			agentSessionServiceWatchAgentToolCallsHandler.ServeHTTP(w, r)
+		case AgentSessionServiceSubmitAgentToolResultProcedure:
+			agentSessionServiceSubmitAgentToolResultHandler.ServeHTTP(w, r)
+		case AgentSessionServiceListAgentMemoriesProcedure:
+			agentSessionServiceListAgentMemoriesHandler.ServeHTTP(w, r)
+		case AgentSessionServicePutAgentMemoryProcedure:
+			agentSessionServicePutAgentMemoryHandler.ServeHTTP(w, r)
+		case AgentSessionServiceDeleteAgentMemoriesProcedure:
+			agentSessionServiceDeleteAgentMemoriesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -733,4 +962,32 @@ func (UnimplementedAgentSessionServiceHandler) StreamAgentMessage(context.Contex
 
 func (UnimplementedAgentSessionServiceHandler) DeleteAgentSession(context.Context, *v1.DeleteAgentSessionRequest) (*v1.DeleteAgentSessionResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.DeleteAgentSession is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) AddAgentMessages(context.Context, *v1.AddAgentMessagesRequest) (*v1.AddAgentMessagesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.AddAgentMessages is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) EndAgentSession(context.Context, *v1.EndAgentSessionRequest) (*v1.EndAgentSessionResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.EndAgentSession is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) WatchAgentToolCalls(context.Context, *v1.WatchAgentToolCallsRequest, *connect.ServerStream[v1.WatchAgentToolCallsResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.WatchAgentToolCalls is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) SubmitAgentToolResult(context.Context, *v1.SubmitAgentToolResultRequest) (*v1.SubmitAgentToolResultResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.SubmitAgentToolResult is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) ListAgentMemories(context.Context, *v1.ListAgentMemoriesRequest) (*v1.ListAgentMemoriesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.ListAgentMemories is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) PutAgentMemory(context.Context, *v1.PutAgentMemoryRequest) (*v1.PutAgentMemoryResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.PutAgentMemory is not implemented"))
+}
+
+func (UnimplementedAgentSessionServiceHandler) DeleteAgentMemories(context.Context, *v1.DeleteAgentMemoriesRequest) (*v1.DeleteAgentMemoriesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.AgentSessionService.DeleteAgentMemories is not implemented"))
 }

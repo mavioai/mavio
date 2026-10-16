@@ -449,6 +449,7 @@
     <string name="plugins_category_notifications">通知</string>
     <string name="plugins_category_devices">设备</string>
     <string name="plugins_category_ai">AI</string>
+    <string name="plugins_category_speech">语音</string>
     <string name="plugins_category_other">其他</string>
     <string name="plugins_manage_catalogs">管理插件目录</string>
     <string name="plugins_none_in_category">此分类中没有插件。</string>

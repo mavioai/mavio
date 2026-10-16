@@ -50,6 +50,8 @@ type Plugin interface {
 	AI() pluginv1connect.AiGatewayServiceClient
 	Agents() pluginv1connect.AgentSessionServiceClient
 	Ratings() pluginv1connect.RatingsProviderServiceClient
+	Speech() pluginv1connect.SpeechToTextServiceClient
+	Voices() pluginv1connect.TextToSpeechServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

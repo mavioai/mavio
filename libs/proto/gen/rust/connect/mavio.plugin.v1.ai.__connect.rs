@@ -148,6 +148,76 @@ pub type OwnedDeleteAgentSessionResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+///Shorthand for `OwnedView<AddAgentMessagesRequestView<'static>>`.
+pub type OwnedAddAgentMessagesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesRequestView<'static>,
+>;
+///Shorthand for `OwnedView<AddAgentMessagesResponseView<'static>>`.
+pub type OwnedAddAgentMessagesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesResponseView<'static>,
+>;
+///Shorthand for `OwnedView<EndAgentSessionRequestView<'static>>`.
+pub type OwnedEndAgentSessionRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionRequestView<'static>,
+>;
+///Shorthand for `OwnedView<EndAgentSessionResponseView<'static>>`.
+pub type OwnedEndAgentSessionResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionResponseView<'static>,
+>;
+///Shorthand for `OwnedView<WatchAgentToolCallsRequestView<'static>>`.
+pub type OwnedWatchAgentToolCallsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<WatchAgentToolCallsResponseView<'static>>`.
+pub type OwnedWatchAgentToolCallsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SubmitAgentToolResultRequestView<'static>>`.
+pub type OwnedSubmitAgentToolResultRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<SubmitAgentToolResultResponseView<'static>>`.
+pub type OwnedSubmitAgentToolResultResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListAgentMemoriesRequestView<'static>>`.
+pub type OwnedListAgentMemoriesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListAgentMemoriesResponseView<'static>>`.
+pub type OwnedListAgentMemoriesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesResponseView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<PutAgentMemoryRequestView<'static>>`.
+pub type OwnedPutAgentMemoryRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryRequestView<'static>,
+>;
+///Shorthand for `OwnedView<PutAgentMemoryResponseView<'static>>`.
+pub type OwnedPutAgentMemoryResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryResponseView<'static>,
+>;
+///Shorthand for `OwnedView<DeleteAgentMemoriesRequestView<'static>>`.
+pub type OwnedDeleteAgentMemoriesRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<DeleteAgentMemoriesResponseView<'static>>`.
+pub type OwnedDeleteAgentMemoriesResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesResponseView<
+        'static,
+    >,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListAiProvidersResponse>
 for crate::proto::mavio::plugin::v1::__buffa::view::ListAiProvidersResponseView<'_> {
     fn encode(
@@ -710,6 +780,266 @@ for crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentSessionResponseVi
 impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::DeleteAgentSessionResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentSessionResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::AddAgentMessagesResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::AddAgentMessagesResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::EndAgentSessionResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::EndAgentSessionResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::WatchAgentToolCallsResponse,
+>
+for crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::WatchAgentToolCallsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::SubmitAgentToolResultResponse,
+>
+for crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::SubmitAgentToolResultResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListAgentMemoriesResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::ListAgentMemoriesResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesResponseView<
+        'static,
+    >,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::PutAgentMemoryResponse>
+for crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::plugin::v1::PutAgentMemoryResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::DeleteAgentMemoriesResponse,
+>
+for crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::plugin::v1::DeleteAgentMemoriesResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesResponseView<
         'static,
     >,
 > {
@@ -2512,6 +2842,48 @@ pub const AGENT_SESSION_SERVICE_DELETE_AGENT_SESSION_SPEC: ::connectrpc::Spec = 
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `AddAgentMessages` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_ADD_AGENT_MESSAGES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/AddAgentMessages",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `EndAgentSession` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_END_AGENT_SESSION_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/EndAgentSession",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `WatchAgentToolCalls` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_WATCH_AGENT_TOOL_CALLS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/WatchAgentToolCalls",
+        ::connectrpc::StreamType::ServerStream,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `SubmitAgentToolResult` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_SUBMIT_AGENT_TOOL_RESULT_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/SubmitAgentToolResult",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListAgentMemories` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_LIST_AGENT_MEMORIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/ListAgentMemories",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `PutAgentMemory` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_PUT_AGENT_MEMORY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/PutAgentMemory",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `DeleteAgentMemories` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const AGENT_SESSION_SERVICE_DELETE_AGENT_MEMORIES_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.plugin.v1.AgentSessionService/DeleteAgentMemories",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// AgentSessionService keeps conversations with a model, durably: each
 /// message and answer is stored before it is returned, and a conversation
 /// interrupted by a restart continues.
@@ -2701,6 +3073,173 @@ pub trait AgentSessionService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::plugin::v1::DeleteAgentSessionResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// AddAgentMessages adds messages and answers to a conversation without
+    /// asking the model, such as requests the host carried out itself, so
+    /// that the model knows of them.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn add_agent_messages<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::AddAgentMessagesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// EndAgentSession ends a conversation: no message is sent to it again,
+    /// and its owner's memories are consolidated from it.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn end_agent_session<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::EndAgentSessionResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// WatchAgentToolCalls streams the calls of the host's tools: those
+    /// waiting first, then each new one. A call waits until
+    /// SubmitAgentToolResult answers it, across restarts of the plugin and
+    /// of the host; a call repeated after the plugin restarts keeps its ID.
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call (until the response stream is returned);
+    /// message fields are read directly on it (zero-copy). Data the
+    /// returned stream needs must be copied out or converted via
+    /// `.to_owned_message()`.
+    fn watch_agent_tool_calls(
+        &self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            ::connectrpc::ServiceStream<
+                impl ::connectrpc::Encodable<
+                    crate::proto::mavio::plugin::v1::WatchAgentToolCallsResponse,
+                > + Send + use<Self>,
+            >,
+        >,
+    > + Send;
+    /// SubmitAgentToolResult answers a call of the host's tools.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn submit_agent_tool_result<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::SubmitAgentToolResultResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListAgentMemories lists what the model remembers about an owner.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_agent_memories<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::ListAgentMemoriesResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// PutAgentMemory changes a memory's text, or adds a memory.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn put_agent_memory<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::PutAgentMemoryResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// DeleteAgentMemories deletes an owner's memories.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn delete_agent_memories<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::plugin::v1::DeleteAgentMemoriesResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -2909,6 +3448,208 @@ impl<S: AgentSessionService> AgentSessionServiceExt for S {
                 },
             )
             .with_spec(AGENT_SESSION_SERVICE_DELETE_AGENT_SESSION_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "AddAgentMessages",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.add_agent_messages(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::AddAgentMessagesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_ADD_AGENT_MESSAGES_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "EndAgentSession",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.end_agent_session(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::EndAgentSessionResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_END_AGENT_SESSION_SPEC)
+            .route_view_server_stream::<
+                _,
+                _,
+                crate::proto::mavio::plugin::v1::WatchAgentToolCallsResponse,
+            >(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "WatchAgentToolCalls",
+                ::connectrpc::view_streaming_handler_fn({
+                    let svc = ::std::sync::Arc::clone(&self);
+                    move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsRequestView<
+                                'static,
+                            >,
+                        >|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.watch_agent_tool_calls(ctx, sreq).await
+                        }
+                    }
+                }),
+            )
+            .with_spec(AGENT_SESSION_SERVICE_WATCH_AGENT_TOOL_CALLS_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "SubmitAgentToolResult",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.submit_agent_tool_result(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::SubmitAgentToolResultResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_SUBMIT_AGENT_TOOL_RESULT_SPEC)
+            .route_view_idempotent(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "ListAgentMemories",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_agent_memories(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::ListAgentMemoriesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_LIST_AGENT_MEMORIES_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "PutAgentMemory",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.put_agent_memory(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::PutAgentMemoryResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_PUT_AGENT_MEMORY_SPEC)
+            .route_view(
+                AGENT_SESSION_SERVICE_SERVICE_NAME,
+                "DeleteAgentMemories",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.delete_agent_memories(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::plugin::v1::DeleteAgentMemoriesResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(AGENT_SESSION_SERVICE_DELETE_AGENT_MEMORIES_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -2999,6 +3740,48 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
                         .with_spec(AGENT_SESSION_SERVICE_DELETE_AGENT_SESSION_SPEC),
+                )
+            }
+            "AddAgentMessages" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_ADD_AGENT_MESSAGES_SPEC),
+                )
+            }
+            "EndAgentSession" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_END_AGENT_SESSION_SPEC),
+                )
+            }
+            "WatchAgentToolCalls" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::server_streaming()
+                        .with_spec(AGENT_SESSION_SERVICE_WATCH_AGENT_TOOL_CALLS_SPEC),
+                )
+            }
+            "SubmitAgentToolResult" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_SUBMIT_AGENT_TOOL_RESULT_SPEC),
+                )
+            }
+            "ListAgentMemories" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(AGENT_SESSION_SERVICE_LIST_AGENT_MEMORIES_SPEC),
+                )
+            }
+            "PutAgentMemory" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_PUT_AGENT_MEMORY_SPEC),
+                )
+            }
+            "DeleteAgentMemories" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(false)
+                        .with_spec(AGENT_SESSION_SERVICE_DELETE_AGENT_MEMORIES_SPEC),
                 )
             }
             _ => None,
@@ -3127,6 +3910,138 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                         >(format)
                 })
             }
+            "AddAgentMessages" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+                    >::from_parts(&req, &body);
+                    svc.add_agent_messages(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::AddAgentMessagesResponse,
+                        >(format)
+                })
+            }
+            "EndAgentSession" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+                    >::from_parts(&req, &body);
+                    svc.end_agent_session(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::EndAgentSessionResponse,
+                        >(format)
+                })
+            }
+            "SubmitAgentToolResult" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+                    >::from_parts(&req, &body);
+                    svc.submit_agent_tool_result(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::SubmitAgentToolResultResponse,
+                        >(format)
+                })
+            }
+            "ListAgentMemories" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_agent_memories(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::ListAgentMemoriesResponse,
+                        >(format)
+                })
+            }
+            "PutAgentMemory" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+                    >::from_parts(&req, &body);
+                    svc.put_agent_memory(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::PutAgentMemoryResponse,
+                        >(format)
+                })
+            }
+            "DeleteAgentMemories" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+                    >::from_parts(&req, &body);
+                    svc.delete_agent_memories(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::plugin::v1::DeleteAgentMemoriesResponse,
+                        >(format)
+                })
+            }
             _ => ::connectrpc::dispatcher::codegen::unimplemented_unary(path),
         }
     }
@@ -3163,6 +4078,32 @@ impl<T: AgentSessionService> ::connectrpc::Dispatcher for AgentSessionServiceSer
                         resp
                             .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
                                 crate::proto::mavio::plugin::v1::StreamAgentMessageResponse,
+                                _,
+                                _,
+                            >(s, format)),
+                    )
+                })
+            }
+            "WatchAgentToolCalls" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+                    >(request, format)?;
+                    let req: crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+                    >::from_parts(&req, &body);
+                    let resp = svc.watch_agent_tool_calls(ctx, req).await?;
+                    Ok(
+                        resp
+                            .map_body(|s| ::connectrpc::dispatcher::codegen::encode_response_stream::<
+                                crate::proto::mavio::plugin::v1::WatchAgentToolCallsResponse,
                                 _,
                                 _,
                             >(s, format)),
@@ -3546,6 +4487,319 @@ where
                 &self.transport,
                 &self.config,
                 AGENT_SESSION_SERVICE_DELETE_AGENT_SESSION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the AddAgentMessages RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/AddAgentMessages.
+    pub async fn add_agent_messages(
+        &self,
+        request: crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.add_agent_messages_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the AddAgentMessages RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn add_agent_messages_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::AddAgentMessagesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::AddAgentMessagesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_ADD_AGENT_MESSAGES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the EndAgentSession RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/EndAgentSession.
+    pub async fn end_agent_session(
+        &self,
+        request: crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.end_agent_session_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the EndAgentSession RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn end_agent_session_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::EndAgentSessionRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::EndAgentSessionResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_END_AGENT_SESSION_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the WatchAgentToolCalls RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/WatchAgentToolCalls.
+    pub async fn watch_agent_tool_calls(
+        &self,
+        request: crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.watch_agent_tool_calls_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the WatchAgentToolCalls RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn watch_agent_tool_calls_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::WatchAgentToolCallsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::ServerStream<
+            T::ResponseBody,
+            crate::proto::mavio::plugin::v1::__buffa::view::WatchAgentToolCallsResponseView<
+                'static,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_server_stream(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_WATCH_AGENT_TOOL_CALLS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the SubmitAgentToolResult RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/SubmitAgentToolResult.
+    pub async fn submit_agent_tool_result(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.submit_agent_tool_result_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the SubmitAgentToolResult RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn submit_agent_tool_result_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::SubmitAgentToolResultRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::SubmitAgentToolResultResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_SUBMIT_AGENT_TOOL_RESULT_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListAgentMemories RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/ListAgentMemories.
+    pub async fn list_agent_memories(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_agent_memories_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListAgentMemories RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_agent_memories_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::ListAgentMemoriesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::ListAgentMemoriesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_LIST_AGENT_MEMORIES_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the PutAgentMemory RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/PutAgentMemory.
+    pub async fn put_agent_memory(
+        &self,
+        request: crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.put_agent_memory_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the PutAgentMemory RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn put_agent_memory_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::PutAgentMemoryRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::PutAgentMemoryResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_PUT_AGENT_MEMORY_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the DeleteAgentMemories RPC. Sends a request to /mavio.plugin.v1.AgentSessionService/DeleteAgentMemories.
+    pub async fn delete_agent_memories(
+        &self,
+        request: crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.delete_agent_memories_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the DeleteAgentMemories RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn delete_agent_memories_with_options(
+        &self,
+        request: crate::proto::mavio::plugin::v1::DeleteAgentMemoriesRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::plugin::v1::__buffa::view::DeleteAgentMemoriesResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                AGENT_SESSION_SERVICE_DELETE_AGENT_MEMORIES_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

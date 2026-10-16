@@ -1,0 +1,485 @@
+edition = "2023";
+
+package mavio.assistant.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "mavio/intent/v1/intent.proto";
+import "mavio/library/v1/item.proto";
+import "mavio/plugin/v1/ai.proto";
+
+// AssistantService carries out users' spoken and typed requests (the
+// assistant document): the fast path's intents, else the AI path's model
+// with the server's tools, always as the user making the request.
+service AssistantService {
+  // GetAssistant tells what the assistant can do for the user: whether it
+  // is on, whether the AI path and memory are available, the server's
+  // recognizers and voices, and examples of requests.
+  rpc GetAssistant(GetAssistantRequest) returns (GetAssistantResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // Ask carries a request out and streams what happens, ending with Done.
+  rpc Ask(AskRequest) returns (stream AskResponse);
+  // GetAssistantHints returns phrases recognizers are likely to hear from
+  // the user: titles being watched, recently added titles, people and
+  // the user's devices.
+  rpc GetAssistantHints(GetAssistantHintsRequest) returns (GetAssistantHintsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // StartListening returns the WebSocket URL the client streams speech to
+  // for the server's recognizer, signed for the session and valid for a
+  // minute.
+  rpc StartListening(StartListeningRequest) returns (StartListeningResponse);
+  // ListAssistantConversations lists the user's conversations, newest
+  // first.
+  rpc ListAssistantConversations(ListAssistantConversationsRequest) returns (ListAssistantConversationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetAssistantConversation returns one of the user's conversations
+  // with its messages.
+  rpc GetAssistantConversation(GetAssistantConversationRequest) returns (GetAssistantConversationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // DeleteAssistantConversation deletes one of the user's conversations.
+  rpc DeleteAssistantConversation(DeleteAssistantConversationRequest) returns (DeleteAssistantConversationResponse);
+  // ListAssistantMemories lists what the assistant remembers about the
+  // user.
+  rpc ListAssistantMemories(ListAssistantMemoriesRequest) returns (ListAssistantMemoriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateAssistantMemory changes a memory's text, or adds a memory.
+  rpc UpdateAssistantMemory(UpdateAssistantMemoryRequest) returns (UpdateAssistantMemoryResponse);
+  // DeleteAssistantMemories deletes memories, or all of them.
+  rpc DeleteAssistantMemories(DeleteAssistantMemoriesRequest) returns (DeleteAssistantMemoriesResponse);
+  // GetAssistantSettings returns the server's assistant settings;
+  // administrators only.
+  rpc GetAssistantSettings(GetAssistantSettingsRequest) returns (GetAssistantSettingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // UpdateAssistantSettings replaces the server's assistant settings;
+  // administrators only.
+  rpc UpdateAssistantSettings(UpdateAssistantSettingsRequest) returns (UpdateAssistantSettingsResponse);
+}
+
+// AssistantSettings are the server's assistant settings.
+message AssistantSettings {
+  // Whether users may use the assistant.
+  bool enabled = 1;
+  // The AI path's model, "ai/<provider>/<model>"; empty, the assistant
+  // has the fast path only.
+  string model = 2 [(buf.validate.field).string.pattern = "^(ai/[^/]+/.+)?$"];
+  // The model writes scripts calling the tools (code mode) beside calling
+  // them one at a time.
+  bool code_mode = 3;
+  // Who may use the AI path.
+  AssistantAccess ai_access = 4 [(buf.validate.field).enum.defined_only = true];
+  // The users who may use it when ai_access is
+  // ASSISTANT_ACCESS_SELECTED.
+  repeated string ai_user_ids = 5 [(buf.validate.field).repeated.items.string.uuid = true];
+  // How long a conversation may be idle before a request starts a new
+  // one, 1–1440 minutes.
+  int32 idle_minutes = 6 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 1440
+  }];
+  // How many days conversations are kept, 1–3650.
+  int32 retention_days = 7 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 3650
+  }];
+  // Whether the assistant remembers what users tell about themselves.
+  bool memory = 8;
+  // The server's recognizer, "<plugin>/<recognizer>"; empty, the first
+  // ready one.
+  string recognizer = 9;
+  // The voices answers are spoken with by default, by language.
+  repeated AssistantVoiceChoice voices = 10;
+  // Whether recognizers are given the user's hints.
+  bool hints = 11;
+}
+
+// AssistantAccess is who may use the AI path.
+enum AssistantAccess {
+  ASSISTANT_ACCESS_UNSPECIFIED = 0;
+  // Every user.
+  ASSISTANT_ACCESS_ALL = 1;
+  // Administrators only.
+  ASSISTANT_ACCESS_ADMINISTRATORS = 2;
+  // The users listed.
+  ASSISTANT_ACCESS_SELECTED = 3;
+}
+
+// AssistantVoiceChoice is the voice of a language.
+message AssistantVoiceChoice {
+  // BCP 47, such as "en" or "zh-CN".
+  string language = 1 [(buf.validate.field).string.min_len = 1];
+  // "<plugin>/<voice>".
+  string voice = 2 [(buf.validate.field).string.pattern = "^[^/]+/.+$"];
+}
+
+message GetAssistantRequest {
+  // The UI's language, BCP 47, for the examples.
+  string language = 1;
+}
+
+message GetAssistantResponse {
+  // The assistant is on for the user.
+  bool enabled = 1;
+  // The user may use the AI path, and it is ready.
+  bool ai = 2;
+  // Memory is on.
+  bool memory = 3;
+  // The server's recognizers, the default first.
+  repeated Recognizer recognizers = 4;
+  // The server's voices.
+  repeated Voice voices = 5;
+  // The voice of each language when the user chooses none.
+  repeated AssistantVoiceChoice default_voices = 6;
+  // Examples of requests in the language asked for.
+  repeated string examples = 7;
+  // The languages the fast path understands, BCP 47.
+  repeated string languages = 8;
+}
+
+// Recognizer is a speech recognizer of the server.
+message Recognizer {
+  // "<plugin>/<recognizer>".
+  string id = 1;
+  string name = 2;
+  // BCP 47; empty for any.
+  repeated string languages = 3;
+}
+
+// Voice is a voice of the server.
+message Voice {
+  // "<plugin>/<voice>".
+  string id = 1;
+  string name = 2;
+  // BCP 47.
+  repeated string languages = 3;
+}
+
+message AskRequest {
+  option (buf.validate.message).cel = {
+    id: "ask.request"
+    message: "text, intent, answer or choice is required"
+    expression: "this.text != '' || has(this.intent) || has(this.answer) || this.choice != ''"
+  };
+  // What the user said or typed.
+  string text = 1 [(buf.validate.field).string.max_len = 2000];
+  // The intent the client's fast path read the text as; unset, the server
+  // reads it.
+  mavio.intent.v1.Intent intent = 2;
+  AskContext context = 3;
+  // The request was spoken: the answer is fit to be spoken.
+  bool spoken = 4;
+  // The answer to a pending confirmation, from its buttons.
+  ConfirmationAnswer answer = 5;
+  // The item the user chose among results.
+  string choice = 6;
+  // Client actions of the last answer the client could not carry out.
+  repeated string failed_actions = 7;
+}
+
+// AskContext is where the request is made.
+message AskContext {
+  // Languages of the user, BCP 47, most likely first: the recognizer's,
+  // then the UI's.
+  repeated string languages = 1;
+  // What the requesting device plays; unset when nothing.
+  AskPlaying playing = 2;
+  // The screen shown, such as "home", "item", "library", "search",
+  // "settings" or "player".
+  string screen = 3;
+  // The item shown, or the library.
+  string item_id = 4;
+  string library_id = 5;
+  // The items selected.
+  repeated string selected_item_ids = 6;
+  // The device's IANA time zone, such as "Europe/Berlin".
+  string time_zone = 7;
+}
+
+// AskPlaying is what the requesting device plays.
+message AskPlaying {
+  string item_id = 1;
+  google.protobuf.Duration position = 2;
+  bool paused = 3;
+  double speed = 4;
+  // The streams played, by their index in the media; -1 for none.
+  int32 audio_stream_index = 5;
+  int32 subtitle_stream_index = 6;
+  // 0–100.
+  int32 volume = 7;
+  bool muted = 8;
+}
+
+// ConfirmationAnswer answers a pending confirmation.
+message ConfirmationAnswer {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+  bool confirmed = 2;
+}
+
+message AskResponse {
+  oneof event {
+    // What the request was understood as.
+    Understood understood = 1;
+    // A tool runs or has run.
+    ToolActivity tool = 2;
+    // Something for the requesting client to do.
+    ClientAction action = 3;
+    // A confirmation to ask for; the request ends waiting for it.
+    Confirmation confirmation = 4;
+    // More of the answer's text.
+    string answer = 5;
+    // The end.
+    Done done = 6;
+  }
+}
+
+// Understood is what a request was understood as.
+message Understood {
+  // The text, as recognized or typed.
+  string text = 1;
+  // The fast path's intent; empty when the model reads the request.
+  string intent = 2;
+  // The model answers.
+  bool ai = 3;
+}
+
+// ToolActivity is a tool running for the request.
+message ToolActivity {
+  string id = 1;
+  // Such as "search_library".
+  string tool = 2;
+  // What it does, in the user's language.
+  string summary = 3;
+  bool done = 4;
+  bool failed = 5;
+}
+
+// ClientAction is something the requesting client does.
+message ClientAction {
+  // Identifies the action in AskRequest.failed_actions.
+  string id = 1;
+  oneof kind {
+    PlayAction play = 2;
+    ControlAction control = 3;
+    StreamsAction streams = 4;
+    NavigateAction navigate = 5;
+    ShowItemsAction show_items = 6;
+  }
+}
+
+// PlayAction plays items, as a queue.
+message PlayAction {
+  repeated string item_ids = 1;
+  // The item of the queue to start with.
+  int32 start_index = 2;
+  // Where to start; unset resumes where the user stopped.
+  google.protobuf.Duration start_position = 3;
+  // The streams to play, by their index in the media; unset leaves them
+  // to the user's preferences, -1 is none.
+  int32 audio_stream_index = 4;
+  int32 subtitle_stream_index = 5;
+}
+
+// ControlAction changes the playback.
+message ControlAction {
+  ControlCommand command = 1;
+  // The position of SEEK; the seconds of SEEK_BY, negative backwards;
+  // the speed of SPEED; the volume of VOLUME, 0–100.
+  double value = 2;
+  // The media segment SKIP skips, such as "intro", "credits" or "recap".
+  string segment = 3;
+}
+
+// ControlCommand is a change of the playback.
+enum ControlCommand {
+  CONTROL_COMMAND_UNSPECIFIED = 0;
+  CONTROL_COMMAND_PAUSE = 1;
+  CONTROL_COMMAND_RESUME = 2;
+  CONTROL_COMMAND_STOP = 3;
+  CONTROL_COMMAND_SEEK = 4;
+  CONTROL_COMMAND_SEEK_BY = 5;
+  CONTROL_COMMAND_SKIP = 6;
+  CONTROL_COMMAND_NEXT = 7;
+  CONTROL_COMMAND_PREVIOUS = 8;
+  CONTROL_COMMAND_SPEED = 9;
+  CONTROL_COMMAND_VOLUME = 10;
+  CONTROL_COMMAND_MUTE = 11;
+  CONTROL_COMMAND_UNMUTE = 12;
+  CONTROL_COMMAND_FULLSCREEN = 13;
+}
+
+// StreamsAction changes the streams played; unset fields stay.
+message StreamsAction {
+  // By index in the media; -1 turns subtitles off.
+  int32 audio_stream_index = 1;
+  int32 subtitle_stream_index = 2;
+  // Shifts the subtitle by this many seconds, negative earlier.
+  double subtitle_offset = 3;
+}
+
+// NavigateAction opens a screen.
+message NavigateAction {
+  NavigateTarget target = 1;
+  // The item or library opened.
+  string id = 2;
+  // The text searched.
+  string query = 3;
+}
+
+// NavigateTarget is a screen to open.
+enum NavigateTarget {
+  NAVIGATE_TARGET_UNSPECIFIED = 0;
+  NAVIGATE_TARGET_HOME = 1;
+  NAVIGATE_TARGET_BACK = 2;
+  NAVIGATE_TARGET_ITEM = 3;
+  NAVIGATE_TARGET_LIBRARY = 4;
+  NAVIGATE_TARGET_SEARCH = 5;
+  NAVIGATE_TARGET_SETTINGS = 6;
+}
+
+// ShowItemsAction shows items, to choose from when choose is set.
+message ShowItemsAction {
+  repeated mavio.library.v1.Item items = 1;
+  bool choose = 2;
+}
+
+// Confirmation asks the user to confirm an action.
+message Confirmation {
+  string id = 1;
+  // What will happen, in the user's language.
+  string text = 2;
+}
+
+// Done ends a request.
+message Done {
+  // The whole answer.
+  string answer = 1;
+  // The answer's language, BCP 47.
+  string language = 2;
+  // The user's current conversation; empty when none is stored.
+  string conversation_id = 3;
+  // A confirmation waits.
+  bool confirmation = 4;
+  // How many results wait to be chosen from.
+  int32 results = 5;
+  // The request was not understood: the answer lists what the assistant
+  // understands.
+  bool not_understood = 6;
+}
+
+message GetAssistantHintsRequest {}
+
+message GetAssistantHintsResponse {
+  repeated string phrases = 1;
+}
+
+message StartListeningRequest {
+  // The language spoken, BCP 47; empty, the recognizer detects it.
+  string language = 1;
+  // "<plugin>/<recognizer>"; empty, the settings'.
+  string recognizer = 2;
+}
+
+message StartListeningResponse {
+  // The WebSocket URL, relative to the server's base URL.
+  string url = 1;
+  string recognizer = 2;
+  google.protobuf.Timestamp expire_time = 3;
+}
+
+// AssistantConversation is one of a user's conversations with the
+// assistant.
+message AssistantConversation {
+  string id = 1;
+  string title = 2;
+  // The device of its first request.
+  string device_name = 3;
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+  // What the model used.
+  mavio.plugin.v1.AiUsage usage = 6;
+}
+
+// AssistantMessage is a request or an answer of a conversation.
+message AssistantMessage {
+  // A request when true, else an answer.
+  bool user = 1;
+  string text = 2;
+  google.protobuf.Timestamp time = 3;
+}
+
+message ListAssistantConversationsRequest {}
+
+message ListAssistantConversationsResponse {
+  repeated AssistantConversation conversations = 1;
+}
+
+message GetAssistantConversationRequest {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message GetAssistantConversationResponse {
+  AssistantConversation conversation = 1;
+  repeated AssistantMessage messages = 2;
+}
+
+message DeleteAssistantConversationRequest {
+  string id = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message DeleteAssistantConversationResponse {}
+
+// AssistantMemory is something the assistant remembers about a user.
+message AssistantMemory {
+  string id = 1;
+  string text = 2;
+  google.protobuf.Timestamp create_time = 3;
+  google.protobuf.Timestamp update_time = 4;
+  // When it was last given to the model.
+  google.protobuf.Timestamp use_time = 5;
+}
+
+message ListAssistantMemoriesRequest {}
+
+message ListAssistantMemoriesResponse {
+  repeated AssistantMemory memories = 1;
+}
+
+message UpdateAssistantMemoryRequest {
+  // Empty adds a memory.
+  string id = 1;
+  string text = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 1000
+  }];
+}
+
+message UpdateAssistantMemoryResponse {
+  AssistantMemory memory = 1;
+}
+
+message DeleteAssistantMemoriesRequest {
+  // Empty deletes every memory.
+  repeated string ids = 1;
+}
+
+message DeleteAssistantMemoriesResponse {}
+
+message GetAssistantSettingsRequest {}
+
+message GetAssistantSettingsResponse {
+  AssistantSettings settings = 1;
+}
+
+message UpdateAssistantSettingsRequest {
+  AssistantSettings settings = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateAssistantSettingsResponse {
+  AssistantSettings settings = 1;
+}

@@ -370,6 +370,30 @@ service AgentSessionService {
   rpc StreamAgentMessage(StreamAgentMessageRequest) returns (stream StreamAgentMessageResponse);
   // DeleteAgentSession deletes a conversation.
   rpc DeleteAgentSession(DeleteAgentSessionRequest) returns (DeleteAgentSessionResponse);
+  // AddAgentMessages adds messages and answers to a conversation without
+  // asking the model, such as requests the host carried out itself, so
+  // that the model knows of them.
+  rpc AddAgentMessages(AddAgentMessagesRequest) returns (AddAgentMessagesResponse);
+  // EndAgentSession ends a conversation: no message is sent to it again,
+  // and its owner's memories are consolidated from it.
+  rpc EndAgentSession(EndAgentSessionRequest) returns (EndAgentSessionResponse);
+  // WatchAgentToolCalls streams the calls of the host's tools: those
+  // waiting first, then each new one. A call waits until
+  // SubmitAgentToolResult answers it, across restarts of the plugin and
+  // of the host; a call repeated after the plugin restarts keeps its ID.
+  rpc WatchAgentToolCalls(WatchAgentToolCallsRequest) returns (stream WatchAgentToolCallsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // SubmitAgentToolResult answers a call of the host's tools.
+  rpc SubmitAgentToolResult(SubmitAgentToolResultRequest) returns (SubmitAgentToolResultResponse);
+  // ListAgentMemories lists what the model remembers about an owner.
+  rpc ListAgentMemories(ListAgentMemoriesRequest) returns (ListAgentMemoriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // PutAgentMemory changes a memory's text, or adds a memory.
+  rpc PutAgentMemory(PutAgentMemoryRequest) returns (PutAgentMemoryResponse);
+  // DeleteAgentMemories deletes an owner's memories.
+  rpc DeleteAgentMemories(DeleteAgentMemoriesRequest) returns (DeleteAgentMemoriesResponse);
 }
 
 // AgentSession is a conversation with a model.
@@ -382,6 +406,50 @@ message AgentSession {
   google.protobuf.Timestamp updated = 6;
   // What its messages used.
   AiUsage usage = 7;
+  // Whom it is for, as the host names them: memories are kept per owner.
+  string owner = 8;
+  // The host's notes about it, such as the device it started on.
+  map<string, string> labels = 9;
+  // EndAgentSession ended it.
+  bool ended = 10;
+}
+
+// AgentTool is a tool of the host offered to a conversation's model: the
+// model's calls of it are streamed to the host by WatchAgentToolCalls.
+message AgentTool {
+  // Such as "search_library".
+  string name = 1 [(buf.validate.field).string.pattern = "^[a-z][a-z0-9_]{0,63}$"];
+  // What it does, for the model.
+  string description = 2 [(buf.validate.field).string.min_len = 1];
+  // The JSON Schema of its arguments, an object.
+  string parameters_json = 3 [(buf.validate.field).string.min_len = 1];
+  // The JSON Schema of its structured result, which scripts of code mode
+  // receive; empty when it has none.
+  string result_json = 4;
+}
+
+// AgentToolCall is a call of a host's tool.
+message AgentToolCall {
+  // Stable across restarts; answers name it.
+  string id = 1;
+  string session_id = 2;
+  string owner = 3;
+  string tool = 4;
+  // The arguments, a JSON object.
+  string arguments_json = 5;
+  google.protobuf.Timestamp create_time = 6;
+}
+
+// AgentMemory is something the model remembers about an owner.
+message AgentMemory {
+  string id = 1;
+  string text = 2;
+  google.protobuf.Timestamp create_time = 3;
+  google.protobuf.Timestamp update_time = 4;
+  // When it was last given to the model.
+  google.protobuf.Timestamp use_time = 5;
+  // The conversation it was learned in.
+  string session_id = 6;
 }
 
 // AgentMessage is a message of a conversation.
@@ -397,13 +465,25 @@ message CreateAgentSessionRequest {
   // The instructions the model follows.
   string instructions = 3;
   string title = 4;
+  // The host's tools offered to the model.
+  repeated AgentTool tools = 5;
+  // The model also writes scripts calling the tools.
+  bool code_mode = 6;
+  string owner = 7;
+  // The model remembers what the owner tells about themselves, and is
+  // given the owner's memories.
+  bool memory = 8;
+  map<string, string> labels = 9;
 }
 
 message CreateAgentSessionResponse {
   AgentSession session = 1;
 }
 
-message ListAgentSessionsRequest {}
+message ListAgentSessionsRequest {
+  // Only an owner's; empty for every conversation.
+  string owner = 1;
+}
 
 message ListAgentSessionsResponse {
   repeated AgentSession sessions = 1;
@@ -448,3 +528,67 @@ message DeleteAgentSessionRequest {
 }
 
 message DeleteAgentSessionResponse {}
+
+message AddAgentMessagesRequest {
+  string session_id = 1 [(buf.validate.field).required = true];
+  // In order; each needs a role and a text.
+  repeated AgentMessage messages = 2 [(buf.validate.field).repeated.min_items = 1];
+  // Makes a retried request add the messages once.
+  string request_id = 3;
+}
+
+message AddAgentMessagesResponse {}
+
+message EndAgentSessionRequest {
+  string id = 1 [(buf.validate.field).required = true];
+}
+
+message EndAgentSessionResponse {}
+
+message WatchAgentToolCallsRequest {}
+
+message WatchAgentToolCallsResponse {
+  AgentToolCall call = 1;
+}
+
+message SubmitAgentToolResultRequest {
+  string call_id = 1 [(buf.validate.field).required = true];
+  // What the model reads.
+  string text = 2;
+  // The structured result, JSON, as the tool's result_json describes it.
+  string result_json = 3;
+  // The call failed; text says why.
+  bool failed = 4;
+}
+
+message SubmitAgentToolResultResponse {}
+
+message ListAgentMemoriesRequest {
+  string owner = 1 [(buf.validate.field).required = true];
+}
+
+message ListAgentMemoriesResponse {
+  repeated AgentMemory memories = 1;
+}
+
+message PutAgentMemoryRequest {
+  string owner = 1 [(buf.validate.field).required = true];
+  // Empty adds a memory.
+  string id = 2;
+  string text = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 1000
+  }];
+}
+
+message PutAgentMemoryResponse {
+  AgentMemory memory = 1;
+}
+
+message DeleteAgentMemoriesRequest {
+  string owner = 1 [(buf.validate.field).required = true];
+  // Empty deletes every memory of the owner.
+  repeated string ids = 2;
+}
+
+message DeleteAgentMemoriesResponse {}

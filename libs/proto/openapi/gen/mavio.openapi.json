@@ -14499,6 +14499,25 @@
             ],
             "title": "usage",
             "description": "What its messages used."
+          },
+          "owner": {
+            "type": "string",
+            "title": "owner",
+            "description": "Whom it is for, as the host names them: memories are kept per owner."
+          },
+          "labels": {
+            "type": "object",
+            "title": "labels",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "The host's notes about it, such as the device it started on."
+          },
+          "ended": {
+            "type": "boolean",
+            "title": "ended",
+            "description": "EndAgentSession ended it."
           }
         },
         "title": "AgentSession",
@@ -14997,7 +15016,9 @@
           "CAPABILITY_SUBTITLE_TRANSLATOR",
           "CAPABILITY_AI_GATEWAY",
           "CAPABILITY_AGENT_SESSION",
-          "CAPABILITY_RATINGS_PROVIDER"
+          "CAPABILITY_RATINGS_PROVIDER",
+          "CAPABILITY_SPEECH_TO_TEXT",
+          "CAPABILITY_TEXT_TO_SPEECH"
         ]
       },
       "mavio.plugin.v1.CatalogKind": {
@@ -15027,7 +15048,8 @@
           "CATEGORY_AUTHENTICATION",
           "CATEGORY_NOTIFICATIONS",
           "CATEGORY_DEVICES",
-          "CATEGORY_AI"
+          "CATEGORY_AI",
+          "CATEGORY_SPEECH"
         ],
         "description": "Category is what a plugin is for, by which clients group plugins."
       },

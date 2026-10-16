@@ -7921,6 +7921,24 @@
         }
       }
     },
+    "plugins.categorySpeech": {
+      "comment": "Category of plugins recognizing and speaking speech.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音"
+          }
+        }
+      }
+    },
     "plugins.categoryOther": {
       "comment": "Category of plugins naming none.",
       "extractionState": "manual",

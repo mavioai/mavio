@@ -98,6 +98,10 @@ enum Capability {
   CAPABILITY_AGENT_SESSION = 27;
   // Implements RatingsProviderService.
   CAPABILITY_RATINGS_PROVIDER = 28;
+  // Implements SpeechToTextService.
+  CAPABILITY_SPEECH_TO_TEXT = 29;
+  // Implements TextToSpeechService.
+  CAPABILITY_TEXT_TO_SPEECH = 30;
 }
 
 // Category is what a plugin is for, by which clients group plugins.
@@ -117,6 +121,8 @@ enum Category {
   CATEGORY_DEVICES = 6;
   // AI models and agents.
   CATEGORY_AI = 7;
+  // Recognizing and speaking speech.
+  CATEGORY_SPEECH = 8;
 }
 
 // Manifest describes a plugin. It is shipped alongside the plugin

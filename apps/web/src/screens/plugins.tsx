@@ -45,6 +45,7 @@ const categories: Record<Category, { title: () => string; icon: IconName; color:
   [Category.NOTIFICATIONS]: { title: () => t("plugins.categoryNotifications"), icon: "pending", color: "#FF3B30" },
   [Category.DEVICES]: { title: () => t("plugins.categoryDevices"), icon: "television", color: "#32ADE6" },
   [Category.AI]: { title: () => t("plugins.categoryAi"), icon: "plugins", color: "#AF52DE" },
+  [Category.SPEECH]: { title: () => t("plugins.categorySpeech"), icon: "plugins", color: "#5856D6" },
 };
 
 /** A plugin as shown: what its catalog offers of it and what is installed, either or both. */

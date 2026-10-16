@@ -22,4 +22,5 @@ include!("mavio.plugin.v1.ratings.__connect.rs");
 include!("mavio.plugin.v1.resolver.__connect.rs");
 include!("mavio.plugin.v1.scene_mapping.__connect.rs");
 include!("mavio.plugin.v1.segment.__connect.rs");
+include!("mavio.plugin.v1.speech.__connect.rs");
 include!("mavio.plugin.v1.subtitle.__connect.rs");

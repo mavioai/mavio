@@ -1423,6 +1423,9 @@ public enum MavioStrings {
     /// Category of AI model and agent plugins.
     public static var pluginsCategoryAi: String { NSLocalizedString("plugins.categoryAi", bundle: .module, comment: "") }
 
+    /// Category of plugins recognizing and speaking speech.
+    public static var pluginsCategorySpeech: String { NSLocalizedString("plugins.categorySpeech", bundle: .module, comment: "") }
+
     /// Category of plugins naming none.
     public static var pluginsCategoryOther: String { NSLocalizedString("plugins.categoryOther", bundle: .module, comment: "") }
 

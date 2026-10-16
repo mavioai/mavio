@@ -125,6 +125,10 @@ pub enum Capability {
     CAPABILITY_AGENT_SESSION = 27i32,
     /// Implements RatingsProviderService.
     CAPABILITY_RATINGS_PROVIDER = 28i32,
+    /// Implements SpeechToTextService.
+    CAPABILITY_SPEECH_TO_TEXT = 29i32,
+    /// Implements TextToSpeechService.
+    CAPABILITY_TEXT_TO_SPEECH = 30i32,
 }
 impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -214,6 +218,12 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_RATINGS_PROVIDER`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const RatingsProvider: Self = Self::CAPABILITY_RATINGS_PROVIDER;
+    ///Idiomatic alias for [`Self::CAPABILITY_SPEECH_TO_TEXT`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const SpeechToText: Self = Self::CAPABILITY_SPEECH_TO_TEXT;
+    ///Idiomatic alias for [`Self::CAPABILITY_TEXT_TO_SPEECH`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const TextToSpeech: Self = Self::CAPABILITY_TEXT_TO_SPEECH;
 }
 impl ::core::default::Default for Capability {
     fn default() -> Self {
@@ -256,6 +266,8 @@ impl ::buffa::Enumeration for Capability {
             26i32 => ::core::option::Option::Some(Self::CAPABILITY_AI_GATEWAY),
             27i32 => ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION),
             28i32 => ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER),
+            29i32 => ::core::option::Option::Some(Self::CAPABILITY_SPEECH_TO_TEXT),
+            30i32 => ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH),
             _ => ::core::option::Option::None,
         }
     }
@@ -297,6 +309,8 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_AI_GATEWAY => "CAPABILITY_AI_GATEWAY",
             Self::CAPABILITY_AGENT_SESSION => "CAPABILITY_AGENT_SESSION",
             Self::CAPABILITY_RATINGS_PROVIDER => "CAPABILITY_RATINGS_PROVIDER",
+            Self::CAPABILITY_SPEECH_TO_TEXT => "CAPABILITY_SPEECH_TO_TEXT",
+            Self::CAPABILITY_TEXT_TO_SPEECH => "CAPABILITY_TEXT_TO_SPEECH",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -388,6 +402,12 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_RATINGS_PROVIDER" => {
                 ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER)
             }
+            "CAPABILITY_SPEECH_TO_TEXT" => {
+                ::core::option::Option::Some(Self::CAPABILITY_SPEECH_TO_TEXT)
+            }
+            "CAPABILITY_TEXT_TO_SPEECH" => {
+                ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -422,6 +442,8 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_AI_GATEWAY,
             Self::CAPABILITY_AGENT_SESSION,
             Self::CAPABILITY_RATINGS_PROVIDER,
+            Self::CAPABILITY_SPEECH_TO_TEXT,
+            Self::CAPABILITY_TEXT_TO_SPEECH,
         ]
     }
 }
@@ -445,6 +467,8 @@ pub enum Category {
     CATEGORY_DEVICES = 6i32,
     /// AI models and agents.
     CATEGORY_AI = 7i32,
+    /// Recognizing and speaking speech.
+    CATEGORY_SPEECH = 8i32,
 }
 impl Category {
     ///Idiomatic alias for [`Self::CATEGORY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -471,6 +495,9 @@ impl Category {
     ///Idiomatic alias for [`Self::CATEGORY_AI`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const Ai: Self = Self::CATEGORY_AI;
+    ///Idiomatic alias for [`Self::CATEGORY_SPEECH`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Speech: Self = Self::CATEGORY_SPEECH;
 }
 impl ::core::default::Default for Category {
     fn default() -> Self {
@@ -488,6 +515,7 @@ impl ::buffa::Enumeration for Category {
             5i32 => ::core::option::Option::Some(Self::CATEGORY_NOTIFICATIONS),
             6i32 => ::core::option::Option::Some(Self::CATEGORY_DEVICES),
             7i32 => ::core::option::Option::Some(Self::CATEGORY_AI),
+            8i32 => ::core::option::Option::Some(Self::CATEGORY_SPEECH),
             _ => ::core::option::Option::None,
         }
     }
@@ -504,6 +532,7 @@ impl ::buffa::Enumeration for Category {
             Self::CATEGORY_NOTIFICATIONS => "CATEGORY_NOTIFICATIONS",
             Self::CATEGORY_DEVICES => "CATEGORY_DEVICES",
             Self::CATEGORY_AI => "CATEGORY_AI",
+            Self::CATEGORY_SPEECH => "CATEGORY_SPEECH",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -526,6 +555,7 @@ impl ::buffa::Enumeration for Category {
             }
             "CATEGORY_DEVICES" => ::core::option::Option::Some(Self::CATEGORY_DEVICES),
             "CATEGORY_AI" => ::core::option::Option::Some(Self::CATEGORY_AI),
+            "CATEGORY_SPEECH" => ::core::option::Option::Some(Self::CATEGORY_SPEECH),
             _ => ::core::option::Option::None,
         }
     }
@@ -539,6 +569,7 @@ impl ::buffa::Enumeration for Category {
             Self::CATEGORY_NOTIFICATIONS,
             Self::CATEGORY_DEVICES,
             Self::CATEGORY_AI,
+            Self::CATEGORY_SPEECH,
         ]
     }
 }

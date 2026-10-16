@@ -888,6 +888,8 @@
     <string name="plugins_category_devices">Devices</string>
     <!-- Category of AI model and agent plugins. -->
     <string name="plugins_category_ai">AI</string>
+    <!-- Category of plugins recognizing and speaking speech. -->
+    <string name="plugins_category_speech">Speech</string>
     <!-- Category of plugins naming none. -->
     <string name="plugins_category_other">Other</string>
     <!-- Button opening the plugin catalogs. -->
