@@ -1,0 +1,108 @@
+name: Snapshots
+
+# The snapshot tests of the clients (docs/clients.md §6.8), run by hand: their
+# references are recorded and committed once the UI settles, so that CI does
+# not fail on every change to it while it moves.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone,java,gradle
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The web UI's, in the browser of Playwright's image on arm64, as they are
+  # recorded on Apple silicon; the results of a failed comparison, and the
+  # gallery of every client's references.
+  web:
+    name: Web
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run web:snapshot --output-style=static
+      - if: always()
+        run: pnpm nx run design:gallery --output-style=static
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: dist/snapshots
+          if-no-files-found: ignore
+
+  # libs/apple's, on the iOS simulator, with Xcode 27, which the references
+  # are made with.
+  ios:
+    name: iOS
+    runs-on: xcode-27
+    # A hung build stops at the cap.
+    timeout-minutes: 60
+    env:
+      # The core built without optimizations, which take most of its time,
+      # for the iOS simulator alone.
+      MAVIO_CORE_PROFILE: dev
+      MAVIO_APPLE_PLATFORMS: ios-sim
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
+          key: ${{ env.MAVIO_CORE_PROFILE }}-${{ env.MAVIO_APPLE_PLATFORMS }}
+          save-if: false
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/Library/Caches/org.swift.swiftpm
+          key: swiftpm-${{ hashFiles('libs/apple/Package.resolved', 'apps/*/Mavio.xcodeproj/**/Package.resolved') }}
+          restore-keys: swiftpm-
+      - uses: actions/cache/restore@v4
+        with:
+          path: dist/deps
+          key: deps-apple-${{ hashFiles('tools/deps/deps.txt') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run apple:snapshot --output-style=static
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-ios
+          path: libs/apple/build/snapshots/*.png
+          if-no-files-found: ignore
+
+  # libs/android's ui, drawn by Robolectric on the JVM; the images of a failed
+  # comparison.
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    env:
+      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone
+      MAVIO_CORE_PROFILE: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: libs/client-rust
+          key: ${{ env.MAVIO_CORE_PROFILE }}
+          save-if: false
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+      - uses: actions/cache/restore@v4
+        with:
+          path: dist/deps
+          key: deps-android-${{ hashFiles('tools/deps/deps.txt') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm nx run android-lib:snapshot --output-style=static
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-android
+          path: libs/android/ui/build/outputs/roborazzi
+          if-no-files-found: ignore

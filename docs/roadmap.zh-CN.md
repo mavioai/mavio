@@ -627,6 +627,7 @@ flowchart TD
     - [ ] Linux 与 Windows：在其 runner 上运行同样的测试（Windows 上用 `syscall`），CI 运行之前未经验证
   - [x] 各平台的快照测试：`libs/design/snapshots/screens.json` 中的页面及其固定数据；Web 上用 Playwright 1.63，浏览器运行在其容器镜像中，以手机、平板与桌面尺寸绘制登录与首页；iOS 模拟器上用 swift-snapshot-testing 1.19，以 `MavioUI` 在 iPhone 与 iPad 上绘制首页；JVM 上用 Roborazzi 1.76 与 Robolectric 4.17，在手机与电视上绘制 wordmark；`design:gallery` 把它们并排展示，CI 任务负责比对
     - [ ] 桌面应用以 MyGo 测试器进行的快照测试，随其骨架
+    - [ ] 客户端 UI 稳定、参考图录制之后，把快照测试放回 CI 在推送与 PR 上的运行；在此之前由 Snapshots 工作流手动运行
     - [ ] Android 应用的页面，随其切片
     - [ ] 若 CI runner 上的绘制与 Mac 不同，在其上重新录制参考图（Android 测试运行在 linux amd64 上）
 - [ ] 各应用与库的骨架

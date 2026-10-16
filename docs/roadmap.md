@@ -627,6 +627,7 @@ flowchart TD
     - [ ] Linux and Windows: the same tests on their runners (`syscall` on Windows), unverified until CI runs them
   - [x] Snapshot testing on every platform: the screens and their fixed data in `libs/design/snapshots/screens.json`; Playwright 1.63 on the web with the browser in its container image, drawing sign-in and Home at the phone, tablet and desktop sizes; swift-snapshot-testing 1.19 on the iOS simulator, drawing Home with `MavioUI` on the iPhone and iPad; Roborazzi 1.76 with Robolectric 4.17 on the JVM, drawing the wordmark on a phone and a TV; `design:gallery` placing them side by side, and the CI jobs comparing them
     - [ ] The desktop app's snapshot tests with MyGo's tester, with its skeleton
+    - [ ] The snapshot tests back in CI's runs on pushes and pull requests, once the clients' UI settles and the references are recorded; until then the Snapshots workflow runs them by hand
     - [ ] The Android apps' screens, with their slice
     - [ ] References recorded again on the CI runners if their drawing differs from the Mac's (the Android tests run on linux amd64)
 - [ ] Skeletons of the apps and libraries

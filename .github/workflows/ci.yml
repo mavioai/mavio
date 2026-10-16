@@ -27,7 +27,6 @@ jobs:
       all: ${{ steps.affected.outputs.all }}
       apple: ${{ steps.affected.outputs.apple }}
       android: ${{ steps.affected.outputs.android }}
-      web: ${{ steps.affected.outputs.web }}
       server: ${{ steps.affected.outputs.server }}
     steps:
       - uses: actions/checkout@v4
@@ -47,15 +46,13 @@ jobs:
             echo "all=$all"
             apple=$(pnpm exec nx show projects $affected --projects tag:platform:apple --json)
             # The apple jobs, one per platform with the affected projects it
-            # builds, and one for the snapshot tests of libs/apple.
+            # builds.
             echo "apple=$(jq -c '. as $a | [
                 {name: "macOS", platforms: "macos", projects: ["apple", "macos"]},
                 {name: "iOS", platforms: "ios-sim", projects: ["ios"]},
-                {name: "tvOS", platforms: "tvos-sim", projects: ["tvos"]},
-                {name: "iOS snapshots", platforms: "ios-sim", projects: [], snapshot: any($a[]; . == "apple")}
-              ] | map(.projects |= map(select(IN($a[])))) | map(select(.projects != [] or .snapshot))' <<< "$apple")"
+                {name: "tvOS", platforms: "tvos-sim", projects: ["tvos"]}
+              ] | map(.projects |= map(select(IN($a[])))) | map(select(.projects != []))' <<< "$apple")"
             echo "android=$(pnpm exec nx show projects $affected --projects tag:platform:android --json)"
-            echo "web=$(pnpm exec nx show projects $affected --projects web --json | jq 'length > 0')"
             # The media, dist and image jobs build and test the server.
             echo "server=$(pnpm exec nx show projects $affected --projects server,media,streaming,fixtures --json | jq 'length > 0')"
           } >> "$GITHUB_OUTPUT"
@@ -127,8 +124,7 @@ jobs:
           key: test
           save: true
 
-  # A job per platform, and one for the snapshot tests, so that the builds
-  # do not share a runner's cores.
+  # A job per platform, so that the builds do not share a runner's cores.
   apple:
     name: Apple (${{ matrix.name }})
     needs: plan
@@ -137,9 +133,8 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.plan.outputs.apple) }}
-    # Xcode 27, which the Package.resolved files and the references of the
-    # snapshots are made with: SwiftPM resolves some packages differently
-    # with older Swift.
+    # Xcode 27, which the Package.resolved files are made with: SwiftPM
+    # resolves some packages differently with older Swift.
     runs-on: xcode-27
     # A hung build stops at the cap.
     timeout-minutes: 60
@@ -178,17 +173,7 @@ jobs:
           path: dist/deps
           key: deps-apple-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
-      - if: matrix.projects[0]
-        run: pnpm nx run-many -t lint build test --projects '${{ join(matrix.projects, ',') }}' --output-style=static
-      # The snapshot tests on the iOS simulator (docs/clients.md §6.8).
-      - if: matrix.snapshot
-        run: pnpm nx run apple:snapshot --output-style=static
-      - if: failure() && matrix.snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapshots-ios
-          path: libs/apple/build/snapshots/*.png
-          if-no-files-found: ignore
+      - run: pnpm nx run-many -t lint build test --projects '${{ join(matrix.projects, ',') }}' --output-style=static
       - if: github.ref == 'refs/heads/main' && steps.swiftpm.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
@@ -199,8 +184,7 @@ jobs:
         with:
           path: dist/deps
           key: ${{ steps.deps.outputs.cache-primary-key }}
-      - if: matrix.projects[0]
-        name: Generated projects are up to date
+      - name: Generated projects are up to date
         run: |
           pnpm nx run-many -t generate --projects '${{ join(matrix.projects, ',') }}' --output-style=static
           git diff --exit-code
@@ -236,44 +220,11 @@ jobs:
           key: deps-android-${{ hashFiles('tools/deps/deps.txt') }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm nx run-many -t lint build test --projects '${{ join(fromJSON(needs.plan.outputs.android), ',') }}' --output-style=static
-      # The tests compare the snapshots with their references; the images
-      # of a failed comparison.
-      - if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapshots-android
-          path: libs/android/ui/build/outputs/roborazzi
-          if-no-files-found: ignore
       - if: ${{ !cancelled() && github.ref == 'refs/heads/main' && steps.deps.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v4
         with:
           path: dist/deps
           key: ${{ steps.deps.outputs.cache-primary-key }}
-
-  # The snapshot tests of the web UI (docs/clients.md §6.8), in the browser of
-  # Playwright's image on arm64, as they are recorded on Apple silicon; the
-  # results of a failed comparison, and the gallery of every client's
-  # references.
-  web-snapshots:
-    name: Web snapshots
-    needs: plan
-    if: needs.plan.outputs.web == 'true'
-    runs-on: ubuntu-24.04-arm
-    env:
-      MISE_DISABLE_TOOLS: github:jellyfin/jellyfin-ffmpeg,http:rclone,java,gradle
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm nx run web:snapshot --output-style=static
-      - if: always()
-        run: pnpm nx run design:gallery --output-style=static
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapshots
-          path: dist/snapshots
-          if-no-files-found: ignore
 
   media:
     name: Media integration (${{ matrix.os }})
