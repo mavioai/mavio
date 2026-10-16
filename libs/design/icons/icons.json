@@ -57,6 +57,8 @@
   "signOut": "sign-out",
   "key": "key",
   "server": "hard-drives",
+  "cpu": "cpu",
+  "memory": "memory",
   "disk": "hard-drive",
   "network": "network",
   "cloud": "cloud",
