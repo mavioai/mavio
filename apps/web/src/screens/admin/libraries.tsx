@@ -365,7 +365,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           <Button type="submit" variant="secondary" disabled={!typed.trim()}>
             {t("libraries.addFolder")}
           </Button>
-          <Button variant="plain" onClick={() => setPicking(!picking)}>
+          <Button variant="plain" aria-pressed={picking} className={picking ? "bg-fill-selected" : undefined} onClick={() => setPicking(!picking)}>
             <Icon name="folder" size={18} />
             {t("libraries.browse")}
           </Button>
