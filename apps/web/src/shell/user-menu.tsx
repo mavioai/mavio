@@ -267,8 +267,16 @@ export function PinPad({
       {error && <p className="-mt-2 mb-3 type-footnote text-danger">{error}</p>}
       <div className="grid grid-cols-3 gap-3">
         {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k) =>
+          // Cancel takes the keypad's empty corner, as on a phone's.
           k === "" ? (
-            <span key="blank" />
+            <button
+              key="cancel"
+              type="button"
+              onClick={onCancel}
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full type-body text-accent-text hover:bg-fill active:opacity-70"
+            >
+              {t("action.cancel")}
+            </button>
           ) : (
             <button
               key={k}
@@ -282,9 +290,6 @@ export function PinPad({
           ),
         )}
       </div>
-      <button type="button" onClick={onCancel} className="mt-4 type-body text-accent-text">
-        {t("action.cancel")}
-      </button>
     </Sheet>
   );
 }
