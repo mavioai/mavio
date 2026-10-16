@@ -4,9 +4,11 @@
 // undone, which only its buttons close.
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { Dialog } from "@base-ui/react/dialog";
-import { type ReactNode, useRef, useState } from "react";
+import { useBlocker } from "@tanstack/react-router";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
+import { prefs } from "../prefs.ts";
 import { Icon } from "../icon.tsx";
 import { Button } from "../ui.tsx";
 import { backdrop, dialogFrame } from "./styles.ts";
@@ -34,6 +36,35 @@ function useOpener() {
   return opener;
 }
 
+/** The ways the dialogs open close, the last opened last. */
+const open: { current: () => void }[] = [];
+
+/**
+ * Back closes the dialog opened last rather than leaving the page under
+ * it; the history stays as it was. Not on the television, whose Back is a
+ * key the dialog takes as Escape.
+ */
+function useBackCloses(close: () => void) {
+  const [entry] = useState(() => ({ current: close }));
+  useEffect(() => {
+    entry.current = close;
+  });
+  useEffect(() => {
+    open.push(entry);
+    return () => {
+      open.splice(open.indexOf(entry), 1);
+    };
+  }, [entry]);
+  useBlocker({
+    shouldBlockFn: ({ action }) => {
+      if (action !== "BACK" || prefs().tv) return false;
+      if (open.at(-1) === entry) entry.current();
+      return true;
+    },
+    enableBeforeUnload: false,
+  });
+}
+
 /**
  * A modal dialog shown while it is rendered, with its title above its
  * content; onClose is called on Escape and a press outside it, which ask
@@ -56,8 +87,10 @@ export function Modal({
 }) {
   const opener = useOpener();
   const [asking, setAsking] = useState(false);
+  const close = () => (changed ? setAsking(true) : onClose());
+  useBackCloses(close);
   return (
-    <Dialog.Root open onOpenChange={(open) => !open && (changed ? setAsking(true) : onClose())}>
+    <Dialog.Root open onOpenChange={(open) => !open && close()}>
       {asking && (
         <Confirm
           title={t("unsaved.title")}
@@ -87,6 +120,7 @@ export function Modal({
  */
 export function Sheet({ label, width = "narrow", className, onClose, children }: { label: string; width?: keyof typeof widths; className?: string; onClose: () => void; children: ReactNode }) {
   const opener = useOpener();
+  useBackCloses(onClose);
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
@@ -131,6 +165,7 @@ export function Confirm({
   onConfirm: () => void;
 }) {
   const opener = useOpener();
+  useBackCloses(onCancel);
   return (
     <AlertDialog.Root open onOpenChange={(open) => !open && onCancel()}>
       <AlertDialog.Portal>
