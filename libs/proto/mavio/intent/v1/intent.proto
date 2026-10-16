@@ -1,0 +1,112 @@
+edition = "2023";
+
+package mavio.intent.v1;
+
+// The messages of the assistant's grammar (libs/intent), which the web UI and
+// the server run as one WASM module: requests go in and answers come out as
+// these messages, encoded in binary. The package imports nothing, so that the
+// module carries no message beyond its own.
+
+// ParseIntentRequest asks the grammar what a request's text means.
+message ParseIntentRequest {
+  // What the user said or typed.
+  string text = 1;
+  // Languages to prefer, BCP 47, most likely first: the recognizer's, then
+  // the UI's. The grammars of every language whose script the text is
+  // written in are tried too; these only break ties.
+  repeated string languages = 2;
+  DialogState state = 3;
+}
+
+// DialogState is what the dialog holds when a request arrives, which some
+// patterns need: "yes" means something only while a confirmation waits.
+message DialogState {
+  // A confirmation waits for an answer.
+  bool confirmation = 1;
+  // How many results were last shown to choose from.
+  int32 results = 2;
+  // Something plays on the requesting device.
+  bool playing = 3;
+}
+
+message ParseIntentResponse {
+  // The best reading, then other readings of the same text that the
+  // server tries when the best one's slots do not resolve, such as a title
+  // containing "on" read as a device. Empty when no pattern matched.
+  repeated Intent intents = 1;
+}
+
+// Intent is what a request means.
+message Intent {
+  // What to do, such as "pause", "seek_back" or "play" (libs/intent's
+  // grammars list them).
+  string name = 1;
+  repeated Slot slots = 2;
+  IntentMatch match = 3;
+  // From 0 to 1.
+  double confidence = 4;
+  // The language of the grammar that matched, BCP 47.
+  string language = 5;
+}
+
+// IntentMatch is how much of the text a pattern matched.
+enum IntentMatch {
+  INTENT_MATCH_UNSPECIFIED = 0;
+  // The whole text.
+  INTENT_MATCH_FULL = 1;
+  // Part of it, the rest left over.
+  INTENT_MATCH_PARTIAL = 2;
+}
+
+// Slot is a value a pattern found in the text.
+message Slot {
+  // Such as "title", "seconds" or "language".
+  string name = 1;
+  // The words as they were said.
+  string text = 2;
+  oneof value {
+    // A number, such as a volume or a speed.
+    double number = 3;
+    // A duration or a position, in seconds.
+    double seconds = 4;
+    // A language, ISO 639-1 where it has one, else 639-2/T.
+    string language = 5;
+    // A position in a list from 1; -1 is the last.
+    int32 ordinal = 6;
+    // One of the values a grammar names, such as "earlier" or "on".
+    string keyword = 7;
+  }
+}
+
+// ReplyRequest asks for an answer's sentence in a language.
+message ReplyRequest {
+  // BCP 47; English when the grammars have no sentence in it.
+  string language = 1;
+  // The sentence, such as "paused" or "playing".
+  string key = 2;
+  // Its arguments by name, such as "title".
+  map<string, string> args = 3;
+}
+
+message ReplyResponse {
+  string text = 1;
+  // The language of the sentence given.
+  string language = 2;
+}
+
+// ExamplesRequest asks for examples of what the grammar understands.
+message ExamplesRequest {
+  // BCP 47; English when the grammars do not have it.
+  string language = 1;
+}
+
+message ExamplesResponse {
+  repeated string examples = 1;
+  string language = 2;
+}
+
+// LanguagesResponse lists the languages the grammars understand.
+message LanguagesResponse {
+  // BCP 47.
+  repeated string languages = 1;
+}
