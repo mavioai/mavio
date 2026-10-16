@@ -26,6 +26,7 @@ import {
   SignInScreen,
   signInSteps,
 } from "./screens/sign-in.tsx";
+import { searchText } from "./search-params.ts";
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -62,7 +63,7 @@ const search = createRoute({
   getParentRoute: () => root,
   path: "/search",
   validateSearch: (s: Record<string, unknown>): { q?: string } => ({
-    q: typeof s.q === "string" && s.q !== "" ? s.q : undefined,
+    q: searchText(s.q),
   }),
   component: SearchScreen,
 });
@@ -98,9 +99,9 @@ const library = createRoute({
     sort: sorts.includes(s.sort as Sort) ? (s.sort as Sort) : undefined,
     filter: filters.includes(s.filter as Filter) && s.filter !== "all" ? (s.filter as Filter) : undefined,
     // The genre, keyword or studio whose items the grid shows, one at most.
-    genre: typeof s.genre === "string" && s.genre ? s.genre : undefined,
-    tag: typeof s.tag === "string" && s.tag && !s.genre ? s.tag : undefined,
-    studio: typeof s.studio === "string" && s.studio && !s.genre && !s.tag ? s.studio : undefined,
+    genre: searchText(s.genre),
+    tag: searchText(s.genre) ? undefined : searchText(s.tag),
+    studio: searchText(s.genre) || searchText(s.tag) ? undefined : searchText(s.studio),
   }),
   component: LibraryScreen,
 });
@@ -151,7 +152,7 @@ const player = createRoute({
   path: "/s/$serverId/play/$itemId",
   validateSearch: (s: Record<string, unknown>): { start?: number; source?: string } => ({
     start: Number(s.start) > 0 ? Number(s.start) : undefined,
-    source: typeof s.source === "string" && s.source !== "" ? s.source : undefined,
+    source: searchText(s.source),
   }),
   component: PlayerScreen,
 });

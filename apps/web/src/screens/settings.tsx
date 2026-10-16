@@ -31,6 +31,7 @@ import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
+import { searchText } from "../search-params.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row } from "../ui.tsx";
 import { Pictures, Switch } from "../controls/inputs.tsx";
@@ -112,7 +113,7 @@ export interface SettingsSearch {
 }
 
 export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
-  const str = (v: unknown) => (typeof v === "string" && v !== "" ? v : undefined);
+  const str = searchText;
   return {
     server: str(s.server),
     tab: s.tab === "installed" ? "installed" : undefined,
