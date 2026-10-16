@@ -14,7 +14,7 @@ import { toggleFullScreen, useFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
-import { type Appearance, setPrefs, usePrefs } from "../prefs.ts";
+import { type Appearance, prefs, setPrefs, usePrefs } from "../prefs.ts";
 import { Avatar } from "../ui.tsx";
 
 /** The sign-in as the user menu presents it. */
@@ -247,6 +247,8 @@ export function PinPad({
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (/^\d$/.test(e.key)) press(e.key);
+      // On the television Back with no digit entered leaves, as Escape.
+      else if (e.key === "Backspace" && pin === "" && prefs().tv) onCancel();
       else if (e.key === "Backspace") press("⌫");
       else return;
       e.preventDefault();
@@ -254,7 +256,7 @@ export function PinPad({
     };
     document.addEventListener("keydown", key, true);
     return () => document.removeEventListener("keydown", key, true);
-  }, [press]);
+  }, [press, pin, onCancel]);
   return (
     <Sheet label={t("auth.enterPin", { name })} width="pin" className="p-6 text-center" onClose={onCancel}>
       <Avatar name={name} size={56} className="mx-auto" />

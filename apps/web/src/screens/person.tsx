@@ -9,6 +9,7 @@ import { useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { Grid, ItemCard, Loading, StatusView } from "../ui.tsx";
 
 const route = getRouteApi("/s/$serverId/person/$personId");
@@ -61,6 +62,7 @@ function PersonPage({ server, personId }: { server: ServerEntry; personId: strin
 
 function Header({ server, person: p }: { server: ServerEntry; person: Person }) {
   const [more, setMore] = useState(false);
+  const { tv } = usePrefs();
   const photo = artwork(server, p, ImageKind.PRIMARY, 480);
   const born = p.birthDate && timestampDate(p.birthDate);
   const died = p.deathDate && timestampDate(p.deathDate);
@@ -93,7 +95,8 @@ function Header({ server, person: p }: { server: ServerEntry; person: Person }) 
             </button>
           </div>
         )}
-        {p.externalUrls.length > 0 && (
+        {/* A television opens no web pages. */}
+        {p.externalUrls.length > 0 && !tv && (
           <div className="flex flex-wrap gap-2 pt-1">
             {p.externalUrls.map((l) => (
               <a

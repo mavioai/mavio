@@ -6,13 +6,11 @@
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-import { focusable } from "./spatial.ts";
+import { focusState, type Point, pointOf } from "./focus.ts";
+import { focusable, popups } from "./spatial.ts";
 
 /** The pages of the tabs, which Back leaves for the tabs. */
 const tabPages = ["/", "/libraries", "/discover"];
-
-/** The popups open over the page: dialogs, menus and lists of options. */
-const popups = "[aria-modal=true], [role=alertdialog], [role=menu], [role=listbox]";
 
 /** Where Back goes from a page opened directly, with nowhere to return to. */
 export function parentOf(pathname: string): string {
@@ -27,8 +25,11 @@ export function parentOf(pathname: string): string {
   return "/";
 }
 
-/** The element focused on a page, found again by its link or its place. */
-type Spot = { href?: string; nth: number; index: number };
+/**
+ * The element focused on a page, found again by its link or its place,
+ * else focus goes to the element nearest its point.
+ */
+type Spot = { href?: string; nth: number; index: number; point: Point; rowScroll?: number };
 
 function keyOf(l: ParsedLocation): string {
   return l.state.__TSR_key ?? l.href;
@@ -38,7 +39,13 @@ function spotOf(el: Element | null): Spot | undefined {
   if (!(el instanceof HTMLElement) || el === document.body) return undefined;
   const all = [...document.querySelectorAll<HTMLElement>(focusable)];
   const href = el.getAttribute("href") ?? undefined;
-  return { href, nth: href ? all.filter((e) => e.getAttribute("href") === href).indexOf(el) : 0, index: all.indexOf(el) };
+  return {
+    href,
+    nth: href ? all.filter((e) => e.getAttribute("href") === href).indexOf(el) : 0,
+    index: all.indexOf(el),
+    point: pointOf(el),
+    rowScroll: el.closest(".scroll-row")?.scrollLeft,
+  };
 }
 
 function find(spot: Spot): HTMLElement | undefined {
@@ -47,11 +54,17 @@ function find(spot: Spot): HTMLElement | undefined {
   return all[spot.index];
 }
 
-/** Focuses el where the page was left, scrolling only its row sideways. */
-function refocus(el: HTMLElement) {
+/**
+ * Focuses el where the page was left: its row scrolled as it was, and the
+ * page and the row scrolled further only to show it.
+ */
+function refocus(el: HTMLElement, spot: Spot) {
   el.focus({ preventScroll: true });
+  const v = el.getBoundingClientRect();
+  if (v.bottom < 0 || v.top > innerHeight) el.scrollIntoView({ block: "nearest" });
   const row = el.closest<HTMLElement>(".scroll-row");
   if (!row) return;
+  if (spot.rowScroll !== undefined) row.scrollLeft = spot.rowScroll;
   const r = el.getBoundingClientRect();
   const box = row.getBoundingClientRect();
   const pad = parseFloat(getComputedStyle(row).paddingLeft);
@@ -76,19 +89,27 @@ export function useTvBack(on = true) {
   // return; the router restores its scroll.
   useEffect(() => {
     if (!on) return;
-    const offBefore = router.subscribe("onBeforeNavigate", ({ fromLocation }) => {
+    const offBefore = router.subscribe("onBeforeNavigate", ({ fromLocation, toLocation }) => {
       const spot = fromLocation && spotOf(document.activeElement);
       if (fromLocation && spot) spots.set(keyOf(fromLocation), spot);
+      // The keeper of focus (focus.ts) waits while focus is put back.
+      focusState.restoring = spots.has(keyOf(toLocation));
     });
     const offRendered = router.subscribe("onRendered", ({ toLocation }) => {
       const spot = spots.get(keyOf(toLocation));
-      if (!spot) return;
-      // The page's items may still be on their way from the cache.
+      if (!spot) {
+        focusState.restoring = false;
+        return;
+      }
+      // The page's items may still be on their way from the cache; failing
+      // them, focus goes to the element nearest where it was.
       let tries = 60;
       const attempt = () => {
         const el = find(spot);
-        if (el) refocus(el);
-        else if (--tries > 0) requestAnimationFrame(attempt);
+        if (el) refocus(el, spot);
+        else if (--tries > 0) return void requestAnimationFrame(attempt);
+        else focusState.last = spot.point;
+        focusState.restoring = false;
       };
       requestAnimationFrame(attempt);
     });
@@ -118,7 +139,10 @@ export function useTvBack(on = true) {
       if (tabPages.includes(pathname)) {
         const tabs = document.querySelector<HTMLElement>("[data-tv-tabs]");
         const current = tabs?.querySelector<HTMLElement>("a[data-status=active]");
-        if (!tabs || !current) return;
+        // A tab's page without its tab, as Discover with no server
+        // discovering, leaves for Home.
+        if (!current) return void router.navigate({ to: "/", replace: true });
+        if (!tabs) return;
         if (!tabs.parentElement?.contains(document.activeElement)) {
           // From the page to its tab, the page back at its top.
           window.scrollTo({ top: 0 });

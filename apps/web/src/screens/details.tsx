@@ -243,7 +243,8 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
           onSource={setSource}
           copies={copies}
           trailer={trailer}
-          trailerUrl={item.remoteTrailers[0]}
+          // A television opens no web pages.
+          trailerUrl={tv ? undefined : item.remoteTrailers[0]}
           tv={tv}
           phone={false}
         />
@@ -524,12 +525,6 @@ function Actions({
   phone: boolean;
 }) {
   const userData = useUserData(server);
-  // On the television focus starts on Play, as on tvOS.
-  const play = useRef<HTMLAnchorElement>(null);
-  const hasNext = !!next;
-  useEffect(() => {
-    if (tv && hasNext && document.activeElement === document.body) play.current?.focus({ preventScroll: true });
-  }, [tv, hasNext, item.id]);
   const played = !!item.userData?.played;
   const favorite = !!item.userData?.favorite;
   const own = next?.id === item.id;
@@ -567,13 +562,13 @@ function Actions({
   );
   return (
     <div className="mt-1 flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-3">
+      {/* On the television focus starts on Play, as on tvOS, else the first action. */}
+      <div data-tv-initial className="flex flex-wrap items-center gap-3">
         {next && (
           <Link
             to="/s/$serverId/play/$itemId"
             params={{ serverId: server.id, itemId: next.id }}
             search={{ start: resumable ? position : undefined, source: own ? source : undefined }}
-            ref={play}
             data-tv-button
             className={primary}
           >
@@ -1040,6 +1035,7 @@ function About({
   const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : item.kind === ItemKind.SERIES ? MediaKind.SERIES : MediaKind.UNSPECIFIED;
   const title = useTitle(kind ? server : undefined, kind, Number(item.externalIds.tmdb) || 0, discoverLanguage).data;
   const [allStudios, setAllStudios] = useState(false);
+  const { tv } = usePrefs();
   const day = (ts?: Timestamp) => (ts ? dateFormat.format(timestampDate(ts)) : undefined);
   const iso = (ts?: Timestamp) => (ts ? timestampDate(ts).toISOString().slice(0, 10) : "");
   const date = item.premiereDate ? dateFormat.format(timestampDate(item.premiereDate)) : undefined;
@@ -1138,7 +1134,8 @@ function About({
   const tmdbId = kind ? Number(item.externalIds.tmdb) || 0 : 0;
   const titled = tmdbId > 0;
   const logos = useTitleLinks(server, kind || MediaKind.MOVIE, tmdbId, item.externalIds.imdb ?? "", item.externalIds.tvdb ?? "");
-  const links = titled ? [] : item.externalUrls;
+  // A television opens no web pages.
+  const links = titled || tv ? [] : item.externalUrls;
   const ratings = titled || item.communityRating > 0 || item.criticRating > 0;
   const crew = libraryCredits(server, credits);
   const leading = crew.some((c) => !isCast(c));

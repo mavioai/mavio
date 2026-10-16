@@ -20,6 +20,7 @@ import { GroupIndicator } from "../screens/syncplay.tsx";
 import { SyncPlayProvider } from "../syncplay.tsx";
 import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { useTvBack } from "./back.ts";
+import { useTvFocus } from "./focus.ts";
 import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
@@ -47,6 +48,7 @@ function Content() {
   // goes up a level on every page but signing in's, the settings' and the
   // player's included.
   useSpatialNavigation(prefs.tv);
+  useTvFocus(prefs.tv);
   useTvBack(prefs.tv && !bare);
 
   // A Mavio account follows the servers it reaches, as it opens.

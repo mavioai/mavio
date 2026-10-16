@@ -44,8 +44,17 @@ export function heroEntries(sections: Section[], servers: ServerEntry[]): HeroEn
 /** How long each title shows before the next. */
 const interval = 9000;
 
+/**
+ * The title shown last, which the hero shows again when its page returns,
+ * so that Back finds the title it left for.
+ */
+const shownLast = { at: 0 };
+
 export function Hero({ entries }: { entries: HeroEntry[] }) {
-  const [at, setAt] = useState(0);
+  const [at, setAt] = useState(() => shownLast.at);
+  useEffect(() => {
+    shownLast.at = at;
+  }, [at]);
   const [paused, setPaused] = useState(false);
   const width = useWidthClass();
   const { tv } = usePrefs();

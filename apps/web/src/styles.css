@@ -271,6 +271,28 @@ input[type="search"]::-webkit-search-cancel-button {
     background: #fff;
     color: #000;
   }
+  /* Every other element focus goes to, as a link or a row, shows it the
+     same way, with its corners rounded; a card shows it by its artwork. */
+  & :is(a[href], summary, [tabindex]:not([tabindex="-1"])):not(
+      button,
+      input,
+      select,
+      textarea,
+      [data-card],
+      .scroll-row > a,
+      .tv-pill,
+      [data-tv-button],
+      [data-tv-dots],
+      [role^="menuitem"],
+      [role="option"]
+    ):focus {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    color: #000;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--mavio-color-tv-focus-shadow);
+  }
   /* A button whose menu is open, focus in the menu, keeps a highlight. */
   & [aria-haspopup][aria-expanded="true"]:not(:focus) {
     background: var(--mavio-color-fill);

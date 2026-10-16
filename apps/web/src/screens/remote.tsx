@@ -7,7 +7,7 @@ import { errorMessage, type ServerEntry, useSendCommand, useSessions } from "@ma
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { PlayStateCommand, type Session } from "@mavio/proto/mavio/session/v1/session_pb";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Slider } from "../controls/inputs.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -17,6 +17,7 @@ import { Icon, type IconName } from "../icon.tsx";
 import { Button, subtitleOf } from "../ui.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
+import { usePrefs } from "../prefs.ts";
 
 /** Kinds a device plays by themselves. */
 export const playable = (kind: ItemKind) =>
@@ -54,15 +55,38 @@ export function RemoteCommands() {
     const timer = setTimeout(() => setMessage(undefined), message.timeoutMs);
     return () => clearTimeout(timer);
   }, [message]);
+  // On the television the message takes focus, which a remote has no
+  // other way to bring to it, and gives it back as it goes; Back
+  // dismisses it.
+  const { tv } = usePrefs();
+  const dismiss = useRef<HTMLButtonElement>(null);
+  const shown = !!message;
+  useEffect(() => {
+    if (!tv || !shown) return;
+    const before = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
+    dismiss.current?.focus();
+    return () => {
+      if (before?.isConnected) before.focus({ preventScroll: true });
+    };
+  }, [tv, shown]);
   if (!message) return null;
   return (
-    <div role="status" className="fixed inset-x-0 top-4 z-[60] flex justify-center px-4">
+    <div
+      role="status"
+      data-tv-popup={tv || undefined}
+      onKeyDown={(e) => {
+        if (e.key !== "Escape") return;
+        e.stopPropagation();
+        setMessage(undefined);
+      }}
+      className="fixed inset-x-0 top-4 z-[60] flex justify-center px-4"
+    >
       <div className="flex max-w-lg items-start gap-3 rounded-[14px] border border-border bg-surface-overlay/95 px-4 py-3 text-on-background shadow-level3 backdrop-blur-xl">
         <div className="min-w-0 flex-1">
           {message.from && <p className="type-footnote text-text-secondary">{t("remote.messageFrom", { name: message.from })}</p>}
           <p className="type-body break-words whitespace-pre-line">{message.text}</p>
         </div>
-        <button type="button" aria-label={t("remote.dismiss")} onClick={() => setMessage(undefined)} className="rounded-full p-1 hover:bg-fill">
+        <button ref={dismiss} type="button" aria-label={t("remote.dismiss")} onClick={() => setMessage(undefined)} className="rounded-full p-1 hover:bg-fill">
           <Icon name="close" size={18} />
         </button>
       </div>

@@ -7,7 +7,8 @@ type Direction = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
 
 /** The elements focus can move to. */
 export const focusable = [
-  "a[href]",
+  // A television opens no web pages: links to them only show where they go.
+  'a[href]:not([target="_blank"])',
   "button:not([disabled])",
   "input:not([disabled])",
   "select:not([disabled])",
@@ -17,7 +18,14 @@ export const focusable = [
   .map((s) => `${s}:not([tabindex="-1"])`)
   .join(", ");
 
-function visible(el: HTMLElement): boolean {
+/**
+ * The popups open over the page: dialogs, menus, lists of options, and
+ * what else asks for focus as it shows (data-tv-popup), as a message.
+ */
+export const popups = "[aria-modal=true], [role=alertdialog], [role=menu], [role=listbox], [data-tv-popup]";
+
+/** Whether an element shows, so that focus may go to it. */
+export function visible(el: HTMLElement): boolean {
   const r = el.getBoundingClientRect();
   return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden" && !el.closest("[inert],[aria-hidden=true]");
 }
@@ -116,11 +124,16 @@ function regionOf(el: HTMLElement): Element {
 /** The chosen element of a choice that focus chooses (data-focus-choice). */
 const chosen = "[aria-selected=true], [aria-checked=true]";
 
+/** The chosen element of the choice el is in, if any. */
+export function chosenIn(el: HTMLElement): HTMLElement | undefined {
+  return el.closest("[data-focus-choice]")?.querySelector<HTMLElement>(chosen) ?? undefined;
+}
+
 /** Focus entering a choice from outside lands on its chosen element. */
 function enter(active: HTMLElement, next: HTMLElement | undefined): HTMLElement | undefined {
   const choice = next?.closest("[data-focus-choice]");
-  if (!choice || choice.contains(active)) return next;
-  return choice.querySelector<HTMLElement>(chosen) ?? next;
+  if (!next || !choice || choice.contains(active)) return next;
+  return chosenIn(next) ?? next;
 }
 
 /**
@@ -169,6 +182,33 @@ function step(active: HTMLElement, dir: Direction, all: HTMLElement[], tabs?: El
   }
 }
 
+/**
+ * Whether a field keeps an arrow for itself: a slider's sideways, and a
+ * caret's while it has room to move, as up and down between a text box's
+ * lines; at the field's edges focus leaves it.
+ */
+function keeps(el: HTMLElement, key: Direction): boolean {
+  const sideways = key === "ArrowLeft" || key === "ArrowRight";
+  if (el instanceof HTMLInputElement && el.type === "range") return sideways;
+  if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return false;
+  // Fields without a caret to ask, as a number's, keep none.
+  const start = el.selectionStart;
+  if (start === null || el.selectionEnd === null) return false;
+  if (start !== el.selectionEnd) return sideways;
+  const v = el.value;
+  const lines = el instanceof HTMLTextAreaElement;
+  switch (key) {
+    case "ArrowLeft":
+      return start > 0;
+    case "ArrowRight":
+      return start < v.length;
+    case "ArrowUp":
+      return lines && start > 0 && v.lastIndexOf("\n", start - 1) >= 0;
+    case "ArrowDown":
+      return lines && v.indexOf("\n", start) >= 0;
+  }
+}
+
 /** Shakes an element briefly, where focus cannot move. */
 function shake(el: HTMLElement) {
   el.classList.remove("tv-shake");
@@ -184,15 +224,14 @@ export function useSpatialNavigation(on = true) {
     const key = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
-      const typing = active?.matches("input, textarea, select") ?? false;
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
-      // The caret of a field moves sideways.
-      if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+      if (active && keeps(active, e.key as Direction)) return;
       // The player seeks with the arrows while none of its controls has focus.
       if ((!active || active === document.body) && document.querySelector("[data-tv-player]")) return;
       // An open dialog, menu or list of options keeps focus within itself;
       // the keys a menu or list moves through its items with never reach here.
-      const scope = document.querySelector<HTMLElement>("[aria-modal]") ?? document.querySelector<HTMLElement>("[role=menu], [role=listbox]");
+      const scope =
+        document.querySelector<HTMLElement>("[aria-modal], [data-tv-popup]") ?? document.querySelector<HTMLElement>("[role=menu], [role=listbox]");
       const all = [...(scope ?? document).querySelectorAll<HTMLElement>(focusable)].filter(visible);
       e.preventDefault();
       if (!active || active === document.body || !all.includes(active)) {

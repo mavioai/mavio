@@ -49,7 +49,7 @@ function collectionStatus(parts: DiscoveredTitle[]): MediaStatus {
 
 function CollectionPage({ server, tmdbId, collection: c }: { server: ServerEntry; tmdbId: number; collection: Collection }) {
   const { tv } = usePrefs();
-  const phone = useWidthClass() === "compact";
+  const phone = useWidthClass() === "compact" && !tv;
   const admin = useAdminServers().some((s) => s.id === server.id);
   const actions = useRequestActions(server);
   const [asking, setAsking] = useState(false);

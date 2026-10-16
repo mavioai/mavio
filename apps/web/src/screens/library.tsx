@@ -13,7 +13,6 @@ import {
 import type { MessageKey } from "@mavio/design/strings";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 
-import { useEffect, useRef } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -63,10 +62,6 @@ function Library({ server, libraryId }: { server: ServerEntry; libraryId: string
   // history, so that back leaves the library (docs/tv.md §6.3).
   const { tv } = usePrefs();
   const all = tab === "all";
-  const current = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    if (tv && document.activeElement === document.body) current.current?.focus({ preventScroll: true });
-  }, [tv]);
   const choose = (to: "recommended" | "all") => {
     if (tv && (to === "all") !== all) void navigate({ search: (s) => ({ ...s, tab: to === "all" ? ("all" as const) : undefined }), replace: true });
   };
@@ -80,10 +75,10 @@ function Library({ server, libraryId }: { server: ServerEntry; libraryId: string
         <div
           role="tablist"
           data-focus-choice
+          data-tv-initial
           className={tv ? "flex gap-1 rounded-full bg-surface-raised/60 p-1.5" : "flex rounded-[9px] bg-fill p-0.5"}
         >
           <Link
-            ref={all ? undefined : current}
             role="tab"
             from="/s/$serverId/library/$libraryId"
             search={{}}
@@ -96,7 +91,6 @@ function Library({ server, libraryId }: { server: ServerEntry; libraryId: string
             {t("library.recommended")}
           </Link>
           <Link
-            ref={all ? current : undefined}
             role="tab"
             from="/s/$serverId/library/$libraryId"
             search={(s) => ({ ...s, tab: "all" as const })}

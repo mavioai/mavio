@@ -29,7 +29,7 @@ import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { Fragment, type ReactNode, useEffect, useRef, useState } from "react";
+import { Fragment, type ReactNode, useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -235,13 +235,6 @@ export function CatalogScreen() {
   const { catalogs } = useDiscovery(discoverLanguage);
   const [filtering, setFiltering] = useState(false);
   const q = useCatalog(server?.token ? server : undefined, catalog, mediaKindOf(kind), discoverLanguage, tmdb ?? 0, f);
-  // On the television focus starts on the first title, as the page has no tabs.
-  const { tv } = usePrefs();
-  const grid = useRef<HTMLDivElement>(null);
-  const loaded = q.isSuccess;
-  useEffect(() => {
-    if (tv && loaded && document.activeElement === document.body) grid.current?.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
-  }, [tv, loaded]);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
   const found = catalogs.find((c) => c.id === catalog);
   const title = found ? (tmdb ? found.name : rowTitle({ catalog: found, mediaKind: mediaKindOf(kind) })) : "";
@@ -284,7 +277,8 @@ export function CatalogScreen() {
           action={{ label: t("discover.reset"), onClick: () => void navigate({ search: (cur) => ({ ...cur, f: undefined }), replace: true }) }}
         />
       ) : (
-        <div ref={grid} className="pt-2">
+        // On the television focus starts on the first title, as the page has no tabs.
+        <div data-tv-initial className="pt-2">
           <Grid>
             {titles.map((title) => (
               <TitleCard key={`${title.mediaKind}/${tmdbOf(title)}`} serverId={server.id} title={title} fluid />
@@ -316,7 +310,7 @@ export function TitleScreen() {
 
 function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) {
   const { tv } = usePrefs();
-  const phone = useWidthClass() === "compact";
+  const phone = useWidthClass() === "compact" && !tv;
   const { catalogs } = useDiscovery(discoverLanguage);
   const [asking, setAsking] = useState(false);
   const request = useRequestTitle(server);
@@ -341,11 +335,6 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   if (title.genres.length > 0) facts.push(<GenreLinks key="genres" server={server} title={title} />);
   const status = statusLabel(title.status);
   const onRequest = () => (series ? setAsking(true) : request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId }));
-  // On the television focus starts on the first action, as on an item's details.
-  const first = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (tv && document.activeElement === document.body) first.current?.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
-  }, [tv]);
   const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
     tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
   }`;
@@ -395,15 +384,17 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
             </div>
             {/* The overview is below on Seerr's page, as here but on the television. */}
             {tv && title.overview && <p className="line-clamp-2 type-body text-white/85">{title.overview}</p>}
-            {/* On a phone the actions fill their rows, as many on each as their names fit. */}
-            <div ref={first} className={`mt-2 flex flex-wrap gap-3 [&>*]:whitespace-nowrap ${phone ? "[&>*]:grow" : ""}`}>
+            {/* On a phone the actions fill their rows, as many on each as their names fit; on the
+                television focus starts on the first, as on an item's details. */}
+            <div data-tv-initial className={`mt-2 flex flex-wrap gap-3 [&>*]:whitespace-nowrap ${phone ? "[&>*]:grow" : ""}`}>
               {title.itemId && (
                 <Link to="/s/$serverId/item/$itemId" params={{ serverId: server.id, itemId: title.itemId }} data-tv-button className={primary}>
                   <Icon name="play" fill size={tv ? 28 : 20} />
                   {t("discover.watch")}
                 </Link>
               )}
-              {title.trailerUrls[0] && (
+              {/* A television opens no web pages. */}
+              {title.trailerUrls[0] && !tv && (
                 <a href={title.trailerUrls[0]} target="_blank" rel="noreferrer" data-tv-button className={secondary}>
                   <Icon name="movies" size={tv ? 28 : 20} />
                   {t("item.trailer")}
