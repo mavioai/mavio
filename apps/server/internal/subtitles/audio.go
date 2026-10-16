@@ -17,8 +17,9 @@ import (
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
-// AudioPath is the pattern of the route serving videos' audio to
-// subtitle provider plugins, such as Whisper's, through the host API.
+// AudioPath is the pattern of the route serving videos' audio to plugins
+// through the host API: to recognizers transcribing subtitles, and to
+// subtitle provider plugins.
 const AudioPath = "GET /subtitles/audio/{token}"
 
 // audioBase is the URL of the audio route in the host API.

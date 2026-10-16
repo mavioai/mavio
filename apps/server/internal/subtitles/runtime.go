@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mavioai/mavio/apps/server/internal/speech"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
 	"github.com/mavioai/mavio/libs/media/vad"
@@ -95,6 +96,9 @@ type Runtime struct {
 	// AI returns the AI gateway plugin's client, whose models translate
 	// as "ai/<provider>/<model>"; nil returns none.
 	AI func() (pluginv1connect.AiGatewayServiceClient, bool)
+	// Recognizers returns the speech recognizers, those the administrator
+	// lets transcribe subtitles among them; nil returns none.
+	Recognizers func(ctx context.Context) []speech.Recognizer
 	// Activity records downloads; nil records none.
 	Activity Activity
 	Now      func() time.Time
@@ -109,6 +113,11 @@ type Runtime struct {
 	audioMu     sync.Mutex
 	audioGrants map[string]*audioGrant
 	audioTokens map[string]string
+
+	// detected are the languages recognizers detected, by recognizer and
+	// audio URL.
+	detectedMu sync.Mutex
+	detected   map[string]string
 
 	// autoCursor is where the translation automation's next run starts
 	// among what is wanted.
@@ -137,12 +146,22 @@ func (r *Runtime) settings() core.SubtitleSettings {
 	return r.Settings()
 }
 
+// providers returns the subtitle provider plugins, and the transcription
+// source last when recognizers are wired.
 func (r *Runtime) providers() []Provider {
-	if r.Providers == nil {
-		return nil
+	var out []Provider
+	if r.Providers != nil {
+		out = r.Providers()
 	}
-	return r.Providers()
+	if r.Recognizers != nil {
+		out = append(out[:len(out):len(out)], Provider{ID: TranscriptionID, Client: &transcriber{r}})
+	}
+	return out
 }
+
+// Sources returns the subtitle provider plugins and the transcription
+// source.
+func (r *Runtime) Sources() []Provider { return r.providers() }
 
 func (r *Runtime) publish(a core.Activity) {
 	if r.Activity != nil {

@@ -210,6 +210,14 @@ func TestPortedEmbedded(t *testing.T) {
 	portedCases(t, "embeddedsubtitles.json", ported{skip: skip})
 }
 
+func TestPortedWhisper(t *testing.T) {
+	const ffprobe = "the server encodes audio for recognizers with its own ffmpeg; recognizers take PCM, never an ffprobe path"
+	portedCases(t, "whisperai.json", ported{skip: map[string]string{
+		"test_ffprobe_path_uses_provided_value":          ffprobe,
+		"test_ffprobe_path_falls_back_when_not_provided": ffprobe,
+	}})
+}
+
 func TestReleaseNames(t *testing.T) {
 	for _, c := range []struct {
 		in, want []string

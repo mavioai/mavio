@@ -40,6 +40,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/apps/server/internal/rpc"
 	"github.com/mavioai/mavio/apps/server/internal/settings"
+	"github.com/mavioai/mavio/apps/server/internal/speech"
 	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/apps/server/internal/warming"
 	"github.com/mavioai/mavio/libs/core"
@@ -371,6 +372,9 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		},
 		Subtitles: subFiles, Storages: storages, Class: pathClasses.Class, FFmpeg: ffmpegPath(cfg.FFmpeg),
 		Extracted: playbacks.ExtractedSubtitle, Activity: activityLog, Logger: log,
+		Recognizers: func(ctx context.Context) []speech.Recognizer {
+			return speech.Recognizers(ctx, plugs.Recognizers(), log)
+		},
 	}
 	// Imports complete the requests of what they import; their scans
 	// search for its subtitles once the files are probed.

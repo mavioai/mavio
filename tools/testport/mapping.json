@@ -81,6 +81,7 @@
         { "source": "tests/subliminal_patch/test_core.py", "target": "libs/acquire/subtitles/testdata/cases" },
         { "source": "tests/subliminal_patch/test_mods.py", "target": "libs/subtitle/testdata/cases" },
         { "source": "tests/subliminal_patch/test_embeddedsubtitles.py", "target": "apps/server/internal/subtitles/testdata/cases" },
+        { "source": "tests/subliminal_patch/test_whisperai.py", "target": "apps/server/internal/subtitles/testdata/cases" },
         { "source": "tests/bazarr/test_app_get_providers.py", "target": "libs/acquire/subtitles/testdata/cases" },
         { "source": "tests/bazarr/test_download_blacklist_on_failure.py", "target": "apps/server/internal/subtitles/testdata/cases" },
         { "source": "tests/bazarr/test_get_providers_blacklist.py", "target": "apps/server/internal/subtitles/testdata/cases" },

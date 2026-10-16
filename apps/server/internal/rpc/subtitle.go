@@ -415,7 +415,7 @@ func (s *SubtitleService) ListSubtitleProviders(ctx context.Context, _ *acquisit
 	}
 	var out []*acquisitionv1.SubtitleProviderState
 	var failed []string
-	for _, p := range s.rt.Providers() {
+	for _, p := range s.rt.Sources() {
 		resp, err := p.Client.ListSubtitleProviders(ctx, &pluginv1.ListSubtitleProvidersRequest{})
 		if err != nil {
 			failed = append(failed, p.ID)
