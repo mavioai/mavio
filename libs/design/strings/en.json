@@ -859,6 +859,7 @@
   "storage.yes": { "message": "Yes", "description": "Answers yes to a question of a remote's configuration" },
   "storage.no": { "message": "No", "description": "Answers no to a question of a remote's configuration" },
   "storage.waitingScan": { "message": "Waiting for the login to be confirmed on the phone\u2026", "description": "Shown under a QR code to scan until the login is confirmed" },
+  "storage.cancelling": { "message": "Cancelling…", "description": "Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted" },
   "storage.reconfigure": { "message": "Configure Again", "description": "Button running a remote's configuration again, such as its login" },
   "storage.reconfigured": { "message": "Configured.", "description": "Notice after configuring a remote again without a question" },
   "storage.secretKept": { "message": "Unchanged", "description": "Placeholder of a secret already set" },

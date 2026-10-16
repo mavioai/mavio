@@ -2755,6 +2755,9 @@ public enum MavioStrings {
     /// Shown under a QR code to scan until the login is confirmed
     public static var storageWaitingScan: String { NSLocalizedString("storage.waitingScan", bundle: .module, comment: "") }
 
+    /// Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted
+    public static var storageCancelling: String { NSLocalizedString("storage.cancelling", bundle: .module, comment: "") }
+
     /// Button running a remote's configuration again, such as its login
     public static var storageReconfigure: String { NSLocalizedString("storage.reconfigure", bundle: .module, comment: "") }
 

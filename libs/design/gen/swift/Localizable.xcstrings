@@ -15655,6 +15655,24 @@
         }
       }
     },
+    "storage.cancelling": {
+      "comment": "Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelling…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在取消…"
+          }
+        }
+      }
+    },
     "storage.reconfigure": {
       "comment": "Button running a remote's configuration again, such as its login",
       "extractionState": "manual",

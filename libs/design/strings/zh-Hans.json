@@ -858,6 +858,7 @@
   "storage.yes": "是",
   "storage.no": "否",
   "storage.waitingScan": "正在等待在手机上确认登录…",
+  "storage.cancelling": "正在取消…",
   "storage.reconfigure": "重新配置",
   "storage.reconfigured": "已配置。",
   "storage.secretKept": "保持不变",

@@ -426,7 +426,7 @@ function QuestionStep({
             <>
               {qr.before && <p className="type-body whitespace-pre-wrap">{qr.before}</p>}
               <QRCode dark={qr.dark} />
-              <p className="type-footnote text-text-secondary">{waiting ? t("storage.waitingScan") : qr.after}</p>
+              <p className="type-footnote text-text-secondary">{cancelled ? t("storage.cancelling") : waiting ? t("storage.waitingScan") : qr.after}</p>
             </>
           ) : (
             help && <p className="type-body whitespace-pre-wrap">{help}</p>
@@ -436,7 +436,7 @@ function QuestionStep({
         {q.error && <p className="px-4 py-3 type-callout text-danger">{q.error}</p>}
       </Group>
       <div className="flex flex-wrap items-center gap-3">
-        {waiting ? null : confirm ? (
+        {waiting || cancelled ? null : confirm ? (
           <>
             <Button disabled={pending} variant={o.defaultValue === "false" ? "secondary" : "primary"} onClick={() => send("true")}>
               {t("storage.yes")}
@@ -455,7 +455,7 @@ function QuestionStep({
           disabled={cancelled}
           onClick={onCancel ? () => ((leaving.current = true), setCancelled(true)) : onDone}
         >
-          {onCancel ? t("action.cancel") : t("storage.later")}
+          {cancelled ? t("storage.cancelling") : onCancel ? t("action.cancel") : t("storage.later")}
         </Button>
         {actions.answer.isError && <span className="type-callout text-danger">{errorMessage(actions.answer.error)}</span>}
       </div>

@@ -1750,6 +1750,8 @@
     <string name="storage_no">No</string>
     <!-- Shown under a QR code to scan until the login is confirmed -->
     <string name="storage_waiting_scan">Waiting for the login to be confirmed on the phone…</string>
+    <!-- Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted -->
+    <string name="storage_cancelling">Cancelling…</string>
     <!-- Button running a remote's configuration again, such as its login -->
     <string name="storage_reconfigure">Configure Again</string>
     <!-- Notice after configuring a remote again without a question -->

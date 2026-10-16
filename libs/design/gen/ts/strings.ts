@@ -861,6 +861,7 @@ export type MessageKey =
   | 'storage.yes'
   | 'storage.no'
   | 'storage.waitingScan'
+  | 'storage.cancelling'
   | 'storage.reconfigure'
   | 'storage.reconfigured'
   | 'storage.secretKept'
@@ -2538,6 +2539,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.yes": "Yes",
     "storage.no": "No",
     "storage.waitingScan": "Waiting for the login to be confirmed on the phone…",
+    "storage.cancelling": "Cancelling…",
     "storage.reconfigure": "Configure Again",
     "storage.reconfigured": "Configured.",
     "storage.secretKept": "Unchanged",
@@ -4213,6 +4215,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.yes": "是",
     "storage.no": "否",
     "storage.waitingScan": "正在等待在手机上确认登录…",
+    "storage.cancelling": "正在取消…",
     "storage.reconfigure": "重新配置",
     "storage.reconfigured": "已配置。",
     "storage.secretKept": "保持不变",
