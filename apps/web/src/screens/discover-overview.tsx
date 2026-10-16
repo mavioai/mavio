@@ -44,7 +44,7 @@ const statusNames: Partial<Record<ProductionStatus, () => string>> = {
   [ProductionStatus.ENDED]: () => t("discover.statusEnded"),
 };
 
-/** The jobs Seerr shows first of a title's crew, in its order. */
+/** The jobs Seerr shows first of a title's crew, in its order, after a series' creators. */
 const crewJobs = ["Director", "Creator", "Screenplay", "Writer", "Original Music Composer", "Composer", "Editor", "Producer", "Co-Producer", "Executive Producer", "Animation"];
 /** The job of a credit without a more specific one. */
 const kindJobs: Partial<Record<CreditKind, string>> = {
@@ -55,6 +55,7 @@ const kindJobs: Partial<Record<CreditKind, string>> = {
   [CreditKind.PRODUCER]: "Producer",
 };
 const crewRank = (c: { role: string; kind: CreditKind }) => {
+  if (c.kind === CreditKind.CREATOR) return -1;
   const i = crewJobs.indexOf(c.role || (kindJobs[c.kind] ?? ""));
   return i < 0 ? crewJobs.length : i;
 };

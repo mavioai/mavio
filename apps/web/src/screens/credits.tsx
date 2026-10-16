@@ -44,9 +44,21 @@ export function libraryCredits(server: ServerEntry, credits: Credit[]): CreditEn
     }));
 }
 
-/** A discovered title's credits, their photos at TMDB's 185-pixel width. */
+/**
+ * A discovered title's credits, their photos at TMDB's 185-pixel width.
+ * An actor playing several characters is listed once, as on Seerr, as the
+ * first of them, the one they play in the most episodes.
+ */
 export function titleCredits(credits: TitleCredit[]): CreditEntry[] {
-  return credits.map((c) => ({
+  const seen = new Set<string>();
+  const once = credits.filter((c) => {
+    if (!isCast(c)) return true;
+    const key = c.externalIds.tmdb || c.name;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return once.map((c) => ({
     name: c.name,
     photo: c.imageUrl ? c.imageUrl.replace(/(image\.tmdb\.org\/t\/p\/)original\//, "$1w185/") : undefined,
     kind: c.kind,
