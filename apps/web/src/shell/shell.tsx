@@ -68,8 +68,7 @@ function Content() {
   if (bare || pathname.includes("/play/")) return <Outlet />;
   if (pathname.startsWith("/settings")) return <Outlet />;
   if (prefs.tv) return <TvShell />;
-  if (width === "compact") return <CompactShell />;
-  return <DesktopShell overlay={width === "medium"} />;
+  return <NormalShell width={width} />;
 }
 
 /**
@@ -100,18 +99,35 @@ function useShortcuts(tv: boolean) {
 }
 
 /**
- * The sidebar and the content. Up to 840 px the sidebar is a rail whose
+ * The phone's layout or the wider one around the page, which stays as the
+ * window crosses from one to the other: the page keeps what it holds.
+ */
+function NormalShell({ width }: { width: ReturnType<typeof useWidthClass> }) {
+  const compact = width === "compact";
+  return (
+    <div className={compact ? "min-h-screen pb-[calc(56px+env(safe-area-inset-bottom))]" : "flex min-h-screen"}>
+      {compact ? <CompactHeader /> : <Sidebar overlay={width === "medium"} />}
+      <main className={compact ? undefined : "min-w-0 flex-1 pb-8"}>
+        <Outlet />
+      </main>
+      {compact && <TabBar />}
+    </div>
+  );
+}
+
+/**
+ * The sidebar beside the content. Up to 840 px the sidebar is a rail whose
  * toggle lays the full sidebar over the content; wider, the toggle
  * collapses it to the rail and is remembered.
  */
-function DesktopShell({ overlay }: { overlay: boolean }) {
+function Sidebar({ overlay }: { overlay: boolean }) {
   const prefs = usePrefs();
   const [over, setOver] = useState(false);
   const { pathname } = useLocation();
   useEffect(() => setOver(false), [pathname, overlay]);
   const rail = overlay || !prefs.sidebar;
   return (
-    <div className="flex min-h-screen">
+    <>
       <aside
         className="sticky top-0 h-screen shrink-0"
         style={{ width: rail ? "var(--mavio-layout-rail)" : sidebarWidth }}
@@ -126,10 +142,7 @@ function DesktopShell({ overlay }: { overlay: boolean }) {
           </aside>
         </div>
       )}
-      <main className="min-w-0 flex-1 pb-8">
-        <Outlet />
-      </main>
-    </div>
+    </>
   );
 }
 
@@ -140,43 +153,44 @@ const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; icon: IconNam
   { to: "/search", icon: "search", label: () => t("nav.search") },
 ];
 
-/** The phone layout: the wordmark and the user's avatar on top, tabs below. */
-function CompactShell() {
+/** The phone's top: the wordmark, and the user's avatar opening the settings. */
+function CompactHeader() {
   const account = useAccount();
+  return (
+    <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-background/80 px-margin pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+      <Wordmark height={20} />
+      <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
+        <Avatar name={account.name} size={32} />
+      </Link>
+    </header>
+  );
+}
+
+/** The phone's tabs, below. */
+function TabBar() {
   // Discover is a tab where a server discovers.
   const discovers = !!useDiscovery(discoverLanguage).server;
   const tabs = allTabs.filter((d) => d.to !== "/discover" || discovers);
   return (
-    <div className="min-h-screen pb-[calc(56px+env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-background/80 px-margin pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <Wordmark height={20} />
-        <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
-          <Avatar name={account.name} size={32} />
+    <nav
+      aria-label={t("nav.navigation")}
+      className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+    >
+      {tabs.map((d) => (
+        <Link
+          key={d.to}
+          to={d.to}
+          activeOptions={{ exact: d.to === "/" }}
+          className="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 type-caption text-text-secondary data-[status=active]:text-accent-text"
+        >
+          {({ isActive }) => (
+            <>
+              <Icon name={d.icon} fill={isActive} />
+              {d.label()}
+            </>
+          )}
         </Link>
-      </header>
-      <main>
-        <Outlet />
-      </main>
-      <nav
-        aria-label={t("nav.navigation")}
-        className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-surface/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
-      >
-        {tabs.map((d) => (
-          <Link
-            key={d.to}
-            to={d.to}
-            activeOptions={{ exact: d.to === "/" }}
-            className="flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 type-caption text-text-secondary data-[status=active]:text-accent-text"
-          >
-            {({ isActive }) => (
-              <>
-                <Icon name={d.icon} fill={isActive} />
-                {d.label()}
-              </>
-            )}
-          </Link>
-        ))}
-      </nav>
-    </div>
+      ))}
+    </nav>
   );
 }
