@@ -31,6 +31,10 @@ export function PageTitle({ moveFocus }: { moveFocus: boolean }) {
   const router = useRouter();
   const [announced, setAnnounced] = useState("");
   useEffect(() => {
+    // The television keeps focus on what it moves between (focus.ts),
+    // never on a heading.
+    const active = document.activeElement;
+    if (!moveFocus && active instanceof HTMLElement && active.matches(":is(h1, h2)[tabindex='-1']")) active.blur();
     let timer: ReturnType<typeof setInterval> | undefined;
     const settle = (opened: boolean) => {
       clearInterval(timer);
