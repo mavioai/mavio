@@ -240,7 +240,7 @@ function PluginCard({ entry: e }: { entry: Entry }) {
       to="/settings/$section"
       params={{ section: "plugins" }}
       search={{ ...cur, plugin: e.id }}
-      className="flex min-h-40 flex-col gap-3 rounded-[14px] bg-surface p-4 transition hover:bg-surface-raised"
+      className="flex min-h-40 flex-col gap-3 rounded-[14px] bg-surface p-4 transition hover:tint"
     >
       <div className="flex items-center gap-3">
         <CategoryTile category={e.category} />

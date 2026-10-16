@@ -253,7 +253,7 @@ function EntryRow({ server, playlistId, entry: e, index, last }: { server: Serve
   const busy = move.isPending || removeEntries.isPending;
   const small = "inline-flex size-9 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-fill disabled:opacity-30";
   return (
-    <li className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-surface-raised">
+    <li className="flex items-center gap-3 rounded-md px-2 py-2 hover:tint">
       <span className="w-6 text-right type-callout text-text-tertiary tabular-nums">{index + 1}</span>
       <Link to="/s/$serverId/play/$itemId" params={{ serverId: server.id, itemId: item.id }} className="flex min-w-0 flex-1 items-center gap-3">
         <Artwork src={thumbOf(server, item, 240)?.url} alt="" className="aspect-video w-24 shrink-0 rounded-md" />

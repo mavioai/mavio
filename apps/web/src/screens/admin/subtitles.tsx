@@ -290,7 +290,7 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
               <span className="flex-1" />
               <button
                 type="button"
-                className="rounded-md p-1.5 text-text-secondary enabled:hover:bg-surface-raised disabled:opacity-30"
+                className="rounded-md p-1.5 text-text-secondary enabled:hover:tint disabled:opacity-30"
                 aria-label={t("rules.remove")}
                 disabled={draft.items.length === 1}
                 onClick={() => removeItem(i)}

@@ -153,7 +153,7 @@ function Activities({ server }: { server: ServerEntry }) {
       {activities.isSuccess && list.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("overview.noActivity")}</p>}
       {activities.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(activities.error)}</p>}
       {(activities.data?.total ?? 0) > list.length && (
-        <button type="button" className="min-h-11 px-4 text-left type-body text-accent-text hover:bg-surface-raised" onClick={() => setLimit(limit + 50)}>
+        <button type="button" className="min-h-11 px-4 text-left type-body text-accent-text hover:tint" onClick={() => setLimit(limit + 50)}>
           {t("overview.showMore")}
         </button>
       )}

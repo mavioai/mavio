@@ -459,7 +459,7 @@ function FolderPicker({ server, chosen, onChoose }: { server: ServerEntry; chose
   const here = remote ? path : (dir.data?.path ?? path);
   const parent = remote ? (/^rclone:[^:]*:$/.test(path) ? "" : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : path.slice(0, path.indexOf(":", 7) + 1)) : (dir.data?.parent ?? "");
   const row = (key: string, label: ReactNode, onClick: () => void, icon: "back" | "folder") => (
-    <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:bg-surface-raised">
+    <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:tint">
       <Icon name={icon} size={18} className="shrink-0 text-text-secondary" />
       <span className="min-w-0 flex-1 truncate type-body">{label}</span>
     </button>

@@ -267,7 +267,7 @@ function AccountCard({ active = false }: { active?: boolean }) {
       to="/settings/$section"
       params={{ section: "account" }}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3 rounded-[14px] p-3 hover:bg-surface-raised ${active ? "bg-fill-selected" : "bg-surface"}`}
+      className={`flex items-center gap-3 rounded-[14px] p-3 hover:tint ${active ? "bg-fill-selected" : "bg-surface"}`}
     >
       <Avatar name={account.name} size={44} />
       <div className="min-w-0">
@@ -300,7 +300,7 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
         <Group key={g.title()} title={g.title()}>
           {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
           {g.ids.map((s) => (
-            <Link key={s} to="/settings/$section" params={{ section: s }} search={{ server: search.server }} className="hover:bg-surface-raised">
+            <Link key={s} to="/settings/$section" params={{ section: s }} search={{ server: search.server }} className="hover:tint">
               <Row label={sections[s].title()} leading={<Tile id={s} />}>
                 <Icon name="forward" size={16} className="text-text-tertiary" />
               </Row>

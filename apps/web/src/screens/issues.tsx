@@ -230,7 +230,7 @@ export function IssueRow({ server, issue: i, onOpen, item: showItem = true }: { 
   const label = [showItem ? item.data?.item?.name : undefined, typeName(i.type), numbersOf(i)].filter(Boolean).join(" · ");
   const first = i.comments[0]?.message ?? "";
   return (
-    <button type="button" onClick={onOpen} className="flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-raised">
+    <button type="button" onClick={onOpen} className="flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left hover:tint">
       <span className="min-w-0 flex-1">
         <span className="block truncate type-body">{label}</span>
         <span className="block truncate type-footnote text-text-secondary">

@@ -101,7 +101,7 @@ function StorageList({ server }: { server: ServerEntry }) {
                 to="/settings/$section"
                 params={{ section: "storage" }}
                 search={{ server: cur.server, remote: r.name }}
-                className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:bg-surface-raised"
+                className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:tint"
               >
                 <ColorTile icon="folder" color="#30B0C7" />
                 <div className="min-w-0 flex-1">
@@ -477,7 +477,7 @@ function Folders({ server, remote }: { server: ServerEntry; remote: string }) {
   const folders = useRemoteFolders(server, path);
   const parent = path === root ? undefined : path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : root;
   const row = (key: string, label: ReactNode, onClick: () => void, icon: "back" | "folder") => (
-    <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:bg-surface-raised">
+    <button key={key} type="button" onClick={onClick} className="flex min-h-11 w-full items-center gap-3 px-4 text-left hover:tint">
       <Icon name={icon} size={18} className="shrink-0 text-text-secondary" />
       <span className="min-w-0 flex-1 truncate type-body">{label}</span>
     </button>
@@ -616,7 +616,7 @@ function OfflineClients({ server, remotes }: { server: ServerEntry; remotes: Rem
             type="button"
             disabled={editing !== undefined}
             onClick={() => (set.reset(), setEditing(i))}
-            className="flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left enabled:hover:bg-surface-raised"
+            className="flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left enabled:hover:tint"
           >
             <ColorTile icon="downloads" color={c.enabled ? "#34C759" : "#8E8E93"} />
             <div className="min-w-0 flex-1">

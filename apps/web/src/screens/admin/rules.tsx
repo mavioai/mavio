@@ -36,7 +36,7 @@ const splitList = (s: string, by: RegExp) =>
 function EntryRow({ label, detail, disabled, onClick, trailing }: { label: ReactNode; detail?: ReactNode; disabled?: boolean; onClick: () => void; trailing?: ReactNode }) {
   return (
     <div className="flex min-h-13 items-center gap-1 pr-2">
-      <button type="button" disabled={disabled} onClick={onClick} className="min-w-0 flex-1 px-4 py-2.5 text-left enabled:hover:bg-surface-raised">
+      <button type="button" disabled={disabled} onClick={onClick} className="min-w-0 flex-1 px-4 py-2.5 text-left enabled:hover:tint">
         <div className="truncate type-body">{label}</div>
         {detail && <div className="type-footnote break-words text-text-secondary">{detail}</div>}
       </button>

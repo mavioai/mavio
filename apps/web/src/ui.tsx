@@ -308,7 +308,7 @@ export function Button({
   const [styles, text] = {
     primary: ["bg-button hover:opacity-85", "text-on-button"],
     secondary: ["bg-fill hover:bg-fill-selected", "text-on-background"],
-    plain: ["hover:bg-surface-raised", "text-on-background"],
+    plain: ["hover:tint", "text-on-background"],
   }[variant];
   // A destructive action's red takes the place of the variant's text color.
   const color = className?.split(" ").includes("text-danger") ? "" : text;

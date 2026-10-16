@@ -109,6 +109,12 @@
   line-height: var(--mavio-type-caption-line-height);
 }
 
+/* color.fill laid over an element's own background, as a hovered row, entry
+   or plain button shows it: darker in the light theme, lighter in the dark. */
+@utility tint {
+  background-image: linear-gradient(var(--mavio-color-fill), var(--mavio-color-fill));
+}
+
 /* A row that scrolls sideways without a visible scroll bar. */
 @utility scroll-row {
   scrollbar-width: none;

@@ -283,7 +283,7 @@ function Equivalences({ server, value, onChange }: { server: ServerEntry; value:
           <span className="flex-1" />
           <button
             type="button"
-            className="rounded-md p-1.5 text-text-secondary hover:bg-surface-raised"
+            className="rounded-md p-1.5 text-text-secondary hover:tint"
             aria-label={t("rules.remove")}
             onClick={() => onChange(value.filter((_, j) => j !== i))}
           >
@@ -382,7 +382,7 @@ function TranslationForm({ server, draft, set }: FormProps) {
           <Row key={id} label={named(id)} detail={t("subtitles.fallbackOf", { position: i + 1 })}>
             <button
               type="button"
-              className="rounded-md p-1.5 text-text-secondary hover:bg-surface-raised"
+              className="rounded-md p-1.5 text-text-secondary hover:tint"
               aria-label={t("rules.remove")}
               onClick={() => setTr({ fallbackTranslators: tr.fallbackTranslators.filter((x) => x !== id) })}
             >
@@ -454,7 +454,7 @@ function TranslationForm({ server, draft, set }: FormProps) {
               <Row key={l} label={languageName(l)} detail={t("subtitles.sourceLanguage")}>
                 <button
                   type="button"
-                  className="rounded-md p-1.5 text-text-secondary hover:bg-surface-raised"
+                  className="rounded-md p-1.5 text-text-secondary hover:tint"
                   aria-label={t("rules.remove")}
                   onClick={() => setA({ sourceLanguages: a.sourceLanguages.filter((x) => x !== l) })}
                 >

@@ -903,7 +903,7 @@ function Children({ server, item, items }: { server: ServerEntry; item: Item; it
               <Link
                 to="/s/$serverId/play/$itemId"
                 params={{ serverId: server.id, itemId: track.id }}
-                className="flex items-center gap-4 rounded-md px-2 py-2 hover:bg-surface-raised"
+                className="flex items-center gap-4 rounded-md px-2 py-2 hover:tint"
               >
                 <span className="w-6 text-right type-callout text-text-tertiary">{track.indexNumber || ""}</span>
                 <span className="flex-1 truncate type-body">{track.name}</span>

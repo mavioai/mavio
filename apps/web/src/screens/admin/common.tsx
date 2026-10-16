@@ -77,7 +77,7 @@ export function PageLink({
       to="/settings/$section"
       params={{ section: to ?? (search.plugin ? "plugins" : (section ?? "")) }}
       search={{ server: cur.server, ...search }}
-      className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:bg-surface-raised"
+      className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:tint"
     >
       {icon && <ColorTile icon={icon} color={color ?? "#8E8E93"} />}
       <div className="min-w-0 flex-1">
