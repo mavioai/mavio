@@ -96,20 +96,7 @@ function StorageList({ server }: { server: ServerEntry }) {
           {(remotes.data ?? [])
             .toSorted((a, b) => a.name.localeCompare(b.name, locale))
             .map((r) => (
-              <Link
-                key={r.name}
-                to="/settings/$section"
-                params={{ section: "storage" }}
-                search={{ server: cur.server, remote: r.name }}
-                className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:tint"
-              >
-                <ColorTile icon="folder" color="#30B0C7" />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate type-body">{r.name}</div>
-                  <div className="truncate type-footnote text-text-secondary">{kindOf(providers.data, r.type)}</div>
-                </div>
-                <Icon name="forward" size={16} className="shrink-0 text-text-tertiary" />
-              </Link>
+              <RemoteRow key={r.name} server={server} remote={r} kind={kindOf(providers.data, r.type)} />
             ))}
           {remotes.isSuccess && remotes.data.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.noRemotes")}</p>}
           {remotes.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(remotes.error)}</p>}
@@ -117,6 +104,40 @@ function StorageList({ server }: { server: ServerEntry }) {
       )}
       <OfflineClients server={server} remotes={available ? (remotes.data ?? []) : []} />
     </Page>
+  );
+}
+
+/**
+ * A remote in the list, with a dot telling whether the server reaches it:
+ * listing its root, green when that succeeds and red, with the error, when
+ * it fails, as a remote whose login expired does.
+ */
+function RemoteRow({ server, remote, kind }: { server: ServerEntry; remote: Remote; kind: string }) {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  const root = useRemoteFolders(server, `rclone:${remote.name}:`);
+  const state = root.isPending ? t("storage.checking") : root.isError ? t("storage.unreached") : t("storage.reached");
+  return (
+    <Link
+      to="/settings/$section"
+      params={{ section: "storage" }}
+      search={{ server: cur.server, remote: remote.name }}
+      className="flex min-h-13 items-center gap-3 px-4 py-2.5 hover:tint"
+    >
+      <ColorTile icon="folder" color="#30B0C7" />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate type-body">{remote.name}</span>
+          <span
+            role="img"
+            aria-label={state}
+            className={`size-1.5 shrink-0 rounded-full ${root.isPending ? "bg-fill" : root.isError ? "bg-danger" : "bg-[#34C759]"}`}
+          />
+        </div>
+        <div className="truncate type-footnote text-text-secondary">{kind}</div>
+        {root.isError && <div className="line-clamp-2 type-footnote text-danger">{errorMessage(root.error)}</div>}
+      </div>
+      <Icon name="forward" size={16} className="shrink-0 text-text-tertiary" />
+    </Link>
   );
 }
 

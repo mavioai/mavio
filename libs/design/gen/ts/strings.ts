@@ -755,6 +755,9 @@ export type MessageKey =
   | 'storage.add'
   | 'storage.rclone'
   | 'storage.status'
+  | 'storage.checking'
+  | 'storage.reached'
+  | 'storage.unreached'
   | 'storage.available'
   | 'storage.unavailable'
   | 'storage.version'
@@ -2432,6 +2435,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.add": "Add Remote",
     "storage.rclone": "rclone",
     "storage.status": "Status",
+    "storage.checking": "Checking",
+    "storage.reached": "Reached",
+    "storage.unreached": "Not reached",
     "storage.available": "Running",
     "storage.unavailable": "Not reached",
     "storage.version": "Version",
@@ -4107,6 +4113,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.add": "添加远端",
     "storage.rclone": "rclone",
     "storage.status": "状态",
+    "storage.checking": "正在检查",
+    "storage.reached": "已连接",
+    "storage.unreached": "无法连接",
     "storage.available": "运行中",
     "storage.unavailable": "无法访问",
     "storage.version": "版本",

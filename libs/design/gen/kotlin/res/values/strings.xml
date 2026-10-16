@@ -1538,6 +1538,12 @@
     <string name="storage_rclone">rclone</string>
     <!-- Row of whether the server reaches rclone -->
     <string name="storage_status">Status</string>
+    <!-- Spoken by a remote's dot while the server is reaching it -->
+    <string name="storage_checking">Checking</string>
+    <!-- Spoken by a remote's green dot: the server lists its folders -->
+    <string name="storage_reached">Reached</string>
+    <!-- Spoken by a remote's red dot: listing its folders fails -->
+    <string name="storage_unreached">Not reached</string>
     <!-- Status when the server reaches rclone -->
     <string name="storage_available">Running</string>
     <!-- Status when the server does not reach rclone -->

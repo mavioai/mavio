@@ -773,6 +773,9 @@
     <string name="storage_add">添加远端</string>
     <string name="storage_rclone">rclone</string>
     <string name="storage_status">状态</string>
+    <string name="storage_checking">正在检查</string>
+    <string name="storage_reached">已连接</string>
+    <string name="storage_unreached">无法连接</string>
     <string name="storage_available">运行中</string>
     <string name="storage_unavailable">无法访问</string>
     <string name="storage_version">版本</string>

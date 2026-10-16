@@ -2437,6 +2437,15 @@ public enum MavioStrings {
     /// Row of whether the server reaches rclone
     public static var storageStatus: String { NSLocalizedString("storage.status", bundle: .module, comment: "") }
 
+    /// Spoken by a remote's dot while the server is reaching it
+    public static var storageChecking: String { NSLocalizedString("storage.checking", bundle: .module, comment: "") }
+
+    /// Spoken by a remote's green dot: the server lists its folders
+    public static var storageReached: String { NSLocalizedString("storage.reached", bundle: .module, comment: "") }
+
+    /// Spoken by a remote's red dot: listing its folders fails
+    public static var storageUnreached: String { NSLocalizedString("storage.unreached", bundle: .module, comment: "") }
+
     /// Status when the server reaches rclone
     public static var storageAvailable: String { NSLocalizedString("storage.available", bundle: .module, comment: "") }
 
