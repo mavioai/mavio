@@ -38,6 +38,7 @@ import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 const restrictions: { value: RestrictionProfile; title: () => string }[] = [
   { value: RestrictionProfile.UNSPECIFIED, title: () => t("users.restrictionNone") },
@@ -319,6 +320,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<Draft>) => (setDraft((d) => ({ ...d, ...patch })), setNotice(undefined));
   const changed = JSON.stringify(draft, bigints) !== JSON.stringify(draftOf(user), bigints);
+  const guard = useUnsavedGuard(changed);
   const valid = draft.name.trim() !== "";
   // The account's name, state and access are mavio.dev's in its mode.
   const own = standalone;
@@ -372,6 +374,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
       back={<BackLink section="users" label={t("settings.users")} />}
       title={
         <span className="flex items-center gap-3">
+      {guard.dialog}
           <Avatar name={user.name} size={40} />
           {user.name}
           <Badges user={user} />
@@ -395,7 +398,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             actions.remove.mutate(user.id, {
-              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "users" }, search: { server: cur.server } }),
+              onSuccess: () => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "users" }, search: { server: cur.server } })),
               onSettled: () => setConfirming(false),
             })
           }

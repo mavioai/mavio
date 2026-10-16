@@ -25,6 +25,7 @@ import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
+import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 const states: Record<PluginState, () => string> = {
   [PluginState.UNSPECIFIED]: () => "",
@@ -448,6 +449,7 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
   const text = JSON.stringify(value);
   // Saving refreshes saved, which the form then matches.
   const changed = text !== JSON.stringify(saved ? JSON.parse(saved) : {});
+  const guard = useUnsavedGuard(changed);
   return (
     <form
       className="flex flex-col gap-3"
@@ -457,6 +459,7 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
         actions.configure.mutate({ id, config: text }, { onSuccess: () => setDone(true) });
       }}
     >
+      {guard.dialog}
       <SchemaForm schema={schema} value={value} onChange={(v) => (setValue(v), setDone(false))} />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={!changed || actions.configure.isPending}>

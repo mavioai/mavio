@@ -36,6 +36,7 @@ import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { Check } from "./formats.tsx";
 import { SubtitleSettingsPage } from "./subtitle-settings.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** The section of the server chosen in the settings. */
 export function SubtitlesSection({ server }: { server: ServerEntry }) {
@@ -228,6 +229,7 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
     set({ items: draft.items.map((it, j) => (j === i ? patched(SubtitleProfileItemSchema, it, patch) : it)) });
   const result = patched(SubtitleProfileSchema, draft, { name: draft.name.trim(), tag: draft.tag.trim(), mustContain: lines(mustContain), mustNotContain: lines(mustNotContain) });
   const changed = isNew || !equals(SubtitleProfileSchema, result, profile);
+  const guard = useUnsavedGuard(changed);
   const valid = result.name !== "" && result.items.length > 0 && !/\s/.test(result.tag);
   const addItem = () => {
     const next = Math.max(0, ...draft.items.map((it) => it.id)) + 1;
@@ -239,11 +241,11 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
     const gone = draft.items[i];
     set({ items: draft.items.filter((_, j) => j !== i), cutoff: draft.cutoff === gone.id ? 0 : draft.cutoff });
   };
-  const toList = () => navigate({ to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server } });
+  const toList = () => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server } }));
   const save = () =>
     isNew
       ? profiles.create.mutate(result, {
-          onSuccess: (r) => r.profile && navigate({ replace: true, to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server, subtitles: "profile", id: r.profile.id } }),
+          onSuccess: (r) => r.profile && (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server, subtitles: "profile", id: r.profile.id } })),
         })
       : profiles.update.mutate(result);
   const hiOptions = [
@@ -254,6 +256,7 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
   const error = profiles.create.error ?? profiles.update.error ?? profiles.remove.error;
   return (
     <Page title={profile.name || t("subtitles.newProfile")} back={back}>
+      {guard.dialog}
       <Group>
         <Row label={t("rules.name")}>
           <input className={`${input} sm:w-72`} aria-label={t("rules.name")} value={draft.name} onChange={(e) => set({ name: e.target.value })} />

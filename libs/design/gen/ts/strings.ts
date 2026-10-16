@@ -261,6 +261,9 @@ export type MessageKey =
   | 'action.scrollForward'
   | 'action.showLess'
   | 'action.close'
+  | 'unsaved.title'
+  | 'unsaved.message'
+  | 'unsaved.discard'
   | 'auth.signIn'
   | 'auth.server'
   | 'auth.username'
@@ -1981,6 +1984,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.scrollForward": "Scroll Forward",
     "action.showLess": "Show Less",
     "action.close": "Close",
+    "unsaved.title": "Discard Changes?",
+    "unsaved.message": "The changes you made here are not saved.",
+    "unsaved.discard": "Discard",
     "auth.signIn": "Sign In",
     "auth.server": "Server",
     "auth.username": "Username",
@@ -3699,6 +3705,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.scrollForward": "向后滚动",
     "action.showLess": "收起",
     "action.close": "关闭",
+    "unsaved.title": "放弃更改？",
+    "unsaved.message": "你在这里所做的更改尚未保存。",
+    "unsaved.discard": "放弃",
     "auth.signIn": "登录",
     "auth.server": "服务器",
     "auth.username": "用户名",

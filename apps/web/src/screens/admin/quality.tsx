@@ -27,6 +27,7 @@ import { mediaKinds } from "./acquisition.tsx";
 import { BackLink, Page, patched } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** The languages releases are parsed into, by their English names, as libs/release names them. */
 export const releaseLanguages = [
@@ -92,12 +93,14 @@ function Definitions({ server, kind }: { server: ServerEntry; kind: MediaKind })
     const saved = list.data?.find((x) => x.quality === d.quality);
     return saved && (saved.minSize !== d.minSize || saved.preferredSize !== d.preferredSize || saved.maxSize !== d.maxSize);
   });
+  const guard = useUnsavedGuard(changed.length > 0);
   const set = (d: QualityDefinition, patch: Partial<QualityDefinition>) => {
     setEdits((e) => ({ ...e, [d.quality]: patched(QualityDefinitionSchema, e[d.quality] ?? d, patch) }));
     setNotice(undefined);
   };
   return (
     <>
+      {guard.dialog}
       <Group footer={t("acquisition.qualitiesFooter")}>
         <div className="hidden min-h-11 items-center gap-3 px-4 type-footnote text-text-secondary sm:flex">
           <span className="flex-1">{t("acquisition.quality")}</span>
@@ -177,6 +180,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
   const isNew = !profile.id;
   const set = (patch: Partial<QualityProfile>) => (setDraft((d) => patched(QualityProfileSchema, d, patch)), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(profile);
+  const guard = useUnsavedGuard(changed);
   const nameOf = (it: QualityProfileItem) => (it.id ? it.name : (titles.get(it.quality) ?? String(it.quality)));
   // Best first, as Radarr shows them; the profile keeps them lowest first.
   const best = draft.items.toReversed();
@@ -203,7 +207,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
     const p = patched(QualityProfileSchema, draft, { name: draft.name.trim() });
     if (isNew)
       profiles.create.mutate(p, {
-        onSuccess: (r) => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "profile", id: r.profile?.id } }),
+        onSuccess: (r) => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "profile", id: r.profile?.id } })),
       });
     else profiles.update.mutate(p, done);
   };
@@ -211,6 +215,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
   const failure = profiles.create.error ?? profiles.update.error;
   return (
     <>
+      {guard.dialog}
       <Group>
         <Row label={t("acquisition.profileName")}>
           <input className={`${input} sm:w-72`} aria-label={t("acquisition.profileName")} value={draft.name} onChange={(e) => set({ name: e.target.value })} />
@@ -306,7 +311,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
             onCancel={() => setRemoving(false)}
             onConfirm={() =>
               profiles.remove.mutate(profile.id, {
-                onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server } }),
+                onSuccess: () => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server } })),
               })
             }
           />

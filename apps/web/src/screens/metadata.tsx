@@ -22,6 +22,7 @@ import { NumberField, Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
+import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 /** Kinds the providers identify. */
 export const identifiable = (kind: ItemKind) =>
@@ -179,8 +180,10 @@ export function EditDialog({ server, item, onClose }: { server: ServerEntry; ite
   const k = item.kind;
   const video = k === ItemKind.MOVIE || k === ItemKind.EPISODE || k === ItemKind.VIDEO || k === ItemKind.MUSIC_VIDEO;
   const { metadata, paths } = changesOf(before, form);
+  const guard = useUnsavedGuard(paths.length > 0 && !update.isSuccess);
   return (
-    <Modal title={t("metadata.editTitle", { name: item.name })} wide onClose={onClose}>
+    <Modal title={t("metadata.editTitle", { name: item.name })} wide changed={paths.length > 0} onClose={onClose}>
+      {guard.dialog}
       <form
         className="-mx-6 flex min-h-0 flex-col gap-3 overflow-y-auto px-6"
         onSubmit={(e) => {

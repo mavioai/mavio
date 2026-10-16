@@ -23,6 +23,7 @@ import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { countryOptions, languageOptions, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** The section of the server chosen in the settings. */
 export function GeneralSection({ server }: { server: ServerEntry }) {
@@ -77,6 +78,7 @@ function GeneralForm({ server, settings }: { server: ServerEntry; settings: Serv
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<Draft>) => (setDraft((d) => ({ ...d, ...patch })), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(draftOf(settings));
+  const guard = useUnsavedGuard(changed);
   const mavioDev = server.mode === "mavioDev";
   const resetters = (plugins.data ?? []).filter((p) => p.manifest?.capabilities.includes(Capability.PASSWORD_RESET));
   const save = () =>
@@ -116,6 +118,7 @@ function GeneralForm({ server, settings }: { server: ServerEntry; settings: Serv
   );
   return (
     <>
+      {guard.dialog}
       <Group>
         {text("name", t("general.name"), t("general.nameDetail"))}
         <Row label={t("general.language")} detail={t("general.languageDetail")}>

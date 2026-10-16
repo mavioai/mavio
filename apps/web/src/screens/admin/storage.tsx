@@ -40,6 +40,7 @@ import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, capacityOf, ColorTile, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** The section of the server chosen in the settings. */
 export function StorageSection({ server }: { server: ServerEntry }) {
@@ -625,8 +626,10 @@ function RemoteForm({
     }),
   );
   const changed = Object.keys(changes).length > 0;
+  const guard = useUnsavedGuard(changed);
   return (
     <>
+      {guard.dialog}
       <OptionsGroup
         options={provider.options}
         values={values}

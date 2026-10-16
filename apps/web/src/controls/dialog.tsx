@@ -4,7 +4,7 @@
 // undone, which only its buttons close.
 import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { Dialog } from "@base-ui/react/dialog";
-import { type ReactNode, useRef } from "react";
+import { type ReactNode, useRef, useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
@@ -36,24 +36,38 @@ function useOpener() {
 
 /**
  * A modal dialog shown while it is rendered, with its title above its
- * content; onClose is called on Escape and a press outside it.
+ * content; onClose is called on Escape and a press outside it, which ask
+ * first while changed holds changes not saved.
  */
 export function Modal({
   title,
   wide = false,
   width,
+  changed = false,
   onClose,
   children,
 }: {
   title: ReactNode;
   wide?: boolean;
   width?: keyof typeof widths;
+  changed?: boolean;
   onClose: () => void;
   children: ReactNode;
 }) {
   const opener = useOpener();
+  const [asking, setAsking] = useState(false);
   return (
-    <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
+    <Dialog.Root open onOpenChange={(open) => !open && (changed ? setAsking(true) : onClose())}>
+      {asking && (
+        <Confirm
+          title={t("unsaved.title")}
+          message={t("unsaved.message")}
+          action={t("unsaved.discard")}
+          busy={false}
+          onCancel={() => setAsking(false)}
+          onConfirm={onClose}
+        />
+      )}
       <Dialog.Portal>
         <Dialog.Backdrop className={backdrop} />
         <Dialog.Popup aria-modal finalFocus={opener} className={`${dialogFrame} ${widths[width ?? (wide ? "wide" : "narrow")]}`}>

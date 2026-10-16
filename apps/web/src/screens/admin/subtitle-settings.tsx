@@ -32,6 +32,7 @@ import { BackLink, Page, patched } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { NumberInput } from "./quality.tsx";
 import { languageName, useSubtitleLanguages } from "./subtitles.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 /** A page of the subtitle settings. */
 export function SubtitleSettingsPage({ server, page }: { server: ServerEntry; page: "settings" | "sync" | "translation" }) {
@@ -66,10 +67,12 @@ function SettingsForm({ server, page, settings }: { server: ServerEntry; page: "
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<SubtitleSettings>) => (setDraft((d) => patched(SubtitleSettingsSchema, d, patch)), setNotice(undefined));
   const changed = !equals(SubtitleSettingsSchema, draft, settings);
+  const guard = useUnsavedGuard(changed);
   const save = () => update.mutate(draft, { onSuccess: () => setNotice(t("subtitles.saved")) });
   const props = { server, draft, set };
   return (
     <>
+      {guard.dialog}
       {page === "settings" && <SearchingForm {...props} />}
       {page === "sync" && <SyncForm {...props} />}
       {page === "translation" && <TranslationForm {...props} />}

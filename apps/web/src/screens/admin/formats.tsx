@@ -23,6 +23,7 @@ import { BackLink, Page, PageLink, patched } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { NumberInput, releaseLanguages } from "./quality.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 const kinds: { kind: Kind; title: () => string }[] = [
   { kind: Kind.RELEASE_TITLE, title: () => t("formats.releaseTitle") },
@@ -134,8 +135,9 @@ function FormatForm({ server, format }: { server: ServerEntry; format: CustomFor
   const setSpec = (i: number, patch: Partial<CustomFormatSpec>) =>
     set({ specifications: draft.specifications.map((s, j) => (j === i ? patched(CustomFormatSpecSchema, s, patch) : s)) });
   const changed = JSON.stringify(draft) !== JSON.stringify(format);
+  const guard = useUnsavedGuard(changed);
   const complete = draft.specifications.every((s) => s.name.trim() && (ranged(s.kind) ? s.max > s.min : s.value.trim()));
-  const list = () => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "formats" } });
+  const list = () => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "formats" } }));
   const save = () => {
     const f = patched(CustomFormatSchema, draft, { name: draft.name.trim() });
     if (isNew) formats.create.mutate(f, { onSuccess: list });
@@ -145,6 +147,7 @@ function FormatForm({ server, format }: { server: ServerEntry; format: CustomFor
   const failure = formats.create.error ?? formats.update.error;
   return (
     <>
+      {guard.dialog}
       <Group>
         <Row label={t("formats.name")}>
           <input className={`${input} sm:w-72`} aria-label={t("formats.name")} value={draft.name} onChange={(e) => set({ name: e.target.value })} />

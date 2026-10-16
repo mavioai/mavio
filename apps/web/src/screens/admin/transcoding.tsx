@@ -19,6 +19,7 @@ import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { Page, patched } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 const accelerations: Partial<Record<HardwareAcceleration, () => string>> = {
   [HardwareAcceleration.AUTO]: () => t("transcoding.accelerationAuto"),
@@ -51,6 +52,7 @@ function TranscodingForm({ server, settings, available }: { server: ServerEntry;
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<TranscodingSettings>) => (setDraft((d) => patched(TranscodingSettingsSchema, d, patch)), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(draftOf(settings));
+  const guard = useUnsavedGuard(changed);
   const save = () =>
     update.mutate(
       (s) => {
@@ -81,6 +83,7 @@ function TranscodingForm({ server, settings, available }: { server: ServerEntry;
   const offered = available.length ? available : [HardwareAcceleration.AUTO, HardwareAcceleration.NONE];
   return (
     <>
+      {guard.dialog}
       <Group title={t("transcoding.hardware")}>
         <Row label={t("transcoding.acceleration")} detail={t("transcoding.accelerationDetail")}>
           <Select

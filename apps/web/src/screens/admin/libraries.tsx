@@ -29,6 +29,7 @@ import type { SettingsSearch } from "../settings.tsx";
 import { BackLink, ColorTile, countryOptions, languageOptions, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
+import { useUnsavedGuard } from "../../controls/unsaved.tsx";
 
 const kinds: { kind: LibraryKind; title: () => string; color: string }[] = [
   { kind: LibraryKind.MOVIES, title: () => t("libraries.kindMovies"), color: "#FF9500" },
@@ -239,6 +240,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
   const [notice, setNotice] = useState<string>();
   const set = (patch: Partial<Draft>) => (setDraft((d) => ({ ...d, ...patch })), setNotice(undefined));
   const changed = JSON.stringify(draft) !== JSON.stringify(draftOf(library));
+  const guard = useUnsavedGuard(changed);
   const valid = draft.name.trim() !== "" && draft.paths.length > 0;
   const saving = actions.create.isPending || actions.update.isPending;
   const failure = [actions.create, actions.update, actions.remove, actions.scan].find((x) => x.isError)?.error;
@@ -250,7 +252,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
     if (!library) {
       actions.create.mutate(specOf(draft), {
         onSuccess: (l) =>
-          l && void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server, library: l.id } }),
+          l && (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server, library: l.id } })),
       });
       return;
     }
@@ -267,6 +269,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
       back={<BackLink section="libraries" label={t("settings.libraries")} />}
       title={
         <span className="flex items-center gap-3">
+      {guard.dialog}
           <ColorTile icon={libraryIcon(draft.kind)} color={k.color} size={40} />
           {library ? library.name : t("libraries.add")}
         </span>
@@ -297,7 +300,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             actions.remove.mutate(library.id, {
-              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server } }),
+              onSuccess: () => (guard.leave(), void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server } })),
               onSettled: () => setConfirming(false),
             })
           }

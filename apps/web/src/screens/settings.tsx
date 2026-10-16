@@ -55,6 +55,7 @@ import { UsersSection } from "./admin/users.tsx";
 import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
+import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 type SectionId = "appearance" | "playback" | "subtitles-audio" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
@@ -656,6 +657,7 @@ function LanguagesForm({
   const a = languages(audio);
   const s = languages(subtitles);
   const changed = audio !== audio0 || subtitles !== subtitles0 || mode !== mode0;
+  const guard = useUnsavedGuard(changed);
   return (
     <form
       className="flex flex-col gap-7"
@@ -664,6 +666,7 @@ function LanguagesForm({
         if (a && s) saving.mutate({ audioLanguages: a, subtitleLanguages: s, subtitleMode: mode });
       }}
     >
+      {guard.dialog}
       <Group footer={t("settings.languagesHint")}>
         <div className="flex flex-col gap-4 p-4">
           <Field label={t("settings.audioLanguages")} value={audio} onChange={(e) => setAudio(e.target.value)} placeholder="chi, eng" />
