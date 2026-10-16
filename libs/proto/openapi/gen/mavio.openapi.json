@@ -18191,7 +18191,7 @@
             "type": "number",
             "title": "read_rate",
             "format": "double",
-            "description": "Bytes per second."
+            "description": "Bytes per second; unset, as are read and written bytes, where the\n operating system does not tell them."
           },
           "writeRate": {
             "type": "number",
@@ -18208,11 +18208,23 @@
             "type": "string",
             "title": "written_bytes",
             "format": "int64"
+          },
+          "totalBytes": {
+            "type": "string",
+            "title": "total_bytes",
+            "format": "int64",
+            "description": "The size of the computer's own disks, together, the volumes of one\n container counted once; unset, as is available, when unknown."
+          },
+          "availableBytes": {
+            "type": "string",
+            "title": "available_bytes",
+            "format": "int64",
+            "description": "What is free to the server on them."
           }
         },
         "title": "DiskLoad",
         "additionalProperties": false,
-        "description": "DiskLoad is what the computer's disks read and write, together."
+        "description": "DiskLoad is what the computer's disks read and write, together, and the\n space of its own disks, shares and cloud drives mounted aside."
       },
       "mavio.system.v1.EpisodeTitleRequired": {
         "type": "string",

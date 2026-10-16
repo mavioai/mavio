@@ -1432,17 +1432,20 @@ func (b0 MemoryLoad_builder) Build() *MemoryLoad {
 	return m0
 }
 
-// DiskLoad is what the computer's disks read and write, together.
+// DiskLoad is what the computer's disks read and write, together, and the
+// space of its own disks, shares and cloud drives mounted aside.
 type DiskLoad struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ReadRate     float64                `protobuf:"fixed64,1,opt,name=read_rate,json=readRate"`
-	xxx_hidden_WriteRate    float64                `protobuf:"fixed64,2,opt,name=write_rate,json=writeRate"`
-	xxx_hidden_ReadBytes    int64                  `protobuf:"varint,3,opt,name=read_bytes,json=readBytes"`
-	xxx_hidden_WrittenBytes int64                  `protobuf:"varint,4,opt,name=written_bytes,json=writtenBytes"`
-	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
-	XXX_presence            [1]uint32
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ReadRate       float64                `protobuf:"fixed64,1,opt,name=read_rate,json=readRate"`
+	xxx_hidden_WriteRate      float64                `protobuf:"fixed64,2,opt,name=write_rate,json=writeRate"`
+	xxx_hidden_ReadBytes      int64                  `protobuf:"varint,3,opt,name=read_bytes,json=readBytes"`
+	xxx_hidden_WrittenBytes   int64                  `protobuf:"varint,4,opt,name=written_bytes,json=writtenBytes"`
+	xxx_hidden_TotalBytes     int64                  `protobuf:"varint,5,opt,name=total_bytes,json=totalBytes"`
+	xxx_hidden_AvailableBytes int64                  `protobuf:"varint,6,opt,name=available_bytes,json=availableBytes"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *DiskLoad) Reset() {
@@ -1498,24 +1501,48 @@ func (x *DiskLoad) GetWrittenBytes() int64 {
 	return 0
 }
 
+func (x *DiskLoad) GetTotalBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_TotalBytes
+	}
+	return 0
+}
+
+func (x *DiskLoad) GetAvailableBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_AvailableBytes
+	}
+	return 0
+}
+
 func (x *DiskLoad) SetReadRate(v float64) {
 	x.xxx_hidden_ReadRate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
 }
 
 func (x *DiskLoad) SetWriteRate(v float64) {
 	x.xxx_hidden_WriteRate = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
 func (x *DiskLoad) SetReadBytes(v int64) {
 	x.xxx_hidden_ReadBytes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
 }
 
 func (x *DiskLoad) SetWrittenBytes(v int64) {
 	x.xxx_hidden_WrittenBytes = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *DiskLoad) SetTotalBytes(v int64) {
+	x.xxx_hidden_TotalBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *DiskLoad) SetAvailableBytes(v int64) {
+	x.xxx_hidden_AvailableBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
 }
 
 func (x *DiskLoad) HasReadRate() bool {
@@ -1546,6 +1573,20 @@ func (x *DiskLoad) HasWrittenBytes() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
 }
 
+func (x *DiskLoad) HasTotalBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *DiskLoad) HasAvailableBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
 func (x *DiskLoad) ClearReadRate() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_ReadRate = 0
@@ -1566,15 +1607,31 @@ func (x *DiskLoad) ClearWrittenBytes() {
 	x.xxx_hidden_WrittenBytes = 0
 }
 
+func (x *DiskLoad) ClearTotalBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_TotalBytes = 0
+}
+
+func (x *DiskLoad) ClearAvailableBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_AvailableBytes = 0
+}
+
 type DiskLoad_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Bytes per second.
+	// Bytes per second; unset, as are read and written bytes, where the
+	// operating system does not tell them.
 	ReadRate  *float64
 	WriteRate *float64
 	// Since the computer started.
 	ReadBytes    *int64
 	WrittenBytes *int64
+	// The size of the computer's own disks, together, the volumes of one
+	// container counted once; unset, as is available, when unknown.
+	TotalBytes *int64
+	// What is free to the server on them.
+	AvailableBytes *int64
 }
 
 func (b0 DiskLoad_builder) Build() *DiskLoad {
@@ -1582,20 +1639,28 @@ func (b0 DiskLoad_builder) Build() *DiskLoad {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.ReadRate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
 		x.xxx_hidden_ReadRate = *b.ReadRate
 	}
 	if b.WriteRate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
 		x.xxx_hidden_WriteRate = *b.WriteRate
 	}
 	if b.ReadBytes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_ReadBytes = *b.ReadBytes
 	}
 	if b.WrittenBytes != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
 		x.xxx_hidden_WrittenBytes = *b.WrittenBytes
+	}
+	if b.TotalBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_TotalBytes = *b.TotalBytes
+	}
+	if b.AvailableBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_AvailableBytes = *b.AvailableBytes
 	}
 	return m0
 }
@@ -5891,14 +5956,17 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"used_bytes\x18\x02 \x01(\x03R\tusedBytes\x12(\n" +
 	"\x10swap_total_bytes\x18\x03 \x01(\x03R\x0eswapTotalBytes\x12&\n" +
 	"\x0fswap_used_bytes\x18\x04 \x01(\x03R\rswapUsedBytes\x12!\n" +
-	"\fserver_bytes\x18\x05 \x01(\x03R\vserverBytes\"\x8a\x01\n" +
+	"\fserver_bytes\x18\x05 \x01(\x03R\vserverBytes\"\xd4\x01\n" +
 	"\bDiskLoad\x12\x1b\n" +
 	"\tread_rate\x18\x01 \x01(\x01R\breadRate\x12\x1d\n" +
 	"\n" +
 	"write_rate\x18\x02 \x01(\x01R\twriteRate\x12\x1d\n" +
 	"\n" +
 	"read_bytes\x18\x03 \x01(\x03R\treadBytes\x12#\n" +
-	"\rwritten_bytes\x18\x04 \x01(\x03R\fwrittenBytes\"\x93\x01\n" +
+	"\rwritten_bytes\x18\x04 \x01(\x03R\fwrittenBytes\x12\x1f\n" +
+	"\vtotal_bytes\x18\x05 \x01(\x03R\n" +
+	"totalBytes\x12'\n" +
+	"\x0favailable_bytes\x18\x06 \x01(\x03R\x0eavailableBytes\"\x93\x01\n" +
 	"\vNetworkLoad\x12!\n" +
 	"\freceive_rate\x18\x01 \x01(\x01R\vreceiveRate\x12\x1b\n" +
 	"\tsend_rate\x18\x02 \x01(\x01R\bsendRate\x12%\n" +

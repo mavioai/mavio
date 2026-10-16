@@ -2013,10 +2013,12 @@ impl ::buffa::ExtensionSet for MemoryLoad {
         &mut self.__buffa_unknown_fields
     }
 }
-/// DiskLoad is what the computer's disks read and write, together.
+/// DiskLoad is what the computer's disks read and write, together, and the
+/// space of its own disks, shares and cloud drives mounted aside.
 #[derive(Clone, PartialEq, Default)]
 pub struct DiskLoad {
-    /// Bytes per second.
+    /// Bytes per second; unset, as are read and written bytes, where the
+    /// operating system does not tell them.
     ///
     /// Field 1: `read_rate`
     pub read_rate: ::core::option::Option<f64>,
@@ -2028,6 +2030,15 @@ pub struct DiskLoad {
     pub read_bytes: ::core::option::Option<i64>,
     /// Field 4: `written_bytes`
     pub written_bytes: ::core::option::Option<i64>,
+    /// The size of the computer's own disks, together, the volumes of one
+    /// container counted once; unset, as is available, when unknown.
+    ///
+    /// Field 5: `total_bytes`
+    pub total_bytes: ::core::option::Option<i64>,
+    /// What is free to the server on them.
+    ///
+    /// Field 6: `available_bytes`
+    pub available_bytes: ::core::option::Option<i64>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -2038,6 +2049,8 @@ impl ::core::fmt::Debug for DiskLoad {
             .field("write_rate", &self.write_rate)
             .field("read_bytes", &self.read_bytes)
             .field("written_bytes", &self.written_bytes)
+            .field("total_bytes", &self.total_bytes)
+            .field("available_bytes", &self.available_bytes)
             .finish()
     }
 }
@@ -2077,6 +2090,20 @@ impl DiskLoad {
         self.written_bytes = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::total_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_total_bytes(mut self, value: i64) -> Self {
+        self.total_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::available_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_available_bytes(mut self, value: i64) -> Self {
+        self.available_bytes = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(DiskLoad);
 impl ::buffa::MessageName for DiskLoad {
@@ -2110,6 +2137,12 @@ impl ::buffa::Message for DiskLoad {
         if let Some(v) = self.written_bytes {
             size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
         }
+        if let Some(v) = self.total_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.available_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2131,6 +2164,12 @@ impl ::buffa::Message for DiskLoad {
         }
         if let Some(v) = self.written_bytes {
             ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        if let Some(v) = self.total_bytes {
+            ::buffa::types::put_int64_field(5u32, v, buf);
+        }
+        if let Some(v) = self.available_bytes {
+            ::buffa::types::put_int64_field(6u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2181,6 +2220,24 @@ impl ::buffa::Message for DiskLoad {
                     ::buffa::types::decode_int64(buf)?,
                 );
             }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.total_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.available_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2193,6 +2250,8 @@ impl ::buffa::Message for DiskLoad {
         self.write_rate = ::core::option::Option::None;
         self.read_bytes = ::core::option::Option::None;
         self.written_bytes = ::core::option::Option::None;
+        self.total_bytes = ::core::option::Option::None;
+        self.available_bytes = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
