@@ -300,6 +300,11 @@ export type MessageKey =
   | 'auth.totpSecret'
   | 'auth.openAuthenticator'
   | 'auth.turnOff'
+  | 'auth.passwordMessage'
+  | 'auth.passwordChanged'
+  | 'auth.changePassword'
+  | 'auth.currentPassword'
+  | 'auth.newPassword'
   | 'auth.pinMessage'
   | 'auth.setPin'
   | 'auth.removePin'
@@ -604,7 +609,6 @@ export type MessageKey =
   | 'users.signIns'
   | 'users.setPassword'
   | 'users.setPasswordDetail'
-  | 'users.setPasswordSelf'
   | 'users.givePassword'
   | 'users.givePasswordDetail'
   | 'users.set'
@@ -1980,6 +1984,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.totpSecret": "Add this key to your authenticator app, then enter its code: {secret}",
     "auth.openAuthenticator": "Open in Authenticator",
     "auth.turnOff": "Turn Off",
+    "auth.passwordMessage": "Changing it signs you out elsewhere.",
+    "auth.passwordChanged": "Password changed. You are signed out elsewhere.",
+    "auth.changePassword": "Change Password",
+    "auth.currentPassword": "Current password",
+    "auth.newPassword": "New password",
     "auth.pinMessage": "A PIN guards switching to you.",
     "auth.setPin": "Set PIN",
     "auth.removePin": "Remove PIN",
@@ -2284,7 +2293,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.signIns": "Sign-Ins",
     "users.setPassword": "Password",
     "users.setPasswordDetail": "Sets a new password and signs the user out elsewhere",
-    "users.setPasswordSelf": "Sets a new password and signs you out elsewhere",
     "users.givePassword": "Make a member",
     "users.givePasswordDetail": "A password lets the user sign in on their own; the restriction profile is removed",
     "users.set": "Set",
@@ -3658,6 +3666,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.totpSecret": "将此密钥添加到身份验证器应用，然后输入其验证码：{secret}",
     "auth.openAuthenticator": "在身份验证器中打开",
     "auth.turnOff": "关闭",
+    "auth.passwordMessage": "修改后会注销你在其他设备上的登录。",
+    "auth.passwordChanged": "密码已修改，其他设备上的登录已注销。",
+    "auth.changePassword": "修改密码",
+    "auth.currentPassword": "当前密码",
+    "auth.newPassword": "新密码",
     "auth.pinMessage": "PIN 用于保护切换到你的账户。",
     "auth.setPin": "设置 PIN",
     "auth.removePin": "移除 PIN",
@@ -3962,7 +3975,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "users.signIns": "登录方式",
     "users.setPassword": "密码",
     "users.setPasswordDetail": "设置新密码并注销其他设备上的登录",
-    "users.setPasswordSelf": "设置新密码并注销你在其他设备上的登录",
     "users.givePassword": "转为成员",
     "users.givePasswordDetail": "设置密码后用户可自行登录；内容限制将被移除",
     "users.set": "设置",

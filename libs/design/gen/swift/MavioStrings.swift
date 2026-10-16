@@ -1004,6 +1004,21 @@ public enum MavioStrings {
     /// Turns off the user's TOTP.
     public static var authTurnOff: String { NSLocalizedString("auth.turnOff", bundle: .module, comment: "") }
 
+    /// Explanation of changing the user's own password.
+    public static var authPasswordMessage: String { NSLocalizedString("auth.passwordMessage", bundle: .module, comment: "") }
+
+    /// Shown once the user's own password is changed.
+    public static var authPasswordChanged: String { NSLocalizedString("auth.passwordChanged", bundle: .module, comment: "") }
+
+    /// Opens changing the user's own password.
+    public static var authChangePassword: String { NSLocalizedString("auth.changePassword", bundle: .module, comment: "") }
+
+    /// Field of the user's current password when changing it.
+    public static var authCurrentPassword: String { NSLocalizedString("auth.currentPassword", bundle: .module, comment: "") }
+
+    /// Field of the user's new password when changing it.
+    public static var authNewPassword: String { NSLocalizedString("auth.newPassword", bundle: .module, comment: "") }
+
     /// Explanation of the user's PIN.
     public static var authPinMessage: String { NSLocalizedString("auth.pinMessage", bundle: .module, comment: "") }
 
@@ -1967,9 +1982,6 @@ public enum MavioStrings {
 
     /// Detail of setting a member's password.
     public static var usersSetPasswordDetail: String { NSLocalizedString("users.setPasswordDetail", bundle: .module, comment: "") }
-
-    /// Detail of setting the administrator's own password.
-    public static var usersSetPasswordSelf: String { NSLocalizedString("users.setPasswordSelf", bundle: .module, comment: "") }
 
     /// Row giving a managed user a password.
     public static var usersGivePassword: String { NSLocalizedString("users.givePassword", bundle: .module, comment: "") }

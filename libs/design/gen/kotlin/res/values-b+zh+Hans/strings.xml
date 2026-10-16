@@ -316,6 +316,11 @@
     <string name="auth_totp_secret">将此密钥添加到身份验证器应用，然后输入其验证码：%s</string>
     <string name="auth_open_authenticator">在身份验证器中打开</string>
     <string name="auth_turn_off">关闭</string>
+    <string name="auth_password_message">修改后会注销你在其他设备上的登录。</string>
+    <string name="auth_password_changed">密码已修改，其他设备上的登录已注销。</string>
+    <string name="auth_change_password">修改密码</string>
+    <string name="auth_current_password">当前密码</string>
+    <string name="auth_new_password">新密码</string>
     <string name="auth_pin_message">PIN 用于保护切换到你的账户。</string>
     <string name="auth_set_pin">设置 PIN</string>
     <string name="auth_remove_pin">移除 PIN</string>
@@ -622,7 +627,6 @@
     <string name="users_sign_ins">登录方式</string>
     <string name="users_set_password">密码</string>
     <string name="users_set_password_detail">设置新密码并注销其他设备上的登录</string>
-    <string name="users_set_password_self">设置新密码并注销你在其他设备上的登录</string>
     <string name="users_give_password">转为成员</string>
     <string name="users_give_password_detail">设置密码后用户可自行登录；内容限制将被移除</string>
     <string name="users_set">设置</string>

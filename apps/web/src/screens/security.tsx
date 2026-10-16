@@ -1,6 +1,6 @@
 // The account settings of one standalone server's sign-in: switching to
 // another of its users (docs/accounts.md §4.4), and the signed-in user's
-// passkeys, authenticator app and PIN.
+// password, passkeys, authenticator app and PIN.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, serverKey, useServersStore } from "@mavio/client-ts";
 import type { SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
@@ -88,7 +88,7 @@ export function SwitchUser({ server }: { server: ServerEntry }) {
   );
 }
 
-/** The signed-in user's passkeys, authenticator app and PIN on a standalone server. */
+/** The signed-in user's password, passkeys, authenticator app and PIN on a standalone server. */
 export function Security({ server }: { server: ServerEntry }) {
   const servers = useServersStore();
   const queryClient = useQueryClient();
@@ -123,6 +123,12 @@ export function Security({ server }: { server: ServerEntry }) {
 
   return (
     <div className="flex flex-col divide-y divide-border rounded-lg bg-surface">
+      {!user.authProvider && (
+        <Password
+          busy={change.isPending}
+          save={(current, next) => change.mutateAsync(() => users.setPassword({ userId: user.id, currentPassword: current, newPassword: next }))}
+        />
+      )}
       <div className="flex flex-col gap-2 p-4">
         <div className="flex items-center">
           <h3 className="type-headline">{t("auth.passkeys")}</h3>
@@ -169,6 +175,62 @@ export function Security({ server }: { server: ServerEntry }) {
         save={(pin) => change.mutateAsync(() => users.setPin({ userId: user.id, pin }))}
       />
       {error && <p className="p-4 type-callout text-danger">{error}</p>}
+    </div>
+  );
+}
+
+/** Changing the user's own password, with the current one; the server signs the user out elsewhere. */
+function Password({ busy, save }: { busy: boolean; save: (current: string, next: string) => Promise<unknown> }) {
+  const [editing, setEditing] = useState(false);
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [done, setDone] = useState(false);
+  const close = () => (setEditing(false), setCurrent(""), setNext(""));
+  return (
+    <div className="flex flex-col gap-2 p-4">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="type-headline">{t("auth.password")}</h3>
+          <div className="type-footnote text-text-secondary">{done ? t("auth.passwordChanged") : t("auth.passwordMessage")}</div>
+        </div>
+        {!editing && (
+          <Button variant="plain" className="text-accent-text" disabled={busy} onClick={() => (setDone(false), setEditing(true))}>
+            {t("auth.changePassword")}
+          </Button>
+        )}
+      </div>
+      {editing && (
+        <form
+          className="flex flex-wrap items-end gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void save(current, next).then(
+              () => (close(), setDone(true)),
+              () => {},
+            );
+          }}
+        >
+          <div className="w-56">
+            <Field
+              label={t("auth.currentPassword")}
+              type="password"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+              autoComplete="current-password"
+              autoFocus
+            />
+          </div>
+          <div className="w-56">
+            <Field label={t("auth.newPassword")} type="password" value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" />
+          </div>
+          <Button type="submit" disabled={busy || !current || !next}>
+            {t("action.save")}
+          </Button>
+          <Button variant="plain" onClick={close}>
+            {t("action.cancel")}
+          </Button>
+        </form>
+      )}
     </div>
   );
 }

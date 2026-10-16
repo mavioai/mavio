@@ -5527,6 +5527,96 @@
         }
       }
     },
+    "auth.passwordMessage": {
+      "comment": "Explanation of changing the user's own password.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changing it signs you out elsewhere."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改后会注销你在其他设备上的登录。"
+          }
+        }
+      }
+    },
+    "auth.passwordChanged": {
+      "comment": "Shown once the user's own password is changed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password changed. You are signed out elsewhere."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码已修改，其他设备上的登录已注销。"
+          }
+        }
+      }
+    },
+    "auth.changePassword": {
+      "comment": "Opens changing the user's own password.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修改密码"
+          }
+        }
+      }
+    },
+    "auth.currentPassword": {
+      "comment": "Field of the user's current password when changing it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前密码"
+          }
+        }
+      }
+    },
+    "auth.newPassword": {
+      "comment": "Field of the user's new password when changing it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新密码"
+          }
+        }
+      }
+    },
     "auth.pinMessage": {
       "comment": "Explanation of the user's PIN.",
       "extractionState": "manual",
@@ -11025,24 +11115,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "设置新密码并注销其他设备上的登录"
-          }
-        }
-      }
-    },
-    "users.setPasswordSelf": {
-      "comment": "Detail of setting the administrator's own password.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sets a new password and signs you out elsewhere"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "设置新密码并注销你在其他设备上的登录"
           }
         }
       }

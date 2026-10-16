@@ -523,7 +523,8 @@ function SignIns({ server, user }: { server: ServerEntry; user: User }) {
   const self = user.id === server.userId;
   return (
     <Group title={t("users.signIns")} footer={notice ?? (failure && <span className="text-danger">{errorMessage(failure)}</span>)}>
-      {!user.authProvider && (
+      {/* Users change their own password, with the current one, in their account's settings. */}
+      {!user.authProvider && !self && (
         <form
           className="flex min-h-13 flex-wrap items-center gap-3 px-4 py-2.5"
           onSubmit={(e) => {
@@ -537,7 +538,7 @@ function SignIns({ server, user }: { server: ServerEntry; user: User }) {
           <div className="min-w-0 flex-1 basis-48">
             <div className="type-body">{user.managed ? t("users.givePassword") : t("users.setPassword")}</div>
             <div className="type-footnote text-text-secondary">
-              {user.managed ? t("users.givePasswordDetail") : self ? t("users.setPasswordSelf") : t("users.setPasswordDetail")}
+              {user.managed ? t("users.givePasswordDetail") : t("users.setPasswordDetail")}
             </div>
           </div>
           <input

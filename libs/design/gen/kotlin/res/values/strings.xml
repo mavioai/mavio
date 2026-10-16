@@ -622,6 +622,16 @@
     <string name="auth_open_authenticator">Open in Authenticator</string>
     <!-- Turns off the user's TOTP. -->
     <string name="auth_turn_off">Turn Off</string>
+    <!-- Explanation of changing the user's own password. -->
+    <string name="auth_password_message">Changing it signs you out elsewhere.</string>
+    <!-- Shown once the user's own password is changed. -->
+    <string name="auth_password_changed">Password changed. You are signed out elsewhere.</string>
+    <!-- Opens changing the user's own password. -->
+    <string name="auth_change_password">Change Password</string>
+    <!-- Field of the user's current password when changing it. -->
+    <string name="auth_current_password">Current password</string>
+    <!-- Field of the user's new password when changing it. -->
+    <string name="auth_new_password">New password</string>
     <!-- Explanation of the user's PIN. -->
     <string name="auth_pin_message">A PIN guards switching to you.</string>
     <!-- Sets or changes the user's PIN. -->
@@ -1236,8 +1246,6 @@
     <string name="users_set_password">Password</string>
     <!-- Detail of setting a member's password. -->
     <string name="users_set_password_detail">Sets a new password and signs the user out elsewhere</string>
-    <!-- Detail of setting the administrator's own password. -->
-    <string name="users_set_password_self">Sets a new password and signs you out elsewhere</string>
     <!-- Row giving a managed user a password. -->
     <string name="users_give_password">Make a member</string>
     <!-- Detail of giving a managed user a password. -->
