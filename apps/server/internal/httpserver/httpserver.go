@@ -15,6 +15,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/apidocs"
+	"github.com/mavioai/mavio/apps/server/internal/assistant"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/cloud"
@@ -39,6 +40,7 @@ import (
 	"github.com/mavioai/mavio/libs/library/storage"
 	"github.com/mavioai/mavio/libs/metadata"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1/assistantv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/hub/v1/hubv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/library/v1/libraryv1connect"
@@ -143,6 +145,9 @@ type Options struct {
 	// SubtitleRuntime acquires subtitles for SubtitleService and runs its
 	// tasks; nil uses one over Store without providers.
 	SubtitleRuntime *subtitles.Runtime
+	// Assistant serves AssistantService and its listening and speech
+	// routes; nil serves none.
+	Assistant *assistant.Service
 	// Dev serves the development player at /dev/player.
 	Dev bool
 }
@@ -236,12 +241,14 @@ func Handler(opts Options) (http.Handler, error) {
 	metadataService := rpc.NewMetadataService(opts.Store, refresher, opts.Images.Fetch)
 	metadataService.ExternalIDKinds, metadataService.Lyrics = opts.ExternalIDKinds, opts.Lyrics
 	mux.Handle(libraryv1connect.NewMetadataServiceHandler(metadataService, interceptors))
-	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(rpc.NewPlaylistService(opts.Store), interceptors))
+	playlists := rpc.NewPlaylistService(opts.Store)
+	mux.Handle(libraryv1connect.NewPlaylistServiceHandler(playlists, interceptors))
 	users := rpc.NewUserService(opts.Store)
 	users.Activity, users.Requests = opts.Activity, requestSettings
 	users.Passkeys, users.TOTP = passkeys, totp
 	mux.Handle(userv1connect.NewUserServiceHandler(users, interceptors))
-	mux.Handle(userv1connect.NewUserDataServiceHandler(rpc.NewUserDataService(opts.Store), interceptors))
+	userData := rpc.NewUserDataService(opts.Store)
+	mux.Handle(userv1connect.NewUserDataServiceHandler(userData, interceptors))
 	mux.Handle(userv1connect.NewDisplayPreferencesServiceHandler(rpc.NewDisplayPreferencesService(opts.Store), interceptors))
 	playbackService := rpc.NewPlaybackService(opts.Playbacks, opts.Store)
 	playbackService.Intros = opts.Intros
@@ -284,10 +291,24 @@ func Handler(opts Options) (http.Handler, error) {
 			reqs.Activity = opts.Activity
 		}
 	}
-	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(rpc.NewDiscoverService(reqs), interceptors))
-	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(rpc.NewRequestService(reqs), interceptors))
+	discover, requestService := rpc.NewDiscoverService(reqs), rpc.NewRequestService(reqs)
+	mux.Handle(acquisitionv1connect.NewDiscoverServiceHandler(discover, interceptors))
+	mux.Handle(acquisitionv1connect.NewRequestServiceHandler(requestService, interceptors))
 	mux.Handle(acquisitionv1connect.NewIssueServiceHandler(rpc.NewIssueService(reqs), interceptors))
 	mux.Handle(hubv1connect.NewHubServiceHandler(rpc.NewHubService(opts.Store, hub.New(opts.Store, reqs)), interceptors))
+	if a := opts.Assistant; a != nil {
+		a.Bind(assistant.Services{
+			Items: items, Libraries: libraries, Playlists: playlists, Sessions: sessions, UserData: userData,
+			Discover: discover, Requests: requestService,
+		})
+		mux.Handle(assistantv1connect.NewAssistantServiceHandler(a, interceptors))
+		// The listening URL's token authenticates; speech authenticates as
+		// the assistant's RPCs do.
+		mux.Handle("GET "+assistant.ListenPath, a.ListenHandler())
+		mux.Handle("POST "+assistant.SpeechPath, a.SpeechHandler(func(r *http.Request) (auth.Principal, error) {
+			return authn.ResolveRequest(r, assistantv1connect.AssistantServiceAskProcedure)
+		}))
+	}
 	// Media is fetched through signed URLs, or with credentials.
 	media := http.NewServeMux()
 	media.Handle("GET /media/", opts.Playbacks.Handler())
@@ -335,6 +356,7 @@ var services = []string{
 	acquisitionv1connect.DownloadServiceName, acquisitionv1connect.ProfileServiceName, acquisitionv1connect.ReleaseServiceName,
 	acquisitionv1connect.WantedServiceName, acquisitionv1connect.DiscoverServiceName, acquisitionv1connect.RequestServiceName,
 	acquisitionv1connect.IssueServiceName, acquisitionv1connect.SubtitleServiceName,
+	assistantv1connect.AssistantServiceName,
 	authv1connect.AuthServiceName,
 	hubv1connect.HubServiceName,
 	libraryv1connect.LibraryServiceName, libraryv1connect.ItemServiceName, libraryv1connect.CollectionServiceName,

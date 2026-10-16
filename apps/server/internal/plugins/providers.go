@@ -14,6 +14,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/providers"
 	"github.com/mavioai/mavio/apps/server/internal/releases"
 	"github.com/mavioai/mavio/apps/server/internal/requests"
+	"github.com/mavioai/mavio/apps/server/internal/speech"
 	"github.com/mavioai/mavio/apps/server/internal/subtitles"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
@@ -518,4 +519,30 @@ func (m *Manager) AgentSessions() (pluginv1connect.AgentSessionServiceClient, bo
 		}
 	}
 	return nil, false
+}
+
+// Recognizers returns the started SPEECH_TO_TEXT plugins, by ID.
+func (m *Manager) Recognizers() []speech.RecognizerPlugin {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_SPEECH_TO_TEXT)
+	slices.Sort(ids)
+	var out []speech.RecognizerPlugin
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.Speech() != nil {
+			out = append(out, speech.RecognizerPlugin{ID: id, Client: pl.Speech()})
+		}
+	}
+	return out
+}
+
+// VoicePlugins returns the started TEXT_TO_SPEECH plugins, by ID.
+func (m *Manager) VoicePlugins() []speech.VoicePlugin {
+	ids := m.withCapability(pluginv1.Capability_CAPABILITY_TEXT_TO_SPEECH)
+	slices.Sort(ids)
+	var out []speech.VoicePlugin
+	for _, id := range ids {
+		if pl, ok := m.running(id); ok && pl.Voices() != nil {
+			out = append(out, speech.VoicePlugin{ID: id, Client: pl.Voices()})
+		}
+	}
+	return out
 }

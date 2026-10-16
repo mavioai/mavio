@@ -19,6 +19,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/assistant/v1/assistantv1connect"
 	authv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/auth/v1/authv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/hub/v1/hubv1connect"
@@ -69,6 +70,7 @@ var UserBoundProcedures = []string{
 	acquisitionv1connect.IssueServiceAddCommentProcedure,
 	systemv1connect.ActivityServiceListMyActivitiesProcedure,
 	hubv1connect.HubServiceName,
+	assistantv1connect.AssistantServiceName,
 }
 
 // SessionBoundProcedures need the caller's signed-in session, which plugins
@@ -83,6 +85,7 @@ var SessionBoundProcedures = []string{
 	userv1connect.UserServiceConfirmTotpProcedure,
 	sessionv1connect.EventServiceName,
 	sessionv1connect.SyncPlayServiceName,
+	assistantv1connect.AssistantServiceStartListeningProcedure,
 }
 
 // AuthService implements mavio.auth.v1.AuthService.

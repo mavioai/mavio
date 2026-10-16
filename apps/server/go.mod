@@ -23,6 +23,7 @@ require (
 	github.com/mavioai/mavio/libs/streaming v0.0.0-20261009053433-ba7d51fbd256
 	github.com/mavioai/mavio/libs/subtitle v0.0.0
 	github.com/mavioai/mavio/tools/fixtures v0.0.0
+	github.com/mozillazg/go-pinyin v0.21.0
 	github.com/shirou/gopsutil/v4 v4.26.6
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10

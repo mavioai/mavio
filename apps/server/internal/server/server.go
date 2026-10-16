@@ -21,6 +21,8 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/apps/server/internal/activity"
+	"github.com/mavioai/mavio/apps/server/internal/assistant"
+	"github.com/mavioai/mavio/apps/server/internal/assistant/intent"
 	"github.com/mavioai/mavio/apps/server/internal/backup"
 	"github.com/mavioai/mavio/apps/server/internal/certs"
 	"github.com/mavioai/mavio/apps/server/internal/cloud"
@@ -379,8 +381,33 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	link.Connections = func() []string {
 		return connections(serverID, localAddresses(), port, https.Port(), certificates != nil && certificates.Ready(), set.Get().Network.BaseURL)
 	}
+	// The assistant understands what it can without a model on its
+	// grammar; a server built without it leaves everything to a model.
+	grammar, err := intent.Load(ctx)
+	switch {
+	case errors.Is(err, intent.ErrMissing):
+		log.WarnContext(ctx, "the assistant's grammar is missing; build intent:wasm", "err", err)
+	case err != nil:
+		return fmt.Errorf("load the assistant's grammar: %w", err)
+	default:
+		defer func() { _ = grammar.Close(context.WithoutCancel(ctx)) }()
+	}
+	helper := assistant.New(assistant.Config{
+		Users:    db.Users(),
+		Settings: func() core.AssistantSettings { return set.Get().Assistant },
+		Change: func(ctx context.Context, a core.AssistantSettings) (core.AssistantSettings, error) {
+			s, err := set.Change(ctx, func(s *core.ServerSettings) error {
+				s.Assistant = a
+				return nil
+			})
+			return s.Assistant, err
+		},
+		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
+		ServerName: serverName, Key: key.Derive("assistant-listen"), Activity: activityLog, Logger: log,
+	})
 	h, err := httpserver.Handler(httpserver.Options{
-		Version: cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
+		Assistant: helper,
+		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
 		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
@@ -446,6 +473,10 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	g.Go(func() error { return httpserver.Serve(ctx, ln, prefix) })
 	g.Go(func() error {
 		link.Run(ctx)
+		return nil
+	})
+	g.Go(func() error {
+		helper.Run(ctx)
 		return nil
 	})
 	if certificates != nil {

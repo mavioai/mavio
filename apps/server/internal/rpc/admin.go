@@ -102,9 +102,11 @@ func settingsFromProto(p *systemv1.ServerSettings, current *core.ServerSettings)
 		Requests:        requests,
 		Metadata:        meta,
 		// The subtitle settings are changed through SubtitleService, and
-		// the disabled plugins through SetPluginEnabled.
+		// the disabled plugins through SetPluginEnabled, the assistant
+		// settings through AssistantService.
 		Subtitles:       current.Subtitles,
 		DisabledPlugins: current.DisabledPlugins,
+		Assistant:       current.Assistant,
 	}, nil
 }
 
