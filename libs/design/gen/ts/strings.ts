@@ -105,6 +105,24 @@ export type MessageKey =
   | 'discover.openItem'
   | 'discover.blockFooter'
   | 'discover.downloading'
+  | 'discover.networks'
+  | 'discover.statusRumored'
+  | 'discover.statusPlanned'
+  | 'discover.statusInProduction'
+  | 'discover.statusPostProduction'
+  | 'discover.statusReleased'
+  | 'discover.statusCanceled'
+  | 'discover.statusPilot'
+  | 'discover.statusReturning'
+  | 'discover.statusEnded'
+  | 'discover.overview'
+  | 'discover.noOverview'
+  | 'discover.fullCrew'
+  | 'discover.theatricalRelease'
+  | 'discover.tmdbScore'
+  | 'discover.releaseDates'
+  | 'discover.episodeRuntime'
+  | 'discover.showMore'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -1675,6 +1693,24 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.openItem": "Open in Library",
     "discover.blockFooter": "A blocklisted title can no longer be requested.",
     "discover.downloading": "Downloading {percent}%",
+    "discover.networks": "Networks",
+    "discover.statusRumored": "Rumored",
+    "discover.statusPlanned": "Planned",
+    "discover.statusInProduction": "In Production",
+    "discover.statusPostProduction": "Post Production",
+    "discover.statusReleased": "Released",
+    "discover.statusCanceled": "Canceled",
+    "discover.statusPilot": "Pilot",
+    "discover.statusReturning": "Returning Series",
+    "discover.statusEnded": "Ended",
+    "discover.overview": "Overview",
+    "discover.noOverview": "Overview unavailable.",
+    "discover.fullCrew": "View Full Crew",
+    "discover.theatricalRelease": "Theatrical Release",
+    "discover.tmdbScore": "TMDB User Score",
+    "discover.releaseDates": "{count, plural, one {Release Date} other {Release Dates}}",
+    "discover.episodeRuntime": "Episode Runtime",
+    "discover.showMore": "Show More",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -3243,6 +3279,24 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.openItem": "在媒体库中打开",
     "discover.blockFooter": "屏蔽后的作品不能再被请求。",
     "discover.downloading": "下载中 {percent}%",
+    "discover.networks": "电视网",
+    "discover.statusRumored": "传闻",
+    "discover.statusPlanned": "已计划",
+    "discover.statusInProduction": "制作中",
+    "discover.statusPostProduction": "后期制作",
+    "discover.statusReleased": "已上映",
+    "discover.statusCanceled": "已取消",
+    "discover.statusPilot": "试播",
+    "discover.statusReturning": "连载中",
+    "discover.statusEnded": "已完结",
+    "discover.overview": "简介",
+    "discover.noOverview": "暂无简介。",
+    "discover.fullCrew": "查看全部职员",
+    "discover.theatricalRelease": "影院上映",
+    "discover.tmdbScore": "TMDB 用户评分",
+    "discover.releaseDates": "{count, plural, other {上映日期}}",
+    "discover.episodeRuntime": "单集时长",
+    "discover.showMore": "显示更多",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",

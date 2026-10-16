@@ -27,18 +27,18 @@ import { DownloadState } from "@mavio/proto/mavio/acquisition/v1/download_pb";
 import { IssueStatus } from "@mavio/proto/mavio/acquisition/v1/issue_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
-import { CreditKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
 import { Artwork, Button, CardPlaceholder, Grid, Group, LoadMore, Loading, minutesText, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
-import { CastShelf, titleCredits } from "./credits.tsx";
-import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
+import { CastShelf, isCast, titleCredits } from "./credits.tsx";
+import { GenreLinks, TitleOverview } from "./discover-overview.tsx";
+import { dayText } from "./facts.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
 import { QueueRow } from "./admin/downloads.tsx";
@@ -331,17 +331,15 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   const series = title.mediaKind === MediaKind.SERIES;
   // A series with seasons requested or available already requests more.
   const some = title.seasons.some((s) => s.status !== MediaStatus.UNSPECIFIED && s.status !== MediaStatus.DELETED);
-  const facts = [
+  // As Seerr's: the year, then rating, runtime and genres.
+  const facts: ReactNode[] = [
     title.year || undefined,
     series ? t("discover.series") : t("discover.movie"),
     title.officialRating || undefined,
-    title.genres.slice(0, 3).join(" / ") || undefined,
+    title.runtimeMinutes > 0 ? minutesText(title.runtimeMinutes) : undefined,
   ].filter(Boolean);
+  if (title.genres.length > 0) facts.push(<GenreLinks key="genres" server={server} title={title} />);
   const status = statusLabel(title.status);
-  // The other parts of a movie's collection, as the collection catalog lists them.
-  const collection = title.externalIds.tmdb_collection
-    ? catalogs.find((c) => c.kind === CatalogKind.COLLECTION && c.mediaKinds.includes(title.mediaKind))
-    : undefined;
   const onRequest = () => (series ? setAsking(true) : request.mutate({ mediaKind: title.mediaKind, tmdbId: title.tmdbId }));
   // On the television focus starts on the first action, as on an item's details.
   const first = useRef<HTMLDivElement>(null);
@@ -382,7 +380,16 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           <div className={`flex min-w-0 flex-col gap-3 text-white ${tv ? "max-w-[960px]" : "max-w-[640px]"}`}>
             <h1 className={`font-bold leading-[1.05] text-balance break-words ${tv ? "text-[72px]" : phone ? "text-[34px]" : "text-[52px]"}`}>{title.name}</h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 type-callout text-white/80">
-              {facts.length > 0 && <span>{facts.join(" · ")}</span>}
+              {facts.length > 0 && (
+                <span>
+                  {facts.map((f, i) => (
+                    <Fragment key={i}>
+                      {i > 0 && " · "}
+                      {f}
+                    </Fragment>
+                  ))}
+                </span>
+              )}
               {title.communityRating > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <Icon name="rating" fill size={14} className="text-[#FFD60A]" />
@@ -392,7 +399,8 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
               {status && <span className="rounded-[4px] bg-white/20 px-1.5 type-caption font-semibold text-white">{status}</span>}
               {admin && title.itemId && <DownloadBadge server={server} itemId={title.itemId} />}
             </div>
-            {title.overview && <p className={`type-body text-white/85 ${tv ? "line-clamp-2" : "line-clamp-4"}`}>{title.overview}</p>}
+            {/* The overview is below on Seerr's page, as here but on the television. */}
+            {tv && title.overview && <p className="line-clamp-2 type-body text-white/85">{title.overview}</p>}
             <div ref={first} className={`mt-2 flex flex-wrap gap-3 ${phone ? "[&>*]:flex-1" : ""}`}>
               {title.itemId && (
                 <Link to="/s/$serverId/item/$itemId" params={{ serverId: server.id, itemId: title.itemId }} data-tv-button className={primary}>
@@ -459,11 +467,14 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           </div>
         </div>
       </header>
-      {phone && title.overview && <p className="px-margin pt-4 type-body">{title.overview}</p>}
+      <TitleOverview server={server} title={title} />
       {series && title.seasons.length > 0 && <Seasons server={server} tmdbId={title.tmdbId} seasons={title.seasons} />}
       <CastShelf
         serverId={server.id}
-        credits={titleCredits(title.credits)}
+        credits={titleCredits(title.credits)
+          .filter(isCast)
+          .toSorted((a, b) => a.order - b.order)
+          .slice(0, 20)}
         all={
           <Link
             to="/s/$serverId/title/$kind/$tmdbId/credits"
@@ -473,23 +484,6 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
           </Link>
         }
       />
-      {collection && (
-        <CatalogShelf
-          server={server}
-          row={{ catalog: collection, mediaKind: title.mediaKind }}
-          filters={{ collectionId: Number(title.externalIds.tmdb_collection) }}
-          title={title.collectionName || t("item.collection")}
-          more={
-            <Link
-              to="/s/$serverId/discover/collection/$tmdbId"
-              params={{ serverId: server.id, tmdbId: title.externalIds.tmdb_collection }}
-            >
-              {t("collection.view")}
-            </Link>
-          }
-        />
-      )}
-      <TitleFacts title={title} />
       {catalogs
         .filter((c) => (c.kind === CatalogKind.RECOMMENDATIONS || c.kind === CatalogKind.SIMILAR) && c.mediaKinds.includes(title.mediaKind))
         .map((c) => (
@@ -609,56 +603,6 @@ function ManageIssues({ server, itemId }: { server: ServerEntry; itemId: string 
       ))}
       {open && <IssueDialog server={server} id={open} onClose={() => setOpen(undefined)} />}
     </Group>
-  );
-}
-
-/** A title's facts, as Seerr's movie and series pages show them, and the services streaming it. */
-function TitleFacts({ title }: { title: Title }) {
-  const series = title.mediaKind === MediaKind.SERIES;
-  const names = (kind: CreditKind) =>
-    title.credits
-      .filter((c) => c.kind === kind)
-      .map((c) => c.name)
-      .join(", ");
-  const rows: [string, ReactNode][] = [
-    [t("item.creators"), names(CreditKind.CREATOR)],
-    [t("item.director"), names(CreditKind.DIRECTOR)],
-    [t("item.writers"), names(CreditKind.WRITER)],
-    [t("item.producers"), names(CreditKind.PRODUCER)],
-    [t("item.music"), names(CreditKind.COMPOSER)],
-    [series ? t("item.firstAired") : t("item.released"), dayText(title.premiereDate)],
-    [t("item.digitalRelease"), dayText(title.digitalReleaseDate)],
-    [t("item.physicalRelease"), dayText(title.physicalReleaseDate)],
-    [t("item.lastAired"), dayText(title.endDate)],
-    [t("item.nextAirDate"), dayText(title.nextAirDate)],
-    [t("item.runtime"), title.runtimeMinutes > 0 ? minutesText(title.runtimeMinutes) : undefined],
-    [t("item.rated"), title.officialRating],
-    [t("item.genres"), title.genres.join(", ")],
-    [series ? t("item.networks") : t("item.studio"), title.studios.join(", ")],
-    [t("item.country"), title.productionLocations.join(", ")],
-    [t("item.originalLanguage"), languageText(title.originalLanguage)],
-    [t("item.originalTitle"), title.originalTitle && title.originalTitle !== title.name ? title.originalTitle : undefined],
-    [t("item.budget"), moneyText(title.budget)],
-    [t("item.revenue"), moneyText(title.revenue)],
-  ];
-  const shown = rows.filter(([, v]) => v);
-  if (shown.length === 0 && title.watchProviders.length === 0 && !title.tagline && title.keywords.length === 0) return null;
-  return (
-    <section className="flex flex-col gap-6 px-margin pt-6 pb-3">
-      <h2 className="type-title3">{t("item.details")}</h2>
-      {title.tagline && <p className="type-title3 font-normal text-text-secondary italic">{title.tagline}</p>}
-      <FactList rows={shown} />
-      <WatchProviders providers={title.watchProviders} />
-      {title.keywords.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
-          {title.keywords.map((k) => (
-            <li key={k} className="rounded-full bg-fill px-3 py-1 type-footnote">
-              {k}
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 

@@ -597,6 +597,8 @@ flowchart TD
   - [x] 如 Seerr 的人物页（`DiscoverService.GetPerson`，发现提供者的 `GetPerson`），从发现的作品的演职人员打开
   - [x] 如 Seerr 的合集页（`DiscoverService.GetCollection`，发现提供者的 `GetCollection`）：请求其电影，管理员可屏蔽它们
   - [x] 如 Seerr 的作品管理：就地批准与拒绝待审批的请求，状态旁的下载进度，列出其请求、下载、未解决的问题与屏蔽的“管理”面板，以及报告媒体库中该作品的问题
+  - [x] 按 Seerr 页面布局的作品页：简介与主创旁是合集、TMDB 评分与信息，类型、关键词、语言、制片厂与播出网络打开其热门作品（`CatalogFilters.networks`）
+  - [ ] 作品页 TMDB 评分旁如 Seerr 的烂番茄与 IMDb 评分（需要评分提供者）
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
 - [x] 服务端：`AuthService.GetAuthInfo` 与发现应答中带上服务端的 ID、名称和版本，客户端据此在任意地址上认出同一服务端
 - [x] 服务端：`ListItems` 可按外部 ID 筛选（`ItemQuery.ExternalIDs`），客户端据此在其他服务端上找到同一作品的版本

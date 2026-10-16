@@ -332,6 +332,62 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("discover.downloading", bundle: .module, comment: ""), percent)
     }
 
+    /// Filter of a series catalog: the networks the titles air on
+    public static var discoverNetworks: String { NSLocalizedString("discover.networks", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusRumored: String { NSLocalizedString("discover.statusRumored", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusPlanned: String { NSLocalizedString("discover.statusPlanned", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusInProduction: String { NSLocalizedString("discover.statusInProduction", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusPostProduction: String { NSLocalizedString("discover.statusPostProduction", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusReleased: String { NSLocalizedString("discover.statusReleased", bundle: .module, comment: "") }
+
+    /// Production status of a title
+    public static var discoverStatusCanceled: String { NSLocalizedString("discover.statusCanceled", bundle: .module, comment: "") }
+
+    /// Production status of a series
+    public static var discoverStatusPilot: String { NSLocalizedString("discover.statusPilot", bundle: .module, comment: "") }
+
+    /// Production status of a series that continues
+    public static var discoverStatusReturning: String { NSLocalizedString("discover.statusReturning", bundle: .module, comment: "") }
+
+    /// Production status of a series that has ended
+    public static var discoverStatusEnded: String { NSLocalizedString("discover.statusEnded", bundle: .module, comment: "") }
+
+    /// Heading of a discovered title's overview
+    public static var discoverOverview: String { NSLocalizedString("discover.overview", bundle: .module, comment: "") }
+
+    /// Shown when a discovered title has no overview
+    public static var discoverNoOverview: String { NSLocalizedString("discover.noOverview", bundle: .module, comment: "") }
+
+    /// Link from a discovered title's leading crew to its whole cast and crew
+    public static var discoverFullCrew: String { NSLocalizedString("discover.fullCrew", bundle: .module, comment: "") }
+
+    /// Kind of a movie's release date, named on hover
+    public static var discoverTheatricalRelease: String { NSLocalizedString("discover.theatricalRelease", bundle: .module, comment: "") }
+
+    /// Names a title's TMDB rating on hover
+    public static var discoverTmdbScore: String { NSLocalizedString("discover.tmdbScore", bundle: .module, comment: "") }
+
+    /// Fact of a discovered movie: its release dates
+    public static func discoverReleaseDates(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.releaseDates", bundle: .module, comment: ""), count)
+    }
+
+    /// Fact of a discovered series: how long an episode runs
+    public static var discoverEpisodeRuntime: String { NSLocalizedString("discover.episodeRuntime", bundle: .module, comment: "") }
+
+    /// Shows the rest of a discovered title's studios or networks
+    public static var discoverShowMore: String { NSLocalizedString("discover.showMore", bundle: .module, comment: "") }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 

@@ -75,7 +75,10 @@ export interface CatalogFilters {
   sort?: DiscoverSort;
   ascending?: boolean;
   genres?: string[];
+  /** Production companies, of movies. */
   studios?: NamedValue[];
+  /** Television networks, of series. */
+  networks?: NamedValue[];
   keywords?: NamedValue[];
   watchProviders?: string[];
   /** ISO 3166-1 country of the watch providers. */
@@ -99,6 +102,7 @@ export function filterCount(f: CatalogFilters): number {
   return [
     f.genres?.length,
     f.studios?.length,
+    f.networks?.length,
     f.keywords?.length,
     f.watchProviders?.length,
     f.originalLanguage,
@@ -117,6 +121,7 @@ export function discoverRequestOf(f: CatalogFilters): MessageInitShape<typeof Di
     ascending: f.ascending ?? false,
     genres: f.genres ?? [],
     studios: (f.studios ?? []).map((v) => v.id),
+    networks: (f.networks ?? []).map((v) => v.id),
     keywords: (f.keywords ?? []).map((v) => v.id),
     watchProviders: providers,
     watchRegion: providers.length > 0 ? (f.watchRegion ?? "") : "",

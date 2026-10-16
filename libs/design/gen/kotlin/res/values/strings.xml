@@ -192,6 +192,45 @@
     <string name="discover_block_footer">A blocklisted title can no longer be requested.</string>
     <!-- Status badge of a title being downloaded -->
     <string name="discover_downloading">Downloading %s%%</string>
+    <!-- Filter of a series catalog: the networks the titles air on -->
+    <string name="discover_networks">Networks</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_rumored">Rumored</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_planned">Planned</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_in_production">In Production</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_post_production">Post Production</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_released">Released</string>
+    <!-- Production status of a title -->
+    <string name="discover_status_canceled">Canceled</string>
+    <!-- Production status of a series -->
+    <string name="discover_status_pilot">Pilot</string>
+    <!-- Production status of a series that continues -->
+    <string name="discover_status_returning">Returning Series</string>
+    <!-- Production status of a series that has ended -->
+    <string name="discover_status_ended">Ended</string>
+    <!-- Heading of a discovered title's overview -->
+    <string name="discover_overview">Overview</string>
+    <!-- Shown when a discovered title has no overview -->
+    <string name="discover_no_overview">Overview unavailable.</string>
+    <!-- Link from a discovered title's leading crew to its whole cast and crew -->
+    <string name="discover_full_crew">View Full Crew</string>
+    <!-- Kind of a movie's release date, named on hover -->
+    <string name="discover_theatrical_release">Theatrical Release</string>
+    <!-- Names a title's TMDB rating on hover -->
+    <string name="discover_tmdb_score">TMDB User Score</string>
+    <!-- Fact of a discovered movie: its release dates -->
+    <plurals name="discover_release_dates">
+        <item quantity="one">Release Date</item>
+        <item quantity="other">Release Dates</item>
+    </plurals>
+    <!-- Fact of a discovered series: how long an episode runs -->
+    <string name="discover_episode_runtime">Episode Runtime</string>
+    <!-- Shows the rest of a discovered title's studios or networks -->
+    <string name="discover_show_more">Show More</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->

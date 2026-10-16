@@ -97,6 +97,26 @@
     <string name="discover_open_item">在媒体库中打开</string>
     <string name="discover_block_footer">屏蔽后的作品不能再被请求。</string>
     <string name="discover_downloading">下载中 %s%%</string>
+    <string name="discover_networks">电视网</string>
+    <string name="discover_status_rumored">传闻</string>
+    <string name="discover_status_planned">已计划</string>
+    <string name="discover_status_in_production">制作中</string>
+    <string name="discover_status_post_production">后期制作</string>
+    <string name="discover_status_released">已上映</string>
+    <string name="discover_status_canceled">已取消</string>
+    <string name="discover_status_pilot">试播</string>
+    <string name="discover_status_returning">连载中</string>
+    <string name="discover_status_ended">已完结</string>
+    <string name="discover_overview">简介</string>
+    <string name="discover_no_overview">暂无简介。</string>
+    <string name="discover_full_crew">查看全部职员</string>
+    <string name="discover_theatrical_release">影院上映</string>
+    <string name="discover_tmdb_score">TMDB 用户评分</string>
+    <plurals name="discover_release_dates">
+        <item quantity="other">上映日期</item>
+    </plurals>
+    <string name="discover_episode_runtime">单集时长</string>
+    <string name="discover_show_more">显示更多</string>
     <string name="library_sort">排序</string>
     <string name="library_filter">筛选</string>
     <plurals name="library_item_count">

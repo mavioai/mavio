@@ -58,6 +58,7 @@ export function parseFilters(raw: unknown): CatalogFilters | undefined {
     ascending: sort && r.ascending === true ? true : undefined,
     genres: strings(r.genres),
     studios: named(r.studios),
+    networks: named(r.networks),
     keywords: named(r.keywords),
     watchProviders: strings(r.watchProviders),
     watchRegion: code(r.watchRegion),
@@ -91,6 +92,7 @@ function SearchedValues({
   title,
   value,
   onChange,
+  searchable = true,
 }: {
   server: ServerEntry;
   catalog: string;
@@ -99,6 +101,8 @@ function SearchedValues({
   title: string;
   value: NamedValue[];
   onChange: (v: NamedValue[]) => void;
+  /** False for values looked up by ID only, as networks are: just the chosen ones. */
+  searchable?: boolean;
 }) {
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
@@ -125,14 +129,14 @@ function SearchedValues({
           ))}
         </div>
       )}
-      <input
+      {searchable && <input
         type="search"
         className={field}
         aria-label={t("discover.searchValues", { filter: title })}
         placeholder={t("discover.searchValues", { filter: title })}
         value={text}
         onChange={(e) => setText(e.target.value)}
-      />
+      />}
       {query !== "" && (
         <div className="flex max-h-32 flex-wrap gap-2 overflow-y-auto">
           {(found.data ?? [])
@@ -261,6 +265,16 @@ export function FiltersDialog({
         )}
         {takes(DiscoverFilter.STUDIO) && mediaKind === MediaKind.MOVIE && (
           <SearchedValues {...common} filter={DiscoverFilter.STUDIO} title={t("discover.studios")} value={f.studios ?? []} onChange={(studios) => set({ studios })} />
+        )}
+        {mediaKind === MediaKind.SERIES && (f.networks?.length ?? 0) > 0 && (
+          <SearchedValues
+            {...common}
+            filter={DiscoverFilter.NETWORK}
+            title={t("discover.networks")}
+            value={f.networks ?? []}
+            onChange={(networks) => set({ networks })}
+            searchable={false}
+          />
         )}
         {takes(DiscoverFilter.KEYWORD) && (
           <SearchedValues {...common} filter={DiscoverFilter.KEYWORD} title={t("discover.keywords")} value={f.keywords ?? []} onChange={(keywords) => set({ keywords })} />
