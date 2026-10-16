@@ -31476,6 +31476,1140 @@
           }
         }
       }
+    },
+    "assistant.title": {
+      "comment": "Name of the assistant: its button and the title of its panel.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assistant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助手"
+          }
+        }
+      }
+    },
+    "assistant.talk": {
+      "comment": "Microphone button of the assistant's panel, held to talk or tapped to talk until the speech ends.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold to Talk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按住说话"
+          }
+        }
+      }
+    },
+    "assistant.stopListening": {
+      "comment": "Microphone button of the assistant's panel while it listens.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Listening"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止聆听"
+          }
+        }
+      }
+    },
+    "assistant.placeholder": {
+      "comment": "Placeholder of the assistant's field for typed requests.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask or tell Mavio what to do"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向 Mavio 提问或下达指令"
+          }
+        }
+      }
+    },
+    "assistant.send": {
+      "comment": "Button sending a typed request to the assistant.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送"
+          }
+        }
+      }
+    },
+    "assistant.listening": {
+      "comment": "Status of the assistant's panel while it listens.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listening…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在聆听…"
+          }
+        }
+      }
+    },
+    "assistant.working": {
+      "comment": "Status of the assistant's panel while a request runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working on it…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在处理…"
+          }
+        }
+      }
+    },
+    "assistant.trySaying": {
+      "comment": "Heading of the examples of requests in the assistant's panel.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try saying"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "试着说"
+          }
+        }
+      }
+    },
+    "assistant.confirm": {
+      "comment": "Button confirming what the assistant asks to confirm.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认"
+          }
+        }
+      }
+    },
+    "assistant.shortcut": {
+      "comment": "Hint of the assistant's panel for keyboards; key is the key held.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold %@ to talk"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按住 %@ 说话"
+          }
+        }
+      }
+    },
+    "assistant.insecure": {
+      "comment": "Note of the assistant's panel when the page is served over plain HTTP.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone works only on a secure (HTTPS) address; type your request instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。"
+          }
+        }
+      }
+    },
+    "assistant.noMicrophone": {
+      "comment": "Error of the assistant's panel when the microphone cannot be opened; error says why.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone can't be used: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法使用麦克风：%@"
+          }
+        }
+      }
+    },
+    "assistant.microphoneDenied": {
+      "comment": "Error of the assistant's panel when the browser or the user refuses the microphone.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow this site to use the microphone to talk, or type your request."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请允许此网站使用麦克风以便说话，或改为输入请求。"
+          }
+        }
+      }
+    },
+    "assistant.noRecognizer": {
+      "comment": "Note of the assistant's panel when no recognizer can be used.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neither the server nor this browser recognizes speech; type your request instead."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务器和此浏览器都无法识别语音；请改为输入请求。"
+          }
+        }
+      }
+    },
+    "assistant.off": {
+      "comment": "Note of the assistant's panel when the server's assistant is turned off.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The assistant is off on this server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此服务器已关闭助手。"
+          }
+        }
+      }
+    },
+    "assistant.cantDo": {
+      "comment": "Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This page can't do that."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此页面无法执行该操作。"
+          }
+        }
+      }
+    },
+    "assistant.speakAnswers": {
+      "comment": "Setting: whether answers to spoken requests are read aloud.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speak Answers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "朗读回答"
+          }
+        }
+      }
+    },
+    "assistant.speakAnswersDetail": {
+      "comment": "Detail of the Speak Answers setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answers to spoken requests are read aloud"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "朗读语音请求的回答"
+          }
+        }
+      }
+    },
+    "assistant.voice": {
+      "comment": "Setting: the voice reading answers aloud.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音"
+          }
+        }
+      }
+    },
+    "assistant.deviceVoice": {
+      "comment": "Option of the Voice setting: the device's own voice for the answer's language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device's voice"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此设备的语音"
+          }
+        }
+      }
+    },
+    "assistant.recognition": {
+      "comment": "Setting: which recognizer is tried first.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech Recognition"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音识别"
+          }
+        }
+      }
+    },
+    "assistant.serverFirst": {
+      "comment": "Option of the Speech Recognition setting: the server's recognizer, then the device's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server first"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "优先使用服务器"
+          }
+        }
+      }
+    },
+    "assistant.deviceFirst": {
+      "comment": "Option of the Speech Recognition setting: the device's recognizer, then the server's.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device first"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "优先使用此设备"
+          }
+        }
+      }
+    },
+    "assistant.recognitionFooter": {
+      "comment": "Footer of the Speech Recognition setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most browsers recognize speech on their maker's servers; the server's recognizer sends audio only to the service its administrator chose."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "大多数浏览器在其厂商的服务器上识别语音；服务器的识别器只把音频发送给管理员选择的服务。"
+          }
+        }
+      }
+    },
+    "assistant.memory": {
+      "comment": "Group of the assistant's settings listing what it remembers about the user.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记忆"
+          }
+        }
+      }
+    },
+    "assistant.memoryFooter": {
+      "comment": "Footer of the assistant's memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you tell the assistant about yourself, kept on the server for its AI."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。"
+          }
+        }
+      }
+    },
+    "assistant.memoryOff": {
+      "comment": "Row of the assistant's memory when the server keeps none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory is off on this server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此服务器已关闭记忆。"
+          }
+        }
+      }
+    },
+    "assistant.noMemories": {
+      "comment": "Row of the assistant's memory when it is empty.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing remembered yet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有记住任何内容。"
+          }
+        }
+      }
+    },
+    "assistant.newMemory": {
+      "comment": "Placeholder of the field adding a memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something to remember"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要记住的事"
+          }
+        }
+      }
+    },
+    "assistant.remember": {
+      "comment": "Button adding a memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remember"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记住"
+          }
+        }
+      }
+    },
+    "assistant.forget": {
+      "comment": "Button deleting one memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记"
+          }
+        }
+      }
+    },
+    "assistant.forgetAll": {
+      "comment": "Button deleting every memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget Everything"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部忘记"
+          }
+        }
+      }
+    },
+    "assistant.forgetAllConfirm": {
+      "comment": "Confirmation of deleting every memory.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget everything the assistant remembers about you?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记助手记住的关于你的所有内容？"
+          }
+        }
+      }
+    },
+    "assistant.conversations": {
+      "comment": "Group of the assistant's settings listing the user's conversations.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversations"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对话"
+          }
+        }
+      }
+    },
+    "assistant.conversationsFooter": {
+      "comment": "Footer of the user's conversations with the assistant.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversations are deleted after the time the server keeps them."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对话会在服务器保留期满后删除。"
+          }
+        }
+      }
+    },
+    "assistant.noConversations": {
+      "comment": "Row of the conversations when there are none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No conversations yet."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有对话。"
+          }
+        }
+      }
+    },
+    "assistant.deleteConversation": {
+      "comment": "Button deleting a conversation with the assistant.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Conversation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除对话"
+          }
+        }
+      }
+    },
+    "assistant.settingsMessage": {
+      "comment": "Description of the assistant's settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How the assistant listens and answers on this device, and what it keeps about you."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助手在此设备上如何聆听和回答，以及它保存的关于你的内容。"
+          }
+        }
+      }
+    },
+    "assistant.server": {
+      "comment": "Group of a server's AI settings: the assistant's settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assistant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助手"
+          }
+        }
+      }
+    },
+    "assistant.enabled": {
+      "comment": "Setting: whether the server's assistant answers requests.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn On the Assistant"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开启助手"
+          }
+        }
+      }
+    },
+    "assistant.enabledDetail": {
+      "comment": "Detail of the setting turning the assistant on.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spoken and typed requests from every app"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接受所有应用的语音和文字请求"
+          }
+        }
+      }
+    },
+    "assistant.model": {
+      "comment": "Setting: the AI model answering what simple commands do not cover.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型"
+          }
+        }
+      }
+    },
+    "assistant.noModel": {
+      "comment": "Option of the assistant's model: no model, so that only the grammar's commands are understood.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None: simple commands only"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无：仅简单指令"
+          }
+        }
+      }
+    },
+    "assistant.codeMode": {
+      "comment": "Setting: whether the model writes scripts calling the tools.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code Mode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代码模式"
+          }
+        }
+      }
+    },
+    "assistant.codeModeDetail": {
+      "comment": "Detail of the Code Mode setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model writes scripts calling the tools; for models that code well"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型编写调用工具的脚本；适合擅长编程的模型"
+          }
+        }
+      }
+    },
+    "assistant.aiAccess": {
+      "comment": "Setting: which users' requests may go to the model.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who Uses AI"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "谁可以使用 AI"
+          }
+        }
+      }
+    },
+    "assistant.accessAll": {
+      "comment": "Option of Who Uses AI: every user.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everyone"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有人"
+          }
+        }
+      }
+    },
+    "assistant.accessAdmins": {
+      "comment": "Option of Who Uses AI: the administrators.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Administrators"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理员"
+          }
+        }
+      }
+    },
+    "assistant.accessSelected": {
+      "comment": "Option of Who Uses AI: the users chosen below.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected users"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选定的用户"
+          }
+        }
+      }
+    },
+    "assistant.idleMinutes": {
+      "comment": "Setting: the minutes without requests after which a new conversation starts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Conversation After (Minutes)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "多久后开始新对话（分钟）"
+          }
+        }
+      }
+    },
+    "assistant.retentionDays": {
+      "comment": "Setting: the days conversations are kept.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Conversations (Days)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对话保留（天）"
+          }
+        }
+      }
+    },
+    "assistant.serverMemory": {
+      "comment": "Setting: whether the assistant remembers what users tell it about themselves.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记忆"
+          }
+        }
+      }
+    },
+    "assistant.serverMemoryDetail": {
+      "comment": "Detail of the server's Memory setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remembers what users tell it about themselves"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记住用户讲述的关于自己的事"
+          }
+        }
+      }
+    },
+    "assistant.recognizer": {
+      "comment": "Setting: the speech recognizer of the assistant.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recognizer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "识别器"
+          }
+        }
+      }
+    },
+    "assistant.firstReady": {
+      "comment": "Option of the Recognizer setting: the first recognizer ready.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First ready"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第一个可用的"
+          }
+        }
+      }
+    },
+    "assistant.hints": {
+      "comment": "Setting: whether titles, names and devices are sent to the recognizer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send Hints"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送提示"
+          }
+        }
+      }
+    },
+    "assistant.hintsDetail": {
+      "comment": "Detail of the Send Hints setting.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Titles, names and devices help the recognizer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题、名称和设备有助于识别"
+          }
+        }
+      }
+    },
+    "assistant.defaultVoices": {
+      "comment": "Group of the server's default voice for each language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default Voices"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认语音"
+          }
+        }
+      }
+    },
+    "assistant.defaultVoicesFooter": {
+      "comment": "Footer of the default voices.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clients that speak with the server's voices use these unless the user picks one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用服务器语音的客户端会采用这些语音，除非用户另选。"
+          }
+        }
+      }
+    },
+    "assistant.language": {
+      "comment": "Field of a default voice: its language, as a code such as en or zh-CN.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
+          }
+        }
+      }
+    },
+    "assistant.addVoice": {
+      "comment": "Button adding a default voice for a language.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Voice"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加语音"
+          }
+        }
+      }
+    },
+    "assistant.noSpeech": {
+      "comment": "Row of the assistant's settings when no speech plugin runs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No speech plugin is ready: requests are typed, or recognized by the browser."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可用的语音插件：请求需要输入，或由浏览器识别。"
+          }
+        }
+      }
+    },
+    "assistant.saved": {
+      "comment": "Notice after the assistant's settings are saved.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

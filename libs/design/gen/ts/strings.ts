@@ -1738,7 +1738,70 @@ export type MessageKey =
   | 'collection.allMovies'
   | 'collection.block'
   | 'collection.unblock'
-  | 'collection.view';
+  | 'collection.view'
+  | 'assistant.title'
+  | 'assistant.talk'
+  | 'assistant.stopListening'
+  | 'assistant.placeholder'
+  | 'assistant.send'
+  | 'assistant.listening'
+  | 'assistant.working'
+  | 'assistant.trySaying'
+  | 'assistant.confirm'
+  | 'assistant.shortcut'
+  | 'assistant.insecure'
+  | 'assistant.noMicrophone'
+  | 'assistant.microphoneDenied'
+  | 'assistant.noRecognizer'
+  | 'assistant.off'
+  | 'assistant.cantDo'
+  | 'assistant.speakAnswers'
+  | 'assistant.speakAnswersDetail'
+  | 'assistant.voice'
+  | 'assistant.deviceVoice'
+  | 'assistant.recognition'
+  | 'assistant.serverFirst'
+  | 'assistant.deviceFirst'
+  | 'assistant.recognitionFooter'
+  | 'assistant.memory'
+  | 'assistant.memoryFooter'
+  | 'assistant.memoryOff'
+  | 'assistant.noMemories'
+  | 'assistant.newMemory'
+  | 'assistant.remember'
+  | 'assistant.forget'
+  | 'assistant.forgetAll'
+  | 'assistant.forgetAllConfirm'
+  | 'assistant.conversations'
+  | 'assistant.conversationsFooter'
+  | 'assistant.noConversations'
+  | 'assistant.deleteConversation'
+  | 'assistant.settingsMessage'
+  | 'assistant.server'
+  | 'assistant.enabled'
+  | 'assistant.enabledDetail'
+  | 'assistant.model'
+  | 'assistant.noModel'
+  | 'assistant.codeMode'
+  | 'assistant.codeModeDetail'
+  | 'assistant.aiAccess'
+  | 'assistant.accessAll'
+  | 'assistant.accessAdmins'
+  | 'assistant.accessSelected'
+  | 'assistant.idleMinutes'
+  | 'assistant.retentionDays'
+  | 'assistant.serverMemory'
+  | 'assistant.serverMemoryDetail'
+  | 'assistant.recognizer'
+  | 'assistant.firstReady'
+  | 'assistant.hints'
+  | 'assistant.hintsDetail'
+  | 'assistant.defaultVoices'
+  | 'assistant.defaultVoicesFooter'
+  | 'assistant.language'
+  | 'assistant.addVoice'
+  | 'assistant.noSpeech'
+  | 'assistant.saved';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -3469,7 +3532,70 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "collection.allMovies": "All Movies",
     "collection.block": "Blocklist",
     "collection.unblock": "Remove from Blocklist",
-    "collection.view": "View"
+    "collection.view": "View",
+    "assistant.title": "Assistant",
+    "assistant.talk": "Hold to Talk",
+    "assistant.stopListening": "Stop Listening",
+    "assistant.placeholder": "Ask or tell Mavio what to do",
+    "assistant.send": "Send",
+    "assistant.listening": "Listening…",
+    "assistant.working": "Working on it…",
+    "assistant.trySaying": "Try saying",
+    "assistant.confirm": "Confirm",
+    "assistant.shortcut": "Hold {key} to talk",
+    "assistant.insecure": "The microphone works only on a secure (HTTPS) address; type your request instead.",
+    "assistant.noMicrophone": "The microphone can't be used: {error}",
+    "assistant.microphoneDenied": "Allow this site to use the microphone to talk, or type your request.",
+    "assistant.noRecognizer": "Neither the server nor this browser recognizes speech; type your request instead.",
+    "assistant.off": "The assistant is off on this server.",
+    "assistant.cantDo": "This page can't do that.",
+    "assistant.speakAnswers": "Speak Answers",
+    "assistant.speakAnswersDetail": "Answers to spoken requests are read aloud",
+    "assistant.voice": "Voice",
+    "assistant.deviceVoice": "This device's voice",
+    "assistant.recognition": "Speech Recognition",
+    "assistant.serverFirst": "Server first",
+    "assistant.deviceFirst": "This device first",
+    "assistant.recognitionFooter": "Most browsers recognize speech on their maker's servers; the server's recognizer sends audio only to the service its administrator chose.",
+    "assistant.memory": "Memory",
+    "assistant.memoryFooter": "What you tell the assistant about yourself, kept on the server for its AI.",
+    "assistant.memoryOff": "Memory is off on this server.",
+    "assistant.noMemories": "Nothing remembered yet.",
+    "assistant.newMemory": "Something to remember",
+    "assistant.remember": "Remember",
+    "assistant.forget": "Forget",
+    "assistant.forgetAll": "Forget Everything",
+    "assistant.forgetAllConfirm": "Forget everything the assistant remembers about you?",
+    "assistant.conversations": "Conversations",
+    "assistant.conversationsFooter": "Conversations are deleted after the time the server keeps them.",
+    "assistant.noConversations": "No conversations yet.",
+    "assistant.deleteConversation": "Delete Conversation",
+    "assistant.settingsMessage": "How the assistant listens and answers on this device, and what it keeps about you.",
+    "assistant.server": "Assistant",
+    "assistant.enabled": "Turn On the Assistant",
+    "assistant.enabledDetail": "Spoken and typed requests from every app",
+    "assistant.model": "Model",
+    "assistant.noModel": "None: simple commands only",
+    "assistant.codeMode": "Code Mode",
+    "assistant.codeModeDetail": "The model writes scripts calling the tools; for models that code well",
+    "assistant.aiAccess": "Who Uses AI",
+    "assistant.accessAll": "Everyone",
+    "assistant.accessAdmins": "Administrators",
+    "assistant.accessSelected": "Selected users",
+    "assistant.idleMinutes": "New Conversation After (Minutes)",
+    "assistant.retentionDays": "Keep Conversations (Days)",
+    "assistant.serverMemory": "Memory",
+    "assistant.serverMemoryDetail": "Remembers what users tell it about themselves",
+    "assistant.recognizer": "Recognizer",
+    "assistant.firstReady": "First ready",
+    "assistant.hints": "Send Hints",
+    "assistant.hintsDetail": "Titles, names and devices help the recognizer",
+    "assistant.defaultVoices": "Default Voices",
+    "assistant.defaultVoicesFooter": "Clients that speak with the server's voices use these unless the user picks one.",
+    "assistant.language": "Language",
+    "assistant.addVoice": "Add Voice",
+    "assistant.noSpeech": "No speech plugin is ready: requests are typed, or recognized by the browser.",
+    "assistant.saved": "Saved."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -5198,6 +5324,69 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "collection.allMovies": "全部电影",
     "collection.block": "屏蔽",
     "collection.unblock": "取消屏蔽",
-    "collection.view": "查看"
+    "collection.view": "查看",
+    "assistant.title": "助手",
+    "assistant.talk": "按住说话",
+    "assistant.stopListening": "停止聆听",
+    "assistant.placeholder": "向 Mavio 提问或下达指令",
+    "assistant.send": "发送",
+    "assistant.listening": "正在聆听…",
+    "assistant.working": "正在处理…",
+    "assistant.trySaying": "试着说",
+    "assistant.confirm": "确认",
+    "assistant.shortcut": "按住 {key} 说话",
+    "assistant.insecure": "麦克风只能在安全（HTTPS）地址下使用；请改为输入请求。",
+    "assistant.noMicrophone": "无法使用麦克风：{error}",
+    "assistant.microphoneDenied": "请允许此网站使用麦克风以便说话，或改为输入请求。",
+    "assistant.noRecognizer": "服务器和此浏览器都无法识别语音；请改为输入请求。",
+    "assistant.off": "此服务器已关闭助手。",
+    "assistant.cantDo": "此页面无法执行该操作。",
+    "assistant.speakAnswers": "朗读回答",
+    "assistant.speakAnswersDetail": "朗读语音请求的回答",
+    "assistant.voice": "语音",
+    "assistant.deviceVoice": "此设备的语音",
+    "assistant.recognition": "语音识别",
+    "assistant.serverFirst": "优先使用服务器",
+    "assistant.deviceFirst": "优先使用此设备",
+    "assistant.recognitionFooter": "大多数浏览器在其厂商的服务器上识别语音；服务器的识别器只把音频发送给管理员选择的服务。",
+    "assistant.memory": "记忆",
+    "assistant.memoryFooter": "你告诉助手的关于你自己的事，保存在服务器上供其 AI 使用。",
+    "assistant.memoryOff": "此服务器已关闭记忆。",
+    "assistant.noMemories": "还没有记住任何内容。",
+    "assistant.newMemory": "要记住的事",
+    "assistant.remember": "记住",
+    "assistant.forget": "忘记",
+    "assistant.forgetAll": "全部忘记",
+    "assistant.forgetAllConfirm": "忘记助手记住的关于你的所有内容？",
+    "assistant.conversations": "对话",
+    "assistant.conversationsFooter": "对话会在服务器保留期满后删除。",
+    "assistant.noConversations": "还没有对话。",
+    "assistant.deleteConversation": "删除对话",
+    "assistant.settingsMessage": "助手在此设备上如何聆听和回答，以及它保存的关于你的内容。",
+    "assistant.server": "助手",
+    "assistant.enabled": "开启助手",
+    "assistant.enabledDetail": "接受所有应用的语音和文字请求",
+    "assistant.model": "模型",
+    "assistant.noModel": "无：仅简单指令",
+    "assistant.codeMode": "代码模式",
+    "assistant.codeModeDetail": "模型编写调用工具的脚本；适合擅长编程的模型",
+    "assistant.aiAccess": "谁可以使用 AI",
+    "assistant.accessAll": "所有人",
+    "assistant.accessAdmins": "管理员",
+    "assistant.accessSelected": "选定的用户",
+    "assistant.idleMinutes": "多久后开始新对话（分钟）",
+    "assistant.retentionDays": "对话保留（天）",
+    "assistant.serverMemory": "记忆",
+    "assistant.serverMemoryDetail": "记住用户讲述的关于自己的事",
+    "assistant.recognizer": "识别器",
+    "assistant.firstReady": "第一个可用的",
+    "assistant.hints": "发送提示",
+    "assistant.hintsDetail": "标题、名称和设备有助于识别",
+    "assistant.defaultVoices": "默认语音",
+    "assistant.defaultVoicesFooter": "使用服务器语音的客户端会采用这些语音，除非用户另选。",
+    "assistant.language": "语言",
+    "assistant.addVoice": "添加语音",
+    "assistant.noSpeech": "没有可用的语音插件：请求需要输入，或由浏览器识别。",
+    "assistant.saved": "已保存。"
   }
 };

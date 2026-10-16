@@ -3518,4 +3518,130 @@
     <string name="collection_unblock">Remove from Blocklist</string>
     <!-- Link from a movie's page to the page of the collection it belongs to. -->
     <string name="collection_view">View</string>
+    <!-- Name of the assistant: its button and the title of its panel. -->
+    <string name="assistant_title">Assistant</string>
+    <!-- Microphone button of the assistant's panel, held to talk or tapped to talk until the speech ends. -->
+    <string name="assistant_talk">Hold to Talk</string>
+    <!-- Microphone button of the assistant's panel while it listens. -->
+    <string name="assistant_stop_listening">Stop Listening</string>
+    <!-- Placeholder of the assistant's field for typed requests. -->
+    <string name="assistant_placeholder">Ask or tell Mavio what to do</string>
+    <!-- Button sending a typed request to the assistant. -->
+    <string name="assistant_send">Send</string>
+    <!-- Status of the assistant's panel while it listens. -->
+    <string name="assistant_listening">Listening…</string>
+    <!-- Status of the assistant's panel while a request runs. -->
+    <string name="assistant_working">Working on it…</string>
+    <!-- Heading of the examples of requests in the assistant's panel. -->
+    <string name="assistant_try_saying">Try saying</string>
+    <!-- Button confirming what the assistant asks to confirm. -->
+    <string name="assistant_confirm">Confirm</string>
+    <!-- Hint of the assistant's panel for keyboards; key is the key held. -->
+    <string name="assistant_shortcut">Hold %s to talk</string>
+    <!-- Note of the assistant's panel when the page is served over plain HTTP. -->
+    <string name="assistant_insecure">The microphone works only on a secure (HTTPS) address; type your request instead.</string>
+    <!-- Error of the assistant's panel when the microphone cannot be opened; error says why. -->
+    <string name="assistant_no_microphone">The microphone can\'t be used: %s</string>
+    <!-- Error of the assistant's panel when the browser or the user refuses the microphone. -->
+    <string name="assistant_microphone_denied">Allow this site to use the microphone to talk, or type your request.</string>
+    <!-- Note of the assistant's panel when no recognizer can be used. -->
+    <string name="assistant_no_recognizer">Neither the server nor this browser recognizes speech; type your request instead.</string>
+    <!-- Note of the assistant's panel when the server's assistant is turned off. -->
+    <string name="assistant_off">The assistant is off on this server.</string>
+    <!-- Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing. -->
+    <string name="assistant_cant_do">This page can\'t do that.</string>
+    <!-- Setting: whether answers to spoken requests are read aloud. -->
+    <string name="assistant_speak_answers">Speak Answers</string>
+    <!-- Detail of the Speak Answers setting. -->
+    <string name="assistant_speak_answers_detail">Answers to spoken requests are read aloud</string>
+    <!-- Setting: the voice reading answers aloud. -->
+    <string name="assistant_voice">Voice</string>
+    <!-- Option of the Voice setting: the device's own voice for the answer's language. -->
+    <string name="assistant_device_voice">This device\'s voice</string>
+    <!-- Setting: which recognizer is tried first. -->
+    <string name="assistant_recognition">Speech Recognition</string>
+    <!-- Option of the Speech Recognition setting: the server's recognizer, then the device's. -->
+    <string name="assistant_server_first">Server first</string>
+    <!-- Option of the Speech Recognition setting: the device's recognizer, then the server's. -->
+    <string name="assistant_device_first">This device first</string>
+    <!-- Footer of the Speech Recognition setting. -->
+    <string name="assistant_recognition_footer">Most browsers recognize speech on their maker\'s servers; the server\'s recognizer sends audio only to the service its administrator chose.</string>
+    <!-- Group of the assistant's settings listing what it remembers about the user. -->
+    <string name="assistant_memory">Memory</string>
+    <!-- Footer of the assistant's memory. -->
+    <string name="assistant_memory_footer">What you tell the assistant about yourself, kept on the server for its AI.</string>
+    <!-- Row of the assistant's memory when the server keeps none. -->
+    <string name="assistant_memory_off">Memory is off on this server.</string>
+    <!-- Row of the assistant's memory when it is empty. -->
+    <string name="assistant_no_memories">Nothing remembered yet.</string>
+    <!-- Placeholder of the field adding a memory. -->
+    <string name="assistant_new_memory">Something to remember</string>
+    <!-- Button adding a memory. -->
+    <string name="assistant_remember">Remember</string>
+    <!-- Button deleting one memory. -->
+    <string name="assistant_forget">Forget</string>
+    <!-- Button deleting every memory. -->
+    <string name="assistant_forget_all">Forget Everything</string>
+    <!-- Confirmation of deleting every memory. -->
+    <string name="assistant_forget_all_confirm">Forget everything the assistant remembers about you?</string>
+    <!-- Group of the assistant's settings listing the user's conversations. -->
+    <string name="assistant_conversations">Conversations</string>
+    <!-- Footer of the user's conversations with the assistant. -->
+    <string name="assistant_conversations_footer">Conversations are deleted after the time the server keeps them.</string>
+    <!-- Row of the conversations when there are none. -->
+    <string name="assistant_no_conversations">No conversations yet.</string>
+    <!-- Button deleting a conversation with the assistant. -->
+    <string name="assistant_delete_conversation">Delete Conversation</string>
+    <!-- Description of the assistant's settings. -->
+    <string name="assistant_settings_message">How the assistant listens and answers on this device, and what it keeps about you.</string>
+    <!-- Group of a server's AI settings: the assistant's settings. -->
+    <string name="assistant_server">Assistant</string>
+    <!-- Setting: whether the server's assistant answers requests. -->
+    <string name="assistant_enabled">Turn On the Assistant</string>
+    <!-- Detail of the setting turning the assistant on. -->
+    <string name="assistant_enabled_detail">Spoken and typed requests from every app</string>
+    <!-- Setting: the AI model answering what simple commands do not cover. -->
+    <string name="assistant_model">Model</string>
+    <!-- Option of the assistant's model: no model, so that only the grammar's commands are understood. -->
+    <string name="assistant_no_model">None: simple commands only</string>
+    <!-- Setting: whether the model writes scripts calling the tools. -->
+    <string name="assistant_code_mode">Code Mode</string>
+    <!-- Detail of the Code Mode setting. -->
+    <string name="assistant_code_mode_detail">The model writes scripts calling the tools; for models that code well</string>
+    <!-- Setting: which users' requests may go to the model. -->
+    <string name="assistant_ai_access">Who Uses AI</string>
+    <!-- Option of Who Uses AI: every user. -->
+    <string name="assistant_access_all">Everyone</string>
+    <!-- Option of Who Uses AI: the administrators. -->
+    <string name="assistant_access_admins">Administrators</string>
+    <!-- Option of Who Uses AI: the users chosen below. -->
+    <string name="assistant_access_selected">Selected users</string>
+    <!-- Setting: the minutes without requests after which a new conversation starts. -->
+    <string name="assistant_idle_minutes">New Conversation After (Minutes)</string>
+    <!-- Setting: the days conversations are kept. -->
+    <string name="assistant_retention_days">Keep Conversations (Days)</string>
+    <!-- Setting: whether the assistant remembers what users tell it about themselves. -->
+    <string name="assistant_server_memory">Memory</string>
+    <!-- Detail of the server's Memory setting. -->
+    <string name="assistant_server_memory_detail">Remembers what users tell it about themselves</string>
+    <!-- Setting: the speech recognizer of the assistant. -->
+    <string name="assistant_recognizer">Recognizer</string>
+    <!-- Option of the Recognizer setting: the first recognizer ready. -->
+    <string name="assistant_first_ready">First ready</string>
+    <!-- Setting: whether titles, names and devices are sent to the recognizer. -->
+    <string name="assistant_hints">Send Hints</string>
+    <!-- Detail of the Send Hints setting. -->
+    <string name="assistant_hints_detail">Titles, names and devices help the recognizer</string>
+    <!-- Group of the server's default voice for each language. -->
+    <string name="assistant_default_voices">Default Voices</string>
+    <!-- Footer of the default voices. -->
+    <string name="assistant_default_voices_footer">Clients that speak with the server\'s voices use these unless the user picks one.</string>
+    <!-- Field of a default voice: its language, as a code such as en or zh-CN. -->
+    <string name="assistant_language">Language</string>
+    <!-- Button adding a default voice for a language. -->
+    <string name="assistant_add_voice">Add Voice</string>
+    <!-- Row of the assistant's settings when no speech plugin runs. -->
+    <string name="assistant_no_speech">No speech plugin is ready: requests are typed, or recognized by the browser.</string>
+    <!-- Notice after the assistant's settings are saved. -->
+    <string name="assistant_saved">Saved.</string>
 </resources>

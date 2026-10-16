@@ -5531,4 +5531,197 @@ public enum MavioStrings {
 
     /// Link from a movie's page to the page of the collection it belongs to.
     public static var collectionView: String { NSLocalizedString("collection.view", bundle: .module, comment: "") }
+
+    /// Name of the assistant: its button and the title of its panel.
+    public static var assistantTitle: String { NSLocalizedString("assistant.title", bundle: .module, comment: "") }
+
+    /// Microphone button of the assistant's panel, held to talk or tapped to talk until the speech ends.
+    public static var assistantTalk: String { NSLocalizedString("assistant.talk", bundle: .module, comment: "") }
+
+    /// Microphone button of the assistant's panel while it listens.
+    public static var assistantStopListening: String { NSLocalizedString("assistant.stopListening", bundle: .module, comment: "") }
+
+    /// Placeholder of the assistant's field for typed requests.
+    public static var assistantPlaceholder: String { NSLocalizedString("assistant.placeholder", bundle: .module, comment: "") }
+
+    /// Button sending a typed request to the assistant.
+    public static var assistantSend: String { NSLocalizedString("assistant.send", bundle: .module, comment: "") }
+
+    /// Status of the assistant's panel while it listens.
+    public static var assistantListening: String { NSLocalizedString("assistant.listening", bundle: .module, comment: "") }
+
+    /// Status of the assistant's panel while a request runs.
+    public static var assistantWorking: String { NSLocalizedString("assistant.working", bundle: .module, comment: "") }
+
+    /// Heading of the examples of requests in the assistant's panel.
+    public static var assistantTrySaying: String { NSLocalizedString("assistant.trySaying", bundle: .module, comment: "") }
+
+    /// Button confirming what the assistant asks to confirm.
+    public static var assistantConfirm: String { NSLocalizedString("assistant.confirm", bundle: .module, comment: "") }
+
+    /// Hint of the assistant's panel for keyboards; key is the key held.
+    public static func assistantShortcut(key: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("assistant.shortcut", bundle: .module, comment: ""), key)
+    }
+
+    /// Note of the assistant's panel when the page is served over plain HTTP.
+    public static var assistantInsecure: String { NSLocalizedString("assistant.insecure", bundle: .module, comment: "") }
+
+    /// Error of the assistant's panel when the microphone cannot be opened; error says why.
+    public static func assistantNoMicrophone(error: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("assistant.noMicrophone", bundle: .module, comment: ""), error)
+    }
+
+    /// Error of the assistant's panel when the browser or the user refuses the microphone.
+    public static var assistantMicrophoneDenied: String { NSLocalizedString("assistant.microphoneDenied", bundle: .module, comment: "") }
+
+    /// Note of the assistant's panel when no recognizer can be used.
+    public static var assistantNoRecognizer: String { NSLocalizedString("assistant.noRecognizer", bundle: .module, comment: "") }
+
+    /// Note of the assistant's panel when the server's assistant is turned off.
+    public static var assistantOff: String { NSLocalizedString("assistant.off", bundle: .module, comment: "") }
+
+    /// Answer of the assistant when the page cannot carry out an action, such as controlling playback with nothing playing.
+    public static var assistantCantDo: String { NSLocalizedString("assistant.cantDo", bundle: .module, comment: "") }
+
+    /// Setting: whether answers to spoken requests are read aloud.
+    public static var assistantSpeakAnswers: String { NSLocalizedString("assistant.speakAnswers", bundle: .module, comment: "") }
+
+    /// Detail of the Speak Answers setting.
+    public static var assistantSpeakAnswersDetail: String { NSLocalizedString("assistant.speakAnswersDetail", bundle: .module, comment: "") }
+
+    /// Setting: the voice reading answers aloud.
+    public static var assistantVoice: String { NSLocalizedString("assistant.voice", bundle: .module, comment: "") }
+
+    /// Option of the Voice setting: the device's own voice for the answer's language.
+    public static var assistantDeviceVoice: String { NSLocalizedString("assistant.deviceVoice", bundle: .module, comment: "") }
+
+    /// Setting: which recognizer is tried first.
+    public static var assistantRecognition: String { NSLocalizedString("assistant.recognition", bundle: .module, comment: "") }
+
+    /// Option of the Speech Recognition setting: the server's recognizer, then the device's.
+    public static var assistantServerFirst: String { NSLocalizedString("assistant.serverFirst", bundle: .module, comment: "") }
+
+    /// Option of the Speech Recognition setting: the device's recognizer, then the server's.
+    public static var assistantDeviceFirst: String { NSLocalizedString("assistant.deviceFirst", bundle: .module, comment: "") }
+
+    /// Footer of the Speech Recognition setting.
+    public static var assistantRecognitionFooter: String { NSLocalizedString("assistant.recognitionFooter", bundle: .module, comment: "") }
+
+    /// Group of the assistant's settings listing what it remembers about the user.
+    public static var assistantMemory: String { NSLocalizedString("assistant.memory", bundle: .module, comment: "") }
+
+    /// Footer of the assistant's memory.
+    public static var assistantMemoryFooter: String { NSLocalizedString("assistant.memoryFooter", bundle: .module, comment: "") }
+
+    /// Row of the assistant's memory when the server keeps none.
+    public static var assistantMemoryOff: String { NSLocalizedString("assistant.memoryOff", bundle: .module, comment: "") }
+
+    /// Row of the assistant's memory when it is empty.
+    public static var assistantNoMemories: String { NSLocalizedString("assistant.noMemories", bundle: .module, comment: "") }
+
+    /// Placeholder of the field adding a memory.
+    public static var assistantNewMemory: String { NSLocalizedString("assistant.newMemory", bundle: .module, comment: "") }
+
+    /// Button adding a memory.
+    public static var assistantRemember: String { NSLocalizedString("assistant.remember", bundle: .module, comment: "") }
+
+    /// Button deleting one memory.
+    public static var assistantForget: String { NSLocalizedString("assistant.forget", bundle: .module, comment: "") }
+
+    /// Button deleting every memory.
+    public static var assistantForgetAll: String { NSLocalizedString("assistant.forgetAll", bundle: .module, comment: "") }
+
+    /// Confirmation of deleting every memory.
+    public static var assistantForgetAllConfirm: String { NSLocalizedString("assistant.forgetAllConfirm", bundle: .module, comment: "") }
+
+    /// Group of the assistant's settings listing the user's conversations.
+    public static var assistantConversations: String { NSLocalizedString("assistant.conversations", bundle: .module, comment: "") }
+
+    /// Footer of the user's conversations with the assistant.
+    public static var assistantConversationsFooter: String { NSLocalizedString("assistant.conversationsFooter", bundle: .module, comment: "") }
+
+    /// Row of the conversations when there are none.
+    public static var assistantNoConversations: String { NSLocalizedString("assistant.noConversations", bundle: .module, comment: "") }
+
+    /// Button deleting a conversation with the assistant.
+    public static var assistantDeleteConversation: String { NSLocalizedString("assistant.deleteConversation", bundle: .module, comment: "") }
+
+    /// Description of the assistant's settings.
+    public static var assistantSettingsMessage: String { NSLocalizedString("assistant.settingsMessage", bundle: .module, comment: "") }
+
+    /// Group of a server's AI settings: the assistant's settings.
+    public static var assistantServer: String { NSLocalizedString("assistant.server", bundle: .module, comment: "") }
+
+    /// Setting: whether the server's assistant answers requests.
+    public static var assistantEnabled: String { NSLocalizedString("assistant.enabled", bundle: .module, comment: "") }
+
+    /// Detail of the setting turning the assistant on.
+    public static var assistantEnabledDetail: String { NSLocalizedString("assistant.enabledDetail", bundle: .module, comment: "") }
+
+    /// Setting: the AI model answering what simple commands do not cover.
+    public static var assistantModel: String { NSLocalizedString("assistant.model", bundle: .module, comment: "") }
+
+    /// Option of the assistant's model: no model, so that only the grammar's commands are understood.
+    public static var assistantNoModel: String { NSLocalizedString("assistant.noModel", bundle: .module, comment: "") }
+
+    /// Setting: whether the model writes scripts calling the tools.
+    public static var assistantCodeMode: String { NSLocalizedString("assistant.codeMode", bundle: .module, comment: "") }
+
+    /// Detail of the Code Mode setting.
+    public static var assistantCodeModeDetail: String { NSLocalizedString("assistant.codeModeDetail", bundle: .module, comment: "") }
+
+    /// Setting: which users' requests may go to the model.
+    public static var assistantAiAccess: String { NSLocalizedString("assistant.aiAccess", bundle: .module, comment: "") }
+
+    /// Option of Who Uses AI: every user.
+    public static var assistantAccessAll: String { NSLocalizedString("assistant.accessAll", bundle: .module, comment: "") }
+
+    /// Option of Who Uses AI: the administrators.
+    public static var assistantAccessAdmins: String { NSLocalizedString("assistant.accessAdmins", bundle: .module, comment: "") }
+
+    /// Option of Who Uses AI: the users chosen below.
+    public static var assistantAccessSelected: String { NSLocalizedString("assistant.accessSelected", bundle: .module, comment: "") }
+
+    /// Setting: the minutes without requests after which a new conversation starts.
+    public static var assistantIdleMinutes: String { NSLocalizedString("assistant.idleMinutes", bundle: .module, comment: "") }
+
+    /// Setting: the days conversations are kept.
+    public static var assistantRetentionDays: String { NSLocalizedString("assistant.retentionDays", bundle: .module, comment: "") }
+
+    /// Setting: whether the assistant remembers what users tell it about themselves.
+    public static var assistantServerMemory: String { NSLocalizedString("assistant.serverMemory", bundle: .module, comment: "") }
+
+    /// Detail of the server's Memory setting.
+    public static var assistantServerMemoryDetail: String { NSLocalizedString("assistant.serverMemoryDetail", bundle: .module, comment: "") }
+
+    /// Setting: the speech recognizer of the assistant.
+    public static var assistantRecognizer: String { NSLocalizedString("assistant.recognizer", bundle: .module, comment: "") }
+
+    /// Option of the Recognizer setting: the first recognizer ready.
+    public static var assistantFirstReady: String { NSLocalizedString("assistant.firstReady", bundle: .module, comment: "") }
+
+    /// Setting: whether titles, names and devices are sent to the recognizer.
+    public static var assistantHints: String { NSLocalizedString("assistant.hints", bundle: .module, comment: "") }
+
+    /// Detail of the Send Hints setting.
+    public static var assistantHintsDetail: String { NSLocalizedString("assistant.hintsDetail", bundle: .module, comment: "") }
+
+    /// Group of the server's default voice for each language.
+    public static var assistantDefaultVoices: String { NSLocalizedString("assistant.defaultVoices", bundle: .module, comment: "") }
+
+    /// Footer of the default voices.
+    public static var assistantDefaultVoicesFooter: String { NSLocalizedString("assistant.defaultVoicesFooter", bundle: .module, comment: "") }
+
+    /// Field of a default voice: its language, as a code such as en or zh-CN.
+    public static var assistantLanguage: String { NSLocalizedString("assistant.language", bundle: .module, comment: "") }
+
+    /// Button adding a default voice for a language.
+    public static var assistantAddVoice: String { NSLocalizedString("assistant.addVoice", bundle: .module, comment: "") }
+
+    /// Row of the assistant's settings when no speech plugin runs.
+    public static var assistantNoSpeech: String { NSLocalizedString("assistant.noSpeech", bundle: .module, comment: "") }
+
+    /// Notice after the assistant's settings are saved.
+    public static var assistantSaved: String { NSLocalizedString("assistant.saved", bundle: .module, comment: "") }
 }
