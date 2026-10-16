@@ -27,6 +27,7 @@
   "pictureInPicture": "picture-in-picture",
   "loop": "repeat",
   "speed": "gauge",
+  "activity": "pulse",
   "cast": "screencast",
   "more": "dots-three",
   "moreVertical": "dots-three-vertical",
