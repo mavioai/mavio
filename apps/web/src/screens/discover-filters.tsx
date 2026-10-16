@@ -23,14 +23,8 @@ const sortNames: Record<DiscoverSort, () => string> = {
   [DiscoverSort.TITLE]: () => t("discover.sortTitle"),
 };
 
-/** The browser's country, for the streaming services offered in it. */
-export function watchRegion(): string {
-  try {
-    return new Intl.Locale(navigator.language).maximize().region ?? "US";
-  } catch {
-    return "US";
-  }
-}
+/** The country of the streaming services until another is chosen, the one with the most of them. */
+const defaultRegion = "US";
 
 const strings = (v: unknown): string[] | undefined => {
   const a = Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x !== "").slice(0, 50) : [];
@@ -274,7 +268,7 @@ export function FiltersDialog({
   const takes = (x: DiscoverFilter) => catalog.filters.includes(x);
   const mediaKind = kind === MediaKind.UNSPECIFIED ? MediaKind.MOVIE : kind;
   const { languages, countries } = useLocalization(server);
-  const region = f.watchRegion ?? watchRegion();
+  const region = f.watchRegion ?? defaultRegion;
   const year = new Date().getFullYear() + 5;
   const common = { server, catalog: catalog.id, mediaKind };
   return (
