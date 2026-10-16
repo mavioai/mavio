@@ -207,7 +207,7 @@ go build -o plugin .                                                     # 子�
 * **apple**（macOS 与 Xcode 27，即 runner 的 `xcode-27` 镜像，因为 `Package.resolved` 文件以 Xcode 27 生成），每个平台一个任务，使各自的构建不争用同一 runner 的 CPU：**Apple (macOS)** 负责 `libs/apple` 与 `apps/macos`，**Apple (iOS)** 负责 `apps/ios`，**Apple (tvOS)** 负责 `apps/tvos`，各自在 **plan** 发现其任一项目受影响时运行。每个任务对其受影响的项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 只为其平台构建，生成的 Xcode 工程与 `generate` 写出的不一致时失败。
 * **android**（Linux），在 **plan** 发现 Android 项目受影响时运行：对这些项目运行 `nx run-many -t lint build test`，核心以 `dev` profile 构建。
 * **media**（Linux、macOS），在服务端受影响时运行：安装 jellyfin-ffmpeg 与 rclone，生成测试媒体，不使用 Nx 缓存运行 `media`、`streaming`、`rclone` 与 `server` 的测试，使 ffmpeg 与 rclone 的集成测试与冒烟测试在 runner 的硬件上执行。
-* **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台，并与锁定版本的 rclone 一起打包；各平台并行构建。
+* **dist**（Linux），在服务端受影响时运行：`nx run server:dist`，确保服务端能交叉编译到所有受支持的平台，并与锁定版本的 rclone 一起打包；各平台并行构建，每次两个（`MAVIO_DIST_JOBS`），因为更多平台同时从头构建会耗尽 runner 的内存。
 * **image**（Linux），在服务端受影响时运行：为 linux/amd64 与 linux/arm64 构建容器镜像（不推送），再运行 amd64 镜像直到健康检查通过。
 
 `.github/workflows/snapshots.yml` 运行各客户端的快照测试（[客户端](clients.zh-CN.md) §6.8），由人在 Actions 页面手动触发（`workflow_dispatch`），而不是每次推送都运行，因为参考图在 UI 稳定后才统一录制：**Web**（linux arm64，因为参考图在 Apple silicon 上录制）运行 `nx run web:snapshot`，然后运行 `design:gallery`，上传画廊与比对结果；**iOS**（`xcode-27` 镜像，因为参考图以 Xcode 27 生成）以 `dev` profile 为 iOS 模拟器构建的核心，在模拟器上运行 `apple:snapshot`，并上传不一致的快照；**Android**（Linux）运行 `android-lib:snapshot`，并上传不一致快照的图片。其任务恢复 **ci.yml** 的缓存，不保存缓存。
