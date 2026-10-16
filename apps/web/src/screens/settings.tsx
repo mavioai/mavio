@@ -3,9 +3,11 @@
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
-// overview, activity, general settings, libraries, users, transcoding, storage,
-// acquisition, subtitles, plugins and tasks. Wide windows show them
-// beside their own sidebar; phones list them first.
+// overview, general settings, users and API keys, and menus of the rest:
+// media, acquisition and downloads, extensions, and monitoring and
+// maintenance. Wide windows show them beside their own sidebar, the menus
+// opening in place; phones and televisions list them first, a menu as a
+// list of its own.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
@@ -57,6 +59,7 @@ import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
+import { isMenu, type MenuId, menuOf, menuSections } from "./settings-menus.ts";
 
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
@@ -90,20 +93,36 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
 
+const menus: Record<MenuId, { icon: IconName; color: string; title: () => string }> = {
+  media: { icon: "movies", color: "#FF9F0A", title: () => t("settings.mediaMenu") },
+  acquiring: { icon: "cloud", color: "#30D158", title: () => t("settings.acquisitionMenu") },
+  extensions: { icon: "plugins", color: "#5E5CE6", title: () => t("settings.extensionsMenu") },
+  maintenance: { icon: "admin", color: "#8E8E93", title: () => t("settings.maintenanceMenu") },
+};
+
+/** An entry of a group: a section, or a menu of sections. */
+type Entry = SectionId | MenuId;
+
+function lookOf(e: Entry) {
+  return isMenu(e) ? menus[e] : sections[e];
+}
+
 /**
- * The groups of sections: this device's, and the server's, in the order a
- * server is set up and kept: the server and who reaches it, its media,
- * acquiring media, what extends it, and watching over and maintaining it.
+ * The groups: this device's sections, and the server's, in the order a
+ * server is set up and kept: the server and who reaches it, then the menus
+ * of its media, of acquiring media, of what extends it, and of watching
+ * over and maintaining it.
  */
-const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
-  { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "users", "devices", "api-keys", "libraries", "storage", "transcoding", "acquisition", "wanted", "downloads", "subtitles", "plugins", "ai", "conversations", "activity", "issues", "tasks", "logs", "backups"], server: true },
+const allGroups: { title: () => string; entries: Entry[]; server?: boolean }[] = [
+  { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio"] },
+  { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "media", "acquiring", "extensions", "maintenance"], server: true },
 ];
 
-/** The server whose settings are shown and whether the user administers it. */
+/** The server whose settings are shown, whether the user administers it, and whether that is known yet. */
 export interface Chosen {
   server: ServerEntry;
   admin: boolean;
+  known: boolean;
 }
 
 /** The server chosen, else the one serving the web UI, else the first signed in to. */
@@ -114,18 +133,51 @@ function useChosen(): Chosen | undefined {
   const { server: id } = useSearch({ strict: false }) as SettingsSearch;
   const home = servers.homeServer();
   const server = signedIn.find((s) => s.id === id) ?? signedIn.find((s) => s.id === home?.id) ?? signedIn[0];
-  return server && { server, admin: admins.some((a) => a.id === server.id) };
+  // The user as useAdminServers asks for it, shared through the cache.
+  const me = useQuery({
+    queryKey: serverKey(server?.id ?? "", "currentUser", server?.userId),
+    queryFn: async () => (await servers.client(UserService, server!).getCurrentUser({})).user ?? null,
+    enabled: !!server,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  return server && { server, admin: admins.some((a) => a.id === server.id), known: me.isFetched };
 }
 
-/** The groups of sections, a server's administration only for its administrators. */
+/**
+ * The groups, a server's administration only for its administrators; a
+ * menu left with one section is that section, and one left with none is
+ * not shown.
+ */
 function useGroups(chosen: Chosen | undefined) {
+  const shown = (id: SectionId) => !sections[id].admin || !!chosen?.admin;
   return allGroups
     .filter((g) => !g.server || chosen)
-    .map((g) => ({ ...g, ids: g.ids.filter((id) => !sections[id].admin || chosen?.admin) }));
+    .map((g) => ({
+      ...g,
+      entries: g.entries.flatMap((e): Entry[] => {
+        if (!isMenu(e)) return shown(e) ? [e] : [];
+        const ids = menuItems(e, chosen);
+        return ids.length > 1 ? [e] : ids;
+      }),
+    }));
+}
+
+/** A menu's sections shown to the user. */
+function menuItems(menu: MenuId, chosen: Chosen | undefined): SectionId[] {
+  return (menuSections[menu] as SectionId[]).filter((id) => !sections[id].admin || !!chosen?.admin);
+}
+
+type Groups = ReturnType<typeof useGroups>;
+
+/** The menu a section is shown in, if it is in one. */
+function shownMenuOf(groups: Groups, id: SectionId): MenuId | undefined {
+  const menu = menuOf(id);
+  return menu && groups.some((g) => g.entries.includes(menu)) ? menu : undefined;
 }
 
 function isSection(s: string | undefined): s is SectionId {
-  return s !== undefined && s in sections;
+  return s !== undefined && Object.hasOwn(sections, s);
 }
 
 export function SettingsScreen() {
@@ -138,16 +190,30 @@ export function SettingsScreen() {
   const groups = useGroups(chosen);
   // The servers moved to the account's page.
   if (section === "servers") return <Navigate to="/settings/$section" params={{ section: "account" }} replace />;
-  if (section !== undefined && !isSection(section)) return <Navigate to="/settings" replace />;
+  if (section !== undefined && !isSection(section) && !isMenu(section)) return <Navigate to="/settings" replace />;
   // A server the user does not administer has no administration; wait
   // until the servers administered are known.
-  if (section && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
+  if (isSection(section) && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
     return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} replace />;
+  }
+  const compact = width === "compact" || prefs.tv;
+  if (isMenu(section)) {
+    // A menu is a list of its own on a phone and a television; a wide
+    // window, opening menus in its sidebar, shows the menu's first section,
+    // as does a menu left with one.
+    if (!chosen?.known) return null;
+    const ids = menuItems(section, chosen);
+    if (compact && ids.length > 1) return <MenuList menu={section} ids={ids} />;
+    return ids[0] ? (
+      <Navigate to="/settings/$section" params={{ section: ids[0] }} search={{ server: search.server }} replace />
+    ) : (
+      <Navigate to="/settings" search={{ server: search.server }} replace />
+    );
   }
   // A phone and a television show the list of sections, then a section in
   // its place; the television without a sidebar (docs/tv.md §6.6).
-  if (width === "compact" || prefs.tv) {
-    return section ? <CompactSection id={section} chosen={chosen} /> : <ProfileList groups={groups} />;
+  if (compact) {
+    return section ? <CompactSection id={section} menu={shownMenuOf(groups, section)} chosen={chosen} /> : <ProfileList groups={groups} />;
   }
   const id = section ?? "appearance";
   return (
@@ -166,20 +232,13 @@ export function SettingsScreen() {
             <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
               <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
               {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
-              {g.ids.map((s) => (
-                <Link
-                  key={s}
-                  to="/settings/$section"
-                  params={{ section: s }}
-                  search={{ server: search.server }}
-                  data-status={s === id ? "active" : undefined}
-                  aria-current={s === id ? "page" : undefined}
-                  className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
-                >
-                  <Tile id={s} />
-                  {sections[s].title()}
-                </Link>
-              ))}
+              {g.entries.map((e) =>
+                isMenu(e) ? (
+                  <SidebarMenu key={e} menu={e} ids={menuItems(e, chosen)} current={id} />
+                ) : (
+                  <SidebarLink key={e} id={e} current={id} />
+                ),
+              )}
             </nav>
           ))}
         </div>
@@ -226,12 +285,80 @@ function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; se
   );
 }
 
-/** A section's icon on its colored tile. */
-function Tile({ id }: { id: SectionId }) {
+/** A section's link in the sidebar. */
+function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
+  const search = useSearch({ strict: false }) as SettingsSearch;
   return (
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-white" style={{ background: sections[id].color }}>
-      <Icon name={sections[id].icon} fill size={17} />
+    <Link
+      to="/settings/$section"
+      params={{ section: id }}
+      search={{ server: search.server }}
+      data-status={id === current ? "active" : undefined}
+      aria-current={id === current ? "page" : undefined}
+      className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
+    >
+      <Tile id={id} />
+      {sections[id].title()}
+    </Link>
+  );
+}
+
+/**
+ * A menu in the sidebar, opening in place to its sections: open while it
+ * holds the section shown, until closed, and marked while closed over it.
+ */
+function SidebarMenu({ menu, ids, current }: { menu: MenuId; ids: SectionId[]; current: SectionId }) {
+  const within = ids.includes(current);
+  const [open, setOpen] = useState(within);
+  // A section of the menu opened from elsewhere, as from a link, opens it.
+  const [shown, setShown] = useState(current);
+  if (shown !== current) {
+    setShown(current);
+    if (within && !open) setOpen(true);
+  }
+  return (
+    <div className="flex flex-col gap-0.5">
+      <button
+        type="button"
+        aria-expanded={open}
+        data-status={within && !open ? "active" : undefined}
+        onClick={() => setOpen(!open)}
+        className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 text-left type-body hover:bg-fill data-[status=active]:bg-fill-selected"
+      >
+        <Tile id={menu} />
+        <span className="flex-1">{menus[menu].title()}</span>
+        <Icon name="expand" size={16} className={`text-text-tertiary transition-transform ${open ? "" : "-rotate-90"}`} />
+      </button>
+      {open && (
+        <div role="group" aria-label={menus[menu].title()} className="flex flex-col gap-0.5 pl-6">
+          {ids.map((s) => (
+            <SidebarLink key={s} id={s} current={current} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** An entry's icon on its colored tile. */
+function Tile({ id }: { id: Entry }) {
+  const look = lookOf(id);
+  return (
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-white" style={{ background: look.color }}>
+      <Icon name={look.icon} fill size={17} />
     </span>
+  );
+}
+
+/** An entry's row in a list, opening it. */
+function EntryRow({ id }: { id: Entry }) {
+  const search = useSearch({ strict: false }) as SettingsSearch;
+  return (
+    <Link to="/settings/$section" params={{ section: id }} search={{ server: search.server }} className="hover:tint">
+      <Row label={lookOf(id).title()} leading={<Tile id={id} />}>
+        <Icon name="forward" size={16} className="text-text-tertiary" />
+      </Row>
+    </Link>
   );
 }
 
@@ -258,12 +385,11 @@ function AccountCard({ active = false }: { active?: boolean }) {
 }
 
 /** The phone's settings: the account, the users to switch to, the sections and signing out. */
-function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
+function ProfileList({ groups }: { groups: Groups }) {
   const servers = useServersStore();
   const account = useAccount();
   const shown = account.shown;
   const chosen = useChosen();
-  const search = useSearch({ strict: false }) as SettingsSearch;
   const tv = usePrefs().tv;
   return (
     <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
@@ -280,18 +406,8 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
       {groups.map((g) => (
         <Group key={g.title()} title={g.title()}>
           {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
-          {g.ids.map((s) => (
-            <Link
-              key={s}
-              to="/settings/$section"
-              params={{ section: s }}
-              search={{ server: search.server }}
-              className="hover:tint"
-            >
-              <Row label={sections[s].title()} leading={<Tile id={s} />}>
-                <Icon name="forward" size={16} className="text-text-tertiary" />
-              </Row>
-            </Link>
+          {g.entries.map((e) => (
+            <EntryRow key={e} id={e} />
           ))}
         </Group>
       ))}
@@ -346,25 +462,50 @@ function Members({ server }: { server: ServerEntry }) {
 }
 
 /**
- * A section on a phone, below a link back to the list; on a television,
- * whose Back returns to the list, alone.
+ * A menu on a phone and a television: its sections, below a link back to
+ * the list on a phone; the television's Back returns to the list.
  */
-function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefined }) {
+function MenuList({ menu, ids }: { menu: MenuId; ids: SectionId[] }) {
+  const tv = usePrefs().tv;
+  return (
+    <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
+      {!tv && <UpLink />}
+      <h1 className="type-display">{menus[menu].title()}</h1>
+      <Group>
+        {ids.map((s) => (
+          <EntryRow key={s} id={s} />
+        ))}
+      </Group>
+    </div>
+  );
+}
+
+/** A phone's link up from a section to its menu, else from a section or a menu to the list. */
+function UpLink({ menu }: { menu?: MenuId }) {
   const search = useSearch({ strict: false }) as SettingsSearch;
+  const className = "inline-flex items-center gap-1 self-start type-body text-accent-text";
+  return menu ? (
+    <Link to="/settings/$section" params={{ section: menu }} search={{ server: search.server }} {...up} className={className}>
+      <Icon name="back" size={18} />
+      {menus[menu].title()}
+    </Link>
+  ) : (
+    <Link to="/settings" search={{ server: search.server }} {...up} className={className}>
+      <Icon name="back" size={18} />
+      {t("nav.settings")}
+    </Link>
+  );
+}
+
+/**
+ * A section on a phone, below a link back to its menu or the list; on a
+ * television, whose Back returns there, alone.
+ */
+function CompactSection({ id, menu, chosen }: { id: SectionId; menu: MenuId | undefined; chosen: Chosen | undefined }) {
   const tv = usePrefs().tv;
   return (
     <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
-      {!tv && (
-        <Link
-          to="/settings"
-          search={{ server: search.server }}
-          {...up}
-          className="inline-flex items-center gap-1 self-start type-body text-accent-text"
-        >
-          <Icon name="back" size={18} />
-          {t("nav.settings")}
-        </Link>
-      )}
+      {!tv && <UpLink menu={menu} />}
       <SectionView id={id} chosen={chosen} />
     </div>
   );

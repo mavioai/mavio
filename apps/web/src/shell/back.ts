@@ -6,6 +6,7 @@
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
+import { menuOf } from "../screens/settings-menus.ts";
 import { focusState, type Point, pointOf } from "./focus.ts";
 import { focusable, popups } from "./spatial.ts";
 
@@ -17,8 +18,11 @@ export function parentOf(pathname: string): string {
   // A title's cast and crew, to the title.
   const credits = /^(.*\/(?:item|title\/[^/]+)\/[^/]+)\/(?:credits|crew)$/.exec(pathname);
   if (credits) return credits[1];
-  // A section of the settings, to their list.
-  if (pathname.startsWith("/settings/")) return "/settings";
+  // A section of the settings, to its menu or their list.
+  if (pathname.startsWith("/settings/")) {
+    const menu = menuOf(pathname.slice("/settings/".length));
+    return menu ? `/settings/${menu}` : "/settings";
+  }
   if (pathname.endsWith("/requests")) return "/discover";
   if (pathname.includes("/library/")) return "/libraries";
   if (pathname.includes("/title/") || pathname.includes("/discover/")) return "/discover";

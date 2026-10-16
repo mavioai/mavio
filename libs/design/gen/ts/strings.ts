@@ -382,6 +382,10 @@ export type MessageKey =
   | 'settings.manageAtMavio'
   | 'settings.admin'
   | 'settings.serverGroup'
+  | 'settings.mediaMenu'
+  | 'settings.acquisitionMenu'
+  | 'settings.extensionsMenu'
+  | 'settings.maintenanceMenu'
   | 'settings.serverChoice'
   | 'settings.thisServer'
   | 'settings.plugins'
@@ -2107,6 +2111,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.manageAtMavio": "Manage at mavio.dev",
     "settings.admin": "Administrator",
     "settings.serverGroup": "Server",
+    "settings.mediaMenu": "Media",
+    "settings.acquisitionMenu": "Acquisition & Downloads",
+    "settings.extensionsMenu": "Extensions",
+    "settings.maintenanceMenu": "Monitoring & Maintenance",
     "settings.serverChoice": "Server",
     "settings.thisServer": "{name} (This Server)",
     "settings.plugins": "Plugins",
@@ -3830,6 +3838,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.manageAtMavio": "在 mavio.dev 管理",
     "settings.admin": "管理员",
     "settings.serverGroup": "服务器",
+    "settings.mediaMenu": "媒体",
+    "settings.acquisitionMenu": "获取与下载",
+    "settings.extensionsMenu": "扩展",
+    "settings.maintenanceMenu": "监控与维护",
     "settings.serverChoice": "服务器",
     "settings.thisServer": "{name}（本服务器）",
     "settings.plugins": "插件",
