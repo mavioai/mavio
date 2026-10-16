@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/system.proto.
  */
 export const file_mavio_system_v1_system: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvc3lzdGVtLnByb3RvEg9tYXZpby5zeXN0ZW0udjEiEgoQR2V0SGVhbHRoUmVxdWVzdCKtAQoRR2V0SGVhbHRoUmVzcG9uc2USOQoGc3RhdHVzGAEgASgOMikubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlLlN0YXR1cxIPCgd2ZXJzaW9uGAIgASgJIkwKBlN0YXR1cxIWChJTVEFUVVNfVU5TUEVDSUZJRUQQABISCg5TVEFUVVNfU0VSVklORxABEhYKElNUQVRVU19OT1RfU0VSVklORxACIhYKFEdldFN5c3RlbUluZm9SZXF1ZXN0IpwBChVHZXRTeXN0ZW1JbmZvUmVzcG9uc2USDwoHdmVyc2lvbhgBIAEoCRIKCgJvcxgCIAEoCRIMCgRhcmNoGAMgASgJEhAKCGRhdGFiYXNlGAQgASgJEhYKDmZmbXBlZ192ZXJzaW9uGAUgASgJEi4KCnN0YXJ0X3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIo0EChNUcmFuc2NvZGluZ1NldHRpbmdzElAKFWhhcmR3YXJlX2FjY2VsZXJhdGlvbhgBIAEoDjIlLm1hdmlvLnN5c3RlbS52MS5IYXJkd2FyZUFjY2VsZXJhdGlvbkIKukgHggEEEAEgABIZChFoYXJkd2FyZV9lbmNvZGluZxgCIAEoCBIWCg5lbmNvZGVyX3ByZXNldBgDIAEoCRIbCghoMjY0X2NyZhgEIAEoBUIJukgGGgQYMygAEhsKCGgyNjVfY3JmGAUgASgFQgm6SAYaBBgzKAASGAoHdGhyZWFkcxgGIAEoBUIHukgEGgIoABIZChF0b25lbWFwX2FsZ29yaXRobRgHIAEoCRIVCg10b25lbWFwX3JhbmdlGAggASgJEiUKDXRvbmVtYXBfZGVzYXQYCSABKAFCDrpICxIJKQAAAAAAAAAAEiQKDHRvbmVtYXBfcGVhaxgKIAEoAUIOukgLEgkpAAAAAAAAAAASGgoSZGVpbnRlcmxhY2VfbWV0aG9kGAsgASgJEh8KF2RlaW50ZXJsYWNlX2RvdWJsZV9yYXRlGAwgASgIEi4KDWRvd25taXhfYm9vc3QYDSABKAFCF7pIFBISGQAAAAAAAAhAKQAAAAAAAOA/EhoKEmNyb3BfYmxhY2tfYm9yZGVycxgOIAEoCBIVCg10cmFuc2NvZGVfZGlyGA8gASgJIrYBCg9OZXR3b3JrU2V0dGluZ3MSHAoLc2VydmVyX25hbWUYASABKAlCB7pIBHICGGQSEAoIYmFzZV91cmwYAiABKAkSHwoKaHR0cHNfcG9ydBgDIAEoBUILukgIGgYY//8DKAASGAoQY2VydGlmaWNhdGVfcGF0aBgEIAEoCRIQCghrZXlfcGF0aBgFIAEoCRIXCg9sb2NhbF9kaXNjb3ZlcnkYBiABKAgSDQoFcmVsYXkYByABKAgi0QMKDlNlcnZlclNldHRpbmdzEkEKC3RyYW5zY29kaW5nGAEgASgLMiQubWF2aW8uc3lzdGVtLnYxLlRyYW5zY29kaW5nU2V0dGluZ3NCBrpIA8gBARI5CgduZXR3b3JrGAIgASgLMiAubWF2aW8uc3lzdGVtLnYxLk5ldHdvcmtTZXR0aW5nc0IGukgDyAEBEiYKD3BsdWdpbl9jYXRhbG9ncxgDIAMoCUINukgKkgEHIgVyA4gBARIvCgt1cGRhdGVfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASHQoVcGFzc3dvcmRfcmVzZXRfcGx1Z2luGAUgASgJEjkKC2FjcXVpc2l0aW9uGAYgASgLMiQubWF2aW8uc3lzdGVtLnYxLkFjcXVpc2l0aW9uU2V0dGluZ3MSMgoIcmVxdWVzdHMYByABKAsyIC5tYXZpby5zeXN0ZW0udjEuUmVxdWVzdFNldHRpbmdzEjMKCG1ldGFkYXRhGAggASgLMiEubWF2aW8uc3lzdGVtLnYxLk1ldGFkYXRhU2V0dGluZ3MSJQoRc2Vzc2lvbl9pZGxlX2RheXMYCSABKAVCCrpIBxoFGMIcKAAipQYKD1JlcXVlc3RTZXR0aW5ncxIeChZkZWZhdWx0X3JlcXVlc3RfbW92aWVzGAEgASgIEh4KFmRlZmF1bHRfcmVxdWVzdF9zZXJpZXMYAiABKAgSIwobZGVmYXVsdF9hdXRvX2FwcHJvdmVfbW92aWVzGAMgASgIEiMKG2RlZmF1bHRfYXV0b19hcHByb3ZlX3NlcmllcxgEIAEoCBIdChVkZWZhdWx0X3JlcG9ydF9pc3N1ZXMYBSABKAgSIgoRbW92aWVfcXVvdGFfbGltaXQYBiABKAVCB7pIBBoCKAASIQoQbW92aWVfcXVvdGFfZGF5cxgHIAEoBUIHukgEGgIoABIjChJzZXJpZXNfcXVvdGFfbGltaXQYCCABKAVCB7pIBBoCKAASIgoRc2VyaWVzX3F1b3RhX2RheXMYCSABKAVCB7pIBBoCKAASGAoQbW92aWVfbGlicmFyeV9pZBgKIAEoCRIgChhtb3ZpZV9xdWFsaXR5X3Byb2ZpbGVfaWQYCyABKAkSUQoUbWluaW11bV9hdmFpbGFiaWxpdHkYDCABKA4yKS5tYXZpby5hY3F1aXNpdGlvbi52MS5NaW5pbXVtQXZhaWxhYmlsaXR5Qgi6SAWCAQIQARIZChFzZXJpZXNfbGlicmFyeV9pZBgNIAEoCRIhChlzZXJpZXNfcXVhbGl0eV9wcm9maWxlX2lkGA4gASgJEhUKDXNlYXNvbl9mb2xkZXIYDyABKAgSSQoRbW9uaXRvcl9uZXdfaXRlbXMYECABKA4yJC5tYXZpby5hY3F1aXNpdGlvbi52MS5OZXdJdGVtTW9uaXRvckIIukgFggECEAESEAoIc3BlY2lhbHMYESABKAgSGAoQYW5pbWVfbGlicmFyeV9pZBgSIAEoCRIgChhhbmltZV9xdWFsaXR5X3Byb2ZpbGVfaWQYEyABKAkSMAoQYmxvY2tsaXN0ZWRfdGFncxgUIAMoCUIWukgTkgEQIg5yDDIKXlteL10rLy4rJBIqChZibG9ja2xpc3RlZF90YWdzX2xpbWl0GBUgASgFQgq6SAcaBRj6ASgAImsKEE1ldGFkYXRhU2V0dGluZ3MSMAoScHJlZmVycmVkX2xhbmd1YWdlGAEgASgJQhS6SBFyDzINXihbYS16XXsyfSk/JBIlCgdjb3VudHJ5GAIgASgJQhS6SBFyDzINXihbQS1aXXsyfSk/JCKPCwoTQWNxdWlzaXRpb25TZXR0aW5ncxI8Cgdwcm9wZXJzGAEgASgOMh8ubWF2aW8uc3lzdGVtLnYxLlByb3BlckRvd25sb2FkQgq6SAeCAQQQASAAEhwKFHByZWZlcl9pbmRleGVyX2ZsYWdzGAIgASgIEiMKG2NvbXBsZXRlZF9kb3dubG9hZF9oYW5kbGluZxgDIAEoCBIeChZhdXRvX3JlZG93bmxvYWRfZmFpbGVkGAQgASgIEh0KDG1heGltdW1fc2l6ZRgFIAEoBUIHukgEGgIoABIcCgttaW5pbXVtX2FnZRgGIAEoBUIHukgEGgIoABIaCglyZXRlbnRpb24YByABKAVCB7pIBBoCKAASHAoUYWxsb3dfaGFyZGNvZGVkX3N1YnMYCCABKAgSIgoad2hpdGVsaXN0ZWRfaGFyZGNvZGVkX3N1YnMYCSADKAkSHQoVc2tpcF9mcmVlX3NwYWNlX2NoZWNrGAogASgIEiMKEm1pbmltdW1fZnJlZV9zcGFjZRgLIAEoBUIHukgEGgIoABIaChJhdmFpbGFiaWxpdHlfZGVsYXkYDCABKAUSIgoRcnNzX3N5bmNfaW50ZXJ2YWwYDSABKAVCB7pIBBoCKAASKAoXY2hlY2tfZmluaXNoZWRfaW50ZXJ2YWwYDiABKAVCB7pIBBoCKAESEwoLcmVjeWNsZV9iaW4YDyABKAkSKQoYcmVjeWNsZV9iaW5fY2xlYW51cF9kYXlzGBAgASgFQge6SAQaAigAEhwKFGNvcHlfdXNpbmdfaGFyZGxpbmtzGBEgASgIEhoKEmltcG9ydF9leHRyYV9maWxlcxgSIAEoCBIdChVleHRyYV9maWxlX2V4dGVuc2lvbnMYEyADKAkSHAoUZGVsZXRlX2VtcHR5X2ZvbGRlcnMYFCABKAgSFQoNcmVuYW1lX21vdmllcxgVIAEoCBIiChpyZXBsYWNlX2lsbGVnYWxfY2hhcmFjdGVycxgWIAEoCBJIChFjb2xvbl9yZXBsYWNlbWVudBgXIAEoDjIhLm1hdmlvLnN5c3RlbS52MS5Db2xvblJlcGxhY2VtZW50Qgq6SAeCAQQQASAAEiQKE21vdmllX2ZvbGRlcl9mb3JtYXQYGCABKAlCB7pIBHICEAESJgoVc3RhbmRhcmRfbW92aWVfZm9ybWF0GBkgASgJQge6SARyAhABEjYKLmF1dG9fcmVkb3dubG9hZF9mYWlsZWRfZnJvbV9pbnRlcmFjdGl2ZV9zZWFyY2gYGiABKAgSFwoPcmVuYW1lX2VwaXNvZGVzGCggASgIEh8KF3N0YW5kYXJkX2VwaXNvZGVfZm9ybWF0GCkgASgJEhwKFGRhaWx5X2VwaXNvZGVfZm9ybWF0GCogASgJEhwKFGFuaW1lX2VwaXNvZGVfZm9ybWF0GCsgASgJEhwKFHNlcmllc19mb2xkZXJfZm9ybWF0GCwgASgJEhwKFHNlYXNvbl9mb2xkZXJfZm9ybWF0GC0gASgJEh4KFnNwZWNpYWxzX2ZvbGRlcl9mb3JtYXQYLiABKAkSSQoTbXVsdGlfZXBpc29kZV9zdHlsZRgvIAEoDjIiLm1hdmlvLnN5c3RlbS52MS5NdWx0aUVwaXNvZGVTdHlsZUIIukgFggECEAESNQotYXV0b191bm1vbml0b3JfcHJldmlvdXNseV9kb3dubG9hZGVkX2VwaXNvZGVzGDAgASgIEk8KFmVwaXNvZGVfdGl0bGVfcmVxdWlyZWQYMSABKA4yJS5tYXZpby5zeXN0ZW0udjEuRXBpc29kZVRpdGxlUmVxdWlyZWRCCLpIBYIBAhABEicKH2Rvd25sb2FkX2NsaWVudF93b3JraW5nX2ZvbGRlcnMYMiABKAkiGgoYR2V0U2VydmVyU2V0dGluZ3NSZXF1ZXN0Ip8BChlHZXRTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlEjEKCHNldHRpbmdzGAEgASgLMh8ubWF2aW8uc3lzdGVtLnYxLlNlcnZlclNldHRpbmdzEk8KIGF2YWlsYWJsZV9oYXJkd2FyZV9hY2NlbGVyYXRpb25zGAIgAygOMiUubWF2aW8uc3lzdGVtLnYxLkhhcmR3YXJlQWNjZWxlcmF0aW9uIlgKG1VwZGF0ZVNlcnZlclNldHRpbmdzUmVxdWVzdBI5CghzZXR0aW5ncxgBIAEoCzIfLm1hdmlvLnN5c3RlbS52MS5TZXJ2ZXJTZXR0aW5nc0IGukgDyAEBIlEKHFVwZGF0ZVNlcnZlclNldHRpbmdzUmVzcG9uc2USMQoIc2V0dGluZ3MYASABKAsyHy5tYXZpby5zeXN0ZW0udjEuU2VydmVyU2V0dGluZ3MiOwoUTGlzdERpcmVjdG9yeVJlcXVlc3QSDAoEcGF0aBgBIAEoCRIVCg1pbmNsdWRlX2ZpbGVzGAIgASgIIjwKDkRpcmVjdG9yeUVudHJ5EgwKBG5hbWUYASABKAkSDAoEcGF0aBgCIAEoCRIOCgZpc19kaXIYAyABKAgiZwoVTGlzdERpcmVjdG9yeVJlc3BvbnNlEgwKBHBhdGgYASABKAkSDgoGcGFyZW50GAIgASgJEjAKB2VudHJpZXMYAyADKAsyHy5tYXZpby5zeXN0ZW0udjEuRGlyZWN0b3J5RW50cnki4wEKCUxvZ1JlY29yZBIoCgR0aW1lGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIoCgVsZXZlbBgCIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5Mb2dMZXZlbBIPCgdtZXNzYWdlGAMgASgJEj4KCmF0dHJpYnV0ZXMYBCADKAsyKi5tYXZpby5zeXN0ZW0udjEuTG9nUmVjb3JkLkF0dHJpYnV0ZXNFbnRyeRoxCg9BdHRyaWJ1dGVzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKQAQoPTGlzdExvZ3NSZXF1ZXN0EjYKCW1pbl9sZXZlbBgBIAEoDjIZLm1hdmlvLnN5c3RlbS52MS5Mb2dMZXZlbEIIukgFggECEAESKgoHbWF4X2FnZRgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhIZCgVsaW1pdBgDIAEoBUIKukgHGgUY6AcoACI/ChBMaXN0TG9nc1Jlc3BvbnNlEisKB3JlY29yZHMYASADKAsyGi5tYXZpby5zeXN0ZW0udjEuTG9nUmVjb3JkKqUBChRIYXJkd2FyZUFjY2VsZXJhdGlvbhIlCiFIQVJEV0FSRV9BQ0NFTEVSQVRJT05fVU5TUEVDSUZJRUQQABIeChpIQVJEV0FSRV9BQ0NFTEVSQVRJT05fQVVUTxABEh4KGkhBUkRXQVJFX0FDQ0VMRVJBVElPTl9OT05FEAISJgoiSEFSRFdBUkVfQUNDRUxFUkFUSU9OX1ZJREVPVE9PTEJPWBADKqABCg5Qcm9wZXJEb3dubG9hZBIfChtQUk9QRVJfRE9XTkxPQURfVU5TUEVDSUZJRUQQABImCiJQUk9QRVJfRE9XTkxPQURfUFJFRkVSX0FORF9VUEdSQURFEAESIgoeUFJPUEVSX0RPV05MT0FEX0RPX05PVF9VUEdSQURFEAISIQodUFJPUEVSX0RPV05MT0FEX0RPX05PVF9QUkVGRVIQAyrWAQoQQ29sb25SZXBsYWNlbWVudBIhCh1DT0xPTl9SRVBMQUNFTUVOVF9VTlNQRUNJRklFRBAAEhwKGENPTE9OX1JFUExBQ0VNRU5UX0RFTEVURRABEhoKFkNPTE9OX1JFUExBQ0VNRU5UX0RBU0gQAhIgChxDT0xPTl9SRVBMQUNFTUVOVF9TUEFDRV9EQVNIEAMSJgoiQ09MT05fUkVQTEFDRU1FTlRfU1BBQ0VfREFTSF9TUEFDRRAEEhsKF0NPTE9OX1JFUExBQ0VNRU5UX1NNQVJUEAUqgQIKEU11bHRpRXBpc29kZVN0eWxlEiMKH01VTFRJX0VQSVNPREVfU1RZTEVfVU5TUEVDSUZJRUQQABIeChpNVUxUSV9FUElTT0RFX1NUWUxFX0VYVEVORBABEiEKHU1VTFRJX0VQSVNPREVfU1RZTEVfRFVQTElDQVRFEAISHgoaTVVMVElfRVBJU09ERV9TVFlMRV9SRVBFQVQQAxIdChlNVUxUSV9FUElTT0RFX1NUWUxFX1NDRU5FEAQSHQoZTVVMVElfRVBJU09ERV9TVFlMRV9SQU5HRRAFEiYKIk1VTFRJX0VQSVNPREVfU1RZTEVfUFJFRklYRURfUkFOR0UQBiq0AQoURXBpc29kZVRpdGxlUmVxdWlyZWQSJgoiRVBJU09ERV9USVRMRV9SRVFVSVJFRF9VTlNQRUNJRklFRBAAEiEKHUVQSVNPREVfVElUTEVfUkVRVUlSRURfQUxXQVlTEAESLworRVBJU09ERV9USVRMRV9SRVFVSVJFRF9CVUxLX1NFQVNPTl9SRUxFQVNFUxACEiAKHEVQSVNPREVfVElUTEVfUkVRVUlSRURfTkVWRVIQAyp3CghMb2dMZXZlbBIZChVMT0dfTEVWRUxfVU5TUEVDSUZJRUQQABITCg9MT0dfTEVWRUxfREVCVUcQARISCg5MT0dfTEVWRUxfSU5GTxACEhIKDkxPR19MRVZFTF9XQVJOEAMSEwoPTE9HX0xFVkVMX0VSUk9SEAQy7gQKDVN5c3RlbVNlcnZpY2USVwoJR2V0SGVhbHRoEiEubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlcXVlc3QaIi5tYXZpby5zeXN0ZW0udjEuR2V0SGVhbHRoUmVzcG9uc2UiA5ACARJjCg1HZXRTeXN0ZW1JbmZvEiUubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUluZm9SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUluZm9SZXNwb25zZSIDkAIBEm8KEUdldFNlcnZlclNldHRpbmdzEikubWF2aW8uc3lzdGVtLnYxLkdldFNlcnZlclNldHRpbmdzUmVxdWVzdBoqLm1hdmlvLnN5c3RlbS52MS5HZXRTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlIgOQAgEScwoUVXBkYXRlU2VydmVyU2V0dGluZ3MSLC5tYXZpby5zeXN0ZW0udjEuVXBkYXRlU2VydmVyU2V0dGluZ3NSZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVNlcnZlclNldHRpbmdzUmVzcG9uc2USYwoNTGlzdERpcmVjdG9yeRIlLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVzcG9uc2UiA5ACARJUCghMaXN0TG9ncxIgLm1hdmlvLnN5c3RlbS52MS5MaXN0TG9nc1JlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTGlzdExvZ3NSZXNwb25zZSIDkAIBQsUBChNjb20ubWF2aW8uc3lzdGVtLnYxQgtTeXN0ZW1Qcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_acquisition_v1_wanted]);
+  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvc3lzdGVtLnByb3RvEg9tYXZpby5zeXN0ZW0udjEiEgoQR2V0SGVhbHRoUmVxdWVzdCKtAQoRR2V0SGVhbHRoUmVzcG9uc2USOQoGc3RhdHVzGAEgASgOMikubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlLlN0YXR1cxIPCgd2ZXJzaW9uGAIgASgJIkwKBlN0YXR1cxIWChJTVEFUVVNfVU5TUEVDSUZJRUQQABISCg5TVEFUVVNfU0VSVklORxABEhYKElNUQVRVU19OT1RfU0VSVklORxACIhYKFEdldFN5c3RlbUluZm9SZXF1ZXN0IpwBChVHZXRTeXN0ZW1JbmZvUmVzcG9uc2USDwoHdmVyc2lvbhgBIAEoCRIKCgJvcxgCIAEoCRIMCgRhcmNoGAMgASgJEhAKCGRhdGFiYXNlGAQgASgJEhYKDmZmbXBlZ192ZXJzaW9uGAUgASgJEi4KCnN0YXJ0X3RpbWUYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIhYKFEdldFN5c3RlbUxvYWRSZXF1ZXN0IkUKFUdldFN5c3RlbUxvYWRSZXNwb25zZRIsCgdzYW1wbGVzGAEgAygLMhsubWF2aW8uc3lzdGVtLnYxLkxvYWRTYW1wbGUi4gEKCkxvYWRTYW1wbGUSKAoEdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJQoDY3B1GAIgASgLMhgubWF2aW8uc3lzdGVtLnYxLkNwdUxvYWQSKwoGbWVtb3J5GAMgASgLMhsubWF2aW8uc3lzdGVtLnYxLk1lbW9yeUxvYWQSJwoEZGlzaxgEIAEoCzIZLm1hdmlvLnN5c3RlbS52MS5EaXNrTG9hZBItCgduZXR3b3JrGAUgASgLMhwubWF2aW8uc3lzdGVtLnYxLk5ldHdvcmtMb2FkIjcKB0NwdUxvYWQSDAoEdXNlchgBIAEoARIOCgZzeXN0ZW0YAiABKAESDgoGc2VydmVyGAMgASgBIn4KCk1lbW9yeUxvYWQSEwoLdG90YWxfYnl0ZXMYASABKAMSEgoKdXNlZF9ieXRlcxgCIAEoAxIYChBzd2FwX3RvdGFsX2J5dGVzGAMgASgDEhcKD3N3YXBfdXNlZF9ieXRlcxgEIAEoAxIUCgxzZXJ2ZXJfYnl0ZXMYBSABKAMiXAoIRGlza0xvYWQSEQoJcmVhZF9yYXRlGAEgASgBEhIKCndyaXRlX3JhdGUYAiABKAESEgoKcmVhZF9ieXRlcxgDIAEoAxIVCg13cml0dGVuX2J5dGVzGAQgASgDImIKC05ldHdvcmtMb2FkEhQKDHJlY2VpdmVfcmF0ZRgBIAEoARIRCglzZW5kX3JhdGUYAiABKAESFgoOcmVjZWl2ZWRfYnl0ZXMYAyABKAMSEgoKc2VudF9ieXRlcxgEIAEoAyKNBAoTVHJhbnNjb2RpbmdTZXR0aW5ncxJQChVoYXJkd2FyZV9hY2NlbGVyYXRpb24YASABKA4yJS5tYXZpby5zeXN0ZW0udjEuSGFyZHdhcmVBY2NlbGVyYXRpb25CCrpIB4IBBBABIAASGQoRaGFyZHdhcmVfZW5jb2RpbmcYAiABKAgSFgoOZW5jb2Rlcl9wcmVzZXQYAyABKAkSGwoIaDI2NF9jcmYYBCABKAVCCbpIBhoEGDMoABIbCghoMjY1X2NyZhgFIAEoBUIJukgGGgQYMygAEhgKB3RocmVhZHMYBiABKAVCB7pIBBoCKAASGQoRdG9uZW1hcF9hbGdvcml0aG0YByABKAkSFQoNdG9uZW1hcF9yYW5nZRgIIAEoCRIlCg10b25lbWFwX2Rlc2F0GAkgASgBQg66SAsSCSkAAAAAAAAAABIkCgx0b25lbWFwX3BlYWsYCiABKAFCDrpICxIJKQAAAAAAAAAAEhoKEmRlaW50ZXJsYWNlX21ldGhvZBgLIAEoCRIfChdkZWludGVybGFjZV9kb3VibGVfcmF0ZRgMIAEoCBIuCg1kb3dubWl4X2Jvb3N0GA0gASgBQhe6SBQSEhkAAAAAAAAIQCkAAAAAAADgPxIaChJjcm9wX2JsYWNrX2JvcmRlcnMYDiABKAgSFQoNdHJhbnNjb2RlX2RpchgPIAEoCSK2AQoPTmV0d29ya1NldHRpbmdzEhwKC3NlcnZlcl9uYW1lGAEgASgJQge6SARyAhhkEhAKCGJhc2VfdXJsGAIgASgJEh8KCmh0dHBzX3BvcnQYAyABKAVCC7pICBoGGP//AygAEhgKEGNlcnRpZmljYXRlX3BhdGgYBCABKAkSEAoIa2V5X3BhdGgYBSABKAkSFwoPbG9jYWxfZGlzY292ZXJ5GAYgASgIEg0KBXJlbGF5GAcgASgIItEDCg5TZXJ2ZXJTZXR0aW5ncxJBCgt0cmFuc2NvZGluZxgBIAEoCzIkLm1hdmlvLnN5c3RlbS52MS5UcmFuc2NvZGluZ1NldHRpbmdzQga6SAPIAQESOQoHbmV0d29yaxgCIAEoCzIgLm1hdmlvLnN5c3RlbS52MS5OZXR3b3JrU2V0dGluZ3NCBrpIA8gBARImCg9wbHVnaW5fY2F0YWxvZ3MYAyADKAlCDbpICpIBByIFcgOIAQESLwoLdXBkYXRlX3RpbWUYBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEh0KFXBhc3N3b3JkX3Jlc2V0X3BsdWdpbhgFIAEoCRI5CgthY3F1aXNpdGlvbhgGIAEoCzIkLm1hdmlvLnN5c3RlbS52MS5BY3F1aXNpdGlvblNldHRpbmdzEjIKCHJlcXVlc3RzGAcgASgLMiAubWF2aW8uc3lzdGVtLnYxLlJlcXVlc3RTZXR0aW5ncxIzCghtZXRhZGF0YRgIIAEoCzIhLm1hdmlvLnN5c3RlbS52MS5NZXRhZGF0YVNldHRpbmdzEiUKEXNlc3Npb25faWRsZV9kYXlzGAkgASgFQgq6SAcaBRjCHCgAIqUGCg9SZXF1ZXN0U2V0dGluZ3MSHgoWZGVmYXVsdF9yZXF1ZXN0X21vdmllcxgBIAEoCBIeChZkZWZhdWx0X3JlcXVlc3Rfc2VyaWVzGAIgASgIEiMKG2RlZmF1bHRfYXV0b19hcHByb3ZlX21vdmllcxgDIAEoCBIjChtkZWZhdWx0X2F1dG9fYXBwcm92ZV9zZXJpZXMYBCABKAgSHQoVZGVmYXVsdF9yZXBvcnRfaXNzdWVzGAUgASgIEiIKEW1vdmllX3F1b3RhX2xpbWl0GAYgASgFQge6SAQaAigAEiEKEG1vdmllX3F1b3RhX2RheXMYByABKAVCB7pIBBoCKAASIwoSc2VyaWVzX3F1b3RhX2xpbWl0GAggASgFQge6SAQaAigAEiIKEXNlcmllc19xdW90YV9kYXlzGAkgASgFQge6SAQaAigAEhgKEG1vdmllX2xpYnJhcnlfaWQYCiABKAkSIAoYbW92aWVfcXVhbGl0eV9wcm9maWxlX2lkGAsgASgJElEKFG1pbmltdW1fYXZhaWxhYmlsaXR5GAwgASgOMikubWF2aW8uYWNxdWlzaXRpb24udjEuTWluaW11bUF2YWlsYWJpbGl0eUIIukgFggECEAESGQoRc2VyaWVzX2xpYnJhcnlfaWQYDSABKAkSIQoZc2VyaWVzX3F1YWxpdHlfcHJvZmlsZV9pZBgOIAEoCRIVCg1zZWFzb25fZm9sZGVyGA8gASgIEkkKEW1vbml0b3JfbmV3X2l0ZW1zGBAgASgOMiQubWF2aW8uYWNxdWlzaXRpb24udjEuTmV3SXRlbU1vbml0b3JCCLpIBYIBAhABEhAKCHNwZWNpYWxzGBEgASgIEhgKEGFuaW1lX2xpYnJhcnlfaWQYEiABKAkSIAoYYW5pbWVfcXVhbGl0eV9wcm9maWxlX2lkGBMgASgJEjAKEGJsb2NrbGlzdGVkX3RhZ3MYFCADKAlCFrpIE5IBECIOcgwyCl5bXi9dKy8uKyQSKgoWYmxvY2tsaXN0ZWRfdGFnc19saW1pdBgVIAEoBUIKukgHGgUY+gEoACJrChBNZXRhZGF0YVNldHRpbmdzEjAKEnByZWZlcnJlZF9sYW5ndWFnZRgBIAEoCUIUukgRcg8yDV4oW2Etel17Mn0pPyQSJQoHY291bnRyeRgCIAEoCUIUukgRcg8yDV4oW0EtWl17Mn0pPyQijwsKE0FjcXVpc2l0aW9uU2V0dGluZ3MSPAoHcHJvcGVycxgBIAEoDjIfLm1hdmlvLnN5c3RlbS52MS5Qcm9wZXJEb3dubG9hZEIKukgHggEEEAEgABIcChRwcmVmZXJfaW5kZXhlcl9mbGFncxgCIAEoCBIjChtjb21wbGV0ZWRfZG93bmxvYWRfaGFuZGxpbmcYAyABKAgSHgoWYXV0b19yZWRvd25sb2FkX2ZhaWxlZBgEIAEoCBIdCgxtYXhpbXVtX3NpemUYBSABKAVCB7pIBBoCKAASHAoLbWluaW11bV9hZ2UYBiABKAVCB7pIBBoCKAASGgoJcmV0ZW50aW9uGAcgASgFQge6SAQaAigAEhwKFGFsbG93X2hhcmRjb2RlZF9zdWJzGAggASgIEiIKGndoaXRlbGlzdGVkX2hhcmRjb2RlZF9zdWJzGAkgAygJEh0KFXNraXBfZnJlZV9zcGFjZV9jaGVjaxgKIAEoCBIjChJtaW5pbXVtX2ZyZWVfc3BhY2UYCyABKAVCB7pIBBoCKAASGgoSYXZhaWxhYmlsaXR5X2RlbGF5GAwgASgFEiIKEXJzc19zeW5jX2ludGVydmFsGA0gASgFQge6SAQaAigAEigKF2NoZWNrX2ZpbmlzaGVkX2ludGVydmFsGA4gASgFQge6SAQaAigBEhMKC3JlY3ljbGVfYmluGA8gASgJEikKGHJlY3ljbGVfYmluX2NsZWFudXBfZGF5cxgQIAEoBUIHukgEGgIoABIcChRjb3B5X3VzaW5nX2hhcmRsaW5rcxgRIAEoCBIaChJpbXBvcnRfZXh0cmFfZmlsZXMYEiABKAgSHQoVZXh0cmFfZmlsZV9leHRlbnNpb25zGBMgAygJEhwKFGRlbGV0ZV9lbXB0eV9mb2xkZXJzGBQgASgIEhUKDXJlbmFtZV9tb3ZpZXMYFSABKAgSIgoacmVwbGFjZV9pbGxlZ2FsX2NoYXJhY3RlcnMYFiABKAgSSAoRY29sb25fcmVwbGFjZW1lbnQYFyABKA4yIS5tYXZpby5zeXN0ZW0udjEuQ29sb25SZXBsYWNlbWVudEIKukgHggEEEAEgABIkChNtb3ZpZV9mb2xkZXJfZm9ybWF0GBggASgJQge6SARyAhABEiYKFXN0YW5kYXJkX21vdmllX2Zvcm1hdBgZIAEoCUIHukgEcgIQARI2Ci5hdXRvX3JlZG93bmxvYWRfZmFpbGVkX2Zyb21faW50ZXJhY3RpdmVfc2VhcmNoGBogASgIEhcKD3JlbmFtZV9lcGlzb2RlcxgoIAEoCBIfChdzdGFuZGFyZF9lcGlzb2RlX2Zvcm1hdBgpIAEoCRIcChRkYWlseV9lcGlzb2RlX2Zvcm1hdBgqIAEoCRIcChRhbmltZV9lcGlzb2RlX2Zvcm1hdBgrIAEoCRIcChRzZXJpZXNfZm9sZGVyX2Zvcm1hdBgsIAEoCRIcChRzZWFzb25fZm9sZGVyX2Zvcm1hdBgtIAEoCRIeChZzcGVjaWFsc19mb2xkZXJfZm9ybWF0GC4gASgJEkkKE211bHRpX2VwaXNvZGVfc3R5bGUYLyABKA4yIi5tYXZpby5zeXN0ZW0udjEuTXVsdGlFcGlzb2RlU3R5bGVCCLpIBYIBAhABEjUKLWF1dG9fdW5tb25pdG9yX3ByZXZpb3VzbHlfZG93bmxvYWRlZF9lcGlzb2RlcxgwIAEoCBJPChZlcGlzb2RlX3RpdGxlX3JlcXVpcmVkGDEgASgOMiUubWF2aW8uc3lzdGVtLnYxLkVwaXNvZGVUaXRsZVJlcXVpcmVkQgi6SAWCAQIQARInCh9kb3dubG9hZF9jbGllbnRfd29ya2luZ19mb2xkZXJzGDIgASgJIhoKGEdldFNlcnZlclNldHRpbmdzUmVxdWVzdCKfAQoZR2V0U2VydmVyU2V0dGluZ3NSZXNwb25zZRIxCghzZXR0aW5ncxgBIAEoCzIfLm1hdmlvLnN5c3RlbS52MS5TZXJ2ZXJTZXR0aW5ncxJPCiBhdmFpbGFibGVfaGFyZHdhcmVfYWNjZWxlcmF0aW9ucxgCIAMoDjIlLm1hdmlvLnN5c3RlbS52MS5IYXJkd2FyZUFjY2VsZXJhdGlvbiJYChtVcGRhdGVTZXJ2ZXJTZXR0aW5nc1JlcXVlc3QSOQoIc2V0dGluZ3MYASABKAsyHy5tYXZpby5zeXN0ZW0udjEuU2VydmVyU2V0dGluZ3NCBrpIA8gBASJRChxVcGRhdGVTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlEjEKCHNldHRpbmdzGAEgASgLMh8ubWF2aW8uc3lzdGVtLnYxLlNlcnZlclNldHRpbmdzIjsKFExpc3REaXJlY3RvcnlSZXF1ZXN0EgwKBHBhdGgYASABKAkSFQoNaW5jbHVkZV9maWxlcxgCIAEoCCI8Cg5EaXJlY3RvcnlFbnRyeRIMCgRuYW1lGAEgASgJEgwKBHBhdGgYAiABKAkSDgoGaXNfZGlyGAMgASgIImcKFUxpc3REaXJlY3RvcnlSZXNwb25zZRIMCgRwYXRoGAEgASgJEg4KBnBhcmVudBgCIAEoCRIwCgdlbnRyaWVzGAMgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkRpcmVjdG9yeUVudHJ5IuMBCglMb2dSZWNvcmQSKAoEdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASKAoFbGV2ZWwYAiABKA4yGS5tYXZpby5zeXN0ZW0udjEuTG9nTGV2ZWwSDwoHbWVzc2FnZRgDIAEoCRI+CgphdHRyaWJ1dGVzGAQgAygLMioubWF2aW8uc3lzdGVtLnYxLkxvZ1JlY29yZC5BdHRyaWJ1dGVzRW50cnkaMQoPQXR0cmlidXRlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEikAEKD0xpc3RMb2dzUmVxdWVzdBI2CgltaW5fbGV2ZWwYASABKA4yGS5tYXZpby5zeXN0ZW0udjEuTG9nTGV2ZWxCCLpIBYIBAhABEioKB21heF9hZ2UYAiABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SGQoFbGltaXQYAyABKAVCCrpIBxoFGOgHKAAiPwoQTGlzdExvZ3NSZXNwb25zZRIrCgdyZWNvcmRzGAEgAygLMhoubWF2aW8uc3lzdGVtLnYxLkxvZ1JlY29yZCqlAQoUSGFyZHdhcmVBY2NlbGVyYXRpb24SJQohSEFSRFdBUkVfQUNDRUxFUkFUSU9OX1VOU1BFQ0lGSUVEEAASHgoaSEFSRFdBUkVfQUNDRUxFUkFUSU9OX0FVVE8QARIeChpIQVJEV0FSRV9BQ0NFTEVSQVRJT05fTk9ORRACEiYKIkhBUkRXQVJFX0FDQ0VMRVJBVElPTl9WSURFT1RPT0xCT1gQAyqgAQoOUHJvcGVyRG93bmxvYWQSHwobUFJPUEVSX0RPV05MT0FEX1VOU1BFQ0lGSUVEEAASJgoiUFJPUEVSX0RPV05MT0FEX1BSRUZFUl9BTkRfVVBHUkFERRABEiIKHlBST1BFUl9ET1dOTE9BRF9ET19OT1RfVVBHUkFERRACEiEKHVBST1BFUl9ET1dOTE9BRF9ET19OT1RfUFJFRkVSEAMq1gEKEENvbG9uUmVwbGFjZW1lbnQSIQodQ09MT05fUkVQTEFDRU1FTlRfVU5TUEVDSUZJRUQQABIcChhDT0xPTl9SRVBMQUNFTUVOVF9ERUxFVEUQARIaChZDT0xPTl9SRVBMQUNFTUVOVF9EQVNIEAISIAocQ09MT05fUkVQTEFDRU1FTlRfU1BBQ0VfREFTSBADEiYKIkNPTE9OX1JFUExBQ0VNRU5UX1NQQUNFX0RBU0hfU1BBQ0UQBBIbChdDT0xPTl9SRVBMQUNFTUVOVF9TTUFSVBAFKoECChFNdWx0aUVwaXNvZGVTdHlsZRIjCh9NVUxUSV9FUElTT0RFX1NUWUxFX1VOU1BFQ0lGSUVEEAASHgoaTVVMVElfRVBJU09ERV9TVFlMRV9FWFRFTkQQARIhCh1NVUxUSV9FUElTT0RFX1NUWUxFX0RVUExJQ0FURRACEh4KGk1VTFRJX0VQSVNPREVfU1RZTEVfUkVQRUFUEAMSHQoZTVVMVElfRVBJU09ERV9TVFlMRV9TQ0VORRAEEh0KGU1VTFRJX0VQSVNPREVfU1RZTEVfUkFOR0UQBRImCiJNVUxUSV9FUElTT0RFX1NUWUxFX1BSRUZJWEVEX1JBTkdFEAYqtAEKFEVwaXNvZGVUaXRsZVJlcXVpcmVkEiYKIkVQSVNPREVfVElUTEVfUkVRVUlSRURfVU5TUEVDSUZJRUQQABIhCh1FUElTT0RFX1RJVExFX1JFUVVJUkVEX0FMV0FZUxABEi8KK0VQSVNPREVfVElUTEVfUkVRVUlSRURfQlVMS19TRUFTT05fUkVMRUFTRVMQAhIgChxFUElTT0RFX1RJVExFX1JFUVVJUkVEX05FVkVSEAMqdwoITG9nTGV2ZWwSGQoVTE9HX0xFVkVMX1VOU1BFQ0lGSUVEEAASEwoPTE9HX0xFVkVMX0RFQlVHEAESEgoOTE9HX0xFVkVMX0lORk8QAhISCg5MT0dfTEVWRUxfV0FSThADEhMKD0xPR19MRVZFTF9FUlJPUhAEMtMFCg1TeXN0ZW1TZXJ2aWNlElcKCUdldEhlYWx0aBIhLm1hdmlvLnN5c3RlbS52MS5HZXRIZWFsdGhSZXF1ZXN0GiIubWF2aW8uc3lzdGVtLnYxLkdldEhlYWx0aFJlc3BvbnNlIgOQAgESYwoNR2V0U3lzdGVtSW5mbxIlLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5HZXRTeXN0ZW1JbmZvUmVzcG9uc2UiA5ACARJjCg1HZXRTeXN0ZW1Mb2FkEiUubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkdldFN5c3RlbUxvYWRSZXNwb25zZSIDkAIBEm8KEUdldFNlcnZlclNldHRpbmdzEikubWF2aW8uc3lzdGVtLnYxLkdldFNlcnZlclNldHRpbmdzUmVxdWVzdBoqLm1hdmlvLnN5c3RlbS52MS5HZXRTZXJ2ZXJTZXR0aW5nc1Jlc3BvbnNlIgOQAgEScwoUVXBkYXRlU2VydmVyU2V0dGluZ3MSLC5tYXZpby5zeXN0ZW0udjEuVXBkYXRlU2VydmVyU2V0dGluZ3NSZXF1ZXN0Gi0ubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVNlcnZlclNldHRpbmdzUmVzcG9uc2USYwoNTGlzdERpcmVjdG9yeRIlLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVxdWVzdBomLm1hdmlvLnN5c3RlbS52MS5MaXN0RGlyZWN0b3J5UmVzcG9uc2UiA5ACARJUCghMaXN0TG9ncxIgLm1hdmlvLnN5c3RlbS52MS5MaXN0TG9nc1JlcXVlc3QaIS5tYXZpby5zeXN0ZW0udjEuTGlzdExvZ3NSZXNwb25zZSIDkAIBQsUBChNjb20ubWF2aW8uc3lzdGVtLnYxQgtTeXN0ZW1Qcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3lzdGVtL3YxO3N5c3RlbXYxogIDTVNYqgIPTWF2aW8uU3lzdGVtLlYxygIPTWF2aW9cU3lzdGVtXFYx4gIbTWF2aW9cU3lzdGVtXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlN5c3RlbTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_mavio_acquisition_v1_wanted]);
 
 /**
  * @generated from message mavio.system.v1.GetHealthRequest
@@ -142,6 +142,232 @@ export const GetSystemInfoResponseSchema: GenMessage<GetSystemInfoResponse> = /*
   messageDesc(file_mavio_system_v1_system, 3);
 
 /**
+ * @generated from message mavio.system.v1.GetSystemLoadRequest
+ */
+export type GetSystemLoadRequest = Message<"mavio.system.v1.GetSystemLoadRequest"> & {
+};
+
+/**
+ * Describes the message mavio.system.v1.GetSystemLoadRequest.
+ * Use `create(GetSystemLoadRequestSchema)` to create a new message.
+ */
+export const GetSystemLoadRequestSchema: GenMessage<GetSystemLoadRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 4);
+
+/**
+ * @generated from message mavio.system.v1.GetSystemLoadResponse
+ */
+export type GetSystemLoadResponse = Message<"mavio.system.v1.GetSystemLoadResponse"> & {
+  /**
+   * Oldest first; empty until the first two readings were taken.
+   *
+   * @generated from field: repeated mavio.system.v1.LoadSample samples = 1;
+   */
+  samples: LoadSample[];
+};
+
+/**
+ * Describes the message mavio.system.v1.GetSystemLoadResponse.
+ * Use `create(GetSystemLoadResponseSchema)` to create a new message.
+ */
+export const GetSystemLoadResponseSchema: GenMessage<GetSystemLoadResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 5);
+
+/**
+ * LoadSample is the load of the server's computer over the interval ending
+ * at its time. A part is unset where the operating system does not tell it.
+ *
+ * @generated from message mavio.system.v1.LoadSample
+ */
+export type LoadSample = Message<"mavio.system.v1.LoadSample"> & {
+  /**
+   * @generated from field: google.protobuf.Timestamp time = 1;
+   */
+  time?: Timestamp | undefined;
+
+  /**
+   * @generated from field: mavio.system.v1.CpuLoad cpu = 2;
+   */
+  cpu?: CpuLoad | undefined;
+
+  /**
+   * @generated from field: mavio.system.v1.MemoryLoad memory = 3;
+   */
+  memory?: MemoryLoad | undefined;
+
+  /**
+   * @generated from field: mavio.system.v1.DiskLoad disk = 4;
+   */
+  disk?: DiskLoad | undefined;
+
+  /**
+   * @generated from field: mavio.system.v1.NetworkLoad network = 5;
+   */
+  network?: NetworkLoad | undefined;
+};
+
+/**
+ * Describes the message mavio.system.v1.LoadSample.
+ * Use `create(LoadSampleSchema)` to create a new message.
+ */
+export const LoadSampleSchema: GenMessage<LoadSample> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 6);
+
+/**
+ * CpuLoad is the share of all the computer's cores busy, from 0 to 1.
+ *
+ * @generated from message mavio.system.v1.CpuLoad
+ */
+export type CpuLoad = Message<"mavio.system.v1.CpuLoad"> & {
+  /**
+   * Running programs.
+   *
+   * @generated from field: double user = 1;
+   */
+  user: number;
+
+  /**
+   * Running the operating system for them.
+   *
+   * @generated from field: double system = 2;
+   */
+  system: number;
+
+  /**
+   * Running the server, of either.
+   *
+   * @generated from field: double server = 3;
+   */
+  server: number;
+};
+
+/**
+ * Describes the message mavio.system.v1.CpuLoad.
+ * Use `create(CpuLoadSchema)` to create a new message.
+ */
+export const CpuLoadSchema: GenMessage<CpuLoad> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 7);
+
+/**
+ * @generated from message mavio.system.v1.MemoryLoad
+ */
+export type MemoryLoad = Message<"mavio.system.v1.MemoryLoad"> & {
+  /**
+   * @generated from field: int64 total_bytes = 1;
+   */
+  totalBytes: bigint;
+
+  /**
+   * What is not available to programs: what they take and the operating
+   * system keeps, its file cache that can be freed aside.
+   *
+   * @generated from field: int64 used_bytes = 2;
+   */
+  usedBytes: bigint;
+
+  /**
+   * @generated from field: int64 swap_total_bytes = 3;
+   */
+  swapTotalBytes: bigint;
+
+  /**
+   * @generated from field: int64 swap_used_bytes = 4;
+   */
+  swapUsedBytes: bigint;
+
+  /**
+   * What the server's process takes in memory.
+   *
+   * @generated from field: int64 server_bytes = 5;
+   */
+  serverBytes: bigint;
+};
+
+/**
+ * Describes the message mavio.system.v1.MemoryLoad.
+ * Use `create(MemoryLoadSchema)` to create a new message.
+ */
+export const MemoryLoadSchema: GenMessage<MemoryLoad> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 8);
+
+/**
+ * DiskLoad is what the computer's disks read and write, together.
+ *
+ * @generated from message mavio.system.v1.DiskLoad
+ */
+export type DiskLoad = Message<"mavio.system.v1.DiskLoad"> & {
+  /**
+   * Bytes per second.
+   *
+   * @generated from field: double read_rate = 1;
+   */
+  readRate: number;
+
+  /**
+   * @generated from field: double write_rate = 2;
+   */
+  writeRate: number;
+
+  /**
+   * Since the computer started.
+   *
+   * @generated from field: int64 read_bytes = 3;
+   */
+  readBytes: bigint;
+
+  /**
+   * @generated from field: int64 written_bytes = 4;
+   */
+  writtenBytes: bigint;
+};
+
+/**
+ * Describes the message mavio.system.v1.DiskLoad.
+ * Use `create(DiskLoadSchema)` to create a new message.
+ */
+export const DiskLoadSchema: GenMessage<DiskLoad> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 9);
+
+/**
+ * NetworkLoad is what the computer's network interfaces receive and send,
+ * together, the loopback's aside.
+ *
+ * @generated from message mavio.system.v1.NetworkLoad
+ */
+export type NetworkLoad = Message<"mavio.system.v1.NetworkLoad"> & {
+  /**
+   * Bytes per second.
+   *
+   * @generated from field: double receive_rate = 1;
+   */
+  receiveRate: number;
+
+  /**
+   * @generated from field: double send_rate = 2;
+   */
+  sendRate: number;
+
+  /**
+   * Since the computer started.
+   *
+   * @generated from field: int64 received_bytes = 3;
+   */
+  receivedBytes: bigint;
+
+  /**
+   * @generated from field: int64 sent_bytes = 4;
+   */
+  sentBytes: bigint;
+};
+
+/**
+ * Describes the message mavio.system.v1.NetworkLoad.
+ * Use `create(NetworkLoadSchema)` to create a new message.
+ */
+export const NetworkLoadSchema: GenMessage<NetworkLoad> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_system, 10);
+
+/**
  * TranscodingSettings steer transcodes.
  *
  * @generated from message mavio.system.v1.TranscodingSettings
@@ -242,7 +468,7 @@ export type TranscodingSettings = Message<"mavio.system.v1.TranscodingSettings">
  * Use `create(TranscodingSettingsSchema)` to create a new message.
  */
 export const TranscodingSettingsSchema: GenMessage<TranscodingSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 4);
+  messageDesc(file_mavio_system_v1_system, 11);
 
 /**
  * NetworkSettings decide how the server is reached.
@@ -304,7 +530,7 @@ export type NetworkSettings = Message<"mavio.system.v1.NetworkSettings"> & {
  * Use `create(NetworkSettingsSchema)` to create a new message.
  */
 export const NetworkSettingsSchema: GenMessage<NetworkSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 5);
+  messageDesc(file_mavio_system_v1_system, 12);
 
 /**
  * ServerSettings are what administrators change while the server runs.
@@ -380,7 +606,7 @@ export type ServerSettings = Message<"mavio.system.v1.ServerSettings"> & {
  * Use `create(ServerSettingsSchema)` to create a new message.
  */
 export const ServerSettingsSchema: GenMessage<ServerSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 6);
+  messageDesc(file_mavio_system_v1_system, 13);
 
 /**
  * RequestSettings are the defaults of users' requests and where approved
@@ -525,7 +751,7 @@ export type RequestSettings = Message<"mavio.system.v1.RequestSettings"> & {
  * Use `create(RequestSettingsSchema)` to create a new message.
  */
 export const RequestSettingsSchema: GenMessage<RequestSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 7);
+  messageDesc(file_mavio_system_v1_system, 14);
 
 /**
  * MetadataSettings are the server's language and country of metadata
@@ -555,7 +781,7 @@ export type MetadataSettings = Message<"mavio.system.v1.MetadataSettings"> & {
  * Use `create(MetadataSettingsSchema)` to create a new message.
  */
 export const MetadataSettingsSchema: GenMessage<MetadataSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 8);
+  messageDesc(file_mavio_system_v1_system, 15);
 
 /**
  * AcquisitionSettings are how releases are chosen, downloaded and
@@ -809,7 +1035,7 @@ export type AcquisitionSettings = Message<"mavio.system.v1.AcquisitionSettings">
  * Use `create(AcquisitionSettingsSchema)` to create a new message.
  */
 export const AcquisitionSettingsSchema: GenMessage<AcquisitionSettings> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 9);
+  messageDesc(file_mavio_system_v1_system, 16);
 
 /**
  * @generated from message mavio.system.v1.GetServerSettingsRequest
@@ -822,7 +1048,7 @@ export type GetServerSettingsRequest = Message<"mavio.system.v1.GetServerSetting
  * Use `create(GetServerSettingsRequestSchema)` to create a new message.
  */
 export const GetServerSettingsRequestSchema: GenMessage<GetServerSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 10);
+  messageDesc(file_mavio_system_v1_system, 17);
 
 /**
  * @generated from message mavio.system.v1.GetServerSettingsResponse
@@ -847,7 +1073,7 @@ export type GetServerSettingsResponse = Message<"mavio.system.v1.GetServerSettin
  * Use `create(GetServerSettingsResponseSchema)` to create a new message.
  */
 export const GetServerSettingsResponseSchema: GenMessage<GetServerSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 11);
+  messageDesc(file_mavio_system_v1_system, 18);
 
 /**
  * @generated from message mavio.system.v1.UpdateServerSettingsRequest
@@ -864,7 +1090,7 @@ export type UpdateServerSettingsRequest = Message<"mavio.system.v1.UpdateServerS
  * Use `create(UpdateServerSettingsRequestSchema)` to create a new message.
  */
 export const UpdateServerSettingsRequestSchema: GenMessage<UpdateServerSettingsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 12);
+  messageDesc(file_mavio_system_v1_system, 19);
 
 /**
  * @generated from message mavio.system.v1.UpdateServerSettingsResponse
@@ -881,7 +1107,7 @@ export type UpdateServerSettingsResponse = Message<"mavio.system.v1.UpdateServer
  * Use `create(UpdateServerSettingsResponseSchema)` to create a new message.
  */
 export const UpdateServerSettingsResponseSchema: GenMessage<UpdateServerSettingsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 13);
+  messageDesc(file_mavio_system_v1_system, 20);
 
 /**
  * @generated from message mavio.system.v1.ListDirectoryRequest
@@ -907,7 +1133,7 @@ export type ListDirectoryRequest = Message<"mavio.system.v1.ListDirectoryRequest
  * Use `create(ListDirectoryRequestSchema)` to create a new message.
  */
 export const ListDirectoryRequestSchema: GenMessage<ListDirectoryRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 14);
+  messageDesc(file_mavio_system_v1_system, 21);
 
 /**
  * DirectoryEntry is a file or folder.
@@ -936,7 +1162,7 @@ export type DirectoryEntry = Message<"mavio.system.v1.DirectoryEntry"> & {
  * Use `create(DirectoryEntrySchema)` to create a new message.
  */
 export const DirectoryEntrySchema: GenMessage<DirectoryEntry> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 15);
+  messageDesc(file_mavio_system_v1_system, 22);
 
 /**
  * @generated from message mavio.system.v1.ListDirectoryResponse
@@ -967,7 +1193,7 @@ export type ListDirectoryResponse = Message<"mavio.system.v1.ListDirectoryRespon
  * Use `create(ListDirectoryResponseSchema)` to create a new message.
  */
 export const ListDirectoryResponseSchema: GenMessage<ListDirectoryResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 16);
+  messageDesc(file_mavio_system_v1_system, 23);
 
 /**
  * LogRecord is a record of the server's log.
@@ -1001,7 +1227,7 @@ export type LogRecord = Message<"mavio.system.v1.LogRecord"> & {
  * Use `create(LogRecordSchema)` to create a new message.
  */
 export const LogRecordSchema: GenMessage<LogRecord> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 17);
+  messageDesc(file_mavio_system_v1_system, 24);
 
 /**
  * @generated from message mavio.system.v1.ListLogsRequest
@@ -1034,7 +1260,7 @@ export type ListLogsRequest = Message<"mavio.system.v1.ListLogsRequest"> & {
  * Use `create(ListLogsRequestSchema)` to create a new message.
  */
 export const ListLogsRequestSchema: GenMessage<ListLogsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 18);
+  messageDesc(file_mavio_system_v1_system, 25);
 
 /**
  * @generated from message mavio.system.v1.ListLogsResponse
@@ -1051,7 +1277,7 @@ export type ListLogsResponse = Message<"mavio.system.v1.ListLogsResponse"> & {
  * Use `create(ListLogsResponseSchema)` to create a new message.
  */
 export const ListLogsResponseSchema: GenMessage<ListLogsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_system, 19);
+  messageDesc(file_mavio_system_v1_system, 26);
 
 /**
  * @generated from enum mavio.system.v1.HardwareAcceleration
@@ -1306,8 +1532,8 @@ export const LogLevelSchema: GenEnum<LogLevel> = /*@__PURE__*/
   enumDesc(file_mavio_system_v1_system, 5);
 
 /**
- * SystemService exposes server-level information and health, the
- * server's settings, its file system and its logs.
+ * SystemService exposes server-level information and health, the load of
+ * its computer, the server's settings, its file system and its logs.
  *
  * @generated from service mavio.system.v1.SystemService
  */
@@ -1331,6 +1557,19 @@ export const SystemService: GenService<{
     methodKind: "unary";
     input: typeof GetSystemInfoRequestSchema;
     output: typeof GetSystemInfoResponseSchema;
+  },
+  /**
+   * GetSystemLoad returns the load of the server's computer — its CPU,
+   * memory, disks and network — over the last two minutes. The server
+   * samples it every two seconds from the first request on, until none
+   * came for a while. Administrators only.
+   *
+   * @generated from rpc mavio.system.v1.SystemService.GetSystemLoad
+   */
+  getSystemLoad: {
+    methodKind: "unary";
+    input: typeof GetSystemLoadRequestSchema;
+    output: typeof GetSystemLoadResponseSchema;
   },
   /**
    * GetServerSettings returns the settings administrators change while

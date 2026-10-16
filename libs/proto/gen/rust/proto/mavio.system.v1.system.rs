@@ -1193,6 +1193,1211 @@ impl ::buffa::ExtensionSet for GetSystemInfoResponse {
         &mut self.__buffa_unknown_fields
     }
 }
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSystemLoadRequest {
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSystemLoadRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSystemLoadRequest").finish()
+    }
+}
+impl GetSystemLoadRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetSystemLoadRequest";
+}
+::buffa::impl_default_instance!(GetSystemLoadRequest);
+impl ::buffa::MessageName for GetSystemLoadRequest {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "GetSystemLoadRequest";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetSystemLoadRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetSystemLoadRequest";
+}
+impl ::buffa::Message for GetSystemLoadRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSystemLoadRequest {
+    const PROTO_FQN: &'static str = "mavio.system.v1.GetSystemLoadRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSystemLoadResponse {
+    /// Oldest first; empty until the first two readings were taken.
+    ///
+    /// Field 1: `samples`
+    pub samples: ::buffa::alloc::vec::Vec<LoadSample>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSystemLoadResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSystemLoadResponse").field("samples", &self.samples).finish()
+    }
+}
+impl GetSystemLoadResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetSystemLoadResponse";
+}
+::buffa::impl_default_instance!(GetSystemLoadResponse);
+impl ::buffa::MessageName for GetSystemLoadResponse {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "GetSystemLoadResponse";
+    const FULL_NAME: &'static str = "mavio.system.v1.GetSystemLoadResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.GetSystemLoadResponse";
+}
+impl ::buffa::Message for GetSystemLoadResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.samples {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.samples {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.samples.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.samples.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSystemLoadResponse {
+    const PROTO_FQN: &'static str = "mavio.system.v1.GetSystemLoadResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// LoadSample is the load of the server's computer over the interval ending
+/// at its time. A part is unset where the operating system does not tell it.
+#[derive(Clone, PartialEq, Default)]
+pub struct LoadSample {
+    /// Field 1: `time`
+    pub time: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    /// Field 2: `cpu`
+    pub cpu: ::buffa::MessageField<CpuLoad, ::buffa::Inline<CpuLoad>>,
+    /// Field 3: `memory`
+    pub memory: ::buffa::MessageField<MemoryLoad, ::buffa::Inline<MemoryLoad>>,
+    /// Field 4: `disk`
+    pub disk: ::buffa::MessageField<DiskLoad, ::buffa::Inline<DiskLoad>>,
+    /// Field 5: `network`
+    pub network: ::buffa::MessageField<NetworkLoad, ::buffa::Inline<NetworkLoad>>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for LoadSample {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("LoadSample")
+            .field("time", &self.time)
+            .field("cpu", &self.cpu)
+            .field("memory", &self.memory)
+            .field("disk", &self.disk)
+            .field("network", &self.network)
+            .finish()
+    }
+}
+impl LoadSample {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.LoadSample";
+}
+::buffa::impl_default_instance!(LoadSample);
+impl ::buffa::MessageName for LoadSample {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "LoadSample";
+    const FULL_NAME: &'static str = "mavio.system.v1.LoadSample";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.LoadSample";
+}
+impl ::buffa::Message for LoadSample {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.time.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.time.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.cpu.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.cpu.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.memory.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.memory.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.disk.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.disk.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.network.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.network.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if self.time.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.time.write_to(__cache, buf);
+        }
+        if self.cpu.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                2u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.cpu.write_to(__cache, buf);
+        }
+        if self.memory.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                3u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.memory.write_to(__cache, buf);
+        }
+        if self.disk.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.disk.write_to(__cache, buf);
+        }
+        if self.network.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                5u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.network.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.time.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.cpu.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.memory.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.disk.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.network.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.time = ::buffa::MessageField::none();
+        self.cpu = ::buffa::MessageField::none();
+        self.memory = ::buffa::MessageField::none();
+        self.disk = ::buffa::MessageField::none();
+        self.network = ::buffa::MessageField::none();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for LoadSample {
+    const PROTO_FQN: &'static str = "mavio.system.v1.LoadSample";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// CpuLoad is the share of all the computer's cores busy, from 0 to 1.
+#[derive(Clone, PartialEq, Default)]
+pub struct CpuLoad {
+    /// Running programs.
+    ///
+    /// Field 1: `user`
+    pub user: ::core::option::Option<f64>,
+    /// Running the operating system for them.
+    ///
+    /// Field 2: `system`
+    pub system: ::core::option::Option<f64>,
+    /// Running the server, of either.
+    ///
+    /// Field 3: `server`
+    pub server: ::core::option::Option<f64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for CpuLoad {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("CpuLoad")
+            .field("user", &self.user)
+            .field("system", &self.system)
+            .field("server", &self.server)
+            .finish()
+    }
+}
+impl CpuLoad {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.CpuLoad";
+}
+impl CpuLoad {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::user`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_user(mut self, value: f64) -> Self {
+        self.user = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::system`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_system(mut self, value: f64) -> Self {
+        self.system = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::server`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_server(mut self, value: f64) -> Self {
+        self.server = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(CpuLoad);
+impl ::buffa::MessageName for CpuLoad {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "CpuLoad";
+    const FULL_NAME: &'static str = "mavio.system.v1.CpuLoad";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.CpuLoad";
+}
+impl ::buffa::Message for CpuLoad {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.user.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.system.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.server.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.user {
+            ::buffa::types::put_double_field(1u32, v, buf);
+        }
+        if let Some(v) = self.system {
+            ::buffa::types::put_double_field(2u32, v, buf);
+        }
+        if let Some(v) = self.server {
+            ::buffa::types::put_double_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.user = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.system = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.server = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.user = ::core::option::Option::None;
+        self.system = ::core::option::Option::None;
+        self.server = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for CpuLoad {
+    const PROTO_FQN: &'static str = "mavio.system.v1.CpuLoad";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct MemoryLoad {
+    /// Field 1: `total_bytes`
+    pub total_bytes: ::core::option::Option<i64>,
+    /// What is not available to programs: what they take and the operating
+    /// system keeps, its file cache that can be freed aside.
+    ///
+    /// Field 2: `used_bytes`
+    pub used_bytes: ::core::option::Option<i64>,
+    /// Field 3: `swap_total_bytes`
+    pub swap_total_bytes: ::core::option::Option<i64>,
+    /// Field 4: `swap_used_bytes`
+    pub swap_used_bytes: ::core::option::Option<i64>,
+    /// What the server's process takes in memory.
+    ///
+    /// Field 5: `server_bytes`
+    pub server_bytes: ::core::option::Option<i64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for MemoryLoad {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("MemoryLoad")
+            .field("total_bytes", &self.total_bytes)
+            .field("used_bytes", &self.used_bytes)
+            .field("swap_total_bytes", &self.swap_total_bytes)
+            .field("swap_used_bytes", &self.swap_used_bytes)
+            .field("server_bytes", &self.server_bytes)
+            .finish()
+    }
+}
+impl MemoryLoad {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.MemoryLoad";
+}
+impl MemoryLoad {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::total_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_total_bytes(mut self, value: i64) -> Self {
+        self.total_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::used_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_used_bytes(mut self, value: i64) -> Self {
+        self.used_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::swap_total_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_swap_total_bytes(mut self, value: i64) -> Self {
+        self.swap_total_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::swap_used_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_swap_used_bytes(mut self, value: i64) -> Self {
+        self.swap_used_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::server_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_server_bytes(mut self, value: i64) -> Self {
+        self.server_bytes = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(MemoryLoad);
+impl ::buffa::MessageName for MemoryLoad {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "MemoryLoad";
+    const FULL_NAME: &'static str = "mavio.system.v1.MemoryLoad";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.MemoryLoad";
+}
+impl ::buffa::Message for MemoryLoad {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.total_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.used_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.swap_total_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.swap_used_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.server_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.total_bytes {
+            ::buffa::types::put_int64_field(1u32, v, buf);
+        }
+        if let Some(v) = self.used_bytes {
+            ::buffa::types::put_int64_field(2u32, v, buf);
+        }
+        if let Some(v) = self.swap_total_bytes {
+            ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if let Some(v) = self.swap_used_bytes {
+            ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        if let Some(v) = self.server_bytes {
+            ::buffa::types::put_int64_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.total_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.used_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.swap_total_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.swap_used_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.server_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.total_bytes = ::core::option::Option::None;
+        self.used_bytes = ::core::option::Option::None;
+        self.swap_total_bytes = ::core::option::Option::None;
+        self.swap_used_bytes = ::core::option::Option::None;
+        self.server_bytes = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for MemoryLoad {
+    const PROTO_FQN: &'static str = "mavio.system.v1.MemoryLoad";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// DiskLoad is what the computer's disks read and write, together.
+#[derive(Clone, PartialEq, Default)]
+pub struct DiskLoad {
+    /// Bytes per second.
+    ///
+    /// Field 1: `read_rate`
+    pub read_rate: ::core::option::Option<f64>,
+    /// Field 2: `write_rate`
+    pub write_rate: ::core::option::Option<f64>,
+    /// Since the computer started.
+    ///
+    /// Field 3: `read_bytes`
+    pub read_bytes: ::core::option::Option<i64>,
+    /// Field 4: `written_bytes`
+    pub written_bytes: ::core::option::Option<i64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for DiskLoad {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("DiskLoad")
+            .field("read_rate", &self.read_rate)
+            .field("write_rate", &self.write_rate)
+            .field("read_bytes", &self.read_bytes)
+            .field("written_bytes", &self.written_bytes)
+            .finish()
+    }
+}
+impl DiskLoad {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.DiskLoad";
+}
+impl DiskLoad {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::read_rate`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_read_rate(mut self, value: f64) -> Self {
+        self.read_rate = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::write_rate`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_write_rate(mut self, value: f64) -> Self {
+        self.write_rate = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::read_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_read_bytes(mut self, value: i64) -> Self {
+        self.read_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::written_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_written_bytes(mut self, value: i64) -> Self {
+        self.written_bytes = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(DiskLoad);
+impl ::buffa::MessageName for DiskLoad {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "DiskLoad";
+    const FULL_NAME: &'static str = "mavio.system.v1.DiskLoad";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.DiskLoad";
+}
+impl ::buffa::Message for DiskLoad {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.read_rate.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.write_rate.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.read_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.written_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.read_rate {
+            ::buffa::types::put_double_field(1u32, v, buf);
+        }
+        if let Some(v) = self.write_rate {
+            ::buffa::types::put_double_field(2u32, v, buf);
+        }
+        if let Some(v) = self.read_bytes {
+            ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if let Some(v) = self.written_bytes {
+            ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.read_rate = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.write_rate = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.read_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.written_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.read_rate = ::core::option::Option::None;
+        self.write_rate = ::core::option::Option::None;
+        self.read_bytes = ::core::option::Option::None;
+        self.written_bytes = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for DiskLoad {
+    const PROTO_FQN: &'static str = "mavio.system.v1.DiskLoad";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// NetworkLoad is what the computer's network interfaces receive and send,
+/// together, the loopback's aside.
+#[derive(Clone, PartialEq, Default)]
+pub struct NetworkLoad {
+    /// Bytes per second.
+    ///
+    /// Field 1: `receive_rate`
+    pub receive_rate: ::core::option::Option<f64>,
+    /// Field 2: `send_rate`
+    pub send_rate: ::core::option::Option<f64>,
+    /// Since the computer started.
+    ///
+    /// Field 3: `received_bytes`
+    pub received_bytes: ::core::option::Option<i64>,
+    /// Field 4: `sent_bytes`
+    pub sent_bytes: ::core::option::Option<i64>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for NetworkLoad {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("NetworkLoad")
+            .field("receive_rate", &self.receive_rate)
+            .field("send_rate", &self.send_rate)
+            .field("received_bytes", &self.received_bytes)
+            .field("sent_bytes", &self.sent_bytes)
+            .finish()
+    }
+}
+impl NetworkLoad {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.NetworkLoad";
+}
+impl NetworkLoad {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::receive_rate`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_receive_rate(mut self, value: f64) -> Self {
+        self.receive_rate = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::send_rate`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_send_rate(mut self, value: f64) -> Self {
+        self.send_rate = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::received_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_received_bytes(mut self, value: i64) -> Self {
+        self.received_bytes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::sent_bytes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_sent_bytes(mut self, value: i64) -> Self {
+        self.sent_bytes = Some(value);
+        self
+    }
+}
+::buffa::impl_default_instance!(NetworkLoad);
+impl ::buffa::MessageName for NetworkLoad {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "NetworkLoad";
+    const FULL_NAME: &'static str = "mavio.system.v1.NetworkLoad";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.NetworkLoad";
+}
+impl ::buffa::Message for NetworkLoad {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if self.receive_rate.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if self.send_rate.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
+        if let Some(v) = self.received_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.sent_bytes {
+            size += 1u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.receive_rate {
+            ::buffa::types::put_double_field(1u32, v, buf);
+        }
+        if let Some(v) = self.send_rate {
+            ::buffa::types::put_double_field(2u32, v, buf);
+        }
+        if let Some(v) = self.received_bytes {
+            ::buffa::types::put_int64_field(3u32, v, buf);
+        }
+        if let Some(v) = self.sent_bytes {
+            ::buffa::types::put_int64_field(4u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.receive_rate = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.send_rate = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.received_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.sent_bytes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.receive_rate = ::core::option::Option::None;
+        self.send_rate = ::core::option::Option::None;
+        self.received_bytes = ::core::option::Option::None;
+        self.sent_bytes = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for NetworkLoad {
+    const PROTO_FQN: &'static str = "mavio.system.v1.NetworkLoad";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
 /// TranscodingSettings steer transcodes.
 #[derive(Clone, PartialEq, Default)]
 pub struct TranscodingSettings {

@@ -7,8 +7,8 @@ import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 import "mavio/acquisition/v1/wanted.proto";
 
-// SystemService exposes server-level information and health, the
-// server's settings, its file system and its logs.
+// SystemService exposes server-level information and health, the load of
+// its computer, the server's settings, its file system and its logs.
 service SystemService {
   // GetHealth reports whether the server is ready to serve requests.
   rpc GetHealth(GetHealthRequest) returns (GetHealthResponse) {
@@ -16,6 +16,13 @@ service SystemService {
   }
   // GetSystemInfo describes the running server.
   rpc GetSystemInfo(GetSystemInfoRequest) returns (GetSystemInfoResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetSystemLoad returns the load of the server's computer — its CPU,
+  // memory, disks and network — over the last two minutes. The server
+  // samples it every two seconds from the first request on, until none
+  // came for a while. Administrators only.
+  rpc GetSystemLoad(GetSystemLoadRequest) returns (GetSystemLoadResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
   // GetServerSettings returns the settings administrators change while
@@ -65,6 +72,65 @@ message GetSystemInfoResponse {
   // First line of `ffmpeg -version`, empty when ffmpeg is unavailable.
   string ffmpeg_version = 5;
   google.protobuf.Timestamp start_time = 6;
+}
+
+message GetSystemLoadRequest {}
+
+message GetSystemLoadResponse {
+  // Oldest first; empty until the first two readings were taken.
+  repeated LoadSample samples = 1;
+}
+
+// LoadSample is the load of the server's computer over the interval ending
+// at its time. A part is unset where the operating system does not tell it.
+message LoadSample {
+  google.protobuf.Timestamp time = 1;
+  CpuLoad cpu = 2;
+  MemoryLoad memory = 3;
+  DiskLoad disk = 4;
+  NetworkLoad network = 5;
+}
+
+// CpuLoad is the share of all the computer's cores busy, from 0 to 1.
+message CpuLoad {
+  // Running programs.
+  double user = 1;
+  // Running the operating system for them.
+  double system = 2;
+  // Running the server, of either.
+  double server = 3;
+}
+
+message MemoryLoad {
+  int64 total_bytes = 1;
+  // What is not available to programs: what they take and the operating
+  // system keeps, its file cache that can be freed aside.
+  int64 used_bytes = 2;
+  int64 swap_total_bytes = 3;
+  int64 swap_used_bytes = 4;
+  // What the server's process takes in memory.
+  int64 server_bytes = 5;
+}
+
+// DiskLoad is what the computer's disks read and write, together.
+message DiskLoad {
+  // Bytes per second.
+  double read_rate = 1;
+  double write_rate = 2;
+  // Since the computer started.
+  int64 read_bytes = 3;
+  int64 written_bytes = 4;
+}
+
+// NetworkLoad is what the computer's network interfaces receive and send,
+// together, the loopback's aside.
+message NetworkLoad {
+  // Bytes per second.
+  double receive_rate = 1;
+  double send_rate = 2;
+  // Since the computer started.
+  int64 received_bytes = 3;
+  int64 sent_bytes = 4;
 }
 
 enum HardwareAcceleration {

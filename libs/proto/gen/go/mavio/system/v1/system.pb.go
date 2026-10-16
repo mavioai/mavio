@@ -822,6 +822,953 @@ func (b0 GetSystemInfoResponse_builder) Build() *GetSystemInfoResponse {
 	return m0
 }
 
+type GetSystemLoadRequest struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSystemLoadRequest) Reset() {
+	*x = GetSystemLoadRequest{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSystemLoadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSystemLoadRequest) ProtoMessage() {}
+
+func (x *GetSystemLoadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetSystemLoadRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetSystemLoadRequest_builder) Build() *GetSystemLoadRequest {
+	m0 := &GetSystemLoadRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type GetSystemLoadResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Samples *[]*LoadSample         `protobuf:"bytes,1,rep,name=samples"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *GetSystemLoadResponse) Reset() {
+	*x = GetSystemLoadResponse{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSystemLoadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSystemLoadResponse) ProtoMessage() {}
+
+func (x *GetSystemLoadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetSystemLoadResponse) GetSamples() []*LoadSample {
+	if x != nil {
+		if x.xxx_hidden_Samples != nil {
+			return *x.xxx_hidden_Samples
+		}
+	}
+	return nil
+}
+
+func (x *GetSystemLoadResponse) SetSamples(v []*LoadSample) {
+	x.xxx_hidden_Samples = &v
+}
+
+type GetSystemLoadResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Oldest first; empty until the first two readings were taken.
+	Samples []*LoadSample
+}
+
+func (b0 GetSystemLoadResponse_builder) Build() *GetSystemLoadResponse {
+	m0 := &GetSystemLoadResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Samples = &b.Samples
+	return m0
+}
+
+// LoadSample is the load of the server's computer over the interval ending
+// at its time. A part is unset where the operating system does not tell it.
+type LoadSample struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Time    *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=time"`
+	xxx_hidden_Cpu     *CpuLoad               `protobuf:"bytes,2,opt,name=cpu"`
+	xxx_hidden_Memory  *MemoryLoad            `protobuf:"bytes,3,opt,name=memory"`
+	xxx_hidden_Disk    *DiskLoad              `protobuf:"bytes,4,opt,name=disk"`
+	xxx_hidden_Network *NetworkLoad           `protobuf:"bytes,5,opt,name=network"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *LoadSample) Reset() {
+	*x = LoadSample{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LoadSample) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LoadSample) ProtoMessage() {}
+
+func (x *LoadSample) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LoadSample) GetTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_Time
+	}
+	return nil
+}
+
+func (x *LoadSample) GetCpu() *CpuLoad {
+	if x != nil {
+		return x.xxx_hidden_Cpu
+	}
+	return nil
+}
+
+func (x *LoadSample) GetMemory() *MemoryLoad {
+	if x != nil {
+		return x.xxx_hidden_Memory
+	}
+	return nil
+}
+
+func (x *LoadSample) GetDisk() *DiskLoad {
+	if x != nil {
+		return x.xxx_hidden_Disk
+	}
+	return nil
+}
+
+func (x *LoadSample) GetNetwork() *NetworkLoad {
+	if x != nil {
+		return x.xxx_hidden_Network
+	}
+	return nil
+}
+
+func (x *LoadSample) SetTime(v *timestamppb.Timestamp) {
+	x.xxx_hidden_Time = v
+}
+
+func (x *LoadSample) SetCpu(v *CpuLoad) {
+	x.xxx_hidden_Cpu = v
+}
+
+func (x *LoadSample) SetMemory(v *MemoryLoad) {
+	x.xxx_hidden_Memory = v
+}
+
+func (x *LoadSample) SetDisk(v *DiskLoad) {
+	x.xxx_hidden_Disk = v
+}
+
+func (x *LoadSample) SetNetwork(v *NetworkLoad) {
+	x.xxx_hidden_Network = v
+}
+
+func (x *LoadSample) HasTime() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Time != nil
+}
+
+func (x *LoadSample) HasCpu() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Cpu != nil
+}
+
+func (x *LoadSample) HasMemory() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Memory != nil
+}
+
+func (x *LoadSample) HasDisk() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Disk != nil
+}
+
+func (x *LoadSample) HasNetwork() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Network != nil
+}
+
+func (x *LoadSample) ClearTime() {
+	x.xxx_hidden_Time = nil
+}
+
+func (x *LoadSample) ClearCpu() {
+	x.xxx_hidden_Cpu = nil
+}
+
+func (x *LoadSample) ClearMemory() {
+	x.xxx_hidden_Memory = nil
+}
+
+func (x *LoadSample) ClearDisk() {
+	x.xxx_hidden_Disk = nil
+}
+
+func (x *LoadSample) ClearNetwork() {
+	x.xxx_hidden_Network = nil
+}
+
+type LoadSample_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Time    *timestamppb.Timestamp
+	Cpu     *CpuLoad
+	Memory  *MemoryLoad
+	Disk    *DiskLoad
+	Network *NetworkLoad
+}
+
+func (b0 LoadSample_builder) Build() *LoadSample {
+	m0 := &LoadSample{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Time = b.Time
+	x.xxx_hidden_Cpu = b.Cpu
+	x.xxx_hidden_Memory = b.Memory
+	x.xxx_hidden_Disk = b.Disk
+	x.xxx_hidden_Network = b.Network
+	return m0
+}
+
+// CpuLoad is the share of all the computer's cores busy, from 0 to 1.
+type CpuLoad struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_User        float64                `protobuf:"fixed64,1,opt,name=user"`
+	xxx_hidden_System      float64                `protobuf:"fixed64,2,opt,name=system"`
+	xxx_hidden_Server      float64                `protobuf:"fixed64,3,opt,name=server"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *CpuLoad) Reset() {
+	*x = CpuLoad{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CpuLoad) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CpuLoad) ProtoMessage() {}
+
+func (x *CpuLoad) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CpuLoad) GetUser() float64 {
+	if x != nil {
+		return x.xxx_hidden_User
+	}
+	return 0
+}
+
+func (x *CpuLoad) GetSystem() float64 {
+	if x != nil {
+		return x.xxx_hidden_System
+	}
+	return 0
+}
+
+func (x *CpuLoad) GetServer() float64 {
+	if x != nil {
+		return x.xxx_hidden_Server
+	}
+	return 0
+}
+
+func (x *CpuLoad) SetUser(v float64) {
+	x.xxx_hidden_User = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *CpuLoad) SetSystem(v float64) {
+	x.xxx_hidden_System = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *CpuLoad) SetServer(v float64) {
+	x.xxx_hidden_Server = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *CpuLoad) HasUser() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *CpuLoad) HasSystem() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *CpuLoad) HasServer() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *CpuLoad) ClearUser() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_User = 0
+}
+
+func (x *CpuLoad) ClearSystem() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_System = 0
+}
+
+func (x *CpuLoad) ClearServer() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Server = 0
+}
+
+type CpuLoad_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Running programs.
+	User *float64
+	// Running the operating system for them.
+	System *float64
+	// Running the server, of either.
+	Server *float64
+}
+
+func (b0 CpuLoad_builder) Build() *CpuLoad {
+	m0 := &CpuLoad{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.User != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_User = *b.User
+	}
+	if b.System != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_System = *b.System
+	}
+	if b.Server != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Server = *b.Server
+	}
+	return m0
+}
+
+type MemoryLoad struct {
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TotalBytes     int64                  `protobuf:"varint,1,opt,name=total_bytes,json=totalBytes"`
+	xxx_hidden_UsedBytes      int64                  `protobuf:"varint,2,opt,name=used_bytes,json=usedBytes"`
+	xxx_hidden_SwapTotalBytes int64                  `protobuf:"varint,3,opt,name=swap_total_bytes,json=swapTotalBytes"`
+	xxx_hidden_SwapUsedBytes  int64                  `protobuf:"varint,4,opt,name=swap_used_bytes,json=swapUsedBytes"`
+	xxx_hidden_ServerBytes    int64                  `protobuf:"varint,5,opt,name=server_bytes,json=serverBytes"`
+	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
+	XXX_presence              [1]uint32
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *MemoryLoad) Reset() {
+	*x = MemoryLoad{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MemoryLoad) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MemoryLoad) ProtoMessage() {}
+
+func (x *MemoryLoad) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *MemoryLoad) GetTotalBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_TotalBytes
+	}
+	return 0
+}
+
+func (x *MemoryLoad) GetUsedBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_UsedBytes
+	}
+	return 0
+}
+
+func (x *MemoryLoad) GetSwapTotalBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_SwapTotalBytes
+	}
+	return 0
+}
+
+func (x *MemoryLoad) GetSwapUsedBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_SwapUsedBytes
+	}
+	return 0
+}
+
+func (x *MemoryLoad) GetServerBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_ServerBytes
+	}
+	return 0
+}
+
+func (x *MemoryLoad) SetTotalBytes(v int64) {
+	x.xxx_hidden_TotalBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *MemoryLoad) SetUsedBytes(v int64) {
+	x.xxx_hidden_UsedBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *MemoryLoad) SetSwapTotalBytes(v int64) {
+	x.xxx_hidden_SwapTotalBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *MemoryLoad) SetSwapUsedBytes(v int64) {
+	x.xxx_hidden_SwapUsedBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *MemoryLoad) SetServerBytes(v int64) {
+	x.xxx_hidden_ServerBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
+}
+
+func (x *MemoryLoad) HasTotalBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *MemoryLoad) HasUsedBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *MemoryLoad) HasSwapTotalBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *MemoryLoad) HasSwapUsedBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *MemoryLoad) HasServerBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *MemoryLoad) ClearTotalBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TotalBytes = 0
+}
+
+func (x *MemoryLoad) ClearUsedBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_UsedBytes = 0
+}
+
+func (x *MemoryLoad) ClearSwapTotalBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_SwapTotalBytes = 0
+}
+
+func (x *MemoryLoad) ClearSwapUsedBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_SwapUsedBytes = 0
+}
+
+func (x *MemoryLoad) ClearServerBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_ServerBytes = 0
+}
+
+type MemoryLoad_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TotalBytes *int64
+	// What is not available to programs: what they take and the operating
+	// system keeps, its file cache that can be freed aside.
+	UsedBytes      *int64
+	SwapTotalBytes *int64
+	SwapUsedBytes  *int64
+	// What the server's process takes in memory.
+	ServerBytes *int64
+}
+
+func (b0 MemoryLoad_builder) Build() *MemoryLoad {
+	m0 := &MemoryLoad{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TotalBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_TotalBytes = *b.TotalBytes
+	}
+	if b.UsedBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_UsedBytes = *b.UsedBytes
+	}
+	if b.SwapTotalBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_SwapTotalBytes = *b.SwapTotalBytes
+	}
+	if b.SwapUsedBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_SwapUsedBytes = *b.SwapUsedBytes
+	}
+	if b.ServerBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_ServerBytes = *b.ServerBytes
+	}
+	return m0
+}
+
+// DiskLoad is what the computer's disks read and write, together.
+type DiskLoad struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ReadRate     float64                `protobuf:"fixed64,1,opt,name=read_rate,json=readRate"`
+	xxx_hidden_WriteRate    float64                `protobuf:"fixed64,2,opt,name=write_rate,json=writeRate"`
+	xxx_hidden_ReadBytes    int64                  `protobuf:"varint,3,opt,name=read_bytes,json=readBytes"`
+	xxx_hidden_WrittenBytes int64                  `protobuf:"varint,4,opt,name=written_bytes,json=writtenBytes"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *DiskLoad) Reset() {
+	*x = DiskLoad{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiskLoad) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiskLoad) ProtoMessage() {}
+
+func (x *DiskLoad) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DiskLoad) GetReadRate() float64 {
+	if x != nil {
+		return x.xxx_hidden_ReadRate
+	}
+	return 0
+}
+
+func (x *DiskLoad) GetWriteRate() float64 {
+	if x != nil {
+		return x.xxx_hidden_WriteRate
+	}
+	return 0
+}
+
+func (x *DiskLoad) GetReadBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_ReadBytes
+	}
+	return 0
+}
+
+func (x *DiskLoad) GetWrittenBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_WrittenBytes
+	}
+	return 0
+}
+
+func (x *DiskLoad) SetReadRate(v float64) {
+	x.xxx_hidden_ReadRate = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *DiskLoad) SetWriteRate(v float64) {
+	x.xxx_hidden_WriteRate = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *DiskLoad) SetReadBytes(v int64) {
+	x.xxx_hidden_ReadBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *DiskLoad) SetWrittenBytes(v int64) {
+	x.xxx_hidden_WrittenBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *DiskLoad) HasReadRate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *DiskLoad) HasWriteRate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *DiskLoad) HasReadBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *DiskLoad) HasWrittenBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *DiskLoad) ClearReadRate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ReadRate = 0
+}
+
+func (x *DiskLoad) ClearWriteRate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_WriteRate = 0
+}
+
+func (x *DiskLoad) ClearReadBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_ReadBytes = 0
+}
+
+func (x *DiskLoad) ClearWrittenBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_WrittenBytes = 0
+}
+
+type DiskLoad_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Bytes per second.
+	ReadRate  *float64
+	WriteRate *float64
+	// Since the computer started.
+	ReadBytes    *int64
+	WrittenBytes *int64
+}
+
+func (b0 DiskLoad_builder) Build() *DiskLoad {
+	m0 := &DiskLoad{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ReadRate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_ReadRate = *b.ReadRate
+	}
+	if b.WriteRate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_WriteRate = *b.WriteRate
+	}
+	if b.ReadBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_ReadBytes = *b.ReadBytes
+	}
+	if b.WrittenBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_WrittenBytes = *b.WrittenBytes
+	}
+	return m0
+}
+
+// NetworkLoad is what the computer's network interfaces receive and send,
+// together, the loopback's aside.
+type NetworkLoad struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ReceiveRate   float64                `protobuf:"fixed64,1,opt,name=receive_rate,json=receiveRate"`
+	xxx_hidden_SendRate      float64                `protobuf:"fixed64,2,opt,name=send_rate,json=sendRate"`
+	xxx_hidden_ReceivedBytes int64                  `protobuf:"varint,3,opt,name=received_bytes,json=receivedBytes"`
+	xxx_hidden_SentBytes     int64                  `protobuf:"varint,4,opt,name=sent_bytes,json=sentBytes"`
+	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
+	XXX_presence             [1]uint32
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *NetworkLoad) Reset() {
+	*x = NetworkLoad{}
+	mi := &file_mavio_system_v1_system_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkLoad) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkLoad) ProtoMessage() {}
+
+func (x *NetworkLoad) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_system_v1_system_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *NetworkLoad) GetReceiveRate() float64 {
+	if x != nil {
+		return x.xxx_hidden_ReceiveRate
+	}
+	return 0
+}
+
+func (x *NetworkLoad) GetSendRate() float64 {
+	if x != nil {
+		return x.xxx_hidden_SendRate
+	}
+	return 0
+}
+
+func (x *NetworkLoad) GetReceivedBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_ReceivedBytes
+	}
+	return 0
+}
+
+func (x *NetworkLoad) GetSentBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_SentBytes
+	}
+	return 0
+}
+
+func (x *NetworkLoad) SetReceiveRate(v float64) {
+	x.xxx_hidden_ReceiveRate = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
+}
+
+func (x *NetworkLoad) SetSendRate(v float64) {
+	x.xxx_hidden_SendRate = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *NetworkLoad) SetReceivedBytes(v int64) {
+	x.xxx_hidden_ReceivedBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *NetworkLoad) SetSentBytes(v int64) {
+	x.xxx_hidden_SentBytes = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
+}
+
+func (x *NetworkLoad) HasReceiveRate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *NetworkLoad) HasSendRate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *NetworkLoad) HasReceivedBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *NetworkLoad) HasSentBytes() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *NetworkLoad) ClearReceiveRate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_ReceiveRate = 0
+}
+
+func (x *NetworkLoad) ClearSendRate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_SendRate = 0
+}
+
+func (x *NetworkLoad) ClearReceivedBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_ReceivedBytes = 0
+}
+
+func (x *NetworkLoad) ClearSentBytes() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_SentBytes = 0
+}
+
+type NetworkLoad_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Bytes per second.
+	ReceiveRate *float64
+	SendRate    *float64
+	// Since the computer started.
+	ReceivedBytes *int64
+	SentBytes     *int64
+}
+
+func (b0 NetworkLoad_builder) Build() *NetworkLoad {
+	m0 := &NetworkLoad{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.ReceiveRate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
+		x.xxx_hidden_ReceiveRate = *b.ReceiveRate
+	}
+	if b.SendRate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
+		x.xxx_hidden_SendRate = *b.SendRate
+	}
+	if b.ReceivedBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_ReceivedBytes = *b.ReceivedBytes
+	}
+	if b.SentBytes != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_SentBytes = *b.SentBytes
+	}
+	return m0
+}
+
 // TranscodingSettings steer transcodes.
 type TranscodingSettings struct {
 	state                            protoimpl.MessageState `protogen:"opaque.v1"`
@@ -848,7 +1795,7 @@ type TranscodingSettings struct {
 
 func (x *TranscodingSettings) Reset() {
 	*x = TranscodingSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[4]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -860,7 +1807,7 @@ func (x *TranscodingSettings) String() string {
 func (*TranscodingSettings) ProtoMessage() {}
 
 func (x *TranscodingSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[4]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1361,7 +2308,7 @@ type NetworkSettings struct {
 
 func (x *NetworkSettings) Reset() {
 	*x = NetworkSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[5]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1373,7 +2320,7 @@ func (x *NetworkSettings) String() string {
 func (*NetworkSettings) ProtoMessage() {}
 
 func (x *NetworkSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[5]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1639,7 +2586,7 @@ type ServerSettings struct {
 
 func (x *ServerSettings) Reset() {
 	*x = ServerSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[6]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1651,7 +2598,7 @@ func (x *ServerSettings) String() string {
 func (*ServerSettings) ProtoMessage() {}
 
 func (x *ServerSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[6]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1936,7 +2883,7 @@ type RequestSettings struct {
 
 func (x *RequestSettings) Reset() {
 	*x = RequestSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[7]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1948,7 +2895,7 @@ func (x *RequestSettings) String() string {
 func (*RequestSettings) ProtoMessage() {}
 
 func (x *RequestSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[7]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2618,7 +3565,7 @@ type MetadataSettings struct {
 
 func (x *MetadataSettings) Reset() {
 	*x = MetadataSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[8]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2630,7 +3577,7 @@ func (x *MetadataSettings) String() string {
 func (*MetadataSettings) ProtoMessage() {}
 
 func (x *MetadataSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[8]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2768,7 +3715,7 @@ type AcquisitionSettings struct {
 
 func (x *AcquisitionSettings) Reset() {
 	*x = AcquisitionSettings{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[9]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2780,7 +3727,7 @@ func (x *AcquisitionSettings) String() string {
 func (*AcquisitionSettings) ProtoMessage() {}
 
 func (x *AcquisitionSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[9]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3920,7 +4867,7 @@ type GetServerSettingsRequest struct {
 
 func (x *GetServerSettingsRequest) Reset() {
 	*x = GetServerSettingsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[10]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3932,7 +4879,7 @@ func (x *GetServerSettingsRequest) String() string {
 func (*GetServerSettingsRequest) ProtoMessage() {}
 
 func (x *GetServerSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[10]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3965,7 +4912,7 @@ type GetServerSettingsResponse struct {
 
 func (x *GetServerSettingsResponse) Reset() {
 	*x = GetServerSettingsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[11]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3977,7 +4924,7 @@ func (x *GetServerSettingsResponse) String() string {
 func (*GetServerSettingsResponse) ProtoMessage() {}
 
 func (x *GetServerSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[11]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4048,7 +4995,7 @@ type UpdateServerSettingsRequest struct {
 
 func (x *UpdateServerSettingsRequest) Reset() {
 	*x = UpdateServerSettingsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[12]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4060,7 +5007,7 @@ func (x *UpdateServerSettingsRequest) String() string {
 func (*UpdateServerSettingsRequest) ProtoMessage() {}
 
 func (x *UpdateServerSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[12]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4116,7 +5063,7 @@ type UpdateServerSettingsResponse struct {
 
 func (x *UpdateServerSettingsResponse) Reset() {
 	*x = UpdateServerSettingsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[13]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4128,7 +5075,7 @@ func (x *UpdateServerSettingsResponse) String() string {
 func (*UpdateServerSettingsResponse) ProtoMessage() {}
 
 func (x *UpdateServerSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[13]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4187,7 +5134,7 @@ type ListDirectoryRequest struct {
 
 func (x *ListDirectoryRequest) Reset() {
 	*x = ListDirectoryRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[14]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4199,7 +5146,7 @@ func (x *ListDirectoryRequest) String() string {
 func (*ListDirectoryRequest) ProtoMessage() {}
 
 func (x *ListDirectoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[14]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4299,7 +5246,7 @@ type DirectoryEntry struct {
 
 func (x *DirectoryEntry) Reset() {
 	*x = DirectoryEntry{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[15]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4311,7 +5258,7 @@ func (x *DirectoryEntry) String() string {
 func (*DirectoryEntry) ProtoMessage() {}
 
 func (x *DirectoryEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[15]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4440,7 +5387,7 @@ type ListDirectoryResponse struct {
 
 func (x *ListDirectoryResponse) Reset() {
 	*x = ListDirectoryResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[16]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4452,7 +5399,7 @@ func (x *ListDirectoryResponse) String() string {
 func (*ListDirectoryResponse) ProtoMessage() {}
 
 func (x *ListDirectoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[16]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4571,7 +5518,7 @@ type LogRecord struct {
 
 func (x *LogRecord) Reset() {
 	*x = LogRecord{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[17]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4583,7 +5530,7 @@ func (x *LogRecord) String() string {
 func (*LogRecord) ProtoMessage() {}
 
 func (x *LogRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[17]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4719,7 +5666,7 @@ type ListLogsRequest struct {
 
 func (x *ListLogsRequest) Reset() {
 	*x = ListLogsRequest{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[18]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4731,7 +5678,7 @@ func (x *ListLogsRequest) String() string {
 func (*ListLogsRequest) ProtoMessage() {}
 
 func (x *ListLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[18]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4850,7 +5797,7 @@ type ListLogsResponse struct {
 
 func (x *ListLogsResponse) Reset() {
 	*x = ListLogsResponse{}
-	mi := &file_mavio_system_v1_system_proto_msgTypes[19]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4862,7 +5809,7 @@ func (x *ListLogsResponse) String() string {
 func (*ListLogsResponse) ProtoMessage() {}
 
 func (x *ListLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_system_v1_system_proto_msgTypes[19]
+	mi := &file_mavio_system_v1_system_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4921,7 +5868,43 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\bdatabase\x18\x04 \x01(\tR\bdatabase\x12%\n" +
 	"\x0effmpeg_version\x18\x05 \x01(\tR\rffmpegVersion\x129\n" +
 	"\n" +
-	"start_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\"\xf2\x05\n" +
+	"start_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\"\x16\n" +
+	"\x14GetSystemLoadRequest\"N\n" +
+	"\x15GetSystemLoadResponse\x125\n" +
+	"\asamples\x18\x01 \x03(\v2\x1b.mavio.system.v1.LoadSampleR\asamples\"\x84\x02\n" +
+	"\n" +
+	"LoadSample\x12.\n" +
+	"\x04time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04time\x12*\n" +
+	"\x03cpu\x18\x02 \x01(\v2\x18.mavio.system.v1.CpuLoadR\x03cpu\x123\n" +
+	"\x06memory\x18\x03 \x01(\v2\x1b.mavio.system.v1.MemoryLoadR\x06memory\x12-\n" +
+	"\x04disk\x18\x04 \x01(\v2\x19.mavio.system.v1.DiskLoadR\x04disk\x126\n" +
+	"\anetwork\x18\x05 \x01(\v2\x1c.mavio.system.v1.NetworkLoadR\anetwork\"M\n" +
+	"\aCpuLoad\x12\x12\n" +
+	"\x04user\x18\x01 \x01(\x01R\x04user\x12\x16\n" +
+	"\x06system\x18\x02 \x01(\x01R\x06system\x12\x16\n" +
+	"\x06server\x18\x03 \x01(\x01R\x06server\"\xc1\x01\n" +
+	"\n" +
+	"MemoryLoad\x12\x1f\n" +
+	"\vtotal_bytes\x18\x01 \x01(\x03R\n" +
+	"totalBytes\x12\x1d\n" +
+	"\n" +
+	"used_bytes\x18\x02 \x01(\x03R\tusedBytes\x12(\n" +
+	"\x10swap_total_bytes\x18\x03 \x01(\x03R\x0eswapTotalBytes\x12&\n" +
+	"\x0fswap_used_bytes\x18\x04 \x01(\x03R\rswapUsedBytes\x12!\n" +
+	"\fserver_bytes\x18\x05 \x01(\x03R\vserverBytes\"\x8a\x01\n" +
+	"\bDiskLoad\x12\x1b\n" +
+	"\tread_rate\x18\x01 \x01(\x01R\breadRate\x12\x1d\n" +
+	"\n" +
+	"write_rate\x18\x02 \x01(\x01R\twriteRate\x12\x1d\n" +
+	"\n" +
+	"read_bytes\x18\x03 \x01(\x03R\treadBytes\x12#\n" +
+	"\rwritten_bytes\x18\x04 \x01(\x03R\fwrittenBytes\"\x93\x01\n" +
+	"\vNetworkLoad\x12!\n" +
+	"\freceive_rate\x18\x01 \x01(\x01R\vreceiveRate\x12\x1b\n" +
+	"\tsend_rate\x18\x02 \x01(\x01R\bsendRate\x12%\n" +
+	"\x0ereceived_bytes\x18\x03 \x01(\x03R\rreceivedBytes\x12\x1d\n" +
+	"\n" +
+	"sent_bytes\x18\x04 \x01(\x03R\tsentBytes\"\xf2\x05\n" +
 	"\x13TranscodingSettings\x12f\n" +
 	"\x15hardware_acceleration\x18\x01 \x01(\x0e2%.mavio.system.v1.HardwareAccelerationB\n" +
 	"\xbaH\a\x82\x01\x04\x10\x01 \x00R\x14hardwareAcceleration\x12+\n" +
@@ -5105,10 +6088,11 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x0fLOG_LEVEL_DEBUG\x10\x01\x12\x12\n" +
 	"\x0eLOG_LEVEL_INFO\x10\x02\x12\x12\n" +
 	"\x0eLOG_LEVEL_WARN\x10\x03\x12\x13\n" +
-	"\x0fLOG_LEVEL_ERROR\x10\x042\xee\x04\n" +
+	"\x0fLOG_LEVEL_ERROR\x10\x042\xd3\x05\n" +
 	"\rSystemService\x12W\n" +
 	"\tGetHealth\x12!.mavio.system.v1.GetHealthRequest\x1a\".mavio.system.v1.GetHealthResponse\"\x03\x90\x02\x01\x12c\n" +
-	"\rGetSystemInfo\x12%.mavio.system.v1.GetSystemInfoRequest\x1a&.mavio.system.v1.GetSystemInfoResponse\"\x03\x90\x02\x01\x12o\n" +
+	"\rGetSystemInfo\x12%.mavio.system.v1.GetSystemInfoRequest\x1a&.mavio.system.v1.GetSystemInfoResponse\"\x03\x90\x02\x01\x12c\n" +
+	"\rGetSystemLoad\x12%.mavio.system.v1.GetSystemLoadRequest\x1a&.mavio.system.v1.GetSystemLoadResponse\"\x03\x90\x02\x01\x12o\n" +
 	"\x11GetServerSettings\x12).mavio.system.v1.GetServerSettingsRequest\x1a*.mavio.system.v1.GetServerSettingsResponse\"\x03\x90\x02\x01\x12s\n" +
 	"\x14UpdateServerSettings\x12,.mavio.system.v1.UpdateServerSettingsRequest\x1a-.mavio.system.v1.UpdateServerSettingsResponse\x12c\n" +
 	"\rListDirectory\x12%.mavio.system.v1.ListDirectoryRequest\x1a&.mavio.system.v1.ListDirectoryResponse\"\x03\x90\x02\x01\x12T\n" +
@@ -5116,7 +6100,7 @@ const file_mavio_system_v1_system_proto_rawDesc = "" +
 	"\x13com.mavio.system.v1B\vSystemProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1;systemv1\xa2\x02\x03MSX\xaa\x02\x0fMavio.System.V1\xca\x02\x0fMavio\\System\\V1\xe2\x02\x1bMavio\\System\\V1\\GPBMetadata\xea\x02\x11Mavio::System::V1b\beditionsp\xe8\a"
 
 var file_mavio_system_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_mavio_system_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_mavio_system_v1_system_proto_goTypes = []any{
 	(HardwareAcceleration)(0),            // 0: mavio.system.v1.HardwareAcceleration
 	(ProperDownload)(0),                  // 1: mavio.system.v1.ProperDownload
@@ -5129,72 +6113,87 @@ var file_mavio_system_v1_system_proto_goTypes = []any{
 	(*GetHealthResponse)(nil),            // 8: mavio.system.v1.GetHealthResponse
 	(*GetSystemInfoRequest)(nil),         // 9: mavio.system.v1.GetSystemInfoRequest
 	(*GetSystemInfoResponse)(nil),        // 10: mavio.system.v1.GetSystemInfoResponse
-	(*TranscodingSettings)(nil),          // 11: mavio.system.v1.TranscodingSettings
-	(*NetworkSettings)(nil),              // 12: mavio.system.v1.NetworkSettings
-	(*ServerSettings)(nil),               // 13: mavio.system.v1.ServerSettings
-	(*RequestSettings)(nil),              // 14: mavio.system.v1.RequestSettings
-	(*MetadataSettings)(nil),             // 15: mavio.system.v1.MetadataSettings
-	(*AcquisitionSettings)(nil),          // 16: mavio.system.v1.AcquisitionSettings
-	(*GetServerSettingsRequest)(nil),     // 17: mavio.system.v1.GetServerSettingsRequest
-	(*GetServerSettingsResponse)(nil),    // 18: mavio.system.v1.GetServerSettingsResponse
-	(*UpdateServerSettingsRequest)(nil),  // 19: mavio.system.v1.UpdateServerSettingsRequest
-	(*UpdateServerSettingsResponse)(nil), // 20: mavio.system.v1.UpdateServerSettingsResponse
-	(*ListDirectoryRequest)(nil),         // 21: mavio.system.v1.ListDirectoryRequest
-	(*DirectoryEntry)(nil),               // 22: mavio.system.v1.DirectoryEntry
-	(*ListDirectoryResponse)(nil),        // 23: mavio.system.v1.ListDirectoryResponse
-	(*LogRecord)(nil),                    // 24: mavio.system.v1.LogRecord
-	(*ListLogsRequest)(nil),              // 25: mavio.system.v1.ListLogsRequest
-	(*ListLogsResponse)(nil),             // 26: mavio.system.v1.ListLogsResponse
-	nil,                                  // 27: mavio.system.v1.LogRecord.AttributesEntry
-	(*timestamppb.Timestamp)(nil),        // 28: google.protobuf.Timestamp
-	(v1.MinimumAvailability)(0),          // 29: mavio.acquisition.v1.MinimumAvailability
-	(v1.NewItemMonitor)(0),               // 30: mavio.acquisition.v1.NewItemMonitor
-	(*durationpb.Duration)(nil),          // 31: google.protobuf.Duration
+	(*GetSystemLoadRequest)(nil),         // 11: mavio.system.v1.GetSystemLoadRequest
+	(*GetSystemLoadResponse)(nil),        // 12: mavio.system.v1.GetSystemLoadResponse
+	(*LoadSample)(nil),                   // 13: mavio.system.v1.LoadSample
+	(*CpuLoad)(nil),                      // 14: mavio.system.v1.CpuLoad
+	(*MemoryLoad)(nil),                   // 15: mavio.system.v1.MemoryLoad
+	(*DiskLoad)(nil),                     // 16: mavio.system.v1.DiskLoad
+	(*NetworkLoad)(nil),                  // 17: mavio.system.v1.NetworkLoad
+	(*TranscodingSettings)(nil),          // 18: mavio.system.v1.TranscodingSettings
+	(*NetworkSettings)(nil),              // 19: mavio.system.v1.NetworkSettings
+	(*ServerSettings)(nil),               // 20: mavio.system.v1.ServerSettings
+	(*RequestSettings)(nil),              // 21: mavio.system.v1.RequestSettings
+	(*MetadataSettings)(nil),             // 22: mavio.system.v1.MetadataSettings
+	(*AcquisitionSettings)(nil),          // 23: mavio.system.v1.AcquisitionSettings
+	(*GetServerSettingsRequest)(nil),     // 24: mavio.system.v1.GetServerSettingsRequest
+	(*GetServerSettingsResponse)(nil),    // 25: mavio.system.v1.GetServerSettingsResponse
+	(*UpdateServerSettingsRequest)(nil),  // 26: mavio.system.v1.UpdateServerSettingsRequest
+	(*UpdateServerSettingsResponse)(nil), // 27: mavio.system.v1.UpdateServerSettingsResponse
+	(*ListDirectoryRequest)(nil),         // 28: mavio.system.v1.ListDirectoryRequest
+	(*DirectoryEntry)(nil),               // 29: mavio.system.v1.DirectoryEntry
+	(*ListDirectoryResponse)(nil),        // 30: mavio.system.v1.ListDirectoryResponse
+	(*LogRecord)(nil),                    // 31: mavio.system.v1.LogRecord
+	(*ListLogsRequest)(nil),              // 32: mavio.system.v1.ListLogsRequest
+	(*ListLogsResponse)(nil),             // 33: mavio.system.v1.ListLogsResponse
+	nil,                                  // 34: mavio.system.v1.LogRecord.AttributesEntry
+	(*timestamppb.Timestamp)(nil),        // 35: google.protobuf.Timestamp
+	(v1.MinimumAvailability)(0),          // 36: mavio.acquisition.v1.MinimumAvailability
+	(v1.NewItemMonitor)(0),               // 37: mavio.acquisition.v1.NewItemMonitor
+	(*durationpb.Duration)(nil),          // 38: google.protobuf.Duration
 }
 var file_mavio_system_v1_system_proto_depIdxs = []int32{
 	6,  // 0: mavio.system.v1.GetHealthResponse.status:type_name -> mavio.system.v1.GetHealthResponse.Status
-	28, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
-	0,  // 2: mavio.system.v1.TranscodingSettings.hardware_acceleration:type_name -> mavio.system.v1.HardwareAcceleration
-	11, // 3: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
-	12, // 4: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
-	28, // 5: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
-	16, // 6: mavio.system.v1.ServerSettings.acquisition:type_name -> mavio.system.v1.AcquisitionSettings
-	14, // 7: mavio.system.v1.ServerSettings.requests:type_name -> mavio.system.v1.RequestSettings
-	15, // 8: mavio.system.v1.ServerSettings.metadata:type_name -> mavio.system.v1.MetadataSettings
-	29, // 9: mavio.system.v1.RequestSettings.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
-	30, // 10: mavio.system.v1.RequestSettings.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
-	1,  // 11: mavio.system.v1.AcquisitionSettings.propers:type_name -> mavio.system.v1.ProperDownload
-	2,  // 12: mavio.system.v1.AcquisitionSettings.colon_replacement:type_name -> mavio.system.v1.ColonReplacement
-	3,  // 13: mavio.system.v1.AcquisitionSettings.multi_episode_style:type_name -> mavio.system.v1.MultiEpisodeStyle
-	4,  // 14: mavio.system.v1.AcquisitionSettings.episode_title_required:type_name -> mavio.system.v1.EpisodeTitleRequired
-	13, // 15: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	0,  // 16: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
-	13, // 17: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
-	13, // 18: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
-	22, // 19: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
-	28, // 20: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
-	5,  // 21: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
-	27, // 22: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
-	5,  // 23: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
-	31, // 24: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
-	24, // 25: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
-	7,  // 26: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
-	9,  // 27: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
-	17, // 28: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
-	19, // 29: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
-	21, // 30: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
-	25, // 31: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
-	8,  // 32: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
-	10, // 33: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
-	18, // 34: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
-	20, // 35: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
-	23, // 36: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
-	26, // 37: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
-	32, // [32:38] is the sub-list for method output_type
-	26, // [26:32] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	35, // 1: mavio.system.v1.GetSystemInfoResponse.start_time:type_name -> google.protobuf.Timestamp
+	13, // 2: mavio.system.v1.GetSystemLoadResponse.samples:type_name -> mavio.system.v1.LoadSample
+	35, // 3: mavio.system.v1.LoadSample.time:type_name -> google.protobuf.Timestamp
+	14, // 4: mavio.system.v1.LoadSample.cpu:type_name -> mavio.system.v1.CpuLoad
+	15, // 5: mavio.system.v1.LoadSample.memory:type_name -> mavio.system.v1.MemoryLoad
+	16, // 6: mavio.system.v1.LoadSample.disk:type_name -> mavio.system.v1.DiskLoad
+	17, // 7: mavio.system.v1.LoadSample.network:type_name -> mavio.system.v1.NetworkLoad
+	0,  // 8: mavio.system.v1.TranscodingSettings.hardware_acceleration:type_name -> mavio.system.v1.HardwareAcceleration
+	18, // 9: mavio.system.v1.ServerSettings.transcoding:type_name -> mavio.system.v1.TranscodingSettings
+	19, // 10: mavio.system.v1.ServerSettings.network:type_name -> mavio.system.v1.NetworkSettings
+	35, // 11: mavio.system.v1.ServerSettings.update_time:type_name -> google.protobuf.Timestamp
+	23, // 12: mavio.system.v1.ServerSettings.acquisition:type_name -> mavio.system.v1.AcquisitionSettings
+	21, // 13: mavio.system.v1.ServerSettings.requests:type_name -> mavio.system.v1.RequestSettings
+	22, // 14: mavio.system.v1.ServerSettings.metadata:type_name -> mavio.system.v1.MetadataSettings
+	36, // 15: mavio.system.v1.RequestSettings.minimum_availability:type_name -> mavio.acquisition.v1.MinimumAvailability
+	37, // 16: mavio.system.v1.RequestSettings.monitor_new_items:type_name -> mavio.acquisition.v1.NewItemMonitor
+	1,  // 17: mavio.system.v1.AcquisitionSettings.propers:type_name -> mavio.system.v1.ProperDownload
+	2,  // 18: mavio.system.v1.AcquisitionSettings.colon_replacement:type_name -> mavio.system.v1.ColonReplacement
+	3,  // 19: mavio.system.v1.AcquisitionSettings.multi_episode_style:type_name -> mavio.system.v1.MultiEpisodeStyle
+	4,  // 20: mavio.system.v1.AcquisitionSettings.episode_title_required:type_name -> mavio.system.v1.EpisodeTitleRequired
+	20, // 21: mavio.system.v1.GetServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	0,  // 22: mavio.system.v1.GetServerSettingsResponse.available_hardware_accelerations:type_name -> mavio.system.v1.HardwareAcceleration
+	20, // 23: mavio.system.v1.UpdateServerSettingsRequest.settings:type_name -> mavio.system.v1.ServerSettings
+	20, // 24: mavio.system.v1.UpdateServerSettingsResponse.settings:type_name -> mavio.system.v1.ServerSettings
+	29, // 25: mavio.system.v1.ListDirectoryResponse.entries:type_name -> mavio.system.v1.DirectoryEntry
+	35, // 26: mavio.system.v1.LogRecord.time:type_name -> google.protobuf.Timestamp
+	5,  // 27: mavio.system.v1.LogRecord.level:type_name -> mavio.system.v1.LogLevel
+	34, // 28: mavio.system.v1.LogRecord.attributes:type_name -> mavio.system.v1.LogRecord.AttributesEntry
+	5,  // 29: mavio.system.v1.ListLogsRequest.min_level:type_name -> mavio.system.v1.LogLevel
+	38, // 30: mavio.system.v1.ListLogsRequest.max_age:type_name -> google.protobuf.Duration
+	31, // 31: mavio.system.v1.ListLogsResponse.records:type_name -> mavio.system.v1.LogRecord
+	7,  // 32: mavio.system.v1.SystemService.GetHealth:input_type -> mavio.system.v1.GetHealthRequest
+	9,  // 33: mavio.system.v1.SystemService.GetSystemInfo:input_type -> mavio.system.v1.GetSystemInfoRequest
+	11, // 34: mavio.system.v1.SystemService.GetSystemLoad:input_type -> mavio.system.v1.GetSystemLoadRequest
+	24, // 35: mavio.system.v1.SystemService.GetServerSettings:input_type -> mavio.system.v1.GetServerSettingsRequest
+	26, // 36: mavio.system.v1.SystemService.UpdateServerSettings:input_type -> mavio.system.v1.UpdateServerSettingsRequest
+	28, // 37: mavio.system.v1.SystemService.ListDirectory:input_type -> mavio.system.v1.ListDirectoryRequest
+	32, // 38: mavio.system.v1.SystemService.ListLogs:input_type -> mavio.system.v1.ListLogsRequest
+	8,  // 39: mavio.system.v1.SystemService.GetHealth:output_type -> mavio.system.v1.GetHealthResponse
+	10, // 40: mavio.system.v1.SystemService.GetSystemInfo:output_type -> mavio.system.v1.GetSystemInfoResponse
+	12, // 41: mavio.system.v1.SystemService.GetSystemLoad:output_type -> mavio.system.v1.GetSystemLoadResponse
+	25, // 42: mavio.system.v1.SystemService.GetServerSettings:output_type -> mavio.system.v1.GetServerSettingsResponse
+	27, // 43: mavio.system.v1.SystemService.UpdateServerSettings:output_type -> mavio.system.v1.UpdateServerSettingsResponse
+	30, // 44: mavio.system.v1.SystemService.ListDirectory:output_type -> mavio.system.v1.ListDirectoryResponse
+	33, // 45: mavio.system.v1.SystemService.ListLogs:output_type -> mavio.system.v1.ListLogsResponse
+	39, // [39:46] is the sub-list for method output_type
+	32, // [32:39] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_mavio_system_v1_system_proto_init() }
@@ -5208,7 +6207,7 @@ func file_mavio_system_v1_system_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_system_v1_system_proto_rawDesc), len(file_mavio_system_v1_system_proto_rawDesc)),
 			NumEnums:      7,
-			NumMessages:   21,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

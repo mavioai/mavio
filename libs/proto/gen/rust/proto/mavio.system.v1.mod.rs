@@ -324,6 +324,34 @@ pub use self::__buffa::view::GetSystemInfoResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetSystemInfoResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetSystemLoadRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSystemLoadRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSystemLoadResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSystemLoadResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadSampleView;
+#[doc(inline)]
+pub use self::__buffa::view::LoadSampleOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CpuLoadView;
+#[doc(inline)]
+pub use self::__buffa::view::CpuLoadOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::MemoryLoadView;
+#[doc(inline)]
+pub use self::__buffa::view::MemoryLoadOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DiskLoadView;
+#[doc(inline)]
+pub use self::__buffa::view::DiskLoadOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::NetworkLoadView;
+#[doc(inline)]
+pub use self::__buffa::view::NetworkLoadOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::TranscodingSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::TranscodingSettingsOwnedView;

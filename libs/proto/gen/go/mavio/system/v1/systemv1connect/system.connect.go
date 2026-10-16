@@ -38,6 +38,9 @@ const (
 	// SystemServiceGetSystemInfoProcedure is the fully-qualified name of the SystemService's
 	// GetSystemInfo RPC.
 	SystemServiceGetSystemInfoProcedure = "/mavio.system.v1.SystemService/GetSystemInfo"
+	// SystemServiceGetSystemLoadProcedure is the fully-qualified name of the SystemService's
+	// GetSystemLoad RPC.
+	SystemServiceGetSystemLoadProcedure = "/mavio.system.v1.SystemService/GetSystemLoad"
 	// SystemServiceGetServerSettingsProcedure is the fully-qualified name of the SystemService's
 	// GetServerSettings RPC.
 	SystemServiceGetServerSettingsProcedure = "/mavio.system.v1.SystemService/GetServerSettings"
@@ -57,6 +60,11 @@ type SystemServiceClient interface {
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
 	// GetSystemInfo describes the running server.
 	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
+	// GetSystemLoad returns the load of the server's computer — its CPU,
+	// memory, disks and network — over the last two minutes. The server
+	// samples it every two seconds from the first request on, until none
+	// came for a while. Administrators only.
+	GetSystemLoad(context.Context, *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error)
 	// GetServerSettings returns the settings administrators change while
 	// the server runs. Administrators only.
 	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
@@ -97,6 +105,13 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getSystemLoad: connect.NewClient[v1.GetSystemLoadRequest, v1.GetSystemLoadResponse](
+			httpClient,
+			baseURL+SystemServiceGetSystemLoadProcedure,
+			connect.WithSchema(systemServiceMethods.ByName("GetSystemLoad")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		getServerSettings: connect.NewClient[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse](
 			httpClient,
 			baseURL+SystemServiceGetServerSettingsProcedure,
@@ -131,6 +146,7 @@ func NewSystemServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 type systemServiceClient struct {
 	getHealth            *connect.Client[v1.GetHealthRequest, v1.GetHealthResponse]
 	getSystemInfo        *connect.Client[v1.GetSystemInfoRequest, v1.GetSystemInfoResponse]
+	getSystemLoad        *connect.Client[v1.GetSystemLoadRequest, v1.GetSystemLoadResponse]
 	getServerSettings    *connect.Client[v1.GetServerSettingsRequest, v1.GetServerSettingsResponse]
 	updateServerSettings *connect.Client[v1.UpdateServerSettingsRequest, v1.UpdateServerSettingsResponse]
 	listDirectory        *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
@@ -149,6 +165,15 @@ func (c *systemServiceClient) GetHealth(ctx context.Context, req *v1.GetHealthRe
 // GetSystemInfo calls mavio.system.v1.SystemService.GetSystemInfo.
 func (c *systemServiceClient) GetSystemInfo(ctx context.Context, req *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error) {
 	response, err := c.getSystemInfo.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
+// GetSystemLoad calls mavio.system.v1.SystemService.GetSystemLoad.
+func (c *systemServiceClient) GetSystemLoad(ctx context.Context, req *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error) {
+	response, err := c.getSystemLoad.CallUnary(ctx, connect.NewRequest(req))
 	if response != nil {
 		return response.Msg, err
 	}
@@ -197,6 +222,11 @@ type SystemServiceHandler interface {
 	GetHealth(context.Context, *v1.GetHealthRequest) (*v1.GetHealthResponse, error)
 	// GetSystemInfo describes the running server.
 	GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error)
+	// GetSystemLoad returns the load of the server's computer — its CPU,
+	// memory, disks and network — over the last two minutes. The server
+	// samples it every two seconds from the first request on, until none
+	// came for a while. Administrators only.
+	GetSystemLoad(context.Context, *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error)
 	// GetServerSettings returns the settings administrators change while
 	// the server runs. Administrators only.
 	GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error)
@@ -233,6 +263,13 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	systemServiceGetSystemLoadHandler := connect.NewUnaryHandlerSimple(
+		SystemServiceGetSystemLoadProcedure,
+		svc.GetSystemLoad,
+		connect.WithSchema(systemServiceMethods.ByName("GetSystemLoad")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	systemServiceGetServerSettingsHandler := connect.NewUnaryHandlerSimple(
 		SystemServiceGetServerSettingsProcedure,
 		svc.GetServerSettings,
@@ -266,6 +303,8 @@ func NewSystemServiceHandler(svc SystemServiceHandler, opts ...connect.HandlerOp
 			systemServiceGetHealthHandler.ServeHTTP(w, r)
 		case SystemServiceGetSystemInfoProcedure:
 			systemServiceGetSystemInfoHandler.ServeHTTP(w, r)
+		case SystemServiceGetSystemLoadProcedure:
+			systemServiceGetSystemLoadHandler.ServeHTTP(w, r)
 		case SystemServiceGetServerSettingsProcedure:
 			systemServiceGetServerSettingsHandler.ServeHTTP(w, r)
 		case SystemServiceUpdateServerSettingsProcedure:
@@ -289,6 +328,10 @@ func (UnimplementedSystemServiceHandler) GetHealth(context.Context, *v1.GetHealt
 
 func (UnimplementedSystemServiceHandler) GetSystemInfo(context.Context, *v1.GetSystemInfoRequest) (*v1.GetSystemInfoResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetSystemInfo is not implemented"))
+}
+
+func (UnimplementedSystemServiceHandler) GetSystemLoad(context.Context, *v1.GetSystemLoadRequest) (*v1.GetSystemLoadResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.system.v1.SystemService.GetSystemLoad is not implemented"))
 }
 
 func (UnimplementedSystemServiceHandler) GetServerSettings(context.Context, *v1.GetServerSettingsRequest) (*v1.GetServerSettingsResponse, error) {

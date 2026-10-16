@@ -18034,6 +18034,32 @@
         "additionalProperties": false,
         "description": "Country is an ISO 3166-1 country."
       },
+      "mavio.system.v1.CpuLoad": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "number",
+            "title": "user",
+            "format": "double",
+            "description": "Running programs."
+          },
+          "system": {
+            "type": "number",
+            "title": "system",
+            "format": "double",
+            "description": "Running the operating system for them."
+          },
+          "server": {
+            "type": "number",
+            "title": "server",
+            "format": "double",
+            "description": "Running the server, of either."
+          }
+        },
+        "title": "CpuLoad",
+        "additionalProperties": false,
+        "description": "CpuLoad is the share of all the computer's cores busy, from 0 to 1."
+      },
       "mavio.system.v1.CreateAiConversationRequest": {
         "type": "object",
         "properties": {
@@ -18157,6 +18183,36 @@
         "title": "DirectoryEntry",
         "additionalProperties": false,
         "description": "DirectoryEntry is a file or folder."
+      },
+      "mavio.system.v1.DiskLoad": {
+        "type": "object",
+        "properties": {
+          "readRate": {
+            "type": "number",
+            "title": "read_rate",
+            "format": "double",
+            "description": "Bytes per second."
+          },
+          "writeRate": {
+            "type": "number",
+            "title": "write_rate",
+            "format": "double"
+          },
+          "readBytes": {
+            "type": "string",
+            "title": "read_bytes",
+            "format": "int64",
+            "description": "Since the computer started."
+          },
+          "writtenBytes": {
+            "type": "string",
+            "title": "written_bytes",
+            "format": "int64"
+          }
+        },
+        "title": "DiskLoad",
+        "additionalProperties": false,
+        "description": "DiskLoad is what the computer's disks read and write, together."
       },
       "mavio.system.v1.EpisodeTitleRequired": {
         "type": "string",
@@ -18394,6 +18450,26 @@
           }
         },
         "title": "GetSystemInfoResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.GetSystemLoadRequest": {
+        "type": "object",
+        "title": "GetSystemLoadRequest",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.GetSystemLoadResponse": {
+        "type": "object",
+        "properties": {
+          "samples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.system.v1.LoadSample"
+            },
+            "title": "samples",
+            "description": "Oldest first; empty until the first two readings were taken."
+          }
+        },
+        "title": "GetSystemLoadResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.HardwareAcceleration": {
@@ -19029,6 +19105,54 @@
         "title": "ListTasksResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.LoadSample": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "time"
+          },
+          "cpu": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.CpuLoad"
+              }
+            ],
+            "title": "cpu"
+          },
+          "memory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.MemoryLoad"
+              }
+            ],
+            "title": "memory"
+          },
+          "disk": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.DiskLoad"
+              }
+            ],
+            "title": "disk"
+          },
+          "network": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.NetworkLoad"
+              }
+            ],
+            "title": "network"
+          }
+        },
+        "title": "LoadSample",
+        "additionalProperties": false,
+        "description": "LoadSample is the load of the server's computer over the interval ending\n at its time. A part is unset where the operating system does not tell it."
+      },
       "mavio.system.v1.LogLevel": {
         "type": "string",
         "title": "LogLevel",
@@ -19095,6 +19219,40 @@
         "title": "LogoutAiResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.MemoryLoad": {
+        "type": "object",
+        "properties": {
+          "totalBytes": {
+            "type": "string",
+            "title": "total_bytes",
+            "format": "int64"
+          },
+          "usedBytes": {
+            "type": "string",
+            "title": "used_bytes",
+            "format": "int64",
+            "description": "What is not available to programs: what they take and the operating\n system keeps, its file cache that can be freed aside."
+          },
+          "swapTotalBytes": {
+            "type": "string",
+            "title": "swap_total_bytes",
+            "format": "int64"
+          },
+          "swapUsedBytes": {
+            "type": "string",
+            "title": "swap_used_bytes",
+            "format": "int64"
+          },
+          "serverBytes": {
+            "type": "string",
+            "title": "server_bytes",
+            "format": "int64",
+            "description": "What the server's process takes in memory."
+          }
+        },
+        "title": "MemoryLoad",
+        "additionalProperties": false
+      },
       "mavio.system.v1.MetadataSettings": {
         "type": "object",
         "properties": {
@@ -19128,6 +19286,36 @@
           "MULTI_EPISODE_STYLE_PREFIXED_RANGE"
         ],
         "description": "MultiEpisodeStyle is how the name of a file of several episodes writes\n their numbers, shown for episodes 6 to 8 of season 15."
+      },
+      "mavio.system.v1.NetworkLoad": {
+        "type": "object",
+        "properties": {
+          "receiveRate": {
+            "type": "number",
+            "title": "receive_rate",
+            "format": "double",
+            "description": "Bytes per second."
+          },
+          "sendRate": {
+            "type": "number",
+            "title": "send_rate",
+            "format": "double"
+          },
+          "receivedBytes": {
+            "type": "string",
+            "title": "received_bytes",
+            "format": "int64",
+            "description": "Since the computer started."
+          },
+          "sentBytes": {
+            "type": "string",
+            "title": "sent_bytes",
+            "format": "int64"
+          }
+        },
+        "title": "NetworkLoad",
+        "additionalProperties": false,
+        "description": "NetworkLoad is what the computer's network interfaces receive and send,\n together, the loopback's aside."
       },
       "mavio.system.v1.NetworkSettings": {
         "type": "object",
@@ -21322,7 +21510,7 @@
     },
     {
       "name": "SystemService",
-      "description": "SystemService exposes server-level information and health, the\n server's settings, its file system and its logs."
+      "description": "SystemService exposes server-level information and health, the load of\n its computer, the server's settings, its file system and its logs."
     },
     {
       "name": "TaskService",
@@ -22127,13 +22315,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.acquisition.v1.DiscoverService/SearchTitles": {
       "post": {
         "tags": [
-          "CollectionService"
+          "DiscoverService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "SearchTitles",
+        "description": "SearchTitles finds movies and series by name through a discovery\n provider, as Seerr's /search, marked as Discover marks them.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.SearchTitles",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22158,7 +22347,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesRequest"
               }
             }
           },
@@ -22180,7 +22369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesResponse"
                 }
               }
             }
@@ -23362,13 +23551,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/CreateQualityProfile": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "ProfileService"
+          "ItemService"
         ],
-        "summary": "CreateQualityProfile",
-        "operationId": "mavio.acquisition.v1.ProfileService.CreateQualityProfile",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23393,7 +23582,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -23415,7 +23604,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -24837,13 +25026,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.RequestService/BlockTitle": {
       "post": {
         "tags": [
-          "ItemService"
+          "RequestService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "BlockTitle",
+        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24868,7 +25058,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
               }
             }
           },
@@ -24890,7 +25080,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
                 }
               }
             }
@@ -26138,13 +26328,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "CollectionService"
         ],
-        "summary": "GetSubtitleSettings",
-        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleSettings",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26169,7 +26359,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -26191,7 +26381,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -29728,14 +29918,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/SearchTitles": {
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "SubtitleService"
         ],
-        "summary": "SearchTitles",
-        "description": "SearchTitles finds movies and series by name through a discovery\n provider, as Seerr's /search, marked as Discover marks them.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.SearchTitles",
+        "summary": "GetSubtitleSettings",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29760,7 +29949,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsRequest"
               }
             }
           },
@@ -29782,7 +29971,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsResponse"
                 }
               }
             }
@@ -29852,14 +30041,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/BlockTitle": {
+    "/mavio.acquisition.v1.ProfileService/CreateQualityProfile": {
       "post": {
         "tags": [
-          "RequestService"
+          "ProfileService"
         ],
-        "summary": "BlockTitle",
-        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
-        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
+        "summary": "CreateQualityProfile",
+        "operationId": "mavio.acquisition.v1.ProfileService.CreateQualityProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29884,7 +30072,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileRequest"
               }
             }
           },
@@ -29906,7 +30094,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileResponse"
                 }
               }
             }
@@ -35838,6 +36026,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.GetSystemInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.SystemService/GetSystemLoad": {
+      "post": {
+        "tags": [
+          "SystemService"
+        ],
+        "summary": "GetSystemLoad",
+        "description": "GetSystemLoad returns the load of the server's computer — its CPU,\n memory, disks and network — over the last two minutes. The server\n samples it every two seconds from the first request on, until none\n came for a while. Administrators only.",
+        "operationId": "mavio.system.v1.SystemService.GetSystemLoad",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.GetSystemLoadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.GetSystemLoadResponse"
                 }
               }
             }

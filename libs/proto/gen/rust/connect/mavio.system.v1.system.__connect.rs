@@ -14,6 +14,14 @@ pub type OwnedGetSystemInfoRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetSystemInfoResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetSystemInfoResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetSystemLoadRequestView<'static>>`.
+pub type OwnedGetSystemLoadRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetSystemLoadResponseView<'static>>`.
+pub type OwnedGetSystemLoadResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<GetServerSettingsRequestView<'static>>`.
 pub type OwnedGetServerSettingsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetServerSettingsRequestView<'static>,
@@ -98,6 +106,40 @@ for crate::proto::mavio::system::v1::__buffa::view::GetSystemInfoResponseView<'_
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetSystemInfoResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::GetSystemInfoResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetSystemLoadResponse>
+for crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::GetSystemLoadResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<'static>,
 > {
     fn encode(
         &self,
@@ -280,6 +322,12 @@ pub const SYSTEM_SERVICE_GET_SYSTEM_INFO_SPEC: ::connectrpc::Spec = ::connectrpc
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetSystemLoad` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.SystemService/GetSystemLoad",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `GetServerSettings` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const SYSTEM_SERVICE_GET_SERVER_SETTINGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.SystemService/GetServerSettings",
@@ -304,8 +352,8 @@ pub const SYSTEM_SERVICE_LIST_LOGS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
-/// SystemService exposes server-level information and health, the
-/// server's settings, its file system and its logs.
+/// SystemService exposes server-level information and health, the load of
+/// its computer, the server's settings, its file system and its logs.
 ///
 /// # Implementing handlers
 ///
@@ -399,6 +447,32 @@ pub trait SystemService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::GetSystemInfoResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetSystemLoad returns the load of the server's computer — its CPU,
+    /// memory, disks and network — over the last two minutes. The server
+    /// samples it every two seconds from the first request on, until none
+    /// came for a while. Administrators only.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_system_load<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::GetSystemLoadRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::GetSystemLoadResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -591,6 +665,35 @@ impl<S: SystemService> SystemServiceExt for S {
             .with_spec(SYSTEM_SERVICE_GET_SYSTEM_INFO_SPEC)
             .route_view_idempotent(
                 SYSTEM_SERVICE_SERVICE_NAME,
+                "GetSystemLoad",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::GetSystemLoadRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_system_load(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::GetSystemLoadResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC)
+            .route_view_idempotent(
+                SYSTEM_SERVICE_SERVICE_NAME,
                 "GetServerSettings",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -771,6 +874,12 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         .with_spec(SYSTEM_SERVICE_GET_SYSTEM_INFO_SPEC),
                 )
             }
+            "GetSystemLoad" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC),
+                )
+            }
             "GetServerSettings" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -851,6 +960,28 @@ impl<T: SystemService> ::connectrpc::Dispatcher for SystemServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::GetSystemInfoResponse,
+                        >(format)
+                })
+            }
+            "GetSystemLoad" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::GetSystemLoadRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::GetSystemLoadRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_system_load(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::GetSystemLoadResponse,
                         >(format)
                 })
             }
@@ -1154,6 +1285,51 @@ where
                 &self.transport,
                 &self.config,
                 SYSTEM_SERVICE_GET_SYSTEM_INFO_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetSystemLoad RPC. Sends a request to /mavio.system.v1.SystemService/GetSystemLoad.
+    pub async fn get_system_load(
+        &self,
+        request: crate::proto::mavio::system::v1::GetSystemLoadRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_system_load_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetSystemLoad RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_system_load_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::GetSystemLoadRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::GetSystemLoadResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                SYSTEM_SERVICE_GET_SYSTEM_LOAD_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,
