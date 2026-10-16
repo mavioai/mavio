@@ -347,10 +347,10 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
     if (tv && document.activeElement === document.body) first.current?.querySelector<HTMLElement>("a, button")?.focus({ preventScroll: true });
   }, [tv]);
   const primary = `inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold type-headline ${
-    tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 flex-1 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
+    tv ? "h-16 bg-white/20 px-10 text-white backdrop-blur-xl" : phone ? "h-12 bg-white px-5 text-black" : "h-11 bg-white px-6 text-black hover:bg-white/90"
   }`;
   const secondary = `inline-flex items-center justify-center gap-2 rounded-[10px] bg-white/20 font-semibold text-white backdrop-blur-xl type-headline hover:bg-white/30 ${
-    tv ? "h-16 px-10" : phone ? "h-12 flex-1 px-5" : "h-11 px-6"
+    tv ? "h-16 px-10" : phone ? "h-12 px-5" : "h-11 px-6"
   }`;
   return (
     <div className="pb-8">
@@ -395,7 +395,8 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
             </div>
             {/* The overview is below on Seerr's page, as here but on the television. */}
             {tv && title.overview && <p className="line-clamp-2 type-body text-white/85">{title.overview}</p>}
-            <div ref={first} className={`mt-2 flex flex-wrap gap-3 ${phone ? "[&>*]:flex-1" : ""}`}>
+            {/* On a phone the actions fill their rows, as many on each as their names fit. */}
+            <div ref={first} className={`mt-2 flex flex-wrap gap-3 [&>*]:whitespace-nowrap ${phone ? "[&>*]:grow" : ""}`}>
               {title.itemId && (
                 <Link to="/s/$serverId/item/$itemId" params={{ serverId: server.id, itemId: title.itemId }} data-tv-button className={primary}>
                   <Icon name="play" fill size={tv ? 28 : 20} />
