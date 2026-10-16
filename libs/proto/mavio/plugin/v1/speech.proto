@@ -48,6 +48,9 @@ message RecognizerInfo {
   bool hints = 9;
   // The longest audio it takes at once; unset for any.
   google.protobuf.Duration max_duration = 10;
+  // The administrator lets it transcribe videos into subtitles; with
+  // timestamps only.
+  bool subtitles = 11;
 }
 
 // SpeechAudio is audio to recognize.

@@ -183,6 +183,7 @@ type RecognizerInfo struct {
 	xxx_hidden_Translates      bool                   `protobuf:"varint,8,opt,name=translates"`
 	xxx_hidden_Hints           bool                   `protobuf:"varint,9,opt,name=hints"`
 	xxx_hidden_MaxDuration     *durationpb.Duration   `protobuf:"bytes,10,opt,name=max_duration,json=maxDuration"`
+	xxx_hidden_Subtitles       bool                   `protobuf:"varint,11,opt,name=subtitles"`
 	XXX_raceDetectHookData     protoimpl.RaceDetectHookData
 	XXX_presence               [1]uint32
 	unknownFields              protoimpl.UnknownFields
@@ -292,14 +293,21 @@ func (x *RecognizerInfo) GetMaxDuration() *durationpb.Duration {
 	return nil
 }
 
+func (x *RecognizerInfo) GetSubtitles() bool {
+	if x != nil {
+		return x.xxx_hidden_Subtitles
+	}
+	return false
+}
+
 func (x *RecognizerInfo) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
 }
 
 func (x *RecognizerInfo) SetDisplayName(v string) {
 	x.xxx_hidden_DisplayName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
 }
 
 func (x *RecognizerInfo) SetSettings(v []*SettingField) {
@@ -308,7 +316,7 @@ func (x *RecognizerInfo) SetSettings(v []*SettingField) {
 
 func (x *RecognizerInfo) SetEnabled(v bool) {
 	x.xxx_hidden_Enabled = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
 }
 
 func (x *RecognizerInfo) SetLanguages(v []string) {
@@ -317,26 +325,31 @@ func (x *RecognizerInfo) SetLanguages(v []string) {
 
 func (x *RecognizerInfo) SetTimestamps(v bool) {
 	x.xxx_hidden_Timestamps = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
 }
 
 func (x *RecognizerInfo) SetDetectsLanguage(v bool) {
 	x.xxx_hidden_DetectsLanguage = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 11)
 }
 
 func (x *RecognizerInfo) SetTranslates(v bool) {
 	x.xxx_hidden_Translates = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 11)
 }
 
 func (x *RecognizerInfo) SetHints(v bool) {
 	x.xxx_hidden_Hints = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 11)
 }
 
 func (x *RecognizerInfo) SetMaxDuration(v *durationpb.Duration) {
 	x.xxx_hidden_MaxDuration = v
+}
+
+func (x *RecognizerInfo) SetSubtitles(v bool) {
+	x.xxx_hidden_Subtitles = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
 }
 
 func (x *RecognizerInfo) HasName() bool {
@@ -395,6 +408,13 @@ func (x *RecognizerInfo) HasMaxDuration() bool {
 	return x.xxx_hidden_MaxDuration != nil
 }
 
+func (x *RecognizerInfo) HasSubtitles() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
+}
+
 func (x *RecognizerInfo) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -434,6 +454,11 @@ func (x *RecognizerInfo) ClearMaxDuration() {
 	x.xxx_hidden_MaxDuration = nil
 }
 
+func (x *RecognizerInfo) ClearSubtitles() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 10)
+	x.xxx_hidden_Subtitles = false
+}
+
 type RecognizerInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -455,6 +480,9 @@ type RecognizerInfo_builder struct {
 	Hints *bool
 	// The longest audio it takes at once; unset for any.
 	MaxDuration *durationpb.Duration
+	// The administrator lets it transcribe videos into subtitles; with
+	// timestamps only.
+	Subtitles *bool
 }
 
 func (b0 RecognizerInfo_builder) Build() *RecognizerInfo {
@@ -462,36 +490,40 @@ func (b0 RecognizerInfo_builder) Build() *RecognizerInfo {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.DisplayName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
 		x.xxx_hidden_DisplayName = b.DisplayName
 	}
 	x.xxx_hidden_Settings = &b.Settings
 	if b.Enabled != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
 		x.xxx_hidden_Enabled = *b.Enabled
 	}
 	x.xxx_hidden_Languages = b.Languages
 	if b.Timestamps != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
 		x.xxx_hidden_Timestamps = *b.Timestamps
 	}
 	if b.DetectsLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 11)
 		x.xxx_hidden_DetectsLanguage = *b.DetectsLanguage
 	}
 	if b.Translates != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 11)
 		x.xxx_hidden_Translates = *b.Translates
 	}
 	if b.Hints != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 11)
 		x.xxx_hidden_Hints = *b.Hints
 	}
 	x.xxx_hidden_MaxDuration = b.MaxDuration
+	if b.Subtitles != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		x.xxx_hidden_Subtitles = *b.Subtitles
+	}
 	return m0
 }
 
@@ -2117,7 +2149,7 @@ const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"\x1cmavio/plugin/v1/speech.proto\x12\x0fmavio.plugin.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1emavio/plugin/v1/settings.proto\"\x18\n" +
 	"\x16ListRecognizersRequest\"\\\n" +
 	"\x17ListRecognizersResponse\x12A\n" +
-	"\vrecognizers\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\vrecognizers\"\xf9\x02\n" +
+	"\vrecognizers\x18\x01 \x03(\v2\x1f.mavio.plugin.v1.RecognizerInfoR\vrecognizers\"\x97\x03\n" +
 	"\x0eRecognizerInfo\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x129\n" +
@@ -2133,7 +2165,8 @@ const file_mavio_plugin_v1_speech_proto_rawDesc = "" +
 	"translates\x12\x14\n" +
 	"\x05hints\x18\t \x01(\bR\x05hints\x12<\n" +
 	"\fmax_duration\x18\n" +
-	" \x01(\v2\x19.google.protobuf.DurationR\vmaxDuration\"w\n" +
+	" \x01(\v2\x19.google.protobuf.DurationR\vmaxDuration\x12\x1c\n" +
+	"\tsubtitles\x18\v \x01(\bR\tsubtitles\"w\n" +
 	"\vSpeechAudio\x12\x12\n" +
 	"\x03pcm\x18\x01 \x01(\fH\x00R\x03pcm\x12\x12\n" +
 	"\x03url\x18\x02 \x01(\tH\x00R\x03url\x12/\n" +

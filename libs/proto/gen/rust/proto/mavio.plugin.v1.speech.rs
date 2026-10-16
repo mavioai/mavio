@@ -301,6 +301,11 @@ pub struct RecognizerInfo {
         ::buffa_types::google::protobuf::Duration,
         ::buffa::Inline<::buffa_types::google::protobuf::Duration>,
     >,
+    /// The administrator lets it transcribe videos into subtitles; with
+    /// timestamps only.
+    ///
+    /// Field 11: `subtitles`
+    pub subtitles: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -317,6 +322,7 @@ impl ::core::fmt::Debug for RecognizerInfo {
             .field("translates", &self.translates)
             .field("hints", &self.hints)
             .field("max_duration", &self.max_duration)
+            .field("subtitles", &self.subtitles)
             .finish()
     }
 }
@@ -383,6 +389,13 @@ impl RecognizerInfo {
         self.hints = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::subtitles`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_subtitles(mut self, value: bool) -> Self {
+        self.subtitles = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(RecognizerInfo);
 impl ::buffa::MessageName for RecognizerInfo {
@@ -444,6 +457,9 @@ impl ::buffa::Message for RecognizerInfo {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.subtitles.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -493,6 +509,9 @@ impl ::buffa::Message for RecognizerInfo {
                 buf,
             );
             self.max_duration.write_to(__cache, buf);
+        }
+        if let Some(v) = self.subtitles {
+            ::buffa::types::put_bool_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -608,6 +627,15 @@ impl ::buffa::Message for RecognizerInfo {
                     ctx,
                 )?;
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.subtitles = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -626,6 +654,7 @@ impl ::buffa::Message for RecognizerInfo {
         self.translates = ::core::option::Option::None;
         self.hints = ::core::option::Option::None;
         self.max_duration = ::buffa::MessageField::none();
+        self.subtitles = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

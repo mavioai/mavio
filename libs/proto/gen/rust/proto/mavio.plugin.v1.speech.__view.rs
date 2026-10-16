@@ -505,6 +505,11 @@ pub struct RecognizerInfoView<'a> {
     pub max_duration: ::buffa::MessageFieldView<
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'a>,
     >,
+    /// The administrator lets it transcribe videos into subtitles; with
+    /// timestamps only.
+    ///
+    /// Field 11: `subtitles`
+    pub subtitles: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
@@ -607,6 +612,13 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                     }
                 }
             }
+            11u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.subtitles = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
             3u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -682,6 +694,7 @@ impl<'a> ::buffa::MessageView<'a> for RecognizerInfoView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            subtitles: self.subtitles,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -733,6 +746,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if self.subtitles.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -783,6 +799,9 @@ impl<'a> ::buffa::ViewEncode<'a> for RecognizerInfoView<'a> {
                 buf,
             );
             self.max_duration.write_to(__cache, buf);
+        }
+        if let Some(v) = self.subtitles {
+            ::buffa::types::put_bool_field(11u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -948,6 +967,14 @@ impl RecognizerInfoOwnedView {
         ::buffa_types::google::protobuf::__buffa::view::DurationView<'_>,
     > {
         &self.0.reborrow().max_duration
+    }
+    /// The administrator lets it transcribe videos into subtitles; with
+    /// timestamps only.
+    ///
+    /// Field 11: `subtitles`
+    #[must_use]
+    pub fn subtitles(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().subtitles
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<RecognizerInfoView<'static>>>
