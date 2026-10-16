@@ -664,7 +664,7 @@
   "overview.disk": "磁盘",
   "overview.read": "读取",
   "overview.write": "写入",
-  "overview.readTotal": "已读取",
+  "overview.diskAvailable": "可用，共 {total}",
   "overview.written": "已写入",
   "overview.network": "网络",
   "overview.download": "下载",

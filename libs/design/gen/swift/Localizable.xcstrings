@@ -12110,7 +12110,7 @@
       }
     },
     "overview.disk": {
-      "comment": "Card of what the computer's disks read and write.",
+      "comment": "Card of the computer's disks: their space, and what they read and write.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -12163,20 +12163,20 @@
         }
       }
     },
-    "overview.readTotal": {
-      "comment": "Bytes the disks read since the computer started.",
+    "overview.diskAvailable": {
+      "comment": "After the space free on the computer's own disks; total is their size.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Read"
+            "value": "available of %@"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已读取"
+            "value": "可用，共 %@"
           }
         }
       }

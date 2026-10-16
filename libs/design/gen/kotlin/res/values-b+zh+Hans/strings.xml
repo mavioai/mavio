@@ -685,7 +685,7 @@
     <string name="overview_disk">磁盘</string>
     <string name="overview_read">读取</string>
     <string name="overview_write">写入</string>
-    <string name="overview_read_total">已读取</string>
+    <string name="overview_disk_available">可用，共 %s</string>
     <string name="overview_written">已写入</string>
     <string name="overview_network">网络</string>
     <string name="overview_download">下载</string>

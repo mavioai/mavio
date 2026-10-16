@@ -1,6 +1,6 @@
 // The load of the server's computer, on the settings' Overview
-// (docs/clients.md §6.3.6): a card each of its CPU, memory, disks and
-// network, with what it is now, three figures more and a graph of the last
+// (docs/clients.md §6.3.6): a card each of its CPU, memory, disks — their
+// space and throughput — and network, with what it is now, three figures more and a graph of the last
 // two minutes.
 import { errorMessage, type ServerEntry, useSystemLoad } from "@mavio/client-ts";
 import type { LoadSample } from "@mavio/proto/mavio/system/v1/system_pb";
@@ -95,15 +95,21 @@ function DiskCard({ now, samples }: CardProps) {
       color="#FF9500"
       title={t("overview.disk")}
       told={!now || !!d}
-      value={d && <Big text={rateOf(d.readRate)} />}
-      caption={t("overview.read")}
+      value={
+        d &&
+        (d.totalBytes !== undefined ? (
+          <Big text={capacityOf(d.availableBytes ?? 0n)} after={t("overview.diskAvailable", { total: capacityOf(d.totalBytes) })} />
+        ) : (
+          <span className="type-title2 text-text-tertiary">–</span>
+        ))
+      }
       stats={[
-        [t("overview.write"), d && rateOf(d.writeRate)],
-        [t("overview.readTotal"), d && capacityOf(d.readBytes)],
-        [t("overview.written"), d && capacityOf(d.writtenBytes)],
+        [t("overview.read"), d && (d.readRate !== undefined ? rateOf(d.readRate) : "–")],
+        [t("overview.write"), d && (d.writeRate !== undefined ? rateOf(d.writeRate) : "–")],
+        [t("overview.written"), d && (d.writtenBytes !== undefined ? capacityOf(d.writtenBytes) : "–")],
       ]}
       graph={scaled(
-        samples.map((s) => s.disk && s.disk.readRate + s.disk.writeRate),
+        samples.map((s) => s.disk && (s.disk.readRate ?? 0) + (s.disk.writeRate ?? 0)),
         1e6,
       )}
     />

@@ -667,7 +667,7 @@ export type MessageKey =
   | 'overview.disk'
   | 'overview.read'
   | 'overview.write'
-  | 'overview.readTotal'
+  | 'overview.diskAvailable'
   | 'overview.written'
   | 'overview.network'
   | 'overview.download'
@@ -2387,7 +2387,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.disk": "Disk",
     "overview.read": "Read",
     "overview.write": "Write",
-    "overview.readTotal": "Read",
+    "overview.diskAvailable": "available of {total}",
     "overview.written": "Written",
     "overview.network": "Network",
     "overview.download": "Download",
@@ -4105,7 +4105,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.disk": "磁盘",
     "overview.read": "读取",
     "overview.write": "写入",
-    "overview.readTotal": "已读取",
+    "overview.diskAvailable": "可用，共 {total}",
     "overview.written": "已写入",
     "overview.network": "网络",
     "overview.download": "下载",

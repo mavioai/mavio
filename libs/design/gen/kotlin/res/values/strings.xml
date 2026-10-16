@@ -1356,14 +1356,14 @@
     <string name="overview_memory_normal">Normal</string>
     <!-- Nearly all memory is in use. -->
     <string name="overview_memory_high">High</string>
-    <!-- Card of what the computer's disks read and write. -->
+    <!-- Card of the computer's disks: their space, and what they read and write. -->
     <string name="overview_disk">Disk</string>
     <!-- Bytes per second the disks read. -->
     <string name="overview_read">Read</string>
     <!-- Bytes per second the disks write. -->
     <string name="overview_write">Write</string>
-    <!-- Bytes the disks read since the computer started. -->
-    <string name="overview_read_total">Read</string>
+    <!-- After the space free on the computer's own disks; total is their size. -->
+    <string name="overview_disk_available">available of %s</string>
     <!-- Bytes the disks wrote since the computer started. -->
     <string name="overview_written">Written</string>
     <!-- Card of the computer's network traffic. -->

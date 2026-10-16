@@ -2158,7 +2158,7 @@ public enum MavioStrings {
     /// Nearly all memory is in use.
     public static var overviewMemoryHigh: String { NSLocalizedString("overview.memoryHigh", bundle: .module, comment: "") }
 
-    /// Card of what the computer's disks read and write.
+    /// Card of the computer's disks: their space, and what they read and write.
     public static var overviewDisk: String { NSLocalizedString("overview.disk", bundle: .module, comment: "") }
 
     /// Bytes per second the disks read.
@@ -2167,8 +2167,10 @@ public enum MavioStrings {
     /// Bytes per second the disks write.
     public static var overviewWrite: String { NSLocalizedString("overview.write", bundle: .module, comment: "") }
 
-    /// Bytes the disks read since the computer started.
-    public static var overviewReadTotal: String { NSLocalizedString("overview.readTotal", bundle: .module, comment: "") }
+    /// After the space free on the computer's own disks; total is their size.
+    public static func overviewDiskAvailable(total: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.diskAvailable", bundle: .module, comment: ""), total)
+    }
 
     /// Bytes the disks wrote since the computer started.
     public static var overviewWritten: String { NSLocalizedString("overview.written", bundle: .module, comment: "") }
