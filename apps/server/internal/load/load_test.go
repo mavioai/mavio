@@ -104,8 +104,15 @@ func TestReadThisComputer(t *testing.T) {
 	r := newReader(storage.Volumes)
 	ctx := context.Background()
 	r0 := r.read(ctx)
-	time.Sleep(100 * time.Millisecond)
-	s := r.read(ctx).since(r0)
+	// The counters of some systems, as macOS's, advance in ticks: the CPU
+	// is told once they have.
+	var s Sample
+	for range 30 {
+		time.Sleep(100 * time.Millisecond)
+		if s = r.read(ctx).since(r0); s.CPU != nil {
+			break
+		}
+	}
 	if s.CPU == nil || math.IsNaN(s.CPU.User) {
 		t.Errorf("CPU = %v, want = read", s.CPU)
 	}
