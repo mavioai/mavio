@@ -1,0 +1,17 @@
+{
+  "id": "dev.mavio.voice",
+  "name": "Voice",
+  "version": "0.1.0",
+  "description": "Speech recognition with whisper-asr-webservice and the OpenAI-compatible transcription API (OpenAI, Groq, speaches), for the assistant and for subtitles transcribed from videos; voices from the OpenAI-compatible speech API (OpenAI, speaches with Kokoro or Piper).",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_PROCESS",
+  "category": "CATEGORY_SPEECH",
+  "capabilities": [
+    "CAPABILITY_SPEECH_TO_TEXT",
+    "CAPABILITY_TEXT_TO_SPEECH"
+  ],
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{\"recognizers\":{\"type\":\"array\",\"description\":\"The recognition services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"whisper-asr\",\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the recognizer takes\"}},\"additionalProperties\":false}},\"synthesizers\":{\"type\":\"array\",\"description\":\"The synthesis services and their settings\",\"items\":{\"type\":\"object\",\"required\":[\"name\"],\"properties\":{\"name\":{\"type\":\"string\",\"enum\":[\"openai\"]},\"enabled\":{\"type\":\"boolean\",\"default\":false},\"settings\":{\"type\":\"object\",\"description\":\"The settings the synthesizer takes\"}},\"additionalProperties\":false}}},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}
