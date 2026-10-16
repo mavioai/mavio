@@ -8293,6 +8293,1384 @@
         "additionalProperties": false,
         "description": "WantedSubtitles is a movie or episode lacking subtitles."
       },
+      "mavio.assistant.v1.AskContext": {
+        "type": "object",
+        "properties": {
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "Languages of the user, BCP 47, most likely first: the recognizer's,\n then the UI's."
+          },
+          "playing": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AskPlaying"
+              }
+            ],
+            "title": "playing",
+            "description": "What the requesting device plays; unset when nothing."
+          },
+          "screen": {
+            "type": "string",
+            "title": "screen",
+            "description": "The screen shown, such as \"home\", \"item\", \"library\", \"search\",\n \"settings\" or \"player\"."
+          },
+          "itemId": {
+            "type": "string",
+            "title": "item_id",
+            "description": "The item shown, or the library."
+          },
+          "libraryId": {
+            "type": "string",
+            "title": "library_id"
+          },
+          "selectedItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "selected_item_ids",
+            "description": "The items selected."
+          },
+          "timeZone": {
+            "type": "string",
+            "title": "time_zone",
+            "description": "The device's IANA time zone, such as \"Europe/Berlin\"."
+          }
+        },
+        "title": "AskContext",
+        "additionalProperties": false,
+        "description": "AskContext is where the request is made."
+      },
+      "mavio.assistant.v1.AskPlaying": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "title": "item_id"
+          },
+          "position": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "position"
+          },
+          "paused": {
+            "type": "boolean",
+            "title": "paused"
+          },
+          "speed": {
+            "type": "number",
+            "title": "speed",
+            "format": "double"
+          },
+          "audioStreamIndex": {
+            "type": "integer",
+            "title": "audio_stream_index",
+            "format": "int32",
+            "description": "The streams played, by their index in the media; -1 for none."
+          },
+          "subtitleStreamIndex": {
+            "type": "integer",
+            "title": "subtitle_stream_index",
+            "format": "int32"
+          },
+          "volume": {
+            "type": "integer",
+            "title": "volume",
+            "format": "int32",
+            "description": "0–100."
+          },
+          "muted": {
+            "type": "boolean",
+            "title": "muted"
+          }
+        },
+        "title": "AskPlaying",
+        "additionalProperties": false,
+        "description": "AskPlaying is what the requesting device plays."
+      },
+      "mavio.assistant.v1.AskRequest": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "text",
+            "maxLength": 2000,
+            "description": "What the user said or typed."
+          },
+          "intent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.intent.v1.Intent"
+              }
+            ],
+            "title": "intent",
+            "description": "The intent the client's fast path read the text as; unset, the server\n reads it."
+          },
+          "context": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AskContext"
+              }
+            ],
+            "title": "context"
+          },
+          "spoken": {
+            "type": "boolean",
+            "title": "spoken",
+            "description": "The request was spoken: the answer is fit to be spoken."
+          },
+          "answer": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.ConfirmationAnswer"
+              }
+            ],
+            "title": "answer",
+            "description": "The answer to a pending confirmation, from its buttons."
+          },
+          "choice": {
+            "type": "string",
+            "title": "choice",
+            "description": "The item the user chose among results."
+          },
+          "failedActions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "failed_actions",
+            "description": "Client actions of the last answer the client could not carry out."
+          }
+        },
+        "title": "AskRequest",
+        "additionalProperties": false,
+        "description": "ask.request // text, intent, answer or choice is required\n"
+      },
+      "mavio.assistant.v1.AskResponse": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.ClientAction"
+                  }
+                ],
+                "title": "action",
+                "description": "Something for the requesting client to do."
+              }
+            },
+            "title": "action"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "answer": {
+                "type": "string",
+                "title": "answer",
+                "description": "More of the answer's text."
+              }
+            },
+            "title": "answer"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "confirmation": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.Confirmation"
+                  }
+                ],
+                "title": "confirmation",
+                "description": "A confirmation to ask for; the request ends waiting for it."
+              }
+            },
+            "title": "confirmation"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "done": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.Done"
+                  }
+                ],
+                "title": "done",
+                "description": "The end."
+              }
+            },
+            "title": "done"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "tool": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.ToolActivity"
+                  }
+                ],
+                "title": "tool",
+                "description": "A tool runs or has run."
+              }
+            },
+            "title": "tool"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "understood": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.Understood"
+                  }
+                ],
+                "title": "understood",
+                "description": "What the request was understood as."
+              }
+            },
+            "title": "understood"
+          }
+        ],
+        "unevaluatedProperties": false,
+        "not": {
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "action"
+                  ]
+                },
+                {
+                  "required": [
+                    "answer"
+                  ]
+                },
+                {
+                  "required": [
+                    "confirmation"
+                  ]
+                },
+                {
+                  "required": [
+                    "done"
+                  ]
+                },
+                {
+                  "required": [
+                    "tool"
+                  ]
+                },
+                {
+                  "required": [
+                    "understood"
+                  ]
+                }
+              ]
+            },
+            {
+              "not": {
+                "oneOf": [
+                  {
+                    "required": [
+                      "action"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "answer"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "confirmation"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "done"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "tool"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "understood"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "title": "AskResponse"
+      },
+      "mavio.assistant.v1.AssistantAccess": {
+        "type": "string",
+        "title": "AssistantAccess",
+        "enum": [
+          "ASSISTANT_ACCESS_UNSPECIFIED",
+          "ASSISTANT_ACCESS_ALL",
+          "ASSISTANT_ACCESS_ADMINISTRATORS",
+          "ASSISTANT_ACCESS_SELECTED"
+        ],
+        "description": "AssistantAccess is who may use the AI path."
+      },
+      "mavio.assistant.v1.AssistantConversation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "title": {
+            "type": "string",
+            "title": "title"
+          },
+          "deviceName": {
+            "type": "string",
+            "title": "device_name",
+            "description": "The device of its first request."
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          },
+          "updateTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "update_time"
+          },
+          "usage": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.AiUsage"
+              }
+            ],
+            "title": "usage",
+            "description": "What the model used."
+          }
+        },
+        "title": "AssistantConversation",
+        "additionalProperties": false,
+        "description": "AssistantConversation is one of a user's conversations with the\n assistant."
+      },
+      "mavio.assistant.v1.AssistantMemory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "text": {
+            "type": "string",
+            "title": "text"
+          },
+          "createTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "create_time"
+          },
+          "updateTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "update_time"
+          },
+          "useTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "use_time",
+            "description": "When it was last given to the model."
+          }
+        },
+        "title": "AssistantMemory",
+        "additionalProperties": false,
+        "description": "AssistantMemory is something the assistant remembers about a user."
+      },
+      "mavio.assistant.v1.AssistantMessage": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "boolean",
+            "title": "user",
+            "description": "A request when true, else an answer."
+          },
+          "text": {
+            "type": "string",
+            "title": "text"
+          },
+          "time": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "time"
+          }
+        },
+        "title": "AssistantMessage",
+        "additionalProperties": false,
+        "description": "AssistantMessage is a request or an answer of a conversation."
+      },
+      "mavio.assistant.v1.AssistantSettings": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled",
+            "description": "Whether users may use the assistant."
+          },
+          "model": {
+            "type": "string",
+            "title": "model",
+            "pattern": "^(ai/[^/]+/.+)?$",
+            "description": "The AI path's model, \"ai/\u003cprovider\u003e/\u003cmodel\u003e\"; empty, the assistant\n has the fast path only."
+          },
+          "codeMode": {
+            "type": "boolean",
+            "title": "code_mode",
+            "description": "The model writes scripts calling the tools (code mode) beside calling\n them one at a time."
+          },
+          "aiAccess": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantAccess"
+              }
+            ],
+            "title": "ai_access",
+            "description": "Who may use the AI path.\nenum.defined_only = true\n"
+          },
+          "aiUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "title": "ai_user_ids",
+            "description": "The users who may use it when ai_access is\n ASSISTANT_ACCESS_SELECTED."
+          },
+          "idleMinutes": {
+            "type": "integer",
+            "title": "idle_minutes",
+            "maximum": 1440,
+            "minimum": 1,
+            "format": "int32",
+            "description": "How long a conversation may be idle before a request starts a new\n one, 1–1440 minutes."
+          },
+          "retentionDays": {
+            "type": "integer",
+            "title": "retention_days",
+            "maximum": 3650,
+            "minimum": 1,
+            "format": "int32",
+            "description": "How many days conversations are kept, 1–3650."
+          },
+          "memory": {
+            "type": "boolean",
+            "title": "memory",
+            "description": "Whether the assistant remembers what users tell about themselves."
+          },
+          "recognizer": {
+            "type": "string",
+            "title": "recognizer",
+            "description": "The server's recognizer, \"\u003cplugin\u003e/\u003crecognizer\u003e\"; empty, the first\n ready one."
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantVoiceChoice"
+            },
+            "title": "voices",
+            "description": "The voices answers are spoken with by default, by language."
+          },
+          "hints": {
+            "type": "boolean",
+            "title": "hints",
+            "description": "Whether recognizers are given the user's hints."
+          }
+        },
+        "title": "AssistantSettings",
+        "additionalProperties": false,
+        "description": "AssistantSettings are the server's assistant settings."
+      },
+      "mavio.assistant.v1.AssistantVoiceChoice": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "language",
+            "minLength": 1,
+            "description": "BCP 47, such as \"en\" or \"zh-CN\"."
+          },
+          "voice": {
+            "type": "string",
+            "title": "voice",
+            "pattern": "^[^/]+/.+$",
+            "description": "\"\u003cplugin\u003e/\u003cvoice\u003e\"."
+          }
+        },
+        "title": "AssistantVoiceChoice",
+        "additionalProperties": false,
+        "description": "AssistantVoiceChoice is the voice of a language."
+      },
+      "mavio.assistant.v1.ClientAction": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "control": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.ControlAction"
+                  }
+                ],
+                "title": "control"
+              }
+            },
+            "title": "control"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "navigate": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.NavigateAction"
+                  }
+                ],
+                "title": "navigate"
+              }
+            },
+            "title": "navigate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "play": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.PlayAction"
+                  }
+                ],
+                "title": "play"
+              }
+            },
+            "title": "play"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "showItems": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.ShowItemsAction"
+                  }
+                ],
+                "title": "show_items"
+              }
+            },
+            "title": "show_items"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "streams": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.assistant.v1.StreamsAction"
+                  }
+                ],
+                "title": "streams"
+              }
+            },
+            "title": "streams"
+          }
+        ],
+        "unevaluatedProperties": false,
+        "not": {
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "control"
+                  ]
+                },
+                {
+                  "required": [
+                    "navigate"
+                  ]
+                },
+                {
+                  "required": [
+                    "play"
+                  ]
+                },
+                {
+                  "required": [
+                    "showItems"
+                  ]
+                },
+                {
+                  "required": [
+                    "streams"
+                  ]
+                }
+              ]
+            },
+            {
+              "not": {
+                "oneOf": [
+                  {
+                    "required": [
+                      "control"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "navigate"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "play"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "showItems"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "streams"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Identifies the action in AskRequest.failed_actions."
+          }
+        },
+        "title": "ClientAction",
+        "description": "ClientAction is something the requesting client does."
+      },
+      "mavio.assistant.v1.Confirmation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "text": {
+            "type": "string",
+            "title": "text",
+            "description": "What will happen, in the user's language."
+          }
+        },
+        "title": "Confirmation",
+        "additionalProperties": false,
+        "description": "Confirmation asks the user to confirm an action."
+      },
+      "mavio.assistant.v1.ConfirmationAnswer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "minLength": 1
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "confirmed"
+          }
+        },
+        "title": "ConfirmationAnswer",
+        "additionalProperties": false,
+        "description": "ConfirmationAnswer answers a pending confirmation."
+      },
+      "mavio.assistant.v1.ControlAction": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.ControlCommand"
+              }
+            ],
+            "title": "command"
+          },
+          "value": {
+            "type": "number",
+            "title": "value",
+            "format": "double",
+            "description": "The position of SEEK; the seconds of SEEK_BY, negative backwards;\n the speed of SPEED; the volume of VOLUME, 0–100."
+          },
+          "segment": {
+            "type": "string",
+            "title": "segment",
+            "description": "The media segment SKIP skips, such as \"intro\", \"credits\" or \"recap\"."
+          }
+        },
+        "title": "ControlAction",
+        "additionalProperties": false,
+        "description": "ControlAction changes the playback."
+      },
+      "mavio.assistant.v1.ControlCommand": {
+        "type": "string",
+        "title": "ControlCommand",
+        "enum": [
+          "CONTROL_COMMAND_UNSPECIFIED",
+          "CONTROL_COMMAND_PAUSE",
+          "CONTROL_COMMAND_RESUME",
+          "CONTROL_COMMAND_STOP",
+          "CONTROL_COMMAND_SEEK",
+          "CONTROL_COMMAND_SEEK_BY",
+          "CONTROL_COMMAND_SKIP",
+          "CONTROL_COMMAND_NEXT",
+          "CONTROL_COMMAND_PREVIOUS",
+          "CONTROL_COMMAND_SPEED",
+          "CONTROL_COMMAND_VOLUME",
+          "CONTROL_COMMAND_MUTE",
+          "CONTROL_COMMAND_UNMUTE",
+          "CONTROL_COMMAND_FULLSCREEN"
+        ],
+        "description": "ControlCommand is a change of the playback."
+      },
+      "mavio.assistant.v1.DeleteAssistantConversationRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "minLength": 1
+          }
+        },
+        "title": "DeleteAssistantConversationRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.DeleteAssistantConversationResponse": {
+        "type": "object",
+        "title": "DeleteAssistantConversationResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.DeleteAssistantMemoriesRequest": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "ids",
+            "description": "Empty deletes every memory."
+          }
+        },
+        "title": "DeleteAssistantMemoriesRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.DeleteAssistantMemoriesResponse": {
+        "type": "object",
+        "title": "DeleteAssistantMemoriesResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.Done": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "answer",
+            "description": "The whole answer."
+          },
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "The answer's language, BCP 47."
+          },
+          "conversationId": {
+            "type": "string",
+            "title": "conversation_id",
+            "description": "The user's current conversation; empty when none is stored."
+          },
+          "confirmation": {
+            "type": "boolean",
+            "title": "confirmation",
+            "description": "A confirmation waits."
+          },
+          "results": {
+            "type": "integer",
+            "title": "results",
+            "format": "int32",
+            "description": "How many results wait to be chosen from."
+          },
+          "notUnderstood": {
+            "type": "boolean",
+            "title": "not_understood",
+            "description": "The request was not understood: the answer lists what the assistant\n understands."
+          }
+        },
+        "title": "Done",
+        "additionalProperties": false,
+        "description": "Done ends a request."
+      },
+      "mavio.assistant.v1.GetAssistantConversationRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "minLength": 1
+          }
+        },
+        "title": "GetAssistantConversationRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantConversationResponse": {
+        "type": "object",
+        "properties": {
+          "conversation": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantConversation"
+              }
+            ],
+            "title": "conversation"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantMessage"
+            },
+            "title": "messages"
+          }
+        },
+        "title": "GetAssistantConversationResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantHintsRequest": {
+        "type": "object",
+        "title": "GetAssistantHintsRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantHintsResponse": {
+        "type": "object",
+        "properties": {
+          "phrases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "phrases"
+          }
+        },
+        "title": "GetAssistantHintsResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantRequest": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "The UI's language, BCP 47, for the examples."
+          }
+        },
+        "title": "GetAssistantRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "enabled",
+            "description": "The assistant is on for the user."
+          },
+          "ai": {
+            "type": "boolean",
+            "title": "ai",
+            "description": "The user may use the AI path, and it is ready."
+          },
+          "memory": {
+            "type": "boolean",
+            "title": "memory",
+            "description": "Memory is on."
+          },
+          "recognizers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.Recognizer"
+            },
+            "title": "recognizers",
+            "description": "The server's recognizers, the default first."
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.Voice"
+            },
+            "title": "voices",
+            "description": "The server's voices."
+          },
+          "defaultVoices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantVoiceChoice"
+            },
+            "title": "default_voices",
+            "description": "The voice of each language when the user chooses none."
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "examples",
+            "description": "Examples of requests in the language asked for."
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "The languages the fast path understands, BCP 47."
+          }
+        },
+        "title": "GetAssistantResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantSettingsRequest": {
+        "type": "object",
+        "title": "GetAssistantSettingsRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.GetAssistantSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "GetAssistantSettingsResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.ListAssistantConversationsRequest": {
+        "type": "object",
+        "title": "ListAssistantConversationsRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.ListAssistantConversationsResponse": {
+        "type": "object",
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantConversation"
+            },
+            "title": "conversations"
+          }
+        },
+        "title": "ListAssistantConversationsResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.ListAssistantMemoriesRequest": {
+        "type": "object",
+        "title": "ListAssistantMemoriesRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.ListAssistantMemoriesResponse": {
+        "type": "object",
+        "properties": {
+          "memories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.assistant.v1.AssistantMemory"
+            },
+            "title": "memories"
+          }
+        },
+        "title": "ListAssistantMemoriesResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.NavigateAction": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.NavigateTarget"
+              }
+            ],
+            "title": "target"
+          },
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "The item or library opened."
+          },
+          "query": {
+            "type": "string",
+            "title": "query",
+            "description": "The text searched."
+          }
+        },
+        "title": "NavigateAction",
+        "additionalProperties": false,
+        "description": "NavigateAction opens a screen."
+      },
+      "mavio.assistant.v1.NavigateTarget": {
+        "type": "string",
+        "title": "NavigateTarget",
+        "enum": [
+          "NAVIGATE_TARGET_UNSPECIFIED",
+          "NAVIGATE_TARGET_HOME",
+          "NAVIGATE_TARGET_BACK",
+          "NAVIGATE_TARGET_ITEM",
+          "NAVIGATE_TARGET_LIBRARY",
+          "NAVIGATE_TARGET_SEARCH",
+          "NAVIGATE_TARGET_SETTINGS"
+        ],
+        "description": "NavigateTarget is a screen to open."
+      },
+      "mavio.assistant.v1.PlayAction": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "item_ids"
+          },
+          "startIndex": {
+            "type": "integer",
+            "title": "start_index",
+            "format": "int32",
+            "description": "The item of the queue to start with."
+          },
+          "startPosition": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "start_position",
+            "description": "Where to start; unset resumes where the user stopped."
+          },
+          "audioStreamIndex": {
+            "type": "integer",
+            "title": "audio_stream_index",
+            "format": "int32",
+            "description": "The streams to play, by their index in the media; unset leaves them\n to the user's preferences, -1 is none."
+          },
+          "subtitleStreamIndex": {
+            "type": "integer",
+            "title": "subtitle_stream_index",
+            "format": "int32"
+          }
+        },
+        "title": "PlayAction",
+        "additionalProperties": false,
+        "description": "PlayAction plays items, as a queue."
+      },
+      "mavio.assistant.v1.Recognizer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "BCP 47; empty for any."
+          }
+        },
+        "title": "Recognizer",
+        "additionalProperties": false,
+        "description": "Recognizer is a speech recognizer of the server."
+      },
+      "mavio.assistant.v1.ShowItemsAction": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.library.v1.Item"
+            },
+            "title": "items"
+          },
+          "choose": {
+            "type": "boolean",
+            "title": "choose"
+          }
+        },
+        "title": "ShowItemsAction",
+        "additionalProperties": false,
+        "description": "ShowItemsAction shows items, to choose from when choose is set."
+      },
+      "mavio.assistant.v1.StartListeningRequest": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "The language spoken, BCP 47; empty, the recognizer detects it."
+          },
+          "recognizer": {
+            "type": "string",
+            "title": "recognizer",
+            "description": "\"\u003cplugin\u003e/\u003crecognizer\u003e\"; empty, the settings'."
+          }
+        },
+        "title": "StartListeningRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.StartListeningResponse": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "url",
+            "description": "The WebSocket URL, relative to the server's base URL."
+          },
+          "recognizer": {
+            "type": "string",
+            "title": "recognizer"
+          },
+          "expireTime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "expire_time"
+          }
+        },
+        "title": "StartListeningResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.StreamsAction": {
+        "type": "object",
+        "properties": {
+          "audioStreamIndex": {
+            "type": "integer",
+            "title": "audio_stream_index",
+            "format": "int32",
+            "description": "By index in the media; -1 turns subtitles off."
+          },
+          "subtitleStreamIndex": {
+            "type": "integer",
+            "title": "subtitle_stream_index",
+            "format": "int32"
+          },
+          "subtitleOffset": {
+            "type": "number",
+            "title": "subtitle_offset",
+            "format": "double",
+            "description": "Shifts the subtitle by this many seconds, negative earlier."
+          }
+        },
+        "title": "StreamsAction",
+        "additionalProperties": false,
+        "description": "StreamsAction changes the streams played; unset fields stay."
+      },
+      "mavio.assistant.v1.ToolActivity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id"
+          },
+          "tool": {
+            "type": "string",
+            "title": "tool",
+            "description": "Such as \"search_library\"."
+          },
+          "summary": {
+            "type": "string",
+            "title": "summary",
+            "description": "What it does, in the user's language."
+          },
+          "done": {
+            "type": "boolean",
+            "title": "done"
+          },
+          "failed": {
+            "type": "boolean",
+            "title": "failed"
+          }
+        },
+        "title": "ToolActivity",
+        "additionalProperties": false,
+        "description": "ToolActivity is a tool running for the request."
+      },
+      "mavio.assistant.v1.Understood": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "text",
+            "description": "The text, as recognized or typed."
+          },
+          "intent": {
+            "type": "string",
+            "title": "intent",
+            "description": "The fast path's intent; empty when the model reads the request."
+          },
+          "ai": {
+            "type": "boolean",
+            "title": "ai",
+            "description": "The model answers."
+          }
+        },
+        "title": "Understood",
+        "additionalProperties": false,
+        "description": "Understood is what a request was understood as."
+      },
+      "mavio.assistant.v1.UpdateAssistantMemoryRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Empty adds a memory."
+          },
+          "text": {
+            "type": "string",
+            "title": "text",
+            "maxLength": 1000,
+            "minLength": 1
+          }
+        },
+        "title": "UpdateAssistantMemoryRequest",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.UpdateAssistantMemoryResponse": {
+        "type": "object",
+        "properties": {
+          "memory": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantMemory"
+              }
+            ],
+            "title": "memory"
+          }
+        },
+        "title": "UpdateAssistantMemoryResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.UpdateAssistantSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "UpdateAssistantSettingsRequest",
+        "required": [
+          "settings"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.UpdateAssistantSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.assistant.v1.AssistantSettings"
+              }
+            ],
+            "title": "settings"
+          }
+        },
+        "title": "UpdateAssistantSettingsResponse",
+        "additionalProperties": false
+      },
+      "mavio.assistant.v1.Voice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "\"\u003cplugin\u003e/\u003cvoice\u003e\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "languages",
+            "description": "BCP 47."
+          }
+        },
+        "title": "Voice",
+        "additionalProperties": false,
+        "description": "Voice is a voice of the server."
+      },
       "mavio.auth.v1.AcceptInvitationRequest": {
         "type": "object",
         "properties": {
@@ -9705,6 +11083,197 @@
         },
         "title": "UpdateHomeLayoutResponse",
         "additionalProperties": false
+      },
+      "mavio.intent.v1.Intent": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "What to do, such as \"pause\", \"seek_back\" or \"play\" (libs/intent's\n grammars list them)."
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.intent.v1.Slot"
+            },
+            "title": "slots"
+          },
+          "match": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.intent.v1.IntentMatch"
+              }
+            ],
+            "title": "match"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "confidence",
+            "format": "double",
+            "description": "From 0 to 1."
+          },
+          "language": {
+            "type": "string",
+            "title": "language",
+            "description": "The language of the grammar that matched, BCP 47."
+          }
+        },
+        "title": "Intent",
+        "additionalProperties": false,
+        "description": "Intent is what a request means."
+      },
+      "mavio.intent.v1.IntentMatch": {
+        "type": "string",
+        "title": "IntentMatch",
+        "enum": [
+          "INTENT_MATCH_UNSPECIFIED",
+          "INTENT_MATCH_FULL",
+          "INTENT_MATCH_PARTIAL"
+        ],
+        "description": "IntentMatch is how much of the text a pattern matched."
+      },
+      "mavio.intent.v1.Slot": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "keyword": {
+                "type": "string",
+                "title": "keyword",
+                "description": "One of the values a grammar names, such as \"earlier\" or \"on\"."
+              }
+            },
+            "title": "keyword"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string",
+                "title": "language",
+                "description": "A language, ISO 639-1 where it has one, else 639-2/T."
+              }
+            },
+            "title": "language"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "number": {
+                "type": "number",
+                "title": "number",
+                "format": "double",
+                "description": "A number, such as a volume or a speed."
+              }
+            },
+            "title": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ordinal": {
+                "type": "integer",
+                "title": "ordinal",
+                "format": "int32",
+                "description": "A position in a list from 1; -1 is the last."
+              }
+            },
+            "title": "ordinal"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "seconds": {
+                "type": "number",
+                "title": "seconds",
+                "format": "double",
+                "description": "A duration or a position, in seconds."
+              }
+            },
+            "title": "seconds"
+          }
+        ],
+        "unevaluatedProperties": false,
+        "not": {
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "keyword"
+                  ]
+                },
+                {
+                  "required": [
+                    "language"
+                  ]
+                },
+                {
+                  "required": [
+                    "number"
+                  ]
+                },
+                {
+                  "required": [
+                    "ordinal"
+                  ]
+                },
+                {
+                  "required": [
+                    "seconds"
+                  ]
+                }
+              ]
+            },
+            {
+              "not": {
+                "oneOf": [
+                  {
+                    "required": [
+                      "keyword"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "language"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "number"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "ordinal"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "seconds"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Such as \"title\", \"seconds\" or \"language\"."
+          },
+          "text": {
+            "type": "string",
+            "title": "text",
+            "description": "The words as they were said."
+          }
+        },
+        "title": "Slot",
+        "description": "Slot is a value a pattern found in the text."
       },
       "mavio.library.v1.AddToCollectionRequest": {
         "type": "object",
@@ -21475,6 +23044,10 @@
       "description": "WantedService adds the movies and series to acquire, and searches for\n them. Administrators only."
     },
     {
+      "name": "AssistantService",
+      "description": "AssistantService carries out users' spoken and typed requests (the\n assistant document): the fast path's intents, else the AI path's model\n with the server's tools, always as the user making the request."
+    },
+    {
       "name": "AuthService",
       "description": "AuthService signs clients in and out. GetAuthInfo, CreateFirstUser,\n Login, StartPasskeySignIn, FinishPasskeySignIn, StartRefresh,\n RefreshSession, the Quick Connect methods except AuthorizeQuickConnect,\n ForgotPassword, ResetPassword, GetInvitation, StartInvitationPasskey,\n AcceptInvitation, StartSignIn and SignInWithAssertion are public; the other methods act on the calling user.\n\n In mavio.dev mode devices sign in with SignInWithAssertion: Login, the\n passkey sign-in, Quick Connect, password resets, invitations and\n switching fail with FAILED_PRECONDITION, as mavio.dev keeps them.\n\n A session belongs to a device's Ed25519 key. Its access token lasts an\n hour; before it expires, or when a call fails with UNAUTHENTICATED\n because it has, the device asks StartRefresh for a nonce and signs it\n with its key for a new token from RefreshSession."
     },
@@ -21916,14 +23489,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.auth.v1.AuthService/StartRefresh": {
       "post": {
         "tags": [
-          "HubService"
+          "AuthService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "StartRefresh",
+        "description": "StartRefresh gives a session's device a nonce to sign for\n RefreshSession, valid for two minutes. Unknown sessions are\n UNAUTHENTICATED.",
+        "operationId": "mavio.auth.v1.AuthService.StartRefresh",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21948,7 +23521,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshRequest"
               }
             }
           },
@@ -21970,7 +23543,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshResponse"
                 }
               }
             }
@@ -21978,13 +23551,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "GetSubtitleTranslationStatistics",
+        "description": "GetSubtitleTranslationStatistics sums up the translations of the\n subtitle history, as Lingarr's statistics.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22009,7 +23583,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest"
               }
             }
           },
@@ -22031,7 +23605,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse"
                 }
               }
             }
@@ -23585,13 +25159,13 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/GetItem": {
+    "/mavio.acquisition.v1.ProfileService/CreateQualityProfile": {
       "post": {
         "tags": [
-          "ItemService"
+          "ProfileService"
         ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
+        "summary": "CreateQualityProfile",
+        "operationId": "mavio.acquisition.v1.ProfileService.CreateQualityProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23616,7 +25190,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileRequest"
               }
             }
           },
@@ -23638,7 +25212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileResponse"
                 }
               }
             }
@@ -26052,14 +27626,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleBlocklist": {
+    "/mavio.hub.v1.HubService/GetHub": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "HubService"
         ],
-        "summary": "DeleteSubtitleBlocklist",
-        "description": "DeleteSubtitleBlocklist deletes entries, or every entry when ids is\n empty and all is set.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.hub.v1.HubService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26084,7 +27658,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
               }
             }
           },
@@ -26106,7 +27680,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
                 }
               }
             }
@@ -26362,13 +27936,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
+    "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings": {
       "post": {
         "tags": [
-          "CollectionService"
+          "SubtitleService"
         ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
+        "summary": "GetSubtitleSettings",
+        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26393,7 +27967,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsRequest"
               }
             }
           },
@@ -26415,7 +27989,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsResponse"
                 }
               }
             }
@@ -26423,14 +27997,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/GetSubtitleTranslationStatistics": {
+    "/mavio.hub.v1.HubService/ListHubs": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "HubService"
         ],
-        "summary": "GetSubtitleTranslationStatistics",
-        "description": "GetSubtitleTranslationStatistics sums up the translations of the\n subtitle history, as Lingarr's statistics.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleTranslationStatistics",
+        "summary": "ListHubs",
+        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
+        "operationId": "mavio.hub.v1.HubService.ListHubs",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -26455,7 +28029,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
               }
             }
           },
@@ -26477,7 +28051,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleTranslationStatisticsResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
                 }
               }
             }
@@ -28032,6 +29606,689 @@
         }
       }
     },
+    "/mavio.assistant.v1.AssistantService/Ask": {},
+    "/mavio.assistant.v1.AssistantService/DeleteAssistantConversation": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "DeleteAssistantConversation",
+        "description": "DeleteAssistantConversation deletes one of the user's conversations.",
+        "operationId": "mavio.assistant.v1.AssistantService.DeleteAssistantConversation",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.DeleteAssistantConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.DeleteAssistantConversationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/DeleteAssistantMemories": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "DeleteAssistantMemories",
+        "description": "DeleteAssistantMemories deletes memories, or all of them.",
+        "operationId": "mavio.assistant.v1.AssistantService.DeleteAssistantMemories",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.DeleteAssistantMemoriesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.DeleteAssistantMemoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/GetAssistant": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "GetAssistant",
+        "description": "GetAssistant tells what the assistant can do for the user: whether it\n is on, whether the AI path and memory are available, the server's\n recognizers and voices, and examples of requests.",
+        "operationId": "mavio.assistant.v1.AssistantService.GetAssistant",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/GetAssistantConversation": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "GetAssistantConversation",
+        "description": "GetAssistantConversation returns one of the user's conversations\n with its messages.",
+        "operationId": "mavio.assistant.v1.AssistantService.GetAssistantConversation",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantConversationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/GetAssistantHints": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "GetAssistantHints",
+        "description": "GetAssistantHints returns phrases recognizers are likely to hear from\n the user: titles being watched, recently added titles, people and\n the user's devices.",
+        "operationId": "mavio.assistant.v1.AssistantService.GetAssistantHints",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantHintsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantHintsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/GetAssistantSettings": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "GetAssistantSettings",
+        "description": "GetAssistantSettings returns the server's assistant settings;\n administrators only.",
+        "operationId": "mavio.assistant.v1.AssistantService.GetAssistantSettings",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.GetAssistantSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/ListAssistantConversations": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "ListAssistantConversations",
+        "description": "ListAssistantConversations lists the user's conversations, newest\n first.",
+        "operationId": "mavio.assistant.v1.AssistantService.ListAssistantConversations",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.ListAssistantConversationsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.ListAssistantConversationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/ListAssistantMemories": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "ListAssistantMemories",
+        "description": "ListAssistantMemories lists what the assistant remembers about the\n user.",
+        "operationId": "mavio.assistant.v1.AssistantService.ListAssistantMemories",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.ListAssistantMemoriesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.ListAssistantMemoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/StartListening": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "StartListening",
+        "description": "StartListening returns the WebSocket URL the client streams speech to\n for the server's recognizer, signed for the session and valid for a\n minute.",
+        "operationId": "mavio.assistant.v1.AssistantService.StartListening",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.StartListeningRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.StartListeningResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/UpdateAssistantMemory": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "UpdateAssistantMemory",
+        "description": "UpdateAssistantMemory changes a memory's text, or adds a memory.",
+        "operationId": "mavio.assistant.v1.AssistantService.UpdateAssistantMemory",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.UpdateAssistantMemoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.UpdateAssistantMemoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.assistant.v1.AssistantService/UpdateAssistantSettings": {
+      "post": {
+        "tags": [
+          "AssistantService"
+        ],
+        "summary": "UpdateAssistantSettings",
+        "description": "UpdateAssistantSettings replaces the server's assistant settings;\n administrators only.",
+        "operationId": "mavio.assistant.v1.AssistantService.UpdateAssistantSettings",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.assistant.v1.UpdateAssistantSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.assistant.v1.UpdateAssistantSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.auth.v1.AuthService/AcceptInvitation": {
       "post": {
         "tags": [
@@ -29334,14 +31591,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/StartRefresh": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "AuthService"
+          "DiscoverService"
         ],
-        "summary": "StartRefresh",
-        "description": "StartRefresh gives a session's device a nonce to sign for\n RefreshSession, valid for two minutes. Unknown sessions are\n UNAUTHENTICATED.",
-        "operationId": "mavio.auth.v1.AuthService.StartRefresh",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29366,7 +31623,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -29388,7 +31645,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.StartRefreshResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -29582,14 +31839,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/GetHub": {
+    "/mavio.acquisition.v1.SubtitleService/DeleteSubtitleBlocklist": {
       "post": {
         "tags": [
-          "HubService"
+          "SubtitleService"
         ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.hub.v1.HubService.GetHub",
+        "summary": "DeleteSubtitleBlocklist",
+        "description": "DeleteSubtitleBlocklist deletes entries, or every entry when ids is\n empty and all is set.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.DeleteSubtitleBlocklist",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29614,7 +31871,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistRequest"
               }
             }
           },
@@ -29636,7 +31893,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteSubtitleBlocklistResponse"
                 }
               }
             }
@@ -29644,76 +31901,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/ListHubs": {
-      "post": {
-        "tags": [
-          "HubService"
-        ],
-        "summary": "ListHubs",
-        "description": "ListHubs lists the hubs of Home, or of a library's Recommended tab,\n with their first items.",
-        "operationId": "mavio.hub.v1.HubService.ListHubs",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.ListHubsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.ListHubsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.acquisition.v1.DiscoverService/GetPerson": {
       "post": {
         "tags": [
           "DiscoverService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "GetPerson",
+        "description": "GetPerson tells of a person by their TMDB ID with the movies and\n series they are credited on, marked as Discover's titles, as Seerr's\n person page. It fails with NOT_FOUND when no discovery provider knows\n them.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetPerson",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29738,7 +31933,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetPersonRequest"
               }
             }
           },
@@ -29760,7 +31955,68 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetPersonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.LibraryService/GetLibrary": {
+      "post": {
+        "tags": [
+          "LibraryService"
+        ],
+        "summary": "GetLibrary",
+        "operationId": "mavio.library.v1.LibraryService.GetLibrary",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.GetLibraryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.GetLibraryResponse"
                 }
               }
             }
@@ -29952,13 +32208,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/GetSubtitleSettings": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "CollectionService"
         ],
-        "summary": "GetSubtitleSettings",
-        "operationId": "mavio.acquisition.v1.SubtitleService.GetSubtitleSettings",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29983,7 +32239,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -30005,7 +32261,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetSubtitleSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -30013,14 +32269,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetPerson": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "CollectionService"
         ],
-        "summary": "GetPerson",
-        "description": "GetPerson tells of a person by their TMDB ID with the movies and\n series they are credited on, marked as Discover's titles, as Seerr's\n person page. It fails with NOT_FOUND when no discovery provider knows\n them.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetPerson",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30045,7 +32300,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetPersonRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -30067,7 +32322,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetPersonResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -30075,13 +32330,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/CreateQualityProfile": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "ProfileService"
+          "ItemService"
         ],
-        "summary": "CreateQualityProfile",
-        "operationId": "mavio.acquisition.v1.ProfileService.CreateQualityProfile",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30106,7 +32361,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -30128,7 +32383,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.CreateQualityProfileResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -30753,13 +33008,14 @@
         }
       }
     },
-    "/mavio.library.v1.LibraryService/GetLibrary": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
-          "LibraryService"
+          "HubService"
         ],
-        "summary": "GetLibrary",
-        "operationId": "mavio.library.v1.LibraryService.GetLibrary",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -30784,7 +33040,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetLibraryRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -30806,7 +33062,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetLibraryResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
                 }
               }
             }

@@ -59,6 +59,7 @@ plugins:
       - short-service-tags
       - trim-unused-types
       - services=mavio.acquisition.v1.*
+      - services=mavio.assistant.v1.*
       - services=mavio.auth.v1.*
       - services=mavio.hub.v1.*
       - services=mavio.library.v1.*
