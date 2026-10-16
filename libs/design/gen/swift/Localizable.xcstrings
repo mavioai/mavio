@@ -8317,6 +8317,60 @@
         }
       }
     },
+    "auth.addServer": {
+      "comment": "Adds another server to sign in to.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Server"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加服务器"
+          }
+        }
+      }
+    },
+    "auth.signedOut": {
+      "comment": "State of a server whose session ended; the user signs in again.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed out"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已退出登录"
+          }
+        }
+      }
+    },
+    "auth.notMavio": {
+      "comment": "Error when the address entered answers but is not a Mavio server.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This address is not a Mavio server."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此地址不是 Mavio 服务器。"
+          }
+        }
+      }
+    },
     "auth.othersUseApp": {
       "comment": "Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's.",
       "extractionState": "manual",
