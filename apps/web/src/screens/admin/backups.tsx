@@ -11,7 +11,7 @@ import { useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
 import { Select } from "../../controls/select.tsx";
-import { fromNow, Page, sizeOf } from "./common.tsx";
+import { fromNow, Page, sizeOf, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 
@@ -101,7 +101,7 @@ const clock = new Intl.DateTimeFormat([locale], { dateStyle: "short", timeStyle:
 
 /** The section of the server chosen in the settings. */
 export function LogsSection({ server }: { server: ServerEntry }) {
-  const [level, setLevel] = useState(LogLevel.INFO);
+  const [level, setLevel] = useChoice<LogLevel>("filter", [LogLevel.INFO, LogLevel.DEBUG, LogLevel.WARN, LogLevel.ERROR]);
   const [hours, setHours] = useState(24);
   const [filter, setFilter] = useState("");
   const logs = useLogs(server, level, hours);

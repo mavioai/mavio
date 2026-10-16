@@ -113,6 +113,10 @@ export interface SettingsSearch {
   /** Subtitles: the page shown, and the profile on it. */
   subtitles?: string;
   id?: string;
+  /** A page's tab or kind shown, as Downloads' tab, when not its first. */
+  view?: string;
+  /** A page's filter, as Wanted's or Issues', when not its first. */
+  filter?: string;
 }
 
 export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
@@ -129,6 +133,8 @@ export function settingsSearch(s: Record<string, unknown>): SettingsSearch {
     acquisition: str(s.acquisition),
     subtitles: str(s.subtitles),
     id: str(s.id),
+    view: str(s.view),
+    filter: str(s.filter),
   };
 }
 

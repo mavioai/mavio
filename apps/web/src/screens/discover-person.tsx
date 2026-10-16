@@ -50,7 +50,10 @@ function age(from: string, to: string): number {
 }
 
 function PersonPage({ server, person: p }: { server: ServerEntry; person: Person }) {
-  const [kinds, setKinds] = useState<Kinds>("all");
+  // The kind shown is kept in the address, which Back and a reload return to.
+  const kinds: Kinds = route.useSearch().kind ?? "all";
+  const navigate = route.useNavigate();
+  const setKinds = (k: Kinds) => void navigate({ search: { kind: k === "all" ? undefined : k }, replace: true, resetScroll: false });
   const [more, setMore] = useState(false);
   const of = (ts: PersonTitle[]) =>
     ts.filter((pt) => kinds === "all" || (pt.title?.mediaKind === MediaKind.SERIES) === (kinds === "series"));

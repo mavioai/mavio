@@ -23,7 +23,7 @@ import { Chips, NumberField } from "../controls/inputs.tsx";
 import { t } from "../i18n.ts";
 import { Button, Group, LoadMore } from "../ui.tsx";
 import { Select } from "../controls/select.tsx";
-import { fromNow, Page } from "./admin/common.tsx";
+import { fromNow, Page, useChoice } from "./admin/common.tsx";
 import { episodeCode } from "./admin/wanted.tsx";
 import { field } from "../controls/styles.ts";
 import { Modal } from "../controls/dialog.tsx";
@@ -267,7 +267,7 @@ const filters: Record<Filter, IssueStatus[]> = { open: [IssueStatus.OPEN], resol
 
 /** The settings' issues of the server chosen, open ones at first. */
 export function IssuesSection({ server }: { server: ServerEntry }) {
-  const [filter, setFilter] = useState<Filter>("open");
+  const [filter, setFilter] = useChoice<Filter>("filter", ["open", "resolved", "all"]);
   const list = useIssues(server, filters[filter]);
   const [open, setOpen] = useState<string>();
   const pages = list.data?.pages ?? [];

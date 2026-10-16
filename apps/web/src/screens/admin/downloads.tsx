@@ -21,14 +21,14 @@ import { t } from "../../i18n.ts";
 import { Button, Group, LoadMore } from "../../ui.tsx";
 import { Progress, Switch, Tabs } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
-import { fromNow, lengthOf, Page, sizeOf } from "./common.tsx";
+import { fromNow, lengthOf, Page, sizeOf, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 
 type Tab = "queue" | "history" | "blocklist" | "import";
 
 /** The section of the server chosen in the settings. */
 export function DownloadsSection({ server }: { server: ServerEntry }) {
-  const [tab, setTab] = useState<Tab>("queue");
+  const [tab, setTab] = useChoice<Tab>("view", ["queue", "history", "blocklist", "import"]);
   const tabs: [Tab, string][] = [
     ["queue", t("downloads.queue")],
     ["history", t("downloads.history")],

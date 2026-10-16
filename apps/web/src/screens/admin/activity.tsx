@@ -11,7 +11,7 @@ import { Select } from "../../controls/select.tsx";
 import { Tip } from "../../controls/tooltip.tsx";
 import { t } from "../../i18n.ts";
 import { Group, subtitleOf } from "../../ui.tsx";
-import { ColorTile, fromNow, Page } from "./common.tsx";
+import { ColorTile, fromNow, Page, useChoice } from "./common.tsx";
 
 const methods: Partial<Record<PlayMethod, () => string>> = {
   [PlayMethod.DIRECT_PLAY]: () => t("activity.directPlay"),
@@ -94,7 +94,7 @@ function clock(ms: number): string {
 }
 
 function Activities({ server }: { server: ServerEntry }) {
-  const [min, setMin] = useState(Severity.UNSPECIFIED);
+  const [min, setMin] = useChoice<Severity>("filter", [Severity.UNSPECIFIED, Severity.WARNING, Severity.ERROR]);
   const [limit, setLimit] = useState(20);
   const activities = useActivities(server, min, limit);
   const list = activities.data?.activities ?? [];

@@ -134,7 +134,16 @@ const title = createRoute({ getParentRoute: () => root, path: "/s/$serverId/titl
 
 const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$hubId", component: HubScreen });
 
-const details = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId", component: Details });
+const details = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/item/$itemId",
+  // The season whose episodes show, and the version chosen to play.
+  validateSearch: (s: Record<string, unknown>): { season?: string; source?: string } => ({
+    season: searchText(s.season),
+    source: searchText(s.source),
+  }),
+  component: Details,
+});
 
 const credits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/credits", component: CreditsScreen });
 const crew = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/crew", component: ItemCrewScreen });
@@ -145,6 +154,10 @@ const person = createRoute({ getParentRoute: () => root, path: "/s/$serverId/per
 const discoveredPerson = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/discover/person/$tmdbId",
+  // The kind of titles shown, all when none.
+  validateSearch: (s: Record<string, unknown>): { kind?: "movie" | "series" } => ({
+    kind: s.kind === "movie" || s.kind === "series" ? s.kind : undefined,
+  }),
   component: DiscoveredPersonScreen,
 });
 const collection = createRoute({ getParentRoute: () => root, path: "/s/$serverId/discover/collection/$tmdbId", component: CollectionScreen });

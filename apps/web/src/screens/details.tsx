@@ -179,7 +179,12 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
   const extras = (useExtras(server, item.id).data ?? []).filter((e) => e.extra !== ExtraKind.THEME_SONG && e.extra !== ExtraKind.THEME_VIDEO);
   const trailer = extras.find((e) => e.extra === ExtraKind.TRAILER);
   const copies = useOtherCopies(server.id, item);
-  const [source, setSource] = useState(sources[0]?.id);
+  // What is chosen is kept in the address, which Back and a reload return to.
+  const search = route.useSearch();
+  const navigate = route.useNavigate();
+  const choose = (k: "season" | "source", v: string) => void navigate({ search: (s) => ({ ...s, [k]: v }), replace: true, resetScroll: false });
+  const source = sources.some((s) => s.id === search.source) ? search.source : sources[0]?.id;
+  const setSource = (id: string) => choose("source", id);
   const width = useWidthClass();
   const { tv } = usePrefs();
   const phone = width === "compact" && !tv;
@@ -280,6 +285,8 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
             seasons={children.data ?? []}
             episodesOf={seasonEpisodes}
             current={next}
+            chosen={search.season}
+            onChoose={(id) => choose("season", id)}
             tv={tv}
             more={tmdbId > 0 && <RequestMore server={server} tmdbId={tmdbId} />}
           />
@@ -705,6 +712,8 @@ function Seasons({
   seasons,
   episodesOf,
   current,
+  chosen,
+  onChoose,
   tv,
   more,
 }: {
@@ -712,11 +721,12 @@ function Seasons({
   seasons: Item[];
   episodesOf: (seasonId: string) => Item[];
   current?: Item;
+  chosen?: string;
+  onChoose: (seasonId: string) => void;
   tv: boolean;
   more?: ReactNode;
 }) {
   // The season of the episode to watch next comes first.
-  const [chosen, setChosen] = useState<string>();
   const season = seasons.find((s) => s.id === chosen) ?? seasons.find((s) => s.id === current?.seasonId) ?? seasons[0];
   if (!season) return null;
   const items = episodesOf(season.id);
@@ -731,7 +741,7 @@ function Seasons({
             look="pills"
             className="scroll-row -my-1 min-w-0 overflow-x-auto py-1"
             tabs={seasons.map((s) => ({ value: s.id, label: s.name }))}
-            onChange={setChosen}
+            onChange={onChoose}
           />
         )}
         {seasons.length === 1 && <span className="type-callout text-text-secondary">{season.name}</span>}

@@ -2,7 +2,7 @@
 // link back from a page to its section's list, colored tiles, the
 // confirmation of what cannot be undone, and times and their lengths.
 import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
-import { Link, useParams, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { locale } from "../../i18n.ts";
@@ -36,6 +36,25 @@ export function Page({
       {children}
     </div>
   );
+}
+
+/**
+ * A page's choice kept in the address, which Back and a reload return to:
+ * one of values, the first when the address names none; choosing replaces
+ * the page in the history rather than adding to it.
+ */
+export function useChoice<T extends string | number>(key: "view" | "filter", values: readonly T[]): [T, (v: T) => void] {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  const navigate = useNavigate();
+  const value = values.find((v) => String(v) === cur[key]) ?? (values[0] as T);
+  const set = (v: T) =>
+    void navigate({
+      to: ".",
+      search: (s: SettingsSearch) => ({ ...s, [key]: v === values[0] ? undefined : String(v) }),
+      replace: true,
+      resetScroll: false,
+    } as never);
+  return [value, set];
 }
 
 /** A link back to a section's list, keeping the server chosen. */

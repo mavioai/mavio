@@ -24,7 +24,7 @@ import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { mediaKinds } from "./acquisition.tsx";
-import { BackLink, Page, patched } from "./common.tsx";
+import { BackLink, Page, patched, useChoice } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
@@ -65,7 +65,7 @@ export function NumberInput({ value, onChange, label, min = 0, max, step = 1, cl
 
 /** Acquisition's page of the sizes of each kind's qualities. */
 export function QualityDefinitionsPage({ server }: { server: ServerEntry }) {
-  const [kind, setKind] = useState(MediaKind.MOVIE);
+  const [kind, setKind] = useChoice("view", mediaKinds.map((k) => k.kind));
   return (
     <Page
       title={t("acquisition.qualities")}

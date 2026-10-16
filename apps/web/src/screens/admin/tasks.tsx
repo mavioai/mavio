@@ -10,7 +10,7 @@ import { useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
 import { Select } from "../../controls/select.tsx";
-import { fromNow, lengthOf, Page } from "./common.tsx";
+import { fromNow, lengthOf, Page, useChoice } from "./common.tsx";
 
 const states: Record<JobState, { color: string; title: () => string }> = {
   [JobState.UNSPECIFIED]: { color: "var(--color-text-tertiary)", title: () => "" },
@@ -104,7 +104,7 @@ const filters: { value: string; states: JobState[]; title: () => string }[] = [
 ];
 
 function Jobs({ server }: { server: ServerEntry }) {
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useChoice("filter", filters.map((f) => f.value));
   const [limit, setLimit] = useState(50);
   const jobs = useJobs(server, filters.find((f) => f.value === filter)?.states ?? [], limit);
   const list = jobs.data?.jobs ?? [];

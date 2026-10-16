@@ -11,7 +11,7 @@ import { useState } from "react";
 import { locale, t } from "../../i18n.ts";
 import { Button, Group, LoadMore } from "../../ui.tsx";
 import { Select } from "../../controls/select.tsx";
-import { Page } from "./common.tsx";
+import { Page, useChoice } from "./common.tsx";
 
 const day = new Intl.DateTimeFormat([locale], { dateStyle: "medium" });
 
@@ -22,8 +22,8 @@ export function episodeCode(season: number, episode: number): string {
 
 /** The section of the server chosen in the settings. */
 export function WantedSection({ server }: { server: ServerEntry }) {
-  const [filter, setFilter] = useState(WantedFilter.MISSING);
-  const [kind, setKind] = useState(WantedKind.MOVIE);
+  const [filter, setFilter] = useChoice<WantedFilter>("filter", [WantedFilter.MISSING, WantedFilter.CUTOFF_UNMET]);
+  const [kind, setKind] = useChoice<WantedKind>("view", [WantedKind.MOVIE, WantedKind.EPISODE]);
   const list = useWantedList(server, filter, kind);
   const actions = useWantedActions(server);
   const [queued, setQueued] = useState<number>();
