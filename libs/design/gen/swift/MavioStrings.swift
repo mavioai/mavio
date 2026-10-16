@@ -388,6 +388,20 @@ public enum MavioStrings {
     /// Shows the rest of a discovered title's studios or networks
     public static var discoverShowMore: String { NSLocalizedString("discover.showMore", bundle: .module, comment: "") }
 
+    /// Hover name of a title's Rotten Tomatoes critics' score
+    public static var discoverTomatometer: String { NSLocalizedString("discover.tomatometer", bundle: .module, comment: "") }
+
+    /// Hover name of a title's Rotten Tomatoes critics' score when certified fresh
+    public static var discoverTomatometerCertified: String { NSLocalizedString("discover.tomatometerCertified", bundle: .module, comment: "") }
+
+    /// Hover name of a title's Rotten Tomatoes audience score
+    public static var discoverAudienceScore: String { NSLocalizedString("discover.audienceScore", bundle: .module, comment: "") }
+
+    /// Hover name of a title's IMDb rating; votes is a compact count such as 3.2M
+    public static func discoverImdbScore(votes: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.imdbScore", bundle: .module, comment: ""), votes)
+    }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 

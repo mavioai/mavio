@@ -133,6 +133,8 @@ const (
 	Capability_CAPABILITY_AI_GATEWAY Capability = 26
 	// Implements AgentSessionService.
 	Capability_CAPABILITY_AGENT_SESSION Capability = 27
+	// Implements RatingsProviderService.
+	Capability_CAPABILITY_RATINGS_PROVIDER Capability = 28
 )
 
 // Enum value maps for Capability.
@@ -166,6 +168,7 @@ var (
 		25: "CAPABILITY_SUBTITLE_TRANSLATOR",
 		26: "CAPABILITY_AI_GATEWAY",
 		27: "CAPABILITY_AGENT_SESSION",
+		28: "CAPABILITY_RATINGS_PROVIDER",
 	}
 	Capability_value = map[string]int32{
 		"CAPABILITY_UNSPECIFIED":              0,
@@ -196,6 +199,7 @@ var (
 		"CAPABILITY_SUBTITLE_TRANSLATOR":      25,
 		"CAPABILITY_AI_GATEWAY":               26,
 		"CAPABILITY_AGENT_SESSION":            27,
+		"CAPABILITY_RATINGS_PROVIDER":         28,
 	}
 )
 
@@ -1668,7 +1672,7 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"\aRuntime\x12\x17\n" +
 	"\x13RUNTIME_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fRUNTIME_WASM\x10\x01\x12\x13\n" +
-	"\x0fRUNTIME_PROCESS\x10\x02*\x92\a\n" +
+	"\x0fRUNTIME_PROCESS\x10\x02*\xb3\a\n" +
 	"\n" +
 	"Capability\x12\x1a\n" +
 	"\x16CAPABILITY_UNSPECIFIED\x10\x00\x12 \n" +
@@ -1699,7 +1703,8 @@ const file_mavio_plugin_v1_plugin_proto_rawDesc = "" +
 	"#CAPABILITY_DOWNLOAD_CLIENT_PROVIDER\x10\x18\x12\"\n" +
 	"\x1eCAPABILITY_SUBTITLE_TRANSLATOR\x10\x19\x12\x19\n" +
 	"\x15CAPABILITY_AI_GATEWAY\x10\x1a\x12\x1c\n" +
-	"\x18CAPABILITY_AGENT_SESSION\x10\x1b*\xcb\x01\n" +
+	"\x18CAPABILITY_AGENT_SESSION\x10\x1b\x12\x1f\n" +
+	"\x1bCAPABILITY_RATINGS_PROVIDER\x10\x1c*\xcb\x01\n" +
 	"\bCategory\x12\x18\n" +
 	"\x14CATEGORY_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11CATEGORY_METADATA\x10\x01\x12\x16\n" +

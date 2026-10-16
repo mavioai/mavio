@@ -8,6 +8,7 @@ import "mavio/acquisition/v1/request.proto";
 import "mavio/library/v1/item.proto";
 import "mavio/plugin/v1/discovery.proto";
 import "mavio/plugin/v1/metadata.proto";
+import "mavio/plugin/v1/ratings.proto";
 
 // DiscoverService lists the movies and series the discovery providers
 // offer, such as trending or popular titles, and those they find by name,
@@ -59,6 +60,12 @@ service DiscoverService {
   // parts marked as Discover's titles, as Seerr's collection page. It
   // fails with NOT_FOUND when no discovery provider knows it.
   rpc GetCollection(GetCollectionRequest) returns (GetCollectionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // GetRatings tells the scores the ratings providers know of a movie or
+  // series, such as Rotten Tomatoes' and IMDb's, as Seerr shows them
+  // beside TMDB's; none when they know none.
+  rpc GetRatings(GetRatingsRequest) returns (GetRatingsResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
 }
@@ -377,6 +384,22 @@ message GetCollectionRequest {
 
 message GetCollectionResponse {
   Collection collection = 1;
+}
+
+message GetRatingsRequest {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  int32 tmdb_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
+}
+
+message GetRatingsResponse {
+  repeated mavio.plugin.v1.Rating ratings = 1;
 }
 
 // Collection is a collection of movies as a discovery provider tells of

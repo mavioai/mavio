@@ -123,6 +123,10 @@ export type MessageKey =
   | 'discover.releaseDates'
   | 'discover.episodeRuntime'
   | 'discover.showMore'
+  | 'discover.tomatometer'
+  | 'discover.tomatometerCertified'
+  | 'discover.audienceScore'
+  | 'discover.imdbScore'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -1711,6 +1715,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.releaseDates": "{count, plural, one {Release Date} other {Release Dates}}",
     "discover.episodeRuntime": "Episode Runtime",
     "discover.showMore": "Show More",
+    "discover.tomatometer": "Rotten Tomatoes Tomatometer",
+    "discover.tomatometerCertified": "Rotten Tomatoes Tomatometer, Certified Fresh",
+    "discover.audienceScore": "Rotten Tomatoes Audience Score",
+    "discover.imdbScore": "IMDb User Score – votes: {votes}",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -3297,6 +3305,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.releaseDates": "{count, plural, other {上映日期}}",
     "discover.episodeRuntime": "单集时长",
     "discover.showMore": "显示更多",
+    "discover.tomatometer": "烂番茄新鲜度",
+    "discover.tomatometerCertified": "烂番茄新鲜度，认证新鲜",
+    "discover.audienceScore": "烂番茄观众评分",
+    "discover.imdbScore": "IMDb 用户评分 – 投票：{votes}",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",

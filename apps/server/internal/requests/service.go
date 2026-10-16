@@ -10,6 +10,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/acquisition"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/library"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
 // Errors of requests and issues, besides the core errors: core.ErrConflict
@@ -55,6 +56,8 @@ type Service struct {
 	Episodes func() []library.EpisodeLister
 	// Discovery returns the discovery providers; nil returns none.
 	Discovery func() []DiscoveryProvider
+	// RatingsProviders returns the ratings providers; nil returns none.
+	RatingsProviders func() []RatingsProvider
 	// Activity records notifications; nil records none.
 	Activity Recorder
 	// Events pushes a notification recorded to the devices of the user it
@@ -81,6 +84,7 @@ type Service struct {
 	users, titles keyLocks
 	cache         ttlCache[Title]
 	episodes      ttlCache[*library.EpisodeList]
+	ratings       ttlCache[[]*pluginv1.Rating]
 }
 
 func (s *Service) now() time.Time {

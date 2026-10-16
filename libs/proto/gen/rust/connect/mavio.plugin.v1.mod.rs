@@ -18,6 +18,7 @@ include!("mavio.plugin.v1.password_reset.__connect.rs");
 include!("mavio.plugin.v1.task.__connect.rs");
 include!("mavio.plugin.v1.plugin.__connect.rs");
 include!("mavio.plugin.v1.processor.__connect.rs");
+include!("mavio.plugin.v1.ratings.__connect.rs");
 include!("mavio.plugin.v1.resolver.__connect.rs");
 include!("mavio.plugin.v1.scene_mapping.__connect.rs");
 include!("mavio.plugin.v1.segment.__connect.rs");

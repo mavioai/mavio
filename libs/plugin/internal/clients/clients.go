@@ -41,6 +41,7 @@ type Set struct {
 	translate pluginv1connect.SubtitleTranslatorServiceClient
 	ai        pluginv1connect.AiGatewayServiceClient
 	agents    pluginv1connect.AgentSessionServiceClient
+	ratings   pluginv1connect.RatingsProviderServiceClient
 }
 
 // New builds the clients for m over c.
@@ -123,6 +124,9 @@ func New(c connect.HTTPClient, baseURL string, m *pluginv1.Manifest, opts ...con
 	}
 	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_AGENT_SESSION) {
 		s.agents = pluginv1connect.NewAgentSessionServiceClient(c, baseURL, opts...)
+	}
+	if manifest.HasCapability(m, pluginv1.Capability_CAPABILITY_RATINGS_PROVIDER) {
+		s.ratings = pluginv1connect.NewRatingsProviderServiceClient(c, baseURL, opts...)
 	}
 	return s
 }
@@ -212,3 +216,6 @@ func (s Set) AI() pluginv1connect.AiGatewayServiceClient { return s.ai }
 
 // Agents returns the AgentSessionService client, or nil.
 func (s Set) Agents() pluginv1connect.AgentSessionServiceClient { return s.agents }
+
+// Ratings returns the RatingsProviderService client, or nil.
+func (s Set) Ratings() pluginv1connect.RatingsProviderServiceClient { return s.ratings }

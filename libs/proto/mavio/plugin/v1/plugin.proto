@@ -96,6 +96,8 @@ enum Capability {
   CAPABILITY_AI_GATEWAY = 26;
   // Implements AgentSessionService.
   CAPABILITY_AGENT_SESSION = 27;
+  // Implements RatingsProviderService.
+  CAPABILITY_RATINGS_PROVIDER = 28;
 }
 
 // Category is what a plugin is for, by which clients group plugins.

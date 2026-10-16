@@ -91,7 +91,7 @@ func pluginDir(t *testing.T, rt string, hosts ...string) string {
 	manifest := fmt.Sprintf(`{"id":"dev.mavio.testplugin","name":"Test","version":"0.1.0","runtime":%q,
 		"capabilities":["CAPABILITY_METADATA_PROVIDER","CAPABILITY_TASK_RUNNER","CAPABILITY_EVENT_CONSUMER","CAPABILITY_HTTP_HANDLER","CAPABILITY_DEVICE_CONTROLLER","CAPABILITY_IMAGE_PROVIDER",
 			"CAPABILITY_LOCAL_METADATA","CAPABILITY_METADATA_SAVER","CAPABILITY_METADATA_PROCESSOR","CAPABILITY_LYRICS_PROVIDER",
-			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER","CAPABILITY_INDEXER_PROVIDER","CAPABILITY_DOWNLOAD_CLIENT_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
+			"CAPABILITY_INTRO_PROVIDER","CAPABILITY_IMAGE_GENERATOR","CAPABILITY_MEDIA_SOURCE_PROVIDER","CAPABILITY_PASSWORD_RESET","CAPABILITY_EPISODE_LIST_PROVIDER","CAPABILITY_DISCOVERY_PROVIDER","CAPABILITY_SCENE_MAPPING_PROVIDER","CAPABILITY_INDEXER_PROVIDER","CAPABILITY_DOWNLOAD_CLIENT_PROVIDER","CAPABILITY_RATINGS_PROVIDER"%s],"apiVersion":"1.0","configPage":"echo","localMetadataFiles":["*.title"],
 		"tasks":[{"id":"write","name":"Write"},{"id":"slow","name":"Slow","timeout":"5s"}],
 		"permissions":{"httpHosts":[%s],"events":["item.*"],"actAsUsers":true},"configSchema":%q}`, runtimeName, resolver, strings.Join(quoted, ","), configSchema)
 	if err := os.WriteFile(filepath.Join(dir, "manifest.json"), []byte(manifest), 0o644); err != nil {
@@ -407,6 +407,18 @@ func TestSceneMappings(t *testing.T) {
 		}.Build())
 		if err != nil || !numbering.GetFound() || numbering.GetEpisodes()[0].GetSceneSeasonNumber() != 2 {
 			t.Errorf("GetSceneNumbering() = %v, %v", numbering, err)
+		}
+	})
+}
+
+func TestRatings(t *testing.T) {
+	eachRuntime(t, func(t *testing.T, rt string) {
+		p := open(t, rt)
+		got, err := p.Ratings().GetRatings(t.Context(), pluginv1.GetRatingsRequest_builder{
+			MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), ExternalIds: map[string]string{"imdb": "tt1"},
+		}.Build())
+		if err != nil || len(got.GetRatings()) != 1 || got.GetRatings()[0].GetUrl() != "https://www.imdb.com/title/tt1" {
+			t.Errorf("GetRatings() = %v, %v", got, err)
 		}
 	})
 }

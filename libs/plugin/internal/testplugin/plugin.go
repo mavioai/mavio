@@ -52,6 +52,8 @@
 // indexer "test", which finds the release "<query>.S01E01" and serves the
 // file "torrent" for it.
 //
+// As a ratings provider it rates every title with an IMDb ID 8 on IMDb.
+//
 // As a device controller it takes commands to its device "tv" and rejects
 // others, naming the device and the user.
 //
@@ -111,6 +113,7 @@ func init() {
 	guest.Handle(pluginv1connect.NewSceneMappingProviderServiceHandler(scene{}))
 	guest.Handle(pluginv1connect.NewIndexerProviderServiceHandler(indexers{}))
 	guest.Handle(pluginv1connect.NewDownloadClientProviderServiceHandler(downloads{}))
+	guest.Handle(pluginv1connect.NewRatingsProviderServiceHandler(ratings{}))
 	routes := http.NewServeMux()
 	routes.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -568,5 +571,19 @@ func (downloads) AddDownload(_ context.Context, req *pluginv1.AddDownloadRequest
 func (downloads) ListDownloads(context.Context, *pluginv1.ListDownloadsRequest) (*pluginv1.ListDownloadsResponse, error) {
 	return pluginv1.ListDownloadsResponse_builder{Downloads: []*pluginv1.Download{pluginv1.Download_builder{
 		ClientId: proto.String("test"), Id: proto.String("ABC"), Status: pluginv1.DownloadStatus_DOWNLOAD_STATUS_COMPLETED.Enum(),
+	}.Build()}}.Build(), nil
+}
+
+type ratings struct{}
+
+// GetRatings rates a title with an IMDb ID 8 on IMDb.
+func (ratings) GetRatings(_ context.Context, req *pluginv1.GetRatingsRequest) (*pluginv1.GetRatingsResponse, error) {
+	id := req.GetExternalIds()["imdb"]
+	if id == "" {
+		return &pluginv1.GetRatingsResponse{}, nil
+	}
+	return pluginv1.GetRatingsResponse_builder{Ratings: []*pluginv1.Rating{pluginv1.Rating_builder{
+		Source: pluginv1.RatingSource_RATING_SOURCE_IMDB.Enum(), Score: proto.Float64(8), Votes: proto.Int64(100),
+		Url: proto.String("https://www.imdb.com/title/" + id),
 	}.Build()}}.Build(), nil
 }

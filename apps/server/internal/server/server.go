@@ -348,7 +348,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	reqs := &requests.Service{
 		Store: db, Acquisition: acq, Settings: func() core.RequestSettings { return set.Get().Requests },
 		Metadata: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Discovery: plugs.DiscoveryProviders,
-		Activity: activityLog, Events: hub.Notify, Logger: log,
+		RatingsProviders: plugs.RatingsProviders,
+		Activity:         activityLog, Events: hub.Notify, Logger: log,
 		MetadataSettings: func() core.MetadataSettings { return set.Get().Metadata },
 		DropBlocklistedTags: func(ctx context.Context, tags []string) error {
 			_, err := set.Change(ctx, func(s *core.ServerSettings) error {

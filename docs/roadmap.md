@@ -598,7 +598,7 @@ flowchart TD
   - [x] A collection's page as Seerr's (`DiscoverService.GetCollection`, the discovery providers' `GetCollection`): requesting its movies, and blocklisting them for administrators
   - [x] A title's administration as Seerr's: approving and declining its pending requests in place, its download progress by its status, a Manage panel of its requests, downloads, open issues and the blocklist, and reporting an issue with what the library has
   - [x] A discovered title laid out as Seerr's page: overview and leading crew beside the collection, TMDB score and facts, genres, keywords, languages, studios and networks opening the popular titles of them (`CatalogFilters.networks`)
-  - [ ] Rotten Tomatoes and IMDb ratings beside the TMDB score of a discovered title, as Seerr's (needs a ratings provider)
+  - [x] Rotten Tomatoes and IMDb ratings beside the TMDB score of a discovered title, as Seerr's (`DiscoverService.GetRatings`, the `RATINGS_PROVIDER` capability, `plugins/ratings`)
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
 - [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers

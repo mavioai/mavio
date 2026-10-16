@@ -19,6 +19,7 @@ export {
   useSearchTitles,
   useSeason,
   useTitle,
+  useTitleRatings,
 } from "./discover.ts";
 export {
   type Content,

@@ -123,6 +123,8 @@ pub enum Capability {
     CAPABILITY_AI_GATEWAY = 26i32,
     /// Implements AgentSessionService.
     CAPABILITY_AGENT_SESSION = 27i32,
+    /// Implements RatingsProviderService.
+    CAPABILITY_RATINGS_PROVIDER = 28i32,
 }
 impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -209,6 +211,9 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_AGENT_SESSION`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const AgentSession: Self = Self::CAPABILITY_AGENT_SESSION;
+    ///Idiomatic alias for [`Self::CAPABILITY_RATINGS_PROVIDER`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const RatingsProvider: Self = Self::CAPABILITY_RATINGS_PROVIDER;
 }
 impl ::core::default::Default for Capability {
     fn default() -> Self {
@@ -250,6 +255,7 @@ impl ::buffa::Enumeration for Capability {
             25i32 => ::core::option::Option::Some(Self::CAPABILITY_SUBTITLE_TRANSLATOR),
             26i32 => ::core::option::Option::Some(Self::CAPABILITY_AI_GATEWAY),
             27i32 => ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION),
+            28i32 => ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER),
             _ => ::core::option::Option::None,
         }
     }
@@ -290,6 +296,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_SUBTITLE_TRANSLATOR => "CAPABILITY_SUBTITLE_TRANSLATOR",
             Self::CAPABILITY_AI_GATEWAY => "CAPABILITY_AI_GATEWAY",
             Self::CAPABILITY_AGENT_SESSION => "CAPABILITY_AGENT_SESSION",
+            Self::CAPABILITY_RATINGS_PROVIDER => "CAPABILITY_RATINGS_PROVIDER",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -378,6 +385,9 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_AGENT_SESSION" => {
                 ::core::option::Option::Some(Self::CAPABILITY_AGENT_SESSION)
             }
+            "CAPABILITY_RATINGS_PROVIDER" => {
+                ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -411,6 +421,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_SUBTITLE_TRANSLATOR,
             Self::CAPABILITY_AI_GATEWAY,
             Self::CAPABILITY_AGENT_SESSION,
+            Self::CAPABILITY_RATINGS_PROVIDER,
         ]
     }
 }

@@ -2053,6 +2053,78 @@
         }
       }
     },
+    "discover.tomatometer": {
+      "comment": "Hover name of a title's Rotten Tomatoes critics' score",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotten Tomatoes Tomatometer"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "烂番茄新鲜度"
+          }
+        }
+      }
+    },
+    "discover.tomatometerCertified": {
+      "comment": "Hover name of a title's Rotten Tomatoes critics' score when certified fresh",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotten Tomatoes Tomatometer, Certified Fresh"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "烂番茄新鲜度，认证新鲜"
+          }
+        }
+      }
+    },
+    "discover.audienceScore": {
+      "comment": "Hover name of a title's Rotten Tomatoes audience score",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rotten Tomatoes Audience Score"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "烂番茄观众评分"
+          }
+        }
+      }
+    },
+    "discover.imdbScore": {
+      "comment": "Hover name of a title's IMDb rating; votes is a compact count such as 3.2M",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IMDb User Score – votes: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IMDb 用户评分 – 投票：%@"
+          }
+        }
+      }
+    },
     "library.sort": {
       "comment": "Button opening the sort options of a library.",
       "extractionState": "manual",

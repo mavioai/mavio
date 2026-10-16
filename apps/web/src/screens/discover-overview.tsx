@@ -2,15 +2,21 @@
 // Seerr's movie and series pages: the tagline, overview, leading crew and
 // keywords beside its collection, ratings and facts, each genre, keyword,
 // studio, network and language opening the popular titles alike.
-import { type CatalogFilters, type ServerEntry, useCollection, useDiscovery } from "@mavio/client-ts";
+import { type CatalogFilters, type ServerEntry, useCollection, useDiscovery, useTitleRatings } from "@mavio/client-ts";
 import type { Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { CreditKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { ProductionStatus } from "@mavio/proto/mavio/plugin/v1/metadata_pb";
+import { type Rating, RatingSource } from "@mavio/proto/mavio/plugin/v1/ratings_pb";
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
+import imdbLogo from "../assets/ratings/imdb.svg";
+import rtAudienceFresh from "../assets/ratings/rt-aud-fresh.svg";
+import rtAudienceRotten from "../assets/ratings/rt-aud-rotten.svg";
+import rtFresh from "../assets/ratings/rt-fresh.svg";
+import rtRotten from "../assets/ratings/rt-rotten.svg";
 import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { minutesText } from "../ui.tsx";
@@ -204,6 +210,33 @@ function Dated({ icon, label, date }: { icon: IconName; label: string; date: str
   );
 }
 
+/** The ratings shown beside TMDB's score, in Seerr's order. */
+const ratingOrder = [RatingSource.ROTTEN_TOMATOES_CRITICS, RatingSource.ROTTEN_TOMATOES_AUDIENCE, RatingSource.IMDB];
+
+/** Rotten Tomatoes' least fresh score, and least upright audience score. */
+const freshScore = 60;
+
+/** A rating linking to its page, with its logo, named on hover. */
+function RatingLink({ rating: r }: { rating: Rating }) {
+  const fresh = r.score >= freshScore;
+  const [logo, label, score] =
+    r.source === RatingSource.IMDB
+      ? [
+          imdbLogo,
+          t("discover.imdbScore", { votes: new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(Number(r.votes)) }),
+          r.score.toFixed(1),
+        ]
+      : r.source === RatingSource.ROTTEN_TOMATOES_CRITICS
+        ? [fresh ? rtFresh : rtRotten, r.certified ? t("discover.tomatometerCertified") : t("discover.tomatometer"), `${Math.round(r.score)}%`]
+        : [fresh ? rtAudienceFresh : rtAudienceRotten, t("discover.audienceScore"), `${Math.round(r.score)}%`];
+  return (
+    <a href={r.url} target="_blank" rel="noreferrer" title={label} className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline">
+      <img src={logo} alt={label} className="h-5 w-auto" />
+      {score}
+    </a>
+  );
+}
+
 const minStudios = 5;
 
 function Facts({ server, title }: { server: ServerEntry; title: Title }) {
@@ -222,6 +255,8 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   const shownStudios = allStudios ? studios : studios.slice(0, minStudios);
   const countries = title.productionCountries.length > 0 ? title.productionCountries.map(countryText) : title.productionLocations;
   const tmdbPath = `https://www.themoviedb.org/${series ? "tv" : "movie"}/${title.tmdbId}`;
+  const ratings = useTitleRatings(server, title.mediaKind, title.tmdbId).data ?? [];
+  const shownRatings = ratingOrder.flatMap((source) => ratings.find((r) => r.source === source) ?? []);
   const links = [
     { name: "TMDB", url: tmdbPath },
     title.externalIds.imdb && { name: "IMDb", url: `https://www.imdb.com/title/${title.externalIds.imdb}` },
@@ -232,18 +267,23 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   ].filter((l) => !!l);
   return (
     <dl className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] border border-border">
-      {title.voteCount > 0 && (
-        <div className="flex justify-center px-4 py-2.5">
-          <a
-            href={`${tmdbPath}?language=${locale}`}
-            target="_blank"
-            rel="noreferrer"
-            title={t("discover.tmdbScore")}
-            className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline"
-          >
-            <span className="rounded-[4px] bg-[#0d253f] px-1.5 type-caption font-bold text-[#01b4e4]">TMDB</span>
-            {Math.round(title.communityRating * 10)}%
-          </a>
+      {(title.voteCount > 0 || shownRatings.length > 0) && (
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 px-4 py-2.5">
+          {shownRatings.map((r) => (
+            <RatingLink key={r.source} rating={r} />
+          ))}
+          {title.voteCount > 0 && (
+            <a
+              href={`${tmdbPath}?language=${locale}`}
+              target="_blank"
+              rel="noreferrer"
+              title={t("discover.tmdbScore")}
+              className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline"
+            >
+              <span className="rounded-[4px] bg-[#0d253f] px-1.5 type-caption font-bold text-[#01b4e4]">TMDB</span>
+              {Math.round(title.communityRating * 10)}%
+            </a>
+          )}
         </div>
       )}
       {title.originalTitle && title.originalLanguage !== discoverLanguage && (

@@ -486,6 +486,17 @@ func (m *Manager) SceneMappingProviders() []SceneMappingProvider {
 	return out
 }
 
+// RatingsProviders returns the ratings providers among the ready plugins.
+func (m *Manager) RatingsProviders() []requests.RatingsProvider {
+	var out []requests.RatingsProvider
+	for _, id := range m.withCapability(pluginv1.Capability_CAPABILITY_RATINGS_PROVIDER) {
+		if pl, ok := m.running(id); ok && pl.Ratings() != nil {
+			out = append(out, requests.RatingsProvider{ID: id, Client: pl.Ratings()})
+		}
+	}
+	return out
+}
+
 // IndexerProviders returns the indexer providers among the ready plugins.
 // Their revisions change when they start and are configured.
 func (m *Manager) IndexerProviders() []releases.Provider {

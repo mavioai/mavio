@@ -1,0 +1,59 @@
+edition = "2023";
+
+package mavio.plugin.v1;
+
+import "buf/validate/validate.proto";
+import "mavio/plugin/v1/metadata.proto";
+
+// RatingsProviderService tells the scores other sites give movies and
+// series, as Seerr shows Rotten Tomatoes' and IMDb's beside TMDB's.
+service RatingsProviderService {
+  // GetRatings tells a title's scores; none when the provider knows none.
+  rpc GetRatings(GetRatingsRequest) returns (GetRatingsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+}
+
+message GetRatingsRequest {
+  // MEDIA_KIND_MOVIE or MEDIA_KIND_SERIES.
+  MediaKind media_kind = 1 [(buf.validate.field).enum = {
+    in: [
+      1,
+      2
+    ]
+  }];
+  // Such as "tmdb" and "imdb".
+  map<string, string> external_ids = 2;
+  // Its name in English, by which sites that do not know its IDs find it.
+  string name = 3 [(buf.validate.field).string.max_len = 500];
+  // The year of a movie's release, a series' first air date; 0 when
+  // unknown.
+  int32 year = 4;
+}
+
+message GetRatingsResponse {
+  repeated Rating ratings = 1;
+}
+
+// RatingSource is a site's score of a title.
+enum RatingSource {
+  RATING_SOURCE_UNSPECIFIED = 0;
+  // The Tomatometer: the critics' score on Rotten Tomatoes, 0–100.
+  RATING_SOURCE_ROTTEN_TOMATOES_CRITICS = 1;
+  // The Popcornmeter: the audience's score on Rotten Tomatoes, 0–100.
+  RATING_SOURCE_ROTTEN_TOMATOES_AUDIENCE = 2;
+  // IMDb's users' rating, 0–10.
+  RATING_SOURCE_IMDB = 3;
+}
+
+// Rating is a site's score of a title.
+message Rating {
+  RatingSource source = 1;
+  double score = 2;
+  // The number of votes, when known.
+  int64 votes = 3;
+  // The title's page on the site.
+  string url = 4;
+  // Rotten Tomatoes' Certified Fresh, of the critics' score.
+  bool certified = 5;
+}

@@ -2,6 +2,7 @@
 
 include!("mavio.plugin.v1.metadata.rs");
 include!("mavio.plugin.v1.discovery.rs");
+include!("mavio.plugin.v1.ratings.rs");
 include!("mavio.plugin.v1.ai.rs");
 include!("mavio.plugin.v1.device.rs");
 include!("mavio.plugin.v1.settings.rs");
@@ -43,6 +44,7 @@ pub mod __buffa {
         use super::*;
         include!("mavio.plugin.v1.metadata.__view.rs");
         include!("mavio.plugin.v1.discovery.__view.rs");
+        include!("mavio.plugin.v1.ratings.__view.rs");
         include!("mavio.plugin.v1.ai.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
         include!("mavio.plugin.v1.settings.__view.rs");
@@ -195,6 +197,18 @@ pub use self::__buffa::view::GetCollectionResponseOwnedView;
 pub use self::__buffa::view::CollectionView;
 #[doc(inline)]
 pub use self::__buffa::view::CollectionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::RatingView;
+#[doc(inline)]
+pub use self::__buffa::view::RatingOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]

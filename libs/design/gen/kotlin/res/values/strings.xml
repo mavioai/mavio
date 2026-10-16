@@ -231,6 +231,14 @@
     <string name="discover_episode_runtime">Episode Runtime</string>
     <!-- Shows the rest of a discovered title's studios or networks -->
     <string name="discover_show_more">Show More</string>
+    <!-- Hover name of a title's Rotten Tomatoes critics' score -->
+    <string name="discover_tomatometer">Rotten Tomatoes Tomatometer</string>
+    <!-- Hover name of a title's Rotten Tomatoes critics' score when certified fresh -->
+    <string name="discover_tomatometer_certified">Rotten Tomatoes Tomatometer, Certified Fresh</string>
+    <!-- Hover name of a title's Rotten Tomatoes audience score -->
+    <string name="discover_audience_score">Rotten Tomatoes Audience Score</string>
+    <!-- Hover name of a title's IMDb rating; votes is a compact count such as 3.2M -->
+    <string name="discover_imdb_score">IMDb User Score – votes: %s</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->

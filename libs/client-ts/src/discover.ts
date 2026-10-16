@@ -7,6 +7,7 @@ import { type Catalog, type Collection, type DiscoverRequestSchema, DiscoverServ
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
+import type { Rating } from "@mavio/proto/mavio/plugin/v1/ratings_pb";
 import { useInfiniteQuery, useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore, useSignedIn } from "./hooks.ts";
@@ -217,6 +218,22 @@ export function useTitle(server: ServerEntry | undefined, mediaKind: MediaKind, 
     queryFn: async (): Promise<Title | undefined> =>
       (await servers.client(DiscoverService, server!).getTitle({ mediaKind, tmdbId, language })).title,
     enabled: !!server && tmdbId > 0,
+  });
+}
+
+/**
+ * A movie's or series' ratings by its TMDB ID beside TMDB's score, such as
+ * on Rotten Tomatoes and IMDb, as the server's ratings providers tell
+ * them.
+ */
+export function useTitleRatings(server: ServerEntry | undefined, mediaKind: MediaKind, tmdbId: number) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "ratings", mediaKind, tmdbId),
+    queryFn: async (): Promise<Rating[]> => (await servers.client(DiscoverService, server!).getRatings({ mediaKind, tmdbId })).ratings,
+    enabled: !!server && tmdbId > 0,
+    staleTime: 60 * 60_000,
+    retry: false,
   });
 }
 

@@ -23,6 +23,7 @@ use (
 	./plugins/dlna
 	./plugins/download-clients
 	./plugins/indexers
+	./plugins/ratings
 	./plugins/scraper-fanart
 	./plugins/scraper-musicbrainz
 	./plugins/scraper-openlibrary

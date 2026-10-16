@@ -114,6 +114,7 @@ mavio/
 │   ├── scraper-musicbrainz/     # [Go → wasm] 音乐元数据刮削
 │   ├── scraper-theaudiodb/      # [Go → wasm] 音乐人简介与图片
 │   ├── scraper-fanart/          # [Go → wasm] fanart.tv 图片
+│   ├── ratings/                 # [Go → wasm] 烂番茄与 IMDb 评分
 │   ├── scraper-openlibrary/     # [Go → wasm] Open Library 图书元数据
 │   ├── subtitles/               # [Go → 子进程] 字幕提供者：OpenSubtitles.com 与 Bazarr 的其他站点
 │   ├── scraper-servarr/         # [Go → wasm] Servarr 的元数据服务：SkyHook、Radarr 元数据、scene 映射、XEM
@@ -487,7 +488,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 ### 13.1 组成
 | 部分 | 位置 | 对应 |
 | :--- | :--- | :--- |
-| 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`、`scraper-servarr`） | Seerr 的发现 |
+| 发现 | `DiscoverService`；列表来自 `DISCOVERY_PROVIDER` 插件（`scraper-tmdb`、`scraper-servarr`），评分来自 `RATINGS_PROVIDER` 插件（`ratings`） | Seerr 的发现 |
 | 请求与问题 | `RequestService`、`IssueService`；规则在 `apps/server/internal/requests` 中 | Seerr 的请求与问题 |
 | 资源获取引擎 | `libs/acquire`，含 `movie` 与 `series` 包，以及为文件命名的 `organize` 包；服务在 `apps/server` 中 | Radarr、Sonarr |
 | 想要的条目 | `WantedService`：按 TMDB ID 加入的电影与按 TVDB ID 加入的剧集，作为 `apps/server/internal/acquisition` 作业执行的搜索、RSS 同步与 scene 映射更新 | Radarr 的电影、Sonarr 的剧集及其搜索 |
@@ -535,7 +536,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 * **创建请求**按 Seerr 的顺序检查：阻止列表、权限、分级限制（标题的分级按该国体系打分；未分级的通过，除非策略屏蔽未分级条目）、配额（被拒绝的请求与忽略配额的请求不计入），然后是重复：已请求、已想要或已可用的电影被拒绝；剧集中其他活动请求所请求的季、已想要或已有文件的季被剔除，剩余季数须在配额之内。请求随后处于待审批状态，或在用户该类型的请求自动通过时立即通过。用户锁与标题锁串行化检查与写入，因此并发请求既不会超出配额，也不会重复请求同一标题。
 * **审批**使标题成为想要的条目：电影通过 `AddMovie` 并搜索；剧集通过不监控任何内容的 `AddSeries`，再监控并搜索所请求的季。媒体库中已有的标题被设为想要，并加入其季。失败时请求被标记为失败并记录错误，由管理员重试。
 * **可用性**：资源获取运行时的入库钩子，以及为扫描发现的文件每十分钟运行一次的周期作业，会完成那些电影已有文件、或各季已播出单集全部有文件的已通过和失败的请求，按季逐一完成。该作业列入任务列表，可立即运行。
-* **发现**把各提供者的目录合并为 `<plugin>/<catalog>`，并把一页中的每个标题标记为可用、部分可用、想要、已请求、已阻止、已删除（已完成请求的文件已不存在）或无，附带其条目、其活动请求以及用户能否请求它。`SearchTitles` 经第一个支持搜索的提供者按名称查找标题，同样标记；`GetTitle` 以客户端要求的语言给出标题的详情、其各季的状态、演职人员、关键词、预告片与合集，`GetSeason` 经剧集列表提供者以该语言列出一季的各集，`GetPerson` 经第一个了解人物的发现提供者给出一位人物，其参与的作品如一页标题一样标记，`GetCollection` 同样给出一个电影合集，并标记其各部电影，以及 Seerr 页面上的信息，其中包括提供者给出而条目不保存的信息：电影的预算与票房、剧集下一集的播出日期，以及服务器所在国家播放它的流媒体服务。用户的分级限制同样适用：仅当调用者指定分级或策略屏蔽未分级标题时，按认证分级过滤的目录才只被请求限制之内的分级，否则保留未分级标题；其余标题逐个查询，超出限制的被剔除。成人标题从不列出。每页统计其剔除的标题，总数为提供者的总数减去它们。
+* **发现**把各提供者的目录合并为 `<plugin>/<catalog>`，并把一页中的每个标题标记为可用、部分可用、想要、已请求、已阻止、已删除（已完成请求的文件已不存在）或无，附带其条目、其活动请求以及用户能否请求它。`SearchTitles` 经第一个支持搜索的提供者按名称查找标题，同样标记；`GetTitle` 以客户端要求的语言给出标题的详情、其各季的状态、演职人员、关键词、预告片与合集，`GetSeason` 经剧集列表提供者以该语言列出一季的各集，`GetPerson` 经第一个了解人物的发现提供者给出一位人物，其参与的作品如一页标题一样标记，`GetCollection` 同样给出一个电影合集，并标记其各部电影，`GetRatings` 给出每个评分提供者的评分（按英文名称、年份与 IMDb ID 查找，保留六小时），以及 Seerr 页面上的信息，其中包括提供者给出而条目不保存的信息：电影的预算与票房、剧集下一集的播出日期，以及服务器所在国家播放它的流媒体服务。用户的分级限制同样适用：仅当调用者指定分级或策略屏蔽未分级标题时，按认证分级过滤的目录才只被请求限制之内的分级，否则保留未分级标题；其余标题逐个查询，超出限制的被剔除。成人标题从不列出。每页统计其剔除的标题，总数为提供者的总数减去它们。
 * **问题**报告用户可访问的条目在视频、音频、字幕或其他方面的问题，可指明季与集，并带有评论串。创建者与管理员可评论、解决与重新打开；管理员，或尚无回复的问题的创建者，可删除问题。
 * **通知**是以相关用户为用户的活动：`request.pending`（面向管理员的通知器）、`request.approved`、`request.auto_approved`、`request.declined`、`request.failed`、`request.available`、`issue.created`、`issue.commented`、`issue.resolved` 与 `issue.reopened`，属性中带有请求或问题。通知器插件投递它们，`ActivityService.ListMyActivities` 列出用户自己的活动，记录时 `NotificationReceived` 事件送达相关用户的会话，待审批或失败的请求与报告的问题也送达管理员的会话。
 

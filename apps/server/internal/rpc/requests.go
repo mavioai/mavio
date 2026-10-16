@@ -784,6 +784,23 @@ func (s *DiscoverService) GetCollection(ctx context.Context, req *acquisitionv1.
 	}.Build()}.Build(), nil
 }
 
+// GetRatings tells a title's ratings, such as on Rotten Tomatoes and IMDb.
+func (s *DiscoverService) GetRatings(ctx context.Context, req *acquisitionv1.GetRatingsRequest) (*acquisitionv1.GetRatingsResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	kind, err := mediaKind(req.GetMediaKind())
+	if err != nil {
+		return nil, err
+	}
+	r, err := s.requests.Ratings(ctx, p.User, kind, int(req.GetTmdbId()))
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	return acquisitionv1.GetRatingsResponse_builder{Ratings: r}.Build(), nil
+}
+
 // productionStatuses maps production statuses to the contract's.
 var productionStatuses = map[metadata.ProductionStatus]pluginv1.ProductionStatus{
 	metadata.ProductionRumored:        pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED,

@@ -1,0 +1,15 @@
+{
+  "id": "dev.mavio.ratings",
+  "name": "Ratings",
+  "version": "0.1.0",
+  "description": "Rotten Tomatoes' critics' and audience scores of movies and series, found by name with Rotten Tomatoes' own search, and IMDb's ratings of movies from Radarr's metadata service. Needs no keys.",
+  "author": "Mavio",
+  "homepage": "https://github.com/mavioai/mavio",
+  "license": "GPL-3.0-only",
+  "runtime": "RUNTIME_WASM",
+  "category": "CATEGORY_METADATA",
+  "capabilities": ["CAPABILITY_RATINGS_PROVIDER"],
+  "permissions": { "httpHosts": ["79frdp12pn-dsn.algolia.net", "api.radarr.video"] },
+  "configSchema": "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}",
+  "apiVersion": "1.0"
+}

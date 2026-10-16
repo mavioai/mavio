@@ -514,6 +514,14 @@ pub use self::__buffa::view::GetCollectionResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetCollectionResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetRatingsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRatingsResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::CollectionView;
 #[doc(inline)]
 pub use self::__buffa::view::CollectionOwnedView;
