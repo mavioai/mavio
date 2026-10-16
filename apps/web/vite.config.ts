@@ -16,6 +16,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 1024,
   },
   server: {
-    proxy: { "/mavio.": server, "/signed/": server, "/images/": server, "/media/": server, "/system/": server },
+    proxy: {
+      "/mavio.": server,
+      "/signed/": server,
+      "/images/": server,
+      "/media/": server,
+      "/system/": server,
+      // The assistant's speech, and the WebSocket it listens on.
+      "/assistant/": { target: server, ws: true },
+    },
   },
 });

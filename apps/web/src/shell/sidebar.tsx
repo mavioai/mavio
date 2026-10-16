@@ -1,10 +1,11 @@
 // The sidebar of the desktop layout (docs/clients.md §6.3): the wordmark,
-// search, Home, the libraries of the shown sign-in and the user at its
-// foot. Collapsed, it is a rail of icons.
+// the assistant, search, Home, the libraries of the shown sign-in and the
+// user at its foot. Collapsed, it is a rail of icons.
 import { useDiscovery, useLibraries } from "@mavio/client-ts";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+import { AssistantButton } from "../assistant/panel.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
@@ -27,20 +28,26 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
     >
       <div className={`flex h-14 shrink-0 items-center ${rail ? "justify-center" : "justify-between pr-2.5 pl-4"}`}>
         {!rail && <Wordmark height={22} />}
-        <Tip label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")} side={rail ? "right" : "bottom"}>
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background"
-          >
-            <Icon name="sidebar" size={20} />
-          </button>
-        </Tip>
+        <div className="flex items-center">
+          {!rail && <AssistantButton size={20} className={headerButton} />}
+          <Tip label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")} side={rail ? "right" : "bottom"}>
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
+              className={headerButton}
+            >
+              <Icon name="sidebar" size={20} />
+            </button>
+          </Tip>
+        </div>
       </div>
       <div className={`flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pb-2 ${rail ? "items-center px-2" : "px-2.5"}`}>
         {rail ? (
-          <NavItem rail to="/search" icon="search" label={t("nav.search")} />
+          <>
+            <NavItem rail to="/search" icon="search" label={t("nav.search")} />
+            <AssistantButton size={20} className={itemClass(true)} />
+          </>
         ) : (
           <SearchBox shortcut={shortcuts ? shortcutLabel("search") : undefined} />
         )}
@@ -110,6 +117,8 @@ function SearchBox({ shortcut }: { shortcut?: string }) {
     </form>
   );
 }
+
+const headerButton = "flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background";
 
 function itemClass(rail: boolean) {
   return `flex items-center gap-2.5 rounded-[10px] type-callout text-on-background hover:bg-fill data-[status=active]:bg-fill-selected data-[status=active]:font-semibold ${

@@ -5,7 +5,7 @@
 // quality and tells how the item plays; an episode's end starts the next.
 // Other devices of the user control it remotely (§6.3.23), and it follows
 // the SyncPlay group playing its item (§6.3.24). A track shows its lyrics
-// (§6.3.27).
+// (§6.3.27). The assistant controls it (docs/assistant.md §5.2).
 import {
   capabilities,
   errorMessage,
@@ -29,6 +29,8 @@ import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type Hls from "hls.js";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { AssistantButton } from "../assistant/panel.tsx";
+import { registerPlayer } from "../assistant/player.ts";
 import { Slider, Tabs } from "../controls/inputs.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
@@ -105,7 +107,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
   const playback = useRef<Playback>(undefined);
   const [info, setInfo] = useState<Playback>();
   const [error, setError] = useState<string>();
-  const [selection, setSelection] = useState<Selection>(() => ({ quality: prefs().quality }));
+  const [selection, setSelection] = useState<Selection>(() => ({ quality: prefs().quality, audio: search.audio, subtitle: search.subtitle }));
   // Where the next start begins, in milliseconds: the resume position, then where a track change happened.
   const startAt = useRef(search.start ?? 0);
   const [paused, setPaused] = useState(true);
@@ -298,6 +300,52 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void shell.current?.requestFullscreen();
   }, []);
+
+  // The assistant's controls, which read the latest of what they call.
+  const live = useRef({ play, pause, back, seekTo, fullScreen, playNext, hasNext: false, info, selection, group });
+  live.current = { play, pause, back, seekTo, fullScreen, playNext, hasNext: !!next.data || !!group, info, selection, group };
+  useEffect(
+    () =>
+      registerPlayer({
+        state: () => {
+          const v = video.current;
+          const l = live.current;
+          return {
+            serverId: server.id,
+            itemId,
+            position: v?.currentTime ?? 0,
+            duration: v?.duration || 0,
+            paused: v?.paused ?? true,
+            speed: v?.playbackRate ?? 1,
+            volume: Math.round((v?.volume ?? 1) * 100),
+            muted: v?.muted ?? false,
+            audioStreamIndex: l.info?.info.audioStreamIndex ?? -1,
+            subtitleStreamIndex: l.info?.info.subtitleStreamIndex ?? -1,
+          };
+        },
+        pause: () => live.current.pause(),
+        resume: () => live.current.play(),
+        stop: () => live.current.back(),
+        seek: (s) => live.current.seekTo(s),
+        speed: (r) => video.current && !live.current.group && (video.current.playbackRate = r),
+        volume: (level) => {
+          if (!video.current) return;
+          video.current.volume = Math.min(Math.max(level, 0), 100) / 100;
+          video.current.muted = false;
+        },
+        mute: (m) => video.current && (video.current.muted = m),
+        fullScreen: () => live.current.fullScreen(),
+        next: () => {
+          if (!live.current.hasNext) return false;
+          live.current.playNext();
+          return true;
+        },
+        previous: () => live.current.seekTo(0),
+        streams: (audio, subtitle) =>
+          setSelection((s) => ({ ...s, ...(audio !== undefined ? { audio } : {}), ...(subtitle !== undefined ? { subtitle } : {}) })),
+      }),
+    [server.id, itemId],
+  );
 
   // What other devices of the user ask of the playback.
   useServerEvents((s, e) => {
@@ -513,6 +561,7 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
                   <Icon name="subtitles" fill={subtitlesOn} />
                 </PlayerButton>
               )}
+              <AssistantButton className="flex size-11 items-center justify-center rounded-full hover:bg-white/15" />
               <PlayerButton label={t("player.options")} onClick={() => openPanel("audio")} active={panel !== undefined && panel !== "subtitles"}>
                 <Icon name="settings" />
               </PlayerButton>

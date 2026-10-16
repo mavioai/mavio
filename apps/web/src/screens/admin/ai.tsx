@@ -1,7 +1,7 @@
 // The settings' AI (docs/clients.md §6.3.13): the providers of the AI
 // gateway plugin, each with where its credential comes from; a provider's
 // API key, its OAuth login followed step by step, signing out, and its
-// models.
+// models; and the assistant's settings (docs/assistant.md §10).
 import {
   errorMessage,
   isNoAiGateway,
@@ -19,6 +19,7 @@ import { locale, t } from "../../i18n.ts";
 import { Button, Group, Row } from "../../ui.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
+import { AssistantServerSettings } from "../assistant-settings.tsx";
 import { BackLink, Page, PageLink } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
@@ -48,6 +49,7 @@ function ProvidersList({ server }: { server: ServerEntry }) {
         <Group footer={t("ai.noGatewayFooter")}>
           <PageLink search={{}} section="plugins" icon="plugins" color="#AF52DE" label={t("ai.noGateway")} detail={t("ai.noGatewayDetail")} />
         </Group>
+        <AssistantServerSettings server={server} />
       </Page>
     );
   return (
@@ -66,6 +68,7 @@ function ProvidersList({ server }: { server: ServerEntry }) {
         {providers.isSuccess && sorted.length === 0 && <p className="px-4 py-3 type-callout text-text-secondary">{t("ai.noProviders")}</p>}
         {providers.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(providers.error)}</p>}
       </Group>
+      <AssistantServerSettings server={server} />
     </Page>
   );
 }

@@ -5,6 +5,7 @@ import { useDiscovery } from "@mavio/client-ts";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
 
+import { AssistantButton } from "../assistant/panel.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { UserButton } from "./user-menu.tsx";
 
@@ -58,8 +59,9 @@ export function TvShell() {
                 </Link>
               ))}
             </nav>
-            {/* The user menu's dots, at the screen's right, centered on the tabs. */}
-            <div className="pointer-events-auto absolute right-0">
+            {/* The assistant and the user menu's dots, at the screen's right, centered on the tabs. */}
+            <div className="pointer-events-auto absolute right-0 flex items-center gap-2">
+              <AssistantButton size={26} className="tv-pill flex size-12 items-center justify-center rounded-full bg-surface-raised/60 text-text-secondary backdrop-blur-xl" />
               <UserButton dots placement="below" />
             </div>
           </div>

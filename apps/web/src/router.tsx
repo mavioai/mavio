@@ -185,9 +185,13 @@ const collection = createRoute({
 const player = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/play/$itemId",
-  validateSearch: (s: Record<string, unknown>): { start?: number; source?: string } => ({
+  // Where to start, in milliseconds, the version, and the streams to play
+  // by their index in the media, -1 for no subtitles.
+  validateSearch: (s: Record<string, unknown>): { start?: number; source?: string; audio?: number; subtitle?: number } => ({
     start: Number(s.start) > 0 ? Number(s.start) : undefined,
     source: searchText(s.source),
+    audio: Number.isInteger(s.audio) && Number(s.audio) >= 0 ? Number(s.audio) : undefined,
+    subtitle: Number.isInteger(s.subtitle) && Number(s.subtitle) >= -1 ? Number(s.subtitle) : undefined,
   }),
   component: PlayerScreen,
 });

@@ -7,6 +7,7 @@ import { useDiscovery, useEvents, useServersStore, useSignIn } from "@mavio/clie
 import { Link, Navigate, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import { AssistantButton, AssistantProvider } from "../assistant/panel.tsx";
 import { useEventHub } from "../events.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { toggleFullScreen } from "../fullscreen.ts";
@@ -31,11 +32,13 @@ export function Shell() {
   const { tv } = usePrefs();
   return (
     <SyncPlayProvider>
-      {/* The television's focus is kept by its own rules (focus.ts). */}
-      <PageTitle moveFocus={!tv} />
-      <Content />
-      <RemoteCommands />
-      <GroupIndicator />
+      <AssistantProvider>
+        {/* The television's focus is kept by its own rules (focus.ts). */}
+        <PageTitle moveFocus={!tv} />
+        <Content />
+        <RemoteCommands />
+        <GroupIndicator />
+      </AssistantProvider>
     </SyncPlayProvider>
   );
 }
@@ -153,15 +156,18 @@ const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; icon: IconNam
   { to: "/search", icon: "search", label: () => t("nav.search") },
 ];
 
-/** The phone's top: the wordmark, and the user's avatar opening the settings. */
+/** The phone's top: the wordmark, the assistant, and the user's avatar opening the settings. */
 function CompactHeader() {
   const account = useAccount();
   return (
     <header className="sticky top-0 z-20 flex h-13 items-center justify-between bg-background/80 px-margin pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <Wordmark height={20} />
-      <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
-        <Avatar name={account.name} size={32} />
-      </Link>
+      <div className="flex items-center gap-2">
+        <AssistantButton className="flex size-9 items-center justify-center rounded-full hover:bg-fill" />
+        <Link to="/settings" aria-label={t("nav.settings")} className="rounded-full">
+          <Avatar name={account.name} size={32} />
+        </Link>
+      </div>
     </header>
   );
 }

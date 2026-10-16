@@ -1,5 +1,5 @@
 // The settings (docs/clients.md §6.3): those of this browser, its
-// appearance, TV mode and playback; the account, on its own page under the
+// appearance, TV mode, playback and the assistant; the account, on its own page under the
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
@@ -49,6 +49,7 @@ import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
 import { SubtitlesSection } from "./admin/subtitles.tsx";
 import { AiSection } from "./admin/ai.tsx";
+import { AssistantPrefs } from "./assistant-settings.tsx";
 import { ConversationsSection } from "./admin/conversations.tsx";
 import { DownloadsSection } from "./admin/downloads.tsx";
 import { WantedSection } from "./admin/wanted.tsx";
@@ -64,12 +65,13 @@ import { isMenu, type MenuId, menuOf, menuSections } from "./settings-menus.ts";
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
+  assistant: { icon: "microphone", color: "#FF2D55", title: () => t("assistant.title") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   overview: { icon: "server", color: "#8E8E93", title: () => t("settings.overview"), admin: true },
   activity: { icon: "activity", color: "#FF2D55", title: () => t("settings.activity"), admin: true },
@@ -114,7 +116,7 @@ function lookOf(e: Entry) {
  * over and maintaining it.
  */
 const allGroups: { title: () => string; entries: Entry[]; server?: boolean }[] = [
-  { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio"] },
+  { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "media", "acquiring", "extensions", "maintenance"], server: true },
 ];
 
@@ -519,6 +521,12 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return <PlaybackSection />;
     case "subtitles-audio":
       return <LanguagesSection />;
+    case "assistant":
+      return (
+        <Section title={t("assistant.title")} message={t("assistant.settingsMessage")}>
+          <AssistantPrefs key={chosen?.server.id} server={chosen?.server} />
+        </Section>
+      );
     case "account":
       return <AccountSection />;
     case "overview":
