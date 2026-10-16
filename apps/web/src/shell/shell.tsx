@@ -97,14 +97,14 @@ function DesktopShell({ overlay }: { overlay: boolean }) {
   return (
     <div className="flex min-h-screen">
       <aside
-        className="sticky top-0 h-screen shrink-0 py-2.5 pl-2.5"
+        className="sticky top-0 h-screen shrink-0"
         style={{ width: rail ? "var(--mavio-layout-rail)" : "var(--mavio-layout-sidebar)" }}
       >
         <SidebarPanel rail={rail} onToggle={() => (overlay ? setOver(true) : setPrefs({ sidebar: !prefs.sidebar }))} />
       </aside>
       {over && (
         <div className="fixed inset-0 z-40 bg-scrim" onPointerDown={(e) => e.target === e.currentTarget && setOver(false)}>
-          <aside className="h-full w-[280px] p-2.5 shadow-level3">
+          <aside className="h-full w-[280px] shadow-level3">
             <SidebarPanel rail={false} onToggle={() => setOver(false)} />
           </aside>
         </div>

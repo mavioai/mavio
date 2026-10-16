@@ -22,7 +22,7 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
   return (
     <nav
       aria-label={t("nav.navigation")}
-      className="flex h-full flex-col rounded-[18px] border border-border bg-sidebar"
+      className="flex h-full flex-col border-r border-border bg-sidebar"
     >
       <div className={`flex h-14 shrink-0 items-center ${rail ? "justify-center" : "justify-between pr-2.5 pl-4"}`}>
         {!rail && <Wordmark height={22} />}
