@@ -51,6 +51,7 @@ Mavio is licensed under **GPL-3.0** (`GPL-3.0-only`). GPL-3.0 is compatible with
 | Concurrency | `errgroup.SetLimit` + `iter.Seq` | |
 | Change detection | **Full reconciliation scans** (scheduled, on startup, manual / API-triggered), pruned by directory mtime | See §9 |
 | Background jobs | In-house database job queue (leases + retries) | Works on both SQLite and PostgreSQL |
+| System load | **gopsutil** | The CPU, memory, disk and network counters of Linux, macOS and Windows without CGO, read only while administrators watch them |
 | Observability | `log/slog` + OpenTelemetry (traces / metrics) | |
 | Command line and settings | **Cobra + Viper** | Flags, `MAVIO_*` environment variables and `config.toml` in the Mavio home; see §11 |
 

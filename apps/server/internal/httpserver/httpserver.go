@@ -24,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/hub"
 	"github.com/mavioai/mavio/apps/server/internal/identity"
 	"github.com/mavioai/mavio/apps/server/internal/images"
+	"github.com/mavioai/mavio/apps/server/internal/load"
 	"github.com/mavioai/mavio/apps/server/internal/logs"
 	"github.com/mavioai/mavio/apps/server/internal/playback"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
@@ -170,6 +171,7 @@ func Handler(opts Options) (http.Handler, error) {
 	mux.Handle(systemv1connect.NewSystemServiceHandler(&rpc.SystemService{
 		Version: opts.Version, StartTime: time.Now(), Database: opts.Database, FFmpegVersion: opts.FFmpegVersion,
 		Settings: opts.Settings, Accelerations: opts.Accelerations, Logs: opts.Logs, Activity: opts.Activity,
+		Load: load.New(),
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
 		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity,

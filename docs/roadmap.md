@@ -331,6 +331,8 @@ flowchart TD
 - [x] Localization data: countries, languages, rating systems; the ported Jellyfin localization cases pass, translations excepted
 - [x] Networking: base URL, HTTPS with configured certificates, local discovery
 - [x] End-to-end test (`apps/server/internal/server/admin_test.go`)
+- [x] The load of the server's computer (CPU, memory, disks, network) sampled while administrators watch it, on Overview
+- [ ] The load's GPU (its use and memory, as the hardware transcodes), temperatures and, for servers on laptops, battery: no portable way without CGO; vendors' tools (`nvidia-smi`) or per-platform readings to evaluate
 
 ### P12 Media Extras
 **Scope**: media features beyond playing a stream.

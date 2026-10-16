@@ -51,6 +51,7 @@ Mavio 采用 **GPL-3.0**（`GPL-3.0-only`）。GPL-3.0 与 Apache-2.0 兼容，�
 | 并发 | `errgroup.SetLimit` + `iter.Seq` | |
 | 变更检测 | **全量对账扫描**（定时、启动时、手动 / API 触发），以目录 mtime 剪枝 | 见 §9 |
 | 后台任务 | 自建数据库任务队列（租约 + 重试） | 同时支持 SQLite / PostgreSQL |
+| 系统负载 | **gopsutil** | 无需 CGO 读取 Linux、macOS 与 Windows 的 CPU、内存、磁盘与网络计数器，仅在管理员查看时读取 |
 | 可观测性 | `log/slog` + OpenTelemetry（trace / metrics） | |
 | 命令行与设置 | **Cobra + Viper** | 命令行参数、`MAVIO_*` 环境变量与 Mavio 主目录中的 `config.toml`；见 §11 |
 
