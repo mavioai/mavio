@@ -156,7 +156,7 @@ export function DiscoverScreen() {
  * television as the row's last card, where focus moving along the row
  * reaches it.
  */
-function CatalogShelf({ server, row, title, tmdbId = 0 }: { server: ServerEntry; row: CatalogRow; title: string; tmdbId?: number }) {
+export function CatalogShelf({ server, row, title, tmdbId = 0 }: { server: ServerEntry; row: CatalogRow; title: string; tmdbId?: number }) {
   const { tv } = usePrefs();
   const q = useCatalog(server, row.catalog.id, row.mediaKind, discoverLanguage, tmdbId);
   const titles = q.data?.pages[0]?.titles ?? [];

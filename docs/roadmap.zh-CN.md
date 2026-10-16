@@ -588,6 +588,10 @@ flowchart TD
   - [ ] 每种以种子生成的推荐行使用多个种子，如 Plex 显示多行"因为你看过"
 - [x] 服务端：`ItemService.ListSimilarItems`，由 `ItemQuery.SimilarTo` 评分（`libs/store/items.go`）
   - [ ] 在本地结果之后，加入发现提供者给出、媒体库拥有的相似作品，如 Jellyfin 的远程相似条目提供者所做
+- [x] 服务端：`ListItems` 以 `owner_id` 列出条目的附加内容（`ItemQuery.OwnerID`），在其详情中显示，预告片列入操作
+- [x] Web 详情与 Seerr 同样丰富：附加内容、合集横幅、发现提供方的推荐、评分、关键词、更多主创，类型、关键词与制片厂打开媒体库中具有该值的条目
+  - [ ] 元数据模型尚未保存的信息：预算与票房、原始语言、与制片厂分开的剧集播出网络、各类发行日期（影院、数字、实体）、剧集的下集播出日期，以及用户所在地区的流媒体服务
+  - [ ] 完整演职人员页面，如 Seerr 的"查看完整剧组"
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
 - [x] 服务端：`AuthService.GetAuthInfo` 与发现应答中带上服务端的 ID、名称和版本，客户端据此在任意地址上认出同一服务端
 - [x] 服务端：`ListItems` 可按外部 ID 筛选（`ItemQuery.ExternalIDs`），客户端据此在其他服务端上找到同一作品的版本

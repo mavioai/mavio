@@ -351,6 +351,24 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("library.sortBy", bundle: .module, comment: ""), sort)
     }
 
+    /// Filter of a library's grid showing one genre's items.
+    public static func libraryGenreValue(value: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("library.genreValue", bundle: .module, comment: ""), value)
+    }
+
+    /// Filter of a library's grid showing one tag's items.
+    public static func libraryTagValue(value: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("library.tagValue", bundle: .module, comment: ""), value)
+    }
+
+    /// Filter of a library's grid showing one studio's items.
+    public static func libraryStudioValue(value: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("library.studioValue", bundle: .module, comment: ""), value)
+    }
+
+    /// Label of the button removing a genre, keyword or studio filter from a library's grid.
+    public static var libraryClearValue: String { NSLocalizedString("library.clearValue", bundle: .module, comment: "") }
+
     /// Starts playback of an item from the beginning.
     public static var itemPlay: String { NSLocalizedString("item.play", bundle: .module, comment: "") }
 
@@ -528,6 +546,42 @@ public enum MavioStrings {
 
     /// Button choosing the media file of an item to play.
     public static var itemVersion: String { NSLocalizedString("item.version", bundle: .module, comment: "") }
+
+    /// Button of an item's details: plays its trailer.
+    public static var itemTrailer: String { NSLocalizedString("item.trailer", bundle: .module, comment: "") }
+
+    /// Section of an item's trailers, featurettes and other extras.
+    public static var itemExtras: String { NSLocalizedString("item.extras", bundle: .module, comment: "") }
+
+    /// Label of the collection a movie belongs to.
+    public static var itemCollection: String { NSLocalizedString("item.collection", bundle: .module, comment: "") }
+
+    /// Button opening the collection a movie belongs to.
+    public static var itemViewCollection: String { NSLocalizedString("item.viewCollection", bundle: .module, comment: "") }
+
+    /// Heading of an item's ratings.
+    public static var itemRatings: String { NSLocalizedString("item.ratings", bundle: .module, comment: "") }
+
+    /// Label of an item's community rating, out of 10.
+    public static var itemCommunityRating: String { NSLocalizedString("item.communityRating", bundle: .module, comment: "") }
+
+    /// Label of an item's critics' score, out of 100.
+    public static var itemCriticRating: String { NSLocalizedString("item.criticRating", bundle: .module, comment: "") }
+
+    /// Label of an item's tags, such as its TMDB keywords.
+    public static var itemTags: String { NSLocalizedString("item.tags", bundle: .module, comment: "") }
+
+    /// Label of an item's producers.
+    public static var itemProducers: String { NSLocalizedString("item.producers", bundle: .module, comment: "") }
+
+    /// Label of an item's composers.
+    public static var itemMusic: String { NSLocalizedString("item.music", bundle: .module, comment: "") }
+
+    /// Label of a series' creators.
+    public static var itemCreators: String { NSLocalizedString("item.creators", bundle: .module, comment: "") }
+
+    /// Label of the date an item was added to the library.
+    public static var itemDateAdded: String { NSLocalizedString("item.dateAdded", bundle: .module, comment: "") }
 
     /// State of a download not started yet.
     public static var downloadWaiting: String { NSLocalizedString("download.waiting", bundle: .module, comment: "") }
@@ -4844,4 +4898,34 @@ public enum MavioStrings {
 
     /// Shown when the conversation chosen no longer exists.
     public static var conversationsGone: String { NSLocalizedString("conversations.gone", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraTrailer: String { NSLocalizedString("extra.trailer", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraClip: String { NSLocalizedString("extra.clip", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraBehindTheScenes: String { NSLocalizedString("extra.behindTheScenes", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraDeletedScene: String { NSLocalizedString("extra.deletedScene", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraInterview: String { NSLocalizedString("extra.interview", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraScene: String { NSLocalizedString("extra.scene", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraSample: String { NSLocalizedString("extra.sample", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraFeaturette: String { NSLocalizedString("extra.featurette", bundle: .module, comment: "") }
+
+    /// Kind of an extra.
+    public static var extraShort: String { NSLocalizedString("extra.short", bundle: .module, comment: "") }
+
+    /// Kind of an extra without a more specific one.
+    public static var extraOther: String { NSLocalizedString("extra.other", bundle: .module, comment: "") }
 }

@@ -209,6 +209,14 @@
     <string name="library_filter_favorites">Favorites</string>
     <!-- Button opening the sort menu; sort is the current order. -->
     <string name="library_sort_by">Sort: %s</string>
+    <!-- Filter of a library's grid showing one genre's items. -->
+    <string name="library_genre_value">Genre: %s</string>
+    <!-- Filter of a library's grid showing one tag's items. -->
+    <string name="library_tag_value">Keyword: %s</string>
+    <!-- Filter of a library's grid showing one studio's items. -->
+    <string name="library_studio_value">Studio: %s</string>
+    <!-- Label of the button removing a genre, keyword or studio filter from a library's grid. -->
+    <string name="library_clear_value">Show all</string>
     <!-- Starts playback of an item from the beginning. -->
     <string name="item_play">Play</string>
     <!-- Resumes playback of an item where it was left. -->
@@ -321,6 +329,30 @@
     <string name="item_more_from">More from %s</string>
     <!-- Button choosing the media file of an item to play. -->
     <string name="item_version">Version</string>
+    <!-- Button of an item's details: plays its trailer. -->
+    <string name="item_trailer">Trailer</string>
+    <!-- Section of an item's trailers, featurettes and other extras. -->
+    <string name="item_extras">Trailers &amp; Extras</string>
+    <!-- Label of the collection a movie belongs to. -->
+    <string name="item_collection">Collection</string>
+    <!-- Button opening the collection a movie belongs to. -->
+    <string name="item_view_collection">View Collection</string>
+    <!-- Heading of an item's ratings. -->
+    <string name="item_ratings">Ratings</string>
+    <!-- Label of an item's community rating, out of 10. -->
+    <string name="item_community_rating">Audience</string>
+    <!-- Label of an item's critics' score, out of 100. -->
+    <string name="item_critic_rating">Critics</string>
+    <!-- Label of an item's tags, such as its TMDB keywords. -->
+    <string name="item_tags">Keywords</string>
+    <!-- Label of an item's producers. -->
+    <string name="item_producers">Producers</string>
+    <!-- Label of an item's composers. -->
+    <string name="item_music">Music</string>
+    <!-- Label of a series' creators. -->
+    <string name="item_creators">Created By</string>
+    <!-- Label of the date an item was added to the library. -->
+    <string name="item_date_added">Added</string>
     <!-- State of a download not started yet. -->
     <string name="download_waiting">Waiting</string>
     <!-- State of a download interrupted, to be resumed. -->
@@ -3074,4 +3106,24 @@
     <string name="conversations_delete_message">Its messages are deleted for every administrator.</string>
     <!-- Shown when the conversation chosen no longer exists. -->
     <string name="conversations_gone">This conversation was deleted.</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_trailer">Trailer</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_clip">Clip</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_behind_the_scenes">Behind the Scenes</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_deleted_scene">Deleted Scene</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_interview">Interview</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_scene">Scene</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_sample">Sample</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_featurette">Featurette</string>
+    <!-- Kind of an extra. -->
+    <string name="extra_short">Short</string>
+    <!-- Kind of an extra without a more specific one. -->
+    <string name="extra_other">Extra</string>
 </resources>

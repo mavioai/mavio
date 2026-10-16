@@ -193,8 +193,14 @@ const sorts: Record<Sort, [SortField, boolean]> = {
   random: [SortField.RANDOM, false],
 };
 
+/** A genre, tag or studio a library's grid shows only the items of. */
+export interface ItemValue {
+  kind: "genre" | "tag" | "studio";
+  value: string;
+}
+
 /** The request of a page of a library's grid. */
-export function libraryItemsRequest(libraryId: string, sort: Sort, filter: Filter, offset: number): ListItemsRequest {
+export function libraryItemsRequest(libraryId: string, sort: Sort, filter: Filter, offset: number, value?: ItemValue): ListItemsRequest {
   const [field, descending] = sorts[sort];
   const req = create(ListItemsRequestSchema, {
     libraryIds: [libraryId],
@@ -202,6 +208,9 @@ export function libraryItemsRequest(libraryId: string, sort: Sort, filter: Filte
     sort: [{ field, descending }],
     offset,
     limit: pageSize,
+    genres: value?.kind === "genre" ? [value.value] : [],
+    tags: value?.kind === "tag" ? [value.value] : [],
+    studios: value?.kind === "studio" ? [value.value] : [],
   });
   if (filter === "played") req.played = true;
   if (filter === "unplayed") req.played = false;
@@ -210,14 +219,14 @@ export function libraryItemsRequest(libraryId: string, sort: Sort, filter: Filte
 }
 
 /** A library's grid: the items at its top, sorted and filtered, page by page. */
-export function useLibraryItems(server: ServerEntry, libraryId: string, sort: Sort, filter: Filter) {
+export function useLibraryItems(server: ServerEntry, libraryId: string, sort: Sort, filter: Filter, value?: ItemValue) {
   const servers = useServersStore();
   return useInfiniteQuery({
-    queryKey: serverKey(server.id, "items", libraryId, sort, filter),
+    queryKey: serverKey(server.id, "items", libraryId, sort, filter, value),
     queryFn: async ({ pageParam }) => {
       const r = await servers
         .client(ItemService, server)
-        .listItems(libraryItemsRequest(libraryId, sort, filter, pageParam));
+        .listItems(libraryItemsRequest(libraryId, sort, filter, pageParam, value));
       const end = pageParam + r.items.length;
       return { items: r.items, total: r.total, next: r.items.length > 0 && end < r.total ? end : undefined };
     },
@@ -319,6 +328,17 @@ export function useSimilar(server: ServerEntry, itemId: string) {
   return useQuery({
     queryKey: serverKey(server.id, "similar", itemId),
     queryFn: async () => (await servers.client(ItemService, server).listSimilarItems({ id: itemId, limit: 20 })).items,
+    staleTime: 10 * 60_000,
+  });
+}
+
+/** An item's trailers, featurettes and other extras, by name. */
+export function useExtras(server: ServerEntry, itemId: string) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "extras", itemId),
+    queryFn: async () =>
+      (await servers.client(ItemService, server).listItems({ ownerId: itemId, sort: [{ field: SortField.NAME }] })).items,
     staleTime: 10 * 60_000,
   });
 }

@@ -112,6 +112,10 @@ export type MessageKey =
   | 'library.filterPlayed'
   | 'library.filterFavorites'
   | 'library.sortBy'
+  | 'library.genreValue'
+  | 'library.tagValue'
+  | 'library.studioValue'
+  | 'library.clearValue'
   | 'item.play'
   | 'item.resume'
   | 'item.favorite'
@@ -160,6 +164,18 @@ export type MessageKey =
   | 'item.links'
   | 'item.moreFrom'
   | 'item.version'
+  | 'item.trailer'
+  | 'item.extras'
+  | 'item.collection'
+  | 'item.viewCollection'
+  | 'item.ratings'
+  | 'item.communityRating'
+  | 'item.criticRating'
+  | 'item.tags'
+  | 'item.producers'
+  | 'item.music'
+  | 'item.creators'
+  | 'item.dateAdded'
   | 'player.play'
   | 'player.pause'
   | 'player.seekBack'
@@ -1510,7 +1526,17 @@ export type MessageKey =
   | 'conversations.delete'
   | 'conversations.deleteConfirm'
   | 'conversations.deleteMessage'
-  | 'conversations.gone';
+  | 'conversations.gone'
+  | 'extra.trailer'
+  | 'extra.clip'
+  | 'extra.behindTheScenes'
+  | 'extra.deletedScene'
+  | 'extra.interview'
+  | 'extra.scene'
+  | 'extra.sample'
+  | 'extra.featurette'
+  | 'extra.short'
+  | 'extra.other';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -1615,6 +1641,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "library.filterPlayed": "Played",
     "library.filterFavorites": "Favorites",
     "library.sortBy": "Sort: {sort}",
+    "library.genreValue": "Genre: {value}",
+    "library.tagValue": "Keyword: {value}",
+    "library.studioValue": "Studio: {value}",
+    "library.clearValue": "Show all",
     "item.play": "Play",
     "item.resume": "Resume",
     "item.favorite": "Favorite",
@@ -1663,6 +1693,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.links": "Links",
     "item.moreFrom": "More from {season}",
     "item.version": "Version",
+    "item.trailer": "Trailer",
+    "item.extras": "Trailers & Extras",
+    "item.collection": "Collection",
+    "item.viewCollection": "View Collection",
+    "item.ratings": "Ratings",
+    "item.communityRating": "Audience",
+    "item.criticRating": "Critics",
+    "item.tags": "Keywords",
+    "item.producers": "Producers",
+    "item.music": "Music",
+    "item.creators": "Created By",
+    "item.dateAdded": "Added",
     "player.play": "Play",
     "player.pause": "Pause",
     "player.seekBack": "Back {count, plural, one {# second} other {# seconds}}",
@@ -3013,7 +3055,17 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.delete": "Delete Conversation",
     "conversations.deleteConfirm": "Delete this conversation?",
     "conversations.deleteMessage": "Its messages are deleted for every administrator.",
-    "conversations.gone": "This conversation was deleted."
+    "conversations.gone": "This conversation was deleted.",
+    "extra.trailer": "Trailer",
+    "extra.clip": "Clip",
+    "extra.behindTheScenes": "Behind the Scenes",
+    "extra.deletedScene": "Deleted Scene",
+    "extra.interview": "Interview",
+    "extra.scene": "Scene",
+    "extra.sample": "Sample",
+    "extra.featurette": "Featurette",
+    "extra.short": "Short",
+    "extra.other": "Extra"
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -3116,6 +3168,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "library.filterPlayed": "已看",
     "library.filterFavorites": "收藏",
     "library.sortBy": "排序：{sort}",
+    "library.genreValue": "类型：{value}",
+    "library.tagValue": "关键词：{value}",
+    "library.studioValue": "制片厂：{value}",
+    "library.clearValue": "显示全部",
     "item.play": "播放",
     "item.resume": "继续播放",
     "item.favorite": "收藏",
@@ -3164,6 +3220,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.links": "链接",
     "item.moreFrom": "{season} 的其他剧集",
     "item.version": "版本",
+    "item.trailer": "预告片",
+    "item.extras": "预告片与花絮",
+    "item.collection": "合集",
+    "item.viewCollection": "查看合集",
+    "item.ratings": "评分",
+    "item.communityRating": "观众评分",
+    "item.criticRating": "影评人评分",
+    "item.tags": "关键词",
+    "item.producers": "制片人",
+    "item.music": "音乐",
+    "item.creators": "创作者",
+    "item.dateAdded": "添加日期",
     "player.play": "播放",
     "player.pause": "暂停",
     "player.seekBack": "{count, plural, other {后退 # 秒}}",
@@ -4514,6 +4582,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "conversations.delete": "删除对话",
     "conversations.deleteConfirm": "删除此对话？",
     "conversations.deleteMessage": "其消息将对所有管理员删除。",
-    "conversations.gone": "此对话已被删除。"
+    "conversations.gone": "此对话已被删除。",
+    "extra.trailer": "预告片",
+    "extra.clip": "片段",
+    "extra.behindTheScenes": "幕后",
+    "extra.deletedScene": "删减片段",
+    "extra.interview": "访谈",
+    "extra.scene": "场景",
+    "extra.sample": "样片",
+    "extra.featurette": "特辑",
+    "extra.short": "短片",
+    "extra.other": "花絮"
   }
 };

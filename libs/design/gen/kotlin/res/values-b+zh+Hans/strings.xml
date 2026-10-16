@@ -106,6 +106,10 @@
     <string name="library_filter_played">已看</string>
     <string name="library_filter_favorites">收藏</string>
     <string name="library_sort_by">排序：%s</string>
+    <string name="library_genre_value">类型：%s</string>
+    <string name="library_tag_value">关键词：%s</string>
+    <string name="library_studio_value">制片厂：%s</string>
+    <string name="library_clear_value">显示全部</string>
     <string name="item_play">播放</string>
     <string name="item_resume">继续播放</string>
     <string name="item_favorite">收藏</string>
@@ -164,6 +168,18 @@
     <string name="item_links">链接</string>
     <string name="item_more_from">%s 的其他剧集</string>
     <string name="item_version">版本</string>
+    <string name="item_trailer">预告片</string>
+    <string name="item_extras">预告片与花絮</string>
+    <string name="item_collection">合集</string>
+    <string name="item_view_collection">查看合集</string>
+    <string name="item_ratings">评分</string>
+    <string name="item_community_rating">观众评分</string>
+    <string name="item_critic_rating">影评人评分</string>
+    <string name="item_tags">关键词</string>
+    <string name="item_producers">制片人</string>
+    <string name="item_music">音乐</string>
+    <string name="item_creators">创作者</string>
+    <string name="item_date_added">添加日期</string>
     <string name="download_waiting">等待中</string>
     <string name="download_paused">已暂停</string>
     <string name="download_failed">下载失败</string>
@@ -1545,4 +1561,14 @@
     <string name="conversations_delete_confirm">删除此对话？</string>
     <string name="conversations_delete_message">其消息将对所有管理员删除。</string>
     <string name="conversations_gone">此对话已被删除。</string>
+    <string name="extra_trailer">预告片</string>
+    <string name="extra_clip">片段</string>
+    <string name="extra_behind_the_scenes">幕后</string>
+    <string name="extra_deleted_scene">删减片段</string>
+    <string name="extra_interview">访谈</string>
+    <string name="extra_scene">场景</string>
+    <string name="extra_sample">样片</string>
+    <string name="extra_featurette">特辑</string>
+    <string name="extra_short">短片</string>
+    <string name="extra_other">花絮</string>
 </resources>

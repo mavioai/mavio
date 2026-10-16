@@ -2,6 +2,7 @@
 // sorted and filtered (docs/clients.md §6.3.1).
 import {
   type Filter,
+  type ItemValue,
   type ServerEntry,
   type Sort,
   useLibrary,
@@ -30,6 +31,12 @@ const sortLabels: Record<Sort, MessageKey> = {
   rating: "library.sortRating",
   lastPlayed: "library.sortLastPlayed",
   random: "library.sortRandom",
+};
+
+const valueLabels: Record<ItemValue["kind"], MessageKey> = {
+  genre: "library.genreValue",
+  tag: "library.tagValue",
+  studio: "library.studioValue",
 };
 
 const filterLabels: Record<Filter, MessageKey> = {
@@ -125,9 +132,17 @@ function Recommended({ server, libraryId }: { server: ServerEntry; libraryId: st
 }
 
 function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: string }) {
-  const { sort = "name", filter = "all" } = route.useSearch();
+  const { sort = "name", filter = "all", genre, tag, studio } = route.useSearch();
   const navigate = useNavigate({ from: "/s/$serverId/library/$libraryId" });
-  const q = useLibraryItems(server, libraryId, sort, filter);
+  // An item's details link to the items of one of its genres, keywords or studios.
+  const value: ItemValue | undefined = genre
+    ? { kind: "genre", value: genre }
+    : tag
+      ? { kind: "tag", value: tag }
+      : studio
+        ? { kind: "studio", value: studio }
+        : undefined;
+  const q = useLibraryItems(server, libraryId, sort, filter, value);
   const total = q.data?.pages[0]?.total;
   // On the television the filters are chosen by focus, as the tabs are,
   // and neither they nor the order add to the history.
@@ -136,6 +151,20 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
   return (
     <div>
       <div className={`flex flex-wrap items-center px-margin pt-1 pb-5 ${tv ? "gap-4" : "gap-2"}`}>
+        {value && (
+          <Link
+            from="/s/$serverId/library/$libraryId"
+            search={(s) => ({ ...s, genre: undefined, tag: undefined, studio: undefined })}
+            replace
+            aria-label={`${t(valueLabels[value.kind], { value: value.value })}, ${t("library.clearValue")}`}
+            className={`inline-flex items-center gap-1.5 rounded-full bg-accent font-semibold text-on-accent hover:opacity-90 ${
+              tv ? "h-12 px-5 type-headline" : "h-8 pr-2.5 pl-3.5 type-callout"
+            }`}
+          >
+            {t(valueLabels[value.kind], { value: value.value })}
+            <Icon name="close" size={tv ? 20 : 14} />
+          </Link>
+        )}
         <div role="radiogroup" aria-label={t("library.filter")} data-focus-choice className={`flex flex-wrap ${tv ? "gap-1 rounded-full bg-surface-raised/60 p-1.5" : "gap-2"}`}>
           {(Object.keys(filterLabels) as Filter[]).map((k) => (
             <Link

@@ -2,7 +2,7 @@ import { create, toJson } from "@bufbuild/protobuf";
 import { type Item, ItemSchema, ListItemsRequestSchema } from "@mavio/proto/mavio/library/v1/item_pb";
 import { expect, test } from "vitest";
 
-import { type Filter, libraryItemsRequest, nextEpisode, seriesNextUp } from "./hooks.ts";
+import { type Filter, type ItemValue, libraryItemsRequest, nextEpisode, seriesNextUp } from "./hooks.ts";
 
 test("the next episode follows by season and number", () => {
   const ep = (id: string, season: number, episode: number) =>
@@ -65,5 +65,17 @@ test("a library's grid sorts and filters", () => {
   for (const [filter, want] of cases) {
     const got = toJson(ListItemsRequestSchema, libraryItemsRequest("lib", "dateAdded", filter, 60));
     expect(got, filter).toEqual({ ...base, sort, ...want });
+  }
+});
+
+test("a library's grid shows a genre's, tag's or studio's items", () => {
+  const cases: [ItemValue, object][] = [
+    [{ kind: "genre", value: "Drama" }, { genres: ["Drama"] }],
+    [{ kind: "tag", value: "space" }, { tags: ["space"] }],
+    [{ kind: "studio", value: "A24" }, { studios: ["A24"] }],
+  ];
+  for (const [value, want] of cases) {
+    const got = toJson(ListItemsRequestSchema, libraryItemsRequest("lib", "name", "all", 0, value));
+    expect(got, value.kind).toEqual({ libraryIds: ["lib"], topLevel: true, offset: 0, limit: 60, sort: [{ field: "SORT_FIELD_NAME", descending: false }], ...want });
   }
 });

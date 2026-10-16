@@ -88,10 +88,16 @@ const filters: Filter[] = ["all", "unplayed", "played", "favorites"];
 const library = createRoute({
   getParentRoute: () => root,
   path: "/s/$serverId/library/$libraryId",
-  validateSearch: (s: Record<string, unknown>): { tab?: "all"; sort?: Sort; filter?: Filter } => ({
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { tab?: "all"; sort?: Sort; filter?: Filter; genre?: string; tag?: string; studio?: string } => ({
     tab: s.tab === "all" ? "all" : undefined,
     sort: sorts.includes(s.sort as Sort) ? (s.sort as Sort) : undefined,
     filter: filters.includes(s.filter as Filter) && s.filter !== "all" ? (s.filter as Filter) : undefined,
+    // The genre, keyword or studio whose items the grid shows, one at most.
+    genre: typeof s.genre === "string" && s.genre ? s.genre : undefined,
+    tag: typeof s.tag === "string" && s.tag && !s.genre ? s.tag : undefined,
+    studio: typeof s.studio === "string" && s.studio && !s.genre && !s.tag ? s.studio : undefined,
   }),
   component: LibraryScreen,
 });

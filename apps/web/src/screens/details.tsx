@@ -5,11 +5,15 @@ import { durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   artwork,
   type Copy,
+  type ItemValue,
   type ServerEntry,
   seriesNextUp,
   thumbOf,
   useChildren,
+  useCollections,
+  useDiscovery,
   useEpisodes,
+  useExtras,
   useItem,
   useOtherCopies,
   useServer,
@@ -17,13 +21,17 @@ import {
   useSimilar,
   useUserData,
 } from "@mavio/client-ts";
-import { CreditKind, type Credit, ImageKind, type Item, ItemKind, SeriesStatus } from "@mavio/proto/mavio/library/v1/item_pb";
+import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
+import { CreditKind, type Credit, ExtraKind, ImageKind, type Item, ItemKind, SeriesStatus } from "@mavio/proto/mavio/library/v1/item_pb";
+import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { type MediaSource, type MediaStream, StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { Fragment, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import { locale, t } from "../i18n.ts";
+import type { MessageKey } from "@mavio/design/strings";
+import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
+import { CatalogShelf } from "./discover.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
@@ -157,6 +165,9 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
   const children = useChildren(server, item);
   const episodes = useEpisodes(server, item.kind === ItemKind.SERIES ? item.id : inSeries ? item.seriesId : undefined).data;
   const similar = useSimilar(server, item.id);
+  // Theme songs and videos play behind the screen elsewhere; the other extras are watched.
+  const extras = (useExtras(server, item.id).data ?? []).filter((e) => e.extra !== ExtraKind.THEME_SONG && e.extra !== ExtraKind.THEME_VIDEO);
+  const trailer = extras.find((e) => e.extra === ExtraKind.TRAILER);
   const copies = useOtherCopies(server.id, item);
   const [source, setSource] = useState(sources[0]?.id);
   const width = useWidthClass();
@@ -228,6 +239,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
           source={source}
           onSource={setSource}
           copies={copies}
+          trailer={trailer}
           tv={tv}
           phone={false}
         />
@@ -240,7 +252,18 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
       {header}
       {phone && (
         <div className="flex flex-col gap-4 px-margin pt-4">
-          <Actions server={server} item={item} next={next} sources={sources} source={source} onSource={setSource} copies={copies} tv={false} phone />
+          <Actions
+            server={server}
+            item={item}
+            next={next}
+            sources={sources}
+            source={source}
+            onSource={setSource}
+            copies={copies}
+            trailer={trailer}
+            tv={false}
+            phone
+          />
           {item.overview && <Overview item={item} inline />}
         </div>
       )}
@@ -258,6 +281,8 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
           <Children server={server} item={item} items={children.data ?? []} />
         )}
         <Cast server={server} credits={credits} />
+        <Extras server={server} items={extras} fallback={artwork(server, item, ImageKind.BACKDROP, 640)?.url} />
+        {item.collectionName && <CollectionBanner server={server} item={item} fallback={backdrop?.url} />}
         {(similar.data?.length ?? 0) > 0 && (
           <Shelf title={t("item.similar")}>
             {similar.data!.map((i) => (
@@ -265,7 +290,8 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
             ))}
           </Shelf>
         )}
-        <About item={item} series={series} credits={credits} source={selected} overview={!phone} />
+        <Recommendations item={item} />
+        <About server={server} item={item} series={series} credits={credits} source={selected} overview={!phone} />
         <Acquisition server={server} item={item} />
         <ItemSubtitles server={server} item={item} />
         <ItemIssues server={server} item={item} />
@@ -459,6 +485,7 @@ function Actions({
   source,
   onSource,
   copies,
+  trailer,
   tv,
   phone,
 }: {
@@ -469,6 +496,7 @@ function Actions({
   source?: string;
   onSource: (id: string) => void;
   copies: Copy[];
+  trailer?: Item;
   tv: boolean;
   phone: boolean;
 }) {
@@ -541,6 +569,19 @@ function Actions({
               className={circle}
             >
               <Icon name="previous" size={icon} />
+            </Link>
+          </Tip>
+        )}
+        {trailer && (
+          <Tip label={t("item.trailer")}>
+            <Link
+              to="/s/$serverId/play/$itemId"
+              params={{ serverId: server.id, itemId: trailer.id }}
+              aria-label={t("item.trailer")}
+              data-tv-button
+              className={circle}
+            >
+              <Icon name="movies" size={icon} />
             </Link>
           </Tip>
         )}
@@ -831,11 +872,12 @@ function Children({ server, item, items }: { server: ServerEntry; item: Item; it
 }
 
 const crewLabels: Partial<Record<CreditKind, () => string>> = {
+  [CreditKind.CREATOR]: () => t("item.creators"),
   [CreditKind.DIRECTOR]: () => t("item.director"),
   [CreditKind.WRITER]: () => t("item.writers"),
 };
 
-/** The cast in billing order, then the directors and writers. */
+/** The cast in billing order, then the creators, directors and writers. */
 function Cast({ server, credits }: { server: ServerEntry; credits: Credit[] }) {
   const isCast = (c: Credit) => c.kind === CreditKind.ACTOR || c.kind === CreditKind.GUEST_STAR;
   const shown = credits.filter((c) => c.person && (isCast(c) || crewLabels[c.kind]));
@@ -869,17 +911,108 @@ function Cast({ server, credits }: { server: ServerEntry; credits: Credit[] }) {
   );
 }
 
+const extraLabels: Partial<Record<ExtraKind, MessageKey>> = {
+  [ExtraKind.TRAILER]: "extra.trailer",
+  [ExtraKind.CLIP]: "extra.clip",
+  [ExtraKind.BEHIND_THE_SCENES]: "extra.behindTheScenes",
+  [ExtraKind.DELETED_SCENE]: "extra.deletedScene",
+  [ExtraKind.INTERVIEW]: "extra.interview",
+  [ExtraKind.SCENE]: "extra.scene",
+  [ExtraKind.SAMPLE]: "extra.sample",
+  [ExtraKind.FEATURETTE]: "extra.featurette",
+  [ExtraKind.SHORT]: "extra.short",
+};
+
+/** An item's trailers, featurettes and other extras, each played by itself; those without a thumbnail wear the item's backdrop. */
+function Extras({ server, items, fallback }: { server: ServerEntry; items: Item[]; fallback?: string }) {
+  if (items.length === 0) return null;
+  return (
+    <Shelf title={t("item.extras")}>
+      {items.map((e) => (
+        <Link
+          key={e.id}
+          to="/s/$serverId/play/$itemId"
+          params={{ serverId: server.id, itemId: e.id }}
+          data-card
+          className="group block w-thumbnail shrink-0 snap-start"
+        >
+          <div className="relative">
+            <Artwork src={thumbOf(server, e, 640)?.url ?? fallback} alt={e.name} className="aspect-video rounded-md" />
+            <span className="absolute bottom-2 left-2 rounded-full bg-scrim p-1.5 text-white">
+              <Icon name="play" fill size={14} />
+            </span>
+          </div>
+          <div className="mt-2 truncate type-headline">{e.name}</div>
+          <div className="truncate type-footnote text-text-secondary">
+            {[t(extraLabels[e.extra] ?? "extra.other"), runtimeOf(e)].filter(Boolean).join(" · ")}
+          </div>
+        </Link>
+      ))}
+    </Shelf>
+  );
+}
+
 /**
- * The details: the whole overview with the tagline and links beside the
- * facts, and under them the media of the version chosen.
+ * The collection a movie belongs to, as the providers name it, over its
+ * artwork, else the movie's.
+ */
+function CollectionBanner({ server, item, fallback }: { server: ServerEntry; item: Item; fallback?: string }) {
+  const collections = useCollections(server);
+  const id = item.externalIds.tmdb_collection;
+  const name = item.collectionName.toLowerCase();
+  const c = collections.data?.find((c) => (id ? c.externalIds.tmdb_collection === id : c.name.toLowerCase() === name));
+  if (!c) return null;
+  const image = artwork(server, c, ImageKind.BACKDROP, 1280)?.url ?? fallback;
+  return (
+    <section className="px-margin py-3">
+      <Link
+        to="/s/$serverId/item/$itemId"
+        params={{ serverId: server.id, itemId: c.id }}
+        data-card
+        className="group relative flex min-h-28 items-center gap-4 overflow-hidden rounded-[14px] bg-surface-raised px-6 py-5 text-white [[data-tv]_&]:min-h-40 [[data-tv]_&]:px-10"
+      >
+        {image && <img src={image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(0_0_0/0.8)_0%,rgb(0_0_0/0.55)_60%,rgb(0_0_0/0.3)_100%)]" />
+        <div className="relative min-w-0 flex-1">
+          <div className="type-footnote font-semibold text-white/70">{t("item.collection")}</div>
+          <div className="truncate type-title3 [[data-tv]_&]:type-title1">{c.name}</div>
+        </div>
+        <span className="relative inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-white/20 px-4 type-callout font-semibold backdrop-blur-xl group-hover:bg-white/30">
+          {t("item.viewCollection")}
+          <Icon name="forward" size={14} />
+        </span>
+      </Link>
+    </section>
+  );
+}
+
+/**
+ * The titles the discovery providers recommend to those who liked a movie
+ * or series, those in a library opening their details there.
+ */
+function Recommendations({ item }: { item: Item }) {
+  const { server, catalogs } = useDiscovery(discoverLanguage);
+  const tmdb = Number(item.externalIds.tmdb);
+  const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : item.kind === ItemKind.SERIES ? MediaKind.SERIES : undefined;
+  const catalog = kind && catalogs.find((c) => c.kind === CatalogKind.RECOMMENDATIONS && c.mediaKinds.includes(kind));
+  if (!server || !kind || !catalog || !(tmdb > 0)) return null;
+  return <CatalogShelf server={server} row={{ catalog, mediaKind: kind }} tmdbId={tmdb} title={t("discover.recommendations")} />;
+}
+
+/**
+ * The details: the whole overview with the tagline, keywords and links
+ * beside the ratings and facts, and under them the media of the version
+ * chosen. Genres, keywords and studios open their items in the library.
  */
 function About({
+  server,
   item,
   series,
   credits,
   source,
   overview,
 }: {
+  server: ServerEntry;
   item: Item;
   series?: Item;
   credits: Credit[];
@@ -892,7 +1025,28 @@ function About({
       .map((c) => c.person!.name)
       .join(", ");
   const date = item.premiereDate ? dateFormat.format(timestampDate(item.premiereDate)) : undefined;
+  // An episode or season shows its series' genres and studios, whose library it shares.
   const genres = item.genres.length ? item.genres : (series?.genres ?? []);
+  const studios = item.studios.length ? item.studios : (series?.studios ?? []);
+  const tags = item.kind === ItemKind.EPISODE || item.kind === ItemKind.SEASON ? [] : item.tags;
+  const values = (kind: ItemValue["kind"], list: string[]) =>
+    list.length > 0 && (
+      <>
+        {list.map((v, i) => (
+          <Fragment key={v}>
+            {i > 0 && ", "}
+            <Link
+              to="/s/$serverId/library/$libraryId"
+              params={{ serverId: server.id, libraryId: item.libraryId }}
+              search={{ tab: "all", [kind]: v }}
+              className="hover:underline"
+            >
+              {v}
+            </Link>
+          </Fragment>
+        ))}
+      </>
+    );
   const facts: [string, ReactNode][] = [
     [item.kind === ItemKind.SERIES ? t("item.firstAired") : item.kind === ItemKind.EPISODE ? t("item.aired") : t("item.released"), date],
     [
@@ -905,12 +1059,16 @@ function About({
     ],
     [t("item.runtime"), runtimeOf(item)],
     [t("item.rated"), item.officialRating],
-    [t("item.genres"), genres.join(", ")],
+    [t("item.genres"), values("genre", genres)],
+    [t("item.creators"), names(CreditKind.CREATOR)],
     [t("item.director"), names(CreditKind.DIRECTOR)],
     [t("item.writers"), names(CreditKind.WRITER)],
-    [t("item.studio"), (item.studios.length ? item.studios : (series?.studios ?? [])).join(", ")],
+    [t("item.producers"), names(CreditKind.PRODUCER)],
+    [t("item.music"), names(CreditKind.COMPOSER)],
+    [t("item.studio"), values("studio", studios)],
     [t("item.country"), item.productionLocations.join(", ")],
     [t("item.originalTitle"), item.originalTitle && item.originalTitle !== item.name ? item.originalTitle : undefined],
+    [t("item.dateAdded"), item.dateAdded && !item.virtual ? dateFormat.format(timestampDate(item.dateAdded)) : undefined],
   ];
   const streams = (kind: StreamKind) => source?.streams.filter((s) => s.kind === kind).map(streamText) ?? [];
   const video = videoOf(source);
@@ -927,17 +1085,36 @@ function About({
   const shownMedia = media.filter(([, v]) => v);
   const text = overview && item.overview;
   const links = item.externalUrls;
-  if (!text && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0) return null;
+  const ratings = item.communityRating > 0 || item.criticRating > 0;
+  if (!text && !ratings && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0) return null;
   return (
     <section className="px-margin pt-8 pb-4">
       <h2 className="mb-4 type-title3">{t("item.details")}</h2>
       <div className="flex flex-col gap-x-16 gap-y-8 lg:flex-row">
-        {(text || links.length > 0) && (
-          <div className="flex min-w-0 flex-col gap-4 lg:w-[44%] lg:shrink-0">
+        {(text || tags.length > 0 || links.length > 0) && (
+          <div className="flex min-w-0 flex-col gap-5 lg:w-[44%] lg:shrink-0">
             {text && (
               <div className="flex flex-col gap-2">
                 {item.tagline && <p className="type-headline">{item.tagline}</p>}
                 <p className="type-body whitespace-pre-line text-text-secondary">{item.overview}</p>
+              </div>
+            )}
+            {tags.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <h3 className="type-footnote font-semibold text-text-secondary">{t("item.tags")}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to="/s/$serverId/library/$libraryId"
+                      params={{ serverId: server.id, libraryId: item.libraryId }}
+                      search={{ tab: "all", tag }}
+                      className="inline-flex items-center rounded-full border border-border px-3 py-1 type-footnote hover:bg-fill"
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
             {links.length > 0 && (
@@ -959,11 +1136,41 @@ function About({
           </div>
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-8">
+          {ratings && <Ratings item={item} />}
           <FactList rows={shownFacts} />
           {shownMedia.length > 0 && <FactList rows={shownMedia} />}
         </div>
       </div>
     </section>
+  );
+}
+
+/** The audience's rating out of 10 and the critics' score out of 100, large. */
+function Ratings({ item }: { item: Item }) {
+  const rows: [string, ReactNode, string][] = [];
+  if (item.communityRating > 0) {
+    rows.push([
+      t("item.communityRating"),
+      <span className="inline-flex items-center gap-1.5">
+        <Icon name="rating" fill size={22} className="text-[#FFD60A]" />
+        {item.communityRating.toFixed(1)}
+      </span>,
+      "/ 10",
+    ]);
+  }
+  if (item.criticRating > 0) rows.push([t("item.criticRating"), `${Math.round(item.criticRating)}%`, ""]);
+  return (
+    <div role="group" aria-label={t("item.ratings")} className="flex flex-wrap gap-3">
+      {rows.map(([label, value, scale]) => (
+        <div key={label} className="flex min-w-36 flex-col gap-1 rounded-[12px] bg-fill px-4 py-3">
+          <span className="type-footnote font-semibold text-text-secondary">{label}</span>
+          <span className="type-title2 font-bold tabular-nums">
+            {value}
+            {scale && <span className="ml-1 type-callout font-normal text-text-tertiary">{scale}</span>}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
