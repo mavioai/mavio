@@ -403,11 +403,14 @@ export function Row({
   label,
   detail,
   leading,
+  wrap = false,
   children,
 }: {
   label: ReactNode;
   detail?: ReactNode;
   leading?: ReactNode;
+  /** Wraps the line under the label rather than cutting it short. */
+  wrap?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -415,7 +418,7 @@ export function Row({
       {leading}
       <div className="min-w-0 flex-1">
         <div className="type-body">{label}</div>
-        {detail && <div className="truncate type-footnote text-text-secondary">{detail}</div>}
+        {detail && <div className={`type-footnote text-text-secondary ${wrap ? "break-words" : "truncate"}`}>{detail}</div>}
       </div>
       {children}
     </div>

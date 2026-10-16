@@ -669,12 +669,16 @@ function ServersGroup() {
                 {[...s.name][0]?.toUpperCase()}
               </span>
             }
+            wrap
             detail={
-              s.token
-                ? [t("auth.signedInAs", { name: s.userName }), shared, s.url !== shared && t("settings.reachedAt", { url: s.url })]
-                    .filter(Boolean)
-                    .join(" · ")
-                : t("auth.unreachable")
+              s.token ? (
+                <>
+                  {t("auth.signedInAs", { name: s.userName })} · <span className="break-all">{shared}</span>
+                  {s.url !== shared && <span className="block break-all">{t("settings.reachedAt", { url: s.url })}</span>}
+                </>
+              ) : (
+                t("auth.unreachable")
+              )
             }
           >
             <div className="flex items-center gap-0.5">
