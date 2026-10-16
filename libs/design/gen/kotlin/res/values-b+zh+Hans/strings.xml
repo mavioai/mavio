@@ -494,7 +494,9 @@
     <string name="libraries_create">添加</string>
     <string name="libraries_none">还没有媒体库。添加一个来扫描你的媒体。</string>
     <string name="libraries_not_found">此媒体库已不存在。</string>
-    <string name="libraries_folder_count">%s 个文件夹</string>
+    <plurals name="libraries_folder_count">
+        <item quantity="other">%d 个文件夹</item>
+    </plurals>
     <string name="libraries_scan">扫描</string>
     <string name="libraries_scan_queued">已开始扫描</string>
     <string name="libraries_scan_pending">已有扫描在等待</string>

@@ -8754,9 +8754,15 @@
           }
         },
         "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 个文件夹"
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 个文件夹"
+                }
+              }
+            }
           }
         }
       }
