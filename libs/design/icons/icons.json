@@ -52,6 +52,7 @@
   "check": "check",
   "pending": "clock",
   "external": "arrow-square-out",
+  "copy": "copy",
   "signOut": "sign-out",
   "key": "key",
   "server": "hard-drives",

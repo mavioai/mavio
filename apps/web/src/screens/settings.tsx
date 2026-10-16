@@ -685,7 +685,7 @@ function ServersSection() {
                 )}
                 {shared && (
                   <IconButton
-                    icon={copied === s.id ? "check" : "external"}
+                    icon={copied === s.id ? "check" : "copy"}
                     label={t("settings.copyAddress")}
                     onClick={() => void navigator.clipboard?.writeText(shared).then(() => setCopied(s.id))}
                   />
