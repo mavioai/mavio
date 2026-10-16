@@ -336,7 +336,6 @@ export type MessageKey =
   | 'menu.fullScreen'
   | 'menu.exitFullScreen'
   | 'settings.thisDevice'
-  | 'settings.accountGroup'
   | 'settings.appearance'
   | 'settings.appearanceMessage'
   | 'settings.system'
@@ -1934,7 +1933,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.fullScreen": "Full Screen",
     "menu.exitFullScreen": "Exit Full Screen",
     "settings.thisDevice": "This Device",
-    "settings.accountGroup": "Account",
     "settings.appearance": "Appearance",
     "settings.appearanceMessage": "Only affects this device.",
     "settings.system": "System",
@@ -3530,7 +3528,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "menu.fullScreen": "全屏",
     "menu.exitFullScreen": "退出全屏",
     "settings.thisDevice": "这台设备",
-    "settings.accountGroup": "账户",
     "settings.appearance": "外观",
     "settings.appearanceMessage": "只影响这台设备。",
     "settings.system": "跟随系统",

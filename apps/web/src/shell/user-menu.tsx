@@ -171,7 +171,7 @@ export function UserButton({
             </MenuExternal>
           )
         ) : (
-          <MenuLink icon="server" to="/settings/$section" params={{ section: "servers" }}>
+          <MenuLink icon="server" to="/settings/$section" params={{ section: "account" }}>
             {t("menu.manageServers")}
           </MenuLink>
         )}

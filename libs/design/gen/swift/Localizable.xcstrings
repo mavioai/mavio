@@ -6193,24 +6193,6 @@
         }
       }
     },
-    "settings.accountGroup": {
-      "comment": "Group of the settings of the account and its servers.",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Account"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "账户"
-          }
-        }
-      }
-    },
     "settings.appearance": {
       "comment": "Settings section of the color theme and TV mode.",
       "extractionState": "manual",

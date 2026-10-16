@@ -1120,9 +1120,6 @@ public enum MavioStrings {
     /// Group of the settings that only affect this device.
     public static var settingsThisDevice: String { NSLocalizedString("settings.thisDevice", bundle: .module, comment: "") }
 
-    /// Group of the settings of the account and its servers.
-    public static var settingsAccountGroup: String { NSLocalizedString("settings.accountGroup", bundle: .module, comment: "") }
-
     /// Settings section of the color theme and TV mode.
     public static var settingsAppearance: String { NSLocalizedString("settings.appearance", bundle: .module, comment: "") }
 

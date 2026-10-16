@@ -1,7 +1,7 @@
 // The settings (docs/clients.md §6.3): those of this browser, its
-// appearance, TV mode and playback; those of the account, the user's
-// languages, the servers in their order and the account's credentials;
-// and those of a server, chosen above them with a Mavio account, the
+// appearance, TV mode and playback; the account, on its own page under the
+// user's card, with its credentials and the servers in their order; and
+// those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
 // overview, general settings, libraries, users, transcoding, storage,
 // acquisition, subtitles, plugins and tasks. Wide windows show them
@@ -54,13 +54,12 @@ import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "servers" | "account" | "overview" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "account" | "overview" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
   playback: { icon: "play", color: "#FF3B30", title: () => t("settings.playback") },
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
-  servers: { icon: "server", color: "#8E8E93", title: () => t("auth.servers") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   overview: { icon: "server", color: "#8E8E93", title: () => t("settings.overview"), admin: true },
   general: { icon: "settings", color: "#8E8E93", title: () => t("settings.general"), admin: true },
@@ -85,7 +84,6 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.accountGroup"), ids: ["account", "servers"] },
   { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "conversations", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
 ];
 
@@ -166,6 +164,8 @@ export function SettingsScreen() {
   const chosen = useChosen();
   const admins = useAdminServers();
   const groups = useGroups(chosen);
+  // The servers moved to the account's page.
+  if (section === "servers") return <Navigate to="/settings/$section" params={{ section: "account" }} />;
   if (section !== undefined && !isSection(section)) return <Navigate to="/settings" />;
   // A server the user does not administer has no administration; wait
   // until the servers administered are known.
@@ -185,7 +185,7 @@ export function SettingsScreen() {
             {t("action.back")}
           </Link>
           <h1 className="px-1 type-title1">{t("nav.settings")}</h1>
-          <AccountCard />
+          <AccountCard active={id === "account"} />
           {groups.map((g) => (
             <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
               <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
@@ -258,10 +258,16 @@ function Tile({ id }: { id: SectionId }) {
 }
 
 /** The user signed in. */
-function AccountCard() {
+/** The user's card, opening the account's page. */
+function AccountCard({ active = false }: { active?: boolean }) {
   const account = useAccount();
   return (
-    <Link to="/settings/$section" params={{ section: "account" }} className="flex items-center gap-3 rounded-[14px] bg-surface p-3 hover:bg-surface-raised">
+    <Link
+      to="/settings/$section"
+      params={{ section: "account" }}
+      aria-current={active ? "page" : undefined}
+      className={`flex items-center gap-3 rounded-[14px] p-3 hover:bg-surface-raised ${active ? "bg-fill-selected" : "bg-surface"}`}
+    >
       <Avatar name={account.name} size={44} />
       <div className="min-w-0">
         <div className="truncate type-headline">{account.name}</div>
@@ -373,8 +379,6 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return <PlaybackSection />;
     case "subtitles-audio":
       return <LanguagesSection />;
-    case "servers":
-      return <ServersSection />;
     case "account":
       return <AccountSection />;
     case "overview":
@@ -641,7 +645,8 @@ function LanguagesForm({
   );
 }
 
-function ServersSection() {
+/** The servers in the user's order, each with its address, moved up and down. */
+function ServersGroup() {
   const servers = useServersStore();
   const list = useServers();
   const account = useAccount();
@@ -652,50 +657,45 @@ function ServersSection() {
     servers.order(ids);
   };
   return (
-    <Section
-      title={t("auth.servers")}
-      message={account.shown?.kind === "mavioDev" ? t("settings.serversMavioMessage") : t("settings.serversMessage")}
-    >
-      <Group>
-        {list.map((s, i) => {
-          const shared = shareableUrl(s);
-          return (
-            <Row
-              key={s.id}
-              label={s.name}
-              leading={
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-fill type-headline">
-                  {[...s.name][0]?.toUpperCase()}
-                </span>
-              }
-              detail={
-                s.token
-                  ? [t("auth.signedInAs", { name: s.userName }), shared, s.url !== shared && t("settings.reachedAt", { url: s.url })]
-                      .filter(Boolean)
-                      .join(" · ")
-                  : t("auth.unreachable")
-              }
-            >
-              <div className="flex items-center gap-0.5">
-                {list.length > 1 && (
-                  <>
-                    <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
-                    <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
-                  </>
-                )}
-                {shared && (
-                  <IconButton
-                    icon={copied === s.id ? "check" : "copy"}
-                    label={t("settings.copyAddress")}
-                    onClick={() => void navigator.clipboard?.writeText(shared).then(() => setCopied(s.id))}
-                  />
-                )}
-              </div>
-            </Row>
-          );
-        })}
-      </Group>
-    </Section>
+    <Group title={t("auth.servers")} footer={account.shown?.kind === "mavioDev" ? t("settings.serversMavioMessage") : t("settings.serversMessage")}>
+      {list.map((s, i) => {
+        const shared = shareableUrl(s);
+        return (
+          <Row
+            key={s.id}
+            label={s.name}
+            leading={
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-fill type-headline">
+                {[...s.name][0]?.toUpperCase()}
+              </span>
+            }
+            detail={
+              s.token
+                ? [t("auth.signedInAs", { name: s.userName }), shared, s.url !== shared && t("settings.reachedAt", { url: s.url })]
+                    .filter(Boolean)
+                    .join(" · ")
+                : t("auth.unreachable")
+            }
+          >
+            <div className="flex items-center gap-0.5">
+              {list.length > 1 && (
+                <>
+                  <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
+                  <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
+                </>
+              )}
+              {shared && (
+                <IconButton
+                  icon={copied === s.id ? "check" : "copy"}
+                  label={t("settings.copyAddress")}
+                  onClick={() => void navigator.clipboard?.writeText(shared).then(() => setCopied(s.id))}
+                />
+              )}
+            </div>
+          </Row>
+        );
+      })}
+    </Group>
   );
 }
 
@@ -737,6 +737,7 @@ function AccountSection() {
             )}
           </Row>
         </Group>
+        <ServersGroup />
       </Section>
     );
   }
@@ -746,6 +747,7 @@ function AccountSection() {
       <SwitchUser server={server} />
       <Security server={server} />
       <AuthorizeDevice server={server} />
+      <ServersGroup />
     </Section>
   );
 }

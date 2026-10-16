@@ -697,8 +697,6 @@
     <string name="menu_exit_full_screen">Exit Full Screen</string>
     <!-- Group of the settings that only affect this device. -->
     <string name="settings_this_device">This Device</string>
-    <!-- Group of the settings of the account and its servers. -->
-    <string name="settings_account_group">Account</string>
     <!-- Settings section of the color theme and TV mode. -->
     <string name="settings_appearance">Appearance</string>
     <!-- Explanation under the Appearance title. -->

@@ -334,7 +334,6 @@
   "menu.fullScreen": { "message": "Full Screen", "description": "User menu item in TV mode putting the page in full screen." },
   "menu.exitFullScreen": { "message": "Exit Full Screen", "description": "User menu item in TV mode leaving full screen." },
   "settings.thisDevice": { "message": "This Device", "description": "Group of the settings that only affect this device." },
-  "settings.accountGroup": { "message": "Account", "description": "Group of the settings of the account and its servers." },
   "settings.appearance": { "message": "Appearance", "description": "Settings section of the color theme and TV mode." },
   "settings.appearanceMessage": { "message": "Only affects this device.", "description": "Explanation under the Appearance title." },
   "settings.system": { "message": "System", "description": "Appearance that follows the system's light or dark setting." },

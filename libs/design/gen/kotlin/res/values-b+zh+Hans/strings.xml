@@ -354,7 +354,6 @@
     <string name="menu_full_screen">全屏</string>
     <string name="menu_exit_full_screen">退出全屏</string>
     <string name="settings_this_device">这台设备</string>
-    <string name="settings_account_group">账户</string>
     <string name="settings_appearance">外观</string>
     <string name="settings_appearance_message">只影响这台设备。</string>
     <string name="settings_system">跟随系统</string>
