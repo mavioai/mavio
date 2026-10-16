@@ -26,6 +26,8 @@ export interface CreditEntry {
   role: string;
   order: number;
   personId?: string;
+  /** Their TMDB ID, opening their discovered page when they are not of the server. */
+  tmdbId?: string;
 }
 
 /** An item's credits, of people of the server. */
@@ -50,6 +52,7 @@ export function titleCredits(credits: TitleCredit[]): CreditEntry[] {
     kind: c.kind,
     role: c.role,
     order: c.order,
+    tmdbId: c.externalIds.tmdb,
   }));
 }
 
@@ -178,7 +181,7 @@ function People({ serverId, title, credits }: { serverId: string; title: string;
 /**
  * A credited person: their photo, else their initials, their name, and
  * under it a label, such as the character they play or their job. People
- * of the server open their page.
+ * of the server open their page, others their discovered page.
  */
 function PersonTile({ serverId, credit: c, label, className = "" }: { serverId: string; credit: CreditEntry; label: string; className?: string }) {
   const body = (
@@ -194,6 +197,13 @@ function PersonTile({ serverId, credit: c, label, className = "" }: { serverId: 
       <div className="line-clamp-2 type-footnote text-text-secondary">{label}</div>
     </>
   );
+  if (!c.personId && c.tmdbId) {
+    return (
+      <Link to="/s/$serverId/discover/person/$tmdbId" params={{ serverId, tmdbId: c.tmdbId }} className={`group rounded-lg text-center ${className}`}>
+        {body}
+      </Link>
+    );
+  }
   if (!c.personId) return <div className={`text-center ${className}`}>{body}</div>;
   return (
     <Link to="/s/$serverId/person/$personId" params={{ serverId, personId: c.personId }} className={`group rounded-lg text-center ${className}`}>

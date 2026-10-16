@@ -741,6 +741,32 @@ func (s *DiscoverService) GetSeason(ctx context.Context, req *acquisitionv1.GetS
 	return acquisitionv1.GetSeasonResponse_builder{Episodes: out}.Build(), nil
 }
 
+// GetPerson tells of a person with the titles they are credited on.
+func (s *DiscoverService) GetPerson(ctx context.Context, req *acquisitionv1.GetPersonRequest) (*acquisitionv1.GetPersonResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	d, err := s.requests.Person(ctx, p.User, int(req.GetTmdbId()), req.GetLanguage())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	titles := func(ts []requests.PersonTitle) []*acquisitionv1.PersonTitle {
+		out := make([]*acquisitionv1.PersonTitle, len(ts))
+		for i := range ts {
+			out[i] = acquisitionv1.PersonTitle_builder{Title: discoveredTitleToProto(&ts[i].DiscoveredTitle), Role: new(ts[i].Role)}.Build()
+		}
+		return out
+	}
+	pp := d.Person
+	return acquisitionv1.GetPersonResponse_builder{Person: acquisitionv1.Person_builder{
+		Name: new(pp.GetName()), Biography: new(pp.GetBiography()), Birthday: new(pp.GetBirthday()), Deathday: new(pp.GetDeathday()),
+		PlaceOfBirth: new(pp.GetPlaceOfBirth()), AlsoKnownAs: pp.GetAlsoKnownAs(), KnownForDepartment: new(pp.GetKnownForDepartment()),
+		ImageUrl: new(pp.GetImageUrl()), ExternalIds: pp.GetExternalIds(), Cast: titles(d.Cast), Crew: titles(d.Crew),
+		HiddenResults: new(int32(d.Hidden)),
+	}.Build()}.Build(), nil
+}
+
 // productionStatuses maps production statuses to the contract's.
 var productionStatuses = map[metadata.ProductionStatus]pluginv1.ProductionStatus{
 	metadata.ProductionRumored:        pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED,

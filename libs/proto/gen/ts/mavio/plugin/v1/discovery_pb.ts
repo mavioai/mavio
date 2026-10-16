@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/discovery.proto.
  */
 export const file_mavio_plugin_v1_discovery: GenFile = /*@__PURE__*/
-  fileDesc("Ch9tYXZpby9wbHVnaW4vdjEvZGlzY292ZXJ5LnByb3RvEg9tYXZpby5wbHVnaW4udjEiJwoTTGlzdENhdGFsb2dzUmVxdWVzdBIQCghsYW5ndWFnZRgBIAEoCSJCChRMaXN0Q2F0YWxvZ3NSZXNwb25zZRIqCghjYXRhbG9ncxgBIAMoCzIYLm1hdmlvLnBsdWdpbi52MS5DYXRhbG9nIuABCgdDYXRhbG9nEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSKgoEa2luZBgDIAEoDjIcLm1hdmlvLnBsdWdpbi52MS5DYXRhbG9nS2luZBIvCgttZWRpYV9raW5kcxgEIAMoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSMAoHZmlsdGVycxgFIAMoDjIfLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlckZpbHRlchIsCgVzb3J0cxgGIAMoDjIdLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlclNvcnQiqQYKD0Rpc2NvdmVyUmVxdWVzdBIXCgdjYXRhbG9nGAEgASgJQga6SAPIAQESLgoKbWVkaWFfa2luZBgCIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSRwoMZXh0ZXJuYWxfaWRzGAMgAygLMjEubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5Eg4KBmdlbnJlcxgEIAMoCRIPCgdzdHVkaW9zGAUgAygJEhAKCG5ldHdvcmtzGAYgAygJEhAKCGtleXdvcmRzGAcgAygJEhkKEWV4Y2x1ZGVkX2tleXdvcmRzGAggAygJEhcKD3dhdGNoX3Byb3ZpZGVycxgJIAMoCRIUCgx3YXRjaF9yZWdpb24YCiABKAkSGQoRb3JpZ2luYWxfbGFuZ3VhZ2UYCyABKAkSFQoNcmVsZWFzZWRfZnJvbRgMIAEoCRITCgtyZWxlYXNlZF90bxgNIAEoCRIcCgtydW50aW1lX21pbhgOIAEoBUIHukgEGgIoABIcCgtydW50aW1lX21heBgPIAEoBUIHukgEGgIoABIrCgpyYXRpbmdfbWluGBAgASgBQhe6SBQSEhkAAAAAAAAkQCkAAAAAAAAAABIrCgpyYXRpbmdfbWF4GBEgASgBQhe6SBQSEhkAAAAAAAAkQCkAAAAAAAAAABIaCgl2b3Rlc19taW4YEiABKAVCB7pIBBoCKAASHQoVY2VydGlmaWNhdGlvbl9jb3VudHJ5GBMgASgJEhYKDmNlcnRpZmljYXRpb25zGBQgAygJEisKBHNvcnQYFSABKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0EhEKCWFzY2VuZGluZxgWIAEoCBIQCghsYW5ndWFnZRgXIAEoCRIOCgZyZWdpb24YGCABKAkSFQoNaW5jbHVkZV9hZHVsdBgZIAEoCBIYCgRwYWdlGBogASgFQgq6SAcaBRj0AygBGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJ+ChBEaXNjb3ZlclJlc3BvbnNlEjAKBnRpdGxlcxgBIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlcmVkVGl0bGUSDAoEcGFnZRgCIAEoBRITCgt0b3RhbF9wYWdlcxgDIAEoBRIVCg10b3RhbF9yZXN1bHRzGAQgASgFIsEDCg9EaXNjb3ZlcmVkVGl0bGUSLgoKbWVkaWFfa2luZBgBIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSDAoEbmFtZRgCIAEoCRIWCg5vcmlnaW5hbF90aXRsZRgDIAEoCRIZChFvcmlnaW5hbF9sYW5ndWFnZRgEIAEoCRIQCghvdmVydmlldxgFIAEoCRIVCg1wcmVtaWVyZV9kYXRlGAYgASgJEgwKBHllYXIYByABKAUSRwoMZXh0ZXJuYWxfaWRzGAggAygLMjEubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyZWRUaXRsZS5FeHRlcm5hbElkc0VudHJ5Eg4KBmdlbnJlcxgJIAMoCRISCgpwb3N0ZXJfdXJsGAogASgJEhQKDGJhY2tkcm9wX3VybBgLIAEoCRIYChBjb21tdW5pdHlfcmF0aW5nGAwgASgBEhIKCnZvdGVfY291bnQYDSABKAUSEgoKcG9wdWxhcml0eRgOIAEoARINCgVhZHVsdBgPIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiwAEKF0xpc3RGaWx0ZXJWYWx1ZXNSZXF1ZXN0EjcKBmZpbHRlchgBIAEoDjIfLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlckZpbHRlckIGukgDyAEBEi4KCm1lZGlhX2tpbmQYAiABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEg0KBXF1ZXJ5GAMgASgJEgsKA2lkcxgEIAMoCRIQCghsYW5ndWFnZRgFIAEoCRIOCgZyZWdpb24YBiABKAkiSAoYTGlzdEZpbHRlclZhbHVlc1Jlc3BvbnNlEiwKBnZhbHVlcxgBIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5GaWx0ZXJWYWx1ZSI6CgtGaWx0ZXJWYWx1ZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhEKCWltYWdlX3VybBgDIAEoCSK6AQoTU2VhcmNoVGl0bGVzUmVxdWVzdBIVCgVxdWVyeRgBIAEoCUIGukgDyAEBEi4KCm1lZGlhX2tpbmQYAiABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEhkKBHllYXIYAyABKAVCC7pICBoGGI9OKIgOEhAKCGxhbmd1YWdlGAQgASgJEhUKDWluY2x1ZGVfYWR1bHQYBSABKAgSGAoEcGFnZRgGIAEoBUIKukgHGgUY9AMoASKCAQoUU2VhcmNoVGl0bGVzUmVzcG9uc2USMAoGdGl0bGVzGAEgAygLMiAubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyZWRUaXRsZRIMCgRwYWdlGAIgASgFEhMKC3RvdGFsX3BhZ2VzGAMgASgFEhUKDXRvdGFsX3Jlc3VsdHMYBCABKAUqhwIKC0NhdGFsb2dLaW5kEhwKGENBVEFMT0dfS0lORF9VTlNQRUNJRklFRBAAEhkKFUNBVEFMT0dfS0lORF9UUkVORElORxABEhgKFENBVEFMT0dfS0lORF9QT1BVTEFSEAISGQoVQ0FUQUxPR19LSU5EX1VQQ09NSU5HEAMSGgoWQ0FUQUxPR19LSU5EX1RPUF9SQVRFRBAEEiAKHENBVEFMT0dfS0lORF9SRUNPTU1FTkRBVElPTlMQBRIYChRDQVRBTE9HX0tJTkRfU0lNSUxBUhAGEhUKEUNBVEFMT0dfS0lORF9MSVNUEAcSGwoXQ0FUQUxPR19LSU5EX0NPTExFQ1RJT04QCCqLAwoORGlzY292ZXJGaWx0ZXISHwobRElTQ09WRVJfRklMVEVSX1VOU1BFQ0lGSUVEEAASGQoVRElTQ09WRVJfRklMVEVSX0dFTlJFEAESGgoWRElTQ09WRVJfRklMVEVSX1NUVURJTxACEhsKF0RJU0NPVkVSX0ZJTFRFUl9ORVRXT1JLEAMSGwoXRElTQ09WRVJfRklMVEVSX0tFWVdPUkQQBBIiCh5ESVNDT1ZFUl9GSUxURVJfV0FUQ0hfUFJPVklERVIQBRIlCiFESVNDT1ZFUl9GSUxURVJfT1JJR0lOQUxfTEFOR1VBR0UQBhIgChxESVNDT1ZFUl9GSUxURVJfUkVMRUFTRV9EQVRFEAcSGwoXRElTQ09WRVJfRklMVEVSX1JVTlRJTUUQCBIaChZESVNDT1ZFUl9GSUxURVJfUkFUSU5HEAkSHgoaRElTQ09WRVJfRklMVEVSX1ZPVEVfQ09VTlQQChIhCh1ESVNDT1ZFUl9GSUxURVJfQ0VSVElGSUNBVElPThALKrwBCgxEaXNjb3ZlclNvcnQSHQoZRElTQ09WRVJfU09SVF9VTlNQRUNJRklFRBAAEhwKGERJU0NPVkVSX1NPUlRfUE9QVUxBUklUWRABEh4KGkRJU0NPVkVSX1NPUlRfUkVMRUFTRV9EQVRFEAISGAoURElTQ09WRVJfU09SVF9SQVRJTkcQAxIcChhESVNDT1ZFUl9TT1JUX1ZPVEVfQ09VTlQQBBIXChNESVNDT1ZFUl9TT1JUX1RJVExFEAUyogMKGERpc2NvdmVyeVByb3ZpZGVyU2VydmljZRJgCgxMaXN0Q2F0YWxvZ3MSJC5tYXZpby5wbHVnaW4udjEuTGlzdENhdGFsb2dzUmVxdWVzdBolLm1hdmlvLnBsdWdpbi52MS5MaXN0Q2F0YWxvZ3NSZXNwb25zZSIDkAIBElQKCERpc2NvdmVyEiAubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyUmVxdWVzdBohLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlclJlc3BvbnNlIgOQAgESbAoQTGlzdEZpbHRlclZhbHVlcxIoLm1hdmlvLnBsdWdpbi52MS5MaXN0RmlsdGVyVmFsdWVzUmVxdWVzdBopLm1hdmlvLnBsdWdpbi52MS5MaXN0RmlsdGVyVmFsdWVzUmVzcG9uc2UiA5ACARJgCgxTZWFyY2hUaXRsZXMSJC5tYXZpby5wbHVnaW4udjEuU2VhcmNoVGl0bGVzUmVxdWVzdBolLm1hdmlvLnBsdWdpbi52MS5TZWFyY2hUaXRsZXNSZXNwb25zZSIDkAIBQsgBChNjb20ubWF2aW8ucGx1Z2luLnYxQg5EaXNjb3ZlcnlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_mavio_plugin_v1_metadata]);
+  fileDesc("Ch9tYXZpby9wbHVnaW4vdjEvZGlzY292ZXJ5LnByb3RvEg9tYXZpby5wbHVnaW4udjEiJwoTTGlzdENhdGFsb2dzUmVxdWVzdBIQCghsYW5ndWFnZRgBIAEoCSJCChRMaXN0Q2F0YWxvZ3NSZXNwb25zZRIqCghjYXRhbG9ncxgBIAMoCzIYLm1hdmlvLnBsdWdpbi52MS5DYXRhbG9nIuABCgdDYXRhbG9nEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSKgoEa2luZBgDIAEoDjIcLm1hdmlvLnBsdWdpbi52MS5DYXRhbG9nS2luZBIvCgttZWRpYV9raW5kcxgEIAMoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSMAoHZmlsdGVycxgFIAMoDjIfLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlckZpbHRlchIsCgVzb3J0cxgGIAMoDjIdLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlclNvcnQiqQYKD0Rpc2NvdmVyUmVxdWVzdBIXCgdjYXRhbG9nGAEgASgJQga6SAPIAQESLgoKbWVkaWFfa2luZBgCIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSRwoMZXh0ZXJuYWxfaWRzGAMgAygLMjEubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyUmVxdWVzdC5FeHRlcm5hbElkc0VudHJ5Eg4KBmdlbnJlcxgEIAMoCRIPCgdzdHVkaW9zGAUgAygJEhAKCG5ldHdvcmtzGAYgAygJEhAKCGtleXdvcmRzGAcgAygJEhkKEWV4Y2x1ZGVkX2tleXdvcmRzGAggAygJEhcKD3dhdGNoX3Byb3ZpZGVycxgJIAMoCRIUCgx3YXRjaF9yZWdpb24YCiABKAkSGQoRb3JpZ2luYWxfbGFuZ3VhZ2UYCyABKAkSFQoNcmVsZWFzZWRfZnJvbRgMIAEoCRITCgtyZWxlYXNlZF90bxgNIAEoCRIcCgtydW50aW1lX21pbhgOIAEoBUIHukgEGgIoABIcCgtydW50aW1lX21heBgPIAEoBUIHukgEGgIoABIrCgpyYXRpbmdfbWluGBAgASgBQhe6SBQSEhkAAAAAAAAkQCkAAAAAAAAAABIrCgpyYXRpbmdfbWF4GBEgASgBQhe6SBQSEhkAAAAAAAAkQCkAAAAAAAAAABIaCgl2b3Rlc19taW4YEiABKAVCB7pIBBoCKAASHQoVY2VydGlmaWNhdGlvbl9jb3VudHJ5GBMgASgJEhYKDmNlcnRpZmljYXRpb25zGBQgAygJEisKBHNvcnQYFSABKA4yHS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJTb3J0EhEKCWFzY2VuZGluZxgWIAEoCBIQCghsYW5ndWFnZRgXIAEoCRIOCgZyZWdpb24YGCABKAkSFQoNaW5jbHVkZV9hZHVsdBgZIAEoCBIYCgRwYWdlGBogASgFQgq6SAcaBRj0AygBGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJ+ChBEaXNjb3ZlclJlc3BvbnNlEjAKBnRpdGxlcxgBIAMoCzIgLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlcmVkVGl0bGUSDAoEcGFnZRgCIAEoBRITCgt0b3RhbF9wYWdlcxgDIAEoBRIVCg10b3RhbF9yZXN1bHRzGAQgASgFIsEDCg9EaXNjb3ZlcmVkVGl0bGUSLgoKbWVkaWFfa2luZBgBIAEoDjIaLm1hdmlvLnBsdWdpbi52MS5NZWRpYUtpbmQSDAoEbmFtZRgCIAEoCRIWCg5vcmlnaW5hbF90aXRsZRgDIAEoCRIZChFvcmlnaW5hbF9sYW5ndWFnZRgEIAEoCRIQCghvdmVydmlldxgFIAEoCRIVCg1wcmVtaWVyZV9kYXRlGAYgASgJEgwKBHllYXIYByABKAUSRwoMZXh0ZXJuYWxfaWRzGAggAygLMjEubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyZWRUaXRsZS5FeHRlcm5hbElkc0VudHJ5Eg4KBmdlbnJlcxgJIAMoCRISCgpwb3N0ZXJfdXJsGAogASgJEhQKDGJhY2tkcm9wX3VybBgLIAEoCRIYChBjb21tdW5pdHlfcmF0aW5nGAwgASgBEhIKCnZvdGVfY291bnQYDSABKAUSEgoKcG9wdWxhcml0eRgOIAEoARINCgVhZHVsdBgPIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiwAEKF0xpc3RGaWx0ZXJWYWx1ZXNSZXF1ZXN0EjcKBmZpbHRlchgBIAEoDjIfLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlckZpbHRlckIGukgDyAEBEi4KCm1lZGlhX2tpbmQYAiABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEg0KBXF1ZXJ5GAMgASgJEgsKA2lkcxgEIAMoCRIQCghsYW5ndWFnZRgFIAEoCRIOCgZyZWdpb24YBiABKAkiSAoYTGlzdEZpbHRlclZhbHVlc1Jlc3BvbnNlEiwKBnZhbHVlcxgBIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5GaWx0ZXJWYWx1ZSI6CgtGaWx0ZXJWYWx1ZRIKCgJpZBgBIAEoCRIMCgRuYW1lGAIgASgJEhEKCWltYWdlX3VybBgDIAEoCSK6AQoTU2VhcmNoVGl0bGVzUmVxdWVzdBIVCgVxdWVyeRgBIAEoCUIGukgDyAEBEi4KCm1lZGlhX2tpbmQYAiABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEhkKBHllYXIYAyABKAVCC7pICBoGGI9OKIgOEhAKCGxhbmd1YWdlGAQgASgJEhUKDWluY2x1ZGVfYWR1bHQYBSABKAgSGAoEcGFnZRgGIAEoBUIKukgHGgUY9AMoASKCAQoUU2VhcmNoVGl0bGVzUmVzcG9uc2USMAoGdGl0bGVzGAEgAygLMiAubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyZWRUaXRsZRIMCgRwYWdlGAIgASgFEhMKC3RvdGFsX3BhZ2VzGAMgASgFEhUKDXRvdGFsX3Jlc3VsdHMYBCABKAUiwwEKEEdldFBlcnNvblJlcXVlc3QSUgoMZXh0ZXJuYWxfaWRzGAEgAygLMjIubWF2aW8ucGx1Z2luLnYxLkdldFBlcnNvblJlcXVlc3QuRXh0ZXJuYWxJZHNFbnRyeUIIukgFmgECCAESEAoIbGFuZ3VhZ2UYAiABKAkSFQoNaW5jbHVkZV9hZHVsdBgDIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiSwoRR2V0UGVyc29uUmVzcG9uc2USDQoFZm91bmQYASABKAgSJwoGcGVyc29uGAIgASgLMhcubWF2aW8ucGx1Z2luLnYxLlBlcnNvbiL5AgoGUGVyc29uEgwKBG5hbWUYASABKAkSEQoJYmlvZ3JhcGh5GAIgASgJEhAKCGJpcnRoZGF5GAMgASgJEhAKCGRlYXRoZGF5GAQgASgJEhYKDnBsYWNlX29mX2JpcnRoGAUgASgJEhUKDWFsc29fa25vd25fYXMYBiADKAkSHAoUa25vd25fZm9yX2RlcGFydG1lbnQYByABKAkSEQoJaW1hZ2VfdXJsGAggASgJEj4KDGV4dGVybmFsX2lkcxgJIAMoCzIoLm1hdmlvLnBsdWdpbi52MS5QZXJzb24uRXh0ZXJuYWxJZHNFbnRyeRIqCgRjYXN0GAogAygLMhwubWF2aW8ucGx1Z2luLnYxLlBlcnNvblRpdGxlEioKBGNyZXcYCyADKAsyHC5tYXZpby5wbHVnaW4udjEuUGVyc29uVGl0bGUaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkwKC1BlcnNvblRpdGxlEi8KBXRpdGxlGAEgASgLMiAubWF2aW8ucGx1Z2luLnYxLkRpc2NvdmVyZWRUaXRsZRIMCgRyb2xlGAIgASgJKocCCgtDYXRhbG9nS2luZBIcChhDQVRBTE9HX0tJTkRfVU5TUEVDSUZJRUQQABIZChVDQVRBTE9HX0tJTkRfVFJFTkRJTkcQARIYChRDQVRBTE9HX0tJTkRfUE9QVUxBUhACEhkKFUNBVEFMT0dfS0lORF9VUENPTUlORxADEhoKFkNBVEFMT0dfS0lORF9UT1BfUkFURUQQBBIgChxDQVRBTE9HX0tJTkRfUkVDT01NRU5EQVRJT05TEAUSGAoUQ0FUQUxPR19LSU5EX1NJTUlMQVIQBhIVChFDQVRBTE9HX0tJTkRfTElTVBAHEhsKF0NBVEFMT0dfS0lORF9DT0xMRUNUSU9OEAgqiwMKDkRpc2NvdmVyRmlsdGVyEh8KG0RJU0NPVkVSX0ZJTFRFUl9VTlNQRUNJRklFRBAAEhkKFURJU0NPVkVSX0ZJTFRFUl9HRU5SRRABEhoKFkRJU0NPVkVSX0ZJTFRFUl9TVFVESU8QAhIbChdESVNDT1ZFUl9GSUxURVJfTkVUV09SSxADEhsKF0RJU0NPVkVSX0ZJTFRFUl9LRVlXT1JEEAQSIgoeRElTQ09WRVJfRklMVEVSX1dBVENIX1BST1ZJREVSEAUSJQohRElTQ09WRVJfRklMVEVSX09SSUdJTkFMX0xBTkdVQUdFEAYSIAocRElTQ09WRVJfRklMVEVSX1JFTEVBU0VfREFURRAHEhsKF0RJU0NPVkVSX0ZJTFRFUl9SVU5USU1FEAgSGgoWRElTQ09WRVJfRklMVEVSX1JBVElORxAJEh4KGkRJU0NPVkVSX0ZJTFRFUl9WT1RFX0NPVU5UEAoSIQodRElTQ09WRVJfRklMVEVSX0NFUlRJRklDQVRJT04QCyq8AQoMRGlzY292ZXJTb3J0Eh0KGURJU0NPVkVSX1NPUlRfVU5TUEVDSUZJRUQQABIcChhESVNDT1ZFUl9TT1JUX1BPUFVMQVJJVFkQARIeChpESVNDT1ZFUl9TT1JUX1JFTEVBU0VfREFURRACEhgKFERJU0NPVkVSX1NPUlRfUkFUSU5HEAMSHAoYRElTQ09WRVJfU09SVF9WT1RFX0NPVU5UEAQSFwoTRElTQ09WRVJfU09SVF9USVRMRRAFMvsDChhEaXNjb3ZlcnlQcm92aWRlclNlcnZpY2USYAoMTGlzdENhdGFsb2dzEiQubWF2aW8ucGx1Z2luLnYxLkxpc3RDYXRhbG9nc1JlcXVlc3QaJS5tYXZpby5wbHVnaW4udjEuTGlzdENhdGFsb2dzUmVzcG9uc2UiA5ACARJUCghEaXNjb3ZlchIgLm1hdmlvLnBsdWdpbi52MS5EaXNjb3ZlclJlcXVlc3QaIS5tYXZpby5wbHVnaW4udjEuRGlzY292ZXJSZXNwb25zZSIDkAIBEmwKEExpc3RGaWx0ZXJWYWx1ZXMSKC5tYXZpby5wbHVnaW4udjEuTGlzdEZpbHRlclZhbHVlc1JlcXVlc3QaKS5tYXZpby5wbHVnaW4udjEuTGlzdEZpbHRlclZhbHVlc1Jlc3BvbnNlIgOQAgESYAoMU2VhcmNoVGl0bGVzEiQubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFRpdGxlc1JlcXVlc3QaJS5tYXZpby5wbHVnaW4udjEuU2VhcmNoVGl0bGVzUmVzcG9uc2UiA5ACARJXCglHZXRQZXJzb24SIS5tYXZpby5wbHVnaW4udjEuR2V0UGVyc29uUmVxdWVzdBoiLm1hdmlvLnBsdWdpbi52MS5HZXRQZXJzb25SZXNwb25zZSIDkAIBQsgBChNjb20ubWF2aW8ucGx1Z2luLnYxQg5EaXNjb3ZlcnlQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate, file_mavio_plugin_v1_metadata]);
 
 /**
  * @generated from message mavio.plugin.v1.ListCatalogsRequest
@@ -601,6 +601,163 @@ export const SearchTitlesResponseSchema: GenMessage<SearchTitlesResponse> = /*@_
   messageDesc(file_mavio_plugin_v1_discovery, 10);
 
 /**
+ * @generated from message mavio.plugin.v1.GetPersonRequest
+ */
+export type GetPersonRequest = Message<"mavio.plugin.v1.GetPersonRequest"> & {
+  /**
+   * Such as "tmdb".
+   *
+   * @generated from field: map<string, string> external_ids = 1;
+   */
+  externalIds: { [key: string]: string };
+
+  /**
+   * ISO 639-1 language of names, the biography and overviews.
+   *
+   * @generated from field: string language = 2;
+   */
+  language: string;
+
+  /**
+   * @generated from field: bool include_adult = 3;
+   */
+  includeAdult: boolean;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.GetPersonRequest.
+ * Use `create(GetPersonRequestSchema)` to create a new message.
+ */
+export const GetPersonRequestSchema: GenMessage<GetPersonRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_discovery, 11);
+
+/**
+ * @generated from message mavio.plugin.v1.GetPersonResponse
+ */
+export type GetPersonResponse = Message<"mavio.plugin.v1.GetPersonResponse"> & {
+  /**
+   * @generated from field: bool found = 1;
+   */
+  found: boolean;
+
+  /**
+   * @generated from field: mavio.plugin.v1.Person person = 2;
+   */
+  person?: Person | undefined;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.GetPersonResponse.
+ * Use `create(GetPersonResponseSchema)` to create a new message.
+ */
+export const GetPersonResponseSchema: GenMessage<GetPersonResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_discovery, 12);
+
+/**
+ * Person is a person with the titles they are credited on.
+ *
+ * @generated from message mavio.plugin.v1.Person
+ */
+export type Person = Message<"mavio.plugin.v1.Person"> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string biography = 2;
+   */
+  biography: string;
+
+  /**
+   * ISO 8601 calendar dates, when known.
+   *
+   * @generated from field: string birthday = 3;
+   */
+  birthday: string;
+
+  /**
+   * @generated from field: string deathday = 4;
+   */
+  deathday: string;
+
+  /**
+   * @generated from field: string place_of_birth = 5;
+   */
+  placeOfBirth: string;
+
+  /**
+   * @generated from field: repeated string also_known_as = 6;
+   */
+  alsoKnownAs: string[];
+
+  /**
+   * The department they are known for, such as "Acting" or "Directing".
+   *
+   * @generated from field: string known_for_department = 7;
+   */
+  knownForDepartment: string;
+
+  /**
+   * @generated from field: string image_url = 8;
+   */
+  imageUrl: string;
+
+  /**
+   * Such as "tmdb" and "imdb".
+   *
+   * @generated from field: map<string, string> external_ids = 9;
+   */
+  externalIds: { [key: string]: string };
+
+  /**
+   * The titles they play in and those they work on, each once with its
+   * roles joined, the most voted first.
+   *
+   * @generated from field: repeated mavio.plugin.v1.PersonTitle cast = 10;
+   */
+  cast: PersonTitle[];
+
+  /**
+   * @generated from field: repeated mavio.plugin.v1.PersonTitle crew = 11;
+   */
+  crew: PersonTitle[];
+};
+
+/**
+ * Describes the message mavio.plugin.v1.Person.
+ * Use `create(PersonSchema)` to create a new message.
+ */
+export const PersonSchema: GenMessage<Person> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_discovery, 13);
+
+/**
+ * PersonTitle is a title a person is credited on.
+ *
+ * @generated from message mavio.plugin.v1.PersonTitle
+ */
+export type PersonTitle = Message<"mavio.plugin.v1.PersonTitle"> & {
+  /**
+   * @generated from field: mavio.plugin.v1.DiscoveredTitle title = 1;
+   */
+  title?: DiscoveredTitle | undefined;
+
+  /**
+   * The characters they play, or their jobs.
+   *
+   * @generated from field: string role = 2;
+   */
+  role: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.PersonTitle.
+ * Use `create(PersonTitleSchema)` to create a new message.
+ */
+export const PersonTitleSchema: GenMessage<PersonTitle> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_discovery, 14);
+
+/**
  * CatalogKind is what a catalog lists.
  *
  * @generated from enum mavio.plugin.v1.CatalogKind
@@ -850,6 +1007,18 @@ export const DiscoveryProviderService: GenService<{
     methodKind: "unary";
     input: typeof SearchTitlesRequestSchema;
     output: typeof SearchTitlesResponseSchema;
+  },
+  /**
+   * GetPerson tells of a person by their external IDs, with the movies and
+   * series they are credited on, as Seerr's person page. A provider that
+   * does not know people answers UNIMPLEMENTED.
+   *
+   * @generated from rpc mavio.plugin.v1.DiscoveryProviderService.GetPerson
+   */
+  getPerson: {
+    methodKind: "unary";
+    input: typeof GetPersonRequestSchema;
+    output: typeof GetPersonResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_mavio_plugin_v1_discovery, 0);

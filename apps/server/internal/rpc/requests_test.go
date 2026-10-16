@@ -56,6 +56,15 @@ func (stubDiscovery) SearchTitles(context.Context, *pluginv1.SearchTitlesRequest
 	}.Build(), nil
 }
 
+func (stubDiscovery) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*pluginv1.GetPersonResponse, error) {
+	page, _ := stubDiscovery{}.Discover(context.Background(), nil)
+	var cast []*pluginv1.PersonTitle
+	for _, t := range page.GetTitles() {
+		cast = append(cast, pluginv1.PersonTitle_builder{Title: t, Role: new("Hero")}.Build())
+	}
+	return pluginv1.GetPersonResponse_builder{Found: new(true), Person: pluginv1.Person_builder{Name: new("Star"), Cast: cast}.Build()}.Build(), nil
+}
+
 func (stubDiscovery) Discover(context.Context, *pluginv1.DiscoverRequest) (*pluginv1.DiscoverResponse, error) {
 	var titles []*pluginv1.DiscoveredTitle
 	for _, id := range []int{1, 2} {
@@ -166,6 +175,13 @@ func TestRequestServices(t *testing.T) {
 	wantCode(t, "GetTitle of an unknown title", err, connect.CodeNotFound)
 	_, err = discover.GetSeason(ctx, acquisitionv1.GetSeasonRequest_builder{TmdbId: new(int32(1)), SeasonNumber: new(int32(1))}.Build())
 	wantCode(t, "GetSeason without an episode lister", err, connect.CodeNotFound)
+	person, err := discover.GetPerson(ctx, acquisitionv1.GetPersonRequest_builder{TmdbId: new(int32(7))}.Build())
+	if cast := person.GetPerson().GetCast(); err != nil || person.GetPerson().GetName() != "Star" || len(cast) != 1 ||
+		cast[0].GetTitle().GetName() != "Movie 1" || cast[0].GetRole() != "Hero" || person.GetPerson().GetHiddenResults() != 1 {
+		t.Errorf("GetPerson() = %v, %v", person, err)
+	}
+	_, err = discover.GetPerson(ctx, &acquisitionv1.GetPersonRequest{})
+	wantCode(t, "GetPerson without an ID", err, connect.CodeInvalidArgument)
 	title, err := discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(1))}.Build())
 	if err != nil || title.GetTitle().GetName() != "Movie 1" || title.GetTitle().GetOfficialRating() != "PG" || !title.GetTitle().GetRequestable() ||
 		title.GetTitle().GetExternalIds()["tmdb"] != "1" {

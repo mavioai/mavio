@@ -48,6 +48,13 @@ service DiscoverService {
   rpc GetSeason(GetSeasonRequest) returns (GetSeasonResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetPerson tells of a person by their TMDB ID with the movies and
+  // series they are credited on, marked as Discover's titles, as Seerr's
+  // person page. It fails with NOT_FOUND when no discovery provider knows
+  // them.
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message ListCatalogsRequest {
@@ -283,7 +290,10 @@ message GetTitleResponse {
 
 message GetSeasonRequest {
   // The series' TMDB ID.
-  int32 tmdb_id = 1 [(buf.validate.field).int32.gt = 0];
+  int32 tmdb_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
   int32 season_number = 2 [(buf.validate.field).int32.gte = 0];
   // ISO 639-1 language of its episodes' names and overviews; unset for
   // the server's metadata language.
@@ -305,6 +315,49 @@ message SeasonEpisode {
   string air_date = 4;
   // A frame of it, if any.
   string still_url = 5;
+}
+
+message GetPersonRequest {
+  int32 tmdb_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).int32.gt = 0
+  ];
+  // ISO 639-1 language of names, the biography and overviews; unset for
+  // English.
+  string language = 2;
+}
+
+message GetPersonResponse {
+  Person person = 1;
+}
+
+// Person is a person as a discovery provider tells of them.
+message Person {
+  string name = 1;
+  string biography = 2;
+  // ISO 8601 calendar dates, when known.
+  string birthday = 3;
+  string deathday = 4;
+  string place_of_birth = 5;
+  repeated string also_known_as = 6;
+  // Such as "Acting" or "Directing".
+  string known_for_department = 7;
+  string image_url = 8;
+  // Such as "tmdb" and "imdb".
+  map<string, string> external_ids = 9;
+  // The titles they play in and those they work on, the most voted first,
+  // without adult titles and those above the caller's rating limit.
+  repeated PersonTitle cast = 10;
+  repeated PersonTitle crew = 11;
+  // The number of titles left out.
+  int32 hidden_results = 12;
+}
+
+// PersonTitle is a title a person is credited on.
+message PersonTitle {
+  DiscoveredTitle title = 1;
+  // The characters they play, or their jobs.
+  string role = 2;
 }
 
 // Title is a movie or series as the metadata providers tell it, in the

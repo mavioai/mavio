@@ -51,6 +51,9 @@ const (
 	// DiscoverServiceGetSeasonProcedure is the fully-qualified name of the DiscoverService's GetSeason
 	// RPC.
 	DiscoverServiceGetSeasonProcedure = "/mavio.acquisition.v1.DiscoverService/GetSeason"
+	// DiscoverServiceGetPersonProcedure is the fully-qualified name of the DiscoverService's GetPerson
+	// RPC.
+	DiscoverServiceGetPersonProcedure = "/mavio.acquisition.v1.DiscoverService/GetPerson"
 )
 
 // DiscoverServiceClient is a client for the mavio.acquisition.v1.DiscoverService service.
@@ -75,6 +78,11 @@ type DiscoverServiceClient interface {
 	// season of a series' page. It fails as GetTitle does, and with
 	// NOT_FOUND when no episode lister knows the season.
 	GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error)
+	// GetPerson tells of a person by their TMDB ID with the movies and
+	// series they are credited on, marked as Discover's titles, as Seerr's
+	// person page. It fails with NOT_FOUND when no discovery provider knows
+	// them.
+	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
 }
 
 // NewDiscoverServiceClient constructs a client for the mavio.acquisition.v1.DiscoverService
@@ -130,6 +138,13 @@ func NewDiscoverServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getPerson: connect.NewClient[v1.GetPersonRequest, v1.GetPersonResponse](
+			httpClient,
+			baseURL+DiscoverServiceGetPersonProcedure,
+			connect.WithSchema(discoverServiceMethods.ByName("GetPerson")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -141,6 +156,7 @@ type discoverServiceClient struct {
 	searchTitles     *connect.Client[v1.SearchTitlesRequest, v1.SearchTitlesResponse]
 	getTitle         *connect.Client[v1.GetTitleRequest, v1.GetTitleResponse]
 	getSeason        *connect.Client[v1.GetSeasonRequest, v1.GetSeasonResponse]
+	getPerson        *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
 }
 
 // ListCatalogs calls mavio.acquisition.v1.DiscoverService.ListCatalogs.
@@ -197,6 +213,15 @@ func (c *discoverServiceClient) GetSeason(ctx context.Context, req *v1.GetSeason
 	return nil, err
 }
 
+// GetPerson calls mavio.acquisition.v1.DiscoverService.GetPerson.
+func (c *discoverServiceClient) GetPerson(ctx context.Context, req *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
+	response, err := c.getPerson.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoverServiceHandler is an implementation of the mavio.acquisition.v1.DiscoverService service.
 type DiscoverServiceHandler interface {
 	// ListCatalogs lists the catalogs of every discovery provider.
@@ -219,6 +244,11 @@ type DiscoverServiceHandler interface {
 	// season of a series' page. It fails as GetTitle does, and with
 	// NOT_FOUND when no episode lister knows the season.
 	GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error)
+	// GetPerson tells of a person by their TMDB ID with the movies and
+	// series they are credited on, marked as Discover's titles, as Seerr's
+	// person page. It fails with NOT_FOUND when no discovery provider knows
+	// them.
+	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
 }
 
 // NewDiscoverServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -270,6 +300,13 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoverServiceGetPersonHandler := connect.NewUnaryHandlerSimple(
+		DiscoverServiceGetPersonProcedure,
+		svc.GetPerson,
+		connect.WithSchema(discoverServiceMethods.ByName("GetPerson")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DiscoverService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoverServiceListCatalogsProcedure:
@@ -284,6 +321,8 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 			discoverServiceGetTitleHandler.ServeHTTP(w, r)
 		case DiscoverServiceGetSeasonProcedure:
 			discoverServiceGetSeasonHandler.ServeHTTP(w, r)
+		case DiscoverServiceGetPersonProcedure:
+			discoverServiceGetPersonHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -315,4 +354,8 @@ func (UnimplementedDiscoverServiceHandler) GetTitle(context.Context, *v1.GetTitl
 
 func (UnimplementedDiscoverServiceHandler) GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetSeason is not implemented"))
+}
+
+func (UnimplementedDiscoverServiceHandler) GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetPerson is not implemented"))
 }

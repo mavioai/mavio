@@ -54,6 +54,14 @@ pub type OwnedGetSeasonRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetSeasonResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetPersonRequestView<'static>>`.
+pub type OwnedGetPersonRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetPersonResponseView<'static>>`.
+pub type OwnedGetPersonResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::ListCatalogsResponse>
 for crate::proto::mavio::acquisition::v1::__buffa::view::ListCatalogsResponseView<'_> {
     fn encode(
@@ -270,6 +278,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::GetPersonResponse>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::GetPersonResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const DISCOVER_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.DiscoverService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -305,6 +347,12 @@ pub const DISCOVER_SERVICE_GET_TITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Sp
 /// Static [`Spec`](::connectrpc::Spec) for the `GetSeason` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const DISCOVER_SERVICE_GET_SEASON_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.DiscoverService/GetSeason",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetPerson` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DISCOVER_SERVICE_GET_PERSON_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.DiscoverService/GetPerson",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -507,6 +555,32 @@ pub trait DiscoverService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::acquisition::v1::GetSeasonResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// GetPerson tells of a person by their TMDB ID with the movies and
+    /// series they are credited on, marked as Discover's titles, as Seerr's
+    /// person page. It fails with NOT_FOUND when no discovery provider knows
+    /// them.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_person<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetPersonRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetPersonResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -716,6 +790,35 @@ impl<S: DiscoverService> DiscoverServiceExt for S {
                 },
             )
             .with_spec(DISCOVER_SERVICE_GET_SEASON_SPEC)
+            .route_view_idempotent(
+                DISCOVER_SERVICE_SERVICE_NAME,
+                "GetPerson",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetPersonRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_person(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetPersonResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DISCOVER_SERVICE_GET_PERSON_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -804,6 +907,12 @@ impl<T: DiscoverService> ::connectrpc::Dispatcher for DiscoverServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(DISCOVER_SERVICE_GET_SEASON_SPEC),
+                )
+            }
+            "GetPerson" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(DISCOVER_SERVICE_GET_PERSON_SPEC),
                 )
             }
             _ => None,
@@ -951,6 +1060,28 @@ impl<T: DiscoverService> ::connectrpc::Dispatcher for DiscoverServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::GetSeasonResponse,
+                        >(format)
+                })
+            }
+            "GetPerson" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetPersonRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetPersonRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_person(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetPersonResponse,
                         >(format)
                 })
             }
@@ -1346,6 +1477,51 @@ where
                 &self.transport,
                 &self.config,
                 DISCOVER_SERVICE_GET_SEASON_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetPerson RPC. Sends a request to /mavio.acquisition.v1.DiscoverService/GetPerson.
+    pub async fn get_person(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetPersonRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_person_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetPerson RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_person_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetPersonRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetPersonResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DISCOVER_SERVICE_GET_PERSON_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

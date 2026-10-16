@@ -23971,6 +23971,96 @@
         }
       }
     },
+    "person.appearances": {
+      "comment": "Section of a discovered person's page with the titles they play in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearances"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出演作品"
+          }
+        }
+      }
+    },
+    "person.crew": {
+      "comment": "Section of a discovered person's page with the titles they work on.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crew"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "幕后作品"
+          }
+        }
+      }
+    },
+    "person.alsoKnownAs": {
+      "comment": "The other names of a discovered person.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also known as %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "又名 %@"
+          }
+        }
+      }
+    },
+    "person.kinds": {
+      "comment": "Label of the choice of a discovered person's titles: all, movies or series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kinds of titles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作品类型"
+          }
+        }
+      }
+    },
+    "person.allKinds": {
+      "comment": "Shows a discovered person's movies and series.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
     "lists.more": {
       "comment": "Button opening an item's More menu.",
       "extractionState": "manual",

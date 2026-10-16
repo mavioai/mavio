@@ -301,3 +301,36 @@ func TestGetSeason(t *testing.T) {
 		t.Errorf("GetSeason() again looked up %d times, %v, want = 0", e.meta.lookups-n, err)
 	}
 }
+
+func TestPerson(t *testing.T) {
+	e := newEnv(t)
+	movie := pluginv1.MediaKind_MEDIA_KIND_MOVIE
+	d := &fakeDiscovery{titles: []*pluginv1.DiscoveredTitle{
+		discovered(movie, 1, false), discovered(movie, 2, false), discovered(movie, 66, true),
+	}}
+	e.svc.Discovery = func() []DiscoveryProvider {
+		return []DiscoveryProvider{{ID: "servarr", Client: &fakeDiscovery{noSearch: true}}, {ID: "tmdb", Client: d}}
+	}
+	pg := e.user("pg", func(u *core.User) { u.Access.MaxParentalRating = score(t, "PG") })
+	if _, err := e.svc.Person(e.ctx, pg, 8, ""); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("Person() of an unknown person: error = %v, want ErrNotFound", err)
+	}
+	p, err := e.svc.Person(e.ctx, pg, 7, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	roles := func(ts []PersonTitle) []string {
+		var out []string
+		for _, pt := range ts {
+			out = append(out, fmt.Sprintf("%d %s requestable=%t", pt.TmdbID, pt.Role, pt.Requestable))
+		}
+		return out
+	}
+	// The R-rated and adult titles are left out.
+	if got, want := roles(p.Cast), []string{"1 Role T1 requestable=true"}; p.Person.GetName() != "Star" || !slices.Equal(got, want) {
+		t.Errorf("Person() %q cast = %q, want = Star, %q", p.Person.GetName(), got, want)
+	}
+	if got, want := roles(p.Crew), []string{"1 Producer requestable=true"}; !slices.Equal(got, want) || p.Hidden != 2 {
+		t.Errorf("Person() crew = %q, hidden %d, want = %q, 2", got, p.Hidden, want)
+	}
+}

@@ -594,6 +594,7 @@ flowchart TD
   - [x] 完整演职人员页面，如 Seerr 的"查看完整剧组"，从演职人员横向列表打开
   - [x] 发现的作品页如条目详情一样丰富，并使用客户端的语言：演职人员及其页面、预告片、合集、标语、关键词与剧组信息；附加内容中没有预告片的条目打开网上的预告片
   - [x] 发现的剧集展开一季显示其各集（`DiscoverService.GetSeason`），如 Seerr，各集列表保留六小时
+  - [x] 如 Seerr 的人物页（`DiscoverService.GetPerson`，发现提供者的 `GetPerson`），从发现的作品的演职人员打开
 - [x] 服务端：所有路由的跨域请求（`apps/server/internal/httpserver/cors.go`）
 - [x] 服务端：`AuthService.GetAuthInfo` 与发现应答中带上服务端的 ID、名称和版本，客户端据此在任意地址上认出同一服务端
 - [x] 服务端：`ListItems` 可按外部 ID 筛选（`ItemQuery.ExternalIDs`），客户端据此在其他服务端上找到同一作品的版本

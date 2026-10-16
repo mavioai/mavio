@@ -238,6 +238,23 @@ func (discovery) SearchTitles(_ context.Context, req *pluginv1.SearchTitlesReque
 	}.Build(), nil
 }
 
+// GetPerson tells of a person named after their TMDB ID, credited on a
+// movie.
+func (discovery) GetPerson(_ context.Context, req *pluginv1.GetPersonRequest) (*pluginv1.GetPersonResponse, error) {
+	return pluginv1.GetPersonResponse_builder{
+		Found: proto.Bool(true),
+		Person: pluginv1.Person_builder{
+			Name: proto.String("Person " + req.GetExternalIds()["tmdb"]), ExternalIds: req.GetExternalIds(),
+			Cast: []*pluginv1.PersonTitle{pluginv1.PersonTitle_builder{
+				Title: pluginv1.DiscoveredTitle_builder{
+					MediaKind: pluginv1.MediaKind_MEDIA_KIND_MOVIE.Enum(), Name: proto.String("Movie"), ExternalIds: map[string]string{"tmdb": "1"},
+				}.Build(),
+				Role: proto.String("Hero"),
+			}.Build()},
+		}.Build(),
+	}.Build(), nil
+}
+
 // ListFilterValues lists the query as the filter's only value.
 func (discovery) ListFilterValues(_ context.Context, req *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {
 	return pluginv1.ListFilterValuesResponse_builder{Values: []*pluginv1.FilterValue{pluginv1.FilterValue_builder{

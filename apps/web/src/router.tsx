@@ -5,6 +5,7 @@ import { CreditsScreen, TitleCreditsScreen } from "./screens/credits.tsx";
 import { Details } from "./screens/details.tsx";
 import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
 import { parseFilters } from "./screens/discover-filters.tsx";
+import { DiscoveredPersonScreen } from "./screens/discover-person.tsx";
 import { HomeScreen } from "./screens/home.tsx";
 import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
@@ -135,6 +136,11 @@ const credits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/it
 const titleCredits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/title/$kind/$tmdbId/credits", component: TitleCreditsScreen });
 
 const person = createRoute({ getParentRoute: () => root, path: "/s/$serverId/person/$personId", component: PersonScreen });
+const discoveredPerson = createRoute({
+  getParentRoute: () => root,
+  path: "/s/$serverId/discover/person/$tmdbId",
+  component: DiscoveredPersonScreen,
+});
 
 const player = createRoute({
   getParentRoute: () => root,
@@ -168,6 +174,7 @@ export const router = createRouter({
     credits,
     titleCredits,
     person,
+    discoveredPerson,
     player,
   ]),
   scrollRestoration: true,

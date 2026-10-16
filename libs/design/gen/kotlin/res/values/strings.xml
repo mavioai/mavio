@@ -2681,6 +2681,16 @@
     <string name="person_more">More</string>
     <!-- Shortens a person's biography. -->
     <string name="person_less">Less</string>
+    <!-- Section of a discovered person's page with the titles they play in. -->
+    <string name="person_appearances">Appearances</string>
+    <!-- Section of a discovered person's page with the titles they work on. -->
+    <string name="person_crew">Crew</string>
+    <!-- The other names of a discovered person. -->
+    <string name="person_also_known_as">Also known as %s</string>
+    <!-- Label of the choice of a discovered person's titles: all, movies or series. -->
+    <string name="person_kinds">Kinds of titles</string>
+    <!-- Shows a discovered person's movies and series. -->
+    <string name="person_all_kinds">All</string>
     <!-- Button opening an item's More menu. -->
     <string name="lists_more">More</string>
     <!-- Adds an item to one of the user's playlists. -->

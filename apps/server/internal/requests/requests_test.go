@@ -733,7 +733,7 @@ type fakeDiscovery struct {
 	titles     []*pluginv1.DiscoveredTitle
 	last       *pluginv1.DiscoverRequest
 	lastSearch *pluginv1.SearchTitlesRequest
-	// noSearch answers searches unimplemented.
+	// noSearch answers searches and people unimplemented.
 	noSearch bool
 }
 
@@ -745,6 +745,25 @@ func (f *fakeDiscovery) SearchTitles(_ context.Context, req *pluginv1.SearchTitl
 	defer f.mu.Unlock()
 	f.lastSearch = req
 	return pluginv1.SearchTitlesResponse_builder{Titles: f.titles, Page: new(int32(1)), TotalPages: new(int32(3)), TotalResults: new(int32(60))}.Build(), nil
+}
+
+// GetPerson tells of person 7, playing in the titles and producing the
+// first.
+func (f *fakeDiscovery) GetPerson(_ context.Context, req *pluginv1.GetPersonRequest) (*pluginv1.GetPersonResponse, error) {
+	if f.noSearch {
+		return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no people"))
+	}
+	if req.GetExternalIds()["tmdb"] != "7" {
+		return pluginv1.GetPersonResponse_builder{Found: new(false)}.Build(), nil
+	}
+	var cast []*pluginv1.PersonTitle
+	for _, t := range f.titles {
+		cast = append(cast, pluginv1.PersonTitle_builder{Title: t, Role: new("Role " + t.GetName())}.Build())
+	}
+	crew := []*pluginv1.PersonTitle{pluginv1.PersonTitle_builder{Title: f.titles[0], Role: new("Producer")}.Build()}
+	return pluginv1.GetPersonResponse_builder{
+		Found: new(true), Person: pluginv1.Person_builder{Name: new("Star"), Cast: cast, Crew: crew}.Build(),
+	}.Build(), nil
 }
 
 func (f *fakeDiscovery) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*pluginv1.ListCatalogsResponse, error) {

@@ -1316,6 +1316,11 @@ export type MessageKey =
   | 'person.died'
   | 'person.more'
   | 'person.less'
+  | 'person.appearances'
+  | 'person.crew'
+  | 'person.alsoKnownAs'
+  | 'person.kinds'
+  | 'person.allKinds'
   | 'lists.more'
   | 'lists.addToPlaylist'
   | 'lists.addToCollection'
@@ -2866,6 +2871,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "person.died": "Died {date}",
     "person.more": "More",
     "person.less": "Less",
+    "person.appearances": "Appearances",
+    "person.crew": "Crew",
+    "person.alsoKnownAs": "Also known as {names}",
+    "person.kinds": "Kinds of titles",
+    "person.allKinds": "All",
     "lists.more": "More",
     "lists.addToPlaylist": "Add to Playlist",
     "lists.addToCollection": "Add to Collection",
@@ -4414,6 +4424,11 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "person.died": "逝于 {date}",
     "person.more": "更多",
     "person.less": "收起",
+    "person.appearances": "出演作品",
+    "person.crew": "幕后作品",
+    "person.alsoKnownAs": "又名 {names}",
+    "person.kinds": "作品类型",
+    "person.allKinds": "全部",
     "lists.more": "更多",
     "lists.addToPlaylist": "添加到播放列表",
     "lists.addToCollection": "添加到合集",

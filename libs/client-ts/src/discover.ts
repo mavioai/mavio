@@ -3,7 +3,7 @@
 // sorted (§6.3.28), the values of their filters, titles found by name, a
 // title with its seasons, and requests of it.
 import type { MessageInitShape } from "@bufbuild/protobuf";
-import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
+import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Person, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
@@ -228,6 +228,19 @@ export function useSeason(server: ServerEntry | undefined, tmdbId: number, seaso
       (await servers.client(DiscoverService, server!).getSeason({ tmdbId, seasonNumber, language })).episodes,
     enabled: enabled && !!server && tmdbId > 0,
     staleTime: 60 * 60_000,
+  });
+}
+
+/**
+ * A person by their TMDB ID with the titles they are credited on, marked as
+ * Discover's, in a language (ISO 639-1), English when empty.
+ */
+export function useDiscoveredPerson(server: ServerEntry | undefined, tmdbId: number, language = "") {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "person", tmdbId, language),
+    queryFn: async (): Promise<Person | undefined> => (await servers.client(DiscoverService, server!).getPerson({ tmdbId, language })).person,
+    enabled: !!server && tmdbId > 0,
   });
 }
 

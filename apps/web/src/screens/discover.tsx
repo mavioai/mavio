@@ -108,8 +108,8 @@ function StatusMark({ status }: { status: MediaStatus }) {
   );
 }
 
-/** The card of a discovered title, which opens it. */
-export function TitleCard({ serverId, title, fluid = false }: { serverId: string; title: DiscoveredTitle; fluid?: boolean }) {
+/** The card of a discovered title, which opens it; under its year and kind, a person's role in it. */
+export function TitleCard({ serverId, title, fluid = false, role }: { serverId: string; title: DiscoveredTitle; fluid?: boolean; role?: string }) {
   const kind = title.mediaKind === MediaKind.SERIES ? t("discover.series") : t("discover.movie");
   return (
     <Link
@@ -124,6 +124,7 @@ export function TitleCard({ serverId, title, fluid = false }: { serverId: string
       </div>
       <div className="mt-2 truncate type-headline">{title.name}</div>
       <div className="truncate type-footnote text-text-secondary">{[title.year || undefined, kind].filter(Boolean).join(" · ")}</div>
+      {role && <div className="truncate type-footnote text-text-secondary">{role}</div>}
     </Link>
   );
 }

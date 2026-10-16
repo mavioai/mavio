@@ -168,6 +168,22 @@ pub use self::__buffa::view::SearchTitlesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SearchTitlesResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetPersonRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPersonRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPersonResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetPersonResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PersonView;
+#[doc(inline)]
+pub use self::__buffa::view::PersonOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PersonTitleView;
+#[doc(inline)]
+pub use self::__buffa::view::PersonTitleOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestOwnedView;

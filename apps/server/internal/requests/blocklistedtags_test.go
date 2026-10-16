@@ -39,6 +39,10 @@ func (f *fakeTags) SearchTitles(context.Context, *pluginv1.SearchTitlesRequest) 
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no search"))
 }
 
+func (f *fakeTags) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*pluginv1.GetPersonResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("no people"))
+}
+
 func (f *fakeTags) ListCatalogs(context.Context, *pluginv1.ListCatalogsRequest) (*pluginv1.ListCatalogsResponse, error) {
 	catalogs := []*pluginv1.Catalog{
 		pluginv1.Catalog_builder{

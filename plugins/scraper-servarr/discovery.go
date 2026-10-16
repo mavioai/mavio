@@ -158,6 +158,11 @@ func (p *plugin) SearchTitles(context.Context, *pluginv1.SearchTitlesRequest) (*
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scraper-servarr does not search titles"))
 }
 
+// GetPerson is not offered: people are told by providers knowing TMDB.
+func (p *plugin) GetPerson(context.Context, *pluginv1.GetPersonRequest) (*pluginv1.GetPersonResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scraper-servarr does not know people"))
+}
+
 // ListFilterValues lists no values: the catalogs take no filters with
 // values.
 func (p *plugin) ListFilterValues(context.Context, *pluginv1.ListFilterValuesRequest) (*pluginv1.ListFilterValuesResponse, error) {

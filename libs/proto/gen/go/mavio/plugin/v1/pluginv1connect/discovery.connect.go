@@ -45,6 +45,9 @@ const (
 	// DiscoveryProviderServiceSearchTitlesProcedure is the fully-qualified name of the
 	// DiscoveryProviderService's SearchTitles RPC.
 	DiscoveryProviderServiceSearchTitlesProcedure = "/mavio.plugin.v1.DiscoveryProviderService/SearchTitles"
+	// DiscoveryProviderServiceGetPersonProcedure is the fully-qualified name of the
+	// DiscoveryProviderService's GetPerson RPC.
+	DiscoveryProviderServiceGetPersonProcedure = "/mavio.plugin.v1.DiscoveryProviderService/GetPerson"
 )
 
 // DiscoveryProviderServiceClient is a client for the mavio.plugin.v1.DiscoveryProviderService
@@ -60,6 +63,10 @@ type DiscoveryProviderServiceClient interface {
 	// SearchTitles finds movies and series by name, a page at a time. A
 	// provider that does not search answers UNIMPLEMENTED.
 	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
+	// GetPerson tells of a person by their external IDs, with the movies and
+	// series they are credited on, as Seerr's person page. A provider that
+	// does not know people answers UNIMPLEMENTED.
+	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
 }
 
 // NewDiscoveryProviderServiceClient constructs a client for the
@@ -101,6 +108,13 @@ func NewDiscoveryProviderServiceClient(httpClient connect.HTTPClient, baseURL st
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getPerson: connect.NewClient[v1.GetPersonRequest, v1.GetPersonResponse](
+			httpClient,
+			baseURL+DiscoveryProviderServiceGetPersonProcedure,
+			connect.WithSchema(discoveryProviderServiceMethods.ByName("GetPerson")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -110,6 +124,7 @@ type discoveryProviderServiceClient struct {
 	discover         *connect.Client[v1.DiscoverRequest, v1.DiscoverResponse]
 	listFilterValues *connect.Client[v1.ListFilterValuesRequest, v1.ListFilterValuesResponse]
 	searchTitles     *connect.Client[v1.SearchTitlesRequest, v1.SearchTitlesResponse]
+	getPerson        *connect.Client[v1.GetPersonRequest, v1.GetPersonResponse]
 }
 
 // ListCatalogs calls mavio.plugin.v1.DiscoveryProviderService.ListCatalogs.
@@ -148,6 +163,15 @@ func (c *discoveryProviderServiceClient) SearchTitles(ctx context.Context, req *
 	return nil, err
 }
 
+// GetPerson calls mavio.plugin.v1.DiscoveryProviderService.GetPerson.
+func (c *discoveryProviderServiceClient) GetPerson(ctx context.Context, req *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
+	response, err := c.getPerson.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoveryProviderServiceHandler is an implementation of the
 // mavio.plugin.v1.DiscoveryProviderService service.
 type DiscoveryProviderServiceHandler interface {
@@ -161,6 +185,10 @@ type DiscoveryProviderServiceHandler interface {
 	// SearchTitles finds movies and series by name, a page at a time. A
 	// provider that does not search answers UNIMPLEMENTED.
 	SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error)
+	// GetPerson tells of a person by their external IDs, with the movies and
+	// series they are credited on, as Seerr's person page. A provider that
+	// does not know people answers UNIMPLEMENTED.
+	GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error)
 }
 
 // NewDiscoveryProviderServiceHandler builds an HTTP handler from the service implementation. It
@@ -198,6 +226,13 @@ func NewDiscoveryProviderServiceHandler(svc DiscoveryProviderServiceHandler, opt
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoveryProviderServiceGetPersonHandler := connect.NewUnaryHandlerSimple(
+		DiscoveryProviderServiceGetPersonProcedure,
+		svc.GetPerson,
+		connect.WithSchema(discoveryProviderServiceMethods.ByName("GetPerson")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.plugin.v1.DiscoveryProviderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoveryProviderServiceListCatalogsProcedure:
@@ -208,6 +243,8 @@ func NewDiscoveryProviderServiceHandler(svc DiscoveryProviderServiceHandler, opt
 			discoveryProviderServiceListFilterValuesHandler.ServeHTTP(w, r)
 		case DiscoveryProviderServiceSearchTitlesProcedure:
 			discoveryProviderServiceSearchTitlesHandler.ServeHTTP(w, r)
+		case DiscoveryProviderServiceGetPersonProcedure:
+			discoveryProviderServiceGetPersonHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -231,4 +268,8 @@ func (UnimplementedDiscoveryProviderServiceHandler) ListFilterValues(context.Con
 
 func (UnimplementedDiscoveryProviderServiceHandler) SearchTitles(context.Context, *v1.SearchTitlesRequest) (*v1.SearchTitlesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.DiscoveryProviderService.SearchTitles is not implemented"))
+}
+
+func (UnimplementedDiscoveryProviderServiceHandler) GetPerson(context.Context, *v1.GetPersonRequest) (*v1.GetPersonResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.plugin.v1.DiscoveryProviderService.GetPerson is not implemented"))
 }

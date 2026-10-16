@@ -27,6 +27,12 @@ service DiscoveryProviderService {
   rpc SearchTitles(SearchTitlesRequest) returns (SearchTitlesResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetPerson tells of a person by their external IDs, with the movies and
+  // series they are credited on, as Seerr's person page. A provider that
+  // does not know people answers UNIMPLEMENTED.
+  rpc GetPerson(GetPersonRequest) returns (GetPersonResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message ListCatalogsRequest {
@@ -252,4 +258,44 @@ message SearchTitlesResponse {
   int32 page = 2;
   int32 total_pages = 3;
   int32 total_results = 4;
+}
+
+message GetPersonRequest {
+  // Such as "tmdb".
+  map<string, string> external_ids = 1 [(buf.validate.field).map.min_pairs = 1];
+  // ISO 639-1 language of names, the biography and overviews.
+  string language = 2;
+  bool include_adult = 3;
+}
+
+message GetPersonResponse {
+  bool found = 1;
+  Person person = 2;
+}
+
+// Person is a person with the titles they are credited on.
+message Person {
+  string name = 1;
+  string biography = 2;
+  // ISO 8601 calendar dates, when known.
+  string birthday = 3;
+  string deathday = 4;
+  string place_of_birth = 5;
+  repeated string also_known_as = 6;
+  // The department they are known for, such as "Acting" or "Directing".
+  string known_for_department = 7;
+  string image_url = 8;
+  // Such as "tmdb" and "imdb".
+  map<string, string> external_ids = 9;
+  // The titles they play in and those they work on, each once with its
+  // roles joined, the most voted first.
+  repeated PersonTitle cast = 10;
+  repeated PersonTitle crew = 11;
+}
+
+// PersonTitle is a title a person is credited on.
+message PersonTitle {
+  DiscoveredTitle title = 1;
+  // The characters they play, or their jobs.
+  string role = 2;
 }

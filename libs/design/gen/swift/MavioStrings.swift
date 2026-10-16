@@ -4208,6 +4208,23 @@ public enum MavioStrings {
     /// Shortens a person's biography.
     public static var personLess: String { NSLocalizedString("person.less", bundle: .module, comment: "") }
 
+    /// Section of a discovered person's page with the titles they play in.
+    public static var personAppearances: String { NSLocalizedString("person.appearances", bundle: .module, comment: "") }
+
+    /// Section of a discovered person's page with the titles they work on.
+    public static var personCrew: String { NSLocalizedString("person.crew", bundle: .module, comment: "") }
+
+    /// The other names of a discovered person.
+    public static func personAlsoKnownAs(names: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("person.alsoKnownAs", bundle: .module, comment: ""), names)
+    }
+
+    /// Label of the choice of a discovered person's titles: all, movies or series.
+    public static var personKinds: String { NSLocalizedString("person.kinds", bundle: .module, comment: "") }
+
+    /// Shows a discovered person's movies and series.
+    public static var personAllKinds: String { NSLocalizedString("person.allKinds", bundle: .module, comment: "") }
+
     /// Button opening an item's More menu.
     public static var listsMore: String { NSLocalizedString("lists.more", bundle: .module, comment: "") }
 

@@ -3398,6 +3398,662 @@ func (b0 SeasonEpisode_builder) Build() *SeasonEpisode {
 	return m0
 }
 
+type GetPersonRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TmdbId      int32                  `protobuf:"varint,1,opt,name=tmdb_id,json=tmdbId"`
+	xxx_hidden_Language    *string                `protobuf:"bytes,2,opt,name=language"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *GetPersonRequest) Reset() {
+	*x = GetPersonRequest{}
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPersonRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPersonRequest) ProtoMessage() {}
+
+func (x *GetPersonRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetPersonRequest) GetTmdbId() int32 {
+	if x != nil {
+		return x.xxx_hidden_TmdbId
+	}
+	return 0
+}
+
+func (x *GetPersonRequest) GetLanguage() string {
+	if x != nil {
+		if x.xxx_hidden_Language != nil {
+			return *x.xxx_hidden_Language
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *GetPersonRequest) SetTmdbId(v int32) {
+	x.xxx_hidden_TmdbId = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *GetPersonRequest) SetLanguage(v string) {
+	x.xxx_hidden_Language = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *GetPersonRequest) HasTmdbId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *GetPersonRequest) HasLanguage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *GetPersonRequest) ClearTmdbId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_TmdbId = 0
+}
+
+func (x *GetPersonRequest) ClearLanguage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Language = nil
+}
+
+type GetPersonRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TmdbId *int32
+	// ISO 639-1 language of names, the biography and overviews; unset for
+	// English.
+	Language *string
+}
+
+func (b0 GetPersonRequest_builder) Build() *GetPersonRequest {
+	m0 := &GetPersonRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.TmdbId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_TmdbId = *b.TmdbId
+	}
+	if b.Language != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Language = b.Language
+	}
+	return m0
+}
+
+type GetPersonResponse struct {
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Person *Person                `protobuf:"bytes,1,opt,name=person"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetPersonResponse) Reset() {
+	*x = GetPersonResponse{}
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPersonResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPersonResponse) ProtoMessage() {}
+
+func (x *GetPersonResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetPersonResponse) GetPerson() *Person {
+	if x != nil {
+		return x.xxx_hidden_Person
+	}
+	return nil
+}
+
+func (x *GetPersonResponse) SetPerson(v *Person) {
+	x.xxx_hidden_Person = v
+}
+
+func (x *GetPersonResponse) HasPerson() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Person != nil
+}
+
+func (x *GetPersonResponse) ClearPerson() {
+	x.xxx_hidden_Person = nil
+}
+
+type GetPersonResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Person *Person
+}
+
+func (b0 GetPersonResponse_builder) Build() *GetPersonResponse {
+	m0 := &GetPersonResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Person = b.Person
+	return m0
+}
+
+// Person is a person as a discovery provider tells of them.
+type Person struct {
+	state                         protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name               *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_Biography          *string                `protobuf:"bytes,2,opt,name=biography"`
+	xxx_hidden_Birthday           *string                `protobuf:"bytes,3,opt,name=birthday"`
+	xxx_hidden_Deathday           *string                `protobuf:"bytes,4,opt,name=deathday"`
+	xxx_hidden_PlaceOfBirth       *string                `protobuf:"bytes,5,opt,name=place_of_birth,json=placeOfBirth"`
+	xxx_hidden_AlsoKnownAs        []string               `protobuf:"bytes,6,rep,name=also_known_as,json=alsoKnownAs"`
+	xxx_hidden_KnownForDepartment *string                `protobuf:"bytes,7,opt,name=known_for_department,json=knownForDepartment"`
+	xxx_hidden_ImageUrl           *string                `protobuf:"bytes,8,opt,name=image_url,json=imageUrl"`
+	xxx_hidden_ExternalIds        map[string]string      `protobuf:"bytes,9,rep,name=external_ids,json=externalIds" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	xxx_hidden_Cast               *[]*PersonTitle        `protobuf:"bytes,10,rep,name=cast"`
+	xxx_hidden_Crew               *[]*PersonTitle        `protobuf:"bytes,11,rep,name=crew"`
+	xxx_hidden_HiddenResults      int32                  `protobuf:"varint,12,opt,name=hidden_results,json=hiddenResults"`
+	XXX_raceDetectHookData        protoimpl.RaceDetectHookData
+	XXX_presence                  [1]uint32
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
+}
+
+func (x *Person) Reset() {
+	*x = Person{}
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Person) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Person) ProtoMessage() {}
+
+func (x *Person) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Person) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetBiography() string {
+	if x != nil {
+		if x.xxx_hidden_Biography != nil {
+			return *x.xxx_hidden_Biography
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetBirthday() string {
+	if x != nil {
+		if x.xxx_hidden_Birthday != nil {
+			return *x.xxx_hidden_Birthday
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetDeathday() string {
+	if x != nil {
+		if x.xxx_hidden_Deathday != nil {
+			return *x.xxx_hidden_Deathday
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetPlaceOfBirth() string {
+	if x != nil {
+		if x.xxx_hidden_PlaceOfBirth != nil {
+			return *x.xxx_hidden_PlaceOfBirth
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetAlsoKnownAs() []string {
+	if x != nil {
+		return x.xxx_hidden_AlsoKnownAs
+	}
+	return nil
+}
+
+func (x *Person) GetKnownForDepartment() string {
+	if x != nil {
+		if x.xxx_hidden_KnownForDepartment != nil {
+			return *x.xxx_hidden_KnownForDepartment
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetImageUrl() string {
+	if x != nil {
+		if x.xxx_hidden_ImageUrl != nil {
+			return *x.xxx_hidden_ImageUrl
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Person) GetExternalIds() map[string]string {
+	if x != nil {
+		return x.xxx_hidden_ExternalIds
+	}
+	return nil
+}
+
+func (x *Person) GetCast() []*PersonTitle {
+	if x != nil {
+		if x.xxx_hidden_Cast != nil {
+			return *x.xxx_hidden_Cast
+		}
+	}
+	return nil
+}
+
+func (x *Person) GetCrew() []*PersonTitle {
+	if x != nil {
+		if x.xxx_hidden_Crew != nil {
+			return *x.xxx_hidden_Crew
+		}
+	}
+	return nil
+}
+
+func (x *Person) GetHiddenResults() int32 {
+	if x != nil {
+		return x.xxx_hidden_HiddenResults
+	}
+	return 0
+}
+
+func (x *Person) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
+}
+
+func (x *Person) SetBiography(v string) {
+	x.xxx_hidden_Biography = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
+}
+
+func (x *Person) SetBirthday(v string) {
+	x.xxx_hidden_Birthday = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
+}
+
+func (x *Person) SetDeathday(v string) {
+	x.xxx_hidden_Deathday = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
+}
+
+func (x *Person) SetPlaceOfBirth(v string) {
+	x.xxx_hidden_PlaceOfBirth = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
+}
+
+func (x *Person) SetAlsoKnownAs(v []string) {
+	x.xxx_hidden_AlsoKnownAs = v
+}
+
+func (x *Person) SetKnownForDepartment(v string) {
+	x.xxx_hidden_KnownForDepartment = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 12)
+}
+
+func (x *Person) SetImageUrl(v string) {
+	x.xxx_hidden_ImageUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 12)
+}
+
+func (x *Person) SetExternalIds(v map[string]string) {
+	x.xxx_hidden_ExternalIds = v
+}
+
+func (x *Person) SetCast(v []*PersonTitle) {
+	x.xxx_hidden_Cast = &v
+}
+
+func (x *Person) SetCrew(v []*PersonTitle) {
+	x.xxx_hidden_Crew = &v
+}
+
+func (x *Person) SetHiddenResults(v int32) {
+	x.xxx_hidden_HiddenResults = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
+}
+
+func (x *Person) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *Person) HasBiography() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *Person) HasBirthday() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *Person) HasDeathday() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *Person) HasPlaceOfBirth() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *Person) HasKnownForDepartment() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 6)
+}
+
+func (x *Person) HasImageUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
+}
+
+func (x *Person) HasHiddenResults() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
+func (x *Person) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *Person) ClearBiography() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Biography = nil
+}
+
+func (x *Person) ClearBirthday() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Birthday = nil
+}
+
+func (x *Person) ClearDeathday() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Deathday = nil
+}
+
+func (x *Person) ClearPlaceOfBirth() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_PlaceOfBirth = nil
+}
+
+func (x *Person) ClearKnownForDepartment() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 6)
+	x.xxx_hidden_KnownForDepartment = nil
+}
+
+func (x *Person) ClearImageUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 7)
+	x.xxx_hidden_ImageUrl = nil
+}
+
+func (x *Person) ClearHiddenResults() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_HiddenResults = 0
+}
+
+type Person_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Name      *string
+	Biography *string
+	// ISO 8601 calendar dates, when known.
+	Birthday     *string
+	Deathday     *string
+	PlaceOfBirth *string
+	AlsoKnownAs  []string
+	// Such as "Acting" or "Directing".
+	KnownForDepartment *string
+	ImageUrl           *string
+	// Such as "tmdb" and "imdb".
+	ExternalIds map[string]string
+	// The titles they play in and those they work on, the most voted first,
+	// without adult titles and those above the caller's rating limit.
+	Cast []*PersonTitle
+	Crew []*PersonTitle
+	// The number of titles left out.
+	HiddenResults *int32
+}
+
+func (b0 Person_builder) Build() *Person {
+	m0 := &Person{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.Biography != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
+		x.xxx_hidden_Biography = b.Biography
+	}
+	if b.Birthday != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
+		x.xxx_hidden_Birthday = b.Birthday
+	}
+	if b.Deathday != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
+		x.xxx_hidden_Deathday = b.Deathday
+	}
+	if b.PlaceOfBirth != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
+		x.xxx_hidden_PlaceOfBirth = b.PlaceOfBirth
+	}
+	x.xxx_hidden_AlsoKnownAs = b.AlsoKnownAs
+	if b.KnownForDepartment != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 12)
+		x.xxx_hidden_KnownForDepartment = b.KnownForDepartment
+	}
+	if b.ImageUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 12)
+		x.xxx_hidden_ImageUrl = b.ImageUrl
+	}
+	x.xxx_hidden_ExternalIds = b.ExternalIds
+	x.xxx_hidden_Cast = &b.Cast
+	x.xxx_hidden_Crew = &b.Crew
+	if b.HiddenResults != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_HiddenResults = *b.HiddenResults
+	}
+	return m0
+}
+
+// PersonTitle is a title a person is credited on.
+type PersonTitle struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Title       *DiscoveredTitle       `protobuf:"bytes,1,opt,name=title"`
+	xxx_hidden_Role        *string                `protobuf:"bytes,2,opt,name=role"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *PersonTitle) Reset() {
+	*x = PersonTitle{}
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PersonTitle) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PersonTitle) ProtoMessage() {}
+
+func (x *PersonTitle) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PersonTitle) GetTitle() *DiscoveredTitle {
+	if x != nil {
+		return x.xxx_hidden_Title
+	}
+	return nil
+}
+
+func (x *PersonTitle) GetRole() string {
+	if x != nil {
+		if x.xxx_hidden_Role != nil {
+			return *x.xxx_hidden_Role
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PersonTitle) SetTitle(v *DiscoveredTitle) {
+	x.xxx_hidden_Title = v
+}
+
+func (x *PersonTitle) SetRole(v string) {
+	x.xxx_hidden_Role = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *PersonTitle) HasTitle() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Title != nil
+}
+
+func (x *PersonTitle) HasRole() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *PersonTitle) ClearTitle() {
+	x.xxx_hidden_Title = nil
+}
+
+func (x *PersonTitle) ClearRole() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Role = nil
+}
+
+type PersonTitle_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Title *DiscoveredTitle
+	// The characters they play, or their jobs.
+	Role *string
+}
+
+func (b0 PersonTitle_builder) Build() *PersonTitle {
+	m0 := &PersonTitle{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Title = b.Title
+	if b.Role != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Role = b.Role
+	}
+	return m0
+}
+
 // Title is a movie or series as the metadata providers tell it, in the
 // server's metadata language and country, with what the server has of it.
 type Title struct {
@@ -3454,7 +4110,7 @@ type Title struct {
 
 func (x *Title) Reset() {
 	*x = Title{}
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[15]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3466,7 +4122,7 @@ func (x *Title) String() string {
 func (*Title) ProtoMessage() {}
 
 func (x *Title) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[15]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4668,7 +5324,7 @@ type TitleCredit struct {
 
 func (x *TitleCredit) Reset() {
 	*x = TitleCredit{}
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[16]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4680,7 +5336,7 @@ func (x *TitleCredit) String() string {
 func (*TitleCredit) ProtoMessage() {}
 
 func (x *TitleCredit) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[16]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4894,7 +5550,7 @@ type SeasonStatus struct {
 
 func (x *SeasonStatus) Reset() {
 	*x = SeasonStatus{}
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[17]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4906,7 +5562,7 @@ func (x *SeasonStatus) String() string {
 func (*SeasonStatus) ProtoMessage() {}
 
 func (x *SeasonStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[17]
+	mi := &file_mavio_acquisition_v1_discover_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5273,9 +5929,10 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	"\atmdb_id\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x06tmdbId\x12\x1a\n" +
 	"\blanguage\x18\x03 \x01(\tR\blanguage\"E\n" +
 	"\x10GetTitleResponse\x121\n" +
-	"\x05title\x18\x01 \x01(\v2\x1b.mavio.acquisition.v1.TitleR\x05title\"~\n" +
-	"\x10GetSeasonRequest\x12 \n" +
-	"\atmdb_id\x18\x01 \x01(\x05B\a\xbaH\x04\x1a\x02 \x00R\x06tmdbId\x12,\n" +
+	"\x05title\x18\x01 \x01(\v2\x1b.mavio.acquisition.v1.TitleR\x05title\"\x81\x01\n" +
+	"\x10GetSeasonRequest\x12#\n" +
+	"\atmdb_id\x18\x01 \x01(\x05B\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x06tmdbId\x12,\n" +
 	"\rseason_number\x18\x02 \x01(\x05B\a\xbaH\x04\x1a\x02(\x00R\fseasonNumber\x12\x1a\n" +
 	"\blanguage\x18\x03 \x01(\tR\blanguage\"T\n" +
 	"\x11GetSeasonResponse\x12?\n" +
@@ -5285,7 +5942,33 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
 	"\boverview\x18\x03 \x01(\tR\boverview\x12\x19\n" +
 	"\bair_date\x18\x04 \x01(\tR\aairDate\x12\x1b\n" +
-	"\tstill_url\x18\x05 \x01(\tR\bstillUrl\"\x87\x0f\n" +
+	"\tstill_url\x18\x05 \x01(\tR\bstillUrl\"S\n" +
+	"\x10GetPersonRequest\x12#\n" +
+	"\atmdb_id\x18\x01 \x01(\x05B\n" +
+	"\xbaH\a\xc8\x01\x01\x1a\x02 \x00R\x06tmdbId\x12\x1a\n" +
+	"\blanguage\x18\x02 \x01(\tR\blanguage\"I\n" +
+	"\x11GetPersonResponse\x124\n" +
+	"\x06person\x18\x01 \x01(\v2\x1c.mavio.acquisition.v1.PersonR\x06person\"\xb2\x04\n" +
+	"\x06Person\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1c\n" +
+	"\tbiography\x18\x02 \x01(\tR\tbiography\x12\x1a\n" +
+	"\bbirthday\x18\x03 \x01(\tR\bbirthday\x12\x1a\n" +
+	"\bdeathday\x18\x04 \x01(\tR\bdeathday\x12$\n" +
+	"\x0eplace_of_birth\x18\x05 \x01(\tR\fplaceOfBirth\x12\"\n" +
+	"\ralso_known_as\x18\x06 \x03(\tR\valsoKnownAs\x120\n" +
+	"\x14known_for_department\x18\a \x01(\tR\x12knownForDepartment\x12\x1b\n" +
+	"\timage_url\x18\b \x01(\tR\bimageUrl\x12P\n" +
+	"\fexternal_ids\x18\t \x03(\v2-.mavio.acquisition.v1.Person.ExternalIdsEntryR\vexternalIds\x125\n" +
+	"\x04cast\x18\n" +
+	" \x03(\v2!.mavio.acquisition.v1.PersonTitleR\x04cast\x125\n" +
+	"\x04crew\x18\v \x03(\v2!.mavio.acquisition.v1.PersonTitleR\x04crew\x12%\n" +
+	"\x0ehidden_results\x18\f \x01(\x05R\rhiddenResults\x1a>\n" +
+	"\x10ExternalIdsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"^\n" +
+	"\vPersonTitle\x12;\n" +
+	"\x05title\x18\x01 \x01(\v2%.mavio.acquisition.v1.DiscoveredTitleR\x05title\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\"\x87\x0f\n" +
 	"\x05Title\x12>\n" +
 	"\n" +
 	"media_kind\x18\x01 \x01(\x0e2\x1f.mavio.acquisition.v1.MediaKindR\tmediaKind\x12\x17\n" +
@@ -5366,18 +6049,19 @@ const file_mavio_acquisition_v1_discover_proto_rawDesc = "" +
 	" MEDIA_STATUS_PARTIALLY_AVAILABLE\x10\x03\x12\x1a\n" +
 	"\x16MEDIA_STATUS_AVAILABLE\x10\x04\x12\x1c\n" +
 	"\x18MEDIA_STATUS_BLOCKLISTED\x10\x05\x12\x18\n" +
-	"\x14MEDIA_STATUS_DELETED\x10\x062\x84\x05\n" +
+	"\x14MEDIA_STATUS_DELETED\x10\x062\xe7\x05\n" +
 	"\x0fDiscoverService\x12j\n" +
 	"\fListCatalogs\x12).mavio.acquisition.v1.ListCatalogsRequest\x1a*.mavio.acquisition.v1.ListCatalogsResponse\"\x03\x90\x02\x01\x12^\n" +
 	"\bDiscover\x12%.mavio.acquisition.v1.DiscoverRequest\x1a&.mavio.acquisition.v1.DiscoverResponse\"\x03\x90\x02\x01\x12v\n" +
 	"\x10ListFilterValues\x12-.mavio.acquisition.v1.ListFilterValuesRequest\x1a..mavio.acquisition.v1.ListFilterValuesResponse\"\x03\x90\x02\x01\x12j\n" +
 	"\fSearchTitles\x12).mavio.acquisition.v1.SearchTitlesRequest\x1a*.mavio.acquisition.v1.SearchTitlesResponse\"\x03\x90\x02\x01\x12^\n" +
 	"\bGetTitle\x12%.mavio.acquisition.v1.GetTitleRequest\x1a&.mavio.acquisition.v1.GetTitleResponse\"\x03\x90\x02\x01\x12a\n" +
-	"\tGetSeason\x12&.mavio.acquisition.v1.GetSeasonRequest\x1a'.mavio.acquisition.v1.GetSeasonResponse\"\x03\x90\x02\x01B\xea\x01\n" +
+	"\tGetSeason\x12&.mavio.acquisition.v1.GetSeasonRequest\x1a'.mavio.acquisition.v1.GetSeasonResponse\"\x03\x90\x02\x01\x12a\n" +
+	"\tGetPerson\x12&.mavio.acquisition.v1.GetPersonRequest\x1a'.mavio.acquisition.v1.GetPersonResponse\"\x03\x90\x02\x01B\xea\x01\n" +
 	"\x18com.mavio.acquisition.v1B\rDiscoverProtoP\x01ZMgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1;acquisitionv1\xa2\x02\x03MAX\xaa\x02\x14Mavio.Acquisition.V1\xca\x02\x14Mavio\\Acquisition\\V1\xe2\x02 Mavio\\Acquisition\\V1\\GPBMetadata\xea\x02\x16Mavio::Acquisition::V1b\beditionsp\xe8\a"
 
 var file_mavio_acquisition_v1_discover_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_mavio_acquisition_v1_discover_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_mavio_acquisition_v1_discover_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_mavio_acquisition_v1_discover_proto_goTypes = []any{
 	(MediaStatus)(0),                 // 0: mavio.acquisition.v1.MediaStatus
 	(*ListCatalogsRequest)(nil),      // 1: mavio.acquisition.v1.ListCatalogsRequest
@@ -5395,77 +6079,89 @@ var file_mavio_acquisition_v1_discover_proto_goTypes = []any{
 	(*GetSeasonRequest)(nil),         // 13: mavio.acquisition.v1.GetSeasonRequest
 	(*GetSeasonResponse)(nil),        // 14: mavio.acquisition.v1.GetSeasonResponse
 	(*SeasonEpisode)(nil),            // 15: mavio.acquisition.v1.SeasonEpisode
-	(*Title)(nil),                    // 16: mavio.acquisition.v1.Title
-	(*TitleCredit)(nil),              // 17: mavio.acquisition.v1.TitleCredit
-	(*SeasonStatus)(nil),             // 18: mavio.acquisition.v1.SeasonStatus
-	nil,                              // 19: mavio.acquisition.v1.DiscoveredTitle.ExternalIdsEntry
-	nil,                              // 20: mavio.acquisition.v1.Title.ExternalIdsEntry
-	nil,                              // 21: mavio.acquisition.v1.TitleCredit.ExternalIdsEntry
-	(v1.CatalogKind)(0),              // 22: mavio.plugin.v1.CatalogKind
-	(MediaKind)(0),                   // 23: mavio.acquisition.v1.MediaKind
-	(v1.DiscoverFilter)(0),           // 24: mavio.plugin.v1.DiscoverFilter
-	(v1.DiscoverSort)(0),             // 25: mavio.plugin.v1.DiscoverSort
-	(RequestStatus)(0),               // 26: mavio.acquisition.v1.RequestStatus
-	(*v1.FilterValue)(nil),           // 27: mavio.plugin.v1.FilterValue
-	(*Request)(nil),                  // 28: mavio.acquisition.v1.Request
-	(*v1.WatchProvider)(nil),         // 29: mavio.plugin.v1.WatchProvider
-	(v1.ProductionStatus)(0),         // 30: mavio.plugin.v1.ProductionStatus
-	(*v1.Reference)(nil),             // 31: mavio.plugin.v1.Reference
-	(v11.CreditKind)(0),              // 32: mavio.library.v1.CreditKind
+	(*GetPersonRequest)(nil),         // 16: mavio.acquisition.v1.GetPersonRequest
+	(*GetPersonResponse)(nil),        // 17: mavio.acquisition.v1.GetPersonResponse
+	(*Person)(nil),                   // 18: mavio.acquisition.v1.Person
+	(*PersonTitle)(nil),              // 19: mavio.acquisition.v1.PersonTitle
+	(*Title)(nil),                    // 20: mavio.acquisition.v1.Title
+	(*TitleCredit)(nil),              // 21: mavio.acquisition.v1.TitleCredit
+	(*SeasonStatus)(nil),             // 22: mavio.acquisition.v1.SeasonStatus
+	nil,                              // 23: mavio.acquisition.v1.DiscoveredTitle.ExternalIdsEntry
+	nil,                              // 24: mavio.acquisition.v1.Person.ExternalIdsEntry
+	nil,                              // 25: mavio.acquisition.v1.Title.ExternalIdsEntry
+	nil,                              // 26: mavio.acquisition.v1.TitleCredit.ExternalIdsEntry
+	(v1.CatalogKind)(0),              // 27: mavio.plugin.v1.CatalogKind
+	(MediaKind)(0),                   // 28: mavio.acquisition.v1.MediaKind
+	(v1.DiscoverFilter)(0),           // 29: mavio.plugin.v1.DiscoverFilter
+	(v1.DiscoverSort)(0),             // 30: mavio.plugin.v1.DiscoverSort
+	(RequestStatus)(0),               // 31: mavio.acquisition.v1.RequestStatus
+	(*v1.FilterValue)(nil),           // 32: mavio.plugin.v1.FilterValue
+	(*Request)(nil),                  // 33: mavio.acquisition.v1.Request
+	(*v1.WatchProvider)(nil),         // 34: mavio.plugin.v1.WatchProvider
+	(v1.ProductionStatus)(0),         // 35: mavio.plugin.v1.ProductionStatus
+	(*v1.Reference)(nil),             // 36: mavio.plugin.v1.Reference
+	(v11.CreditKind)(0),              // 37: mavio.library.v1.CreditKind
 }
 var file_mavio_acquisition_v1_discover_proto_depIdxs = []int32{
 	3,  // 0: mavio.acquisition.v1.ListCatalogsResponse.catalogs:type_name -> mavio.acquisition.v1.Catalog
-	22, // 1: mavio.acquisition.v1.Catalog.kind:type_name -> mavio.plugin.v1.CatalogKind
-	23, // 2: mavio.acquisition.v1.Catalog.media_kinds:type_name -> mavio.acquisition.v1.MediaKind
-	24, // 3: mavio.acquisition.v1.Catalog.filters:type_name -> mavio.plugin.v1.DiscoverFilter
-	25, // 4: mavio.acquisition.v1.Catalog.sorts:type_name -> mavio.plugin.v1.DiscoverSort
-	23, // 5: mavio.acquisition.v1.DiscoverRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	25, // 6: mavio.acquisition.v1.DiscoverRequest.sort:type_name -> mavio.plugin.v1.DiscoverSort
+	27, // 1: mavio.acquisition.v1.Catalog.kind:type_name -> mavio.plugin.v1.CatalogKind
+	28, // 2: mavio.acquisition.v1.Catalog.media_kinds:type_name -> mavio.acquisition.v1.MediaKind
+	29, // 3: mavio.acquisition.v1.Catalog.filters:type_name -> mavio.plugin.v1.DiscoverFilter
+	30, // 4: mavio.acquisition.v1.Catalog.sorts:type_name -> mavio.plugin.v1.DiscoverSort
+	28, // 5: mavio.acquisition.v1.DiscoverRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	30, // 6: mavio.acquisition.v1.DiscoverRequest.sort:type_name -> mavio.plugin.v1.DiscoverSort
 	6,  // 7: mavio.acquisition.v1.DiscoverResponse.titles:type_name -> mavio.acquisition.v1.DiscoveredTitle
-	23, // 8: mavio.acquisition.v1.DiscoveredTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	19, // 9: mavio.acquisition.v1.DiscoveredTitle.external_ids:type_name -> mavio.acquisition.v1.DiscoveredTitle.ExternalIdsEntry
+	28, // 8: mavio.acquisition.v1.DiscoveredTitle.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	23, // 9: mavio.acquisition.v1.DiscoveredTitle.external_ids:type_name -> mavio.acquisition.v1.DiscoveredTitle.ExternalIdsEntry
 	0,  // 10: mavio.acquisition.v1.DiscoveredTitle.status:type_name -> mavio.acquisition.v1.MediaStatus
-	26, // 11: mavio.acquisition.v1.DiscoveredTitle.request_status:type_name -> mavio.acquisition.v1.RequestStatus
-	24, // 12: mavio.acquisition.v1.ListFilterValuesRequest.filter:type_name -> mavio.plugin.v1.DiscoverFilter
-	23, // 13: mavio.acquisition.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	27, // 14: mavio.acquisition.v1.ListFilterValuesResponse.values:type_name -> mavio.plugin.v1.FilterValue
-	23, // 15: mavio.acquisition.v1.SearchTitlesRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	31, // 11: mavio.acquisition.v1.DiscoveredTitle.request_status:type_name -> mavio.acquisition.v1.RequestStatus
+	29, // 12: mavio.acquisition.v1.ListFilterValuesRequest.filter:type_name -> mavio.plugin.v1.DiscoverFilter
+	28, // 13: mavio.acquisition.v1.ListFilterValuesRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	32, // 14: mavio.acquisition.v1.ListFilterValuesResponse.values:type_name -> mavio.plugin.v1.FilterValue
+	28, // 15: mavio.acquisition.v1.SearchTitlesRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
 	6,  // 16: mavio.acquisition.v1.SearchTitlesResponse.titles:type_name -> mavio.acquisition.v1.DiscoveredTitle
-	23, // 17: mavio.acquisition.v1.GetTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	16, // 18: mavio.acquisition.v1.GetTitleResponse.title:type_name -> mavio.acquisition.v1.Title
+	28, // 17: mavio.acquisition.v1.GetTitleRequest.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	20, // 18: mavio.acquisition.v1.GetTitleResponse.title:type_name -> mavio.acquisition.v1.Title
 	15, // 19: mavio.acquisition.v1.GetSeasonResponse.episodes:type_name -> mavio.acquisition.v1.SeasonEpisode
-	23, // 20: mavio.acquisition.v1.Title.media_kind:type_name -> mavio.acquisition.v1.MediaKind
-	20, // 21: mavio.acquisition.v1.Title.external_ids:type_name -> mavio.acquisition.v1.Title.ExternalIdsEntry
-	0,  // 22: mavio.acquisition.v1.Title.status:type_name -> mavio.acquisition.v1.MediaStatus
-	28, // 23: mavio.acquisition.v1.Title.requests:type_name -> mavio.acquisition.v1.Request
-	18, // 24: mavio.acquisition.v1.Title.seasons:type_name -> mavio.acquisition.v1.SeasonStatus
-	29, // 25: mavio.acquisition.v1.Title.watch_providers:type_name -> mavio.plugin.v1.WatchProvider
-	17, // 26: mavio.acquisition.v1.Title.credits:type_name -> mavio.acquisition.v1.TitleCredit
-	30, // 27: mavio.acquisition.v1.Title.production_status:type_name -> mavio.plugin.v1.ProductionStatus
-	31, // 28: mavio.acquisition.v1.Title.genre_refs:type_name -> mavio.plugin.v1.Reference
-	31, // 29: mavio.acquisition.v1.Title.keyword_refs:type_name -> mavio.plugin.v1.Reference
-	31, // 30: mavio.acquisition.v1.Title.studio_refs:type_name -> mavio.plugin.v1.Reference
-	32, // 31: mavio.acquisition.v1.TitleCredit.kind:type_name -> mavio.library.v1.CreditKind
-	21, // 32: mavio.acquisition.v1.TitleCredit.external_ids:type_name -> mavio.acquisition.v1.TitleCredit.ExternalIdsEntry
-	0,  // 33: mavio.acquisition.v1.SeasonStatus.status:type_name -> mavio.acquisition.v1.MediaStatus
-	26, // 34: mavio.acquisition.v1.SeasonStatus.request_status:type_name -> mavio.acquisition.v1.RequestStatus
-	1,  // 35: mavio.acquisition.v1.DiscoverService.ListCatalogs:input_type -> mavio.acquisition.v1.ListCatalogsRequest
-	4,  // 36: mavio.acquisition.v1.DiscoverService.Discover:input_type -> mavio.acquisition.v1.DiscoverRequest
-	7,  // 37: mavio.acquisition.v1.DiscoverService.ListFilterValues:input_type -> mavio.acquisition.v1.ListFilterValuesRequest
-	9,  // 38: mavio.acquisition.v1.DiscoverService.SearchTitles:input_type -> mavio.acquisition.v1.SearchTitlesRequest
-	11, // 39: mavio.acquisition.v1.DiscoverService.GetTitle:input_type -> mavio.acquisition.v1.GetTitleRequest
-	13, // 40: mavio.acquisition.v1.DiscoverService.GetSeason:input_type -> mavio.acquisition.v1.GetSeasonRequest
-	2,  // 41: mavio.acquisition.v1.DiscoverService.ListCatalogs:output_type -> mavio.acquisition.v1.ListCatalogsResponse
-	5,  // 42: mavio.acquisition.v1.DiscoverService.Discover:output_type -> mavio.acquisition.v1.DiscoverResponse
-	8,  // 43: mavio.acquisition.v1.DiscoverService.ListFilterValues:output_type -> mavio.acquisition.v1.ListFilterValuesResponse
-	10, // 44: mavio.acquisition.v1.DiscoverService.SearchTitles:output_type -> mavio.acquisition.v1.SearchTitlesResponse
-	12, // 45: mavio.acquisition.v1.DiscoverService.GetTitle:output_type -> mavio.acquisition.v1.GetTitleResponse
-	14, // 46: mavio.acquisition.v1.DiscoverService.GetSeason:output_type -> mavio.acquisition.v1.GetSeasonResponse
-	41, // [41:47] is the sub-list for method output_type
-	35, // [35:41] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	18, // 20: mavio.acquisition.v1.GetPersonResponse.person:type_name -> mavio.acquisition.v1.Person
+	24, // 21: mavio.acquisition.v1.Person.external_ids:type_name -> mavio.acquisition.v1.Person.ExternalIdsEntry
+	19, // 22: mavio.acquisition.v1.Person.cast:type_name -> mavio.acquisition.v1.PersonTitle
+	19, // 23: mavio.acquisition.v1.Person.crew:type_name -> mavio.acquisition.v1.PersonTitle
+	6,  // 24: mavio.acquisition.v1.PersonTitle.title:type_name -> mavio.acquisition.v1.DiscoveredTitle
+	28, // 25: mavio.acquisition.v1.Title.media_kind:type_name -> mavio.acquisition.v1.MediaKind
+	25, // 26: mavio.acquisition.v1.Title.external_ids:type_name -> mavio.acquisition.v1.Title.ExternalIdsEntry
+	0,  // 27: mavio.acquisition.v1.Title.status:type_name -> mavio.acquisition.v1.MediaStatus
+	33, // 28: mavio.acquisition.v1.Title.requests:type_name -> mavio.acquisition.v1.Request
+	22, // 29: mavio.acquisition.v1.Title.seasons:type_name -> mavio.acquisition.v1.SeasonStatus
+	34, // 30: mavio.acquisition.v1.Title.watch_providers:type_name -> mavio.plugin.v1.WatchProvider
+	21, // 31: mavio.acquisition.v1.Title.credits:type_name -> mavio.acquisition.v1.TitleCredit
+	35, // 32: mavio.acquisition.v1.Title.production_status:type_name -> mavio.plugin.v1.ProductionStatus
+	36, // 33: mavio.acquisition.v1.Title.genre_refs:type_name -> mavio.plugin.v1.Reference
+	36, // 34: mavio.acquisition.v1.Title.keyword_refs:type_name -> mavio.plugin.v1.Reference
+	36, // 35: mavio.acquisition.v1.Title.studio_refs:type_name -> mavio.plugin.v1.Reference
+	37, // 36: mavio.acquisition.v1.TitleCredit.kind:type_name -> mavio.library.v1.CreditKind
+	26, // 37: mavio.acquisition.v1.TitleCredit.external_ids:type_name -> mavio.acquisition.v1.TitleCredit.ExternalIdsEntry
+	0,  // 38: mavio.acquisition.v1.SeasonStatus.status:type_name -> mavio.acquisition.v1.MediaStatus
+	31, // 39: mavio.acquisition.v1.SeasonStatus.request_status:type_name -> mavio.acquisition.v1.RequestStatus
+	1,  // 40: mavio.acquisition.v1.DiscoverService.ListCatalogs:input_type -> mavio.acquisition.v1.ListCatalogsRequest
+	4,  // 41: mavio.acquisition.v1.DiscoverService.Discover:input_type -> mavio.acquisition.v1.DiscoverRequest
+	7,  // 42: mavio.acquisition.v1.DiscoverService.ListFilterValues:input_type -> mavio.acquisition.v1.ListFilterValuesRequest
+	9,  // 43: mavio.acquisition.v1.DiscoverService.SearchTitles:input_type -> mavio.acquisition.v1.SearchTitlesRequest
+	11, // 44: mavio.acquisition.v1.DiscoverService.GetTitle:input_type -> mavio.acquisition.v1.GetTitleRequest
+	13, // 45: mavio.acquisition.v1.DiscoverService.GetSeason:input_type -> mavio.acquisition.v1.GetSeasonRequest
+	16, // 46: mavio.acquisition.v1.DiscoverService.GetPerson:input_type -> mavio.acquisition.v1.GetPersonRequest
+	2,  // 47: mavio.acquisition.v1.DiscoverService.ListCatalogs:output_type -> mavio.acquisition.v1.ListCatalogsResponse
+	5,  // 48: mavio.acquisition.v1.DiscoverService.Discover:output_type -> mavio.acquisition.v1.DiscoverResponse
+	8,  // 49: mavio.acquisition.v1.DiscoverService.ListFilterValues:output_type -> mavio.acquisition.v1.ListFilterValuesResponse
+	10, // 50: mavio.acquisition.v1.DiscoverService.SearchTitles:output_type -> mavio.acquisition.v1.SearchTitlesResponse
+	12, // 51: mavio.acquisition.v1.DiscoverService.GetTitle:output_type -> mavio.acquisition.v1.GetTitleResponse
+	14, // 52: mavio.acquisition.v1.DiscoverService.GetSeason:output_type -> mavio.acquisition.v1.GetSeasonResponse
+	17, // 53: mavio.acquisition.v1.DiscoverService.GetPerson:output_type -> mavio.acquisition.v1.GetPersonResponse
+	47, // [47:54] is the sub-list for method output_type
+	40, // [40:47] is the sub-list for method input_type
+	40, // [40:40] is the sub-list for extension type_name
+	40, // [40:40] is the sub-list for extension extendee
+	0,  // [0:40] is the sub-list for field type_name
 }
 
 func init() { file_mavio_acquisition_v1_discover_proto_init() }
@@ -5481,7 +6177,7 @@ func file_mavio_acquisition_v1_discover_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_acquisition_v1_discover_proto_rawDesc), len(file_mavio_acquisition_v1_discover_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   21,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

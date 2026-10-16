@@ -1348,6 +1348,11 @@
     <string name="person_died">逝于 %s</string>
     <string name="person_more">更多</string>
     <string name="person_less">收起</string>
+    <string name="person_appearances">出演作品</string>
+    <string name="person_crew">幕后作品</string>
+    <string name="person_also_known_as">又名 %s</string>
+    <string name="person_kinds">作品类型</string>
+    <string name="person_all_kinds">全部</string>
     <string name="lists_more">更多</string>
     <string name="lists_add_to_playlist">添加到播放列表</string>
     <string name="lists_add_to_collection">添加到合集</string>
