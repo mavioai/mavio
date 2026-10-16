@@ -1742,15 +1742,13 @@
     <string name="storage_question_none">Continue to finish the configuration.</string>
     <!-- Button answering a configuration question -->
     <string name="storage_continue">Continue</string>
-    <!-- Button leaving the configuration's questions -->
-    <string name="storage_later">Later</string>
     <!-- Answers yes to a question of a remote's configuration -->
     <string name="storage_yes">Yes</string>
     <!-- Answers no to a question of a remote's configuration -->
     <string name="storage_no">No</string>
     <!-- Shown under a QR code to scan until the login is confirmed -->
     <string name="storage_waiting_scan">Waiting for the login to be confirmed on the phone…</string>
-    <!-- Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted -->
+    <!-- Shown while a remote's configuration is cancelled, until the answer being sent returns -->
     <string name="storage_cancelling">Cancelling…</string>
     <!-- Button running a remote's configuration again, such as its login -->
     <string name="storage_reconfigure">Configure Again</string>

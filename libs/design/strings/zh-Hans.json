@@ -854,7 +854,6 @@
   "storage.questionFooter": "要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。",
   "storage.questionNone": "继续以完成配置。",
   "storage.continue": "继续",
-  "storage.later": "稍后",
   "storage.yes": "是",
   "storage.no": "否",
   "storage.waitingScan": "正在等待在手机上确认登录…",

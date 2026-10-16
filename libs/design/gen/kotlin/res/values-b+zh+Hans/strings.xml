@@ -875,7 +875,6 @@
     <string name="storage_question_footer">要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。</string>
     <string name="storage_question_none">继续以完成配置。</string>
     <string name="storage_continue">继续</string>
-    <string name="storage_later">稍后</string>
     <string name="storage_yes">是</string>
     <string name="storage_no">否</string>
     <string name="storage_waiting_scan">正在等待在手机上确认登录…</string>

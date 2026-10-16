@@ -857,7 +857,6 @@ export type MessageKey =
   | 'storage.questionFooter'
   | 'storage.questionNone'
   | 'storage.continue'
-  | 'storage.later'
   | 'storage.yes'
   | 'storage.no'
   | 'storage.waitingScan'
@@ -2535,7 +2534,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.questionFooter": "To authorize a cloud drive, run the command its help gives on a computer with a browser and paste the token it prints.",
     "storage.questionNone": "Continue to finish the configuration.",
     "storage.continue": "Continue",
-    "storage.later": "Later",
     "storage.yes": "Yes",
     "storage.no": "No",
     "storage.waitingScan": "Waiting for the login to be confirmed on the phone…",
@@ -4211,7 +4209,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "storage.questionFooter": "要授权云盘，请在有浏览器的电脑上运行帮助中给出的命令，然后粘贴它输出的令牌。",
     "storage.questionNone": "继续以完成配置。",
     "storage.continue": "继续",
-    "storage.later": "稍后",
     "storage.yes": "是",
     "storage.no": "否",
     "storage.waitingScan": "正在等待在手机上确认登录…",

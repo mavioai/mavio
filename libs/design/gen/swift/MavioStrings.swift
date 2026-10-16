@@ -2743,9 +2743,6 @@ public enum MavioStrings {
     /// Button answering a configuration question
     public static var storageContinue: String { NSLocalizedString("storage.continue", bundle: .module, comment: "") }
 
-    /// Button leaving the configuration's questions
-    public static var storageLater: String { NSLocalizedString("storage.later", bundle: .module, comment: "") }
-
     /// Answers yes to a question of a remote's configuration
     public static var storageYes: String { NSLocalizedString("storage.yes", bundle: .module, comment: "") }
 
@@ -2755,7 +2752,7 @@ public enum MavioStrings {
     /// Shown under a QR code to scan until the login is confirmed
     public static var storageWaitingScan: String { NSLocalizedString("storage.waitingScan", bundle: .module, comment: "") }
 
-    /// Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted
+    /// Shown while a remote's configuration is cancelled, until the answer being sent returns
     public static var storageCancelling: String { NSLocalizedString("storage.cancelling", bundle: .module, comment: "") }
 
     /// Button running a remote's configuration again, such as its login

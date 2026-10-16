@@ -363,8 +363,9 @@ function NewRemote({ server }: { server: ServerEntry }) {
  * value, or the token of authorizing a cloud drive — answered until none is
  * left. A question drawing a QR code, as 115's login asks, is answered yes
  * again and again until the phone confirms the login, its code kept on
- * screen while rclone asks again without it. onCancel, given for a new
- * remote, takes the place of Later.
+ * screen while rclone asks again without it. Cancelling stops asking once
+ * no answer is being sent; onCancel deletes a new remote, and leaves an
+ * existing one as its answers left it.
  */
 function QuestionStep({
   server,
@@ -377,7 +378,7 @@ function QuestionStep({
   name: string;
   question: ConfigQuestion;
   onDone: () => void;
-  onCancel?: () => void;
+  onCancel: () => void;
 }) {
   const actions = useRemoteActions(server);
   const [q, setQ] = useState(question);
@@ -388,7 +389,7 @@ function QuestionStep({
   const qr = drawn ?? (scan?.state === q.state ? scan.qr : undefined);
   const confirm = o?.type === "bool";
   // Cancelling waits for the answer being sent, which would otherwise save
-  // the remote again after its deletion.
+  // the remote after it is left, or again after its deletion.
   const leaving = useRef(false);
   const [cancelled, setCancelled] = useState(false);
   const waiting = !!qr && confirm && !actions.answer.isError && !cancelled;
@@ -413,7 +414,7 @@ function QuestionStep({
     return () => clearTimeout(id);
   }, [waiting, pending, q]);
   useEffect(() => {
-    if (cancelled && !pending) onCancel?.();
+    if (cancelled && !pending) onCancel();
   }, [cancelled, pending]);
   const help = o?.help.trim() ?? "";
   return (
@@ -426,7 +427,7 @@ function QuestionStep({
             <>
               {qr.before && <p className="type-body whitespace-pre-wrap">{qr.before}</p>}
               <QRCode dark={qr.dark} />
-              <p className="type-footnote text-text-secondary">{cancelled ? t("storage.cancelling") : waiting ? t("storage.waitingScan") : qr.after}</p>
+              {!cancelled && <p className="type-footnote text-text-secondary">{waiting ? t("storage.waitingScan") : qr.after}</p>}
             </>
           ) : (
             help && <p className="type-body whitespace-pre-wrap">{help}</p>
@@ -453,9 +454,9 @@ function QuestionStep({
         <Button
           variant="plain"
           disabled={cancelled}
-          onClick={onCancel ? () => ((leaving.current = true), setCancelled(true)) : onDone}
+          onClick={() => ((leaving.current = true), setCancelled(true))}
         >
-          {cancelled ? t("storage.cancelling") : onCancel ? t("action.cancel") : t("storage.later")}
+          {cancelled ? t("storage.cancelling") : t("action.cancel")}
         </Button>
         {actions.answer.isError && <span className="type-callout text-danger">{errorMessage(actions.answer.error)}</span>}
       </div>
@@ -468,6 +469,9 @@ function RemotePage({ server, name }: { server: ServerEntry; name: string }) {
   const providers = useStorageProviders(server);
   const remote = remotes.data?.find((r) => r.name === name);
   const provider = providers.data?.find((p) => p.name === remote?.type);
+  // The questions of its configuration, while they are answered, take the page.
+  const [question, setQuestion] = useState<ConfigQuestion>();
+  const [notice, setNotice] = useState<string>();
   const back = <BackLink section="storage" label={t("settings.storage")} />;
   if (remotes.isSuccess && !remote)
     return (
@@ -475,21 +479,45 @@ function RemotePage({ server, name }: { server: ServerEntry; name: string }) {
         <p className="type-callout text-text-secondary">{t("storage.noRemote")}</p>
       </Page>
     );
+  if (question)
+    return (
+      <Page title={name} message={t("storage.questionMessage")} back={back}>
+        <QuestionStep
+          server={server}
+          name={name}
+          question={question}
+          onDone={() => (setQuestion(undefined), setNotice(t("storage.saved")))}
+          onCancel={() => setQuestion(undefined)}
+        />
+      </Page>
+    );
   return (
     <Page title={name} message={remote && kindOf(providers.data, remote.type)} back={back}>
       {(remotes.isError || providers.isError) && <p className="type-callout text-danger">{errorMessage(remotes.error ?? providers.error)}</p>}
-      {remote && provider && <RemoteForm server={server} remote={remote} provider={provider} />}
+      {remote && provider && <RemoteForm server={server} remote={remote} provider={provider} notice={notice} onNotice={setNotice} onQuestion={setQuestion} />}
       {remote && <Folders server={server} remote={remote.name} />}
       {remote && <RemoveRemote server={server} name={remote.name} />}
     </Page>
   );
 }
 
-function RemoteForm({ server, remote, provider }: { server: ServerEntry; remote: Remote; provider: Provider }) {
+function RemoteForm({
+  server,
+  remote,
+  provider,
+  notice,
+  onNotice: setNotice,
+  onQuestion: setQuestion,
+}: {
+  server: ServerEntry;
+  remote: Remote;
+  provider: Provider;
+  notice?: string;
+  onNotice: (notice?: string) => void;
+  onQuestion: (q: ConfigQuestion) => void;
+}) {
   const actions = useRemoteActions(server);
   const [values, setValues] = useState<Record<string, string>>(() => ({ ...remote.parameters }));
-  const [question, setQuestion] = useState<ConfigQuestion>();
-  const [notice, setNotice] = useState<string>();
   // Secrets are never listed: an empty one keeps what is set.
   const secret = (o: Option) => o.password || o.sensitive;
   const changes = Object.fromEntries(
@@ -499,15 +527,6 @@ function RemoteForm({ server, remote, provider }: { server: ServerEntry; remote:
     }),
   );
   const changed = Object.keys(changes).length > 0;
-  if (question)
-    return (
-      <QuestionStep
-        server={server}
-        name={remote.name}
-        question={question}
-        onDone={() => (setQuestion(undefined), setNotice(t("storage.saved")), setValues({ ...remote.parameters }))}
-      />
-    );
   return (
     <>
       <OptionsGroup

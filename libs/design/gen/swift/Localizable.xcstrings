@@ -15583,24 +15583,6 @@
         }
       }
     },
-    "storage.later": {
-      "comment": "Button leaving the configuration's questions",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Later"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "稍后"
-          }
-        }
-      }
-    },
     "storage.yes": {
       "comment": "Answers yes to a question of a remote's configuration",
       "extractionState": "manual",
@@ -15656,7 +15638,7 @@
       }
     },
     "storage.cancelling": {
-      "comment": "Shown while a new remote's configuration is cancelled, until the answer being sent returns and the remote is deleted",
+      "comment": "Shown while a remote's configuration is cancelled, until the answer being sent returns",
       "extractionState": "manual",
       "localizations": {
         "en": {
