@@ -392,6 +392,9 @@ export type MessageKey =
   | 'settings.downloads'
   | 'settings.issues'
   | 'settings.conversations'
+  | 'settings.language'
+  | 'settings.systemLanguage'
+  | 'settings.languageNote'
   | 'plugins.installed'
   | 'plugins.available'
   | 'plugins.noneInstalled'
@@ -1985,6 +1988,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.downloads": "Downloads",
     "settings.issues": "Issues",
     "settings.conversations": "AI Conversations",
+    "settings.language": "Language",
+    "settings.systemLanguage": "System Language",
+    "settings.languageNote": "The page reloads in the language chosen.",
     "plugins.installed": "Installed",
     "plugins.available": "Available",
     "plugins.noneInstalled": "No plugins are installed.",
@@ -3576,6 +3582,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.downloads": "下载",
     "settings.issues": "问题",
     "settings.conversations": "AI 对话",
+    "settings.language": "语言",
+    "settings.systemLanguage": "跟随系统",
+    "settings.languageNote": "选择后，页面将以所选语言重新载入。",
     "plugins.installed": "已安装",
     "plugins.available": "可用",
     "plugins.noneInstalled": "尚未安装插件。",

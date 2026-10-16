@@ -410,6 +410,9 @@
     <string name="settings_downloads">下载</string>
     <string name="settings_issues">问题</string>
     <string name="settings_conversations">AI 对话</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_system_language">跟随系统</string>
+    <string name="settings_language_note">选择后，页面将以所选语言重新载入。</string>
     <string name="plugins_installed">已安装</string>
     <string name="plugins_available">可用</string>
     <string name="plugins_none_installed">尚未安装插件。</string>

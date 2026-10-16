@@ -19,6 +19,7 @@ import {
   useSignedIn,
   useSignIn,
 } from "@mavio/client-ts";
+import { locales } from "@mavio/design/strings";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
@@ -447,6 +448,23 @@ function AppearanceSection() {
           </>
         )}
       />
+      <Group footer={t("settings.languageNote")}>
+        <Row label={t("settings.language")}>
+          <Select
+            value={prefs.language}
+            label={t("settings.language")}
+            options={[
+              { value: "system" as const, label: t("settings.systemLanguage") },
+              ...locales.map((l) => ({ value: l, label: new Intl.DisplayNames([l], { type: "language" }).of(l) ?? l })),
+            ]}
+            onChange={(language) => {
+              // The strings and formats are chosen as the page loads.
+              setPrefs({ language });
+              location.reload();
+            }}
+          />
+        </Row>
+      </Group>
       <Group footer={t("settings.tvModeNote")}>
         <Row label={t("settings.tvMode")} detail={t("settings.tvModeMessage")}>
           <Switch on={prefs.tv} label={t("settings.tvMode")} onChange={(tv) => setPrefs({ tv })} />

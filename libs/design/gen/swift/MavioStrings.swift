@@ -1292,6 +1292,15 @@ public enum MavioStrings {
     /// Settings section of the administrators' conversations with AI models.
     public static var settingsConversations: String { NSLocalizedString("settings.conversations", bundle: .module, comment: "") }
 
+    /// Setting choosing the UI's language, under Appearance.
+    public static var settingsLanguage: String { NSLocalizedString("settings.language", bundle: .module, comment: "") }
+
+    /// Language option following the system's languages.
+    public static var settingsSystemLanguage: String { NSLocalizedString("settings.systemLanguage", bundle: .module, comment: "") }
+
+    /// Note under the Language setting.
+    public static var settingsLanguageNote: String { NSLocalizedString("settings.languageNote", bundle: .module, comment: "") }
+
     /// Tab of the plugins installed on the server, and the mark of an installed plugin.
     public static var pluginsInstalled: String { NSLocalizedString("plugins.installed", bundle: .module, comment: "") }
 

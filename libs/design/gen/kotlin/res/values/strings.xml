@@ -809,6 +809,12 @@
     <string name="settings_issues">Issues</string>
     <!-- Settings section of the administrators' conversations with AI models. -->
     <string name="settings_conversations">AI Conversations</string>
+    <!-- Setting choosing the UI's language, under Appearance. -->
+    <string name="settings_language">Language</string>
+    <!-- Language option following the system's languages. -->
+    <string name="settings_system_language">System Language</string>
+    <!-- Note under the Language setting. -->
+    <string name="settings_language_note">The page reloads in the language chosen.</string>
     <!-- Tab of the plugins installed on the server, and the mark of an installed plugin. -->
     <string name="plugins_installed">Installed</string>
     <!-- Tab of the plugins the catalogs offer, installed or not. -->

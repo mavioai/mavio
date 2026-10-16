@@ -14,8 +14,21 @@ export function pickLocale(languages: readonly string[]): Locale {
   return sourceLocale as Locale;
 }
 
-/** The locale of this browser. */
-export const locale: Locale = pickLocale(typeof navigator === "undefined" ? [] : navigator.languages);
+/** Where this browser's settings are kept (prefs.ts), the language chosen among them. */
+export const prefsKey = "mavio.prefs";
+
+/** The language chosen in the Appearance settings; undefined to follow the system's. */
+function chosenLocale(): Locale | undefined {
+  try {
+    const { language } = JSON.parse(localStorage.getItem(prefsKey) ?? "{}") as { language?: string };
+    return locales.find((l) => l === language);
+  } catch {
+    return undefined;
+  }
+}
+
+/** The locale of this browser: the language chosen, else the first of the system's the strings have. */
+export const locale: Locale = chosenLocale() ?? pickLocale(typeof navigator === "undefined" ? [] : navigator.languages);
 
 /** The language of discovered names and overviews: the locale's, as ISO 639-1. */
 export const discoverLanguage = locale.split("-")[0];

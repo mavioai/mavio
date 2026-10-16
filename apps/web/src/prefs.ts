@@ -4,7 +4,9 @@
 import { breakpoints } from "@mavio/design/tokens";
 import { useSyncExternalStore } from "react";
 
-import { t } from "./i18n.ts";
+import type { Locale } from "@mavio/design/strings";
+
+import { prefsKey, t } from "./i18n.ts";
 
 /** The color theme: the system's, or one chosen. */
 export type Appearance = "system" | "light" | "dark";
@@ -32,6 +34,8 @@ export const qualities: { value: Quality; label: () => string }[] = [
 
 export interface Prefs {
   appearance: Appearance;
+  /** The UI's language, or the system's; read by i18n.ts as the page loads. */
+  language: Locale | "system";
   /** The television layout, for a computer connected to a TV. */
   tv: boolean;
   /** Whether the desktop layout's sidebar is expanded, where the window is wide enough. */
@@ -40,8 +44,8 @@ export interface Prefs {
   autoplayNext: boolean;
 }
 
-const key = "mavio.prefs";
-const defaults: Prefs = { appearance: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true };
+const key = prefsKey;
+const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true };
 
 function read(): Prefs {
   try {
