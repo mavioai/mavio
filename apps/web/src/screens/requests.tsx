@@ -137,7 +137,8 @@ function seasonsText(r: Request): string {
   return numbers.map((n) => (n === 0 ? t("discover.specials") : t("discover.season", { number: n }))).join(", ");
 }
 
-function RequestRow({ server, request: r, admin, userName }: { server: ServerEntry; request: Request; admin: boolean; userName: string }) {
+/** A request with what the user may do to it. */
+export function RequestRow({ server, request: r, admin, userName }: { server: ServerEntry; request: Request; admin: boolean; userName: string }) {
   const series = r.mediaKind === MediaKind.SERIES;
   const title = useTitle(server, r.mediaKind, r.tmdbId);
   const actions = useRequestActions(server);

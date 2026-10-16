@@ -223,7 +223,8 @@ function StatusBadge({ status }: { status: IssueStatus }) {
 }
 
 /** An issue in a list: its item, kind, numbers and status, who reported it and when it last changed. */
-function IssueRow({ server, issue: i, onOpen, item: showItem = true }: { server: ServerEntry; issue: Issue; onOpen: () => void; item?: boolean }) {
+/** An issue, opened in its dialog when pressed. */
+export function IssueRow({ server, issue: i, onOpen, item: showItem = true }: { server: ServerEntry; issue: Issue; onOpen: () => void; item?: boolean }) {
   const item = useItem(showItem ? server : undefined, i.itemId);
   const nameOf = useNames(server);
   const label = [showItem ? item.data?.item?.name : undefined, typeName(i.type), numbersOf(i)].filter(Boolean).join(" · ");

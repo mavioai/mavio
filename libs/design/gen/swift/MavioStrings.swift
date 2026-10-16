@@ -307,6 +307,31 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("discover.episodeTitle", bundle: .module, comment: ""), number, name)
     }
 
+    /// Opens a dialog to report a problem with a title the library has
+    public static var discoverReportIssue: String { NSLocalizedString("discover.reportIssue", bundle: .module, comment: "") }
+
+    /// Opens the administrator's panel of a discovered title
+    public static var discoverManage: String { NSLocalizedString("discover.manage", bundle: .module, comment: "") }
+
+    /// Title of the administrator's panel of a discovered title
+    public static func discoverManageTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.manageTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Shown in the manage panel when a title has no active requests
+    public static var discoverNoRequests: String { NSLocalizedString("discover.noRequests", bundle: .module, comment: "") }
+
+    /// Link from the manage panel to the title's item
+    public static var discoverOpenItem: String { NSLocalizedString("discover.openItem", bundle: .module, comment: "") }
+
+    /// Footer under the block button of the manage panel
+    public static var discoverBlockFooter: String { NSLocalizedString("discover.blockFooter", bundle: .module, comment: "") }
+
+    /// Status badge of a title being downloaded
+    public static func discoverDownloading(percent: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.downloading", bundle: .module, comment: ""), percent)
+    }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 

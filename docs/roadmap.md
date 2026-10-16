@@ -596,6 +596,7 @@ flowchart TD
   - [x] A discovered series' seasons expanding to their episodes (`DiscoverService.GetSeason`), as Seerr's, episode lists kept for six hours
   - [x] A person's page as Seerr's (`DiscoverService.GetPerson`, the discovery providers' `GetPerson`), opened from the cast and crew of a discovered title
   - [x] A collection's page as Seerr's (`DiscoverService.GetCollection`, the discovery providers' `GetCollection`): requesting its movies, and blocklisting them for administrators
+  - [x] A title's administration as Seerr's: approving and declining its pending requests in place, its download progress by its status, a Manage panel of its requests, downloads, open issues and the blocklist, and reporting an issue with what the library has
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
 - [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers

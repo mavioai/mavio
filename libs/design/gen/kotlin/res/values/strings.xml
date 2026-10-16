@@ -178,6 +178,20 @@
     <string name="discover_no_episodes">Episode list unavailable.</string>
     <!-- An episode of an expanded season of a discovered series: its number and name. -->
     <string name="discover_episode_title">%1$s - %2$s</string>
+    <!-- Opens a dialog to report a problem with a title the library has -->
+    <string name="discover_report_issue">Report Issue</string>
+    <!-- Opens the administrator's panel of a discovered title -->
+    <string name="discover_manage">Manage</string>
+    <!-- Title of the administrator's panel of a discovered title -->
+    <string name="discover_manage_title">Manage %s</string>
+    <!-- Shown in the manage panel when a title has no active requests -->
+    <string name="discover_no_requests">No active requests.</string>
+    <!-- Link from the manage panel to the title's item -->
+    <string name="discover_open_item">Open in Library</string>
+    <!-- Footer under the block button of the manage panel -->
+    <string name="discover_block_footer">A blocklisted title can no longer be requested.</string>
+    <!-- Status badge of a title being downloaded -->
+    <string name="discover_downloading">Downloading %s%%</string>
     <!-- Button opening the sort options of a library. -->
     <string name="library_sort">Sort</string>
     <!-- Button opening the filters of a library. -->

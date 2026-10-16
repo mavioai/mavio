@@ -3,6 +3,7 @@
 // declining, retrying, changing the seasons of and deleting them; and the
 // user's quotas.
 import { RequestService, type RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
+import type { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { serverKey, useServersStore } from "./hooks.ts";
@@ -51,6 +52,8 @@ export function useRequestActions(server: ServerEntry) {
     retry: useMutation({ mutationFn: (id: string) => c().retryRequest({ id }), onSuccess }),
     update: useMutation({ mutationFn: (v: { id: string; seasons: number[] }) => c().updateRequest(v), onSuccess }),
     remove: useMutation({ mutationFn: (id: string) => c().deleteRequest({ id }), onSuccess }),
+    blockTitle: useMutation({ mutationFn: (v: { mediaKind: MediaKind; tmdbId: number }) => c().blockTitle(v), onSuccess }),
+    unblockTitle: useMutation({ mutationFn: (v: { mediaKind: MediaKind; tmdbId: number }) => c().unblockTitle(v), onSuccess }),
     blockCollection: useMutation({ mutationFn: (tmdbCollectionId: number) => c().blockCollection({ tmdbCollectionId }), onSuccess }),
     unblockCollection: useMutation({ mutationFn: (tmdbCollectionId: number) => c().unblockCollection({ tmdbCollectionId }), onSuccess }),
   };

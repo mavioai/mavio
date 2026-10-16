@@ -9,15 +9,24 @@ import {
   rowsOf,
   type ServerEntry,
   titlesOf,
+  useAdminServers,
   useCatalog,
   useDiscovery,
+  useIssues,
+  useItem,
+  useQueue,
+  useRequestActions,
   useRequestTitle,
   useSeason,
   useServer,
   useTitle,
+  useUsers,
 } from "@mavio/client-ts";
 import { type DiscoveredTitle, MediaStatus, type SeasonStatus, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
+import { DownloadState } from "@mavio/proto/mavio/acquisition/v1/download_pb";
+import { IssueStatus } from "@mavio/proto/mavio/acquisition/v1/issue_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
+import { RequestStatus } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CreditKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
@@ -27,11 +36,14 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, LoadMore, Loading, minutesText, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, Group, LoadMore, Loading, minutesText, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
 import { CastShelf, titleCredits } from "./credits.tsx";
 import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
+import { QueueRow } from "./admin/downloads.tsx";
+import { IssueDialog, IssueRow, ReportDialog, useMayReport } from "./issues.tsx";
+import { RequestRow } from "./requests.tsx";
 
 /** A title's kind in addresses. */
 export type KindParam = "movie" | "series";
@@ -308,6 +320,14 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
   const { catalogs } = useDiscovery(discoverLanguage);
   const [asking, setAsking] = useState(false);
   const request = useRequestTitle(server);
+  const admin = useAdminServers().some((s) => s.id === server.id);
+  const actions = useRequestActions(server);
+  const [dialog, setDialog] = useState<"manage" | "report">();
+  // An issue is reported of what a library has, as on Seerr once available.
+  const available = title.status === MediaStatus.AVAILABLE || title.status === MediaStatus.PARTIALLY_AVAILABLE;
+  const mayReport = useMayReport(server);
+  const item = useItem(available && title.itemId && mayReport ? server : undefined, title.itemId);
+  const pending = title.requests.filter((r) => r.status === RequestStatus.PENDING);
   const series = title.mediaKind === MediaKind.SERIES;
   // A series with seasons requested or available already requests more.
   const some = title.seasons.some((s) => s.status !== MediaStatus.UNSPECIFIED && s.status !== MediaStatus.DELETED);
@@ -370,6 +390,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
                 </span>
               )}
               {status && <span className="rounded-[4px] bg-white/20 px-1.5 type-caption font-semibold text-white">{status}</span>}
+              {admin && title.itemId && <DownloadBadge server={server} itemId={title.itemId} />}
             </div>
             {title.overview && <p className={`type-body text-white/85 ${tv ? "line-clamp-2" : "line-clamp-4"}`}>{title.overview}</p>}
             <div ref={first} className={`mt-2 flex flex-wrap gap-3 ${phone ? "[&>*]:flex-1" : ""}`}>
@@ -396,8 +417,45 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
                   {series && some ? t("discover.requestMore") : t("discover.request")}
                 </button>
               )}
+              {admin && pending.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    disabled={actions.approve.isPending || actions.decline.isPending}
+                    onClick={() => pending.forEach((r) => actions.approve.mutate(r.id))}
+                    className={secondary}
+                  >
+                    <Icon name="check" size={tv ? 28 : 20} />
+                    {t("requests.approve")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={actions.approve.isPending || actions.decline.isPending}
+                    onClick={() => pending.forEach((r) => actions.decline.mutate(r.id))}
+                    className={secondary}
+                  >
+                    <Icon name="close" size={tv ? 28 : 20} />
+                    {t("requests.decline")}
+                  </button>
+                </>
+              )}
+              {item.data?.item && (
+                <button type="button" onClick={() => setDialog("report")} className={secondary}>
+                  <Icon name="error" size={tv ? 28 : 20} />
+                  {t("discover.reportIssue")}
+                </button>
+              )}
+              {admin && (
+                <button type="button" onClick={() => setDialog("manage")} className={secondary}>
+                  <Icon name="settings" size={tv ? 28 : 20} />
+                  {t("discover.manage")}
+                </button>
+              )}
             </div>
             {request.isError && <p className="type-callout text-white">{t("discover.requestFailed", { reason: errorMessage(request.error) })}</p>}
+            {[actions.approve, actions.decline].map(
+              (m, k) => m.isError && <p key={k} className="type-callout break-words text-white">{errorMessage(m.error)}</p>,
+            )}
           </div>
         </div>
       </header>
@@ -443,6 +501,8 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
             title={c.kind === CatalogKind.RECOMMENDATIONS ? t("discover.recommendations") : t("discover.similar")}
           />
         ))}
+      {dialog === "report" && item.data?.item && <ReportDialog server={server} item={item.data.item} onClose={() => setDialog(undefined)} />}
+      {dialog === "manage" && <ManageDialog server={server} title={title} onClose={() => setDialog(undefined)} />}
       {asking && (
         <RequestDialog
           title={title}
@@ -454,6 +514,101 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
         />
       )}
     </div>
+  );
+}
+
+/** How far the title's downloads have come, for administrators, as Seerr's status badge. */
+function DownloadBadge({ server, itemId }: { server: ServerEntry; itemId: string }) {
+  const queue = useQueue(server, itemId);
+  const downloading = (queue.data?.pages.flatMap((p) => p.items) ?? []).filter((d) => d.state === DownloadState.DOWNLOADING && Number(d.size) > 0);
+  if (downloading.length === 0) return null;
+  const size = downloading.reduce((n, d) => n + Number(d.size), 0);
+  const left = downloading.reduce((n, d) => n + Number(d.remainingSize), 0);
+  const percent = Math.round(Math.max(0, Math.min(1, 1 - left / size)) * 100);
+  return <span className="rounded-[4px] bg-accent px-1.5 type-caption font-semibold text-white">{t("discover.downloading", { percent })}</span>;
+}
+
+/**
+ * What an administrator manages of a title, as Seerr's manage panel: its
+ * requests, downloads and open issues, and the blocklist.
+ */
+function ManageDialog({ server, title, onClose }: { server: ServerEntry; title: Title; onClose: () => void }) {
+  const actions = useRequestActions(server);
+  const users = useUsers(server, true);
+  const target = { mediaKind: title.mediaKind, tmdbId: title.tmdbId };
+  const blocked = title.status === MediaStatus.BLOCKLISTED;
+  const blockable = title.status === MediaStatus.UNSPECIFIED && title.requests.length === 0;
+  const error = [actions.blockTitle, actions.unblockTitle].find((m) => m.isError)?.error;
+  return (
+    <Modal title={t("discover.manageTitle", { name: title.name })} wide onClose={onClose}>
+      <div className="-mx-6 flex min-h-0 flex-col gap-6 overflow-y-auto px-6 pb-1">
+        <Group title={t("requests.title")}>
+          {title.requests.length === 0 ? (
+            <p className="px-4 py-3 type-callout text-text-secondary">{t("discover.noRequests")}</p>
+          ) : (
+            title.requests.map((r) => (
+              <RequestRow key={r.id} server={server} request={r} admin userName={users.data?.find((u) => u.id === r.requestedBy)?.name ?? ""} />
+            ))
+          )}
+        </Group>
+        {title.itemId && <ManageDownloads server={server} itemId={title.itemId} />}
+        {title.itemId && <ManageIssues server={server} itemId={title.itemId} />}
+        {title.itemId && (
+          <Link
+            to="/s/$serverId/item/$itemId"
+            params={{ serverId: server.id, itemId: title.itemId }}
+            onClick={onClose}
+            className="type-callout font-semibold text-accent hover:underline"
+          >
+            {t("discover.openItem")}
+          </Link>
+        )}
+        {(blocked || blockable) && (
+          <Group footer={blocked ? undefined : t("discover.blockFooter")}>
+            <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+              {blocked ? (
+                <Button variant="secondary" disabled={actions.unblockTitle.isPending} onClick={() => actions.unblockTitle.mutate(target)}>
+                  {t("collection.unblock")}
+                </Button>
+              ) : (
+                <Button variant="secondary" className="text-danger" disabled={actions.blockTitle.isPending} onClick={() => actions.blockTitle.mutate(target)}>
+                  {t("collection.block")}
+                </Button>
+              )}
+            </div>
+            {error != null && <p className="px-4 pb-3 type-footnote break-words text-danger">{errorMessage(error)}</p>}
+          </Group>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+function ManageDownloads({ server, itemId }: { server: ServerEntry; itemId: string }) {
+  const queue = useQueue(server, itemId);
+  const downloads = queue.data?.pages.flatMap((p) => p.items) ?? [];
+  if (downloads.length === 0) return null;
+  return (
+    <Group title={t("downloads.queue")}>
+      {downloads.map((d) => (
+        <QueueRow key={d.id} server={server} item={d} />
+      ))}
+    </Group>
+  );
+}
+
+function ManageIssues({ server, itemId }: { server: ServerEntry; itemId: string }) {
+  const list = useIssues(server, [IssueStatus.OPEN], itemId);
+  const [open, setOpen] = useState<string>();
+  const issues = list.data?.pages.flatMap((p) => p.issues) ?? [];
+  if (issues.length === 0) return null;
+  return (
+    <Group title={t("issues.itemTitle")}>
+      {issues.map((i) => (
+        <IssueRow key={i.id} server={server} issue={i} item={false} onOpen={() => setOpen(i.id)} />
+      ))}
+      {open && <IssueDialog server={server} id={open} onClose={() => setOpen(undefined)} />}
+    </Group>
   );
 }
 
