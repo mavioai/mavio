@@ -41,6 +41,9 @@ public enum MavioStrings {
     /// Accessible label of the main navigation.
     public static var navNavigation: String { NSLocalizedString("nav.navigation", bundle: .module, comment: "") }
 
+    /// Accessible name of the edge of the sidebar dragged to resize it; double-click restores its width.
+    public static var navResizeSidebar: String { NSLocalizedString("nav.resizeSidebar", bundle: .module, comment: "") }
+
     /// Shelf of items whose playback was left unfinished.
     public static var homeContinueWatching: String { NSLocalizedString("home.continueWatching", bundle: .module, comment: "") }
 

@@ -18,7 +18,7 @@ import { Avatar } from "../ui.tsx";
 import { RemoteCommands } from "../screens/remote.tsx";
 import { GroupIndicator } from "../screens/syncplay.tsx";
 import { SyncPlayProvider } from "../syncplay.tsx";
-import { SidebarPanel } from "./sidebar.tsx";
+import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
 
@@ -98,13 +98,14 @@ function DesktopShell({ overlay }: { overlay: boolean }) {
     <div className="flex min-h-screen">
       <aside
         className="sticky top-0 h-screen shrink-0"
-        style={{ width: rail ? "var(--mavio-layout-rail)" : "var(--mavio-layout-sidebar)" }}
+        style={{ width: rail ? "var(--mavio-layout-rail)" : sidebarWidth }}
       >
         <SidebarPanel rail={rail} onToggle={() => (overlay ? setOver(true) : setPrefs({ sidebar: !prefs.sidebar }))} />
+        {!rail && <SidebarResizer />}
       </aside>
       {over && (
         <div className="fixed inset-0 z-40 bg-scrim" onPointerDown={(e) => e.target === e.currentTarget && setOver(false)}>
-          <aside className="h-full w-[280px] shadow-level3">
+          <aside className="h-full shadow-level3" style={{ width: sidebarWidth }}>
             <SidebarPanel rail={false} onToggle={() => setOver(false)} />
           </aside>
         </div>

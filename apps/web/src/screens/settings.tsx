@@ -28,6 +28,7 @@ import { type ReactNode, useState } from "react";
 import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { SidebarResizer, sidebarWidth } from "../shell/sidebar.tsx";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
 import { Avatar, Button, Field, Group, Row } from "../ui.tsx";
@@ -176,32 +177,35 @@ export function SettingsScreen() {
   const id = section ?? "appearance";
   return (
     <div className="flex min-h-screen">
-      <aside className="sticky top-0 flex h-screen w-[300px] shrink-0 flex-col gap-4 overflow-y-auto border-r border-border bg-sidebar px-4 py-5">
-        <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
-          <Icon name="back" size={18} />
-          {t("action.back")}
-        </Link>
-        <h1 className="px-1 type-title1">{t("nav.settings")}</h1>
-        <AccountCard />
-        {groups.map((g) => (
-          <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
-            <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
-            {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
-            {g.ids.map((s) => (
-              <Link
-                key={s}
-                to="/settings/$section"
-                params={{ section: s }}
-                search={{ server: search.server }}
-                data-status={s === id ? "active" : undefined}
-                className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
-              >
-                <Tile id={s} />
-                {sections[s].title()}
-              </Link>
-            ))}
-          </nav>
-        ))}
+      <aside className="sticky top-0 h-screen shrink-0" style={{ width: sidebarWidth }}>
+        <div className="flex h-full flex-col gap-4 overflow-y-auto border-r border-border bg-sidebar px-4 py-5">
+          <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
+            <Icon name="back" size={18} />
+            {t("action.back")}
+          </Link>
+          <h1 className="px-1 type-title1">{t("nav.settings")}</h1>
+          <AccountCard />
+          {groups.map((g) => (
+            <nav key={g.title()} aria-label={g.title()} className="flex flex-col gap-0.5">
+              <div className="px-2 pb-1 type-caption font-semibold text-text-tertiary">{g.title()}</div>
+              {g.server && chosen && <ServerChoice chosen={chosen} section={id} />}
+              {g.ids.map((s) => (
+                <Link
+                  key={s}
+                  to="/settings/$section"
+                  params={{ section: s }}
+                  search={{ server: search.server }}
+                  data-status={s === id ? "active" : undefined}
+                  className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
+                >
+                  <Tile id={s} />
+                  {sections[s].title()}
+                </Link>
+              ))}
+            </nav>
+          ))}
+        </div>
+        <SidebarResizer />
       </aside>
       <main className="min-w-0 flex-1 px-14 py-10">
         <div className="max-w-[900px]">

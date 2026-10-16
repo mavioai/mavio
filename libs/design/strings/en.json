@@ -11,6 +11,7 @@
   "nav.expandSidebar": { "message": "Show Sidebar", "description": "Button that expands the sidebar from its rail of icons." },
   "nav.userMenu": { "message": "{name}, User Menu", "description": "Accessible label of the button opening the user menu; name is the signed-in user's." },
   "nav.navigation": { "message": "Navigation", "description": "Accessible label of the main navigation." },
+  "nav.resizeSidebar": { "message": "Resize Sidebar", "description": "Accessible name of the edge of the sidebar dragged to resize it; double-click restores its width." },
   "home.continueWatching": { "message": "Continue Watching", "description": "Shelf of items whose playback was left unfinished." },
   "home.nextUp": { "message": "Next Up", "description": "Shelf of the next episodes of the series being watched." },
   "home.latest": { "message": "Latest in {library}", "description": "Shelf of the items added last to a library; library is its name." },

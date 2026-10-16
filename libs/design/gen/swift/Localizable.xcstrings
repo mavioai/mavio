@@ -199,6 +199,24 @@
         }
       }
     },
+    "nav.resizeSidebar": {
+      "comment": "Accessible name of the edge of the sidebar dragged to resize it; double-click restores its width.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resize Sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调整侧边栏宽度"
+          }
+        }
+      }
+    },
     "home.continueWatching": {
       "comment": "Shelf of items whose playback was left unfinished.",
       "extractionState": "manual",

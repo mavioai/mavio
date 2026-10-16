@@ -23,6 +23,8 @@
     <string name="nav_user_menu">%s, User Menu</string>
     <!-- Accessible label of the main navigation. -->
     <string name="nav_navigation">Navigation</string>
+    <!-- Accessible name of the edge of the sidebar dragged to resize it; double-click restores its width. -->
+    <string name="nav_resize_sidebar">Resize Sidebar</string>
     <!-- Shelf of items whose playback was left unfinished. -->
     <string name="home_continue_watching">Continue Watching</string>
     <!-- Shelf of the next episodes of the series being watched. -->

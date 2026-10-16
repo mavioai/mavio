@@ -22,6 +22,7 @@ export type MessageKey =
   | 'nav.expandSidebar'
   | 'nav.userMenu'
   | 'nav.navigation'
+  | 'nav.resizeSidebar'
   | 'home.continueWatching'
   | 'home.nextUp'
   | 'home.latest'
@@ -1618,6 +1619,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.expandSidebar": "Show Sidebar",
     "nav.userMenu": "{name}, User Menu",
     "nav.navigation": "Navigation",
+    "nav.resizeSidebar": "Resize Sidebar",
     "home.continueWatching": "Continue Watching",
     "home.nextUp": "Next Up",
     "home.latest": "Latest in {library}",
@@ -3212,6 +3214,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "nav.expandSidebar": "展开边栏",
     "nav.userMenu": "{name}，用户菜单",
     "nav.navigation": "导航",
+    "nav.resizeSidebar": "调整侧边栏宽度",
     "home.continueWatching": "继续观看",
     "home.nextUp": "下一集",
     "home.latest": "{library} 最新内容",

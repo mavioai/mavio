@@ -40,6 +40,8 @@ export interface Prefs {
   tv: boolean;
   /** Whether the desktop layout's sidebar is expanded, where the window is wide enough. */
   sidebar: boolean;
+  /** The width of the expanded sidebars, of the app and the settings, in pixels; undefined for the layout's. */
+  sidebarWidth?: number;
   quality: Quality;
   autoplayNext: boolean;
 }
@@ -85,9 +87,13 @@ export function setPrefs(change: Partial<Prefs>) {
   for (const l of listeners) l();
 }
 
+/** The narrowest and widest the sidebars are dragged to, in pixels. */
+export const sidebarWidths = { min: 200, max: 400 };
+
 /**
  * Sets the root element's data-theme and data-tv, which tokens.css and the
- * styles read: television starts dark unless a theme is chosen.
+ * styles read: television starts dark unless a theme is chosen; and the
+ * width of the sidebars chosen, --mavio-sidebar-width.
  */
 export function applyTheme() {
   const root = document.documentElement;
@@ -96,6 +102,8 @@ export function applyTheme() {
   else delete root.dataset.theme;
   if (current.tv) root.dataset.tv = "";
   else delete root.dataset.tv;
+  if (current.sidebarWidth) root.style.setProperty("--mavio-sidebar-width", `${current.sidebarWidth}px`);
+  else root.style.removeProperty("--mavio-sidebar-width");
 }
 
 /** The layout a window's width chooses (docs/clients.md §6.3). */

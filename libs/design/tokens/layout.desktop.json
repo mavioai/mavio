@@ -47,7 +47,7 @@
         "value": 262,
         "unit": "px"
       },
-      "$description": "Width of the column of the expanded sidebar of the desktop layout, its inset included (0 where the form factor has none)."
+      "$description": "Width of the expanded sidebar of the desktop layout and of the settings, the default of the width the user drags it to (0 where the form factor has none)."
     },
     "rail": {
       "$type": "dimension",
@@ -55,7 +55,7 @@
         "value": 86,
         "unit": "px"
       },
-      "$description": "Width of the column of the sidebar collapsed to a rail of icons, its inset included (0 where the form factor has none)."
+      "$description": "Width of the sidebar collapsed to a rail of icons (0 where the form factor has none)."
     },
     "focusScale": {
       "$type": "number",

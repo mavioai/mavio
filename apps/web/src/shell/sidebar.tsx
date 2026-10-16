@@ -3,12 +3,13 @@
 // foot. Collapsed, it is a rail of icons.
 import { useDiscovery, useLibraries } from "@mavio/client-ts";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { Tip } from "../controls/tooltip.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
+import { prefs, setPrefs, sidebarWidths } from "../prefs.ts";
 import { Wordmark } from "../logo.tsx";
 import { libraryIcon } from "../ui.tsx";
 import { UserButton } from "./user-menu.tsx";
@@ -140,5 +141,61 @@ function NavItem({
         )}
       </Link>
     </Tip>
+  );
+}
+
+/** The width of an expanded sidebar: the one chosen by dragging its edge, else the layout's. */
+export const sidebarWidth = "var(--mavio-sidebar-width, var(--mavio-layout-sidebar))";
+
+/**
+ * The right edge of an expanded sidebar, dragged or moved with the arrow
+ * keys to widen or narrow it within sidebarWidths, and double-clicked to
+ * return it to the layout's width. The width is remembered, and shared by
+ * the app's sidebar and the settings'.
+ */
+export function SidebarResizer() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const current = () => ref.current?.parentElement?.getBoundingClientRect().width ?? 0;
+  const resize = (width: number) => setPrefs({ sidebarWidth: Math.round(Math.min(sidebarWidths.max, Math.max(sidebarWidths.min, width))) });
+  return (
+    <div
+      ref={ref}
+      role="separator"
+      aria-orientation="vertical"
+      aria-label={t("nav.resizeSidebar")}
+      aria-valuemin={sidebarWidths.min}
+      aria-valuemax={sidebarWidths.max}
+      aria-valuenow={Math.round(prefs().sidebarWidth ?? current())}
+      tabIndex={0}
+      className={`absolute inset-y-0 -right-1 z-10 w-2 cursor-col-resize outline-none after:absolute after:inset-y-0 after:left-[3px] after:w-0.5 after:transition-colors hover:after:bg-accent focus-visible:after:bg-accent ${
+        dragging ? "after:bg-accent" : ""
+      }`}
+      onPointerDown={(e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        e.currentTarget.setPointerCapture(e.pointerId);
+        const from = e.clientX - current();
+        setDragging(true);
+        const el = e.currentTarget;
+        const move = (m: PointerEvent) => resize(m.clientX - from);
+        const up = () => {
+          setDragging(false);
+          el.removeEventListener("pointermove", move);
+          el.removeEventListener("pointerup", up);
+          el.removeEventListener("pointercancel", up);
+        };
+        el.addEventListener("pointermove", move);
+        el.addEventListener("pointerup", up);
+        el.addEventListener("pointercancel", up);
+      }}
+      onDoubleClick={() => setPrefs({ sidebarWidth: undefined })}
+      onKeyDown={(e) => {
+        const step = e.key === "ArrowLeft" ? -10 : e.key === "ArrowRight" ? 10 : 0;
+        if (step === 0) return;
+        e.preventDefault();
+        resize(current() + step);
+      }}
+    />
   );
 }
