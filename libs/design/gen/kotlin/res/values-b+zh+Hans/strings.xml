@@ -1628,6 +1628,7 @@
     <string name="credits_narrators">旁白</string>
     <string name="credits_other">其他职员</string>
     <string name="credits_none">暂无演职人员信息。</string>
+    <string name="credits_full_crew">全部职员</string>
     <plurals name="collection_movie_count">
         <item quantity="other">%d 部电影</item>
     </plurals>

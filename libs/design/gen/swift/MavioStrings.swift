@@ -368,7 +368,7 @@ public enum MavioStrings {
     /// Shown when a discovered title has no overview
     public static var discoverNoOverview: String { NSLocalizedString("discover.noOverview", bundle: .module, comment: "") }
 
-    /// Link from a discovered title's leading crew to its whole cast and crew
+    /// Link from a discovered title's leading crew to its whole crew
     public static var discoverFullCrew: String { NSLocalizedString("discover.fullCrew", bundle: .module, comment: "") }
 
     /// Kind of a movie's release date, named on hover
@@ -5105,6 +5105,9 @@ public enum MavioStrings {
 
     /// Shown on the credits page when an item credits no one.
     public static var creditsNone: String { NSLocalizedString("credits.none", bundle: .module, comment: "") }
+
+    /// Title of the page of a discovered title's crew, without its cast
+    public static var creditsFullCrew: String { NSLocalizedString("credits.fullCrew", bundle: .module, comment: "") }
 
     /// Number of movies of a discovered collection.
     public static func collectionMovieCount(count: Int) -> String {

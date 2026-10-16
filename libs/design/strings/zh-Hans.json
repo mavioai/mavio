@@ -1589,6 +1589,7 @@
   "credits.narrators": "旁白",
   "credits.other": "其他职员",
   "credits.none": "暂无演职人员信息。",
+  "credits.fullCrew": "全部职员",
   "collection.movieCount": "{count, plural, other {# 部电影}}",
   "collection.movies": "电影",
   "collection.request": "请求合集",

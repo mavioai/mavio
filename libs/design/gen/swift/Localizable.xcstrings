@@ -1928,7 +1928,7 @@
       }
     },
     "discover.fullCrew": {
-      "comment": "Link from a discovered title's leading crew to its whole cast and crew",
+      "comment": "Link from a discovered title's leading crew to its whole crew",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -28971,6 +28971,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "暂无演职人员信息。"
+          }
+        }
+      }
+    },
+    "credits.fullCrew": {
+      "comment": "Title of the page of a discovered title's crew, without its cast",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Crew"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部职员"
           }
         }
       }

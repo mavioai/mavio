@@ -12,13 +12,21 @@ import { type Rating, RatingSource } from "@mavio/proto/mavio/plugin/v1/ratings_
 import { Link } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
-import imdbLogo from "../assets/ratings/imdb.svg";
-import rtAudienceFresh from "../assets/ratings/rt-aud-fresh.svg";
-import rtAudienceRotten from "../assets/ratings/rt-aud-rotten.svg";
-import rtFresh from "../assets/ratings/rt-fresh.svg";
-import rtRotten from "../assets/ratings/rt-rotten.svg";
+import imdbLogo from "../assets/services/imdb.svg";
+import letterboxdLogo from "../assets/services/letterboxd.svg";
+import rtAudienceFresh from "../assets/services/rt-aud-fresh.svg";
+import rtAudienceRotten from "../assets/services/rt-aud-rotten.svg";
+import rtFresh from "../assets/services/rt-fresh.svg";
+import rtRotten from "../assets/services/rt-rotten.svg";
+import rtLogo from "../assets/services/rt.svg";
+import simklLogo from "../assets/services/simkl.svg";
+import tmdbLogo from "../assets/services/tmdb.svg";
+import tmdbWideLogo from "../assets/services/tmdb-wide.svg";
+import traktLogo from "../assets/services/trakt.svg";
+import tvdbLogo from "../assets/services/tvdb.svg";
 import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
+import { Wordmark } from "../logo.tsx";
 import { minutesText } from "../ui.tsx";
 import { crewLabels, isCast } from "./credits.tsx";
 import { kindParam, sized } from "./discover.tsx";
@@ -145,7 +153,7 @@ function OverviewLeft({ server, title }: { server: ServerEntry; title: Title }) 
             ))}
           </ul>
           <Link
-            to="/s/$serverId/title/$kind/$tmdbId/credits"
+            to="/s/$serverId/title/$kind/$tmdbId/crew"
             params={{ serverId: server.id, kind: kindParam(title.mediaKind), tmdbId: String(title.tmdbId) }}
             className="inline-flex items-center gap-1 self-end type-callout text-text-secondary hover:text-on-background"
           >
@@ -237,6 +245,57 @@ function RatingLink({ rating: r }: { rating: Rating }) {
   );
 }
 
+/** A link to a title or person elsewhere, with the site's logo. */
+export interface ExternalLink {
+  name: string;
+  url: string;
+  logo: string;
+  /** The logo's width, as Seerr's. */
+  width: string;
+  /** Whether the logo is white alone, drawn in the text's color instead. */
+  mono?: boolean;
+}
+
+/**
+ * The logos linking a title or person elsewhere, as Seerr's, faint until
+ * hovered; first, Mavio's opening its item when the server has it, where
+ * Seerr links its media server.
+ */
+export function ExternalLinks({
+  links,
+  item,
+  className = "justify-center",
+}: {
+  links: ExternalLink[];
+  item?: { serverId: string; itemId: string };
+  className?: string;
+}) {
+  const faint = "flex items-center opacity-50 transition-opacity hover:opacity-100 focus-visible:opacity-100";
+  return (
+    <div className={`flex flex-wrap items-center gap-x-5 gap-y-3 ${className}`}>
+      {item && (
+        <Link to="/s/$serverId/item/$itemId" params={item} className={faint} title={t("discover.openItem")}>
+          <Wordmark height={14} />
+        </Link>
+      )}
+      {links.map((l) => (
+        <a key={l.name} href={l.url} target="_blank" rel="noreferrer" title={l.name} className={`${faint} ${l.width}`}>
+          {l.mono ? (
+            <span
+              role="img"
+              aria-label={l.name}
+              className="block h-6 w-full bg-on-background"
+              style={{ mask: `url("${l.logo}") center / contain no-repeat`, WebkitMask: `url("${l.logo}") center / contain no-repeat` }}
+            />
+          ) : (
+            <img src={l.logo} alt={l.name} className="w-full" />
+          )}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 const minStudios = 5;
 
 function Facts({ server, title }: { server: ServerEntry; title: Title }) {
@@ -257,13 +316,17 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   const tmdbPath = `https://www.themoviedb.org/${series ? "tv" : "movie"}/${title.tmdbId}`;
   const ratings = useTitleRatings(server, title.mediaKind, title.tmdbId).data ?? [];
   const shownRatings = ratingOrder.flatMap((source) => ratings.find((r) => r.source === source) ?? []);
-  const links = [
-    { name: "TMDB", url: tmdbPath },
-    title.externalIds.imdb && { name: "IMDb", url: `https://www.imdb.com/title/${title.externalIds.imdb}` },
-    (title.externalIds.tvdb || title.tvdbId > 0) && {
-      name: "TVDB",
-      url: `https://www.thetvdb.com/dereferrer/series/${title.externalIds.tvdb || title.tvdbId}`,
-    },
+  const imdb = title.externalIds.imdb;
+  const tvdb = title.externalIds.tvdb || (title.tvdbId > 0 ? String(title.tvdbId) : "");
+  const rt = shownRatings.find((r) => r.source !== RatingSource.IMDB)?.url;
+  const links: ExternalLink[] = [
+    { name: "TMDB", url: `${tmdbPath}?language=${locale}`, logo: tmdbLogo, width: "w-8" },
+    series && tvdb && { name: "TVDB", url: `https://www.thetvdb.com/dereferrer/series/${tvdb}`, logo: tvdbLogo, width: "w-9", mono: true },
+    imdb && { name: "IMDb", url: `https://www.imdb.com/title/${imdb}`, logo: imdbLogo, width: "w-8" },
+    rt && { name: "Rotten Tomatoes", url: rt, logo: rtLogo, width: "w-14" },
+    imdb && { name: "Trakt", url: `https://trakt.tv/${series ? "shows" : "movies"}/${imdb}`, logo: traktLogo, width: "w-8" },
+    imdb && { name: "Simkl", url: `https://api.simkl.com/redirect?to=Simkl&imdb=${encodeURIComponent(imdb)}`, logo: simklLogo, width: "w-8", mono: true },
+    !series && { name: "Letterboxd", url: `https://letterboxd.com/tmdb/${title.tmdbId}`, logo: letterboxdLogo, width: "w-8" },
   ].filter((l) => !!l);
   return (
     <dl className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] border border-border">
@@ -280,7 +343,7 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
               title={t("discover.tmdbScore")}
               className="inline-flex items-center gap-1.5 type-callout font-semibold hover:underline"
             >
-              <span className="rounded-[4px] bg-[#0d253f] px-1.5 type-caption font-bold text-[#01b4e4]">TMDB</span>
+              <img src={tmdbWideLogo} alt="TMDB" className="h-4 w-auto" />
               {Math.round(title.communityRating * 10)}%
             </a>
           )}
@@ -343,13 +406,8 @@ function Facts({ server, title }: { server: ServerEntry; title: Title }) {
           </dd>
         </div>
       )}
-      <div className="flex flex-wrap justify-center gap-2 px-4 py-2.5">
-        {links.map((l) => (
-          <a key={l.name} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-fill px-3 py-1 type-footnote font-semibold hover:bg-fill-selected">
-            {l.name}
-            <Icon name="external" size={12} />
-          </a>
-        ))}
+      <div className="px-4 py-3">
+        <ExternalLinks links={links} item={title.itemId ? { serverId: server.id, itemId: title.itemId } : undefined} />
       </div>
     </dl>
   );

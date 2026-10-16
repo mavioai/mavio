@@ -1,7 +1,7 @@
 // The cast and crew of an item or a discovered title (libs/design/
 // components.md, Credits Screen): the shelf on their details, and the page
 // of the whole cast and crew it opens, the cast in billing order, then the
-// crew by job.
+// crew by job; and a discovered title's crew alone, by job.
 import { artwork, errorMessage, type ServerEntry, useItem, useServer, useTitle } from "@mavio/client-ts";
 import type { TitleCredit } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
@@ -17,6 +17,7 @@ import { initialsOf } from "./person.tsx";
 
 const itemRoute = getRouteApi("/s/$serverId/item/$itemId/credits");
 const titleRoute = getRouteApi("/s/$serverId/title/$kind/$tmdbId/credits");
+const crewRoute = getRouteApi("/s/$serverId/title/$kind/$tmdbId/crew");
 
 /** A credited person: of the server's people when personId is set, else as a metadata provider tells them. */
 export interface CreditEntry {
@@ -133,7 +134,15 @@ export function CreditsScreen() {
 }
 
 export function TitleCreditsScreen() {
-  const { serverId, kind, tmdbId } = titleRoute.useParams();
+  return <TitleCredits params={titleRoute.useParams()} />;
+}
+
+/** A discovered title's crew alone, which View Full Crew opens, as Seerr's crew page. */
+export function TitleCrewScreen() {
+  return <TitleCredits params={crewRoute.useParams()} crew />;
+}
+
+function TitleCredits({ params: { serverId, kind, tmdbId }, crew = false }: { params: { serverId: string; kind: string; tmdbId: string }; crew?: boolean }) {
   const server = useServer(serverId);
   const q = useTitle(server?.token ? server : undefined, kind === "series" ? MediaKind.SERIES : MediaKind.MOVIE, Number(tmdbId), discoverLanguage);
   if (!server?.token) return <StatusView icon="error" title={t("auth.unreachable")} />;
@@ -141,10 +150,12 @@ export function TitleCreditsScreen() {
   if (q.isError || !q.data) {
     return <StatusView icon="error" title={t("state.error")} message={q.error ? errorMessage(q.error) : undefined} />;
   }
+  const credits = titleCredits(q.data.credits);
   return (
     <CreditsPage
       serverId={serverId}
-      credits={titleCredits(q.data.credits)}
+      title={crew ? t("credits.fullCrew") : undefined}
+      credits={crew ? credits.filter((c) => !isCast(c)) : credits}
       back={
         <Link to="/s/$serverId/title/$kind/$tmdbId" params={{ serverId, kind, tmdbId }} className={backClass}>
           <Icon name="back" size={16} />
@@ -157,13 +168,13 @@ export function TitleCreditsScreen() {
 
 const backClass = "inline-flex items-center gap-1 type-callout text-text-secondary hover:text-on-background";
 
-function CreditsPage({ serverId, credits, back }: { serverId: string; credits: CreditEntry[]; back: ReactNode }) {
+function CreditsPage({ serverId, title, credits, back }: { serverId: string; title?: string; credits: CreditEntry[]; back: ReactNode }) {
   const of = (kind: CreditKind) => credits.filter((c) => c.kind === kind).toSorted((a, b) => a.order - b.order);
   return (
     <div className="pb-10">
       <div className="px-margin pt-6 pb-2">
         {back}
-        <h1 className="mt-1 type-title1">{t("item.cast")}</h1>
+        <h1 className="mt-1 type-title1">{title ?? t("item.cast")}</h1>
       </div>
       {credits.length === 0 && <p className="px-margin pt-6 type-body text-text-secondary">{t("credits.none")}</p>}
       <People serverId={serverId} title={t("credits.cast")} credits={of(CreditKind.ACTOR)} />

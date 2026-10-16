@@ -9,11 +9,13 @@ import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 
+import imdbLogo from "../assets/services/imdb.svg";
+import tmdbLogo from "../assets/services/tmdb.svg";
 import { discoverLanguage, locale, t } from "../i18n.ts";
-import { Icon } from "../icon.tsx";
 import { Grid, Loading, StatusView } from "../ui.tsx";
 import { Segmented } from "../controls/inputs.tsx";
 import { sized, TitleCard } from "./discover.tsx";
+import { type ExternalLink, ExternalLinks } from "./discover-overview.tsx";
 import { initialsOf } from "./person.tsx";
 
 const route = getRouteApi("/s/$serverId/discover/person/$tmdbId");
@@ -57,9 +59,9 @@ function PersonPage({ server, person: p }: { server: ServerEntry; person: Person
     p.placeOfBirth,
     p.deathday && t("person.died", { date: day(p.deathday)! }),
   ].filter(Boolean);
-  const links = [
-    p.externalIds.tmdb && { name: "TMDB", url: `https://www.themoviedb.org/person/${p.externalIds.tmdb}` },
-    p.externalIds.imdb && { name: "IMDb", url: `https://www.imdb.com/name/${p.externalIds.imdb}` },
+  const links: ExternalLink[] = [
+    p.externalIds.tmdb && { name: "TMDB", url: `https://www.themoviedb.org/person/${p.externalIds.tmdb}?language=${locale}`, logo: tmdbLogo, width: "w-8" },
+    p.externalIds.imdb && { name: "IMDb", url: `https://www.imdb.com/name/${p.externalIds.imdb}`, logo: imdbLogo, width: "w-8" },
   ].filter((l) => !!l);
   const cast = <Titles key="cast" server={server} title={t("person.appearances")} titles={of(p.cast)} />;
   const crew = <Titles key="crew" server={server} title={t("person.crew")} titles={of(p.crew)} />;
@@ -79,22 +81,7 @@ function PersonPage({ server, person: p }: { server: ServerEntry; person: Person
           {p.alsoKnownAs.length > 0 && (
             <p className="type-callout text-text-secondary">{t("person.alsoKnownAs", { names: p.alsoKnownAs.join(", ") })}</p>
           )}
-          {links.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {links.map((l) => (
-                <a
-                  key={l.url}
-                  href={l.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-fill px-3.5 py-1.5 type-footnote font-semibold hover:bg-fill-selected"
-                >
-                  {l.name}
-                  <Icon name="external" size={14} className="text-text-secondary" />
-                </a>
-              ))}
-            </div>
-          )}
+          {links.length > 0 && <ExternalLinks links={links} className="justify-center sm:justify-start" />}
           {p.biography && (
             <div className="flex flex-col items-start gap-1">
               <p className={`type-body whitespace-pre-line ${more ? "" : "line-clamp-6"}`}>{p.biography}</p>

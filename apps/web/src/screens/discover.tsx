@@ -390,12 +390,6 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
                   ))}
                 </span>
               )}
-              {title.communityRating > 0 && (
-                <span className="inline-flex items-center gap-1">
-                  <Icon name="rating" fill size={14} className="text-[#FFD60A]" />
-                  {title.communityRating.toFixed(1)}
-                </span>
-              )}
               {status && <span className="rounded-[4px] bg-white/20 px-1.5 type-caption font-semibold text-white">{status}</span>}
               {admin && title.itemId && <DownloadBadge server={server} itemId={title.itemId} />}
             </div>
@@ -619,7 +613,7 @@ function Seasons({ server, tmdbId, seasons }: { server: ServerEntry; tmdbId: num
   return (
     <section className="px-margin py-3">
       <h2 className="mb-2 type-title3">{t("item.seasons")}</h2>
-      <div className="flex flex-col divide-y divide-border rounded-lg bg-surface-raised">
+      <div className="flex flex-col gap-2">
         {ordered.map((s) => (
           <Season key={s.seasonNumber} server={server} tmdbId={tmdbId} season={s} />
         ))}
@@ -632,7 +626,7 @@ function Season({ server, tmdbId, season: s }: { server: ServerEntry; tmdbId: nu
   const [open, setOpen] = useState(false);
   const status = statusLabel(s.status);
   return (
-    <div>
+    <div className="overflow-hidden rounded-[10px] border border-border bg-surface-raised">
       <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left">
         <span className="min-w-0 flex-1 truncate type-headline">{seasonName(s)}</span>
         {s.episodeCount > 0 && <span className="type-callout text-text-secondary">{t("item.episodeCount", { count: s.episodeCount })}</span>}

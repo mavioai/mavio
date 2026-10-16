@@ -216,7 +216,7 @@
     <string name="discover_overview">Overview</string>
     <!-- Shown when a discovered title has no overview -->
     <string name="discover_no_overview">Overview unavailable.</string>
-    <!-- Link from a discovered title's leading crew to its whole cast and crew -->
+    <!-- Link from a discovered title's leading crew to its whole crew -->
     <string name="discover_full_crew">View Full Crew</string>
     <!-- Kind of a movie's release date, named on hover -->
     <string name="discover_theatrical_release">Theatrical Release</string>
@@ -3239,6 +3239,8 @@
     <string name="credits_other">Other Crew</string>
     <!-- Shown on the credits page when an item credits no one. -->
     <string name="credits_none">No cast or crew is known.</string>
+    <!-- Title of the page of a discovered title's crew, without its cast -->
+    <string name="credits_full_crew">Full Crew</string>
     <!-- Number of movies of a discovered collection. -->
     <plurals name="collection_movie_count">
         <item quantity="one">%d movie</item>

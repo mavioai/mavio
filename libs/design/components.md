@@ -68,7 +68,7 @@ Below the header, in order:
 
 ## Credits Screen
 
-An item's or a discovered title's whole cast and crew, opened from its details: a link back to it over the title, then sections of person cards in grids — the actors in billing order, the guest stars, then the crew by job (creators, directors, writers, authors, producers, music, conductors, lyricists, artists, narrators, other crew), each card with the character played or the job's own title when known. People of the server open their page, others their discovered page.
+An item's or a discovered title's whole cast and crew, opened from its details: a link back to it over the title, then sections of person cards in grids — the actors in billing order, the guest stars, then the crew by job (creators, directors, writers, authors, producers, music, conductors, lyricists, artists, narrators, other crew), each card with the character played or the job's own title when known. People of the server open their page, others their discovered page. A discovered title's View Full Crew opens it with the crew alone, titled Full Crew, as Seerr's crew page.
 
 ## Episode Card
 

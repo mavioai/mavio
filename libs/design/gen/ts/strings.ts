@@ -1592,6 +1592,7 @@ export type MessageKey =
   | 'credits.narrators'
   | 'credits.other'
   | 'credits.none'
+  | 'credits.fullCrew'
   | 'collection.movieCount'
   | 'collection.movies'
   | 'collection.request'
@@ -3184,6 +3185,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "credits.narrators": "Narrators",
     "credits.other": "Other Crew",
     "credits.none": "No cast or crew is known.",
+    "credits.fullCrew": "Full Crew",
     "collection.movieCount": "{count, plural, one {# movie} other {# movies}}",
     "collection.movies": "Movies",
     "collection.request": "Request Collection",
@@ -4774,6 +4776,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "credits.narrators": "旁白",
     "credits.other": "其他职员",
     "credits.none": "暂无演职人员信息。",
+    "credits.fullCrew": "全部职员",
     "collection.movieCount": "{count, plural, other {# 部电影}}",
     "collection.movies": "电影",
     "collection.request": "请求合集",
