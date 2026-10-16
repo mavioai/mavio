@@ -461,7 +461,11 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: bo
   );
 }
 
-/** A choice among options, drawn as a native select. */
+/**
+ * A choice among options: a native select drawing its own arrow, as far
+ * from the right edge as the text is from the left, since browsers put
+ * theirs against the edge.
+ */
 export function Select<T extends string>({
   value,
   options,
@@ -476,17 +480,20 @@ export function Select<T extends string>({
   className?: string;
 }) {
   return (
-    <select
-      value={value}
-      aria-label={label}
-      onChange={(e) => onChange(e.target.value as T)}
-      className={`min-h-9 max-w-full rounded-md bg-fill px-2 type-callout text-on-background ${className ?? ""}`}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+    <span className={`relative inline-grid max-w-full ${className ?? ""}`}>
+      <select
+        value={value}
+        aria-label={label}
+        onChange={(e) => onChange(e.target.value as T)}
+        className="min-h-9 w-full min-w-0 appearance-none truncate rounded-md bg-fill ps-2.5 pe-8 type-callout text-on-background"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <Icon name="expand" size={14} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-text-secondary" />
+    </span>
   );
 }

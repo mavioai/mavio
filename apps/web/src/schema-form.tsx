@@ -7,7 +7,7 @@ import { type ReactNode, useState } from "react";
 
 import { t } from "./i18n.ts";
 import { Icon } from "./icon.tsx";
-import { Button, Toggle } from "./ui.tsx";
+import { Button, Select, Toggle } from "./ui.tsx";
 
 /** The subset of JSON Schema the form draws. */
 export interface Schema {
@@ -263,21 +263,15 @@ function EnumField({
   const options = s.enum ?? [];
   const index = options.findIndex((o) => o === value);
   return (
-    <select
-      aria-label={label}
-      className="min-h-9 max-w-full rounded-md bg-fill px-2 type-callout text-on-background"
+    <Select
+      label={label}
       value={index < 0 ? "" : String(index)}
-      onChange={(e) => onChange(e.target.value === "" ? undefined : options[Number(e.target.value)])}
-    >
-      {(!required || index < 0) && (
-        <option value="">{s.default !== undefined ? t("schema.default", { value: String(s.default) }) : "—"}</option>
-      )}
-      {options.map((o, i) => (
-        <option key={String(o)} value={String(i)}>
-          {String(o)}
-        </option>
-      ))}
-    </select>
+      options={[
+        ...(!required || index < 0 ? [{ value: "", label: s.default !== undefined ? t("schema.default", { value: String(s.default) }) : "—" }] : []),
+        ...options.map((o, i) => ({ value: String(i), label: String(o) })),
+      ]}
+      onChange={(v) => onChange(v === "" ? undefined : options[Number(v)])}
+    />
   );
 }
 
