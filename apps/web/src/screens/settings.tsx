@@ -219,9 +219,10 @@ export function SettingsScreen() {
 /**
  * The choice of the server whose settings are shown, with a Mavio account
  * alone: a standalone server's user is signed in to one server. The server
- * serving the web UI is marked.
+ * serving the web UI is marked. In a group, on a phone, it is padded as
+ * the group's rows.
  */
-function ServerChoice({ chosen, section }: { chosen: Chosen; section?: SectionId }) {
+function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; section?: SectionId; inGroup?: boolean }) {
   const servers = useServersStore();
   const signIn = useSignIn();
   const signedIn = useSignedIn();
@@ -229,7 +230,7 @@ function ServerChoice({ chosen, section }: { chosen: Chosen; section?: SectionId
   if (signIn?.kind !== "mavioDev") return null;
   const home = servers.homeServer();
   return (
-    <div className="flex flex-col px-2 pb-1.5 [&>select]:min-h-10 [&>select]:w-full">
+    <div className={`flex flex-col [&>select]:min-h-10 [&>select]:w-full ${inGroup ? "px-4 py-2.5" : "px-2 pb-1.5"}`}>
       <Select
         value={chosen.server.id}
         label={t("settings.serverChoice")}
@@ -289,7 +290,7 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
       {groups.map((g) => (
         <Group key={g.title()} title={g.title()}>
-          {g.server && chosen && <ServerChoice chosen={chosen} />}
+          {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
           {g.ids.map((s) => (
             <Link key={s} to="/settings/$section" params={{ section: s }} search={{ server: search.server }} className="hover:bg-surface-raised">
               <Row label={sections[s].title()} leading={<Tile id={s} />}>
