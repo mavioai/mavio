@@ -167,7 +167,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 ### 8.13 字幕提供者
 `SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
 
-对于读取视频本身的提供者（如 Whisper），视频的描述还带有其各音频流及文件中记录的语言标签，以及 `audio_url`：宿主 API 的一个 URL（`/subtitles/audio/{token}`），以 16 kHz 单声道 16 位 PCM 提供一条音频流，其起点与视频对齐；参数 `stream` 选择音频流，`seconds` 只取开头若干秒。服务端只在读取音频的地方给出它，即装有 ffmpeg 时的本地与网络存储；该路由只经宿主 API 应答，其不可猜测的令牌在最后一次给出它的搜索或下载之后一天内有效。
+字幕提供者不读取音频：从视频音频转写的字幕来自服务端的转写来源，使用 `SPEECH_TO_TEXT` 插件的识别器（§8.16，[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。
 
 ### 8.14 字幕翻译器
 `SUBTITLE_TRANSLATOR` 如 Lingarr 一样以翻译服务翻译字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SubtitleTranslatorService.ListSubtitleTranslators` 列出插件实现的翻译器及其设置、是否启用、每次接受多少字幕条、是否保留 SubRip 标记以及可翻译的源语言与目标语言（BCP 47，为空表示任意），服务端据此排列翻译器链；`TranslateSubtitleLines` 接受翻译器、源语言与目标语言、字幕条的文字（纯文本，或对保留标记的翻译器为 SubRip 中的形式）以及电影或剧集的描述，返回同样数量的译文（空译文保留原字幕条）及署名。服务端解析字幕、分批发送字幕条并写出译文。`plugins/subtitles` 实现了 Lingarr 的翻译服务：DeepL（以账户密钥调用其 API，每次请求五十条，以 `:fx` 结尾的密钥使用免费 API）与 LibreTranslate（服务器 URL 及可选密钥，每次请求 25 条），二者的语言由服务列出并保留一天；以及如 Lingarr 所用的 GTranslate 库那样无需密钥访问的 Google 翻译（其浏览器扩展的端点，带请求令牌）、Bing Translator（其页面的端点，使用页面的凭据，每小时重新读取）、Microsoft Translator（其 Android 应用的 API，请求按该应用的方式签名）与 Yandex.Translate（其 Android 应用的 API），每次请求一条、同时四条、每批二十条，语言为 Lingarr 为它们列出的语言。语言按 BCP 47 匹配到服务的代码（`zh` 为 `zh-Hans`，`pt` 为 `pt-BR`）。限速与服务不可用如实报告，由服务端重试；被拒的密钥、用尽的配额与服务缺少的语言不重试，任何一条失败则其所在批次失败。
@@ -177,7 +177,20 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 `AGENT_SESSION` 持久地保存与模型的会话（`AgentSessionService`）：以模型与指令创建，可列出、连同消息读取、以 `SendAgentMessage` 继续（其请求 ID 使重试成为同一条消息）或以 `StreamAgentMessage` 继续（随回答增长以流式传送目前为止的回答，最后给出回答），以及删除。每条消息与回答都在返回之前保存。
 
-`plugins/agent` 以 Bun 编译的 TypeScript 子进程插件提供这两项能力，基于 [pi-ai](https://github.com/earendil-works/pi) 与 pi-durable：pi-ai 支持的所有提供商，带 API key、OAuth 登录（包括订阅登录；客户端提示风险并交由管理员决定）以及其配置添加的、由 OpenAI 兼容 API（如 Ollama 的）提供的提供商；凭据保存在其数据目录中（`credentials.json`，只有服务端的用户可读），会话保存在那里的 SQLite 数据库中，因此进行中的回答在重启后继续。pi-durable 永久保留对话的条目：插件记录已删除的会话（`deleted-sessions.json`），在下次启动、打开数据库之前删除它们的对话，连同它们拥有的对话及其文档。按 schema 的回答经由模型调用的工具给出，提供商支持时使用约束采样。
+助手的会话（[助手 §6](assistant.zh-CN.md#6-ai-路径)）还具有：
+* **远程工具**：会话创建时附上服务端工具的声明——名称、描述、参数与结果的 JSON Schema 以及 TypeScript 声明——由模型调用、服务端运行。`WatchAgentToolCalls` 向服务端以流式传送正在等待的调用，再传送每个新调用，带有其 ID、会话、工具与参数，以及它是否嵌套在代码模式脚本中；`SubmitAgentToolResult` 以给模型的文本、结构化结果与是否失败回答一个调用。调用持久地等待，直到被回答或其会话被删除；插件重启后同一个调用以同一个 ID 再次列出，服务端根据它运行过的调用的记录回答，不再运行。
+* **代码模式**（会话创建时开启）：模型还拥有 pi-durable 的 `codemode` 工具，其 JavaScript 在 QuickJS 沙箱中调用会话的工具，每次调用都是一次嵌套调用，和普通调用一样到达服务端。
+* **不经回答而添加的消息**：`AddAgentMessages` 添加一条用户消息及其回答（由助手的快速路径产生），不询问模型。
+* **记忆**：以记忆键（服务端的用户 ID）创建的会话拥有插件的 `remember`、`forget` 与 `recall` 工具，其指令在预算内包含该键的记忆；`EndAgentSession` 结束会话，并启动一个后台任务把会话整理进该键的记忆。`ListAgentMemories`、`UpdateAgentMemory`、`DeleteAgentMemory` 与 `DeleteAgentMemories`（删除一个键的全部记忆）供服务端显示与管理它们。
+
+`plugins/agent` 以 Bun 编译的 TypeScript 子进程插件提供这两项能力，基于 [pi-ai](https://github.com/earendil-works/pi) 与 pi-durable：pi-ai 支持的所有提供商，带 API key、OAuth 登录（包括订阅登录；客户端提示风险并交由管理员决定）以及其配置添加的、由 OpenAI 兼容 API（如 Ollama 的）提供的提供商；凭据保存在其数据目录中（`credentials.json`，只有服务端的用户可读），会话保存在那里的 SQLite 数据库中，因此进行中的回答在重启后继续。pi-durable 永久保留对话的条目：插件记录已删除的会话（`deleted-sessions.json`），在下次启动、打开数据库之前删除它们的对话，连同它们拥有的对话及其文档。按 schema 的回答经由模型调用的工具给出，提供商支持时使用约束采样。远程工具是声明为可安全重放的 pi-durable 工具，它们把调用交给服务端，并在任务文档中等待结果；代码模式是 pi-durable 的代码模式扩展及其 QuickJS 沙箱；记忆是以记忆键为键的 pi-durable 文档族，`recall` 用 pi-durable 的 BM25 搜索检索它们，删除一个键的记忆会连同其会话的文档一起清除。
+
+### 8.16 语音识别与合成
+`SPEECH_TO_TEXT` 为助手识别语音（[助手 §8](assistant.zh-CN.md#8-语音)），并转写字幕（[架构 §14.5](architecture.zh-CN.md#145-翻译与转写)）。`SpeechToTextService.ListSpeechRecognizers` 列出插件已配置的识别器，每个都有 ID、名称、语言（BCP 47）、可接受的最长音频，以及是否支持流式、是否给出时间戳、是否检测语言、是否翻译为英语、是否接受提示。`TranscribeSpeech` 转写从宿主 API 的 URL（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 16 位 PCM；参数 `stream` 选择音频流，`seconds` 只取开头若干秒）读取的音频，较短时也可以直接放在请求中；结果为文本，或按要求为带时间的分段；可指定语言或检测语言，可转写或翻译为英语。`DetectSpeechLanguage` 检测前 30 秒的语言。`StreamSpeech` 是双向流，接收随录随发的 PCM 以及语言与提示，返回部分文本与最终文本；不支持流式的识别器在流结束后一次性应答。失败带有 Connect 错误码，与 AI 网关相同。
+
+`TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出已配置服务的语音，每个都有 ID、名称、语言与示例文本；`SynthesizeSpeech` 以请求指定的格式（Ogg 封装的 Opus、MP3 或 PCM）流式返回用某个语音朗读一段文本的语音。
+
+`plugins/voice` 以 Go 子进程插件提供这两项能力：其配置列出各个服务，每个服务是一种类型及其地址、key（机密项）与模型——whisper-asr-webservice、OpenAI 兼容的转写与语音 API、Deepgram、Azure Speech、Google Cloud 的语音服务、火山引擎与阿里云的语音服务，以及 ElevenLabs——插件把它们的识别器与语音命名为 `<plugin>/<id>`。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；流式服务经由其 WebSocket 连接，其他服务一次性收到每段话。
 
 ## 9. 运行时差异
 | | WASM | 进程 |

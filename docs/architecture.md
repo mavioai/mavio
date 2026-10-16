@@ -105,6 +105,7 @@ mavio/
 │   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
 │   ├── rclone/                  # [Go] rclone rcd: rc client, storage on remotes, media proxy, rcd supervision
 │   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
+│   ├── intent/                  # [Rust] The assistant's grammar: one parser for the clients and, as WASM, the web UI and the server (see assistant.md)
 │   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
 │   ├── apple/                   # [Swift] Code shared by the Apple apps (see clients.md)
 │   ├── android/                 # [Kotlin] Code shared by the Android apps (see clients.md)
@@ -122,6 +123,7 @@ mavio/
 │   ├── indexers/                # [Go → child process] Indexers: Newznab, Torznab, Cardigann, Prowlarr's sites
 │   ├── download-clients/        # [Go → child process] Download clients: qBittorrent, Transmission, SABnzbd, NZBGet, …
 │   ├── agent/                   # [TS → child process, Bun] AI gateway (pi-ai) and agent sessions (pi-durable)
+│   ├── voice/                   # [Go → child process] Speech recognition and synthesis services: Whisper, OpenAI-compatible APIs, …
 │   ├── notifier-webhook/        # [Go → wasm] Webhook notifications
 │   └── auth-ldap/               # [Go → child process] LDAP authentication (needs native long-lived TCP connections)
 │
@@ -152,6 +154,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `acquire`, like `library`, reaches storage, scans and plugins only through ports in `core`, which `apps/server` implements.
 * `media` depends only on `core` and knows nothing about databases or plugins.
 * `rclone` depends only on `core`: it implements `core.Storage` over an rcd's HTTP API and links none of rclone's code.
+* `libs/intent`, in Rust, depends on nothing but its generated messages from `libs/proto`; `libs/client-rust` links it, and `apps/server` embeds its WASM build and runs it on wazero ([Assistant §4.3](assistant.md#43-one-implementation-three-hosts)).
 * Only `apps/server` does wiring. The dependency direction is enforced in CI by depguard rules.
 
 ---
@@ -559,6 +562,7 @@ Mavio finds the subtitles its movies and episodes lack, as Bazarr does beside So
 | Providers, translators | `plugins/subtitles` (process), `SUBTITLE_PROVIDER`, `SUBTITLE_TRANSLATOR` | `subliminal_patch/providers`, `pitcher.py`, the throttling of `get_providers.py`, `subtitles/tools/translate` |
 | Mods, encodings, language detection | `libs/subtitle` | subzero, character set detection, `guess_language` |
 | Synchronization | `libs/media/subsync`, speech detected by Silero VAD run in Go (`libs/media/vad`) | ffsubsync with its Silero detector |
+| Transcription | `libs/acquire/subtitles` (what to transcribe), `apps/server/internal/subtitles` (the source), the recognizers of `SPEECH_TO_TEXT` plugins (`plugins/voice`) | `subliminal_patch/providers/whisperai.py` |
 
 * **The server's own data stands in for Bazarr's sync.** Movies, series and episodes are the server's items; the release a file came from is the grab its import recorded (Bazarr's `sceneName` and history refiner), else the file's name; release names are parsed by `libs/release`, in place of guessit; codecs, resolution and audio languages come from the stored probe. Bazarr's Sonarr and Radarr sync, path mappings, Plex and Jellyfin refreshes, Apprise, scheduler, backup and announcements have their counterparts in imports and scans, the item's streams, the activity log with notifier plugins, `TaskService` and P11.
 * **Rules apart from networks**, as acquisition (§13): profiles, decisions, history and the blocklist are the server's; what talks to subtitle sites, and changes with them, is in the plugin, upgraded from the catalog without a server release.
@@ -581,7 +585,7 @@ Subtitle acquisition reads media under the policy of [Optimization §2.3](optimi
 * Embedded text subtitles are extracted to sidecars only by hand and only on local and network storage, from the extraction cache of playback ([Optimization §2.6](optimization.md#26-embedded-subtitles)), filled by its single ffmpeg run when empty; on cloud storage they are never extracted.
 * Synchronization against the audio reads the whole audio track, so it runs only on local and network storage; on cloud storage a subtitle is synchronized only by hand against another subtitle file of the video, whose cues stand for the speech, which reads no video on any storage.
 * Language detection and mods read only the subtitle files.
-* Whisper's audio (§14.5) is served only on local and network storage, and embedded subtitles are translated only there; on cloud storage Whisper finds nothing and only subtitle files are translated.
+* The audio transcribed (§14.5) is served only on local and network storage, and embedded subtitles are translated only there; on cloud storage transcription finds nothing and only subtitle files are translated.
 
 ### 14.4 Subtitle Providers (`plugins/subtitles`)
 A first-party process plugin porting Bazarr's providers: subtitle sites behind cookies, logins and Cloudflare (through the indexers' kinds of proxies and FlareSolverr), captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha with the administrator's account, archives (zip, RAR, 7z) and self-hosted providers at addresses a WASM manifest cannot list. Its configuration enables providers with their settings; `SubtitleProviderService` lists them, searches them for a video in several languages, returning candidates with their release names, flags and matched properties, and downloads one. Providers failing are throttled for Bazarr's durations by kind of failure (too many requests, download limit, service unavailable, authentication), some until midnight in their site's time zone, counted failures only after five in two minutes; their state is kept in the plugin's data folder. OpenSubtitles.com is one of its providers.
@@ -593,4 +597,13 @@ A first-party process plugin porting Bazarr's providers: subtitle sites behind c
   * **Proofreading** (`subtitles.proofread`) has an AI model, the one named or else the first that translated the file, compare each translated cue with its source and replace it with its correction. Cues pair with the source's by order when the file has as many (its credit aside), else by exact timing, else with the source cues overlapping at least half of the shorter, so a file synchronized or edited since its translation is still proofread; the record notes the cues revised.
   * **Automation** (the `subtitles.translate_wanted` task, every interval when enabled) translates what movies and episodes lack, taking them in turns from where the last run stopped, up to the settings' maximum per run, once their files are old enough, from a subtitle in the first source language they have: an external file before an embedded text stream, never a forced one, and one not for the hearing impaired before one that is. A translation pending or running for the same item and language is not queued again.
   * **Statistics** (`GetSubtitleTranslationStatistics`) add up the records: files, cues, characters, tokens and cost, by translator, language pair and media type, and the files of each of the last days.
-* **Transcription** is Whisper's, a provider of `plugins/subtitles` as in Bazarr: it transcribes the audio in its own language or translates it to English, never to other languages and never through translators. The audio's language comes from the audio streams' tags; Whisper detects it from the first 30 seconds of the first stream when no stream is tagged or a tag is ambiguous (`und`, `mul`, `zxx` and the like); with several streams, the one in the subtitle's language is transcribed. The plugin streams the audio from the host API ([Plugins §8.13](plugins.md#813-subtitle-providers)) to a whisper-asr-webservice server, which answers with SubRip.
+* **Transcription** follows Bazarr's Whisper provider, with the recognizers of `SPEECH_TO_TEXT` plugins ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)) in place of a provider of its own, so that every speech service configured for the assistant ([Assistant §8.5](assistant.md#85-subtitles)) also transcribes subtitles. The server's transcription source takes part in searches beside the subtitle providers, in the library's provider order, with the recognizer the subtitle settings choose among those giving timestamps; it offers a subtitle in each wanted language it can make, scored as Bazarr scores Whisper's (the series, season and episode, or the title, alone), so that it is chosen only when no provider's subtitle is better. It transcribes the audio in its own language, or translates it to English where the recognizer translates, never to other languages and never through translators. The audio's language comes from the audio streams' tags, mapped as Bazarr maps them; the recognizer detects it from the first 30 seconds of the first stream when no stream is tagged or a tag is ambiguous (`und`, `mul`, `zxx` and the like), and the detection is kept per file; with several streams, the one in the subtitle's language is transcribed. These choices are pure functions of `libs/acquire/subtitles`. The recognizer reads the audio from the host API (`/speech/audio/{token}`, 16 kHz mono PCM aligned with the video's start) and answers with timed segments, which the server writes as SubRip.
+
+## 15. Assistant (apps/server/internal/assistant)
+
+The assistant is specified in [Assistant](assistant.md). In the server:
+* **`AssistantService`** (`mavio.assistant.v1`) takes requests as text, with an intent when a client's grammar matched, and streams what happens; it lists, reads and deletes the user's conversations and memories, gives recognizers their hints, and signs the listening WebSocket. The speech routes are plain HTTP: `/assistant/listen/{token}` (WebSocket) and `/assistant/speech`.
+* **The fast path** runs `libs/intent`'s WASM module on wazero, as the server runs WASM plugins, and resolves its slots against the user's libraries.
+* **The tools** call the server's own services as the user; the requesting device is acted on through client actions, other devices through `SessionService.SendCommand`.
+* **The AI path** goes through the `AGENT_SESSION` plugin ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)): the server watches its tool calls, runs them and keeps their results for a day by call ID, and records each conversation's user and device.
+* **Speech** goes through the `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` plugins ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)); the end of an utterance is detected by Silero VAD (`libs/media/vad`), and audio is never stored.

@@ -17,6 +17,7 @@ This is the repository working guide for AI coding agents (and new developers). 
 | [docs/clients.md](docs/clients.md) | Clients: the embedded web UI, the Apple, Android and desktop apps, the shared Rust core, the design system |
 | [docs/accounts.md](docs/accounts.md) | Accounts: mavio.dev and standalone modes, library access, managed users and switching, Homes, friends, tokens |
 | [docs/mavio-dev.md](docs/mavio-dev.md) | mavio.dev: website and API, push to servers, certificates and subdomains, relay, deployment |
+| [docs/assistant.md](docs/assistant.md) | Assistant: the fast path's grammar, tools and client actions, the AI path with remote tools and code mode, conversations and memory, speech, the clients |
 | [docs/jellyfin-compat.md](docs/jellyfin-compat.md) | Evaluation of a Jellyfin API compatibility shim (not adopted) |
 
 ## Project Overview
@@ -45,6 +46,8 @@ libs/acquire/         Acquisition engine: profiles, decisions, searches, queue, 
 libs/rclone/          rclone rcd: rc client, storage on remotes, media proxy, rcd supervision (from P25)
 plugins/<name>/       Plugins (built as wasip1 WASM by default)
 plugins/agent/        AI gateway and agent sessions: a TypeScript process plugin compiled by Bun (pi-ai, pi-durable)
+plugins/voice/        Speech recognition and synthesis services, Whisper among them: a Go process plugin (from P29)
+libs/intent/          The assistant's grammar in Rust: linked by libs/client-rust, built as WASM (intent:wasm) for the web UI and the server (from P29)
 apps/web/             Web UI (React + Vite), built into apps/server/internal/webui/dist and embedded by the server
 apps/website/         mavio.dev: accounts, access records, Homes, push to servers (TanStack Start on Cloudflare Workers, from P28)
 apps/relay/           Relay for servers that cannot be reached directly: TLS passthrough by SNI (from P28)

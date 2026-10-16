@@ -47,6 +47,7 @@ flowchart TD
     P25["P25 存储后端与 rclone<br/>存储端口、libs/rclone、rcd、离线下载"]
     P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
     P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
+    P29["P29 助手<br/>libs/intent、AssistantService、plugins/voice、远程工具与记忆"]
     P28["P28 账户<br/>mavio.dev 模式与独立模式、媒体库访问、托管用户、用户切换、Home、好友、绑定设备的令牌；mavio.dev、中转、DNS 与证书"]
 
     P0 --> P1
@@ -87,6 +88,8 @@ flowchart TD
     P13 --> P27
     P26 --> P27
     P21 --> P28
+    P21 --> P29
+    P27 --> P29
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -120,6 +123,7 @@ flowchart TD
 | P26 | 字幕获取 | ✅ 完成 |
 | P27 | AI 网关与字幕翻译 | 进行中 |
 | P28 | 账户 | 进行中 |
+| P29 | 助手 | 未开始 |
 
 ---
 
@@ -894,6 +898,35 @@ flowchart TD
 - [ ] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
 - [ ] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
 
+### P29 助手
+**范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其三处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；带 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 的 `plugins/voice`，Whisper 并入其中，字幕由其识别器转写；各客户端，Web UI 最先。
+
+- 快速路径：`libs/intent`、其语法、用例与 WASM 构建，由客户端、Web UI 与服务端运行
+- `AssistantService`、工具与客户端动作；助手设置
+- AI 路径：`plugins/agent` 中的远程工具、代码模式、会话与记忆
+- 语音：`plugins/voice`、收听与语音路由、基于其识别器的字幕转写
+- 各客户端的助手：先 Web UI，再 Apple、Android 与桌面应用
+
+**完成标准**：一个经由 API 的端到端测试：没有 AI 网关插件时，中英文请求暂停假设备、跳转并切换其字幕，播放以名称的同音字说出的作品，一个需要确认的请求以语音确认、另一个以语音取消；使用构建好的 `plugins/agent` 与回环接口上的假 OpenAI 兼容 API 提供的模型时，语法未匹配的请求经由代码模式以用户身份运行工具，重启插件时被中断的工具调用只运行一次，在一个会话中学到的记忆在下一个会话中被使用；通过构建好的 `plugins/voice` 与假 whisper-asr-webservice 收听，得到一段录音的文本，同一个识别器转写一集的字幕；在 Web UI 中，一个说出的请求播放一部作品。
+
+**进展**：
+- [ ] `libs/proto` 中的 `mavio.assistant.v1`：`Intent`、`ParseIntentRequest` 与 `AssistantService`
+- [ ] `libs/intent`：语法格式、规范化、中文与英文语法、对话状态及其用例；WASM 构建（`intent:wasm`），由服务端在 wazero 上运行、由 `libs/client-ts` 运行，各自对照用例
+- [ ] `apps/server` 中的 `AssistantService` 与工具：带拼音的槽位解析、客户端动作、经 `SendCommand` 控制其他设备、活动日志；服务端设置中的助手设置与可使用 AI 路径的用户（[领域模型](domain.zh-CN.md)）
+- [ ] `AGENT_SESSION` 与 `plugins/agent` 中的远程工具：声明、`WatchAgentToolCalls`、`SubmitAgentToolResult`、服务端按 ID 记录的调用、`AddAgentMessages`
+- [ ] `plugins/agent` 中的代码模式，在各平台的 Bun 可执行文件中验证其 QuickJS 沙箱
+- [ ] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
+- [ ] `libs/proto` 中的 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`；`plugins/voice`，包括从 `plugins/subtitles` 连同测试用例移来的 whisper-asr-webservice，以及 OpenAI 兼容的转写与语音 API
+- [ ] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
+- [ ] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
+- [ ] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、“助手”设置以及 AI 设置中的助手部分
+- [ ] 决定哪些工具需要确认
+- [ ] `plugins/voice` 中更多的语音服务：Deepgram、Azure Speech、Google Cloud、火山引擎、阿里云、ElevenLabs
+- [ ] Apple 应用：带提示的设备端识别、`AVSpeechSynthesizer`、App Intents；tvOS 上的听写
+- [ ] Android 应用：带提示的 `SpeechRecognizer`、`TextToSpeech`、Android TV 上的搜索 intent 与按搜索播放
+- [ ] 桌面应用：服务端的识别器与语音
+- [ ] 语法支持更多语言
+
 ---
 
 ## 4. 风险与待决事项
@@ -921,3 +954,7 @@ flowchart TD
 | Linux 上的 HDR | Linux 应用以 OpenGL 在 GTK 3 的 `GtkGLArea` 中绘制视频，后者只能呈现 SDR，因此 HDR 经色调映射输出 | MyGo 的 Linux 后端能呈现 HDR 表面时再评估 |
 | MyGo | `apps/desktop` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。其发布版没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（macOS 上的视图、Windows 上的子窗口、Linux 上的 `GtkGLArea`） | 视频元素已在分叉 `mavioai/mygo`（`v0.4.5-mavio` 分支）中于 macOS 上完成，固定到某一提交，并随 MyGo 的发布变基；贡献给上游；接下来是带 HDR10 的 Windows |
 | macOS 上的 mpv | mpv 的 macOS 输出不能嵌入宿主的视图；mavio-deps 中 Mavio 的补丁使之可行，并须跟随 mpv 对该代码的修改 | 每次更新 mpv 的固定版本时变基补丁；提交给 mpv |
+| Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | P29 中首先验证；验证通过之前，会话只直接提供工具 |
+| 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
+| 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
+| Siri Remote 的麦克风 | tvOS 不允许应用从 Siri Remote 录音 | 助手输入框中的听写；App Intents |

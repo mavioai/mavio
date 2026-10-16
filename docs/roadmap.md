@@ -47,6 +47,7 @@ flowchart TD
     P25["P25 Storage backends and rclone<br/>storage port, libs/rclone, rcd, offline downloads"]
     P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
     P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
+    P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/voice, remote tools and memory"]
     P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
 
     P0 --> P1
@@ -87,6 +88,8 @@ flowchart TD
     P13 --> P27
     P26 --> P27
     P21 --> P28
+    P21 --> P29
+    P27 --> P29
 ```
 
 | Phase | Theme | Status |
@@ -120,6 +123,7 @@ flowchart TD
 | P26 | Subtitle acquisition | ✅ Done |
 | P27 | AI gateway and subtitle translation | In progress |
 | P28 | Accounts | In progress |
+| P29 | Assistant | Not started |
 
 ---
 
@@ -894,6 +898,35 @@ flowchart TD
 - [ ] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
 - [ ] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
 
+### P29 Assistant
+**Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its three hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; `plugins/voice` with `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH`, Whisper moved into it and subtitles transcribed by its recognizers; the clients, the web UI first.
+
+- The fast path: `libs/intent`, its grammars, cases and WASM build, run by the clients, the web UI and the server
+- `AssistantService`, the tools and the client actions; the assistant settings
+- The AI path: remote tools, code mode, conversations and memory in `plugins/agent`
+- Speech: `plugins/voice`, listening and speech routes, subtitle transcription over its recognizers
+- The clients' assistant: the web UI, then the Apple, Android and desktop apps
+
+**Done when**: an end-to-end test through the API: with no AI gateway plugin, requests in Chinese and English pause, seek and switch the subtitles of a fake device, play a title named by a homophone of its name, and a request requiring confirmation is confirmed and another canceled by voice; with the built `plugins/agent` and a model served by a fake OpenAI-compatible API on the loopback interface, a request the grammar does not match runs tools as the user through code mode, a tool call interrupted by restarting the plugin is run once, and a memory learned in one conversation is used in the next; listening through the built `plugins/voice` with a fake whisper-asr-webservice gives the text of a recording, and the same recognizer transcribes an episode's subtitles; in the web UI, a spoken request plays a title.
+
+**Progress**:
+- [ ] `mavio.assistant.v1` in `libs/proto`: `Intent`, `ParseIntentRequest` and `AssistantService`
+- [ ] `libs/intent`: the grammar format, normalization, the Chinese and English grammars, the dialog state and their cases; the WASM build (`intent:wasm`), run by the server on wazero and by `libs/client-ts`, each against the cases
+- [ ] `AssistantService` and the tools in `apps/server`: slot resolution with pinyin, client actions, other devices through `SendCommand`, the activity log; the assistant settings in the server settings and who may use the AI path ([Domain Model](domain.md))
+- [ ] Remote tools in `AGENT_SESSION` and `plugins/agent`: declarations, `WatchAgentToolCalls`, `SubmitAgentToolResult`, the server's record of calls by ID, `AddAgentMessages`
+- [ ] Code mode in `plugins/agent`, its QuickJS sandbox checked in the Bun executable on every platform
+- [ ] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
+- [ ] `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` in `libs/proto`; `plugins/voice` with whisper-asr-webservice, moved from `plugins/subtitles` with its test cases, and the OpenAI-compatible transcription and speech APIs
+- [ ] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
+- [ ] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
+- [ ] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the Assistant settings and the assistant's part of the AI settings
+- [ ] Deciding which tools require confirmation
+- [ ] More speech services in `plugins/voice`: Deepgram, Azure Speech, Google Cloud, Volcengine, Alibaba Cloud, ElevenLabs
+- [ ] The Apple apps: on-device recognition with hints, `AVSpeechSynthesizer`, App Intents; dictation on tvOS
+- [ ] The Android apps: `SpeechRecognizer` with hints, `TextToSpeech`, search intents and play-from-search on Android TV
+- [ ] The desktop app: the server's recognizer and voices
+- [ ] More languages in the grammar
+
 ---
 
 ## 4. Risks and Open Items
@@ -921,3 +954,7 @@ flowchart TD
 | HDR on Linux | The Linux app draws video with OpenGL in a GTK 3 `GtkGLArea`, which presents SDR only, so HDR is tone mapped | Revisit when MyGo's Linux backend can present HDR surfaces |
 | MyGo | `apps/desktop` builds on MyGo, started in September 2026 and still in 0.x, mostly by one maintainer. Its release has no element that places a native surface drawn by another renderer under its native UI, which the player needs for mpv's video (a view on macOS, a child window on Windows, a `GtkGLArea` on Linux) | The video element, done on macOS in the fork `mavioai/mygo` (branch `v0.4.5-mavio`), pinned to a commit and rebased on MyGo's releases; contribute it upstream; Windows with HDR10 next |
 | mpv on macOS | mpv's macOS output cannot embed in a host's view; Mavio's patch in mavio-deps makes it, and must follow mpv's changes to that code | Rebase the patch with each mpv pin; offer it to mpv |
+| Code mode in the Bun executable | pi-durable's code mode runs scripts in quickjs-wasi, a WASM module, which must load inside `plugins/agent`'s Bun executable on every platform | Check first in P29; until it does, conversations offer the tools directly only |
+| Microphones in browsers | `getUserMedia` works only on secure pages, so a standalone server reached over plain HTTP on the local network cannot record in the web UI | Servers' HTTPS addresses (P28); typed requests elsewhere |
+| Recognizing titles | Recognizers misspell titles and names, Chinese ones as homophones | Hints to recognizers that take them; pinyin and tolerant matching in slot resolution (P29) |
+| The Siri Remote's microphone | tvOS gives apps no recording from the Siri Remote | Dictation in the assistant's field; App Intents |

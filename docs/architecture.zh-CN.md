@@ -105,6 +105,7 @@ mavio/
 │   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
 │   ├── rclone/                  # [Go] rclone rcd：rc 客户端、远端上的存储、媒体代理、rcd 托管
 │   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
+│   ├── intent/                  # [Rust] 助手的语法：客户端共用的一份解析器，以 WASM 形式也供 Web UI 与服务端使用（见 assistant.zh-CN.md）
 │   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
 │   ├── apple/                   # [Swift] Apple 各应用的共享代码（见 clients.zh-CN.md）
 │   ├── android/                 # [Kotlin] Android 各应用的共享代码（见 clients.zh-CN.md）
@@ -122,6 +123,7 @@ mavio/
 │   ├── indexers/                # [Go → 子进程] 索引器：Newznab、Torznab、Cardigann、Prowlarr 的站点
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── agent/                   # [TS → 子进程，Bun] AI 网关（pi-ai）与智能体会话（pi-durable）
+│   ├── voice/                   # [Go → 子进程] 语音识别与合成服务：Whisper、OpenAI 兼容 API 等
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
 │
@@ -152,6 +154,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `acquire` 与 `library` 一样，只通过 `core` 中的端口访问存储、扫描与插件，这些端口由 `apps/server` 实现。
 * `media` 只依赖 `core`，不感知数据库与插件。
 * `rclone` 只依赖 `core`：它基于 rcd 的 HTTP API 实现 `core.Storage`，不链接 rclone 的任何代码。
+* `libs/intent` 用 Rust 编写，只依赖 `libs/proto` 为它生成的消息；`libs/client-rust` 链接它，`apps/server` 嵌入它的 WASM 构建并在 wazero 上运行（[助手 §4.3](assistant.zh-CN.md#43-一份实现三处运行)）。
 * 只有 `apps/server` 负责装配。依赖方向由 depguard 规则在 CI 中强制。
 
 ---
@@ -559,6 +562,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 | 提供者、翻译器 | `plugins/subtitles`（进程）、`SUBTITLE_PROVIDER`、`SUBTITLE_TRANSLATOR` | `subliminal_patch/providers`、`pitcher.py`、`get_providers.py` 的限流、`subtitles/tools/translate` |
 | 修正、编码、语言识别 | `libs/subtitle` | subzero、字符集检测、`guess_language` |
 | 时间轴同步 | `libs/media/subsync`，语音由以 Go 运行的 Silero VAD 检测（`libs/media/vad`） | ffsubsync 及其 Silero 检测器 |
+| 转写 | `libs/acquire/subtitles`（转写什么）、`apps/server/internal/subtitles`（转写来源）、`SPEECH_TO_TEXT` 插件的识别器（`plugins/voice`） | `subliminal_patch/providers/whisperai.py` |
 
 * **以服务端自己的数据代替 Bazarr 的同步。** 电影、剧集与单集是服务端的条目；文件来自的 release 是其入库所记录的抓取（Bazarr 的 `sceneName` 与历史 refiner），否则是文件名；release 名称由 `libs/release` 解析，代替 guessit；编码、分辨率与音轨语言来自已保存的 probe 结果。Bazarr 的 Sonarr 与 Radarr 同步、路径映射、Plex 与 Jellyfin 刷新、Apprise、调度器、备份与公告，分别对应入库与扫描、条目的流、活动日志与通知插件、`TaskService` 以及 P11。
 * **规则与网络分开**，如资源获取（§13）：配置、决策、历史与阻止列表属于服务端；与字幕站点通信、随站点变化的部分在插件中，从插件目录升级，无需发布服务端。
@@ -581,7 +585,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 内嵌文字字幕只在手动操作时、且只在本地和网络存储上提取为外挂字幕，来源是播放的提取缓存（[优化 §2.6](optimization.zh-CN.md#26-内嵌字幕)），缓存为空时由其单次 ffmpeg 运行填充；云存储上从不提取。
 * 按音频同步需读取整条音轨，因此只在本地和网络存储上进行；云存储上的字幕只能手动按该视频的另一个字幕文件同步，以其字幕条代表语音；这在任何存储上都不读取视频。
 * 语言识别与修正只读取字幕文件。
-* Whisper 的音频（§14.5）只在本地和网络存储上提供，内嵌字幕也只在那里翻译；云存储上 Whisper 找不到字幕，只翻译字幕文件。
+* 用于转写的音频（§14.5）只在本地和网络存储上提供，内嵌字幕也只在那里翻译；云存储上转写找不到字幕，只翻译字幕文件。
 
 ### 14.4 字幕提供者（`plugins/subtitles`）
 移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
@@ -593,4 +597,13 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
   * **校对**（`subtitles.proofread`）让一个 AI 模型（指定的，否则为第一个翻译该文件的）把每条译文与其来源比较，并以其修正替换。字幕条数（不计署名条）相同时按顺序与源字幕条配对，否则按精确时间，再否则与重叠至少较短者一半时长的源字幕条配对，因此翻译后经过同步或编辑的文件仍能校对；记录中注明修改的条数。
   * **自动化**（`subtitles.translate_wanted` 定时任务，启用时每隔设定间隔运行）为电影与单集翻译缺少的字幕：从上次停下处起轮流选取，每次至多设置中的数量，仅限文件足够旧的，依据其已有的第一个源语言字幕：外挂文件优先于内嵌文字字幕流，从不用 forced 字幕，非听障字幕优先于听障字幕。同一条目与语言已有待处理或正在运行的翻译时不再排队。
   * **统计**（`GetSubtitleTranslationStatistics`）汇总各记录：文件数、字幕条数、字符数、令牌数与费用，按翻译器、语言对与媒体类型分组，以及最近每天的文件数。
-* **转写**由 Whisper 完成，它如 Bazarr 一样是 `plugins/subtitles` 的一个提供者：把音频转写为其本身的语言，或翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，Whisper 从第一条音频流的前 30 秒识别；有多条音频流时，转写与字幕语言相同的那条。插件从宿主 API（[插件 §8.13](plugins.zh-CN.md#813-字幕提供者)）把音频流式送往 whisper-asr-webservice 服务器，后者以 SubRip 应答。
+* **转写**遵循 Bazarr 的 Whisper 提供者，但由 `SPEECH_TO_TEXT` 插件的识别器（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）代替一个单独的提供者，因此为助手配置的每个语音服务（[助手 §8.5](assistant.zh-CN.md#85-字幕)）也能转写字幕。服务端的转写来源与字幕提供者一起参与搜索，位于媒体库的提供者顺序中，使用字幕设置在给出时间戳的识别器中选定的那个；它为每个它能生成的缺少语言提供一条字幕，评分与 Bazarr 给 Whisper 的相同（只匹配剧集、季与集，或标题），因此只在没有更好的提供者字幕时被选中。它把音频转写为其本身的语言，或在识别器支持翻译时翻译为英语，从不译为其他语言，也不经过翻译器。音频的语言取自音频流的标签，按 Bazarr 的方式映射；没有标签的流或标签含义不明（`und`、`mul`、`zxx` 等）时，识别器从第一条音频流的前 30 秒检测，检测结果按文件保存；有多条音频流时，转写与字幕语言相同的那条。这些选择是 `libs/acquire/subtitles` 的纯函数。识别器从宿主 API（`/speech/audio/{token}`，与视频开头对齐的 16 kHz 单声道 PCM）读取音频，以带时间的分段应答，由服务端写成 SubRip。
+
+## 15. 助手（apps/server/internal/assistant）
+
+助手的规格见[助手](assistant.zh-CN.md)。在服务端：
+* **`AssistantService`**（`mavio.assistant.v1`）接收文本请求（客户端的语法匹配时附带意图），并以流式传送发生的一切；它列出、读取与删除用户的会话与记忆，为识别器提供提示，并为收听用的 WebSocket 签名。语音路由是普通 HTTP：`/assistant/listen/{token}`（WebSocket）与 `/assistant/speech`。
+* **快速路径**像运行 WASM 插件那样在 wazero 上运行 `libs/intent` 的 WASM 模块，并在用户的媒体库中解析其槽位。
+* **工具**以用户身份调用服务端自己的服务；对发出请求的设备通过客户端动作执行，对其他设备通过 `SessionService.SendCommand` 执行。
+* **AI 路径**经由 `AGENT_SESSION` 插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）：服务端监听其工具调用并运行，按调用 ID 把结果保留一天，并记录每个会话的用户与设备。
+* **语音**经由 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 插件（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）；一段话的结束由 Silero VAD（`libs/media/vad`）检测，音频从不保存。

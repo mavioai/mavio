@@ -17,6 +17,7 @@
 | [docs/clients.zh-CN.md](docs/clients.zh-CN.md) | 客户端：内嵌 Web UI，Apple、Android 与桌面应用，共享 Rust 核心，设计系统 |
 | [docs/accounts.zh-CN.md](docs/accounts.zh-CN.md) | 账户：mavio.dev 模式与独立模式、媒体库访问、托管用户与切换、Home、好友、令牌 |
 | [docs/mavio-dev.zh-CN.md](docs/mavio-dev.zh-CN.md) | mavio.dev：网站与 API、向服务端推送、证书与子域名、中转、部署 |
+| [docs/assistant.zh-CN.md](docs/assistant.zh-CN.md) | 助手：快速路径的语法、工具与客户端动作、带远程工具与代码模式的 AI 路径、会话与记忆、语音、各客户端 |
 | [docs/jellyfin-compat.zh-CN.md](docs/jellyfin-compat.zh-CN.md) | Jellyfin API 兼容垫片评估（未采用） |
 
 ## 项目概览
@@ -45,6 +46,8 @@ libs/acquire/         资源获取引擎：档案、决策、搜索、队列、�
 libs/rclone/          rclone rcd：rc 客户端、远端上的存储、媒体代理、rcd 托管（P25 起）
 plugins/<name>/       插件（默认编译为 wasip1 WASM）
 plugins/agent/        AI 网关与智能体会话：由 Bun 编译的 TypeScript 子进程插件（pi-ai、pi-durable）
+plugins/voice/        语音识别与合成服务（包括 Whisper）：Go 子进程插件（P29 起）
+libs/intent/          助手的 Rust 语法：由 libs/client-rust 链接，并构建为 WASM（intent:wasm）供 Web UI 与服务端使用（P29 起）
 apps/web/             Web UI（React + Vite），构建到 apps/server/internal/webui/dist，由服务端内嵌
 apps/website/         mavio.dev：账户、访问记录、Home、向服务端推送（Cloudflare Workers 上的 TanStack Start，自 P28 起）
 apps/relay/           供无法直接访问的服务端使用的中转：按 SNI 透传 TLS（自 P28 起）
