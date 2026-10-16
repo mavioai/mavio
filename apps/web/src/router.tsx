@@ -1,4 +1,4 @@
-import { createRootRoute, createRoute, createRouter, notFound, redirect } from "@tanstack/react-router";
+import { createRootRoute, createRoute, createRouter, lazyRouteComponent, notFound, redirect } from "@tanstack/react-router";
 import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 
 import { CreditsScreen, ItemCrewScreen, TitleCreditsScreen, TitleCrewScreen } from "./screens/credits.tsx";
@@ -12,10 +12,8 @@ import { HubScreen } from "./screens/hub.tsx";
 import { LibrariesScreen } from "./screens/libraries.tsx";
 import { LibraryScreen } from "./screens/library.tsx";
 import { PersonScreen } from "./screens/person.tsx";
-import { PlayerScreen } from "./screens/player.tsx";
 import { type RequestFilter, requestFilters, RequestsScreen } from "./screens/requests.tsx";
 import { SearchScreen } from "./screens/search.tsx";
-import { SettingsScreen, settingsSearch } from "./screens/settings.tsx";
 import {
   CallbackScreen,
   InviteScreen,
@@ -27,8 +25,12 @@ import {
   redirectOf,
   signInSteps,
 } from "./screens/sign-in.tsx";
-import { searchText } from "./search-params.ts";
-import { NotFoundView } from "./ui.tsx";
+import { searchText, settingsSearch } from "./search-params.ts";
+import { Loading, NotFoundView } from "./ui.tsx";
+
+// The settings and the player load as they are first opened, or pointed at.
+const SettingsScreen = lazyRouteComponent(() => import("./screens/settings.tsx"), "SettingsScreen");
+const PlayerScreen = lazyRouteComponent(() => import("./screens/player.tsx"), "PlayerScreen");
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -220,6 +222,8 @@ export const router = createRouter({
   ]),
   scrollRestoration: true,
   defaultNotFoundComponent: NotFoundView,
+  defaultPendingComponent: Loading,
+  defaultPreload: "intent",
 });
 
 declare module "@tanstack/react-router" {
