@@ -90,9 +90,14 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
 };
 
+/**
+ * The groups of sections: this device's, and the server's, in the order a
+ * server is set up and kept: the server and who reaches it, its media,
+ * acquiring media, what extends it, and watching over and maintaining it.
+ */
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "activity", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "conversations", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "users", "devices", "api-keys", "libraries", "storage", "transcoding", "acquisition", "wanted", "downloads", "subtitles", "plugins", "ai", "conversations", "activity", "issues", "tasks", "logs", "backups"], server: true },
 ];
 
 /** The server whose settings are shown and whether the user administers it. */
