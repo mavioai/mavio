@@ -4,6 +4,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { TooltipProvider } from "./controls/tooltip.tsx";
 import { EventHub, EventHubProvider } from "./events.tsx";
 import { locale } from "./i18n.ts";
 import { applyTheme } from "./prefs.ts";
@@ -34,7 +35,9 @@ createRoot(document.getElementById("root")!).render(
     <ServersProvider value={servers}>
       <QueryClientProvider client={queryClient}>
         <EventHubProvider value={events}>
-          <RouterProvider router={router} />
+          <TooltipProvider>
+            <RouterProvider router={router} />
+          </TooltipProvider>
         </EventHubProvider>
       </QueryClientProvider>
     </ServersProvider>

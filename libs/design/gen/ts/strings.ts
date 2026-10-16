@@ -189,6 +189,7 @@ export type MessageKey =
   | 'player.method'
   | 'player.options'
   | 'player.lyrics'
+  | 'player.position'
   | 'state.loading'
   | 'state.empty'
   | 'state.error'
@@ -1352,6 +1353,7 @@ export type MessageKey =
   | 'itemsubs.blocklisted'
   | 'itemsubs.download'
   | 'itemsubs.downloaded'
+  | 'itemsubs.chooseFile'
   | 'metadata.edit'
   | 'metadata.identify'
   | 'metadata.refresh'
@@ -1690,6 +1692,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.method": "Playback",
     "player.options": "Playback Options",
     "player.lyrics": "Lyrics",
+    "player.position": "Position",
     "state.loading": "Loading…",
     "state.empty": "Nothing here yet",
     "state.error": "Something went wrong",
@@ -2853,6 +2856,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.blocklisted": "Blocklisted",
     "itemsubs.download": "Download",
     "itemsubs.downloaded": "Downloaded",
+    "itemsubs.chooseFile": "Choose a Subtitle File…",
     "metadata.edit": "Edit Metadata",
     "metadata.identify": "Identify",
     "metadata.refresh": "Refresh Metadata",
@@ -3189,6 +3193,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "player.method": "播放方式",
     "player.options": "播放选项",
     "player.lyrics": "歌词",
+    "player.position": "进度",
     "state.loading": "正在载入…",
     "state.empty": "这里还没有内容",
     "state.error": "出了点问题",
@@ -4352,6 +4357,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "itemsubs.blocklisted": "已拉黑",
     "itemsubs.download": "下载",
     "itemsubs.downloaded": "已下载",
+    "itemsubs.chooseFile": "选择字幕文件…",
     "metadata.edit": "编辑元数据",
     "metadata.identify": "识别",
     "metadata.refresh": "刷新元数据",

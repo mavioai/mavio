@@ -18,9 +18,12 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row, Select } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Confirm, fromNow, input, Page, PageLink } from "./common.tsx";
+import { BackLink, fromNow, Page, PageLink } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 /** A message to send once its new conversation shows. */
 interface First {

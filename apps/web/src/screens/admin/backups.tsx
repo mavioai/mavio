@@ -9,8 +9,11 @@ import { LogLevel, type LogRecord } from "@mavio/proto/mavio/system/v1/system_pb
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row, Select } from "../../ui.tsx";
-import { Confirm, fromNow, input, Page, sizeOf } from "./common.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
+import { fromNow, Page, sizeOf } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 /** The section of the server chosen in the settings. */
 export function BackupsSection({ server }: { server: ServerEntry }) {

@@ -5,9 +5,12 @@
 // arbitrary keys, as JSON.
 import { type ReactNode, useState } from "react";
 
+import { Tip } from "./controls/tooltip.tsx";
 import { t } from "./i18n.ts";
 import { Icon } from "./icon.tsx";
-import { Button, Select, Toggle } from "./ui.tsx";
+import { Button } from "./ui.tsx";
+import { Checkbox, NumberField, Switch } from "./controls/inputs.tsx";
+import { Select } from "./controls/select.tsx";
 
 /** The subset of JSON Schema the form draws. */
 export interface Schema {
@@ -137,7 +140,7 @@ function Property({
   switch (type) {
     case "boolean":
       return head(
-        <Toggle on={typeof value === "boolean" ? value : s.default === true} label={labelOf(name, s)} onChange={(on) => onChange(on)} />,
+        <Switch on={typeof value === "boolean" ? value : s.default === true} label={labelOf(name, s)} onChange={(on) => onChange(on)} />,
       );
     case "enum":
     case "string":
@@ -158,17 +161,15 @@ function Property({
     case "integer":
     case "number":
       return head(
-        <input
-          type="number"
-          className={`${input} sm:w-40`}
-          aria-label={labelOf(name, s)}
-          required={required}
+        <NumberField
+          className="sm:w-40"
+          label={labelOf(name, s)}
           min={s.minimum}
           max={s.maximum}
-          step={type === "integer" ? 1 : "any"}
-          value={typeof value === "number" ? value : ""}
+          integer={type === "integer"}
+          value={typeof value === "number" ? value : undefined}
           placeholder={s.default !== undefined ? String(s.default) : undefined}
-          onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+          onChange={onChange}
         />,
       );
     case "object": {
@@ -177,7 +178,7 @@ function Property({
       const set = isObj(value);
       return (
         <div className="pb-3">
-          {head(!required && <Toggle on={set} label={labelOf(name, s)} onChange={(on) => onChange(on ? initial(s) : undefined)} />)}
+          {head(!required && <Switch on={set} label={labelOf(name, s)} onChange={(on) => onChange(on ? initial(s) : undefined)} />)}
           {(set || required) && (
             <div className="mx-4 rounded-[12px] border border-border">
               <ObjectFields schema={s} value={set ? value : {}} onChange={onChange} />
@@ -233,15 +234,16 @@ function TextField({
         onChange={(e) => onChange(e.target.value)}
       />
       {secret && (
-        <button
-          type="button"
-          aria-label={shown ? t("schema.hide") : t("schema.show")}
-          title={shown ? t("schema.hide") : t("schema.show")}
-          onClick={() => setShown(!shown)}
-          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-text-secondary hover:text-on-background"
-        >
-          <Icon name={shown ? "lock" : "key"} size={16} />
-        </button>
+        <Tip label={shown ? t("schema.hide") : t("schema.show")}>
+          <button
+            type="button"
+            aria-label={shown ? t("schema.hide") : t("schema.show")}
+            onClick={() => setShown(!shown)}
+            className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-text-secondary hover:text-on-background"
+          >
+            <Icon name={shown ? "lock" : "key"} size={16} />
+          </button>
+        </Tip>
       )}
     </div>
   );
@@ -280,15 +282,9 @@ function EnumSet({ schema: s, value, onChange }: { schema: Schema; value: Json[]
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-2">
       {(s.enum ?? []).map((o) => (
-        <label key={String(o)} className="inline-flex items-center gap-2 type-body">
-          <input
-            type="checkbox"
-            className="size-4 accent-accent"
-            checked={value.includes(o)}
-            onChange={(e) => onChange(e.target.checked ? [...value, o] : value.filter((x) => x !== o))}
-          />
+        <Checkbox key={String(o)} checked={value.includes(o)} onChange={(on) => onChange(on ? [...value, o] : value.filter((x) => x !== o))}>
           {String(o)}
-        </label>
+        </Checkbox>
       ))}
     </div>
   );

@@ -12,12 +12,13 @@ import {
 import type { MessageKey } from "@mavio/design/strings";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
-import { Grid, ItemCard, LoadMore, Loading, StatusView, useDismiss } from "../ui.tsx";
+import { Grid, ItemCard, LoadMore, Loading, StatusView } from "../ui.tsx";
+import { Menu, MenuChoice, MenuOption } from "../controls/menu.tsx";
 import { SectionView } from "./home.tsx";
 
 const route = getRouteApi("/s/$serverId/library/$libraryId");
@@ -185,51 +186,29 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
 
 /** The button naming the order of the items, which opens the orders to choose from. */
 function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(ref, open, close);
-  // On the television the menu opens with focus on the current order.
   const { tv } = usePrefs();
-  useEffect(() => {
-    if (open && tv) ref.current?.querySelector<HTMLElement>("[aria-checked=true]")?.focus();
-  }, [open, tv]);
   return (
-    <div ref={ref} data-focus-scope className="relative">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-        className={`inline-flex items-center rounded-full text-text-secondary hover:bg-fill hover:text-on-background ${
-          tv ? "h-12 gap-2 px-5 type-headline" : "h-8 gap-1.5 px-3 type-callout"
-        }`}
-      >
-        <Icon name="sort" size={tv ? 22 : 16} />
-        {t("library.sortBy", { sort: t(sortLabels[sort]) })}
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className={`absolute top-full left-0 z-30 mt-1.5 rounded-[12px] border border-border p-1.5 shadow-level3 ${
-            tv ? "w-80 bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : "w-56 bg-surface-overlay/90 backdrop-blur-xl"
+    <Menu
+      width={tv ? "w-80" : "w-56"}
+      trigger={
+        <button
+          type="button"
+          className={`inline-flex items-center rounded-full text-text-secondary hover:bg-fill hover:text-on-background data-popup-open:bg-fill ${
+            tv ? "h-12 gap-2 px-5 type-headline" : "h-8 gap-1.5 px-3 type-callout"
           }`}
         >
-          {(Object.keys(sortLabels) as Sort[]).map((k) => (
-            <button
-              key={k}
-              type="button"
-              role="menuitemradio"
-              aria-checked={k === sort}
-              onClick={() => (onSort(k), close())}
-              className={`flex w-full items-center gap-2 rounded-lg px-2.5 text-left hover:bg-fill ${tv ? "min-h-12 type-headline" : "min-h-9 type-body"}`}
-            >
-              <span className="w-4">{k === sort && <Icon name="check" size={16} className="text-accent-text" />}</span>
-              {t(sortLabels[k])}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+          <Icon name="sort" size={tv ? 22 : 16} />
+          {t("library.sortBy", { sort: t(sortLabels[sort]) })}
+        </button>
+      }
+    >
+      <MenuChoice value={sort} onChange={onSort}>
+        {(Object.keys(sortLabels) as Sort[]).map((k) => (
+          <MenuOption key={k} value={k}>
+            {t(sortLabels[k])}
+          </MenuOption>
+        ))}
+      </MenuChoice>
+    </Menu>
   );
 }

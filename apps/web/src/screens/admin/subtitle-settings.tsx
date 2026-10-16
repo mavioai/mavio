@@ -25,8 +25,11 @@ import { type ReactNode, useState } from "react";
 
 import { t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
-import { BackLink, input, Page, patched } from "./common.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
+import { BackLink, Page, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
 import { NumberInput } from "./quality.tsx";
 import { languageName, useSubtitleLanguages } from "./subtitles.tsx";
 
@@ -105,7 +108,7 @@ function NumberRow({ label, detail, value, onChange, min = 0, max, step }: { lab
 function ToggleRow({ label, detail, on, onChange }: { label: string; detail?: string; on: boolean; onChange: (on: boolean) => void }) {
   return (
     <Row label={label} detail={detail}>
-      <Toggle on={on} label={label} onChange={onChange} />
+      <Switch on={on} label={label} onChange={onChange} />
     </Row>
   );
 }

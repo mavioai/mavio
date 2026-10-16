@@ -8,7 +8,8 @@ import { type Job, JobState, type Task } from "@mavio/proto/mavio/system/v1/task
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row, Select } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
 import { fromNow, lengthOf, Page } from "./common.tsx";
 
 const states: Record<JobState, { color: string; title: () => string }> = {

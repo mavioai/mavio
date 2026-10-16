@@ -28,9 +28,13 @@ import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { More, NumberField, SuggestField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, ColorTile, Confirm, input, Page } from "./common.tsx";
+import { BackLink, ColorTile, Page } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 /** The section of the server chosen in the settings. */
 export function StorageSection({ server }: { server: ServerEntry }) {
@@ -158,35 +162,31 @@ function OptionField({
   const current = value ?? o.defaultValue;
   let control: ReactNode;
   if (o.type === "bool") {
-    control = <Toggle on={current === "true"} label={o.name} onChange={(on) => onChange(String(on))} />;
+    control = <Switch on={current === "true"} label={o.name} onChange={(on) => onChange(String(on))} />;
   } else if (examples.length && o.exclusive) {
     const options = examples.map((e) => ({ value: e.value, label: e.help ? `${e.value} — ${e.help.split("\n")[0]}` : e.value }));
     if (!options.some((x) => x.value === current)) options.unshift({ value: current, label: current || "—" });
     control = <Select value={current} label={o.name} className="w-full sm:w-72" options={options} onChange={onChange} />;
   } else {
-    const list = examples.length ? `options-${o.name}` : undefined;
-    control = (
-      <>
-        <input
-          type={o.password ? "password" : "text"}
-          autoComplete={o.password ? "new-password" : "off"}
-          className={`${input} sm:w-72`}
-          aria-label={o.name}
-          list={list}
-          placeholder={placeholder ?? o.defaultValue}
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        {list && (
-          <datalist id={list}>
-            {examples.map((e) => (
-              <option key={e.value} value={e.value}>
-                {e.help.split("\n")[0]}
-              </option>
-            ))}
-          </datalist>
-        )}
-      </>
+    control = examples.length && !o.password ? (
+      <SuggestField
+        className={`${input} sm:w-72`}
+        label={o.name}
+        placeholder={placeholder ?? o.defaultValue}
+        value={value ?? ""}
+        suggestions={examples.map((e) => ({ value: e.value, label: e.help.split("\n")[0] }))}
+        onChange={onChange}
+      />
+    ) : (
+      <input
+        type={o.password ? "password" : "text"}
+        autoComplete={o.password ? "new-password" : "off"}
+        className={`${input} sm:w-72`}
+        aria-label={o.name}
+        placeholder={placeholder ?? o.defaultValue}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value)}
+      />
     );
   }
   return (
@@ -198,10 +198,11 @@ function OptionField({
         </div>
         {first && <div className="type-footnote text-text-secondary">{first}</div>}
         {rest && (
-          <details className="type-footnote text-text-secondary">
-            <summary className="cursor-pointer text-accent-text">{t("storage.more")}</summary>
-            <p className="mt-1 whitespace-pre-wrap">{rest}</p>
-          </details>
+          <div className="type-footnote text-text-secondary">
+            <More label={t("storage.more")}>
+              <p className="mt-1 whitespace-pre-wrap">{rest}</p>
+            </More>
+          </div>
         )}
       </div>
       {control}
@@ -231,7 +232,7 @@ function OptionsGroup({
       ))}
       {options.some((o) => o.advanced && !o.required) && (
         <Row label={t("storage.advanced")}>
-          <Toggle on={advanced} label={t("storage.advanced")} onChange={setAdvanced} />
+          <Switch on={advanced} label={t("storage.advanced")} onChange={setAdvanced} />
         </Row>
       )}
     </Group>
@@ -635,24 +636,23 @@ function ClientForm({
       {text("folder", t("storage.offlineFolder"), t("storage.offlineFolderDetail"), remotes[0] ? `rclone:${remotes[0].name}:downloads` : "rclone:pikpak:downloads")}
       {text("tags", t("storage.offlineTags"), t("storage.offlineTagsDetail"))}
       <Row label={t("storage.offlinePriority")} detail={t("storage.offlinePriorityDetail")}>
-        <input
-          type="number"
+        <NumberField
           min={1}
           max={50}
-          className={`${input} w-24`}
-          aria-label={t("storage.offlinePriority")}
+          className="w-32"
+          label={t("storage.offlinePriority")}
           value={d.priority || 1}
-          onChange={(e) => set({ priority: Math.max(1, Math.min(50, Math.trunc(Number(e.target.value) || 1))) })}
+          onChange={(v) => set({ priority: v ?? 1 })}
         />
       </Row>
       <Row label={t("storage.offlineEnabled")}>
-        <Toggle on={d.enabled} label={t("storage.offlineEnabled")} onChange={(enabled) => set({ enabled })} />
+        <Switch on={d.enabled} label={t("storage.offlineEnabled")} onChange={(enabled) => set({ enabled })} />
       </Row>
       <Row label={t("storage.removeCompleted")}>
-        <Toggle on={d.removeCompleted} label={t("storage.removeCompleted")} onChange={(removeCompleted) => set({ removeCompleted })} />
+        <Switch on={d.removeCompleted} label={t("storage.removeCompleted")} onChange={(removeCompleted) => set({ removeCompleted })} />
       </Row>
       <Row label={t("storage.removeFailed")}>
-        <Toggle on={d.removeFailed} label={t("storage.removeFailed")} onChange={(removeFailed) => set({ removeFailed })} />
+        <Switch on={d.removeFailed} label={t("storage.removeFailed")} onChange={(removeFailed) => set({ removeFailed })} />
       </Row>
       <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
         <Button disabled={!valid || busy} onClick={() => onSave({ ...d, id })}>

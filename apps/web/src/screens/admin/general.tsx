@@ -18,8 +18,11 @@ import {
 import { useState } from "react";
 
 import { t } from "../../i18n.ts";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
-import { countryOptions, input, languageOptions, Page } from "./common.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { NumberField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
+import { countryOptions, languageOptions, Page } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
 
 /** The section of the server chosen in the settings. */
 export function GeneralSection({ server }: { server: ServerEntry }) {
@@ -136,14 +139,13 @@ function GeneralForm({ server, settings }: { server: ServerEntry; settings: Serv
       </Group>
       <Group title={t("general.signIn")}>
         <Row label={t("general.idleDays")} detail={t("general.idleDaysDetail")}>
-          <input
-            type="number"
+          <NumberField
             min={1}
             max={3650}
-            className={`${input} w-24`}
-            aria-label={t("general.idleDays")}
+            className="w-32"
+            label={t("general.idleDays")}
             value={draft.idleDays}
-            onChange={(e) => set({ idleDays: Math.max(1, Math.min(3650, Math.trunc(Number(e.target.value) || 1))) })}
+            onChange={(v) => set({ idleDays: v ?? 1 })}
           />
         </Row>
         {!mavioDev && (
@@ -166,24 +168,23 @@ function GeneralForm({ server, settings }: { server: ServerEntry; settings: Serv
       <Group title={t("general.network")} footer={t("general.networkFooter")}>
         {text("baseUrl", t("general.baseUrl"), t("general.baseUrlDetail"), "/mavio")}
         <Row label={t("general.httpsPort")} detail={mavioDev ? t("general.httpsPortMavioDev") : t("general.httpsPortDetail")}>
-          <input
-            type="number"
+          <NumberField
             min={0}
             max={65535}
-            className={`${input} w-28`}
-            aria-label={t("general.httpsPort")}
+            className="w-36"
+            label={t("general.httpsPort")}
             value={draft.httpsPort}
-            onChange={(e) => set({ httpsPort: Math.max(0, Math.min(65535, Math.trunc(Number(e.target.value) || 0))) })}
+            onChange={(v) => set({ httpsPort: v ?? 0 })}
           />
         </Row>
         {draft.httpsPort > 0 && text("certificate", t("general.certificate"), t("general.certificateDetail"), "/etc/mavio/cert.pem")}
         {draft.httpsPort > 0 && text("key", t("general.key"), undefined, "/etc/mavio/key.pem")}
         <Row label={t("general.discovery")} detail={t("general.discoveryDetail")}>
-          <Toggle on={draft.discovery} label={t("general.discovery")} onChange={(discovery) => set({ discovery })} />
+          <Switch on={draft.discovery} label={t("general.discovery")} onChange={(discovery) => set({ discovery })} />
         </Row>
         {mavioDev && (
           <Row label={t("general.relay")} detail={t("general.relayDetail")}>
-            <Toggle on={draft.relay} label={t("general.relay")} onChange={(relay) => set({ relay })} />
+            <Switch on={draft.relay} label={t("general.relay")} onChange={(relay) => set({ relay })} />
           </Row>
         )}
       </Group>

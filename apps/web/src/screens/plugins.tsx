@@ -21,7 +21,9 @@ import { type FormEvent, type ReactNode, useState } from "react";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { type Schema, SchemaForm } from "../schema-form.tsx";
-import { Button, Group, Row, Select, Toggle } from "../ui.tsx";
+import { Button, Group, Row } from "../ui.tsx";
+import { Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
 
 const states: Record<PluginState, () => string> = {
@@ -340,7 +342,7 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
           )}
           {e.installed && (
             <>
-              <Toggle
+              <Switch
                 on={toggling ? !enabled : enabled}
                 label={t("plugins.enabled")}
                 onChange={(on) => !toggling && actions.setEnabled.mutate({ id, enabled: on })}

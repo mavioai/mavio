@@ -20,7 +20,7 @@ import {
 import { CreditKind, type Credit, ImageKind, type Item, ItemKind, SeriesStatus } from "@mavio/proto/mavio/library/v1/item_pb";
 import { type MediaSource, type MediaStream, StreamKind, VideoRange } from "@mavio/proto/mavio/library/v1/media_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { Fragment, type KeyboardEvent, type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
@@ -30,7 +30,11 @@ import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { initialsOf } from "./person.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, useDismiss, yearOf } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
+import { Dismiss, Sheet } from "../controls/dialog.tsx";
+import { Tabs, ToggleButton } from "../controls/inputs.tsx";
+import { Tip } from "../controls/tooltip.tsx";
+import { Menu, MenuChoice, MenuLabel, MenuLink, MenuOption } from "../controls/menu.tsx";
 
 const route = getRouteApi("/s/$serverId/item/$itemId");
 
@@ -428,49 +432,17 @@ function Overview({ item, inline = false, lines = 3 }: { item: Item; inline?: bo
 
 /** The whole overview and tagline, over the screen. */
 function OverviewDialog({ item, onClose }: { item: Item; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  // Focus returns to More when the dialog goes, as a closed dialog's would.
-  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
-  useEffect(() => {
-    if (!ref.current?.open) ref.current?.showModal();
-    return () => opener?.focus({ preventScroll: true });
-  }, [opener]);
-  // Back closes the dialog rather than leaving the screen.
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== "Escape" && e.key !== "Backspace") return;
-    e.preventDefault();
-    e.stopPropagation();
-    onClose();
-  };
   return (
-    <dialog
-      ref={ref}
-      aria-modal
-      aria-labelledby="overview-title"
-      onClose={onClose}
-      onKeyDown={onKeyDown}
-      onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto max-h-[80vh] w-[min(640px,calc(100vw-32px))] rounded-[18px] border border-border bg-surface-overlay p-0 text-on-background shadow-level3 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
+    <Sheet label={item.name} width="medium" className="overflow-y-auto" onClose={onClose}>
       <div className="flex flex-col gap-3 p-7">
         <div className="flex items-start gap-4">
-          <h2 id="overview-title" className="min-w-0 flex-1 type-title2">
-            {item.name}
-          </h2>
-          <button
-            type="button"
-            autoFocus
-            onClick={onClose}
-            aria-label={t("action.close")}
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-fill hover:bg-fill-selected"
-          >
-            <Icon name="close" size={16} />
-          </button>
+          <h2 className="min-w-0 flex-1 type-title2">{item.name}</h2>
+          <Dismiss />
         </div>
         {item.tagline && <p className="type-headline text-text-secondary">{item.tagline}</p>}
         <p className="type-body whitespace-pre-line">{item.overview}</p>
       </div>
-    </dialog>
+    </Sheet>
   );
 }
 
@@ -559,38 +531,34 @@ function Actions({
           </Link>
         )}
         {resumable && next && (
-          <Link
-            to="/s/$serverId/play/$itemId"
-            params={{ serverId: server.id, itemId: next.id }}
-            search={{ source: own ? source : undefined }}
-            aria-label={t("item.fromStart")}
-            title={t("item.fromStart")}
-            data-tv-button
+          <Tip label={t("item.fromStart")}>
+            <Link
+              to="/s/$serverId/play/$itemId"
+              params={{ serverId: server.id, itemId: next.id }}
+              search={{ source: own ? source : undefined }}
+              aria-label={t("item.fromStart")}
+              data-tv-button
+              className={circle}
+            >
+              <Icon name="previous" size={icon} />
+            </Link>
+          </Tip>
+        )}
+        <Tip label={t("item.favorite")}>
+          <ToggleButton on={favorite} label={t("item.favorite")} onChange={(on) => userData.mutate({ itemId: item.id, favorite: on })} className={circle}>
+            <Icon name="favorite" fill={favorite} size={icon} className={favorite ? "text-[#FF453A]" : undefined} />
+          </ToggleButton>
+        </Tip>
+        <Tip label={played ? t("item.markUnplayed") : t("item.markPlayed")}>
+          <ToggleButton
+            on={played}
+            label={played ? t("item.markUnplayed") : t("item.markPlayed")}
+            onChange={(on) => userData.mutate({ itemId: item.id, played: on })}
             className={circle}
           >
-            <Icon name="previous" size={icon} />
-          </Link>
-        )}
-        <button
-          type="button"
-          aria-pressed={favorite}
-          aria-label={t("item.favorite")}
-          title={t("item.favorite")}
-          onClick={() => userData.mutate({ itemId: item.id, favorite: !favorite })}
-          className={circle}
-        >
-          <Icon name="favorite" fill={favorite} size={icon} className={favorite ? "text-[#FF453A]" : undefined} />
-        </button>
-        <button
-          type="button"
-          aria-pressed={played}
-          aria-label={played ? t("item.markUnplayed") : t("item.markPlayed")}
-          title={played ? t("item.markUnplayed") : t("item.markPlayed")}
-          onClick={() => userData.mutate({ itemId: item.id, played: !played })}
-          className={circle}
-        >
-          <Icon name="played" fill={played} size={icon} />
-        </button>
+            <Icon name="played" fill={played} size={icon} />
+          </ToggleButton>
+        </Tip>
         {(sources.length > 1 || copies.length > 0) && (
           <VersionMenu server={server} sources={sources} selected={source} onSelect={onSource} copies={copies} tv={tv} phone={phone} />
         )}
@@ -619,67 +587,48 @@ function VersionMenu({
   tv: boolean;
   phone: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(ref, open, close);
   const current = sources.find((s) => s.id === selected);
-  const item = "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-fill";
   return (
-    <div ref={ref} data-focus-scope className="relative">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen(!open)}
-        className={`inline-flex items-center gap-2 rounded-full px-4 font-semibold backdrop-blur-xl ${tv ? "h-16 px-6 type-headline" : "h-11 type-callout"} ${
-          phone ? "bg-fill hover:bg-fill-selected" : "bg-white/20 text-white hover:bg-white/30"
-        } ${open ? (phone ? "bg-fill-selected" : "bg-white/30") : ""}`}
-      >
-        <span className={phone ? "text-text-secondary" : "text-white/70"}>{t("item.version")}</span>
-        {current ? versionName(current) : server.name}
-        <Icon name="expand" size={14} />
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className={`absolute bottom-full z-50 mb-2 ${phone ? "left-0" : "right-0"} ${tv ? "w-[440px]" : "w-[320px]"} rounded-[14px] border border-border bg-surface-overlay/90 p-1.5 text-on-background shadow-level3 backdrop-blur-xl`}
+    <Menu
+      side="top"
+      align={phone ? "start" : "end"}
+      width={tv ? "w-[440px]" : "w-[320px]"}
+      trigger={
+        <button
+          type="button"
+          className={`inline-flex items-center gap-2 rounded-full px-4 font-semibold backdrop-blur-xl ${tv ? "h-16 px-6 type-headline" : "h-11 type-callout"} ${
+            phone ? "bg-fill hover:bg-fill-selected data-popup-open:bg-fill-selected" : "bg-white/20 text-white hover:bg-white/30 data-popup-open:bg-white/30"
+          }`}
         >
-          <div className="px-2.5 pt-1.5 pb-1 type-caption text-text-secondary">{t("item.versions")}</div>
-          {sources.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              role="menuitemradio"
-              aria-checked={s.id === selected}
-              onClick={() => (onSelect(s.id), close())}
-              className={item}
-            >
-              <Icon name="check" size={16} className={s.id === selected ? "text-accent" : "invisible"} />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate type-callout font-semibold">{versionName(s)}</span>
-                <span className="block truncate type-caption text-text-secondary">
-                  {[resolutionOf(s), rangeOf(s), surroundOf(s), containerOf(s), s.sizeBytes > 0n ? sizeOf(s.sizeBytes) : undefined].filter(Boolean).join(" · ")}
-                </span>
-              </span>
-            </button>
-          ))}
-          {copies.map((c) => (
-            <Link
-              key={c.server.id}
-              role="menuitem"
-              to="/s/$serverId/item/$itemId"
-              params={{ serverId: c.server.id, itemId: c.item.id }}
-              className={item}
-            >
-              <Icon name="server" size={16} className="text-text-secondary" />
-              <span className="min-w-0 flex-1 truncate type-callout">{t("item.onServer", { server: c.server.name })}</span>
-              <Icon name="forward" size={14} className="text-text-tertiary" />
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+          <span className={phone ? "text-text-secondary" : "text-white/70"}>{t("item.version")}</span>
+          {current ? versionName(current) : server.name}
+          <Icon name="expand" size={14} />
+        </button>
+      }
+    >
+      <MenuLabel>{t("item.versions")}</MenuLabel>
+      <MenuChoice value={selected ?? ""} onChange={onSelect}>
+        {sources.map((s) => (
+          <MenuOption key={s.id} value={s.id}>
+            <span className="block truncate type-callout font-semibold">{versionName(s)}</span>
+            <span className="block truncate type-caption text-text-secondary">
+              {[resolutionOf(s), rangeOf(s), surroundOf(s), containerOf(s), s.sizeBytes > 0n ? sizeOf(s.sizeBytes) : undefined].filter(Boolean).join(" · ")}
+            </span>
+          </MenuOption>
+        ))}
+      </MenuChoice>
+      {copies.map((c) => (
+        <MenuLink
+          key={c.server.id}
+          icon="server"
+          to="/s/$serverId/item/$itemId"
+          params={{ serverId: c.server.id, itemId: c.item.id }}
+          end={<Icon name="forward" size={14} className="text-text-tertiary" />}
+        >
+          <span className="block truncate type-callout">{t("item.onServer", { server: c.server.name })}</span>
+        </MenuLink>
+      ))}
+    </Menu>
   );
 }
 
@@ -707,22 +656,14 @@ function Seasons({
       <div className="mb-3 flex items-center gap-4 px-margin">
         <h2 className="type-title3">{t("item.episodes")}</h2>
         {seasons.length > 1 && (
-          <div role="tablist" aria-label={t("item.seasons")} className="scroll-row -my-1 flex min-w-0 gap-1 overflow-x-auto py-1">
-            {seasons.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                role="tab"
-                aria-selected={s.id === season.id}
-                onClick={() => setChosen(s.id)}
-                // On a television, as tabs do, focus chooses the season.
-                onFocus={() => tv && setChosen(s.id)}
-                className="tv-pill shrink-0 rounded-full px-4 py-1.5 type-callout font-semibold text-text-secondary hover:bg-fill aria-selected:bg-fill-selected aria-selected:text-on-background"
-              >
-                {s.name}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            value={season.id}
+            label={t("item.seasons")}
+            look="pills"
+            className="scroll-row -my-1 min-w-0 overflow-x-auto py-1"
+            tabs={seasons.map((s) => ({ value: s.id, label: s.name }))}
+            onChange={setChosen}
+          />
         )}
         {seasons.length === 1 && <span className="type-callout text-text-secondary">{season.name}</span>}
         <Link

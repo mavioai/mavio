@@ -20,10 +20,13 @@ import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { DownloadProtocol, type Release } from "@mavio/proto/mavio/acquisition/v1/release_pb";
 import { type Wanted, WantedSchema } from "@mavio/proto/mavio/acquisition/v1/wanted_pb";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { t } from "../i18n.ts";
-import { Button, Group, Select, Toggle } from "../ui.tsx";
+import { Button, Group } from "../ui.tsx";
+import { Sheet } from "../controls/dialog.tsx";
+import { Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
 import { fromNow, sizeOf } from "./admin/common.tsx";
 import { HistoryRow, QueueRow } from "./admin/downloads.tsx";
 
@@ -71,7 +74,7 @@ function AcquisitionPanel({ server, item }: { server: ServerEntry; item: Item })
           <Group>
             <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
               <span className="type-body">{t("acquire.monitored")}</span>
-              <Toggle on={monitored} onChange={setMonitored} label={t("acquire.monitored")} />
+              <Switch on={monitored} onChange={setMonitored} label={t("acquire.monitored")} />
             </div>
             {whole && wanted.data && <ProfileRow server={server} wanted={wanted.data} kind={item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : MediaKind.SERIES} />}
             {whole && wanted.data?.lastSearchTime && (
@@ -134,34 +137,14 @@ function ProfileRow({ server, wanted, kind }: { server: ServerEntry; wanted: Wan
 
 /** The releases the indexers have of the item, each grabbed in place. */
 function ReleasesDialog({ server, item, onClose }: { server: ServerEntry; item: Item; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
   const releases = useReleases(server, item.id, true);
-  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
-  useEffect(() => {
-    if (!ref.current?.open) ref.current?.showModal();
-    return () => opener?.focus({ preventScroll: true });
-  }, [opener]);
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== "Escape") return;
-    e.preventDefault();
-    e.stopPropagation();
-    onClose();
-  };
   const list = releases.data?.releases ?? [];
   const failures = releases.data?.failures ?? [];
   return (
-    <dialog
-      ref={ref}
-      aria-modal
-      aria-labelledby="releases-title"
-      onClose={onClose}
-      onKeyDown={onKeyDown}
-      onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto max-h-[85vh] w-[min(960px,calc(100vw-32px))] rounded-[18px] border border-border bg-surface-overlay p-0 text-on-background shadow-level3 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <div className="flex max-h-[85vh] flex-col gap-3 p-6">
+    <Sheet label={t("acquire.releasesTitle", { name: item.name })} width="full" onClose={onClose}>
+      <div className="flex max-h-[85vh] min-h-0 flex-col gap-3 p-6">
         <div className="flex items-center gap-3">
-          <h2 id="releases-title" className="min-w-0 flex-1 type-title2">
+          <h2 className="min-w-0 flex-1 type-title2">
             {t("acquire.releasesTitle", { name: item.name })}
           </h2>
           <Button variant="secondary" disabled={releases.isFetching} onClick={() => void releases.refetch()}>
@@ -185,7 +168,7 @@ function ReleasesDialog({ server, item, onClose }: { server: ServerEntry; item: 
           ))}
         </div>
       </div>
-    </dialog>
+    </Sheet>
   );
 }
 

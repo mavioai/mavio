@@ -15,9 +15,13 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Checkbox, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Confirm, input, Page, PageLink, patched } from "./common.tsx";
+import { BackLink, Page, PageLink, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 import { NumberInput, releaseLanguages } from "./quality.tsx";
 
 const kinds: { kind: Kind; title: () => string }[] = [
@@ -146,7 +150,7 @@ function FormatForm({ server, format }: { server: ServerEntry; format: CustomFor
           <input className={`${input} sm:w-72`} aria-label={t("formats.name")} value={draft.name} onChange={(e) => set({ name: e.target.value })} />
         </Row>
         <Row label={t("formats.rename")} detail={t("formats.renameDetail")}>
-          <Toggle on={draft.includeWhenRenaming} label={t("formats.rename")} onChange={(includeWhenRenaming) => set({ includeWhenRenaming })} />
+          <Switch on={draft.includeWhenRenaming} label={t("formats.rename")} onChange={(includeWhenRenaming) => set({ includeWhenRenaming })} />
         </Row>
       </Group>
       <Group
@@ -260,9 +264,8 @@ function SpecForm({ spec: s, onChange, onRemove }: { spec: CustomFormatSpec; onC
 /** A checkbox with its label. */
 export function Check({ on, label, onChange }: { on: boolean; label: string; onChange: (on: boolean) => void }) {
   return (
-    <label className="inline-flex items-center gap-2 type-callout">
-      <input type="checkbox" className="size-4 accent-[#34C759]" checked={on} onChange={(e) => onChange(e.target.checked)} />
+    <Checkbox checked={on} onChange={onChange} className="type-callout">
       {label}
-    </label>
+    </Checkbox>
   );
 }

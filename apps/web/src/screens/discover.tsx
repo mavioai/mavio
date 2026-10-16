@@ -19,13 +19,15 @@ import { type DiscoveredTitle, MediaStatus, type SeasonStatus, type Title } from
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { CatalogKind } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
 import { Artwork, Button, CardPlaceholder, Grid, LoadMore, Loading, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { Modal } from "../controls/dialog.tsx";
+import { Checkbox } from "../controls/inputs.tsx";
 
 /** A title's kind in addresses. */
 export type KindParam = "movie" | "series";
@@ -91,7 +93,8 @@ function StatusMark({ status }: { status: MediaStatus }) {
   if (!available && !waiting) return null;
   return (
     <span
-      title={statusLabel(status)}
+      role="img"
+      aria-label={statusLabel(status)}
       className={`absolute top-1.5 right-1.5 flex rounded-full p-0.5 text-white ${available ? "bg-accent" : "bg-scrim"} ${
         status === MediaStatus.PARTIALLY_AVAILABLE ? "opacity-70" : ""
       }`}
@@ -437,23 +440,10 @@ export function RequestDialog({
   onCancel: () => void;
   onRequest: (seasons?: number[]) => void;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
   const choosable = (s: SeasonStatus) => s.requestable || !!requested?.includes(s.seasonNumber);
   const open = title.seasons.filter(choosable);
   const [chosen, setChosen] = useState<Set<number>>(() => new Set(requested ?? open.map((s) => s.seasonNumber)));
   const all = chosen.size === open.length;
-  // Focus returns to Request when the dialog goes.
-  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
-  useEffect(() => {
-    if (!ref.current?.open) ref.current?.showModal();
-    return () => opener?.focus({ preventScroll: true });
-  }, [opener]);
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== "Escape" && e.key !== "Backspace") return;
-    e.preventDefault();
-    e.stopPropagation();
-    onCancel();
-  };
   const toggle = (n: number) =>
     setChosen((c) => {
       const next = new Set(c);
@@ -461,48 +451,27 @@ export function RequestDialog({
       else next.add(n);
       return next;
     });
-  const check = (on: boolean) => (
-    <span className={`flex size-6 shrink-0 items-center justify-center rounded-md ${on ? "bg-accent text-on-accent" : "border-2 border-border"}`}>
-      {on && <Icon name="check" size={16} />}
-    </span>
-  );
-  const row = "flex min-h-12 w-full items-center gap-3 rounded-lg px-3 text-left type-body hover:bg-fill";
+  const row = "min-h-12 rounded-lg px-3 hover:bg-fill";
   return (
-    <dialog
-      ref={ref}
-      aria-modal
-      aria-labelledby="request-title"
-      onClose={onCancel}
-      onKeyDown={onKeyDown}
-      onClick={(e) => e.target === ref.current && onCancel()}
-      className="m-auto max-h-[80vh] w-[min(480px,calc(100vw-32px))] rounded-[18px] border border-border bg-surface-overlay p-0 text-on-background shadow-level3 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <div className="flex max-h-[80vh] flex-col gap-3 p-6">
-        <h2 id="request-title" className="type-title2">
-          {requested ? t("requests.editTitle", { name: title.name }) : t("discover.requestTitle", { name: title.name })}
-        </h2>
+    <Modal title={requested ? t("requests.editTitle", { name: title.name }) : t("discover.requestTitle", { name: title.name })} onClose={onCancel}>
         <div className="-mx-3 flex min-h-0 flex-col overflow-y-auto">
-          <button type="button" role="checkbox" aria-checked={all} onClick={() => setChosen(all ? new Set() : new Set(open.map((s) => s.seasonNumber)))} className={row}>
-            {check(all)}
-            <span className="flex-1 type-headline">{t("discover.allSeasons")}</span>
-          </button>
+          <Checkbox checked={all} onChange={(on) => setChosen(on ? new Set(open.map((s) => s.seasonNumber)) : new Set())} className={row}>
+            <span className="type-headline">{t("discover.allSeasons")}</span>
+          </Checkbox>
           {title.seasons.map((s) => {
             const status = statusLabel(s.status);
             return (
-              <button
+              <Checkbox
                 key={s.seasonNumber}
-                type="button"
-                role="checkbox"
-                aria-checked={chosen.has(s.seasonNumber)}
+                checked={chosen.has(s.seasonNumber)}
                 disabled={!choosable(s)}
-                onClick={() => toggle(s.seasonNumber)}
-                className={`${row} disabled:opacity-50 disabled:hover:bg-transparent`}
+                onChange={() => toggle(s.seasonNumber)}
+                className={row}
               >
-                {check(chosen.has(s.seasonNumber))}
                 <span className="min-w-0 flex-1 truncate">{seasonName(s)}</span>
                 {s.episodeCount > 0 && <span className="type-callout text-text-secondary">{t("item.episodeCount", { count: s.episodeCount })}</span>}
                 {status && <span className="type-footnote text-text-secondary">{status}</span>}
-              </button>
+              </Checkbox>
             );
           })}
         </div>
@@ -517,7 +486,6 @@ export function RequestDialog({
             {requested ? t("action.save") : t("discover.requestSeasons", { count: chosen.size })}
           </Button>
         </div>
-      </div>
-    </dialog>
+    </Modal>
   );
 }

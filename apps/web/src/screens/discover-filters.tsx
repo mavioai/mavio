@@ -9,10 +9,13 @@ import { DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/disco
 import { type ReactNode, useEffect, useState } from "react";
 
 import { discoverLanguage, locale, t } from "../i18n.ts";
+import { NumberField, ToggleChip } from "../controls/inputs.tsx";
 import { Icon } from "../icon.tsx";
-import { Button, Select } from "../ui.tsx";
+import { Button } from "../ui.tsx";
+import { Select } from "../controls/select.tsx";
 import { countryOptions, languageOptions } from "./admin/common.tsx";
-import { field, Modal } from "./modal.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 
 const sortNames: Record<DiscoverSort, () => string> = {
   [DiscoverSort.UNSPECIFIED]: () => t("discover.sortDefault"),
@@ -79,55 +82,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** A value to pick, with its logo when it has one. */
-function Chip({ on, label, image, onClick }: { on: boolean; label: string; image?: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={onClick}
-      className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 type-footnote font-semibold ${on ? "bg-accent text-on-accent" : "bg-fill hover:bg-fill-selected"}`}
-    >
-      {image && <img src={image} alt="" className="size-5 rounded-[5px]" loading="lazy" />}
-      {label}
-    </button>
-  );
-}
-
-/** A number field for a range's end; empty is unset. */
-function NumberField({
-  label,
-  value,
-  min,
-  max,
-  wide = false,
-  onChange,
-}: {
-  label: string;
-  value?: number;
-  min: number;
-  max: number;
-  wide?: boolean;
-  onChange: (v?: number) => void;
-}) {
-  return (
-    <input
-      type="number"
-      inputMode="numeric"
-      className={`${field} flex-none ${wide ? "w-44" : "w-28"}`}
-      aria-label={label}
-      placeholder={label}
-      min={min}
-      max={max}
-      value={value ?? ""}
-      onChange={(e) => {
-        const n = e.target.valueAsNumber;
-        onChange(Number.isFinite(n) && n > 0 ? Math.min(max, Math.max(min, Math.round(n))) : undefined);
-      }}
-    />
-  );
-}
-
 /** Values found by name, as studios and keywords are: the chosen ones, a field, and what it finds. */
 function SearchedValues({
   server,
@@ -185,10 +139,15 @@ function SearchedValues({
             .filter((v) => !chosen.has(v.id))
             .slice(0, 20)
             .map((v) => (
-              <Chip key={v.id} on={false} label={v.name} onClick={() => {
+              <ToggleChip
+                key={v.id}
+                on={false}
+                label={v.name}
+                onChange={() => {
                   onChange([...value, { id: v.id, name: v.name }]);
                   setText("");
-                }} />
+                }}
+              />
             ))}
         </div>
       )}
@@ -229,12 +188,12 @@ function ListedValues({
         {list.map((v) => {
           const on = value.includes(v.id);
           return (
-            <Chip
+            <ToggleChip
               key={v.id}
               on={on}
               label={v.name}
               image={v.imageUrl || undefined}
-              onClick={() => onChange(on ? value.filter((x) => x !== v.id) : [...value, v.id])}
+              onChange={(now) => onChange(now ? [...value, v.id] : value.filter((x) => x !== v.id))}
             />
           );
         })}
@@ -337,18 +296,18 @@ export function FiltersDialog({
         {takes(DiscoverFilter.RELEASE_DATE) && (
           <Section title={t("discover.released")}>
             <div className="flex items-center gap-2">
-              <NumberField label={t("discover.from")} value={f.yearFrom} min={1870} max={year} onChange={(yearFrom) => set({ yearFrom })} />
+              <NumberField label={t("discover.from")} placeholder={t("discover.from")} value={f.yearFrom} min={1870} max={year} className="w-36" onChange={(yearFrom) => set({ yearFrom: yearFrom || undefined })} />
               <span className="text-text-secondary">–</span>
-              <NumberField label={t("discover.to")} value={f.yearTo} min={1870} max={year} onChange={(yearTo) => set({ yearTo })} />
+              <NumberField label={t("discover.to")} placeholder={t("discover.to")} value={f.yearTo} min={1870} max={year} className="w-36" onChange={(yearTo) => set({ yearTo: yearTo || undefined })} />
             </div>
           </Section>
         )}
         {takes(DiscoverFilter.RUNTIME) && (
           <Section title={t("discover.runtime")}>
             <div className="flex items-center gap-2">
-              <NumberField label={t("discover.from")} value={f.runtimeMin} min={1} max={1000} onChange={(runtimeMin) => set({ runtimeMin })} />
+              <NumberField label={t("discover.from")} placeholder={t("discover.from")} value={f.runtimeMin} min={1} max={1000} className="w-36" onChange={(runtimeMin) => set({ runtimeMin: runtimeMin || undefined })} />
               <span className="text-text-secondary">–</span>
-              <NumberField label={t("discover.to")} value={f.runtimeMax} min={1} max={1000} onChange={(runtimeMax) => set({ runtimeMax })} />
+              <NumberField label={t("discover.to")} placeholder={t("discover.to")} value={f.runtimeMax} min={1} max={1000} className="w-36" onChange={(runtimeMax) => set({ runtimeMax: runtimeMax || undefined })} />
             </div>
           </Section>
         )}
@@ -366,7 +325,16 @@ export function FiltersDialog({
             )}
             {takes(DiscoverFilter.VOTE_COUNT) && (
               <Section title={t("discover.votesMin")}>
-                <NumberField wide label={t("discover.votesMin")} value={f.votesMin} min={1} max={1_000_000} onChange={(votesMin) => set({ votesMin })} />
+                <NumberField
+                  label={t("discover.votesMin")}
+                  placeholder={t("discover.any")}
+                  value={f.votesMin}
+                  min={0}
+                  max={1_000_000}
+                  step={100}
+                  className="w-44"
+                  onChange={(votesMin) => set({ votesMin: votesMin || undefined })}
+                />
               </Section>
             )}
           </div>

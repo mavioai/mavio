@@ -24,11 +24,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { type ReactNode, useState } from "react";
 
+import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { type Appearance, qualities, setPrefs, usePrefs, useWidthClass } from "../prefs.ts";
 import { PinPad, useAccount, useMavioDevAccountUrl, useSwitchUsers } from "../shell/user-menu.tsx";
-import { Avatar, Button, Field, Group, Row, Select, Toggle } from "../ui.tsx";
+import { Avatar, Button, Field, Group, Row } from "../ui.tsx";
+import { Pictures, Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
 import { GeneralSection } from "./admin/general.tsx";
 import { IssuesSection } from "./issues.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
@@ -431,27 +434,22 @@ function AppearanceSection() {
   const prefs = usePrefs();
   return (
     <Section title={t("settings.appearance")} message={t("settings.appearanceMessage")}>
-      <div role="radiogroup" aria-label={t("settings.appearance")} className="grid grid-cols-3 gap-4">
-        {themes.map((th) => {
-          const on = prefs.appearance === th.value;
-          return (
-            <button
-              key={th.value}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              onClick={() => setPrefs({ appearance: th.value })}
-              className="flex flex-col items-center gap-2"
-            >
-              <ThemePreview theme={th.value} on={on} />
-              <span className={`type-callout ${on ? "font-semibold" : "text-text-secondary"}`}>{th.label()}</span>
-            </button>
-          );
-        })}
-      </div>
+      <Pictures
+        value={prefs.appearance}
+        label={t("settings.appearance")}
+        options={themes.map((th) => th.value)}
+        onChange={(appearance) => setPrefs({ appearance })}
+        className="grid grid-cols-3 gap-4"
+        draw={(theme, on) => (
+          <>
+            <ThemePreview theme={theme} on={on} />
+            <span className={`type-callout ${on ? "font-semibold" : "text-text-secondary"}`}>{themes.find((th) => th.value === theme)?.label()}</span>
+          </>
+        )}
+      />
       <Group footer={t("settings.tvModeNote")}>
         <Row label={t("settings.tvMode")} detail={t("settings.tvModeMessage")}>
-          <Toggle on={prefs.tv} label={t("settings.tvMode")} onChange={(tv) => setPrefs({ tv })} />
+          <Switch on={prefs.tv} label={t("settings.tvMode")} onChange={(tv) => setPrefs({ tv })} />
         </Row>
       </Group>
     </Section>
@@ -499,7 +497,7 @@ function PlaybackSection() {
           />
         </Row>
         <Row label={t("settings.autoplayNext")}>
-          <Toggle on={prefs.autoplayNext} label={t("settings.autoplayNext")} onChange={(autoplayNext) => setPrefs({ autoplayNext })} />
+          <Switch on={prefs.autoplayNext} label={t("settings.autoplayNext")} onChange={(autoplayNext) => setPrefs({ autoplayNext })} />
         </Row>
       </Group>
     </Section>
@@ -675,15 +673,16 @@ function IconButton({
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & { icon: IconName; label: string }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      {...props}
-      className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background disabled:opacity-30 disabled:hover:bg-transparent"
-    >
-      <Icon name={icon} size={18} className={className} />
-    </button>
+    <Tip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        {...props}
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background disabled:opacity-30 disabled:hover:bg-transparent"
+      >
+        <Icon name={icon} size={18} className={className} />
+      </button>
+    </Tip>
   );
 }
 

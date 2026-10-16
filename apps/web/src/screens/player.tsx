@@ -29,6 +29,8 @@ import { getRouteApi, useRouter } from "@tanstack/react-router";
 import type Hls from "hls.js";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
+import { Slider, Tabs } from "../controls/inputs.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
@@ -479,27 +481,19 @@ function Player({ server, itemId }: { server: ServerEntry; itemId: string }) {
           aria-label={t("player.options")}
           className="absolute right-4 bottom-24 flex max-h-[calc(100%-7rem)] w-[min(360px,calc(100vw-32px))] flex-col overflow-hidden rounded-[18px] border border-white/10 bg-neutral-900/75 shadow-level3 backdrop-blur-2xl"
         >
-          <div role="tablist" className="m-3 flex rounded-[9px] bg-white/10 p-0.5">
-            {(
-              [
-                ["audio", t("player.audio")],
-                ["subtitles", t("player.subtitles")],
-                ["quality", t("player.quality")],
-                ["info", t("player.info")],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={panel === id}
-                onClick={() => setPanel(id)}
-                className={`flex-1 rounded-[7px] px-2 py-1 type-footnote font-semibold ${panel === id ? "bg-white/25" : "text-white/70 hover:text-white"}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            value={panel}
+            label={t("player.options")}
+            look="dark"
+            className="m-3"
+            tabs={[
+              { value: "audio" as const, label: t("player.audio") },
+              { value: "subtitles" as const, label: t("player.subtitles") },
+              { value: "quality" as const, label: t("player.quality") },
+              { value: "info" as const, label: t("player.info") },
+            ]}
+            onChange={setPanel}
+          />
           <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
             {panel === "audio" && (
               <>
@@ -584,30 +578,9 @@ function methodText(m: PlayMethod): string {
   }
 }
 
-/** The timeline: a slim bar that thickens under the pointer, with a range input over it. */
+/** The timeline: a slim bar that thickens under the pointer. */
 function Scrubber({ time, total, onSeek }: { time: number; total: number; onSeek: (s: number) => void }) {
-  const at = total > 0 ? Math.min(1, time / total) : 0;
-  return (
-    <div className="group relative flex h-5 items-center">
-      <div className="h-1 w-full overflow-hidden rounded-full bg-white/30 transition-[height] group-hover:h-1.5">
-        <div className="h-full rounded-full bg-white" style={{ width: `${at * 100}%` }} />
-      </div>
-      <div
-        className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white opacity-0 shadow-level1 transition-opacity group-hover:opacity-100"
-        style={{ left: `${at * 100}%` }}
-      />
-      <input
-        type="range"
-        min={0}
-        max={total || 1}
-        step={1}
-        value={Math.min(time, total || 1)}
-        onChange={(e) => onSeek(Number(e.target.value))}
-        aria-label={clock(time)}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-      />
-    </div>
-  );
+  return <Slider light min={0} max={total || 1} value={Math.min(time, total || 1)} label={t("player.position")} valueText={clock} onChange={onSeek} />;
 }
 
 function PlayerButton({
@@ -624,16 +597,17 @@ function PlayerButton({
   large?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={active}
-      title={label}
-      onClick={onClick}
-      className={`flex items-center justify-center rounded-full hover:bg-white/15 ${large ? "h-12 w-12" : "h-11 w-11"} ${active ? "bg-white/20" : ""}`}
-    >
-      {children}
-    </button>
+    <Tip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={active}
+        onClick={onClick}
+        className={`flex items-center justify-center rounded-full hover:bg-white/15 ${large ? "h-12 w-12" : "h-11 w-11"} ${active ? "bg-white/20" : ""}`}
+      >
+        {children}
+      </button>
+    </Tip>
   );
 }
 

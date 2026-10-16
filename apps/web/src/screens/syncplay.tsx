@@ -12,7 +12,8 @@ import { Icon } from "../icon.tsx";
 import { useWidthClass } from "../prefs.ts";
 import { useSyncPlay } from "../syncplay.tsx";
 import { Button } from "../ui.tsx";
-import { field, Modal } from "./modal.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 
 /** Who a group waits for. */
 function waitingFor(group: SyncPlayGroup): string {

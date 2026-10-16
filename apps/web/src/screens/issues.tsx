@@ -19,11 +19,14 @@ import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { Chips, NumberField } from "../controls/inputs.tsx";
 import { t } from "../i18n.ts";
-import { Button, Group, LoadMore, Select } from "../ui.tsx";
+import { Button, Group, LoadMore } from "../ui.tsx";
+import { Select } from "../controls/select.tsx";
 import { fromNow, Page } from "./admin/common.tsx";
 import { episodeCode } from "./admin/wanted.tsx";
-import { field, Modal } from "./modal.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 
 /** Kinds problems are reported with. */
 export const reportable = (kind: ItemKind) => [ItemKind.MOVIE, ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE].includes(kind);
@@ -81,37 +84,22 @@ export function ReportDialog({ server, item, onClose }: { server: ServerEntry; i
           );
         }}
       >
-        <div role="radiogroup" aria-label={t("issues.type")} className="flex flex-wrap gap-2">
-          {types.map((x) => (
-            <button
-              key={x.value}
-              type="button"
-              role="radio"
-              aria-checked={type === x.value}
-              onClick={() => setType(x.value)}
-              className={`min-h-9 rounded-full px-4 type-callout font-semibold ${type === x.value ? "bg-button text-on-button" : "bg-fill hover:bg-fill-selected"}`}
-            >
-              {x.label()}
-            </button>
-          ))}
-        </div>
+        <Chips
+          value={String(type)}
+          label={t("issues.type")}
+          options={types.map((x) => ({ value: String(x.value), label: x.label() }))}
+          onChange={(v) => setType(Number(v) as IssueType)}
+        />
         {series && (
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 type-footnote text-text-secondary">
+            <div className="flex flex-1 flex-col gap-1 type-footnote text-text-secondary">
               {t("issues.season")}
-              <input className={field} type="number" min={0} value={season} onChange={(e) => setSeason(Math.max(0, Number(e.target.value) || 0))} />
-            </label>
-            <label className="flex flex-1 flex-col gap-1 type-footnote text-text-secondary">
+              <NumberField label={t("issues.season")} min={0} value={season} onChange={(v) => setSeason(v ?? 0)} />
+            </div>
+            <div className="flex flex-1 flex-col gap-1 type-footnote text-text-secondary">
               {t("issues.episode")}
-              <input
-                className={field}
-                type="number"
-                min={0}
-                disabled={season === 0}
-                value={season === 0 ? 0 : episode}
-                onChange={(e) => setEpisode(Math.max(0, Number(e.target.value) || 0))}
-              />
-            </label>
+              <NumberField label={t("issues.episode")} min={0} disabled={season === 0} value={season === 0 ? 0 : episode} onChange={(v) => setEpisode(v ?? 0)} />
+            </div>
           </div>
         )}
         {series && <p className="type-footnote text-text-secondary">{t("issues.allNumbers")}</p>}

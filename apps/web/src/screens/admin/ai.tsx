@@ -16,9 +16,12 @@ import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, Row, Select } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Confirm, input, Page, PageLink } from "./common.tsx";
+import { BackLink, Page, PageLink } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 /** The section of the server chosen in the settings. */
 export function AiSection({ server }: { server: ServerEntry }) {

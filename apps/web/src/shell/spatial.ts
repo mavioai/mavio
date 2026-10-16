@@ -187,10 +187,9 @@ export function useSpatialNavigation() {
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
       // The caret of a field moves sideways.
       if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
-      // An open menu keeps focus within it and the button that opened it
-      // (data-focus-scope), a dialog within itself.
-      const open = document.querySelector<HTMLElement>("[aria-modal]") ?? document.querySelector<HTMLElement>("[role=menu]");
-      const scope = open && (open.closest<HTMLElement>("[data-focus-scope]") ?? open);
+      // An open dialog, menu or list of options keeps focus within itself;
+      // the keys a menu or list moves through its items with never reach here.
+      const scope = document.querySelector<HTMLElement>("[aria-modal]") ?? document.querySelector<HTMLElement>("[role=menu], [role=listbox]");
       const all = [...(scope ?? document).querySelectorAll<HTMLElement>(focusable)].filter(visible);
       e.preventDefault();
       if (!active || active === document.body || !all.includes(active)) {

@@ -14,8 +14,11 @@ import {
 import { useState } from "react";
 
 import { t } from "../../i18n.ts";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
-import { input, Page, patched } from "./common.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { NumberField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
+import { Page, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
 
 const accelerations: Partial<Record<HardwareAcceleration, () => string>> = {
   [HardwareAcceleration.AUTO]: () => t("transcoding.accelerationAuto"),
@@ -58,24 +61,21 @@ function TranscodingForm({ server, settings, available }: { server: ServerEntry;
   const choices = (list: string[]) => list.map((v) => ({ value: v, label: v }));
   const number = (key: "h264Crf" | "h265Crf" | "threads" | "tonemapDesat" | "tonemapPeak" | "downmixBoost", label: string, detail: string | undefined, min: number, max: number, step = 1) => (
     <Row label={label} detail={detail}>
-      <input
-        type="number"
+      <NumberField
         min={min}
         max={max}
         step={step}
-        className={`${input} w-24`}
-        aria-label={label}
+        integer={step === 1}
+        className="w-32"
+        label={label}
         value={draft[key]}
-        onChange={(e) => {
-          const v = Number(e.target.value);
-          if (Number.isFinite(v)) set({ [key]: Math.max(min, Math.min(max, step === 1 ? Math.trunc(v) : v)) });
-        }}
+        onChange={(v) => v !== undefined && set({ [key]: v })}
       />
     </Row>
   );
   const toggle = (key: "hardwareEncoding" | "deinterlaceDoubleRate" | "cropBlackBorders", label: string, detail?: string) => (
     <Row label={label} detail={detail}>
-      <Toggle on={draft[key]} label={label} onChange={(on) => set({ [key]: on })} />
+      <Switch on={draft[key]} label={label} onChange={(on) => set({ [key]: on })} />
     </Row>
   );
   const offered = available.length ? available : [HardwareAcceleration.AUTO, HardwareAcceleration.NONE];

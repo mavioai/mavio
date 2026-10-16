@@ -17,8 +17,11 @@ import type { RemoteSearchResult } from "@mavio/proto/mavio/library/v1/metadata_
 import { type ReactNode, useState } from "react";
 
 import { t } from "../i18n.ts";
-import { Button, Select, Toggle } from "../ui.tsx";
-import { field, Modal } from "./modal.tsx";
+import { Button } from "../ui.tsx";
+import { NumberField, Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 
 /** Kinds the providers identify. */
 export const identifiable = (kind: ItemKind) =>
@@ -247,14 +250,14 @@ export function EditDialog({ server, item, onClose }: { server: ServerEntry; ite
         <h3 className="pt-2 type-headline">{t("metadata.locks")}</h3>
         <div className="flex items-center justify-between gap-3">
           <span className="type-callout">{t("metadata.lockAll")}</span>
-          <Toggle on={form.locked} onChange={(on) => set("locked", on)} label={t("metadata.lockAll")} />
+          <Switch on={form.locked} onChange={(on) => set("locked", on)} label={t("metadata.lockAll")} />
         </div>
         {!form.locked && (
           <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
             {lockable.map(([f, label]) => (
               <div key={f} className="flex items-center justify-between gap-3">
                 <span className="type-callout">{label()}</span>
-                <Toggle
+                <Switch
                   on={form.locked_fields.includes(f)}
                   onChange={(on) => set("locked_fields", on ? [...form.locked_fields, f] : form.locked_fields.filter((x) => x !== f))}
                   label={label()}
@@ -296,13 +299,14 @@ export function IdentifyDialog({ server, item, onClose }: { server: ServerEntry;
         }}
       >
         <input className={`${field} basis-60`} aria-label={t("metadata.name")} placeholder={t("metadata.name")} value={name} onChange={(e) => setName(e.target.value)} />
-        <input
-          className={`${field} w-28 flex-none`}
-          type="number"
-          aria-label={t("metadata.year")}
+        <NumberField
+          className="w-36 flex-none"
+          label={t("metadata.year")}
           placeholder={t("metadata.year")}
-          value={year}
-          onChange={(e) => setYear(e.target.value)}
+          min={1800}
+          max={3000}
+          value={Number.parseInt(year, 10) || undefined}
+          onChange={(v) => setYear(v === undefined ? "" : String(v))}
         />
         <Button type="submit" variant="secondary" disabled={!name.trim()}>
           {t("metadata.search")}
@@ -363,7 +367,7 @@ export function RefreshDialog({ server, item, onClose }: { server: ServerEntry; 
     <Modal title={t("metadata.refreshTitle", { name: item.name })} onClose={onClose}>
       <div className="flex items-center justify-between gap-3">
         <span className="type-callout">{t("metadata.replace")}</span>
-        <Toggle on={replace} onChange={setReplace} label={t("metadata.replace")} />
+        <Switch on={replace} onChange={setReplace} label={t("metadata.replace")} />
       </div>
       <p className="type-footnote text-text-secondary">{replace ? t("metadata.replaceFooter") : t("metadata.refreshFooter")}</p>
       {refresh.isError && <p className="type-footnote break-words text-danger">{errorMessage(refresh.error)}</p>}
@@ -404,7 +408,7 @@ export function ImagesDialog({ server, item, onClose }: { server: ServerEntry; i
     <Modal title={t("metadata.imagesTitle", { name: item.name })} wide onClose={onClose}>
       <div className="flex flex-wrap items-center gap-2">
         <Select value={String(kind)} label={t("metadata.imageKind")} options={imageKinds.map(([k, l]) => ({ value: String(k), label: l() }))} onChange={(v) => setKind(Number(v))} />
-        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md bg-fill px-4 type-headline hover:bg-fill-selected">
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md bg-fill px-4 type-headline hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
           {t("metadata.uploadImage")}
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
         </label>

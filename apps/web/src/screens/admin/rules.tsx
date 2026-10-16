@@ -17,8 +17,11 @@ import { type ReactNode, useState } from "react";
 
 import { t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
-import { BackLink, input, Page, patched } from "./common.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
+import { BackLink, Page, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
 import { NumberInput } from "./quality.tsx";
 
 const back = () => <BackLink section="acquisition" label={t("settings.acquisition")} />;
@@ -205,7 +208,7 @@ function DelayForm({
   const valid = (d.usenet || d.torrent) && (profile.default || tags.length > 0);
   const toggle = (key: "usenet" | "torrent" | "bypassQuality" | "bypassScore", label: string, detail?: string) => (
     <Row label={label} detail={detail}>
-      <Toggle on={d[key]} label={label} onChange={(on) => set({ [key]: on })} />
+      <Switch on={d[key]} label={label} onChange={(on) => set({ [key]: on })} />
     </Row>
   );
   return (
@@ -381,7 +384,7 @@ function ReleaseForm({
         <input className={`${input} sm:w-72`} aria-label={t("rules.name")} value={d.name} onChange={(e) => set({ name: e.target.value })} />
       </Row>
       <Row label={t("rules.enabled")}>
-        <Toggle on={d.enabled} label={t("rules.enabled")} onChange={(enabled) => set({ enabled })} />
+        <Switch on={d.enabled} label={t("rules.enabled")} onChange={(enabled) => set({ enabled })} />
       </Row>
       {terms("required", t("rules.required"), t("rules.requiredDetail"))}
       {terms("ignored", t("rules.ignored"), t("rules.ignoredDetail"))}

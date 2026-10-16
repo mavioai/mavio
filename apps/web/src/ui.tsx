@@ -6,7 +6,7 @@ import { ImageKind, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { LibraryKind } from "@mavio/proto/mavio/library/v1/library_pb";
 import { artwork, type Server, thumbOf } from "@mavio/client-ts";
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { t } from "./i18n.ts";
 import { Icon, type IconName } from "./icon.tsx";
@@ -380,34 +380,6 @@ export function Avatar({ name, size = 32, className }: { name: string; size?: nu
   );
 }
 
-/** Calls onClose on Escape and on a press outside ref, while open. */
-export function useDismiss(ref: RefObject<HTMLElement | null>, open: boolean, onClose: () => void) {
-  useEffect(() => {
-    if (!open) return;
-    const down = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    // Before other handlers of Escape and Backspace, which go back on a
-    // television; focus returns to the element that opened it. A dialog
-    // above it, such as the PIN keypad, keeps its keys.
-    const key = (e: KeyboardEvent) => {
-      if (document.querySelector("[aria-modal]")) return;
-      const typing = document.activeElement?.matches("input, textarea, select") ?? false;
-      if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      if (ref.current?.contains(document.activeElement)) ref.current.querySelector("button")?.focus();
-      onClose();
-    };
-    document.addEventListener("pointerdown", down);
-    document.addEventListener("keydown", key, true);
-    return () => {
-      document.removeEventListener("pointerdown", down);
-      document.removeEventListener("keydown", key, true);
-    };
-  }, [ref, open, onClose]);
-}
-
 /** A group of rows on a raised surface, as in the settings. */
 export function Group({ title, footer, children }: { title?: ReactNode; footer?: ReactNode; children: ReactNode }) {
   return (
@@ -443,57 +415,3 @@ export function Row({
   );
 }
 
-/** A switch, green when on as Apple's are. */
-export function Toggle({ on, onChange, label }: { on: boolean; onChange: (on: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={() => onChange(!on)}
-      className={`relative h-[31px] w-[51px] shrink-0 rounded-full transition-colors ${on ? "bg-[#34C759]" : "bg-fill-selected"}`}
-    >
-      <span
-        className={`absolute top-[2px] left-[2px] h-[27px] w-[27px] rounded-full bg-white shadow-level1 transition-transform ${on ? "translate-x-5" : ""}`}
-      />
-    </button>
-  );
-}
-
-/**
- * A choice among options: a native select drawing its own arrow, as far
- * from the right edge as the text is from the left, since browsers put
- * theirs against the edge.
- */
-export function Select<T extends string>({
-  value,
-  options,
-  onChange,
-  label,
-  className,
-}: {
-  value: T;
-  options: { value: T; label: string }[];
-  onChange: (v: T) => void;
-  label: string;
-  className?: string;
-}) {
-  return (
-    <span className={`relative inline-grid max-w-full ${className ?? ""}`}>
-      <select
-        value={value}
-        aria-label={label}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="min-h-9 w-full min-w-0 appearance-none truncate rounded-md bg-fill ps-2.5 pe-8 type-callout text-on-background"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <Icon name="expand" size={14} className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-text-secondary" />
-    </span>
-  );
-}

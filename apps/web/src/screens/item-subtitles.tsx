@@ -16,11 +16,13 @@ import {
 } from "@mavio/client-ts";
 import type { ItemSubtitle, ScoredSubtitle, SubtitleLanguageSpec, SubtitleLanguageSpecSchema } from "@mavio/proto/mavio/acquisition/v1/subtitle_pb";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
-import { type KeyboardEvent, type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import { discoverLanguage, locale, t } from "../i18n.ts";
-import { Button, Group, Select, Toggle } from "../ui.tsx";
-import { Confirm } from "./admin/common.tsx";
+import { Button, Group } from "../ui.tsx";
+import { FileField, Switch } from "../controls/inputs.tsx";
+import { Select } from "../controls/select.tsx";
+import { Confirm, Sheet } from "../controls/dialog.tsx";
 import { mods } from "./admin/subtitle-settings.tsx";
 import { useSubtitleLanguages } from "./admin/subtitles.tsx";
 
@@ -193,7 +195,7 @@ function ModsPanel({ server, itemId, path, onDone }: { server: ServerEntry; item
       {mods.map(([m, label]) => (
         <div key={m} className="flex items-center justify-between gap-3">
           <span className="type-callout">{label()}</span>
-          <Toggle on={chosen.includes(m)} onChange={(on) => setChosen(on ? [...chosen, m] : chosen.filter((x) => x !== m))} label={label()} />
+          <Switch on={chosen.includes(m)} onChange={(on) => setChosen(on ? [...chosen, m] : chosen.filter((x) => x !== m))} label={label()} />
         </div>
       ))}
       <div className="flex items-center gap-2">
@@ -254,22 +256,16 @@ function UploadPanel({ server, itemId, onDone }: { server: ServerEntry; itemId: 
   };
   return (
     <div className="flex flex-col gap-3 px-4 py-3">
-      <input
-        type="file"
-        accept={formats.map((f) => `.${f}`).join(",")}
-        aria-label={t("itemsubs.file")}
-        className="type-callout file:mr-3 file:rounded-[8px] file:border-0 file:bg-fill file:px-3 file:py-1.5 file:type-callout file:font-semibold"
-        onChange={(e) => setFile(e.target.files?.[0])}
-      />
+      <FileField label={t("itemsubs.chooseFile")} accept={formats.map((f) => `.${f}`).join(",")} file={file} onChange={setFile} />
       {file && !formats.includes(format) && <p className="type-footnote text-danger">{t("itemsubs.badFormat")}</p>}
       <Select value={language} label={t("itemsubs.language")} options={[{ value: "", label: t("itemsubs.language") }, ...languages]} onChange={setLanguage} />
       <div className="flex items-center justify-between gap-3">
         <span className="type-callout">{t("subtitles.forced")}</span>
-        <Toggle on={forced} onChange={(on) => (setForced(on), on && setHi(false))} label={t("subtitles.forced")} />
+        <Switch on={forced} onChange={(on) => (setForced(on), on && setHi(false))} label={t("subtitles.forced")} />
       </div>
       <div className="flex items-center justify-between gap-3">
         <span className="type-callout">{t("subtitles.hearingImpaired")}</span>
-        <Toggle on={hi} onChange={(on) => (setHi(on), on && setForced(false))} label={t("subtitles.hearingImpaired")} />
+        <Switch on={hi} onChange={(on) => (setHi(on), on && setForced(false))} label={t("subtitles.hearingImpaired")} />
       </div>
       <div className="flex items-center gap-2">
         <Button disabled={!file || !language || !formats.includes(format) || upload.isPending} onClick={() => void send()}>
@@ -283,38 +279,18 @@ function UploadPanel({ server, itemId, onDone }: { server: ServerEntry; itemId: 
 
 /** The providers' subtitles of the item in a language, or those its profile wants. */
 function SearchDialog({ server, item, missing, onClose }: { server: ServerEntry; item: Item; missing: SubtitleLanguageSpec[]; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
   const [language, setLanguage] = useState(missing.length > 0 ? "" : discoverLanguage);
   const languages = useSubtitleLanguages(server, language);
   const specs: Spec[] = language
     ? [{ language }]
     : missing.map((m) => ({ language: m.language, forced: m.forced, hearingImpaired: m.hearingImpaired }));
   const search = useSubtitleSearch(server, item.id, specs, true);
-  const [opener] = useState(() => (document.activeElement instanceof HTMLElement ? document.activeElement : undefined));
-  useEffect(() => {
-    if (!ref.current?.open) ref.current?.showModal();
-    return () => opener?.focus({ preventScroll: true });
-  }, [opener]);
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== "Escape") return;
-    e.preventDefault();
-    e.stopPropagation();
-    onClose();
-  };
   const list = search.data?.subtitles ?? [];
   return (
-    <dialog
-      ref={ref}
-      aria-modal
-      aria-labelledby="subtitle-search-title"
-      onClose={onClose}
-      onKeyDown={onKeyDown}
-      onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto max-h-[85vh] w-[min(880px,calc(100vw-32px))] rounded-[18px] border border-border bg-surface-overlay p-0 text-on-background shadow-level3 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <div className="flex max-h-[85vh] flex-col gap-3 p-6">
+    <Sheet label={t("itemsubs.searchTitle", { name: item.name })} width="full" onClose={onClose}>
+      <div className="flex max-h-[85vh] min-h-0 flex-col gap-3 p-6">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 id="subtitle-search-title" className="min-w-0 flex-1 type-title2">
+          <h2 className="min-w-0 flex-1 type-title2">
             {t("itemsubs.searchTitle", { name: item.name })}
           </h2>
           <Select
@@ -341,7 +317,7 @@ function SearchDialog({ server, item, missing, onClose }: { server: ServerEntry;
           ))}
         </div>
       </div>
-    </dialog>
+    </Sheet>
   );
 }
 

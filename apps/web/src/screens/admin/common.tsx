@@ -5,9 +5,8 @@ import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
 import { Link, useParams, useSearch } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { locale, t } from "../../i18n.ts";
+import { locale } from "../../i18n.ts";
 import { Icon, type IconName } from "../../icon.tsx";
-import { Button, Group, Row } from "../../ui.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 
 /** A page's title, the line under it, the buttons beside it, and its groups. */
@@ -102,35 +101,6 @@ export function ColorTile({ icon, color, size = 32 }: { icon: IconName; color: s
   );
 }
 
-/** Asks before something that cannot be undone. */
-export function Confirm({
-  title,
-  message,
-  action,
-  busy,
-  onCancel,
-  onConfirm,
-}: {
-  title: string;
-  message?: string;
-  action: string;
-  busy: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <Group>
-      <Row label={title} detail={message}>
-        <Button variant="plain" onClick={onCancel}>
-          {t("action.cancel")}
-        </Button>
-        <Button variant="secondary" className="text-danger" disabled={busy} onClick={onConfirm}>
-          {action}
-        </Button>
-      </Row>
-    </Group>
-  );
-}
 
 /**
  * A copy of a message with some fields changed. Spreading a message would
@@ -140,9 +110,6 @@ export function patched<Desc extends DescMessage>(schema: Desc, message: Message
   return Object.assign(clone(schema, message), changes);
 }
 
-/** The class of inputs inside rows. */
-export const input =
-  "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";
 
 const languageNames = new Intl.DisplayNames([locale], { type: "language", fallback: "none" });
 const regionNames = new Intl.DisplayNames([locale], { type: "region", fallback: "none" });

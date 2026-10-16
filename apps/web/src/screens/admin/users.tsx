@@ -31,9 +31,13 @@ import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Avatar, Button, Group, Row, Select, Toggle } from "../../ui.tsx";
+import { Avatar, Button, Group, Row } from "../../ui.tsx";
+import { Checkbox, NumberField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Confirm, input, Page } from "./common.tsx";
+import { BackLink, Page } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 const restrictions: { value: RestrictionProfile; title: () => string }[] = [
   { value: RestrictionProfile.UNSPECIFIED, title: () => t("users.restrictionNone") },
@@ -328,7 +332,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
       {disabled ? (
         <span className="type-callout text-text-secondary">{draft[key] ? t("users.on") : t("users.off")}</span>
       ) : (
-        <Toggle on={draft[key] as boolean} label={label} onChange={(on) => set({ [key]: on })} />
+        <Switch on={draft[key] as boolean} label={label} onChange={(on) => set({ [key]: on })} />
       )}
     </Row>
   );
@@ -353,27 +357,13 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
       <Row label={label} detail={q ? undefined : t("users.quotaServer")}>
         {q && (
           <span className="flex items-center gap-2 type-callout text-text-secondary">
-            <input
-              type="number"
-              min={0}
-              className={`${input} w-20`}
-              aria-label={t("users.quotaLimit")}
-              value={q.limit}
-              onChange={(e) => set({ [key]: { ...q, limit: Math.max(0, Math.trunc(Number(e.target.value) || 0)) } })}
-            />
+            <NumberField min={0} className="w-28" label={t("users.quotaLimit")} value={q.limit} onChange={(v) => set({ [key]: { ...q, limit: v ?? 0 } })} />
             {t("users.quotaEvery")}
-            <input
-              type="number"
-              min={0}
-              className={`${input} w-20`}
-              aria-label={t("users.quotaDays")}
-              value={q.days}
-              onChange={(e) => set({ [key]: { ...q, days: Math.max(0, Math.trunc(Number(e.target.value) || 0)) } })}
-            />
+            <NumberField min={0} className="w-28" label={t("users.quotaDays")} value={q.days} onChange={(v) => set({ [key]: { ...q, days: v ?? 0 } })} />
             {t("users.quotaDaysUnit")}
           </span>
         )}
-        <Toggle on={!!q} label={t("users.quotaCustom")} onChange={(on) => set({ [key]: on ? { limit: 10, days: 7 } : undefined })} />
+        <Switch on={!!q} label={t("users.quotaCustom")} onChange={(on) => set({ [key]: on ? { limit: 10, days: 7 } : undefined })} />
       </Row>
     );
   };
@@ -438,18 +428,15 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
             (libraries.data ?? [])
               .filter((l) => accessible(l.kind))
               .map((l) => (
-                <label key={l.id} className="flex min-h-11 items-center gap-3 px-4 py-2 type-body">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-accent"
-                    disabled={!own}
-                    checked={draft.libraryIds.includes(l.id)}
-                    onChange={(e) =>
-                      set({ libraryIds: e.target.checked ? [...draft.libraryIds, l.id] : draft.libraryIds.filter((x) => x !== l.id) })
-                    }
-                  />
+                <Checkbox
+                  key={l.id}
+                  className="min-h-11 px-4 py-2"
+                  disabled={!own}
+                  checked={draft.libraryIds.includes(l.id)}
+                  onChange={(on) => set({ libraryIds: on ? [...draft.libraryIds, l.id] : draft.libraryIds.filter((x) => x !== l.id) })}
+                >
                   {l.name}
-                </label>
+                </Checkbox>
               ))}
           <Row label={t("users.maxRating")} detail={t("users.maxRatingDetail")}>
             <Select
@@ -496,15 +483,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
           />
         </Row>
         <Row label={t("users.maxSessions")} detail={t("users.maxSessionsDetail")}>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            className={`${input} w-24`}
-            aria-label={t("users.maxSessions")}
-            value={draft.maxSessions}
-            onChange={(e) => set({ maxSessions: Math.max(0, Math.min(100, Math.trunc(Number(e.target.value) || 0))) })}
-          />
+          <NumberField min={0} max={100} className="w-32" label={t("users.maxSessions")} value={draft.maxSessions} onChange={(v) => set({ maxSessions: v ?? 0 })} />
         </Row>
       </Group>
       {!user.admin && (
@@ -721,46 +700,29 @@ function Invitations({ server, users }: { server: ServerEntry; users: User[] }) 
         {making && (
           <form className="flex flex-col divide-y divide-border bg-background/40" onSubmit={(e) => (e.preventDefault(), make())}>
             <Row label={t("users.maxUses")}>
-              <input
-                type="number"
-                min={1}
-                max={100}
-                className={`${input} w-24`}
-                aria-label={t("users.maxUses")}
-                value={uses}
-                onChange={(e) => setUses(Math.max(1, Math.min(100, Math.trunc(Number(e.target.value) || 1))))}
-              />
+              <NumberField min={1} max={100} className="w-32" label={t("users.maxUses")} value={uses} onChange={(v) => setUses(v ?? 1)} />
             </Row>
             <Row label={t("users.validDays")}>
-              <input
-                type="number"
-                min={1}
-                max={30}
-                className={`${input} w-24`}
-                aria-label={t("users.validDays")}
-                value={days}
-                onChange={(e) => setDays(Math.max(1, Math.min(30, Math.trunc(Number(e.target.value) || 1))))}
-              />
+              <NumberField min={1} max={30} className="w-32" label={t("users.validDays")} value={days} onChange={(v) => setDays(v ?? 1)} />
             </Row>
             <Row label={t("users.allLibraries")}>
-              <Toggle on={all} label={t("users.allLibraries")} onChange={setAll} />
+              <Switch on={all} label={t("users.allLibraries")} onChange={setAll} />
             </Row>
             {!all &&
               (libraries.data ?? [])
                 .filter((l) => accessible(l.kind))
                 .map((l) => (
-                  <label key={l.id} className="flex min-h-11 items-center gap-3 px-4 py-2 type-body">
-                    <input
-                      type="checkbox"
-                      className="size-4 accent-accent"
-                      checked={ids.includes(l.id)}
-                      onChange={(e) => setIds(e.target.checked ? [...ids, l.id] : ids.filter((x) => x !== l.id))}
-                    />
+                  <Checkbox
+                    key={l.id}
+                    className="min-h-11 px-4 py-2"
+                    checked={ids.includes(l.id)}
+                    onChange={(on) => setIds(on ? [...ids, l.id] : ids.filter((x) => x !== l.id))}
+                  >
                     {l.name}
-                  </label>
+                  </Checkbox>
                 ))}
             <Row label={t("users.allowDownload")}>
-              <Toggle on={download} label={t("users.allowDownload")} onChange={setDownload} />
+              <Switch on={download} label={t("users.allowDownload")} onChange={setDownload} />
             </Row>
             <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
               <Button type="submit" disabled={actions.create.isPending}>

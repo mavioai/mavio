@@ -27,9 +27,13 @@ import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Confirm, fromNow, input, languageOptions, Page, PageLink, patched } from "./common.tsx";
+import { BackLink, fromNow, languageOptions, Page, PageLink, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 import { Check } from "./formats.tsx";
 import { SubtitleSettingsPage } from "./subtitle-settings.tsx";
 
@@ -317,7 +321,7 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
           />
         </Row>
         <Row label={t("subtitles.originalFormat")} detail={t("subtitles.originalFormatDetail")}>
-          <Toggle on={draft.originalFormat} label={t("subtitles.originalFormat")} onChange={(originalFormat) => set({ originalFormat })} />
+          <Switch on={draft.originalFormat} label={t("subtitles.originalFormat")} onChange={(originalFormat) => set({ originalFormat })} />
         </Row>
         <Row label={t("subtitles.tag")} detail={t("subtitles.tagDetail")}>
           <input className={`${input} sm:w-48`} aria-label={t("subtitles.tag")} value={draft.tag} onChange={(e) => set({ tag: e.target.value })} />

@@ -3493,6 +3493,24 @@
         }
       }
     },
+    "player.position": {
+      "comment": "The accessible name of the player's timeline.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进度"
+          }
+        }
+      }
+    },
     "state.loading": {
       "comment": "Shown while content loads.",
       "extractionState": "manual",
@@ -24615,6 +24633,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "已下载"
+          }
+        }
+      }
+    },
+    "itemsubs.chooseFile": {
+      "comment": "The button choosing the subtitle file to upload.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a Subtitle File…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择字幕文件…"
           }
         }
       }

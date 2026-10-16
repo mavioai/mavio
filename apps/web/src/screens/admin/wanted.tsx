@@ -9,7 +9,8 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
-import { Button, Group, LoadMore, Select } from "../../ui.tsx";
+import { Button, Group, LoadMore } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
 import { Page } from "./common.tsx";
 
 const day = new Intl.DateTimeFormat([locale], { dateStyle: "medium" });

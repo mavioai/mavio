@@ -152,14 +152,36 @@
 }
 
 body {
+  /* Dialogs' backdrops cover the page however far it scrolls. */
+  position: relative;
   background: var(--mavio-color-background);
   color: var(--mavio-color-text-primary);
   font-family: var(--mavio-font-family);
 }
 
-:focus-visible {
-  outline: 2px solid var(--mavio-color-focus);
-  outline-offset: 2px;
+/* The page is a stacking context of its own, so that the popups Base UI
+   portals to the body stay above it whatever its z-indices. */
+#root {
+  isolation: isolate;
+}
+
+/* Search fields are drawn as the other fields are: without the browser's
+   own clear button and decorations, which differ between browsers. */
+input[type="search"] {
+  appearance: none;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* The focus ring, in the base layer so that a control drawing its own,
+   as Base UI's highlighted items do, turns it off with outline-none. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--mavio-color-focus);
+    outline-offset: 2px;
+  }
 }
 
 /* A card's artwork (libs/design/components.md, States): an accent border
@@ -254,11 +276,6 @@ body {
     background: color-mix(in oklab, var(--mavio-color-surface-raised) 60%, transparent);
     backdrop-filter: blur(24px);
     color: var(--mavio-color-on-background);
-  }
-  /* A menu's items look focused as they look hovered. */
-  & [role="menu"] :is(a, button):focus {
-    background: var(--mavio-color-fill);
-    color: inherit;
   }
 }
 

@@ -4,16 +4,18 @@
 import { errorMessage, type ServerEntry, serverKey, type SignIn, useServersStore, useSignIn } from "@mavio/client-ts";
 import type { SwitchableUser } from "@mavio/proto/mavio/auth/v1/auth_pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useLocation } from "@tanstack/react-router";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useLocation } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 
+import { Sheet } from "../controls/dialog.tsx";
+import { Menu, MenuChoice, MenuExternal, MenuIconOption, MenuItem, MenuLabel, MenuLink, MenuSeparator } from "../controls/menu.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { toggleFullScreen, useFullScreen } from "../fullscreen.ts";
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
 import { type Appearance, setPrefs, usePrefs } from "../prefs.ts";
-import { Avatar, useDismiss } from "../ui.tsx";
+import { Avatar } from "../ui.tsx";
 
 /** The sign-in as the user menu presents it. */
 export function useAccount(): { shown?: SignIn; name: string; line: string } {
@@ -70,169 +72,124 @@ export function UserButton({
   dots?: boolean;
   placement?: "above" | "below";
 }) {
-  const account = useAccount();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(ref, open, close);
-  const { pathname } = useLocation();
-  useEffect(close, [pathname, close]);
-  if (!account.shown) return null;
-  return (
-    <div ref={ref} data-focus-scope className="relative">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        data-tv-dots={dots || undefined}
-        aria-label={t("nav.userMenu", { name: account.name })}
-        title={compact || dots ? account.name : undefined}
-        onClick={() => setOpen(!open)}
-        className={
-          dots
-            ? "flex size-16 items-center justify-center rounded-full text-text-secondary"
-            : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill ${compact ? "justify-center p-1.5" : "p-2"} ${open ? "bg-fill" : ""}`
-        }
-      >
-        {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 36 : 32} />}
-        {!compact && !dots && (
-          <>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate type-callout font-semibold">{account.name}</span>
-              <span className="block truncate type-caption text-text-secondary">{account.line}</span>
-            </span>
-            <Icon name="selector" size={16} className="text-text-tertiary" />
-          </>
-        )}
-      </button>
-      {open && <UserMenu placement={placement} onClose={close} />}
-    </div>
-  );
-}
-
-/** The glass menu of the user. */
-function UserMenu({ placement, onClose }: { placement: "above" | "below"; onClose: () => void }) {
   const servers = useServersStore();
   const account = useAccount();
-  const shown = account.shown!;
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setOpen(false), [pathname]);
   const { tv } = usePrefs();
   const full = useFullScreen();
   // Shortcuts are shown only where a keyboard can press them.
   const keys = useShortcutsShown();
-  const server = shown.kind === "standalone" ? shown.servers[0] : undefined;
+  const shown = account.shown;
+  const server = shown?.kind === "standalone" ? shown.servers[0] : undefined;
   const { users, switchTo } = useSwitchUsers(server);
   const [asking, setAsking] = useState<SwitchableUser>();
   const manage = useMavioDevAccountUrl();
-  // On the television the menu opens with focus on the settings.
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (tv) ref.current?.querySelector<HTMLElement>("[data-menu-start]")?.focus();
-  }, [tv]);
-
-  return (
-    <div
-      ref={ref}
-      role="menu"
-      className={`absolute z-50 rounded-[14px] border border-border p-1.5 shadow-level3 ${
-        // On the television, frosted glass over the artwork behind it.
-        tv ? "w-[400px] bg-surface-overlay/45 backdrop-blur-3xl backdrop-saturate-150" : "w-[300px] bg-surface-overlay/85 backdrop-blur-xl"
-      } ${
-        placement === "above" ? "bottom-full left-0 mb-2" : "top-full right-0 mt-2"
-      }`}
+  if (!shown) return null;
+  const trigger = (
+    <button
+      type="button"
+      data-tv-dots={dots || undefined}
+      aria-label={t("nav.userMenu", { name: account.name })}
+      className={
+        dots
+          ? "flex size-16 items-center justify-center rounded-full text-text-secondary"
+          : `flex w-full items-center gap-2.5 rounded-[10px] text-left hover:bg-fill data-popup-open:bg-fill ${compact ? "justify-center p-1.5" : "p-2"}`
+      }
     >
-      <div className="flex items-center gap-3 px-2.5 py-2">
-        <Avatar name={account.name} size={36} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate type-headline">{account.name}</div>
-          <div className="truncate type-footnote text-text-secondary">
-            {shown.kind === "mavioDev" ? t("auth.mavioAccount") : t("auth.standaloneUser", { server: account.line })}
-          </div>
-        </div>
-        <ThemeSwitch />
-      </div>
-      {users.length > 0 && (
+      {dots ? <Icon name="moreVertical" size={32} /> : <Avatar name={account.name} size={compact ? 36 : 32} />}
+      {!compact && !dots && (
         <>
-          <Divider />
-          <div className="px-2.5 pt-1.5 pb-1 type-caption text-text-secondary">{t("auth.switchUser")}</div>
-          {users.map((u) => (
-            <button
-              key={u.id}
-              type="button"
-              role="menuitem"
-              disabled={u.current || switchTo.isPending}
-              onClick={() => (u.hasPin ? setAsking(u) : switchTo.mutate({ user: u }, { onSuccess: onClose }))}
-              className="flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-left type-body hover:bg-fill disabled:hover:bg-transparent"
-            >
-              <Avatar name={u.name} size={24} />
-              <span className="min-w-0 flex-1 truncate">{u.name}</span>
-              {u.current ? (
-                <Icon name="check" size={16} className="text-accent-text" />
-              ) : (
-                u.hasPin && <Icon name="lock" size={14} className="text-text-tertiary" />
-              )}
-            </button>
-          ))}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate type-callout font-semibold">{account.name}</span>
+            <span className="block truncate type-caption text-text-secondary">{account.line}</span>
+          </span>
+          <Icon name="selector" size={16} className="text-text-tertiary" />
         </>
       )}
-      <Divider />
-      <MenuLink start icon="settings" to="/settings" onClose={onClose} shortcut={keys ? shortcutLabel("settings") : undefined}>
-        {t("nav.settings")}
-      </MenuLink>
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onClose();
-          setPrefs({ tv: !tv });
-        }}
-        className={itemClass}
+    </button>
+  );
+  return (
+    <>
+      <Menu
+        trigger={compact || dots ? <Tip label={account.name}>{trigger}</Tip> : trigger}
+        side={placement === "above" ? "top" : "bottom"}
+        align={placement === "above" ? "start" : "end"}
+        width={tv ? "w-[400px]" : "w-[300px]"}
+        label={t("nav.userMenu", { name: account.name })}
+        open={open}
+        onOpenChange={setOpen}
+        start="[data-menu-start]"
       >
-        <Icon name={tv ? "sidebar" : "television"} size={18} className="text-text-secondary" />
-        <span className="flex-1">{tv ? t("menu.standardMode") : t("menu.tvMode")}</span>
-        {keys && <Shortcut>{shortcutLabel("tvMode")}</Shortcut>}
-      </button>
-      {tv && (
-        <button type="button" role="menuitem" onClick={() => (onClose(), toggleFullScreen())} className={itemClass}>
-          <Icon name={full ? "exitFullScreen" : "fullScreen"} size={18} className="text-text-secondary" />
-          <span className="flex-1">{full ? t("menu.exitFullScreen") : t("menu.fullScreen")}</span>
-          {keys && <Shortcut>{shortcutLabel("fullScreen")}</Shortcut>}
-        </button>
-      )}
-      {shown.kind === "mavioDev" ? (
-        manage && (
-          <a role="menuitem" href={manage} target="_blank" rel="noreferrer" onClick={onClose} className={itemClass}>
-            <Icon name="external" size={18} className="text-text-secondary" />
-            <span className="flex-1">{t("menu.manageAccount")}</span>
-          </a>
-        )
-      ) : (
-        <MenuLink icon="server" to="/settings/$section" section="servers" onClose={onClose}>
-          {t("menu.manageServers")}
+        <div className="flex items-center gap-3 px-2.5 py-2">
+          <Avatar name={account.name} size={36} />
+          <div className="min-w-0 flex-1">
+            <div className="truncate type-headline">{account.name}</div>
+            <div className="truncate type-footnote text-text-secondary">
+              {shown.kind === "mavioDev" ? t("auth.mavioAccount") : t("auth.standaloneUser", { server: account.line })}
+            </div>
+          </div>
+          <ThemeSwitch />
+        </div>
+        {users.length > 0 && (
+          <>
+            <MenuSeparator />
+            <MenuLabel>{t("auth.switchUser")}</MenuLabel>
+            {users.map((u) => (
+              <MenuItem
+                key={u.id}
+                disabled={u.current || switchTo.isPending}
+                closeOnClick={false}
+                onClick={() => (u.hasPin ? (setOpen(false), setAsking(u)) : switchTo.mutate({ user: u }, { onSuccess: () => setOpen(false) }))}
+                end={u.current ? <Icon name="check" size={16} className="text-accent-text" /> : u.hasPin && <Icon name="lock" size={14} className="text-text-tertiary" />}
+              >
+                <span className="flex items-center gap-2.5">
+                  <Avatar name={u.name} size={24} />
+                  <span className="min-w-0 flex-1 truncate">{u.name}</span>
+                </span>
+              </MenuItem>
+            ))}
+          </>
+        )}
+        <MenuSeparator />
+        <MenuLink start icon="settings" to="/settings" shortcut={keys ? shortcutLabel("settings") : undefined}>
+          {t("nav.settings")}
         </MenuLink>
-      )}
-      <Divider />
-      <button
-        type="button"
-        role="menuitem"
-        onClick={() => {
-          onClose();
-          void servers.signOut();
-        }}
-        className={itemClass}
-      >
-        <Icon name="signOut" size={18} className="text-text-secondary" />
-        <span className="flex-1">{t("auth.signOut")}</span>
-      </button>
+        <MenuItem icon={tv ? "sidebar" : "television"} shortcut={keys ? shortcutLabel("tvMode") : undefined} onClick={() => setPrefs({ tv: !tv })}>
+          {tv ? t("menu.standardMode") : t("menu.tvMode")}
+        </MenuItem>
+        {tv && (
+          <MenuItem icon={full ? "exitFullScreen" : "fullScreen"} shortcut={keys ? shortcutLabel("fullScreen") : undefined} onClick={toggleFullScreen}>
+            {full ? t("menu.exitFullScreen") : t("menu.fullScreen")}
+          </MenuItem>
+        )}
+        {shown.kind === "mavioDev" ? (
+          manage && (
+            <MenuExternal icon="external" href={manage}>
+              {t("menu.manageAccount")}
+            </MenuExternal>
+          )
+        ) : (
+          <MenuLink icon="server" to="/settings/$section" params={{ section: "servers" }}>
+            {t("menu.manageServers")}
+          </MenuLink>
+        )}
+        <MenuSeparator />
+        <MenuItem icon="signOut" onClick={() => void servers.signOut()}>
+          {t("auth.signOut")}
+        </MenuItem>
+      </Menu>
       {asking && (
         <PinPad
           name={asking.name}
           busy={switchTo.isPending}
           error={switchTo.error ? errorMessage(switchTo.error) : undefined}
           onCancel={() => (setAsking(undefined), switchTo.reset())}
-          onPin={(pin) => switchTo.mutate({ user: asking, pin }, { onSuccess: () => (setAsking(undefined), onClose()) })}
+          onPin={(pin) => switchTo.mutate({ user: asking, pin }, { onSuccess: () => setAsking(undefined) })}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -244,66 +201,18 @@ const themes: { value: Appearance; icon: IconName; label: () => string }[] = [
 
 /** The appearance, chosen beside the account's name: the system's, light or dark. */
 function ThemeSwitch() {
-  const { appearance, tv } = usePrefs();
+  const { appearance } = usePrefs();
   return (
-    <div role="radiogroup" aria-label={t("settings.appearance")} className="flex shrink-0 rounded-full bg-fill p-0.5">
-      {themes.map((th) => {
-        const on = appearance === th.value;
-        return (
-          <button
-            key={th.value}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            aria-label={th.label()}
-            title={th.label()}
-            onClick={() => setPrefs({ appearance: th.value })}
-            className={`flex ${tv ? "size-9" : "size-7"} items-center justify-center rounded-full ${
-              on ? "bg-surface-raised text-on-background shadow-level1" : "text-text-secondary hover:text-on-background"
-            }`}
-          >
-            <Icon name={th.icon} fill={on} size={tv ? 20 : 16} />
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/** The keys of a menu item's shortcut, at its end. */
-function Shortcut({ children }: { children: string }) {
-  return <kbd className="font-sans type-footnote text-text-tertiary">{children}</kbd>;
-}
-
-const itemClass = "flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-left type-body hover:bg-fill";
-
-function Divider() {
-  return <div className="mx-2.5 my-1 h-px bg-border" />;
-}
-
-function MenuLink({
-  start = false,
-  icon,
-  to,
-  section,
-  shortcut,
-  onClose,
-  children,
-}: {
-  start?: boolean;
-  icon: IconName;
-  to: "/settings" | "/settings/$section";
-  section?: string;
-  shortcut?: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <Link role="menuitem" data-menu-start={start || undefined} to={to} params={section ? { section } : undefined} onClick={onClose} className={itemClass}>
-      <Icon name={icon} size={18} className="text-text-secondary" />
-      <span className="flex-1">{children}</span>
-      {shortcut && <Shortcut>{shortcut}</Shortcut>}
-    </Link>
+    <MenuChoice
+      value={appearance}
+      onChange={(v) => setPrefs({ appearance: v })}
+      label={t("settings.appearance")}
+      className="flex shrink-0 rounded-full bg-fill p-0.5"
+    >
+      {themes.map((th) => (
+        <MenuIconOption key={th.value} value={th.value} icon={th.icon} label={th.label()} />
+      ))}
+    </MenuChoice>
   );
 }
 
@@ -339,55 +248,43 @@ export function PinPad({
     const key = (e: KeyboardEvent) => {
       if (/^\d$/.test(e.key)) press(e.key);
       else if (e.key === "Backspace") press("⌫");
-      else if (e.key === "Escape") onCancel();
       else return;
       e.preventDefault();
       e.stopImmediatePropagation();
     };
     document.addEventListener("keydown", key, true);
     return () => document.removeEventListener("keydown", key, true);
-  }, [press, onCancel]);
-  // In the body, outside the menu: its backdrop filter would hold a fixed
-  // element, and a press on the keypad must not close the menu.
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim backdrop-blur-sm"
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        if (e.target === e.currentTarget) onCancel();
-      }}
-    >
-      <div role="dialog" aria-modal aria-label={t("auth.enterPin", { name })} className="w-[300px] rounded-[22px] bg-surface p-6 text-center shadow-level3">
-        <Avatar name={name} size={56} className="mx-auto" />
-        <h2 className="mt-3 type-title3">{t("auth.enterPin", { name })}</h2>
-        <div className="my-5 flex justify-center gap-4" aria-live="polite">
-          {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={`h-3 w-3 rounded-full border-2 border-on-background ${i < pin.length ? "bg-on-background" : ""}`} />
-          ))}
-        </div>
-        {error && <p className="-mt-2 mb-3 type-footnote text-danger">{error}</p>}
-        <div className="grid grid-cols-3 gap-3">
-          {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k) =>
-            k === "" ? (
-              <span key="blank" />
-            ) : (
-              <button
-                key={k}
-                type="button"
-                aria-label={k === "⌫" ? t("action.delete") : k}
-                onClick={() => press(k)}
-                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-fill type-title2 hover:bg-fill-selected active:opacity-70"
-              >
-                {k === "⌫" ? <Icon name="backspace" /> : k}
-              </button>
-            ),
-          )}
-        </div>
-        <button type="button" onClick={onCancel} className="mt-4 type-body text-accent-text">
-          {t("action.cancel")}
-        </button>
+  }, [press]);
+  return (
+    <Sheet label={t("auth.enterPin", { name })} width="pin" className="p-6 text-center" onClose={onCancel}>
+      <Avatar name={name} size={56} className="mx-auto" />
+      <h2 className="mt-3 type-title3">{t("auth.enterPin", { name })}</h2>
+      <div className="my-5 flex justify-center gap-4" aria-live="polite">
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className={`h-3 w-3 rounded-full border-2 border-on-background ${i < pin.length ? "bg-on-background" : ""}`} />
+        ))}
       </div>
-    </div>,
-    document.body,
+      {error && <p className="-mt-2 mb-3 type-footnote text-danger">{error}</p>}
+      <div className="grid grid-cols-3 gap-3">
+        {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k) =>
+          k === "" ? (
+            <span key="blank" />
+          ) : (
+            <button
+              key={k}
+              type="button"
+              aria-label={k === "⌫" ? t("action.delete") : k}
+              onClick={() => press(k)}
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-fill type-title2 hover:bg-fill-selected active:opacity-70"
+            >
+              {k === "⌫" ? <Icon name="backspace" /> : k}
+            </button>
+          ),
+        )}
+      </div>
+      <button type="button" onClick={onCancel} className="mt-4 type-body text-accent-text">
+        {t("action.cancel")}
+      </button>
+    </Sheet>
   );
 }

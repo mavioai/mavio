@@ -9,11 +9,14 @@ import { PlayStateCommand, type Session } from "@mavio/proto/mavio/session/v1/se
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import { Slider } from "../controls/inputs.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { useServerEvents } from "../events.tsx";
 import { t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { Button, subtitleOf } from "../ui.tsx";
-import { field, Modal } from "./modal.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 
 /** Kinds a device plays by themselves. */
 export const playable = (kind: ItemKind) =>
@@ -146,6 +149,8 @@ export function RemoteDialog({ server, sessionId, onClose }: { server: ServerEnt
   const position = np?.position ? durationMs(np.position) : 0;
   const command = (kind: Parameters<typeof send.mutate>[0]["command"]["kind"]) => send.mutate({ sessionId, command: { kind } });
   const state = (c: PlayStateCommand) => command({ case: "playState", value: { command: c } });
+  // The position as the slider is dragged, sent once it is let go.
+  const [dragged, setDragged] = useState<number>();
   const seek = (ms: number) => command({ case: "seek", value: { position: durationFromMs(Math.max(0, Math.round(ms))) } });
   return (
     <Modal title={s ? deviceName(s) : t("remote.title")} onClose={onClose}>
@@ -159,18 +164,18 @@ export function RemoteDialog({ server, sessionId, onClose }: { server: ServerEnt
           </div>
           {runtime > 0 && (
             <div className="flex flex-col gap-1">
-              <input
-                type="range"
+              <Slider
                 min={0}
                 max={runtime}
                 step={1000}
-                value={Math.min(position, runtime)}
-                aria-label={t("remote.position")}
-                onChange={(e) => seek(Number(e.target.value))}
-                className="w-full accent-[var(--color-accent)]"
+                value={Math.min(dragged ?? position, runtime)}
+                label={t("remote.position")}
+                valueText={clock}
+                onChange={setDragged}
+                onCommit={(v) => (seek(v), setDragged(undefined))}
               />
               <div className="flex justify-between type-caption text-text-secondary tabular-nums">
-                <span>{clock(position)}</span>
+                <span>{clock(dragged ?? position)}</span>
                 <span>{clock(runtime)}</span>
               </div>
             </div>
@@ -198,16 +203,14 @@ export function RemoteDialog({ server, sessionId, onClose }: { server: ServerEnt
         <>
           <div className="flex items-center gap-2">
             <Control icon="mute" label={t("player.mute")} onClick={() => command({ case: "volume", value: { muted: true } })} />
-            <input
-              type="range"
+            <Slider
               min={0}
               max={100}
               value={volume}
-              aria-label={t("remote.volume")}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              onPointerUp={() => command({ case: "volume", value: { level: volume, muted: false } })}
-              onKeyUp={() => command({ case: "volume", value: { level: volume, muted: false } })}
-              className="min-w-0 flex-1 accent-[var(--color-accent)]"
+              label={t("remote.volume")}
+              className="flex-1"
+              onChange={setVolume}
+              onCommit={(level) => command({ case: "volume", value: { level, muted: false } })}
             />
             <span className="w-10 text-right type-footnote text-text-secondary tabular-nums">{volume}</span>
           </div>
@@ -243,14 +246,15 @@ export function RemoteDialog({ server, sessionId, onClose }: { server: ServerEnt
 
 function Control({ icon, label, large = false, onClick }: { icon: IconName; label: string; large?: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className={`flex shrink-0 items-center justify-center rounded-full hover:bg-fill ${large ? "h-14 w-14 bg-fill" : "h-11 w-11"}`}
-    >
-      <Icon name={icon} fill={large} size={large ? 28 : 22} />
-    </button>
+    <Tip label={label}>
+      <button
+        type="button"
+        aria-label={label}
+        onClick={onClick}
+        className={`flex shrink-0 items-center justify-center rounded-full hover:bg-fill ${large ? "h-14 w-14 bg-fill" : "h-11 w-11"}`}
+      >
+        <Icon name={icon} fill={large} size={large ? 28 : 22} />
+      </button>
+    </Tip>
   );
 }

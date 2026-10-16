@@ -19,10 +19,14 @@ import { useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, Row, Select, Toggle } from "../../ui.tsx";
+import { Button, Group, Row } from "../../ui.tsx";
+import { NumberField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
 import { mediaKinds } from "./acquisition.tsx";
-import { BackLink, Confirm, input, Page, patched } from "./common.tsx";
+import { BackLink, Page, patched } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 /** The languages releases are parsed into, by their English names, as libs/release names them. */
 export const releaseLanguages = [
@@ -34,8 +38,8 @@ export const releaseLanguages = [
   "Marathi", "Tagalog", "Urdu", "Romansh", "Mongolian", "Georgian",
 ];
 
-/** A number input clamped to a range. */
-export function NumberInput({ value, onChange, label, min = 0, max, step = 1, className = "w-24" }: {
+/** A number field clamped to a range, with buttons to step it. */
+export function NumberInput({ value, onChange, label, min = 0, max, step = 1, className = "w-32" }: {
   value: number;
   onChange: (v: number) => void;
   label: string;
@@ -45,18 +49,15 @@ export function NumberInput({ value, onChange, label, min = 0, max, step = 1, cl
   className?: string;
 }) {
   return (
-    <input
-      type="number"
+    <NumberField
       min={min}
       max={max}
       step={step}
-      className={`${input} ${className}`}
-      aria-label={label}
+      integer={Number.isInteger(step)}
+      className={className}
+      label={label}
       value={value}
-      onChange={(e) => {
-        const v = Number(e.target.value);
-        if (Number.isFinite(v)) onChange(Math.max(min, max === undefined ? v : Math.min(max, v)));
-      }}
+      onChange={(v) => v !== undefined && onChange(v)}
     />
   );
 }
@@ -215,7 +216,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
           <input className={`${input} sm:w-72`} aria-label={t("acquisition.profileName")} value={draft.name} onChange={(e) => set({ name: e.target.value })} />
         </Row>
         <Row label={t("acquisition.upgradeAllowed")} detail={t("acquisition.upgradeAllowedDetail")}>
-          <Toggle on={draft.upgradeAllowed} label={t("acquisition.upgradeAllowed")} onChange={(upgradeAllowed) => set({ upgradeAllowed })} />
+          <Switch on={draft.upgradeAllowed} label={t("acquisition.upgradeAllowed")} onChange={(upgradeAllowed) => set({ upgradeAllowed })} />
         </Row>
         {draft.upgradeAllowed && (
           <Row label={t("acquisition.cutoff")} detail={t("acquisition.cutoffDetail")}>
@@ -252,7 +253,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
           const i = draft.items.indexOf(it);
           return (
             <div key={itemId(it)} className="flex min-h-11 items-center gap-3 px-4 py-1.5">
-              <Toggle on={it.allowed} label={nameOf(it)} onChange={() => toggle(i)} />
+              <Switch on={it.allowed} label={nameOf(it)} onChange={() => toggle(i)} />
               <div className="min-w-0 flex-1">
                 <div className={`type-body ${it.allowed ? "" : "text-text-secondary"}`}>{nameOf(it)}</div>
                 {it.id > 0 && <div className="type-footnote text-text-secondary">{it.items.map(nameOf).join(", ")}</div>}

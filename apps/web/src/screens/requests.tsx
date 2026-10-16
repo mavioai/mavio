@@ -19,6 +19,7 @@ import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { Tabs } from "../controls/inputs.tsx";
 import { t } from "../i18n.ts";
 import { Artwork, Button, LoadMore, Loading, ScreenTitle, StatusView } from "../ui.tsx";
 import { fromNow } from "./admin/common.tsx";
@@ -82,23 +83,13 @@ export function RequestsScreen() {
   return (
     <div className="pt-2 pb-8">
       <ScreenTitle>{t("requests.title")}</ScreenTitle>
-      <div className="flex flex-wrap gap-2 px-margin pb-3" role="tablist">
-        {(["all", ...Object.keys(requestFilters)] as (RequestFilter | "all")[]).map((f) => {
-          const on = (status ?? "all") === f;
-          return (
-            <button
-              key={f}
-              type="button"
-              role="tab"
-              aria-selected={on}
-              onClick={() => void navigate({ to: "/s/$serverId/requests", params: { serverId }, search: { status: f === "all" ? undefined : f }, replace: true })}
-              className={`min-h-9 rounded-full px-4 type-callout font-semibold ${on ? "bg-button text-on-button" : "bg-fill hover:bg-fill-selected"}`}
-            >
-              {filterNames[f]()}
-            </button>
-          );
-        })}
-      </div>
+      <Tabs
+        value={status ?? "all"}
+        label={t("requests.title")}
+        className="px-margin pb-3"
+        tabs={(["all", ...Object.keys(requestFilters)] as (RequestFilter | "all")[]).map((f) => ({ value: f, label: filterNames[f]() }))}
+        onChange={(f) => void navigate({ to: "/s/$serverId/requests", params: { serverId }, search: { status: f === "all" ? undefined : f }, replace: true })}
+      />
       {!admin && <Quotas server={server} />}
       <RequestList key={status ?? "all"} server={server} statuses={status ? [...requestFilters[status]] : []} admin={admin} />
     </div>

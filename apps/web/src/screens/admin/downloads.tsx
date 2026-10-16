@@ -18,8 +18,11 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { t } from "../../i18n.ts";
-import { Button, Group, LoadMore, Select, Toggle } from "../../ui.tsx";
-import { fromNow, input, lengthOf, Page, sizeOf } from "./common.tsx";
+import { Button, Group, LoadMore } from "../../ui.tsx";
+import { Progress, Switch, Tabs } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
+import { fromNow, lengthOf, Page, sizeOf } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
 
 type Tab = "queue" | "history" | "blocklist" | "import";
 
@@ -34,20 +37,7 @@ export function DownloadsSection({ server }: { server: ServerEntry }) {
   ];
   return (
     <Page title={t("settings.downloads")} message={t("downloads.message")}>
-      <div className="flex flex-wrap gap-2" role="tablist">
-        {tabs.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={tab === id}
-            onClick={() => setTab(id)}
-            className={`min-h-9 rounded-full px-4 type-callout font-semibold ${tab === id ? "bg-button text-on-button" : "bg-fill hover:bg-fill-selected"}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} label={t("settings.downloads")} tabs={tabs.map(([value, label]) => ({ value, label }))} onChange={setTab} />
       {tab === "queue" && <Queue server={server} />}
       {tab === "history" && <History server={server} />}
       {tab === "blocklist" && <Blocklist server={server} />}
@@ -110,7 +100,7 @@ function Queue({ server }: { server: ServerEntry }) {
       <Group footer={q.isSuccess ? t("downloads.count", { count: q.data.pages[0]?.total ?? 0 }) : undefined}>
         <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
           <span className="type-body">{t("downloads.showFinished")}</span>
-          <Toggle on={finished} onChange={setFinished} label={t("downloads.showFinished")} />
+          <Switch on={finished} onChange={setFinished} label={t("downloads.showFinished")} />
         </div>
         {items.map((i) => (
           <QueueRow key={i.id} server={server} item={i} />
@@ -152,9 +142,7 @@ export function QueueRow({ server, item: i }: { server: ServerEntry; item: Queue
       <p className="type-footnote break-all">{i.title}</p>
       <p className="type-footnote text-text-secondary">{detail.join(" · ")}</p>
       {progress !== undefined && (
-        <div className="h-1.5 overflow-hidden rounded-full bg-fill" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
-          <div className="h-full rounded-full bg-progress" style={{ width: `${progress * 100}%` }} />
-        </div>
+        <Progress value={progress} label={i.title} />
       )}
       {i.messages.map((m, k) => (
         <p key={k} className="type-footnote break-words text-danger">
@@ -189,16 +177,16 @@ function RemovePanel({ server, item, onDone }: { server: ServerEntry; item: Queu
     <div className="flex flex-col rounded-lg bg-surface-raised px-3 py-2">
       <div className={row}>
         <span className="type-callout">{t("downloads.removeFromClient")}</span>
-        <Toggle on={fromClient} onChange={setFromClient} label={t("downloads.removeFromClient")} />
+        <Switch on={fromClient} onChange={setFromClient} label={t("downloads.removeFromClient")} />
       </div>
       <div className={row}>
         <span className="type-callout">{t("downloads.blocklistRelease")}</span>
-        <Toggle on={blocklist} onChange={(v) => (setBlocklist(v), v || setSearch(false))} label={t("downloads.blocklistRelease")} />
+        <Switch on={blocklist} onChange={(v) => (setBlocklist(v), v || setSearch(false))} label={t("downloads.blocklistRelease")} />
       </div>
       {blocklist && (
         <div className={row}>
           <span className="type-callout">{t("downloads.searchAgain")}</span>
-          <Toggle on={search} onChange={setSearch} label={t("downloads.searchAgain")} />
+          <Switch on={search} onChange={setSearch} label={t("downloads.searchAgain")} />
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2 pt-1">

@@ -9,8 +9,10 @@ import { type Activity, Severity } from "@mavio/proto/mavio/system/v1/activity_p
 import { GetHealthResponse_Status } from "@mavio/proto/mavio/system/v1/system_pb";
 import { useState } from "react";
 
+import { Tip } from "../../controls/tooltip.tsx";
 import { t } from "../../i18n.ts";
-import { Group, Row, Select, subtitleOf } from "../../ui.tsx";
+import { Group, Row, subtitleOf } from "../../ui.tsx";
+import { Select } from "../../controls/select.tsx";
 import { ColorTile, fromNow, lengthOf, Page } from "./common.tsx";
 
 const methods: Partial<Record<PlayMethod, () => string>> = {
@@ -163,15 +165,17 @@ function ActivityRow({ activity: a }: { activity: Activity }) {
   const s = severities[a.severity];
   return (
     <div className="flex items-start gap-3 px-4 py-2.5">
-      <span className="mt-2 size-2 shrink-0 rounded-full" style={{ background: s.color }} title={s.title()} />
+      <span role="img" aria-label={s.title()} className="mt-2 size-2 shrink-0 rounded-full" style={{ background: s.color }} />
       <div className="min-w-0 flex-1">
         <div className="type-body">{a.title}</div>
         {a.message && <div className="type-footnote break-words text-text-secondary">{a.message}</div>}
       </div>
       {a.time && (
-        <time className="shrink-0 type-footnote text-text-secondary" dateTime={timestampDate(a.time).toISOString()} title={timestampDate(a.time).toLocaleString()}>
-          {fromNow(timestampDate(a.time))}
-        </time>
+        <Tip label={timestampDate(a.time).toLocaleString()}>
+          <time className="shrink-0 type-footnote text-text-secondary" dateTime={timestampDate(a.time).toISOString()}>
+            {fromNow(timestampDate(a.time))}
+          </time>
+        </Tip>
       )}
     </div>
   );

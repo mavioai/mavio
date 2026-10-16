@@ -5,6 +5,7 @@ import { useDiscovery, useLibraries } from "@mavio/client-ts";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 
+import { Tip } from "../controls/tooltip.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
@@ -25,15 +26,16 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
     >
       <div className={`flex h-14 shrink-0 items-center ${rail ? "justify-center" : "justify-between pr-2.5 pl-4"}`}>
         {!rail && <Wordmark height={22} />}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
-          title={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background"
-        >
-          <Icon name="sidebar" size={20} />
-        </button>
+        <Tip label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")} side={rail ? "right" : "bottom"}>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={rail ? t("nav.expandSidebar") : t("nav.collapseSidebar")}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary hover:bg-fill hover:text-on-background"
+          >
+            <Icon name="sidebar" size={20} />
+          </button>
+        </Tip>
       </div>
       <div className={`flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pb-2 ${rail ? "items-center px-2" : "px-2.5"}`}>
         {rail ? (
@@ -54,17 +56,17 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
               <div className="truncate px-2.5 pt-2 pb-0.5 type-caption text-text-tertiary">{server.name}</div>
             )}
             {list.map((l) => (
-              <Link
-                key={l.id}
-                to="/s/$serverId/library/$libraryId"
-                params={{ serverId: server.id, libraryId: l.id }}
-                title={rail ? (several ? `${l.name} · ${server.name}` : l.name) : undefined}
-                aria-label={rail ? l.name : undefined}
-                className={itemClass(rail)}
-              >
-                <Icon name={libraryIcon(l.kind)} size={20} className="shrink-0 text-accent-text" />
-                {!rail && <span className="truncate">{l.name}</span>}
-              </Link>
+              <Tip key={l.id} label={several ? `${l.name} · ${server.name}` : l.name} side="right" disabled={!rail}>
+                <Link
+                  to="/s/$serverId/library/$libraryId"
+                  params={{ serverId: server.id, libraryId: l.id }}
+                  aria-label={rail ? l.name : undefined}
+                  className={itemClass(rail)}
+                >
+                  <Icon name={libraryIcon(l.kind)} size={20} className="shrink-0 text-accent-text" />
+                  {!rail && <span className="truncate">{l.name}</span>}
+                </Link>
+              </Tip>
             ))}
           </div>
         ))}
@@ -128,19 +130,15 @@ function NavItem({
   exact?: boolean;
 }): ReactNode {
   return (
-    <Link
-      to={to}
-      activeOptions={{ exact }}
-      title={rail ? label : undefined}
-      aria-label={rail ? label : undefined}
-      className={itemClass(rail)}
-    >
-      {({ isActive }) => (
-        <>
-          <Icon name={icon} fill={isActive} size={20} className="shrink-0" />
-          {!rail && label}
-        </>
-      )}
-    </Link>
+    <Tip label={label} side="right" disabled={!rail}>
+      <Link to={to} activeOptions={{ exact }} aria-label={rail ? label : undefined} className={itemClass(rail)}>
+        {({ isActive }) => (
+          <>
+            <Icon name={icon} fill={isActive} size={20} className="shrink-0" />
+            {!rail && label}
+          </>
+        )}
+      </Link>
+    </Tip>
   );
 }

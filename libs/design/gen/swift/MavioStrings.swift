@@ -640,6 +640,9 @@ public enum MavioStrings {
     /// Button showing or hiding a track's lyrics in the player, and their accessible label.
     public static var playerLyrics: String { NSLocalizedString("player.lyrics", bundle: .module, comment: "") }
 
+    /// The accessible name of the player's timeline.
+    public static var playerPosition: String { NSLocalizedString("player.position", bundle: .module, comment: "") }
+
     /// Shown while content loads.
     public static var stateLoading: String { NSLocalizedString("state.loading", bundle: .module, comment: "") }
 
@@ -4331,6 +4334,9 @@ public enum MavioStrings {
 
     /// The subtitle was downloaded.
     public static var itemsubsDownloaded: String { NSLocalizedString("itemsubs.downloaded", bundle: .module, comment: "") }
+
+    /// The button choosing the subtitle file to upload.
+    public static var itemsubsChooseFile: String { NSLocalizedString("itemsubs.chooseFile", bundle: .module, comment: "") }
 
     /// More menu item editing an item's metadata.
     public static var metadataEdit: String { NSLocalizedString("metadata.edit", bundle: .module, comment: "") }

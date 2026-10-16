@@ -1,6 +1,6 @@
 // The remote's Back on the television (docs/tv.md §4): it always goes up
 // a level rather than through the browser's history. A menu or dialog
-// closes itself first (useDismiss, the dialogs); on a tab's page Back
+// closes itself first, as Escape closes it; on a tab's page Back
 // moves to the tab, the page at its top; any deeper page returns to where
 // it was opened from, focus and position as they were.
 import { type ParsedLocation, useRouter } from "@tanstack/react-router";
@@ -10,6 +10,9 @@ import { focusable } from "./spatial.ts";
 
 /** The pages of the tabs, which Back leaves for the tabs. */
 const tabPages = ["/", "/libraries", "/discover"];
+
+/** The popups open over the page: dialogs, menus and lists of options. */
+const popups = "[aria-modal=true], [role=alertdialog], [role=menu], [role=listbox]";
 
 /** Where Back goes from a page opened directly, with nowhere to return to. */
 function parentOf(pathname: string): string {
@@ -85,6 +88,14 @@ export function useTvBack() {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const typing = document.activeElement?.matches("input, textarea, select") ?? false;
       if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
+      // An open popup closes on Escape by itself; Back is its Escape too.
+      if (document.querySelector(popups)) {
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          (document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+        }
+        return;
+      }
       e.preventDefault();
       const { pathname } = router.state.location;
       if (tabPages.includes(pathname)) {

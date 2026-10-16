@@ -19,13 +19,16 @@ import {
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import type { PlaylistEntry } from "@mavio/proto/mavio/library/v1/playlist_pb";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 
 import { t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
-import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf, useDismiss } from "../ui.tsx";
+import { Artwork, Button, Grid, ItemCard, runtimeOf, subtitleOf } from "../ui.tsx";
+import { Menu, MenuItem } from "../controls/menu.tsx";
+import { Tip } from "../controls/tooltip.tsx";
 import { EditDialog, IdentifyDialog, identifiable, ImagesDialog, RefreshDialog } from "./metadata.tsx";
-import { field, Modal } from "./modal.tsx";
+import { field } from "../controls/styles.ts";
+import { Modal } from "../controls/dialog.tsx";
 import { playable, PlayOnDialog } from "./remote.tsx";
 import { ReportDialog, reportable, useMayReport } from "./issues.tsx";
 import { SyncPlayDialog } from "./syncplay.tsx";
@@ -39,11 +42,7 @@ const listable = (kind: ItemKind) => kind !== ItemKind.PLAYLIST && kind !== Item
 export function MoreMenu({ server, item, className, iconSize, phone }: { server: ServerEntry; item: Item; className: string; iconSize: number; phone: boolean }) {
   const admin = useAdminServers().some((s) => s.id === server.id);
   const mayReport = useMayReport(server);
-  const [open, setOpen] = useState(false);
   const [dialog, setDialog] = useState<Dialog>();
-  const ref = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss(ref, open, close);
   const own = item.kind === ItemKind.PLAYLIST || (item.kind === ItemKind.COLLECTION && admin);
   const entries: [Dialog, string][] = [
     ...(playable(item.kind)
@@ -72,28 +71,25 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
   ];
   if (entries.length === 0) return null;
   return (
-    <div ref={ref} data-focus-scope className="relative">
-      <button type="button" aria-haspopup="menu" aria-expanded={open} aria-label={t("lists.more")} title={t("lists.more")} onClick={() => setOpen(!open)} className={className}>
-        <Icon name="more" size={iconSize} />
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className={`absolute bottom-full z-50 mb-2 ${phone ? "right-0" : "left-0"} w-[260px] rounded-[14px] border border-border bg-surface-overlay/90 p-1.5 text-on-background shadow-level3 backdrop-blur-xl`}
-        >
-          {entries.map(([d, label]) => (
-            <button
-              key={d}
-              type="button"
-              role="menuitem"
-              onClick={() => (setDialog(d), close())}
-              className={`flex w-full items-center rounded-lg px-2.5 py-2 text-left type-callout hover:bg-fill ${d === "delete" ? "text-danger" : ""}`}
-            >
-              {label}
+    <>
+      <Menu
+        side="top"
+        align={phone ? "end" : "start"}
+        width="w-[260px]"
+        trigger={
+          <Tip label={t("lists.more")}>
+            <button type="button" aria-label={t("lists.more")} className={className}>
+              <Icon name="more" size={iconSize} />
             </button>
-          ))}
-        </div>
-      )}
+          </Tip>
+        }
+      >
+        {entries.map(([d, label]) => (
+          <MenuItem key={d} danger={d === "delete"} onClick={() => setDialog(d)}>
+            {label}
+          </MenuItem>
+        ))}
+      </Menu>
       {(dialog === "playlist" || dialog === "collection") && <AddDialog server={server} item={item} kind={dialog} onClose={() => setDialog(undefined)} />}
       {dialog === "report" && <ReportDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "together" && <SyncPlayDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
@@ -104,7 +100,7 @@ export function MoreMenu({ server, item, className, iconSize, phone }: { server:
       {dialog === "images" && <ImagesDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "rename" && <RenameDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
       {dialog === "delete" && <DeleteDialog server={server} item={item} onClose={() => setDialog(undefined)} />}
-    </div>
+    </>
   );
 }
 
@@ -266,15 +262,21 @@ function EntryRow({ server, playlistId, entry: e, index, last }: { server: Serve
           <span className="block truncate type-footnote text-text-secondary">{[subtitleOf(item), runtimeOf(item)].filter(Boolean).join(" · ")}</span>
         </span>
       </Link>
-      <button type="button" aria-label={t("lists.moveUp")} title={t("lists.moveUp")} disabled={busy || index === 0} onClick={() => move.mutate({ id: playlistId, entryId: e.id, position: index - 1 })} className={small}>
-        <Icon name="expand" size={16} className="rotate-180" />
-      </button>
-      <button type="button" aria-label={t("lists.moveDown")} title={t("lists.moveDown")} disabled={busy || last} onClick={() => move.mutate({ id: playlistId, entryId: e.id, position: index + 1 })} className={small}>
-        <Icon name="expand" size={16} />
-      </button>
-      <button type="button" aria-label={t("lists.remove")} title={t("lists.remove")} disabled={busy} onClick={() => removeEntries.mutate({ id: playlistId, entryIds: [e.id] })} className={small}>
-        <Icon name="close" size={16} />
-      </button>
+      <Tip label={t("lists.moveUp")}>
+        <button type="button" aria-label={t("lists.moveUp")} disabled={busy || index === 0} onClick={() => move.mutate({ id: playlistId, entryId: e.id, position: index - 1 })} className={small}>
+          <Icon name="expand" size={16} className="rotate-180" />
+        </button>
+      </Tip>
+      <Tip label={t("lists.moveDown")}>
+        <button type="button" aria-label={t("lists.moveDown")} disabled={busy || last} onClick={() => move.mutate({ id: playlistId, entryId: e.id, position: index + 1 })} className={small}>
+          <Icon name="expand" size={16} />
+        </button>
+      </Tip>
+      <Tip label={t("lists.remove")}>
+        <button type="button" aria-label={t("lists.remove")} disabled={busy} onClick={() => removeEntries.mutate({ id: playlistId, entryIds: [e.id] })} className={small}>
+          <Icon name="close" size={16} />
+        </button>
+      </Tip>
     </li>
   );
 }

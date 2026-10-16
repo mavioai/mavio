@@ -202,6 +202,7 @@
     <string name="player_method">播放方式</string>
     <string name="player_options">播放选项</string>
     <string name="player_lyrics">歌词</string>
+    <string name="player_position">进度</string>
     <string name="state_loading">正在载入…</string>
     <string name="state_empty">这里还没有内容</string>
     <string name="state_error">出了点问题</string>
@@ -1384,6 +1385,7 @@
     <string name="itemsubs_blocklisted">已拉黑</string>
     <string name="itemsubs_download">下载</string>
     <string name="itemsubs_downloaded">已下载</string>
+    <string name="itemsubs_choose_file">选择字幕文件…</string>
     <string name="metadata_edit">编辑元数据</string>
     <string name="metadata_identify">识别</string>
     <string name="metadata_refresh">刷新元数据</string>

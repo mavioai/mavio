@@ -22,9 +22,13 @@ import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
-import { Button, Group, libraryIcon, Row, Select, Toggle } from "../../ui.tsx";
+import { Button, Group, libraryIcon, Row } from "../../ui.tsx";
+import { NumberField, Switch } from "../../controls/inputs.tsx";
+import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, ColorTile, Confirm, countryOptions, input, languageOptions, Page } from "./common.tsx";
+import { BackLink, ColorTile, countryOptions, languageOptions, Page } from "./common.tsx";
+import { input } from "../../controls/styles.ts";
+import { Confirm } from "../../controls/dialog.tsx";
 
 const kinds: { kind: LibraryKind; title: () => string; color: string }[] = [
   { kind: LibraryKind.MOVIES, title: () => t("libraries.kindMovies"), color: "#FF9500" },
@@ -254,7 +258,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
   };
   const toggle = (key: keyof Draft, label: string, detail?: string) => (
     <Row key={key} label={label} detail={detail}>
-      <Toggle on={draft[key] as boolean} label={label} onChange={(on) => set({ [key]: on })} />
+      <Switch on={draft[key] as boolean} label={label} onChange={(on) => set({ [key]: on })} />
     </Row>
   );
   const k = kindOf(draft.kind);
@@ -414,14 +418,13 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           {toggle("specials", t("libraries.missingSpecials"))}
           {!draft.missing && (
             <Row label={t("libraries.graceDays")} detail={t("libraries.graceDaysDetail")}>
-              <input
-                type="number"
+              <NumberField
                 min={0}
                 max={3650}
-                className={`${input} w-24`}
-                aria-label={t("libraries.graceDays")}
+                className="w-32"
+                label={t("libraries.graceDays")}
                 value={draft.graceDays}
-                onChange={(e) => set({ graceDays: Math.max(0, Math.min(3650, Math.trunc(Number(e.target.value) || 0))) })}
+                onChange={(v) => set({ graceDays: v ?? 0 })}
               />
             </Row>
           )}
