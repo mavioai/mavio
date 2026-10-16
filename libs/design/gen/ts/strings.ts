@@ -363,6 +363,7 @@ export type MessageKey =
   | 'settings.serversMavioMessage'
   | 'settings.serversMessage'
   | 'settings.copyAddress'
+  | 'settings.reachedAt'
   | 'settings.devices'
   | 'settings.devicesMessage'
   | 'settings.thisBrowser'
@@ -1960,6 +1961,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.serversMavioMessage": "The servers your Mavio account reaches. Their order arranges Home.",
     "settings.serversMessage": "The server you are signed in to.",
     "settings.copyAddress": "Copy Address",
+    "settings.reachedAt": "Reached at {url}",
     "settings.devices": "Devices",
     "settings.devicesMessage": "The devices signed in to this server as you.",
     "settings.thisBrowser": "This browser",
@@ -3555,6 +3557,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.serversMavioMessage": "你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。",
     "settings.serversMessage": "你登录的服务器。",
     "settings.copyAddress": "复制地址",
+    "settings.reachedAt": "经由 {url} 连接",
     "settings.devices": "设备",
     "settings.devicesMessage": "以你的身份登录此服务器的设备。",
     "settings.thisBrowser": "这个浏览器",

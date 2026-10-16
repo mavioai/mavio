@@ -381,6 +381,7 @@
     <string name="settings_servers_mavio_message">你的 Mavio 账户能访问的服务器。顺序决定首页上各服务器内容的排列。</string>
     <string name="settings_servers_message">你登录的服务器。</string>
     <string name="settings_copy_address">复制地址</string>
+    <string name="settings_reached_at">经由 %s 连接</string>
     <string name="settings_devices">设备</string>
     <string name="settings_devices_message">以你的身份登录此服务器的设备。</string>
     <string name="settings_this_browser">这个浏览器</string>

@@ -122,6 +122,7 @@ export {
   type ServerEntry,
   type ServerInfo,
   Servers,
+  shareableUrl,
   type SignIn,
   type Storage,
 } from "./servers.ts";

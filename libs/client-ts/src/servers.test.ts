@@ -4,7 +4,7 @@ import { afterEach, expect, test, vi } from "vitest";
 
 import { assertionMessage, memoryDeviceKey, refreshMessage, renewalMessage } from "./device-key.ts";
 import { isTotpRequired } from "./hooks.ts";
-import { type ServerEntry, Servers, type Storage } from "./servers.ts";
+import { type ServerEntry, Servers, shareableUrl, type Storage } from "./servers.ts";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -335,4 +335,12 @@ test("an expired token is refreshed and the call made again", async () => {
   });
   await servers.client(SystemService, servers.get("a")!).getHealth({});
   expect(servers.get("a")?.token).toBe("new");
+});
+
+test("a server's address for others is the best it published", () => {
+  const cases: [string, Pick<ServerEntry, "url" | "urls">, string][] = [
+    ["the first published", { url: "http://localhost:5174", urls: ["https://a.mavio.site:8920", "http://192.168.1.10:8686"] }, "https://a.mavio.site:8920"],
+    ["a standalone server as reached", { url: "https://media.example.com" }, "https://media.example.com"],
+  ];
+  for (const [name, s, want] of cases) expect(shareableUrl(s), name).toBe(want);
 });

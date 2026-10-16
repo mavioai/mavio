@@ -1198,8 +1198,13 @@ public enum MavioStrings {
     /// Explanation under the Servers title on a standalone server.
     public static var settingsServersMessage: String { NSLocalizedString("settings.serversMessage", bundle: .module, comment: "") }
 
-    /// Button that copies a server's address.
+    /// Button that copies a server's address, one others reach it at.
     public static var settingsCopyAddress: String { NSLocalizedString("settings.copyAddress", bundle: .module, comment: "") }
+
+    /// The address this device reaches a server at, where it is not the one others are given, such as localhost.
+    public static func settingsReachedAt(url: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("settings.reachedAt", bundle: .module, comment: ""), url)
+    }
 
     /// Settings section of the devices signed in as the user.
     public static var settingsDevices: String { NSLocalizedString("settings.devices", bundle: .module, comment: "") }

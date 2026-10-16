@@ -11,6 +11,7 @@ import {
   errorMessage,
   type ServerEntry,
   serverKey,
+  shareableUrl,
   useAdminServers,
   useServers,
   useRevokeSession,
@@ -656,34 +657,43 @@ function ServersSection() {
       message={account.shown?.kind === "mavioDev" ? t("settings.serversMavioMessage") : t("settings.serversMessage")}
     >
       <Group>
-        {list.map((s, i) => (
-          <Row
-            key={s.id}
-            label={s.name}
-            leading={
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-fill type-headline">
-                {[...s.name][0]?.toUpperCase()}
-              </span>
-            }
-            detail={s.token ? `${t("auth.signedInAs", { name: s.userName })} · ${s.url}` : t("auth.unreachable")}
-          >
-            <div className="flex items-center gap-0.5">
-              {list.length > 1 && (
-                <>
-                  <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
-                  <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
-                </>
-              )}
-              {s.url && (
-                <IconButton
-                  icon={copied === s.id ? "check" : "external"}
-                  label={t("settings.copyAddress")}
-                  onClick={() => void navigator.clipboard?.writeText(s.url).then(() => setCopied(s.id))}
-                />
-              )}
-            </div>
-          </Row>
-        ))}
+        {list.map((s, i) => {
+          const shared = shareableUrl(s);
+          return (
+            <Row
+              key={s.id}
+              label={s.name}
+              leading={
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-fill type-headline">
+                  {[...s.name][0]?.toUpperCase()}
+                </span>
+              }
+              detail={
+                s.token
+                  ? [t("auth.signedInAs", { name: s.userName }), shared, s.url !== shared && t("settings.reachedAt", { url: s.url })]
+                      .filter(Boolean)
+                      .join(" · ")
+                  : t("auth.unreachable")
+              }
+            >
+              <div className="flex items-center gap-0.5">
+                {list.length > 1 && (
+                  <>
+                    <IconButton icon="expand" className="rotate-180" label={t("auth.moveUp")} disabled={i === 0} onClick={() => move(i, -1)} />
+                    <IconButton icon="expand" label={t("auth.moveDown")} disabled={i === list.length - 1} onClick={() => move(i, 1)} />
+                  </>
+                )}
+                {shared && (
+                  <IconButton
+                    icon={copied === s.id ? "check" : "external"}
+                    label={t("settings.copyAddress")}
+                    onClick={() => void navigator.clipboard?.writeText(shared).then(() => setCopied(s.id))}
+                  />
+                )}
+              </div>
+            </Row>
+          );
+        })}
       </Group>
     </Section>
   );

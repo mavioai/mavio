@@ -6662,7 +6662,7 @@
       }
     },
     "settings.copyAddress": {
-      "comment": "Button that copies a server's address.",
+      "comment": "Button that copies a server's address, one others reach it at.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -6675,6 +6675,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "复制地址"
+          }
+        }
+      }
+    },
+    "settings.reachedAt": {
+      "comment": "The address this device reaches a server at, where it is not the one others are given, such as localhost.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reached at %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "经由 %@ 连接"
           }
         }
       }

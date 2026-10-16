@@ -749,8 +749,10 @@
     <string name="settings_servers_mavio_message">The servers your Mavio account reaches. Their order arranges Home.</string>
     <!-- Explanation under the Servers title on a standalone server. -->
     <string name="settings_servers_message">The server you are signed in to.</string>
-    <!-- Button that copies a server's address. -->
+    <!-- Button that copies a server's address, one others reach it at. -->
     <string name="settings_copy_address">Copy Address</string>
+    <!-- The address this device reaches a server at, where it is not the one others are given, such as localhost. -->
+    <string name="settings_reached_at">Reached at %s</string>
     <!-- Settings section of the devices signed in as the user. -->
     <string name="settings_devices">Devices</string>
     <!-- Explanation under the Devices title. -->

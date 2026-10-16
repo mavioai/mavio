@@ -21,7 +21,11 @@ export interface ServerEntry {
   id: string;
   name: string;
   version: string;
-  /** The base URL it is reached at, such as `https://media.example.com/mavio`; empty while unreachable. */
+  /**
+   * The base URL this client reaches it at, such as `https://media.example.com`;
+   * empty while unreachable. It may be one only this device reaches, such as
+   * the page's own localhost; shareableUrl tells one for others.
+   */
   url: string;
   /** The URLs a Mavio account's server published, best first. */
   urls?: string[];
@@ -164,6 +168,15 @@ async function device(storage: Storage, key: DeviceKey) {
   return { id, name: browser, client: "Mavio Web", clientVersion: "0.0.0", publicKey: await key.publicKey() };
 }
 
+/**
+ * The address of a server to give to others: the best of the URLs it
+ * published, which it orders itself (docs/mavio-dev.md §4.3), else the one
+ * this client reaches it at.
+ */
+export function shareableUrl(s: Pick<ServerEntry, "url" | "urls">): string {
+  return s.urls?.[0] ?? s.url;
+}
+
 /** Normalizes a base URL: no trailing slashes. */
 export function normalizeUrl(input: string): string {
   const u = new URL(input.trim());
@@ -260,7 +273,7 @@ export class Servers {
 
   constructor(
     private storage: Storage,
-    /** The origin and base path of the web UI, such as `https://media.example.com/mavio`. */
+    /** The origin of the web UI, such as `https://media.example.com`. */
     readonly base: string,
     options: Options = {},
   ) {
