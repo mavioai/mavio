@@ -1,6 +1,7 @@
 import { createRootRoute, createRoute, createRouter, redirect } from "@tanstack/react-router";
 import type { CatalogFilters, Filter, Sort } from "@mavio/client-ts";
 
+import { CreditsScreen } from "./screens/credits.tsx";
 import { Details } from "./screens/details.tsx";
 import { CatalogScreen, DiscoverScreen, TitleScreen } from "./screens/discover.tsx";
 import { parseFilters } from "./screens/discover-filters.tsx";
@@ -130,6 +131,8 @@ const hub = createRoute({ getParentRoute: () => root, path: "/s/$serverId/hub/$h
 
 const details = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId", component: Details });
 
+const credits = createRoute({ getParentRoute: () => root, path: "/s/$serverId/item/$itemId/credits", component: CreditsScreen });
+
 const person = createRoute({ getParentRoute: () => root, path: "/s/$serverId/person/$personId", component: PersonScreen });
 
 const player = createRoute({
@@ -161,6 +164,7 @@ export const router = createRouter({
     library,
     hub,
     details,
+    credits,
     person,
     player,
   ]),

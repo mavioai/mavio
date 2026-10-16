@@ -4928,4 +4928,34 @@ public enum MavioStrings {
 
     /// Kind of an extra without a more specific one.
     public static var extraOther: String { NSLocalizedString("extra.other", bundle: .module, comment: "") }
+
+    /// Link from the cast on an item's details to its whole cast and crew.
+    public static var creditsAll: String { NSLocalizedString("credits.all", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the actors.
+    public static var creditsCast: String { NSLocalizedString("credits.cast", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the guest stars.
+    public static var creditsGuestStars: String { NSLocalizedString("credits.guestStars", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the authors of the work an item adapts.
+    public static var creditsAuthors: String { NSLocalizedString("credits.authors", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the conductors.
+    public static var creditsConductors: String { NSLocalizedString("credits.conductors", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the lyricists.
+    public static var creditsLyricists: String { NSLocalizedString("credits.lyricists", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the artists.
+    public static var creditsArtists: String { NSLocalizedString("credits.artists", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the narrators.
+    public static var creditsNarrators: String { NSLocalizedString("credits.narrators", bundle: .module, comment: "") }
+
+    /// Section of the credits page: the crew of other jobs.
+    public static var creditsOther: String { NSLocalizedString("credits.other", bundle: .module, comment: "") }
+
+    /// Shown on the credits page when an item credits no one.
+    public static var creditsNone: String { NSLocalizedString("credits.none", bundle: .module, comment: "") }
 }

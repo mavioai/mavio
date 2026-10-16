@@ -32,10 +32,10 @@ import type { MessageKey } from "@mavio/design/strings";
 import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
 import { CatalogShelf } from "./discover.tsx";
+import { crewLabels, isCast, PersonTile } from "./credits.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
-import { initialsOf } from "./person.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
@@ -280,7 +280,7 @@ function ItemDetails({ server, item, sources, credits }: { server: ServerEntry; 
         {item.kind !== ItemKind.SERIES && item.kind !== ItemKind.SEASON && item.kind !== ItemKind.PLAYLIST && item.kind !== ItemKind.COLLECTION && (
           <Children server={server} item={item} items={children.data ?? []} />
         )}
-        <Cast server={server} credits={credits} />
+        <Cast server={server} item={item} credits={credits} />
         <Extras server={server} items={extras} fallback={artwork(server, item, ImageKind.BACKDROP, 640)?.url} />
         {item.collectionName && <CollectionBanner server={server} item={item} fallback={backdrop?.url} />}
         {(similar.data?.length ?? 0) > 0 && (
@@ -871,42 +871,32 @@ function Children({ server, item, items }: { server: ServerEntry; item: Item; it
   );
 }
 
-const crewLabels: Partial<Record<CreditKind, () => string>> = {
-  [CreditKind.CREATOR]: () => t("item.creators"),
-  [CreditKind.DIRECTOR]: () => t("item.director"),
-  [CreditKind.WRITER]: () => t("item.writers"),
-};
+const shelfCrew = new Set([CreditKind.CREATOR, CreditKind.DIRECTOR, CreditKind.WRITER]);
 
-/** The cast in billing order, then the creators, directors and writers. */
-function Cast({ server, credits }: { server: ServerEntry; credits: Credit[] }) {
-  const isCast = (c: Credit) => c.kind === CreditKind.ACTOR || c.kind === CreditKind.GUEST_STAR;
-  const shown = credits.filter((c) => c.person && (isCast(c) || crewLabels[c.kind]));
+/** The cast in billing order, then the creators, directors and writers; the whole cast and crew are a page of their own. */
+function Cast({ server, item, credits }: { server: ServerEntry; item: Item; credits: Credit[] }) {
+  const shown = credits.filter((c) => c.person && (isCast(c) || shelfCrew.has(c.kind)));
   if (shown.length === 0) return null;
   const sorted = shown.toSorted((a, b) => Number(!isCast(a)) - Number(!isCast(b)) || a.order - b.order);
+  const label = (c: Credit) => (isCast(c) ? c.role : t(crewLabels.find(([k]) => k === c.kind)![1]));
   return (
-    <Shelf title={t("item.cast")}>
-      {sorted.map((c, i) => {
-        const p = c.person!;
-        const photo = artwork(server, p, ImageKind.PRIMARY, 240);
-        return (
-          <Link
-            key={`${p.id}-${i}`}
-            to="/s/$serverId/person/$personId"
-            params={{ serverId: server.id, personId: p.id }}
-            className="group w-28 shrink-0 snap-start rounded-lg text-center [[data-tv]_&]:w-40"
-          >
-            <div className="relative mx-auto aspect-square w-24 overflow-hidden rounded-full bg-fill [[data-tv]_&]:w-36">
-              {photo ? (
-                <img src={photo.url} alt="" loading="lazy" className="h-full w-full object-cover" />
-              ) : (
-                <span className="absolute inset-0 flex items-center justify-center type-title3 text-text-secondary">{initialsOf(p.name)}</span>
-              )}
-            </div>
-            <div className="mt-2 line-clamp-2 type-callout group-hover:underline">{p.name}</div>
-            <div className="line-clamp-2 type-footnote text-text-secondary">{isCast(c) ? c.role : crewLabels[c.kind]!()}</div>
-          </Link>
-        );
-      })}
+    <Shelf
+      title={t("item.cast")}
+      more={
+        <Link to="/s/$serverId/item/$itemId/credits" params={{ serverId: server.id, itemId: item.id }}>
+          {t("credits.all")}
+        </Link>
+      }
+    >
+      {sorted.map((c, i) => (
+        <PersonTile
+          key={`${c.person!.id}-${i}`}
+          server={server}
+          credit={c}
+          label={label(c)}
+          className="w-28 shrink-0 snap-start [[data-tv]_&]:w-40"
+        />
+      ))}
     </Shelf>
   );
 }

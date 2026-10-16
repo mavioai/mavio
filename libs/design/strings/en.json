@@ -1534,5 +1534,15 @@
   "extra.sample": { "message": "Sample", "description": "Kind of an extra." },
   "extra.featurette": { "message": "Featurette", "description": "Kind of an extra." },
   "extra.short": { "message": "Short", "description": "Kind of an extra." },
-  "extra.other": { "message": "Extra", "description": "Kind of an extra without a more specific one." }
+  "extra.other": { "message": "Extra", "description": "Kind of an extra without a more specific one." },
+  "credits.all": { "message": "See All", "description": "Link from the cast on an item's details to its whole cast and crew." },
+  "credits.cast": { "message": "Cast", "description": "Section of the credits page: the actors." },
+  "credits.guestStars": { "message": "Guest Stars", "description": "Section of the credits page: the guest stars." },
+  "credits.authors": { "message": "Authors", "description": "Section of the credits page: the authors of the work an item adapts." },
+  "credits.conductors": { "message": "Conductors", "description": "Section of the credits page: the conductors." },
+  "credits.lyricists": { "message": "Lyricists", "description": "Section of the credits page: the lyricists." },
+  "credits.artists": { "message": "Artists", "description": "Section of the credits page: the artists." },
+  "credits.narrators": { "message": "Narrators", "description": "Section of the credits page: the narrators." },
+  "credits.other": { "message": "Other Crew", "description": "Section of the credits page: the crew of other jobs." },
+  "credits.none": { "message": "No cast or crew is known.", "description": "Shown on the credits page when an item credits no one." }
 }

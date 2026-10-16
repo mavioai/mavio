@@ -3126,4 +3126,24 @@
     <string name="extra_short">Short</string>
     <!-- Kind of an extra without a more specific one. -->
     <string name="extra_other">Extra</string>
+    <!-- Link from the cast on an item's details to its whole cast and crew. -->
+    <string name="credits_all">See All</string>
+    <!-- Section of the credits page: the actors. -->
+    <string name="credits_cast">Cast</string>
+    <!-- Section of the credits page: the guest stars. -->
+    <string name="credits_guest_stars">Guest Stars</string>
+    <!-- Section of the credits page: the authors of the work an item adapts. -->
+    <string name="credits_authors">Authors</string>
+    <!-- Section of the credits page: the conductors. -->
+    <string name="credits_conductors">Conductors</string>
+    <!-- Section of the credits page: the lyricists. -->
+    <string name="credits_lyricists">Lyricists</string>
+    <!-- Section of the credits page: the artists. -->
+    <string name="credits_artists">Artists</string>
+    <!-- Section of the credits page: the narrators. -->
+    <string name="credits_narrators">Narrators</string>
+    <!-- Section of the credits page: the crew of other jobs. -->
+    <string name="credits_other">Other Crew</string>
+    <!-- Shown on the credits page when an item credits no one. -->
+    <string name="credits_none">No cast or crew is known.</string>
 </resources>

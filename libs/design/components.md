@@ -59,12 +59,16 @@ The top of an item's details screen.
 Below the header, in order:
 
 * **Episodes**: a series has its seasons as pills, starting with the season of the next episode, and that season's episodes in a row of episode cards, with See All opening the season; on television focus on a pill chooses it. A season lists its episodes as episode rows. An episode shows its season's other episodes in a row, scrolled to it.
-* **Cast and crew**: a shelf of person cards, the actors in billing order, then the creators, directors and writers.
+* **Cast and crew**: a shelf of person cards, the actors in billing order, then the creators, directors and writers, with See All opening the Credits Screen.
 * **Trailers and extras**: a shelf of thumbnail cards of the item's extras other than theme songs and videos, each with a play mark, its name and its kind and runtime, played on selection; an extra without a thumbnail wears the item's backdrop.
 * **Collection**: a movie in a collection has a banner of the collection's backdrop, else the movie's, darkened toward the left, with "Collection" over its name and View Collection at the right (radius 14 pt).
 * **Similar**: a shelf of posters of the server's items like it.
 * **Recommendations**: for a movie or series with a TMDB ID, the discovery providers' recommendations as a shelf of title cards, as on a discovered title.
 * **Details**: at the left the tagline, the whole overview, the keywords (the item's tags) as outlined pills and links to the external sites; at the right the ratings — the audience's out of 10 with a star and the critics' in percent, each large on `color.fill` — then the facts (release or air date, status, runtime, official rating, genres, creators, directors, writers, producers, music, studio, country, original title, date added) and below them the chosen version's video, audio, subtitles, file and size, each a caption (`typography.caption`, `color.textSecondary`) over its value. Genres, keywords and studios open the library's items of that value.
+
+## Credits Screen
+
+An item's whole cast and crew, opened from its details: a link back to the item over the title, then sections of person cards in grids — the actors in billing order, the guest stars, then the crew by job (creators, directors, writers, authors, producers, music, conductors, lyricists, artists, narrators, other crew), each card with the character played or the job's own title when known.
 
 ## Episode Card
 

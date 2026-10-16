@@ -27966,6 +27966,186 @@
           }
         }
       }
+    },
+    "credits.all": {
+      "comment": "Link from the cast on an item's details to its whole cast and crew.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看全部"
+          }
+        }
+      }
+    },
+    "credits.cast": {
+      "comment": "Section of the credits page: the actors.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cast"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "演员"
+          }
+        }
+      }
+    },
+    "credits.guestStars": {
+      "comment": "Section of the credits page: the guest stars.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guest Stars"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "客串演员"
+          }
+        }
+      }
+    },
+    "credits.authors": {
+      "comment": "Section of the credits page: the authors of the work an item adapts.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authors"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原著"
+          }
+        }
+      }
+    },
+    "credits.conductors": {
+      "comment": "Section of the credits page: the conductors.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conductors"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指挥"
+          }
+        }
+      }
+    },
+    "credits.lyricists": {
+      "comment": "Section of the credits page: the lyricists.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lyricists"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作词"
+          }
+        }
+      }
+    },
+    "credits.artists": {
+      "comment": "Section of the credits page: the artists.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Artists"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "艺术家"
+          }
+        }
+      }
+    },
+    "credits.narrators": {
+      "comment": "Section of the credits page: the narrators.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narrators"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旁白"
+          }
+        }
+      }
+    },
+    "credits.other": {
+      "comment": "Section of the credits page: the crew of other jobs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other Crew"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他职员"
+          }
+        }
+      }
+    },
+    "credits.none": {
+      "comment": "Shown on the credits page when an item credits no one.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cast or crew is known."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无演职人员信息。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

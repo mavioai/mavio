@@ -1536,7 +1536,17 @@ export type MessageKey =
   | 'extra.sample'
   | 'extra.featurette'
   | 'extra.short'
-  | 'extra.other';
+  | 'extra.other'
+  | 'credits.all'
+  | 'credits.cast'
+  | 'credits.guestStars'
+  | 'credits.authors'
+  | 'credits.conductors'
+  | 'credits.lyricists'
+  | 'credits.artists'
+  | 'credits.narrators'
+  | 'credits.other'
+  | 'credits.none';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -3065,7 +3075,17 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "extra.sample": "Sample",
     "extra.featurette": "Featurette",
     "extra.short": "Short",
-    "extra.other": "Extra"
+    "extra.other": "Extra",
+    "credits.all": "See All",
+    "credits.cast": "Cast",
+    "credits.guestStars": "Guest Stars",
+    "credits.authors": "Authors",
+    "credits.conductors": "Conductors",
+    "credits.lyricists": "Lyricists",
+    "credits.artists": "Artists",
+    "credits.narrators": "Narrators",
+    "credits.other": "Other Crew",
+    "credits.none": "No cast or crew is known."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -4592,6 +4612,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "extra.sample": "样片",
     "extra.featurette": "特辑",
     "extra.short": "短片",
-    "extra.other": "花絮"
+    "extra.other": "花絮",
+    "credits.all": "查看全部",
+    "credits.cast": "演员",
+    "credits.guestStars": "客串演员",
+    "credits.authors": "原著",
+    "credits.conductors": "指挥",
+    "credits.lyricists": "作词",
+    "credits.artists": "艺术家",
+    "credits.narrators": "旁白",
+    "credits.other": "其他职员",
+    "credits.none": "暂无演职人员信息。"
   }
 };

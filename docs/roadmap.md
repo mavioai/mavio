@@ -591,7 +591,7 @@ flowchart TD
 - [x] Server: an item's extras by `ListItems` with `owner_id` (`ItemQuery.OwnerID`), shown on its details with its trailer among the actions
 - [x] Web details as rich as Seerr's: extras, the collection's banner, the discovery providers' recommendations, ratings, keywords, more crew and genres, keywords and studios opening the library's items of them
   - [ ] Facts the metadata model does not keep yet: budget and revenue, original language, a series' networks apart from its studios, release dates by kind (theatrical, digital, physical), a series' next air date, and the streaming services in the user's region
-  - [ ] A page of the whole cast and crew, as Seerr's View Full Crew
+  - [x] A page of the whole cast and crew, as Seerr's View Full Crew, opened from the cast
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address
 - [x] Server: `ListItems` by external IDs (`ItemQuery.ExternalIDs`), by which clients find a title's versions on their other servers

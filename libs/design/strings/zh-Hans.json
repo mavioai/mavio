@@ -1533,5 +1533,15 @@
   "extra.sample": "样片",
   "extra.featurette": "特辑",
   "extra.short": "短片",
-  "extra.other": "花絮"
+  "extra.other": "花絮",
+  "credits.all": "查看全部",
+  "credits.cast": "演员",
+  "credits.guestStars": "客串演员",
+  "credits.authors": "原著",
+  "credits.conductors": "指挥",
+  "credits.lyricists": "作词",
+  "credits.artists": "艺术家",
+  "credits.narrators": "旁白",
+  "credits.other": "其他职员",
+  "credits.none": "暂无演职人员信息。"
 }
