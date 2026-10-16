@@ -187,6 +187,9 @@ importers:
       '@mavio/design':
         specifier: workspace:*
         version: link:../../libs/design
+      '@mavio/intent':
+        specifier: workspace:*
+        version: link:../../libs/intent
       '@mavio/proto':
         specifier: workspace:*
         version: link:../../libs/proto
@@ -355,6 +358,9 @@ importers:
         specifier: 5.104.1
         version: 5.104.1(react@19.3.0)
     devDependencies:
+      '@types/node':
+        specifier: 26.6.3
+        version: 26.6.3
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -367,6 +373,9 @@ importers:
       vitest:
         specifier: 5.0.3
         version: 5.0.3(@types/node@26.6.3)(vite@8.3.4(@types/node@26.6.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.0))
+      yaml:
+        specifier: 2.9.0
+        version: 2.9.0
 
   libs/design:
     devDependencies:

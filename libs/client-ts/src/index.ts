@@ -192,3 +192,18 @@ export {
 } from "./acquisition.ts";
 export { type ClockSample, clockSample, groupPositionAt, syncClock, useSyncPlayGroups } from "./syncplay.ts";
 export { useCurrentUser, useIssue, useIssueActions, useIssues } from "./issues.ts";
+export {
+  ask,
+  type Heard,
+  Sentences,
+  speakWithServer,
+  startListening,
+  useAssistant,
+  useAssistantActions,
+  useAssistantConversation,
+  useAssistantConversations,
+  useAssistantMemories,
+  useAssistantSettings,
+  useUpdateAssistantSettings,
+} from "./assistant.ts";
+export { Grammar, slotKeyword, slotLanguage, slotNumber, slotOf } from "./intent.ts";
