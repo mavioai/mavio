@@ -24,6 +24,7 @@ import {
   setupSteps,
   type SignInSearch,
   SignInScreen,
+  redirectOf,
   signInSteps,
 } from "./screens/sign-in.tsx";
 import { searchText } from "./search-params.ts";
@@ -38,6 +39,7 @@ const signIn = createRoute({
   path: "/sign-in",
   validateSearch: (s: Record<string, unknown>): SignInSearch => ({
     step: signInSteps.find((x) => x === s.step),
+    redirect: redirectOf(s.redirect),
   }),
   component: SignInScreen,
 });

@@ -167,7 +167,7 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
               aria-checked={filter === k}
               from="/s/$serverId/library/$libraryId"
               search={(s) => ({ ...s, filter: filterTo(k) })}
-              replace={tv}
+              replace
               data-active={filter === k}
               onFocus={() => tv && filter !== k && void navigate({ search: (s) => ({ ...s, filter: filterTo(k) }), replace: true })}
               className={
@@ -180,7 +180,8 @@ function AllItems({ server, libraryId }: { server: ServerEntry; libraryId: strin
             </Link>
           ))}
         </div>
-        <SortMenu sort={sort} onSort={(k) => void navigate({ search: (s) => ({ ...s, sort: k }), replace: tv })} />
+        {/* Filters and orders change the view, which Back leaves as a whole. */}
+        <SortMenu sort={sort} onSort={(k) => void navigate({ search: (s) => ({ ...s, sort: k }), replace: true })} />
         {total !== undefined && (
           <span className="ml-auto type-callout text-text-tertiary">{t("library.itemCount", { count: total })}</span>
         )}

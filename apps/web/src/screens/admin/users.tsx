@@ -150,7 +150,7 @@ function NewUser({ server }: { server: ServerEntry }) {
       managed ? { name: name.trim(), managed, restriction, ...(pin ? { pin } : {}) } : { name: name.trim(), password },
       {
         onSuccess: (u) =>
-          u && void navigate({ to: "/settings/$section", params: { section: "users" }, search: { server: cur.server, user: u.id } }),
+          u && void navigate({ replace: true, to: "/settings/$section", params: { section: "users" }, search: { server: cur.server, user: u.id } }),
       },
     );
   return (
@@ -395,7 +395,7 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             actions.remove.mutate(user.id, {
-              onSuccess: () => void navigate({ to: "/settings/$section", params: { section: "users" }, search: { server: cur.server } }),
+              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "users" }, search: { server: cur.server } }),
               onSettled: () => setConfirming(false),
             })
           }

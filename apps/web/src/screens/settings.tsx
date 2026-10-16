@@ -168,12 +168,12 @@ export function SettingsScreen() {
   const admins = useAdminServers();
   const groups = useGroups(chosen);
   // The servers moved to the account's page.
-  if (section === "servers") return <Navigate to="/settings/$section" params={{ section: "account" }} />;
-  if (section !== undefined && !isSection(section)) return <Navigate to="/settings" />;
+  if (section === "servers") return <Navigate to="/settings/$section" params={{ section: "account" }} replace />;
+  if (section !== undefined && !isSection(section)) return <Navigate to="/settings" replace />;
   // A server the user does not administer has no administration; wait
   // until the servers administered are known.
   if (section && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
-    return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} />;
+    return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} replace />;
   }
   // A phone and a television show the list of sections, then a section in
   // its place; the television without a sidebar (docs/tv.md §6.6).
@@ -185,9 +185,10 @@ export function SettingsScreen() {
     <div className="flex min-h-screen">
       <aside className="sticky top-0 h-screen shrink-0" style={{ width: sidebarWidth }}>
         <div className="flex h-full flex-col gap-4 overflow-y-auto border-r border-border bg-sidebar px-4 py-5">
+          {/* Home, as on a phone: the settings' own pages lie between. */}
           <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
             <Icon name="back" size={18} />
-            {t("action.back")}
+            {t("nav.home")}
           </Link>
           <h1 className="px-1 type-title1">{t("nav.settings")}</h1>
           <AccountCard active={id === "account"} />
@@ -241,11 +242,12 @@ function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; se
         value={chosen.server.id}
         label={t("settings.serverChoice")}
         options={signedIn.map((s) => ({ value: s.id, label: s.id === home?.id ? t("settings.thisServer", { name: s.name }) : s.name }))}
+        // Another server's settings take the place of these, as a choice of the page.
         onChange={(server) =>
           void navigate(
             section
-              ? { to: "/settings/$section", params: { section }, search: { server } }
-              : { to: "/settings", search: { server } },
+              ? { to: "/settings/$section", params: { section }, search: { server }, replace: true }
+              : { to: "/settings", search: { server }, replace: true },
           )
         }
       />

@@ -203,7 +203,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
     const p = patched(QualityProfileSchema, draft, { name: draft.name.trim() });
     if (isNew)
       profiles.create.mutate(p, {
-        onSuccess: (r) => void navigate({ to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "profile", id: r.profile?.id } }),
+        onSuccess: (r) => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "profile", id: r.profile?.id } }),
       });
     else profiles.update.mutate(p, done);
   };
@@ -306,7 +306,7 @@ function ProfileForm({ server, profile, titles }: { server: ServerEntry; profile
             onCancel={() => setRemoving(false)}
             onConfirm={() =>
               profiles.remove.mutate(profile.id, {
-                onSuccess: () => void navigate({ to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server } }),
+                onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server } }),
               })
             }
           />

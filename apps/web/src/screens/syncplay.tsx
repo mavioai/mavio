@@ -4,7 +4,7 @@
 import { errorMessage, groupPositionAt, type ServerEntry, useItem, useServersStore, useSyncPlayGroups } from "@mavio/client-ts";
 import type { Item } from "@mavio/proto/mavio/library/v1/item_pb";
 import { type SyncPlayGroup, SyncPlayService, SyncPlayState } from "@mavio/proto/mavio/session/v1/syncplay_pb";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { t } from "../i18n.ts";
@@ -44,7 +44,6 @@ function GroupState({ server, group }: { server: ServerEntry; group: SyncPlayGro
 export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry; item?: Item; onClose: () => void }) {
   const servers = useServersStore();
   const sp = useSyncPlay();
-  const navigate = useNavigate();
   const { pathname } = useLocation();
   const joined = sp?.joined;
   const groups = useSyncPlayGroups(server, !joined);
@@ -93,16 +92,16 @@ export function SyncPlayDialog({ server, item, onClose }: { server: ServerEntry;
             {t("syncplay.leave")}
           </Button>
           {watching && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                const start = Math.round(groupPositionAt(group, sp.serverNow()));
-                void navigate({ to: "/s/$serverId/play/$itemId", params: { serverId: at.id, itemId: entry.itemId }, search: { start: start || undefined } });
-                onClose();
-              }}
+            // A link, the group's position taken as it is followed.
+            <Link
+              to="/s/$serverId/play/$itemId"
+              params={{ serverId: at.id, itemId: entry.itemId }}
+              search={() => ({ start: Math.round(groupPositionAt(group, sp.serverNow())) || undefined })}
+              onClick={onClose}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-fill px-4 type-headline text-on-background transition hover:bg-fill-selected active:opacity-80"
             >
               {t("syncplay.watch")}
-            </Button>
+            </Link>
           )}
           {item && at.id === server.id ? (
             <Button

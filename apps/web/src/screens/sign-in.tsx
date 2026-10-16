@@ -21,7 +21,7 @@ import {
   useSignIn,
 } from "@mavio/client-ts";
 import { useQuery } from "@tanstack/react-query";
-import { getRouteApi, Link, Navigate, useCanGoBack, useNavigate } from "@tanstack/react-router";
+import { getRouteApi, Link, Navigate, useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 import type { IconName } from "../icon.tsx";
@@ -40,6 +40,17 @@ export const signInSteps = ["totp", "quick"] as const;
 /** The search of /sign-in. */
 export interface SignInSearch {
   step?: (typeof signInSteps)[number];
+  /** The page that sent the user to sign in, to open once signed in. */
+  redirect?: string;
+}
+
+/**
+ * A page of the web UI to go to after signing in: a path of its own, not
+ * another site's, nor signing in's again.
+ */
+export function redirectOf(v: unknown): string | undefined {
+  if (typeof v !== "string" || !v.startsWith("/") || v.startsWith("//") || v.startsWith("/\\")) return undefined;
+  return ["/sign-in", "/setup", "/auth/callback", "/invite"].some((p) => v === p || v.startsWith(`${p}?`)) ? undefined : v;
 }
 
 /** The steps of setting a new server up. */
@@ -199,13 +210,21 @@ function useHomeInfo() {
   });
 }
 
+/** Opens a page of the web UI in signing in's place. */
+function Redirect({ href }: { href: string }) {
+  const router = useRouter();
+  useEffect(() => router.history.replace(href), [router, href]);
+  return null;
+}
+
 /** Signing in (docs/accounts.md §6): the way the serving server signs people in, or app.mavio.dev's. */
 export function SignInScreen() {
   const servers = useServersStore();
   const signIn = useSignIn();
   const { tv } = usePrefs();
   const home = useHomeInfo();
-  if (signIn) return <Navigate to="/" replace />;
+  const { redirect } = signInRoute.useSearch();
+  if (signIn) return redirect ? <Redirect href={redirect} /> : <Navigate to="/" replace />;
   if (servers.app) {
     return tv ? (
       <Screen>
@@ -281,6 +300,7 @@ function MavioSignIn({ info }: { info?: ServerInfo }) {
   const servers = useServersStore();
   const look = useLook();
   const { busy, error, run } = useRun();
+  const { redirect } = signInRoute.useSearch();
   const app = useQuery({ queryKey: ["appUrl", info?.id], queryFn: () => servers.appUrl(), enabled: !!info, staleTime: Infinity });
   const phone = look.layout === "phone";
   return (
@@ -292,7 +312,7 @@ function MavioSignIn({ info }: { info?: ServerInfo }) {
         disabled={busy}
         onClick={() =>
           run(async () => {
-            window.location.href = await servers.startSignIn("/");
+            window.location.href = await servers.startSignIn(redirect ?? "/");
           })
         }
       >
@@ -430,7 +450,9 @@ function StandaloneSignIn({ info }: { info: ServerInfo }) {
   const [code, setCode] = useState("");
   const look = useLook();
   const first = step === undefined || (step === "totp" && !name);
-  const back = first ? undefined : () => (canGoBack ? history.back() : void navigate({ to: "/sign-in", replace: true }));
+  const back = first
+    ? undefined
+    : () => (canGoBack ? history.back() : void navigate({ to: "/sign-in", search: (s) => ({ redirect: s.redirect }), replace: true }));
   useBackKey(back);
   useEffect(() => setError(undefined), [step]);
 
@@ -441,7 +463,7 @@ function StandaloneSignIn({ info }: { info: ServerInfo }) {
       } catch (err) {
         if (!totp && isTotpRequired(err)) {
           setCode("");
-          void navigate({ to: "/sign-in", search: { step: "totp" } });
+          void navigate({ to: "/sign-in", search: (s) => ({ ...s, step: "totp" }) });
           return;
         }
         throw isUnauthenticated(err) ? new Error(t(totp ? "auth.wrongCode" : "auth.wrongPassword")) : err;
@@ -504,7 +526,7 @@ function StandaloneSignIn({ info }: { info: ServerInfo }) {
               {t("auth.passkey")}
             </Action>
           )}
-          <Action variant="secondary" icon="devices" onClick={() => void navigate({ to: "/sign-in", search: { step: "quick" } })}>
+          <Action variant="secondary" icon="devices" onClick={() => void navigate({ to: "/sign-in", search: (s) => ({ ...s, step: "quick" }) })}>
             {t("auth.quickConnect")}
           </Action>
         </div>

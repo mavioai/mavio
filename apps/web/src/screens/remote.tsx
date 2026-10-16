@@ -6,7 +6,7 @@ import { durationFromMs, durationMs } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useSendCommand, useSessions } from "@mavio/client-ts";
 import { type Item, ItemKind } from "@mavio/proto/mavio/library/v1/item_pb";
 import { PlayStateCommand, type Session } from "@mavio/proto/mavio/session/v1/session_pb";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { Slider } from "../controls/inputs.tsx";
@@ -36,6 +36,7 @@ interface Shown {
  */
 export function RemoteCommands() {
   const navigate = useNavigate();
+  const router = useRouter();
   const [message, setMessage] = useState<Shown>();
   useServerEvents((server, e) => {
     if (e.kind.case !== "command") return;
@@ -45,7 +46,13 @@ export function RemoteCommands() {
       const id = c.value.itemIds[c.value.startIndex] ?? c.value.itemIds[0];
       if (!id) return;
       const start = c.value.startPosition ? Math.round(durationMs(c.value.startPosition)) : undefined;
-      void navigate({ to: "/s/$serverId/play/$itemId", params: { serverId: server.id, itemId: id }, search: { start: start || undefined } });
+      // An item asked for while playing another takes its place.
+      void navigate({
+        to: "/s/$serverId/play/$itemId",
+        params: { serverId: server.id, itemId: id },
+        search: { start: start || undefined },
+        replace: router.state.location.pathname.includes("/play/"),
+      });
     } else if (c?.case === "message") {
       setMessage({ from: fromUserName, text: c.value.text, timeoutMs: c.value.timeout ? durationMs(c.value.timeout) : undefined });
     }

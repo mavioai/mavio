@@ -114,7 +114,7 @@ function NewConversation({ server, onStarted }: { server: ServerEntry; onStarted
       {
         onSuccess: (c) => {
           onStarted({ id: c.id, text: message });
-          void navigate({ to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server, id: c.id } });
+          void navigate({ replace: true, to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server, id: c.id } });
         },
       },
     );
@@ -232,7 +232,7 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             remove.mutate(id, {
-              onSuccess: () => void navigate({ to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server } }),
+              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "conversations" }, search: { server: cur.server } }),
             })
           }
         />

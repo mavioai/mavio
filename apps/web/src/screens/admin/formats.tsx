@@ -135,7 +135,7 @@ function FormatForm({ server, format }: { server: ServerEntry; format: CustomFor
     set({ specifications: draft.specifications.map((s, j) => (j === i ? patched(CustomFormatSpecSchema, s, patch) : s)) });
   const changed = JSON.stringify(draft) !== JSON.stringify(format);
   const complete = draft.specifications.every((s) => s.name.trim() && (ranged(s.kind) ? s.max > s.min : s.value.trim()));
-  const list = () => void navigate({ to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "formats" } });
+  const list = () => void navigate({ replace: true, to: "/settings/$section", params: { section: "acquisition" }, search: { server: cur.server, acquisition: "formats" } });
   const save = () => {
     const f = patched(CustomFormatSchema, draft, { name: draft.name.trim() });
     if (isNew) formats.create.mutate(f, { onSuccess: list });

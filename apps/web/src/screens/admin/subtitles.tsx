@@ -243,7 +243,7 @@ function ProfileForm({ server, profile, back }: { server: ServerEntry; profile: 
   const save = () =>
     isNew
       ? profiles.create.mutate(result, {
-          onSuccess: (r) => r.profile && navigate({ to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server, subtitles: "profile", id: r.profile.id } }),
+          onSuccess: (r) => r.profile && navigate({ replace: true, to: "/settings/$section", params: { section: "subtitles" }, search: { server: cur.server, subtitles: "profile", id: r.profile.id } }),
         })
       : profiles.update.mutate(result);
   const hiOptions = [

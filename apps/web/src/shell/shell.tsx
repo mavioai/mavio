@@ -38,7 +38,7 @@ export function Shell() {
 function Content() {
   const servers = useServersStore();
   const signIn = useSignIn();
-  const { pathname } = useLocation();
+  const { pathname, href } = useLocation();
   const prefs = usePrefs();
   const width = useWidthClass();
   useEvents(useEventHub().emit);
@@ -57,7 +57,8 @@ function Content() {
     if (account) servers.sync().catch(() => {});
   }, [servers, account]);
 
-  if (!signIn && !bare) return <Navigate to="/sign-in" />;
+  // Signing in replaces the page asked for, and opens it after.
+  if (!signIn && !bare) return <Navigate to="/sign-in" search={{ redirect: href === "/" ? undefined : href }} replace />;
   if (bare || pathname.includes("/play/")) return <Outlet />;
   if (pathname.startsWith("/settings")) return <Outlet />;
   if (prefs.tv) return <TvShell />;

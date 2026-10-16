@@ -250,7 +250,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
     if (!library) {
       actions.create.mutate(specOf(draft), {
         onSuccess: (l) =>
-          l && void navigate({ to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server, library: l.id } }),
+          l && void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server, library: l.id } }),
       });
       return;
     }
@@ -297,7 +297,7 @@ function LibraryForm({ server, library }: { server: ServerEntry; library?: Libra
           onCancel={() => setConfirming(false)}
           onConfirm={() =>
             actions.remove.mutate(library.id, {
-              onSuccess: () => void navigate({ to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server } }),
+              onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "libraries" }, search: { server: cur.server } }),
               onSettled: () => setConfirming(false),
             })
           }

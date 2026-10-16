@@ -402,7 +402,7 @@ function NewRemote({ server }: { server: ServerEntry }) {
   const taken = remotes.data?.some((r) => r.name === name.trim());
   const valid = /^[A-Za-z0-9_][A-Za-z0-9_.+@-]*$/.test(name.trim()) && !taken;
   const missing = provider ? shownOptions(provider.options, values, false).some((o) => o.required && !(values[o.name] ?? o.defaultValue)) : true;
-  const open = () => void navigate({ to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server, remote: name.trim() } });
+  const open = () => void navigate({ replace: true, to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server, remote: name.trim() } });
   const back = <BackLink section="storage" label={t("settings.storage")} />;
   if (question)
     return (
@@ -414,7 +414,7 @@ function NewRemote({ server }: { server: ServerEntry }) {
           onDone={open}
           onCancel={() =>
             actions.remove.mutate(name.trim(), {
-              onSettled: () => void navigate({ to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server } }),
+              onSettled: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server } }),
             })
           }
         />
@@ -711,7 +711,7 @@ function RemoveRemote({ server, name }: { server: ServerEntry; name: string }) {
         onCancel={() => setConfirming(false)}
         onConfirm={() =>
           actions.remove.mutate(name, {
-            onSuccess: () => void navigate({ to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server } }),
+            onSuccess: () => void navigate({ replace: true, to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server } }),
           })
         }
       />
