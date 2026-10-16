@@ -11,6 +11,7 @@ import { locale, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs } from "../prefs.ts";
 import { Grid, ItemCard, Loading, NotFoundView, StatusView } from "../ui.tsx";
+import { useEntryState } from "../shell/entry-state.ts";
 
 const route = getRouteApi("/s/$serverId/person/$personId");
 
@@ -62,7 +63,7 @@ function PersonPage({ server, personId }: { server: ServerEntry; personId: strin
 }
 
 function Header({ server, person: p }: { server: ServerEntry; person: Person }) {
-  const [more, setMore] = useState(false);
+  const [more, setMore] = useEntryState("biography", false);
   const { tv } = usePrefs();
   const photo = artwork(server, p, ImageKind.PRIMARY, 480);
   const born = p.birthDate && timestampDate(p.birthDate);

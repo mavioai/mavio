@@ -17,6 +17,7 @@ import { Segmented } from "../controls/inputs.tsx";
 import { sized, TitleCard } from "./discover.tsx";
 import { type ExternalLink, ExternalLinks } from "./discover-overview.tsx";
 import { initialsOf } from "./person.tsx";
+import { useEntryState } from "../shell/entry-state.ts";
 
 const route = getRouteApi("/s/$serverId/discover/person/$tmdbId");
 
@@ -55,7 +56,7 @@ function PersonPage({ server, person: p }: { server: ServerEntry; person: Person
   const kinds: Kinds = route.useSearch().kind ?? "all";
   const navigate = route.useNavigate();
   const setKinds = (k: Kinds) => void navigate({ search: { kind: k === "all" ? undefined : k }, replace: true, resetScroll: false });
-  const [more, setMore] = useState(false);
+  const [more, setMore] = useEntryState("biography", false);
   const of = (ts: PersonTitle[]) =>
     ts.filter((pt) => kinds === "all" || (pt.title?.mediaKind === MediaKind.SERIES) === (kinds === "series"));
   const facts = [

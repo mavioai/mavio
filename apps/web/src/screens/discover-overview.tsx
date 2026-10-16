@@ -31,6 +31,7 @@ import { minutesText } from "../ui.tsx";
 import { type CreditEntry, crewLabels, isCast, titleCredits } from "./credits.tsx";
 import { kindParam, sized } from "./discover.tsx";
 import { dayText, languageText, moneyText } from "./facts.tsx";
+import { useEntryState } from "../shell/entry-state.ts";
 
 const regions = new Intl.DisplayNames(locale, { type: "region" });
 
@@ -390,7 +391,7 @@ export const minStudios = 5;
 function Facts({ server, title }: { server: ServerEntry; title: Title }) {
   const series = title.mediaKind === MediaKind.SERIES;
   const alike = useAlike(server, title.mediaKind);
-  const [allStudios, setAllStudios] = useState(false);
+  const [allStudios, setAllStudios] = useEntryState("studios", false);
   const status = statusNames[title.productionStatus]?.();
   const releases = series
     ? []

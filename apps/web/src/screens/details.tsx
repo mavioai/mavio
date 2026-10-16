@@ -56,6 +56,7 @@ import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, NotFoundView, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
 import { Dismiss, Sheet } from "../controls/dialog.tsx";
+import { useEntryState } from "../shell/entry-state.ts";
 import { Tabs, ToggleButton } from "../controls/inputs.tsx";
 import { Tip } from "../controls/tooltip.tsx";
 import { Menu, MenuChoice, MenuLabel, MenuLink, MenuOption } from "../controls/menu.tsx";
@@ -457,6 +458,8 @@ function Overview({ item, inline = false, lines = 3 }: { item: Item; inline?: bo
   const ref = useRef<HTMLParagraphElement>(null);
   const [long, setLong] = useState(false);
   const [open, setOpen] = useState(false);
+  // Expanded inline, the overview stays so as the page is returned to.
+  const [unfolded, setUnfolded] = useEntryState("overview", false);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -466,7 +469,7 @@ function Overview({ item, inline = false, lines = 3 }: { item: Item; inline?: bo
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const expanded = inline && open;
+  const expanded = inline && unfolded;
   return (
     <div className={inline ? "" : "text-white/85"}>
       <p ref={ref} className={`type-body ${expanded ? "" : lines === 2 ? "line-clamp-2" : "line-clamp-3"}`}>
@@ -475,7 +478,7 @@ function Overview({ item, inline = false, lines = 3 }: { item: Item; inline?: bo
       {(long || expanded) && (
         <button
           type="button"
-          onClick={() => setOpen(!open)}
+          onClick={() => (inline ? setUnfolded(!unfolded) : setOpen(true))}
           className={`mt-1 type-callout font-semibold ${inline ? "text-accent-text" : "text-white hover:text-white/80"}`}
         >
           {expanded ? t("action.showLess") : t("item.more")}
