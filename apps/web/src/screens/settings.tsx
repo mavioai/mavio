@@ -5,7 +5,7 @@
 // devices signed in to it as the user and, for its administrators, its
 // overview, general settings, libraries, users, transcoding, storage,
 // acquisition, subtitles, plugins and tasks. Wide windows show them
-// beside their own sidebar; phones list them first, as the profile.
+// beside their own sidebar; phones list them first.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   errorMessage,
@@ -271,7 +271,7 @@ function AccountCard() {
   );
 }
 
-/** The phone's profile: the account, the users to switch to, the sections and signing out. */
+/** The phone's settings: the account, the users to switch to, the sections and signing out. */
 function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const servers = useServersStore();
   const account = useAccount();
@@ -284,7 +284,7 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
         <Icon name="back" size={18} />
         {t("nav.home")}
       </Link>
-      <h1 className="type-display">{t("nav.profile")}</h1>
+      <h1 className="type-display">{t("nav.settings")}</h1>
       <AccountCard />
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
       {groups.map((g) => (
@@ -356,7 +356,7 @@ function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefi
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
       <Link to="/settings" search={{ server: search.server }} className="inline-flex items-center gap-1 self-start type-body text-accent-text">
         <Icon name="back" size={18} />
-        {t("nav.profile")}
+        {t("nav.settings")}
       </Link>
       <SectionView id={id} chosen={chosen} />
     </div>
