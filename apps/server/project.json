@@ -1,15 +1,25 @@
 {
   "name": "server",
-  "implicitDependencies": ["web"],
+  "implicitDependencies": ["web", "intent"],
   "targets": {
     "build": {
-      "dependsOn": [{ "projects": ["web"], "target": "build" }],
+      "dependsOn": [
+        { "projects": ["web"], "target": "build" },
+        { "projects": ["intent"], "target": "wasm" }
+      ],
+      "inputs": ["go", "^go", { "dependentTasksOutputFiles": "**/*", "transitive": false }]
+    },
+    "test": {
+      "dependsOn": [{ "projects": ["intent"], "target": "wasm" }],
       "inputs": ["go", "^go", { "dependentTasksOutputFiles": "**/*", "transitive": false }]
     },
     "dist": {
       "executor": "nx:run-commands",
       "options": { "command": "sh scripts/dist.sh", "cwd": "{projectRoot}" },
-      "dependsOn": [{ "projects": ["web"], "target": "build" }],
+      "dependsOn": [
+        { "projects": ["web"], "target": "build" },
+        { "projects": ["intent"], "target": "wasm" }
+      ],
       "cache": false,
       "outputs": ["{projectRoot}/dist"]
     }

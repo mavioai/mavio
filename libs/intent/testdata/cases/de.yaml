@@ -13,8 +13,8 @@
 - {text: lauter, intent: volume, slots: {change: up}}
 - {text: Intro überspringen, intent: skip, slots: {segment: intro}}
 - {text: nächste Folge, intent: next}
-- {text: Was ist das?, intent: now_playing}
-- {text: Wie lange noch?, intent: time_left}
+- {text: "Was ist das?", intent: now_playing}
+- {text: "Wie lange noch?", intent: time_left}
 - {text: ja, confirmation: true, intent: "yes"}
 - {text: den zweiten, results: 3, intent: choose, slots: {choice: 2}}
 - {text: Straßen von San Francisco suchen, intent: null}

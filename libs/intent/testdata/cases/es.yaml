@@ -12,8 +12,8 @@
 - {text: sube el volumen, intent: volume, slots: {change: up}}
 - {text: Salta la intro, intent: skip, slots: {segment: intro}}
 - {text: siguiente episodio, intent: next}
-- {text: ¿Qué es esto?, intent: now_playing}
-- {text: ¿Cuánto falta?, intent: time_left}
+- {text: "¿Qué es esto?", intent: now_playing}
+- {text: "¿Cuánto falta?", intent: time_left}
 - {text: sí, confirmation: true, intent: "yes"}
 - {text: el segundo, results: 3, intent: choose, slots: {choice: 2}}
 - {text: busca películas de Almodóvar, intent: search, slots: {query: películas de Almodóvar}}

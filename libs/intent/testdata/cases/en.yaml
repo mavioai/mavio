@@ -24,8 +24,8 @@
 - {text: turn it up, intent: volume, slots: {change: up}}
 - {text: skip the intro, intent: skip, slots: {segment: intro}}
 - {text: next episode, intent: next}
-- {text: What's this?, intent: now_playing}
-- {text: Who's in this?, intent: cast}
+- {text: "What's this?", intent: now_playing}
+- {text: "Who's in this?", intent: cast}
 - {text: how much time is left, intent: time_left}
 - {text: when does this end, intent: end_time}
 - {text: mark as watched, intent: mark_played}

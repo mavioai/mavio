@@ -13,8 +13,8 @@
 - {text: plus fort, intent: volume, slots: {change: up}}
 - {text: Passe l'intro, intent: skip, slots: {segment: intro}}
 - {text: épisode suivant, intent: next}
-- {text: Qu'est-ce que c'est ?, intent: now_playing}
-- {text: Il reste combien de temps ?, intent: time_left}
+- {text: "Qu'est-ce que c'est ?", intent: now_playing}
+- {text: "Il reste combien de temps ?", intent: time_left}
 - {text: oui, confirmation: true, intent: "yes"}
 - {text: le deuxième, results: 3, intent: choose, slots: {choice: 2}}
 - {text: le 3e, results: 3, intent: choose, slots: {choice: 3}}
