@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,7 +20,8 @@ concurrency:
 
 jobs:
   # Finds what a change affects, so that the jobs of what it does not affect
-  # are skipped. A change to the CI or the toolchain affects every project.
+  # are skipped. A change to the CI or the toolchain affects every project,
+  # as does a run started by hand.
   plan:
     name: Plan
     runs-on: ubuntu-latest
@@ -37,7 +39,7 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
       - id: affected
         run: |
-          if git diff --quiet "$NX_BASE" "$NX_HEAD" -- .github mise.toml; then
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ] && git diff --quiet "$NX_BASE" "$NX_HEAD" -- .github mise.toml; then
             all=false affected=--affected
           else
             all=true affected=

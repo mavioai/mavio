@@ -200,7 +200,7 @@ go build -o plugin .                                                     # 子�
 
 ## 6. 持续集成
 
-`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行。**plan** 找出改动影响的范围后，所有任务同时开始，改动未影响其项目的任务被跳过；对 `.github` 或 `mise.toml` 的改动影响所有项目：
+`.github/workflows/ci.yml` 在推送到 `main` 和提交 PR 时运行，也可在 Actions 页面手动运行。**plan** 找出改动影响的范围后，所有任务同时开始，改动未影响其项目的任务被跳过；对 `.github` 或 `mise.toml` 的改动影响所有项目，手动运行同样如此：
 * **plan**（Linux）：列出受影响的 Apple 与 Android 项目，并判断服务端或构成它的库是否受影响。
 * **check**（Linux）：`nx affected -t buf-lint lint tidy-check typecheck build test`；重新生成代码，有任何差异即失败；PR 上对照目标分支运行 `buf breaking`。
 * **test**：在 linux arm64、macOS、Windows 上运行 `nx run-many -t typecheck test build`；PR 上改为运行 `nx affected`。

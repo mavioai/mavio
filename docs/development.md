@@ -200,7 +200,7 @@ The server runs on Linux, macOS and Windows, and CI tests on all three (§6), so
 
 ## 6. Continuous Integration
 
-`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests. Every job starts once **plan** has found what the change affects, and a job whose projects it does not affect is skipped; a change to `.github` or `mise.toml` affects every project:
+`.github/workflows/ci.yml` runs on pushes to `main` and on pull requests, and by hand from the Actions tab. Every job starts once **plan** has found what the change affects, and a job whose projects it does not affect is skipped; a change to `.github` or `mise.toml` affects every project, as does a run started by hand:
 * **plan** (Linux): lists the affected Apple and Android projects, and whether the server or a library it is built from is affected.
 * **check** (Linux): `nx affected -t buf-lint lint tidy-check typecheck build test`; regenerates code and fails on any diff; runs `buf breaking` against the base branch on pull requests.
 * **test**: `nx run-many -t typecheck test build` on linux arm64, macOS and Windows; pull requests run `nx affected` instead.
