@@ -178,8 +178,9 @@ function shake(el: HTMLElement) {
 }
 
 /** Moves focus with the arrow keys; Back is the shell's (back.ts). */
-export function useSpatialNavigation() {
+export function useSpatialNavigation(on = true) {
   useEffect(() => {
+    if (!on) return;
     const key = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
@@ -187,6 +188,8 @@ export function useSpatialNavigation() {
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
       // The caret of a field moves sideways.
       if (typing && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+      // The player seeks with the arrows while none of its controls has focus.
+      if ((!active || active === document.body) && document.querySelector("[data-tv-player]")) return;
       // An open dialog, menu or list of options keeps focus within itself;
       // the keys a menu or list moves through its items with never reach here.
       const scope = document.querySelector<HTMLElement>("[aria-modal]") ?? document.querySelector<HTMLElement>("[role=menu], [role=listbox]");
@@ -207,5 +210,5 @@ export function useSpatialNavigation() {
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, []);
+  }, [on]);
 }

@@ -6,8 +6,6 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
-import { useTvBack } from "./back.ts";
-import { useSpatialNavigation } from "./spatial.ts";
 import { UserButton } from "./user-menu.tsx";
 
 const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; label: () => string }[] = [
@@ -18,8 +16,6 @@ const allTabs: { to: "/" | "/libraries" | "/discover" | "/search"; label: () => 
 ];
 
 export function TvShell() {
-  useSpatialNavigation();
-  useTvBack();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   // Discover is a tab where a server discovers.

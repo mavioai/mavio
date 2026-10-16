@@ -26,11 +26,12 @@
 
 ## 4. Focus
 
+* **Always present**: every page but the player always has one element with focus, and shows which: a page opens with focus on its first element, unless it names another, and focus that cannot return where it was goes to the element nearest it. The player alone may have none (§7).
 * **Moving**: the D-pad moves focus by rows; elements are in one row when they overlap vertically by at least half the smaller one's height. Up and down move to the previous or next row, to its element nearest the focused one horizontally, preferring those in view. Left and right move along the row; past its first element, left moves to the rightmost element in view of the previous row, and past its last, right moves to the leftmost in view of the next. Above the first row are the tabs, focus going to the current one; below the last row nothing. Regions side by side, such as Search's keyboard and results, have rows of their own, and left and right cross between them at their edges. A choice that focus makes, such as a library's Recommended and All or its filters, is entered at its current element, wherever focus comes from. Where focus cannot move, the focused element shakes sideways for 320 ms.
 * **Scrolling**: the page scrolls to keep the focused element in view, stopping 200 pt below the top, so that its row's title shows under the bar, and 120 pt above the bottom, with room for a card to grow, so that the last row reaches the page's end. A row scrolls sideways to keep its focused card in view.
 * **Cards**: a focused card scales by `layout.focusScale` (1.05) and its artwork gets a 3 pt `color.accent` border 1.5 pt apart from it and a shadow of `color.tvFocusShadow` with an offset of 12 pt and a blur of 32 pt, over `duration.fast` with `easing.standard`. The other cards of a row are at 75 % opacity. Rows leave room above and below for a card to grow.
 * **Buttons and tabs**: a focused button or tab turns white with black content. White belongs to focus alone: a button that is white elsewhere, such as Play over the artwork, is glass like the others until it has focus. A text field with focus gets a white ring of 3 pt.
-* **Back**: it always goes up a level, never simply back through the browser's history. An open menu or dialog closes, and focus returns to what opened it. On a tab's page, back moves focus from the page to its tab and returns the page to its top, with every row scrolled back to its start; from a tab, it moves to Home's. Any deeper page — a title's details, a library, Search — returns to where it was opened from, as it was left: the page at the same position, the row scrolled as it was, and focus on the card that opened it. A page opened directly returns to its parent: a library to Libraries, a discovered title or a catalog to Discover, anything else to Home. Opening a tab by focusing it replaces the page rather than adding to the history, so that back never steps through the tabs.
+* **Back**: it always goes up a level, never simply back through the browser's history. An open menu or dialog closes, and focus returns to what opened it. On a tab's page, back moves focus from the page to its tab and returns the page to its top, with every row scrolled back to its start; from a tab, it moves to Home's. Any deeper page — a title's details, a library, Search — returns to where it was opened from, as it was left: the page at the same position, the row scrolled as it was, and focus on the card that opened it. A page opened directly returns to its parent: a title's cast or crew to the title, a section of the settings to their list, a library to Libraries, a discovered title, a catalog or the requests to Discover, anything else to Home. Pages show no link back, which the remote's back takes the place of. Opening a tab by focusing it replaces the page rather than adding to the history, so that back never steps through the tabs.
 
 ## 5. Menus
 
@@ -61,9 +62,15 @@ A catalog of Discover is a grid alike, under its name, with focus starting on it
 ### 6.5 Signing In
 A television signs a Mavio account in with a code to enter at mavio.dev/link; a new server's setup shows the server's address to open on a computer or phone ([Accounts §6](accounts.md#6-signing-in)).
 
+### 6.6 Settings
+The settings show the list of their sections — the account, the users to switch to, the sections by group — and a section in its place when selected, with no sidebar. Back returns from a section to the list, with focus on the section's entry, and from the list to the page the settings were opened from.
+
 ## 7. Player
 
 The on-screen controller follows the platform's focus and stays up while it has focus. The track and subtitle pickers open as a side panel.
+
+* **Focus**: while the controller is hidden nothing has focus, and left and right seek by 10 seconds; up, down and select show it with focus on Play. Left and right then move focus among the controls, and the controller hides as usual once nothing is pressed for 3 seconds during playback, taking focus with it. The side panel opens with focus on its current choice, and closing it returns focus to the button that opened it.
+* **Back**: back closes the side panel, then hides the controller, then leaves the player for where it was opened from, else the item's details.
 
 ## 8. Platforms
 

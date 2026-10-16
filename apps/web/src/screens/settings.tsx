@@ -175,7 +175,9 @@ export function SettingsScreen() {
   if (section && sections[section].admin && chosen && !chosen.admin && admins.length > 0) {
     return <Navigate to="/settings/$section" params={{ section: "devices" }} search={{ server: search.server }} />;
   }
-  if (width === "compact" && !prefs.tv) {
+  // A phone and a television show the list of sections, then a section in
+  // its place; the television without a sidebar (docs/tv.md §6.6).
+  if (width === "compact" || prefs.tv) {
     return section ? <CompactSection id={section} chosen={chosen} /> : <ProfileList groups={groups} />;
   }
   const id = section ?? "appearance";
@@ -296,6 +298,7 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const shown = account.shown;
   const chosen = useChosen();
   const search = useSearch({ strict: false }) as SettingsSearch;
+  const tv = usePrefs().tv;
   useLayoutEffect(() => {
     if (!listScroll.returning) return;
     listScroll.returning = false;
@@ -308,11 +311,14 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
     restore();
   }, []);
   return (
-    <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
-      <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
-        <Icon name="back" size={18} />
-        {t("nav.home")}
-      </Link>
+    <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
+      {/* The remote's Back leaves the settings on the television. */}
+      {!tv && (
+        <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
+          <Icon name="back" size={18} />
+          {t("nav.home")}
+        </Link>
+      )}
       <h1 className="type-display">{t("nav.settings")}</h1>
       <AccountCard />
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
@@ -385,21 +391,27 @@ function Members({ server }: { server: ServerEntry }) {
   );
 }
 
-/** A section on a phone, below a link back to the list. */
+/**
+ * A section on a phone, below a link back to the list; on a television,
+ * whose Back returns to the list, alone.
+ */
 function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefined }) {
   const search = useSearch({ strict: false }) as SettingsSearch;
+  const tv = usePrefs().tv;
   return (
-    <div className="mx-auto flex max-w-xl flex-col gap-4 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
-      <Link
-        to="/settings"
-        search={{ server: search.server }}
-        resetScroll={false}
-        onClick={() => (listScroll.returning = true)}
-        className="inline-flex items-center gap-1 self-start type-body text-accent-text"
-      >
-        <Icon name="back" size={18} />
-        {t("nav.settings")}
-      </Link>
+    <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
+      {!tv && (
+        <Link
+          to="/settings"
+          search={{ server: search.server }}
+          resetScroll={false}
+          onClick={() => (listScroll.returning = true)}
+          className="inline-flex items-center gap-1 self-start type-body text-accent-text"
+        >
+          <Icon name="back" size={18} />
+          {t("nav.settings")}
+        </Link>
+      )}
       <SectionView id={id} chosen={chosen} />
     </div>
   );

@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
+import { usePrefs } from "../prefs.ts";
 import { Loading, Shelf, StatusView } from "../ui.tsx";
 import { initialsOf } from "./person.tsx";
 
@@ -192,10 +193,12 @@ const backClass = "inline-flex items-center gap-1 type-callout text-text-seconda
 
 function CreditsPage({ serverId, title, credits, back }: { serverId: string; title?: string; credits: CreditEntry[]; back: ReactNode }) {
   const of = (kind: CreditKind) => credits.filter((c) => c.kind === kind).toSorted((a, b) => a.order - b.order);
+  const tv = usePrefs().tv;
   return (
     <div className="pb-10">
       <div className="px-margin pt-6 pb-2">
-        {back}
+        {/* The remote's Back returns to the title on the television. */}
+        {!tv && back}
         <h1 className="mt-1 type-title1">{title ?? t("item.cast")}</h1>
       </div>
       {credits.length === 0 && <p className="px-margin pt-6 type-body text-text-secondary">{t("credits.none")}</p>}

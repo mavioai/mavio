@@ -19,6 +19,8 @@ import { RemoteCommands } from "../screens/remote.tsx";
 import { GroupIndicator } from "../screens/syncplay.tsx";
 import { SyncPlayProvider } from "../syncplay.tsx";
 import { SidebarPanel, SidebarResizer, sidebarWidth } from "./sidebar.tsx";
+import { useTvBack } from "./back.ts";
+import { useSpatialNavigation } from "./spatial.ts";
 import { TvShell } from "./tv.tsx";
 import { useAccount } from "./user-menu.tsx";
 
@@ -40,6 +42,12 @@ function Content() {
   const width = useWidthClass();
   useEvents(useEventHub().emit);
   useShortcuts(prefs.tv);
+  const bare = ["/sign-in", "/setup", "/auth/callback", "/invite"].includes(pathname);
+  // On the television, focus moves with the arrows on every page, and Back
+  // goes up a level on every page but signing in's, the settings' and the
+  // player's included.
+  useSpatialNavigation(prefs.tv);
+  useTvBack(prefs.tv && !bare);
 
   // A Mavio account follows the servers it reaches, as it opens.
   const account = signIn?.account?.id;
@@ -47,7 +55,6 @@ function Content() {
     if (account) servers.sync().catch(() => {});
   }, [servers, account]);
 
-  const bare = ["/sign-in", "/setup", "/auth/callback", "/invite"].includes(pathname);
   if (!signIn && !bare) return <Navigate to="/sign-in" />;
   if (bare || pathname.includes("/play/")) return <Outlet />;
   if (pathname.startsWith("/settings")) return <Outlet />;

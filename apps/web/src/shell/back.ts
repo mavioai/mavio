@@ -15,7 +15,13 @@ const tabPages = ["/", "/libraries", "/discover"];
 const popups = "[aria-modal=true], [role=alertdialog], [role=menu], [role=listbox]";
 
 /** Where Back goes from a page opened directly, with nowhere to return to. */
-function parentOf(pathname: string): string {
+export function parentOf(pathname: string): string {
+  // A title's cast and crew, to the title.
+  const credits = /^(.*\/(?:item|title\/[^/]+)\/[^/]+)\/(?:credits|crew)$/.exec(pathname);
+  if (credits) return credits[1];
+  // A section of the settings, to their list.
+  if (pathname.startsWith("/settings/")) return "/settings";
+  if (pathname.endsWith("/requests")) return "/discover";
   if (pathname.includes("/library/")) return "/libraries";
   if (pathname.includes("/title/") || pathname.includes("/discover/")) return "/discover";
   return "/";
@@ -53,14 +59,23 @@ function refocus(el: HTMLElement) {
   else if (r.right > box.right - pad) row.scrollLeft += r.right - (box.right - pad);
 }
 
-/** Goes up a level on Escape, and on Backspace outside a field. */
-export function useTvBack() {
+/**
+ * Where focus was on each page when it was left, by its history entry:
+ * kept apart from the shell, which the settings and the player leave.
+ */
+const spots = new Map<string, Spot>();
+
+/**
+ * Goes up a level on Escape, and on Backspace outside a field, while on;
+ * the player goes back by itself (docs/tv.md §7).
+ */
+export function useTvBack(on = true) {
   const router = useRouter();
 
   // Each page keeps where focus was when it was left, and gets it back on
   // return; the router restores its scroll.
   useEffect(() => {
-    const spots = new Map<string, Spot>();
+    if (!on) return;
     const offBefore = router.subscribe("onBeforeNavigate", ({ fromLocation }) => {
       const spot = fromLocation && spotOf(document.activeElement);
       if (fromLocation && spot) spots.set(keyOf(fromLocation), spot);
@@ -81,11 +96,13 @@ export function useTvBack() {
       offBefore();
       offRendered();
     };
-  }, [router]);
+  }, [router, on]);
 
   useEffect(() => {
+    if (!on) return;
     const key = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (router.state.location.pathname.includes("/play/")) return;
       const typing = document.activeElement?.matches("input, textarea, select") ?? false;
       if (e.key !== "Escape" && (e.key !== "Backspace" || typing)) return;
       // An open popup closes on Escape by itself; Back is its Escape too.
@@ -118,5 +135,5 @@ export function useTvBack() {
     };
     document.addEventListener("keydown", key);
     return () => document.removeEventListener("keydown", key);
-  }, [router]);
+  }, [router, on]);
 }
