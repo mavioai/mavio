@@ -3761,6 +3761,34 @@ pub struct Title {
     ///
     /// Field 37: `collection_name`
     pub collection_name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Where it is in its making and run.
+    ///
+    /// Field 38: `production_status`
+    pub production_status: ::core::option::Option<
+        ::buffa::EnumValue<super::super::plugin::v1::ProductionStatus>,
+    >,
+    /// A movie's release in cinemas in rating_country, else the earliest
+    /// anywhere, as an ISO 8601 calendar date.
+    ///
+    /// Field 39: `theatrical_release_date`
+    pub theatrical_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The countries it was produced in, as ISO 3166-1 alpha-2 codes.
+    ///
+    /// Field 40: `production_countries`
+    pub production_countries: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// Its genres, keywords and studios (a series' networks) by the discovery
+    /// providers' IDs, by which a catalog filters titles alike.
+    ///
+    /// Field 41: `genre_refs`
+    pub genre_refs: ::buffa::alloc::vec::Vec<super::super::plugin::v1::Reference>,
+    /// Field 42: `keyword_refs`
+    pub keyword_refs: ::buffa::alloc::vec::Vec<super::super::plugin::v1::Reference>,
+    /// Field 43: `studio_refs`
+    pub studio_refs: ::buffa::alloc::vec::Vec<super::super::plugin::v1::Reference>,
+    /// The number of votes its community rating counts.
+    ///
+    /// Field 44: `vote_count`
+    pub vote_count: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3804,6 +3832,13 @@ impl ::core::fmt::Debug for Title {
             .field("credits", &self.credits)
             .field("trailer_urls", &self.trailer_urls)
             .field("collection_name", &self.collection_name)
+            .field("production_status", &self.production_status)
+            .field("theatrical_release_date", &self.theatrical_release_date)
+            .field("production_countries", &self.production_countries)
+            .field("genre_refs", &self.genre_refs)
+            .field("keyword_refs", &self.keyword_refs)
+            .field("studio_refs", &self.studio_refs)
+            .field("vote_count", &self.vote_count)
             .finish()
     }
 }
@@ -4058,6 +4093,33 @@ impl Title {
         self.collection_name = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::production_status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_production_status(
+        mut self,
+        value: impl Into<::buffa::EnumValue<super::super::plugin::v1::ProductionStatus>>,
+    ) -> Self {
+        self.production_status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::theatrical_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_theatrical_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.theatrical_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::vote_count`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_vote_count(mut self, value: i32) -> Self {
+        self.vote_count = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Title);
 impl ::buffa::MessageName for Title {
@@ -4213,6 +4275,42 @@ impl ::buffa::Message for Title {
         if let Some(ref v) = self.collection_name {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.production_status {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.theatrical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.production_countries {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.genre_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.keyword_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.studio_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(v) = self.vote_count {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4355,6 +4453,42 @@ impl ::buffa::Message for Title {
         }
         if let Some(ref v) = self.collection_name {
             ::buffa::types::put_string_field(37u32, v, buf);
+        }
+        if let Some(ref v) = self.production_status {
+            ::buffa::types::put_int32_field(38u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.theatrical_release_date {
+            ::buffa::types::put_string_field(39u32, v, buf);
+        }
+        for v in &self.production_countries {
+            ::buffa::types::put_string_field(40u32, v, buf);
+        }
+        for v in &self.genre_refs {
+            ::buffa::types::put_len_delimited_header(
+                41u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.keyword_refs {
+            ::buffa::types::put_len_delimited_header(
+                42u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.studio_refs {
+            ::buffa::types::put_len_delimited_header(
+                43u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.vote_count {
+            ::buffa::types::put_int32_field(44u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -4768,6 +4902,83 @@ impl ::buffa::Message for Title {
                     buf,
                 )?;
             }
+            38u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.production_status = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            39u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .theatrical_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            40u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.production_countries.push(__elem);
+            }
+            41u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.genre_refs.push(elem);
+            }
+            42u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.keyword_refs.push(elem);
+            }
+            43u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.studio_refs.push(elem);
+            }
+            44u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.vote_count = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4813,6 +5024,13 @@ impl ::buffa::Message for Title {
         self.credits.clear();
         self.trailer_urls.clear();
         self.collection_name = ::core::option::Option::None;
+        self.production_status = ::core::option::Option::None;
+        self.theatrical_release_date = ::core::option::Option::None;
+        self.production_countries.clear();
+        self.genre_refs.clear();
+        self.keyword_refs.clear();
+        self.studio_refs.clear();
+        self.vote_count = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -4845,6 +5063,13 @@ pub struct TitleCredit {
     ///
     /// Field 5: `image_url`
     pub image_url: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Such as "tmdb", by which their page is looked up.
+    ///
+    /// Field 6: `external_ids`
+    pub external_ids: ::buffa::__private::HashMap<
+        ::buffa::alloc::string::String,
+        ::buffa::alloc::string::String,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -4856,6 +5081,7 @@ impl ::core::fmt::Debug for TitleCredit {
             .field("role", &self.role)
             .field("order", &self.order)
             .field("image_url", &self.image_url)
+            .field("external_ids", &self.external_ids)
             .finish()
     }
 }
@@ -4950,6 +5176,12 @@ impl ::buffa::Message for TitleCredit {
         if let Some(ref v) = self.image_url {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        size
+            += ::buffa::map_codec::field_len::<
+                ::buffa::map_codec::Str,
+                ::buffa::map_codec::Str,
+                _,
+            >(&self.external_ids, 1u64);
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4975,6 +5207,11 @@ impl ::buffa::Message for TitleCredit {
         if let Some(ref v) = self.image_url {
             ::buffa::types::put_string_field(5u32, v, buf);
         }
+        ::buffa::map_codec::write_field::<
+            ::buffa::map_codec::Str,
+            ::buffa::map_codec::Str,
+            _,
+        >(&self.external_ids, 6u32, buf);
         self.__buffa_unknown_fields.write_to(buf);
     }
     fn merge_field(
@@ -5038,6 +5275,17 @@ impl ::buffa::Message for TitleCredit {
                     buf,
                 )?;
             }
+            6u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::map_codec::merge_entry::<
+                    ::buffa::map_codec::Str,
+                    ::buffa::map_codec::Str,
+                    _,
+                >(&mut self.external_ids, buf, ctx)?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -5051,6 +5299,7 @@ impl ::buffa::Message for TitleCredit {
         self.role = ::core::option::Option::None;
         self.order = ::core::option::Option::None;
         self.image_url = ::core::option::Option::None;
+        self.external_ids.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

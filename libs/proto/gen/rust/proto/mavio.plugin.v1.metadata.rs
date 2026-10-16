@@ -248,6 +248,146 @@ impl ::buffa::Enumeration for SeriesStatus {
         ]
     }
 }
+/// ProductionStatus is where a title is in its making and run, as TMDB
+/// tells it.
+#[allow(non_camel_case_types)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[repr(i32)]
+pub enum ProductionStatus {
+    PRODUCTION_STATUS_UNSPECIFIED = 0i32,
+    PRODUCTION_STATUS_RUMORED = 1i32,
+    PRODUCTION_STATUS_PLANNED = 2i32,
+    PRODUCTION_STATUS_IN_PRODUCTION = 3i32,
+    PRODUCTION_STATUS_POST_PRODUCTION = 4i32,
+    PRODUCTION_STATUS_RELEASED = 5i32,
+    PRODUCTION_STATUS_CANCELED = 6i32,
+    /// For series.
+    PRODUCTION_STATUS_PILOT = 7i32,
+    PRODUCTION_STATUS_RETURNING = 8i32,
+    PRODUCTION_STATUS_ENDED = 9i32,
+}
+impl ProductionStatus {
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_UNSPECIFIED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Unspecified: Self = Self::PRODUCTION_STATUS_UNSPECIFIED;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_RUMORED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Rumored: Self = Self::PRODUCTION_STATUS_RUMORED;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_PLANNED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Planned: Self = Self::PRODUCTION_STATUS_PLANNED;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_IN_PRODUCTION`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const InProduction: Self = Self::PRODUCTION_STATUS_IN_PRODUCTION;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_POST_PRODUCTION`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const PostProduction: Self = Self::PRODUCTION_STATUS_POST_PRODUCTION;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_RELEASED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Released: Self = Self::PRODUCTION_STATUS_RELEASED;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_CANCELED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Canceled: Self = Self::PRODUCTION_STATUS_CANCELED;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_PILOT`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Pilot: Self = Self::PRODUCTION_STATUS_PILOT;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_RETURNING`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Returning: Self = Self::PRODUCTION_STATUS_RETURNING;
+    ///Idiomatic alias for [`Self::PRODUCTION_STATUS_ENDED`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const Ended: Self = Self::PRODUCTION_STATUS_ENDED;
+}
+impl ::core::default::Default for ProductionStatus {
+    fn default() -> Self {
+        Self::PRODUCTION_STATUS_UNSPECIFIED
+    }
+}
+impl ::buffa::Enumeration for ProductionStatus {
+    fn from_i32(value: i32) -> ::core::option::Option<Self> {
+        match value {
+            0i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_UNSPECIFIED),
+            1i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_RUMORED),
+            2i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_PLANNED),
+            3i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_IN_PRODUCTION),
+            4i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_POST_PRODUCTION),
+            5i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_RELEASED),
+            6i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_CANCELED),
+            7i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_PILOT),
+            8i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_RETURNING),
+            9i32 => ::core::option::Option::Some(Self::PRODUCTION_STATUS_ENDED),
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn to_i32(&self) -> i32 {
+        *self as i32
+    }
+    fn proto_name(&self) -> &'static str {
+        match self {
+            Self::PRODUCTION_STATUS_UNSPECIFIED => "PRODUCTION_STATUS_UNSPECIFIED",
+            Self::PRODUCTION_STATUS_RUMORED => "PRODUCTION_STATUS_RUMORED",
+            Self::PRODUCTION_STATUS_PLANNED => "PRODUCTION_STATUS_PLANNED",
+            Self::PRODUCTION_STATUS_IN_PRODUCTION => "PRODUCTION_STATUS_IN_PRODUCTION",
+            Self::PRODUCTION_STATUS_POST_PRODUCTION => {
+                "PRODUCTION_STATUS_POST_PRODUCTION"
+            }
+            Self::PRODUCTION_STATUS_RELEASED => "PRODUCTION_STATUS_RELEASED",
+            Self::PRODUCTION_STATUS_CANCELED => "PRODUCTION_STATUS_CANCELED",
+            Self::PRODUCTION_STATUS_PILOT => "PRODUCTION_STATUS_PILOT",
+            Self::PRODUCTION_STATUS_RETURNING => "PRODUCTION_STATUS_RETURNING",
+            Self::PRODUCTION_STATUS_ENDED => "PRODUCTION_STATUS_ENDED",
+        }
+    }
+    fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
+        match name {
+            "PRODUCTION_STATUS_UNSPECIFIED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_UNSPECIFIED)
+            }
+            "PRODUCTION_STATUS_RUMORED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_RUMORED)
+            }
+            "PRODUCTION_STATUS_PLANNED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_PLANNED)
+            }
+            "PRODUCTION_STATUS_IN_PRODUCTION" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_IN_PRODUCTION)
+            }
+            "PRODUCTION_STATUS_POST_PRODUCTION" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_POST_PRODUCTION)
+            }
+            "PRODUCTION_STATUS_RELEASED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_RELEASED)
+            }
+            "PRODUCTION_STATUS_CANCELED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_CANCELED)
+            }
+            "PRODUCTION_STATUS_PILOT" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_PILOT)
+            }
+            "PRODUCTION_STATUS_RETURNING" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_RETURNING)
+            }
+            "PRODUCTION_STATUS_ENDED" => {
+                ::core::option::Option::Some(Self::PRODUCTION_STATUS_ENDED)
+            }
+            _ => ::core::option::Option::None,
+        }
+    }
+    fn values() -> &'static [Self] {
+        &[
+            Self::PRODUCTION_STATUS_UNSPECIFIED,
+            Self::PRODUCTION_STATUS_RUMORED,
+            Self::PRODUCTION_STATUS_PLANNED,
+            Self::PRODUCTION_STATUS_IN_PRODUCTION,
+            Self::PRODUCTION_STATUS_POST_PRODUCTION,
+            Self::PRODUCTION_STATUS_RELEASED,
+            Self::PRODUCTION_STATUS_CANCELED,
+            Self::PRODUCTION_STATUS_PILOT,
+            Self::PRODUCTION_STATUS_RETURNING,
+            Self::PRODUCTION_STATUS_ENDED,
+        ]
+    }
+}
 #[allow(non_camel_case_types)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
@@ -591,6 +731,12 @@ pub struct Lookup {
     ///
     /// Field 13: `episode_number_end`
     pub episode_number_end: ::core::option::Option<i32>,
+    /// For movies and series looked up for a title's page: the whole crew,
+    /// as Seerr's View Full Crew lists it, each job of it credited; else only
+    /// the directors, writers and producers libraries keep.
+    ///
+    /// Field 14: `all_credits`
+    pub all_credits: ::core::option::Option<bool>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -610,6 +756,7 @@ impl ::core::fmt::Debug for Lookup {
             .field("country", &self.country)
             .field("display_order", &self.display_order)
             .field("episode_number_end", &self.episode_number_end)
+            .field("all_credits", &self.all_credits)
             .finish()
     }
 }
@@ -706,6 +853,13 @@ impl Lookup {
         self.episode_number_end = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::all_credits`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_all_credits(mut self, value: bool) -> Self {
+        self.all_credits = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Lookup);
 impl ::buffa::MessageName for Lookup {
@@ -772,6 +926,9 @@ impl ::buffa::Message for Lookup {
         if let Some(v) = self.episode_number_end {
             size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
         }
+        if self.all_credits.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -824,6 +981,9 @@ impl ::buffa::Message for Lookup {
         }
         if let Some(v) = self.episode_number_end {
             ::buffa::types::put_int32_field(13u32, v, buf);
+        }
+        if let Some(v) = self.all_credits {
+            ::buffa::types::put_bool_field(14u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -970,6 +1130,15 @@ impl ::buffa::Message for Lookup {
                     ::buffa::types::decode_int32(buf)?,
                 );
             }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.all_credits = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -991,6 +1160,7 @@ impl ::buffa::Message for Lookup {
         self.country = ::core::option::Option::None;
         self.display_order = ::core::option::Option::None;
         self.episode_number_end = ::core::option::Option::None;
+        self.all_credits = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -1892,6 +2062,34 @@ pub struct Metadata {
     ///
     /// Field 35: `watch_providers`
     pub watch_providers: ::buffa::alloc::vec::Vec<WatchProvider>,
+    /// For movies and series: where it is in its making and run.
+    ///
+    /// Field 38: `production_status`
+    pub production_status: ::core::option::Option<::buffa::EnumValue<ProductionStatus>>,
+    /// For movies: its release in cinemas in the requested country, else the
+    /// earliest anywhere, as an ISO 8601 calendar date.
+    ///
+    /// Field 39: `theatrical_release_date`
+    pub theatrical_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// For movies and series: the countries it was produced in, as ISO 3166-1
+    /// alpha-2 codes.
+    ///
+    /// Field 40: `production_countries`
+    pub production_countries: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The genres, keywords (tags) and studios (a series' networks) by the
+    /// provider's IDs of discovery filters, by which a title's page lists
+    /// titles alike.
+    ///
+    /// Field 41: `genre_refs`
+    pub genre_refs: ::buffa::alloc::vec::Vec<Reference>,
+    /// Field 42: `keyword_refs`
+    pub keyword_refs: ::buffa::alloc::vec::Vec<Reference>,
+    /// Field 43: `studio_refs`
+    pub studio_refs: ::buffa::alloc::vec::Vec<Reference>,
+    /// The number of votes community_rating counts.
+    ///
+    /// Field 44: `vote_count`
+    pub vote_count: ::core::option::Option<i32>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1935,6 +2133,13 @@ impl ::core::fmt::Debug for Metadata {
             .field("revenue", &self.revenue)
             .field("next_air_date", &self.next_air_date)
             .field("watch_providers", &self.watch_providers)
+            .field("production_status", &self.production_status)
+            .field("theatrical_release_date", &self.theatrical_release_date)
+            .field("production_countries", &self.production_countries)
+            .field("genre_refs", &self.genre_refs)
+            .field("keyword_refs", &self.keyword_refs)
+            .field("studio_refs", &self.studio_refs)
+            .field("vote_count", &self.vote_count)
             .finish()
     }
 }
@@ -2158,6 +2363,33 @@ impl Metadata {
         self.next_air_date = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::production_status`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_production_status(
+        mut self,
+        value: impl Into<::buffa::EnumValue<ProductionStatus>>,
+    ) -> Self {
+        self.production_status = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::theatrical_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_theatrical_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.theatrical_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::vote_count`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_vote_count(mut self, value: i32) -> Self {
+        self.vote_count = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Metadata);
 impl ::buffa::MessageName for Metadata {
@@ -2313,6 +2545,42 @@ impl ::buffa::Message for Metadata {
         for v in &self.remote_trailers {
             size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if let Some(ref v) = self.production_status {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v.to_i32()) as u64;
+        }
+        if let Some(ref v) = self.theatrical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.production_countries {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.genre_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.keyword_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        for v in &self.studio_refs {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(v) = self.vote_count {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2455,6 +2723,42 @@ impl ::buffa::Message for Metadata {
         }
         for v in &self.remote_trailers {
             ::buffa::types::put_string_field(37u32, v, buf);
+        }
+        if let Some(ref v) = self.production_status {
+            ::buffa::types::put_int32_field(38u32, v.to_i32(), buf);
+        }
+        if let Some(ref v) = self.theatrical_release_date {
+            ::buffa::types::put_string_field(39u32, v, buf);
+        }
+        for v in &self.production_countries {
+            ::buffa::types::put_string_field(40u32, v, buf);
+        }
+        for v in &self.genre_refs {
+            ::buffa::types::put_len_delimited_header(
+                41u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.keyword_refs {
+            ::buffa::types::put_len_delimited_header(
+                42u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        for v in &self.studio_refs {
+            ::buffa::types::put_len_delimited_header(
+                43u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(v) = self.vote_count {
+            ::buffa::types::put_int32_field(44u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2877,6 +3181,83 @@ impl ::buffa::Message for Metadata {
                 )?;
                 self.remote_trailers.push(__elem);
             }
+            38u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.production_status = ::core::option::Option::Some(
+                    ::buffa::EnumValue::from(::buffa::types::decode_int32(buf)?),
+                );
+            }
+            39u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .theatrical_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            40u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.production_countries.push(__elem);
+            }
+            41u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.genre_refs.push(elem);
+            }
+            42u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.keyword_refs.push(elem);
+            }
+            43u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.studio_refs.push(elem);
+            }
+            44u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.vote_count = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2922,11 +3303,161 @@ impl ::buffa::Message for Metadata {
         self.watch_providers.clear();
         self.production_locations.clear();
         self.remote_trailers.clear();
+        self.production_status = ::core::option::Option::None;
+        self.theatrical_release_date = ::core::option::Option::None;
+        self.production_countries.clear();
+        self.genre_refs.clear();
+        self.keyword_refs.clear();
+        self.studio_refs.clear();
+        self.vote_count = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for Metadata {
     const PROTO_FQN: &'static str = "mavio.plugin.v1.Metadata";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// Reference is a value a provider identifies, such as a genre.
+#[derive(Clone, PartialEq, Default)]
+pub struct Reference {
+    /// The provider's ID, such as those of discovery filters.
+    ///
+    /// Field 1: `id`
+    pub id: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 2: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for Reference {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("Reference")
+            .field("id", &self.id)
+            .field("name", &self.name)
+            .finish()
+    }
+}
+impl Reference {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.Reference";
+}
+impl Reference {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_id(mut self, value: impl Into<::buffa::alloc::string::String>) -> Self {
+        self.id = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(Reference);
+impl ::buffa::MessageName for Reference {
+    const PACKAGE: &'static str = "mavio.plugin.v1";
+    const NAME: &'static str = "Reference";
+    const FULL_NAME: &'static str = "mavio.plugin.v1.Reference";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.plugin.v1.Reference";
+}
+impl ::buffa::Message for Reference {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.id {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.id {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.id.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.id = ::core::option::Option::None;
+        self.name = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for Reference {
+    const PROTO_FQN: &'static str = "mavio.plugin.v1.Reference";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"math"
 	"slices"
 	"strconv"
 	"strings"
@@ -258,13 +259,20 @@ func (s session) movieMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugin
 	}
 	setRating(md, r, ratings)
 	setMovieReleases(md, m, r)
-	md.SetProductionLocations(names(m.Countries))
 	md.SetBudget(m.Budget)
 	md.SetRevenue(m.Revenue)
 	md.SetWatchProviders(watchProviders(m.WatchProviders, r))
 	md.SetRemoteTrailers(trailers(m.Videos))
-	people := castCredits(mapCast(m.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
-	people = append(people, crewCredits(m.Credits.Crew)...)
+	md.SetTheatricalReleaseDate(earliestRelease(m, r, func(typ int) bool { return typ == releaseTheatrical }))
+	md.SetProductionLocations(countryNames(m.Countries))
+	md.SetProductionCountries(countryCodes(m.Countries))
+	md.SetProductionStatus(productionStatus(m.Status))
+	md.SetVoteCount(int32(m.VoteCount))
+	md.SetGenreRefs(refs(m.Genres))
+	md.SetKeywordRefs(refs(m.Keywords.Keywords))
+	md.SetStudioRefs(refs(m.Companies))
+	people := castCredits(mapCast(m.Credits.Cast, s.castFor(l)), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
+	people = append(people, crewCredits(m.Credits.Crew, l.GetAllCredits())...)
 	md.SetPeople(people)
 	md.SetImages(images(r, []imageSet{
 		{pluginv1.ImageKind_IMAGE_KIND_PRIMARY, m.Images.Posters},
@@ -313,6 +321,13 @@ func (s session) seriesMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugi
 	}
 	md.SetWatchProviders(watchProviders(t.WatchProviders, r))
 	md.SetRemoteTrailers(trailers(t.Videos))
+	md.SetProductionLocations(countryNames(t.Countries))
+	md.SetProductionCountries(countryCodes(t.Countries))
+	md.SetProductionStatus(productionStatus(t.Status))
+	md.SetVoteCount(int32(t.VoteCount))
+	md.SetGenreRefs(refs(t.Genres))
+	md.SetKeywordRefs(refs(t.Keywords.Results))
+	md.SetStudioRefs(refs(t.Networks))
 	ratings := map[string]string{}
 	for _, cr := range t.ContentRatings.Results {
 		if cr.Rating != "" {
@@ -320,11 +335,22 @@ func (s session) seriesMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugi
 		}
 	}
 	setRating(md, r, ratings)
-	people := castCredits(mapAggregateCast(t.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
+	people := castCredits(mapAggregateCast(t.Credits.Cast, s.castFor(l)), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	for _, c := range t.CreatedBy {
 		if strings.TrimSpace(c.Name) != "" {
 			people = append(people, person(strings.TrimSpace(c.Name), pluginv1.CreditKind_CREDIT_KIND_CREATOR, "", c.ID, c.ProfilePath))
 		}
+	}
+	if l.GetAllCredits() {
+		// A series' crew, each of their jobs on it.
+		var crew []tmdbCrew
+		for _, c := range t.Credits.Crew {
+			for _, j := range c.Jobs {
+				c.Job = j.Job
+				crew = append(crew, c)
+			}
+		}
+		people = append(people, crewCredits(crew, true)...)
 	}
 	md.SetPeople(people)
 	md.SetImages(images(r, []imageSet{
@@ -421,7 +447,7 @@ func (s session) episodeMetadata(ctx context.Context, l *pluginv1.Lookup) (*plug
 	}
 	people := castCredits(mapCast(e.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	people = append(people, castCredits(mapCast(e.Credits.GuestStars, s.cast), pluginv1.CreditKind_CREDIT_KIND_GUEST_STAR)...)
-	people = append(people, crewCredits(e.Credits.Crew)...)
+	people = append(people, crewCredits(e.Credits.Crew, false)...)
 	md.SetPeople(people)
 	md.SetImages(images(r, []imageSet{{pluginv1.ImageKind_IMAGE_KIND_PRIMARY, e.Images.Stills}}))
 	return md, nil
@@ -449,6 +475,74 @@ func (s session) episodeNumbers(ctx context.Context, seriesID int, l *pluginv1.L
 	}
 	season, episode := g.airedNumbers(int(l.GetSeasonNumber()), int(l.GetEpisodeNumber()))
 	return season, episode, nil
+}
+
+// refs lists TMDB's IDs and names, such as of genres, by which discovery
+// filters.
+func refs(ns []tmdbName) []*pluginv1.Reference {
+	var out []*pluginv1.Reference
+	for _, n := range ns {
+		if name := strings.TrimSpace(n.Name); name != "" && n.ID > 0 {
+			out = append(out, pluginv1.Reference_builder{Id: proto.String(strconv.Itoa(n.ID)), Name: proto.String(name)}.Build())
+		}
+	}
+	return out
+}
+
+func countryNames(cs []tmdbCountry) []string {
+	var out []string
+	for _, c := range cs {
+		if n := strings.TrimSpace(c.Name); n != "" {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
+func countryCodes(cs []tmdbCountry) []string {
+	var out []string
+	for _, c := range cs {
+		if len(c.Code) == 2 {
+			out = append(out, strings.ToUpper(c.Code))
+		}
+	}
+	return out
+}
+
+// productionStatus maps TMDB's status of a movie ("Rumored", "Planned",
+// "In Production", "Post Production", "Released", "Canceled") or series
+// ("Returning Series", "Planned", "In Production", "Ended", "Canceled",
+// "Pilot").
+func productionStatus(status string) pluginv1.ProductionStatus {
+	switch strings.ToLower(status) {
+	case "rumored":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED
+	case "planned":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_PLANNED
+	case "in production":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_IN_PRODUCTION
+	case "post production":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_POST_PRODUCTION
+	case "released":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED
+	case "canceled", "cancelled":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_CANCELED
+	case "pilot":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_PILOT
+	case "returning series":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_RETURNING
+	case "ended":
+		return pluginv1.ProductionStatus_PRODUCTION_STATUS_ENDED
+	}
+	return pluginv1.ProductionStatus_PRODUCTION_STATUS_UNSPECIFIED
+}
+
+// castFor is the cast a lookup takes: all of it for a title's page.
+func (s session) castFor(l *pluginv1.Lookup) castConfig {
+	if l.GetAllCredits() {
+		return castConfig{maxCast: math.MaxInt}
+	}
+	return s.cast
 }
 
 func names(ns []tmdbName) []string {
@@ -527,25 +621,7 @@ func setMovieReleases(md *pluginv1.Metadata, m tmdbMovie, r request) {
 	if m.Language != "" && m.Language != "xx" {
 		md.SetOriginalLanguage(strings.ToLower(m.Language))
 	}
-	country := r.ratingCountry()
-	earliest := func(match func(typ int) bool) string {
-		local, anywhere := "", ""
-		for _, rd := range m.ReleaseDates.Results {
-			for _, d := range rd.Dates {
-				day := d.Date[:min(len(d.Date), 10)]
-				if _, ok := yearOf(day); !ok || !match(d.Type) {
-					continue
-				}
-				if anywhere == "" || day < anywhere {
-					anywhere = day
-				}
-				if strings.EqualFold(rd.Country, country) && (local == "" || day < local) {
-					local = day
-				}
-			}
-		}
-		return cmp.Or(local, anywhere)
-	}
+	earliest := func(match func(typ int) bool) string { return earliestRelease(m, r, match) }
 	if d := earliest(func(typ int) bool { return typ == releaseDigital }); d != "" {
 		md.SetDigitalReleaseDate(d)
 	}
@@ -569,6 +645,28 @@ func setMovieReleases(md *pluginv1.Metadata, m tmdbMovie, r request) {
 	}
 	md.SetAlternativeTitles(alt)
 	md.SetTranslatedTitles(translated)
+}
+
+// earliestRelease is a movie's earliest release of the types matched in the
+// requested country, else anywhere; empty when there is none.
+func earliestRelease(m tmdbMovie, r request, match func(typ int) bool) string {
+	country := r.ratingCountry()
+	local, anywhere := "", ""
+	for _, rd := range m.ReleaseDates.Results {
+		for _, d := range rd.Dates {
+			day := d.Date[:min(len(d.Date), 10)]
+			if _, ok := yearOf(day); !ok || !match(d.Type) {
+				continue
+			}
+			if anywhere == "" || day < anywhere {
+				anywhere = day
+			}
+			if strings.EqualFold(rd.Country, country) && (local == "" || day < local) {
+				local = day
+			}
+		}
+	}
+	return cmp.Or(local, anywhere)
 }
 
 func setRuntime(md *pluginv1.Metadata, minutes int) {
@@ -625,29 +723,57 @@ func castCredits(cs []credit, kind pluginv1.CreditKind) []*pluginv1.PersonCredit
 	return out
 }
 
-// crewCredits credits directors, writers and producers once each per kind.
-func crewCredits(crew []tmdbCrew) []*pluginv1.PersonCredit {
+// crewCredits credits directors, writers and producers once each per kind;
+// all credits each job of the whole crew once, by the kind of its
+// department.
+func crewCredits(crew []tmdbCrew, all bool) []*pluginv1.PersonCredit {
 	kinds := map[string]pluginv1.CreditKind{
 		"director": pluginv1.CreditKind_CREDIT_KIND_DIRECTOR,
 		"writer":   pluginv1.CreditKind_CREDIT_KIND_WRITER,
 		"producer": pluginv1.CreditKind_CREDIT_KIND_PRODUCER,
 	}
 	type key struct {
-		name string
-		kind pluginv1.CreditKind
+		name, job string
+		kind      pluginv1.CreditKind
 	}
 	seen := map[key]bool{}
 	var out []*pluginv1.PersonCredit
 	for _, c := range crew {
 		kind, ok := kinds[crewKind(c.Department, c.Job)]
-		name := strings.TrimSpace(c.Name)
-		if !ok || name == "" || seen[key{name, kind}] {
+		if all {
+			kind, ok = jobKind(c.Department, c.Job), true
+		}
+		name, job := strings.TrimSpace(c.Name), strings.TrimSpace(c.Job)
+		k := key{name: name, kind: kind}
+		if all {
+			k.job = job
+		}
+		if !ok || name == "" || seen[k] {
 			continue
 		}
-		seen[key{name, kind}] = true
-		out = append(out, person(name, kind, strings.TrimSpace(c.Job), c.ID, c.ProfilePath))
+		seen[k] = true
+		out = append(out, person(name, kind, job, c.ID, c.ProfilePath))
 	}
 	return out
+}
+
+// jobKind is the kind of credit of a crew member's job: directors,
+// writers, producers and composers by their department, the rest other
+// crew.
+func jobKind(department, job string) pluginv1.CreditKind {
+	switch {
+	case strings.EqualFold(department, "directing") && strings.EqualFold(job, "director"):
+		return pluginv1.CreditKind_CREDIT_KIND_DIRECTOR
+	case strings.EqualFold(department, "writing"):
+		return pluginv1.CreditKind_CREDIT_KIND_WRITER
+	case strings.EqualFold(department, "production") && strings.Contains(strings.ToLower(job), "producer"):
+		return pluginv1.CreditKind_CREDIT_KIND_PRODUCER
+	case strings.EqualFold(department, "sound") && slices.ContainsFunc([]string{"original music composer", "music", "composer"}, func(j string) bool {
+		return strings.EqualFold(j, job)
+	}):
+		return pluginv1.CreditKind_CREDIT_KIND_COMPOSER
+	}
+	return pluginv1.CreditKind_CREDIT_KIND_OTHER
 }
 
 func langBase(lang string) string {

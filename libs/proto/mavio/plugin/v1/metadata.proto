@@ -69,6 +69,10 @@ message Lookup {
   // episode_number to it as one, their names and overviews joined by
   // " / ", as Jellyfin's TmdbEpisodeProvider does.
   int32 episode_number_end = 13;
+  // For movies and series looked up for a title's page: the whole crew,
+  // as Seerr's View Full Crew lists it, each job of it credited; else only
+  // the directors, writers and producers libraries keep.
+  bool all_credits = 14;
 }
 
 message SearchRequest {
@@ -173,6 +177,45 @@ message Metadata {
   // The services streaming it by subscription in the requested country,
   // in the provider's order.
   repeated WatchProvider watch_providers = 35;
+  // For movies and series: where it is in its making and run.
+  ProductionStatus production_status = 38;
+  // For movies: its release in cinemas in the requested country, else the
+  // earliest anywhere, as an ISO 8601 calendar date.
+  string theatrical_release_date = 39;
+  // For movies and series: the countries it was produced in, as ISO 3166-1
+  // alpha-2 codes.
+  repeated string production_countries = 40;
+  // The genres, keywords (tags) and studios (a series' networks) by the
+  // provider's IDs of discovery filters, by which a title's page lists
+  // titles alike.
+  repeated Reference genre_refs = 41;
+  repeated Reference keyword_refs = 42;
+  repeated Reference studio_refs = 43;
+  // The number of votes community_rating counts.
+  int32 vote_count = 44;
+}
+
+// ProductionStatus is where a title is in its making and run, as TMDB
+// tells it.
+enum ProductionStatus {
+  PRODUCTION_STATUS_UNSPECIFIED = 0;
+  PRODUCTION_STATUS_RUMORED = 1;
+  PRODUCTION_STATUS_PLANNED = 2;
+  PRODUCTION_STATUS_IN_PRODUCTION = 3;
+  PRODUCTION_STATUS_POST_PRODUCTION = 4;
+  PRODUCTION_STATUS_RELEASED = 5;
+  PRODUCTION_STATUS_CANCELED = 6;
+  // For series.
+  PRODUCTION_STATUS_PILOT = 7;
+  PRODUCTION_STATUS_RETURNING = 8;
+  PRODUCTION_STATUS_ENDED = 9;
+}
+
+// Reference is a value a provider identifies, such as a genre.
+message Reference {
+  // The provider's ID, such as those of discovery filters.
+  string id = 1;
+  string name = 2;
 }
 
 // WatchProvider is a service streaming a title.

@@ -347,6 +347,20 @@ message Title {
   // The collection (movie set) a movie belongs to; its TMDB ID is the
   // external ID "tmdb_collection".
   string collection_name = 37;
+  // Where it is in its making and run.
+  mavio.plugin.v1.ProductionStatus production_status = 38;
+  // A movie's release in cinemas in rating_country, else the earliest
+  // anywhere, as an ISO 8601 calendar date.
+  string theatrical_release_date = 39;
+  // The countries it was produced in, as ISO 3166-1 alpha-2 codes.
+  repeated string production_countries = 40;
+  // Its genres, keywords and studios (a series' networks) by the discovery
+  // providers' IDs, by which a catalog filters titles alike.
+  repeated mavio.plugin.v1.Reference genre_refs = 41;
+  repeated mavio.plugin.v1.Reference keyword_refs = 42;
+  repeated mavio.plugin.v1.Reference studio_refs = 43;
+  // The number of votes its community rating counts.
+  int32 vote_count = 44;
 }
 
 // TitleCredit is a person credited on a title, as the metadata providers
@@ -359,6 +373,8 @@ message TitleCredit {
   int32 order = 4;
   // Their photo, if any.
   string image_url = 5;
+  // Such as "tmdb", by which their page is looked up.
+  map<string, string> external_ids = 6;
 }
 
 // SeasonStatus is a season of a series with what the server has of it, as

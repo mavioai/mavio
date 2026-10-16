@@ -144,7 +144,7 @@ func (s *Service) titleIn(ctx context.Context, kind core.ItemKind, tmdbID int, l
 	for _, p := range providers {
 		res, err := p.Metadata(ctx, library.Lookup{
 			Kind: kind, ExternalIDs: map[core.Provider]string{core.ProviderTMDB: strconv.Itoa(tmdbID)},
-			Language: language, Country: country,
+			Language: language, Country: country, AllCredits: true,
 		})
 		if errors.Is(err, library.ErrProviderUnavailable) {
 			continue
@@ -199,6 +199,13 @@ func (s *Service) titleIn(ctx context.Context, kind core.ItemKind, tmdbID int, l
 		t.Budget, t.Revenue = cmp.Or(t.Budget, f.Budget), cmp.Or(t.Revenue, f.Revenue)
 		t.NextAirDate = cmp.Or(t.NextAirDate, f.NextAirDate)
 		t.WatchProviders = orList(t.WatchProviders, f.WatchProviders)
+		t.ProductionStatus = cmp.Or(t.ProductionStatus, f.ProductionStatus)
+		t.TheatricalReleaseDate = cmp.Or(t.TheatricalReleaseDate, f.TheatricalReleaseDate)
+		t.ProductionCountries = orList(t.ProductionCountries, f.ProductionCountries)
+		t.GenreRefs = orList(t.GenreRefs, f.GenreRefs)
+		t.KeywordRefs = orList(t.KeywordRefs, f.KeywordRefs)
+		t.StudioRefs = orList(t.StudioRefs, f.StudioRefs)
+		t.VoteCount = cmp.Or(t.VoteCount, f.VoteCount)
 		t.CommunityRating = cmp.Or(t.CommunityRating, it.CommunityRating)
 		for p, id := range it.ExternalIDs {
 			if _, ok := t.ExternalIDs[p]; !ok && id != "" {

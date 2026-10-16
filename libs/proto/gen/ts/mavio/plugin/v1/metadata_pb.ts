@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/metadata.proto.
  */
 export const file_mavio_plugin_v1_metadata: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvbWV0YWRhdGEucHJvdG8SD21hdmlvLnBsdWdpbi52MSLuAwoGTG9va3VwEigKBGtpbmQYASABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEgwKBG5hbWUYAiABKAkSDAoEeWVhchgDIAEoBRI+CgxleHRlcm5hbF9pZHMYBCADKAsyKC5tYXZpby5wbHVnaW4udjEuTG9va3VwLkV4dGVybmFsSWRzRW50cnkSSwoTc2VyaWVzX2V4dGVybmFsX2lkcxgFIAMoCzIuLm1hdmlvLnBsdWdpbi52MS5Mb29rdXAuU2VyaWVzRXh0ZXJuYWxJZHNFbnRyeRIVCg1zZWFzb25fbnVtYmVyGAYgASgFEhYKDmVwaXNvZGVfbnVtYmVyGAcgASgFEg0KBWFsYnVtGAggASgJEg8KB2FydGlzdHMYCSADKAkSEAoIbGFuZ3VhZ2UYCiABKAkSDwoHY291bnRyeRgLIAEoCRIVCg1kaXNwbGF5X29yZGVyGAwgASgJEhoKEmVwaXNvZGVfbnVtYmVyX2VuZBgNIAEoBRoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaOAoWU2VyaWVzRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkcKDVNlYXJjaFJlcXVlc3QSJwoGbG9va3VwGAEgASgLMhcubWF2aW8ucGx1Z2luLnYxLkxvb2t1cBINCgVsaW1pdBgCIAEoBSJACg5TZWFyY2hSZXNwb25zZRIuCgdyZXN1bHRzGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlc3VsdCLYAQoMU2VhcmNoUmVzdWx0EgwKBG5hbWUYASABKAkSDAoEeWVhchgCIAEoBRIQCghvdmVydmlldxgDIAEoCRJECgxleHRlcm5hbF9pZHMYBCADKAsyLi5tYXZpby5wbHVnaW4udjEuU2VhcmNoUmVzdWx0LkV4dGVybmFsSWRzRW50cnkSEQoJaW1hZ2VfdXJsGAUgASgJEg0KBXNjb3JlGAYgASgBGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASI9ChJHZXRNZXRhZGF0YVJlcXVlc3QSJwoGbG9va3VwGAEgASgLMhcubWF2aW8ucGx1Z2luLnYxLkxvb2t1cCJRChNHZXRNZXRhZGF0YVJlc3BvbnNlEg0KBWZvdW5kGAEgASgIEisKCG1ldGFkYXRhGAIgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1ldGFkYXRhIqMICghNZXRhZGF0YRIMCgRuYW1lGAEgASgJEhYKDm9yaWdpbmFsX3RpdGxlGAIgASgJEhEKCXNvcnRfbmFtZRgDIAEoCRIQCghvdmVydmlldxgEIAEoCRIPCgd0YWdsaW5lGAUgASgJEhcKD3Byb2R1Y3Rpb25feWVhchgGIAEoBRIVCg1wcmVtaWVyZV9kYXRlGAcgASgJEhAKCGVuZF9kYXRlGAggASgJEioKB3J1bnRpbWUYCSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SFwoPb2ZmaWNpYWxfcmF0aW5nGAogASgJEhgKEGNvbW11bml0eV9yYXRpbmcYCyABKAESFQoNY3JpdGljX3JhdGluZxgMIAEoARIOCgZnZW5yZXMYDSADKAkSDAoEdGFncxgOIAMoCRIPCgdzdHVkaW9zGA8gAygJEkAKDGV4dGVybmFsX2lkcxgQIAMoCzIqLm1hdmlvLnBsdWdpbi52MS5NZXRhZGF0YS5FeHRlcm5hbElkc0VudHJ5EjQKDXNlcmllc19zdGF0dXMYESABKA4yHS5tYXZpby5wbHVnaW4udjEuU2VyaWVzU3RhdHVzEg8KB2FydGlzdHMYEiADKAkSFQoNYWxidW1fYXJ0aXN0cxgTIAMoCRItCgZwZW9wbGUYFCADKAsyHS5tYXZpby5wbHVnaW4udjEuUGVyc29uQ3JlZGl0EiwKBmltYWdlcxgVIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5SZW1vdGVJbWFnZRISCgpiaXJ0aF9kYXRlGBYgASgJEhIKCmRlYXRoX2RhdGUYFyABKAkSEwoLYmlydGhfcGxhY2UYGCABKAkSFwoPY29sbGVjdGlvbl9uYW1lGBkgASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGBogASgJEhwKFGRpZ2l0YWxfcmVsZWFzZV9kYXRlGBsgASgJEh0KFXBoeXNpY2FsX3JlbGVhc2VfZGF0ZRgcIAEoCRIaChJhbHRlcm5hdGl2ZV90aXRsZXMYHSADKAkSGQoRdHJhbnNsYXRlZF90aXRsZXMYHiADKAkSFgoOc2Vjb25kYXJ5X3llYXIYHyABKAUSHAoUcHJvZHVjdGlvbl9sb2NhdGlvbnMYJCADKAkSFwoPcmVtb3RlX3RyYWlsZXJzGCUgAygJEg4KBmJ1ZGdldBggIAEoAxIPCgdyZXZlbnVlGCEgASgDEhUKDW5leHRfYWlyX2RhdGUYIiABKAkSNwoPd2F0Y2hfcHJvdmlkZXJzGCMgAygLMh4ubWF2aW8ucGx1Z2luLnYxLldhdGNoUHJvdmlkZXIaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIi8KDVdhdGNoUHJvdmlkZXISDAoEbmFtZRgBIAEoCRIQCghsb2dvX3VybBgCIAEoCSLxAQoMUGVyc29uQ3JlZGl0EgwKBG5hbWUYASABKAkSKQoEa2luZBgCIAEoDjIbLm1hdmlvLnBsdWdpbi52MS5DcmVkaXRLaW5kEgwKBHJvbGUYAyABKAkSDQoFb3JkZXIYBCABKAUSRAoMZXh0ZXJuYWxfaWRzGAUgAygLMi4ubWF2aW8ucGx1Z2luLnYxLlBlcnNvbkNyZWRpdC5FeHRlcm5hbElkc0VudHJ5EhEKCWltYWdlX3VybBgGIAEoCRoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEihAEKC1JlbW90ZUltYWdlEigKBGtpbmQYASABKA4yGi5tYXZpby5wbHVnaW4udjEuSW1hZ2VLaW5kEgsKA3VybBgCIAEoCRINCgV3aWR0aBgDIAEoBRIOCgZoZWlnaHQYBCABKAUSEAoIbGFuZ3VhZ2UYBSABKAkSDQoFc2NvcmUYBiABKAEq/AIKCU1lZGlhS2luZBIaChZNRURJQV9LSU5EX1VOU1BFQ0lGSUVEEAASFAoQTUVESUFfS0lORF9NT1ZJRRABEhUKEU1FRElBX0tJTkRfU0VSSUVTEAISFQoRTUVESUFfS0lORF9TRUFTT04QAxIWChJNRURJQV9LSU5EX0VQSVNPREUQBBIbChdNRURJQV9LSU5EX01VU0lDX0FSVElTVBAFEhoKFk1FRElBX0tJTkRfTVVTSUNfQUxCVU0QBhIUChBNRURJQV9LSU5EX1RSQUNLEAcSGgoWTUVESUFfS0lORF9NVVNJQ19WSURFTxAIEhMKD01FRElBX0tJTkRfQk9PSxAJEhgKFE1FRElBX0tJTkRfQVVESU9CT09LEAoSFQoRTUVESUFfS0lORF9QRVJTT04QCxIUChBNRURJQV9LSU5EX1ZJREVPEAwSGgoWTUVESUFfS0lORF9QSE9UT19BTEJVTRANEhQKEE1FRElBX0tJTkRfUEhPVE8QDiqCAQoMU2VyaWVzU3RhdHVzEh0KGVNFUklFU19TVEFUVVNfVU5TUEVDSUZJRUQQABIcChhTRVJJRVNfU1RBVFVTX0NPTlRJTlVJTkcQARIXChNTRVJJRVNfU1RBVFVTX0VOREVEEAISHAoYU0VSSUVTX1NUQVRVU19VTlJFTEVBU0VEEAMq8QIKCkNyZWRpdEtpbmQSGwoXQ1JFRElUX0tJTkRfVU5TUEVDSUZJRUQQABIVChFDUkVESVRfS0lORF9BQ1RPUhABEhoKFkNSRURJVF9LSU5EX0dVRVNUX1NUQVIQAhIYChRDUkVESVRfS0lORF9ESVJFQ1RPUhADEhYKEkNSRURJVF9LSU5EX1dSSVRFUhAEEhgKFENSRURJVF9LSU5EX1BST0RVQ0VSEAUSFwoTQ1JFRElUX0tJTkRfQ1JFQVRPUhAGEhgKFENSRURJVF9LSU5EX0NPTVBPU0VSEAcSGQoVQ1JFRElUX0tJTkRfQ09ORFVDVE9SEAgSGAoUQ1JFRElUX0tJTkRfTFlSSUNJU1QQCRIWChJDUkVESVRfS0lORF9BUlRJU1QQChIWChJDUkVESVRfS0lORF9BVVRIT1IQCxIYChRDUkVESVRfS0lORF9OQVJSQVRPUhAMEhUKEUNSRURJVF9LSU5EX09USEVSEA0q3gEKCUltYWdlS2luZBIaChZJTUFHRV9LSU5EX1VOU1BFQ0lGSUVEEAASFgoSSU1BR0VfS0lORF9QUklNQVJZEAESFwoTSU1BR0VfS0lORF9CQUNLRFJPUBACEhMKD0lNQUdFX0tJTkRfTE9HTxADEhQKEElNQUdFX0tJTkRfVEhVTUIQBBIVChFJTUFHRV9LSU5EX0JBTk5FUhAFEhIKDklNQUdFX0tJTkRfQVJUEAYSEwoPSU1BR0VfS0lORF9ESVNDEAcSGQoVSU1BR0VfS0lORF9TQ1JFRU5TSE9UEAgyyAEKF01ldGFkYXRhUHJvdmlkZXJTZXJ2aWNlEk4KBlNlYXJjaBIeLm1hdmlvLnBsdWdpbi52MS5TZWFyY2hSZXF1ZXN0Gh8ubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlc3BvbnNlIgOQAgESXQoLR2V0TWV0YWRhdGESIy5tYXZpby5wbHVnaW4udjEuR2V0TWV0YWRhdGFSZXF1ZXN0GiQubWF2aW8ucGx1Z2luLnYxLkdldE1ldGFkYXRhUmVzcG9uc2UiA5ACAULHAQoTY29tLm1hdmlvLnBsdWdpbi52MUINTWV0YWRhdGFQcm90b1ABWkNnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vcGx1Z2luL3YxO3BsdWdpbnYxogIDTVBYqgIPTWF2aW8uUGx1Z2luLlYxygIPTWF2aW9cUGx1Z2luXFYx4gIbTWF2aW9cUGx1Z2luXFYxXEdQQk1ldGFkYXRh6gIRTWF2aW86OlBsdWdpbjo6VjFiCGVkaXRpb25zcOgH", [file_google_protobuf_duration]);
+  fileDesc("Ch5tYXZpby9wbHVnaW4vdjEvbWV0YWRhdGEucHJvdG8SD21hdmlvLnBsdWdpbi52MSKDBAoGTG9va3VwEigKBGtpbmQYASABKA4yGi5tYXZpby5wbHVnaW4udjEuTWVkaWFLaW5kEgwKBG5hbWUYAiABKAkSDAoEeWVhchgDIAEoBRI+CgxleHRlcm5hbF9pZHMYBCADKAsyKC5tYXZpby5wbHVnaW4udjEuTG9va3VwLkV4dGVybmFsSWRzRW50cnkSSwoTc2VyaWVzX2V4dGVybmFsX2lkcxgFIAMoCzIuLm1hdmlvLnBsdWdpbi52MS5Mb29rdXAuU2VyaWVzRXh0ZXJuYWxJZHNFbnRyeRIVCg1zZWFzb25fbnVtYmVyGAYgASgFEhYKDmVwaXNvZGVfbnVtYmVyGAcgASgFEg0KBWFsYnVtGAggASgJEg8KB2FydGlzdHMYCSADKAkSEAoIbGFuZ3VhZ2UYCiABKAkSDwoHY291bnRyeRgLIAEoCRIVCg1kaXNwbGF5X29yZGVyGAwgASgJEhoKEmVwaXNvZGVfbnVtYmVyX2VuZBgNIAEoBRITCgthbGxfY3JlZGl0cxgOIAEoCBoyChBFeHRlcm5hbElkc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaOAoWU2VyaWVzRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIkcKDVNlYXJjaFJlcXVlc3QSJwoGbG9va3VwGAEgASgLMhcubWF2aW8ucGx1Z2luLnYxLkxvb2t1cBINCgVsaW1pdBgCIAEoBSJACg5TZWFyY2hSZXNwb25zZRIuCgdyZXN1bHRzGAEgAygLMh0ubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlc3VsdCLYAQoMU2VhcmNoUmVzdWx0EgwKBG5hbWUYASABKAkSDAoEeWVhchgCIAEoBRIQCghvdmVydmlldxgDIAEoCRJECgxleHRlcm5hbF9pZHMYBCADKAsyLi5tYXZpby5wbHVnaW4udjEuU2VhcmNoUmVzdWx0LkV4dGVybmFsSWRzRW50cnkSEQoJaW1hZ2VfdXJsGAUgASgJEg0KBXNjb3JlGAYgASgBGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASI9ChJHZXRNZXRhZGF0YVJlcXVlc3QSJwoGbG9va3VwGAEgASgLMhcubWF2aW8ucGx1Z2luLnYxLkxvb2t1cCJRChNHZXRNZXRhZGF0YVJlc3BvbnNlEg0KBWZvdW5kGAEgASgIEisKCG1ldGFkYXRhGAIgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1ldGFkYXRhIscKCghNZXRhZGF0YRIMCgRuYW1lGAEgASgJEhYKDm9yaWdpbmFsX3RpdGxlGAIgASgJEhEKCXNvcnRfbmFtZRgDIAEoCRIQCghvdmVydmlldxgEIAEoCRIPCgd0YWdsaW5lGAUgASgJEhcKD3Byb2R1Y3Rpb25feWVhchgGIAEoBRIVCg1wcmVtaWVyZV9kYXRlGAcgASgJEhAKCGVuZF9kYXRlGAggASgJEioKB3J1bnRpbWUYCSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SFwoPb2ZmaWNpYWxfcmF0aW5nGAogASgJEhgKEGNvbW11bml0eV9yYXRpbmcYCyABKAESFQoNY3JpdGljX3JhdGluZxgMIAEoARIOCgZnZW5yZXMYDSADKAkSDAoEdGFncxgOIAMoCRIPCgdzdHVkaW9zGA8gAygJEkAKDGV4dGVybmFsX2lkcxgQIAMoCzIqLm1hdmlvLnBsdWdpbi52MS5NZXRhZGF0YS5FeHRlcm5hbElkc0VudHJ5EjQKDXNlcmllc19zdGF0dXMYESABKA4yHS5tYXZpby5wbHVnaW4udjEuU2VyaWVzU3RhdHVzEg8KB2FydGlzdHMYEiADKAkSFQoNYWxidW1fYXJ0aXN0cxgTIAMoCRItCgZwZW9wbGUYFCADKAsyHS5tYXZpby5wbHVnaW4udjEuUGVyc29uQ3JlZGl0EiwKBmltYWdlcxgVIAMoCzIcLm1hdmlvLnBsdWdpbi52MS5SZW1vdGVJbWFnZRISCgpiaXJ0aF9kYXRlGBYgASgJEhIKCmRlYXRoX2RhdGUYFyABKAkSEwoLYmlydGhfcGxhY2UYGCABKAkSFwoPY29sbGVjdGlvbl9uYW1lGBkgASgJEhkKEW9yaWdpbmFsX2xhbmd1YWdlGBogASgJEhwKFGRpZ2l0YWxfcmVsZWFzZV9kYXRlGBsgASgJEh0KFXBoeXNpY2FsX3JlbGVhc2VfZGF0ZRgcIAEoCRIaChJhbHRlcm5hdGl2ZV90aXRsZXMYHSADKAkSGQoRdHJhbnNsYXRlZF90aXRsZXMYHiADKAkSFgoOc2Vjb25kYXJ5X3llYXIYHyABKAUSHAoUcHJvZHVjdGlvbl9sb2NhdGlvbnMYJCADKAkSFwoPcmVtb3RlX3RyYWlsZXJzGCUgAygJEg4KBmJ1ZGdldBggIAEoAxIPCgdyZXZlbnVlGCEgASgDEhUKDW5leHRfYWlyX2RhdGUYIiABKAkSNwoPd2F0Y2hfcHJvdmlkZXJzGCMgAygLMh4ubWF2aW8ucGx1Z2luLnYxLldhdGNoUHJvdmlkZXISPAoRcHJvZHVjdGlvbl9zdGF0dXMYJiABKA4yIS5tYXZpby5wbHVnaW4udjEuUHJvZHVjdGlvblN0YXR1cxIfChd0aGVhdHJpY2FsX3JlbGVhc2VfZGF0ZRgnIAEoCRIcChRwcm9kdWN0aW9uX2NvdW50cmllcxgoIAMoCRIuCgpnZW5yZV9yZWZzGCkgAygLMhoubWF2aW8ucGx1Z2luLnYxLlJlZmVyZW5jZRIwCgxrZXl3b3JkX3JlZnMYKiADKAsyGi5tYXZpby5wbHVnaW4udjEuUmVmZXJlbmNlEi8KC3N0dWRpb19yZWZzGCsgAygLMhoubWF2aW8ucGx1Z2luLnYxLlJlZmVyZW5jZRISCgp2b3RlX2NvdW50GCwgASgFGjIKEEV4dGVybmFsSWRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASIlCglSZWZlcmVuY2USCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCSIvCg1XYXRjaFByb3ZpZGVyEgwKBG5hbWUYASABKAkSEAoIbG9nb191cmwYAiABKAki8QEKDFBlcnNvbkNyZWRpdBIMCgRuYW1lGAEgASgJEikKBGtpbmQYAiABKA4yGy5tYXZpby5wbHVnaW4udjEuQ3JlZGl0S2luZBIMCgRyb2xlGAMgASgJEg0KBW9yZGVyGAQgASgFEkQKDGV4dGVybmFsX2lkcxgFIAMoCzIuLm1hdmlvLnBsdWdpbi52MS5QZXJzb25DcmVkaXQuRXh0ZXJuYWxJZHNFbnRyeRIRCglpbWFnZV91cmwYBiABKAkaMgoQRXh0ZXJuYWxJZHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIoQBCgtSZW1vdGVJbWFnZRIoCgRraW5kGAEgASgOMhoubWF2aW8ucGx1Z2luLnYxLkltYWdlS2luZBILCgN1cmwYAiABKAkSDQoFd2lkdGgYAyABKAUSDgoGaGVpZ2h0GAQgASgFEhAKCGxhbmd1YWdlGAUgASgJEg0KBXNjb3JlGAYgASgBKvwCCglNZWRpYUtpbmQSGgoWTUVESUFfS0lORF9VTlNQRUNJRklFRBAAEhQKEE1FRElBX0tJTkRfTU9WSUUQARIVChFNRURJQV9LSU5EX1NFUklFUxACEhUKEU1FRElBX0tJTkRfU0VBU09OEAMSFgoSTUVESUFfS0lORF9FUElTT0RFEAQSGwoXTUVESUFfS0lORF9NVVNJQ19BUlRJU1QQBRIaChZNRURJQV9LSU5EX01VU0lDX0FMQlVNEAYSFAoQTUVESUFfS0lORF9UUkFDSxAHEhoKFk1FRElBX0tJTkRfTVVTSUNfVklERU8QCBITCg9NRURJQV9LSU5EX0JPT0sQCRIYChRNRURJQV9LSU5EX0FVRElPQk9PSxAKEhUKEU1FRElBX0tJTkRfUEVSU09OEAsSFAoQTUVESUFfS0lORF9WSURFTxAMEhoKFk1FRElBX0tJTkRfUEhPVE9fQUxCVU0QDRIUChBNRURJQV9LSU5EX1BIT1RPEA4qggEKDFNlcmllc1N0YXR1cxIdChlTRVJJRVNfU1RBVFVTX1VOU1BFQ0lGSUVEEAASHAoYU0VSSUVTX1NUQVRVU19DT05USU5VSU5HEAESFwoTU0VSSUVTX1NUQVRVU19FTkRFRBACEhwKGFNFUklFU19TVEFUVVNfVU5SRUxFQVNFRBADKtoCChBQcm9kdWN0aW9uU3RhdHVzEiEKHVBST0RVQ1RJT05fU1RBVFVTX1VOU1BFQ0lGSUVEEAASHQoZUFJPRFVDVElPTl9TVEFUVVNfUlVNT1JFRBABEh0KGVBST0RVQ1RJT05fU1RBVFVTX1BMQU5ORUQQAhIjCh9QUk9EVUNUSU9OX1NUQVRVU19JTl9QUk9EVUNUSU9OEAMSJQohUFJPRFVDVElPTl9TVEFUVVNfUE9TVF9QUk9EVUNUSU9OEAQSHgoaUFJPRFVDVElPTl9TVEFUVVNfUkVMRUFTRUQQBRIeChpQUk9EVUNUSU9OX1NUQVRVU19DQU5DRUxFRBAGEhsKF1BST0RVQ1RJT05fU1RBVFVTX1BJTE9UEAcSHwobUFJPRFVDVElPTl9TVEFUVVNfUkVUVVJOSU5HEAgSGwoXUFJPRFVDVElPTl9TVEFUVVNfRU5ERUQQCSrxAgoKQ3JlZGl0S2luZBIbChdDUkVESVRfS0lORF9VTlNQRUNJRklFRBAAEhUKEUNSRURJVF9LSU5EX0FDVE9SEAESGgoWQ1JFRElUX0tJTkRfR1VFU1RfU1RBUhACEhgKFENSRURJVF9LSU5EX0RJUkVDVE9SEAMSFgoSQ1JFRElUX0tJTkRfV1JJVEVSEAQSGAoUQ1JFRElUX0tJTkRfUFJPRFVDRVIQBRIXChNDUkVESVRfS0lORF9DUkVBVE9SEAYSGAoUQ1JFRElUX0tJTkRfQ09NUE9TRVIQBxIZChVDUkVESVRfS0lORF9DT05EVUNUT1IQCBIYChRDUkVESVRfS0lORF9MWVJJQ0lTVBAJEhYKEkNSRURJVF9LSU5EX0FSVElTVBAKEhYKEkNSRURJVF9LSU5EX0FVVEhPUhALEhgKFENSRURJVF9LSU5EX05BUlJBVE9SEAwSFQoRQ1JFRElUX0tJTkRfT1RIRVIQDSreAQoJSW1hZ2VLaW5kEhoKFklNQUdFX0tJTkRfVU5TUEVDSUZJRUQQABIWChJJTUFHRV9LSU5EX1BSSU1BUlkQARIXChNJTUFHRV9LSU5EX0JBQ0tEUk9QEAISEwoPSU1BR0VfS0lORF9MT0dPEAMSFAoQSU1BR0VfS0lORF9USFVNQhAEEhUKEUlNQUdFX0tJTkRfQkFOTkVSEAUSEgoOSU1BR0VfS0lORF9BUlQQBhITCg9JTUFHRV9LSU5EX0RJU0MQBxIZChVJTUFHRV9LSU5EX1NDUkVFTlNIT1QQCDLIAQoXTWV0YWRhdGFQcm92aWRlclNlcnZpY2USTgoGU2VhcmNoEh4ubWF2aW8ucGx1Z2luLnYxLlNlYXJjaFJlcXVlc3QaHy5tYXZpby5wbHVnaW4udjEuU2VhcmNoUmVzcG9uc2UiA5ACARJdCgtHZXRNZXRhZGF0YRIjLm1hdmlvLnBsdWdpbi52MS5HZXRNZXRhZGF0YVJlcXVlc3QaJC5tYXZpby5wbHVnaW4udjEuR2V0TWV0YWRhdGFSZXNwb25zZSIDkAIBQscBChNjb20ubWF2aW8ucGx1Z2luLnYxQg1NZXRhZGF0YVByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac", [file_google_protobuf_duration]);
 
 /**
  * Lookup is what the host knows about an item.
@@ -106,6 +106,15 @@ export type Lookup = Message<"mavio.plugin.v1.Lookup"> & {
    * @generated from field: int32 episode_number_end = 13;
    */
   episodeNumberEnd: number;
+
+  /**
+   * For movies and series looked up for a title's page: the whole crew,
+   * as Seerr's View Full Crew lists it, each job of it credited; else only
+   * the directors, writers and producers libraries keep.
+   *
+   * @generated from field: bool all_credits = 14;
+   */
+  allCredits: boolean;
 };
 
 /**
@@ -472,6 +481,55 @@ export type Metadata = Message<"mavio.plugin.v1.Metadata"> & {
    * @generated from field: repeated mavio.plugin.v1.WatchProvider watch_providers = 35;
    */
   watchProviders: WatchProvider[];
+
+  /**
+   * For movies and series: where it is in its making and run.
+   *
+   * @generated from field: mavio.plugin.v1.ProductionStatus production_status = 38;
+   */
+  productionStatus: ProductionStatus;
+
+  /**
+   * For movies: its release in cinemas in the requested country, else the
+   * earliest anywhere, as an ISO 8601 calendar date.
+   *
+   * @generated from field: string theatrical_release_date = 39;
+   */
+  theatricalReleaseDate: string;
+
+  /**
+   * For movies and series: the countries it was produced in, as ISO 3166-1
+   * alpha-2 codes.
+   *
+   * @generated from field: repeated string production_countries = 40;
+   */
+  productionCountries: string[];
+
+  /**
+   * The genres, keywords (tags) and studios (a series' networks) by the
+   * provider's IDs of discovery filters, by which a title's page lists
+   * titles alike.
+   *
+   * @generated from field: repeated mavio.plugin.v1.Reference genre_refs = 41;
+   */
+  genreRefs: Reference[];
+
+  /**
+   * @generated from field: repeated mavio.plugin.v1.Reference keyword_refs = 42;
+   */
+  keywordRefs: Reference[];
+
+  /**
+   * @generated from field: repeated mavio.plugin.v1.Reference studio_refs = 43;
+   */
+  studioRefs: Reference[];
+
+  /**
+   * The number of votes community_rating counts.
+   *
+   * @generated from field: int32 vote_count = 44;
+   */
+  voteCount: number;
 };
 
 /**
@@ -480,6 +538,32 @@ export type Metadata = Message<"mavio.plugin.v1.Metadata"> & {
  */
 export const MetadataSchema: GenMessage<Metadata> = /*@__PURE__*/
   messageDesc(file_mavio_plugin_v1_metadata, 6);
+
+/**
+ * Reference is a value a provider identifies, such as a genre.
+ *
+ * @generated from message mavio.plugin.v1.Reference
+ */
+export type Reference = Message<"mavio.plugin.v1.Reference"> & {
+  /**
+   * The provider's ID, such as those of discovery filters.
+   *
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message mavio.plugin.v1.Reference.
+ * Use `create(ReferenceSchema)` to create a new message.
+ */
+export const ReferenceSchema: GenMessage<Reference> = /*@__PURE__*/
+  messageDesc(file_mavio_plugin_v1_metadata, 7);
 
 /**
  * WatchProvider is a service streaming a title.
@@ -503,7 +587,7 @@ export type WatchProvider = Message<"mavio.plugin.v1.WatchProvider"> & {
  * Use `create(WatchProviderSchema)` to create a new message.
  */
 export const WatchProviderSchema: GenMessage<WatchProvider> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_metadata, 7);
+  messageDesc(file_mavio_plugin_v1_metadata, 8);
 
 /**
  * @generated from message mavio.plugin.v1.PersonCredit
@@ -547,7 +631,7 @@ export type PersonCredit = Message<"mavio.plugin.v1.PersonCredit"> & {
  * Use `create(PersonCreditSchema)` to create a new message.
  */
 export const PersonCreditSchema: GenMessage<PersonCredit> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_metadata, 8);
+  messageDesc(file_mavio_plugin_v1_metadata, 9);
 
 /**
  * @generated from message mavio.plugin.v1.RemoteImage
@@ -593,7 +677,7 @@ export type RemoteImage = Message<"mavio.plugin.v1.RemoteImage"> & {
  * Use `create(RemoteImageSchema)` to create a new message.
  */
 export const RemoteImageSchema: GenMessage<RemoteImage> = /*@__PURE__*/
-  messageDesc(file_mavio_plugin_v1_metadata, 9);
+  messageDesc(file_mavio_plugin_v1_metadata, 10);
 
 /**
  * MediaKind is the kind of item metadata is requested for.
@@ -718,6 +802,72 @@ export const SeriesStatusSchema: GenEnum<SeriesStatus> = /*@__PURE__*/
   enumDesc(file_mavio_plugin_v1_metadata, 1);
 
 /**
+ * ProductionStatus is where a title is in its making and run, as TMDB
+ * tells it.
+ *
+ * @generated from enum mavio.plugin.v1.ProductionStatus
+ */
+export enum ProductionStatus {
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_RUMORED = 1;
+   */
+  RUMORED = 1,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_PLANNED = 2;
+   */
+  PLANNED = 2,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_IN_PRODUCTION = 3;
+   */
+  IN_PRODUCTION = 3,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_POST_PRODUCTION = 4;
+   */
+  POST_PRODUCTION = 4,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_RELEASED = 5;
+   */
+  RELEASED = 5,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_CANCELED = 6;
+   */
+  CANCELED = 6,
+
+  /**
+   * For series.
+   *
+   * @generated from enum value: PRODUCTION_STATUS_PILOT = 7;
+   */
+  PILOT = 7,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_RETURNING = 8;
+   */
+  RETURNING = 8,
+
+  /**
+   * @generated from enum value: PRODUCTION_STATUS_ENDED = 9;
+   */
+  ENDED = 9,
+}
+
+/**
+ * Describes the enum mavio.plugin.v1.ProductionStatus.
+ */
+export const ProductionStatusSchema: GenEnum<ProductionStatus> = /*@__PURE__*/
+  enumDesc(file_mavio_plugin_v1_metadata, 2);
+
+/**
  * @generated from enum mavio.plugin.v1.CreditKind
  */
 export enum CreditKind {
@@ -796,7 +946,7 @@ export enum CreditKind {
  * Describes the enum mavio.plugin.v1.CreditKind.
  */
 export const CreditKindSchema: GenEnum<CreditKind> = /*@__PURE__*/
-  enumDesc(file_mavio_plugin_v1_metadata, 2);
+  enumDesc(file_mavio_plugin_v1_metadata, 3);
 
 /**
  * @generated from enum mavio.plugin.v1.ImageKind
@@ -852,7 +1002,7 @@ export enum ImageKind {
  * Describes the enum mavio.plugin.v1.ImageKind.
  */
 export const ImageKindSchema: GenEnum<ImageKind> = /*@__PURE__*/
-  enumDesc(file_mavio_plugin_v1_metadata, 3);
+  enumDesc(file_mavio_plugin_v1_metadata, 4);
 
 /**
  * MetadataProviderService finds and fetches metadata from an external source

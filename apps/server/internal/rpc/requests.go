@@ -10,6 +10,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/requests"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/metadata"
 	acquisitionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/acquisition/v1/acquisitionv1connect"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -671,10 +672,7 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 	if err != nil {
 		return nil, requestError(ctx, err)
 	}
-	ids := make(map[string]string, len(d.ExternalIDs))
-	for k, v := range d.ExternalIDs {
-		ids[string(k)] = v
-	}
+	ids := stringIDs(d.ExternalIDs)
 	reqs := make([]*acquisitionv1.Request, len(d.Requests))
 	for i := range d.Requests {
 		reqs[i] = requestToProto(&d.Requests[i])
@@ -692,7 +690,9 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 	}
 	credits := make([]*acquisitionv1.TitleCredit, len(d.People))
 	for i, pc := range d.People {
-		b := acquisitionv1.TitleCredit_builder{Name: new(pc.Name), Kind: new(creditKinds[pc.Kind]), Role: new(pc.Role), ImageUrl: new(pc.ImageURL)}
+		b := acquisitionv1.TitleCredit_builder{
+			Name: new(pc.Name), Kind: new(creditKinds[pc.Kind]), Role: new(pc.Role), ImageUrl: new(pc.ImageURL), ExternalIds: stringIDs(pc.ExternalIDs),
+		}
 		if pc.Order != nil {
 			b.Order = new(int32(*pc.Order))
 		}
@@ -715,8 +715,32 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 		DigitalReleaseDate: isoDate(d.DigitalReleaseDate), PhysicalReleaseDate: isoDate(d.PhysicalReleaseDate),
 		EndDate: isoDate(d.EndDate), NextAirDate: isoDate(d.NextAirDate), WatchProviders: watch,
 		Tagline: new(d.Tagline), Keywords: d.Tags, Credits: credits, TrailerUrls: d.Trailers, CollectionName: new(d.CollectionName),
+		ProductionStatus: new(productionStatuses[d.ProductionStatus]), TheatricalReleaseDate: isoDate(d.TheatricalReleaseDate),
+		ProductionCountries: d.ProductionCountries, GenreRefs: refsToProto(d.GenreRefs), KeywordRefs: refsToProto(d.KeywordRefs),
+		StudioRefs: refsToProto(d.StudioRefs), VoteCount: new(int32(d.VoteCount)),
 	}.Build()
 	return acquisitionv1.GetTitleResponse_builder{Title: t}.Build(), nil
+}
+
+// productionStatuses maps production statuses to the contract's.
+var productionStatuses = map[metadata.ProductionStatus]pluginv1.ProductionStatus{
+	metadata.ProductionRumored:        pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED,
+	metadata.ProductionPlanned:        pluginv1.ProductionStatus_PRODUCTION_STATUS_PLANNED,
+	metadata.ProductionInProduction:   pluginv1.ProductionStatus_PRODUCTION_STATUS_IN_PRODUCTION,
+	metadata.ProductionPostProduction: pluginv1.ProductionStatus_PRODUCTION_STATUS_POST_PRODUCTION,
+	metadata.ProductionReleased:       pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED,
+	metadata.ProductionCanceled:       pluginv1.ProductionStatus_PRODUCTION_STATUS_CANCELED,
+	metadata.ProductionPilot:          pluginv1.ProductionStatus_PRODUCTION_STATUS_PILOT,
+	metadata.ProductionReturning:      pluginv1.ProductionStatus_PRODUCTION_STATUS_RETURNING,
+	metadata.ProductionEnded:          pluginv1.ProductionStatus_PRODUCTION_STATUS_ENDED,
+}
+
+func refsToProto(rs []metadata.Ref) []*pluginv1.Reference {
+	out := make([]*pluginv1.Reference, len(rs))
+	for i, r := range rs {
+		out[i] = pluginv1.Reference_builder{Id: new(r.ID), Name: new(r.Name)}.Build()
+	}
+	return out
 }
 
 // ListFilterValues lists the values a filter of a catalog takes.

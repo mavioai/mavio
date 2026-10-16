@@ -70,7 +70,10 @@ func (f *fakeMetadata) Metadata(_ context.Context, l library.Lookup) (*metadata.
 	return &metadata.Result{
 		Item: it, RemoteImages: []metadata.RemoteImage{{Kind: core.ImagePrimary, URL: "https://img/" + t.name}},
 		People: []metadata.Person{{Name: "Lead", Kind: core.CreditActor, Role: "Hero"}},
-		Facts:  metadata.Facts{Budget: 1000, WatchProviders: []metadata.WatchProvider{{Name: "Stream"}}},
+		Facts: metadata.Facts{
+			Budget: 1000, WatchProviders: []metadata.WatchProvider{{Name: "Stream"}},
+			ProductionStatus: metadata.ProductionReleased, GenreRefs: []metadata.Ref{{ID: "18", Name: "Drama"}},
+		},
 	}, nil
 }
 

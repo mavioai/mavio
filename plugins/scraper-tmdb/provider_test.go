@@ -62,7 +62,8 @@ var routes = map[string]string{
 		{"id":752662,"title":"Hua Mulan","original_title":"花木兰","release_date":"2020-12-01"}]}`,
 	"/3/movie/337401": `{"id":337401,"title":"Mulan","original_title":"Mulan","overview":"A young woman disguises herself.",
 		"tagline":"Loyal. Brave. True.","release_date":"2020-09-04","runtime":115,"vote_average":7.1,"imdb_id":"tt4566758",
-		"genres":[{"name":"Adventure"},{"name":"Fantasy"}],"production_companies":[{"name":"Walt Disney Pictures"}],
+		"genres":[{"id":12,"name":"Adventure"},{"id":14,"name":"Fantasy"}],"production_companies":[{"id":2,"name":"Walt Disney Pictures"}],
+		"status":"Released","vote_count":5120,
 		"belongs_to_collection":{"id":1166519,"name":"Mulan Collection"},
 		"credits":{"cast":[
 			{"id":2,"name":"Donnie Yen","character":"Commander Tung","order":1},
@@ -80,7 +81,7 @@ var routes = map[string]string{
 			"backdrops":[
 				{"file_path":"/bd-en.jpg","iso_639_1":"en","vote_average":8},
 				{"file_path":"/bd.jpg","iso_639_1":null,"vote_average":6}]},
-		"keywords":{"keywords":[{"name":"warrior"}]},
+		"keywords":{"keywords":[{"id":1,"name":"warrior"}]},
 		"release_dates":{"results":[
 			{"iso_3166_1":"US","release_dates":[{"certification":"","type":4,"release_date":"2020-09-04T00:00:00.000Z"},
 				{"certification":"PG-13","type":5,"release_date":"2020-11-10T00:00:00.000Z"}]},
@@ -99,9 +100,11 @@ var routes = map[string]string{
 	"/3/find/81189":     `{"movie_results":[],"tv_results":[{"id":1396}]}`,
 	"/3/tv/1396": `{"id":1396,"name":"Breaking Bad","original_name":"Breaking Bad","first_air_date":"2008-01-20","original_language":"en",
 		"last_air_date":"2013-09-29","status":"Ended","episode_run_time":[45,47],"vote_average":8.9,
-		"genres":[{"name":"Drama"}],"networks":[{"name":"AMC"}],
+		"genres":[{"id":18,"name":"Drama"}],"networks":[{"id":174,"name":"AMC"}],"production_countries":[{"iso_3166_1":"us","name":"United States of America"}],
 		"created_by":[{"id":66633,"name":"Vince Gilligan","profile_path":"/vg.jpg"}],
-		"aggregate_credits":{"cast":[{"id":17419,"name":"Bryan Cranston","order":0,"roles":[{"character":"Walter White","episode_count":62}]}]},
+		"aggregate_credits":{"cast":[{"id":17419,"name":"Bryan Cranston","order":0,"roles":[{"character":"Walter White","episode_count":62}]}],
+			"crew":[{"id":29779,"name":"Dave Porter","department":"Sound","jobs":[{"job":"Original Music Composer"}]},
+				{"id":66633,"name":"Vince Gilligan","department":"Production","jobs":[{"job":"Executive Producer"},{"job":"Producer"}]}]},
 		"external_ids":{"imdb_id":"tt0903747","tvdb_id":81189},
 		"keywords":{"results":[{"name":"drug dealer"}]},
 		"content_ratings":{"results":[{"iso_3166_1":"US","rating":"TV-MA"}]},
@@ -256,6 +259,35 @@ func TestMovieBySearch(t *testing.T) {
 	if got := md.GetExternalIds(); !maps.Equal(got, wantIDs) {
 		t.Errorf("external IDs = %v, want = %v", got, wantIDs)
 	}
+	if got := md.GetTheatricalReleaseDate(); got != "2019-12-31" {
+		t.Errorf("theatrical release date = %q, want = 2019-12-31", got)
+	}
+	if got, want := md.GetProductionCountries(), []string{"US"}; !slices.Equal(got, want) {
+		t.Errorf("production countries = %v, want = %v", got, want)
+	}
+	if got := md.GetProductionStatus(); got != pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED {
+		t.Errorf("production status = %v, want = released", got)
+	}
+	if got := md.GetVoteCount(); got != 5120 {
+		t.Errorf("vote count = %d, want = 5120", got)
+	}
+	for _, c := range []struct {
+		name string
+		refs []*pluginv1.Reference
+		want []string
+	}{
+		{"genre refs", md.GetGenreRefs(), []string{"12:Adventure", "14:Fantasy"}},
+		{"keyword refs", md.GetKeywordRefs(), []string{"1:warrior"}},
+		{"studio refs", md.GetStudioRefs(), []string{"2:Walt Disney Pictures"}},
+	} {
+		var got []string
+		for _, r := range c.refs {
+			got = append(got, r.GetId()+":"+r.GetName())
+		}
+		if !slices.Equal(got, c.want) {
+			t.Errorf("%s = %v, want = %v", c.name, got, c.want)
+		}
+	}
 	if got := md.GetCollectionName(); got != "Mulan Collection" {
 		t.Errorf("collection = %q, want = Mulan Collection", got)
 	}
@@ -344,6 +376,55 @@ func TestSeries(t *testing.T) {
 	}
 	if want := []string{"CREDIT_KIND_ACTOR:Bryan Cranston:Walter White", "CREDIT_KIND_CREATOR:Vince Gilligan:"}; !slices.Equal(people, want) {
 		t.Errorf("people = %v, want = %v", people, want)
+	}
+	if got := md.GetProductionStatus(); got != pluginv1.ProductionStatus_PRODUCTION_STATUS_ENDED {
+		t.Errorf("production status = %v, want = ended", got)
+	}
+	if got, want := md.GetProductionCountries(), []string{"US"}; !slices.Equal(got, want) {
+		t.Errorf("production countries = %v, want = %v", got, want)
+	}
+	if r := md.GetStudioRefs(); len(r) != 1 || r[0].GetId() != "174" || r[0].GetName() != "AMC" {
+		t.Errorf("studio refs = %v, want = [174:AMC]", r)
+	}
+}
+
+// A title's page asks for the whole cast and crew, each job once.
+func TestAllCredits(t *testing.T) {
+	p, _ := newTestPlugin(t, `{"api_key":"key","max_cast_members":1}`)
+	for _, c := range []struct {
+		name string
+		l    *pluginv1.Lookup
+		want []string
+	}{
+		{
+			"movie",
+			lookup(pluginv1.MediaKind_MEDIA_KIND_MOVIE, "", 0, map[string]string{"tmdb": "337401"}),
+			[]string{
+				"CREDIT_KIND_ACTOR:Yifei Liu:Mulan", "CREDIT_KIND_ACTOR:Donnie Yen:Commander Tung",
+				"CREDIT_KIND_DIRECTOR:Niki Caro:Director", "CREDIT_KIND_WRITER:Rick Jaffa:Screenplay",
+				"CREDIT_KIND_OTHER:Mandy Walker:Director of Photography",
+			},
+		},
+		{
+			"series",
+			lookup(pluginv1.MediaKind_MEDIA_KIND_SERIES, "", 0, map[string]string{"tmdb": "1396"}),
+			[]string{
+				"CREDIT_KIND_ACTOR:Bryan Cranston:Walter White", "CREDIT_KIND_CREATOR:Vince Gilligan:",
+				"CREDIT_KIND_COMPOSER:Dave Porter:Original Music Composer",
+				"CREDIT_KIND_PRODUCER:Vince Gilligan:Executive Producer", "CREDIT_KIND_PRODUCER:Vince Gilligan:Producer",
+			},
+		},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			c.l.SetAllCredits(true)
+			var people []string
+			for _, p := range metadataFor(t, p, c.l).GetPeople() {
+				people = append(people, p.GetKind().String()+":"+p.GetName()+":"+p.GetRole())
+			}
+			if !slices.Equal(people, c.want) {
+				t.Errorf("people = %v, want = %v", people, c.want)
+			}
+		})
 	}
 }
 

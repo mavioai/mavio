@@ -6985,6 +6985,56 @@
             "type": "string",
             "title": "collection_name",
             "description": "The collection (movie set) a movie belongs to; its TMDB ID is the\n external ID \"tmdb_collection\"."
+          },
+          "productionStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.plugin.v1.ProductionStatus"
+              }
+            ],
+            "title": "production_status",
+            "description": "Where it is in its making and run."
+          },
+          "theatricalReleaseDate": {
+            "type": "string",
+            "title": "theatrical_release_date",
+            "description": "A movie's release in cinemas in rating_country, else the earliest\n anywhere, as an ISO 8601 calendar date."
+          },
+          "productionCountries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "production_countries",
+            "description": "The countries it was produced in, as ISO 3166-1 alpha-2 codes."
+          },
+          "genreRefs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.Reference"
+            },
+            "title": "genre_refs",
+            "description": "Its genres, keywords and studios (a series' networks) by the discovery\n providers' IDs, by which a catalog filters titles alike."
+          },
+          "keywordRefs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.Reference"
+            },
+            "title": "keyword_refs"
+          },
+          "studioRefs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.Reference"
+            },
+            "title": "studio_refs"
+          },
+          "voteCount": {
+            "type": "integer",
+            "title": "vote_count",
+            "format": "int32",
+            "description": "The number of votes its community rating counts."
           }
         },
         "title": "Title",
@@ -7020,6 +7070,15 @@
             "type": "string",
             "title": "image_url",
             "description": "Their photo, if any."
+          },
+          "externalIds": {
+            "type": "object",
+            "title": "external_ids",
+            "additionalProperties": {
+              "type": "string",
+              "title": "value"
+            },
+            "description": "Such as \"tmdb\", by which their page is looked up."
           }
         },
         "title": "TitleCredit",
@@ -14915,6 +14974,40 @@
         "title": "Permissions",
         "additionalProperties": false,
         "description": "Permissions are the host resources a plugin requests. An administrator\n approves them at install time; anything else is denied."
+      },
+      "mavio.plugin.v1.ProductionStatus": {
+        "type": "string",
+        "title": "ProductionStatus",
+        "enum": [
+          "PRODUCTION_STATUS_UNSPECIFIED",
+          "PRODUCTION_STATUS_RUMORED",
+          "PRODUCTION_STATUS_PLANNED",
+          "PRODUCTION_STATUS_IN_PRODUCTION",
+          "PRODUCTION_STATUS_POST_PRODUCTION",
+          "PRODUCTION_STATUS_RELEASED",
+          "PRODUCTION_STATUS_CANCELED",
+          "PRODUCTION_STATUS_PILOT",
+          "PRODUCTION_STATUS_RETURNING",
+          "PRODUCTION_STATUS_ENDED"
+        ],
+        "description": "ProductionStatus is where a title is in its making and run, as TMDB\n tells it."
+      },
+      "mavio.plugin.v1.Reference": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "The provider's ID, such as those of discovery filters."
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          }
+        },
+        "title": "Reference",
+        "additionalProperties": false,
+        "description": "Reference is a value a provider identifies, such as a genre."
       },
       "mavio.plugin.v1.Runtime": {
         "type": "string",

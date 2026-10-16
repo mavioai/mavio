@@ -220,6 +220,15 @@ func TestToResultFacts(t *testing.T) {
 	md := pluginv1.Metadata_builder{
 		Budget: proto.Int64(150_000_000), Revenue: proto.Int64(400_000_000), NextAirDate: proto.String("2026-11-02"),
 		ProductionLocations: []string{"France"}, RemoteTrailers: []string{"https://www.youtube.com/watch?v=t"},
+		ProductionStatus: pluginv1.ProductionStatus_PRODUCTION_STATUS_RETURNING.Enum(), TheatricalReleaseDate: proto.String("2024-05-01"),
+		ProductionCountries: []string{"FR"}, VoteCount: proto.Int32(42),
+		StudioRefs: []*pluginv1.Reference{
+			pluginv1.Reference_builder{Id: proto.String("174"), Name: proto.String("AMC")}.Build(),
+			pluginv1.Reference_builder{Name: proto.String("No ID")}.Build(),
+		},
+		People: []*pluginv1.PersonCredit{pluginv1.PersonCredit_builder{
+			Name: proto.String("Lead"), Kind: pluginv1.CreditKind_CREDIT_KIND_ACTOR.Enum(), ExternalIds: map[string]string{"tmdb": "7"},
+		}.Build()},
 		WatchProviders: []*pluginv1.WatchProvider{
 			pluginv1.WatchProvider_builder{Name: proto.String("Netflix"), LogoUrl: proto.String("https://image.tmdb.org/n.png")}.Build(),
 			pluginv1.WatchProvider_builder{LogoUrl: proto.String("https://image.tmdb.org/x.png")}.Build(),
@@ -242,5 +251,17 @@ func TestToResultFacts(t *testing.T) {
 	}
 	if want := []string{"https://www.youtube.com/watch?v=t"}; !slices.Equal(res.Item.RemoteTrailers, want) {
 		t.Errorf("trailers = %v, want = %v", res.Item.RemoteTrailers, want)
+	}
+	if f.ProductionStatus != metadata.ProductionReturning || f.VoteCount != 42 || !slices.Equal(f.ProductionCountries, []string{"FR"}) {
+		t.Errorf("status, votes, countries = %q, %d, %v, want = returning, 42, [FR]", f.ProductionStatus, f.VoteCount, f.ProductionCountries)
+	}
+	if f.TheatricalReleaseDate == nil || !f.TheatricalReleaseDate.Equal(time.Date(2024, 5, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("theatrical release date = %v, want = 2024-05-01", f.TheatricalReleaseDate)
+	}
+	if want := []metadata.Ref{{ID: "174", Name: "AMC"}}; !slices.Equal(f.StudioRefs, want) {
+		t.Errorf("studio refs = %v, want = %v", f.StudioRefs, want)
+	}
+	if len(res.People) != 1 || res.People[0].ExternalIDs[core.ProviderTMDB] != "7" {
+		t.Errorf("people = %+v, want = Lead with TMDB ID 7", res.People)
 	}
 }

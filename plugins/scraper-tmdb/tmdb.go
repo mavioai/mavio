@@ -198,6 +198,11 @@ type (
 	}
 
 	tmdbName struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+	tmdbCountry struct {
+		Code string `json:"iso_3166_1"`
 		Name string `json:"name"`
 	}
 	tmdbCast struct {
@@ -224,6 +229,10 @@ type (
 		Department  string `json:"department"`
 		Job         string `json:"job"`
 		ProfilePath string `json:"profile_path"`
+		// Jobs are a series' aggregate crew's, in place of Job.
+		Jobs []struct {
+			Job string `json:"job"`
+		} `json:"jobs"`
 	}
 	tmdbCredits struct {
 		Cast       []tmdbCast `json:"cast"`
@@ -250,21 +259,23 @@ type (
 	}
 
 	tmdbMovie struct {
-		ID            int        `json:"id"`
-		Title         string     `json:"title"`
-		OriginalTitle string     `json:"original_title"`
-		Overview      string     `json:"overview"`
-		Tagline       string     `json:"tagline"`
-		ReleaseDate   string     `json:"release_date"`
-		Runtime       int        `json:"runtime"`
-		VoteAverage   float64    `json:"vote_average"`
-		IMDbID        string     `json:"imdb_id"`
-		Language      string     `json:"original_language"`
-		Genres        []tmdbName `json:"genres"`
-		Companies     []tmdbName `json:"production_companies"`
-		Countries     []tmdbName `json:"production_countries"`
-		Budget        int64      `json:"budget"`
-		Revenue       int64      `json:"revenue"`
+		ID            int           `json:"id"`
+		Title         string        `json:"title"`
+		OriginalTitle string        `json:"original_title"`
+		Overview      string        `json:"overview"`
+		Tagline       string        `json:"tagline"`
+		ReleaseDate   string        `json:"release_date"`
+		Runtime       int           `json:"runtime"`
+		VoteAverage   float64       `json:"vote_average"`
+		IMDbID        string        `json:"imdb_id"`
+		Language      string        `json:"original_language"`
+		Genres        []tmdbName    `json:"genres"`
+		Companies     []tmdbName    `json:"production_companies"`
+		Countries     []tmdbCountry `json:"production_countries"`
+		Status        string        `json:"status"`
+		VoteCount     int           `json:"vote_count"`
+		Budget        int64         `json:"budget"`
+		Revenue       int64         `json:"revenue"`
 		Collection    *struct {
 			ID   int    `json:"id"`
 			Name string `json:"name"`
@@ -303,20 +314,22 @@ type (
 	}
 
 	tmdbSeries struct {
-		ID             int        `json:"id"`
-		Name           string     `json:"name"`
-		OriginalName   string     `json:"original_name"`
-		Overview       string     `json:"overview"`
-		Tagline        string     `json:"tagline"`
-		FirstAirDate   string     `json:"first_air_date"`
-		Language       string     `json:"original_language"`
-		LastAirDate    string     `json:"last_air_date"`
-		Status         string     `json:"status"`
-		EpisodeRunTime []int      `json:"episode_run_time"`
-		VoteAverage    float64    `json:"vote_average"`
-		Genres         []tmdbName `json:"genres"`
-		Networks       []tmdbName `json:"networks"`
-		CreatedBy      []tmdbCast `json:"created_by"`
+		ID             int           `json:"id"`
+		Name           string        `json:"name"`
+		OriginalName   string        `json:"original_name"`
+		Overview       string        `json:"overview"`
+		Tagline        string        `json:"tagline"`
+		FirstAirDate   string        `json:"first_air_date"`
+		Language       string        `json:"original_language"`
+		LastAirDate    string        `json:"last_air_date"`
+		Status         string        `json:"status"`
+		EpisodeRunTime []int         `json:"episode_run_time"`
+		VoteAverage    float64       `json:"vote_average"`
+		VoteCount      int           `json:"vote_count"`
+		Genres         []tmdbName    `json:"genres"`
+		Networks       []tmdbName    `json:"networks"`
+		Countries      []tmdbCountry `json:"production_countries"`
+		CreatedBy      []tmdbCast    `json:"created_by"`
 		NextEpisode    *struct {
 			AirDate string `json:"air_date"`
 		} `json:"next_episode_to_air"`

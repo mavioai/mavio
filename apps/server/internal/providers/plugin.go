@@ -153,6 +153,7 @@ func toLookup(kind pluginv1.MediaKind, l library.Lookup) *pluginv1.Lookup {
 		Language:          proto.String(l.Language),
 		Country:           proto.String(l.Country),
 		DisplayOrder:      proto.String(string(l.DisplayOrder)),
+		AllCredits:        proto.Bool(l.AllCredits),
 	}.Build()
 	if l.SeasonNumber != nil {
 		lookup.SetSeasonNumber(int32(*l.SeasonNumber))
@@ -220,7 +221,10 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		if pc.GetName() == "" {
 			continue
 		}
-		p := metadata.Person{Name: pc.GetName(), Kind: creditKinds[pc.GetKind()], Role: pc.GetRole(), ImageURL: pc.GetImageUrl()}
+		p := metadata.Person{
+			Name: pc.GetName(), Kind: creditKinds[pc.GetKind()], Role: pc.GetRole(), ImageURL: pc.GetImageUrl(),
+			ExternalIDs: externalIDs(pc.GetExternalIds()),
+		}
 		if p.Kind == "" {
 			p.Kind = core.CreditOther
 		}
@@ -231,13 +235,46 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		res.People = append(res.People, p)
 	}
 	res.RemoteImages = remoteImages(md.GetImages())
-	res.Facts = metadata.Facts{Budget: md.GetBudget(), Revenue: md.GetRevenue(), NextAirDate: date(md.GetNextAirDate())}
+	res.Facts = metadata.Facts{
+		Budget: md.GetBudget(), Revenue: md.GetRevenue(), NextAirDate: date(md.GetNextAirDate()),
+		ProductionStatus:      productionStatuses[md.GetProductionStatus()],
+		TheatricalReleaseDate: date(md.GetTheatricalReleaseDate()),
+		ProductionCountries:   md.GetProductionCountries(),
+		GenreRefs:             refs(md.GetGenreRefs()),
+		KeywordRefs:           refs(md.GetKeywordRefs()),
+		StudioRefs:            refs(md.GetStudioRefs()),
+		VoteCount:             int(md.GetVoteCount()),
+	}
 	for _, w := range md.GetWatchProviders() {
 		if w.GetName() != "" {
 			res.Facts.WatchProviders = append(res.Facts.WatchProviders, metadata.WatchProvider{Name: w.GetName(), LogoURL: w.GetLogoUrl()})
 		}
 	}
 	return res
+}
+
+// productionStatuses maps the contract's production statuses.
+var productionStatuses = map[pluginv1.ProductionStatus]metadata.ProductionStatus{
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED:         metadata.ProductionRumored,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_PLANNED:         metadata.ProductionPlanned,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_IN_PRODUCTION:   metadata.ProductionInProduction,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_POST_PRODUCTION: metadata.ProductionPostProduction,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_RELEASED:        metadata.ProductionReleased,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_CANCELED:        metadata.ProductionCanceled,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_PILOT:           metadata.ProductionPilot,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_RETURNING:       metadata.ProductionReturning,
+	pluginv1.ProductionStatus_PRODUCTION_STATUS_ENDED:           metadata.ProductionEnded,
+}
+
+// refs converts a contract's references, leaving out those without IDs.
+func refs(rs []*pluginv1.Reference) []metadata.Ref {
+	var out []metadata.Ref
+	for _, r := range rs {
+		if r.GetId() != "" && r.GetName() != "" {
+			out = append(out, metadata.Ref{ID: r.GetId(), Name: r.GetName()})
+		}
+	}
+	return out
 }
 
 // remoteImages converts a contract's images, leaving out those of unknown

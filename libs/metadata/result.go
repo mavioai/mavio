@@ -39,6 +39,41 @@ type Facts struct {
 	// WatchProviders are the services streaming it by subscription in
 	// the lookup's country.
 	WatchProviders []WatchProvider
+	// ProductionStatus is where it is in its making and run.
+	ProductionStatus ProductionStatus
+	// TheatricalReleaseDate is a movie's release in cinemas in the
+	// lookup's country, else the earliest anywhere.
+	TheatricalReleaseDate *time.Time
+	// ProductionCountries are the countries it was produced in, as ISO
+	// 3166-1 alpha-2 codes.
+	ProductionCountries []string
+	// GenreRefs, KeywordRefs and StudioRefs are its genres, keywords and
+	// studios (a series' networks) by the provider's IDs of discovery
+	// filters.
+	GenreRefs, KeywordRefs, StudioRefs []Ref
+	// VoteCount is the number of votes its community rating counts.
+	VoteCount int
+}
+
+// ProductionStatus is where a title is in its making and run.
+type ProductionStatus string
+
+// Production statuses, as TMDB's.
+const (
+	ProductionRumored        ProductionStatus = "rumored"
+	ProductionPlanned        ProductionStatus = "planned"
+	ProductionInProduction   ProductionStatus = "inProduction"
+	ProductionPostProduction ProductionStatus = "postProduction"
+	ProductionReleased       ProductionStatus = "released"
+	ProductionCanceled       ProductionStatus = "canceled"
+	ProductionPilot          ProductionStatus = "pilot"
+	ProductionReturning      ProductionStatus = "returning"
+	ProductionEnded          ProductionStatus = "ended"
+)
+
+// Ref is a value a provider identifies, such as a genre.
+type Ref struct {
+	ID, Name string
 }
 
 // WatchProvider is a service streaming a title.
@@ -54,6 +89,8 @@ type Person struct {
 	// Order is the billing order, nil when unknown.
 	Order    *int
 	ImageURL string
+	// ExternalIDs identify the person with providers, such as TMDB.
+	ExternalIDs map[core.Provider]string
 }
 
 // RemoteImage is an image at a URL. Providers may describe it further:

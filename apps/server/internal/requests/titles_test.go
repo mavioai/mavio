@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/metadata"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
@@ -69,6 +70,13 @@ func TestGetTitle(t *testing.T) {
 	}
 	if m.Tagline != "In en" || len(m.People) != 1 || m.People[0].Name != "Lead" {
 		t.Errorf("GetTitle(movie) tagline, people = %q, %v, want = In en, [Lead]", m.Tagline, m.People)
+	}
+	if m.ProductionStatus != metadata.ProductionReleased || !slices.Equal(m.GenreRefs, []metadata.Ref{{ID: "18", Name: "Drama"}}) {
+		t.Errorf("GetTitle(movie) status, genre refs = %q, %v, want = released, [18 Drama]", m.ProductionStatus, m.GenreRefs)
+	}
+	// A title's page has its whole cast and crew.
+	if !e.meta.last.AllCredits {
+		t.Errorf("lookup all credits = false, want = true")
 	}
 	// Another language is looked up apart.
 	if fr, err := e.svc.GetTitle(e.ctx, pg, core.KindMovie, 1, "fr"); err != nil || fr.Tagline != "In fr" {

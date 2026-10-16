@@ -39,6 +39,9 @@ type Lookup struct {
 	// DisplayOrder is the series' order, which numbers its seasons and
 	// episodes.
 	DisplayOrder core.DisplayOrder
+	// AllCredits asks for a movie's or series' whole cast and crew, for a
+	// title's page, rather than those libraries keep.
+	AllCredits bool
 }
 
 // Provider fetches metadata from an external source, such as a metadata
