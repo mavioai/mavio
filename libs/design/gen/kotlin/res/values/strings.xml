@@ -1330,6 +1330,52 @@
     <string name="overview_ffmpeg_missing">Not found</string>
     <!-- How long the server has been running. -->
     <string name="overview_uptime">Running for</string>
+    <!-- The load of the server's computer. -->
+    <string name="overview_load">Load</string>
+    <!-- Footer of the load cards. -->
+    <string name="overview_load_footer">Sampled every two seconds while this page is open. Totals are since the computer started.</string>
+    <!-- Shown when the operating system does not tell a load. -->
+    <string name="overview_load_unknown">Not told on this system</string>
+    <!-- Card of the computer's processor load. -->
+    <string name="overview_cpu">CPU</string>
+    <!-- CPU share running programs. -->
+    <string name="overview_cpu_user">User</string>
+    <!-- CPU share running the operating system. -->
+    <string name="overview_cpu_system">System</string>
+    <!-- What the server's own process takes, of CPU or memory. -->
+    <string name="overview_by_server">Mavio</string>
+    <!-- Card of the computer's memory. -->
+    <string name="overview_memory">Memory</string>
+    <!-- After the memory used; total is a size. -->
+    <string name="overview_memory_of">of %s</string>
+    <!-- Memory available to programs. -->
+    <string name="overview_memory_available">Available</string>
+    <!-- Swap space used. -->
+    <string name="overview_swap">Swap</string>
+    <!-- Most of the memory is in use but not nearly all. -->
+    <string name="overview_memory_normal">Normal</string>
+    <!-- Nearly all memory is in use. -->
+    <string name="overview_memory_high">High</string>
+    <!-- Card of what the computer's disks read and write. -->
+    <string name="overview_disk">Disk</string>
+    <!-- Bytes per second the disks read. -->
+    <string name="overview_read">Read</string>
+    <!-- Bytes per second the disks write. -->
+    <string name="overview_write">Write</string>
+    <!-- Bytes the disks read since the computer started. -->
+    <string name="overview_read_total">Read</string>
+    <!-- Bytes the disks wrote since the computer started. -->
+    <string name="overview_written">Written</string>
+    <!-- Card of the computer's network traffic. -->
+    <string name="overview_network">Network</string>
+    <!-- Bytes per second received. -->
+    <string name="overview_download">Download</string>
+    <!-- Bytes per second sent. -->
+    <string name="overview_upload">Upload</string>
+    <!-- Bytes received since the computer started. -->
+    <string name="overview_received">Received</string>
+    <!-- Bytes sent since the computer started. -->
+    <string name="overview_sent">Sent</string>
     <!-- Group of what devices are playing. -->
     <string name="activity_now_playing">Now Playing</string>
     <!-- Shown when no device plays anything. -->

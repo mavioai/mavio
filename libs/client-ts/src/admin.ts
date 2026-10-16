@@ -164,6 +164,16 @@ export function useSystemInfo(server: ServerEntry) {
   return { info, health };
 }
 
+/** The load of the server's computer over the last minutes, refreshed as the server samples it. */
+export function useSystemLoad(server: ServerEntry) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "system", "load"),
+    queryFn: async () => (await servers.client(SystemService, server).getSystemLoad({})).samples,
+    refetchInterval: 2_000,
+  });
+}
+
 /** Every user's sessions, those playing first, refreshed every few seconds. */
 export function useAllSessions(server: ServerEntry) {
   const servers = useServersStore();

@@ -90,6 +90,7 @@ export {
   useServerLibraries,
   useServerSettings,
   useSystemInfo,
+  useSystemLoad,
   useTasks,
   useUpdateServerSettings,
   useUserActions,

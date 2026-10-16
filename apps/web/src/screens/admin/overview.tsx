@@ -1,5 +1,6 @@
 // The settings' Overview (docs/clients.md §6.3.6): the server chosen —
-// its version and what it runs on, whether it serves and since when.
+// its version and what it runs on, whether it serves and since when — and
+// the load of its computer.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
 import { errorMessage, type ServerEntry, useSystemInfo } from "@mavio/client-ts";
 import { GetHealthResponse_Status } from "@mavio/proto/mavio/system/v1/system_pb";
@@ -7,12 +8,14 @@ import { GetHealthResponse_Status } from "@mavio/proto/mavio/system/v1/system_pb
 import { t } from "../../i18n.ts";
 import { Group, Row } from "../../ui.tsx";
 import { lengthOf, Page } from "./common.tsx";
+import { Load } from "./load.tsx";
 
 /** The section of the server chosen in the settings. */
 export function OverviewSection({ server }: { server: ServerEntry }) {
   return (
     <Page title={t("settings.overview")} message={server.name}>
       <ServerInfo server={server} />
+      <Load server={server} />
     </Page>
   );
 }

@@ -2117,6 +2117,77 @@ public enum MavioStrings {
     /// How long the server has been running.
     public static var overviewUptime: String { NSLocalizedString("overview.uptime", bundle: .module, comment: "") }
 
+    /// The load of the server's computer.
+    public static var overviewLoad: String { NSLocalizedString("overview.load", bundle: .module, comment: "") }
+
+    /// Footer of the load cards.
+    public static var overviewLoadFooter: String { NSLocalizedString("overview.loadFooter", bundle: .module, comment: "") }
+
+    /// Shown when the operating system does not tell a load.
+    public static var overviewLoadUnknown: String { NSLocalizedString("overview.loadUnknown", bundle: .module, comment: "") }
+
+    /// Card of the computer's processor load.
+    public static var overviewCpu: String { NSLocalizedString("overview.cpu", bundle: .module, comment: "") }
+
+    /// CPU share running programs.
+    public static var overviewCpuUser: String { NSLocalizedString("overview.cpuUser", bundle: .module, comment: "") }
+
+    /// CPU share running the operating system.
+    public static var overviewCpuSystem: String { NSLocalizedString("overview.cpuSystem", bundle: .module, comment: "") }
+
+    /// What the server's own process takes, of CPU or memory.
+    public static var overviewByServer: String { NSLocalizedString("overview.byServer", bundle: .module, comment: "") }
+
+    /// Card of the computer's memory.
+    public static var overviewMemory: String { NSLocalizedString("overview.memory", bundle: .module, comment: "") }
+
+    /// After the memory used; total is a size.
+    public static func overviewMemoryOf(total: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.memoryOf", bundle: .module, comment: ""), total)
+    }
+
+    /// Memory available to programs.
+    public static var overviewMemoryAvailable: String { NSLocalizedString("overview.memoryAvailable", bundle: .module, comment: "") }
+
+    /// Swap space used.
+    public static var overviewSwap: String { NSLocalizedString("overview.swap", bundle: .module, comment: "") }
+
+    /// Most of the memory is in use but not nearly all.
+    public static var overviewMemoryNormal: String { NSLocalizedString("overview.memoryNormal", bundle: .module, comment: "") }
+
+    /// Nearly all memory is in use.
+    public static var overviewMemoryHigh: String { NSLocalizedString("overview.memoryHigh", bundle: .module, comment: "") }
+
+    /// Card of what the computer's disks read and write.
+    public static var overviewDisk: String { NSLocalizedString("overview.disk", bundle: .module, comment: "") }
+
+    /// Bytes per second the disks read.
+    public static var overviewRead: String { NSLocalizedString("overview.read", bundle: .module, comment: "") }
+
+    /// Bytes per second the disks write.
+    public static var overviewWrite: String { NSLocalizedString("overview.write", bundle: .module, comment: "") }
+
+    /// Bytes the disks read since the computer started.
+    public static var overviewReadTotal: String { NSLocalizedString("overview.readTotal", bundle: .module, comment: "") }
+
+    /// Bytes the disks wrote since the computer started.
+    public static var overviewWritten: String { NSLocalizedString("overview.written", bundle: .module, comment: "") }
+
+    /// Card of the computer's network traffic.
+    public static var overviewNetwork: String { NSLocalizedString("overview.network", bundle: .module, comment: "") }
+
+    /// Bytes per second received.
+    public static var overviewDownload: String { NSLocalizedString("overview.download", bundle: .module, comment: "") }
+
+    /// Bytes per second sent.
+    public static var overviewUpload: String { NSLocalizedString("overview.upload", bundle: .module, comment: "") }
+
+    /// Bytes received since the computer started.
+    public static var overviewReceived: String { NSLocalizedString("overview.received", bundle: .module, comment: "") }
+
+    /// Bytes sent since the computer started.
+    public static var overviewSent: String { NSLocalizedString("overview.sent", bundle: .module, comment: "") }
+
     /// Group of what devices are playing.
     public static var activityNowPlaying: String { NSLocalizedString("activity.nowPlaying", bundle: .module, comment: "") }
 

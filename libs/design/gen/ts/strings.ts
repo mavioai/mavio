@@ -651,6 +651,29 @@ export type MessageKey =
   | 'overview.ffmpeg'
   | 'overview.ffmpegMissing'
   | 'overview.uptime'
+  | 'overview.load'
+  | 'overview.loadFooter'
+  | 'overview.loadUnknown'
+  | 'overview.cpu'
+  | 'overview.cpuUser'
+  | 'overview.cpuSystem'
+  | 'overview.byServer'
+  | 'overview.memory'
+  | 'overview.memoryOf'
+  | 'overview.memoryAvailable'
+  | 'overview.swap'
+  | 'overview.memoryNormal'
+  | 'overview.memoryHigh'
+  | 'overview.disk'
+  | 'overview.read'
+  | 'overview.write'
+  | 'overview.readTotal'
+  | 'overview.written'
+  | 'overview.network'
+  | 'overview.download'
+  | 'overview.upload'
+  | 'overview.received'
+  | 'overview.sent'
   | 'activity.nowPlaying'
   | 'activity.nothingPlaying'
   | 'activity.directPlay'
@@ -2348,6 +2371,29 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "Not found",
     "overview.uptime": "Running for",
+    "overview.load": "Load",
+    "overview.loadFooter": "Sampled every two seconds while this page is open. Totals are since the computer started.",
+    "overview.loadUnknown": "Not told on this system",
+    "overview.cpu": "CPU",
+    "overview.cpuUser": "User",
+    "overview.cpuSystem": "System",
+    "overview.byServer": "Mavio",
+    "overview.memory": "Memory",
+    "overview.memoryOf": "of {total}",
+    "overview.memoryAvailable": "Available",
+    "overview.swap": "Swap",
+    "overview.memoryNormal": "Normal",
+    "overview.memoryHigh": "High",
+    "overview.disk": "Disk",
+    "overview.read": "Read",
+    "overview.write": "Write",
+    "overview.readTotal": "Read",
+    "overview.written": "Written",
+    "overview.network": "Network",
+    "overview.download": "Download",
+    "overview.upload": "Upload",
+    "overview.received": "Received",
+    "overview.sent": "Sent",
     "activity.nowPlaying": "Now Playing",
     "activity.nothingPlaying": "Nothing is playing.",
     "activity.directPlay": "Direct Play",
@@ -4043,6 +4089,29 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "未找到",
     "overview.uptime": "已运行",
+    "overview.load": "负载",
+    "overview.loadFooter": "页面打开期间每两秒采样一次；累计值自电脑启动起计。",
+    "overview.loadUnknown": "此系统不提供",
+    "overview.cpu": "CPU",
+    "overview.cpuUser": "用户",
+    "overview.cpuSystem": "系统",
+    "overview.byServer": "Mavio",
+    "overview.memory": "内存",
+    "overview.memoryOf": "共 {total}",
+    "overview.memoryAvailable": "可用",
+    "overview.swap": "交换",
+    "overview.memoryNormal": "正常",
+    "overview.memoryHigh": "紧张",
+    "overview.disk": "磁盘",
+    "overview.read": "读取",
+    "overview.write": "写入",
+    "overview.readTotal": "已读取",
+    "overview.written": "已写入",
+    "overview.network": "网络",
+    "overview.download": "下载",
+    "overview.upload": "上传",
+    "overview.received": "已接收",
+    "overview.sent": "已发送",
     "activity.nowPlaying": "正在播放",
     "activity.nothingPlaying": "当前没有播放。",
     "activity.directPlay": "直接播放",
