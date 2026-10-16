@@ -3,7 +3,7 @@
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
 // devices signed in to it as the user and, for its administrators, its
-// overview, general settings, libraries, users, transcoding, storage,
+// overview, activity, general settings, libraries, users, transcoding, storage,
 // acquisition, subtitles, plugins and tasks. Wide windows show them
 // beside their own sidebar; phones list them first.
 import { timestampDate } from "@bufbuild/protobuf/wkt";
@@ -39,6 +39,7 @@ import { Select } from "../controls/select.tsx";
 import { GeneralSection } from "./admin/general.tsx";
 import { IssuesSection } from "./issues.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
+import { ActivitySection } from "./admin/activity.tsx";
 import { OverviewSection } from "./admin/overview.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
 import { AcquisitionSection } from "./admin/acquisition.tsx";
@@ -55,7 +56,7 @@ import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "account" | "overview" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -63,6 +64,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   "subtitles-audio": { icon: "subtitles", color: "#34C759", title: () => t("settings.subtitlesAudio") },
   account: { icon: "profile", color: "#FF9500", title: () => t("settings.account") },
   overview: { icon: "server", color: "#8E8E93", title: () => t("settings.overview"), admin: true },
+  activity: { icon: "activity", color: "#FF2D55", title: () => t("settings.activity"), admin: true },
   general: { icon: "settings", color: "#8E8E93", title: () => t("settings.general"), admin: true },
   devices: { icon: "devices", color: "#32ADE6", title: () => t("settings.devices") },
   issues: { icon: "error", color: "#FF9500", title: () => t("settings.issues") },
@@ -85,7 +87,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
 
 const allGroups: { title: () => string; ids: SectionId[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), ids: ["appearance", "playback", "subtitles-audio"] },
-  { title: () => t("settings.serverGroup"), ids: ["overview", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "conversations", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
+  { title: () => t("settings.serverGroup"), ids: ["overview", "activity", "general", "devices", "issues", "libraries", "users", "transcoding", "storage", "acquisition", "wanted", "downloads", "subtitles", "ai", "conversations", "plugins", "tasks", "backups", "logs", "api-keys"], server: true },
 ];
 
 /** Where the settings are: the server chosen, and within Plugins, the plugin or the catalogs shown. */
@@ -384,6 +386,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return <AccountSection />;
     case "overview":
       return chosen?.admin && <OverviewSection key={chosen.server.id} server={chosen.server} />;
+    case "activity":
+      return chosen?.admin && <ActivitySection key={chosen.server.id} server={chosen.server} />;
     case "general":
       return chosen?.admin && <GeneralSection key={chosen.server.id} server={chosen.server} />;
     case "acquisition":

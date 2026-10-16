@@ -384,6 +384,8 @@ export type MessageKey =
   | 'settings.libraries'
   | 'settings.users'
   | 'settings.overview'
+  | 'settings.activity'
+  | 'settings.activityMessage'
   | 'settings.tasks'
   | 'settings.general'
   | 'settings.transcoding'
@@ -649,21 +651,21 @@ export type MessageKey =
   | 'overview.ffmpeg'
   | 'overview.ffmpegMissing'
   | 'overview.uptime'
-  | 'overview.nowPlaying'
-  | 'overview.nothingPlaying'
-  | 'overview.directPlay'
-  | 'overview.directStream'
-  | 'overview.transcode'
-  | 'overview.activity'
-  | 'overview.activityShown'
-  | 'overview.activityAll'
-  | 'overview.activityWarnings'
-  | 'overview.activityErrors'
-  | 'overview.noActivity'
-  | 'overview.showMore'
-  | 'overview.severityInfo'
-  | 'overview.severityWarning'
-  | 'overview.severityError'
+  | 'activity.nowPlaying'
+  | 'activity.nothingPlaying'
+  | 'activity.directPlay'
+  | 'activity.directStream'
+  | 'activity.transcode'
+  | 'activity.recent'
+  | 'activity.activityShown'
+  | 'activity.activityAll'
+  | 'activity.activityWarnings'
+  | 'activity.activityErrors'
+  | 'activity.noActivity'
+  | 'activity.showMore'
+  | 'activity.severityInfo'
+  | 'activity.severityWarning'
+  | 'activity.severityError'
   | 'tasks.message'
   | 'tasks.server'
   | 'tasks.run'
@@ -2079,6 +2081,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.libraries": "Libraries",
     "settings.users": "Users",
     "settings.overview": "Overview",
+    "settings.activity": "Activity",
+    "settings.activityMessage": "Who is playing, and what happened on the server lately.",
     "settings.tasks": "Tasks",
     "settings.general": "General",
     "settings.transcoding": "Transcoding",
@@ -2344,21 +2348,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "Not found",
     "overview.uptime": "Running for",
-    "overview.nowPlaying": "Now Playing",
-    "overview.nothingPlaying": "Nothing is playing.",
-    "overview.directPlay": "Direct Play",
-    "overview.directStream": "Direct Stream",
-    "overview.transcode": "Transcoding",
-    "overview.activity": "Activity",
-    "overview.activityShown": "Activities shown",
-    "overview.activityAll": "All",
-    "overview.activityWarnings": "Warnings and errors",
-    "overview.activityErrors": "Errors",
-    "overview.noActivity": "Nothing happened yet.",
-    "overview.showMore": "Show More",
-    "overview.severityInfo": "Information",
-    "overview.severityWarning": "Warning",
-    "overview.severityError": "Error",
+    "activity.nowPlaying": "Now Playing",
+    "activity.nothingPlaying": "Nothing is playing.",
+    "activity.directPlay": "Direct Play",
+    "activity.directStream": "Direct Stream",
+    "activity.transcode": "Transcoding",
+    "activity.recent": "Recent Activity",
+    "activity.activityShown": "Activities shown",
+    "activity.activityAll": "All",
+    "activity.activityWarnings": "Warnings and errors",
+    "activity.activityErrors": "Errors",
+    "activity.noActivity": "Nothing happened yet.",
+    "activity.showMore": "Show More",
+    "activity.severityInfo": "Information",
+    "activity.severityWarning": "Warning",
+    "activity.severityError": "Error",
     "tasks.message": "What the server does on its own, and the jobs it queued.",
     "tasks.server": "Server",
     "tasks.run": "Run",
@@ -3772,6 +3776,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.libraries": "媒体库",
     "settings.users": "用户",
     "settings.overview": "概览",
+    "settings.activity": "活动",
+    "settings.activityMessage": "谁在播放，以及服务器上最近发生的事。",
     "settings.tasks": "任务",
     "settings.general": "通用",
     "settings.transcoding": "转码",
@@ -4037,21 +4043,21 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "未找到",
     "overview.uptime": "已运行",
-    "overview.nowPlaying": "正在播放",
-    "overview.nothingPlaying": "当前没有播放。",
-    "overview.directPlay": "直接播放",
-    "overview.directStream": "直接串流",
-    "overview.transcode": "转码",
-    "overview.activity": "活动",
-    "overview.activityShown": "显示的活动",
-    "overview.activityAll": "全部",
-    "overview.activityWarnings": "警告与错误",
-    "overview.activityErrors": "错误",
-    "overview.noActivity": "暂无活动。",
-    "overview.showMore": "显示更多",
-    "overview.severityInfo": "信息",
-    "overview.severityWarning": "警告",
-    "overview.severityError": "错误",
+    "activity.nowPlaying": "正在播放",
+    "activity.nothingPlaying": "当前没有播放。",
+    "activity.directPlay": "直接播放",
+    "activity.directStream": "直接串流",
+    "activity.transcode": "转码",
+    "activity.recent": "最近活动",
+    "activity.activityShown": "显示的活动",
+    "activity.activityAll": "全部",
+    "activity.activityWarnings": "警告与错误",
+    "activity.activityErrors": "错误",
+    "activity.noActivity": "暂无活动。",
+    "activity.showMore": "显示更多",
+    "activity.severityInfo": "信息",
+    "activity.severityWarning": "警告",
+    "activity.severityError": "错误",
     "tasks.message": "服务器自动执行的工作，以及它排队的作业。",
     "tasks.server": "服务器",
     "tasks.run": "运行",

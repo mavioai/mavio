@@ -1267,8 +1267,14 @@ public enum MavioStrings {
     /// Settings section of a server's users and invitations.
     public static var settingsUsers: String { NSLocalizedString("settings.users", bundle: .module, comment: "") }
 
-    /// Settings section of a server's state, who plays on it and its activity.
+    /// Settings section of a server's state and its computer's load.
     public static var settingsOverview: String { NSLocalizedString("settings.overview", bundle: .module, comment: "") }
+
+    /// Settings section of who plays on a server and what happened on it.
+    public static var settingsActivity: String { NSLocalizedString("settings.activity", bundle: .module, comment: "") }
+
+    /// Explanation under the Activity title.
+    public static var settingsActivityMessage: String { NSLocalizedString("settings.activityMessage", bundle: .module, comment: "") }
 
     /// Settings section of a server's recurring tasks and jobs.
     public static var settingsTasks: String { NSLocalizedString("settings.tasks", bundle: .module, comment: "") }
@@ -2112,49 +2118,49 @@ public enum MavioStrings {
     public static var overviewUptime: String { NSLocalizedString("overview.uptime", bundle: .module, comment: "") }
 
     /// Group of what devices are playing.
-    public static var overviewNowPlaying: String { NSLocalizedString("overview.nowPlaying", bundle: .module, comment: "") }
+    public static var activityNowPlaying: String { NSLocalizedString("activity.nowPlaying", bundle: .module, comment: "") }
 
     /// Shown when no device plays anything.
-    public static var overviewNothingPlaying: String { NSLocalizedString("overview.nothingPlaying", bundle: .module, comment: "") }
+    public static var activityNothingPlaying: String { NSLocalizedString("activity.nothingPlaying", bundle: .module, comment: "") }
 
     /// The file is played as it is.
-    public static var overviewDirectPlay: String { NSLocalizedString("overview.directPlay", bundle: .module, comment: "") }
+    public static var activityDirectPlay: String { NSLocalizedString("activity.directPlay", bundle: .module, comment: "") }
 
     /// The streams are copied into another container.
-    public static var overviewDirectStream: String { NSLocalizedString("overview.directStream", bundle: .module, comment: "") }
+    public static var activityDirectStream: String { NSLocalizedString("activity.directStream", bundle: .module, comment: "") }
 
     /// The media is re-encoded.
-    public static var overviewTranscode: String { NSLocalizedString("overview.transcode", bundle: .module, comment: "") }
+    public static var activityTranscode: String { NSLocalizedString("activity.transcode", bundle: .module, comment: "") }
 
     /// Group of what happened on the server.
-    public static var overviewActivity: String { NSLocalizedString("overview.activity", bundle: .module, comment: "") }
+    public static var activityRecent: String { NSLocalizedString("activity.recent", bundle: .module, comment: "") }
 
     /// Label of the filter of activities.
-    public static var overviewActivityShown: String { NSLocalizedString("overview.activityShown", bundle: .module, comment: "") }
+    public static var activityActivityShown: String { NSLocalizedString("activity.activityShown", bundle: .module, comment: "") }
 
     /// Shows every activity.
-    public static var overviewActivityAll: String { NSLocalizedString("overview.activityAll", bundle: .module, comment: "") }
+    public static var activityActivityAll: String { NSLocalizedString("activity.activityAll", bundle: .module, comment: "") }
 
     /// Shows warnings and errors only.
-    public static var overviewActivityWarnings: String { NSLocalizedString("overview.activityWarnings", bundle: .module, comment: "") }
+    public static var activityActivityWarnings: String { NSLocalizedString("activity.activityWarnings", bundle: .module, comment: "") }
 
     /// Shows errors only.
-    public static var overviewActivityErrors: String { NSLocalizedString("overview.activityErrors", bundle: .module, comment: "") }
+    public static var activityActivityErrors: String { NSLocalizedString("activity.activityErrors", bundle: .module, comment: "") }
 
     /// Shown when there are no activities.
-    public static var overviewNoActivity: String { NSLocalizedString("overview.noActivity", bundle: .module, comment: "") }
+    public static var activityNoActivity: String { NSLocalizedString("activity.noActivity", bundle: .module, comment: "") }
 
     /// Loads more activities.
-    public static var overviewShowMore: String { NSLocalizedString("overview.showMore", bundle: .module, comment: "") }
+    public static var activityShowMore: String { NSLocalizedString("activity.showMore", bundle: .module, comment: "") }
 
     /// Severity of an ordinary activity.
-    public static var overviewSeverityInfo: String { NSLocalizedString("overview.severityInfo", bundle: .module, comment: "") }
+    public static var activitySeverityInfo: String { NSLocalizedString("activity.severityInfo", bundle: .module, comment: "") }
 
     /// Severity of a warning.
-    public static var overviewSeverityWarning: String { NSLocalizedString("overview.severityWarning", bundle: .module, comment: "") }
+    public static var activitySeverityWarning: String { NSLocalizedString("activity.severityWarning", bundle: .module, comment: "") }
 
     /// Severity of an error.
-    public static var overviewSeverityError: String { NSLocalizedString("overview.severityError", bundle: .module, comment: "") }
+    public static var activitySeverityError: String { NSLocalizedString("activity.severityError", bundle: .module, comment: "") }
 
     /// Line under the Tasks title.
     public static var tasksMessage: String { NSLocalizedString("tasks.message", bundle: .module, comment: "") }

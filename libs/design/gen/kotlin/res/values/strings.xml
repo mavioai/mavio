@@ -791,8 +791,12 @@
     <string name="settings_libraries">Libraries</string>
     <!-- Settings section of a server's users and invitations. -->
     <string name="settings_users">Users</string>
-    <!-- Settings section of a server's state, who plays on it and its activity. -->
+    <!-- Settings section of a server's state and its computer's load. -->
     <string name="settings_overview">Overview</string>
+    <!-- Settings section of who plays on a server and what happened on it. -->
+    <string name="settings_activity">Activity</string>
+    <!-- Explanation under the Activity title. -->
+    <string name="settings_activity_message">Who is playing, and what happened on the server lately.</string>
     <!-- Settings section of a server's recurring tasks and jobs. -->
     <string name="settings_tasks">Tasks</string>
     <!-- Settings section of a server's name, metadata language, sign-in and network. -->
@@ -1327,35 +1331,35 @@
     <!-- How long the server has been running. -->
     <string name="overview_uptime">Running for</string>
     <!-- Group of what devices are playing. -->
-    <string name="overview_now_playing">Now Playing</string>
+    <string name="activity_now_playing">Now Playing</string>
     <!-- Shown when no device plays anything. -->
-    <string name="overview_nothing_playing">Nothing is playing.</string>
+    <string name="activity_nothing_playing">Nothing is playing.</string>
     <!-- The file is played as it is. -->
-    <string name="overview_direct_play">Direct Play</string>
+    <string name="activity_direct_play">Direct Play</string>
     <!-- The streams are copied into another container. -->
-    <string name="overview_direct_stream">Direct Stream</string>
+    <string name="activity_direct_stream">Direct Stream</string>
     <!-- The media is re-encoded. -->
-    <string name="overview_transcode">Transcoding</string>
+    <string name="activity_transcode">Transcoding</string>
     <!-- Group of what happened on the server. -->
-    <string name="overview_activity">Activity</string>
+    <string name="activity_recent">Recent Activity</string>
     <!-- Label of the filter of activities. -->
-    <string name="overview_activity_shown">Activities shown</string>
+    <string name="activity_activity_shown">Activities shown</string>
     <!-- Shows every activity. -->
-    <string name="overview_activity_all">All</string>
+    <string name="activity_activity_all">All</string>
     <!-- Shows warnings and errors only. -->
-    <string name="overview_activity_warnings">Warnings and errors</string>
+    <string name="activity_activity_warnings">Warnings and errors</string>
     <!-- Shows errors only. -->
-    <string name="overview_activity_errors">Errors</string>
+    <string name="activity_activity_errors">Errors</string>
     <!-- Shown when there are no activities. -->
-    <string name="overview_no_activity">Nothing happened yet.</string>
+    <string name="activity_no_activity">Nothing happened yet.</string>
     <!-- Loads more activities. -->
-    <string name="overview_show_more">Show More</string>
+    <string name="activity_show_more">Show More</string>
     <!-- Severity of an ordinary activity. -->
-    <string name="overview_severity_info">Information</string>
+    <string name="activity_severity_info">Information</string>
     <!-- Severity of a warning. -->
-    <string name="overview_severity_warning">Warning</string>
+    <string name="activity_severity_warning">Warning</string>
     <!-- Severity of an error. -->
-    <string name="overview_severity_error">Error</string>
+    <string name="activity_severity_error">Error</string>
     <!-- Line under the Tasks title. -->
     <string name="tasks_message">What the server does on its own, and the jobs it queued.</string>
     <!-- Group of the server's own tasks. -->

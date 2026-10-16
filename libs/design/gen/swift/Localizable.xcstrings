@@ -7040,7 +7040,7 @@
       }
     },
     "settings.overview": {
-      "comment": "Settings section of a server's state, who plays on it and its activity.",
+      "comment": "Settings section of a server's state and its computer's load.",
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -7053,6 +7053,42 @@
           "stringUnit": {
             "state": "translated",
             "value": "概览"
+          }
+        }
+      }
+    },
+    "settings.activity": {
+      "comment": "Settings section of who plays on a server and what happened on it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activity"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "活动"
+          }
+        }
+      }
+    },
+    "settings.activityMessage": {
+      "comment": "Explanation under the Activity title.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Who is playing, and what happened on the server lately."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "谁在播放，以及服务器上最近发生的事。"
           }
         }
       }
@@ -11839,7 +11875,7 @@
         }
       }
     },
-    "overview.nowPlaying": {
+    "activity.nowPlaying": {
       "comment": "Group of what devices are playing.",
       "extractionState": "manual",
       "localizations": {
@@ -11857,7 +11893,7 @@
         }
       }
     },
-    "overview.nothingPlaying": {
+    "activity.nothingPlaying": {
       "comment": "Shown when no device plays anything.",
       "extractionState": "manual",
       "localizations": {
@@ -11875,7 +11911,7 @@
         }
       }
     },
-    "overview.directPlay": {
+    "activity.directPlay": {
       "comment": "The file is played as it is.",
       "extractionState": "manual",
       "localizations": {
@@ -11893,7 +11929,7 @@
         }
       }
     },
-    "overview.directStream": {
+    "activity.directStream": {
       "comment": "The streams are copied into another container.",
       "extractionState": "manual",
       "localizations": {
@@ -11911,7 +11947,7 @@
         }
       }
     },
-    "overview.transcode": {
+    "activity.transcode": {
       "comment": "The media is re-encoded.",
       "extractionState": "manual",
       "localizations": {
@@ -11929,25 +11965,25 @@
         }
       }
     },
-    "overview.activity": {
+    "activity.recent": {
       "comment": "Group of what happened on the server.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Activity"
+            "value": "Recent Activity"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "活动"
+            "value": "最近活动"
           }
         }
       }
     },
-    "overview.activityShown": {
+    "activity.activityShown": {
       "comment": "Label of the filter of activities.",
       "extractionState": "manual",
       "localizations": {
@@ -11965,7 +12001,7 @@
         }
       }
     },
-    "overview.activityAll": {
+    "activity.activityAll": {
       "comment": "Shows every activity.",
       "extractionState": "manual",
       "localizations": {
@@ -11983,7 +12019,7 @@
         }
       }
     },
-    "overview.activityWarnings": {
+    "activity.activityWarnings": {
       "comment": "Shows warnings and errors only.",
       "extractionState": "manual",
       "localizations": {
@@ -12001,7 +12037,7 @@
         }
       }
     },
-    "overview.activityErrors": {
+    "activity.activityErrors": {
       "comment": "Shows errors only.",
       "extractionState": "manual",
       "localizations": {
@@ -12019,7 +12055,7 @@
         }
       }
     },
-    "overview.noActivity": {
+    "activity.noActivity": {
       "comment": "Shown when there are no activities.",
       "extractionState": "manual",
       "localizations": {
@@ -12037,7 +12073,7 @@
         }
       }
     },
-    "overview.showMore": {
+    "activity.showMore": {
       "comment": "Loads more activities.",
       "extractionState": "manual",
       "localizations": {
@@ -12055,7 +12091,7 @@
         }
       }
     },
-    "overview.severityInfo": {
+    "activity.severityInfo": {
       "comment": "Severity of an ordinary activity.",
       "extractionState": "manual",
       "localizations": {
@@ -12073,7 +12109,7 @@
         }
       }
     },
-    "overview.severityWarning": {
+    "activity.severityWarning": {
       "comment": "Severity of a warning.",
       "extractionState": "manual",
       "localizations": {
@@ -12091,7 +12127,7 @@
         }
       }
     },
-    "overview.severityError": {
+    "activity.severityError": {
       "comment": "Severity of an error.",
       "extractionState": "manual",
       "localizations": {
