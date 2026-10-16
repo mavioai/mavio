@@ -15,6 +15,10 @@ coverage/
 !apps/server/internal/webui/dist/
 apps/server/internal/webui/dist/*
 !apps/server/internal/webui/dist/.gitkeep
+# the assistant's grammar (libs/intent), built to WASM and embedded by the server
+!apps/server/internal/assistant/intent/dist/
+apps/server/internal/assistant/intent/dist/*
+!apps/server/internal/assistant/intent/dist/.gitkeep
 
 # the catalog of the first-party plugins built locally (see tools/plugindist)
 /plugins/catalog.json

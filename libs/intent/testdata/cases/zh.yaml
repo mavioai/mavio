@@ -1,0 +1,45 @@
+- {text: 暂停, intent: pause}
+- {text: 请暂停一下, intent: pause}
+- {text: 後退三十秒, intent: seek_back, slots: {seconds: 30}}
+- {text: 后退30秒, intent: seek_back, slots: {seconds: 30}}
+- {text: 快进一分半, intent: seek_forward, slots: {seconds: 90}}
+- {text: 快进一个半小时, intent: seek_forward, slots: {seconds: 5400}}
+- {text: 快退, intent: seek_back, slots: {seconds: 10}}
+- {text: 跳到一小时二十分, intent: seek_to, slots: {position: 4800}}
+- {text: 跳到1:20:00, intent: seek_to, slots: {position: 4800}}
+- {text: 打开英文字幕, intent: subtitles_on, slots: {language: en}}
+- {text: 打開英文字幕, intent: subtitles_on, slots: {language: en}}
+- {text: 打开字幕, intent: subtitles_on}
+- {text: 把字幕关掉, intent: subtitles_off}
+- {text: 切换到日语配音, intent: audio, slots: {language: ja}}
+- {text: 换成原声, intent: audio, slots: {language: original}}
+- {text: 播放繁城之下第二集, intent: play, slots: {title: 繁城之下, episode: 2}}
+- {text: 播放三体第一季第十二集, intent: play, slots: {title: 三体, season: 1, episode: 12}}
+- {text: 在客厅电视上播放流浪地球, intent: play, slots: {title: 流浪地球, device: 客厅电视}}
+- {text: 我想看Breaking Bad, intent: play, slots: {title: Breaking Bad}}
+- {text: 继续看, intent: continue}
+- {text: 继续看狂飙, intent: continue, slots: {title: 狂飙}}
+- {text: 1.5倍速, intent: speed, slots: {speed: 1.5}}
+- {text: 调到一点五倍速, intent: speed, slots: {speed: 1.5}}
+- {text: 快一点, intent: speed, slots: {change: up}}
+- {text: 音量调到百分之五十, intent: volume, slots: {level: 50}}
+- {text: 大声一点, intent: volume, slots: {change: up}}
+- {text: 跳过片头, intent: skip, slots: {segment: intro}}
+- {text: 下一集, intent: next}
+- {text: 这是什么电影, intent: now_playing}
+- {text: 这部剧是谁演的, intent: cast}
+- {text: 还剩多久, intent: time_left}
+- {text: 几点结束, intent: end_time}
+- {text: 标记为已看, intent: mark_played}
+- {text: 切换到卧室电视, intent: transfer, slots: {device: 卧室电视}}
+- {text: 搜索诺兰的电影, intent: search, slots: {query: 诺兰的电影}}
+- {text: 回到首页, intent: go_home}
+- {text: 好的, confirmation: true, intent: "yes"}
+- {text: 算了, confirmation: true, intent: "no"}
+- {text: 第二个, results: 3, intent: choose, slots: {choice: 2}}
+- {text: 播放最后一个, results: 3, intent: choose, slots: {choice: -1}}
+- {text: 字幕延后两秒, intent: subtitle_offset, slots: {seconds: 2, direction: later}}
+- {text: 求沙丘2, intent: request, slots: {title: 沙丘2}}
+- {text: 随机播放我的收藏, intent: shuffle, slots: {kind: favorites}}
+- {text: 今天天气怎么样, intent: null}
+- {text: pause, languages: [zh-CN, en], intent: pause}

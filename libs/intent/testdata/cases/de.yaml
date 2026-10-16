@@ -1,0 +1,20 @@
+- {text: Pause, intent: pause}
+- {text: 30 Sekunden zurück, intent: seek_back, slots: {seconds: 30}}
+- {text: spring einundzwanzig Sekunden vor, intent: seek_forward, slots: {seconds: 21}}
+- {text: anderthalb Minuten vor, intent: seek_forward, slots: {seconds: 90}}
+- {text: eine halbe Stunde vor, intent: seek_forward, slots: {seconds: 1800}}
+- {text: Englische Untertitel an, intent: subtitles_on, slots: {language: en}}
+- {text: Untertitel aus, intent: subtitles_off}
+- {text: Originalton, intent: audio, slots: {language: original}}
+- {text: Spiele Dark Staffel 2 Folge 3, intent: play, slots: {title: Dark, season: 2, episode: 3}}
+- {text: spiele Das Boot im Wohnzimmer, intent: play, slots: {title: Das Boot, device: Wohnzimmer}}
+- {text: Weiterschauen, intent: continue}
+- {text: "Geschwindigkeit auf 1,5", intent: speed, slots: {speed: 1.5}}
+- {text: lauter, intent: volume, slots: {change: up}}
+- {text: Intro überspringen, intent: skip, slots: {segment: intro}}
+- {text: nächste Folge, intent: next}
+- {text: Was ist das?, intent: now_playing}
+- {text: Wie lange noch?, intent: time_left}
+- {text: ja, confirmation: true, intent: "yes"}
+- {text: den zweiten, results: 3, intent: choose, slots: {choice: 2}}
+- {text: Straßen von San Francisco suchen, intent: null}

@@ -1,0 +1,278 @@
+# Japanese.
+language: ja
+scripts: [kana, han]
+
+fillers:
+  prefix: [ねえ, ちょっと, mavio, ねえ mavio, あの]
+  suffix: [ください, 下さい, して, してください, お願い, お願いします, くれる, ちょうだい, ね, よ, て]
+
+lists:
+  play: [再生, 再生して, 見たい, 見る, 見せて, 流して, かけて, つけて]
+  subtitles: [字幕]
+  episode: [話, 回, エピソード]
+  season: [期, シーズン]
+  to: [に, へ]
+
+numbers:
+  words: {〇: 0, ゼロ: 0, 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9}
+  multipliers: {十: 10, 百: 100, 千: 1000, 万: 10000}
+  half: [半]
+  point: [点]
+  classifiers: [つ, 個, 本]
+
+units:
+  second: [秒]
+  minute: [分]
+  hour: [時間]
+
+ordinals:
+  words: {最後: -1, 最後の: -1, 一番目: 1, 最初: 1, 最初の: 1}
+  prefix: [第]
+  suffix: [番目, つ目, 番]
+
+percent: ["%", パーセント]
+speed: [倍, 倍速, x]
+
+languages:
+  ja: [日本語]
+  en: [英語]
+  zh: [中国語, 中文]
+  ko: [韓国語]
+  es: [スペイン語]
+  fr: [フランス語]
+  de: [ドイツ語]
+  it: [イタリア語]
+  pt: [ポルトガル語]
+  ru: [ロシア語]
+  th: [タイ語]
+
+device:
+  - "{device}で@"
+
+intents:
+  - intent: pause
+    patterns: ["一時停止", "ポーズ", "(止|と)めて", "[ちょっと]待って"]
+  - intent: resume
+    patterns: ["再開", "再生", "続けて", "再生を再開"]
+  - intent: stop
+    patterns: ["停止", "再生を(止|と)めて", "終了", "やめて"]
+  - intent: seek_back
+    patterns: ["{seconds:duration}(戻して|戻る|巻き戻して|巻き戻し)", "(巻き戻し|巻き戻して|戻して)"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["{seconds:duration}(進めて|進む|早送り|早送りして|飛ばして|スキップ)", "(早送り|早送りして|進めて)"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["{position:position}<to>(飛んで|移動|移動して|ジャンプ|飛ばして)"]
+  - intent: restart
+    patterns: ["(最初|はじめ)から[(再生|再生して|見る|見て)]"]
+  - intent: skip
+    patterns: ["(オープニング|イントロ|op)[を](スキップ|飛ばして)"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["(エンディング|クレジット|ed)[を](スキップ|飛ばして)"]
+    set: {segment: credits}
+  - intent: skip
+    patterns: ["(あらすじ|前回のあらすじ)[を](スキップ|飛ばして)"]
+    set: {segment: recap}
+  - intent: next
+    patterns: ["次の(話|エピソード|動画)[を][再生]", "次へ", "次"]
+  - intent: previous
+    patterns: ["前の(話|エピソード|動画)[を][再生]", "前へ"]
+  - intent: speed
+    patterns: ["{speed:speed}[で][(再生|再生して)][にして]", "(速度|再生速度)[を]{speed:speed}に[して]"]
+  - intent: speed
+    patterns: ["(速くして|早くして|もっと速く)"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(遅くして|ゆっくり[にして]|もっと遅く)"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["(通常速度|等速|普通の速さ)[(に戻して|にして)]"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["(音量|ボリューム)[を]{level:percent}[に][して]"]
+  - intent: volume
+    patterns: ["(音量|ボリューム|音)[を](上げて|大きくして)"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["(音量|ボリューム|音)[を](下げて|小さくして)"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["(ミュート|消音)[して|にして]"]
+  - intent: unmute
+    patterns: ["(ミュート解除|消音解除|音を出して)"]
+  - intent: fullscreen
+    patterns: ["(全画面|フルスクリーン)[(にして|表示)]"]
+
+  - intent: subtitles_on
+    patterns: ["字幕[を](オン|表示|つけて|出して)[にして]"]
+  - intent: subtitles_on
+    patterns: ["{language:language}[の]字幕[を][(オン|表示|つけて|出して)][にして]", "字幕[を]{language:language}に[(して|変えて|切り替えて)]"]
+  - intent: subtitles_off
+    patterns: ["字幕[を](オフ|消して|非表示)[にして]"]
+  - intent: audio
+    patterns: ["(音声|吹き替え|音声トラック)[を]{language:language}に[(して|変えて|切り替えて)]", "{language:language}[の](音声|吹き替え)[に][(して|変えて|切り替えて)]"]
+  - intent: audio
+    patterns: ["(原語|オリジナル)[の][音声][(に|で)][(して|変えて|切り替えて|再生)]"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["字幕[を]{seconds:duration}(遅らせて|遅く[して])"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["字幕[を]{seconds:duration}(早めて|早く[して])"]
+    set: {direction: earlier}
+
+  - intent: play
+    device: true
+    patterns: ["{title}[を]<play>", "{title}[の]第{season:count}<season>第{episode:count}<episode>[を]<play>", "{title}[の][第]{episode:count}<episode>[を]<play>", "{title}[の]{season:count}<season>[を]<play>"]
+  - intent: continue
+    device: true
+    patterns: ["{title}の続き[を][(再生|見る|見たい|見せて)]"]
+  - intent: continue
+    patterns: ["続き[を](見る|見たい|見せて)", "どこまで見た"]
+  - intent: shuffle
+    device: true
+    patterns: ["{query}[を]シャッフル[再生][して]", "シャッフル[再生]"]
+  - intent: shuffle
+    device: true
+    patterns: ["お気に入り[を](シャッフル[再生]|再生|流して)"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["{device}(で|に)(続きを見る|切り替えて|移して|続けて)"]
+
+  - intent: search
+    patterns: ["{query}[を](検索|探して|調べて)", "検索"]
+  - intent: open
+    patterns: ["{title}[の](詳細|ページ)[を][(開いて|見せて)]"]
+  - intent: go_home
+    patterns: ["(ホーム|トップ)[画面][<to>][(戻って|戻る|行って)]"]
+  - intent: go_back
+    patterns: ["(戻って|戻る)", "前の画面[に戻って]"]
+  - intent: open_settings
+    patterns: ["設定[を][(開いて|開く)]"]
+  - intent: open_library
+    patterns: ["{library}[の]ライブラリ[を][(開いて|開く)]"]
+
+  - intent: now_playing
+    patterns: ["(これ|この(映画|番組|作品|ドラマ))[は](何|なに)", "今(何|なに)を(再生|見て)(してる|いる|る)"]
+  - intent: cast
+    patterns: ["(誰|だれ)が出て(る|いる|ます)", "(出演者|キャスト)[は](誰|だれ)", "この人(誰|だれ)"]
+  - intent: time_left
+    patterns: ["(あと|残り)(どのくらい|どれくらい|何分)"]
+  - intent: end_time
+    patterns: ["(何時に|いつ)終わる"]
+
+  - intent: mark_played
+    patterns: ["(視聴済み|見た)に(して|する)"]
+  - intent: mark_unplayed
+    patterns: ["未視聴に(して|する)"]
+  - intent: favorite
+    patterns: ["お気に入りに(追加|入れて)"]
+  - intent: unfavorite
+    patterns: ["お気に入りから(削除|外して)"]
+  - intent: add_to_playlist
+    patterns: ["プレイリスト[の]{playlist}に追加", "プレイリストに追加"]
+
+  - intent: request
+    patterns: ["{title}を(リクエスト|ダウンロード)[して]"]
+
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(はい|うん|ええ|いいよ|お願い|お願いします|そう|オッケー|ok|大丈夫)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(いいえ|いや|ううん|やめて|キャンセル|やめる|違う|だめ)"]
+  - intent: choose
+    when: results
+    patterns: ["{choice:ordinal}[の][(やつ|もの)][を][(再生|選んで|開いて)]"]
+  - intent: more
+    when: results
+    patterns: ["(もっと|他には|他の|次のページ)"]
+  - intent: cancel
+    patterns: ["(キャンセル|やっぱりいい|なんでもない)"]
+  - intent: help
+    patterns: ["(ヘルプ|何ができる[の]|使い方)"]
+
+replies:
+  paused: 一時停止しました。
+  resumed: 再生します。
+  stopped: 停止しました。
+  seeked_back: "{duration}戻しました。"
+  seeked_forward: "{duration}進めました。"
+  seeked_to: "{position}に移動しました。"
+  restarted: 最初から再生します。
+  skipped: スキップしました。
+  no_segment: スキップできる部分はありません。
+  next: 次は「{title}」です。
+  previous: 「{title}」に戻ります。
+  no_next: これが最後です。
+  no_previous: これが最初です。
+  speed: "{speed}倍速です。"
+  volume: 音量 {level}%。
+  muted: ミュートしました。
+  unmuted: ミュートを解除しました。
+  fullscreen: 全画面にしました。
+  subtitles_on: 字幕をオンにしました。
+  subtitles_language: "{language}字幕をオンにしました。"
+  subtitles_off: 字幕をオフにしました。
+  no_subtitles: "{language}の字幕はありません。"
+  audio: "{language}の音声にしました。"
+  no_audio: "{language}の音声はありません。"
+  subtitle_offset: 字幕を{duration}{direction}。
+  earlier: 早めました
+  later: 遅らせました
+  playing: 「{title}」を再生します。
+  playing_on: "{device}で「{title}」を再生します。"
+  continuing: 「{title}」の続きを再生します。
+  nothing_to_continue: 続きのある作品はありません。
+  shuffling: "{query}をシャッフル再生します。"
+  transferred: "{device}に切り替えました。"
+  no_device: "「{device}」というデバイスが見つかりません。"
+  no_title: 「{title}」が見つかりません。
+  which: どれですか？{choices}
+  searching: 「{query}」の検索結果です。
+  opening: 「{title}」を開きます。
+  home: ホームです。
+  back: 戻ります。
+  settings: 設定です。
+  library: "{library}を開きます。"
+  now_playing: これは「{title}」です。
+  nothing_playing: 何も再生していません。
+  cast: 「{title}」の出演者は{cast}です。
+  time_left: 残り{remaining}です。
+  end_time: "{time}に終わります。"
+  marked_played: 視聴済みにしました。
+  marked_unplayed: 未視聴にしました。
+  favorited: お気に入りに追加しました。
+  unfavorited: お気に入りから削除しました。
+  added_to_playlist: "{playlist}に追加しました。"
+  no_playlist: "「{playlist}」というプレイリストが見つかりません。"
+  requested: 「{title}」をリクエストしました。
+  confirm: "{action}しますか？"
+  confirm_request: 「{title}」をリクエストしますか？
+  confirm_transfer: "{device}に切り替えますか？"
+  cancelled: わかりました、やめておきます。
+  not_understood: すみません、よくわかりませんでした。
+  not_allowed: その操作は許可されていません。
+  no_ai: AI なしでは簡単なことしかできません。たとえば：
+  failed: エラーが発生しました。
+  help: たとえばこう言えます：
+  listening: 聞いています…
+  more: ほかにもあります。
+  no_more: これで全部です。
+  hours: "{n}時間"
+  minutes: "{n}分"
+  seconds: "{n}秒"
+
+examples:
+  - 一時停止
+  - 三十秒戻して
+  - 英語の字幕をつけて
+  - 鬼滅の刃の第二話を再生
+  - 続きを見る
+  - これは何
+  - 誰が出てる
+  - あとどのくらい
+  - オープニングをスキップ
+  - 1.5倍速で再生

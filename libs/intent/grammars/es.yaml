@@ -1,0 +1,280 @@
+# Spanish. Accents are folded away before matching: "subtítulos" is
+# "subtitulos".
+language: es
+scripts: [latin]
+
+fillers:
+  prefix: [por favor, oye, oye mavio, mavio, puedes, podrias, quiero, me gustaria, ahora]
+  suffix: [por favor, gracias, ahora, mavio]
+
+lists:
+  play: [pon, ponme, reproduce, reproducir, quiero ver, ver, juega]
+  the: [el, la, los, las, un, una]
+  subtitles: [subtitulos, subtitulo, subs]
+  audio: [audio, idioma, doblaje, pista de audio]
+  it: [lo, la, el video, la pelicula, el episodio]
+  episode: [episodio, capitulo, cap]
+  season: [temporada]
+
+numbers:
+  words: {cero: 0, uno: 1, un: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15, dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, veintiuno: 21, veintidos: 22, veintitres: 23, veinticuatro: 24, veinticinco: 25, veintiseis: 26, veintisiete: 27, veintiocho: 28, veintinueve: 29, treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90, doscientos: 200, trescientos: 300, quinientos: 500}
+  multipliers: {cien: 100, ciento: 100, mil: 1000}
+  half: [medio, media]
+  and: [y]
+  point: [punto, coma]
+  articles: [un, una]
+
+units:
+  second: [segundo, segundos, seg, s]
+  minute: [minuto, minutos, min]
+  hour: [hora, horas, h]
+
+ordinals:
+  words: {primero: 1, primera: 1, primer: 1, segundo: 2, segunda: 2, tercero: 3, tercera: 3, tercer: 3, cuarto: 4, cuarta: 4, quinto: 5, quinta: 5, sexto: 6, sexta: 6, septimo: 7, octavo: 8, noveno: 9, decimo: 10, ultimo: -1, ultima: -1}
+  prefix: [numero, el numero, la numero]
+  suffix: [o, a]
+
+percent: ["%", por ciento]
+speed: [x, veces]
+
+languages:
+  es: [espanol, castellano]
+  en: [ingles]
+  zh: [chino, mandarin]
+  ja: [japones]
+  ko: [coreano]
+  fr: [frances]
+  de: [aleman]
+  it: [italiano]
+  pt: [portugues]
+  ru: [ruso]
+
+device:
+  - "@ en [<the>] {device}"
+
+intents:
+  - intent: pause
+    patterns: ["(pausa|pausar|pausalo|pausala|para|espera)", "pon [lo] en pausa"]
+  - intent: resume
+    patterns: ["(continua|continuar|sigue|seguir|reanuda|reanudar|reproduce|play)"]
+  - intent: stop
+    patterns: ["(deten|detener|detenlo|para la reproduccion|termina|salir)"]
+  - intent: seek_back
+    patterns: ["(retrocede|atrasa|regresa|vuelve|rebobina) [{seconds:duration}]", "{seconds:duration} (atras|para atras)", "(retrocede|atrasa|regresa|vuelve) {seconds:duration}"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["(adelanta|avanza|salta) [{seconds:duration}]", "{seconds:duration} (adelante|hacia adelante)"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["(ve|ir|salta|ve directo) (a|al minuto) {position:position}"]
+  - intent: restart
+    patterns: ["(empieza|empezar|reproduce|ponlo) (desde el principio|de nuevo|desde el inicio)", "(reinicia|reiniciar)"]
+  - intent: skip
+    patterns: ["(salta|saltar|omite|omitir) [la] (intro|introduccion|entrada|cabecera)"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["(salta|saltar|omite|omitir) [los] (creditos|final)"]
+    set: {segment: credits}
+  - intent: skip
+    patterns: ["(salta|saltar|omite|omitir) [el] (resumen|anteriormente)"]
+    set: {segment: recap}
+  - intent: next
+    patterns: ["[(pon|ve al|reproduce el)] (siguiente|proximo) [(episodio|capitulo|video)]"]
+  - intent: previous
+    patterns: ["[(pon|ve al|reproduce el)] (anterior) [(episodio|capitulo|video)]", "[(pon|ve al)] (episodio|capitulo) anterior"]
+  - intent: speed
+    patterns: ["[(pon|cambia)] [la] velocidad [a] {speed:speed}", "(reproduce|pon) [lo] a {speed:speed}", "{speed:speed} [velocidad]"]
+  - intent: speed
+    patterns: ["(mas rapido|acelera|aumenta la velocidad)"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(mas lento|mas despacio|reduce la velocidad)"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["velocidad normal"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["[(pon|cambia|sube|baja)] [el] volumen (a|al) {level:percent}"]
+  - intent: volume
+    patterns: ["(sube|subir|aumenta) [el] (volumen|sonido)", "mas (alto|fuerte)", "subelo"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["(baja|bajar|reduce) [el] (volumen|sonido)", "mas bajo", "bajalo"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["(silencio|silencia|silenciar|mutea|mute)", "quita el sonido"]
+  - intent: unmute
+    patterns: ["(quita el silencio|activa el sonido|pon el sonido)"]
+  - intent: fullscreen
+    patterns: ["[(pon|poner)] [en] pantalla completa"]
+
+  - intent: subtitles_on
+    patterns: ["(activa|pon|muestra|enciende) [los] <subtitles>", "<subtitles> (activados|si)"]
+  - intent: subtitles_on
+    patterns: ["(activa|pon|muestra|enciende) [los] <subtitles> en {language:language}", "<subtitles> en {language:language}", "(cambia|pon) [los] <subtitles> (a|en) {language:language}"]
+  - intent: subtitles_off
+    patterns: ["(quita|desactiva|apaga|oculta) [los] <subtitles>", "sin <subtitles>"]
+  - intent: audio
+    patterns: ["(cambia|pon) [el] <audio> (a|en) {language:language}", "(ponlo|ver) en {language:language}", "<audio> en {language:language}"]
+  - intent: audio
+    patterns: ["(cambia|pon) [el] <audio> (a|en) [la] version original", "(version original|audio original|idioma original)", "ponlo en version original"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["(retrasa|atrasa) [los] <subtitles> {seconds:duration}"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["adelanta [los] <subtitles> {seconds:duration}"]
+    set: {direction: earlier}
+
+  - intent: play
+    device: true
+    patterns: ["<play> {title}", "<play> {title} <season> {season:count} <episode> {episode:count}", "<play> [el] <episode> {episode:count} de {title}", "<play> {title} <episode> {episode:count}"]
+  - intent: continue
+    device: true
+    patterns: ["(sigue|seguir|continua|continuar) (viendo|con) {title}"]
+  - intent: continue
+    patterns: ["(sigue|seguir|continua|continuar) viendo", "donde me quede"]
+  - intent: shuffle
+    device: true
+    patterns: ["(pon|reproduce) {query} (en aleatorio|aleatoriamente|al azar)", "(aleatorio|modo aleatorio)"]
+  - intent: shuffle
+    device: true
+    patterns: ["(pon|reproduce) [mis] favoritos [(en aleatorio|al azar)]"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["(pasa|mueve|manda|envia|cambia) [lo] (a|al) [<the>] {device}", "(sigue|continua) (viendo|en) [<the>] {device}"]
+
+  - intent: search
+    patterns: ["(busca|buscar|encuentra) {query}", "buscar"]
+  - intent: open
+    patterns: ["(abre|muestra|ve a) [la pagina de] {title}", "(de que trata|que es) {title}"]
+  - intent: go_home
+    patterns: ["(ve|vuelve|ir) (al|a) inicio", "inicio", "pantalla de inicio"]
+  - intent: go_back
+    patterns: ["(atras|volver|regresa|vuelve)"]
+  - intent: open_settings
+    patterns: ["[(abre|ve a)] [la] (configuracion|ajustes)"]
+  - intent: open_library
+    patterns: ["(abre|muestra|ve a) [la] biblioteca [de] {library}"]
+
+  - intent: now_playing
+    patterns: ["(que es esto|que estoy viendo|que pelicula es esta|que serie es esta|que es lo que se esta reproduciendo)"]
+  - intent: cast
+    patterns: ["quien (sale|actua|aparece|esta) en (esto|esta [pelicula]|esta serie)", "(quien es|quienes son) (este|esta|el reparto)", "(reparto|elenco)"]
+  - intent: time_left
+    patterns: ["cuanto (falta|queda)", "cuanto tiempo (falta|queda)"]
+  - intent: end_time
+    patterns: ["(a que hora|cuando) (termina|acaba)"]
+
+  - intent: mark_played
+    patterns: ["(marca|marcar) [lo|la] como (visto|vista)"]
+  - intent: mark_unplayed
+    patterns: ["(marca|marcar) [lo|la] como no (visto|vista)"]
+  - intent: favorite
+    patterns: ["(agrega|anade|pon) [lo|la] (a|en) [mis] favoritos", "me gusta"]
+  - intent: unfavorite
+    patterns: ["(quita|elimina) [lo|la] de [mis] favoritos"]
+  - intent: add_to_playlist
+    patterns: ["(agrega|anade) [lo|la] a [la] lista [de reproduccion] {playlist}", "(agrega|anade) [lo|la] a una lista"]
+
+  - intent: request
+    patterns: ["(solicita|pide|descarga|consigue) {title}"]
+
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(si|claro|vale|de acuerdo|ok|correcto|hazlo|adelante|por supuesto)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(no|cancela|cancelar|olvidalo|mejor no|para)"]
+  - intent: choose
+    when: results
+    patterns: ["[(pon|abre|elige|el|la)] [el|la] {choice:ordinal}", "[el|la] {choice:ordinal}", "[el] numero {choice:count}"]
+  - intent: more
+    when: results
+    patterns: ["(mas|muestrame mas|que mas|otros|otras)"]
+  - intent: cancel
+    patterns: ["(cancela|cancelar|olvidalo|nada|eso es todo)"]
+  - intent: help
+    patterns: ["(ayuda|que puedes hacer|que puedo decir)"]
+
+replies:
+  paused: En pausa.
+  resumed: Reproduciendo.
+  stopped: Detenido.
+  seeked_back: Atrás {duration}.
+  seeked_forward: Adelante {duration}.
+  seeked_to: Saltando a {position}.
+  restarted: Desde el principio.
+  skipped: Saltado.
+  no_segment: No hay nada que saltar aquí.
+  next: A continuación, {title}.
+  previous: Volviendo a {title}.
+  no_next: Es el último.
+  no_previous: Es el primero.
+  speed: Velocidad {speed}×.
+  volume: Volumen {level} %.
+  muted: Silenciado.
+  unmuted: Sonido activado.
+  fullscreen: Pantalla completa.
+  subtitles_on: Subtítulos activados.
+  subtitles_language: Subtítulos en {language} activados.
+  subtitles_off: Subtítulos desactivados.
+  no_subtitles: No hay subtítulos en {language}.
+  audio: Audio en {language}.
+  no_audio: No hay audio en {language}.
+  subtitle_offset: Subtítulos {direction} {duration}.
+  earlier: adelantados
+  later: retrasados
+  playing: Reproduciendo {title}.
+  playing_on: Reproduciendo {title} en {device}.
+  continuing: Continuando {title}.
+  nothing_to_continue: No hay nada que continuar.
+  shuffling: Reproduciendo {query} en aleatorio.
+  transferred: Pasado a {device}.
+  no_device: No encuentro ningún dispositivo llamado {device}.
+  no_title: No encontré {title}.
+  which: "¿Cuál? {choices}"
+  searching: Esto es lo que encontré para {query}.
+  opening: Abriendo {title}.
+  home: Inicio.
+  back: Atrás.
+  settings: Configuración.
+  library: Abriendo {library}.
+  now_playing: Esto es {title}.
+  nothing_playing: No se está reproduciendo nada.
+  cast: En {title} actúan {cast}.
+  time_left: Quedan {remaining}.
+  end_time: Termina a las {time}.
+  marked_played: Marcado como visto.
+  marked_unplayed: Marcado como no visto.
+  favorited: Añadido a favoritos.
+  unfavorited: Quitado de favoritos.
+  added_to_playlist: Añadido a {playlist}.
+  no_playlist: No encuentro ninguna lista llamada {playlist}.
+  requested: "{title} solicitado."
+  confirm: "¿{action}?"
+  confirm_request: "¿Solicitar {title}?"
+  confirm_transfer: "¿Pasar la reproducción a {device}?"
+  cancelled: Vale, olvídalo.
+  not_understood: Perdona, no te he entendido.
+  not_allowed: No tienes permiso para hacer eso.
+  no_ai: "Sin IA solo puedo hacer cosas sencillas. Prueba con:"
+  failed: Algo salió mal.
+  help: "Puedes decir cosas como:"
+  listening: Escuchando…
+  more: Aquí hay más.
+  no_more: Eso es todo.
+  hours: "{n} h"
+  minutes: "{n} min"
+  seconds: "{n} s"
+
+examples:
+  - Pausa
+  - Retrocede 30 segundos
+  - Pon los subtítulos en inglés
+  - Pon La casa de papel temporada 2 episodio 3
+  - Sigue viendo
+  - ¿Qué es esto?
+  - ¿Cuánto falta?
+  - Salta la intro
+  - Velocidad a 1,5

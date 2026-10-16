@@ -1,0 +1,20 @@
+- {text: Pause, intent: pause}
+- {text: Recule de 30 secondes, intent: seek_back, slots: {seconds: 30}}
+- {text: avance d'une minute et demie, intent: seek_forward, slots: {seconds: 90}}
+- {text: avance de quatre vingt dix secondes, intent: seek_forward, slots: {seconds: 90}}
+- {text: avance de dix sept secondes, intent: seek_forward, slots: {seconds: 17}}
+- {text: Mets les sous-titres en anglais, intent: subtitles_on, slots: {language: en}}
+- {text: enlève les sous-titres, intent: subtitles_off}
+- {text: mets la VO, intent: audio, slots: {language: original}}
+- {text: Mets Lupin saison 2 épisode 3, intent: play, slots: {title: Lupin, season: 2, episode: 3}}
+- {text: lance Amélie sur la télé du salon, intent: play, slots: {title: Amélie, device: télé du salon}}
+- {text: Continue à regarder, intent: continue}
+- {text: "Mets la vitesse à 1,5", intent: speed, slots: {speed: 1.5}}
+- {text: plus fort, intent: volume, slots: {change: up}}
+- {text: Passe l'intro, intent: skip, slots: {segment: intro}}
+- {text: épisode suivant, intent: next}
+- {text: Qu'est-ce que c'est ?, intent: now_playing}
+- {text: Il reste combien de temps ?, intent: time_left}
+- {text: oui, confirmation: true, intent: "yes"}
+- {text: le deuxième, results: 3, intent: choose, slots: {choice: 2}}
+- {text: le 3e, results: 3, intent: choose, slots: {choice: 3}}

@@ -1,0 +1,305 @@
+# English. See README.md for the syntax of patterns and the intents' slots.
+language: en
+scripts: [latin]
+
+fillers:
+  prefix: [please, hey mavio, mavio, ok mavio, okay mavio, hey, ok, okay, can you, could you, would you, can you please, could you please, i want to, i'd like to, i would like to, let's, lets, just, now, go ahead and]
+  suffix: [please, for me, now, thanks, thank you, mavio]
+
+lists:
+  play: [play, watch, put on, start, start playing, i want to watch, let me watch]
+  the: [the, a, an]
+  subtitles: [subtitles, subtitle, subs, captions, closed captions, cc]
+  audio: [audio, audio track, language, soundtrack, dub, dubbing]
+  it: [it, this, that, the video, the movie, the show, the episode, playback, the playback]
+  back: [back, backward, backwards, rewind]
+  forward: [forward, forwards, ahead, fast forward, skip ahead, skip forward]
+  seconds: ["{seconds:duration}"]
+  favorites: [favorites, favourites, my favorites, my favourites, favorite, favourite]
+  episode: [episode, ep, chapter]
+  season: [season, series]
+
+numbers:
+  words: {zero: 0, oh: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90, a couple: 2, a couple of: 2, a few: 3}
+  multipliers: {hundred: 100, thousand: 1000}
+  half: [half]
+  and: [and]
+  point: [point, dot]
+  articles: [a, an, one]
+  classifiers: [of]
+
+units:
+  second: [second, seconds, sec, secs, s]
+  minute: [minute, minutes, min, mins, m]
+  hour: [hour, hours, hr, hrs, h]
+
+ordinals:
+  words: {first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10, last: -1, the last one: -1, last one: -1, top: 1}
+  prefix: [number, no]
+  suffix: [st, nd, rd, th, one]
+
+percent: [percent, "%", per cent]
+speed: [x, times, speed]
+
+languages:
+  en: [english]
+  zh: [chinese, mandarin, cantonese]
+  ja: [japanese]
+  ko: [korean]
+  es: [spanish, castilian]
+  fr: [french]
+  de: [german]
+  it: [italian]
+  pt: [portuguese]
+  ru: [russian]
+  ar: [arabic]
+  hi: [hindi]
+  th: [thai]
+  vi: [vietnamese]
+  nl: [dutch]
+  sv: [swedish]
+  pl: [polish]
+  tr: [turkish]
+
+device:
+  - "@ on [<the>] {device}"
+  - "@ in [<the>] {device}"
+  - "on [<the>] {device} @"
+
+intents:
+  # Playback.
+  - intent: pause
+    patterns: ["pause [<it>]", "hold on", "wait", "pause playback"]
+  - intent: resume
+    patterns: ["(resume|unpause|continue|keep going) [<it>]", "play", "go on"]
+  - intent: stop
+    patterns: ["stop [<it>]", "stop (playing|watching)", "(quit|exit|end) [<it>]"]
+  - intent: seek_back
+    patterns: ["(go|jump|skip|rewind|seek) <back> [by] <seconds>", "<seconds> <back>", "<back> [by] <seconds>", "(go|jump|skip|rewind) <back>", "rewind [<it>]", "back up [by] [<seconds>]"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["(go|jump|skip|seek) <forward> [by] <seconds>", "<seconds> <forward>", "(go|jump|skip) <forward>", "fast forward [<it>]", "skip <seconds>"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["(go|jump|skip|seek) to [the] {position:position} [mark]", "(start|play) from {position:position}"]
+  - intent: restart
+    patterns: ["(restart|start over) [<it>]", "(play|start) [<it>] from the (beginning|start)", "(go|jump) [back] to the (beginning|start)"]
+  - intent: skip
+    patterns: ["skip [the] (intro|opening|theme song)"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["skip [the] (credits|outro|ending)"]
+    set: {segment: credits}
+  - intent: skip
+    patterns: ["skip [the] (recap|previously on)"]
+    set: {segment: recap}
+  - intent: next
+    patterns: ["next [(episode|one|video|chapter|track)]", "(play|go to|skip to) [the] next [(episode|one|video)]", "skip [(this|it)] [(episode|one)]"]
+  - intent: previous
+    patterns: ["previous [(episode|one|video|chapter)]", "(play|go to) [the] (previous|last) (episode|one|video)", "go back an episode"]
+  - intent: speed
+    patterns: ["[(set|change)] [the] [playback] speed to {speed:speed}", "play at {speed:speed} [speed]", "{speed:speed} speed"]
+  - intent: speed
+    patterns: ["(speed up|faster|play faster|increase [the] speed)"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(slow down|slower|play slower|decrease [the] speed)"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["(normal speed|regular speed|reset [the] speed)", "play at normal speed"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["[(set|change|turn)] [the] volume to {level:percent}", "volume {level:percent}"]
+  - intent: volume
+    patterns: ["(turn|crank) [it] up", "(turn|crank) up the (volume|sound)", "(louder|volume up|increase [the] volume|raise [the] volume)"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["turn [it] down", "turn down the (volume|sound)", "(quieter|softer|volume down|decrease [the] volume|lower [the] volume)"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["mute [(it|the sound|the audio)]", "(turn|switch) off the (sound|audio)"]
+  - intent: unmute
+    patterns: ["unmute [(it|the sound|the audio)]", "(turn|switch) on the (sound|audio)"]
+  - intent: fullscreen
+    patterns: ["[(go|enter|make it|switch to)] (fullscreen|full screen)"]
+
+  # Streams.
+  - intent: subtitles_on
+    patterns: ["(turn|switch|put) on [the] <subtitles>", "(show|enable) [the] <subtitles>", "<subtitles> on"]
+  - intent: subtitles_on
+    patterns: ["[(turn|switch|put) on] {language:language} <subtitles>", "(show|enable|use) {language:language} <subtitles>", "<subtitles> in {language:language}", "(turn|switch|put) on [the] <subtitles> in {language:language}", "(switch|change) [the] <subtitles> to {language:language}"]
+  - intent: subtitles_off
+    patterns: ["(turn|switch|take) off [the] <subtitles>", "(hide|disable|remove) [the] <subtitles>", "<subtitles> off", "no <subtitles>"]
+  - intent: audio
+    patterns: ["(switch|change|set) [the] <audio> to {language:language}", "{language:language} (audio|dub|dubbing|track)", "(play|watch) [it] in {language:language}", "(switch|change) to {language:language} [(audio|dub|track)]"]
+  - intent: audio
+    patterns: ["(switch|change|set) [the] <audio> to [the] original [language]", "original (audio|language|soundtrack)", "(play|watch) [it] in the original [language]"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["(move|shift|delay) [the] <subtitles> [by] {seconds:duration} later", "<subtitles> {seconds:duration} later", "delay [the] <subtitles> [by] {seconds:duration}"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["(move|shift) [the] <subtitles> [by] {seconds:duration} earlier", "<subtitles> {seconds:duration} earlier", "<subtitles> (are|is) {seconds:duration} (late|behind)"]
+    set: {direction: earlier}
+
+  # What to play.
+  - intent: play
+    device: true
+    patterns: ["<play> {title}", "<play> {title} <season> {season:count} <episode> {episode:count}", "<play> {title} s {season:count} e {episode:count}", "<play> <season> {season:count} <episode> {episode:count} of {title}", "<play> <episode> {episode:count} of {title}", "<play> {title} <episode> {episode:count}", "<play> <season> {season:count} of {title}", "<play> {title} <season> {season:count}"]
+  - intent: continue
+    device: true
+    patterns: ["(continue|resume|keep) (watching|playing) {title}", "(continue|resume) {title}", "(pick up|carry on) (where i left off|) [(with|in)] {title}", "what was i watching"]
+  - intent: continue
+    patterns: ["(continue|resume|keep) (watching|playing)", "pick up where i left off", "where was i"]
+  - intent: shuffle
+    device: true
+    patterns: ["(shuffle|play random|play something random from) {query}", "play {query} on shuffle", "shuffle"]
+  - intent: shuffle
+    device: true
+    patterns: ["(shuffle|play) [from] <favorites>", "play something from <favorites>"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["(move|transfer|send|switch|cast|throw) [(it|this|playback)] to [<the>] {device}", "(continue|keep watching|watch) [(it|this)] on [<the>] {device}", "play [(it|this)] on [<the>] {device} instead"]
+
+  # Finding and going places.
+  - intent: search
+    patterns: ["(search|look|find) [for] {query}", "search [for]", "(show|find) me {query}", "(look up|search up) {query}"]
+  - intent: open
+    patterns: ["(open|show|go to) [the] (page|details) (of|for) {title}", "(open|go to) {title}", "tell me about {title}", "(what is|what's) {title} about"]
+  - intent: go_home
+    patterns: ["(go|take me) [back] home", "(go to|show|open) [the] home [(page|screen)]", "home [(page|screen)]"]
+  - intent: go_back
+    patterns: ["(go|take me) back", "back", "previous (page|screen)"]
+  - intent: open_settings
+    patterns: ["(open|show|go to) [the] settings", "settings", "preferences"]
+  - intent: open_library
+    patterns: ["(open|show|go to) [my] {library} library", "(open|show|go to) [the] library [called] {library}"]
+
+  # Questions.
+  - intent: now_playing
+    patterns: ["(what is|what's) (this|playing|on) [(movie|show|episode|video)]", "what (am i|are we) watching", "(what|which) (movie|show|episode) is this", "(what's|what is) the name of this [(movie|show|episode)]"]
+  - intent: cast
+    patterns: ["who (is|are|'s) in (this|it) [(movie|show|episode)]", "who (plays|starred|stars|acts) in (this|it)", "(who's|who is) (this|that) [(actor|actress|guy|woman|man)]", "(show|tell) [me] the cast", "who directed (this|it)"]
+  - intent: time_left
+    patterns: ["how (much|long) (is left|time is left|left|longer)", "how much (time|longer) [is] left", "(how long|when) until (it|this) ends"]
+  - intent: end_time
+    patterns: ["(when|what time) (does|will) (this|it) (end|finish|be over)", "(when|what time) (is|am) (this|it|i) (over|done|finished)"]
+
+  # What the user has watched and likes.
+  - intent: mark_played
+    patterns: ["mark [(it|this)] as (watched|played|seen)", "(i've|i have) (seen|watched) (this|it)", "mark {title} as (watched|played|seen)"]
+  - intent: mark_unplayed
+    patterns: ["mark [(it|this)] as (unwatched|unplayed|not watched|unseen)", "mark {title} as (unwatched|unplayed|not watched)"]
+  - intent: favorite
+    patterns: ["(add|put) [(it|this)] to [my] <favorites>", "(favorite|favourite|like|love) [(it|this)]", "(add|put) {title} to [my] <favorites>"]
+  - intent: unfavorite
+    patterns: ["(remove|take) [(it|this)] (from|out of) [my] <favorites>", "(unfavorite|unfavourite|unlike) [(it|this)]", "remove {title} from [my] <favorites>"]
+  - intent: add_to_playlist
+    patterns: ["(add|put) [(it|this)] to [my] [playlist] {playlist} [playlist]", "(add|put) [(it|this)] to [a] playlist"]
+
+  # Getting what the server lacks.
+  - intent: request
+    patterns: ["(request|get|download|add|i want) {title} [(please|for me)]", "(can you|could you) (get|find|download) {title}", "(i want|i'd like) to (watch|see) {title} but (it's|it is) not here"]
+
+  # The dialog.
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(yes|yeah|yep|yup|sure|ok|okay|do it|go ahead|confirm|correct|right|that's right|absolutely|of course)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(no|nope|nah|cancel|don't|do not|never mind|nevermind|stop|forget it)"]
+  - intent: choose
+    when: results
+    patterns: ["[(play|open|pick|choose|select|the)] [the] {choice:ordinal} [(one|option|result|of them)]", "{choice:ordinal}", "number {choice:count}", "[(play|open|pick|choose)] the {choice:ordinal} one"]
+  - intent: more
+    when: results
+    patterns: ["(more|show more|next page|show me more|what else|anything else|others|other ones)"]
+  - intent: cancel
+    patterns: ["(cancel|never mind|nevermind|forget it|stop listening|that's all|nothing)"]
+  - intent: help
+    patterns: ["help", "what can (you|i) (do|say)", "how does this work", "what can i ask [you]"]
+
+replies:
+  paused: Paused.
+  resumed: Playing.
+  stopped: Stopped.
+  seeked_back: Back {duration}.
+  seeked_forward: Forward {duration}.
+  seeked_to: Jumped to {position}.
+  restarted: From the beginning.
+  skipped: Skipped.
+  no_segment: There's nothing to skip here.
+  next: Next up, {title}.
+  previous: Back to {title}.
+  no_next: That's the last one.
+  no_previous: That's the first one.
+  speed: Speed {speed}×.
+  volume: Volume {level}%.
+  muted: Muted.
+  unmuted: Sound on.
+  fullscreen: Full screen.
+  subtitles_on: Subtitles on.
+  subtitles_language: "{language} subtitles on."
+  subtitles_off: Subtitles off.
+  no_subtitles: There are no {language} subtitles.
+  audio: Audio in {language}.
+  no_audio: There's no {language} audio.
+  subtitle_offset: Subtitles moved {duration} {direction}.
+  earlier: earlier
+  later: later
+  playing: Playing {title}.
+  playing_on: Playing {title} on {device}.
+  continuing: Picking up {title}.
+  nothing_to_continue: There's nothing to pick up.
+  shuffling: Shuffling {query}.
+  transferred: Moved to {device}.
+  no_device: I can't find a device called {device}.
+  no_title: I couldn't find {title}.
+  which: "Which one? {choices}"
+  searching: Here's what I found for {query}.
+  opening: Opening {title}.
+  home: Home.
+  back: Back.
+  settings: Settings.
+  library: Opening {library}.
+  now_playing: This is {title}.
+  nothing_playing: Nothing's playing.
+  cast: "{title} stars {cast}."
+  time_left: "{remaining} left."
+  end_time: It ends at {time}.
+  marked_played: Marked as watched.
+  marked_unplayed: Marked as unwatched.
+  favorited: Added to favorites.
+  unfavorited: Removed from favorites.
+  added_to_playlist: Added to {playlist}.
+  no_playlist: I can't find a playlist called {playlist}.
+  requested: Requested {title}.
+  confirm: "{action}?"
+  confirm_request: Request {title}?
+  confirm_transfer: Move playback to {device}?
+  cancelled: OK, never mind.
+  not_understood: Sorry, I didn't get that.
+  not_allowed: You're not allowed to do that.
+  no_ai: I can only do simple things without AI. Try one of these.
+  failed: Something went wrong.
+  help: "You can say things like:"
+  listening: Listening…
+  more: Here are some more.
+  no_more: That's all of them.
+  hours: "{n} h"
+  minutes: "{n} min"
+  seconds: "{n} s"
+
+examples:
+  - Pause
+  - Back 30 seconds
+  - Turn on English subtitles
+  - Play Severance season 2 episode 3
+  - Play The Matrix on the living room TV
+  - Continue watching
+  - What's this?
+  - Who's in this?
+  - How much time is left?
+  - Skip the intro
+  - Play at 1.5x speed
+  - Mark as watched

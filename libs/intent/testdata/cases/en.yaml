@@ -1,0 +1,45 @@
+- {text: Pause, intent: pause}
+- {text: "Hey Mavio, pause it please", intent: pause}
+- {text: Back 30 seconds, intent: seek_back, slots: {seconds: 30}}
+- {text: go back thirty seconds, intent: seek_back, slots: {seconds: 30}}
+- {text: rewind, intent: seek_back, slots: {seconds: 10}}
+- {text: skip ahead a minute and a half, intent: seek_forward, slots: {seconds: 90}}
+- {text: jump forward 2 minutes, intent: seek_forward, slots: {seconds: 120}}
+- {text: go to 1:20:00, intent: seek_to, slots: {position: 4800}}
+- {text: jump to 1 hour 20 minutes, intent: seek_to, slots: {position: 4800}}
+- {text: Turn on English subtitles, intent: subtitles_on, slots: {language: en}}
+- {text: subtitles in Spanish, intent: subtitles_on, slots: {language: es}}
+- {text: turn off subtitles, intent: subtitles_off}
+- {text: switch the audio to Japanese, intent: audio, slots: {language: ja}}
+- {text: original audio, intent: audio, slots: {language: original}}
+- {text: Play Severance season 2 episode 3, intent: play, slots: {title: Severance, season: 2, episode: 3}}
+- {text: play severance s02e03, intent: play, slots: {title: severance, season: 2, episode: 3}}
+- {text: Play The Matrix on the living room TV, intent: play, slots: {title: The Matrix, device: living room TV}}
+- {text: watch the office, intent: play, slots: {title: the office}}
+- {text: Continue watching, intent: continue}
+- {text: continue watching Breaking Bad, intent: continue, slots: {title: Breaking Bad}}
+- {text: play at 1.5x speed, intent: speed, slots: {speed: 1.5}}
+- {text: faster, intent: speed, slots: {change: up}}
+- {text: set the volume to fifty percent, intent: volume, slots: {level: 50}}
+- {text: turn it up, intent: volume, slots: {change: up}}
+- {text: skip the intro, intent: skip, slots: {segment: intro}}
+- {text: next episode, intent: next}
+- {text: What's this?, intent: now_playing}
+- {text: Who's in this?, intent: cast}
+- {text: how much time is left, intent: time_left}
+- {text: when does this end, intent: end_time}
+- {text: mark as watched, intent: mark_played}
+- {text: move it to the bedroom tv, intent: transfer, slots: {device: bedroom tv}}
+- {text: search for christopher nolan movies, intent: search, slots: {query: christopher nolan movies}}
+- {text: go home, intent: go_home}
+- {text: yes, confirmation: true, intent: "yes"}
+- {text: nope, confirmation: true, intent: "no"}
+- {text: the second one, results: 3, intent: choose, slots: {choice: 2}}
+- {text: number 3, results: 3, intent: choose, slots: {choice: 3}}
+- {text: the last one, results: 3, intent: choose, slots: {choice: -1}}
+- {text: 3rd, results: 3, intent: choose, slots: {choice: 3}}
+- {text: pause uh, intent: pause, partial: true}
+- {text: delay subtitles by 2 seconds, intent: subtitle_offset, slots: {seconds: 2, direction: later}}
+- {text: request Dune Part Two, intent: request, slots: {title: Dune Part Two}}
+- {text: shuffle my favorites, intent: shuffle, slots: {kind: favorites}}
+- {text: what's the weather like on mars tomorrow morning, intent: null}

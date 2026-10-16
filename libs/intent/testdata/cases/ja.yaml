@@ -1,0 +1,22 @@
+- {text: 一時停止, intent: pause}
+- {text: 止めてください, intent: pause}
+- {text: 三十秒戻して, intent: seek_back, slots: {seconds: 30}}
+- {text: 1分30秒進めて, intent: seek_forward, slots: {seconds: 90}}
+- {text: 英語の字幕をつけて, intent: subtitles_on, slots: {language: en}}
+- {text: 字幕を消して, intent: subtitles_off}
+- {text: 音声を日本語にして, intent: audio, slots: {language: ja}}
+- {text: 鬼滅の刃の第二話を再生, intent: play, slots: {title: 鬼滅の刃, episode: 2}}
+- {text: リビングのテレビで君の名はを再生して, intent: play, slots: {title: 君の名は, device: リビングのテレビ}}
+- {text: 続きを見る, intent: continue}
+- {text: 1.5倍速で再生, intent: speed, slots: {speed: 1.5}}
+- {text: 音量を上げて, intent: volume, slots: {change: up}}
+- {text: オープニングをスキップ, intent: skip, slots: {segment: intro}}
+- {text: 次のエピソード, intent: next}
+- {text: これは何, intent: now_playing}
+- {text: 誰が出てる, intent: cast}
+- {text: あとどのくらい, intent: time_left}
+- {text: はい, confirmation: true, intent: "yes"}
+- {text: 2番目, results: 3, intent: choose, slots: {choice: 2}}
+- {text: 最後のやつ, results: 3, intent: choose, slots: {choice: -1}}
+- {text: 字幕を2秒遅らせて, intent: subtitle_offset, slots: {seconds: 2, direction: later}}
+- {text: ﾎｰﾑに戻って, intent: go_home}

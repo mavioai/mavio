@@ -1,0 +1,274 @@
+# Korean. Every syllable is a token, so particles are matched as optional
+# syllables: [을|를], [으로|로].
+language: ko
+scripts: [hangul]
+
+fillers:
+  prefix: [저기, 야, 좀, mavio, 헤이 mavio]
+  suffix: [줘, 주세요, 줄래, 좀, 요, 해줘, 해 주세요, 해주세요]
+
+lists:
+  play: [틀어, 재생해, 재생, 보여, 보고 싶어, 켜]
+  obj: [을, 를]
+  to: [으로, 로]
+  episode: [화, 회, 편]
+
+numbers:
+  words: {영: 0, 공: 0, 일: 1, 이: 2, 삼: 3, 사: 4, 오: 5, 육: 6, 칠: 7, 팔: 8, 구: 9, 하나: 1, 한: 1, 둘: 2, 두: 2, 셋: 3, 세: 3, 넷: 4, 네: 4, 다섯: 5, 여섯: 6, 일곱: 7, 여덟: 8, 아홉: 9, 열: 10, 스물: 20, 스무: 20, 서른: 30, 마흔: 40, 쉰: 50}
+  multipliers: {십: 10, 백: 100, 천: 1000, 만: 10000}
+  half: [반]
+  point: [점]
+  classifiers: [개]
+
+units:
+  second: [초]
+  minute: [분]
+  hour: [시간]
+
+ordinals:
+  words: {첫번째: 1, 첫 번째: 1, 첫째: 1, 마지막: -1, 마지막 거: -1, 마지막꺼: -1}
+  suffix: [번째, 째, 번]
+
+percent: ["%", 퍼센트, 프로]
+speed: [배, 배속, x]
+
+languages:
+  ko: [한국어, 한국말]
+  en: [영어]
+  ja: [일본어]
+  zh: [중국어]
+  es: [스페인어]
+  fr: [프랑스어, 불어]
+  de: [독일어]
+  it: [이탈리아어]
+  pt: [포르투갈어]
+  ru: [러시아어]
+  th: [태국어]
+
+device:
+  - "{device}에서 @"
+
+intents:
+  - intent: pause
+    patterns: ["(일시정지|일시 정지|멈춰|정지|잠깐|잠깐만)[해]"]
+  - intent: resume
+    patterns: ["(다시 재생|재생|계속|이어서 재생|계속 재생)[해]"]
+  - intent: stop
+    patterns: ["(그만|재생 중지|종료|끝내|중지)[해]"]
+  - intent: seek_back
+    patterns: ["{seconds:duration}[만] (뒤로|되감기)[해]", "(뒤로|되감기)[해]"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["{seconds:duration}[만] (앞으로|빨리 감기|건너뛰기|넘겨)[해]", "빨리 감기[해]"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["{position:position}[<to>] (이동|가|점프)[해]"]
+  - intent: restart
+    patterns: ["처음부터 [다시] (재생|보기|봐|틀어)[해]"]
+  - intent: skip
+    patterns: ["(오프닝|인트로)[<obj>] (건너뛰어|건너뛰기|스킵|넘겨)[해]"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["(엔딩|크레딧)[<obj>] (건너뛰어|건너뛰기|스킵|넘겨)[해]"]
+    set: {segment: credits}
+  - intent: next
+    patterns: ["다음 (화|편|에피소드|회)[<obj>] [<play>]", "다음[(으로|거)]"]
+  - intent: previous
+    patterns: ["이전 (화|편|에피소드|회)[<obj>] [<play>]", "이전[(으로|거)]"]
+  - intent: speed
+    patterns: ["{speed:speed}[<to>] [재생][해]", "(속도|재생 속도)[를] {speed:speed}[<to>] [(해|바꿔)]"]
+  - intent: speed
+    patterns: ["(빠르게|더 빨리)[해]"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(느리게|더 천천히|천천히)[해]"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["(정상 속도|원래 속도)[<to>][해]"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["(볼륨|음량|소리)[<obj>] {level:percent}[<to>] [(맞춰|해|설정해)]"]
+  - intent: volume
+    patterns: ["(볼륨|음량|소리)[<obj>] (키워|올려|크게 해)", "소리 크게"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["(볼륨|음량|소리)[<obj>] (줄여|낮춰|작게 해)", "소리 작게"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["(음소거|소리 꺼)[해]"]
+  - intent: unmute
+    patterns: ["(음소거 해제|소리 켜)[해]"]
+  - intent: fullscreen
+    patterns: ["전체 화면[<to>][해]"]
+
+  - intent: subtitles_on
+    patterns: ["자막[<obj>] (켜|표시해)"]
+  - intent: subtitles_on
+    patterns: ["{language:language} 자막[<obj>] [(켜|표시해|틀어)]", "자막[<obj>] {language:language}[<to>] (바꿔|변경해|해)"]
+  - intent: subtitles_off
+    patterns: ["자막[<obj>] (꺼|숨겨|없애)"]
+  - intent: audio
+    patterns: ["(음성|오디오|더빙)[<obj>] {language:language}[<to>] (바꿔|변경해|해)", "{language:language} (음성|더빙)[<to>] [(바꿔|틀어)]"]
+  - intent: audio
+    patterns: ["원어[<to>] [(바꿔|틀어|재생해)]", "원래 (음성|언어)[<to>] [바꿔]"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["자막[<obj>] {seconds:duration} (늦춰|뒤로)"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["자막[<obj>] {seconds:duration} (앞당겨|앞으로)"]
+    set: {direction: earlier}
+
+  - intent: play
+    device: true
+    patterns: ["{title}[<obj>] <play>", "{title} 시즌 {season:count} {episode:count}<episode>[<obj>] <play>", "{title} {season:count}시즌 {episode:count}<episode>[<obj>] <play>", "{title} {episode:count}<episode>[<obj>] <play>"]
+  - intent: continue
+    device: true
+    patterns: ["{title} 이어서 (보기|봐|재생해)"]
+  - intent: continue
+    patterns: ["이어서 (보기|봐)", "보던 거 [이어서] (틀어|재생해)"]
+  - intent: shuffle
+    device: true
+    patterns: ["{query} (셔플|랜덤)[<to>] [재생][해]", "(셔플|랜덤)[<to>] [재생][해]"]
+  - intent: shuffle
+    device: true
+    patterns: ["즐겨찾기[<obj>] (셔플|랜덤)[<to>] [재생][해]"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["{device}[<to>] (옮겨|전환해)", "{device}에서 이어서 (봐|재생해)"]
+
+  - intent: search
+    patterns: ["{query}[<obj>] (검색해|찾아)", "검색"]
+  - intent: open
+    patterns: ["{title} (정보|상세|페이지)[<obj>] [(열어|보여)]"]
+  - intent: go_home
+    patterns: ["홈[ 화면][<to>][(가|돌아가)]"]
+  - intent: go_back
+    patterns: ["(뒤로 가기|뒤로 가|이전 화면)[<to>]"]
+  - intent: open_settings
+    patterns: ["설정[<obj>][(열어|보여)]"]
+  - intent: open_library
+    patterns: ["{library} (라이브러리|보관함)[<obj>][(열어|보여)]"]
+
+  - intent: now_playing
+    patterns: ["(이거|이건|이 (영화|드라마|프로그램)) 뭐[(야|예요|지)]", "지금 뭐 나와"]
+  - intent: cast
+    patterns: ["(누가|누구) 나와", "(출연자|배우|출연진)[(는|은)] 누구[야]", "이 사람 누구[야]"]
+  - intent: time_left
+    patterns: ["(얼마나|몇 분) 남았어", "남은 시간[(은|이)] [얼마야]"]
+  - intent: end_time
+    patterns: ["(몇 시에|언제) 끝나"]
+
+  - intent: mark_played
+    patterns: ["시청 완료[<to>] 표시[해]", "봤다고 표시[해]"]
+  - intent: mark_unplayed
+    patterns: ["(안 본 것|미시청)[<to>] 표시[해]"]
+  - intent: favorite
+    patterns: ["즐겨찾기에 (추가|넣어)[해]"]
+  - intent: unfavorite
+    patterns: ["즐겨찾기에서 (삭제|빼)[해]"]
+  - intent: add_to_playlist
+    patterns: ["{playlist} 재생목록에 추가[해]", "재생목록에 추가[해]"]
+
+  - intent: request
+    patterns: ["{title}[<obj>] (요청해|다운로드해|받아)"]
+
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(네|예|응|그래|좋아|맞아|확인|오케이|그렇게 해)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(아니|아니요|아니오|취소|됐어|싫어|하지 마)"]
+  - intent: choose
+    when: results
+    patterns: ["{choice:ordinal}[ 거][<obj>] [(틀어|재생해|선택해)]"]
+  - intent: more
+    when: results
+    patterns: ["(더 보여|더|다른 거|다음 페이지)"]
+  - intent: cancel
+    patterns: ["(취소|됐어|아무것도 아니야)"]
+  - intent: help
+    patterns: ["(도움말|뭘 할 수 있어|사용법)"]
+
+replies:
+  paused: 일시정지했어요.
+  resumed: 재생할게요.
+  stopped: 정지했어요.
+  seeked_back: "{duration} 뒤로 갔어요."
+  seeked_forward: "{duration} 앞으로 갔어요."
+  seeked_to: "{position}(으)로 이동했어요."
+  restarted: 처음부터 재생할게요.
+  skipped: 건너뛰었어요.
+  no_segment: 건너뛸 부분이 없어요.
+  next: "다음은 {title}이에요."
+  previous: "{title}(으)로 돌아갈게요."
+  no_next: 마지막이에요.
+  no_previous: 처음이에요.
+  speed: "{speed}배속이에요."
+  volume: 볼륨 {level}%.
+  muted: 음소거했어요.
+  unmuted: 음소거를 해제했어요.
+  fullscreen: 전체 화면이에요.
+  subtitles_on: 자막을 켰어요.
+  subtitles_language: "{language} 자막을 켰어요."
+  subtitles_off: 자막을 껐어요.
+  no_subtitles: "{language} 자막이 없어요."
+  audio: "{language} 음성으로 바꿨어요."
+  no_audio: "{language} 음성이 없어요."
+  subtitle_offset: "자막을 {duration} {direction}."
+  earlier: 앞당겼어요
+  later: 늦췄어요
+  playing: "{title} 재생할게요."
+  playing_on: "{device}에서 {title} 재생할게요."
+  continuing: "{title} 이어서 재생할게요."
+  nothing_to_continue: 이어서 볼 게 없어요.
+  shuffling: "{query} 셔플 재생할게요."
+  transferred: "{device}(으)로 옮겼어요."
+  no_device: "{device}라는 기기를 찾을 수 없어요."
+  no_title: "{title}을(를) 찾을 수 없어요."
+  which: "어느 거요? {choices}"
+  searching: "{query} 검색 결과예요."
+  opening: "{title} 열게요."
+  home: 홈이에요.
+  back: 뒤로 갈게요.
+  settings: 설정이에요.
+  library: "{library} 열게요."
+  now_playing: "{title}이에요."
+  nothing_playing: 재생 중인 게 없어요.
+  cast: "{title} 출연진은 {cast}예요."
+  time_left: "{remaining} 남았어요."
+  end_time: "{time}에 끝나요."
+  marked_played: 시청 완료로 표시했어요.
+  marked_unplayed: 안 본 것으로 표시했어요.
+  favorited: 즐겨찾기에 추가했어요.
+  unfavorited: 즐겨찾기에서 뺐어요.
+  added_to_playlist: "{playlist}에 추가했어요."
+  no_playlist: "{playlist}라는 재생목록을 찾을 수 없어요."
+  requested: "{title}을(를) 요청했어요."
+  confirm: "{action}할까요?"
+  confirm_request: "{title}을(를) 요청할까요?"
+  confirm_transfer: "{device}(으)로 옮길까요?"
+  cancelled: 알겠어요, 그만둘게요.
+  not_understood: 죄송해요, 잘 모르겠어요.
+  not_allowed: 그 작업은 허용되지 않아요.
+  no_ai: "AI 없이는 간단한 것만 할 수 있어요. 예를 들면:"
+  failed: 문제가 생겼어요.
+  help: "이렇게 말해 보세요:"
+  listening: 듣고 있어요…
+  more: 더 있어요.
+  no_more: 이게 다예요.
+  hours: "{n}시간"
+  minutes: "{n}분"
+  seconds: "{n}초"
+
+examples:
+  - 일시정지
+  - 30초 뒤로
+  - 영어 자막 켜줘
+  - 오징어 게임 2화 틀어줘
+  - 이어서 보기
+  - 이거 뭐야
+  - 누가 나와
+  - 얼마나 남았어
+  - 오프닝 건너뛰어
+  - 1.5배속으로 재생해

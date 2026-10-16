@@ -69,7 +69,9 @@ jobs:
       # Rust comes from libs/client-rust/rust-toolchain.toml through rustup.
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: libs/client-rust
+          workspaces: |
+            libs/client-rust
+            libs/intent
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - uses: nrwl/nx-set-shas@v4
@@ -109,7 +111,9 @@ jobs:
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: libs/client-rust
+          workspaces: |
+            libs/client-rust
+            libs/intent
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: pnpm install --frozen-lockfile
       - uses: ./.github/actions/go-cache
@@ -152,7 +156,9 @@ jobs:
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: libs/client-rust
+          workspaces: |
+            libs/client-rust
+            libs/intent
           # The key changes with the profile and the platforms, whose builds
           # the cache keeps.
           key: ${{ env.MAVIO_CORE_PROFILE }}-${{ matrix.platforms }}
@@ -203,7 +209,9 @@ jobs:
       - uses: jdx/mise-action@v2
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: libs/client-rust
+          workspaces: |
+            libs/client-rust
+            libs/intent
           # The key changes with the profile, whose builds the cache keeps.
           key: ${{ env.MAVIO_CORE_PROFILE }}
           save-if: ${{ github.ref == 'refs/heads/main' }}

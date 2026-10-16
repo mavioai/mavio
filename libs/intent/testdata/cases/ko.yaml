@@ -1,0 +1,18 @@
+- {text: 일시정지, intent: pause}
+- {text: 30초 뒤로, intent: seek_back, slots: {seconds: 30}}
+- {text: 삼십 초 뒤로 가줘, intent: seek_back, slots: {seconds: 30}, partial: true}
+- {text: 열다섯 초 앞으로, intent: seek_forward, slots: {seconds: 15}}
+- {text: 영어 자막 켜줘, intent: subtitles_on, slots: {language: en}}
+- {text: 자막 꺼줘, intent: subtitles_off}
+- {text: 오징어 게임 2화 틀어줘, intent: play, slots: {title: 오징어 게임, episode: 2}}
+- {text: 거실 TV에서 기생충 틀어줘, intent: play, slots: {title: 기생충, device: 거실 TV}}
+- {text: 이어서 보기, intent: continue}
+- {text: 1.5배속으로 재생해, intent: speed, slots: {speed: 1.5}}
+- {text: 볼륨 올려, intent: volume, slots: {change: up}}
+- {text: 오프닝 건너뛰어, intent: skip, slots: {segment: intro}}
+- {text: 이거 뭐야, intent: now_playing}
+- {text: 누가 나와, intent: cast}
+- {text: 얼마나 남았어, intent: time_left}
+- {text: 네, confirmation: true, intent: "yes"}
+- {text: 두 번째, results: 3, intent: choose, slots: {choice: 2}}
+- {text: 마지막 거 틀어줘, results: 3, intent: choose, slots: {choice: -1}}

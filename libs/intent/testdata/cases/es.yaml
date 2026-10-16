@@ -1,0 +1,19 @@
+- {text: Pausa, intent: pause}
+- {text: Retrocede 30 segundos, intent: seek_back, slots: {seconds: 30}}
+- {text: adelanta un minuto y medio, intent: seek_forward, slots: {seconds: 90}}
+- {text: avanza treinta y cinco segundos, intent: seek_forward, slots: {seconds: 35}}
+- {text: Pon los subtítulos en inglés, intent: subtitles_on, slots: {language: en}}
+- {text: quita los subtítulos, intent: subtitles_off}
+- {text: cambia el audio a japonés, intent: audio, slots: {language: ja}}
+- {text: Pon La casa de papel temporada 2 episodio 3, intent: play, slots: {title: La casa de papel, season: 2, episode: 3}}
+- {text: pon Coco en la tele del salón, intent: play, slots: {title: Coco, device: tele del salón}}
+- {text: Sigue viendo, intent: continue}
+- {text: "Velocidad a 1,5", intent: speed, slots: {speed: 1.5}}
+- {text: sube el volumen, intent: volume, slots: {change: up}}
+- {text: Salta la intro, intent: skip, slots: {segment: intro}}
+- {text: siguiente episodio, intent: next}
+- {text: ¿Qué es esto?, intent: now_playing}
+- {text: ¿Cuánto falta?, intent: time_left}
+- {text: sí, confirmation: true, intent: "yes"}
+- {text: el segundo, results: 3, intent: choose, slots: {choice: 2}}
+- {text: busca películas de Almodóvar, intent: search, slots: {query: películas de Almodóvar}}

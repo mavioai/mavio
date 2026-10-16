@@ -1,0 +1,293 @@
+# Chinese, in Simplified characters: requests in Traditional characters are
+# folded to Simplified before matching, and answers to zh-Hant, zh-TW, zh-HK
+# and zh-MO are written in Traditional characters.
+language: zh
+scripts: [han]
+
+fillers:
+  prefix: [请, 帮我, 给我, 麻烦你, 麻烦, 我想, 我要, 能不能, 可不可以, 可以, 嘿, 你好, 喂, mavio, 嘿 mavio, 你好 mavio, 把, 现在, 先]
+  suffix: [吧, 一下, 吗, 了, 呢, 啊, 呀, 谢谢, 好吗, 好不好, 可以吗, 行吗, 一下吧]
+
+lists:
+  play: [播放, 播, 放, 看, 我想看, 我要看, 来一部, 来一集, 打开播放]
+  it: [它, 这个, 视频, 电影, 节目, 这集]
+  subtitles: [字幕]
+  episode: [集, 话]
+  season: [季, 部]
+
+numbers:
+  words: {零: 0, 〇: 0, 一: 1, 幺: 1, 二: 2, 两: 2, 俩: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9}
+  multipliers: {十: 10, 百: 100, 千: 1000, 万: 10000}
+  half: [半]
+  point: [点]
+  classifiers: [个, 部]
+
+units:
+  second: [秒, 秒钟]
+  minute: [分, 分钟]
+  hour: [小时, 钟头]
+
+ordinals:
+  words: {最后一个: -1, 最后: -1, 最后那个: -1, 头一个: 1}
+  prefix: [第]
+
+percent: ["%"]
+speed: [倍, 倍速, x]
+
+languages:
+  zh: [中文, 汉语, 国语, 普通话, 华语, 粤语, 简体中文, 繁体中文, 简体, 繁体]
+  en: [英语, 英文]
+  ja: [日语, 日文]
+  ko: [韩语, 韩文, 朝鲜语]
+  es: [西班牙语, 西语]
+  fr: [法语, 法文]
+  de: [德语, 德文]
+  it: [意大利语]
+  pt: [葡萄牙语]
+  ru: [俄语, 俄文]
+  ar: [阿拉伯语]
+  hi: [印地语]
+  th: [泰语]
+  vi: [越南语]
+
+device:
+  - "(在|用){device}[上]@"
+  - "@(到|在){device}[上]"
+
+intents:
+  # Playback.
+  - intent: pause
+    patterns: ["暂停[播放]", "停一下", "停一停", "等一下", "等等", "暂停一下"]
+  - intent: resume
+    patterns: ["继续[播放]", "播放", "接着(放|播)", "恢复播放", "取消暂停"]
+  - intent: stop
+    patterns: ["停止[播放]", "(关掉|退出|结束)[播放]", "别(放|播)了", "不看了"]
+  - intent: seek_back
+    patterns: ["(后退|倒退|快退|往回|回退|倒回去|往回倒|退)[{seconds:duration}]"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["(快进|前进|往后|往前跳|跳过|进)[{seconds:duration}]"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["(跳到|跳转到|转到|拖到|到){position:position}", "从{position:position}(开始|播放|放)"]
+  - intent: restart
+    patterns: ["从头(开始|播放|放|看)", "重新(播放|开始|放)", "重播", "回到开头"]
+  - intent: skip
+    patterns: ["跳过(片头|开头|主题曲)"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["跳过(片尾|结尾|演职员表)"]
+    set: {segment: credits}
+  - intent: skip
+    patterns: ["跳过(前情提要|回顾)"]
+    set: {segment: recap}
+  - intent: next
+    patterns: ["下一(集|个|部|话)", "(播放|放|看|换)下一(集|个|话)"]
+  - intent: previous
+    patterns: ["上一(集|个|部|话)", "(播放|放|看|换)上一(集|个|话)"]
+  - intent: speed
+    patterns: ["[(调到|调成|切到|设为|设成|改成|用)]{speed:speed}[播放]", "(倍速|播放速度|速度)(调到|调成|设为|设成|改成){speed:speed}"]
+  - intent: speed
+    patterns: ["(加速|快一点|快点|调快[一点]|播放快[一]点)"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(减速|慢一点|慢点|调慢[一点]|播放慢[一]点)"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["(正常速度|恢复正常速度|原速|恢复原速|正常倍速)"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["(音量|声音)(调到|调成|设为|设成|改成)[百分之]{level:percent}", "音量[百分之]{level:percent}"]
+  - intent: volume
+    patterns: ["(大声[一]点|声音大[一]点|调大音量|(音量|声音)(调大|加大|大[一]点)|音量加)"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["(小声[一]点|声音小[一]点|调小音量|(音量|声音)(调小|减小|小[一]点)|音量减)"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["静音", "(关掉|关闭)声音"]
+  - intent: unmute
+    patterns: ["取消静音", "(打开|开)声音"]
+  - intent: fullscreen
+    patterns: ["[(切换到|进入)]全屏[(播放|显示)]"]
+
+  # Streams.
+  - intent: subtitles_on
+    patterns: ["(打开|开启|显示|开)字幕", "字幕(打开|开启|开)"]
+  - intent: subtitles_on
+    patterns: ["(打开|开启|显示|开|切换到|换成|用)[成]{language:language}字幕", "{language:language}字幕", "字幕(切换到|换成|改成|调成|用){language:language}"]
+  - intent: subtitles_off
+    patterns: ["(关闭|关掉|关|隐藏|去掉|不要)字幕", "字幕(关闭|关掉|关了)"]
+  - intent: audio
+    patterns: ["(切换到|换成|改成|用|听){language:language}[(配音|音轨|发音|版)]", "(音轨|配音|语言)(切换到|换成|改成|调成){language:language}", "{language:language}(配音|音轨)"]
+  - intent: audio
+    patterns: ["(切换到|换成|改成|听)原声", "原声[(音轨|配音)]", "(音轨|配音)(切换到|换成|改成)原声"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["字幕(延后|推迟|往后|晚)[了]{seconds:duration}", "字幕快了{seconds:duration}"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["字幕(提前|往前|早)[了]{seconds:duration}", "字幕慢了{seconds:duration}"]
+    set: {direction: earlier}
+
+  # What to play.
+  - intent: play
+    device: true
+    patterns: ["<play>{title}", "<play>{title}第{season:count}<season>第{episode:count}<episode>", "<play>{title}第{episode:count}<episode>", "<play>{title}第{season:count}<season>", "<play>{title}s{season:count}e{episode:count}"]
+  - intent: continue
+    device: true
+    patterns: ["(继续|接着)(看|播放|放){title}"]
+  - intent: continue
+    patterns: ["(继续|接着)看", "[我]上次看到哪[了|里]", "看到哪了"]
+  - intent: shuffle
+    device: true
+    patterns: ["随机(播放|放|看)[(一些|点)]{query}", "随机播放", "随便放点{query}"]
+  - intent: shuffle
+    device: true
+    patterns: ["[随机](播放|放)[我的]收藏[的]", "随机播放[我的]收藏[的]"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["(切换|转移|投|投屏|移|换|转)到{device}[上][(播放|看|放)]", "在{device}上(继续|接着)(看|播放|放)"]
+
+  # Finding and going places.
+  - intent: search
+    patterns: ["(搜索|搜|查找|找|查)[一下]{query}", "搜索"]
+  - intent: open
+    patterns: ["打开{title}[的(详情|页面)]", "(介绍一下|讲讲|说说){title}", "{title}讲的是什么"]
+  - intent: go_home
+    patterns: ["[(回到|返回|去|打开)](首页|主页)"]
+  - intent: go_back
+    patterns: ["返回[(上一页|上一级)]", "回去", "上一页"]
+  - intent: open_settings
+    patterns: ["[(打开|进入|去)]设置"]
+  - intent: open_library
+    patterns: ["(打开|去|进入)[我的]{library}(库|媒体库|资料库)"]
+
+  # Questions.
+  - intent: now_playing
+    patterns: ["这是什么[(电影|剧|节目|片子|视频)]", "(现在|正在)(放|播)的是什么", "这(部|集|个)(电影|剧|节目|片子)叫什么[名字]", "我在看什么"]
+  - intent: cast
+    patterns: ["这[(部|个|集)][(电影|剧|片子|节目)][是]谁演的", "(演员|主演)(是谁|有谁|都有谁|有哪些)", "这个(人|演员)是谁", "谁导演的"]
+  - intent: time_left
+    patterns: ["还(剩|有)多(久|长时间|少时间)", "还剩几分钟", "(还要|还有)多久(结束|放完|看完)"]
+  - intent: end_time
+    patterns: ["(几点|什么时候)(结束|放完|看完|播完)"]
+
+  # What the user has watched and likes.
+  - intent: mark_played
+    patterns: ["标记[为]已(看|看过|播放)", "我看过[这个|这部]", "标记[为]看过"]
+  - intent: mark_unplayed
+    patterns: ["标记[为]未(看|看过|播放)", "标记[为]没看过"]
+  - intent: favorite
+    patterns: ["(收藏|加入收藏|添加到收藏|加到收藏)[(这个|这部|它)]", "喜欢这(个|部)"]
+  - intent: unfavorite
+    patterns: ["取消收藏[(这个|这部|它)]", "从收藏(里|中)(移除|删除|去掉)"]
+  - intent: add_to_playlist
+    patterns: ["(加到|添加到|加入)[播放列表]{playlist}[播放列表]", "(加到|加入|添加到)播放列表"]
+
+  # Getting what the server lacks.
+  - intent: request
+    patterns: ["(请求|求片|下载|我想要)[一下]{title}", "求{title}"]
+
+  # The dialog.
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(是|是的|对|对的|好|好的|可以|行|确定|没错|嗯|嗯嗯|要|对啊|好啊|没问题)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(不|不要|不是|不用|不了|取消|算了|别|不行|否)"]
+  - intent: choose
+    when: results
+    patterns: ["[(播放|放|打开|选|要|看)]{choice:ordinal}"]
+  - intent: more
+    when: results
+    patterns: ["(更多|还有(吗|呢|别的吗)|换一批|下一页|再来点|其他的)"]
+  - intent: cancel
+    patterns: ["(取消|算了|没事了|不用了|没什么)"]
+  - intent: help
+    patterns: ["(帮助|你能做什么|你会什么|我能说什么|怎么用)"]
+
+replies:
+  paused: 已暂停。
+  resumed: 继续播放。
+  stopped: 已停止。
+  seeked_back: 后退 {duration}。
+  seeked_forward: 快进 {duration}。
+  seeked_to: 跳到 {position}。
+  restarted: 从头播放。
+  skipped: 已跳过。
+  no_segment: 这里没有可以跳过的内容。
+  next: 下一个：{title}。
+  previous: 回到 {title}。
+  no_next: 已经是最后一个了。
+  no_previous: 已经是第一个了。
+  speed: "{speed} 倍速。"
+  volume: 音量 {level}%。
+  muted: 已静音。
+  unmuted: 已取消静音。
+  fullscreen: 全屏。
+  subtitles_on: 已打开字幕。
+  subtitles_language: 已打开{language}字幕。
+  subtitles_off: 已关闭字幕。
+  no_subtitles: 没有{language}字幕。
+  audio: 已切换到{language}音轨。
+  no_audio: 没有{language}音轨。
+  subtitle_offset: 字幕{direction} {duration}。
+  earlier: 提前
+  later: 延后
+  playing: 正在播放《{title}》。
+  playing_on: 在{device}上播放《{title}》。
+  continuing: 继续播放《{title}》。
+  nothing_to_continue: 没有可以继续看的内容。
+  shuffling: 随机播放{query}。
+  transferred: 已切换到{device}。
+  no_device: 找不到叫“{device}”的设备。
+  no_title: 找不到《{title}》。
+  which: 哪一个？{choices}
+  searching: 这是“{query}”的搜索结果。
+  opening: 正在打开《{title}》。
+  home: 首页。
+  back: 返回。
+  settings: 设置。
+  library: 正在打开{library}。
+  now_playing: 这是《{title}》。
+  nothing_playing: 现在没有在播放。
+  cast: 《{title}》的主演是{cast}。
+  time_left: 还剩 {remaining}。
+  end_time: "{time} 结束。"
+  marked_played: 已标记为看过。
+  marked_unplayed: 已标记为未看。
+  favorited: 已加入收藏。
+  unfavorited: 已取消收藏。
+  added_to_playlist: 已加入{playlist}。
+  no_playlist: 找不到叫“{playlist}”的播放列表。
+  requested: 已请求《{title}》。
+  confirm: "{action}？"
+  confirm_request: 要请求《{title}》吗？
+  confirm_transfer: 要切换到{device}播放吗？
+  cancelled: 好的，算了。
+  not_understood: 抱歉，我没听懂。
+  not_allowed: 你没有权限这样做。
+  no_ai: 没有 AI 时我只能做简单的事，试试这些：
+  failed: 出错了。
+  help: 你可以这样说：
+  listening: 正在听…
+  more: 还有这些。
+  no_more: 就这些了。
+  hours: "{n} 小时"
+  minutes: "{n} 分钟"
+  seconds: "{n} 秒"
+
+examples:
+  - 暂停
+  - 后退三十秒
+  - 打开英文字幕
+  - 播放繁城之下第二集
+  - 在客厅电视上播放流浪地球
+  - 继续看
+  - 这是什么电影
+  - 这部剧是谁演的
+  - 还剩多久
+  - 跳过片头
+  - 1.5倍速
+  - 标记为已看

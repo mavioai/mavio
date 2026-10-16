@@ -1,0 +1,21 @@
+{
+  "name": "intent",
+  "namedInputs": {
+    "intent": ["rust", "{projectRoot}/grammars/**/*", "{projectRoot}/testdata/**/*"]
+  },
+  "targets": {
+    "build": { "inputs": ["intent", "^rustGen"] },
+    "test": { "inputs": ["intent", "^rustGen"] },
+    "lint": { "inputs": ["intent", "^rustGen"] },
+    "wasm": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cargo build --locked --release --lib --target wasm32-unknown-unknown && node scripts/copy-wasm.mjs",
+        "cwd": "{projectRoot}"
+      },
+      "cache": true,
+      "inputs": ["intent", "^rustGen"],
+      "outputs": ["{projectRoot}/dist", "{workspaceRoot}/apps/server/internal/assistant/intent/dist/intent.wasm"]
+    }
+  }
+}

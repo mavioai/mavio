@@ -1,0 +1,279 @@
+# French. Accents are folded away before matching, and an elided article is
+# a token of its own: "l'anglais" is "l anglais".
+language: fr
+scripts: [latin]
+
+fillers:
+  prefix: [s'il te plait, s'il vous plait, dis mavio, mavio, hey mavio, est ce que tu peux, tu peux, peux tu, pouvez vous, je veux, je voudrais, maintenant]
+  suffix: [s'il te plait, s'il vous plait, stp, svp, merci, maintenant]
+
+lists:
+  play: [mets, lance, joue, regarde, je veux regarder, passe]
+  the: [le, la, les, l, un, une]
+  subtitles: [sous titres, sous titre, soustitres]
+  audio: [audio, langue, piste audio, doublage, version]
+  episode: [episode, ep]
+  season: [saison]
+
+numbers:
+  words: {zero: 0, un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14, quinze: 15, seize: 16, vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60, quatre vingt: 80, quatre vingts: 80}
+  multipliers: {cent: 100, cents: 100, mille: 1000}
+  half: [demi, demie]
+  and: [et]
+  point: [virgule, point]
+  articles: [un, une]
+
+units:
+  second: [seconde, secondes, sec, s]
+  minute: [minute, minutes, min]
+  hour: [heure, heures, h]
+
+ordinals:
+  words: {premier: 1, premiere: 1, deuxieme: 2, second: 2, seconde: 2, troisieme: 3, quatrieme: 4, cinquieme: 5, sixieme: 6, septieme: 7, huitieme: 8, neuvieme: 9, dixieme: 10, dernier: -1, derniere: -1}
+  prefix: [numero, le numero]
+  suffix: [e, eme, er, re]
+
+percent: ["%", pour cent, pourcent]
+speed: [x, fois]
+
+languages:
+  fr: [francais]
+  en: [anglais]
+  zh: [chinois, mandarin]
+  ja: [japonais]
+  ko: [coreen]
+  es: [espagnol]
+  de: [allemand]
+  it: [italien]
+  pt: [portugais]
+  ru: [russe]
+
+device:
+  - "@ sur [<the>] {device}"
+
+intents:
+  - intent: pause
+    patterns: ["(pause|mets en pause|mets pause|attends)"]
+  - intent: resume
+    patterns: ["(reprends|reprendre|continue|continuer|lecture|play)"]
+  - intent: stop
+    patterns: ["(stop|arrete|arreter|arrete la lecture|quitte)"]
+  - intent: seek_back
+    patterns: ["(recule|reviens|retour) [en arriere] [de|d] [{seconds:duration}]", "{seconds:duration} en arriere"]
+    set: {seconds: 10}
+  - intent: seek_forward
+    patterns: ["(avance|saute) [de|d] [{seconds:duration}]", "{seconds:duration} en avant"]
+    set: {seconds: 30}
+  - intent: seek_to
+    patterns: ["(va|aller|saute) a {position:position}"]
+  - intent: restart
+    patterns: ["(recommence|reprends du debut|depuis le debut|relance)"]
+  - intent: skip
+    patterns: ["(passe|saute|zappe) [l] [le] (intro|introduction|generique de debut|generique)"]
+    set: {segment: intro}
+  - intent: skip
+    patterns: ["(passe|saute|zappe) [le] generique de fin"]
+    set: {segment: credits}
+  - intent: skip
+    patterns: ["(passe|saute|zappe) [le] (resume|recapitulatif)"]
+    set: {segment: recap}
+  - intent: next
+    patterns: ["[(episode|video)] suivant", "[(mets|passe a)] [l] [<episode>] suivant", "suivant"]
+  - intent: previous
+    patterns: ["[(episode|video)] precedent", "[(mets|reviens a)] [l] [<episode>] precedent"]
+  - intent: speed
+    patterns: ["[(mets|regle)] [la] vitesse a {speed:speed}", "(lis|joue) a {speed:speed}", "{speed:speed}"]
+  - intent: speed
+    patterns: ["(plus vite|accelere)"]
+    set: {change: up}
+  - intent: speed
+    patterns: ["(moins vite|plus lentement|ralentis)"]
+    set: {change: down}
+  - intent: speed
+    patterns: ["vitesse normale"]
+    set: {change: normal}
+  - intent: volume
+    patterns: ["[(mets|regle)] [le] volume a {level:percent}"]
+  - intent: volume
+    patterns: ["(monte|augmente) [le] (volume|son)", "plus fort"]
+    set: {change: up}
+  - intent: volume
+    patterns: ["(baisse|diminue) [le] (volume|son)", "moins fort"]
+    set: {change: down}
+  - intent: mute
+    patterns: ["(coupe le son|sourdine|muet|mute)"]
+  - intent: unmute
+    patterns: ["(remets le son|active le son|reactive le son)"]
+  - intent: fullscreen
+    patterns: ["[(mets|passe)] [en] plein ecran"]
+
+  - intent: subtitles_on
+    patterns: ["(active|mets|affiche) [les] <subtitles>"]
+  - intent: subtitles_on
+    patterns: ["(active|mets|affiche) [les] <subtitles> en {language:language}", "<subtitles> en {language:language}", "(change|passe) [les] <subtitles> en {language:language}"]
+  - intent: subtitles_off
+    patterns: ["(desactive|enleve|retire|cache|coupe) [les] <subtitles>", "sans <subtitles>"]
+  - intent: audio
+    patterns: ["(change|mets|passe) [l] [la] <audio> en {language:language}", "(mets le|passe en) {language:language}", "en {language:language}"]
+  - intent: audio
+    patterns: ["(mets|passe) [en|la] (vo|version originale)", "(version originale|vo|audio original)"]
+    set: {language: original}
+  - intent: subtitle_offset
+    patterns: ["(retarde|decale) [les] <subtitles> de {seconds:duration}"]
+    set: {direction: later}
+  - intent: subtitle_offset
+    patterns: ["avance [les] <subtitles> de {seconds:duration}"]
+    set: {direction: earlier}
+
+  - intent: play
+    device: true
+    patterns: ["<play> {title}", "<play> {title} <season> {season:count} <episode> {episode:count}", "<play> [l] <episode> {episode:count} de {title}", "<play> {title} <episode> {episode:count}"]
+  - intent: continue
+    device: true
+    patterns: ["(continue|reprends) {title}"]
+  - intent: continue
+    patterns: ["(continue|reprends) (a regarder|ou j'en etais|la ou je me suis arrete)"]
+  - intent: shuffle
+    device: true
+    patterns: ["(mets|lance) {query} en aleatoire", "lecture aleatoire"]
+  - intent: shuffle
+    device: true
+    patterns: ["(mets|lance) [mes] favoris [en aleatoire]"]
+    set: {kind: favorites}
+  - intent: transfer
+    patterns: ["(passe|mets|envoie|transfere) [ca] sur [<the>] {device}", "continue sur [<the>] {device}"]
+
+  - intent: search
+    patterns: ["(cherche|recherche|trouve) {query}", "recherche"]
+  - intent: open
+    patterns: ["(ouvre|montre) [la page de] {title}", "(c'est quoi|de quoi parle) {title}"]
+  - intent: go_home
+    patterns: ["[(retourne|va)] [a] [l] accueil", "accueil"]
+  - intent: go_back
+    patterns: ["(retour|reviens en arriere|page precedente)"]
+  - intent: open_settings
+    patterns: ["[(ouvre|va dans)] [les] (parametres|reglages)"]
+  - intent: open_library
+    patterns: ["(ouvre|montre) [la] bibliotheque {library}"]
+
+  - intent: now_playing
+    patterns: ["(c'est quoi ca|qu'est ce que c'est|qu'est ce que je regarde|c'est quel film|c'est quelle serie)"]
+  - intent: cast
+    patterns: ["qui (joue|est) dans (ce film|cette serie|ca)", "(qui est cet acteur|qui est cette actrice|le casting|les acteurs)"]
+  - intent: time_left
+    patterns: ["combien de temps (reste t il|il reste)", "il reste combien [de temps]"]
+  - intent: end_time
+    patterns: ["(a quelle heure|quand) (ca|est ce que ca) (finit|se termine)"]
+
+  - intent: mark_played
+    patterns: ["marque [le|la] comme vu", "marquer comme vu"]
+  - intent: mark_unplayed
+    patterns: ["marque [le|la] comme non vu", "marquer comme non vu"]
+  - intent: favorite
+    patterns: ["(ajoute|mets) [le|la|ca] (aux|dans mes) favoris"]
+  - intent: unfavorite
+    patterns: ["(retire|enleve) [le|la|ca] (des|de mes) favoris"]
+  - intent: add_to_playlist
+    patterns: ["(ajoute|mets) [le|la|ca] (a|dans) [la] playlist {playlist}", "(ajoute|mets) [le|la|ca] (a|dans) une playlist"]
+
+  - intent: request
+    patterns: ["(demande|telecharge|recupere) {title}"]
+
+  - intent: "yes"
+    when: confirmation
+    patterns: ["(oui|ouais|d'accord|ok|vas y|c'est ca|exactement|bien sur|confirme)"]
+  - intent: "no"
+    when: confirmation
+    patterns: ["(non|annule|laisse tomber|pas maintenant|stop)"]
+  - intent: choose
+    when: results
+    patterns: ["[(mets|ouvre|choisis)] [le|la|l] {choice:ordinal}", "[le] numero {choice:count}"]
+  - intent: more
+    when: results
+    patterns: ["(plus|encore|autre chose|d'autres|montre m en plus)"]
+  - intent: cancel
+    patterns: ["(annule|laisse tomber|rien|c'est tout)"]
+  - intent: help
+    patterns: ["(aide|qu'est ce que tu sais faire|que puis je dire)"]
+
+replies:
+  paused: En pause.
+  resumed: Lecture.
+  stopped: Arrêté.
+  seeked_back: Retour de {duration}.
+  seeked_forward: Avance de {duration}.
+  seeked_to: Aller à {position}.
+  restarted: Depuis le début.
+  skipped: Passé.
+  no_segment: Il n'y a rien à passer ici.
+  next: Ensuite, {title}.
+  previous: Retour à {title}.
+  no_next: C'est le dernier.
+  no_previous: C'est le premier.
+  speed: Vitesse {speed}×.
+  volume: Volume {level} %.
+  muted: Son coupé.
+  unmuted: Son rétabli.
+  fullscreen: Plein écran.
+  subtitles_on: Sous-titres activés.
+  subtitles_language: Sous-titres en {language} activés.
+  subtitles_off: Sous-titres désactivés.
+  no_subtitles: Il n'y a pas de sous-titres en {language}.
+  audio: Audio en {language}.
+  no_audio: Il n'y a pas d'audio en {language}.
+  subtitle_offset: Sous-titres {direction} de {duration}.
+  earlier: avancés
+  later: retardés
+  playing: Lecture de {title}.
+  playing_on: Lecture de {title} sur {device}.
+  continuing: Reprise de {title}.
+  nothing_to_continue: Rien à reprendre.
+  shuffling: Lecture aléatoire de {query}.
+  transferred: Passé sur {device}.
+  no_device: Je ne trouve pas d'appareil nommé {device}.
+  no_title: Je n'ai pas trouvé {title}.
+  which: "Lequel ? {choices}"
+  searching: Voici ce que j'ai trouvé pour {query}.
+  opening: Ouverture de {title}.
+  home: Accueil.
+  back: Retour.
+  settings: Paramètres.
+  library: Ouverture de {library}.
+  now_playing: C'est {title}.
+  nothing_playing: Rien n'est en lecture.
+  cast: "{title}, avec {cast}."
+  time_left: Il reste {remaining}.
+  end_time: Ça se termine à {time}.
+  marked_played: Marqué comme vu.
+  marked_unplayed: Marqué comme non vu.
+  favorited: Ajouté aux favoris.
+  unfavorited: Retiré des favoris.
+  added_to_playlist: Ajouté à {playlist}.
+  no_playlist: Je ne trouve pas de playlist nommée {playlist}.
+  requested: "{title} demandé."
+  confirm: "{action} ?"
+  confirm_request: "Demander {title} ?"
+  confirm_transfer: "Passer la lecture sur {device} ?"
+  cancelled: D'accord, laisse tomber.
+  not_understood: Désolé, je n'ai pas compris.
+  not_allowed: Tu n'as pas le droit de faire ça.
+  no_ai: "Sans IA, je ne sais faire que des choses simples. Essaie :"
+  failed: Quelque chose s'est mal passé.
+  help: "Tu peux dire par exemple :"
+  listening: J'écoute…
+  more: En voici d'autres.
+  no_more: C'est tout.
+  hours: "{n} h"
+  minutes: "{n} min"
+  seconds: "{n} s"
+
+examples:
+  - Pause
+  - Recule de 30 secondes
+  - Mets les sous-titres en anglais
+  - Mets Lupin saison 2 épisode 3
+  - Continue à regarder
+  - Qu'est-ce que c'est ?
+  - Il reste combien de temps ?
+  - Passe l'intro
+  - Mets la vitesse à 1,5
