@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"path"
 	"slices"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/library/storage"
 	storagev1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/storage/v1"
 	"github.com/mavioai/mavio/libs/rclone"
 )
@@ -30,6 +32,9 @@ type StorageService struct {
 	Offline *downloads.Offline
 	// Down is why the server reaches no rcd, when Client is nil.
 	Down string
+	// Volumes lists the disks of the server's computer; nil lists them
+	// with storage.Volumes.
+	Volumes func(ctx context.Context) ([]storage.Volume, error)
 }
 
 // client returns the rcd's client, after checking the caller is an
@@ -57,6 +62,68 @@ func rcloneError(ctx context.Context, err error) error {
 		return connect.NewError(connect.CodeUnavailable, err)
 	}
 	return connectError(ctx, err)
+}
+
+// diskKinds maps the devices of volumes to disks' kinds.
+var diskKinds = map[storage.DeviceKind]storagev1.DiskKind{
+	storage.KindLocalSSD:   storagev1.DiskKind_DISK_KIND_SSD,
+	storage.KindLocalHDD:   storagev1.DiskKind_DISK_KIND_HDD,
+	storage.KindRemoteNAS:  storagev1.DiskKind_DISK_KIND_NETWORK,
+	storage.KindCloudMount: storagev1.DiskKind_DISK_KIND_CLOUD,
+}
+
+// ListDisks lists the disks of the server's computer, by path.
+func (s *StorageService) ListDisks(ctx context.Context, _ *storagev1.ListDisksRequest) (*storagev1.ListDisksResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	list := s.Volumes
+	if list == nil {
+		list = storage.Volumes
+	}
+	vs, err := list(ctx)
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+	slices.SortFunc(vs, func(a, b storage.Volume) int { return cmp.Compare(a.Path, b.Path) })
+	disks := make([]*storagev1.Disk, len(vs))
+	for i, v := range vs {
+		d := storagev1.Disk_builder{Path: &v.Path, FileSystem: &v.FSType}.Build()
+		if k, ok := diskKinds[v.Kind]; ok {
+			d.SetKind(k)
+		}
+		if v.Name != "" {
+			d.SetName(v.Name)
+		}
+		if v.Total > 0 {
+			d.SetTotalBytes(bytesOf(v.Total))
+			d.SetUsedBytes(bytesOf(v.Used))
+			d.SetAvailableBytes(bytesOf(v.Available))
+		}
+		disks[i] = d
+	}
+	return storagev1.ListDisksResponse_builder{Disks: disks}.Build(), nil
+}
+
+func bytesOf(n uint64) int64 { return int64(min(n, math.MaxInt64)) }
+
+// GetRemoteUsage tells how much of a remote is used.
+func (s *StorageService) GetRemoteUsage(ctx context.Context, req *storagev1.GetRemoteUsageRequest) (*storagev1.GetRemoteUsageResponse, error) {
+	c, err := s.client(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if strings.ContainsAny(req.GetRemote(), `:/\`) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("want a remote's name"))
+	}
+	u, err := c.About(ctx, req.GetRemote())
+	if errors.Is(err, rclone.ErrNoUsage) {
+		return nil, connect.NewError(connect.CodeUnimplemented, err)
+	}
+	if err != nil {
+		return nil, rcloneError(ctx, err)
+	}
+	return storagev1.GetRemoteUsageResponse_builder{TotalBytes: u.Total, UsedBytes: u.Used, FreeBytes: u.Free}.Build(), nil
 }
 
 // GetStatus tells whether the server reaches an rcd.

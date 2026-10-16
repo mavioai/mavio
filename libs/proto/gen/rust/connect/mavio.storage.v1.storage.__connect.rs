@@ -1,3 +1,11 @@
+///Shorthand for `OwnedView<ListDisksRequestView<'static>>`.
+pub type OwnedListDisksRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListDisksRequestView<'static>,
+>;
+///Shorthand for `OwnedView<ListDisksResponseView<'static>>`.
+pub type OwnedListDisksResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListDisksResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<GetStatusRequestView<'static>>`.
 pub type OwnedGetStatusRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::storage::v1::__buffa::view::GetStatusRequestView<'static>,
@@ -62,6 +70,14 @@ pub type OwnedListFoldersRequestView = ::buffa::view::OwnedView<
 pub type OwnedListFoldersResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::storage::v1::__buffa::view::ListFoldersResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetRemoteUsageRequestView<'static>>`.
+pub type OwnedGetRemoteUsageRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetRemoteUsageResponseView<'static>>`.
+pub type OwnedGetRemoteUsageResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<'static>,
+>;
 ///Shorthand for `OwnedView<ListOfflineClientsRequestView<'static>>`.
 pub type OwnedListOfflineClientsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::storage::v1::__buffa::view::ListOfflineClientsRequestView<
@@ -86,6 +102,40 @@ pub type OwnedSetOfflineClientsResponseView = ::buffa::view::OwnedView<
         'static,
     >,
 >;
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::ListDisksResponse>
+for crate::proto::mavio::storage::v1::__buffa::view::ListDisksResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::ListDisksResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::ListDisksResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::GetStatusResponse>
 for crate::proto::mavio::storage::v1::__buffa::view::GetStatusResponseView<'_> {
     fn encode(
@@ -358,6 +408,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::GetRemoteUsageResponse>
+for crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::storage::v1::GetRemoteUsageResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 impl ::connectrpc::Encodable<
     crate::proto::mavio::storage::v1::ListOfflineClientsResponse,
 >
@@ -436,6 +520,12 @@ for ::buffa::view::OwnedView<
 }
 /// Full service name for this service.
 pub const STORAGE_SERVICE_SERVICE_NAME: &str = "mavio.storage.v1.StorageService";
+/// Static [`Spec`](::connectrpc::Spec) for the `ListDisks` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_LIST_DISKS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/ListDisks",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `GetStatus` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const STORAGE_SERVICE_GET_STATUS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.storage.v1.StorageService/GetStatus",
@@ -484,6 +574,12 @@ pub const STORAGE_SERVICE_LIST_FOLDERS_SPEC: ::connectrpc::Spec = ::connectrpc::
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetRemoteUsage` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.storage.v1.StorageService/GetRemoteUsage",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListOfflineClients` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const STORAGE_SERVICE_LIST_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.storage.v1.StorageService/ListOfflineClients",
@@ -496,8 +592,9 @@ pub const STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::conne
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
-/// StorageService configures the rclone remotes that library folders may lie
-/// on, as "rclone:\<remote\>:\<path\>", through the rclone rcd the server runs or
+/// StorageService tells of the disks of the server's computer, and
+/// configures the rclone remotes that library folders may lie on, as
+/// "rclone:\<remote\>:\<path\>", through the rclone rcd the server runs or
 /// reaches. Administrators only.
 ///
 /// # Implementing handlers
@@ -549,6 +646,31 @@ pub const STORAGE_SERVICE_SET_OFFLINE_CLIENTS_SPEC: ::connectrpc::Spec = ::conne
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait StorageService: Send + Sync + 'static {
+    /// ListDisks lists the disks of the server's computer: its drives and the
+    /// shares and cloud drives mounted on it, with their sizes. Neither the
+    /// system's own file systems nor its hidden volumes are listed.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_disks<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::storage::v1::ListDisksRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::storage::v1::ListDisksResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
     /// GetStatus tells whether the server reaches an rcd.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
@@ -737,6 +859,30 @@ pub trait StorageService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// GetRemoteUsage tells how much of a remote is used, as its backend tells;
+    /// remotes whose backend does not fail with UNIMPLEMENTED.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_remote_usage<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::storage::v1::GetRemoteUsageResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
     /// ListOfflineClients lists the download clients of cloud drives' offline
     /// downloads, which acquisition sends magnet links to.
     ///
@@ -816,6 +962,35 @@ impl<S: StorageService> StorageServiceExt for S {
         router: ::connectrpc::Router,
     ) -> ::connectrpc::Router {
         router
+            .route_view_idempotent(
+                STORAGE_SERVICE_SERVICE_NAME,
+                "ListDisks",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::storage::v1::__buffa::view::ListDisksRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::storage::v1::ListDisksRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_disks(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::storage::v1::ListDisksResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(STORAGE_SERVICE_LIST_DISKS_SPEC)
             .route_view_idempotent(
                 STORAGE_SERVICE_SERVICE_NAME,
                 "GetStatus",
@@ -1050,6 +1225,35 @@ impl<S: StorageService> StorageServiceExt for S {
             .with_spec(STORAGE_SERVICE_LIST_FOLDERS_SPEC)
             .route_view_idempotent(
                 STORAGE_SERVICE_SERVICE_NAME,
+                "GetRemoteUsage",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_remote_usage(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::storage::v1::GetRemoteUsageResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC)
+            .route_view_idempotent(
+                STORAGE_SERVICE_SERVICE_NAME,
                 "ListOfflineClients",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1160,6 +1364,12 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
     ) -> Option<::connectrpc::dispatcher::codegen::MethodDescriptor> {
         let method = path.strip_prefix("mavio.storage.v1.StorageService/")?;
         match method {
+            "ListDisks" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(STORAGE_SERVICE_LIST_DISKS_SPEC),
+                )
+            }
             "GetStatus" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1208,6 +1418,12 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                         .with_spec(STORAGE_SERVICE_LIST_FOLDERS_SPEC),
                 )
             }
+            "GetRemoteUsage" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC),
+                )
+            }
             "ListOfflineClients" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1235,6 +1451,28 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
         };
         let _ = (&ctx, &request, &format);
         match method {
+            "ListDisks" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::storage::v1::ListDisksRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::ListDisksRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::storage::v1::ListDisksRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_disks(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::storage::v1::ListDisksResponse,
+                        >(format)
+                })
+            }
             "GetStatus" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -1411,6 +1649,28 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
                         >(format)
                 })
             }
+            "GetRemoteUsage" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_remote_usage(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::storage::v1::GetRemoteUsageResponse,
+                        >(format)
+                })
+            }
             "ListOfflineClients" => {
                 let svc = ::std::sync::Arc::clone(&self.inner);
                 Box::pin(async move {
@@ -1522,7 +1782,7 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
 /// let config = ClientConfig::new(uri).with_protocol(Protocol::Grpc);
 ///
 /// let client = StorageServiceClient::new(conn, config);
-/// let response = client.get_status(request).await?;
+/// let response = client.list_disks(request).await?;
 /// ```
 ///
 /// # Example (Connect / HTTP/1.1 or ALPN)
@@ -1534,7 +1794,7 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
 /// let config = ClientConfig::new("http://localhost:8080".parse()?);
 ///
 /// let client = StorageServiceClient::new(http, config);
-/// let response = client.get_status(request).await?;
+/// let response = client.list_disks(request).await?;
 /// ```
 ///
 /// # Working with the response
@@ -1544,7 +1804,7 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
 /// message, so field access is zero-copy:
 ///
 /// ```rust,ignore
-/// let resp = client.get_status(request).await?;
+/// let resp = client.list_disks(request).await?;
 /// let name: &str = resp.view().name;  // borrow into the response buffer
 /// ```
 ///
@@ -1552,7 +1812,7 @@ impl<T: StorageService> ::connectrpc::Dispatcher for StorageServiceServer<T> {
 /// [`into_owned()`](::connectrpc::client::UnaryResponse::into_owned):
 ///
 /// ```rust,ignore
-/// let owned = client.get_status(request).await?.into_owned();
+/// let owned = client.list_disks(request).await?.into_owned();
 /// ```
 ///
 /// [`into_view()`](::connectrpc::client::UnaryResponse::into_view) keeps the
@@ -1582,6 +1842,51 @@ where
     /// Get a mutable reference to the client configuration.
     pub fn config_mut(&mut self) -> &mut ::connectrpc::client::ClientConfig {
         &mut self.config
+    }
+    /// Call the ListDisks RPC. Sends a request to /mavio.storage.v1.StorageService/ListDisks.
+    pub async fn list_disks(
+        &self,
+        request: crate::proto::mavio::storage::v1::ListDisksRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::ListDisksResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_disks_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListDisks RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_disks_with_options(
+        &self,
+        request: crate::proto::mavio::storage::v1::ListDisksRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::ListDisksResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                STORAGE_SERVICE_LIST_DISKS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
     }
     /// Call the GetStatus RPC. Sends a request to /mavio.storage.v1.StorageService/GetStatus.
     pub async fn get_status(
@@ -1937,6 +2242,51 @@ where
                 &self.transport,
                 &self.config,
                 STORAGE_SERVICE_LIST_FOLDERS_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetRemoteUsage RPC. Sends a request to /mavio.storage.v1.StorageService/GetRemoteUsage.
+    pub async fn get_remote_usage(
+        &self,
+        request: crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_remote_usage_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetRemoteUsage RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_remote_usage_with_options(
+        &self,
+        request: crate::proto::mavio::storage::v1::GetRemoteUsageRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::storage::v1::__buffa::view::GetRemoteUsageResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                STORAGE_SERVICE_GET_REMOTE_USAGE_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

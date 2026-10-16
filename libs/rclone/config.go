@@ -3,7 +3,10 @@ package rclone
 import (
 	"cmp"
 	"context"
+	"errors"
+	"fmt"
 	"slices"
+	"strings"
 )
 
 // Provider is a kind of remote, as config/providers lists them.
@@ -128,4 +131,26 @@ func (c *Client) Continue(ctx context.Context, name, state, answer string) (Conf
 // DeleteRemote removes a remote's configuration.
 func (c *Client) DeleteRemote(ctx context.Context, name string) error {
 	return c.Call(ctx, "config/delete", map[string]any{"name": name}, nil)
+}
+
+// Usage is how much of a remote is used, in bytes, as its backend tells;
+// nil for what it does not tell.
+type Usage struct {
+	Total *int64 `json:"total"`
+	Used  *int64 `json:"used"`
+	Free  *int64 `json:"free"`
+}
+
+// ErrNoUsage is returned by About for remotes whose backend does not tell
+// their usage.
+var ErrNoUsage = errors.New("the remote does not tell its usage")
+
+// About tells how much of a remote is used.
+func (c *Client) About(ctx context.Context, remote string) (Usage, error) {
+	var u Usage
+	err := c.Call(ctx, "operations/about", map[string]any{"fs": remote + ":"}, &u)
+	if e := (*Error)(nil); errors.As(err, &e) && strings.HasSuffix(e.Message, "doesn't support about") {
+		return Usage{}, fmt.Errorf("%w: %s", ErrNoUsage, remote)
+	}
+	return u, err
 }

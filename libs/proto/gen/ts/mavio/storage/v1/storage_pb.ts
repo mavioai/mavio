@@ -2,8 +2,8 @@
 // @generated from file mavio/storage/v1/storage.proto (package mavio.storage.v1, edition 2023)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../../buf/validate/validate_pb";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -11,7 +11,103 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/storage/v1/storage.proto.
  */
 export const file_mavio_storage_v1_storage: GenFile = /*@__PURE__*/
-  fileDesc("Ch5tYXZpby9zdG9yYWdlL3YxL3N0b3JhZ2UucHJvdG8SEG1hdmlvLnN0b3JhZ2UudjEiEgoQR2V0U3RhdHVzUmVxdWVzdCJXChFHZXRTdGF0dXNSZXNwb25zZRIRCglhdmFpbGFibGUYASABKAgSDwoHdmVyc2lvbhgCIAEoCRIPCgdtYW5hZ2VkGAMgASgIEg0KBWVycm9yGAQgASgJIhYKFExpc3RQcm92aWRlcnNSZXF1ZXN0IkYKFUxpc3RQcm92aWRlcnNSZXNwb25zZRItCglwcm92aWRlcnMYASADKAsyGi5tYXZpby5zdG9yYWdlLnYxLlByb3ZpZGVyIlgKCFByb3ZpZGVyEgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSKQoHb3B0aW9ucxgDIAMoCzIYLm1hdmlvLnN0b3JhZ2UudjEuT3B0aW9uIuQBCgZPcHRpb24SDAoEbmFtZRgBIAEoCRIMCgRoZWxwGAIgASgJEhAKCHByb3ZpZGVyGAMgASgJEhUKDWRlZmF1bHRfdmFsdWUYBCABKAkSDAoEdHlwZRgFIAEoCRIQCghyZXF1aXJlZBgGIAEoCBIQCghwYXNzd29yZBgHIAEoCBIQCghhZHZhbmNlZBgIIAEoCBIRCglzZW5zaXRpdmUYCSABKAgSEQoJZXhjbHVzaXZlGAogASgIEisKCGV4YW1wbGVzGAsgAygLMhkubWF2aW8uc3RvcmFnZS52MS5FeGFtcGxlIjgKB0V4YW1wbGUSDQoFdmFsdWUYASABKAkSDAoEaGVscBgCIAEoCRIQCghwcm92aWRlchgDIAEoCSIUChJMaXN0UmVtb3Rlc1JlcXVlc3QiQAoTTGlzdFJlbW90ZXNSZXNwb25zZRIpCgdyZW1vdGVzGAEgAygLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUilQEKBlJlbW90ZRIMCgRuYW1lGAEgASgJEgwKBHR5cGUYAiABKAkSPAoKcGFyYW1ldGVycxgDIAMoCzIoLm1hdmlvLnN0b3JhZ2UudjEuUmVtb3RlLlBhcmFtZXRlcnNFbnRyeRoxCg9QYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJYCg5Db25maWdRdWVzdGlvbhINCgVzdGF0ZRgBIAEoCRIoCgZvcHRpb24YAiABKAsyGC5tYXZpby5zdG9yYWdlLnYxLk9wdGlvbhINCgVlcnJvchgDIAEoCSLoAQoTQ3JlYXRlUmVtb3RlUmVxdWVzdBI5CgRuYW1lGAEgASgJQiu6SCjIAQFyIxhAMh9eW0EtWmEtejAtOV9dW0EtWmEtejAtOV8uK0AtXSokEhgKBHR5cGUYAiABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgDIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuQ3JlYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUQ3JlYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIq0BChNVcGRhdGVSZW1vdGVSZXF1ZXN0EhgKBG5hbWUYASABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgCIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUVXBkYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIlgKFUNvbnRpbnVlUmVtb3RlUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhAEhUKBXN0YXRlGAIgASgJQga6SAPIAQESDgoGYW5zd2VyGAMgASgJInYKFkNvbnRpbnVlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIi8KE0RlbGV0ZVJlbW90ZVJlcXVlc3QSGAoEbmFtZRgBIAEoCUIKukgHyAEBcgIYQCIWChREZWxldGVSZW1vdGVSZXNwb25zZSI4ChJMaXN0Rm9sZGVyc1JlcXVlc3QSIgoEcGF0aBgBIAEoCUIUukgRyAEBcgwYgCA6B3JjbG9uZToiJgoTTGlzdEZvbGRlcnNSZXNwb25zZRIPCgdmb2xkZXJzGAEgAygJIocCCg1PZmZsaW5lQ2xpZW50EigKAmlkGAEgASgJQhy6SBnIAQFyFBhAMhBeW0EtWmEtejAtOV8tXSskEhkKBG5hbWUYAiABKAlCC7pICMgBAXIDGMgBEg8KB2VuYWJsZWQYAyABKAgSGQoIcHJpb3JpdHkYBCABKAVCB7pIBBoCKAASJAoGZm9sZGVyGAUgASgJQhS6SBHIAQFyDBiAIDoHcmNsb25lOhIaCgR0YWdzGAYgAygJQgy6SAmSAQYiBHICGGQSIgoacmVtb3ZlX2NvbXBsZXRlZF9kb3dubG9hZHMYByABKAgSHwoXcmVtb3ZlX2ZhaWxlZF9kb3dubG9hZHMYCCABKAgiGwoZTGlzdE9mZmxpbmVDbGllbnRzUmVxdWVzdCJOChpMaXN0T2ZmbGluZUNsaWVudHNSZXNwb25zZRIwCgdjbGllbnRzGAEgAygLMh8ubWF2aW8uc3RvcmFnZS52MS5PZmZsaW5lQ2xpZW50IlYKGFNldE9mZmxpbmVDbGllbnRzUmVxdWVzdBI6CgdjbGllbnRzGAEgAygLMh8ubWF2aW8uc3RvcmFnZS52MS5PZmZsaW5lQ2xpZW50Qgi6SAWSAQIQZCIbChlTZXRPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlMvoHCg5TdG9yYWdlU2VydmljZRJZCglHZXRTdGF0dXMSIi5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1JlcXVlc3QaIy5tYXZpby5zdG9yYWdlLnYxLkdldFN0YXR1c1Jlc3BvbnNlIgOQAgESZQoNTGlzdFByb3ZpZGVycxImLm1hdmlvLnN0b3JhZ2UudjEuTGlzdFByb3ZpZGVyc1JlcXVlc3QaJy5tYXZpby5zdG9yYWdlLnYxLkxpc3RQcm92aWRlcnNSZXNwb25zZSIDkAIBEl8KC0xpc3RSZW1vdGVzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0UmVtb3Rlc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RSZW1vdGVzUmVzcG9uc2UiA5ACARJdCgxDcmVhdGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkNyZWF0ZVJlbW90ZVJlc3BvbnNlEl0KDFVwZGF0ZVJlbW90ZRIlLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdBomLm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVzcG9uc2USYwoOQ29udGludWVSZW1vdGUSJy5tYXZpby5zdG9yYWdlLnYxLkNvbnRpbnVlUmVtb3RlUmVxdWVzdBooLm1hdmlvLnN0b3JhZ2UudjEuQ29udGludWVSZW1vdGVSZXNwb25zZRJdCgxEZWxldGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLkRlbGV0ZVJlbW90ZVJlc3BvbnNlEl8KC0xpc3RGb2xkZXJzEiQubWF2aW8uc3RvcmFnZS52MS5MaXN0Rm9sZGVyc1JlcXVlc3QaJS5tYXZpby5zdG9yYWdlLnYxLkxpc3RGb2xkZXJzUmVzcG9uc2UiA5ACARJ0ChJMaXN0T2ZmbGluZUNsaWVudHMSKy5tYXZpby5zdG9yYWdlLnYxLkxpc3RPZmZsaW5lQ2xpZW50c1JlcXVlc3QaLC5tYXZpby5zdG9yYWdlLnYxLkxpc3RPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlIgOQAgESbAoRU2V0T2ZmbGluZUNsaWVudHMSKi5tYXZpby5zdG9yYWdlLnYxLlNldE9mZmxpbmVDbGllbnRzUmVxdWVzdBorLm1hdmlvLnN0b3JhZ2UudjEuU2V0T2ZmbGluZUNsaWVudHNSZXNwb25zZULNAQoUY29tLm1hdmlvLnN0b3JhZ2UudjFCDFN0b3JhZ2VQcm90b1ABWkVnaXRodWIuY29tL21hdmlvYWkvbWF2aW8vbGlicy9wcm90by9nZW4vZ28vbWF2aW8vc3RvcmFnZS92MTtzdG9yYWdldjGiAgNNU1iqAhBNYXZpby5TdG9yYWdlLlYxygIQTWF2aW9cU3RvcmFnZVxWMeICHE1hdmlvXFN0b3JhZ2VcVjFcR1BCTWV0YWRhdGHqAhJNYXZpbzo6U3RvcmFnZTo6VjFiCGVkaXRpb25zcOgH", [file_buf_validate_validate]);
+  fileDesc("Ch5tYXZpby9zdG9yYWdlL3YxL3N0b3JhZ2UucHJvdG8SEG1hdmlvLnN0b3JhZ2UudjEiEgoQTGlzdERpc2tzUmVxdWVzdCI6ChFMaXN0RGlza3NSZXNwb25zZRIlCgVkaXNrcxgBIAMoCzIWLm1hdmlvLnN0b3JhZ2UudjEuRGlzayKjAQoERGlzaxIMCgRwYXRoGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZmlsZV9zeXN0ZW0YAyABKAkSKAoEa2luZBgEIAEoDjIaLm1hdmlvLnN0b3JhZ2UudjEuRGlza0tpbmQSEwoLdG90YWxfYnl0ZXMYBSABKAMSEgoKdXNlZF9ieXRlcxgGIAEoAxIXCg9hdmFpbGFibGVfYnl0ZXMYByABKAMiEgoQR2V0U3RhdHVzUmVxdWVzdCJXChFHZXRTdGF0dXNSZXNwb25zZRIRCglhdmFpbGFibGUYASABKAgSDwoHdmVyc2lvbhgCIAEoCRIPCgdtYW5hZ2VkGAMgASgIEg0KBWVycm9yGAQgASgJIhYKFExpc3RQcm92aWRlcnNSZXF1ZXN0IkYKFUxpc3RQcm92aWRlcnNSZXNwb25zZRItCglwcm92aWRlcnMYASADKAsyGi5tYXZpby5zdG9yYWdlLnYxLlByb3ZpZGVyIlgKCFByb3ZpZGVyEgwKBG5hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSKQoHb3B0aW9ucxgDIAMoCzIYLm1hdmlvLnN0b3JhZ2UudjEuT3B0aW9uIuQBCgZPcHRpb24SDAoEbmFtZRgBIAEoCRIMCgRoZWxwGAIgASgJEhAKCHByb3ZpZGVyGAMgASgJEhUKDWRlZmF1bHRfdmFsdWUYBCABKAkSDAoEdHlwZRgFIAEoCRIQCghyZXF1aXJlZBgGIAEoCBIQCghwYXNzd29yZBgHIAEoCBIQCghhZHZhbmNlZBgIIAEoCBIRCglzZW5zaXRpdmUYCSABKAgSEQoJZXhjbHVzaXZlGAogASgIEisKCGV4YW1wbGVzGAsgAygLMhkubWF2aW8uc3RvcmFnZS52MS5FeGFtcGxlIjgKB0V4YW1wbGUSDQoFdmFsdWUYASABKAkSDAoEaGVscBgCIAEoCRIQCghwcm92aWRlchgDIAEoCSIUChJMaXN0UmVtb3Rlc1JlcXVlc3QiQAoTTGlzdFJlbW90ZXNSZXNwb25zZRIpCgdyZW1vdGVzGAEgAygLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUilQEKBlJlbW90ZRIMCgRuYW1lGAEgASgJEgwKBHR5cGUYAiABKAkSPAoKcGFyYW1ldGVycxgDIAMoCzIoLm1hdmlvLnN0b3JhZ2UudjEuUmVtb3RlLlBhcmFtZXRlcnNFbnRyeRoxCg9QYXJhbWV0ZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJYCg5Db25maWdRdWVzdGlvbhINCgVzdGF0ZRgBIAEoCRIoCgZvcHRpb24YAiABKAsyGC5tYXZpby5zdG9yYWdlLnYxLk9wdGlvbhINCgVlcnJvchgDIAEoCSLoAQoTQ3JlYXRlUmVtb3RlUmVxdWVzdBI5CgRuYW1lGAEgASgJQiu6SCjIAQFyIxhAMh9eW0EtWmEtejAtOV9dW0EtWmEtejAtOV8uK0AtXSokEhgKBHR5cGUYAiABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgDIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuQ3JlYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUQ3JlYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIq0BChNVcGRhdGVSZW1vdGVSZXF1ZXN0EhgKBG5hbWUYASABKAlCCrpIB8gBAXICGEASSQoKcGFyYW1ldGVycxgCIAMoCzI1Lm1hdmlvLnN0b3JhZ2UudjEuVXBkYXRlUmVtb3RlUmVxdWVzdC5QYXJhbWV0ZXJzRW50cnkaMQoPUGFyYW1ldGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEidAoUVXBkYXRlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIlgKFUNvbnRpbnVlUmVtb3RlUmVxdWVzdBIYCgRuYW1lGAEgASgJQgq6SAfIAQFyAhhAEhUKBXN0YXRlGAIgASgJQga6SAPIAQESDgoGYW5zd2VyGAMgASgJInYKFkNvbnRpbnVlUmVtb3RlUmVzcG9uc2USKAoGcmVtb3RlGAEgASgLMhgubWF2aW8uc3RvcmFnZS52MS5SZW1vdGUSMgoIcXVlc3Rpb24YAiABKAsyIC5tYXZpby5zdG9yYWdlLnYxLkNvbmZpZ1F1ZXN0aW9uIi8KE0RlbGV0ZVJlbW90ZVJlcXVlc3QSGAoEbmFtZRgBIAEoCUIKukgHyAEBcgIYQCIWChREZWxldGVSZW1vdGVSZXNwb25zZSI4ChJMaXN0Rm9sZGVyc1JlcXVlc3QSIgoEcGF0aBgBIAEoCUIUukgRyAEBcgwYgCA6B3JjbG9uZToiJgoTTGlzdEZvbGRlcnNSZXNwb25zZRIPCgdmb2xkZXJzGAEgAygJIjMKFUdldFJlbW90ZVVzYWdlUmVxdWVzdBIaCgZyZW1vdGUYASABKAlCCrpIB8gBAXICGEAiVQoWR2V0UmVtb3RlVXNhZ2VSZXNwb25zZRITCgt0b3RhbF9ieXRlcxgBIAEoAxISCgp1c2VkX2J5dGVzGAIgASgDEhIKCmZyZWVfYnl0ZXMYAyABKAMihwIKDU9mZmxpbmVDbGllbnQSKAoCaWQYASABKAlCHLpIGcgBAXIUGEAyEF5bQS1aYS16MC05Xy1dKyQSGQoEbmFtZRgCIAEoCUILukgIyAEBcgMYyAESDwoHZW5hYmxlZBgDIAEoCBIZCghwcmlvcml0eRgEIAEoBUIHukgEGgIoABIkCgZmb2xkZXIYBSABKAlCFLpIEcgBAXIMGIAgOgdyY2xvbmU6EhoKBHRhZ3MYBiADKAlCDLpICZIBBiIEcgIYZBIiChpyZW1vdmVfY29tcGxldGVkX2Rvd25sb2FkcxgHIAEoCBIfChdyZW1vdmVfZmFpbGVkX2Rvd25sb2FkcxgIIAEoCCIbChlMaXN0T2ZmbGluZUNsaWVudHNSZXF1ZXN0Ik4KGkxpc3RPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlEjAKB2NsaWVudHMYASADKAsyHy5tYXZpby5zdG9yYWdlLnYxLk9mZmxpbmVDbGllbnQiVgoYU2V0T2ZmbGluZUNsaWVudHNSZXF1ZXN0EjoKB2NsaWVudHMYASADKAsyHy5tYXZpby5zdG9yYWdlLnYxLk9mZmxpbmVDbGllbnRCCLpIBZIBAhBkIhsKGVNldE9mZmxpbmVDbGllbnRzUmVzcG9uc2UqdwoIRGlza0tpbmQSGQoVRElTS19LSU5EX1VOU1BFQ0lGSUVEEAASEQoNRElTS19LSU5EX1NTRBABEhEKDURJU0tfS0lORF9IREQQAhIVChFESVNLX0tJTkRfTkVUV09SSxADEhMKD0RJU0tfS0lORF9DTE9VRBAEMr8JCg5TdG9yYWdlU2VydmljZRJZCglMaXN0RGlza3MSIi5tYXZpby5zdG9yYWdlLnYxLkxpc3REaXNrc1JlcXVlc3QaIy5tYXZpby5zdG9yYWdlLnYxLkxpc3REaXNrc1Jlc3BvbnNlIgOQAgESWQoJR2V0U3RhdHVzEiIubWF2aW8uc3RvcmFnZS52MS5HZXRTdGF0dXNSZXF1ZXN0GiMubWF2aW8uc3RvcmFnZS52MS5HZXRTdGF0dXNSZXNwb25zZSIDkAIBEmUKDUxpc3RQcm92aWRlcnMSJi5tYXZpby5zdG9yYWdlLnYxLkxpc3RQcm92aWRlcnNSZXF1ZXN0GicubWF2aW8uc3RvcmFnZS52MS5MaXN0UHJvdmlkZXJzUmVzcG9uc2UiA5ACARJfCgtMaXN0UmVtb3RlcxIkLm1hdmlvLnN0b3JhZ2UudjEuTGlzdFJlbW90ZXNSZXF1ZXN0GiUubWF2aW8uc3RvcmFnZS52MS5MaXN0UmVtb3Rlc1Jlc3BvbnNlIgOQAgESXQoMQ3JlYXRlUmVtb3RlEiUubWF2aW8uc3RvcmFnZS52MS5DcmVhdGVSZW1vdGVSZXF1ZXN0GiYubWF2aW8uc3RvcmFnZS52MS5DcmVhdGVSZW1vdGVSZXNwb25zZRJdCgxVcGRhdGVSZW1vdGUSJS5tYXZpby5zdG9yYWdlLnYxLlVwZGF0ZVJlbW90ZVJlcXVlc3QaJi5tYXZpby5zdG9yYWdlLnYxLlVwZGF0ZVJlbW90ZVJlc3BvbnNlEmMKDkNvbnRpbnVlUmVtb3RlEicubWF2aW8uc3RvcmFnZS52MS5Db250aW51ZVJlbW90ZVJlcXVlc3QaKC5tYXZpby5zdG9yYWdlLnYxLkNvbnRpbnVlUmVtb3RlUmVzcG9uc2USXQoMRGVsZXRlUmVtb3RlEiUubWF2aW8uc3RvcmFnZS52MS5EZWxldGVSZW1vdGVSZXF1ZXN0GiYubWF2aW8uc3RvcmFnZS52MS5EZWxldGVSZW1vdGVSZXNwb25zZRJfCgtMaXN0Rm9sZGVycxIkLm1hdmlvLnN0b3JhZ2UudjEuTGlzdEZvbGRlcnNSZXF1ZXN0GiUubWF2aW8uc3RvcmFnZS52MS5MaXN0Rm9sZGVyc1Jlc3BvbnNlIgOQAgESaAoOR2V0UmVtb3RlVXNhZ2USJy5tYXZpby5zdG9yYWdlLnYxLkdldFJlbW90ZVVzYWdlUmVxdWVzdBooLm1hdmlvLnN0b3JhZ2UudjEuR2V0UmVtb3RlVXNhZ2VSZXNwb25zZSIDkAIBEnQKEkxpc3RPZmZsaW5lQ2xpZW50cxIrLm1hdmlvLnN0b3JhZ2UudjEuTGlzdE9mZmxpbmVDbGllbnRzUmVxdWVzdBosLm1hdmlvLnN0b3JhZ2UudjEuTGlzdE9mZmxpbmVDbGllbnRzUmVzcG9uc2UiA5ACARJsChFTZXRPZmZsaW5lQ2xpZW50cxIqLm1hdmlvLnN0b3JhZ2UudjEuU2V0T2ZmbGluZUNsaWVudHNSZXF1ZXN0GisubWF2aW8uc3RvcmFnZS52MS5TZXRPZmZsaW5lQ2xpZW50c1Jlc3BvbnNlQs0BChRjb20ubWF2aW8uc3RvcmFnZS52MUIMU3RvcmFnZVByb3RvUAFaRWdpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zdG9yYWdlL3YxO3N0b3JhZ2V2MaICA01TWKoCEE1hdmlvLlN0b3JhZ2UuVjHKAhBNYXZpb1xTdG9yYWdlXFYx4gIcTWF2aW9cU3RvcmFnZVxWMVxHUEJNZXRhZGF0YeoCEk1hdmlvOjpTdG9yYWdlOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate]);
+
+/**
+ * @generated from message mavio.storage.v1.ListDisksRequest
+ */
+export type ListDisksRequest = Message<"mavio.storage.v1.ListDisksRequest"> & {
+};
+
+/**
+ * Describes the message mavio.storage.v1.ListDisksRequest.
+ * Use `create(ListDisksRequestSchema)` to create a new message.
+ */
+export const ListDisksRequestSchema: GenMessage<ListDisksRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 0);
+
+/**
+ * @generated from message mavio.storage.v1.ListDisksResponse
+ */
+export type ListDisksResponse = Message<"mavio.storage.v1.ListDisksResponse"> & {
+  /**
+   * @generated from field: repeated mavio.storage.v1.Disk disks = 1;
+   */
+  disks: Disk[];
+};
+
+/**
+ * Describes the message mavio.storage.v1.ListDisksResponse.
+ * Use `create(ListDisksResponseSchema)` to create a new message.
+ */
+export const ListDisksResponseSchema: GenMessage<ListDisksResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 1);
+
+/**
+ * Disk is a file system mounted on the server's computer.
+ *
+ * @generated from message mavio.storage.v1.Disk
+ */
+export type Disk = Message<"mavio.storage.v1.Disk"> & {
+  /**
+   * Where it is mounted: a mount point, or the root of a drive on
+   * Windows, such as "C:\".
+   *
+   * @generated from field: string path = 1;
+   */
+  path: string;
+
+  /**
+   * Its label, unset when it has none or none is read.
+   *
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * Its file system, such as "apfs", "ext4" or "NTFS".
+   *
+   * @generated from field: string file_system = 3;
+   */
+  fileSystem: string;
+
+  /**
+   * Unspecified when the disk did not answer.
+   *
+   * @generated from field: mavio.storage.v1.DiskKind kind = 4;
+   */
+  kind: DiskKind;
+
+  /**
+   * Its size; unset, as are used and available, when unknown, as for a
+   * share that did not answer in time.
+   *
+   * @generated from field: int64 total_bytes = 5;
+   */
+  totalBytes: bigint;
+
+  /**
+   * What is not available: what its files take, space reserved and, where
+   * volumes share a container as on APFS, what the others hold.
+   *
+   * @generated from field: int64 used_bytes = 6;
+   */
+  usedBytes: bigint;
+
+  /**
+   * What is free to the server.
+   *
+   * @generated from field: int64 available_bytes = 7;
+   */
+  availableBytes: bigint;
+};
+
+/**
+ * Describes the message mavio.storage.v1.Disk.
+ * Use `create(DiskSchema)` to create a new message.
+ */
+export const DiskSchema: GenMessage<Disk> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 2);
 
 /**
  * @generated from message mavio.storage.v1.GetStatusRequest
@@ -24,7 +120,7 @@ export type GetStatusRequest = Message<"mavio.storage.v1.GetStatusRequest"> & {
  * Use `create(GetStatusRequestSchema)` to create a new message.
  */
 export const GetStatusRequestSchema: GenMessage<GetStatusRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 0);
+  messageDesc(file_mavio_storage_v1_storage, 3);
 
 /**
  * @generated from message mavio.storage.v1.GetStatusResponse
@@ -64,7 +160,7 @@ export type GetStatusResponse = Message<"mavio.storage.v1.GetStatusResponse"> & 
  * Use `create(GetStatusResponseSchema)` to create a new message.
  */
 export const GetStatusResponseSchema: GenMessage<GetStatusResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 1);
+  messageDesc(file_mavio_storage_v1_storage, 4);
 
 /**
  * @generated from message mavio.storage.v1.ListProvidersRequest
@@ -77,7 +173,7 @@ export type ListProvidersRequest = Message<"mavio.storage.v1.ListProvidersReques
  * Use `create(ListProvidersRequestSchema)` to create a new message.
  */
 export const ListProvidersRequestSchema: GenMessage<ListProvidersRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 2);
+  messageDesc(file_mavio_storage_v1_storage, 5);
 
 /**
  * @generated from message mavio.storage.v1.ListProvidersResponse
@@ -94,7 +190,7 @@ export type ListProvidersResponse = Message<"mavio.storage.v1.ListProvidersRespo
  * Use `create(ListProvidersResponseSchema)` to create a new message.
  */
 export const ListProvidersResponseSchema: GenMessage<ListProvidersResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 3);
+  messageDesc(file_mavio_storage_v1_storage, 6);
 
 /**
  * Provider is a kind of remote, such as "drive" or "s3".
@@ -123,7 +219,7 @@ export type Provider = Message<"mavio.storage.v1.Provider"> & {
  * Use `create(ProviderSchema)` to create a new message.
  */
 export const ProviderSchema: GenMessage<Provider> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 4);
+  messageDesc(file_mavio_storage_v1_storage, 7);
 
 /**
  * Option is a setting of a provider, or a question of a remote's
@@ -205,7 +301,7 @@ export type Option = Message<"mavio.storage.v1.Option"> & {
  * Use `create(OptionSchema)` to create a new message.
  */
 export const OptionSchema: GenMessage<Option> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 5);
+  messageDesc(file_mavio_storage_v1_storage, 8);
 
 /**
  * @generated from message mavio.storage.v1.Example
@@ -232,7 +328,7 @@ export type Example = Message<"mavio.storage.v1.Example"> & {
  * Use `create(ExampleSchema)` to create a new message.
  */
 export const ExampleSchema: GenMessage<Example> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 6);
+  messageDesc(file_mavio_storage_v1_storage, 9);
 
 /**
  * @generated from message mavio.storage.v1.ListRemotesRequest
@@ -245,7 +341,7 @@ export type ListRemotesRequest = Message<"mavio.storage.v1.ListRemotesRequest"> 
  * Use `create(ListRemotesRequestSchema)` to create a new message.
  */
 export const ListRemotesRequestSchema: GenMessage<ListRemotesRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 7);
+  messageDesc(file_mavio_storage_v1_storage, 10);
 
 /**
  * @generated from message mavio.storage.v1.ListRemotesResponse
@@ -262,7 +358,7 @@ export type ListRemotesResponse = Message<"mavio.storage.v1.ListRemotesResponse"
  * Use `create(ListRemotesResponseSchema)` to create a new message.
  */
 export const ListRemotesResponseSchema: GenMessage<ListRemotesResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 8);
+  messageDesc(file_mavio_storage_v1_storage, 11);
 
 /**
  * Remote is a configured remote.
@@ -295,7 +391,7 @@ export type Remote = Message<"mavio.storage.v1.Remote"> & {
  * Use `create(RemoteSchema)` to create a new message.
  */
 export const RemoteSchema: GenMessage<Remote> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 9);
+  messageDesc(file_mavio_storage_v1_storage, 12);
 
 /**
  * ConfigQuestion asks for what a remote's configuration needs next.
@@ -328,7 +424,7 @@ export type ConfigQuestion = Message<"mavio.storage.v1.ConfigQuestion"> & {
  * Use `create(ConfigQuestionSchema)` to create a new message.
  */
 export const ConfigQuestionSchema: GenMessage<ConfigQuestion> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 10);
+  messageDesc(file_mavio_storage_v1_storage, 13);
 
 /**
  * @generated from message mavio.storage.v1.CreateRemoteRequest
@@ -357,7 +453,7 @@ export type CreateRemoteRequest = Message<"mavio.storage.v1.CreateRemoteRequest"
  * Use `create(CreateRemoteRequestSchema)` to create a new message.
  */
 export const CreateRemoteRequestSchema: GenMessage<CreateRemoteRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 11);
+  messageDesc(file_mavio_storage_v1_storage, 14);
 
 /**
  * @generated from message mavio.storage.v1.CreateRemoteResponse
@@ -381,7 +477,7 @@ export type CreateRemoteResponse = Message<"mavio.storage.v1.CreateRemoteRespons
  * Use `create(CreateRemoteResponseSchema)` to create a new message.
  */
 export const CreateRemoteResponseSchema: GenMessage<CreateRemoteResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 12);
+  messageDesc(file_mavio_storage_v1_storage, 15);
 
 /**
  * @generated from message mavio.storage.v1.UpdateRemoteRequest
@@ -403,7 +499,7 @@ export type UpdateRemoteRequest = Message<"mavio.storage.v1.UpdateRemoteRequest"
  * Use `create(UpdateRemoteRequestSchema)` to create a new message.
  */
 export const UpdateRemoteRequestSchema: GenMessage<UpdateRemoteRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 13);
+  messageDesc(file_mavio_storage_v1_storage, 16);
 
 /**
  * @generated from message mavio.storage.v1.UpdateRemoteResponse
@@ -425,7 +521,7 @@ export type UpdateRemoteResponse = Message<"mavio.storage.v1.UpdateRemoteRespons
  * Use `create(UpdateRemoteResponseSchema)` to create a new message.
  */
 export const UpdateRemoteResponseSchema: GenMessage<UpdateRemoteResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 14);
+  messageDesc(file_mavio_storage_v1_storage, 17);
 
 /**
  * @generated from message mavio.storage.v1.ContinueRemoteRequest
@@ -452,7 +548,7 @@ export type ContinueRemoteRequest = Message<"mavio.storage.v1.ContinueRemoteRequ
  * Use `create(ContinueRemoteRequestSchema)` to create a new message.
  */
 export const ContinueRemoteRequestSchema: GenMessage<ContinueRemoteRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 15);
+  messageDesc(file_mavio_storage_v1_storage, 18);
 
 /**
  * @generated from message mavio.storage.v1.ContinueRemoteResponse
@@ -474,7 +570,7 @@ export type ContinueRemoteResponse = Message<"mavio.storage.v1.ContinueRemoteRes
  * Use `create(ContinueRemoteResponseSchema)` to create a new message.
  */
 export const ContinueRemoteResponseSchema: GenMessage<ContinueRemoteResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 16);
+  messageDesc(file_mavio_storage_v1_storage, 19);
 
 /**
  * @generated from message mavio.storage.v1.DeleteRemoteRequest
@@ -491,7 +587,7 @@ export type DeleteRemoteRequest = Message<"mavio.storage.v1.DeleteRemoteRequest"
  * Use `create(DeleteRemoteRequestSchema)` to create a new message.
  */
 export const DeleteRemoteRequestSchema: GenMessage<DeleteRemoteRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 17);
+  messageDesc(file_mavio_storage_v1_storage, 20);
 
 /**
  * @generated from message mavio.storage.v1.DeleteRemoteResponse
@@ -504,7 +600,7 @@ export type DeleteRemoteResponse = Message<"mavio.storage.v1.DeleteRemoteRespons
  * Use `create(DeleteRemoteResponseSchema)` to create a new message.
  */
 export const DeleteRemoteResponseSchema: GenMessage<DeleteRemoteResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 18);
+  messageDesc(file_mavio_storage_v1_storage, 21);
 
 /**
  * @generated from message mavio.storage.v1.ListFoldersRequest
@@ -523,7 +619,7 @@ export type ListFoldersRequest = Message<"mavio.storage.v1.ListFoldersRequest"> 
  * Use `create(ListFoldersRequestSchema)` to create a new message.
  */
 export const ListFoldersRequestSchema: GenMessage<ListFoldersRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 19);
+  messageDesc(file_mavio_storage_v1_storage, 22);
 
 /**
  * @generated from message mavio.storage.v1.ListFoldersResponse
@@ -542,7 +638,54 @@ export type ListFoldersResponse = Message<"mavio.storage.v1.ListFoldersResponse"
  * Use `create(ListFoldersResponseSchema)` to create a new message.
  */
 export const ListFoldersResponseSchema: GenMessage<ListFoldersResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 20);
+  messageDesc(file_mavio_storage_v1_storage, 23);
+
+/**
+ * @generated from message mavio.storage.v1.GetRemoteUsageRequest
+ */
+export type GetRemoteUsageRequest = Message<"mavio.storage.v1.GetRemoteUsageRequest"> & {
+  /**
+   * @generated from field: string remote = 1;
+   */
+  remote: string;
+};
+
+/**
+ * Describes the message mavio.storage.v1.GetRemoteUsageRequest.
+ * Use `create(GetRemoteUsageRequestSchema)` to create a new message.
+ */
+export const GetRemoteUsageRequestSchema: GenMessage<GetRemoteUsageRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 24);
+
+/**
+ * GetRemoteUsageResponse is a remote's usage in bytes; what its backend
+ * does not tell is unset.
+ *
+ * @generated from message mavio.storage.v1.GetRemoteUsageResponse
+ */
+export type GetRemoteUsageResponse = Message<"mavio.storage.v1.GetRemoteUsageResponse"> & {
+  /**
+   * @generated from field: int64 total_bytes = 1;
+   */
+  totalBytes: bigint;
+
+  /**
+   * @generated from field: int64 used_bytes = 2;
+   */
+  usedBytes: bigint;
+
+  /**
+   * @generated from field: int64 free_bytes = 3;
+   */
+  freeBytes: bigint;
+};
+
+/**
+ * Describes the message mavio.storage.v1.GetRemoteUsageResponse.
+ * Use `create(GetRemoteUsageResponseSchema)` to create a new message.
+ */
+export const GetRemoteUsageResponseSchema: GenMessage<GetRemoteUsageResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_storage_v1_storage, 25);
 
 /**
  * OfflineClient is a download client of a cloud drive's offline downloads:
@@ -611,7 +754,7 @@ export type OfflineClient = Message<"mavio.storage.v1.OfflineClient"> & {
  * Use `create(OfflineClientSchema)` to create a new message.
  */
 export const OfflineClientSchema: GenMessage<OfflineClient> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 21);
+  messageDesc(file_mavio_storage_v1_storage, 26);
 
 /**
  * @generated from message mavio.storage.v1.ListOfflineClientsRequest
@@ -624,7 +767,7 @@ export type ListOfflineClientsRequest = Message<"mavio.storage.v1.ListOfflineCli
  * Use `create(ListOfflineClientsRequestSchema)` to create a new message.
  */
 export const ListOfflineClientsRequestSchema: GenMessage<ListOfflineClientsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 22);
+  messageDesc(file_mavio_storage_v1_storage, 27);
 
 /**
  * @generated from message mavio.storage.v1.ListOfflineClientsResponse
@@ -641,7 +784,7 @@ export type ListOfflineClientsResponse = Message<"mavio.storage.v1.ListOfflineCl
  * Use `create(ListOfflineClientsResponseSchema)` to create a new message.
  */
 export const ListOfflineClientsResponseSchema: GenMessage<ListOfflineClientsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 23);
+  messageDesc(file_mavio_storage_v1_storage, 28);
 
 /**
  * @generated from message mavio.storage.v1.SetOfflineClientsRequest
@@ -658,7 +801,7 @@ export type SetOfflineClientsRequest = Message<"mavio.storage.v1.SetOfflineClien
  * Use `create(SetOfflineClientsRequestSchema)` to create a new message.
  */
 export const SetOfflineClientsRequestSchema: GenMessage<SetOfflineClientsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 24);
+  messageDesc(file_mavio_storage_v1_storage, 29);
 
 /**
  * @generated from message mavio.storage.v1.SetOfflineClientsResponse
@@ -671,16 +814,75 @@ export type SetOfflineClientsResponse = Message<"mavio.storage.v1.SetOfflineClie
  * Use `create(SetOfflineClientsResponseSchema)` to create a new message.
  */
 export const SetOfflineClientsResponseSchema: GenMessage<SetOfflineClientsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_storage_v1_storage, 25);
+  messageDesc(file_mavio_storage_v1_storage, 30);
 
 /**
- * StorageService configures the rclone remotes that library folders may lie
- * on, as "rclone:<remote>:<path>", through the rclone rcd the server runs or
+ * DiskKind is the device a disk is on.
+ *
+ * @generated from enum mavio.storage.v1.DiskKind
+ */
+export enum DiskKind {
+  /**
+   * @generated from enum value: DISK_KIND_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * A solid-state drive.
+   *
+   * @generated from enum value: DISK_KIND_SSD = 1;
+   */
+  SSD = 1,
+
+  /**
+   * A hard disk, or a drive of an external enclosure.
+   *
+   * @generated from enum value: DISK_KIND_HDD = 2;
+   */
+  HDD = 2,
+
+  /**
+   * A share on the network, such as SMB or NFS.
+   *
+   * @generated from enum value: DISK_KIND_NETWORK = 3;
+   */
+  NETWORK = 3,
+
+  /**
+   * A cloud drive mounted, such as by rclone mount.
+   *
+   * @generated from enum value: DISK_KIND_CLOUD = 4;
+   */
+  CLOUD = 4,
+}
+
+/**
+ * Describes the enum mavio.storage.v1.DiskKind.
+ */
+export const DiskKindSchema: GenEnum<DiskKind> = /*@__PURE__*/
+  enumDesc(file_mavio_storage_v1_storage, 0);
+
+/**
+ * StorageService tells of the disks of the server's computer, and
+ * configures the rclone remotes that library folders may lie on, as
+ * "rclone:<remote>:<path>", through the rclone rcd the server runs or
  * reaches. Administrators only.
  *
  * @generated from service mavio.storage.v1.StorageService
  */
 export const StorageService: GenService<{
+  /**
+   * ListDisks lists the disks of the server's computer: its drives and the
+   * shares and cloud drives mounted on it, with their sizes. Neither the
+   * system's own file systems nor its hidden volumes are listed.
+   *
+   * @generated from rpc mavio.storage.v1.StorageService.ListDisks
+   */
+  listDisks: {
+    methodKind: "unary";
+    input: typeof ListDisksRequestSchema;
+    output: typeof ListDisksResponseSchema;
+  },
   /**
    * GetStatus tells whether the server reaches an rcd.
    *
@@ -764,6 +966,17 @@ export const StorageService: GenService<{
     methodKind: "unary";
     input: typeof ListFoldersRequestSchema;
     output: typeof ListFoldersResponseSchema;
+  },
+  /**
+   * GetRemoteUsage tells how much of a remote is used, as its backend tells;
+   * remotes whose backend does not fail with UNIMPLEMENTED.
+   *
+   * @generated from rpc mavio.storage.v1.StorageService.GetRemoteUsage
+   */
+  getRemoteUsage: {
+    methodKind: "unary";
+    input: typeof GetRemoteUsageRequestSchema;
+    output: typeof GetRemoteUsageResponseSchema;
   },
   /**
    * ListOfflineClients lists the download clients of cloud drives' offline

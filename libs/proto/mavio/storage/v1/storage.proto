@@ -4,10 +4,17 @@ package mavio.storage.v1;
 
 import "buf/validate/validate.proto";
 
-// StorageService configures the rclone remotes that library folders may lie
-// on, as "rclone:<remote>:<path>", through the rclone rcd the server runs or
+// StorageService tells of the disks of the server's computer, and
+// configures the rclone remotes that library folders may lie on, as
+// "rclone:<remote>:<path>", through the rclone rcd the server runs or
 // reaches. Administrators only.
 service StorageService {
+  // ListDisks lists the disks of the server's computer: its drives and the
+  // shares and cloud drives mounted on it, with their sizes. Neither the
+  // system's own file systems nor its hidden volumes are listed.
+  rpc ListDisks(ListDisksRequest) returns (ListDisksResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // GetStatus tells whether the server reaches an rcd.
   rpc GetStatus(GetStatusRequest) returns (GetStatusResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
@@ -36,6 +43,11 @@ service StorageService {
   rpc ListFolders(ListFoldersRequest) returns (ListFoldersResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetRemoteUsage tells how much of a remote is used, as its backend tells;
+  // remotes whose backend does not fail with UNIMPLEMENTED.
+  rpc GetRemoteUsage(GetRemoteUsageRequest) returns (GetRemoteUsageResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListOfflineClients lists the download clients of cloud drives' offline
   // downloads, which acquisition sends magnet links to.
   rpc ListOfflineClients(ListOfflineClientsRequest) returns (ListOfflineClientsResponse) {
@@ -43,6 +55,46 @@ service StorageService {
   }
   // SetOfflineClients replaces the download clients of offline downloads.
   rpc SetOfflineClients(SetOfflineClientsRequest) returns (SetOfflineClientsResponse);
+}
+
+message ListDisksRequest {}
+
+message ListDisksResponse {
+  repeated Disk disks = 1;
+}
+
+// DiskKind is the device a disk is on.
+enum DiskKind {
+  DISK_KIND_UNSPECIFIED = 0;
+  // A solid-state drive.
+  DISK_KIND_SSD = 1;
+  // A hard disk, or a drive of an external enclosure.
+  DISK_KIND_HDD = 2;
+  // A share on the network, such as SMB or NFS.
+  DISK_KIND_NETWORK = 3;
+  // A cloud drive mounted, such as by rclone mount.
+  DISK_KIND_CLOUD = 4;
+}
+
+// Disk is a file system mounted on the server's computer.
+message Disk {
+  // Where it is mounted: a mount point, or the root of a drive on
+  // Windows, such as "C:\".
+  string path = 1;
+  // Its label, unset when it has none or none is read.
+  string name = 2;
+  // Its file system, such as "apfs", "ext4" or "NTFS".
+  string file_system = 3;
+  // Unspecified when the disk did not answer.
+  DiskKind kind = 4;
+  // Its size; unset, as are used and available, when unknown, as for a
+  // share that did not answer in time.
+  int64 total_bytes = 5;
+  // What is not available: what its files take, space reserved and, where
+  // volumes share a container as on APFS, what the others hold.
+  int64 used_bytes = 6;
+  // What is free to the server.
+  int64 available_bytes = 7;
 }
 
 message GetStatusRequest {}
@@ -196,6 +248,21 @@ message ListFoldersRequest {
 message ListFoldersResponse {
   // The folders' paths, as library paths, by name.
   repeated string folders = 1;
+}
+
+message GetRemoteUsageRequest {
+  string remote = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.max_len = 64
+  ];
+}
+
+// GetRemoteUsageResponse is a remote's usage in bytes; what its backend
+// does not tell is unset.
+message GetRemoteUsageResponse {
+  int64 total_bytes = 1;
+  int64 used_bytes = 2;
+  int64 free_bytes = 3;
 }
 
 // OfflineClient is a download client of a cloud drive's offline downloads:

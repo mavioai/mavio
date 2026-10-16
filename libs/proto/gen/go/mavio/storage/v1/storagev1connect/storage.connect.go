@@ -33,6 +33,9 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// StorageServiceListDisksProcedure is the fully-qualified name of the StorageService's ListDisks
+	// RPC.
+	StorageServiceListDisksProcedure = "/mavio.storage.v1.StorageService/ListDisks"
 	// StorageServiceGetStatusProcedure is the fully-qualified name of the StorageService's GetStatus
 	// RPC.
 	StorageServiceGetStatusProcedure = "/mavio.storage.v1.StorageService/GetStatus"
@@ -57,6 +60,9 @@ const (
 	// StorageServiceListFoldersProcedure is the fully-qualified name of the StorageService's
 	// ListFolders RPC.
 	StorageServiceListFoldersProcedure = "/mavio.storage.v1.StorageService/ListFolders"
+	// StorageServiceGetRemoteUsageProcedure is the fully-qualified name of the StorageService's
+	// GetRemoteUsage RPC.
+	StorageServiceGetRemoteUsageProcedure = "/mavio.storage.v1.StorageService/GetRemoteUsage"
 	// StorageServiceListOfflineClientsProcedure is the fully-qualified name of the StorageService's
 	// ListOfflineClients RPC.
 	StorageServiceListOfflineClientsProcedure = "/mavio.storage.v1.StorageService/ListOfflineClients"
@@ -67,6 +73,10 @@ const (
 
 // StorageServiceClient is a client for the mavio.storage.v1.StorageService service.
 type StorageServiceClient interface {
+	// ListDisks lists the disks of the server's computer: its drives and the
+	// shares and cloud drives mounted on it, with their sizes. Neither the
+	// system's own file systems nor its hidden volumes are listed.
+	ListDisks(context.Context, *v1.ListDisksRequest) (*v1.ListDisksResponse, error)
 	// GetStatus tells whether the server reaches an rcd.
 	GetStatus(context.Context, *v1.GetStatusRequest) (*v1.GetStatusResponse, error)
 	// ListProviders lists the kinds of remotes and the settings each takes,
@@ -87,6 +97,9 @@ type StorageServiceClient interface {
 	// ListFolders lists the folders of a folder of a remote, for choosing
 	// library folders.
 	ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error)
+	// GetRemoteUsage tells how much of a remote is used, as its backend tells;
+	// remotes whose backend does not fail with UNIMPLEMENTED.
+	GetRemoteUsage(context.Context, *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error)
 	// ListOfflineClients lists the download clients of cloud drives' offline
 	// downloads, which acquisition sends magnet links to.
 	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
@@ -105,6 +118,13 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 	baseURL = strings.TrimRight(baseURL, "/")
 	storageServiceMethods := v1.File_mavio_storage_v1_storage_proto.Services().ByName("StorageService").Methods()
 	return &storageServiceClient{
+		listDisks: connect.NewClient[v1.ListDisksRequest, v1.ListDisksResponse](
+			httpClient,
+			baseURL+StorageServiceListDisksProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("ListDisks")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		getStatus: connect.NewClient[v1.GetStatusRequest, v1.GetStatusResponse](
 			httpClient,
 			baseURL+StorageServiceGetStatusProcedure,
@@ -157,6 +177,13 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getRemoteUsage: connect.NewClient[v1.GetRemoteUsageRequest, v1.GetRemoteUsageResponse](
+			httpClient,
+			baseURL+StorageServiceGetRemoteUsageProcedure,
+			connect.WithSchema(storageServiceMethods.ByName("GetRemoteUsage")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 		listOfflineClients: connect.NewClient[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse](
 			httpClient,
 			baseURL+StorageServiceListOfflineClientsProcedure,
@@ -175,6 +202,7 @@ func NewStorageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // storageServiceClient implements StorageServiceClient.
 type storageServiceClient struct {
+	listDisks          *connect.Client[v1.ListDisksRequest, v1.ListDisksResponse]
 	getStatus          *connect.Client[v1.GetStatusRequest, v1.GetStatusResponse]
 	listProviders      *connect.Client[v1.ListProvidersRequest, v1.ListProvidersResponse]
 	listRemotes        *connect.Client[v1.ListRemotesRequest, v1.ListRemotesResponse]
@@ -183,8 +211,18 @@ type storageServiceClient struct {
 	continueRemote     *connect.Client[v1.ContinueRemoteRequest, v1.ContinueRemoteResponse]
 	deleteRemote       *connect.Client[v1.DeleteRemoteRequest, v1.DeleteRemoteResponse]
 	listFolders        *connect.Client[v1.ListFoldersRequest, v1.ListFoldersResponse]
+	getRemoteUsage     *connect.Client[v1.GetRemoteUsageRequest, v1.GetRemoteUsageResponse]
 	listOfflineClients *connect.Client[v1.ListOfflineClientsRequest, v1.ListOfflineClientsResponse]
 	setOfflineClients  *connect.Client[v1.SetOfflineClientsRequest, v1.SetOfflineClientsResponse]
+}
+
+// ListDisks calls mavio.storage.v1.StorageService.ListDisks.
+func (c *storageServiceClient) ListDisks(ctx context.Context, req *v1.ListDisksRequest) (*v1.ListDisksResponse, error) {
+	response, err := c.listDisks.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
 }
 
 // GetStatus calls mavio.storage.v1.StorageService.GetStatus.
@@ -259,6 +297,15 @@ func (c *storageServiceClient) ListFolders(ctx context.Context, req *v1.ListFold
 	return nil, err
 }
 
+// GetRemoteUsage calls mavio.storage.v1.StorageService.GetRemoteUsage.
+func (c *storageServiceClient) GetRemoteUsage(ctx context.Context, req *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error) {
+	response, err := c.getRemoteUsage.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // ListOfflineClients calls mavio.storage.v1.StorageService.ListOfflineClients.
 func (c *storageServiceClient) ListOfflineClients(ctx context.Context, req *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {
 	response, err := c.listOfflineClients.CallUnary(ctx, connect.NewRequest(req))
@@ -279,6 +326,10 @@ func (c *storageServiceClient) SetOfflineClients(ctx context.Context, req *v1.Se
 
 // StorageServiceHandler is an implementation of the mavio.storage.v1.StorageService service.
 type StorageServiceHandler interface {
+	// ListDisks lists the disks of the server's computer: its drives and the
+	// shares and cloud drives mounted on it, with their sizes. Neither the
+	// system's own file systems nor its hidden volumes are listed.
+	ListDisks(context.Context, *v1.ListDisksRequest) (*v1.ListDisksResponse, error)
 	// GetStatus tells whether the server reaches an rcd.
 	GetStatus(context.Context, *v1.GetStatusRequest) (*v1.GetStatusResponse, error)
 	// ListProviders lists the kinds of remotes and the settings each takes,
@@ -299,6 +350,9 @@ type StorageServiceHandler interface {
 	// ListFolders lists the folders of a folder of a remote, for choosing
 	// library folders.
 	ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error)
+	// GetRemoteUsage tells how much of a remote is used, as its backend tells;
+	// remotes whose backend does not fail with UNIMPLEMENTED.
+	GetRemoteUsage(context.Context, *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error)
 	// ListOfflineClients lists the download clients of cloud drives' offline
 	// downloads, which acquisition sends magnet links to.
 	ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error)
@@ -313,6 +367,13 @@ type StorageServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	storageServiceMethods := v1.File_mavio_storage_v1_storage_proto.Services().ByName("StorageService").Methods()
+	storageServiceListDisksHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceListDisksProcedure,
+		svc.ListDisks,
+		connect.WithSchema(storageServiceMethods.ByName("ListDisks")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	storageServiceGetStatusHandler := connect.NewUnaryHandlerSimple(
 		StorageServiceGetStatusProcedure,
 		svc.GetStatus,
@@ -365,6 +426,13 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	storageServiceGetRemoteUsageHandler := connect.NewUnaryHandlerSimple(
+		StorageServiceGetRemoteUsageProcedure,
+		svc.GetRemoteUsage,
+		connect.WithSchema(storageServiceMethods.ByName("GetRemoteUsage")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	storageServiceListOfflineClientsHandler := connect.NewUnaryHandlerSimple(
 		StorageServiceListOfflineClientsProcedure,
 		svc.ListOfflineClients,
@@ -380,6 +448,8 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 	)
 	return "/mavio.storage.v1.StorageService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case StorageServiceListDisksProcedure:
+			storageServiceListDisksHandler.ServeHTTP(w, r)
 		case StorageServiceGetStatusProcedure:
 			storageServiceGetStatusHandler.ServeHTTP(w, r)
 		case StorageServiceListProvidersProcedure:
@@ -396,6 +466,8 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 			storageServiceDeleteRemoteHandler.ServeHTTP(w, r)
 		case StorageServiceListFoldersProcedure:
 			storageServiceListFoldersHandler.ServeHTTP(w, r)
+		case StorageServiceGetRemoteUsageProcedure:
+			storageServiceGetRemoteUsageHandler.ServeHTTP(w, r)
 		case StorageServiceListOfflineClientsProcedure:
 			storageServiceListOfflineClientsHandler.ServeHTTP(w, r)
 		case StorageServiceSetOfflineClientsProcedure:
@@ -408,6 +480,10 @@ func NewStorageServiceHandler(svc StorageServiceHandler, opts ...connect.Handler
 
 // UnimplementedStorageServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedStorageServiceHandler struct{}
+
+func (UnimplementedStorageServiceHandler) ListDisks(context.Context, *v1.ListDisksRequest) (*v1.ListDisksResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.ListDisks is not implemented"))
+}
 
 func (UnimplementedStorageServiceHandler) GetStatus(context.Context, *v1.GetStatusRequest) (*v1.GetStatusResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.GetStatus is not implemented"))
@@ -439,6 +515,10 @@ func (UnimplementedStorageServiceHandler) DeleteRemote(context.Context, *v1.Dele
 
 func (UnimplementedStorageServiceHandler) ListFolders(context.Context, *v1.ListFoldersRequest) (*v1.ListFoldersResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.ListFolders is not implemented"))
+}
+
+func (UnimplementedStorageServiceHandler) GetRemoteUsage(context.Context, *v1.GetRemoteUsageRequest) (*v1.GetRemoteUsageResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.storage.v1.StorageService.GetRemoteUsage is not implemented"))
 }
 
 func (UnimplementedStorageServiceHandler) ListOfflineClients(context.Context, *v1.ListOfflineClientsRequest) (*v1.ListOfflineClientsResponse, error) {

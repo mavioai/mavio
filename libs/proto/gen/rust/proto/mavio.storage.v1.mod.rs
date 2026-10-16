@@ -22,6 +22,18 @@ pub mod __buffa {
     }
 }
 #[doc(inline)]
+pub use self::__buffa::view::ListDisksRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListDisksRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListDisksResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListDisksResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::DiskView;
+#[doc(inline)]
+pub use self::__buffa::view::DiskOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::GetStatusRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::GetStatusRequestOwnedView;
@@ -105,6 +117,14 @@ pub use self::__buffa::view::ListFoldersRequestOwnedView;
 pub use self::__buffa::view::ListFoldersResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::ListFoldersResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteUsageRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteUsageRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteUsageResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetRemoteUsageResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::OfflineClientView;
 #[doc(inline)]

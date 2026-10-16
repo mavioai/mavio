@@ -17062,6 +17062,68 @@
         "title": "DeleteRemoteResponse",
         "additionalProperties": false
       },
+      "mavio.storage.v1.Disk": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "path",
+            "description": "Where it is mounted: a mount point, or the root of a drive on\n Windows, such as \"C:\\\"."
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "description": "Its label, unset when it has none or none is read."
+          },
+          "fileSystem": {
+            "type": "string",
+            "title": "file_system",
+            "description": "Its file system, such as \"apfs\", \"ext4\" or \"NTFS\"."
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.storage.v1.DiskKind"
+              }
+            ],
+            "title": "kind",
+            "description": "Unspecified when the disk did not answer."
+          },
+          "totalBytes": {
+            "type": "string",
+            "title": "total_bytes",
+            "format": "int64",
+            "description": "Its size; unset, as are used and available, when unknown, as for a\n share that did not answer in time."
+          },
+          "usedBytes": {
+            "type": "string",
+            "title": "used_bytes",
+            "format": "int64",
+            "description": "What is not available: what its files take, space reserved and, where\n volumes share a container as on APFS, what the others hold."
+          },
+          "availableBytes": {
+            "type": "string",
+            "title": "available_bytes",
+            "format": "int64",
+            "description": "What is free to the server."
+          }
+        },
+        "title": "Disk",
+        "additionalProperties": false,
+        "description": "Disk is a file system mounted on the server's computer."
+      },
+      "mavio.storage.v1.DiskKind": {
+        "type": "string",
+        "title": "DiskKind",
+        "enum": [
+          "DISK_KIND_UNSPECIFIED",
+          "DISK_KIND_SSD",
+          "DISK_KIND_HDD",
+          "DISK_KIND_NETWORK",
+          "DISK_KIND_CLOUD"
+        ],
+        "description": "DiskKind is the device a disk is on."
+      },
       "mavio.storage.v1.Example": {
         "type": "object",
         "properties": {
@@ -17080,6 +17142,44 @@
         },
         "title": "Example",
         "additionalProperties": false
+      },
+      "mavio.storage.v1.GetRemoteUsageRequest": {
+        "type": "object",
+        "properties": {
+          "remote": {
+            "type": "string",
+            "title": "remote",
+            "maxLength": 64
+          }
+        },
+        "title": "GetRemoteUsageRequest",
+        "required": [
+          "remote"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.storage.v1.GetRemoteUsageResponse": {
+        "type": "object",
+        "properties": {
+          "totalBytes": {
+            "type": "string",
+            "title": "total_bytes",
+            "format": "int64"
+          },
+          "usedBytes": {
+            "type": "string",
+            "title": "used_bytes",
+            "format": "int64"
+          },
+          "freeBytes": {
+            "type": "string",
+            "title": "free_bytes",
+            "format": "int64"
+          }
+        },
+        "title": "GetRemoteUsageResponse",
+        "additionalProperties": false,
+        "description": "GetRemoteUsageResponse is a remote's usage in bytes; what its backend\n does not tell is unset."
       },
       "mavio.storage.v1.GetStatusRequest": {
         "type": "object",
@@ -17111,6 +17211,25 @@
           }
         },
         "title": "GetStatusResponse",
+        "additionalProperties": false
+      },
+      "mavio.storage.v1.ListDisksRequest": {
+        "type": "object",
+        "title": "ListDisksRequest",
+        "additionalProperties": false
+      },
+      "mavio.storage.v1.ListDisksResponse": {
+        "type": "object",
+        "properties": {
+          "disks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.storage.v1.Disk"
+            },
+            "title": "disks"
+          }
+        },
+        "title": "ListDisksResponse",
         "additionalProperties": false
       },
       "mavio.storage.v1.ListFoldersRequest": {
@@ -21183,7 +21302,7 @@
     },
     {
       "name": "StorageService",
-      "description": "StorageService configures the rclone remotes that library folders may lie\n on, as \"rclone:\u003cremote\u003e:\u003cpath\u003e\", through the rclone rcd the server runs or\n reaches. Administrators only."
+      "description": "StorageService tells of the disks of the server's computer, and\n configures the rclone remotes that library folders may lie on, as\n \"rclone:\u003cremote\u003e:\u003cpath\u003e\", through the rclone rcd the server runs or\n reaches. Administrators only."
     },
     {
       "name": "AiProviderService",
@@ -21575,14 +21694,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/GetHub": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
           "HubService"
         ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.hub.v1.HubService.GetHub",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -21607,7 +21726,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -21629,7 +21748,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
                 }
               }
             }
@@ -22008,14 +22127,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/SearchTitles": {
+    "/mavio.library.v1.CollectionService/UpdateCollection": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "CollectionService"
         ],
-        "summary": "SearchTitles",
-        "description": "SearchTitles finds movies and series by name through a discovery\n provider, as Seerr's /search, marked as Discover marks them.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.SearchTitles",
+        "summary": "UpdateCollection",
+        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -22040,7 +22158,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
               }
             }
           },
@@ -22062,7 +22180,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
                 }
               }
             }
@@ -24719,14 +24837,13 @@
         }
       }
     },
-    "/mavio.acquisition.v1.RequestService/BlockTitle": {
+    "/mavio.library.v1.ItemService/GetItem": {
       "post": {
         "tags": [
-          "RequestService"
+          "ItemService"
         ],
-        "summary": "BlockTitle",
-        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
-        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
+        "summary": "GetItem",
+        "operationId": "mavio.library.v1.ItemService.GetItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24751,7 +24868,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
               }
             }
           },
@@ -24773,7 +24890,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
                 }
               }
             }
@@ -29241,14 +29358,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.hub.v1.HubService/GetHub": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "HubService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.hub.v1.HubService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29273,7 +29390,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
               }
             }
           },
@@ -29295,7 +29412,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
                 }
               }
             }
@@ -29365,14 +29482,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "HubService"
+          "DiscoverService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29397,7 +29514,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -29419,68 +29536,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -29550,6 +29606,190 @@
         }
       }
     },
+    "/mavio.library.v1.CollectionService/CreateCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.acquisition.v1.DiscoverService/SearchTitles": {
+      "post": {
+        "tags": [
+          "DiscoverService"
+        ],
+        "summary": "SearchTitles",
+        "description": "SearchTitles finds movies and series by name through a discovery\n provider, as Seerr's /search, marked as Discover marks them.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.SearchTitles",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SearchTitlesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.acquisition.v1.DiscoverService/GetPerson": {
       "post": {
         "tags": [
@@ -29612,14 +29852,14 @@
         }
       }
     },
-    "/mavio.user.v1.UserService/UpdatePlaybackPreferences": {
+    "/mavio.acquisition.v1.RequestService/BlockTitle": {
       "post": {
         "tags": [
-          "UserService"
+          "RequestService"
         ],
-        "summary": "UpdatePlaybackPreferences",
-        "description": "UpdatePlaybackPreferences changes the calling user's playback preferences.",
-        "operationId": "mavio.user.v1.UserService.UpdatePlaybackPreferences",
+        "summary": "BlockTitle",
+        "description": "BlockTitle blocklists a movie or series, as Seerr's blocklist: it can\n no longer be requested. It fails with ALREADY_EXISTS when the title is\n blocklisted already. Administrators only.",
+        "operationId": "mavio.acquisition.v1.RequestService.BlockTitle",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29644,7 +29884,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.user.v1.UpdatePlaybackPreferencesRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleRequest"
               }
             }
           },
@@ -29666,129 +29906,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.user.v1.UpdatePlaybackPreferencesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/UpdateCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "UpdateCollection",
-        "operationId": "mavio.library.v1.CollectionService.UpdateCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.UpdateCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.ItemService/GetItem": {
-      "post": {
-        "tags": [
-          "ItemService"
-        ],
-        "summary": "GetItem",
-        "operationId": "mavio.library.v1.ItemService.GetItem",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.GetItemRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.GetItemResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.BlockTitleResponse"
                 }
               }
             }
@@ -33313,6 +33431,68 @@
         }
       }
     },
+    "/mavio.storage.v1.StorageService/GetRemoteUsage": {
+      "post": {
+        "tags": [
+          "StorageService"
+        ],
+        "summary": "GetRemoteUsage",
+        "description": "GetRemoteUsage tells how much of a remote is used, as its backend tells;\n remotes whose backend does not fail with UNIMPLEMENTED.",
+        "operationId": "mavio.storage.v1.StorageService.GetRemoteUsage",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.storage.v1.GetRemoteUsageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.storage.v1.GetRemoteUsageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.storage.v1.StorageService/GetStatus": {
       "post": {
         "tags": [
@@ -33368,6 +33548,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.storage.v1.GetStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.storage.v1.StorageService/ListDisks": {
+      "post": {
+        "tags": [
+          "StorageService"
+        ],
+        "summary": "ListDisks",
+        "description": "ListDisks lists the disks of the server's computer: its drives and the\n shares and cloud drives mounted on it, with their sizes. Neither the\n system's own file systems nor its hidden volumes are listed.",
+        "operationId": "mavio.storage.v1.StorageService.ListDisks",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.storage.v1.ListDisksRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.storage.v1.ListDisksResponse"
                 }
               }
             }
@@ -37270,13 +37512,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.user.v1.UserService/UpdatePlaybackPreferences": {
       "post": {
         "tags": [
-          "CollectionService"
+          "UserService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "UpdatePlaybackPreferences",
+        "description": "UpdatePlaybackPreferences changes the calling user's playback preferences.",
+        "operationId": "mavio.user.v1.UserService.UpdatePlaybackPreferences",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -37301,7 +37544,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.user.v1.UpdatePlaybackPreferencesRequest"
               }
             }
           },
@@ -37323,7 +37566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.user.v1.UpdatePlaybackPreferencesResponse"
                 }
               }
             }
