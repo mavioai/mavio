@@ -289,6 +289,12 @@ message Item {
   // The caller's state of the item, unset when it has none; set where the
   // item is listed for the caller.
   mavio.user.v1.UserData user_data = 50;
+  // The language (ISO 639-1) a movie or series was made in, and when a
+  // movie came out digitally and on disc; premiere_date is its release in
+  // cinemas.
+  string original_language = 51;
+  google.protobuf.Timestamp digital_release_date = 52;
+  google.protobuf.Timestamp physical_release_date = 53;
 }
 
 // ExternalUrl is the page of an item or person on an external site.

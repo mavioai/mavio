@@ -78,6 +78,11 @@ export function runtimeOf(item: Item): string | undefined {
   if (!item.runtime) return undefined;
   const m = Math.round(durationMs(item.runtime) / 60_000);
   if (m <= 0) return undefined;
+  return minutesText(m);
+}
+
+/** A length of time as "1 h 21 min". */
+export function minutesText(m: number): string {
   return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`;
 }
 

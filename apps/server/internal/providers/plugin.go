@@ -201,6 +201,7 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		AlternativeTitles:   md.GetAlternativeTitles(),
 		TranslatedTitles:    md.GetTranslatedTitles(),
 		SecondaryYear:       int(md.GetSecondaryYear()),
+		ProductionLocations: md.GetProductionLocations(),
 	}
 	if md.HasRuntime() {
 		it.Runtime = md.GetRuntime().AsDuration()
@@ -229,6 +230,12 @@ func toResult(md *pluginv1.Metadata) *metadata.Result {
 		res.People = append(res.People, p)
 	}
 	res.RemoteImages = remoteImages(md.GetImages())
+	res.Facts = metadata.Facts{Budget: md.GetBudget(), Revenue: md.GetRevenue(), NextAirDate: date(md.GetNextAirDate())}
+	for _, w := range md.GetWatchProviders() {
+		if w.GetName() != "" {
+			res.Facts.WatchProviders = append(res.Facts.WatchProviders, metadata.WatchProvider{Name: w.GetName(), LogoURL: w.GetLogoUrl()})
+		}
+	}
 	return res
 }
 

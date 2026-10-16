@@ -63,6 +63,10 @@ func TestGetTitle(t *testing.T) {
 		m.ExternalIDs[core.ProviderIMDb] != "tt1" || m.Status != StatusNone || !m.Requestable || len(m.Seasons) != 0 {
 		t.Errorf("GetTitle(movie) = %+v", m)
 	}
+	if m.OriginalLanguage != "en" || !slices.Equal(m.Studios, []string{"Studio Family Film"}) || m.Budget != 1000 ||
+		len(m.WatchProviders) != 1 || m.WatchProviders[0].Name != "Stream" {
+		t.Errorf("GetTitle(movie) facts = %+v", m)
+	}
 
 	// Season 1 is requested and available, season 2 requested by
 	// another user and pending.

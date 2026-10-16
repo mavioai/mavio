@@ -130,13 +130,13 @@ func (c *client) find(ctx context.Context, id, source string) (tmdbFind, error) 
 
 func (c *client) movie(ctx context.Context, id int, language, country string) (tmdbMovie, error) {
 	var m tmdbMovie
-	q := detailsQuery(language, country, "credits,images,keywords,release_dates,alternative_titles,translations")
+	q := detailsQuery(language, country, "credits,images,keywords,release_dates,alternative_titles,translations,watch/providers")
 	return m, c.get(ctx, "/movie/"+strconv.Itoa(id), q, &m)
 }
 
 func (c *client) series(ctx context.Context, id int, language, country string) (tmdbSeries, error) {
 	var s tmdbSeries
-	q := detailsQuery(language, country, "aggregate_credits,images,keywords,external_ids,content_ratings")
+	q := detailsQuery(language, country, "aggregate_credits,images,keywords,external_ids,content_ratings,watch/providers")
 	return s, c.get(ctx, "/tv/"+strconv.Itoa(id), q, &s)
 }
 
@@ -259,6 +259,9 @@ type (
 		Language      string     `json:"original_language"`
 		Genres        []tmdbName `json:"genres"`
 		Companies     []tmdbName `json:"production_companies"`
+		Countries     []tmdbName `json:"production_countries"`
+		Budget        int64      `json:"budget"`
+		Revenue       int64      `json:"revenue"`
 		Collection    *struct {
 			ID   int    `json:"id"`
 			Name string `json:"name"`
@@ -292,6 +295,7 @@ type (
 				} `json:"data"`
 			} `json:"translations"`
 		} `json:"translations"`
+		WatchProviders tmdbWatchProviders `json:"watch/providers"`
 	}
 
 	tmdbSeries struct {
@@ -301,6 +305,7 @@ type (
 		Overview       string     `json:"overview"`
 		Tagline        string     `json:"tagline"`
 		FirstAirDate   string     `json:"first_air_date"`
+		Language       string     `json:"original_language"`
 		LastAirDate    string     `json:"last_air_date"`
 		Status         string     `json:"status"`
 		EpisodeRunTime []int      `json:"episode_run_time"`
@@ -308,6 +313,10 @@ type (
 		Genres         []tmdbName `json:"genres"`
 		Networks       []tmdbName `json:"networks"`
 		CreatedBy      []tmdbCast `json:"created_by"`
+		NextEpisode    *struct {
+			AirDate string `json:"air_date"`
+		} `json:"next_episode_to_air"`
+		WatchProviders tmdbWatchProviders `json:"watch/providers"`
 		Credits        struct {
 			Cast []tmdbAggregateCast `json:"cast"`
 			Crew []tmdbCrew          `json:"crew"`
@@ -323,6 +332,16 @@ type (
 				Rating  string `json:"rating"`
 			} `json:"results"`
 		} `json:"content_ratings"`
+	}
+
+	// tmdbWatchProviders are the services offering a title, by country.
+	tmdbWatchProviders struct {
+		Results map[string]struct {
+			Flatrate []struct {
+				Name string `json:"provider_name"`
+				Logo string `json:"logo_path"`
+			} `json:"flatrate"`
+		} `json:"results"`
 	}
 
 	tmdbSeason struct {

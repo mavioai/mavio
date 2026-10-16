@@ -6,6 +6,7 @@ import "buf/validate/validate.proto";
 import "mavio/acquisition/v1/profile.proto";
 import "mavio/acquisition/v1/request.proto";
 import "mavio/plugin/v1/discovery.proto";
+import "mavio/plugin/v1/metadata.proto";
 
 // DiscoverService lists the movies and series the discovery providers
 // offer, such as trending or popular titles, and those they find by name,
@@ -307,6 +308,29 @@ message Title {
   // The seasons of a series, in order; specials only when the server
   // allows requesting them.
   repeated SeasonStatus seasons = 21;
+
+  // The language (ISO 639-1) it was made in.
+  string original_language = 22;
+  // A movie's production companies, a series' networks.
+  repeated string studios = 23;
+  // The countries it was produced in.
+  repeated string production_locations = 24;
+  // A movie's runtime, an episode's of a series, in minutes; 0 when
+  // unknown.
+  int32 runtime_minutes = 25;
+  // A movie's budget and box office takings, in US dollars; 0 when
+  // unknown.
+  int64 budget = 26;
+  int64 revenue = 27;
+  // ISO 8601 calendar dates: a movie's digital and physical releases in
+  // rating_country, else the earliest anywhere; a series' last air date,
+  // when it has ended, and its next episode's.
+  string digital_release_date = 28;
+  string physical_release_date = 29;
+  string end_date = 30;
+  string next_air_date = 31;
+  // The services streaming it by subscription in rating_country.
+  repeated mavio.plugin.v1.WatchProvider watch_providers = 32;
 }
 
 // SeasonStatus is a season of a series with what the server has of it, as

@@ -3637,6 +3637,48 @@ pub struct Title {
     ///
     /// Field 21: `seasons`
     pub seasons: ::buffa::alloc::vec::Vec<SeasonStatus>,
+    /// The language (ISO 639-1) it was made in.
+    ///
+    /// Field 22: `original_language`
+    pub original_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// A movie's production companies, a series' networks.
+    ///
+    /// Field 23: `studios`
+    pub studios: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// The countries it was produced in.
+    ///
+    /// Field 24: `production_locations`
+    pub production_locations: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
+    /// A movie's runtime, an episode's of a series, in minutes; 0 when
+    /// unknown.
+    ///
+    /// Field 25: `runtime_minutes`
+    pub runtime_minutes: ::core::option::Option<i32>,
+    /// A movie's budget and box office takings, in US dollars; 0 when
+    /// unknown.
+    ///
+    /// Field 26: `budget`
+    pub budget: ::core::option::Option<i64>,
+    /// Field 27: `revenue`
+    pub revenue: ::core::option::Option<i64>,
+    /// ISO 8601 calendar dates: a movie's digital and physical releases in
+    /// rating_country, else the earliest anywhere; a series' last air date,
+    /// when it has ended, and its next episode's.
+    ///
+    /// Field 28: `digital_release_date`
+    pub digital_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 29: `physical_release_date`
+    pub physical_release_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 30: `end_date`
+    pub end_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 31: `next_air_date`
+    pub next_air_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The services streaming it by subscription in rating_country.
+    ///
+    /// Field 32: `watch_providers`
+    pub watch_providers: ::buffa::alloc::vec::Vec<
+        super::super::plugin::v1::WatchProvider,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3664,6 +3706,17 @@ impl ::core::fmt::Debug for Title {
             .field("requests", &self.requests)
             .field("requestable", &self.requestable)
             .field("seasons", &self.seasons)
+            .field("original_language", &self.original_language)
+            .field("studios", &self.studios)
+            .field("production_locations", &self.production_locations)
+            .field("runtime_minutes", &self.runtime_minutes)
+            .field("budget", &self.budget)
+            .field("revenue", &self.revenue)
+            .field("digital_release_date", &self.digital_release_date)
+            .field("physical_release_date", &self.physical_release_date)
+            .field("end_date", &self.end_date)
+            .field("next_air_date", &self.next_air_date)
+            .field("watch_providers", &self.watch_providers)
             .finish()
     }
 }
@@ -3827,6 +3880,77 @@ impl Title {
         self.requestable = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::original_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_original_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.original_language = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::runtime_minutes`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_runtime_minutes(mut self, value: i32) -> Self {
+        self.runtime_minutes = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::budget`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_budget(mut self, value: i64) -> Self {
+        self.budget = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::revenue`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_revenue(mut self, value: i64) -> Self {
+        self.revenue = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::digital_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_digital_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.digital_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::physical_release_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_physical_release_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.physical_release_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::end_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_end_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.end_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::next_air_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_next_air_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.next_air_date = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Title);
 impl ::buffa::MessageName for Title {
@@ -3924,6 +4048,44 @@ impl ::buffa::Message for Title {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.studios {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.production_locations {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.runtime_minutes {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.budget {
+            size += 2u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.revenue {
+            size += 2u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.digital_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.physical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.end_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.next_air_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.watch_providers {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -4004,6 +4166,44 @@ impl ::buffa::Message for Title {
         for v in &self.seasons {
             ::buffa::types::put_len_delimited_header(
                 21u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(22u32, v, buf);
+        }
+        for v in &self.studios {
+            ::buffa::types::put_string_field(23u32, v, buf);
+        }
+        for v in &self.production_locations {
+            ::buffa::types::put_string_field(24u32, v, buf);
+        }
+        if let Some(v) = self.runtime_minutes {
+            ::buffa::types::put_int32_field(25u32, v, buf);
+        }
+        if let Some(v) = self.budget {
+            ::buffa::types::put_int64_field(26u32, v, buf);
+        }
+        if let Some(v) = self.revenue {
+            ::buffa::types::put_int64_field(27u32, v, buf);
+        }
+        if let Some(ref v) = self.digital_release_date {
+            ::buffa::types::put_string_field(28u32, v, buf);
+        }
+        if let Some(ref v) = self.physical_release_date {
+            ::buffa::types::put_string_field(29u32, v, buf);
+        }
+        if let Some(ref v) = self.end_date {
+            ::buffa::types::put_string_field(30u32, v, buf);
+        }
+        if let Some(ref v) = self.next_air_date {
+            ::buffa::types::put_string_field(31u32, v, buf);
+        }
+        for v in &self.watch_providers {
+            ::buffa::types::put_len_delimited_header(
+                32u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -4244,6 +4444,127 @@ impl ::buffa::Message for Title {
                 ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
                 self.seasons.push(elem);
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .original_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.studios.push(__elem);
+            }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.production_locations.push(__elem);
+            }
+            25u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.runtime_minutes = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.budget = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            27u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.revenue = ::core::option::Option::Some(
+                    ::buffa::types::decode_int64(buf)?,
+                );
+            }
+            28u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .digital_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            29u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .physical_release_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            30u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .end_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .next_air_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            32u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.watch_providers.push(elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -4273,6 +4594,17 @@ impl ::buffa::Message for Title {
         self.requests.clear();
         self.requestable = ::core::option::Option::None;
         self.seasons.clear();
+        self.original_language = ::core::option::Option::None;
+        self.studios.clear();
+        self.production_locations.clear();
+        self.runtime_minutes = ::core::option::Option::None;
+        self.budget = ::core::option::Option::None;
+        self.revenue = ::core::option::Option::None;
+        self.digital_release_date = ::core::option::Option::None;
+        self.physical_release_date = ::core::option::Option::None;
+        self.end_date = ::core::option::Option::None;
+        self.next_air_date = ::core::option::Option::None;
+        self.watch_providers.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

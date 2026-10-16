@@ -23,6 +23,27 @@ type Result struct {
 	// Video holds stream details recorded in the file; probing the media
 	// file supersedes them.
 	Video VideoDetails
+	// Facts are what a title's page tells of it beyond the item, which
+	// is not stored.
+	Facts Facts
+}
+
+// Facts are what a metadata provider tells of a title for its page, as
+// Seerr shows of a movie or series, beyond what the item keeps.
+type Facts struct {
+	// Budget and Revenue are a movie's budget and box office takings, in
+	// US dollars; 0 when unknown.
+	Budget, Revenue int64
+	// NextAirDate is the air date of a series' next episode, if known.
+	NextAirDate *time.Time
+	// WatchProviders are the services streaming it by subscription in
+	// the lookup's country.
+	WatchProviders []WatchProvider
+}
+
+// WatchProvider is a service streaming a title.
+type WatchProvider struct {
+	Name, LogoURL string
 }
 
 // Person is a credited person.

@@ -590,7 +590,7 @@ flowchart TD
   - [ ] The discovery providers' similar titles that the libraries have, after the local ones, as Jellyfin's remote similar items providers add them
 - [x] Server: an item's extras by `ListItems` with `owner_id` (`ItemQuery.OwnerID`), shown on its details with its trailer among the actions
 - [x] Web details as rich as Seerr's: extras, the collection's banner, the discovery providers' recommendations, ratings, keywords, more crew and genres, keywords and studios opening the library's items of them
-  - [ ] Facts the metadata model does not keep yet: budget and revenue, original language, a series' networks apart from its studios, release dates by kind (theatrical, digital, physical), a series' next air date, and the streaming services in the user's region
+  - [x] Seerr's facts: original language and digital and physical release dates from the items, networks as a series' studios, and budget and revenue, a series' next air date and the streaming services in the server's country from the metadata providers through `GetTitle`, also on a discovered title
   - [x] A page of the whole cast and crew, as Seerr's View Full Crew, opened from the cast
 - [x] Server: cross-origin requests on every route (`apps/server/internal/httpserver/cors.go`)
 - [x] Server: the server's ID, name and version in `AuthService.GetAuthInfo` and the discovery reply, by which clients recognize a server at any address

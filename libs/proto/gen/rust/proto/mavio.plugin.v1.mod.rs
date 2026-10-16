@@ -108,6 +108,10 @@ pub use self::__buffa::view::MetadataView;
 #[doc(inline)]
 pub use self::__buffa::view::MetadataOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::WatchProviderView;
+#[doc(inline)]
+pub use self::__buffa::view::WatchProviderOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::PersonCreditView;
 #[doc(inline)]
 pub use self::__buffa::view::PersonCreditOwnedView;

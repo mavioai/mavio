@@ -4795,6 +4795,49 @@ pub struct TitleView<'a> {
         'a,
         super::super::__buffa::view::SeasonStatusView<'a>,
     >,
+    /// The language (ISO 639-1) it was made in.
+    ///
+    /// Field 22: `original_language`
+    pub original_language: ::core::option::Option<&'a str>,
+    /// A movie's production companies, a series' networks.
+    ///
+    /// Field 23: `studios`
+    pub studios: ::buffa::RepeatedView<'a, &'a str>,
+    /// The countries it was produced in.
+    ///
+    /// Field 24: `production_locations`
+    pub production_locations: ::buffa::RepeatedView<'a, &'a str>,
+    /// A movie's runtime, an episode's of a series, in minutes; 0 when
+    /// unknown.
+    ///
+    /// Field 25: `runtime_minutes`
+    pub runtime_minutes: ::core::option::Option<i32>,
+    /// A movie's budget and box office takings, in US dollars; 0 when
+    /// unknown.
+    ///
+    /// Field 26: `budget`
+    pub budget: ::core::option::Option<i64>,
+    /// Field 27: `revenue`
+    pub revenue: ::core::option::Option<i64>,
+    /// ISO 8601 calendar dates: a movie's digital and physical releases in
+    /// rating_country, else the earliest anywhere; a series' last air date,
+    /// when it has ended, and its next episode's.
+    ///
+    /// Field 28: `digital_release_date`
+    pub digital_release_date: ::core::option::Option<&'a str>,
+    /// Field 29: `physical_release_date`
+    pub physical_release_date: ::core::option::Option<&'a str>,
+    /// Field 30: `end_date`
+    pub end_date: ::core::option::Option<&'a str>,
+    /// Field 31: `next_air_date`
+    pub next_air_date: ::core::option::Option<&'a str>,
+    /// The services streaming it by subscription in rating_country.
+    ///
+    /// Field 32: `watch_providers`
+    pub watch_providers: ::buffa::RepeatedView<
+        'a,
+        super::super::super::super::plugin::v1::__buffa::view::WatchProviderView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
@@ -4950,6 +4993,62 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                 )?;
                 view.requestable = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            22u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.original_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            25u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.runtime_minutes = Some(::buffa::types::decode_int32(&mut cur)?);
+            }
+            26u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.budget = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            27u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.revenue = Some(::buffa::types::decode_int64(&mut cur)?);
+            }
+            28u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.digital_release_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            29u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.physical_release_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            30u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.end_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            31u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.next_air_date = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             11u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -4994,6 +5093,48 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                 view.seasons
                     .push(
                         <super::super::__buffa::view::SeasonStatusView as ::buffa::MessageView>::decode_view_ctx(
+                            sub,
+                            __sub_ctx,
+                        )?,
+                    );
+            }
+            23u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.studios.push(__elem);
+            }
+            24u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.production_locations.push(__elem);
+            }
+            32u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                ctx.register_element_memory(
+                    ::core::mem::size_of::<
+                        super::super::super::super::plugin::v1::__buffa::view::WatchProviderView,
+                    >(),
+                )?;
+                view.watch_providers
+                    .push(
+                        <super::super::super::super::plugin::v1::__buffa::view::WatchProviderView as ::buffa::MessageView>::decode_view_ctx(
                             sub,
                             __sub_ctx,
                         )?,
@@ -5095,6 +5236,25 @@ impl<'a> ::buffa::MessageView<'a> for TitleView<'a> {
                 .iter()
                 .map(|v| v.to_owned_from_source(__buffa_src))
                 .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
+            original_language: self.original_language.map(|s| s.to_string()),
+            studios: self.studios.iter().map(|s| s.to_string()).collect(),
+            production_locations: self
+                .production_locations
+                .iter()
+                .map(|s| s.to_string())
+                .collect(),
+            runtime_minutes: self.runtime_minutes,
+            budget: self.budget,
+            revenue: self.revenue,
+            digital_release_date: self.digital_release_date.map(|s| s.to_string()),
+            physical_release_date: self.physical_release_date.map(|s| s.to_string()),
+            end_date: self.end_date.map(|s| s.to_string()),
+            next_air_date: self.next_air_date.map(|s| s.to_string()),
+            watch_providers: self
+                .watch_providers
+                .iter()
+                .map(|v| v.to_owned_from_source(__buffa_src))
+                .collect::<::core::result::Result<_, ::buffa::DecodeError>>()?,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -5175,6 +5335,44 @@ impl<'a> ::buffa::ViewEncode<'a> for TitleView<'a> {
             size += 2u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         for v in &self.seasons {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.studios {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.production_locations {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.runtime_minutes {
+            size += 2u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.budget {
+            size += 2u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.revenue {
+            size += 2u64 + ::buffa::types::int64_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.digital_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.physical_release_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.end_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.next_air_date {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.watch_providers {
             let __slot = __cache.reserve();
             let inner_size = v.compute_size(__cache);
             __cache.set(__slot, inner_size);
@@ -5280,6 +5478,44 @@ impl<'a> ::buffa::ViewEncode<'a> for TitleView<'a> {
         for v in &self.seasons {
             ::buffa::types::put_len_delimited_header(
                 21u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(22u32, v, buf);
+        }
+        for v in &self.studios {
+            ::buffa::types::put_string_field(23u32, v, buf);
+        }
+        for v in &self.production_locations {
+            ::buffa::types::put_string_field(24u32, v, buf);
+        }
+        if let Some(v) = self.runtime_minutes {
+            ::buffa::types::put_int32_field(25u32, v, buf);
+        }
+        if let Some(v) = self.budget {
+            ::buffa::types::put_int64_field(26u32, v, buf);
+        }
+        if let Some(v) = self.revenue {
+            ::buffa::types::put_int64_field(27u32, v, buf);
+        }
+        if let Some(ref v) = self.digital_release_date {
+            ::buffa::types::put_string_field(28u32, v, buf);
+        }
+        if let Some(ref v) = self.physical_release_date {
+            ::buffa::types::put_string_field(29u32, v, buf);
+        }
+        if let Some(ref v) = self.end_date {
+            ::buffa::types::put_string_field(30u32, v, buf);
+        }
+        if let Some(ref v) = self.next_air_date {
+            ::buffa::types::put_string_field(31u32, v, buf);
+        }
+        for v in &self.watch_providers {
+            ::buffa::types::put_len_delimited_header(
+                32u32,
                 u64::from(__cache.consume_next()),
                 buf,
             );
@@ -5511,6 +5747,84 @@ impl TitleOwnedView {
         &self,
     ) -> &::buffa::RepeatedView<'_, super::super::__buffa::view::SeasonStatusView<'_>> {
         &self.0.reborrow().seasons
+    }
+    /// The language (ISO 639-1) it was made in.
+    ///
+    /// Field 22: `original_language`
+    #[must_use]
+    pub fn original_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().original_language
+    }
+    /// A movie's production companies, a series' networks.
+    ///
+    /// Field 23: `studios`
+    #[must_use]
+    pub fn studios(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().studios
+    }
+    /// The countries it was produced in.
+    ///
+    /// Field 24: `production_locations`
+    #[must_use]
+    pub fn production_locations(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().production_locations
+    }
+    /// A movie's runtime, an episode's of a series, in minutes; 0 when
+    /// unknown.
+    ///
+    /// Field 25: `runtime_minutes`
+    #[must_use]
+    pub fn runtime_minutes(&self) -> ::core::option::Option<i32> {
+        self.0.reborrow().runtime_minutes
+    }
+    /// A movie's budget and box office takings, in US dollars; 0 when
+    /// unknown.
+    ///
+    /// Field 26: `budget`
+    #[must_use]
+    pub fn budget(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().budget
+    }
+    /// Field 27: `revenue`
+    #[must_use]
+    pub fn revenue(&self) -> ::core::option::Option<i64> {
+        self.0.reborrow().revenue
+    }
+    /// ISO 8601 calendar dates: a movie's digital and physical releases in
+    /// rating_country, else the earliest anywhere; a series' last air date,
+    /// when it has ended, and its next episode's.
+    ///
+    /// Field 28: `digital_release_date`
+    #[must_use]
+    pub fn digital_release_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().digital_release_date
+    }
+    /// Field 29: `physical_release_date`
+    #[must_use]
+    pub fn physical_release_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().physical_release_date
+    }
+    /// Field 30: `end_date`
+    #[must_use]
+    pub fn end_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().end_date
+    }
+    /// Field 31: `next_air_date`
+    #[must_use]
+    pub fn next_air_date(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().next_air_date
+    }
+    /// The services streaming it by subscription in rating_country.
+    ///
+    /// Field 32: `watch_providers`
+    #[must_use]
+    pub fn watch_providers(
+        &self,
+    ) -> &::buffa::RepeatedView<
+        '_,
+        super::super::super::super::plugin::v1::__buffa::view::WatchProviderView<'_>,
+    > {
+        &self.0.reborrow().watch_providers
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<TitleView<'static>>> for TitleOwnedView {

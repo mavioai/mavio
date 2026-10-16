@@ -814,6 +814,7 @@ func itemToProto(ctx context.Context, it *core.Item, images []core.Image, admin 
 		AbsoluteNumber:    int32Ptr(it.AbsoluteNumber),
 
 		ProductionLocations: it.ProductionLocations,
+		OriginalLanguage:    &it.OriginalLanguage,
 	}
 	if it.CustomRating != "" {
 		b.OfficialRating = &it.CustomRating
@@ -834,6 +835,12 @@ func itemToProto(ctx context.Context, it *core.Item, images []core.Image, admin 
 	}
 	if it.EndDate != nil {
 		b.EndDate = timestamppb.New(*it.EndDate)
+	}
+	if it.DigitalReleaseDate != nil {
+		b.DigitalReleaseDate = timestamppb.New(*it.DigitalReleaseDate)
+	}
+	if it.PhysicalReleaseDate != nil {
+		b.PhysicalReleaseDate = timestamppb.New(*it.PhysicalReleaseDate)
 	}
 	if it.Runtime > 0 {
 		b.Runtime = durationpb.New(it.Runtime)

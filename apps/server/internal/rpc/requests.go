@@ -684,6 +684,10 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 		}
 		seasons[i] = b.Build()
 	}
+	watch := make([]*pluginv1.WatchProvider, len(d.WatchProviders))
+	for i, w := range d.WatchProviders {
+		watch[i] = pluginv1.WatchProvider_builder{Name: new(w.Name), LogoUrl: new(w.LogoURL)}.Build()
+	}
 	t := acquisitionv1.Title_builder{
 		MediaKind: new(keyOf(acquisitionKinds, d.Kind)), TmdbId: new(int32(d.TmdbID)), TvdbId: new(int32(d.TvdbID)),
 		Name: new(d.Name), OriginalTitle: new(d.OriginalTitle), Overview: new(d.Overview), PremiereDate: isoDate(d.PremiereDate),
@@ -691,6 +695,11 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 		CommunityRating: new(d.CommunityRating), ExternalIds: ids, PosterUrl: new(d.PosterURL), BackdropUrl: new(d.BackdropURL),
 		Anime: new(d.Anime()), Status: new(mediaStatuses[d.Status]), ItemId: optionalID(d.ItemID), Requests: reqs,
 		Requestable: new(d.Requestable), Seasons: seasons,
+
+		OriginalLanguage: new(d.OriginalLanguage), Studios: d.Studios, ProductionLocations: d.ProductionLocations,
+		RuntimeMinutes: new(int32(d.Runtime / time.Minute)), Budget: new(d.Budget), Revenue: new(d.Revenue),
+		DigitalReleaseDate: isoDate(d.DigitalReleaseDate), PhysicalReleaseDate: isoDate(d.PhysicalReleaseDate),
+		EndDate: isoDate(d.EndDate), NextAirDate: isoDate(d.NextAirDate), WatchProviders: watch,
 	}.Build()
 	return acquisitionv1.GetTitleResponse_builder{Title: t}.Build(), nil
 }

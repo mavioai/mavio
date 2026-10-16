@@ -6877,6 +6877,69 @@
             },
             "title": "seasons",
             "description": "The seasons of a series, in order; specials only when the server\n allows requesting them."
+          },
+          "originalLanguage": {
+            "type": "string",
+            "title": "original_language",
+            "description": "The language (ISO 639-1) it was made in."
+          },
+          "studios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "studios",
+            "description": "A movie's production companies, a series' networks."
+          },
+          "productionLocations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "production_locations",
+            "description": "The countries it was produced in."
+          },
+          "runtimeMinutes": {
+            "type": "integer",
+            "title": "runtime_minutes",
+            "format": "int32",
+            "description": "A movie's runtime, an episode's of a series, in minutes; 0 when\n unknown."
+          },
+          "budget": {
+            "type": "string",
+            "title": "budget",
+            "format": "int64",
+            "description": "A movie's budget and box office takings, in US dollars; 0 when\n unknown."
+          },
+          "revenue": {
+            "type": "string",
+            "title": "revenue",
+            "format": "int64"
+          },
+          "digitalReleaseDate": {
+            "type": "string",
+            "title": "digital_release_date",
+            "description": "ISO 8601 calendar dates: a movie's digital and physical releases in\n rating_country, else the earliest anywhere; a series' last air date,\n when it has ended, and its next episode's."
+          },
+          "physicalReleaseDate": {
+            "type": "string",
+            "title": "physical_release_date"
+          },
+          "endDate": {
+            "type": "string",
+            "title": "end_date"
+          },
+          "nextAirDate": {
+            "type": "string",
+            "title": "next_air_date"
+          },
+          "watchProviders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.plugin.v1.WatchProvider"
+            },
+            "title": "watch_providers",
+            "description": "The services streaming it by subscription in rating_country."
           }
         },
         "title": "Title",
@@ -10203,6 +10266,27 @@
             ],
             "title": "user_data",
             "description": "The caller's state of the item, unset when it has none; set where the\n item is listed for the caller."
+          },
+          "originalLanguage": {
+            "type": "string",
+            "title": "original_language",
+            "description": "The language (ISO 639-1) a movie or series was made in, and when a\n movie came out digitally and on disc; premiere_date is its release in\n cinemas."
+          },
+          "digitalReleaseDate": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "digital_release_date"
+          },
+          "physicalReleaseDate": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Timestamp"
+              }
+            ],
+            "title": "physical_release_date"
           }
         },
         "title": "Item",
@@ -14814,6 +14898,22 @@
         "title": "Task",
         "additionalProperties": false,
         "description": "Task is a task a plugin declares."
+      },
+      "mavio.plugin.v1.WatchProvider": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "logoUrl": {
+            "type": "string",
+            "title": "logo_url"
+          }
+        },
+        "title": "WatchProvider",
+        "additionalProperties": false,
+        "description": "WatchProvider is a service streaming a title."
       },
       "mavio.session.v1.Command": {
         "type": "object",

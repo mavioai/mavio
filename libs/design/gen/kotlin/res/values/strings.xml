@@ -353,6 +353,24 @@
     <string name="item_creators">Created By</string>
     <!-- Label of the date an item was added to the library. -->
     <string name="item_date_added">Added</string>
+    <!-- Fact of the details: when a movie came out digitally. -->
+    <string name="item_digital_release">Digital Release</string>
+    <!-- Fact of the details: when a movie came out on disc. -->
+    <string name="item_physical_release">Physical Release</string>
+    <!-- Fact of the details: when an ended series last aired. -->
+    <string name="item_last_aired">Last Aired</string>
+    <!-- Fact of the details: when a series' next episode airs. -->
+    <string name="item_next_air_date">Next Episode</string>
+    <!-- Fact of the details: the networks a series airs on. -->
+    <string name="item_networks">Network</string>
+    <!-- Fact of the details: the language a title was made in. -->
+    <string name="item_original_language">Original Language</string>
+    <!-- Fact of the details: a movie's budget. -->
+    <string name="item_budget">Budget</string>
+    <!-- Fact of the details: a movie's box office takings. -->
+    <string name="item_revenue">Revenue</string>
+    <!-- Heading of the services streaming a title by subscription in the server's country. -->
+    <string name="item_streaming">Streaming On</string>
     <!-- State of a download not started yet. -->
     <string name="download_waiting">Waiting</string>
     <!-- State of a download interrupted, to be resumed. -->

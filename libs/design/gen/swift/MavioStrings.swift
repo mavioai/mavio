@@ -583,6 +583,33 @@ public enum MavioStrings {
     /// Label of the date an item was added to the library.
     public static var itemDateAdded: String { NSLocalizedString("item.dateAdded", bundle: .module, comment: "") }
 
+    /// Fact of the details: when a movie came out digitally.
+    public static var itemDigitalRelease: String { NSLocalizedString("item.digitalRelease", bundle: .module, comment: "") }
+
+    /// Fact of the details: when a movie came out on disc.
+    public static var itemPhysicalRelease: String { NSLocalizedString("item.physicalRelease", bundle: .module, comment: "") }
+
+    /// Fact of the details: when an ended series last aired.
+    public static var itemLastAired: String { NSLocalizedString("item.lastAired", bundle: .module, comment: "") }
+
+    /// Fact of the details: when a series' next episode airs.
+    public static var itemNextAirDate: String { NSLocalizedString("item.nextAirDate", bundle: .module, comment: "") }
+
+    /// Fact of the details: the networks a series airs on.
+    public static var itemNetworks: String { NSLocalizedString("item.networks", bundle: .module, comment: "") }
+
+    /// Fact of the details: the language a title was made in.
+    public static var itemOriginalLanguage: String { NSLocalizedString("item.originalLanguage", bundle: .module, comment: "") }
+
+    /// Fact of the details: a movie's budget.
+    public static var itemBudget: String { NSLocalizedString("item.budget", bundle: .module, comment: "") }
+
+    /// Fact of the details: a movie's box office takings.
+    public static var itemRevenue: String { NSLocalizedString("item.revenue", bundle: .module, comment: "") }
+
+    /// Heading of the services streaming a title by subscription in the server's country.
+    public static var itemStreaming: String { NSLocalizedString("item.streaming", bundle: .module, comment: "") }
+
     /// State of a download not started yet.
     public static var downloadWaiting: String { NSLocalizedString("download.waiting", bundle: .module, comment: "") }
 

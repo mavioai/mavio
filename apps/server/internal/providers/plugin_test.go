@@ -215,3 +215,29 @@ func TestToResultMovieAcquisition(t *testing.T) {
 		t.Errorf("physical release = %v, want = 2020-04-01", it.PhysicalReleaseDate)
 	}
 }
+
+func TestToResultFacts(t *testing.T) {
+	md := pluginv1.Metadata_builder{
+		Budget: proto.Int64(150_000_000), Revenue: proto.Int64(400_000_000), NextAirDate: proto.String("2026-11-02"),
+		ProductionLocations: []string{"France"},
+		WatchProviders: []*pluginv1.WatchProvider{
+			pluginv1.WatchProvider_builder{Name: proto.String("Netflix"), LogoUrl: proto.String("https://image.tmdb.org/n.png")}.Build(),
+			pluginv1.WatchProvider_builder{LogoUrl: proto.String("https://image.tmdb.org/x.png")}.Build(),
+		},
+	}.Build()
+	res := toResult(md)
+	f := res.Facts
+	if f.Budget != 150_000_000 || f.Revenue != 400_000_000 {
+		t.Errorf("budget, revenue = %d, %d, want = 150000000, 400000000", f.Budget, f.Revenue)
+	}
+	if f.NextAirDate == nil || !f.NextAirDate.Equal(time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("next air date = %v, want = 2026-11-02", f.NextAirDate)
+	}
+	want := []metadata.WatchProvider{{Name: "Netflix", LogoURL: "https://image.tmdb.org/n.png"}}
+	if !slices.Equal(f.WatchProviders, want) {
+		t.Errorf("watch providers = %v, want = %v", f.WatchProviders, want)
+	}
+	if !slices.Equal(res.Item.ProductionLocations, []string{"France"}) {
+		t.Errorf("production locations = %v, want = [France]", res.Item.ProductionLocations)
+	}
+}

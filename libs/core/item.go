@@ -306,8 +306,8 @@ type Item struct {
 	// Movie.
 	// CollectionName is the collection (movie set) the movie belongs to.
 	CollectionName string
-	// OriginalLanguage is the language (ISO 639-1) the movie was made in;
-	// empty when unknown.
+	// OriginalLanguage is the language (ISO 639-1) the movie, or series,
+	// was made in; empty when unknown.
 	OriginalLanguage string
 	// DigitalReleaseDate and PhysicalReleaseDate are when the movie came
 	// out digitally and on disc; PremiereDate is its release in cinemas.

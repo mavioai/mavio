@@ -125,7 +125,7 @@ There is a single `Item` type for every kind; `Kind` selects which fields are me
 | Numbering | `IndexNumber`, `ParentIndexNumber`, `IndexNumberEnd`, `AbsoluteNumber` (an episode's number across seasons, as anime releases number it) |
 | Dates and ratings | `ProductionYear`, `PremiereDate`, `EndDate`, `Runtime`, `OfficialRating`, `CustomRating`, `ParentalRating`, `InheritedRating`, `CommunityRating` (0–10), `CriticRating` (0–100) |
 | Classification | `Genres`, `Tags`, `Studios`, `ExternalIDs` (by `Provider`), `ProductionLocations` (countries), `RemoteTrailers` (URLs) |
-| Movie and video | `CollectionName` (movie set), `AspectRatio`, `Video3DFormat`; for acquisition `OriginalLanguage` (ISO 639-1, which profiles wanting `Original` take), `DigitalReleaseDate` and `PhysicalReleaseDate` (which minimum availability uses besides `PremiereDate`, the release in cinemas), `AlternativeTitles`, `TranslatedTitles` and `SecondaryYear` (by which releases are matched to the movie) |
+| Movie and video | `CollectionName` (movie set), `AspectRatio`, `Video3DFormat`; for acquisition `OriginalLanguage` (ISO 639-1, which profiles wanting `Original` take; series have it too), `DigitalReleaseDate` and `PhysicalReleaseDate` (which minimum availability uses besides `PremiereDate`, the release in cinemas), `AlternativeTitles`, `TranslatedTitles` and `SecondaryYear` (by which releases are matched to the movie) |
 | Music | `Artists`, `AlbumArtists`, `Album` |
 | Series | `SeriesStatus`, `AirDays`, `AirTime`, `DisplayOrder`, `SeriesType` |
 | Episode | `AirsBeforeSeasonNumber`, `AirsAfterSeasonNumber`, `AirsBeforeEpisodeNumber` (where a special airs) |

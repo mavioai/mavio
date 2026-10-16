@@ -180,6 +180,15 @@
     <string name="item_music">音乐</string>
     <string name="item_creators">创作者</string>
     <string name="item_date_added">添加日期</string>
+    <string name="item_digital_release">数字版发行</string>
+    <string name="item_physical_release">实体版发行</string>
+    <string name="item_last_aired">最后播出</string>
+    <string name="item_next_air_date">下集播出</string>
+    <string name="item_networks">播出网络</string>
+    <string name="item_original_language">原始语言</string>
+    <string name="item_budget">预算</string>
+    <string name="item_revenue">票房</string>
+    <string name="item_streaming">流媒体平台</string>
     <string name="download_waiting">等待中</string>
     <string name="download_paused">已暂停</string>
     <string name="download_failed">下载失败</string>

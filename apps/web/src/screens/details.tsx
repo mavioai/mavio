@@ -1,7 +1,7 @@
 // An item's details (libs/design/components.md, Details Screen): the header
 // with what to watch and how, a series' episodes by season, an episode's
 // season, the cast, items like it, and its details and media.
-import { durationMs, timestampDate } from "@bufbuild/protobuf/wkt";
+import { durationMs, type Timestamp, timestampDate } from "@bufbuild/protobuf/wkt";
 import {
   artwork,
   type Copy,
@@ -19,6 +19,7 @@ import {
   useServer,
   useSignedIn,
   useSimilar,
+  useTitle,
   useUserData,
 } from "@mavio/client-ts";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
@@ -33,12 +34,13 @@ import { discoverLanguage, locale, t } from "../i18n.ts";
 import { Acquisition } from "./acquire.tsx";
 import { CatalogShelf } from "./discover.tsx";
 import { crewLabels, isCast, PersonTile } from "./credits.tsx";
+import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { ItemIssues } from "./issues.tsx";
 import { ItemSubtitles } from "./item-subtitles.tsx";
 import { CollectionMembers, MoreMenu, PlaylistEntries } from "./lists.tsx";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
-import { Artwork, Grid, ItemCard, Loading, minutesLeft, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
+import { Artwork, Grid, ItemCard, Loading, minutesLeft, minutesText, progressOf, runtimeOf, Shelf, StatusView, yearOf } from "../ui.tsx";
 import { Dismiss, Sheet } from "../controls/dialog.tsx";
 import { Tabs, ToggleButton } from "../controls/inputs.tsx";
 import { Tip } from "../controls/tooltip.tsx";
@@ -83,11 +85,6 @@ function videoOf(source?: MediaSource): MediaStream | undefined {
 function sizeOf(bytes: bigint): string {
   const n = Number(bytes);
   return n >= 1e9 ? `${(n / 1e9).toFixed(1)} GB` : `${Math.round(n / 1e6)} MB`;
-}
-
-/** A length of time as "1 h 21 min". */
-function minutesText(m: number): string {
-  return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`;
 }
 
 const rangeNames: Partial<Record<VideoRange, string>> = {
@@ -1009,6 +1006,12 @@ function About({
   source?: MediaSource;
   overview: boolean;
 }) {
+  // What the metadata providers tell of a movie or series beyond what the
+  // library keeps, as Seerr shows: its budget and takings, its next
+  // episode and the services streaming it.
+  const kind = item.kind === ItemKind.MOVIE ? MediaKind.MOVIE : item.kind === ItemKind.SERIES ? MediaKind.SERIES : MediaKind.UNSPECIFIED;
+  const title = useTitle(kind ? server : undefined, kind, Number(item.externalIds.tmdb) || 0).data;
+  const day = (ts?: Timestamp) => (ts ? dateFormat.format(timestampDate(ts)) : undefined);
   const names = (kind: CreditKind) =>
     credits
       .filter((c) => c.kind === kind && c.person)
@@ -1047,6 +1050,10 @@ function About({
           ? t("item.ended")
           : undefined,
     ],
+    [t("item.digitalRelease"), day(item.digitalReleaseDate) ?? dayText(title?.digitalReleaseDate ?? "")],
+    [t("item.physicalRelease"), day(item.physicalReleaseDate) ?? dayText(title?.physicalReleaseDate ?? "")],
+    [t("item.lastAired"), item.kind === ItemKind.SERIES && item.seriesStatus === SeriesStatus.ENDED ? day(item.endDate) : undefined],
+    [t("item.nextAirDate"), item.kind === ItemKind.SERIES ? dayText(title?.nextAirDate ?? "") : undefined],
     [t("item.runtime"), runtimeOf(item)],
     [t("item.rated"), item.officialRating],
     [t("item.genres"), values("genre", genres)],
@@ -1055,9 +1062,12 @@ function About({
     [t("item.writers"), names(CreditKind.WRITER)],
     [t("item.producers"), names(CreditKind.PRODUCER)],
     [t("item.music"), names(CreditKind.COMPOSER)],
-    [t("item.studio"), values("studio", studios)],
-    [t("item.country"), item.productionLocations.join(", ")],
+    [[ItemKind.SERIES, ItemKind.SEASON, ItemKind.EPISODE].includes(item.kind) ? t("item.networks") : t("item.studio"), values("studio", studios)],
+    [t("item.country"), (item.productionLocations.length ? item.productionLocations : (title?.productionLocations ?? [])).join(", ")],
+    [t("item.originalLanguage"), languageText(item.originalLanguage || (title?.originalLanguage ?? ""))],
     [t("item.originalTitle"), item.originalTitle && item.originalTitle !== item.name ? item.originalTitle : undefined],
+    [t("item.budget"), moneyText(title?.budget ?? 0n)],
+    [t("item.revenue"), moneyText(title?.revenue ?? 0n)],
     [t("item.dateAdded"), item.dateAdded && !item.virtual ? dateFormat.format(timestampDate(item.dateAdded)) : undefined],
   ];
   const streams = (kind: StreamKind) => source?.streams.filter((s) => s.kind === kind).map(streamText) ?? [];
@@ -1076,7 +1086,10 @@ function About({
   const text = overview && item.overview;
   const links = item.externalUrls;
   const ratings = item.communityRating > 0 || item.criticRating > 0;
-  if (!text && !ratings && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0) return null;
+  const streaming = title?.watchProviders ?? [];
+  if (!text && !ratings && tags.length === 0 && shownFacts.length === 0 && shownMedia.length === 0 && links.length === 0 && streaming.length === 0) {
+    return null;
+  }
   return (
     <section className="px-margin pt-8 pb-4">
       <h2 className="mb-4 type-title3">{t("item.details")}</h2>
@@ -1128,6 +1141,7 @@ function About({
         <div className="flex min-w-0 flex-1 flex-col gap-8">
           {ratings && <Ratings item={item} />}
           <FactList rows={shownFacts} />
+          <WatchProviders providers={streaming} />
           {shownMedia.length > 0 && <FactList rows={shownMedia} />}
         </div>
       </div>
@@ -1161,19 +1175,5 @@ function Ratings({ item }: { item: Item }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function FactList({ rows }: { rows: [string, ReactNode][] }) {
-  if (rows.length === 0) return null;
-  return (
-    <dl className="grid gap-x-8 gap-y-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
-      {rows.map(([k, v]) => (
-        <div key={k} className="min-w-0">
-          <dt className="type-footnote font-semibold text-text-secondary">{k}</dt>
-          <dd className="mt-1 type-callout break-words whitespace-pre-line">{v}</dd>
-        </div>
-      ))}
-    </dl>
   );
 }

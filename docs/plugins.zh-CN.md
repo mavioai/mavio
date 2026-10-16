@@ -151,6 +151,8 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 文件包含多集的单集，其查询以 `episode_number_end` 带上最后一集的集号；元数据提供者随后把这些单集作为一个条目描述，名称与简介以 ` / ` 连接，与 Jellyfin 的 TmdbEpisodeProvider 相同。`scraper-tmdb` 和 `scraper-servarr` 都这样做。
 
+在条目保存的内容之外，元数据提供者还给出作品页显示的信息，与 Seerr 相同：电影的预算与票房、剧集下一集的播出日期，以及在查询所在国家以订阅方式播放该作品的流媒体服务。主机不保存这些信息，由 `DiscoverService.GetTitle` 返回。`scraper-tmdb` 从 TMDB 的详情与观看提供方中取得它们。
+
 ### 8.12 资源获取提供者
 资源获取（[架构 §13](architecture.zh-CN.md#13-资源获取libsacquire)）新增五种提供者类型，都由服务端汇集，彼此之间从不互相调用：
 * `EPISODE_LIST_PROVIDER`：`EpisodeListProviderService.ListEpisodes` 按查询的 `display_order` 编号列出剧集的季与单集，附带绝对集数、元数据，以及标识它们的外部 ID（`provider`）；刷新剧集时，从媒体库中第一个认识该剧集的集列表提供者取得列表，把剧集缺少的单集建为虚拟条目（[领域模型 §4.8](domain.zh-CN.md#48-虚拟条目)）。`scraper-tmdb` 提供它：按播出顺序，或按该显示顺序类型的第一个 TMDB episode group，以其分组作为季。`scraper-servarr` 根据 Sonarr 的 SkyHook 提供它，无论显示顺序如何都按 TVDB 编号，与 Sonarr 给 release 和文件编号的方式一致；`scraper-tmdb` 按带有 TVDB ID 的单集的该 ID 查找它，从而无论这类单集如何编号都能给它们 TMDB 的元数据。

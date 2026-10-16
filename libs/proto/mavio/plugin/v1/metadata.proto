@@ -144,7 +144,7 @@ message Metadata {
   // The collection (movie set) a movie belongs to; its ID is among the
   // external IDs, such as "tmdb_collection".
   string collection_name = 25;
-  // For movies: the language (ISO 639-1) the movie was made in.
+  // For movies and series: the language (ISO 639-1) it was made in.
   string original_language = 26;
   // For movies: when the movie came out digitally and on disc, as ISO 8601
   // calendar dates; premiere_date is its release in cinemas.
@@ -157,6 +157,26 @@ message Metadata {
   // For movies: another year releases may give the movie, such as that of
   // its premiere when it differs from production_year.
   int32 secondary_year = 31;
+  // For movies: the countries the movie was produced in, by name.
+  repeated string production_locations = 36;
+
+  // What a title's page tells of it beyond the item, which the host does
+  // not store, as Seerr shows of a movie or series.
+  // For movies: its budget and box office takings, in US dollars.
+  int64 budget = 32;
+  int64 revenue = 33;
+  // For series: the air date of its next episode, as an ISO 8601 calendar
+  // date.
+  string next_air_date = 34;
+  // The services streaming it by subscription in the requested country,
+  // in the provider's order.
+  repeated WatchProvider watch_providers = 35;
+}
+
+// WatchProvider is a service streaming a title.
+message WatchProvider {
+  string name = 1;
+  string logo_url = 2;
 }
 
 enum CreditKind {

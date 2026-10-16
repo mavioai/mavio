@@ -1294,8 +1294,13 @@ type Metadata struct {
 	xxx_hidden_AlternativeTitles   []string               `protobuf:"bytes,29,rep,name=alternative_titles,json=alternativeTitles"`
 	xxx_hidden_TranslatedTitles    []string               `protobuf:"bytes,30,rep,name=translated_titles,json=translatedTitles"`
 	xxx_hidden_SecondaryYear       int32                  `protobuf:"varint,31,opt,name=secondary_year,json=secondaryYear"`
+	xxx_hidden_ProductionLocations []string               `protobuf:"bytes,36,rep,name=production_locations,json=productionLocations"`
+	xxx_hidden_Budget              int64                  `protobuf:"varint,32,opt,name=budget"`
+	xxx_hidden_Revenue             int64                  `protobuf:"varint,33,opt,name=revenue"`
+	xxx_hidden_NextAirDate         *string                `protobuf:"bytes,34,opt,name=next_air_date,json=nextAirDate"`
+	xxx_hidden_WatchProviders      *[]*WatchProvider      `protobuf:"bytes,35,rep,name=watch_providers,json=watchProviders"`
 	XXX_raceDetectHookData         protoimpl.RaceDetectHookData
-	XXX_presence                   [1]uint32
+	XXX_presence                   [2]uint32
 	unknownFields                  protoimpl.UnknownFields
 	sizeCache                      protoimpl.SizeCache
 }
@@ -1593,44 +1598,84 @@ func (x *Metadata) GetSecondaryYear() int32 {
 	return 0
 }
 
+func (x *Metadata) GetProductionLocations() []string {
+	if x != nil {
+		return x.xxx_hidden_ProductionLocations
+	}
+	return nil
+}
+
+func (x *Metadata) GetBudget() int64 {
+	if x != nil {
+		return x.xxx_hidden_Budget
+	}
+	return 0
+}
+
+func (x *Metadata) GetRevenue() int64 {
+	if x != nil {
+		return x.xxx_hidden_Revenue
+	}
+	return 0
+}
+
+func (x *Metadata) GetNextAirDate() string {
+	if x != nil {
+		if x.xxx_hidden_NextAirDate != nil {
+			return *x.xxx_hidden_NextAirDate
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *Metadata) GetWatchProviders() []*WatchProvider {
+	if x != nil {
+		if x.xxx_hidden_WatchProviders != nil {
+			return *x.xxx_hidden_WatchProviders
+		}
+	}
+	return nil
+}
+
 func (x *Metadata) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 36)
 }
 
 func (x *Metadata) SetOriginalTitle(v string) {
 	x.xxx_hidden_OriginalTitle = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 36)
 }
 
 func (x *Metadata) SetSortName(v string) {
 	x.xxx_hidden_SortName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 36)
 }
 
 func (x *Metadata) SetOverview(v string) {
 	x.xxx_hidden_Overview = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 36)
 }
 
 func (x *Metadata) SetTagline(v string) {
 	x.xxx_hidden_Tagline = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 36)
 }
 
 func (x *Metadata) SetProductionYear(v int32) {
 	x.xxx_hidden_ProductionYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 36)
 }
 
 func (x *Metadata) SetPremiereDate(v string) {
 	x.xxx_hidden_PremiereDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 36)
 }
 
 func (x *Metadata) SetEndDate(v string) {
 	x.xxx_hidden_EndDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 36)
 }
 
 func (x *Metadata) SetRuntime(v *durationpb.Duration) {
@@ -1639,17 +1684,17 @@ func (x *Metadata) SetRuntime(v *durationpb.Duration) {
 
 func (x *Metadata) SetOfficialRating(v string) {
 	x.xxx_hidden_OfficialRating = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 36)
 }
 
 func (x *Metadata) SetCommunityRating(v float64) {
 	x.xxx_hidden_CommunityRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 36)
 }
 
 func (x *Metadata) SetCriticRating(v float64) {
 	x.xxx_hidden_CriticRating = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 36)
 }
 
 func (x *Metadata) SetGenres(v []string) {
@@ -1670,7 +1715,7 @@ func (x *Metadata) SetExternalIds(v map[string]string) {
 
 func (x *Metadata) SetSeriesStatus(v SeriesStatus) {
 	x.xxx_hidden_SeriesStatus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 16, 36)
 }
 
 func (x *Metadata) SetArtists(v []string) {
@@ -1691,37 +1736,37 @@ func (x *Metadata) SetImages(v []*RemoteImage) {
 
 func (x *Metadata) SetBirthDate(v string) {
 	x.xxx_hidden_BirthDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 21, 36)
 }
 
 func (x *Metadata) SetDeathDate(v string) {
 	x.xxx_hidden_DeathDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 22, 36)
 }
 
 func (x *Metadata) SetBirthPlace(v string) {
 	x.xxx_hidden_BirthPlace = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 23, 36)
 }
 
 func (x *Metadata) SetCollectionName(v string) {
 	x.xxx_hidden_CollectionName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 24, 36)
 }
 
 func (x *Metadata) SetOriginalLanguage(v string) {
 	x.xxx_hidden_OriginalLanguage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 25, 36)
 }
 
 func (x *Metadata) SetDigitalReleaseDate(v string) {
 	x.xxx_hidden_DigitalReleaseDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 26, 36)
 }
 
 func (x *Metadata) SetPhysicalReleaseDate(v string) {
 	x.xxx_hidden_PhysicalReleaseDate = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 27, 36)
 }
 
 func (x *Metadata) SetAlternativeTitles(v []string) {
@@ -1734,7 +1779,30 @@ func (x *Metadata) SetTranslatedTitles(v []string) {
 
 func (x *Metadata) SetSecondaryYear(v int32) {
 	x.xxx_hidden_SecondaryYear = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 31)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 30, 36)
+}
+
+func (x *Metadata) SetProductionLocations(v []string) {
+	x.xxx_hidden_ProductionLocations = v
+}
+
+func (x *Metadata) SetBudget(v int64) {
+	x.xxx_hidden_Budget = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 32, 36)
+}
+
+func (x *Metadata) SetRevenue(v int64) {
+	x.xxx_hidden_Revenue = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 33, 36)
+}
+
+func (x *Metadata) SetNextAirDate(v string) {
+	x.xxx_hidden_NextAirDate = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[1]), 34, 36)
+}
+
+func (x *Metadata) SetWatchProviders(v []*WatchProvider) {
+	x.xxx_hidden_WatchProviders = &v
 }
 
 func (x *Metadata) HasName() bool {
@@ -1884,6 +1952,27 @@ func (x *Metadata) HasSecondaryYear() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 30)
 }
 
+func (x *Metadata) HasBudget() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 32)
+}
+
+func (x *Metadata) HasRevenue() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 33)
+}
+
+func (x *Metadata) HasNextAirDate() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[1]), 34)
+}
+
 func (x *Metadata) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -1988,6 +2077,21 @@ func (x *Metadata) ClearSecondaryYear() {
 	x.xxx_hidden_SecondaryYear = 0
 }
 
+func (x *Metadata) ClearBudget() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 32)
+	x.xxx_hidden_Budget = 0
+}
+
+func (x *Metadata) ClearRevenue() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 33)
+	x.xxx_hidden_Revenue = 0
+}
+
+func (x *Metadata) ClearNextAirDate() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[1]), 34)
+	x.xxx_hidden_NextAirDate = nil
+}
+
 type Metadata_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -2023,7 +2127,7 @@ type Metadata_builder struct {
 	// The collection (movie set) a movie belongs to; its ID is among the
 	// external IDs, such as "tmdb_collection".
 	CollectionName *string
-	// For movies: the language (ISO 639-1) the movie was made in.
+	// For movies and series: the language (ISO 639-1) it was made in.
 	OriginalLanguage *string
 	// For movies: when the movie came out digitally and on disc, as ISO 8601
 	// calendar dates; premiere_date is its release in cinemas.
@@ -2036,6 +2140,19 @@ type Metadata_builder struct {
 	// For movies: another year releases may give the movie, such as that of
 	// its premiere when it differs from production_year.
 	SecondaryYear *int32
+	// For movies: the countries the movie was produced in, by name.
+	ProductionLocations []string
+	// What a title's page tells of it beyond the item, which the host does
+	// not store, as Seerr shows of a movie or series.
+	// For movies: its budget and box office takings, in US dollars.
+	Budget  *int64
+	Revenue *int64
+	// For series: the air date of its next episode, as an ISO 8601 calendar
+	// date.
+	NextAirDate *string
+	// The services streaming it by subscription in the requested country,
+	// in the provider's order.
+	WatchProviders []*WatchProvider
 }
 
 func (b0 Metadata_builder) Build() *Metadata {
@@ -2043,48 +2160,48 @@ func (b0 Metadata_builder) Build() *Metadata {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 36)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.OriginalTitle != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 36)
 		x.xxx_hidden_OriginalTitle = b.OriginalTitle
 	}
 	if b.SortName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 36)
 		x.xxx_hidden_SortName = b.SortName
 	}
 	if b.Overview != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 36)
 		x.xxx_hidden_Overview = b.Overview
 	}
 	if b.Tagline != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 36)
 		x.xxx_hidden_Tagline = b.Tagline
 	}
 	if b.ProductionYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 36)
 		x.xxx_hidden_ProductionYear = *b.ProductionYear
 	}
 	if b.PremiereDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 36)
 		x.xxx_hidden_PremiereDate = b.PremiereDate
 	}
 	if b.EndDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 36)
 		x.xxx_hidden_EndDate = b.EndDate
 	}
 	x.xxx_hidden_Runtime = b.Runtime
 	if b.OfficialRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 36)
 		x.xxx_hidden_OfficialRating = b.OfficialRating
 	}
 	if b.CommunityRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 36)
 		x.xxx_hidden_CommunityRating = *b.CommunityRating
 	}
 	if b.CriticRating != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 36)
 		x.xxx_hidden_CriticRating = *b.CriticRating
 	}
 	x.xxx_hidden_Genres = b.Genres
@@ -2092,7 +2209,7 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_Studios = b.Studios
 	x.xxx_hidden_ExternalIds = b.ExternalIds
 	if b.SeriesStatus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 16, 36)
 		x.xxx_hidden_SeriesStatus = *b.SeriesStatus
 	}
 	x.xxx_hidden_Artists = b.Artists
@@ -2100,38 +2217,164 @@ func (b0 Metadata_builder) Build() *Metadata {
 	x.xxx_hidden_People = &b.People
 	x.xxx_hidden_Images = &b.Images
 	if b.BirthDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 21, 36)
 		x.xxx_hidden_BirthDate = b.BirthDate
 	}
 	if b.DeathDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 22, 36)
 		x.xxx_hidden_DeathDate = b.DeathDate
 	}
 	if b.BirthPlace != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 23, 36)
 		x.xxx_hidden_BirthPlace = b.BirthPlace
 	}
 	if b.CollectionName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 24, 36)
 		x.xxx_hidden_CollectionName = b.CollectionName
 	}
 	if b.OriginalLanguage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 25, 36)
 		x.xxx_hidden_OriginalLanguage = b.OriginalLanguage
 	}
 	if b.DigitalReleaseDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 26, 36)
 		x.xxx_hidden_DigitalReleaseDate = b.DigitalReleaseDate
 	}
 	if b.PhysicalReleaseDate != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 27, 36)
 		x.xxx_hidden_PhysicalReleaseDate = b.PhysicalReleaseDate
 	}
 	x.xxx_hidden_AlternativeTitles = b.AlternativeTitles
 	x.xxx_hidden_TranslatedTitles = b.TranslatedTitles
 	if b.SecondaryYear != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 31)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 30, 36)
 		x.xxx_hidden_SecondaryYear = *b.SecondaryYear
+	}
+	x.xxx_hidden_ProductionLocations = b.ProductionLocations
+	if b.Budget != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 32, 36)
+		x.xxx_hidden_Budget = *b.Budget
+	}
+	if b.Revenue != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 33, 36)
+		x.xxx_hidden_Revenue = *b.Revenue
+	}
+	if b.NextAirDate != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[1]), 34, 36)
+		x.xxx_hidden_NextAirDate = b.NextAirDate
+	}
+	x.xxx_hidden_WatchProviders = &b.WatchProviders
+	return m0
+}
+
+// WatchProvider is a service streaming a title.
+type WatchProvider struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Name        *string                `protobuf:"bytes,1,opt,name=name"`
+	xxx_hidden_LogoUrl     *string                `protobuf:"bytes,2,opt,name=logo_url,json=logoUrl"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *WatchProvider) Reset() {
+	*x = WatchProvider{}
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WatchProvider) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WatchProvider) ProtoMessage() {}
+
+func (x *WatchProvider) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *WatchProvider) GetName() string {
+	if x != nil {
+		if x.xxx_hidden_Name != nil {
+			return *x.xxx_hidden_Name
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *WatchProvider) GetLogoUrl() string {
+	if x != nil {
+		if x.xxx_hidden_LogoUrl != nil {
+			return *x.xxx_hidden_LogoUrl
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *WatchProvider) SetName(v string) {
+	x.xxx_hidden_Name = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *WatchProvider) SetLogoUrl(v string) {
+	x.xxx_hidden_LogoUrl = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *WatchProvider) HasName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *WatchProvider) HasLogoUrl() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *WatchProvider) ClearName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Name = nil
+}
+
+func (x *WatchProvider) ClearLogoUrl() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_LogoUrl = nil
+}
+
+type WatchProvider_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Name    *string
+	LogoUrl *string
+}
+
+func (b0 WatchProvider_builder) Build() *WatchProvider {
+	m0 := &WatchProvider{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Name != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_Name = b.Name
+	}
+	if b.LogoUrl != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_LogoUrl = b.LogoUrl
 	}
 	return m0
 }
@@ -2152,7 +2395,7 @@ type PersonCredit struct {
 
 func (x *PersonCredit) Reset() {
 	*x = PersonCredit{}
-	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2164,7 +2407,7 @@ func (x *PersonCredit) String() string {
 func (*PersonCredit) ProtoMessage() {}
 
 func (x *PersonCredit) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[7]
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2373,7 +2616,7 @@ type RemoteImage struct {
 
 func (x *RemoteImage) Reset() {
 	*x = RemoteImage{}
-	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2385,7 +2628,7 @@ func (x *RemoteImage) String() string {
 func (*RemoteImage) ProtoMessage() {}
 
 func (x *RemoteImage) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[8]
+	mi := &file_mavio_plugin_v1_metadata_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2637,8 +2880,7 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x06lookup\x18\x01 \x01(\v2\x17.mavio.plugin.v1.LookupR\x06lookup\"b\n" +
 	"\x13GetMetadataResponse\x12\x14\n" +
 	"\x05found\x18\x01 \x01(\bR\x05found\x125\n" +
-	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\x92\n" +
-	"\n" +
+	"\bmetadata\x18\x02 \x01(\v2\x19.mavio.plugin.v1.MetadataR\bmetadata\"\xe4\v\n" +
 	"\bMetadata\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x0eoriginal_title\x18\x02 \x01(\tR\roriginalTitle\x12\x1b\n" +
@@ -2674,10 +2916,18 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x15physical_release_date\x18\x1c \x01(\tR\x13physicalReleaseDate\x12-\n" +
 	"\x12alternative_titles\x18\x1d \x03(\tR\x11alternativeTitles\x12+\n" +
 	"\x11translated_titles\x18\x1e \x03(\tR\x10translatedTitles\x12%\n" +
-	"\x0esecondary_year\x18\x1f \x01(\x05R\rsecondaryYear\x1a>\n" +
+	"\x0esecondary_year\x18\x1f \x01(\x05R\rsecondaryYear\x121\n" +
+	"\x14production_locations\x18$ \x03(\tR\x13productionLocations\x12\x16\n" +
+	"\x06budget\x18  \x01(\x03R\x06budget\x12\x18\n" +
+	"\arevenue\x18! \x01(\x03R\arevenue\x12\"\n" +
+	"\rnext_air_date\x18\" \x01(\tR\vnextAirDate\x12G\n" +
+	"\x0fwatch_providers\x18# \x03(\v2\x1e.mavio.plugin.v1.WatchProviderR\x0ewatchProviders\x1a>\n" +
 	"\x10ExternalIdsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xad\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\">\n" +
+	"\rWatchProvider\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x19\n" +
+	"\blogo_url\x18\x02 \x01(\tR\alogoUrl\"\xad\x02\n" +
 	"\fPersonCredit\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12/\n" +
 	"\x04kind\x18\x02 \x01(\x0e2\x1b.mavio.plugin.v1.CreditKindR\x04kind\x12\x12\n" +
@@ -2750,7 +3000,7 @@ const file_mavio_plugin_v1_metadata_proto_rawDesc = "" +
 	"\x13com.mavio.plugin.v1B\rMetadataProtoP\x01ZCgithub.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1;pluginv1\xa2\x02\x03MPX\xaa\x02\x0fMavio.Plugin.V1\xca\x02\x0fMavio\\Plugin\\V1\xe2\x02\x1bMavio\\Plugin\\V1\\GPBMetadata\xea\x02\x11Mavio::Plugin::V1b\beditionsp\xe8\a"
 
 var file_mavio_plugin_v1_metadata_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_mavio_plugin_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_mavio_plugin_v1_metadata_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_mavio_plugin_v1_metadata_proto_goTypes = []any{
 	(MediaKind)(0),              // 0: mavio.plugin.v1.MediaKind
 	(SeriesStatus)(0),           // 1: mavio.plugin.v1.SeriesStatus
@@ -2763,41 +3013,43 @@ var file_mavio_plugin_v1_metadata_proto_goTypes = []any{
 	(*GetMetadataRequest)(nil),  // 8: mavio.plugin.v1.GetMetadataRequest
 	(*GetMetadataResponse)(nil), // 9: mavio.plugin.v1.GetMetadataResponse
 	(*Metadata)(nil),            // 10: mavio.plugin.v1.Metadata
-	(*PersonCredit)(nil),        // 11: mavio.plugin.v1.PersonCredit
-	(*RemoteImage)(nil),         // 12: mavio.plugin.v1.RemoteImage
-	nil,                         // 13: mavio.plugin.v1.Lookup.ExternalIdsEntry
-	nil,                         // 14: mavio.plugin.v1.Lookup.SeriesExternalIdsEntry
-	nil,                         // 15: mavio.plugin.v1.SearchResult.ExternalIdsEntry
-	nil,                         // 16: mavio.plugin.v1.Metadata.ExternalIdsEntry
-	nil,                         // 17: mavio.plugin.v1.PersonCredit.ExternalIdsEntry
-	(*durationpb.Duration)(nil), // 18: google.protobuf.Duration
+	(*WatchProvider)(nil),       // 11: mavio.plugin.v1.WatchProvider
+	(*PersonCredit)(nil),        // 12: mavio.plugin.v1.PersonCredit
+	(*RemoteImage)(nil),         // 13: mavio.plugin.v1.RemoteImage
+	nil,                         // 14: mavio.plugin.v1.Lookup.ExternalIdsEntry
+	nil,                         // 15: mavio.plugin.v1.Lookup.SeriesExternalIdsEntry
+	nil,                         // 16: mavio.plugin.v1.SearchResult.ExternalIdsEntry
+	nil,                         // 17: mavio.plugin.v1.Metadata.ExternalIdsEntry
+	nil,                         // 18: mavio.plugin.v1.PersonCredit.ExternalIdsEntry
+	(*durationpb.Duration)(nil), // 19: google.protobuf.Duration
 }
 var file_mavio_plugin_v1_metadata_proto_depIdxs = []int32{
 	0,  // 0: mavio.plugin.v1.Lookup.kind:type_name -> mavio.plugin.v1.MediaKind
-	13, // 1: mavio.plugin.v1.Lookup.external_ids:type_name -> mavio.plugin.v1.Lookup.ExternalIdsEntry
-	14, // 2: mavio.plugin.v1.Lookup.series_external_ids:type_name -> mavio.plugin.v1.Lookup.SeriesExternalIdsEntry
+	14, // 1: mavio.plugin.v1.Lookup.external_ids:type_name -> mavio.plugin.v1.Lookup.ExternalIdsEntry
+	15, // 2: mavio.plugin.v1.Lookup.series_external_ids:type_name -> mavio.plugin.v1.Lookup.SeriesExternalIdsEntry
 	4,  // 3: mavio.plugin.v1.SearchRequest.lookup:type_name -> mavio.plugin.v1.Lookup
 	7,  // 4: mavio.plugin.v1.SearchResponse.results:type_name -> mavio.plugin.v1.SearchResult
-	15, // 5: mavio.plugin.v1.SearchResult.external_ids:type_name -> mavio.plugin.v1.SearchResult.ExternalIdsEntry
+	16, // 5: mavio.plugin.v1.SearchResult.external_ids:type_name -> mavio.plugin.v1.SearchResult.ExternalIdsEntry
 	4,  // 6: mavio.plugin.v1.GetMetadataRequest.lookup:type_name -> mavio.plugin.v1.Lookup
 	10, // 7: mavio.plugin.v1.GetMetadataResponse.metadata:type_name -> mavio.plugin.v1.Metadata
-	18, // 8: mavio.plugin.v1.Metadata.runtime:type_name -> google.protobuf.Duration
-	16, // 9: mavio.plugin.v1.Metadata.external_ids:type_name -> mavio.plugin.v1.Metadata.ExternalIdsEntry
+	19, // 8: mavio.plugin.v1.Metadata.runtime:type_name -> google.protobuf.Duration
+	17, // 9: mavio.plugin.v1.Metadata.external_ids:type_name -> mavio.plugin.v1.Metadata.ExternalIdsEntry
 	1,  // 10: mavio.plugin.v1.Metadata.series_status:type_name -> mavio.plugin.v1.SeriesStatus
-	11, // 11: mavio.plugin.v1.Metadata.people:type_name -> mavio.plugin.v1.PersonCredit
-	12, // 12: mavio.plugin.v1.Metadata.images:type_name -> mavio.plugin.v1.RemoteImage
-	2,  // 13: mavio.plugin.v1.PersonCredit.kind:type_name -> mavio.plugin.v1.CreditKind
-	17, // 14: mavio.plugin.v1.PersonCredit.external_ids:type_name -> mavio.plugin.v1.PersonCredit.ExternalIdsEntry
-	3,  // 15: mavio.plugin.v1.RemoteImage.kind:type_name -> mavio.plugin.v1.ImageKind
-	5,  // 16: mavio.plugin.v1.MetadataProviderService.Search:input_type -> mavio.plugin.v1.SearchRequest
-	8,  // 17: mavio.plugin.v1.MetadataProviderService.GetMetadata:input_type -> mavio.plugin.v1.GetMetadataRequest
-	6,  // 18: mavio.plugin.v1.MetadataProviderService.Search:output_type -> mavio.plugin.v1.SearchResponse
-	9,  // 19: mavio.plugin.v1.MetadataProviderService.GetMetadata:output_type -> mavio.plugin.v1.GetMetadataResponse
-	18, // [18:20] is the sub-list for method output_type
-	16, // [16:18] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	12, // 11: mavio.plugin.v1.Metadata.people:type_name -> mavio.plugin.v1.PersonCredit
+	13, // 12: mavio.plugin.v1.Metadata.images:type_name -> mavio.plugin.v1.RemoteImage
+	11, // 13: mavio.plugin.v1.Metadata.watch_providers:type_name -> mavio.plugin.v1.WatchProvider
+	2,  // 14: mavio.plugin.v1.PersonCredit.kind:type_name -> mavio.plugin.v1.CreditKind
+	18, // 15: mavio.plugin.v1.PersonCredit.external_ids:type_name -> mavio.plugin.v1.PersonCredit.ExternalIdsEntry
+	3,  // 16: mavio.plugin.v1.RemoteImage.kind:type_name -> mavio.plugin.v1.ImageKind
+	5,  // 17: mavio.plugin.v1.MetadataProviderService.Search:input_type -> mavio.plugin.v1.SearchRequest
+	8,  // 18: mavio.plugin.v1.MetadataProviderService.GetMetadata:input_type -> mavio.plugin.v1.GetMetadataRequest
+	6,  // 19: mavio.plugin.v1.MetadataProviderService.Search:output_type -> mavio.plugin.v1.SearchResponse
+	9,  // 20: mavio.plugin.v1.MetadataProviderService.GetMetadata:output_type -> mavio.plugin.v1.GetMetadataResponse
+	19, // [19:21] is the sub-list for method output_type
+	17, // [17:19] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_mavio_plugin_v1_metadata_proto_init() }
@@ -2811,7 +3063,7 @@ func file_mavio_plugin_v1_metadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_plugin_v1_metadata_proto_rawDesc), len(file_mavio_plugin_v1_metadata_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   14,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

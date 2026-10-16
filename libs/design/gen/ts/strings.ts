@@ -176,6 +176,15 @@ export type MessageKey =
   | 'item.music'
   | 'item.creators'
   | 'item.dateAdded'
+  | 'item.digitalRelease'
+  | 'item.physicalRelease'
+  | 'item.lastAired'
+  | 'item.nextAirDate'
+  | 'item.networks'
+  | 'item.originalLanguage'
+  | 'item.budget'
+  | 'item.revenue'
+  | 'item.streaming'
   | 'player.play'
   | 'player.pause'
   | 'player.seekBack'
@@ -1715,6 +1724,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.music": "Music",
     "item.creators": "Created By",
     "item.dateAdded": "Added",
+    "item.digitalRelease": "Digital Release",
+    "item.physicalRelease": "Physical Release",
+    "item.lastAired": "Last Aired",
+    "item.nextAirDate": "Next Episode",
+    "item.networks": "Network",
+    "item.originalLanguage": "Original Language",
+    "item.budget": "Budget",
+    "item.revenue": "Revenue",
+    "item.streaming": "Streaming On",
     "player.play": "Play",
     "player.pause": "Pause",
     "player.seekBack": "Back {count, plural, one {# second} other {# seconds}}",
@@ -3252,6 +3270,15 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "item.music": "音乐",
     "item.creators": "创作者",
     "item.dateAdded": "添加日期",
+    "item.digitalRelease": "数字版发行",
+    "item.physicalRelease": "实体版发行",
+    "item.lastAired": "最后播出",
+    "item.nextAirDate": "下集播出",
+    "item.networks": "播出网络",
+    "item.originalLanguage": "原始语言",
+    "item.budget": "预算",
+    "item.revenue": "票房",
+    "item.streaming": "流媒体平台",
     "player.play": "播放",
     "player.pause": "暂停",
     "player.seekBack": "{count, plural, other {后退 # 秒}}",

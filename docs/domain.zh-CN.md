@@ -125,7 +125,7 @@ erDiagram
 | 编号 | `IndexNumber`、`ParentIndexNumber`、`IndexNumberEnd`、`AbsoluteNumber`（单集跨季的编号，动画发布即按它编号） |
 | 日期与评分 | `ProductionYear`、`PremiereDate`、`EndDate`、`Runtime`、`OfficialRating`、`CustomRating`、`ParentalRating`、`InheritedRating`、`CommunityRating`（0–10）、`CriticRating`（0–100） |
 | 分类 | `Genres`、`Tags`、`Studios`、`ExternalIDs`（按 `Provider`）、`ProductionLocations`（制片国家）、`RemoteTrailers`（预告片 URL） |
-| 电影与视频 | `CollectionName`（电影系列）、`AspectRatio`、`Video3DFormat`；供获取使用的 `OriginalLanguage`（ISO 639-1，要求 `Original` 的档案取它）、`DigitalReleaseDate` 与 `PhysicalReleaseDate`（最低可用性在 `PremiereDate`（院线上映）之外使用它们）、`AlternativeTitles`、`TranslatedTitles` 与 `SecondaryYear`（据此把发布匹配到电影） |
+| 电影与视频 | `CollectionName`（电影系列）、`AspectRatio`、`Video3DFormat`；供获取使用的 `OriginalLanguage`（ISO 639-1，要求 `Original` 的档案取它；剧集也有）、`DigitalReleaseDate` 与 `PhysicalReleaseDate`（最低可用性在 `PremiereDate`（院线上映）之外使用它们）、`AlternativeTitles`、`TranslatedTitles` 与 `SecondaryYear`（据此把发布匹配到电影） |
 | 音乐 | `Artists`、`AlbumArtists`、`Album` |
 | 剧集 | `SeriesStatus`、`AirDays`、`AirTime`、`DisplayOrder`、`SeriesType` |
 | 单集 | `AirsBeforeSeasonNumber`、`AirsAfterSeasonNumber`、`AirsBeforeEpisodeNumber`（特别篇的插播位置） |

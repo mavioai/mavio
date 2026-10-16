@@ -258,6 +258,10 @@ func (s session) movieMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugin
 	}
 	setRating(md, r, ratings)
 	setMovieReleases(md, m, r)
+	md.SetProductionLocations(names(m.Countries))
+	md.SetBudget(m.Budget)
+	md.SetRevenue(m.Revenue)
+	md.SetWatchProviders(watchProviders(m.WatchProviders, r))
 	people := castCredits(mapCast(m.Credits.Cast, s.cast), pluginv1.CreditKind_CREDIT_KIND_ACTOR)
 	people = append(people, crewCredits(m.Credits.Crew)...)
 	md.SetPeople(people)
@@ -298,6 +302,15 @@ func (s session) seriesMetadata(ctx context.Context, l *pluginv1.Lookup) (*plugi
 	if len(t.EpisodeRunTime) > 0 {
 		setRuntime(md, t.EpisodeRunTime[0])
 	}
+	if t.Language != "" && t.Language != "xx" {
+		md.SetOriginalLanguage(strings.ToLower(t.Language))
+	}
+	if t.NextEpisode != nil {
+		if _, ok := yearOf(t.NextEpisode.AirDate); ok {
+			md.SetNextAirDate(t.NextEpisode.AirDate)
+		}
+	}
+	md.SetWatchProviders(watchProviders(t.WatchProviders, r))
 	ratings := map[string]string{}
 	for _, cr := range t.ContentRatings.Results {
 		if cr.Rating != "" {
@@ -455,6 +468,26 @@ func externalIDs(id int, ext tmdbExternalIDs) map[string]string {
 		ids[keyTVDB] = strconv.Itoa(ext.TVDBID)
 	}
 	return ids
+}
+
+// logoSize is the size of watch providers' logos.
+const logoSize = "w92"
+
+// watchProviders lists the services streaming a title by subscription in
+// the requested country, as Seerr's streaming providers.
+func watchProviders(w tmdbWatchProviders, r request) []*pluginv1.WatchProvider {
+	var out []*pluginv1.WatchProvider
+	for _, p := range w.Results[r.ratingCountry()].Flatrate {
+		if p.Name == "" {
+			continue
+		}
+		b := pluginv1.WatchProvider_builder{Name: proto.String(p.Name)}
+		if p.Logo != "" {
+			b.LogoUrl = proto.String(imageBaseURL + logoSize + p.Logo)
+		}
+		out = append(out, b.Build())
+	}
+	return out
 }
 
 // setDate sets the premiere date and production year from a TMDB date.

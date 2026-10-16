@@ -88,11 +88,14 @@ var routes = map[string]string{
 			{"iso_3166_1":"CN","release_dates":[{"type":3,"release_date":"2019-12-31T00:00:00.000Z"}]}]},
 		"original_language":"en",
 		"alternative_titles":{"titles":[{"iso_3166_1":"US","title":"Mulan (2020)"},{"iso_3166_1":"US","title":"Mulan"}]},
-		"translations":{"translations":[{"iso_639_1":"zh","data":{"title":"花木兰"}},{"iso_639_1":"de","data":{"title":""}}]}}`,
+		"translations":{"translations":[{"iso_639_1":"zh","data":{"title":"花木兰"}},{"iso_639_1":"de","data":{"title":""}}]},
+		"budget":200000000,"revenue":69965374,"production_countries":[{"iso_3166_1":"US","name":"United States of America"}],
+		"watch/providers":{"results":{"DE":{"flatrate":[{"provider_name":"Disney Plus","logo_path":"/dp.jpg"}]},
+			"US":{"flatrate":[{"provider_name":"Netflix","logo_path":"/nf.jpg"}]}}}}`,
 	"/3/find/tt0120762": `{"movie_results":[{"id":10674}],"tv_results":[]}`,
 	"/3/movie/10674":    `{"id":10674,"title":"Mulan","release_date":"1998-06-18"}`,
 	"/3/find/81189":     `{"movie_results":[],"tv_results":[{"id":1396}]}`,
-	"/3/tv/1396": `{"id":1396,"name":"Breaking Bad","original_name":"Breaking Bad","first_air_date":"2008-01-20",
+	"/3/tv/1396": `{"id":1396,"name":"Breaking Bad","original_name":"Breaking Bad","first_air_date":"2008-01-20","original_language":"en",
 		"last_air_date":"2013-09-29","status":"Ended","episode_run_time":[45,47],"vote_average":8.9,
 		"genres":[{"name":"Drama"}],"networks":[{"name":"AMC"}],
 		"created_by":[{"id":66633,"name":"Vince Gilligan","profile_path":"/vg.jpg"}],
@@ -101,6 +104,8 @@ var routes = map[string]string{
 		"keywords":{"results":[{"name":"drug dealer"}]},
 		"content_ratings":{"results":[{"iso_3166_1":"US","rating":"TV-MA"}]},
 		"seasons":[{"id":3572,"name":"Season 1","air_date":"2008-01-20","season_number":1,"poster_path":"/s1.jpg"}],
+		"next_episode_to_air":{"air_date":"2026-11-02"},
+		"watch/providers":{"results":{"US":{"flatrate":[{"provider_name":"Netflix"}]}}},
 		"episode_groups":{"results":[{"id":"g-dvd","type":3}]}}`,
 	"/3/tv/1396/season/1": `{"id":3572,"name":"Season 1","air_date":"2008-01-20","season_number":1,
 		"images":{"posters":[{"file_path":"/s1.jpg","iso_639_1":"en"}]},"external_ids":{"tvdb_id":30272},
@@ -192,6 +197,16 @@ func TestMovieBySearch(t *testing.T) {
 
 	if got, want := fake.paths(), []string{"/3/search/movie", "/3/movie/337401"}; !slices.Equal(got, want) {
 		t.Errorf("requests = %v, want = %v", got, want)
+	}
+	if md.GetBudget() != 200000000 || md.GetRevenue() != 69965374 {
+		t.Errorf("budget, revenue = %d, %d, want = 200000000, 69965374", md.GetBudget(), md.GetRevenue())
+	}
+	if got, want := md.GetProductionLocations(), []string{"United States of America"}; !slices.Equal(got, want) {
+		t.Errorf("production locations = %v, want = %v", got, want)
+	}
+	// The services of the lookup's country.
+	if w := md.GetWatchProviders(); len(w) != 1 || w[0].GetName() != "Disney Plus" || w[0].GetLogoUrl() != "https://image.tmdb.org/t/p/w92/dp.jpg" {
+		t.Errorf("watch providers = %v, want = [Disney Plus]", w)
 	}
 	q := fake.requests[1].URL.Query()
 	if got, want := q.Get("include_image_language"), "de,null,en"; got != want {
@@ -301,6 +316,15 @@ func TestSeries(t *testing.T) {
 	}
 	if got := md.GetRuntime().AsDuration(); got != 45*time.Minute {
 		t.Errorf("runtime = %v, want = 45m", got)
+	}
+	if got := md.GetOriginalLanguage(); got != "en" {
+		t.Errorf("original language = %q, want = en", got)
+	}
+	if got := md.GetNextAirDate(); got != "2026-11-02" {
+		t.Errorf("next air date = %q, want = 2026-11-02", got)
+	}
+	if w := md.GetWatchProviders(); len(w) != 1 || w[0].GetName() != "Netflix" || w[0].HasLogoUrl() {
+		t.Errorf("watch providers = %v, want = [Netflix without a logo]", w)
 	}
 	wantIDs := map[string]string{"tmdb": "1396", "imdb": "tt0903747", "tvdb": "81189"}
 	if got := md.GetExternalIds(); !maps.Equal(got, wantIDs) {

@@ -25,7 +25,8 @@ import { discoverLanguage, t } from "../i18n.ts";
 import { Icon } from "../icon.tsx";
 import { usePrefs, useWidthClass } from "../prefs.ts";
 import { FiltersDialog, parseFilters } from "./discover-filters.tsx";
-import { Artwork, Button, CardPlaceholder, Grid, LoadMore, Loading, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { Artwork, Button, CardPlaceholder, Grid, LoadMore, Loading, minutesText, ScreenTitle, Shelf, StatusView } from "../ui.tsx";
+import { dayText, FactList, languageText, moneyText, WatchProviders } from "./facts.tsx";
 import { Modal } from "../controls/dialog.tsx";
 import { Checkbox } from "../controls/inputs.tsx";
 
@@ -372,6 +373,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
       </header>
       {phone && title.overview && <p className="px-margin pt-4 type-body">{title.overview}</p>}
       {series && title.seasons.length > 0 && <Seasons seasons={title.seasons} />}
+      <TitleFacts title={title} />
       {catalogs
         .filter((c) => (c.kind === CatalogKind.RECOMMENDATIONS || c.kind === CatalogKind.SIMILAR) && c.mediaKinds.includes(title.mediaKind))
         .map((c) => (
@@ -394,6 +396,36 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
         />
       )}
     </div>
+  );
+}
+
+/** A title's facts, as Seerr's movie and series pages show them, and the services streaming it. */
+function TitleFacts({ title }: { title: Title }) {
+  const series = title.mediaKind === MediaKind.SERIES;
+  const rows: [string, ReactNode][] = [
+    [series ? t("item.firstAired") : t("item.released"), dayText(title.premiereDate)],
+    [t("item.digitalRelease"), dayText(title.digitalReleaseDate)],
+    [t("item.physicalRelease"), dayText(title.physicalReleaseDate)],
+    [t("item.lastAired"), dayText(title.endDate)],
+    [t("item.nextAirDate"), dayText(title.nextAirDate)],
+    [t("item.runtime"), title.runtimeMinutes > 0 ? minutesText(title.runtimeMinutes) : undefined],
+    [t("item.rated"), title.officialRating],
+    [t("item.genres"), title.genres.join(", ")],
+    [series ? t("item.networks") : t("item.studio"), title.studios.join(", ")],
+    [t("item.country"), title.productionLocations.join(", ")],
+    [t("item.originalLanguage"), languageText(title.originalLanguage)],
+    [t("item.originalTitle"), title.originalTitle && title.originalTitle !== title.name ? title.originalTitle : undefined],
+    [t("item.budget"), moneyText(title.budget)],
+    [t("item.revenue"), moneyText(title.revenue)],
+  ];
+  const shown = rows.filter(([, v]) => v);
+  if (shown.length === 0 && title.watchProviders.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-6 px-margin pt-6 pb-3">
+      <h2 className="type-title3">{t("item.details")}</h2>
+      <FactList rows={shown} />
+      <WatchProviders providers={title.watchProviders} />
+    </section>
   );
 }
 

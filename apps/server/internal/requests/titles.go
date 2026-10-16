@@ -41,6 +41,15 @@ type Title struct {
 	ExternalIDs     map[core.Provider]string
 	PosterURL       string
 	BackdropURL     string
+	// The facts of Seerr's movie and series pages.
+	OriginalLanguage    string
+	Studios             []string
+	ProductionLocations []string
+	Runtime             time.Duration
+	// EndDate is an ended series' last air date.
+	EndDate                                 *time.Time
+	DigitalReleaseDate, PhysicalReleaseDate *time.Time
+	metadata.Facts
 }
 
 // animeKeyword is the TMDB keyword of anime, which the TMDB provider
@@ -162,6 +171,17 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 		if len(t.Tags) == 0 {
 			t.Tags = it.Tags
 		}
+		t.OriginalLanguage = cmp.Or(t.OriginalLanguage, it.OriginalLanguage)
+		t.Studios = orList(t.Studios, it.Studios)
+		t.ProductionLocations = orList(t.ProductionLocations, it.ProductionLocations)
+		t.Runtime = cmp.Or(t.Runtime, it.Runtime)
+		t.EndDate = cmp.Or(t.EndDate, it.EndDate)
+		t.DigitalReleaseDate = cmp.Or(t.DigitalReleaseDate, it.DigitalReleaseDate)
+		t.PhysicalReleaseDate = cmp.Or(t.PhysicalReleaseDate, it.PhysicalReleaseDate)
+		f := &res.Facts
+		t.Budget, t.Revenue = cmp.Or(t.Budget, f.Budget), cmp.Or(t.Revenue, f.Revenue)
+		t.NextAirDate = cmp.Or(t.NextAirDate, f.NextAirDate)
+		t.WatchProviders = orList(t.WatchProviders, f.WatchProviders)
 		t.CommunityRating = cmp.Or(t.CommunityRating, it.CommunityRating)
 		for p, id := range it.ExternalIDs {
 			if _, ok := t.ExternalIDs[p]; !ok && id != "" {
@@ -183,6 +203,14 @@ func (s *Service) Title(ctx context.Context, kind core.ItemKind, tmdbID int) (Ti
 	}
 	s.cache.put(key, t, s.now())
 	return t, nil
+}
+
+// orList returns a, else b when a is empty.
+func orList[T any](a, b []T) []T {
+	if len(a) == 0 {
+		return b
+	}
+	return a
 }
 
 func yearOf(it *core.Item) int {

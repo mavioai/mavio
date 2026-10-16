@@ -160,6 +160,20 @@ pub struct ItemView<'a> {
     pub user_data: ::buffa::MessageFieldView<
         super::super::super::super::user::v1::__buffa::view::UserDataView<'a>,
     >,
+    /// The language (ISO 639-1) a movie or series was made in, and when a
+    /// movie came out digitally and on disc; premiere_date is its release in
+    /// cinemas.
+    ///
+    /// Field 51: `original_language`
+    pub original_language: ::core::option::Option<&'a str>,
+    /// Field 52: `digital_release_date`
+    pub digital_release_date: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
+    /// Field 53: `physical_release_date`
+    pub physical_release_date: ::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'a>,
+    >,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
@@ -552,6 +566,55 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                     }
                 }
             }
+            51u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.original_language = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
+            52u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.digital_release_date.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.digital_release_date = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
+            53u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __sub_ctx = ctx.descend()?;
+                let sub = ::buffa::types::borrow_bytes(&mut cur)?;
+                match view.physical_release_date.as_mut() {
+                    Some(existing) => {
+                        ::buffa::MessageView::merge_into_view(existing, sub, __sub_ctx)?
+                    }
+                    None => {
+                        view.physical_release_date = ::buffa::MessageFieldView::set(
+                            <::buffa_types::google::protobuf::__buffa::view::TimestampView as ::buffa::MessageView>::decode_view_ctx(
+                                sub,
+                                __sub_ctx,
+                            )?,
+                        );
+                    }
+                }
+            }
             21u32 => {
                 ::buffa::encoding::check_wire_type(
                     tag,
@@ -855,6 +918,25 @@ impl<'a> ::buffa::MessageView<'a> for ItemView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            original_language: self.original_language.map(|s| s.to_string()),
+            digital_release_date: match self.digital_release_date.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Timestamp,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
+            physical_release_date: match self.physical_release_date.as_option() {
+                Some(v) => {
+                    ::buffa::MessageField::<
+                        ::buffa_types::google::protobuf::Timestamp,
+                        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+                    >::some(v.to_owned_from_source(__buffa_src)?)
+                }
+                None => ::buffa::MessageField::none(),
+            },
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1054,6 +1136,25 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
         if self.user_data.is_set() {
             let __slot = __cache.reserve();
             let inner_size = self.user_data.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.digital_release_date.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.digital_release_date.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.physical_release_date.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.physical_release_date.compute_size(__cache);
             __cache.set(__slot, inner_size);
             size
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
@@ -1281,6 +1382,25 @@ impl<'a> ::buffa::ViewEncode<'a> for ItemView<'a> {
                 buf,
             );
             self.user_data.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(51u32, v, buf);
+        }
+        if self.digital_release_date.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                52u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.digital_release_date.write_to(__cache, buf);
+        }
+        if self.physical_release_date.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                53u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.physical_release_date.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1687,6 +1807,33 @@ impl ItemOwnedView {
         super::super::super::super::user::v1::__buffa::view::UserDataView<'_>,
     > {
         &self.0.reborrow().user_data
+    }
+    /// The language (ISO 639-1) a movie or series was made in, and when a
+    /// movie came out digitally and on disc; premiere_date is its release in
+    /// cinemas.
+    ///
+    /// Field 51: `original_language`
+    #[must_use]
+    pub fn original_language(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().original_language
+    }
+    /// Field 52: `digital_release_date`
+    #[must_use]
+    pub fn digital_release_date(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+    > {
+        &self.0.reborrow().digital_release_date
+    }
+    /// Field 53: `physical_release_date`
+    #[must_use]
+    pub fn physical_release_date(
+        &self,
+    ) -> &::buffa::MessageFieldView<
+        ::buffa_types::google::protobuf::__buffa::view::TimestampView<'_>,
+    > {
+        &self.0.reborrow().physical_release_date
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ItemView<'static>>> for ItemOwnedView {

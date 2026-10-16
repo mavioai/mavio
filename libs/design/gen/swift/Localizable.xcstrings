@@ -3115,6 +3115,168 @@
         }
       }
     },
+    "item.digitalRelease": {
+      "comment": "Fact of the details: when a movie came out digitally.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digital Release"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "数字版发行"
+          }
+        }
+      }
+    },
+    "item.physicalRelease": {
+      "comment": "Fact of the details: when a movie came out on disc.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Physical Release"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实体版发行"
+          }
+        }
+      }
+    },
+    "item.lastAired": {
+      "comment": "Fact of the details: when an ended series last aired.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Aired"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最后播出"
+          }
+        }
+      }
+    },
+    "item.nextAirDate": {
+      "comment": "Fact of the details: when a series' next episode airs.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next Episode"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下集播出"
+          }
+        }
+      }
+    },
+    "item.networks": {
+      "comment": "Fact of the details: the networks a series airs on.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播出网络"
+          }
+        }
+      }
+    },
+    "item.originalLanguage": {
+      "comment": "Fact of the details: the language a title was made in.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Original Language"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原始语言"
+          }
+        }
+      }
+    },
+    "item.budget": {
+      "comment": "Fact of the details: a movie's budget.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Budget"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "预算"
+          }
+        }
+      }
+    },
+    "item.revenue": {
+      "comment": "Fact of the details: a movie's box office takings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revenue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "票房"
+          }
+        }
+      }
+    },
+    "item.streaming": {
+      "comment": "Heading of the services streaming a title by subscription in the server's country.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streaming On"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "流媒体平台"
+          }
+        }
+      }
+    },
     "download.waiting": {
       "comment": "State of a download not started yet.",
       "extractionState": "manual",

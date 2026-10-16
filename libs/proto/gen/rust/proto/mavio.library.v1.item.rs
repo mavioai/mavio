@@ -1534,6 +1534,22 @@ pub struct Item {
         super::super::user::v1::UserData,
         ::buffa::Inline<super::super::user::v1::UserData>,
     >,
+    /// The language (ISO 639-1) a movie or series was made in, and when a
+    /// movie came out digitally and on disc; premiere_date is its release in
+    /// cinemas.
+    ///
+    /// Field 51: `original_language`
+    pub original_language: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 52: `digital_release_date`
+    pub digital_release_date: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
+    /// Field 53: `physical_release_date`
+    pub physical_release_date: ::buffa::MessageField<
+        ::buffa_types::google::protobuf::Timestamp,
+        ::buffa::Inline<::buffa_types::google::protobuf::Timestamp>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -1590,6 +1606,9 @@ impl ::core::fmt::Debug for Item {
             .field("display_order", &self.display_order)
             .field("absolute_number", &self.absolute_number)
             .field("user_data", &self.user_data)
+            .field("original_language", &self.original_language)
+            .field("digital_release_date", &self.digital_release_date)
+            .field("physical_release_date", &self.physical_release_date)
             .finish()
     }
 }
@@ -1912,6 +1931,16 @@ impl Item {
         self.absolute_number = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::original_language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_original_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.original_language = Some(value.into());
+        self
+    }
 }
 ::buffa::impl_default_instance!(Item);
 impl ::buffa::MessageName for Item {
@@ -2126,6 +2155,25 @@ impl ::buffa::Message for Item {
                 += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.original_language {
+            size += 2u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if self.digital_release_date.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.digital_release_date.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.physical_release_date.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.physical_release_date.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 2u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -2330,6 +2378,25 @@ impl ::buffa::Message for Item {
                 buf,
             );
             self.user_data.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.original_language {
+            ::buffa::types::put_string_field(51u32, v, buf);
+        }
+        if self.digital_release_date.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                52u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.digital_release_date.write_to(__cache, buf);
+        }
+        if self.physical_release_date.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                53u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.physical_release_date.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -2902,6 +2969,40 @@ impl ::buffa::Message for Item {
                     ctx,
                 )?;
             }
+            51u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .original_language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            52u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.digital_release_date.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            53u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.physical_release_date.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -2960,6 +3061,9 @@ impl ::buffa::Message for Item {
         self.display_order = ::core::option::Option::None;
         self.absolute_number = ::core::option::Option::None;
         self.user_data = ::buffa::MessageField::none();
+        self.original_language = ::core::option::Option::None;
+        self.digital_release_date = ::buffa::MessageField::none();
+        self.physical_release_date = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
