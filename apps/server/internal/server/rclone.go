@@ -36,22 +36,23 @@ type rcloneRuntime struct {
 
 // startRclone starts the rcd cfg asks for, or reaches the one at
 // cfg.RcloneURL. Without rclone the server serves no remotes, which nil
-// tells; an rcd that does not start, or runs another release than
-// rclone.Version, is logged and leaves the server without them too.
+// tells, with the reason; an rcd that does not start, or runs another
+// release than rclone.Version, is logged and leaves the server without
+// them too.
 // class gives the storage class of library paths, which decides whether
 // the files of a folder are cached.
-func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository, class func(context.Context, string) core.StorageClass) *rcloneRuntime {
+func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.StorageJobRepository, class func(context.Context, string) core.StorageClass) (*rcloneRuntime, string) {
 	rt := &rcloneRuntime{}
 	switch {
 	case cfg.RcloneURL != "":
 		ep, err := externalEndpoint(cfg)
 		if err != nil {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
-			return nil
+			return nil, err.Error()
 		}
 		if rt.Client, err = rclone.NewClient(ep, nil); err != nil {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
-			return nil
+			return nil, err.Error()
 		}
 		// An rcd that does not answer yet is checked when it first does.
 		rt.Client.Require(rclone.Version)
@@ -60,7 +61,7 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 		cancel()
 		if errors.Is(err, rclone.ErrVersion) {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
-			return nil
+			return nil, err.Error()
 		}
 		if err != nil {
 			log.WarnContext(ctx, "rclone does not answer yet", "url", cfg.RcloneURL, "err", err)
@@ -69,12 +70,12 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 		bin, err := exec.LookPath(cfg.Rclone)
 		if err != nil {
 			log.InfoContext(ctx, "rclone not found; libraries on rclone remotes are unavailable", "rclone", cfg.Rclone)
-			return nil
+			return nil, "rclone not found: " + err.Error()
 		}
 		pass, err := rclonePassword(cfg.RcloneConfig)
 		if err != nil {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
-			return nil
+			return nil, err.Error()
 		}
 		d, err := rclone.StartDaemon(ctx, rclone.DaemonOptions{
 			Path: bin, Config: cfg.RcloneConfig, ConfigPass: pass,
@@ -82,11 +83,11 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 		})
 		if err != nil {
 			log.ErrorContext(ctx, "libraries on rclone remotes are unavailable", "err", err)
-			return nil
+			return nil, err.Error()
 		}
 		rt.daemon, rt.Client, rt.Managed = d, d.Client(), true
 	default:
-		return nil
+		return nil, "the server is set to run no rclone"
 	}
 	rt.proxy = rclone.NewProxy(rt.Client, log)
 	if err := rt.proxy.Listen(); err != nil {
@@ -108,7 +109,7 @@ func startRclone(ctx context.Context, log *slog.Logger, cfg Config, jobs core.St
 			log.WarnContext(ctx, "sweep rclone transfers", "err", err)
 		}
 	}()
-	return rt
+	return rt, ""
 }
 
 // Close stops the proxy and the rcd the server runs.
@@ -126,10 +127,10 @@ func (rt *rcloneRuntime) Close() {
 }
 
 // Service returns the StorageService of the rcd, keeping the offline
-// download clients in offline.
-func (rt *rcloneRuntime) Service(offline *downloads.Offline) *rpc.StorageService {
+// download clients in offline; down is why the server reaches none.
+func (rt *rcloneRuntime) Service(offline *downloads.Offline, down string) *rpc.StorageService {
 	if rt == nil {
-		return &rpc.StorageService{Offline: offline}
+		return &rpc.StorageService{Offline: offline, Down: down}
 	}
 	return &rpc.StorageService{Client: rt.Client, Managed: rt.Managed, Changed: rt.Remotes.Forget, Offline: offline}
 }

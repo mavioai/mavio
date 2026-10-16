@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"net/http"
@@ -27,6 +28,8 @@ type StorageService struct {
 	Changed func(remote string)
 	// Offline keeps the offline download clients; nil keeps none.
 	Offline *downloads.Offline
+	// Down is why the server reaches no rcd, when Client is nil.
+	Down string
 }
 
 // client returns the rcd's client, after checking the caller is an
@@ -63,7 +66,7 @@ func (s *StorageService) GetStatus(ctx context.Context, _ *storagev1.GetStatusRe
 	}
 	out := storagev1.GetStatusResponse_builder{Managed: &s.Managed}.Build()
 	if s.Client == nil {
-		out.SetError("the server reaches no rclone")
+		out.SetError(cmp.Or(s.Down, "the server reaches no rclone"))
 		return out, nil
 	}
 	v, err := s.Client.Version(ctx)

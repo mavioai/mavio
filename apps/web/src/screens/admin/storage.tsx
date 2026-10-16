@@ -83,7 +83,8 @@ function StorageList({ server }: { server: ServerEntry }) {
             <span className="type-callout text-text-secondary">{s.version}</span>
           </Row>
         )}
-        {s && (
+        {/* Whose rcd it is tells only of one reached. */}
+        {available && s && (
           <Row label={t("storage.rcd")} detail={s.managed ? t("storage.managedDetail") : t("storage.externalDetail")}>
             <span className="type-callout text-text-secondary">{s.managed ? t("storage.managed") : t("storage.external")}</span>
           </Row>

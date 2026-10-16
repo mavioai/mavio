@@ -261,7 +261,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	warmer := warming.New(warming.Config{Store: db, Keeper: keeper, Online: hub.OnlineSessions, Logger: log})
 
 	// Library paths are local folders, or folders of rclone remotes.
-	rc := startRclone(ctx, log, cfg, db.StorageJobs(), pathClasses.Class)
+	rc, rcDown := startRclone(ctx, log, cfg, db.StorageJobs(), pathClasses.Class)
 	defer rc.Close()
 	storages := &library.Storages{}
 	// Cloud drives of rclone remotes that download magnet links themselves
@@ -381,7 +381,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	h, err := httpserver.Handler(httpserver.Options{
 		Version: cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
 		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
