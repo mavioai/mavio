@@ -48,6 +48,9 @@ const (
 	// DiscoverServiceGetTitleProcedure is the fully-qualified name of the DiscoverService's GetTitle
 	// RPC.
 	DiscoverServiceGetTitleProcedure = "/mavio.acquisition.v1.DiscoverService/GetTitle"
+	// DiscoverServiceGetSeasonProcedure is the fully-qualified name of the DiscoverService's GetSeason
+	// RPC.
+	DiscoverServiceGetSeasonProcedure = "/mavio.acquisition.v1.DiscoverService/GetSeason"
 )
 
 // DiscoverServiceClient is a client for the mavio.acquisition.v1.DiscoverService service.
@@ -68,6 +71,10 @@ type DiscoverServiceClient interface {
 	// fails with PERMISSION_DENIED when the title is rated above the
 	// caller's limit, and NOT_FOUND when no metadata provider knows it.
 	GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error)
+	// GetSeason lists the episodes of a season of a series, as Seerr's
+	// season of a series' page. It fails as GetTitle does, and with
+	// NOT_FOUND when no episode lister knows the season.
+	GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error)
 }
 
 // NewDiscoverServiceClient constructs a client for the mavio.acquisition.v1.DiscoverService
@@ -116,6 +123,13 @@ func NewDiscoverServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 			connect.WithClientOptions(opts...),
 		),
+		getSeason: connect.NewClient[v1.GetSeasonRequest, v1.GetSeasonResponse](
+			httpClient,
+			baseURL+DiscoverServiceGetSeasonProcedure,
+			connect.WithSchema(discoverServiceMethods.ByName("GetSeason")),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -126,6 +140,7 @@ type discoverServiceClient struct {
 	listFilterValues *connect.Client[v1.ListFilterValuesRequest, v1.ListFilterValuesResponse]
 	searchTitles     *connect.Client[v1.SearchTitlesRequest, v1.SearchTitlesResponse]
 	getTitle         *connect.Client[v1.GetTitleRequest, v1.GetTitleResponse]
+	getSeason        *connect.Client[v1.GetSeasonRequest, v1.GetSeasonResponse]
 }
 
 // ListCatalogs calls mavio.acquisition.v1.DiscoverService.ListCatalogs.
@@ -173,6 +188,15 @@ func (c *discoverServiceClient) GetTitle(ctx context.Context, req *v1.GetTitleRe
 	return nil, err
 }
 
+// GetSeason calls mavio.acquisition.v1.DiscoverService.GetSeason.
+func (c *discoverServiceClient) GetSeason(ctx context.Context, req *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error) {
+	response, err := c.getSeason.CallUnary(ctx, connect.NewRequest(req))
+	if response != nil {
+		return response.Msg, err
+	}
+	return nil, err
+}
+
 // DiscoverServiceHandler is an implementation of the mavio.acquisition.v1.DiscoverService service.
 type DiscoverServiceHandler interface {
 	// ListCatalogs lists the catalogs of every discovery provider.
@@ -191,6 +215,10 @@ type DiscoverServiceHandler interface {
 	// fails with PERMISSION_DENIED when the title is rated above the
 	// caller's limit, and NOT_FOUND when no metadata provider knows it.
 	GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error)
+	// GetSeason lists the episodes of a season of a series, as Seerr's
+	// season of a series' page. It fails as GetTitle does, and with
+	// NOT_FOUND when no episode lister knows the season.
+	GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error)
 }
 
 // NewDiscoverServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -235,6 +263,13 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
 		connect.WithHandlerOptions(opts...),
 	)
+	discoverServiceGetSeasonHandler := connect.NewUnaryHandlerSimple(
+		DiscoverServiceGetSeasonProcedure,
+		svc.GetSeason,
+		connect.WithSchema(discoverServiceMethods.ByName("GetSeason")),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/mavio.acquisition.v1.DiscoverService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DiscoverServiceListCatalogsProcedure:
@@ -247,6 +282,8 @@ func NewDiscoverServiceHandler(svc DiscoverServiceHandler, opts ...connect.Handl
 			discoverServiceSearchTitlesHandler.ServeHTTP(w, r)
 		case DiscoverServiceGetTitleProcedure:
 			discoverServiceGetTitleHandler.ServeHTTP(w, r)
+		case DiscoverServiceGetSeasonProcedure:
+			discoverServiceGetSeasonHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -274,4 +311,8 @@ func (UnimplementedDiscoverServiceHandler) SearchTitles(context.Context, *v1.Sea
 
 func (UnimplementedDiscoverServiceHandler) GetTitle(context.Context, *v1.GetTitleRequest) (*v1.GetTitleResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetTitle is not implemented"))
+}
+
+func (UnimplementedDiscoverServiceHandler) GetSeason(context.Context, *v1.GetSeasonRequest) (*v1.GetSeasonResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("mavio.acquisition.v1.DiscoverService.GetSeason is not implemented"))
 }

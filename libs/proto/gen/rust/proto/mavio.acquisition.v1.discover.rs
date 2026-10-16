@@ -3624,6 +3624,532 @@ impl ::buffa::ExtensionSet for GetTitleResponse {
         &mut self.__buffa_unknown_fields
     }
 }
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSeasonRequest {
+    /// The series' TMDB ID.
+    ///
+    /// Field 1: `tmdb_id`
+    pub tmdb_id: ::core::option::Option<i32>,
+    /// Field 2: `season_number`
+    pub season_number: ::core::option::Option<i32>,
+    /// ISO 639-1 language of its episodes' names and overviews; unset for
+    /// the server's metadata language.
+    ///
+    /// Field 3: `language`
+    pub language: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSeasonRequest {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSeasonRequest")
+            .field("tmdb_id", &self.tmdb_id)
+            .field("season_number", &self.season_number)
+            .field("language", &self.language)
+            .finish()
+    }
+}
+impl GetSeasonRequest {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSeasonRequest";
+}
+impl GetSeasonRequest {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::tmdb_id`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_tmdb_id(mut self, value: i32) -> Self {
+        self.tmdb_id = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::season_number`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_season_number(mut self, value: i32) -> Self {
+        self.season_number = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::language`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_language(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.language = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(GetSeasonRequest);
+impl ::buffa::MessageName for GetSeasonRequest {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSeasonRequest";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSeasonRequest";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSeasonRequest";
+}
+impl ::buffa::Message for GetSeasonRequest {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.tmdb_id {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(v) = self.season_number {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.language {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.tmdb_id {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        if let Some(v) = self.season_number {
+            ::buffa::types::put_int32_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.language {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.tmdb_id = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.season_number = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .language
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.tmdb_id = ::core::option::Option::None;
+        self.season_number = ::core::option::Option::None;
+        self.language = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSeasonRequest {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetSeasonRequest";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+#[derive(Clone, PartialEq, Default)]
+pub struct GetSeasonResponse {
+    /// In episode order.
+    ///
+    /// Field 1: `episodes`
+    pub episodes: ::buffa::alloc::vec::Vec<SeasonEpisode>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for GetSeasonResponse {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("GetSeasonResponse").field("episodes", &self.episodes).finish()
+    }
+}
+impl GetSeasonResponse {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSeasonResponse";
+}
+::buffa::impl_default_instance!(GetSeasonResponse);
+impl ::buffa::MessageName for GetSeasonResponse {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "GetSeasonResponse";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.GetSeasonResponse";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.GetSeasonResponse";
+}
+impl ::buffa::Message for GetSeasonResponse {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, __cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        for v in &self.episodes {
+            let __slot = __cache.reserve();
+            let inner_size = v.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        __cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        for v in &self.episodes {
+            ::buffa::types::put_len_delimited_header(
+                1u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            v.write_to(__cache, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let mut elem = ::core::default::Default::default();
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&elem),
+                )?;
+                ::buffa::Message::merge_length_delimited(&mut elem, buf, ctx)?;
+                self.episodes.push(elem);
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.episodes.clear();
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for GetSeasonResponse {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.GetSeasonResponse";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// SeasonEpisode is an episode of a season as the metadata providers tell
+/// it.
+#[derive(Clone, PartialEq, Default)]
+pub struct SeasonEpisode {
+    /// Field 1: `episode_number`
+    pub episode_number: ::core::option::Option<i32>,
+    /// Field 2: `name`
+    pub name: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Field 3: `overview`
+    pub overview: ::core::option::Option<::buffa::alloc::string::String>,
+    /// ISO 8601 calendar date it first aired, when known.
+    ///
+    /// Field 4: `air_date`
+    pub air_date: ::core::option::Option<::buffa::alloc::string::String>,
+    /// A frame of it, if any.
+    ///
+    /// Field 5: `still_url`
+    pub still_url: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for SeasonEpisode {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("SeasonEpisode")
+            .field("episode_number", &self.episode_number)
+            .field("name", &self.name)
+            .field("overview", &self.overview)
+            .field("air_date", &self.air_date)
+            .field("still_url", &self.still_url)
+            .finish()
+    }
+}
+impl SeasonEpisode {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SeasonEpisode";
+}
+impl SeasonEpisode {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::episode_number`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_episode_number(mut self, value: i32) -> Self {
+        self.episode_number = Some(value);
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::name`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_name(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.name = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::overview`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_overview(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.overview = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::air_date`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_air_date(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.air_date = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::still_url`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_still_url(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.still_url = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(SeasonEpisode);
+impl ::buffa::MessageName for SeasonEpisode {
+    const PACKAGE: &'static str = "mavio.acquisition.v1";
+    const NAME: &'static str = "SeasonEpisode";
+    const FULL_NAME: &'static str = "mavio.acquisition.v1.SeasonEpisode";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.acquisition.v1.SeasonEpisode";
+}
+impl ::buffa::Message for SeasonEpisode {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(v) = self.episode_number {
+            size += 1u64 + ::buffa::types::int32_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.overview {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.air_date {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.still_url {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(v) = self.episode_number {
+            ::buffa::types::put_int32_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.name {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.overview {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        if let Some(ref v) = self.air_date {
+            ::buffa::types::put_string_field(4u32, v, buf);
+        }
+        if let Some(ref v) = self.still_url {
+            ::buffa::types::put_string_field(5u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.episode_number = ::core::option::Option::Some(
+                    ::buffa::types::decode_int32(buf)?,
+                );
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.name.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .overview
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .air_date
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .still_url
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.episode_number = ::core::option::Option::None;
+        self.name = ::core::option::Option::None;
+        self.overview = ::core::option::Option::None;
+        self.air_date = ::core::option::Option::None;
+        self.still_url = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for SeasonEpisode {
+    const PROTO_FQN: &'static str = "mavio.acquisition.v1.SeasonEpisode";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
 /// Title is a movie or series as the metadata providers tell it, in the
 /// server's metadata language and country, with what the server has of it.
 #[derive(Clone, PartialEq, Default)]

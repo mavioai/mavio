@@ -478,6 +478,18 @@ pub use self::__buffa::view::GetTitleResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::GetTitleResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::GetSeasonRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSeasonRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSeasonResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::GetSeasonResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SeasonEpisodeView;
+#[doc(inline)]
+pub use self::__buffa::view::SeasonEpisodeOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::TitleView;
 #[doc(inline)]
 pub use self::__buffa::view::TitleOwnedView;

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mavioai/mavio/libs/core"
+	"github.com/mavioai/mavio/libs/metadata"
 )
 
 // TitleDetails is a title's page, as Seerr's GET /movie/:id and /tv/:id
@@ -132,5 +133,53 @@ func (s *Service) seasonStatuses(ctx context.Context, u *core.User, t Title, st 
 		out = append(out, *season)
 	}
 	slices.SortFunc(out, func(a, b SeasonStatus) int { return cmp.Compare(a.Number, b.Number) })
+	return out, nil
+}
+
+// Episode is an episode of a season, as Seerr's season page lists it.
+type Episode struct {
+	Number   int
+	Name     string
+	Overview string
+	// AirDate is when it first aired, if known.
+	AirDate *time.Time
+	// StillURL is a frame of it, if any.
+	StillURL string
+}
+
+// GetSeason lists the episodes of a series' season for a user, in episode
+// order, with their names and overviews in a language (ISO 639-1), the
+// server's metadata language when empty: series above the user's rating
+// limit fail with ErrRating, and seasons no episode lister knows with
+// core.ErrNotFound.
+func (s *Service) GetSeason(ctx context.Context, caller core.User, tmdbID, number int, language string) ([]Episode, error) {
+	t, err := s.titleIn(ctx, core.KindSeries, tmdbID, language)
+	if err != nil {
+		return nil, err
+	}
+	if !RatingAllowed(&caller, t.Rating, t.Country) {
+		return nil, fmt.Errorf("%w: %s is rated %q", ErrRating, t.Name, t.Rating)
+	}
+	_, server := s.region()
+	list, err := s.episodeList(ctx, t, cmp.Or(language, server))
+	if err != nil {
+		return nil, err
+	}
+	var out []Episode
+	for _, ep := range list.Episodes {
+		it := ep.Item
+		if it.ParentIndexNumber == nil || *it.ParentIndexNumber != number || it.IndexNumber == nil {
+			continue
+		}
+		e := Episode{Number: *it.IndexNumber, Name: it.Name, Overview: it.Overview, AirDate: it.PremiereDate}
+		if i := slices.IndexFunc(ep.RemoteImages, func(im metadata.RemoteImage) bool { return im.Kind == core.ImagePrimary }); i >= 0 {
+			e.StillURL = ep.RemoteImages[i].URL
+		}
+		out = append(out, e)
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("%w: season %d of the series with TMDB ID %d", core.ErrNotFound, number, tmdbID)
+	}
+	slices.SortFunc(out, func(a, b Episode) int { return cmp.Compare(a.Number, b.Number) })
 	return out, nil
 }

@@ -68,40 +68,43 @@ func (t *Title) Anime() bool {
 	return slices.ContainsFunc(t.Tags, func(tag string) bool { return strings.EqualFold(tag, animeKeyword) })
 }
 
-// titleTTL is how long looked up titles are kept.
+// titleTTL is how long looked up titles and episode lists are kept.
 const titleTTL = 6 * time.Hour
 
-// titleCacheSize bounds the titles kept; a full cache is emptied.
+// titleCacheSize bounds the entries a cache keeps; a full cache is
+// emptied.
 const titleCacheSize = 10000
 
-// titleCache keeps looked up titles, by kind, TMDB ID and country.
-type titleCache struct {
+// ttlCache keeps what the metadata providers tell, such as titles by
+// kind, TMDB ID, country and language, for titleTTL.
+type ttlCache[V any] struct {
 	mu      sync.Mutex
-	entries map[string]cachedTitle
+	entries map[string]cached[V]
 }
 
-type cachedTitle struct {
-	title Title
+type cached[V any] struct {
+	value V
 	at    time.Time
 }
 
-func (c *titleCache) get(key string, now time.Time) (Title, bool) {
+func (c *ttlCache[V]) get(key string, now time.Time) (V, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	e, ok := c.entries[key]
 	if !ok || now.Sub(e.at) > titleTTL {
-		return Title{}, false
+		var zero V
+		return zero, false
 	}
-	return e.title, true
+	return e.value, true
 }
 
-func (c *titleCache) put(key string, t Title, now time.Time) {
+func (c *ttlCache[V]) put(key string, v V, now time.Time) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.entries == nil || len(c.entries) >= titleCacheSize {
-		c.entries = map[string]cachedTitle{}
+		c.entries = map[string]cached[V]{}
 	}
-	c.entries[key] = cachedTitle{t, now}
+	c.entries[key] = cached[V]{v, now}
 }
 
 // region is the country and language titles are looked up and rated in:
@@ -271,6 +274,42 @@ type seasonInfo struct {
 // seasonInfos lists a series' seasons that have episodes, by number,
 // through the first episode lister knowing it.
 func (s *Service) seasonInfos(ctx context.Context, t Title) ([]seasonInfo, error) {
+	_, language := s.region()
+	list, err := s.episodeList(ctx, t, language)
+	if err != nil {
+		return nil, err
+	}
+	byNumber := map[int]*seasonInfo{}
+	for _, ep := range list.Episodes {
+		n := ep.Item.ParentIndexNumber
+		if n == nil {
+			continue
+		}
+		si := byNumber[*n]
+		if si == nil {
+			si = &seasonInfo{number: *n}
+			byNumber[*n] = si
+		}
+		si.episodes++
+		if d := ep.Item.PremiereDate; d != nil && (si.premiere == nil || d.Before(*si.premiere)) {
+			si.premiere = d
+		}
+	}
+	out := make([]seasonInfo, 0, len(byNumber))
+	for _, si := range byNumber {
+		out = append(out, *si)
+	}
+	slices.SortFunc(out, func(a, b seasonInfo) int { return cmp.Compare(a.number, b.number) })
+	return out, nil
+}
+
+// episodeList lists a series' episodes in a language through the first
+// episode lister knowing it, kept for titleTTL.
+func (s *Service) episodeList(ctx context.Context, t Title, language string) (*library.EpisodeList, error) {
+	key := fmt.Sprintf("%d:%s:%s", t.TmdbID, t.Country, language)
+	if list, ok := s.episodes.get(key, s.now()); ok {
+		return list, nil
+	}
 	var listers []library.EpisodeLister
 	if s.Episodes != nil {
 		listers = s.Episodes()
@@ -279,7 +318,6 @@ func (s *Service) seasonInfos(ctx context.Context, t Title) ([]seasonInfo, error
 	if t.TvdbID > 0 {
 		ids[core.ProviderTVDB] = strconv.Itoa(t.TvdbID)
 	}
-	_, language := s.region()
 	for _, l := range listers {
 		list, err := l.Episodes(ctx, library.Lookup{Kind: core.KindSeries, ExternalIDs: ids, Language: language, Country: t.Country})
 		if err != nil {
@@ -292,28 +330,8 @@ func (s *Service) seasonInfos(ctx context.Context, t Title) ([]seasonInfo, error
 		if list == nil {
 			continue
 		}
-		byNumber := map[int]*seasonInfo{}
-		for _, ep := range list.Episodes {
-			n := ep.Item.ParentIndexNumber
-			if n == nil {
-				continue
-			}
-			si := byNumber[*n]
-			if si == nil {
-				si = &seasonInfo{number: *n}
-				byNumber[*n] = si
-			}
-			si.episodes++
-			if d := ep.Item.PremiereDate; d != nil && (si.premiere == nil || d.Before(*si.premiere)) {
-				si.premiere = d
-			}
-		}
-		out := make([]seasonInfo, 0, len(byNumber))
-		for _, si := range byNumber {
-			out = append(out, *si)
-		}
-		slices.SortFunc(out, func(a, b seasonInfo) int { return cmp.Compare(a.number, b.number) })
-		return out, nil
+		s.episodes.put(key, list, s.now())
+		return list, nil
 	}
 	return nil, fmt.Errorf("%w: no episode lister knows the series with TMDB ID %d", core.ErrNotFound, t.TmdbID)
 }

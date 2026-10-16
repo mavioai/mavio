@@ -88,6 +88,8 @@
     <string name="discover_apply">显示作品</string>
     <string name="discover_no_matches">没有符合筛选条件的作品。</string>
     <string name="discover_region">国家或地区</string>
+    <string name="discover_no_episodes">暂无各集列表。</string>
+    <string name="discover_episode_title">%1$s - %2$s</string>
     <string name="library_sort">排序</string>
     <string name="library_filter">筛选</string>
     <plurals name="library_item_count">

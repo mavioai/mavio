@@ -79,7 +79,8 @@ type Service struct {
 	// title's requests and approvals, for duplicates. A user's lock is
 	// taken before a title's.
 	users, titles keyLocks
-	cache         titleCache
+	cache         ttlCache[Title]
+	episodes      ttlCache[*library.EpisodeList]
 }
 
 func (s *Service) now() time.Time {

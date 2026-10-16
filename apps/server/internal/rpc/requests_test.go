@@ -164,6 +164,8 @@ func TestRequestServices(t *testing.T) {
 	wantCode(t, "GetTitle above the rating limit", err, connect.CodePermissionDenied)
 	_, err = discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(404))}.Build())
 	wantCode(t, "GetTitle of an unknown title", err, connect.CodeNotFound)
+	_, err = discover.GetSeason(ctx, acquisitionv1.GetSeasonRequest_builder{TmdbId: new(int32(1)), SeasonNumber: new(int32(1))}.Build())
+	wantCode(t, "GetSeason without an episode lister", err, connect.CodeNotFound)
 	title, err := discover.GetTitle(ctx, acquisitionv1.GetTitleRequest_builder{MediaKind: new(acquisitionv1.MediaKind_MEDIA_KIND_MOVIE), TmdbId: new(int32(1))}.Build())
 	if err != nil || title.GetTitle().GetName() != "Movie 1" || title.GetTitle().GetOfficialRating() != "PG" || !title.GetTitle().GetRequestable() ||
 		title.GetTitle().GetExternalIds()["tmdb"] != "1" {

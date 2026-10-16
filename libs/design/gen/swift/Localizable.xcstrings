@@ -1549,6 +1549,42 @@
         }
       }
     },
+    "discover.noEpisodes": {
+      "comment": "Shown in an expanded season of a discovered series when no episode lister lists its episodes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Episode list unavailable."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无各集列表。"
+          }
+        }
+      }
+    },
+    "discover.episodeTitle": {
+      "comment": "An episode of an expanded season of a discovered series: its number and name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ - %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ - %2$@"
+          }
+        }
+      }
+    },
     "library.sort": {
       "comment": "Button opening the sort options of a library.",
       "extractionState": "manual",

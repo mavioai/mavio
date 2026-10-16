@@ -299,6 +299,14 @@ public enum MavioStrings {
     /// The label of the choice of the country whose streaming services Discover's filters list.
     public static var discoverRegion: String { NSLocalizedString("discover.region", bundle: .module, comment: "") }
 
+    /// Shown in an expanded season of a discovered series when no episode lister lists its episodes.
+    public static var discoverNoEpisodes: String { NSLocalizedString("discover.noEpisodes", bundle: .module, comment: "") }
+
+    /// An episode of an expanded season of a discovered series: its number and name.
+    public static func discoverEpisodeTitle(number: String, name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("discover.episodeTitle", bundle: .module, comment: ""), number, name)
+    }
+
     /// Button opening the sort options of a library.
     public static var librarySort: String { NSLocalizedString("library.sort", bundle: .module, comment: "") }
 
@@ -2828,8 +2836,8 @@ public enum MavioStrings {
     public static var rulesDefaultDelay: String { NSLocalizedString("rules.defaultDelay", bundle: .module, comment: "") }
 
     /// A delay profile's preferred protocol
-    public static func rulesPrefers(`protocol`: String) -> String {
-        String.localizedStringWithFormat(NSLocalizedString("rules.prefers", bundle: .module, comment: ""), `protocol`)
+    public static func rulesPrefers(protocol: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("rules.prefers", bundle: .module, comment: ""), protocol)
     }
 
     /// A delay profile's usenet delay

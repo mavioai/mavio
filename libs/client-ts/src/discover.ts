@@ -3,7 +3,7 @@
 // sorted (§6.3.28), the values of their filters, titles found by name, a
 // title with its seasons, and requests of it.
 import type { MessageInitShape } from "@bufbuild/protobuf";
-import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
+import { type Catalog, type DiscoverRequestSchema, DiscoverService, type DiscoveredTitle, type SeasonEpisode, type Title } from "@mavio/proto/mavio/acquisition/v1/discover_pb";
 import { MediaKind } from "@mavio/proto/mavio/acquisition/v1/profile_pb";
 import { type Request, RequestService } from "@mavio/proto/mavio/acquisition/v1/request_pb";
 import { CatalogKind, type DiscoverFilter, DiscoverSort } from "@mavio/proto/mavio/plugin/v1/discovery_pb";
@@ -212,6 +212,22 @@ export function useTitle(server: ServerEntry | undefined, mediaKind: MediaKind, 
     queryFn: async (): Promise<Title | undefined> =>
       (await servers.client(DiscoverService, server!).getTitle({ mediaKind, tmdbId, language })).title,
     enabled: !!server && tmdbId > 0,
+  });
+}
+
+/**
+ * The episodes of a season of a series by its TMDB ID, in a language (ISO
+ * 639-1), the server's metadata language when empty; fetched while enabled,
+ * as when the season is expanded.
+ */
+export function useSeason(server: ServerEntry | undefined, tmdbId: number, seasonNumber: number, language = "", enabled = true) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server?.id ?? "", "discover", "season", tmdbId, seasonNumber, language),
+    queryFn: async (): Promise<SeasonEpisode[]> =>
+      (await servers.client(DiscoverService, server!).getSeason({ tmdbId, seasonNumber, language })).episodes,
+    enabled: enabled && !!server && tmdbId > 0,
+    staleTime: 60 * 60_000,
   });
 }
 

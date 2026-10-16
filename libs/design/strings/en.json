@@ -85,6 +85,8 @@
   "discover.apply": { "message": "Show Titles", "description": "Button applying the filters." },
   "discover.noMatches": { "message": "No titles match the filters.", "description": "Shown when the filters leave no titles." },
   "discover.region": { "message": "Country or region", "description": "The label of the choice of the country whose streaming services Discover's filters list." },
+  "discover.noEpisodes": { "message": "Episode list unavailable.", "description": "Shown in an expanded season of a discovered series when no episode lister lists its episodes." },
+  "discover.episodeTitle": { "message": "{number} - {name}", "description": "An episode of an expanded season of a discovered series: its number and name." },
   "library.sort": { "message": "Sort", "description": "Button opening the sort options of a library." },
   "library.filter": { "message": "Filter", "description": "Button opening the filters of a library." },
   "library.itemCount": { "message": "{count, plural, one {# item} other {# items}}", "description": "Number of items in a library or list." },

@@ -46,6 +46,14 @@ pub type OwnedGetTitleRequestView = ::buffa::view::OwnedView<
 pub type OwnedGetTitleResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::acquisition::v1::__buffa::view::GetTitleResponseView<'static>,
 >;
+///Shorthand for `OwnedView<GetSeasonRequestView<'static>>`.
+pub type OwnedGetSeasonRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonRequestView<'static>,
+>;
+///Shorthand for `OwnedView<GetSeasonResponseView<'static>>`.
+pub type OwnedGetSeasonResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<'static>,
+>;
 impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::ListCatalogsResponse>
 for crate::proto::mavio::acquisition::v1::__buffa::view::ListCatalogsResponseView<'_> {
     fn encode(
@@ -228,6 +236,40 @@ for ::buffa::view::OwnedView<
         )
     }
 }
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::GetSeasonResponse>
+for crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<'_> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<crate::proto::mavio::acquisition::v1::GetSeasonResponse>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
 /// Full service name for this service.
 pub const DISCOVER_SERVICE_SERVICE_NAME: &str = "mavio.acquisition.v1.DiscoverService";
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogs` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
@@ -257,6 +299,12 @@ pub const DISCOVER_SERVICE_SEARCH_TITLES_SPEC: ::connectrpc::Spec = ::connectrpc
 /// Static [`Spec`](::connectrpc::Spec) for the `GetTitle` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const DISCOVER_SERVICE_GET_TITLE_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.acquisition.v1.DiscoverService/GetTitle",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
+/// Static [`Spec`](::connectrpc::Spec) for the `GetSeason` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const DISCOVER_SERVICE_GET_SEASON_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.acquisition.v1.DiscoverService/GetSeason",
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
@@ -437,6 +485,31 @@ pub trait DiscoverService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
+    /// GetSeason lists the episodes of a season of a series, as Seerr's
+    /// season of a series' page. It fails as GetTitle does, and with
+    /// NOT_FOUND when no episode lister knows the season.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn get_season<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::acquisition::v1::GetSeasonResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
 }
 /// Extension trait for registering a service implementation with a Router.
 ///
@@ -614,6 +687,35 @@ impl<S: DiscoverService> DiscoverServiceExt for S {
                 },
             )
             .with_spec(DISCOVER_SERVICE_GET_TITLE_SPEC)
+            .route_view_idempotent(
+                DISCOVER_SERVICE_SERVICE_NAME,
+                "GetSeason",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.get_season(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::acquisition::v1::GetSeasonResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(DISCOVER_SERVICE_GET_SEASON_SPEC)
     }
 }
 /// Type-inference marker used by [`Router::add_service`](::connectrpc::Router::add_service).
@@ -696,6 +798,12 @@ impl<T: DiscoverService> ::connectrpc::Dispatcher for DiscoverServiceServer<T> {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
                         .with_spec(DISCOVER_SERVICE_GET_TITLE_SPEC),
+                )
+            }
+            "GetSeason" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(DISCOVER_SERVICE_GET_SEASON_SPEC),
                 )
             }
             _ => None,
@@ -821,6 +929,28 @@ impl<T: DiscoverService> ::connectrpc::Dispatcher for DiscoverServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::acquisition::v1::GetTitleResponse,
+                        >(format)
+                })
+            }
+            "GetSeason" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+                    >::from_parts(&req, &body);
+                    svc.get_season(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::acquisition::v1::GetSeasonResponse,
                         >(format)
                 })
             }
@@ -1171,6 +1301,51 @@ where
                 &self.transport,
                 &self.config,
                 DISCOVER_SERVICE_GET_TITLE_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the GetSeason RPC. Sends a request to /mavio.acquisition.v1.DiscoverService/GetSeason.
+    pub async fn get_season(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.get_season_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the GetSeason RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn get_season_with_options(
+        &self,
+        request: crate::proto::mavio::acquisition::v1::GetSeasonRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::acquisition::v1::__buffa::view::GetSeasonResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                DISCOVER_SERVICE_GET_SEASON_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

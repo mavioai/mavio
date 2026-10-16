@@ -12,6 +12,7 @@ import {
   useCatalog,
   useDiscovery,
   useRequestTitle,
+  useSeason,
   useServer,
   useTitle,
 } from "@mavio/client-ts";
@@ -397,7 +398,7 @@ function TitleDetails({ server, title }: { server: ServerEntry; title: Title }) 
         </div>
       </header>
       {phone && title.overview && <p className="px-margin pt-4 type-body">{title.overview}</p>}
-      {series && title.seasons.length > 0 && <Seasons seasons={title.seasons} />}
+      {series && title.seasons.length > 0 && <Seasons server={server} tmdbId={title.tmdbId} seasons={title.seasons} />}
       <CastShelf
         serverId={server.id}
         credits={titleCredits(title.credits)}
@@ -498,24 +499,62 @@ function seasonName(s: SeasonStatus): string {
   return s.seasonNumber === 0 ? t("discover.specials") : t("discover.season", { number: s.seasonNumber });
 }
 
-/** A series' seasons with what the server has of each. */
-function Seasons({ seasons }: { seasons: SeasonStatus[] }) {
+/**
+ * A series' seasons with what the server has of each, as Seerr lists them:
+ * the latest first, specials last, each expanding to its episodes.
+ */
+function Seasons({ server, tmdbId, seasons }: { server: ServerEntry; tmdbId: number; seasons: SeasonStatus[] }) {
+  const ordered = seasons.toSorted((a, b) => Number(a.seasonNumber === 0) - Number(b.seasonNumber === 0) || b.seasonNumber - a.seasonNumber);
   return (
     <section className="px-margin py-3">
       <h2 className="mb-2 type-title3">{t("item.seasons")}</h2>
       <div className="flex flex-col divide-y divide-border rounded-lg bg-surface-raised">
-        {seasons.map((s) => {
-          const status = statusLabel(s.status);
-          return (
-            <div key={s.seasonNumber} className="flex min-h-12 items-center gap-3 px-4 py-2">
-              <span className="min-w-0 flex-1 truncate type-headline">{seasonName(s)}</span>
-              {s.episodeCount > 0 && <span className="type-callout text-text-secondary">{t("item.episodeCount", { count: s.episodeCount })}</span>}
-              {status && <span className="rounded-full bg-fill px-2.5 py-0.5 type-footnote font-semibold">{status}</span>}
-            </div>
-          );
-        })}
+        {ordered.map((s) => (
+          <Season key={s.seasonNumber} server={server} tmdbId={tmdbId} season={s} />
+        ))}
       </div>
     </section>
+  );
+}
+
+function Season({ server, tmdbId, season: s }: { server: ServerEntry; tmdbId: number; season: SeasonStatus }) {
+  const [open, setOpen] = useState(false);
+  const status = statusLabel(s.status);
+  return (
+    <div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="flex min-h-12 w-full items-center gap-3 px-4 py-2 text-left">
+        <span className="min-w-0 flex-1 truncate type-headline">{seasonName(s)}</span>
+        {s.episodeCount > 0 && <span className="type-callout text-text-secondary">{t("item.episodeCount", { count: s.episodeCount })}</span>}
+        {status && <span className="rounded-full bg-fill px-2.5 py-0.5 type-footnote font-semibold">{status}</span>}
+        <Icon name="expand" size={16} className={`text-text-secondary transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <SeasonEpisodes server={server} tmdbId={tmdbId} seasonNumber={s.seasonNumber} />}
+    </div>
+  );
+}
+
+/** The episodes of an expanded season, the latest first, as Seerr's. */
+function SeasonEpisodes({ server, tmdbId, seasonNumber }: { server: ServerEntry; tmdbId: number; seasonNumber: number }) {
+  const q = useSeason(server, tmdbId, seasonNumber, discoverLanguage);
+  if (q.isPending) return <div className="px-4 pb-4 type-callout text-text-secondary">{t("state.loading")}</div>;
+  if (q.isError || q.data.length === 0) {
+    return <p className="px-4 pb-4 type-callout text-text-secondary">{q.isError ? t("state.error") : t("discover.noEpisodes")}</p>;
+  }
+  return (
+    <ul className="mx-4 divide-y divide-border border-t border-border">
+      {q.data.toReversed().map((e) => (
+        <li key={e.episodeNumber} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-start">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h3 className="type-headline">{t("discover.episodeTitle", { number: e.episodeNumber, name: e.name })}</h3>
+              {e.airDate && <span className="rounded-full bg-fill px-2.5 py-0.5 type-footnote">{dayText(e.airDate)}</span>}
+            </div>
+            {e.overview && <p className="mt-1 type-callout text-text-secondary">{e.overview}</p>}
+          </div>
+          {e.stillUrl && <img src={sized(e.stillUrl, 300)} alt="" loading="lazy" className="aspect-video w-full shrink-0 rounded-lg object-cover sm:w-56" />}
+        </li>
+      ))}
+    </ul>
   );
 }
 

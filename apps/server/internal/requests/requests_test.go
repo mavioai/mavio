@@ -86,9 +86,13 @@ func (f *fakeMetadata) Episodes(_ context.Context, l library.Lookup) (*library.E
 	for _, n := range t.seasons {
 		aired := time.Date(2020+n, 1, 1, 0, 0, 0, 0, time.UTC)
 		for e := 1; e <= 2; e++ {
-			out.Episodes = append(out.Episodes, metadata.Result{Item: core.Item{
-				Name: "Episode", ParentIndexNumber: new(n), IndexNumber: new(e), PremiereDate: new(aired.AddDate(0, 0, 7*(e-1))),
-			}})
+			out.Episodes = append(out.Episodes, metadata.Result{
+				Item: core.Item{
+					Name: "Episode", Overview: "In " + l.Language, ParentIndexNumber: new(n), IndexNumber: new(e),
+					PremiereDate: new(aired.AddDate(0, 0, 7*(e-1))),
+				},
+				RemoteImages: []metadata.RemoteImage{{Kind: core.ImagePrimary, URL: "https://img/s" + strconv.Itoa(n) + "e" + strconv.Itoa(e)}},
+			})
 		}
 	}
 	return out, nil

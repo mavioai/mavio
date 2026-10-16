@@ -722,6 +722,25 @@ func (s *DiscoverService) GetTitle(ctx context.Context, req *acquisitionv1.GetTi
 	return acquisitionv1.GetTitleResponse_builder{Title: t}.Build(), nil
 }
 
+// GetSeason lists the episodes of a season of a series.
+func (s *DiscoverService) GetSeason(ctx context.Context, req *acquisitionv1.GetSeasonRequest) (*acquisitionv1.GetSeasonResponse, error) {
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	eps, err := s.requests.GetSeason(ctx, p.User, int(req.GetTmdbId()), int(req.GetSeasonNumber()), req.GetLanguage())
+	if err != nil {
+		return nil, requestError(ctx, err)
+	}
+	out := make([]*acquisitionv1.SeasonEpisode, len(eps))
+	for i, e := range eps {
+		out[i] = acquisitionv1.SeasonEpisode_builder{
+			EpisodeNumber: new(int32(e.Number)), Name: new(e.Name), Overview: new(e.Overview), AirDate: isoDate(e.AirDate), StillUrl: new(e.StillURL),
+		}.Build()
+	}
+	return acquisitionv1.GetSeasonResponse_builder{Episodes: out}.Build(), nil
+}
+
 // productionStatuses maps production statuses to the contract's.
 var productionStatuses = map[metadata.ProductionStatus]pluginv1.ProductionStatus{
 	metadata.ProductionRumored:        pluginv1.ProductionStatus_PRODUCTION_STATUS_RUMORED,

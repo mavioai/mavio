@@ -2,9 +2,11 @@ package requests
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/metadata"
@@ -266,5 +268,36 @@ func TestNotificationEvents(t *testing.T) {
 	want := []pushed{{TypePending, false, true, true}, {TypeDeclined, true, false, true}}
 	if !slices.Equal(got, want) {
 		t.Errorf("pushed = %+v, want %+v", got, want)
+	}
+}
+
+func TestGetSeason(t *testing.T) {
+	e := newEnv(t)
+	g := e.user("g", func(u *core.User) { u.Access.MaxParentalRating = score(t, "G") })
+	if _, err := e.svc.GetSeason(e.ctx, g, 9, 1, ""); !errors.Is(err, ErrRating) {
+		t.Errorf("GetSeason() above the limit: error = %v, want ErrRating", err)
+	}
+	if _, err := e.svc.GetSeason(e.ctx, e.admin, 9, 7, ""); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("GetSeason() of an unknown season: error = %v, want ErrNotFound", err)
+	}
+	if _, err := e.svc.GetSeason(e.ctx, e.admin, 404, 1, ""); !errors.Is(err, core.ErrNotFound) {
+		t.Errorf("GetSeason() of an unknown series: error = %v, want ErrNotFound", err)
+	}
+	eps, err := e.svc.GetSeason(e.ctx, e.admin, 9, 2, "fr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, ep := range eps {
+		got = append(got, fmt.Sprintf("%d %s %s %s %s", ep.Number, ep.Name, ep.Overview, ep.AirDate.Format(time.DateOnly), ep.StillURL))
+	}
+	want := []string{"1 Episode In fr 2022-01-01 https://img/s2e1", "2 Episode In fr 2022-01-08 https://img/s2e2"}
+	if !slices.Equal(got, want) {
+		t.Errorf("GetSeason() = %q, want = %q", got, want)
+	}
+	// Episode lists are kept.
+	n := e.meta.lookups
+	if _, err := e.svc.GetSeason(e.ctx, e.admin, 9, 1, "fr"); err != nil || e.meta.lookups != n {
+		t.Errorf("GetSeason() again looked up %d times, %v, want = 0", e.meta.lookups-n, err)
 	}
 }

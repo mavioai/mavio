@@ -96,6 +96,8 @@ export type MessageKey =
   | 'discover.apply'
   | 'discover.noMatches'
   | 'discover.region'
+  | 'discover.noEpisodes'
+  | 'discover.episodeTitle'
   | 'library.sort'
   | 'library.filter'
   | 'library.itemCount'
@@ -1644,6 +1646,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.apply": "Show Titles",
     "discover.noMatches": "No titles match the filters.",
     "discover.region": "Country or region",
+    "discover.noEpisodes": "Episode list unavailable.",
+    "discover.episodeTitle": "{number} - {name}",
     "library.sort": "Sort",
     "library.filter": "Filter",
     "library.itemCount": "{count, plural, one {# item} other {# items}}",
@@ -3190,6 +3194,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "discover.apply": "显示作品",
     "discover.noMatches": "没有符合筛选条件的作品。",
     "discover.region": "国家或地区",
+    "discover.noEpisodes": "暂无各集列表。",
+    "discover.episodeTitle": "{number} - {name}",
     "library.sort": "排序",
     "library.filter": "筛选",
     "library.itemCount": "{count, plural, other {# 个项目}}",

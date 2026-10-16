@@ -15,6 +15,7 @@ export {
   useFilterValues,
   useRequestTitle,
   useSearchTitles,
+  useSeason,
   useTitle,
 } from "./discover.ts";
 export {

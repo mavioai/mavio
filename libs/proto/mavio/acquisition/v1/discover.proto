@@ -42,6 +42,12 @@ service DiscoverService {
   rpc GetTitle(GetTitleRequest) returns (GetTitleResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
+  // GetSeason lists the episodes of a season of a series, as Seerr's
+  // season of a series' page. It fails as GetTitle does, and with
+  // NOT_FOUND when no episode lister knows the season.
+  rpc GetSeason(GetSeasonRequest) returns (GetSeasonResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
 }
 
 message ListCatalogsRequest {
@@ -273,6 +279,32 @@ message GetTitleRequest {
 
 message GetTitleResponse {
   Title title = 1;
+}
+
+message GetSeasonRequest {
+  // The series' TMDB ID.
+  int32 tmdb_id = 1 [(buf.validate.field).int32.gt = 0];
+  int32 season_number = 2 [(buf.validate.field).int32.gte = 0];
+  // ISO 639-1 language of its episodes' names and overviews; unset for
+  // the server's metadata language.
+  string language = 3;
+}
+
+message GetSeasonResponse {
+  // In episode order.
+  repeated SeasonEpisode episodes = 1;
+}
+
+// SeasonEpisode is an episode of a season as the metadata providers tell
+// it.
+message SeasonEpisode {
+  int32 episode_number = 1;
+  string name = 2;
+  string overview = 3;
+  // ISO 8601 calendar date it first aired, when known.
+  string air_date = 4;
+  // A frame of it, if any.
+  string still_url = 5;
 }
 
 // Title is a movie or series as the metadata providers tell it, in the
