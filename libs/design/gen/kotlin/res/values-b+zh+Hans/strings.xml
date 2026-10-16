@@ -876,6 +876,11 @@
     <string name="storage_question_none">继续以完成配置。</string>
     <string name="storage_continue">继续</string>
     <string name="storage_later">稍后</string>
+    <string name="storage_yes">是</string>
+    <string name="storage_no">否</string>
+    <string name="storage_waiting_scan">正在等待在手机上确认登录…</string>
+    <string name="storage_reconfigure">重新配置</string>
+    <string name="storage_reconfigured">已配置。</string>
     <string name="storage_secret_kept">保持不变</string>
     <string name="storage_saved">已保存。</string>
     <string name="storage_folders">文件夹</string>

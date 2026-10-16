@@ -2746,6 +2746,21 @@ public enum MavioStrings {
     /// Button leaving the configuration's questions
     public static var storageLater: String { NSLocalizedString("storage.later", bundle: .module, comment: "") }
 
+    /// Answers yes to a question of a remote's configuration
+    public static var storageYes: String { NSLocalizedString("storage.yes", bundle: .module, comment: "") }
+
+    /// Answers no to a question of a remote's configuration
+    public static var storageNo: String { NSLocalizedString("storage.no", bundle: .module, comment: "") }
+
+    /// Shown under a QR code to scan until the login is confirmed
+    public static var storageWaitingScan: String { NSLocalizedString("storage.waitingScan", bundle: .module, comment: "") }
+
+    /// Button running a remote's configuration again, such as its login
+    public static var storageReconfigure: String { NSLocalizedString("storage.reconfigure", bundle: .module, comment: "") }
+
+    /// Notice after configuring a remote again without a question
+    public static var storageReconfigured: String { NSLocalizedString("storage.reconfigured", bundle: .module, comment: "") }
+
     /// Placeholder of a secret already set
     public static var storageSecretKept: String { NSLocalizedString("storage.secretKept", bundle: .module, comment: "") }
 

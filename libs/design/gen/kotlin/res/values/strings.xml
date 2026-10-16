@@ -1744,6 +1744,16 @@
     <string name="storage_continue">Continue</string>
     <!-- Button leaving the configuration's questions -->
     <string name="storage_later">Later</string>
+    <!-- Answers yes to a question of a remote's configuration -->
+    <string name="storage_yes">Yes</string>
+    <!-- Answers no to a question of a remote's configuration -->
+    <string name="storage_no">No</string>
+    <!-- Shown under a QR code to scan until the login is confirmed -->
+    <string name="storage_waiting_scan">Waiting for the login to be confirmed on the phone…</string>
+    <!-- Button running a remote's configuration again, such as its login -->
+    <string name="storage_reconfigure">Configure Again</string>
+    <!-- Notice after configuring a remote again without a question -->
+    <string name="storage_reconfigured">Configured.</string>
     <!-- Placeholder of a secret already set -->
     <string name="storage_secret_kept">Unchanged</string>
     <!-- Notice after saving a remote -->

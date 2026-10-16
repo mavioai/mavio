@@ -25,7 +25,7 @@ import {
   type Remote,
 } from "@mavio/proto/mavio/storage/v1/storage_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
 import { Icon } from "../../icon.tsx";
@@ -188,7 +188,7 @@ function QRCode({ dark }: { dark: boolean[][] }) {
 }
 
 /** The control of an option's value. */
-function OptionField({
+function OptionControl({
   option: o,
   value,
   provider,
@@ -201,39 +201,40 @@ function OptionField({
   placeholder?: string;
   onChange: (v: string) => void;
 }) {
-  const help = o.help.trim();
-  const qr = qrOf(o.help);
   const examples = o.examples.filter((e) => providerMatches(e.provider, provider));
   const current = value ?? o.defaultValue;
-  let control: ReactNode;
-  if (o.type === "bool") {
-    control = <Switch on={current === "true"} label={o.name} onChange={(on) => onChange(String(on))} />;
-  } else if (examples.length && o.exclusive) {
+  if (o.type === "bool") return <Switch on={current === "true"} label={o.name} onChange={(on) => onChange(String(on))} />;
+  if (examples.length && o.exclusive) {
     const options = examples.map((e) => ({ value: e.value, label: e.help ? `${e.value} — ${e.help.split("\n")[0]}` : e.value }));
     if (!options.some((x) => x.value === current)) options.unshift({ value: current, label: current || "—" });
-    control = <Select value={current} label={o.name} className="w-full sm:w-72" options={options} onChange={onChange} />;
-  } else {
-    control = examples.length && !o.password ? (
-      <SuggestField
-        className={`${input} sm:w-72`}
-        label={o.name}
-        placeholder={placeholder ?? o.defaultValue}
-        value={value ?? ""}
-        suggestions={examples.map((e) => ({ value: e.value, label: e.help.split("\n")[0] }))}
-        onChange={onChange}
-      />
-    ) : (
-      <input
-        type={o.password ? "password" : "text"}
-        autoComplete={o.password ? "new-password" : "off"}
-        className={`${input} sm:w-72`}
-        aria-label={o.name}
-        placeholder={placeholder ?? o.defaultValue}
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    );
+    return <Select value={current} label={o.name} className="w-full sm:w-72" options={options} onChange={onChange} />;
   }
+  return examples.length && !o.password ? (
+    <SuggestField
+      className={`${input} sm:w-72`}
+      label={o.name}
+      placeholder={placeholder ?? o.defaultValue}
+      value={value ?? ""}
+      suggestions={examples.map((e) => ({ value: e.value, label: e.help.split("\n")[0] }))}
+      onChange={onChange}
+    />
+  ) : (
+    <input
+      type={o.password ? "password" : "text"}
+      autoComplete={o.password ? "new-password" : "off"}
+      className={`${input} sm:w-72`}
+      aria-label={o.name}
+      placeholder={placeholder ?? o.defaultValue}
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+}
+
+/** An option: its name, its whole help and its control. */
+function OptionField(props: { option: Option; value: string | undefined; provider: string; placeholder?: string; onChange: (v: string) => void }) {
+  const o = props.option;
+  const help = o.help.trim();
   return (
     <div className="flex min-h-13 flex-wrap items-center gap-3 px-4 py-2.5">
       <div className="min-w-0 flex-1 basis-60">
@@ -241,17 +242,9 @@ function OptionField({
           <code>{o.name}</code>
           {o.required && <span className="text-danger"> *</span>}
         </div>
-        {qr ? (
-          <div className="type-caption font-normal text-text-secondary">
-            {qr.before && <p className="whitespace-pre-wrap">{qr.before}</p>}
-            <QRCode dark={qr.dark} />
-            {qr.after && <p className="whitespace-pre-wrap">{qr.after}</p>}
-          </div>
-        ) : (
-          help && <p className="mt-0.5 type-caption font-normal whitespace-pre-wrap text-text-secondary">{help}</p>
-        )}
+        {help && <p className="mt-0.5 type-caption font-normal whitespace-pre-wrap text-text-secondary">{help}</p>}
       </div>
-      {control}
+      <OptionControl {...props} />
     </div>
   );
 }
@@ -316,7 +309,17 @@ function NewRemote({ server }: { server: ServerEntry }) {
   if (question)
     return (
       <Page title={name.trim()} message={t("storage.questionMessage")} back={back}>
-        <QuestionStep server={server} name={name.trim()} question={question} onDone={open} />
+        <QuestionStep
+          server={server}
+          name={name.trim()}
+          question={question}
+          onDone={open}
+          onCancel={() =>
+            actions.remove.mutate(name.trim(), {
+              onSettled: () => void navigate({ to: "/settings/$section", params: { section: "storage" }, search: { server: cur.server } }),
+            })
+          }
+        />
       </Page>
     );
   return (
@@ -356,35 +359,103 @@ function NewRemote({ server }: { server: ServerEntry }) {
 }
 
 /**
- * A question of a remote's configuration — a choice, a value, or the token
- * of authorizing a cloud drive — answered until none is left.
+ * The questions of a remote's configuration — a yes or no, a choice, a
+ * value, or the token of authorizing a cloud drive — answered until none is
+ * left. A question drawing a QR code, as 115's login asks, is answered yes
+ * again and again until the phone confirms the login, its code kept on
+ * screen while rclone asks again without it. onCancel, given for a new
+ * remote, takes the place of Later.
  */
-function QuestionStep({ server, name, question, onDone }: { server: ServerEntry; name: string; question: ConfigQuestion; onDone: () => void }) {
+function QuestionStep({
+  server,
+  name,
+  question,
+  onDone,
+  onCancel,
+}: {
+  server: ServerEntry;
+  name: string;
+  question: ConfigQuestion;
+  onDone: () => void;
+  onCancel?: () => void;
+}) {
   const actions = useRemoteActions(server);
   const [q, setQ] = useState(question);
   const o = q.option;
   const [answer, setAnswer] = useState(o?.defaultValue ?? "");
-  const next = (r: { question?: ConfigQuestion }) => {
-    if (!r.question) return onDone();
-    setQ(r.question);
-    setAnswer(r.question.option?.defaultValue ?? "");
-  };
+  const [scan, setScan] = useState<{ state: string; qr: HelpQR }>();
+  const drawn = o && qrOf(o.help);
+  const qr = drawn ?? (scan?.state === q.state ? scan.qr : undefined);
+  const confirm = o?.type === "bool";
+  // Cancelling waits for the answer being sent, which would otherwise save
+  // the remote again after its deletion.
+  const leaving = useRef(false);
+  const [cancelled, setCancelled] = useState(false);
+  const waiting = !!qr && confirm && !actions.answer.isError && !cancelled;
+  const send = (value: string) =>
+    actions.answer.mutate(
+      { name, state: q.state, answer: value },
+      {
+        onSuccess: (r) => {
+          if (leaving.current) return;
+          if (!r.question) return onDone();
+          if (drawn) setScan({ state: q.state, qr: drawn });
+          setQ(r.question);
+          setAnswer(r.question.option?.defaultValue ?? "");
+        },
+      },
+    );
+  const pending = actions.answer.isPending;
+  // Each answer waits for the last; send answers the question shown.
+  useEffect(() => {
+    if (!waiting || pending) return;
+    const id = setTimeout(() => send("true"), 2500);
+    return () => clearTimeout(id);
+  }, [waiting, pending, q]);
+  useEffect(() => {
+    if (cancelled && !pending) onCancel?.();
+  }, [cancelled, pending]);
+  const help = o?.help.trim() ?? "";
   return (
     <>
-      <Group footer={t("storage.questionFooter")}>
-        {o ? (
-          <OptionField key={q.state} option={o} value={answer} provider="" onChange={setAnswer} />
-        ) : (
-          <p className="px-4 py-3 type-callout text-text-secondary">{t("storage.questionNone")}</p>
-        )}
+      <Group footer={o?.name === "config_token" ? t("storage.questionFooter") : undefined}>
+        <div className="flex flex-col gap-3 px-4 py-3">
+          {!o ? (
+            <p className="type-callout text-text-secondary">{t("storage.questionNone")}</p>
+          ) : qr ? (
+            <>
+              {qr.before && <p className="type-body whitespace-pre-wrap">{qr.before}</p>}
+              <QRCode dark={qr.dark} />
+              <p className="type-footnote text-text-secondary">{waiting ? t("storage.waitingScan") : qr.after}</p>
+            </>
+          ) : (
+            help && <p className="type-body whitespace-pre-wrap">{help}</p>
+          )}
+          {o && !confirm && <OptionControl option={o} value={answer} provider="" onChange={setAnswer} />}
+        </div>
         {q.error && <p className="px-4 py-3 type-callout text-danger">{q.error}</p>}
       </Group>
       <div className="flex flex-wrap items-center gap-3">
-        <Button disabled={actions.answer.isPending} onClick={() => actions.answer.mutate({ name, state: q.state, answer }, { onSuccess: next })}>
-          {actions.answer.isPending ? "…" : t("storage.continue")}
-        </Button>
-        <Button variant="plain" onClick={onDone}>
-          {t("storage.later")}
+        {waiting ? null : confirm ? (
+          <>
+            <Button disabled={pending} variant={o.defaultValue === "false" ? "secondary" : "primary"} onClick={() => send("true")}>
+              {t("storage.yes")}
+            </Button>
+            <Button disabled={pending} variant={o.defaultValue === "false" ? "primary" : "secondary"} onClick={() => send("false")}>
+              {t("storage.no")}
+            </Button>
+          </>
+        ) : (
+          <Button disabled={pending} onClick={() => send(answer)}>
+            {pending ? "…" : t("storage.continue")}
+          </Button>
+        )}
+        <Button
+          variant="plain"
+          disabled={cancelled}
+          onClick={onCancel ? () => ((leaving.current = true), setCancelled(true)) : onDone}
+        >
+          {onCancel ? t("action.cancel") : t("storage.later")}
         </Button>
         {actions.answer.isError && <span className="type-callout text-danger">{errorMessage(actions.answer.error)}</span>}
       </div>
@@ -462,6 +533,18 @@ function RemoteForm({ server, remote, provider }: { server: ServerEntry; remote:
           }
         >
           {actions.update.isPending ? "…" : t("action.save")}
+        </Button>
+        <Button
+          variant="secondary"
+          disabled={actions.update.isPending}
+          onClick={() =>
+            actions.update.mutate(
+              { name: remote.name, parameters: {} },
+              { onSuccess: (r) => (r.question ? setQuestion(r.question) : setNotice(t("storage.reconfigured"))) },
+            )
+          }
+        >
+          {t("storage.reconfigure")}
         </Button>
         {notice && !changed && <span className="type-callout text-text-secondary">{notice}</span>}
         {actions.update.isError && <span className="type-callout text-danger">{errorMessage(actions.update.error)}</span>}

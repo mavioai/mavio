@@ -15601,6 +15601,96 @@
         }
       }
     },
+    "storage.yes": {
+      "comment": "Answers yes to a question of a remote's configuration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是"
+          }
+        }
+      }
+    },
+    "storage.no": {
+      "comment": "Answers no to a question of a remote's configuration",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "否"
+          }
+        }
+      }
+    },
+    "storage.waitingScan": {
+      "comment": "Shown under a QR code to scan until the login is confirmed",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for the login to be confirmed on the phone…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在等待在手机上确认登录…"
+          }
+        }
+      }
+    },
+    "storage.reconfigure": {
+      "comment": "Button running a remote's configuration again, such as its login",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configure Again"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新配置"
+          }
+        }
+      }
+    },
+    "storage.reconfigured": {
+      "comment": "Notice after configuring a remote again without a question",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configured."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已配置。"
+          }
+        }
+      }
+    },
     "storage.secretKept": {
       "comment": "Placeholder of a secret already set",
       "extractionState": "manual",
