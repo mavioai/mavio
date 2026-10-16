@@ -99,6 +99,10 @@ type Refresher struct {
 	// Storages opens the storage of library paths; nil opens local
 	// folders only.
 	Storages *Storages
+	// Metadata gives the server's language and country of metadata, used
+	// for libraries and items without their own; nil gives none, leaving
+	// them to the providers.
+	Metadata func() core.MetadataSettings
 	// MetadataDir holds the artwork chosen for items whose library does
 	// not save local metadata, one folder per item; empty keeps none.
 	MetadataDir string
@@ -451,6 +455,14 @@ func bestOfEachKind(images []metadata.RemoteImage) []metadata.RemoteImage {
 	return out
 }
 
+// metadata is the server's language and country of metadata, if known.
+func (r *Refresher) metadata() core.MetadataSettings {
+	if r.Metadata == nil {
+		return core.MetadataSettings{}
+	}
+	return r.Metadata()
+}
+
 // lookup describes an item to providers, with its series and season for
 // episodes and seasons.
 func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) (Lookup, error) {
@@ -464,6 +476,8 @@ func (r *Refresher) lookup(ctx context.Context, lib core.Library, it core.Item) 
 	if it.MetadataCountry != "" {
 		l.Country = it.MetadataCountry
 	}
+	m := r.metadata()
+	l.Language, l.Country = cmp.Or(l.Language, m.PreferredLanguage), cmp.Or(l.Country, m.Country)
 	switch it.Kind {
 	case core.KindSeries:
 		l.DisplayOrder = it.DisplayOrder

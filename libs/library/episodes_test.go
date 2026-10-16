@@ -178,6 +178,41 @@ func TestLookupEpisodeRange(t *testing.T) {
 	}
 }
 
+// TestLookupLanguage checks an item is looked up in its own language and
+// country, else its library's, else the server's, as Jellyfin's
+// GetPreferredMetadataLanguage.
+func TestLookupLanguage(t *testing.T) {
+	f := newScan(t, core.LibraryShows)
+	tree(t, f.root, "Show/Season 01/Show S01E01.mkv")
+	f.scan()
+	server := func() core.MetadataSettings { return core.MetadataSettings{PreferredLanguage: "zh", Country: "CN"} }
+	for _, tt := range []struct {
+		name                      string
+		lib, item                 [2]string
+		metadata                  func() core.MetadataSettings
+		wantLanguage, wantCountry string
+	}{
+		{"server", [2]string{}, [2]string{}, server, "zh", "CN"},
+		{"library", [2]string{"de", "DE"}, [2]string{}, server, "de", "DE"},
+		{"item", [2]string{"de", "DE"}, [2]string{"fr", "FR"}, server, "fr", "FR"},
+		{"library language, server country", [2]string{"de", ""}, [2]string{}, server, "de", "CN"},
+		{"none", [2]string{}, [2]string{}, nil, "", ""},
+	} {
+		lib := f.lib
+		lib.PreferredLanguage, lib.MetadataCountry = tt.lib[0], tt.lib[1]
+		it := f.item("Show/Season 01/Show S01E01.mkv")
+		it.MetadataLanguage, it.MetadataCountry = tt.item[0], tt.item[1]
+		r := &Refresher{Store: f.store, Metadata: tt.metadata}
+		l, err := r.lookup(t.Context(), lib, it)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if l.Language != tt.wantLanguage || l.Country != tt.wantCountry {
+			t.Errorf("%s: language, country = %q, %q, want = %q, %q", tt.name, l.Language, l.Country, tt.wantLanguage, tt.wantCountry)
+		}
+	}
+}
+
 // fakeLister lists a fixed set of episodes and records lookups.
 type fakeLister struct {
 	list    EpisodeList

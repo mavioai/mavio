@@ -186,7 +186,7 @@ func (r *Refresher) Update(ctx context.Context, lib core.Library, itemID core.ID
 		if err := change(&it); err != nil {
 			return err
 		}
-		country := cmp.Or(it.MetadataCountry, lib.MetadataCountry)
+		country := cmp.Or(it.MetadataCountry, lib.MetadataCountry, r.metadata().Country)
 		it.ParentalRating = ratingScore(&it, country)
 		if err := it.Validate(); err != nil {
 			return err

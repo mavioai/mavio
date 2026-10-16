@@ -108,7 +108,7 @@ erDiagram
 ### 4.1 媒体库
 * `Kind` 决定扫描器如何解读目录；`Paths` 是根目录：服务器文件系统的绝对路径，或 rclone 远端根目录之下的目录 `rclone:<remote>:<path>`（`core.RemoteScheme`）。媒体库路径之下的条目与媒体文件的路径，是媒体库路径加斜杠再加文件在其中以斜杠分隔的名称（`core.StoragePath`、`core.StorageName`）；路径与媒体库路径匹配时，`/` 与 `\` 视为同一分隔符（`core.InFolder`、`core.StorageName`），因为 Windows 的媒体库路径之后接的是以斜杠分隔的名称。一个路径最多属于一个媒体库：媒体库的路径不能与其他媒体库的路径相同、包含或被包含（`ErrConflict`）。整理类种类（`LibraryKind.Curated`），即 `collections` 与 `playlists`，存放用户整理的合集与播放列表而非扫描的目录：它们没有路径，从不扫描，每种至多一个媒体库（`ErrConflict`），由服务端在首次需要时创建。
 * `StorageClasses` 按路径为部分路径设定 `StorageClass`，用于服务端会判错的存储；每个键必须是 `Paths` 之一，每个值不能是自动（`ErrInvalid`）。其余路径为自动：按所在设备分类。存储类别说明读取文件的代价：`local`（服务器自己的磁盘）、`network`（局域网共享）或 `cloud`（云盘，读取计入配额和限流），并决定服务端自行读取多少媒体（[优化 §2](optimization.zh-CN.md)）。`Library.StorageClassOf` 返回包含某文件或目录的最长路径所设定的类别。
-* `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数。
+* `ScanInterval` 是定时对账扫描的周期（为零则不定时扫描）；`PreferredLanguage`（ISO 639-1）与 `MetadataCountry`（ISO 3166-1 alpha-2）影响元数据提供者的取数，优先于服务端的设置，次于条目自身的设置。
 * `SaveLocalMetadata` 把每个条目的 NFO 文件以及为它选择或下载的图片写到媒体旁边，扫描时再读回；`AutoCollections` 把电影放入以提供者的合集（电影系列）命名的合集，先按 `tmdb_collection` ID 查找，否则按名称，首次需要时创建。
 * `ExtractTrickplay` 与 `ExtractChapterImages` 为视频生成缩略图拼图与各章节的图片；`AnalyzeLoudness` 测量音轨的响度。
 * `Providers`（`ProviderOrder`）按能力（元数据、图片、字幕、歌词、片段、集列表）以插件 ID 列出媒体库使用的提供者及其顺序：nil 列表按默认顺序使用所有提供者，空列表不使用任何提供者；列表中重复的提供者或空 ID 为 `ErrInvalid`。`DownloadLyrics` 让刷新为没有歌词文件的音轨从媒体库的歌词提供者下载歌词。
@@ -348,7 +348,7 @@ erDiagram
 * `SessionIdleDays`：会话闲置多少天后结束，1–3650，默认 90。
 * `Acquisition`：如何选择、下载与入库发布（§13.4）。
 * `Requests`：新用户获得的权限、默认配额，以及通过的请求去向（§13.6）。
-* `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
+* `Metadata`（`MetadataSettings`）：服务端元数据的 `PreferredLanguage`（ISO 639-1）与 `Country`（ISO 3166-1），如 Jellyfin 的 `PreferredMetadataLanguage` 与 `MetadataCountryCode`；未设置自身语言与国家的媒体库与条目按它们取元数据，请求与发现以该语言命名作品，按该国家分级。默认为 `en` 与 `US`。
 * `Subtitles`：如何搜索、选择、保存与同步字幕（§14.3）。
 * `Validate` 检查已知取值与范围。
 

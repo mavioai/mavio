@@ -286,8 +286,8 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	})
 	lyrics := &library.Lyrics{Store: db, Source: plugs.LyricsProviders, Storages: storages, Logger: log}
 	refresher := &library.Refresher{
-		Storages: storages,
-		Store:    db, Source: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
+		Storages: storages, Metadata: func() core.MetadataSettings { return set.Get().Metadata },
+		Store: db, Source: plugs.MetadataProviders, Episodes: plugs.EpisodeListers, Images: plugs.ImageProviders, Local: plugs.LocalReaders, Savers: plugs.Savers,
 		Processors: plugs.Processors, Generators: plugs.ImageGenerators, Lyrics: lyrics,
 		MetadataDir: filepath.ToSlash(metadataDir), Fetch: imageServer.Fetch, Logger: log,
 	}
