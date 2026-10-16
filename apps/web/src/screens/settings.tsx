@@ -24,7 +24,7 @@ import { locales } from "@mavio/design/strings";
 import { SubtitleMode, UserService } from "@mavio/proto/mavio/user/v1/user_pb";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useLayoutEffect, useState } from "react";
 
 import { Tip } from "../controls/tooltip.tsx";
 import { locale, t } from "../i18n.ts";
@@ -282,6 +282,13 @@ function AccountCard({ active = false }: { active?: boolean }) {
   );
 }
 
+/**
+ * Where the phone's list of sections was scrolled when a section was
+ * opened from it, for the section's link back to return there: the link
+ * goes to the list anew, which the router would show from its top.
+ */
+const listScroll = { top: 0, returning: false };
+
 /** The phone's settings: the account, the users to switch to, the sections and signing out. */
 function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const servers = useServersStore();
@@ -289,6 +296,17 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
   const shown = account.shown;
   const chosen = useChosen();
   const search = useSearch({ strict: false }) as SettingsSearch;
+  useLayoutEffect(() => {
+    if (!listScroll.returning) return;
+    listScroll.returning = false;
+    // The list may still grow as its servers and users come from the cache.
+    let tries = 30;
+    const restore = () => {
+      window.scrollTo({ top: listScroll.top });
+      if (Math.abs(window.scrollY - listScroll.top) > 1 && --tries > 0) requestAnimationFrame(restore);
+    };
+    restore();
+  }, []);
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-6 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
       <Link to="/" className="inline-flex items-center gap-1 self-start type-body text-accent-text">
@@ -302,7 +320,14 @@ function ProfileList({ groups }: { groups: ReturnType<typeof useGroups> }) {
         <Group key={g.title()} title={g.title()}>
           {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
           {g.ids.map((s) => (
-            <Link key={s} to="/settings/$section" params={{ section: s }} search={{ server: search.server }} className="hover:tint">
+            <Link
+              key={s}
+              to="/settings/$section"
+              params={{ section: s }}
+              search={{ server: search.server }}
+              onClick={() => (listScroll.top = window.scrollY)}
+              className="hover:tint"
+            >
               <Row label={sections[s].title()} leading={<Tile id={s} />}>
                 <Icon name="forward" size={16} className="text-text-tertiary" />
               </Row>
@@ -365,7 +390,13 @@ function CompactSection({ id, chosen }: { id: SectionId; chosen: Chosen | undefi
   const search = useSearch({ strict: false }) as SettingsSearch;
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-4 px-margin pt-[calc(env(safe-area-inset-top)+12px)] pb-12">
-      <Link to="/settings" search={{ server: search.server }} className="inline-flex items-center gap-1 self-start type-body text-accent-text">
+      <Link
+        to="/settings"
+        search={{ server: search.server }}
+        resetScroll={false}
+        onClick={() => (listScroll.returning = true)}
+        className="inline-flex items-center gap-1 self-start type-body text-accent-text"
+      >
         <Icon name="back" size={18} />
         {t("nav.settings")}
       </Link>
