@@ -39,6 +39,7 @@ func settingsGroups(s *core.ServerSettings) []settingsGroup {
 		{"requests", &s.Requests},
 		{"metadata", &s.Metadata},
 		{"subtitles", &s.Subtitles},
+		{"assistant", &s.Assistant},
 	}
 }
 

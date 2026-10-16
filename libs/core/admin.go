@@ -33,6 +33,8 @@ type ServerSettings struct {
 	Metadata MetadataSettings
 	// Subtitles are how subtitles are acquired.
 	Subtitles SubtitleSettings
+	// Assistant is how the assistant serves users.
+	Assistant AssistantSettings
 	UpdatedAt time.Time
 }
 
@@ -156,6 +158,7 @@ func DefaultServerSettings() ServerSettings {
 		Requests:        DefaultRequestSettings(),
 		Metadata:        MetadataSettings{PreferredLanguage: "en", Country: "US"},
 		Subtitles:       DefaultSubtitleSettings(),
+		Assistant:       DefaultAssistantSettings(),
 	}
 }
 
@@ -202,6 +205,9 @@ func (s *ServerSettings) Validate() error {
 		return err
 	}
 	if err := s.Subtitles.Validate(); err != nil {
+		return err
+	}
+	if err := s.Assistant.Validate(); err != nil {
 		return err
 	}
 	for _, c := range s.PluginCatalogs {
