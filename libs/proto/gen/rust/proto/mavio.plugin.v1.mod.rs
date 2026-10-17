@@ -4,6 +4,8 @@ include!("mavio.plugin.v1.metadata.rs");
 include!("mavio.plugin.v1.discovery.rs");
 include!("mavio.plugin.v1.ratings.rs");
 include!("mavio.plugin.v1.ai.rs");
+include!("mavio.plugin.v1.proxy.rs");
+include!("mavio.plugin.v1.challenge.rs");
 include!("mavio.plugin.v1.container.rs");
 include!("mavio.plugin.v1.device.rs");
 include!("mavio.plugin.v1.settings.rs");
@@ -48,6 +50,8 @@ pub mod __buffa {
         include!("mavio.plugin.v1.discovery.__view.rs");
         include!("mavio.plugin.v1.ratings.__view.rs");
         include!("mavio.plugin.v1.ai.__view.rs");
+        include!("mavio.plugin.v1.proxy.__view.rs");
+        include!("mavio.plugin.v1.challenge.__view.rs");
         include!("mavio.plugin.v1.container.__view.rs");
         include!("mavio.plugin.v1.device.__view.rs");
         include!("mavio.plugin.v1.settings.__view.rs");
@@ -475,6 +479,46 @@ pub use self::__buffa::view::DeleteAgentMemoriesRequestOwnedView;
 pub use self::__buffa::view::DeleteAgentMemoriesResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::DeleteAgentMemoriesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ProxyView;
+#[doc(inline)]
+pub use self::__buffa::view::ProxyOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListProxiesResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ChallengeView;
+#[doc(inline)]
+pub use self::__buffa::view::ChallengeOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CookieView;
+#[doc(inline)]
+pub use self::__buffa::view::CookieOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ChallengeSolutionView;
+#[doc(inline)]
+pub use self::__buffa::view::ChallengeSolutionOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveChallengeRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveChallengeRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveChallengeResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SolveChallengeResponseOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ContainerDependencyView;
 #[doc(inline)]

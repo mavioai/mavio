@@ -129,6 +129,8 @@ pub enum Capability {
     CAPABILITY_SPEECH_TO_TEXT = 29i32,
     /// Implements TextToSpeechService.
     CAPABILITY_TEXT_TO_SPEECH = 30i32,
+    /// Implements ChallengeSolverService.
+    CAPABILITY_CHALLENGE_SOLVER = 31i32,
 }
 impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_UNSPECIFIED`]; `Debug` prints the variant name.
@@ -224,6 +226,9 @@ impl Capability {
     ///Idiomatic alias for [`Self::CAPABILITY_TEXT_TO_SPEECH`]; `Debug` prints the variant name.
     #[allow(non_upper_case_globals)]
     pub const TextToSpeech: Self = Self::CAPABILITY_TEXT_TO_SPEECH;
+    ///Idiomatic alias for [`Self::CAPABILITY_CHALLENGE_SOLVER`]; `Debug` prints the variant name.
+    #[allow(non_upper_case_globals)]
+    pub const ChallengeSolver: Self = Self::CAPABILITY_CHALLENGE_SOLVER;
 }
 impl ::core::default::Default for Capability {
     fn default() -> Self {
@@ -268,6 +273,7 @@ impl ::buffa::Enumeration for Capability {
             28i32 => ::core::option::Option::Some(Self::CAPABILITY_RATINGS_PROVIDER),
             29i32 => ::core::option::Option::Some(Self::CAPABILITY_SPEECH_TO_TEXT),
             30i32 => ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH),
+            31i32 => ::core::option::Option::Some(Self::CAPABILITY_CHALLENGE_SOLVER),
             _ => ::core::option::Option::None,
         }
     }
@@ -311,6 +317,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_RATINGS_PROVIDER => "CAPABILITY_RATINGS_PROVIDER",
             Self::CAPABILITY_SPEECH_TO_TEXT => "CAPABILITY_SPEECH_TO_TEXT",
             Self::CAPABILITY_TEXT_TO_SPEECH => "CAPABILITY_TEXT_TO_SPEECH",
+            Self::CAPABILITY_CHALLENGE_SOLVER => "CAPABILITY_CHALLENGE_SOLVER",
         }
     }
     fn from_proto_name(name: &str) -> ::core::option::Option<Self> {
@@ -408,6 +415,9 @@ impl ::buffa::Enumeration for Capability {
             "CAPABILITY_TEXT_TO_SPEECH" => {
                 ::core::option::Option::Some(Self::CAPABILITY_TEXT_TO_SPEECH)
             }
+            "CAPABILITY_CHALLENGE_SOLVER" => {
+                ::core::option::Option::Some(Self::CAPABILITY_CHALLENGE_SOLVER)
+            }
             _ => ::core::option::Option::None,
         }
     }
@@ -444,6 +454,7 @@ impl ::buffa::Enumeration for Capability {
             Self::CAPABILITY_RATINGS_PROVIDER,
             Self::CAPABILITY_SPEECH_TO_TEXT,
             Self::CAPABILITY_TEXT_TO_SPEECH,
+            Self::CAPABILITY_CHALLENGE_SOLVER,
         ]
     }
 }

@@ -16587,7 +16587,8 @@
           "CAPABILITY_AGENT_SESSION",
           "CAPABILITY_RATINGS_PROVIDER",
           "CAPABILITY_SPEECH_TO_TEXT",
-          "CAPABILITY_TEXT_TO_SPEECH"
+          "CAPABILITY_TEXT_TO_SPEECH",
+          "CAPABILITY_CHALLENGE_SOLVER"
         ]
       },
       "mavio.plugin.v1.CatalogKind": {
@@ -19962,6 +19963,39 @@
         "title": "CreateBackupResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.CreateProxyRequest": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+              }
+            ],
+            "title": "proxy"
+          }
+        },
+        "title": "CreateProxyRequest",
+        "required": [
+          "proxy"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.CreateProxyResponse": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+              }
+            ],
+            "title": "proxy"
+          }
+        },
+        "title": "CreateProxyResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.DeleteAiConversationRequest": {
         "type": "object",
         "properties": {
@@ -19999,6 +20033,26 @@
       "mavio.system.v1.DeleteBackupResponse": {
         "type": "object",
         "title": "DeleteBackupResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.DeleteProxyRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "format": "uuid"
+          }
+        },
+        "title": "DeleteProxyRequest",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.DeleteProxyResponse": {
+        "type": "object",
+        "title": "DeleteProxyResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.DirectoryEntry": {
@@ -21003,6 +21057,25 @@
         "title": "ListPluginsResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.ListProxiesRequest": {
+        "type": "object",
+        "title": "ListProxiesRequest",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.ListProxiesResponse": {
+        "type": "object",
+        "properties": {
+          "proxies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+            },
+            "title": "proxies"
+          }
+        },
+        "title": "ListProxiesResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.ListRatingsRequest": {
         "type": "object",
         "properties": {
@@ -21440,6 +21513,79 @@
           "PROPER_DOWNLOAD_DO_NOT_PREFER"
         ],
         "description": "ProperDownload is what to do with propers and repacks."
+      },
+      "mavio.system.v1.Proxy": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "id",
+            "description": "Set by the server."
+          },
+          "name": {
+            "type": "string",
+            "title": "name",
+            "maxLength": 256,
+            "minLength": 1
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.ProxyKind"
+              }
+            ],
+            "not": {
+              "enum": [
+                "PROXY_KIND_UNSPECIFIED"
+              ]
+            },
+            "title": "kind",
+            "description": "enum.defined_only = true\n"
+          },
+          "host": {
+            "type": "string",
+            "title": "host",
+            "maxLength": 253,
+            "minLength": 1,
+            "description": "A name or an IP address, without brackets."
+          },
+          "port": {
+            "type": "integer",
+            "title": "port",
+            "maximum": 65535,
+            "minimum": 1,
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "title": "username",
+            "maxLength": 256
+          },
+          "password": {
+            "type": "string",
+            "title": "password",
+            "maxLength": 256,
+            "description": "Write only: never returned. On update, unset keeps the stored one and\n clear_password removes it."
+          },
+          "hasPassword": {
+            "type": "boolean",
+            "title": "has_password",
+            "description": "Whether a password is stored; output only."
+          }
+        },
+        "title": "Proxy",
+        "additionalProperties": false,
+        "description": "Proxy is one of the server's proxies."
+      },
+      "mavio.system.v1.ProxyKind": {
+        "type": "string",
+        "title": "ProxyKind",
+        "enum": [
+          "PROXY_KIND_UNSPECIFIED",
+          "PROXY_KIND_HTTP",
+          "PROXY_KIND_SOCKS4",
+          "PROXY_KIND_SOCKS5"
+        ]
       },
       "mavio.system.v1.Rating": {
         "type": "object",
@@ -22040,6 +22186,123 @@
         "additionalProperties": false,
         "description": "Task is a recurring piece of work."
       },
+      "mavio.system.v1.TestProxyRequest": {
+        "type": "object",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "id",
+                "format": "uuid",
+                "description": "A stored proxy."
+              }
+            },
+            "title": "id"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "proxy": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+                  }
+                ],
+                "title": "proxy",
+                "description": "An unsaved proxy; with an ID and no password, the stored proxy's\n password is used, for testing an edit before saving."
+              }
+            },
+            "title": "proxy"
+          }
+        ],
+        "unevaluatedProperties": false,
+        "not": {
+          "allOf": [
+            {
+              "anyOf": [
+                {
+                  "required": [
+                    "id"
+                  ]
+                },
+                {
+                  "required": [
+                    "proxy"
+                  ]
+                }
+              ]
+            },
+            {
+              "not": {
+                "oneOf": [
+                  {
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "proxy"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "url",
+            "format": "uri",
+            "description": "The URL to fetch; unset means\n https://www.cloudflare.com/cdn-cgi/trace."
+          }
+        },
+        "title": "TestProxyRequest"
+      },
+      "mavio.system.v1.TestProxyResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "ok",
+            "description": "Whether the URL answered through the proxy, with any HTTP status."
+          },
+          "error": {
+            "type": "string",
+            "title": "error",
+            "description": "Why not."
+          },
+          "status": {
+            "type": "integer",
+            "title": "status",
+            "format": "int32",
+            "description": "The HTTP status of the answer."
+          },
+          "latency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/google.protobuf.Duration"
+              }
+            ],
+            "title": "latency",
+            "description": "How long the request took."
+          },
+          "exitIp": {
+            "type": "string",
+            "title": "exit_ip",
+            "description": "From Cloudflare's trace: the address the request left the proxy\n from, and its country (ISO 3166-1)."
+          },
+          "country": {
+            "type": "string",
+            "title": "country"
+          }
+        },
+        "title": "TestProxyResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.TranscodingSettings": {
         "type": "object",
         "properties": {
@@ -22156,6 +22419,44 @@
       "mavio.system.v1.UninstallPluginResponse": {
         "type": "object",
         "title": "UninstallPluginResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.UpdateProxyRequest": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+              }
+            ],
+            "title": "proxy"
+          },
+          "clearPassword": {
+            "type": "boolean",
+            "title": "clear_password",
+            "description": "Removes the stored password."
+          }
+        },
+        "title": "UpdateProxyRequest",
+        "required": [
+          "proxy"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.UpdateProxyResponse": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Proxy"
+              }
+            ],
+            "title": "proxy"
+          }
+        },
+        "title": "UpdateProxyResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.UpdateServerSettingsRequest": {
@@ -23597,6 +23898,10 @@
       "description": "LocalizationService lists the countries, languages and content rating\n systems metadata and preferences refer to, with English names."
     },
     {
+      "name": "ProxyService",
+      "description": "ProxyService manages the server's proxies, which plugins reach sites\n through. Administrators only."
+    },
+    {
       "name": "SystemService",
       "description": "SystemService exposes server-level information and health, the load of\n its computer, the server's settings, its file system and its logs."
     },
@@ -23970,14 +24275,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/SwitchUser": {
+    "/mavio.hub.v1.HubService/GetHub": {
       "post": {
         "tags": [
-          "AuthService"
+          "HubService"
         ],
-        "summary": "SwitchUser",
-        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
-        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.hub.v1.HubService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24002,7 +24307,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
               }
             }
           },
@@ -24024,7 +24329,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
                 }
               }
             }
@@ -24032,14 +24337,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SetMonitored": {
+    "/mavio.auth.v1.AuthService/ResetPassword": {
       "post": {
         "tags": [
-          "WantedService"
+          "AuthService"
         ],
-        "summary": "SetMonitored",
-        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
-        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
+        "summary": "ResetPassword",
+        "description": "ResetPassword sets a new password with the PIN ForgotPassword\n delivered, and ends the user's sessions.",
+        "operationId": "mavio.auth.v1.AuthService.ResetPassword",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24064,7 +24369,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordRequest"
               }
             }
           },
@@ -24086,7 +24391,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordResponse"
                 }
               }
             }
@@ -29405,14 +29710,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleSettings": {
       "post": {
         "tags": [
-          "HubService"
+          "SubtitleService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "UpdateSubtitleSettings",
+        "description": "UpdateSubtitleSettings replaces the settings and applies them at once.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29437,7 +29742,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsRequest"
               }
             }
           },
@@ -29459,7 +29764,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsResponse"
                 }
               }
             }
@@ -29901,14 +30206,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "CollectionService"
+          "WantedService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29933,7 +30238,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -29955,7 +30260,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
                 }
               }
             }
@@ -31514,13 +31819,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.auth.v1.AuthService/LoginWithQuickConnect": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AuthService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "LoginWithQuickConnect",
+        "description": "LoginWithQuickConnect gives the authorized device its access token,\n once.",
+        "operationId": "mavio.auth.v1.AuthService.LoginWithQuickConnect",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31545,7 +31851,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectRequest"
               }
             }
           },
@@ -31567,7 +31873,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectResponse"
                 }
               }
             }
@@ -31699,14 +32005,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/ResetPassword": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "AuthService"
+          "CollectionService"
         ],
-        "summary": "ResetPassword",
-        "description": "ResetPassword sets a new password with the PIN ForgotPassword\n delivered, and ends the user's sessions.",
-        "operationId": "mavio.auth.v1.AuthService.ResetPassword",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31731,7 +32036,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -31753,7 +32058,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -31761,14 +32066,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/RevokeApiKey": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "AuthService"
+          "CollectionService"
         ],
-        "summary": "RevokeApiKey",
-        "description": "RevokeApiKey deletes an API key. Administrators only.",
-        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31793,7 +32097,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -31815,7 +32119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -32195,14 +32499,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.auth.v1.AuthService/SwitchUser": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "AuthService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "SwitchUser",
+        "description": "SwitchUser makes the calling session the given user's: its access\n token and refreshes then act as that user, and the session can still\n switch. A user with a PIN needs it: without one the call is\n FAILED_PRECONDITION, a wrong one PERMISSION_DENIED, and after three\n wrong PINs for a user each locks it out twice as long as the one\n before, as Login does, with RESOURCE_EXHAUSTED meanwhile. Streams the\n session opened before switching keep their user, so the client opens\n them again.",
+        "operationId": "mavio.auth.v1.AuthService.SwitchUser",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32227,7 +32531,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserRequest"
               }
             }
           },
@@ -32249,7 +32553,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.SwitchUserResponse"
                 }
               }
             }
@@ -32319,14 +32623,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/GetHub": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "HubService"
+          "DiscoverService"
         ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.hub.v1.HubService.GetHub",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32351,7 +32655,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -32373,7 +32677,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -32443,14 +32747,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleSettings": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "HubService"
         ],
-        "summary": "UpdateSubtitleSettings",
-        "description": "UpdateSubtitleSettings replaces the settings and applies them at once.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32475,7 +32779,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -32497,7 +32801,131 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.library.v1.CollectionService/AddToCollection": {
+      "post": {
+        "tags": [
+          "CollectionService"
+        ],
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.auth.v1.AuthService/RevokeApiKey": {
+      "post": {
+        "tags": [
+          "AuthService"
+        ],
+        "summary": "RevokeApiKey",
+        "description": "RevokeApiKey deletes an API key. Administrators only.",
+        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
                 }
               }
             }
@@ -32567,14 +32995,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/LoginWithQuickConnect": {
+    "/mavio.session.v1.SyncPlayService/NextItem": {
       "post": {
         "tags": [
-          "AuthService"
+          "SyncPlayService"
         ],
-        "summary": "LoginWithQuickConnect",
-        "description": "LoginWithQuickConnect gives the authorized device its access token,\n once.",
-        "operationId": "mavio.auth.v1.AuthService.LoginWithQuickConnect",
+        "summary": "NextItem",
+        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32599,7 +33026,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
               }
             }
           },
@@ -32621,129 +33048,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
-      "post": {
-        "tags": [
-          "CollectionService"
-        ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
-        "parameters": [
-          {
-            "name": "Connect-Protocol-Version",
-            "in": "header",
-            "description": "Define the version of the Connect protocol",
-            "schema": {
-              "$ref": "#/components/schemas/connect-protocol-version"
-            },
-            "example": 1
-          },
-          {
-            "name": "Connect-Timeout-Ms",
-            "in": "header",
-            "description": "Define the timeout, in ms",
-            "schema": {
-              "$ref": "#/components/schemas/connect-timeout-header"
-            },
-            "example": 1000
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/connect.error"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
                 }
               }
             }
@@ -35652,13 +35957,13 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/NextItem": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "CollectionService"
         ],
-        "summary": "NextItem",
-        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -35683,7 +35988,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -35705,7 +36010,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -38859,6 +39164,316 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.UninstallPluginResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ProxyService/CreateProxy": {
+      "post": {
+        "tags": [
+          "ProxyService"
+        ],
+        "summary": "CreateProxy",
+        "description": "CreateProxy adds a proxy. A proxy of the same name, ignoring case, or\n of the same host, port and username, whatever its kind, is\n ALREADY_EXISTS, naming it.",
+        "operationId": "mavio.system.v1.ProxyService.CreateProxy",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.CreateProxyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.CreateProxyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ProxyService/DeleteProxy": {
+      "post": {
+        "tags": [
+          "ProxyService"
+        ],
+        "summary": "DeleteProxy",
+        "description": "DeleteProxy deletes a proxy; plugins configured with it fail what\n uses it until configured otherwise.",
+        "operationId": "mavio.system.v1.ProxyService.DeleteProxy",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.DeleteProxyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.DeleteProxyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ProxyService/ListProxies": {
+      "post": {
+        "tags": [
+          "ProxyService"
+        ],
+        "summary": "ListProxies",
+        "description": "ListProxies lists the proxies ordered by name.",
+        "operationId": "mavio.system.v1.ProxyService.ListProxies",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.ListProxiesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.ListProxiesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ProxyService/TestProxy": {
+      "post": {
+        "tags": [
+          "ProxyService"
+        ],
+        "summary": "TestProxy",
+        "description": "TestProxy fetches a URL through a stored or an unsaved proxy.",
+        "operationId": "mavio.system.v1.ProxyService.TestProxy",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.TestProxyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.TestProxyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.ProxyService/UpdateProxy": {
+      "post": {
+        "tags": [
+          "ProxyService"
+        ],
+        "summary": "UpdateProxy",
+        "description": "UpdateProxy replaces a proxy, keeping its password when none is given;\n duplicates are refused as by CreateProxy.",
+        "operationId": "mavio.system.v1.ProxyService.UpdateProxy",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.UpdateProxyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.UpdateProxyResponse"
                 }
               }
             }

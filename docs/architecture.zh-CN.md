@@ -663,7 +663,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **插件**：schema 带 `"x-mavio-options": "proxies"` 的配置属性取代理的 ID，从服务端的代理中选择（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可列出直连的主机。
 
 ### 17.2 质询求解器
-* **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.SolveChallenge`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
+* **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
 * **经由服务端**：插件以其所用代理的 ID 调用 `HostService.SolveChallenge`；服务端填入代理，按 ID 顺序依次询问就绪的 `CHALLENGE_SOLVER` 插件，没有时答复 unavailable。因此插件既不需要求解器的地址，也不需要自己所用之外的代理。
 * **识别**：`libs/plugin/challenge` 按 Prowlarr 的方式识别质询（Cloudflare 或 DDoS-Guard 返回 403 或 503 及其质询页面）；其 transport 解答质询，按主机与代理复用 cookie 与 user agent，并重试一次请求。
 

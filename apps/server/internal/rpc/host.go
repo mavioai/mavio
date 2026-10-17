@@ -93,3 +93,13 @@ func (s *HostService) ListContainers(ctx context.Context, _ *pluginv1.ListContai
 	}
 	return pluginv1.ListContainersResponse_builder{Containers: out}.Build(), nil
 }
+
+// ListProxies returns the server's proxies to the calling plugin.
+func (s *HostService) ListProxies(context.Context, *pluginv1.ListProxiesRequest) (*pluginv1.ListProxiesResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("the server keeps no proxies"))
+}
+
+// SolveChallenge solves a site's challenge with the challenge solvers.
+func (s *HostService) SolveChallenge(context.Context, *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
+	return nil, connect.NewError(connect.CodeUnavailable, errors.New("no challenge solver is ready"))
+}

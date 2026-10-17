@@ -1,0 +1,125 @@
+edition = "2023";
+
+package mavio.system.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/duration.proto";
+
+// ProxyService manages the server's proxies, which plugins reach sites
+// through. Administrators only.
+service ProxyService {
+  // ListProxies lists the proxies ordered by name.
+  rpc ListProxies(ListProxiesRequest) returns (ListProxiesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  // CreateProxy adds a proxy. A proxy of the same name, ignoring case, or
+  // of the same host, port and username, whatever its kind, is
+  // ALREADY_EXISTS, naming it.
+  rpc CreateProxy(CreateProxyRequest) returns (CreateProxyResponse);
+  // UpdateProxy replaces a proxy, keeping its password when none is given;
+  // duplicates are refused as by CreateProxy.
+  rpc UpdateProxy(UpdateProxyRequest) returns (UpdateProxyResponse);
+  // DeleteProxy deletes a proxy; plugins configured with it fail what
+  // uses it until configured otherwise.
+  rpc DeleteProxy(DeleteProxyRequest) returns (DeleteProxyResponse);
+  // TestProxy fetches a URL through a stored or an unsaved proxy.
+  rpc TestProxy(TestProxyRequest) returns (TestProxyResponse);
+}
+
+enum ProxyKind {
+  PROXY_KIND_UNSPECIFIED = 0;
+  // HTTP, with CONNECT for HTTPS.
+  PROXY_KIND_HTTP = 1;
+  PROXY_KIND_SOCKS4 = 2;
+  PROXY_KIND_SOCKS5 = 3;
+}
+
+// Proxy is one of the server's proxies.
+message Proxy {
+  // Set by the server.
+  string id = 1;
+  string name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 256
+  }];
+  ProxyKind kind = 3 [(buf.validate.field).enum = {
+    defined_only: true
+    not_in: [0]
+  }];
+  // A name or an IP address, without brackets.
+  string host = 4 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 253
+  }];
+  int32 port = 5 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 65535
+  }];
+  string username = 6 [(buf.validate.field).string.max_len = 256];
+  // Write only: never returned. On update, unset keeps the stored one and
+  // clear_password removes it.
+  string password = 7 [(buf.validate.field).string.max_len = 256];
+  // Whether a password is stored; output only.
+  bool has_password = 8;
+}
+
+message ListProxiesRequest {}
+
+message ListProxiesResponse {
+  repeated Proxy proxies = 1;
+}
+
+message CreateProxyRequest {
+  Proxy proxy = 1 [(buf.validate.field).required = true];
+}
+
+message CreateProxyResponse {
+  Proxy proxy = 1;
+}
+
+message UpdateProxyRequest {
+  Proxy proxy = 1 [(buf.validate.field).required = true];
+  // Removes the stored password.
+  bool clear_password = 2;
+}
+
+message UpdateProxyResponse {
+  Proxy proxy = 1;
+}
+
+message DeleteProxyRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.uuid = true
+  ];
+}
+
+message DeleteProxyResponse {}
+
+message TestProxyRequest {
+  oneof target {
+    // A stored proxy.
+    string id = 1 [(buf.validate.field).string.uuid = true];
+    // An unsaved proxy; with an ID and no password, the stored proxy's
+    // password is used, for testing an edit before saving.
+    Proxy proxy = 2;
+  }
+  // The URL to fetch; unset means
+  // https://www.cloudflare.com/cdn-cgi/trace.
+  string url = 3 [(buf.validate.field).string.uri = true];
+}
+
+message TestProxyResponse {
+  // Whether the URL answered through the proxy, with any HTTP status.
+  bool ok = 1;
+  // Why not.
+  string error = 2;
+  // The HTTP status of the answer.
+  int32 status = 3;
+  // How long the request took.
+  google.protobuf.Duration latency = 4;
+  // From Cloudflare's trace: the address the request left the proxy
+  // from, and its country (ISO 3166-1).
+  string exit_ip = 5;
+  string country = 6;
+}
