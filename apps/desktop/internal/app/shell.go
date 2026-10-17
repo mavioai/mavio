@@ -282,6 +282,9 @@ func (a *App) userButton(c *ui.Context, withName bool) {
 	}
 	colors := style.Colors(c)
 	name := a.servers[0].GetUserName()
+	if a.account != nil {
+		name = a.account.GetName()
+	}
 	b := ui.ButtonBase(c).Margin(8, 12, 12).Padding(6, 8).Gap(10).Radius(design.RadiusMd).AlignItems(ui.Center).Label(style.T(c, "nav.userMenu", "name", name))
 	if !withName {
 		b.Margin(8).Justify(ui.Center)
@@ -314,23 +317,13 @@ func (a *App) userMenu(c *ui.Context, m *ui.Menu) {
 			}
 		}
 	})
+	if m.Item(style.T(c, "menu.tvMode")).Chosen() {
+		a.setTV(true)
+	}
 	m.Separator()
-	if m.Item(style.T(c, "auth.addServer")).Chosen() {
-		a.addServer()
+	if m.Item(style.T(c, "auth.signOut")).Chosen() {
+		a.signOut()
 	}
-	if len(a.servers) == 1 {
-		if m.Item(style.T(c, "auth.signOut")).Chosen() {
-			a.signOut(a.servers[0].GetId())
-		}
-		return
-	}
-	m.Submenu(style.T(c, "auth.signOut"), func(m *ui.Menu) {
-		for _, s := range a.servers {
-			if m.Item(s.GetName()).Chosen() {
-				a.signOut(s.GetId())
-			}
-		}
-	})
 }
 
 // iconButton builds a borderless button of an icon.

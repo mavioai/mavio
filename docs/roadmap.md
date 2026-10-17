@@ -731,6 +731,9 @@ flowchart TD
 - [ ] Apple TV and Android TV apps
 - [ ] Mac app
 - [ ] Desktop app (macOS, Windows and Linux)
+  - [ ] Television mode beyond sign-in: the top navigation, remote focus and the television's screens ([Television](tv.md))
+  - [ ] Downloads, Discover and requests, the assistant, settings, person pages, and switching users with PINs
+  - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
 - [ ] The decision on a Jellyfin API compatibility shim
 
 ### P22 Real-Device Acceptance
@@ -898,11 +901,13 @@ flowchart TD
 - [x] `apps/relay` and relay tickets: the relay splicing clients' connections by the ClientHello's name to servers' connections back, servers authenticated by their identity keys; `AccountService.CreateRelayTicket`, `ServerService.ListRelays` and `SetRelayRegion`; the server's `internal/relay`, which keeps a connection to the nearest relay and serves TLS on the connections it relays; tested on each side against the other's protocol, with the tickets checked against a shared vector
 - [ ] Running `apps/relay` on VMs in Europe, the United States and Singapore, with the relays' A and AAAA records in `apps/dns`'s configuration and `RELAYS` and `RELAY_TICKET_SECRET` in the Worker's
 - [x] The web UI: `/setup` choosing the mode on a new server, opened by the server on first start, where the first Mavio account to sign in claims the server through the authorization request the server pushes to mavio.dev (`AuthService.StartSignIn`, `/authorize?request_uri=…`); one sign-in, a Mavio account's through mavio.dev's authorization code flow with PKCE (`/authorize`, `/auth/callback`, `/api/oauth/token`) into a session of the device key, restricted to the administrator on a server's own web UI and pointing everyone else to app.mavio.dev, or a standalone server's; every server of the account at the first of its published URLs that answers; link codes on televisions; signing out of every session; switching a standalone server's users with PINs; signing in with passkeys and TOTP codes, and managing passkeys, TOTP and PINs
-- [ ] A QR code of the server's address on a new server's television setup, and of mavio.dev/link beside a television's link code
+- [ ] A QR code of the server's address on a new server's television setup, and of mavio.dev/link beside a television's link code, in the web UI and the Apple and Android apps; the desktop app shows one beside its link code
 - [ ] Reaching a Mavio account's servers through the relay when none of their published URLs answers
 - [ ] Managing the account, its Homes, friends and access records inside the web UI rather than on mavio.dev's pages
 - [ ] Deploying app.mavio.dev: the web UI built with `VITE_MAVIO_DEV_URL` on Cloudflare at that address
 - [ ] The apps (Apple, Android and desktop) and the shared Rust core: the same as the web UI, Mavio accounts signing in with mavio.dev sessions of their own (bearer sessions and television codes)
+  - [x] The core (`account.rs`): link codes (the device code grant), the browser's sign-in to a loopback address with PKCE, the session of the device key renewed by its signature, the account's servers signed in to with assertions and kept in step with its list, and signing out of every session; in the C ABI, and the desktop app's sign-in
+  - [ ] The account's calls in the UniFFI bindings, and the Apple and Android apps' sign-in
 
 ### P29 Assistant
 **Scope**: the assistant of [Assistant](assistant.md): the grammar of `libs/intent` on its three hosts; `AssistantService` with the tools, slot resolution, confirmation and client actions; remote tools, code mode, rolling conversations and memory in `AGENT_SESSION`; `plugins/voice` with `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH`, Whisper moved into it and subtitles transcribed by its recognizers; the clients, the web UI first.

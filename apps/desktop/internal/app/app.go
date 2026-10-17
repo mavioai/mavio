@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"slices"
+	goruntime "runtime"
 
 	"github.com/egoist/mygo/ui"
 
@@ -48,6 +48,10 @@ type Options struct {
 	Preferences string
 	// SetAppearance applies the appearance to the windows.
 	SetAppearance func(Appearance)
+	// OpenURL opens a URL in the browser.
+	OpenURL func(string) error
+	// MavioDev is the API of the mavio.dev Mavio accounts sign in at.
+	MavioDev string
 }
 
 // phase is where the app is: starting, signing in, or showing the
@@ -64,6 +68,8 @@ const (
 type preferences struct {
 	Appearance       Appearance `json:"appearance,omitempty"`
 	SidebarCollapsed bool       `json:"sidebarCollapsed,omitempty"`
+	// TV is the TV mode (docs/tv.md).
+	TV bool `json:"tv,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.
@@ -73,7 +79,9 @@ type App struct {
 	prefs  preferences
 	router *ui.Router
 
-	phase   phase
+	phase phase
+	// account is the Mavio account signed in, if any.
+	account *capiv1.Account
 	servers []*capiv1.ServerRecord
 	// state is the state of each server's stream.
 	state map[string]capiv1.StreamState_State
@@ -111,13 +119,21 @@ func New(ctx context.Context, opts Options) *App {
 	return a
 }
 
-// Start lists the servers signed in to, showing them or the sign-in.
+// Start lists the Mavio account and the servers signed in to, showing
+// them or the sign-in.
 func (a *App) Start() {
 	go func() {
+		acc, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{GetAccount: &capiv1.GetAccount{}}.Build())
+		if err != nil {
+			slog.ErrorContext(a.ctx, "get the Mavio account", "error", err)
+		}
 		m, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{ListServers: &capiv1.ListServers{}}.Build())
 		a.opts.Update(func() {
 			if err != nil {
 				slog.ErrorContext(a.ctx, "list the servers", "error", err)
+			}
+			if acc.HasAccount() {
+				a.account = acc.GetAccount()
 			}
 			a.setServers(m.GetServers().GetServers())
 		})
@@ -127,10 +143,11 @@ func (a *App) Start() {
 	}()
 }
 
-// setServers shows servers, or the sign-in when there are none.
+// setServers shows servers, or the sign-in when there are none and no
+// Mavio account brings any.
 func (a *App) setServers(servers []*capiv1.ServerRecord) {
 	a.servers = servers
-	if len(servers) == 0 {
+	if len(servers) == 0 && a.account == nil {
 		a.phase = phaseSignIn
 		a.signIn = signIn{}
 		return
@@ -144,6 +161,10 @@ func (a *App) Event(e *capiv1.Event) {
 	if e.HasTokenChanged() {
 		return
 	}
+	if e.HasServersChanged() {
+		a.listServers()
+		return
+	}
 	a.opts.Update(func() {
 		id := e.GetServerId()
 		switch {
@@ -155,22 +176,52 @@ func (a *App) Event(e *capiv1.Event) {
 	})
 }
 
-// signOut signs out of the server with id.
-func (a *App) signOut(id string) {
+// listServers lists the servers again, as the Mavio account's change.
+func (a *App) listServers() {
 	go func() {
-		_, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{
-			RemoveServer: capiv1.RemoveServer_builder{ServerId: id}.Build(),
-		}.Build())
+		m, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{ListServers: &capiv1.ListServers{}}.Build())
 		if err != nil {
-			slog.ErrorContext(a.ctx, "sign out", "server", id, "error", err)
+			slog.ErrorContext(a.ctx, "list the servers", "error", err)
 			return
 		}
 		a.opts.Update(func() {
-			a.setServers(slices.DeleteFunc(slices.Clone(a.servers), func(s *capiv1.ServerRecord) bool { return s.GetId() == id }))
-			delete(a.libraries, id)
+			if a.phase == phaseReady {
+				a.setServers(m.GetServers().GetServers())
+			}
+		})
+	}()
+}
+
+// signOut signs out of the Mavio account, or of every server.
+func (a *App) signOut() {
+	go func() {
+		_, err := a.opts.Core.Call(a.ctx, capiv1.Request_builder{SignOut: &capiv1.SignOut{}}.Build())
+		if err != nil {
+			slog.ErrorContext(a.ctx, "sign out", "error", err)
+			return
+		}
+		a.opts.Update(func() {
+			a.account = nil
+			clear(a.libraries)
+			a.setServers(nil)
 			a.router.Replace("/home")
 		})
 	}()
+}
+
+// tvShortcut reports whether the TV mode's shortcut was pressed: ⌃⌘T on
+// the Mac, Shift+F11 elsewhere.
+func tvShortcut(c *ui.Context) bool {
+	if goruntime.GOOS == "darwin" {
+		return c.Shortcut(ui.Ctrl|ui.Super, ui.KeyT)
+	}
+	return c.Shortcut(ui.Shift, ui.KeyF11)
+}
+
+// setTV turns the TV mode on or off and keeps it.
+func (a *App) setTV(on bool) {
+	a.prefs.TV = on
+	a.savePreferences()
 }
 
 // setAppearance applies and keeps the appearance.
@@ -225,6 +276,9 @@ func (a *App) savePreferences() {
 // View builds the window.
 func (a *App) View(c *ui.Context) {
 	c.SetTheme(style.Theme(c.Theme().Dark))
+	if tvShortcut(c) {
+		a.setTV(!a.prefs.TV)
+	}
 	switch a.phase {
 	case phaseStarting:
 		ui.Box(c).Fill().DragWindow()

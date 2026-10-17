@@ -44,24 +44,6 @@ func errorMessage(c *ui.Context, err error) string {
 	return style.T(c, "state.error")
 }
 
-// primaryButton builds the primary button: the label color's fill, with an
-// optional icon.
-func primaryButton(c *ui.Context, icon, label string) ui.Element {
-	colors := style.Colors(c)
-	b := ui.ButtonBase(c).Height(36).Padding(0, 18).Gap(8).Radius(18).AlignItems(ui.Center).Justify(ui.Center).
-		Background(style.Color(colors.Button)).Label(label)
-	if b.Pressed() || b.IsDisabled() {
-		b.Opacity(0.8)
-	}
-	b.Children(func() {
-		if icon != "" {
-			ui.Icon(c, style.Icon(icon, true)).Size(18, 18).TextColor(style.Color(colors.OnButton))
-		}
-		style.Text(ui.Text(c, label), style.Type.Headline).TextColor(style.Color(colors.OnButton)).SingleLine()
-	})
-	return b
-}
-
 // secondaryButton builds a button on the fill color.
 func secondaryButton(c *ui.Context, icon, label string) ui.Element {
 	colors := style.Colors(c)

@@ -144,12 +144,24 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 	switch {
 	case req.HasListServers():
 		m.Servers = capiv1.Servers_builder{Servers: f.servers}.Build()
-	case req.HasStart(), req.HasCancelQuickConnect(), req.HasSetPlayed(), req.HasSetFavorite():
+	case req.HasStart(), req.HasCancelQuickConnect(), req.HasSetPlayed(), req.HasSetFavorite(),
+		req.HasGetAccount(), req.HasPollLink(), req.HasCancelLink(), req.HasCancelAccountSignIn():
 		m.Done = &capiv1.Done{}
+	case req.HasStartLink():
+		m.LinkCode = capiv1.LinkCode_builder{
+			Request: 1, UserCode: "BDWP-HQPK", VerificationUri: "https://mavio.dev/link",
+			VerificationUriComplete: "https://mavio.dev/link?code=BDWP-HQPK",
+			ExpiresMs:               time.Now().Add(15 * time.Minute).UnixMilli(), IntervalMs: 5000,
+		}.Build()
 	case req.HasDiscover():
 		m.FoundServers = &capiv1.FoundServers{}
 	case req.HasProbe():
-		m.ServerInfo = capiv1.ServerInfo_builder{Id: f.s.Server.ID, Name: f.s.Server.Name, Address: req.GetProbe().GetAddress()}.Build()
+		address := req.GetProbe().GetAddress()
+		info := capiv1.ServerInfo_builder{Id: f.s.Server.ID, Name: f.s.Server.Name, Address: address}
+		if strings.Contains(address, "account") {
+			info.Mode, info.MavioDevUrl = capiv1.AccountMode_ACCOUNT_MODE_MAVIO_DEV, "https://mavio.dev/api"
+		}
+		m.ServerInfo = info.Build()
 	case req.HasSignIn():
 		if req.GetSignIn().GetPassword() != "secret" {
 			return nil, &capi.Error{Code: capiv1.Error_CODE_UNAUTHENTICATED}

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"crypto/rand"
 	"encoding/hex"
@@ -113,6 +114,8 @@ func run() error {
 		Update:        update,
 		Preferences:   filepath.Join(data, "preferences.json"),
 		SetAppearance: setAppearance,
+		OpenURL:       mygo.Shell.OpenExternal,
+		MavioDev:      cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
 	})
 	setAppearance(a.Appearance())
 

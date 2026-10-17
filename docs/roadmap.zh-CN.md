@@ -731,6 +731,9 @@ flowchart TD
 - [ ] Apple TV 与 Android TV 应用
 - [ ] Mac 应用
 - [ ] 桌面应用（macOS、Windows 与 Linux）
+  - [ ] 登录之外的电视模式：顶部导航、遥控器焦点与电视的各页面（[电视](tv.zh-CN.md)）
+  - [ ] 下载、发现与请求、助手、设置、人物页面，以及凭 PIN 切换用户
+  - [ ] 在 Windows 与 Linux 上试用；在 macOS 上签名与公证；应用图标
 - [ ] 关于 Jellyfin API 兼容层的决定
 
 ### P22 真实设备验收
@@ -898,11 +901,13 @@ flowchart TD
 - [x] `apps/relay` 与中转票据：中转按 ClientHello 中的名称把客户端的连接拼接到服务端回连的连接上，服务端以身份密钥认证；`AccountService.CreateRelayTicket`、`ServerService.ListRelays` 与 `SetRelayRegion`；服务端的 `internal/relay` 与最近的中转保持连接，并在中转来的连接上提供 TLS；两侧分别按对方的协议测试，票据以共享的测试向量核对
 - [ ] 在欧洲、美国和新加坡的虚拟机上运行 `apps/relay`，在 `apps/dns` 的配置中加入各中转的 A 与 AAAA 记录，在 Worker 的配置中加入 `RELAYS` 与 `RELAY_TICKET_SECRET`
 - [x] Web UI：新服务器上由 `/setup` 选择模式（服务端首次启动时打开），第一个登录的 Mavio 账户通过服务端推送给 mavio.dev 的授权请求（`AuthService.StartSignIn`、`/authorize?request_uri=…`）认领服务器；唯一的登录身份：Mavio 账户通过 mavio.dev 带 PKCE 的授权码流程（`/authorize`、`/auth/callback`、`/api/oauth/token`）得到设备密钥的会话，在服务器自身的 Web UI 上仅限管理员并把其他人引导到 app.mavio.dev，或独立服务器的登录；账户的每台服务器使用其发布的 URL 中第一个有应答的地址；电视上的关联代码；退出所有会话；凭 PIN 切换独立服务器的用户；用通行密钥和 TOTP 验证码登录，以及管理通行密钥、TOTP 与 PIN
-- [ ] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码
+- [ ] 新服务器的电视设置页显示服务器地址的二维码，电视关联代码旁显示 mavio.dev/link 的二维码，在 Web UI 与 Apple、Android 应用中；桌面应用已在其关联代码旁显示二维码
 - [ ] Mavio 账户的服务器发布的 URL 均无应答时，经中转访问
 - [ ] 在 Web UI 中而不是 mavio.dev 的页面上管理账户、其 Home、好友与访问记录
 - [ ] 部署 app.mavio.dev：在 Cloudflare 上以该地址部署以 `VITE_MAVIO_DEV_URL` 构建的 Web UI
 - [ ] 各应用（Apple、Android 与桌面）和共享的 Rust 核心：与 Web UI 相同，Mavio 账户以它们自己的 mavio.dev 会话登录（Bearer 会话与电视代码）
+  - [x] 核心（`account.rs`）：关联代码（设备码授权）、浏览器登录回到带 PKCE 的回环地址、以设备密钥签名续期的会话、以断言登录账户的服务器并与其列表保持同步、退出所有会话；C ABI 中的对应调用，以及桌面应用的登录
+  - [ ] UniFFI 绑定中的账户调用，以及 Apple、Android 应用的登录
 
 ### P29 助手
 **范围**：[助手](assistant.zh-CN.md)所述的助手：`libs/intent` 的语法及其三处运行；`AssistantService` 及工具、槽位解析、确认与客户端动作；`AGENT_SESSION` 中的远程工具、代码模式、滚动会话与记忆；带 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 的 `plugins/voice`，Whisper 并入其中，字幕由其识别器转写；各客户端，Web UI 最先。

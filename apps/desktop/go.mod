@@ -6,6 +6,7 @@ require (
 	github.com/egoist/mygo v0.5.5
 	github.com/mavioai/mavio/libs/client-rust/capi v0.0.0-00010101000000-000000000000
 	github.com/mavioai/mavio/libs/design v0.0.0
+	rsc.io/qr v0.2.0
 )
 
 require (
