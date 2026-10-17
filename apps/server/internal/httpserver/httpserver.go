@@ -299,7 +299,7 @@ func Handler(opts Options) (http.Handler, error) {
 	if a := opts.Assistant; a != nil {
 		a.Bind(assistant.Services{
 			Items: items, Libraries: libraries, Playlists: playlists, Sessions: sessions, UserData: userData,
-			Discover: discover, Requests: requestService,
+			Discover: discover, Requests: requestService, Subtitles: subRuntime.Read,
 		})
 		mux.Handle(assistantv1connect.NewAssistantServiceHandler(a, interceptors))
 		// The listening URL's token authenticates; speech authenticates as

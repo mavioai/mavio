@@ -922,7 +922,7 @@ flowchart TD
 - [x] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
 - [x] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
 - [ ] **完成标准**中的端到端测试
-- [ ] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
+- [x] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
 - [ ] 决定 `request_title` 之外还有哪些工具需要确认
 - [ ] 流式识别：双向的 `StreamSpeech` 在用户说话时给出部分文本，并经由 WebSocket 连接流式服务
 - [ ] Web 播放器：助手的动作会要求、而播放器尚不能执行的字幕偏移与多个条目的队列；在播放器的快捷键中列出 V

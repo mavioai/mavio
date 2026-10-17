@@ -270,6 +270,37 @@ func (r *Runtime) parse(ctx context.Context, itemID core.ID, p string) (*subtitl
 	return sub, format, nil
 }
 
+// Read reads and parses a text subtitle stream of an item's video by its
+// index: a subtitle file, or an embedded stream from the extraction cache
+// playback reads it from, which videos on cloud drives are not read for.
+func (r *Runtime) Read(ctx context.Context, itemID core.ID, index int) (*subtitle.Subtitle, error) {
+	s := r.settings()
+	t, err := r.load(ctx, itemID, &s)
+	if err != nil {
+		return nil, err
+	}
+	src := t.source()
+	i := slices.IndexFunc(src.Streams, func(st core.MediaStream) bool { return st.Index == index })
+	if i < 0 || src.Streams[i].Kind != core.StreamSubtitle {
+		return nil, fmt.Errorf("%w: %s has no subtitle stream %d", core.ErrNotFound, t.item.Name, index)
+	}
+	st := &src.Streams[i]
+	if st.ExternalPath != "" {
+		sub, _, err := r.parse(ctx, itemID, st.ExternalPath)
+		return sub, err
+	}
+	if !st.IsTextSubtitle() {
+		return nil, fmt.Errorf("%w: stream %d of %s is not a text subtitle", ErrUnavailable, index, t.item.Name)
+	}
+	if r.Extracted == nil || !r.readable(ctx, src.Path) {
+		return nil, fmt.Errorf("%w: embedded subtitles of %s cannot be extracted", ErrUnavailable, t.item.Name)
+	}
+	sub, _, err := readCues(ctx, fmt.Sprintf("stream %d", index), func(ctx context.Context) ([]byte, string, error) {
+		return r.Extracted(ctx, t.item.ID, src, st)
+	})
+	return sub, err
+}
+
 // Sync synchronizes a subtitle file of an item against its video's audio,
 // or against reference, another subtitle file of the item, when set.
 func (r *Runtime) Sync(ctx context.Context, itemID core.ID, p, reference string) (SyncResult, error) {

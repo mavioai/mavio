@@ -922,7 +922,7 @@ flowchart TD
 - [x] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
 - [x] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
 - [ ] The end-to-end test of **Done when**
-- [ ] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
+- [x] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
 - [ ] Deciding which tools require confirmation beyond `request_title`
 - [ ] Streaming recognition: a bidirectional `StreamSpeech` giving partial text as the user speaks, and the streaming services reached over their WebSockets
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts

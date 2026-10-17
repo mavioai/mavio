@@ -20,6 +20,7 @@ import (
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
 	userv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1"
+	"github.com/mavioai/mavio/libs/subtitle"
 )
 
 // call is the context of a tool call: the user it runs as and, when the
@@ -174,6 +175,19 @@ func tools() []*tool {
 				"id": str(""), "name": str(""), "client": str(""), "this": boolean("The requesting device"), "playing": str(""), "paused": boolean(""),
 			}))}),
 			(*call).listDevices),
+		def("read_subtitles", "Reads an item's subtitles before a position, to answer questions about the story: what was said, who said it, what happened. Never reads past the position the user has reached, so it does not spoil what is ahead.",
+			obj(map[string]any{
+				"item_id":          str("The item; empty is what the requesting device plays"),
+				"position_seconds": num("Read up to this time; default the position the user has reached"),
+				"before_seconds":   num("How far back to read, default 300, at most 1800"),
+				"language":         str("ISO 639-1; default the subtitles shown, else the user's language"),
+			}),
+			obj(map[string]any{
+				"item": str(""), "language": str(""), "from_seconds": num(""), "to_seconds": num(""),
+				"reached_seconds": num("The position the user has reached; nothing after it is read"),
+				"lines":           arrOf(obj(map[string]any{"start_seconds": num(""), "text": str("")})),
+			}),
+			(*call).readSubtitles),
 		def("play", "Plays items on a device: movies, episodes, a series (its next episode), a season, albums or tracks, as a queue, shuffled or not, from the resume position, the beginning or a time.",
 			obj(map[string]any{
 				"item_ids":          strs("The items, in order"),
@@ -910,6 +924,147 @@ func (s streams) subtitle(lang string) (int32, bool) {
 		return forced.GetIndex(), true
 	}
 	return 0, false
+}
+
+type subtitlesArgs struct {
+	ItemID   string   `json:"item_id"`
+	Position *float64 `json:"position_seconds"`
+	Before   float64  `json:"before_seconds"`
+	Language string   `json:"language"`
+}
+
+type subtitleLine struct {
+	Start float64 `json:"start_seconds"`
+	Text  string  `json:"text"`
+}
+
+type subtitlesResult struct {
+	Item     string         `json:"item"`
+	Language string         `json:"language,omitempty"`
+	From     float64        `json:"from_seconds"`
+	To       float64        `json:"to_seconds"`
+	Reached  float64        `json:"reached_seconds"`
+	Lines    []subtitleLine `json:"lines"`
+}
+
+// readSubtitles reads an item's subtitles up to a position, never past
+// the position the user has reached: the user data's, or the requesting
+// device's when it plays the item further on; a watched item is read
+// whole (docs/assistant.md §5.1).
+func (c *call) readSubtitles(a subtitlesArgs) (any, error) {
+	if c.s.cfg.Services.Subtitles == nil {
+		return nil, errors.New("the server reads no subtitles")
+	}
+	playing := c.ask.GetPlaying()
+	id := a.ItemID
+	if id == "" {
+		if id = playing.GetItemId(); id == "" {
+			return nil, failure("nothing_playing", nil, "nothing plays on the requesting device; name the item")
+		}
+	}
+	it, err := c.fetch(id)
+	if err != nil {
+		return nil, err
+	}
+	reached := it.GetUserData().GetPosition().AsDuration()
+	if playing.GetItemId() == it.GetId() {
+		reached = max(reached, playing.GetPosition().AsDuration())
+	}
+	at := reached
+	watched := it.GetUserData().GetPlayed()
+	if watched {
+		reached = max(reached, it.GetRuntime().AsDuration())
+		if at == 0 {
+			at = reached
+		}
+	}
+	if a.Position != nil {
+		at = time.Duration(max(*a.Position, 0) * float64(time.Second))
+	}
+	if watched {
+		reached = max(reached, at)
+	}
+	at = min(at, reached)
+	if at <= 0 {
+		return nil, fmt.Errorf("the user has not started %s; its subtitles are not read before they watch it", title(it))
+	}
+	before := 300 * time.Second
+	if a.Before > 0 {
+		before = time.Duration(min(a.Before, 1800) * float64(time.Second))
+	}
+	from := max(at-before, 0)
+	st, err := c.streamsOf(it.GetId())
+	if err != nil {
+		return nil, err
+	}
+	sub, stream, err := c.subtitleOf(it, st, a.Language)
+	if err != nil {
+		return nil, err
+	}
+	res := subtitlesResult{
+		Item: title(it), Language: twoLetter(stream.GetLanguage()),
+		From: from.Seconds(), To: at.Seconds(), Reached: reached.Seconds(), Lines: []subtitleLine{},
+	}
+	for _, cue := range sub.Cues {
+		if cue.End <= from || cue.Start >= at {
+			continue
+		}
+		text := strings.Join(strings.Fields(subtitle.PlainText(cue.Text)), " ")
+		if text == "" {
+			continue
+		}
+		res.Lines = append(res.Lines, subtitleLine{Start: cue.Start.Seconds(), Text: text})
+	}
+	return res, nil
+}
+
+// subtitleOf reads the subtitle stream of an item in a language, else the
+// one the requesting device shows, else one in the user's languages, else
+// any it can read.
+func (c *call) subtitleOf(it *libraryv1.Item, st streams, lang string) (*subtitle.Subtitle, *libraryv1.MediaStream, error) {
+	var order []int32
+	if lang != "" {
+		i, ok := st.subtitle(lang)
+		if !ok {
+			return nil, nil, failure("no_subtitles", map[string]string{"language": lang}, "no %s subtitles", lang)
+		}
+		order = append(order, i)
+	} else {
+		if p := c.ask.GetPlaying(); p.GetItemId() == it.GetId() && p.GetSubtitleStreamIndex() >= 0 && p.HasSubtitleStreamIndex() {
+			order = append(order, p.GetSubtitleStreamIndex())
+		}
+		for _, l := range c.ask.GetLanguages() {
+			if i, ok := st.subtitle(l); ok {
+				order = append(order, i)
+			}
+		}
+		for _, s := range st.subtitles {
+			if !s.GetForced() {
+				order = append(order, s.GetIndex())
+			}
+		}
+	}
+	last := failure("no_subtitles", map[string]string{"language": lang}, "%s has no subtitles to read", title(it))
+	tried := map[int32]bool{}
+	for _, i := range order {
+		if tried[i] {
+			continue
+		}
+		tried[i] = true
+		sub, err := c.s.cfg.Services.Subtitles(c.ctx, parseID(it.GetId()), int(i))
+		if err != nil {
+			last = err
+			continue
+		}
+		var stream *libraryv1.MediaStream
+		for _, s := range st.subtitles {
+			if s.GetIndex() == i {
+				stream = s
+			}
+		}
+		return sub, stream, nil
+	}
+	return nil, nil, last
 }
 
 type controlArgs struct {
