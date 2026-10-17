@@ -644,21 +644,24 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
       )}
       {chosen === ContainerMode.MANAGED && mode === ContainerMode.MANAGED && (
         <>
-          <Row label={t("plugins.proxy")} detail={t("plugins.containerProxyDetail")} wrap>
-            <Select
-              value={proxy}
-              label={t("plugins.proxy")}
-              className="w-48"
-              disabled={actions.setContainer.isPending}
-              options={proxyChoices(proxies.list.data, proxy)}
-              onChange={(p) => {
-                const was = proxyDirect(proxies.list.data, c.proxy);
-                const next = proxyDirect(proxies.list.data, p);
-                if (was !== undefined && next !== undefined && was !== next) setRecreating(p);
-                else setProxy(p);
-              }}
-            />
-          </Row>
+          {/* A container given the proxy of each request reaches sites directly. */}
+          {!d.direct && (
+            <Row label={t("plugins.proxy")} detail={t("plugins.containerProxyDetail")} wrap>
+              <Select
+                value={proxy}
+                label={t("plugins.proxy")}
+                className="w-48"
+                disabled={actions.setContainer.isPending}
+                options={proxyChoices(proxies.list.data, proxy)}
+                onChange={(p) => {
+                  const was = proxyDirect(proxies.list.data, c.proxy);
+                  const next = proxyDirect(proxies.list.data, p);
+                  if (was !== undefined && next !== undefined && was !== next) setRecreating(p);
+                  else setProxy(p);
+                }}
+              />
+            </Row>
+          )}
           {c.command && <ContainerCommand command={c.command} />}
         </>
       )}

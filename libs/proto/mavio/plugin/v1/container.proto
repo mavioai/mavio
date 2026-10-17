@@ -47,6 +47,10 @@ message ContainerDependency {
   // name it themselves. On Linux, a service on the host must listen
   // beyond its loopback interface to be reached.
   bool host_access = 14;
+  // Whether a managed container reaches sites only directly, for a service
+  // given the proxy of each request, such as a challenge solver: the server
+  // offers no proxy choice for it and sends its requests through none.
+  bool direct = 15;
 }
 
 // GpuSupport is whether a container dependency uses a GPU.

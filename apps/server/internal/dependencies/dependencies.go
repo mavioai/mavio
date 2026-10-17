@@ -308,7 +308,7 @@ func (s *Service) runPlugin(ctx context.Context, m *pluginv1.Manifest) error {
 // resolve is Resolve, with the environment of the dependency's proxy.
 func (s *Service) resolve(ctx context.Context, m *pluginv1.Manifest, spec *pluginv1.ContainerDependency, c core.PluginContainer) containers.Dependency {
 	d := Resolve(s.cfg.Names, spec, c)
-	if s.cfg.ProxyEnv != nil {
+	if s.cfg.ProxyEnv != nil && !spec.GetDirect() {
 		d.ProxyEnv = s.cfg.ProxyEnv(ctx, m, c)
 	}
 	return d
@@ -354,7 +354,7 @@ func (s *Service) ProxyOf(ctx context.Context, container string) (string, bool) 
 				continue
 			}
 			c, err := s.kept(ctx, id, spec.GetName())
-			if err != nil || c.Mode != core.ContainerManaged {
+			if err != nil || c.Mode != core.ContainerManaged || spec.GetDirect() {
 				return "", false
 			}
 			return c.Proxy, true
@@ -600,6 +600,9 @@ func (s *Service) Set(ctx context.Context, pluginID, name string, mode core.Cont
 		Secrets: secrets(spec, old.Secrets), UseGPU: useGPU, Proxy: old.Proxy,
 	}
 	if proxy != nil && *proxy != old.Proxy {
+		if spec.GetDirect() {
+			return Dependency{}, fmt.Errorf("%w: container %s of plugin %s reaches sites directly", core.ErrInvalid, name, pluginID)
+		}
 		if s.cfg.CheckProxy != nil {
 			if err := s.cfg.CheckProxy(ctx, *proxy); err != nil {
 				return Dependency{}, err

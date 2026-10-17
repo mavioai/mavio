@@ -75,6 +75,12 @@ pub struct ContainerDependencyView<'a> {
     ///
     /// Field 14: `host_access`
     pub host_access: ::core::option::Option<bool>,
+    /// Whether a managed container reaches sites only directly, for a service
+    /// given the proxy of each request, such as a challenge solver: the server
+    /// offers no proxy choice for it and sends its requests through none.
+    ///
+    /// Field 15: `direct`
+    pub direct: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
@@ -185,6 +191,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 view.host_access = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            15u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.direct = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -325,6 +338,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
             cpus: self.cpus,
             required: self.required,
             host_access: self.host_access,
+            direct: self.direct,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -382,6 +396,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         if self.host_access.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.direct.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -474,6 +491,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         }
         if let Some(v) = self.host_access {
             ::buffa::types::put_bool_field(14u32, v, buf);
+        }
+        if let Some(v) = self.direct {
+            ::buffa::types::put_bool_field(15u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -681,6 +701,15 @@ impl ContainerDependencyOwnedView {
     #[must_use]
     pub fn host_access(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().host_access
+    }
+    /// Whether a managed container reaches sites only directly, for a service
+    /// given the proxy of each request, such as a challenge solver: the server
+    /// offers no proxy choice for it and sends its requests through none.
+    ///
+    /// Field 15: `direct`
+    #[must_use]
+    pub fn direct(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().direct
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerDependencyView<'static>>>

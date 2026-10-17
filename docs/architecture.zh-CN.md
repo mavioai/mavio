@@ -673,7 +673,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 17.3 `plugins/solvers`
 第一方进程插件：一次质询可长达一分钟，会话在调用之间保持，而 WASM 实例受调用超时限制且不共享内存，无法做到。其求解方式参照 Byparr。
-* **求解器**：FlareSolverr，以容器依赖 `flaresolverr` 运行（§16），每种只有一个容器。配置列出启用的求解器，按尝试的顺序，各带超时（60 秒）以及是否不加载图片、字体与样式（`disable_media`）。
+* **求解器**：FlareSolverr，以容器依赖 `flaresolverr` 运行（§16），每种只有一个容器；它声明了 `direct`，因此其浏览器只经请求所带的代理（即发起者的代理）访问站点，没有代理时直连，从不经自己的代理。配置列出启用的求解器，按尝试的顺序，各带超时（60 秒）以及是否不加载图片、字体与样式（`disable_media`）。
 * **会话**：如同 Byparr 保持一个预热的浏览器，插件为每个代理保持一个 FlareSolverr 会话（`mavio-<代理的哈希>`，无代理时为 `mavio-direct`），创建时带上代理及其凭据——FlareSolverr 只在创建会话时接受凭据；会话在 `session_ttl_minutes`（30）后轮换。每次请求前插件都确认 FlareSolverr 仍有该会话，没有时带上代理重新创建，因为重新启动的 FlareSolverr 会不带代理地创建缺失的会话。闲置 10 分钟的会话会被销毁，此前遗留的同前缀会话亦然；插件被再次配置或停止时，销毁它创建的全部会话。
 * **并发**：每个会话同时只处理一个请求（一个会话即一个浏览器），全局至多 `max_concurrent`（2）个；同一主机与代理的并发请求共享一次解答，并在 30 秒内复用。
 * **请求**：`request.get`，或带表单正文的 `request.post`，并带 `returnOnlyCookies`；FlareSolverr 的错误答复（HTTP 500）给出其消息；没有 cookie 或 user agent 的解答视为失败。只提交表单正文；带用户名的 SOCKS 代理被拒绝，因为 Chrome 不支持登录 SOCKS 代理。

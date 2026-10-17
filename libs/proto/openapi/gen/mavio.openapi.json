@@ -16711,6 +16711,11 @@
             "type": "boolean",
             "title": "host_access",
             "description": "Whether the service reaches services on the server's host, such as a\n proxy on its loopback interface, by the name host.docker.internal:\n Docker maps it to the host (host-gateway), Docker Desktop and Podman\n name it themselves. On Linux, a service on the host must listen\n beyond its loopback interface to be reached."
+          },
+          "direct": {
+            "type": "boolean",
+            "title": "direct",
+            "description": "Whether a managed container reaches sites only directly, for a service\n given the proxy of each request, such as a challenge solver: the server\n offers no proxy choice for it and sends its requests through none."
           }
         },
         "title": "ContainerDependency",

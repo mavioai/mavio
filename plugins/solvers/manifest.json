@@ -23,7 +23,8 @@
         "LOG_LEVEL": "info"
       },
       "memoryMib": 2048,
-      "hostAccess": true
+      "hostAccess": true,
+      "direct": true
     }
   ],
   "apiVersion": "1.0"

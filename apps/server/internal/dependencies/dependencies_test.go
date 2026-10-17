@@ -495,3 +495,36 @@ func TestManagedProxy(t *testing.T) {
 		t.Error("ProxyOf of no dependency got = ok, want = false")
 	}
 }
+
+func TestManagedDirect(t *testing.T) {
+	engine := containerstest.New()
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+		c.ProxyEnv = func(context.Context, *pluginv1.Manifest, core.PluginContainer) func(string) map[string]string {
+			return func(host string) map[string]string {
+				return map[string]string{"HTTPS_PROXY": "http://" + host + ":8686"}
+			}
+		}
+	})
+	plugs.manifest.GetContainers()[0].SetDirect(true)
+	ctx := t.Context()
+	s.PluginStarted(ctx, plugs.manifest)
+
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, nil); err != nil {
+		t.Fatal(err)
+	}
+	eventually(t, "whisper running", func() bool { _, running, _ := engine.Spec("mavio-voice-whisper"); return running })
+	if spec, _, _ := engine.Spec("mavio-voice-whisper"); slices.ContainsFunc(spec.Env, func(e string) bool { return strings.HasPrefix(e, "HTTPS_PROXY=") }) {
+		t.Errorf("env of a direct container got = %q, want no proxy", spec.Env)
+	}
+	if got, ok := s.ProxyOf(ctx, "mavio-voice-whisper"); ok {
+		t.Errorf("ProxyOf of a direct container got = %q, true, want = false", got)
+	}
+	p := "01a14422-45e1-730c-a64f-a7e1a6b5e6b7"
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false, &p); !errors.Is(err, core.ErrInvalid) {
+		t.Errorf("Set of a direct container's proxy got = %v, want = ErrInvalid", err)
+	}
+}
