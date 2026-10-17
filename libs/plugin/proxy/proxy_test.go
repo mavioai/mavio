@@ -42,6 +42,16 @@ func TestBypass(t *testing.T) {
 		{[]string{"::1"}, "[::1]:80", true},
 		{[]string{"*"}, "podnapisi.net", true},
 		{nil, "localhost", false},
+		{[]string{"192.168.0.0/16"}, "192.168.31.1:80", true},
+		{[]string{"192.168.0.0/16"}, "10.0.0.1", false},
+		{[]string{"127.0.0.1/32"}, "127.0.0.1", true},
+		{[]string{"10.0.0.0/8"}, "10.example.com", false},
+		{[]string{"*.local"}, "nas.local", true},
+		{[]string{"*.local"}, "local", false},
+		{[]string{"10.*"}, "10.1.2.3:8080", true},
+		{[]string{"<local>"}, "nas:8080", true},
+		{[]string{"<local>"}, "nas.lan", false},
+		{[]string{"<local>"}, "[::1]", false},
 	} {
 		if got := Bypass(tc.hosts)(tc.host); got != tc.want {
 			t.Errorf("Bypass(%v)(%q) got = %v, want = %v", tc.hosts, tc.host, got, tc.want)
@@ -64,6 +74,9 @@ func TestURL(t *testing.T) {
 	}
 	if URL(nil) != nil {
 		t.Error("URL(nil) got = non-nil, want = nil")
+	}
+	if got := URL(pluginv1.Proxy_builder{Id: new(SystemID)}.Build()); got != nil {
+		t.Errorf("URL(system proxy setting none) got = %v, want = nil", got)
 	}
 }
 
@@ -100,6 +113,19 @@ func TestHTTPProxy(t *testing.T) {
 	}
 	if got := get(t, Transport(nil, nil), site.URL); got != "direct" {
 		t.Errorf("without a proxy got = %q, want = direct", got)
+	}
+	system := newProxy(pluginv1.ProxyKind_PROXY_KIND_HTTP, u.Host, "", "")
+	system.SetId(SystemID)
+	system.SetBypass([]string{"127.0.0.0/8"})
+	if got := get(t, Transport(system, nil), site.URL); got != "direct" {
+		t.Errorf("bypassed by the proxy got = %q, want = direct", got)
+	}
+	if got := get(t, Transport(system, nil), "http://subtitles.test/b"); got != "proxied" {
+		t.Errorf("not bypassed by the proxy got = %q, want = proxied", got)
+	}
+	none := pluginv1.Proxy_builder{Id: new(SystemID)}.Build()
+	if got := get(t, Transport(none, nil), site.URL); got != "direct" {
+		t.Errorf("system proxy setting none got = %q, want = direct", got)
 	}
 }
 

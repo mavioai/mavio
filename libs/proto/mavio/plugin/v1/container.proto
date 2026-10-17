@@ -41,6 +41,12 @@ message ContainerDependency {
   // Whether the plugin cannot work without it. Optional dependencies stay
   // unset until an administrator chooses.
   bool required = 13;
+  // Whether the service reaches services on the server's host, such as a
+  // proxy on its loopback interface, by the name host.docker.internal:
+  // Docker maps it to the host (host-gateway), Docker Desktop and Podman
+  // name it themselves. On Linux, a service on the host must listen
+  // beyond its loopback interface to be reached.
+  bool host_access = 14;
 }
 
 // GpuSupport is whether a container dependency uses a GPU.

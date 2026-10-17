@@ -241,7 +241,10 @@ pub const PROXY_SERVICE_TEST_PROXY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
 /// ProxyService manages the server's proxies, which plugins reach sites
-/// through. Administrators only.
+/// through. Besides those added, every server has the system proxy, of ID
+/// "system": the one its environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY
+/// and NO_PROXY) or else its operating system sets, read only.
+/// Administrators only.
 ///
 /// # Implementing handlers
 ///
@@ -292,7 +295,7 @@ pub const PROXY_SERVICE_TEST_PROXY_SPEC: ::connectrpc::Spec = ::connectrpc::Spec
 /// example` doc.
 #[allow(clippy::type_complexity)]
 pub trait ProxyService: Send + Sync + 'static {
-    /// ListProxies lists the proxies ordered by name.
+    /// ListProxies lists the system proxy, then the others ordered by name.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -341,7 +344,8 @@ pub trait ProxyService: Send + Sync + 'static {
         >,
     > + Send;
     /// UpdateProxy replaces a proxy, keeping its password when none is given;
-    /// duplicates are refused as by CreateProxy.
+    /// duplicates are refused as by CreateProxy, and the system proxy is
+    /// INVALID_ARGUMENT.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -365,7 +369,8 @@ pub trait ProxyService: Send + Sync + 'static {
         >,
     > + Send;
     /// DeleteProxy deletes a proxy; plugins configured with it fail what
-    /// uses it until configured otherwise.
+    /// uses it until configured otherwise. The system proxy is not stored and
+    /// cannot be deleted.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -388,7 +393,8 @@ pub trait ProxyService: Send + Sync + 'static {
             > + Send + use<'a, Self>,
         >,
     > + Send;
-    /// TestProxy fetches a URL through a stored or an unsaved proxy.
+    /// TestProxy fetches a URL through a stored proxy, the system proxy
+    /// (directly when it sets none) or an unsaved proxy.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///

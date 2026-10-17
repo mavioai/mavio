@@ -92,7 +92,13 @@ type Dependency struct {
 	Memory  int64
 	CPUs    float64
 	GPU     bool
+	// HostAccess is whether the service reaches the host by the name
+	// HostName.
+	HostAccess bool
 }
+
+// HostName is the name a container reaches the host by.
+const HostName = "host.docker.internal"
 
 // Hash identifies what a container is created from: a container whose
 // LabelSpec differs is replaced.
@@ -170,6 +176,10 @@ type SupervisorOptions struct {
 	// Server is the server's ID, which labels what it creates; the
 	// Supervisor touches nothing labeled with another.
 	Server string
+	// HostGateway maps HostName to the host in the containers of
+	// dependencies with HostAccess, for Docker; Docker Desktop and Podman
+	// name it themselves.
+	HostGateway bool
 	// Self is the server's own container when the server runs in one off
 	// the host's network: it joins the network of Names.Network, and
 	// dependencies are reached there by name rather than through ports
@@ -621,7 +631,7 @@ func (s *Supervisor) spec(r *run, name string) ContainerSpec {
 	return ContainerSpec{
 		Name: name, Image: d.Image, Cmd: d.Cmd, Env: env, Labels: labels, VolumeLabels: volumeLabels,
 		Port: d.Port, PublishLoopback: s.o.Self == "", Network: s.o.Names.Network(), Aliases: []string{name},
-		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU,
+		Volumes: volumes, Memory: d.Memory, CPUs: d.CPUs, GPU: d.GPU, HostGateway: d.HostAccess && s.o.HostGateway,
 	}
 }
 

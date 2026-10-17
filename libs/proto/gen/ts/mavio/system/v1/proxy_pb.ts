@@ -13,7 +13,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/proxy.proto.
  */
 export const file_mavio_system_v1_proxy: GenFile = /*@__PURE__*/
-  fileDesc("ChttYXZpby9zeXN0ZW0vdjEvcHJveHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSLmAQoFUHJveHkSCgoCaWQYASABKAkSGAoEbmFtZRgCIAEoCUIKukgHcgUQARiAAhI0CgRraW5kGAMgASgOMhoubWF2aW8uc3lzdGVtLnYxLlByb3h5S2luZEIKukgHggEEEAEgABIYCgRob3N0GAQgASgJQgq6SAdyBRABGP0BEhkKBHBvcnQYBSABKAVCC7pICBoGGP//AygBEhoKCHVzZXJuYW1lGAYgASgJQgi6SAVyAxiAAhIaCghwYXNzd29yZBgHIAEoCUIIukgFcgMYgAISFAoMaGFzX3Bhc3N3b3JkGAggASgIIhQKEkxpc3RQcm94aWVzUmVxdWVzdCI+ChNMaXN0UHJveGllc1Jlc3BvbnNlEicKB3Byb3hpZXMYASADKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHkiQwoSQ3JlYXRlUHJveHlSZXF1ZXN0Ei0KBXByb3h5GAEgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5Qga6SAPIAQEiPAoTQ3JlYXRlUHJveHlSZXNwb25zZRIlCgVwcm94eRgBIAEoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eSJbChJVcGRhdGVQcm94eVJlcXVlc3QSLQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHlCBrpIA8gBARIWCg5jbGVhcl9wYXNzd29yZBgCIAEoCCI8ChNVcGRhdGVQcm94eVJlc3BvbnNlEiUKBXByb3h5GAEgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5Ii0KEkRlbGV0ZVByb3h5UmVxdWVzdBIXCgJpZBgBIAEoCUILukgIyAEBcgOwAQEiFQoTRGVsZXRlUHJveHlSZXNwb25zZSJ0ChBUZXN0UHJveHlSZXF1ZXN0EhYKAmlkGAEgASgJQgi6SAVyA7ABAUgAEicKBXByb3h5GAIgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5SAASFQoDdXJsGAMgASgJQgi6SAVyA4gBAUIICgZ0YXJnZXQijAEKEVRlc3RQcm94eVJlc3BvbnNlEgoKAm9rGAEgASgIEg0KBWVycm9yGAIgASgJEg4KBnN0YXR1cxgDIAEoBRIqCgdsYXRlbmN5GAQgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg8KB2V4aXRfaXAYBSABKAkSDwoHY291bnRyeRgGIAEoCSpqCglQcm94eUtpbmQSGgoWUFJPWFlfS0lORF9VTlNQRUNJRklFRBAAEhMKD1BST1hZX0tJTkRfSFRUUBABEhUKEVBST1hZX0tJTkRfU09DS1M0EAISFQoRUFJPWFlfS0lORF9TT0NLUzUQAzLPAwoMUHJveHlTZXJ2aWNlEl0KC0xpc3RQcm94aWVzEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQcm94aWVzUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UHJveGllc1Jlc3BvbnNlIgOQAgESWAoLQ3JlYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkNyZWF0ZVByb3h5UmVzcG9uc2USWAoLVXBkYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuVXBkYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVByb3h5UmVzcG9uc2USWAoLRGVsZXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuRGVsZXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkRlbGV0ZVByb3h5UmVzcG9uc2USUgoJVGVzdFByb3h5EiEubWF2aW8uc3lzdGVtLnYxLlRlc3RQcm94eVJlcXVlc3QaIi5tYXZpby5zeXN0ZW0udjEuVGVzdFByb3h5UmVzcG9uc2VCxAEKE2NvbS5tYXZpby5zeXN0ZW0udjFCClByb3h5UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration]);
+  fileDesc("ChttYXZpby9zeXN0ZW0vdjEvcHJveHkucHJvdG8SD21hdmlvLnN5c3RlbS52MSKGAgoFUHJveHkSCgoCaWQYASABKAkSGAoEbmFtZRgCIAEoCUIKukgHcgUQARiAAhI0CgRraW5kGAMgASgOMhoubWF2aW8uc3lzdGVtLnYxLlByb3h5S2luZEIKukgHggEEEAEgABIYCgRob3N0GAQgASgJQgq6SAdyBRABGP0BEhkKBHBvcnQYBSABKAVCC7pICBoGGP//AygBEhoKCHVzZXJuYW1lGAYgASgJQgi6SAVyAxiAAhIaCghwYXNzd29yZBgHIAEoCUIIukgFcgMYgAISFAoMaGFzX3Bhc3N3b3JkGAggASgIEg4KBnN5c3RlbRgJIAEoCBIOCgZieXBhc3MYCiADKAkiFAoSTGlzdFByb3hpZXNSZXF1ZXN0Ij4KE0xpc3RQcm94aWVzUmVzcG9uc2USJwoHcHJveGllcxgBIAMoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eSJDChJDcmVhdGVQcm94eVJlcXVlc3QSLQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHlCBrpIA8gBASI8ChNDcmVhdGVQcm94eVJlc3BvbnNlEiUKBXByb3h5GAEgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5IlsKElVwZGF0ZVByb3h5UmVxdWVzdBItCgVwcm94eRgBIAEoCzIWLm1hdmlvLnN5c3RlbS52MS5Qcm94eUIGukgDyAEBEhYKDmNsZWFyX3Bhc3N3b3JkGAIgASgIIjwKE1VwZGF0ZVByb3h5UmVzcG9uc2USJQoFcHJveHkYASABKAsyFi5tYXZpby5zeXN0ZW0udjEuUHJveHkiLQoSRGVsZXRlUHJveHlSZXF1ZXN0EhcKAmlkGAEgASgJQgu6SAjIAQFyA7ABASIVChNEZWxldGVQcm94eVJlc3BvbnNlInUKEFRlc3RQcm94eVJlcXVlc3QSFwoCaWQYASABKAlCCbpIBnIEEAEYJEgAEicKBXByb3h5GAIgASgLMhYubWF2aW8uc3lzdGVtLnYxLlByb3h5SAASFQoDdXJsGAMgASgJQgi6SAVyA4gBAUIICgZ0YXJnZXQijAEKEVRlc3RQcm94eVJlc3BvbnNlEgoKAm9rGAEgASgIEg0KBWVycm9yGAIgASgJEg4KBnN0YXR1cxgDIAEoBRIqCgdsYXRlbmN5GAQgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uEg8KB2V4aXRfaXAYBSABKAkSDwoHY291bnRyeRgGIAEoCSpqCglQcm94eUtpbmQSGgoWUFJPWFlfS0lORF9VTlNQRUNJRklFRBAAEhMKD1BST1hZX0tJTkRfSFRUUBABEhUKEVBST1hZX0tJTkRfU09DS1M0EAISFQoRUFJPWFlfS0lORF9TT0NLUzUQAzLPAwoMUHJveHlTZXJ2aWNlEl0KC0xpc3RQcm94aWVzEiMubWF2aW8uc3lzdGVtLnYxLkxpc3RQcm94aWVzUmVxdWVzdBokLm1hdmlvLnN5c3RlbS52MS5MaXN0UHJveGllc1Jlc3BvbnNlIgOQAgESWAoLQ3JlYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuQ3JlYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkNyZWF0ZVByb3h5UmVzcG9uc2USWAoLVXBkYXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuVXBkYXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLlVwZGF0ZVByb3h5UmVzcG9uc2USWAoLRGVsZXRlUHJveHkSIy5tYXZpby5zeXN0ZW0udjEuRGVsZXRlUHJveHlSZXF1ZXN0GiQubWF2aW8uc3lzdGVtLnYxLkRlbGV0ZVByb3h5UmVzcG9uc2USUgoJVGVzdFByb3h5EiEubWF2aW8uc3lzdGVtLnYxLlRlc3RQcm94eVJlcXVlc3QaIi5tYXZpby5zeXN0ZW0udjEuVGVzdFByb3h5UmVzcG9uc2VCxAEKE2NvbS5tYXZpby5zeXN0ZW0udjFCClByb3h5UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3N5c3RlbS92MTtzeXN0ZW12MaICA01TWKoCD01hdmlvLlN5c3RlbS5WMcoCD01hdmlvXFN5c3RlbVxWMeICG01hdmlvXFN5c3RlbVxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpTeXN0ZW06OlYxYghlZGl0aW9uc3DoBw", [file_buf_validate_validate, file_google_protobuf_duration]);
 
 /**
  * Proxy is one of the server's proxies.
@@ -69,6 +69,20 @@ export type Proxy = Message<"mavio.system.v1.Proxy"> & {
    * @generated from field: bool has_password = 8;
    */
   hasPassword: boolean;
+
+  /**
+   * Whether this is the system proxy, which cannot be changed; output only.
+   *
+   * @generated from field: bool system = 9;
+   */
+  system: boolean;
+
+  /**
+   * On the system proxy, the hosts it reaches directly; output only.
+   *
+   * @generated from field: repeated string bypass = 10;
+   */
+  bypass: string[];
 };
 
 /**
@@ -222,7 +236,7 @@ export type TestProxyRequest = Message<"mavio.system.v1.TestProxyRequest"> & {
    */
   target: {
     /**
-     * A stored proxy.
+     * A stored proxy, or "system".
      *
      * @generated from field: string id = 1;
      */
@@ -313,6 +327,8 @@ export const TestProxyResponseSchema: GenMessage<TestProxyResponse> = /*@__PURE_
  */
 export enum ProxyKind {
   /**
+   * On the system proxy: the system sets none.
+   *
    * @generated from enum value: PROXY_KIND_UNSPECIFIED = 0;
    */
   UNSPECIFIED = 0,
@@ -343,13 +359,16 @@ export const ProxyKindSchema: GenEnum<ProxyKind> = /*@__PURE__*/
 
 /**
  * ProxyService manages the server's proxies, which plugins reach sites
- * through. Administrators only.
+ * through. Besides those added, every server has the system proxy, of ID
+ * "system": the one its environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY
+ * and NO_PROXY) or else its operating system sets, read only.
+ * Administrators only.
  *
  * @generated from service mavio.system.v1.ProxyService
  */
 export const ProxyService: GenService<{
   /**
-   * ListProxies lists the proxies ordered by name.
+   * ListProxies lists the system proxy, then the others ordered by name.
    *
    * @generated from rpc mavio.system.v1.ProxyService.ListProxies
    */
@@ -372,7 +391,8 @@ export const ProxyService: GenService<{
   },
   /**
    * UpdateProxy replaces a proxy, keeping its password when none is given;
-   * duplicates are refused as by CreateProxy.
+   * duplicates are refused as by CreateProxy, and the system proxy is
+   * INVALID_ARGUMENT.
    *
    * @generated from rpc mavio.system.v1.ProxyService.UpdateProxy
    */
@@ -383,7 +403,8 @@ export const ProxyService: GenService<{
   },
   /**
    * DeleteProxy deletes a proxy; plugins configured with it fail what
-   * uses it until configured otherwise.
+   * uses it until configured otherwise. The system proxy is not stored and
+   * cannot be deleted.
    *
    * @generated from rpc mavio.system.v1.ProxyService.DeleteProxy
    */
@@ -393,7 +414,8 @@ export const ProxyService: GenService<{
     output: typeof DeleteProxyResponseSchema;
   },
   /**
-   * TestProxy fetches a URL through a stored or an unsaved proxy.
+   * TestProxy fetches a URL through a stored proxy, the system proxy
+   * (directly when it sets none) or an unsaved proxy.
    *
    * @generated from rpc mavio.system.v1.ProxyService.TestProxy
    */

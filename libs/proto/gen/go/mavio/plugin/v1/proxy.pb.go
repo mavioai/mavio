@@ -24,6 +24,8 @@ const (
 type ProxyKind int32
 
 const (
+	// On the system proxy: the system sets none, and sites are reached
+	// directly.
 	ProxyKind_PROXY_KIND_UNSPECIFIED ProxyKind = 0
 	// HTTP, with CONNECT for HTTPS.
 	ProxyKind_PROXY_KIND_HTTP   ProxyKind = 1
@@ -79,6 +81,7 @@ type Proxy struct {
 	xxx_hidden_Port        int32                  `protobuf:"varint,5,opt,name=port"`
 	xxx_hidden_Username    *string                `protobuf:"bytes,6,opt,name=username"`
 	xxx_hidden_Password    *string                `protobuf:"bytes,7,opt,name=password"`
+	xxx_hidden_Bypass      []string               `protobuf:"bytes,8,rep,name=bypass"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -176,39 +179,50 @@ func (x *Proxy) GetPassword() string {
 	return ""
 }
 
+func (x *Proxy) GetBypass() []string {
+	if x != nil {
+		return x.xxx_hidden_Bypass
+	}
+	return nil
+}
+
 func (x *Proxy) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
 }
 
 func (x *Proxy) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
 }
 
 func (x *Proxy) SetKind(v ProxyKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
 }
 
 func (x *Proxy) SetHost(v string) {
 	x.xxx_hidden_Host = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
 }
 
 func (x *Proxy) SetPort(v int32) {
 	x.xxx_hidden_Port = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
 }
 
 func (x *Proxy) SetUsername(v string) {
 	x.xxx_hidden_Username = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
 }
 
 func (x *Proxy) SetPassword(v string) {
 	x.xxx_hidden_Password = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 7)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+}
+
+func (x *Proxy) SetBypass(v []string) {
+	x.xxx_hidden_Bypass = v
 }
 
 func (x *Proxy) HasId() bool {
@@ -298,6 +312,8 @@ func (x *Proxy) ClearPassword() {
 type Proxy_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// A UUID, or "system" for the system proxy: the one the server's
+	// environment or operating system sets, which every server has.
 	Id   *string
 	Name *string
 	Kind *ProxyKind
@@ -306,6 +322,10 @@ type Proxy_builder struct {
 	Port     *int32
 	Username *string
 	Password *string
+	// Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+	// "*" wildcards and "<local>" for names without a dot; only the system
+	// proxy has them.
+	Bypass []string
 }
 
 func (b0 Proxy_builder) Build() *Proxy {
@@ -313,33 +333,34 @@ func (b0 Proxy_builder) Build() *Proxy {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Host != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
 		x.xxx_hidden_Host = b.Host
 	}
 	if b.Port != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
 		x.xxx_hidden_Port = *b.Port
 	}
 	if b.Username != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
 		x.xxx_hidden_Username = b.Username
 	}
 	if b.Password != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 7)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
 		x.xxx_hidden_Password = b.Password
 	}
+	x.xxx_hidden_Bypass = b.Bypass
 	return m0
 }
 
@@ -389,7 +410,7 @@ func (x *ListProxiesRequest) SetIds(v []string) {
 type ListProxiesRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The proxies wanted; all when empty.
+	// The proxies wanted, "system" among them; all when empty.
 	Ids []string
 }
 
@@ -449,7 +470,8 @@ func (x *ListProxiesResponse) SetProxies(v []*Proxy) {
 type ListProxiesResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// The proxies found, ordered by name; IDs not found are left out.
+	// The proxies found, the system proxy first and the others ordered by
+	// name; IDs not found are left out.
 	Proxies []*Proxy
 }
 
@@ -465,7 +487,7 @@ var File_mavio_plugin_v1_proxy_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_proxy_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmavio/plugin/v1/proxy.proto\x12\x0fmavio.plugin.v1\"\xbb\x01\n" +
+	"\x1bmavio/plugin/v1/proxy.proto\x12\x0fmavio.plugin.v1\"\xd3\x01\n" +
 	"\x05Proxy\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12.\n" +
@@ -473,7 +495,8 @@ const file_mavio_plugin_v1_proxy_proto_rawDesc = "" +
 	"\x04host\x18\x04 \x01(\tR\x04host\x12\x12\n" +
 	"\x04port\x18\x05 \x01(\x05R\x04port\x12\x1a\n" +
 	"\busername\x18\x06 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\a \x01(\tR\bpassword\"&\n" +
+	"\bpassword\x18\a \x01(\tR\bpassword\x12\x16\n" +
+	"\x06bypass\x18\b \x03(\tR\x06bypass\"&\n" +
 	"\x12ListProxiesRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\tR\x03ids\"G\n" +
 	"\x13ListProxiesResponse\x120\n" +

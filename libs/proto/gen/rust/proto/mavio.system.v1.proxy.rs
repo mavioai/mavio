@@ -5,6 +5,7 @@
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum ProxyKind {
+    /// On the system proxy: the system sets none.
     PROXY_KIND_UNSPECIFIED = 0i32,
     /// HTTP, with CONNECT for HTTPS.
     PROXY_KIND_HTTP = 1i32,
@@ -99,6 +100,14 @@ pub struct Proxy {
     ///
     /// Field 8: `has_password`
     pub has_password: ::core::option::Option<bool>,
+    /// Whether this is the system proxy, which cannot be changed; output only.
+    ///
+    /// Field 9: `system`
+    pub system: ::core::option::Option<bool>,
+    /// On the system proxy, the hosts it reaches directly; output only.
+    ///
+    /// Field 10: `bypass`
+    pub bypass: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -113,6 +122,8 @@ impl ::core::fmt::Debug for Proxy {
             .field("username", &self.username)
             .field("password", &self.password)
             .field("has_password", &self.has_password)
+            .field("system", &self.system)
+            .field("bypass", &self.bypass)
             .finish()
     }
 }
@@ -192,6 +203,13 @@ impl Proxy {
         self.has_password = Some(value);
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::system`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_system(mut self, value: bool) -> Self {
+        self.system = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Proxy);
 impl ::buffa::MessageName for Proxy {
@@ -237,6 +255,12 @@ impl ::buffa::Message for Proxy {
         if self.has_password.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.system.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        for v in &self.bypass {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -270,6 +294,12 @@ impl ::buffa::Message for Proxy {
         }
         if let Some(v) = self.has_password {
             ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        if let Some(v) = self.system {
+            ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        for v in &self.bypass {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -365,6 +395,26 @@ impl ::buffa::Message for Proxy {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                self.system = ::core::option::Option::Some(
+                    ::buffa::types::decode_bool(buf)?,
+                );
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.bypass.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -381,6 +431,8 @@ impl ::buffa::Message for Proxy {
         self.username = ::core::option::Option::None;
         self.password = ::core::option::Option::None;
         self.has_password = ::core::option::Option::None;
+        self.system = ::core::option::Option::None;
+        self.bypass.clear();
         self.__buffa_unknown_fields.clear();
     }
 }

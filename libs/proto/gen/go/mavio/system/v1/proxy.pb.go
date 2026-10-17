@@ -25,6 +25,7 @@ const (
 type ProxyKind int32
 
 const (
+	// On the system proxy: the system sets none.
 	ProxyKind_PROXY_KIND_UNSPECIFIED ProxyKind = 0
 	// HTTP, with CONNECT for HTTPS.
 	ProxyKind_PROXY_KIND_HTTP   ProxyKind = 1
@@ -81,6 +82,8 @@ type Proxy struct {
 	xxx_hidden_Username    *string                `protobuf:"bytes,6,opt,name=username"`
 	xxx_hidden_Password    *string                `protobuf:"bytes,7,opt,name=password"`
 	xxx_hidden_HasPassword bool                   `protobuf:"varint,8,opt,name=has_password,json=hasPassword"`
+	xxx_hidden_System      bool                   `protobuf:"varint,9,opt,name=system"`
+	xxx_hidden_Bypass      []string               `protobuf:"bytes,10,rep,name=bypass"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -185,44 +188,67 @@ func (x *Proxy) GetHasPassword() bool {
 	return false
 }
 
+func (x *Proxy) GetSystem() bool {
+	if x != nil {
+		return x.xxx_hidden_System
+	}
+	return false
+}
+
+func (x *Proxy) GetBypass() []string {
+	if x != nil {
+		return x.xxx_hidden_Bypass
+	}
+	return nil
+}
+
 func (x *Proxy) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 10)
 }
 
 func (x *Proxy) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 10)
 }
 
 func (x *Proxy) SetKind(v ProxyKind) {
 	x.xxx_hidden_Kind = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 10)
 }
 
 func (x *Proxy) SetHost(v string) {
 	x.xxx_hidden_Host = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 10)
 }
 
 func (x *Proxy) SetPort(v int32) {
 	x.xxx_hidden_Port = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 10)
 }
 
 func (x *Proxy) SetUsername(v string) {
 	x.xxx_hidden_Username = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 10)
 }
 
 func (x *Proxy) SetPassword(v string) {
 	x.xxx_hidden_Password = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 6, 10)
 }
 
 func (x *Proxy) SetHasPassword(v bool) {
 	x.xxx_hidden_HasPassword = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 7, 10)
+}
+
+func (x *Proxy) SetSystem(v bool) {
+	x.xxx_hidden_System = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 10)
+}
+
+func (x *Proxy) SetBypass(v []string) {
+	x.xxx_hidden_Bypass = v
 }
 
 func (x *Proxy) HasId() bool {
@@ -281,6 +307,13 @@ func (x *Proxy) HasHasPassword() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 7)
 }
 
+func (x *Proxy) HasSystem() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 8)
+}
+
 func (x *Proxy) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -321,6 +354,11 @@ func (x *Proxy) ClearHasPassword() {
 	x.xxx_hidden_HasPassword = false
 }
 
+func (x *Proxy) ClearSystem() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 8)
+	x.xxx_hidden_System = false
+}
+
 type Proxy_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -337,6 +375,10 @@ type Proxy_builder struct {
 	Password *string
 	// Whether a password is stored; output only.
 	HasPassword *bool
+	// Whether this is the system proxy, which cannot be changed; output only.
+	System *bool
+	// On the system proxy, the hosts it reaches directly; output only.
+	Bypass []string
 }
 
 func (b0 Proxy_builder) Build() *Proxy {
@@ -344,37 +386,42 @@ func (b0 Proxy_builder) Build() *Proxy {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 10)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 10)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 10)
 		x.xxx_hidden_Kind = *b.Kind
 	}
 	if b.Host != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 10)
 		x.xxx_hidden_Host = b.Host
 	}
 	if b.Port != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 10)
 		x.xxx_hidden_Port = *b.Port
 	}
 	if b.Username != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 10)
 		x.xxx_hidden_Username = b.Username
 	}
 	if b.Password != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 6, 10)
 		x.xxx_hidden_Password = b.Password
 	}
 	if b.HasPassword != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 7, 10)
 		x.xxx_hidden_HasPassword = *b.HasPassword
 	}
+	if b.System != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 10)
+		x.xxx_hidden_System = *b.System
+	}
+	x.xxx_hidden_Bypass = b.Bypass
 	return m0
 }
 
@@ -1059,7 +1106,7 @@ type TestProxyRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// Fields of oneof xxx_hidden_Target:
-	// A stored proxy.
+	// A stored proxy, or "system".
 	Id *string
 	// An unsaved proxy; with an ID and no password, the stored proxy's
 	// password is used, for testing an edit before saving.
@@ -1102,7 +1149,7 @@ type isTestProxyRequest_Target interface {
 }
 
 type testProxyRequest_Id struct {
-	// A stored proxy.
+	// A stored proxy, or "system".
 	Id string `protobuf:"bytes,1,opt,name=id,oneof"`
 }
 
@@ -1355,7 +1402,7 @@ var File_mavio_system_v1_proxy_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_proxy_proto_rawDesc = "" +
 	"\n" +
-	"\x1bmavio/system/v1/proxy.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\"\xa3\x02\n" +
+	"\x1bmavio/system/v1/proxy.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\"\xd3\x02\n" +
 	"\x05Proxy\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\x04name\x18\x02 \x01(\tB\n" +
@@ -1367,7 +1414,10 @@ const file_mavio_system_v1_proxy_proto_rawDesc = "" +
 	"\x04port\x18\x05 \x01(\x05B\v\xbaH\b\x1a\x06\x18\xff\xff\x03(\x01R\x04port\x12$\n" +
 	"\busername\x18\x06 \x01(\tB\b\xbaH\x05r\x03\x18\x80\x02R\busername\x12$\n" +
 	"\bpassword\x18\a \x01(\tB\b\xbaH\x05r\x03\x18\x80\x02R\bpassword\x12!\n" +
-	"\fhas_password\x18\b \x01(\bR\vhasPassword\"\x14\n" +
+	"\fhas_password\x18\b \x01(\bR\vhasPassword\x12\x16\n" +
+	"\x06system\x18\t \x01(\bR\x06system\x12\x16\n" +
+	"\x06bypass\x18\n" +
+	" \x03(\tR\x06bypass\"\x14\n" +
 	"\x12ListProxiesRequest\"G\n" +
 	"\x13ListProxiesResponse\x120\n" +
 	"\aproxies\x18\x01 \x03(\v2\x16.mavio.system.v1.ProxyR\aproxies\"J\n" +
@@ -1382,9 +1432,9 @@ const file_mavio_system_v1_proxy_proto_rawDesc = "" +
 	"\x05proxy\x18\x01 \x01(\v2\x16.mavio.system.v1.ProxyR\x05proxy\"1\n" +
 	"\x12DeleteProxyRequest\x12\x1b\n" +
 	"\x02id\x18\x01 \x01(\tB\v\xbaH\b\xc8\x01\x01r\x03\xb0\x01\x01R\x02id\"\x15\n" +
-	"\x13DeleteProxyResponse\"\x84\x01\n" +
-	"\x10TestProxyRequest\x12\x1a\n" +
-	"\x02id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01H\x00R\x02id\x12.\n" +
+	"\x13DeleteProxyResponse\"\x85\x01\n" +
+	"\x10TestProxyRequest\x12\x1b\n" +
+	"\x02id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18$H\x00R\x02id\x12.\n" +
 	"\x05proxy\x18\x02 \x01(\v2\x16.mavio.system.v1.ProxyH\x00R\x05proxy\x12\x1a\n" +
 	"\x03url\x18\x03 \x01(\tB\b\xbaH\x05r\x03\x88\x01\x01R\x03urlB\b\n" +
 	"\x06target\"\xb9\x01\n" +

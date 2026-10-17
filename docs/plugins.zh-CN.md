@@ -243,6 +243,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 * `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是其他容器访问该依赖自己时的地址 `http://mavio-<plugin>-<name>:<port>`。
 * `volumes`：按卷名给出的挂载路径，例如 `{"cache": "/root/.cache"}`。
 * `gpu`：不设置表示不用，或 `GPU_SUPPORT_OPTIONAL`、`GPU_SUPPORT_REQUIRED`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像，同样带 digest；`memory_mib` 与 `cpus`：托管容器的限制。
+* `host_access`：服务是否以名称 `host.docker.internal` 访问服务器宿主机上的服务：Docker 把它映射到宿主机（`host-gateway`），Docker Desktop 与 Podman 自行提供该名称。在 Linux 上，宿主机上的服务须监听回环接口之外的接口才能被访问。
 * `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
 
 安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
@@ -262,10 +263,10 @@ whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 C
 ## 12. 代理与 `plugins/solvers`
 
 ### 12.1 代理
-服务端的代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）通过配置交给插件：带 `"x-mavio-options": {"source": "proxies"}` 的字符串属性取代理的 ID，由 `ListPluginConfigOptions` 列出，选项名称为代理名称，描述为 `kind://host:port`，标签为其种类。`HostService.ListProxies` 按 ID 返回插件请求的代理（未指定时返回全部），含种类、主机、端口、用户名与密码；只有 schema 中带此类属性的插件才能调用。这些插件在代理变更或删除时会被再次配置，而使用已不存在的代理的请求会失败。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可指定直连的主机。
+服务端的代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）通过配置交给插件：带 `"x-mavio-options": {"source": "proxies"}` 的字符串属性取代理的 ID，由 `ListPluginConfigOptions` 列出，选项名称为代理名称，描述为 `kind://host:port`，标签为其种类。系统代理（`system`，[架构 §17.1](architecture.zh-CN.md#171-代理)）排在最前，标签为 `system`，系统未设置代理时没有描述。`HostService.ListProxies` 按 ID 返回插件请求的代理（未指定时返回全部），含种类、主机、端口、用户名与密码，系统代理还带其直连的主机，未设置代理时种类为未指定；只有 schema 中带此类属性的插件才能调用。这些插件在代理变更或删除时会被再次配置，而使用已不存在的代理的请求会失败。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理列表与插件列表中的主机，系统未设置代理时完全直连；`proxy.SystemID` 是系统代理的 ID。
 
 ### 12.2 `plugins/solvers`
-以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`）。其配置列出依次尝试的求解器，各带是否启用、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
+以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`，`host_access`，以便经 `host.docker.internal` 访问宿主机回环接口上的代理）。其配置列出依次尝试的求解器，各带是否启用、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
 
 ### 12.3 索引器与字幕提供者
-`plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认不用；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent。
+`plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认为系统代理；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，默认为系统代理，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent。

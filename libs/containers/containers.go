@@ -42,7 +42,12 @@ type ContainerSpec struct {
 	CPUs   float64
 	// GPU gives the container every NVIDIA GPU.
 	GPU bool
+	// HostGateway maps HostName to the host, as Docker's host-gateway.
+	HostGateway bool
 }
+
+// hostGateway maps HostName to the host.
+const hostGateway = HostName + ":host-gateway"
 
 // createBody is the body of a container creation.
 type createBody struct {
@@ -62,6 +67,7 @@ type createHostConfig struct {
 	Memory         int64                    `json:",omitempty"`
 	NanoCPUs       int64                    `json:"NanoCpus,omitempty"`
 	DeviceRequests []deviceRequest          `json:",omitempty"`
+	ExtraHosts     []string                 `json:",omitempty"`
 	RestartPolicy  struct{ Name string }
 }
 
@@ -174,6 +180,9 @@ func (c *Client) CreateContainer(ctx context.Context, s ContainerSpec) (string, 
 	body.HostConfig.NanoCPUs = int64(s.CPUs * 1e9)
 	if s.GPU {
 		body.HostConfig.DeviceRequests = []deviceRequest{{Count: -1, Capabilities: [][]string{{"gpu"}}}}
+	}
+	if s.HostGateway {
+		body.HostConfig.ExtraHosts = []string{hostGateway}
 	}
 	var out struct {
 		ID string `json:"Id"`

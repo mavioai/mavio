@@ -12,6 +12,7 @@ import (
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/apps/server/internal/proxies"
 	"github.com/mavioai/mavio/libs/core"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	systemv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/system/v1/systemv1connect"
 )
@@ -46,9 +47,10 @@ func (s *ProxyService) ListProxies(ctx context.Context, _ *systemv1.ListProxiesR
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
-	out := make([]*systemv1.Proxy, len(list))
+	out := make([]*systemv1.Proxy, 0, len(list)+1)
+	out = append(out, systemProxyToProto(svc.System(ctx)))
 	for i := range list {
-		out[i] = proxyToProto(&list[i])
+		out = append(out, proxyToProto(&list[i]))
 	}
 	return systemv1.ListProxiesResponse_builder{Proxies: out}.Build(), nil
 }
@@ -81,6 +83,9 @@ func (s *ProxyService) UpdateProxy(ctx context.Context, req *systemv1.UpdateProx
 	if err != nil {
 		return nil, err
 	}
+	if req.GetProxy().GetId() == proxies.SystemID {
+		return nil, errSystemProxy
+	}
 	in := proxyFromProto(req.GetProxy())
 	if in.ID, err = core.ParseID(req.GetProxy().GetId()); err != nil {
 		return nil, connectError(ctx, err)
@@ -103,6 +108,9 @@ func (s *ProxyService) DeleteProxy(ctx context.Context, req *systemv1.DeleteProx
 	if err != nil {
 		return nil, err
 	}
+	if req.GetId() == proxies.SystemID {
+		return nil, errSystemProxy
+	}
 	id, err := core.ParseID(req.GetId())
 	if err != nil {
 		return nil, connectError(ctx, err)
@@ -118,7 +126,8 @@ func (s *ProxyService) DeleteProxy(ctx context.Context, req *systemv1.DeleteProx
 	return &systemv1.DeleteProxyResponse{}, nil
 }
 
-// TestProxy fetches a URL through a stored or an unsaved proxy.
+// TestProxy fetches a URL through a stored proxy, the system proxy or an
+// unsaved proxy.
 func (s *ProxyService) TestProxy(ctx context.Context, req *systemv1.TestProxyRequest) (*systemv1.TestProxyResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
@@ -129,6 +138,12 @@ func (s *ProxyService) TestProxy(ctx context.Context, req *systemv1.TestProxyReq
 	}
 	var px core.Proxy
 	switch {
+	case req.GetId() == proxies.SystemID:
+		r, err := svc.TestSystem(ctx, req.GetUrl())
+		if err != nil {
+			return nil, connectError(ctx, err)
+		}
+		return testResult(r), nil
 	case req.HasId():
 		id, err := core.ParseID(req.GetId())
 		if err != nil {
@@ -151,10 +166,16 @@ func (s *ProxyService) TestProxy(ctx context.Context, req *systemv1.TestProxyReq
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	return testResult(r), nil
+}
+
+var errSystemProxy = connect.NewError(connect.CodeInvalidArgument, errors.New("the system proxy is set by the system and cannot be changed"))
+
+func testResult(r proxies.TestResult) *systemv1.TestProxyResponse {
 	return systemv1.TestProxyResponse_builder{
 		Ok: &r.OK, Error: &r.Err, Status: new(int32(r.Status)), Latency: durationpb.New(r.Latency),
 		ExitIp: &r.ExitIP, Country: &r.Country,
-	}.Build(), nil
+	}.Build()
 }
 
 func (s *ProxyService) record(ctx context.Context, p auth.Principal, kind, title string, px *core.Proxy) {
@@ -190,5 +211,14 @@ func proxyToProto(p *core.Proxy) *systemv1.Proxy {
 	return systemv1.Proxy_builder{
 		Id: new(p.ID.String()), Name: &p.Name, Kind: &kind, Host: &p.Host, Port: new(int32(p.Port)),
 		Username: &p.Username, HasPassword: new(p.Password != ""),
+	}.Build()
+}
+
+// systemProxyToProto returns the system proxy without its password.
+func systemProxyToProto(p *pluginv1.Proxy) *systemv1.Proxy {
+	return systemv1.Proxy_builder{
+		Id: new(p.GetId()), Name: new(p.GetName()), Kind: new(systemv1.ProxyKind(p.GetKind())), Host: new(p.GetHost()),
+		Port: new(p.GetPort()), Username: new(p.GetUsername()), HasPassword: new(p.GetPassword() != ""),
+		System: new(true), Bypass: p.GetBypass(),
 	}.Build()
 }

@@ -67,6 +67,14 @@ pub struct ContainerDependencyView<'a> {
     ///
     /// Field 13: `required`
     pub required: ::core::option::Option<bool>,
+    /// Whether the service reaches services on the server's host, such as a
+    /// proxy on its loopback interface, by the name host.docker.internal:
+    /// Docker maps it to the host (host-gateway), Docker Desktop and Podman
+    /// name it themselves. On Linux, a service on the host must listen
+    /// beyond its loopback interface to be reached.
+    ///
+    /// Field 14: `host_access`
+    pub host_access: ::core::option::Option<bool>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
@@ -170,6 +178,13 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
                     ::buffa::encoding::WireType::Varint,
                 )?;
                 view.required = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            14u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.host_access = Some(::buffa::types::decode_bool(&mut cur)?);
             }
             6u32 => {
                 ::buffa::encoding::check_wire_type(
@@ -309,6 +324,7 @@ impl<'a> ::buffa::MessageView<'a> for ContainerDependencyView<'a> {
             memory_mib: self.memory_mib,
             cpus: self.cpus,
             required: self.required,
+            host_access: self.host_access,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -363,6 +379,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
             size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
         }
         if self.required.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        if self.host_access.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -452,6 +471,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ContainerDependencyView<'a> {
         }
         if let Some(v) = self.required {
             ::buffa::types::put_bool_field(13u32, v, buf);
+        }
+        if let Some(v) = self.host_access {
+            ::buffa::types::put_bool_field(14u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -648,6 +670,17 @@ impl ContainerDependencyOwnedView {
     #[must_use]
     pub fn required(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().required
+    }
+    /// Whether the service reaches services on the server's host, such as a
+    /// proxy on its loopback interface, by the name host.docker.internal:
+    /// Docker maps it to the host (host-gateway), Docker Desktop and Podman
+    /// name it themselves. On Linux, a service on the host must listen
+    /// beyond its loopback interface to be reached.
+    ///
+    /// Field 14: `host_access`
+    #[must_use]
+    pub fn host_access(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().host_access
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ContainerDependencyView<'static>>>

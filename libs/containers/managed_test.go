@@ -368,3 +368,30 @@ func TestSupervisorPullProgress(t *testing.T) {
 		}
 	})
 }
+
+func TestSupervisorHostGateway(t *testing.T) {
+	for _, tc := range []struct {
+		gateway, access, want bool
+	}{
+		{gateway: true, access: true, want: true},
+		{gateway: true, access: false, want: false},
+		{gateway: false, access: true, want: false},
+	} {
+		synctest.Test(t, func(t *testing.T) {
+			e, h := containerstest.New(), &health{}
+			h.set(true)
+			s := containers.NewSupervisor(containers.SupervisorOptions{
+				Engine: e, Server: "server-1", OnChange: (&changes{}).record, Probe: h.probe, HostGateway: tc.gateway,
+			})
+			defer s.Close(context.Background())
+			d := whisper()
+			d.HostAccess = tc.access
+			s.Start(d)
+			synctest.Wait()
+			spec, _, _ := e.Spec("mavio-voice-whisper")
+			if spec.HostGateway != tc.want {
+				t.Errorf("gateway %v, access %v: HostGateway = %v, want = %v", tc.gateway, tc.access, spec.HostGateway, tc.want)
+			}
+		})
+	}
+}

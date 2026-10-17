@@ -29,6 +29,14 @@ pub struct ProxyView<'a> {
     ///
     /// Field 8: `has_password`
     pub has_password: ::core::option::Option<bool>,
+    /// Whether this is the system proxy, which cannot be changed; output only.
+    ///
+    /// Field 9: `system`
+    pub system: ::core::option::Option<bool>,
+    /// On the system proxy, the hosts it reaches directly; output only.
+    ///
+    /// Field 10: `bypass`
+    pub bypass: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
@@ -119,6 +127,24 @@ impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
                 )?;
                 view.has_password = Some(::buffa::types::decode_bool(&mut cur)?);
             }
+            9u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Varint,
+                )?;
+                view.system = Some(::buffa::types::decode_bool(&mut cur)?);
+            }
+            10u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.bypass.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -149,6 +175,8 @@ impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
             username: self.username.map(|s| s.to_string()),
             password: self.password.map(|s| s.to_string()),
             has_password: self.has_password,
+            system: self.system,
+            bypass: self.bypass.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -184,6 +212,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ProxyView<'a> {
         if self.has_password.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.system.is_some() {
+            size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
+        }
+        for v in &self.bypass {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -218,6 +252,12 @@ impl<'a> ::buffa::ViewEncode<'a> for ProxyView<'a> {
         }
         if let Some(v) = self.has_password {
             ::buffa::types::put_bool_field(8u32, v, buf);
+        }
+        if let Some(v) = self.system {
+            ::buffa::types::put_bool_field(9u32, v, buf);
+        }
+        for v in &self.bypass {
+            ::buffa::types::put_string_field(10u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -356,6 +396,20 @@ impl ProxyOwnedView {
     #[must_use]
     pub fn has_password(&self) -> ::core::option::Option<bool> {
         self.0.reborrow().has_password
+    }
+    /// Whether this is the system proxy, which cannot be changed; output only.
+    ///
+    /// Field 9: `system`
+    #[must_use]
+    pub fn system(&self) -> ::core::option::Option<bool> {
+        self.0.reborrow().system
+    }
+    /// On the system proxy, the hosts it reaches directly; output only.
+    ///
+    /// Field 10: `bypass`
+    #[must_use]
+    pub fn bypass(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().bypass
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<ProxyView<'static>>> for ProxyOwnedView {

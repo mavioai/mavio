@@ -21,6 +21,7 @@ import (
 	"github.com/mavioai/mavio/libs/containers"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/manifest"
+	"github.com/mavioai/mavio/libs/plugin/proxy"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	sessionv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1"
@@ -276,7 +277,8 @@ func (s *PluginManagementService) ListPluginConfigOptions(ctx context.Context, r
 }
 
 // proxyOptions returns the server's proxies as options: their IDs, named
-// and described by their kinds and addresses.
+// and described by their kinds and addresses, the system proxy first,
+// tagged "system" and undescribed when the system sets none.
 func (s *PluginManagementService) proxyOptions(ctx context.Context) ([]plugins.ConfigOption, error) {
 	if s.Proxies == nil {
 		return nil, nil
@@ -285,11 +287,18 @@ func (s *PluginManagementService) proxyOptions(ctx context.Context) ([]plugins.C
 	if err != nil {
 		return nil, err
 	}
-	out := make([]plugins.ConfigOption, len(list))
-	for i, p := range list {
-		out[i] = plugins.ConfigOption{
+	sys := s.Proxies.System(ctx)
+	out := make([]plugins.ConfigOption, 0, len(list)+1)
+	system := plugins.ConfigOption{Value: sys.GetId(), Name: sys.GetName(), Tags: []string{proxies.SystemID}}
+	if u := proxy.URL(sys); u != nil {
+		system.Description = u.Scheme + "://" + u.Host
+		system.Tags = append(system.Tags, u.Scheme)
+	}
+	out = append(out, system)
+	for _, p := range list {
+		out = append(out, plugins.ConfigOption{
 			Value: p.ID.String(), Name: p.Name, Description: string(p.Kind) + "://" + p.Address(), Tags: []string{string(p.Kind)},
-		}
+		})
 	}
 	return out, nil
 }

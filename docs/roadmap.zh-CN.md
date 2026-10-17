@@ -966,18 +966,20 @@ flowchart TD
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
 
 ### P31 代理与质询求解
-**范围**：[架构 §17](architecture.zh-CN.md#17-代理与质询求解) 与[插件 §12](plugins.zh-CN.md#12-代理与-pluginssolvers) 的代理与质询求解器：`libs/core` 与 `libs/store` 中的 `Proxy`、`ProxyService`、`proxies` 选项来源与 `HostService.ListProxies`；`CHALLENGE_SOLVER` 能力与 `HostService.SolveChallenge`；`libs/plugin/proxy` 与 `libs/plugin/challenge`；以容器依赖运行 FlareSolverr 并参照 Byparr 的做法的 `plugins/solvers`；`plugins/indexers` 与 `plugins/subtitles` 改用它们，移除各自的代理与 FlareSolverr；Web UI 的代理页面。
+**范围**：[架构 §17](architecture.zh-CN.md#17-代理与质询求解) 与[插件 §12](plugins.zh-CN.md#12-代理与-pluginssolvers) 的代理与质询求解器：`libs/core` 与 `libs/store` 中的 `Proxy`、系统代理、`ProxyService`、`proxies` 选项来源与 `HostService.ListProxies`；`CHALLENGE_SOLVER` 能力与 `HostService.SolveChallenge`；`libs/plugin/proxy` 与 `libs/plugin/challenge`；可访问宿主机的容器依赖（`host_access`）；以容器依赖运行 FlareSolverr 并参照 Byparr 的做法的 `plugins/solvers`；`plugins/indexers` 与 `plugins/subtitles` 改用它们，移除各自的代理与 FlareSolverr；Web UI 的代理页面。
 
 **完成标准**：管理员在 Web UI 中添加代理，重复的被拒绝；配置了代理的索引器与字幕提供者经由它访问站点；索引器遇到的质询由 `plugins/solvers` 经索引器的代理解答，测试中使用录制的 FlareSolverr，设置 `MAVIO_FLARESOLVERR_URL` 时使用真实的 FlareSolverr。
 
 **进度**：
-- [ ] 领域、存储与契约：`Proxy`、带迁移的 `ProxyRepository`、`ProxyService`、`ChallengeSolverService`、`HostService.ListProxies` 与 `SolveChallenge`
-- [ ] 插件 SDK：`libs/plugin/proxy`、`libs/plugin/challenge`、`proxies` 选项来源、`CHALLENGE_SOLVER` 客户端
-- [ ] 服务端：代理及其测试、选项来源、代理变更时再次配置插件、把质询转交求解插件
+- [x] 领域、存储与契约：`Proxy`、带迁移的 `ProxyRepository`、`ProxyService`、`ChallengeSolverService`、`HostService.ListProxies` 与 `SolveChallenge`
+- [x] 插件 SDK：`libs/plugin/proxy`、`libs/plugin/challenge`、`proxies` 选项来源、`CHALLENGE_SOLVER` 客户端
+- [x] 服务端：代理及其测试、选项来源、代理变更时再次配置插件、把质询转交求解插件
+- [x] 系统代理：来自环境变量、macOS 的网络设置或 Windows 的 Internet 选项，连同其直连的主机，每 30 秒读取一次；可访问宿主机的容器依赖（`host_access`）
 - [ ] `plugins/solvers`：以容器依赖运行的 FlareSolverr、按代理的会话、合并请求、并发、POST
 - [ ] `plugins/indexers` 与 `plugins/subtitles` 改用服务端的代理与 `HostService.SolveChallenge`
 - [ ] Web UI 的代理页面
 - [ ] 没有发布镜像的求解器，各需在 mavio-deps 中构建 Mavio 自己的镜像：Zendriver、Camoufox、invisible_playwright（Byparr 所用）；同时为容器声明加入浏览器所需的共享内存与 tmpfs
+- [ ] Linux 桌面设置（GNOME、KDE）与代理自动配置（PAC）文件中的系统代理，目前只能由环境变量设置
 - [ ] 服务端自身的请求（TMDB 及资源获取的其他服务、插件目录）经设置中选择的代理
 - [ ] WASM 插件的 HTTP 请求经代理，由宿主的 HTTP 客户端支持
 

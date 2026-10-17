@@ -195,6 +195,7 @@ type ContainerDependency struct {
 	xxx_hidden_MemoryMib   uint32                 `protobuf:"varint,11,opt,name=memory_mib,json=memoryMib"`
 	xxx_hidden_Cpus        float64                `protobuf:"fixed64,12,opt,name=cpus"`
 	xxx_hidden_Required    bool                   `protobuf:"varint,13,opt,name=required"`
+	xxx_hidden_HostAccess  bool                   `protobuf:"varint,14,opt,name=host_access,json=hostAccess"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -334,29 +335,36 @@ func (x *ContainerDependency) GetRequired() bool {
 	return false
 }
 
+func (x *ContainerDependency) GetHostAccess() bool {
+	if x != nil {
+		return x.xxx_hidden_HostAccess
+	}
+	return false
+}
+
 func (x *ContainerDependency) SetName(v string) {
 	x.xxx_hidden_Name = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 14)
 }
 
 func (x *ContainerDependency) SetDescription(v string) {
 	x.xxx_hidden_Description = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 14)
 }
 
 func (x *ContainerDependency) SetImage(v string) {
 	x.xxx_hidden_Image = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 14)
 }
 
 func (x *ContainerDependency) SetPort(v uint32) {
 	x.xxx_hidden_Port = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 14)
 }
 
 func (x *ContainerDependency) SetHealthPath(v string) {
 	x.xxx_hidden_HealthPath = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 14)
 }
 
 func (x *ContainerDependency) SetCommand(v []string) {
@@ -373,27 +381,32 @@ func (x *ContainerDependency) SetVolumes(v map[string]string) {
 
 func (x *ContainerDependency) SetGpu(v GpuSupport) {
 	x.xxx_hidden_Gpu = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 8, 14)
 }
 
 func (x *ContainerDependency) SetGpuImage(v string) {
 	x.xxx_hidden_GpuImage = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 14)
 }
 
 func (x *ContainerDependency) SetMemoryMib(v uint32) {
 	x.xxx_hidden_MemoryMib = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 14)
 }
 
 func (x *ContainerDependency) SetCpus(v float64) {
 	x.xxx_hidden_Cpus = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 14)
 }
 
 func (x *ContainerDependency) SetRequired(v bool) {
 	x.xxx_hidden_Required = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 13)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 12, 14)
+}
+
+func (x *ContainerDependency) SetHostAccess(v bool) {
+	x.xxx_hidden_HostAccess = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 13, 14)
 }
 
 func (x *ContainerDependency) HasName() bool {
@@ -466,6 +479,13 @@ func (x *ContainerDependency) HasRequired() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 12)
 }
 
+func (x *ContainerDependency) HasHostAccess() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 13)
+}
+
 func (x *ContainerDependency) ClearName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Name = nil
@@ -516,6 +536,11 @@ func (x *ContainerDependency) ClearRequired() {
 	x.xxx_hidden_Required = false
 }
 
+func (x *ContainerDependency) ClearHostAccess() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 13)
+	x.xxx_hidden_HostAccess = false
+}
+
 type ContainerDependency_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -553,6 +578,12 @@ type ContainerDependency_builder struct {
 	// Whether the plugin cannot work without it. Optional dependencies stay
 	// unset until an administrator chooses.
 	Required *bool
+	// Whether the service reaches services on the server's host, such as a
+	// proxy on its loopback interface, by the name host.docker.internal:
+	// Docker maps it to the host (host-gateway), Docker Desktop and Podman
+	// name it themselves. On Linux, a service on the host must listen
+	// beyond its loopback interface to be reached.
+	HostAccess *bool
 }
 
 func (b0 ContainerDependency_builder) Build() *ContainerDependency {
@@ -560,47 +591,51 @@ func (b0 ContainerDependency_builder) Build() *ContainerDependency {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Name != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 14)
 		x.xxx_hidden_Name = b.Name
 	}
 	if b.Description != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 14)
 		x.xxx_hidden_Description = b.Description
 	}
 	if b.Image != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 14)
 		x.xxx_hidden_Image = b.Image
 	}
 	if b.Port != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 14)
 		x.xxx_hidden_Port = *b.Port
 	}
 	if b.HealthPath != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 14)
 		x.xxx_hidden_HealthPath = b.HealthPath
 	}
 	x.xxx_hidden_Command = b.Command
 	x.xxx_hidden_Env = b.Env
 	x.xxx_hidden_Volumes = b.Volumes
 	if b.Gpu != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 8, 14)
 		x.xxx_hidden_Gpu = *b.Gpu
 	}
 	if b.GpuImage != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 14)
 		x.xxx_hidden_GpuImage = b.GpuImage
 	}
 	if b.MemoryMib != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 14)
 		x.xxx_hidden_MemoryMib = *b.MemoryMib
 	}
 	if b.Cpus != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 14)
 		x.xxx_hidden_Cpus = *b.Cpus
 	}
 	if b.Required != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 13)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 12, 14)
 		x.xxx_hidden_Required = *b.Required
+	}
+	if b.HostAccess != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 13, 14)
+		x.xxx_hidden_HostAccess = *b.HostAccess
 	}
 	return m0
 }
@@ -956,7 +991,7 @@ var File_mavio_plugin_v1_container_proto protoreflect.FileDescriptor
 
 const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\n" +
-	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xcd\x04\n" +
+	"\x1fmavio/plugin/v1/container.proto\x12\x0fmavio.plugin.v1\"\xee\x04\n" +
 	"\x13ContainerDependency\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
@@ -973,7 +1008,9 @@ const file_mavio_plugin_v1_container_proto_rawDesc = "" +
 	"\n" +
 	"memory_mib\x18\v \x01(\rR\tmemoryMib\x12\x12\n" +
 	"\x04cpus\x18\f \x01(\x01R\x04cpus\x12\x1a\n" +
-	"\brequired\x18\r \x01(\bR\brequired\x1a6\n" +
+	"\brequired\x18\r \x01(\bR\brequired\x12\x1f\n" +
+	"\vhost_access\x18\x0e \x01(\bR\n" +
+	"hostAccess\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +

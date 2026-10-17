@@ -205,7 +205,8 @@ func (s *Service) supervisor(ctx context.Context) (*containers.Supervisor, error
 	if s.sup == nil && s.ctx.Err() == nil {
 		s.sup = containers.NewSupervisor(containers.SupervisorOptions{
 			Engine: s.cfg.Engine(rt), Pull: s.pullImage(s.cfg.Engine(rt)), Names: s.cfg.Names, Server: s.cfg.Server, Self: self, OnChange: s.changed,
-			Probe: s.cfg.Probe, Poll: s.cfg.Poll, Logger: s.cfg.Logger,
+			HostGateway: rt.Version.Engine == "docker",
+			Probe:       s.cfg.Probe, Poll: s.cfg.Poll, Logger: s.cfg.Logger,
 		})
 	}
 	if s.sup == nil {
@@ -382,7 +383,7 @@ func Resolve(names containers.Names, spec *pluginv1.ContainerDependency, c core.
 	return containers.Dependency{
 		Plugin: c.PluginID, Name: c.Name, Image: image, Cmd: spec.GetCommand(), Env: env,
 		Port: int(spec.GetPort()), HealthPath: spec.GetHealthPath(), Volumes: maps.Clone(spec.GetVolumes()),
-		Memory: int64(spec.GetMemoryMib()) << 20, CPUs: spec.GetCpus(), GPU: gpu,
+		Memory: int64(spec.GetMemoryMib()) << 20, CPUs: spec.GetCpus(), GPU: gpu, HostAccess: spec.GetHostAccess(),
 	}
 }
 

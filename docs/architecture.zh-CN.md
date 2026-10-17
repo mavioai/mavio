@@ -657,10 +657,11 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 
 ### 17.1 代理
 * **种类**：HTTP（HTTPS 经 CONNECT）、SOCKS4 与 SOCKS5，各可带用户名与密码。管理员通过 `ProxyService`（`mavio.system.v1`）配置任意多个，同一种类也可有多个；它们保存为 `Proxy`（[领域模型 §12.4](domain.zh-CN.md#124-代理)）。
+* **系统代理**：每个服务器还有系统代理，ID 为 `system`，既不保存也不可修改：即服务器环境变量设置的代理（依次为 `HTTPS_PROXY`、`HTTP_PROXY` 或 `ALL_PROXY`，并带 `NO_PROXY`），否则为操作系统设置的代理（macOS 上为网络设置，以 `scutil --proxy` 读取；Windows 上为 Internet 选项），连同它们直连的主机（名称、域名、`*` 通配符、CIDR 网段，以及表示不含点的名称的 `<local>`）。两者都未设置时，它直接访问站点。服务端每 30 秒读取一次，变化时再次配置使用代理的插件。
 * **去重**：主机、端口与用户名相同的代理即同一个代理，与种类无关；主机按小写比较，IP 地址按其规范形式比较，从不解析域名。名称忽略大小写唯一。重复的代理被拒绝，并指出与之重复的代理。
 * **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
-* **测试**：`TestProxy` 经已保存或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
-* **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可列出直连的主机。
+* **测试**：`TestProxy` 经已保存的代理、系统代理或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
+* **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择，系统代理排在最前（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，直连代理自身列表与插件列表中的主机。
 
 ### 17.2 质询求解器
 * **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
@@ -673,4 +674,4 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **会话**：如同 Byparr 保持一个预热的浏览器，插件为每个代理保持一个 FlareSolverr 会话（`mavio-<代理的哈希>`，无代理时为 `mavio-direct`），创建时带上代理及其凭据——FlareSolverr 只在创建会话时接受凭据；会话在 `session_ttl_minutes` 后轮换，FlareSolverr 丢失会话时重新创建一次，插件被配置时销毁不再使用的代理的会话。
 * **并发**：每个会话同时只处理一个请求（一个会话即一个浏览器），全局至多 `max_concurrent`（2）个；同一主机与代理的并发请求共享一次解答，并在 30 秒内复用。
 * **请求**：`request.get`，或带表单正文的 `request.post`，并带 `returnOnlyCookies`；FlareSolverr 的错误答复（HTTP 500）给出其消息；没有 cookie 或 user agent 的解答视为失败。
-* **回环地址**：托管的 FlareSolverr 运行在容器中，无法访问宿主机的回环接口，因此回环地址上的代理会以此原因失败。
+* **回环地址**：托管的 FlareSolverr 运行在容器中，其回环接口并非宿主机的；`flaresolverr` 声明了 `host_access`（§16），回环地址上的代理（例如 `127.0.0.1` 上的系统代理）改经 `host.docker.internal` 访问。Docker Desktop 把该名称转发到宿主机的回环接口；在 Linux 上，代理须监听容器能访问的接口。

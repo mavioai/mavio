@@ -51,19 +51,22 @@ const (
 
 // ProxyServiceClient is a client for the mavio.system.v1.ProxyService service.
 type ProxyServiceClient interface {
-	// ListProxies lists the proxies ordered by name.
+	// ListProxies lists the system proxy, then the others ordered by name.
 	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
 	// CreateProxy adds a proxy. A proxy of the same name, ignoring case, or
 	// of the same host, port and username, whatever its kind, is
 	// ALREADY_EXISTS, naming it.
 	CreateProxy(context.Context, *v1.CreateProxyRequest) (*v1.CreateProxyResponse, error)
 	// UpdateProxy replaces a proxy, keeping its password when none is given;
-	// duplicates are refused as by CreateProxy.
+	// duplicates are refused as by CreateProxy, and the system proxy is
+	// INVALID_ARGUMENT.
 	UpdateProxy(context.Context, *v1.UpdateProxyRequest) (*v1.UpdateProxyResponse, error)
 	// DeleteProxy deletes a proxy; plugins configured with it fail what
-	// uses it until configured otherwise.
+	// uses it until configured otherwise. The system proxy is not stored and
+	// cannot be deleted.
 	DeleteProxy(context.Context, *v1.DeleteProxyRequest) (*v1.DeleteProxyResponse, error)
-	// TestProxy fetches a URL through a stored or an unsaved proxy.
+	// TestProxy fetches a URL through a stored proxy, the system proxy
+	// (directly when it sets none) or an unsaved proxy.
 	TestProxy(context.Context, *v1.TestProxyRequest) (*v1.TestProxyResponse, error)
 }
 
@@ -168,19 +171,22 @@ func (c *proxyServiceClient) TestProxy(ctx context.Context, req *v1.TestProxyReq
 
 // ProxyServiceHandler is an implementation of the mavio.system.v1.ProxyService service.
 type ProxyServiceHandler interface {
-	// ListProxies lists the proxies ordered by name.
+	// ListProxies lists the system proxy, then the others ordered by name.
 	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
 	// CreateProxy adds a proxy. A proxy of the same name, ignoring case, or
 	// of the same host, port and username, whatever its kind, is
 	// ALREADY_EXISTS, naming it.
 	CreateProxy(context.Context, *v1.CreateProxyRequest) (*v1.CreateProxyResponse, error)
 	// UpdateProxy replaces a proxy, keeping its password when none is given;
-	// duplicates are refused as by CreateProxy.
+	// duplicates are refused as by CreateProxy, and the system proxy is
+	// INVALID_ARGUMENT.
 	UpdateProxy(context.Context, *v1.UpdateProxyRequest) (*v1.UpdateProxyResponse, error)
 	// DeleteProxy deletes a proxy; plugins configured with it fail what
-	// uses it until configured otherwise.
+	// uses it until configured otherwise. The system proxy is not stored and
+	// cannot be deleted.
 	DeleteProxy(context.Context, *v1.DeleteProxyRequest) (*v1.DeleteProxyResponse, error)
-	// TestProxy fetches a URL through a stored or an unsaved proxy.
+	// TestProxy fetches a URL through a stored proxy, the system proxy
+	// (directly when it sets none) or an unsaved proxy.
 	TestProxy(context.Context, *v1.TestProxyRequest) (*v1.TestProxyResponse, error)
 }
 

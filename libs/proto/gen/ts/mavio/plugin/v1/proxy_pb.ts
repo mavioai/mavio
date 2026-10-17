@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/plugin/v1/proxy.proto.
  */
 export const file_mavio_plugin_v1_proxy: GenFile = /*@__PURE__*/
-  fileDesc("ChttYXZpby9wbHVnaW4vdjEvcHJveHkucHJvdG8SD21hdmlvLnBsdWdpbi52MSKLAQoFUHJveHkSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIoCgRraW5kGAMgASgOMhoubWF2aW8ucGx1Z2luLnYxLlByb3h5S2luZBIMCgRob3N0GAQgASgJEgwKBHBvcnQYBSABKAUSEAoIdXNlcm5hbWUYBiABKAkSEAoIcGFzc3dvcmQYByABKAkiIQoSTGlzdFByb3hpZXNSZXF1ZXN0EgsKA2lkcxgBIAMoCSI+ChNMaXN0UHJveGllc1Jlc3BvbnNlEicKB3Byb3hpZXMYASADKAsyFi5tYXZpby5wbHVnaW4udjEuUHJveHkqagoJUHJveHlLaW5kEhoKFlBST1hZX0tJTkRfVU5TUEVDSUZJRUQQABITCg9QUk9YWV9LSU5EX0hUVFAQARIVChFQUk9YWV9LSU5EX1NPQ0tTNBACEhUKEVBST1hZX0tJTkRfU09DS1M1EANCxAEKE2NvbS5tYXZpby5wbHVnaW4udjFCClByb3h5UHJvdG9QAVpDZ2l0aHViLmNvbS9tYXZpb2FpL21hdmlvL2xpYnMvcHJvdG8vZ2VuL2dvL21hdmlvL3BsdWdpbi92MTtwbHVnaW52MaICA01QWKoCD01hdmlvLlBsdWdpbi5WMcoCD01hdmlvXFBsdWdpblxWMeICG01hdmlvXFBsdWdpblxWMVxHUEJNZXRhZGF0YeoCEU1hdmlvOjpQbHVnaW46OlYxYghlZGl0aW9uc3DoBw");
+  fileDesc("ChttYXZpby9wbHVnaW4vdjEvcHJveHkucHJvdG8SD21hdmlvLnBsdWdpbi52MSKbAQoFUHJveHkSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIoCgRraW5kGAMgASgOMhoubWF2aW8ucGx1Z2luLnYxLlByb3h5S2luZBIMCgRob3N0GAQgASgJEgwKBHBvcnQYBSABKAUSEAoIdXNlcm5hbWUYBiABKAkSEAoIcGFzc3dvcmQYByABKAkSDgoGYnlwYXNzGAggAygJIiEKEkxpc3RQcm94aWVzUmVxdWVzdBILCgNpZHMYASADKAkiPgoTTGlzdFByb3hpZXNSZXNwb25zZRInCgdwcm94aWVzGAEgAygLMhYubWF2aW8ucGx1Z2luLnYxLlByb3h5KmoKCVByb3h5S2luZBIaChZQUk9YWV9LSU5EX1VOU1BFQ0lGSUVEEAASEwoPUFJPWFlfS0lORF9IVFRQEAESFQoRUFJPWFlfS0lORF9TT0NLUzQQAhIVChFQUk9YWV9LSU5EX1NPQ0tTNRADQsQBChNjb20ubWF2aW8ucGx1Z2luLnYxQgpQcm94eVByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9wbHVnaW4vdjE7cGx1Z2ludjGiAgNNUFiqAg9NYXZpby5QbHVnaW4uVjHKAg9NYXZpb1xQbHVnaW5cVjHiAhtNYXZpb1xQbHVnaW5cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6UGx1Z2luOjpWMWIIZWRpdGlvbnNw6Ac");
 
 /**
  * Proxy is one of the server's proxies, as a plugin uses it.
@@ -19,6 +19,9 @@ export const file_mavio_plugin_v1_proxy: GenFile = /*@__PURE__*/
  */
 export type Proxy = Message<"mavio.plugin.v1.Proxy"> & {
   /**
+   * A UUID, or "system" for the system proxy: the one the server's
+   * environment or operating system sets, which every server has.
+   *
    * @generated from field: string id = 1;
    */
   id: string;
@@ -54,6 +57,15 @@ export type Proxy = Message<"mavio.plugin.v1.Proxy"> & {
    * @generated from field: string password = 7;
    */
   password: string;
+
+  /**
+   * Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+   * "*" wildcards and "<local>" for names without a dot; only the system
+   * proxy has them.
+   *
+   * @generated from field: repeated string bypass = 8;
+   */
+  bypass: string[];
 };
 
 /**
@@ -68,7 +80,7 @@ export const ProxySchema: GenMessage<Proxy> = /*@__PURE__*/
  */
 export type ListProxiesRequest = Message<"mavio.plugin.v1.ListProxiesRequest"> & {
   /**
-   * The proxies wanted; all when empty.
+   * The proxies wanted, "system" among them; all when empty.
    *
    * @generated from field: repeated string ids = 1;
    */
@@ -87,7 +99,8 @@ export const ListProxiesRequestSchema: GenMessage<ListProxiesRequest> = /*@__PUR
  */
 export type ListProxiesResponse = Message<"mavio.plugin.v1.ListProxiesResponse"> & {
   /**
-   * The proxies found, ordered by name; IDs not found are left out.
+   * The proxies found, the system proxy first and the others ordered by
+   * name; IDs not found are left out.
    *
    * @generated from field: repeated mavio.plugin.v1.Proxy proxies = 1;
    */
@@ -108,6 +121,9 @@ export const ListProxiesResponseSchema: GenMessage<ListProxiesResponse> = /*@__P
  */
 export enum ProxyKind {
   /**
+   * On the system proxy: the system sets none, and sites are reached
+   * directly.
+   *
    * @generated from enum value: PROXY_KIND_UNSPECIFIED = 0;
    */
   UNSPECIFIED = 0,

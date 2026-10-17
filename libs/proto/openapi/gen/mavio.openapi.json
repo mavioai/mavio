@@ -16706,6 +16706,11 @@
             "type": "boolean",
             "title": "required",
             "description": "Whether the plugin cannot work without it. Optional dependencies stay\n unset until an administrator chooses."
+          },
+          "hostAccess": {
+            "type": "boolean",
+            "title": "host_access",
+            "description": "Whether the service reaches services on the server's host, such as a\n proxy on its loopback interface, by the name host.docker.internal:\n Docker maps it to the host (host-gateway), Docker Desktop and Podman\n name it themselves. On Linux, a service on the host must listen\n beyond its loopback interface to be reached."
           }
         },
         "title": "ContainerDependency",
@@ -21571,6 +21576,19 @@
             "type": "boolean",
             "title": "has_password",
             "description": "Whether a password is stored; output only."
+          },
+          "system": {
+            "type": "boolean",
+            "title": "system",
+            "description": "Whether this is the system proxy, which cannot be changed; output only."
+          },
+          "bypass": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "bypass",
+            "description": "On the system proxy, the hosts it reaches directly; output only."
           }
         },
         "title": "Proxy",
@@ -22195,8 +22213,9 @@
               "id": {
                 "type": "string",
                 "title": "id",
-                "format": "uuid",
-                "description": "A stored proxy."
+                "maxLength": 36,
+                "minLength": 1,
+                "description": "A stored proxy, or \"system\"."
               }
             },
             "title": "id"
@@ -23899,7 +23918,7 @@
     },
     {
       "name": "ProxyService",
-      "description": "ProxyService manages the server's proxies, which plugins reach sites\n through. Administrators only."
+      "description": "ProxyService manages the server's proxies, which plugins reach sites\n through. Besides those added, every server has the system proxy, of ID\n \"system\": the one its environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY\n and NO_PROXY) or else its operating system sets, read only.\n Administrators only."
     },
     {
       "name": "SystemService",
@@ -39239,7 +39258,7 @@
           "ProxyService"
         ],
         "summary": "DeleteProxy",
-        "description": "DeleteProxy deletes a proxy; plugins configured with it fail what\n uses it until configured otherwise.",
+        "description": "DeleteProxy deletes a proxy; plugins configured with it fail what\n uses it until configured otherwise. The system proxy is not stored and\n cannot be deleted.",
         "operationId": "mavio.system.v1.ProxyService.DeleteProxy",
         "parameters": [
           {
@@ -39301,7 +39320,7 @@
           "ProxyService"
         ],
         "summary": "ListProxies",
-        "description": "ListProxies lists the proxies ordered by name.",
+        "description": "ListProxies lists the system proxy, then the others ordered by name.",
         "operationId": "mavio.system.v1.ProxyService.ListProxies",
         "parameters": [
           {
@@ -39363,7 +39382,7 @@
           "ProxyService"
         ],
         "summary": "TestProxy",
-        "description": "TestProxy fetches a URL through a stored or an unsaved proxy.",
+        "description": "TestProxy fetches a URL through a stored proxy, the system proxy\n (directly when it sets none) or an unsaved proxy.",
         "operationId": "mavio.system.v1.ProxyService.TestProxy",
         "parameters": [
           {
@@ -39425,7 +39444,7 @@
           "ProxyService"
         ],
         "summary": "UpdateProxy",
-        "description": "UpdateProxy replaces a proxy, keeping its password when none is given;\n duplicates are refused as by CreateProxy.",
+        "description": "UpdateProxy replaces a proxy, keeping its password when none is given;\n duplicates are refused as by CreateProxy, and the system proxy is\n INVALID_ARGUMENT.",
         "operationId": "mavio.system.v1.ProxyService.UpdateProxy",
         "parameters": [
           {

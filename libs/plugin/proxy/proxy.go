@@ -11,7 +11,9 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/netip"
 	"net/url"
+	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -26,6 +28,11 @@ import (
 // ErrNotFound is a proxy the server does not have, such as one deleted.
 var ErrNotFound = errors.New("proxy not found")
 
+// SystemID is the ID of the system proxy, which every server has: the one
+// its environment or operating system sets. With none set, its kind is
+// unspecified and Transport reaches sites directly.
+const SystemID = "system"
+
 var schemes = map[pluginv1.ProxyKind]string{
 	pluginv1.ProxyKind_PROXY_KIND_HTTP:   "http",
 	pluginv1.ProxyKind_PROXY_KIND_SOCKS4: "socks4",
@@ -37,9 +44,10 @@ func Address(p *pluginv1.Proxy) string {
 	return net.JoinHostPort(p.GetHost(), strconv.Itoa(int(p.GetPort())))
 }
 
-// URL returns the proxy as kind://user:password@host:port; nil for nil.
+// URL returns the proxy as kind://user:password@host:port; nil for nil
+// and for a system proxy setting none.
 func URL(p *pluginv1.Proxy) *url.URL {
-	if p == nil {
+	if p == nil || p.GetKind() == pluginv1.ProxyKind_PROXY_KIND_UNSPECIFIED {
 		return nil
 	}
 	u := &url.URL{Scheme: schemes[p.GetKind()], Host: Address(p)}
@@ -53,8 +61,11 @@ func URL(p *pluginv1.Proxy) *url.URL {
 }
 
 // Bypass returns whether a host is reached directly, as NO_PROXY lists
-// them: a host is excluded by its name, a domain by its suffix ("example.com"
-// and ".example.com" both exclude its subdomains) and every host by "*".
+// them: a host is excluded by its name, a domain by its suffix
+// ("example.com" and ".example.com" both exclude its subdomains), names
+// by "*" wildcards ("*.local", "10.*"), IP addresses by themselves or
+// their CIDR blocks, names without a dot by "<local>" and every host by
+// "*".
 func Bypass(hosts []string) func(host string) bool {
 	return func(hostport string) bool {
 		host := hostport
@@ -62,20 +73,41 @@ func Bypass(hosts []string) func(host string) bool {
 			host = h
 		}
 		host = strings.ToLower(strings.Trim(host, "[]"))
+		addr, addrErr := netip.ParseAddr(host)
 		return slices.ContainsFunc(hosts, func(e string) bool {
-			e = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(e)), ".")
-			return e != "" && (e == "*" || host == e || strings.HasSuffix(host, "."+e))
+			e = strings.ToLower(strings.TrimSpace(e))
+			switch {
+			case e == "":
+				return false
+			case e == "*":
+				return true
+			case e == "<local>":
+				return addrErr != nil && !strings.Contains(host, ".")
+			case strings.Contains(e, "/"):
+				pfx, err := netip.ParsePrefix(e)
+				return err == nil && addrErr == nil && pfx.Contains(addr.Unmap())
+			case strings.Contains(e, "*"):
+				ok, _ := path.Match(e, host)
+				return ok
+			}
+			e = strings.TrimPrefix(e, ".")
+			return host == e || strings.HasSuffix(host, "."+e)
 		})
 	}
 }
 
-// Transport returns a transport through p, a direct one for nil, reaching
-// the hosts bypass reports directly; bypass may be nil.
+// Transport returns a transport through p, a direct one for nil and for
+// a system proxy setting none, reaching directly the hosts p's bypass
+// list and bypass report; bypass may be nil.
 func Transport(p *pluginv1.Proxy, bypass func(host string) bool) *http.Transport {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.Proxy = nil
-	if p == nil {
+	if URL(p) == nil {
 		return t
+	}
+	if own := p.GetBypass(); len(own) > 0 {
+		ownBypass, other := Bypass(own), bypass
+		bypass = func(host string) bool { return ownBypass(host) || other != nil && other(host) }
 	}
 	if bypass == nil {
 		bypass = func(string) bool { return false }

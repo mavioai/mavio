@@ -966,18 +966,20 @@ flowchart TD
 - [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
 
 ### P31 Proxies and Challenge Solving
-**Scope**: the proxies and challenge solvers of [Architecture §17](architecture.md#17-proxies-and-challenge-solving) and [Plugins §12](plugins.md#12-proxies-and-pluginssolvers): `Proxy` in `libs/core` and `libs/store`, `ProxyService`, the `proxies` options source and `HostService.ListProxies`; the `CHALLENGE_SOLVER` capability and `HostService.SolveChallenge`; `libs/plugin/proxy` and `libs/plugin/challenge`; `plugins/solvers` with FlareSolverr as a container dependency, following Byparr's ways; `plugins/indexers` and `plugins/subtitles` moved to them, their own proxies and FlareSolverr removed; the web UI's proxies page.
+**Scope**: the proxies and challenge solvers of [Architecture §17](architecture.md#17-proxies-and-challenge-solving) and [Plugins §12](plugins.md#12-proxies-and-pluginssolvers): `Proxy` in `libs/core` and `libs/store`, the system proxy, `ProxyService`, the `proxies` options source and `HostService.ListProxies`; the `CHALLENGE_SOLVER` capability and `HostService.SolveChallenge`; `libs/plugin/proxy` and `libs/plugin/challenge`; container dependencies reaching the host (`host_access`); `plugins/solvers` with FlareSolverr as a container dependency, following Byparr's ways; `plugins/indexers` and `plugins/subtitles` moved to them, their own proxies and FlareSolverr removed; the web UI's proxies page.
 
 **Done when**: an administrator adds proxies in the web UI, a duplicate refused; an indexer and the subtitle providers configured with one reach sites through it; a challenge met by an indexer is solved by `plugins/solvers` through the indexer's proxy, with a recorded FlareSolverr in the tests and a live one when `MAVIO_FLARESOLVERR_URL` is set.
 
 **Progress**:
-- [ ] Domain, storage and contracts: `Proxy`, `ProxyRepository` with its migrations, `ProxyService`, `ChallengeSolverService`, `HostService.ListProxies` and `SolveChallenge`
-- [ ] Plugin SDK: `libs/plugin/proxy`, `libs/plugin/challenge`, the `proxies` options source, the `CHALLENGE_SOLVER` client
-- [ ] Server: proxies and their tests, the options source, plugins configured again when proxies change, challenges routed to solver plugins
+- [x] Domain, storage and contracts: `Proxy`, `ProxyRepository` with its migrations, `ProxyService`, `ChallengeSolverService`, `HostService.ListProxies` and `SolveChallenge`
+- [x] Plugin SDK: `libs/plugin/proxy`, `libs/plugin/challenge`, the `proxies` options source, the `CHALLENGE_SOLVER` client
+- [x] Server: proxies and their tests, the options source, plugins configured again when proxies change, challenges routed to solver plugins
+- [x] The system proxy: from the environment, macOS's network settings or Windows's Internet Options, with the hosts it reaches directly, read every 30 seconds; container dependencies reaching the host (`host_access`)
 - [ ] `plugins/solvers`: FlareSolverr as a container dependency, sessions per proxy, coalescing, concurrency, POST
 - [ ] `plugins/indexers` and `plugins/subtitles` moved to the server's proxies and to `HostService.SolveChallenge`
 - [ ] The web UI's proxies page
 - [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need
+- [ ] The system proxy of Linux desktops' settings (GNOME, KDE) and of proxy auto-configuration (PAC) files, which only the environment sets for now
 - [ ] The server's own requests (TMDB and the other services of acquisition, the plugin catalog) through a proxy chosen in the settings
 - [ ] WASM plugins' HTTP requests through a proxy, the host's HTTP client honoring one
 

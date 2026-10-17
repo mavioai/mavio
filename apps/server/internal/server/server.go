@@ -439,10 +439,11 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		Grammar: grammar, Agents: plugs.AgentSessions, Recognizers: plugs.Recognizers, Voices: plugs.VoicePlugins,
 		ServerName: serverName, Key: key.Derive("assistant-listen"), Activity: activityLog, Logger: log,
 	})
+	proxyService := proxies.New(db.Proxies(), plugs, log)
 	h, err := httpserver.Handler(httpserver.Options{
 		Assistant: helper,
 		Version:   cfg.Version, Store: db, Identity: key, Hub: hub, Database: raw.Dialect(), FFmpegVersion: ffmpegVersion, Playbacks: playbacks,
-		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Proxies: proxies.New(db.Proxies(), plugs, log), Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
+		Images: imageServer, Plugins: plugs, Devices: plugs, Containers: deps, Proxies: proxyService, Refresher: refresher, Storage: classifier, Storages: storages, Remotes: rc.Service(offline, rcDown),
 		Subtitles: subFiles, SubtitleRuntime: subs,
 		Lyrics:   lyrics,
 		Intros:   &library.Intros{Store: db, Source: plugs.IntroProviders, Logger: log},
@@ -497,6 +498,12 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 
 	log.InfoContext(ctx, "starting mavio", "version", cfg.Version, "addr", ln.Addr().String())
 	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		if err := proxyService.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
 	g.Go(func() error { return playbacks.Run(ctx) })
 	g.Go(func() error {
 		if err := warmer.Run(ctx); !errors.Is(err, context.Canceled) {

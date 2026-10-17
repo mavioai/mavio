@@ -4,6 +4,9 @@
 /// Proxy is one of the server's proxies, as a plugin uses it.
 #[derive(Clone, Debug, Default)]
 pub struct ProxyView<'a> {
+    /// A UUID, or "system" for the system proxy: the one the server's
+    /// environment or operating system sets, which every server has.
+    ///
     /// Field 1: `id`
     pub id: ::core::option::Option<&'a str>,
     /// Field 2: `name`
@@ -20,6 +23,12 @@ pub struct ProxyView<'a> {
     pub username: ::core::option::Option<&'a str>,
     /// Field 7: `password`
     pub password: ::core::option::Option<&'a str>,
+    /// Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+    /// "*" wildcards and "\<local\>" for names without a dot; only the system
+    /// proxy has them.
+    ///
+    /// Field 8: `bypass`
+    pub bypass: ::buffa::RepeatedView<'a, &'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
@@ -103,6 +112,17 @@ impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
                 )?;
                 view.password = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::borrow_str(&mut cur)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                view.bypass.push(__elem);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -132,6 +152,7 @@ impl<'a> ::buffa::MessageView<'a> for ProxyView<'a> {
             port: self.port,
             username: self.username.map(|s| s.to_string()),
             password: self.password.map(|s| s.to_string()),
+            bypass: self.bypass.iter().map(|s| s.to_string()).collect(),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -162,6 +183,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ProxyView<'a> {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         if let Some(ref v) = self.password {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        for v in &self.bypass {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
@@ -195,6 +219,9 @@ impl<'a> ::buffa::ViewEncode<'a> for ProxyView<'a> {
         }
         if let Some(ref v) = self.password {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        for v in &self.bypass {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -283,6 +310,9 @@ impl ProxyOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// A UUID, or "system" for the system proxy: the one the server's
+    /// environment or operating system sets, which every server has.
+    ///
     /// Field 1: `id`
     #[must_use]
     pub fn id(&self) -> ::core::option::Option<&'_ str> {
@@ -322,6 +352,15 @@ impl ProxyOwnedView {
     pub fn password(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().password
     }
+    /// Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+    /// "*" wildcards and "\<local\>" for names without a dot; only the system
+    /// proxy has them.
+    ///
+    /// Field 8: `bypass`
+    #[must_use]
+    pub fn bypass(&self) -> &::buffa::RepeatedView<'_, &'_ str> {
+        &self.0.reborrow().bypass
+    }
 }
 impl ::core::convert::From<::buffa::OwnedView<ProxyView<'static>>> for ProxyOwnedView {
     fn from(inner: ::buffa::OwnedView<ProxyView<'static>>) -> Self {
@@ -344,7 +383,7 @@ impl ::buffa::HasMessageView for super::super::Proxy {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListProxiesRequestView<'a> {
-    /// The proxies wanted; all when empty.
+    /// The proxies wanted, "system" among them; all when empty.
     ///
     /// Field 1: `ids`
     pub ids: ::buffa::RepeatedView<'a, &'a str>,
@@ -537,7 +576,7 @@ impl ListProxiesRequestOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The proxies wanted; all when empty.
+    /// The proxies wanted, "system" among them; all when empty.
     ///
     /// Field 1: `ids`
     #[must_use]
@@ -569,7 +608,8 @@ impl ::buffa::HasMessageView for super::super::ListProxiesRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct ListProxiesResponseView<'a> {
-    /// The proxies found, ordered by name; IDs not found are left out.
+    /// The proxies found, the system proxy first and the others ordered by
+    /// name; IDs not found are left out.
     ///
     /// Field 1: `proxies`
     pub proxies: ::buffa::RepeatedView<'a, super::super::__buffa::view::ProxyView<'a>>,
@@ -789,7 +829,8 @@ impl ListProxiesResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
-    /// The proxies found, ordered by name; IDs not found are left out.
+    /// The proxies found, the system proxy first and the others ordered by
+    /// name; IDs not found are left out.
     ///
     /// Field 1: `proxies`
     #[must_use]

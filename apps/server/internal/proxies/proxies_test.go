@@ -8,10 +8,17 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"slices"
 	"strconv"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"testing/synctest"
+	"time"
+
+	"github.com/mavioai/mavio/apps/server/internal/sysproxy"
 
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -25,13 +32,37 @@ func newService(t *testing.T, plugins Plugins) *Service {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = st.Close() })
-	return New(st.Proxies(), plugins, slog.New(slog.DiscardHandler))
+	s := New(st.Proxies(), plugins, slog.New(slog.DiscardHandler))
+	s.detect = func(context.Context) (sysproxy.Setting, error) { return sysproxy.Setting{}, nil }
+	return s
+}
+
+// mutableSystem makes s read the system proxy from the returned
+// function's last call, which sets the proxy u, none for "".
+func mutableSystem(t *testing.T, s *Service) func(u string, bypass ...string) {
+	var current atomic.Pointer[sysproxy.Setting]
+	current.Store(&sysproxy.Setting{})
+	s.detect = func(context.Context) (sysproxy.Setting, error) { return *current.Load(), nil }
+	return func(u string, bypass ...string) {
+		t.Helper()
+		set := sysproxy.Setting{Bypass: bypass}
+		if u != "" {
+			parsed, err := url.Parse(u)
+			if err != nil {
+				t.Fatal(err)
+			}
+			set.URL = parsed
+		}
+		current.Store(&set)
+	}
 }
 
 type fakePlugins struct {
-	users        []string
+	users   []string
+	solvers []Solver
+
+	mu           sync.Mutex
 	reconfigured []string
-	solvers      []Solver
 }
 
 func (f *fakePlugins) UsesProxies(id string) bool { return slices.Contains(f.users, id) }
@@ -39,8 +70,18 @@ func (f *fakePlugins) ProxyUsers() []string       { return f.users }
 func (f *fakePlugins) ChallengeSolvers() []Solver { return f.solvers }
 
 func (f *fakePlugins) Reconfigure(_ context.Context, id string) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.reconfigured = append(f.reconfigured, id)
 	return nil
+}
+
+func (f *fakePlugins) takeReconfigured() []string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := f.reconfigured
+	f.reconfigured = nil
+	return out
 }
 
 type fakeSolver struct {
@@ -116,15 +157,14 @@ func TestUpdateKeepsPassword(t *testing.T) {
 			}
 		})
 	}
-	if len(plugins.reconfigured) == 0 || plugins.reconfigured[0] != "indexers" || plugins.reconfigured[1] != "subtitles" {
-		t.Errorf("reconfigured = %v, want = indexers and subtitles after each update", plugins.reconfigured)
+	if got := plugins.takeReconfigured(); len(got) < 2 || got[0] != "indexers" || got[1] != "subtitles" {
+		t.Errorf("reconfigured = %v, want = indexers and subtitles after each update", got)
 	}
-	plugins.reconfigured = nil
 	if err := s.Delete(ctx, p.ID); err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"indexers", "subtitles"}; !slices.Equal(plugins.reconfigured, want) {
-		t.Errorf("reconfigured after delete = %v, want = %v", plugins.reconfigured, want)
+	if got, want := plugins.takeReconfigured(), []string{"indexers", "subtitles"}; !slices.Equal(got, want) {
+		t.Errorf("reconfigured after delete = %v, want = %v", got, want)
 	}
 }
 
@@ -160,8 +200,8 @@ func TestForPlugin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(all) != 2 {
-		t.Errorf("len(all) = %d, want = 2", len(all))
+	if len(all) != 3 || all[0].GetId() != SystemID {
+		t.Errorf("all = %v, want = the system proxy and both", all)
 	}
 	some, err := s.ForPlugin(ctx, []string{a.ID.String(), core.NewID().String()})
 	if err != nil {
@@ -281,4 +321,80 @@ func TestTest(t *testing.T) {
 	if _, err := s.Test(t.Context(), core.Proxy{Name: "Bad", Kind: core.ProxyHTTP}, ""); !errors.Is(err, core.ErrInvalid) {
 		t.Errorf("err = %v, want = %v", err, core.ErrInvalid)
 	}
+}
+
+func TestSystem(t *testing.T) {
+	plugins := &fakePlugins{users: []string{"indexers"}}
+	s := newService(t, plugins)
+	ctx := t.Context()
+	if got := s.System(ctx); got.GetId() != SystemID || got.GetKind() != pluginv1.ProxyKind_PROXY_KIND_UNSPECIFIED {
+		t.Errorf("System() with none set = %v, want = system of no kind", got)
+	}
+	if s.refresh(ctx) {
+		t.Error("refresh() unchanged = true, want = false")
+	}
+	setSystem := mutableSystem(t, s)
+	setSystem("http://u:p@127.0.0.1:1080", "192.168.0.0/16", "<local>")
+	if !s.refresh(ctx) {
+		t.Error("refresh() changed = false, want = true")
+	}
+	got := s.System(ctx)
+	if got.GetKind() != pluginv1.ProxyKind_PROXY_KIND_HTTP || got.GetHost() != "127.0.0.1" || got.GetPort() != 1080 ||
+		got.GetUsername() != "u" || got.GetPassword() != "p" || !slices.Equal(got.GetBypass(), []string{"192.168.0.0/16", "<local>"}) {
+		t.Errorf("System() = %v, want = http://u:p@127.0.0.1:1080 bypassing two", got)
+	}
+	only, err := s.ForPlugin(ctx, []string{SystemID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(only) != 1 || only[0].GetHost() != "127.0.0.1" {
+		t.Errorf("ForPlugin(system) = %v, want = the system proxy", only)
+	}
+
+	solver := &fakeSolver{sol: solution("")}
+	plugins.solvers = []Solver{{ID: "solvers", Client: solver}}
+	if _, err := s.Solve(ctx, pluginv1.Challenge_builder{Url: new("https://tracker.example/")}.Build(), SystemID); err != nil {
+		t.Fatal(err)
+	}
+	if solver.proxy.GetHost() != "127.0.0.1" {
+		t.Errorf("solved through %v, want = the system proxy", solver.proxy)
+	}
+	setSystem("")
+	s.refresh(ctx)
+	if _, err := s.Solve(ctx, pluginv1.Challenge_builder{Url: new("https://tracker.example/")}.Build(), SystemID); err != nil {
+		t.Fatal(err)
+	}
+	if solver.proxy != nil {
+		t.Errorf("solved through %v with the system setting none, want = directly", solver.proxy)
+	}
+}
+
+func TestRunReconfigures(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		plugins := &fakePlugins{users: []string{"indexers"}}
+		s := newService(t, plugins)
+		setSystem := mutableSystem(t, s)
+		ctx, cancel := context.WithCancel(t.Context())
+		done := make(chan error)
+		go func() { done <- s.Run(ctx) }()
+		synctest.Wait()
+		if got := plugins.takeReconfigured(); len(got) != 0 {
+			t.Errorf("reconfigured on start = %v, want = none", got)
+		}
+		setSystem("socks5://127.0.0.1:1086")
+		time.Sleep(systemPoll)
+		synctest.Wait()
+		if got := plugins.takeReconfigured(); !slices.Equal(got, []string{"indexers"}) {
+			t.Errorf("reconfigured = %v, want = [indexers]", got)
+		}
+		time.Sleep(systemPoll)
+		synctest.Wait()
+		if got := plugins.takeReconfigured(); len(got) != 0 {
+			t.Errorf("reconfigured unchanged = %v, want = none", got)
+		}
+		cancel()
+		if err := <-done; !errors.Is(err, context.Canceled) {
+			t.Errorf("Run() = %v, want = %v", err, context.Canceled)
+		}
+	})
 }

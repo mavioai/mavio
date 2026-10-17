@@ -41,6 +41,9 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	if d.GPU {
 		args = append(args, "--gpus", "all")
 	}
+	if d.HostAccess {
+		args = append(args, "--add-host", hostGateway)
+	}
 	if d.Memory > 0 {
 		args = append(args, "--memory", strconv.FormatInt(d.Memory>>20, 10)+"m")
 	}
@@ -68,6 +71,9 @@ func RunCommands(n Names, d Dependency, onHost bool) Commands {
 	}
 	if onHost {
 		fmt.Fprintf(&b, "    ports: [%q]\n", "127.0.0.1:"+port+":"+port)
+	}
+	if d.HostAccess {
+		fmt.Fprintf(&b, "    extra_hosts: [%q]\n", hostGateway)
 	}
 	if len(env) > 0 {
 		b.WriteString("    environment:\n")

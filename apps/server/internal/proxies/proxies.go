@@ -10,9 +10,14 @@ import (
 	"log/slog"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
+	"github.com/mavioai/mavio/apps/server/internal/sysproxy"
 	"github.com/mavioai/mavio/libs/core"
 	"github.com/mavioai/mavio/libs/plugin/proxy"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
@@ -45,16 +50,84 @@ type Plugins interface {
 	ChallengeSolvers() []Solver
 }
 
+// SystemID is the ID of the system proxy.
+const SystemID = proxy.SystemID
+
+// SystemName is the system proxy's name.
+const SystemName = "System proxy"
+
+// systemPoll is how often Run reads the system proxy again.
+const systemPoll = 30 * time.Second
+
 // Service keeps the server's proxies.
 type Service struct {
 	repo    core.ProxyRepository
 	plugins Plugins
 	log     *slog.Logger
+	// detect reads the system proxy; sysproxy.Detect but in tests.
+	detect func(context.Context) (sysproxy.Setting, error)
+	// system is the system proxy last read, nil before the first.
+	system atomic.Pointer[pluginv1.Proxy]
 }
 
 // New returns a Service keeping proxies in repo; plugins may be nil.
 func New(repo core.ProxyRepository, plugins Plugins, log *slog.Logger) *Service {
-	return &Service{repo: repo, plugins: plugins, log: log}
+	return &Service{repo: repo, plugins: plugins, log: log, detect: sysproxy.Detect}
+}
+
+// Run reads the system proxy every 30 seconds until ctx ends, configuring
+// the plugins taking proxies again when it changes.
+func (s *Service) Run(ctx context.Context) error {
+	t := time.NewTicker(systemPoll)
+	defer t.Stop()
+	for {
+		if s.refresh(ctx) {
+			s.changed(ctx)
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-t.C:
+		}
+	}
+}
+
+// refresh reads the system proxy, reporting whether it changed since last
+// read; one failing to read is none, logged.
+func (s *Service) refresh(ctx context.Context) bool {
+	set, err := s.detect(ctx)
+	if err != nil {
+		s.log.WarnContext(ctx, "read the system proxy", "err", err)
+		set = sysproxy.Setting{}
+	}
+	p := systemProxy(set)
+	old := s.system.Swap(p)
+	return old != nil && !proto.Equal(old, p)
+}
+
+// System returns the system proxy, its kind unspecified when none is set.
+func (s *Service) System(ctx context.Context) *pluginv1.Proxy {
+	if p := s.system.Load(); p != nil {
+		return p
+	}
+	s.refresh(ctx)
+	return s.system.Load()
+}
+
+func systemProxy(set sysproxy.Setting) *pluginv1.Proxy {
+	p := pluginv1.Proxy_builder{Id: new(SystemID), Name: new(SystemName)}.Build()
+	if set.URL == nil {
+		return p
+	}
+	port, _ := strconv.Atoi(set.URL.Port())
+	p.SetKind(kinds[core.ProxyKind(set.URL.Scheme)])
+	p.SetHost(set.URL.Hostname())
+	p.SetPort(int32(port))
+	p.SetUsername(set.URL.User.Username())
+	password, _ := set.URL.User.Password()
+	p.SetPassword(password)
+	p.SetBypass(set.Bypass)
+	return p
 }
 
 // List returns the proxies ordered by name.
@@ -133,14 +206,17 @@ func (s *Service) UsesProxies(pluginID string) bool {
 	return s.plugins != nil && s.plugins.UsesProxies(pluginID)
 }
 
-// ForPlugin returns the proxies of the IDs, all when none; IDs not found
-// are left out.
+// ForPlugin returns the proxies of the IDs, all when none, the system
+// proxy first; IDs not found are left out.
 func (s *Service) ForPlugin(ctx context.Context, ids []string) ([]*pluginv1.Proxy, error) {
 	list, err := s.repo.List(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var out []*pluginv1.Proxy
+	if len(ids) == 0 || slices.Contains(ids, SystemID) {
+		out = append(out, s.System(ctx))
+	}
 	for i := range list {
 		if len(ids) == 0 || slices.Contains(ids, list[i].ID.String()) {
 			out = append(out, ToPlugin(&list[i]))
@@ -167,7 +243,13 @@ func ToPlugin(p *core.Proxy) *pluginv1.Proxy {
 // asking the ready solver plugins in turn by ID until one solves it.
 func (s *Service) Solve(ctx context.Context, c *pluginv1.Challenge, proxyID string) (*pluginv1.ChallengeSolution, error) {
 	req := pluginv1.SolveRequest_builder{Challenge: c}.Build()
-	if proxyID != "" {
+	switch proxyID {
+	case "":
+	case SystemID:
+		if p := s.System(ctx); proxy.URL(p) != nil {
+			req.SetProxy(p)
+		}
+	default:
 		id, err := core.ParseID(proxyID)
 		if err != nil {
 			return nil, err
@@ -218,6 +300,12 @@ type TestResult struct {
 	ExitIP, Country string
 }
 
+// TestSystem fetches a URL, DefaultTestURL when empty, through the system
+// proxy, directly when none is set.
+func (s *Service) TestSystem(ctx context.Context, url string) (TestResult, error) {
+	return fetch(ctx, s.System(ctx), url)
+}
+
 // Test fetches a URL, DefaultTestURL when empty, through p; with p's ID
 // and no password, the stored proxy's password is used.
 func (s *Service) Test(ctx context.Context, p core.Proxy, url string) (TestResult, error) {
@@ -233,6 +321,10 @@ func (s *Service) Test(ctx context.Context, p core.Proxy, url string) (TestResul
 	if err := p.Validate(); err != nil {
 		return TestResult{}, err
 	}
+	return fetch(ctx, ToPlugin(&p), url)
+}
+
+func fetch(ctx context.Context, p *pluginv1.Proxy, url string) (TestResult, error) {
 	if url == "" {
 		url = DefaultTestURL
 	}
@@ -242,7 +334,7 @@ func (s *Service) Test(ctx context.Context, p core.Proxy, url string) (TestResul
 	if err != nil {
 		return TestResult{}, fmt.Errorf("%w: %w", core.ErrInvalid, err)
 	}
-	tr := proxy.Transport(ToPlugin(&p), nil)
+	tr := proxy.Transport(p, nil)
 	defer tr.CloseIdleConnections()
 	start := time.Now()
 	resp, err := (&http.Client{Transport: tr}).Do(req)

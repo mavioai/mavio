@@ -33,4 +33,14 @@ func TestRunCommands(t *testing.T) {
 	if c.Address != "http://mavio-voice-whisper:9000" {
 		t.Errorf("Address = %s, want = http://mavio-voice-whisper:9000", c.Address)
 	}
+	if strings.Contains(c.DockerRun, "--add-host") || strings.Contains(c.Compose, "extra_hosts") {
+		t.Errorf("without host access, got = %s\n%s", c.DockerRun, c.Compose)
+	}
+
+	d.HostAccess = true
+	c = containers.RunCommands(containers.Names{}, d, true)
+	if !strings.Contains(c.DockerRun, " --add-host host.docker.internal:host-gateway ") ||
+		!strings.Contains(c.Compose, `extra_hosts: ["host.docker.internal:host-gateway"]`) {
+		t.Errorf("with host access, got = %s\n%s", c.DockerRun, c.Compose)
+	}
 }

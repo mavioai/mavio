@@ -6,6 +6,8 @@
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(i32)]
 pub enum ProxyKind {
+    /// On the system proxy: the system sets none, and sites are reached
+    /// directly.
     PROXY_KIND_UNSPECIFIED = 0i32,
     /// HTTP, with CONNECT for HTTPS.
     PROXY_KIND_HTTP = 1i32,
@@ -75,6 +77,9 @@ impl ::buffa::Enumeration for ProxyKind {
 /// Proxy is one of the server's proxies, as a plugin uses it.
 #[derive(Clone, PartialEq, Default)]
 pub struct Proxy {
+    /// A UUID, or "system" for the system proxy: the one the server's
+    /// environment or operating system sets, which every server has.
+    ///
     /// Field 1: `id`
     pub id: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 2: `name`
@@ -91,6 +96,12 @@ pub struct Proxy {
     pub username: ::core::option::Option<::buffa::alloc::string::String>,
     /// Field 7: `password`
     pub password: ::core::option::Option<::buffa::alloc::string::String>,
+    /// Hosts reached directly, as NO_PROXY lists them, with CIDR blocks,
+    /// "*" wildcards and "\<local\>" for names without a dot; only the system
+    /// proxy has them.
+    ///
+    /// Field 8: `bypass`
+    pub bypass: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -104,6 +115,7 @@ impl ::core::fmt::Debug for Proxy {
             .field("port", &self.port)
             .field("username", &self.username)
             .field("password", &self.password)
+            .field("bypass", &self.bypass)
             .finish()
     }
 }
@@ -218,6 +230,9 @@ impl ::buffa::Message for Proxy {
         if let Some(ref v) = self.password {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        for v in &self.bypass {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -248,6 +263,9 @@ impl ::buffa::Message for Proxy {
         }
         if let Some(ref v) = self.password {
             ::buffa::types::put_string_field(7u32, v, buf);
+        }
+        for v in &self.bypass {
+            ::buffa::types::put_string_field(8u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -334,6 +352,17 @@ impl ::buffa::Message for Proxy {
                     buf,
                 )?;
             }
+            8u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                let __elem = ::buffa::types::decode_string(buf)?;
+                ctx.register_element_memory(
+                    ::buffa::__private::element_footprint(&__elem),
+                )?;
+                self.bypass.push(__elem);
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -349,6 +378,7 @@ impl ::buffa::Message for Proxy {
         self.port = ::core::option::Option::None;
         self.username = ::core::option::Option::None;
         self.password = ::core::option::Option::None;
+        self.bypass.clear();
         self.__buffa_unknown_fields.clear();
     }
 }
@@ -363,7 +393,7 @@ impl ::buffa::ExtensionSet for Proxy {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListProxiesRequest {
-    /// The proxies wanted; all when empty.
+    /// The proxies wanted, "system" among them; all when empty.
     ///
     /// Field 1: `ids`
     pub ids: ::buffa::alloc::vec::Vec<::buffa::alloc::string::String>,
@@ -465,7 +495,8 @@ impl ::buffa::ExtensionSet for ListProxiesRequest {
 }
 #[derive(Clone, PartialEq, Default)]
 pub struct ListProxiesResponse {
-    /// The proxies found, ordered by name; IDs not found are left out.
+    /// The proxies found, the system proxy first and the others ordered by
+    /// name; IDs not found are left out.
     ///
     /// Field 1: `proxies`
     pub proxies: ::buffa::alloc::vec::Vec<Proxy>,
