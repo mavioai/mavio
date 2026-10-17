@@ -2533,7 +2533,7 @@
             "type": "string",
             "title": "item_id",
             "format": "uuid",
-            "description": "The movie the release is for, or the wanted series, season or episode\n whose episodes it holds."
+            "description": "The movie the release is for, or the wanted series, season or episode\n whose episodes it holds; unset to send the release to the client\n alone, neither tracked nor imported, as Prowlarr's searches grab."
           },
           "release": {
             "allOf": [
@@ -2569,7 +2569,13 @@
                 "$ref": "#/components/schemas/mavio.acquisition.v1.QueueItem"
               }
             ],
-            "title": "item"
+            "title": "item",
+            "description": "The tracked download; unset for a release sent without an item."
+          },
+          "clientName": {
+            "type": "string",
+            "title": "client_name",
+            "description": "The name of the client the release went to."
           }
         },
         "title": "GrabReleaseResponse",

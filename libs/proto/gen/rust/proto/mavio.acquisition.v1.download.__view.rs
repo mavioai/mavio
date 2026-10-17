@@ -995,7 +995,8 @@ impl ::buffa::HasMessageView for super::super::ListDownloadClientsResponse {
 #[derive(Clone, Debug, Default)]
 pub struct GrabReleaseRequestView<'a> {
     /// The movie the release is for, or the wanted series, season or episode
-    /// whose episodes it holds.
+    /// whose episodes it holds; unset to send the release to the client
+    /// alone, neither tracked nor imported, as Prowlarr's searches grab.
     ///
     /// Field 1: `item_id`
     pub item_id: ::core::option::Option<&'a str>,
@@ -1270,7 +1271,8 @@ impl GrabReleaseRequestOwnedView {
         self.0.into_bytes()
     }
     /// The movie the release is for, or the wanted series, season or episode
-    /// whose episodes it holds.
+    /// whose episodes it holds; unset to send the release to the client
+    /// alone, neither tracked nor imported, as Prowlarr's searches grab.
     ///
     /// Field 1: `item_id`
     #[must_use]
@@ -1324,8 +1326,14 @@ impl ::buffa::HasMessageView for super::super::GrabReleaseRequest {
 }
 #[derive(Clone, Debug, Default)]
 pub struct GrabReleaseResponseView<'a> {
+    /// The tracked download; unset for a release sent without an item.
+    ///
     /// Field 1: `item`
     pub item: ::buffa::MessageFieldView<super::super::__buffa::view::QueueItemView<'a>>,
+    /// The name of the client the release went to.
+    ///
+    /// Field 2: `client_name`
+    pub client_name: ::core::option::Option<&'a str>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for GrabReleaseResponseView<'a> {
@@ -1379,6 +1387,13 @@ impl<'a> ::buffa::MessageView<'a> for GrabReleaseResponseView<'a> {
                     }
                 }
             }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                view.client_name = Some(::buffa::types::borrow_str(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -1416,6 +1431,7 @@ impl<'a> ::buffa::MessageView<'a> for GrabReleaseResponseView<'a> {
                 }
                 None => ::buffa::MessageField::none(),
             },
+            client_name: self.client_name.map(|s| s.to_string()),
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -1435,6 +1451,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GrabReleaseResponseView<'a> {
                 += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
                     + inner_size as u64;
         }
+        if let Some(ref v) = self.client_name {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -1453,6 +1472,9 @@ impl<'a> ::buffa::ViewEncode<'a> for GrabReleaseResponseView<'a> {
                 buf,
             );
             self.item.write_to(__cache, buf);
+        }
+        if let Some(ref v) = self.client_name {
+            ::buffa::types::put_string_field(2u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -1549,12 +1571,21 @@ impl GrabReleaseResponseOwnedView {
     pub fn into_bytes(self) -> ::buffa::bytes::Bytes {
         self.0.into_bytes()
     }
+    /// The tracked download; unset for a release sent without an item.
+    ///
     /// Field 1: `item`
     #[must_use]
     pub fn item(
         &self,
     ) -> &::buffa::MessageFieldView<super::super::__buffa::view::QueueItemView<'_>> {
         &self.0.reborrow().item
+    }
+    /// The name of the client the release went to.
+    ///
+    /// Field 2: `client_name`
+    #[must_use]
+    pub fn client_name(&self) -> ::core::option::Option<&'_ str> {
+        self.0.reborrow().client_name
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<GrabReleaseResponseView<'static>>>

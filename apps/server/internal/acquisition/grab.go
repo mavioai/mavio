@@ -17,6 +17,7 @@ import (
 	"github.com/mavioai/mavio/libs/acquire/series"
 	"github.com/mavioai/mavio/libs/core"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
+	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/release"
 )
 
@@ -258,37 +259,9 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 			req.SetSeedTime(durationpb.New(seedTime))
 		}
 	}
-	var resp *pluginv1.AddDownloadResponse
-	if rel.Protocol == core.ProtocolTorrent && rel.MagnetURL != "" && !client.GetPrefersTorrentFile() {
-		req.SetMagnetUrl(rel.MagnetURL)
-		resp, err = api.AddDownload(ctx, req)
-		if connect.CodeOf(err) == connect.CodeUnimplemented && rel.DownloadURL != "" {
-			req.ClearMagnetUrl()
-			if err = r.releaseFile(ctx, rel, req); err == nil {
-				resp, err = api.AddDownload(ctx, req)
-			}
-		}
-	} else {
-		if err = r.releaseFile(ctx, rel, req); err == nil {
-			resp, err = api.AddDownload(ctx, req)
-		}
-	}
+	resp, err := r.addDownload(ctx, api, client, rel, req)
 	if err != nil {
-		if errors.Is(err, errReleaseUnavailable) {
-			return core.Download{}, err
-		}
-		switch connect.CodeOf(err) {
-		case connect.CodeFailedPrecondition:
-			// The client refused the release, as Radarr's
-			// ReleaseBlockedException and ReleaseDownloadException: the
-			// release fails, not the client.
-		case connect.CodeUnavailable, connect.CodeUnauthenticated, connect.CodePermissionDenied, connect.CodeDeadlineExceeded:
-			return core.Download{}, fmt.Errorf("%w: %s: %w", errClientUnavailable, client.GetName(), err)
-		}
-		return core.Download{}, fmt.Errorf("download client %s: %w", client.GetName(), err)
-	}
-	if resp.GetDownloadId() == "" {
-		return core.Download{}, fmt.Errorf("download client %s returned no download ID", client.GetName())
+		return core.Download{}, err
 	}
 
 	d := core.Download{
@@ -365,6 +338,99 @@ func (r *Runtime) grab(ctx context.Context, rn *run, g grabRequest) (core.Downlo
 	}
 	r.logger().InfoContext(ctx, "grabbed release", "release", rel.Title, "item", d.ItemID, "client", client.GetName(), "indexer", rel.IndexerName)
 	return d, nil
+}
+
+// addDownload sends a release to a download client: its magnet link, or
+// its torrent file or NZB fetched from its indexer. A client that cannot
+// be reached fails with errClientUnavailable.
+func (r *Runtime) addDownload(ctx context.Context, api pluginv1connect.DownloadClientProviderServiceClient, client Client, rel *Release, req *pluginv1.AddDownloadRequest) (*pluginv1.AddDownloadResponse, error) {
+	var resp *pluginv1.AddDownloadResponse
+	var err error
+	if rel.Protocol == core.ProtocolTorrent && rel.MagnetURL != "" && !client.GetPrefersTorrentFile() {
+		req.SetMagnetUrl(rel.MagnetURL)
+		resp, err = api.AddDownload(ctx, req)
+		if connect.CodeOf(err) == connect.CodeUnimplemented && rel.DownloadURL != "" {
+			req.ClearMagnetUrl()
+			if err = r.releaseFile(ctx, rel, req); err == nil {
+				resp, err = api.AddDownload(ctx, req)
+			}
+		}
+	} else {
+		if err = r.releaseFile(ctx, rel, req); err == nil {
+			resp, err = api.AddDownload(ctx, req)
+		}
+	}
+	if err != nil {
+		if errors.Is(err, errReleaseUnavailable) {
+			return nil, err
+		}
+		switch connect.CodeOf(err) {
+		case connect.CodeFailedPrecondition:
+			// The client refused the release, as Radarr's
+			// ReleaseBlockedException and ReleaseDownloadException: the
+			// release fails, not the client.
+		case connect.CodeUnavailable, connect.CodeUnauthenticated, connect.CodePermissionDenied, connect.CodeDeadlineExceeded:
+			return nil, fmt.Errorf("%w: %s: %w", errClientUnavailable, client.GetName(), err)
+		}
+		return nil, fmt.Errorf("download client %s: %w", client.GetName(), err)
+	}
+	if resp.GetDownloadId() == "" {
+		return nil, fmt.Errorf("download client %s returned no download ID", client.GetName())
+	}
+	return resp, nil
+}
+
+// SendRelease sends a release a search found to a download client
+// without a movie or series, as Prowlarr's
+// DownloadService.SendReportToClient: the download is the client's
+// alone, neither tracked nor imported. series puts it in the client's
+// category for series, else in that for movies. pluginID and clientID
+// name the client; empty for one to choose by the release's protocol.
+func (r *Runtime) SendRelease(ctx context.Context, rel *Release, series bool, pluginID, clientID string) (Client, error) {
+	if !rel.Protocol.Valid() {
+		return Client{}, fmt.Errorf("%w: release has no protocol", core.ErrInvalid)
+	}
+	rn, err := r.newRun(ctx)
+	if err != nil {
+		return Client{}, err
+	}
+	ch := clientChoice{protocol: rel.Protocol, pluginID: pluginID, clientID: clientID, indexer: rel.IndexerName}
+	if ix, ok := rn.indexer(ctx, rel.IndexerRef()); ok {
+		ch.indexerClient = ix.GetDownloadClientId()
+	}
+	client, err := r.chooseClient(ctx, ch)
+	if err != nil {
+		return Client{}, err
+	}
+	api := r.clientAPI(client.PluginID)
+	if api == nil {
+		return Client{}, fmt.Errorf("%w: %w: plugin %s is not ready", core.ErrConflict, errClientUnavailable, client.PluginID)
+	}
+	kind := pluginv1.DownloadKind_DOWNLOAD_KIND_MOVIE
+	if series {
+		kind = pluginv1.DownloadKind_DOWNLOAD_KIND_SERIES
+	}
+	req := pluginv1.AddDownloadRequest_builder{
+		ClientId: new(client.GetId()), Title: new(rel.Title), Kind: new(kind), InfoHash: new(rel.InfoHash),
+		Details: pluginv1.DownloadDetails_builder{Indexer: new(rel.IndexerName)}.Build(),
+	}.Build()
+	if rel.Protocol == core.ProtocolTorrent {
+		ratio, seedTime := rn.seedSettings(ctx, rel, false)
+		if ratio > 0 {
+			req.SetSeedRatio(ratio)
+		}
+		if seedTime > 0 {
+			req.SetSeedTime(durationpb.New(seedTime))
+		}
+	}
+	if _, err := r.addDownload(ctx, api, client, rel, req); err != nil {
+		if errors.Is(err, errReleaseUnavailable) || errors.Is(err, errClientUnavailable) {
+			return Client{}, fmt.Errorf("%w: %w", core.ErrConflict, err)
+		}
+		return Client{}, err
+	}
+	r.logger().InfoContext(ctx, "sent release", "release", rel.Title, "client", client.GetName(), "indexer", rel.IndexerName)
+	return client, nil
 }
 
 // releaseFile fetches a release's torrent file or NZB from its indexer

@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -48,10 +49,19 @@ func (s *DownloadService) ListDownloadClients(ctx context.Context, _ *acquisitio
 }
 
 // GrabRelease sends a release to a download client for a movie or
-// episodes.
+// episodes, or for no item, untracked.
 func (s *DownloadService) GrabRelease(ctx context.Context, req *acquisitionv1.GrabReleaseRequest) (*acquisitionv1.GrabReleaseResponse, error) {
 	if _, err := admin(ctx); err != nil {
 		return nil, err
+	}
+	if req.GetItemId() == "" {
+		// Television categories are 5000 to 5999.
+		series := slices.ContainsFunc(req.GetRelease().GetCategories(), func(c int32) bool { return c >= 5000 && c < 6000 })
+		client, err := s.rt.SendRelease(ctx, releaseFromProto(req.GetRelease()), series, req.GetClientPluginId(), req.GetClientId())
+		if err != nil {
+			return nil, failedPrecondition(ctx, err)
+		}
+		return acquisitionv1.GrabReleaseResponse_builder{ClientName: new(client.GetName())}.Build(), nil
 	}
 	id, err := core.ParseID(req.GetItemId())
 	if err != nil {

@@ -844,7 +844,8 @@ type GrabReleaseRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	// The movie the release is for, or the wanted series, season or episode
-	// whose episodes it holds.
+	// whose episodes it holds; unset to send the release to the client
+	// alone, neither tracked nor imported, as Prowlarr's searches grab.
 	ItemId *string
 	// A release as SearchReleases returned it.
 	Release *Release
@@ -875,10 +876,13 @@ func (b0 GrabReleaseRequest_builder) Build() *GrabReleaseRequest {
 }
 
 type GrabReleaseResponse struct {
-	state           protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Item *QueueItem             `protobuf:"bytes,1,opt,name=item"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Item        *QueueItem             `protobuf:"bytes,1,opt,name=item"`
+	xxx_hidden_ClientName  *string                `protobuf:"bytes,2,opt,name=client_name,json=clientName"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *GrabReleaseResponse) Reset() {
@@ -913,8 +917,23 @@ func (x *GrabReleaseResponse) GetItem() *QueueItem {
 	return nil
 }
 
+func (x *GrabReleaseResponse) GetClientName() string {
+	if x != nil {
+		if x.xxx_hidden_ClientName != nil {
+			return *x.xxx_hidden_ClientName
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *GrabReleaseResponse) SetItem(v *QueueItem) {
 	x.xxx_hidden_Item = v
+}
+
+func (x *GrabReleaseResponse) SetClientName(v string) {
+	x.xxx_hidden_ClientName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
 }
 
 func (x *GrabReleaseResponse) HasItem() bool {
@@ -924,14 +943,29 @@ func (x *GrabReleaseResponse) HasItem() bool {
 	return x.xxx_hidden_Item != nil
 }
 
+func (x *GrabReleaseResponse) HasClientName() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
 func (x *GrabReleaseResponse) ClearItem() {
 	x.xxx_hidden_Item = nil
+}
+
+func (x *GrabReleaseResponse) ClearClientName() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_ClientName = nil
 }
 
 type GrabReleaseResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// The tracked download; unset for a release sent without an item.
 	Item *QueueItem
+	// The name of the client the release went to.
+	ClientName *string
 }
 
 func (b0 GrabReleaseResponse_builder) Build() *GrabReleaseResponse {
@@ -939,6 +973,10 @@ func (b0 GrabReleaseResponse_builder) Build() *GrabReleaseResponse {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Item = b.Item
+	if b.ClientName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_ClientName = b.ClientName
+	}
 	return m0
 }
 
@@ -4303,9 +4341,11 @@ const file_mavio_acquisition_v1_download_proto_rawDesc = "" +
 	"\aitem_id\x18\x01 \x01(\tB\b\xbaH\x05r\x03\xb0\x01\x01R\x06itemId\x12?\n" +
 	"\arelease\x18\x02 \x01(\v2\x1d.mavio.acquisition.v1.ReleaseB\x06\xbaH\x03\xc8\x01\x01R\arelease\x12(\n" +
 	"\x10client_plugin_id\x18\x03 \x01(\tR\x0eclientPluginId\x12\x1b\n" +
-	"\tclient_id\x18\x04 \x01(\tR\bclientId\"J\n" +
+	"\tclient_id\x18\x04 \x01(\tR\bclientId\"k\n" +
 	"\x13GrabReleaseResponse\x123\n" +
-	"\x04item\x18\x01 \x01(\v2\x1f.mavio.acquisition.v1.QueueItemR\x04item\"\xf5\x05\n" +
+	"\x04item\x18\x01 \x01(\v2\x1f.mavio.acquisition.v1.QueueItemR\x04item\x12\x1f\n" +
+	"\vclient_name\x18\x02 \x01(\tR\n" +
+	"clientName\"\xf5\x05\n" +
 	"\tQueueItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\tR\x06itemId\x12\x1b\n" +
