@@ -251,7 +251,7 @@ export function SettingsScreen() {
         <SidebarResizer />
       </aside>
       <main className="min-w-0 flex-1 px-14 py-10">
-        <div className="max-w-[900px]">
+        <div className="mx-auto max-w-[900px]">
           <SectionView id={id} chosen={chosen} />
         </div>
       </main>
