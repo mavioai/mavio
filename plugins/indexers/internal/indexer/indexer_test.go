@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -12,6 +11,12 @@ import (
 	"testing"
 	"testing/synctest"
 	"time"
+
+	"connectrpc.com/connect"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/mavioai/mavio/libs/plugin/challenge"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
 // handlerTransport answers requests with a handler, without a network.
@@ -422,34 +427,77 @@ func TestIsCloudflareProtected(t *testing.T) {
 	}
 }
 
-func TestFlareSolverr(t *testing.T) {
-	synctest.Test(t, func(t *testing.T) {
-		h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.Host {
-			case "solver":
-				fmt.Fprint(w, `{"status":"ok","solution":{"userAgent":"Solved/1","cookies":[{"name":"cf_clearance","value":"yes"}]}}`)
-			default:
-				if c, err := r.Cookie("cf_clearance"); err == nil && c.Value == "yes" && r.UserAgent() == "Solved/1" {
-					fmt.Fprint(w, "a 1\n")
-					return
+// fakeSolver solves challenges with a cookie, or fails with err.
+type fakeSolver struct {
+	err   error
+	got   []*pluginv1.SolveChallengeRequest
+	agent string
+}
+
+func (s *fakeSolver) SolveChallenge(_ context.Context, req *pluginv1.SolveChallengeRequest) (*pluginv1.SolveChallengeResponse, error) {
+	s.got = append(s.got, req)
+	if s.err != nil {
+		return nil, s.err
+	}
+	sol := pluginv1.ChallengeSolution_builder{
+		UserAgent: proto.String(s.agent),
+		Cookies:   []*pluginv1.Cookie{pluginv1.Cookie_builder{Name: proto.String("cf_clearance"), Value: proto.String("yes")}.Build()},
+	}.Build()
+	return pluginv1.SolveChallengeResponse_builder{Solution: sol}.Build(), nil
+}
+
+func TestSolveChallenge(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if c, err := r.Cookie("cf_clearance"); err == nil && c.Value == "yes" && r.UserAgent() == "Solved/1" {
+			fmt.Fprint(w, "a 1\n")
+			return
+		}
+		w.Header().Set("Server", "cloudflare")
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprint(w, "<title>Just a moment...</title>")
+	})
+	site := &fakeSite{info: Info{SupportsSearch: true}, chain: func(*Query) *Chain { return pages("http://site/") }}
+	px := pluginv1.Proxy_builder{Id: proto.String("p1"), Kind: pluginv1.ProxyKind_PROXY_KIND_HTTP.Enum(), Host: proto.String("proxy"), Port: proto.Int32(8080)}.Build()
+	for _, tt := range []struct {
+		name   string
+		solver *fakeSolver
+		want   error
+	}{
+		{"no solver", nil, ErrCloudflare},
+		{"no solver plugin", &fakeSolver{err: connect.NewError(connect.CodeUnavailable, errors.New("no solver"))}, ErrCloudflare},
+		{"failed", &fakeSolver{err: connect.NewError(connect.CodeDeadlineExceeded, errors.New("timeout"))}, challenge.ErrUnsolved},
+		{"solved", &fakeSolver{agent: "Solved/1"}, nil},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ix := newIndexer(t, site, h)
+			ix.Session.proxy = px
+			if tt.solver != nil {
+				ix.Session.solver = tt.solver
+			}
+			rs, err := ix.Search(t.Context(), &Query{Term: "x"})
+			if tt.want != nil {
+				if !errors.Is(err, tt.want) {
+					t.Errorf("Search() error got = %v, want = %v", err, tt.want)
 				}
-				w.Header().Set("Server", "cloudflare")
-				w.WriteHeader(http.StatusForbidden)
-				fmt.Fprint(w, "<title>Just a moment...</title>")
+				return
+			}
+			if err != nil || len(rs) != 1 {
+				t.Fatalf("Search() got = %v, %v, want = 1 release", titles(rs), err)
+			}
+			if got := tt.solver.got[0].GetProxyId(); got != "p1" {
+				t.Errorf("proxy ID got = %q, want = p1", got)
+			}
+			if got := tt.solver.got[0].GetChallenge().GetUrl(); got != "http://site/" {
+				t.Errorf("challenge URL got = %q, want = http://site/", got)
+			}
+			if got := ix.Session.client.solvedAgent("site", px); got != "Solved/1" {
+				t.Errorf("solved agent got = %q, want = Solved/1", got)
+			}
+			if got := ix.Session.client.solvedAgent("site", nil); got != "" {
+				t.Errorf("solved agent without the proxy got = %q, want = none", got)
 			}
 		})
-		site := &fakeSite{info: Info{SupportsSearch: true}, chain: func(*Query) *Chain { return pages("http://site/") }}
-		ix := newIndexer(t, site, h)
-		if _, err := ix.Search(t.Context(), &Query{Term: "x"}); !errors.Is(err, ErrCloudflare) {
-			t.Errorf("without FlareSolverr error got = %v, want = ErrCloudflare", err)
-		}
-		ix = newIndexer(t, site, h)
-		ix.Session.solver = &Proxy{Kind: ProxyFlareSolverr, Host: "http://solver"}
-		rs, err := ix.Search(t.Context(), &Query{Term: "x"})
-		if err != nil || len(rs) != 1 {
-			t.Errorf("with FlareSolverr got = %v, %v, want = 1 release", titles(rs), err)
-		}
-	})
+	}
 }
 
 func TestRateLimitSpacing(t *testing.T) {
@@ -472,60 +520,4 @@ func TestRateLimitSpacing(t *testing.T) {
 			}
 		}
 	})
-}
-
-func TestSelectProxies(t *testing.T) {
-	proxies := []Proxy{
-		{Kind: ProxySOCKS5, Host: "a:1", Tags: []string{"x"}},
-		{Kind: ProxyFlareSolverr, Host: "http://fs", Tags: []string{"y"}},
-		{Kind: ProxyHTTP, Host: "b:2", Tags: []string{"y"}},
-	}
-	for _, tt := range []struct {
-		tags          []string
-		proxy, solver string
-	}{
-		{[]string{"x", "y"}, "a:1", "http://fs"},
-		{[]string{"y"}, "b:2", "http://fs"},
-		{nil, "", ""},
-	} {
-		p, s := SelectProxies(proxies, tt.tags)
-		var gp, gs string
-		if p != nil {
-			gp = p.Host
-		}
-		if s != nil {
-			gs = s.Host
-		}
-		if gp != tt.proxy || gs != tt.solver {
-			t.Errorf("SelectProxies(%v) got = %q %q, want = %q %q", tt.tags, gp, gs, tt.proxy, tt.solver)
-		}
-	}
-}
-
-func TestSOCKS4(t *testing.T) {
-	for _, tt := range []struct {
-		host string
-		want []byte
-	}{
-		{"10.0.0.1", []byte{4, 1, 0, 80, 10, 0, 0, 1, 'u', 0}},
-		{"example.org", append([]byte{4, 1, 0, 80, 0, 0, 0, 1, 'u', 0}, "example.org\x00"...)},
-	} {
-		client, server := net.Pipe()
-		got := make(chan []byte, 1)
-		go func() {
-			buf := make([]byte, 64)
-			n, _ := server.Read(buf)
-			got <- buf[:n]
-			_, _ = server.Write([]byte{0, 0x5a, 0, 0, 0, 0, 0, 0})
-		}()
-		d := &socks4Dialer{user: "u"}
-		if err := d.connect(client, tt.host, 80); err != nil {
-			t.Errorf("connect(%s) error = %v", tt.host, err)
-		}
-		if g := <-got; !slices.Equal(g, tt.want) {
-			t.Errorf("connect(%s) sent got = %v, want = %v", tt.host, g, tt.want)
-		}
-		client.Close()
-		server.Close()
-	}
 }

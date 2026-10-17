@@ -2,8 +2,6 @@ package indexer
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -15,8 +13,13 @@ import (
 	"sync"
 	"time"
 
+	"connectrpc.com/connect"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
+
+	"github.com/mavioai/mavio/libs/plugin/challenge"
+	"github.com/mavioai/mavio/libs/plugin/proxy"
+	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 )
 
 // DefaultUserAgent is the User-Agent of requests that set none.
@@ -30,16 +33,19 @@ const (
 
 // Client sends the requests of all indexers: it spaces requests to each
 // host by their rate limits, as Prowlarr's RateLimitService does, sends
-// them through proxies and solves challenges with FlareSolverr.
+// them through the server's proxies and has the server solve challenges.
 type Client struct {
 	// Transport replaces the transports through proxies, for tests.
 	Transport http.RoundTripper
 	UserAgent string
 
-	mu         sync.Mutex
-	next       map[string]time.Time
+	mu sync.Mutex
+	// next is when each host may be sent another request.
+	next map[string]time.Time
+	// transports are by proxy ID, "" for none.
 	transports map[string]http.RoundTripper
-	// User agents FlareSolverr solved hosts' challenges with.
+	// solvedAgents are the user agents hosts' challenges were solved
+	// with, by solvedKey.
 	solvedAgents map[string]string
 }
 
@@ -48,9 +54,11 @@ func NewClient() *Client {
 	return &Client{UserAgent: DefaultUserAgent}
 }
 
-// Session returns a session sending requests through the proxies given.
-func (c *Client) Session(proxy, solver *Proxy) *Session {
-	return &Session{client: c, proxy: proxy, solver: solver}
+// Session returns a session sending requests through the server's proxy
+// p (nil for none) and solving challenges with solver (nil to leave them
+// unsolved).
+func (c *Client) Session(p *pluginv1.Proxy, solver challenge.Solver) *Session {
+	return &Session{client: c, proxy: p, solver: solver}
 }
 
 // wait waits until the host may be sent another request, at least
@@ -73,14 +81,21 @@ func (c *Client) wait(ctx context.Context, host string, interval time.Duration) 
 	return sleep(ctx, at.Sub(now))
 }
 
-func (c *Client) transport(p *Proxy) http.RoundTripper {
+// local reports the hosts reached directly whichever the proxy, as
+// Prowlarr's BypassLocalAddresses: those of this machine and the local
+// network.
+var local = proxy.Bypass([]string{
+	"<local>", "localhost", "127.0.0.0/8", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
+})
+
+// transport returns the transport through a proxy. A configuration
+// replaces its plugin's proxies, sessions with them, and their
+// transports.
+func (c *Client) transport(p *pluginv1.Proxy) http.RoundTripper {
 	if c.Transport != nil {
 		return c.Transport
 	}
-	key := ""
-	if u := p.URL(); u != nil {
-		key = u.String()
-	}
+	key := p.GetId()
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.transports == nil {
@@ -88,31 +103,49 @@ func (c *Client) transport(p *Proxy) http.RoundTripper {
 	}
 	t := c.transports[key]
 	if t == nil {
-		t = newTransport(p)
+		t = proxy.Transport(p, local)
 		c.transports[key] = t
 	}
 	return t
 }
 
-func (c *Client) solvedAgent(host string) string {
+// Forget drops the transports through proxies, for a configuration
+// whose proxies may have changed.
+func (c *Client) Forget() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.solvedAgents[host]
+	for _, t := range c.transports {
+		if t, ok := t.(*http.Transport); ok {
+			t.CloseIdleConnections()
+		}
+	}
+	c.transports = nil
 }
 
-func (c *Client) setSolvedAgent(host, agent string) {
+// solvedKey keys a host's solved agent: a solution holds only through the
+// proxy it was solved through.
+func solvedKey(host string, p *pluginv1.Proxy) string { return host + "\x00" + p.GetId() }
+
+func (c *Client) solvedAgent(host string, p *pluginv1.Proxy) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.solvedAgents[solvedKey(host, p)]
+}
+
+func (c *Client) setSolvedAgent(host string, p *pluginv1.Proxy, agent string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.solvedAgents == nil {
 		c.solvedAgents = map[string]string{}
 	}
-	c.solvedAgents[host] = agent
+	c.solvedAgents[solvedKey(host, p)] = agent
 }
 
 // Session sends an indexer's requests.
 type Session struct {
-	client        *Client
-	proxy, solver *Proxy
+	client *Client
+	proxy  *pluginv1.Proxy
+	solver challenge.Solver
 	// Encoding decodes responses whose requests set none; the response's
 	// charset, else UTF-8, when nil.
 	Encoding encoding.Encoding
@@ -121,8 +154,8 @@ type Session struct {
 }
 
 // Do sends a request, following redirects when it asks to, and solving
-// Cloudflare's challenges when the indexer has a FlareSolverr. Error
-// statuses are returned as responses.
+// Cloudflare's and DDoS-Guard's challenges with the session's solver.
+// Error statuses are returned as responses.
 func (s *Session) Do(ctx context.Context, r *Request) (*Response, error) {
 	req := *r
 	req.Cookies = maps.Clone(r.Cookies)
@@ -154,20 +187,39 @@ func (s *Session) Do(ctx context.Context, r *Request) (*Response, error) {
 	return nil, fmt.Errorf("%s redirected more than %d times", r.URL, maxRedirects)
 }
 
-// do sends a request once, solving a challenge if one answers.
+// do sends a request once, solving a challenge if one answers. Without a
+// solver plugin, the challenge is returned as it is.
 func (s *Session) do(ctx context.Context, r *Request) (*Response, error) {
 	resp, err := s.send(ctx, r, "")
 	if err != nil || s.solver == nil || !IsCloudflareProtected(resp) {
 		return resp, err
 	}
-	solution, err := s.solve(ctx, r)
+	sol, err := s.solve(ctx, r)
+	if connect.CodeOf(err) == connect.CodeUnavailable {
+		return resp, nil
+	}
 	if err != nil {
 		return nil, err
 	}
-	host := hostOf(r.URL)
-	s.client.setSolvedAgent(host, solution.UserAgent)
-	maps.Copy(r.Cookies, solution.cookies())
-	return s.send(ctx, r, solution.UserAgent)
+	s.client.setSolvedAgent(hostOf(r.URL), s.proxy, sol.GetUserAgent())
+	for _, c := range sol.GetCookies() {
+		r.Cookies[c.GetName()] = c.GetValue()
+	}
+	return s.send(ctx, r, sol.GetUserAgent())
+}
+
+// solve has the server solve the challenge answering a request, through
+// the session's proxy.
+func (s *Session) solve(ctx context.Context, r *Request) (*pluginv1.ChallengeSolution, error) {
+	req, err := http.NewRequestWithContext(ctx, r.Method, r.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = r.Header.Clone()
+	if req.Header == nil {
+		req.Header = http.Header{}
+	}
+	return challenge.Solve(ctx, s.solver, req, r.Body, s.proxy.GetId(), 0)
 }
 
 func (s *Session) send(ctx context.Context, r *Request, agent string) (*Response, error) {
@@ -198,7 +250,7 @@ func (s *Session) send(ctx context.Context, r *Request, agent string) (*Response
 		req.Header[k] = slices.Clone(v)
 	}
 	if agent == "" && req.Header.Get("User-Agent") == "" && s.solver != nil {
-		agent = s.client.solvedAgent(host)
+		agent = s.client.solvedAgent(host, s.proxy)
 	}
 	switch {
 	case agent != "":
@@ -297,86 +349,4 @@ func sleep(ctx context.Context, d time.Duration) error {
 	case <-t.C:
 		return nil
 	}
-}
-
-// solution is FlareSolverr's solution of a challenge.
-type solution struct {
-	UserAgent string `json:"userAgent"`
-	Cookies   []struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
-	} `json:"cookies"`
-}
-
-func (s *solution) cookies() map[string]string {
-	m := map[string]string{}
-	for _, c := range s.Cookies {
-		m[c.Name] = c.Value
-	}
-	return m
-}
-
-// ErrFlareSolverr is returned when FlareSolverr fails to solve a challenge.
-var ErrFlareSolverr = errors.New("FlareSolverr failed")
-
-// solve asks FlareSolverr to solve the challenge answering a request, as
-// Prowlarr's FlareSolverr proxy does.
-func (s *Session) solve(ctx context.Context, r *Request) (*solution, error) {
-	timeout := s.solver.RequestTimeout
-	if timeout <= 0 {
-		timeout = 60
-	}
-	cmd := map[string]any{"url": r.URL, "maxTimeout": timeout * 1000}
-	if u := s.proxy.URL(); u != nil {
-		u.User = nil
-		p := map[string]any{"url": u.String()}
-		if s.proxy.Username != "" {
-			p["username"], p["password"] = s.proxy.Username, s.proxy.Password
-		}
-		cmd["proxy"] = p
-	}
-	switch r.Method {
-	case "", http.MethodGet:
-		cmd["cmd"] = "request.get"
-	case http.MethodPost:
-		ct := r.Header.Get("Content-Type")
-		if !strings.Contains(strings.ToLower(ct), "application/x-www-form-urlencoded") {
-			return nil, fmt.Errorf("%w: unsupported POST content type %q", ErrFlareSolverr, ct)
-		}
-		cmd["cmd"] = "request.post"
-		cmd["postData"] = string(r.Body)
-		cmd["headers"] = map[string]any{"contentType": ct}
-	default:
-		return nil, fmt.Errorf("%w: unsupported method %s", ErrFlareSolverr, r.Method)
-	}
-	body, err := json.Marshal(cmd)
-	if err != nil {
-		return nil, err
-	}
-	req := &Request{
-		Method:  http.MethodPost,
-		URL:     strings.TrimRight(s.solver.Host, "/") + "/v1",
-		Header:  http.Header{"Content-Type": {"application/json"}, "Accept": {AcceptJSON}},
-		Body:    body,
-		Timeout: time.Duration(timeout+5) * time.Second,
-	}
-	direct := &Session{client: s.client}
-	resp, err := direct.send(ctx, req, "")
-	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrFlareSolverr, err)
-	}
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusInternalServerError {
-		return nil, fmt.Errorf("%w: HTTP %d", ErrFlareSolverr, resp.StatusCode)
-	}
-	var result struct {
-		Message  string    `json:"message"`
-		Solution *solution `json:"solution"`
-	}
-	if err := json.Unmarshal(resp.Body, &result); err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrFlareSolverr, err)
-	}
-	if result.Solution == nil || len(result.Solution.Cookies) == 0 {
-		return nil, fmt.Errorf("%w: no cookies returned: %s", ErrFlareSolverr, result.Message)
-	}
-	return result.Solution, nil
 }

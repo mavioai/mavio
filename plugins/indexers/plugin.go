@@ -14,15 +14,15 @@ import (
 	"connectrpc.com/connect"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/mavioai/mavio/libs/plugin/challenge"
+	"github.com/mavioai/mavio/libs/plugin/proxy"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
 )
 
 // config is the plugin's configuration.
 type config struct {
-	Indexers []indexerConfig `json:"indexers"`
-	// Proxies are the proxies indexers sharing a tag with them use.
-	Proxies     []indexer.Proxy   `json:"proxies"`
+	Indexers    []indexerConfig   `json:"indexers"`
 	Definitions definitionsConfig `json:"definitions"`
 }
 
@@ -47,9 +47,11 @@ type indexerConfig struct {
 	// Priority orders indexers, lower first; 25 when 0.
 	Priority int `json:"priority"`
 	// Tags limit the indexer to items sharing one of them, as the
-	// IndexerTag specifications of Radarr and Sonarr do, and pick the
-	// proxies sharing one.
+	// IndexerTag specifications of Radarr and Sonarr do.
 	Tags []string `json:"tags"`
+	// Proxy is the ID of the server's proxy the indexer is reached
+	// through: the system proxy when unset, none when empty.
+	Proxy *string `json:"proxy"`
 	// QueryLimit and GrabLimit are the most queries and grabs per
 	// LimitsUnit, "day" (the default) or "hour"; the definition's when 0.
 	QueryLimit int    `json:"query_limit"`
@@ -105,6 +107,15 @@ func knownFlag(f string) bool {
 	return false
 }
 
+// proxyID returns the ID of the server's proxy the indexer is reached
+// through, "" for none.
+func (c *indexerConfig) proxyID() string {
+	if c.Proxy == nil {
+		return proxy.SystemID
+	}
+	return *c.Proxy
+}
+
 func (c *indexerConfig) enabled() bool { return c.Enabled == nil || *c.Enabled }
 
 func (c *indexerConfig) priority() int {
@@ -121,8 +132,17 @@ type configured struct {
 	ix  *indexer.Indexer
 }
 
+// hostService is the server's host API the plugin calls: it lists the
+// server's proxies and solves challenges.
+type hostService interface {
+	proxy.Lister
+	challenge.Solver
+}
+
 // plugin implements the plugin's services.
 type plugin struct {
+	// host returns the server's host API, nil before it is reached.
+	host     func() hostService
 	log      *slog.Logger
 	version  string
 	client   *indexer.Client
@@ -136,14 +156,20 @@ type plugin struct {
 	defs     []indexer.Definition
 	byID     map[string]indexer.Definition
 	indexers []*configured
+	// proxies are the server's proxies the configuration names, by ID;
+	// nil without the host API, reaching indexers directly.
+	proxies map[string]*pluginv1.Proxy
+	// solver solves challenges; nil leaves them unsolved.
+	solver challenge.Solver
 	// stop ends the definitions' updates.
 	stop context.CancelFunc
 	done chan struct{}
 }
 
 // newPlugin returns the plugin keeping its state in dataDir: the
-// indexers' statuses and the Cardigann definitions.
-func newPlugin(log *slog.Logger, version, dataDir, hostOS string) (*plugin, error) {
+// indexers' statuses and the Cardigann definitions. host returns the
+// server's host API; it may be nil.
+func newPlugin(log *slog.Logger, version, dataDir, hostOS string, host func() hostService) (*plugin, error) {
 	file := ""
 	if dataDir != "" {
 		file = filepath.Join(dataDir, "status.json")
@@ -154,7 +180,7 @@ func newPlugin(log *slog.Logger, version, dataDir, hostOS string) (*plugin, erro
 	}
 	statuses.SetStarted(time.Now())
 	p := &plugin{
-		log: log, version: version,
+		host: host, log: log, version: version,
 		client:   indexer.NewClient(),
 		statuses: statuses,
 		store: &definitionStore{
@@ -191,8 +217,9 @@ func (p *plugin) Describe(context.Context, *pluginv1.DescribeRequest) (*pluginv1
 
 // Configure takes a configuration: its indexers replace those configured,
 // and the definitions are updated at once and then daily unless updates
-// are turned off.
-func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
+// are turned off. The server configures the plugin again when its
+// proxies change.
+func (p *plugin) Configure(ctx context.Context, req *pluginv1.ConfigureRequest) (*pluginv1.ConfigureResponse, error) {
 	var c config
 	if err := json.Unmarshal([]byte(req.GetConfigJson()), &c); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -200,9 +227,25 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 	if err := c.validate(); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
+	var ids []string
+	for _, ic := range c.Indexers {
+		ids = append(ids, ic.proxyID())
+	}
+	h := p.hostService()
+	var proxies map[string]*pluginv1.Proxy
+	if h != nil {
+		var err error
+		if proxies, err = proxy.List(ctx, h, ids...); err != nil {
+			return nil, connect.NewError(connect.CodeUnavailable, err)
+		}
+	}
 	p.halt()
 	p.mu.Lock()
-	p.cfg = c
+	p.cfg, p.proxies = c, proxies
+	if h != nil {
+		p.solver = h
+	}
+	p.client.Forget()
 	p.store.url = definitionsURL
 	if c.Definitions.URL != "" {
 		p.store.url = c.Definitions.URL
@@ -222,7 +265,15 @@ func (p *plugin) Configure(_ context.Context, req *pluginv1.ConfigureRequest) (*
 	return &pluginv1.ConfigureResponse{}, nil
 }
 
-// validate checks the configuration's indexers and proxies.
+// hostService returns the server's host API, nil when unreached.
+func (p *plugin) hostService() hostService {
+	if p.host == nil {
+		return nil
+	}
+	return p.host()
+}
+
+// validate checks the configuration's indexers.
 func (c *config) validate() error {
 	seen, names := map[string]bool{}, map[string]bool{}
 	for i, ic := range c.Indexers {
@@ -251,11 +302,6 @@ func (c *config) validate() error {
 		}
 		seen[ic.ID], names[strings.ToLower(ic.Name)] = true, true
 	}
-	for i := range c.Proxies {
-		if err := c.Proxies[i].Validate(); err != nil {
-			return fmt.Errorf("proxies[%d]: %w", i, err)
-		}
-	}
 	return nil
 }
 
@@ -265,7 +311,7 @@ func (c *config) validate() error {
 func (p *plugin) build(c config) []*configured {
 	var out []*configured
 	for _, ic := range c.Indexers {
-		ix, def, err := p.newIndexer(ic, c.Proxies)
+		ix, def, err := p.newIndexer(ic, p.proxies)
 		if err != nil {
 			p.log.Error("configure indexer", "indexer", ic.ID, "err", err)
 			continue
@@ -275,8 +321,9 @@ func (p *plugin) build(c config) []*configured {
 	return out
 }
 
-// newIndexer makes an indexer of a definition. p.mu is held.
-func (p *plugin) newIndexer(ic indexerConfig, proxies []indexer.Proxy) (*indexer.Indexer, indexer.Definition, error) {
+// newIndexer makes an indexer of a definition, reached through its proxy
+// among proxies, directly when proxies is nil. p.mu is held.
+func (p *plugin) newIndexer(ic indexerConfig, proxies map[string]*pluginv1.Proxy) (*indexer.Indexer, indexer.Definition, error) {
 	def, ok := p.byID[ic.Definition]
 	if !ok {
 		return nil, def, fmt.Errorf("unknown definition %q", ic.Definition)
@@ -285,7 +332,12 @@ func (p *plugin) newIndexer(ic indexerConfig, proxies []indexer.Proxy) (*indexer
 	if err != nil {
 		return nil, def, err
 	}
-	proxy, solver := indexer.SelectProxies(proxies, ic.Tags)
+	var px *pluginv1.Proxy
+	if id := ic.proxyID(); id != "" && proxies != nil {
+		if px = proxies[id]; px == nil {
+			return nil, def, fmt.Errorf("proxy %s: %w", id, proxy.ErrNotFound)
+		}
+	}
 	limits := def.Limits
 	if ic.QueryLimit > 0 {
 		limits.Queries = ic.QueryLimit
@@ -301,7 +353,7 @@ func (p *plugin) newIndexer(ic indexerConfig, proxies []indexer.Proxy) (*indexer
 	}
 	return &indexer.Indexer{
 		ID: ic.ID, Name: ic.Name, Priority: ic.priority(),
-		Site: site, Session: p.client.Session(proxy, solver), Statuses: p.statuses,
+		Site: site, Session: p.client.Session(px, p.solver), Statuses: p.statuses,
 		Limits: limits, Now: p.now,
 	}, def, nil
 }

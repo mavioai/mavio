@@ -300,7 +300,7 @@ const (
 		"open the site's search page, open the browser's developer tools on the Network tab, refresh the page, " +
 		"select the first request and copy the whole value of its 'cookie:' request header."
 	userAgentHelp   = "From the same request you copied the cookie from, copy the whole value of its 'user-agent:' request header."
-	flareSolverrFmt = "This site may use Cloudflare DDoS Protection, therefore it requires a FlareSolverr proxy to access it."
+	flareSolverrFmt = "This site may use Cloudflare DDoS Protection, therefore it requires a challenge solver plugin to access it."
 	category8000Fmt = "%s does not return categories in its search results. To sync to your apps, include 8000(Other) in your Apps' Sync Categories."
 )
 

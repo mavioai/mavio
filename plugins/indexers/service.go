@@ -16,6 +16,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/mavioai/mavio/libs/plugin/proxy"
 	pluginv1 "github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1"
 	"github.com/mavioai/mavio/plugins/indexers/internal/indexer"
 )
@@ -178,8 +179,12 @@ func (p *plugin) TestIndexer(ctx context.Context, req *pluginv1.TestIndexerReque
 		if err != nil {
 			return nil, err
 		}
+		proxies, err := p.systemProxy(ctx)
+		if err != nil {
+			return nil, err
+		}
 		p.mu.RLock()
-		ix, _, err = p.newIndexer(indexerConfig{ID: id, Definition: req.GetDefinitionId(), Settings: []byte(req.GetSettingsJson())}, p.cfg.Proxies)
+		ix, _, err = p.newIndexer(indexerConfig{ID: id, Definition: req.GetDefinitionId(), Settings: []byte(req.GetSettingsJson())}, proxies)
 		p.mu.RUnlock()
 		if err != nil {
 			return pluginv1.TestIndexerResponse_builder{Failure: proto.String(err.Error())}.Build(), nil
@@ -192,6 +197,26 @@ func (p *plugin) TestIndexer(ctx context.Context, req *pluginv1.TestIndexerReque
 		return pluginv1.TestIndexerResponse_builder{Failure: proto.String(err.Error())}.Build(), nil
 	}
 	return &pluginv1.TestIndexerResponse{}, nil
+}
+
+// systemProxy returns the system proxy by ID, which an indexer tested
+// before it is configured is reached through.
+func (p *plugin) systemProxy(ctx context.Context) (map[string]*pluginv1.Proxy, error) {
+	p.mu.RLock()
+	sys := p.proxies[proxy.SystemID]
+	p.mu.RUnlock()
+	if sys != nil {
+		return map[string]*pluginv1.Proxy{proxy.SystemID: sys}, nil
+	}
+	h := p.hostService()
+	if h == nil {
+		return nil, nil
+	}
+	proxies, err := proxy.List(ctx, h, proxy.SystemID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeUnavailable, err)
+	}
+	return proxies, nil
 }
 
 // searchTimeout bounds each indexer's search.
