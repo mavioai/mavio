@@ -662,7 +662,12 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
               />
             </Row>
           )}
-          {c.command && <ContainerCommand command={c.command} />}
+          {/* Apart from the divider above it, as it is not below a row of its own. */}
+          {c.command && (
+            <div className="pt-2.5">
+              <ContainerCommand command={c.command} />
+            </div>
+          )}
         </>
       )}
       {recreating !== undefined && (
@@ -692,11 +697,15 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
               aria-label={t("plugins.containerAddress")}
               className="min-w-0 flex-1 bg-transparent type-body outline-none placeholder:text-text-tertiary"
             />
-            <Button type="submit" variant="secondary" disabled={!address.trim() || actions.setContainer.isPending}>
+            <Button
+              type="submit"
+              variant="secondary"
+              disabled={!address.trim() || (mode === ContainerMode.EXTERNAL && address.trim().replace(/\/$/, "") === st?.address) || actions.setContainer.isPending}
+            >
               {t("action.save")}
             </Button>
           </form>
-          <p className="px-4 pt-1 type-footnote text-text-secondary">
+          <p className="px-4 py-2.5 type-footnote text-text-secondary">
             {t("plugins.containerCommandsHint", { address: c.commands?.address ?? c.gpuCommands?.address ?? "" })}
           </p>
           {commands(t("plugins.containerCommands"), c.commands)}
