@@ -410,8 +410,8 @@ pub trait HostService: Send + Sync + 'static {
         >,
     > + Send;
     /// ListProxies returns the server's proxies with their credentials, for
-    /// plugins whose configuration schema takes proxies ("x-mavio-options":
-    /// "proxies"); others are denied. The server configures such plugins
+    /// plugins whose configuration schema takes proxies ("x-mavio-options"
+    /// {"source": "proxies"}); others are denied. The server configures such plugins
     /// again when a proxy changes or is deleted.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).

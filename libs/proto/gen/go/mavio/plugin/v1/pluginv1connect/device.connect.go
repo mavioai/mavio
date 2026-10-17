@@ -68,8 +68,8 @@ type HostServiceClient interface {
 	// configures the plugin again when an address changes.
 	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
 	// ListProxies returns the server's proxies with their credentials, for
-	// plugins whose configuration schema takes proxies ("x-mavio-options":
-	// "proxies"); others are denied. The server configures such plugins
+	// plugins whose configuration schema takes proxies ("x-mavio-options"
+	// {"source": "proxies"}); others are denied. The server configures such plugins
 	// again when a proxy changes or is deleted.
 	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
 	// SolveChallenge solves a site's challenge with the ready
@@ -194,8 +194,8 @@ type HostServiceHandler interface {
 	// configures the plugin again when an address changes.
 	ListContainers(context.Context, *v1.ListContainersRequest) (*v1.ListContainersResponse, error)
 	// ListProxies returns the server's proxies with their credentials, for
-	// plugins whose configuration schema takes proxies ("x-mavio-options":
-	// "proxies"); others are denied. The server configures such plugins
+	// plugins whose configuration schema takes proxies ("x-mavio-options"
+	// {"source": "proxies"}); others are denied. The server configures such plugins
 	// again when a proxy changes or is deleted.
 	ListProxies(context.Context, *v1.ListProxiesRequest) (*v1.ListProxiesResponse, error)
 	// SolveChallenge solves a site's challenge with the ready

@@ -52,6 +52,7 @@ type Plugin interface {
 	Ratings() pluginv1connect.RatingsProviderServiceClient
 	Speech() pluginv1connect.SpeechToTextServiceClient
 	Voices() pluginv1connect.TextToSpeechServiceClient
+	ChallengeSolver() pluginv1connect.ChallengeSolverServiceClient
 	// HTTP returns the handler of the plugin's HTTP routes, or nil without
 	// CAPABILITY_HTTP_HANDLER; it expects paths relative to the routes' prefix.
 	HTTP() http.Handler

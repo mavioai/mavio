@@ -51,3 +51,22 @@ func TestGenerateIDs(t *testing.T) {
 		t.Error("GenerateIDs() of invalid JSON err = nil, want = an error")
 	}
 }
+
+func TestUsesOptions(t *testing.T) {
+	for _, tc := range []struct {
+		schema string
+		want   bool
+	}{
+		{`{"properties":{"proxy":{"type":"string","x-mavio-options":{"source":"proxies"}}}}`, true},
+		{`{"properties":{"indexers":{"type":"array","items":{"properties":{"proxy":{"x-mavio-options":{"source":"proxies"}}}}}}}`, true},
+		{`{"properties":{"client":{"x-mavio-options":{"source":"download-clients"}}}}`, false},
+		{`{"properties":{"proxies":{"type":"array"}}}`, false},
+		{``, false},
+	} {
+		m := valid()
+		m.SetConfigSchema(tc.schema)
+		if got := UsesOptions(m, OptionsProxies); got != tc.want {
+			t.Errorf("UsesOptions(%s) got = %v, want = %v", tc.schema, got, tc.want)
+		}
+	}
+}

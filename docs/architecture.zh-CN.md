@@ -660,7 +660,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **去重**：主机、端口与用户名相同的代理即同一个代理，与种类无关；主机按小写比较，IP 地址按其规范形式比较，从不解析域名。名称忽略大小写唯一。重复的代理被拒绝，并指出与之重复的代理。
 * **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
 * **测试**：`TestProxy` 经已保存或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
-* **插件**：schema 带 `"x-mavio-options": "proxies"` 的配置属性取代理的 ID，从服务端的代理中选择（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可列出直连的主机。
+* **插件**：schema 带 `"x-mavio-options": {"source": "proxies"}` 的配置属性取代理的 ID，从服务端的代理中选择（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可列出直连的主机。
 
 ### 17.2 质询求解器
 * **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.Solve`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。

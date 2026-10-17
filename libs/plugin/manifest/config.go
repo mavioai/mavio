@@ -32,6 +32,10 @@ const (
 	// OptionsDownloadClients are the download clients of every download
 	// client provider, as "<plugin>/<client>".
 	OptionsDownloadClients = "download-clients"
+	// OptionsProxies are the server's proxies, by ID. A plugin taking them
+	// reads them with HostService.ListProxies and is configured again when
+	// they change.
+	OptionsProxies = "proxies"
 )
 
 // GenerateIDs returns configJSON with every property its schema marks
@@ -102,4 +106,34 @@ func generate(schema map[string]any, v any) bool {
 // generated reports whether a property's schema marks it generated.
 func generated(s map[string]any) bool {
 	return s["readOnly"] == true && s["format"] == "uuid"
+}
+
+// UsesOptions reports whether the manifest's configuration schema has a
+// property taking its values from source, found through properties and
+// items.
+func UsesOptions(m *pluginv1.Manifest, source string) bool {
+	if m.GetConfigSchema() == "" {
+		return false
+	}
+	var schema map[string]any
+	if json.Unmarshal([]byte(m.GetConfigSchema()), &schema) != nil {
+		return false
+	}
+	return usesOptions(schema, source)
+}
+
+func usesOptions(schema map[string]any, source string) bool {
+	if o, ok := schema[OptionsKeyword].(map[string]any); ok && o["source"] == source {
+		return true
+	}
+	if items, ok := schema["items"].(map[string]any); ok && usesOptions(items, source) {
+		return true
+	}
+	props, _ := schema["properties"].(map[string]any)
+	for _, p := range props {
+		if ps, ok := p.(map[string]any); ok && usesOptions(ps, source) {
+			return true
+		}
+	}
+	return false
 }
