@@ -31,6 +31,7 @@ import { Loading, NotFoundView } from "./ui.tsx";
 // The settings and the player load as they are first opened, or pointed at.
 const SettingsScreen = lazyRouteComponent(() => import("./screens/settings.tsx"), "SettingsScreen");
 const PlayerScreen = lazyRouteComponent(() => import("./screens/player.tsx"), "PlayerScreen");
+const ToolScreen = lazyRouteComponent(() => import("./screens/indexer-search.tsx"), "ToolScreen");
 import { Shell } from "./shell/shell.tsx";
 
 const root = createRootRoute({ component: Shell });
@@ -83,6 +84,9 @@ const settingsSection = createRoute({
 });
 
 // The profile became the settings.
+// An advanced tool pinned to the sidebar.
+const tool = createRoute({ getParentRoute: () => root, path: "/tools/$tool", component: ToolScreen });
+
 const profile = createRoute({
   getParentRoute: () => root,
   path: "/profile",
@@ -211,6 +215,7 @@ export const router = createRouter({
     requests,
     settings,
     settingsSection,
+    tool,
     profile,
     library,
     hub,

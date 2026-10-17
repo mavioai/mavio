@@ -9,7 +9,7 @@ import {
   type ManualImportRequestSchema,
   type RemoveFromQueueRequestSchema,
 } from "@mavio/proto/mavio/acquisition/v1/download_pb";
-import { type Release, ReleaseService } from "@mavio/proto/mavio/acquisition/v1/release_pb";
+import { type Release, type ReleaseSearchType, ReleaseService } from "@mavio/proto/mavio/acquisition/v1/release_pb";
 import {
   type SeriesMonitor,
   type Wanted,
@@ -120,6 +120,41 @@ export function useGrab(server: ServerEntry) {
     mutationFn: async (v: { itemId: string; release: Release; clientPluginId?: string; clientId?: string }) =>
       (await servers.client(DownloadService, server).grabRelease(v)).item,
     onSuccess: () => qc.invalidateQueries({ queryKey: serverKey(server.id, "acquisition", "downloads") }),
+  });
+}
+
+/** A search of a server's indexers by text, as Prowlarr's, run while a search is given. */
+export interface ReleaseSearch {
+  query: string;
+  type?: ReleaseSearchType;
+  /** Newznab categories; empty for those of the type. */
+  categories?: number[];
+  /** The indexers to search; empty for every enabled indexer. */
+  indexers?: { pluginId: string; indexerId: string }[];
+}
+
+/** The releases of a search of a server's indexers by text, and the indexers that failed. */
+export function useReleaseSearch(server: ServerEntry, search: ReleaseSearch | undefined) {
+  const servers = useServersStore();
+  return useQuery({
+    queryKey: serverKey(server.id, "acquisition", "releases", "search", search),
+    queryFn: () => servers.client(ReleaseService, server).searchReleases(search!),
+    enabled: !!search,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+}
+
+/**
+ * Sending a release to a download client without an item: the client's
+ * alone, neither tracked nor imported, as Prowlarr's searches grab. Resolves
+ * to the client's name.
+ */
+export function useSendRelease(server: ServerEntry) {
+  const servers = useServersStore();
+  return useMutation({
+    mutationFn: async (v: { release: Release; clientPluginId?: string; clientId?: string }) =>
+      (await servers.client(DownloadService, server).grabRelease(v)).clientName,
   });
 }
 

@@ -713,6 +713,8 @@ flowchart TD
   - [x] The web UI's acquisition: the wanted movies and series, added and monitored by season or episode, searched and synced by RSS (`WantedService`); a title's releases from the indexers, with their quality, custom formats and rejections, to grab (`SearchReleases`, `GrabRelease`); and the downloads' queue, history, blocklist and manual import (`DownloadService`)
     - [x] Wanted and Downloads in the settings (`apps/web/src/screens/admin/wanted.tsx`, `apps/web/src/screens/admin/downloads.tsx`, `libs/client-ts/src/acquisition.ts`): the missing and cutoff unmet movies and episodes, searched, unmonitored and synced by RSS; the queue, history, blocklist and a folder's manual import
     - [x] An item's acquisition on its details (`apps/web/src/screens/acquire.tsx`): monitoring, the quality profile, automatic and interactive searches with grabbing, and the item's downloads and history
+    - [x] The indexer search (`apps/web/src/screens/indexer-search.tsx`, §6.3.31): the indexers searched by text on every server administered or one, releases sent to a download client without an item (`GrabRelease` without `item_id`), and pinned to the sidebar's Features group
+    - [ ] The indexer search in the Apple, Android and desktop apps
     - [ ] A series' monitoring choices (`SetMonitored` with `series`) and its other wanted settings: tags, minimum availability, new items, season folders
     - [ ] Manual import of files no wanted movie matches, choosing their movie or episodes
     - [ ] Adding movies and series to the wanted from Discover's titles (`AddMovie`, `AddSeries`)

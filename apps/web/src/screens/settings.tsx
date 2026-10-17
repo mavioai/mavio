@@ -1,4 +1,5 @@
-// The settings (docs/clients.md §6.3): those of this browser, its
+// The settings (docs/clients.md §6.3): the advanced tools, for
+// administrators, each pinned to the app's sidebar; those of this browser, its
 // appearance, TV mode, playback and the assistant; the account, on its own page under the
 // user's card, with its credentials and the servers in their order; and
 // those of a server, chosen above them with a Mavio account, the
@@ -61,12 +62,13 @@ import { PluginsSection } from "./plugins.tsx";
 import { RemoteDialog } from "./remote.tsx";
 import { Security, SwitchUser } from "./security.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
-import { isMenu, type MenuId, menuOf, menuSections } from "./settings-menus.ts";
+import { isMenu, isTool, type MenuId, menuOf, menuSections, toolLooks, tools } from "./settings-menus.ts";
+import { IndexerSearch, PinButton } from "./indexer-search.tsx";
 
 /** Where the settings are, which the pages of the sections read. */
 export type { SettingsSearch } from "../search-params.ts";
 
-type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies";
+type SectionId = "appearance" | "playback" | "subtitles-audio" | "assistant" | "account" | "overview" | "activity" | "general" | "devices" | "issues" | "libraries" | "users" | "transcoding" | "storage" | "acquisition" | "wanted" | "downloads" | "subtitles" | "ai" | "conversations" | "plugins" | "tasks" | "backups" | "logs" | "api-keys" | "proxies" | "indexer-search";
 
 const sections: Record<SectionId, { icon: IconName; color: string; title: () => string; admin?: boolean }> = {
   appearance: { icon: "appearance", color: "#5E5CE6", title: () => t("settings.appearance") },
@@ -95,6 +97,7 @@ const sections: Record<SectionId, { icon: IconName; color: string; title: () => 
   proxies: { icon: "network", color: "#30B0C7", title: () => t("settings.proxies"), admin: true },
   plugins: { icon: "plugins", color: "#AF52DE", title: () => t("settings.plugins"), admin: true },
   tasks: { icon: "pending", color: "#5856D6", title: () => t("settings.tasks"), admin: true },
+  "indexer-search": toolLooks["indexer-search"],
 };
 
 const menus: Record<MenuId, { icon: IconName; color: string; title: () => string }> = {
@@ -111,15 +114,17 @@ function lookOf(e: Entry) {
   return isMenu(e) ? menus[e] : sections[e];
 }
 
-/**
- * The groups: this device's sections, and the server's, in the order a
- * server is set up and kept: the server and who reaches it, then the menus
- * of its media, of acquiring media, of what extends it, and of watching
- * over and maintaining it.
- */
-const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account"];
+/** The sections not of the server chosen: this device's, and the tools, which choose their servers themselves. */
+const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account", ...tools];
 
-const allGroups: { title: () => string; entries: Entry[]; server?: boolean }[] = [
+/**
+ * The groups: the advanced tools, for administrators; this device's
+ * sections; and the server's, in the order a server is set up and kept:
+ * the server and who reaches it, then the menus of its media, of acquiring
+ * media, of what extends it, and of watching over and maintaining it.
+ */
+const allGroups: { title: () => string; entries: Entry[]; server?: boolean; tools?: boolean }[] = [
+  { title: () => t("settings.advancedGroup"), entries: [...tools], tools: true },
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "extensions", "maintenance"], server: true },
 ];
@@ -157,8 +162,9 @@ function useChosen(): Chosen | undefined {
  */
 function useGroups(chosen: Chosen | undefined) {
   const shown = (id: SectionId) => !sections[id].admin || !!chosen?.admin;
+  const administers = useAdminServers().length > 0;
   return allGroups
-    .filter((g) => !g.server || chosen)
+    .filter((g) => (!g.server || chosen) && (!g.tools || administers))
     .map((g) => ({
       ...g,
       entries: g.entries.flatMap((e): Entry[] => {
@@ -295,10 +301,11 @@ function ServerChoice({ chosen, section, place = "sidebar" }: { chosen: Chosen; 
   );
 }
 
-/** A section's link in the sidebar. */
+/** A section's link in the sidebar; a tool's with its pin, shown while pinned or pointed at. */
 function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
   const search = useSearch({ strict: false }) as SettingsSearch;
-  return (
+  const pinned = usePrefs().pinned.includes(id);
+  const link = (
     <Link
       to="/settings/$section"
       params={{ section: id }}
@@ -308,8 +315,15 @@ function SidebarLink({ id, current }: { id: SectionId; current: SectionId }) {
       className="flex min-h-10 items-center gap-3 rounded-[10px] px-2 type-body hover:bg-fill data-[status=active]:bg-fill-selected"
     >
       <Tile id={id} />
-      {sections[id].title()}
+      <span className="min-w-0 flex-1 truncate">{sections[id].title()}</span>
     </Link>
+  );
+  if (!isTool(id)) return link;
+  return (
+    <div className="group relative flex flex-col [&>a]:pe-10">
+      {link}
+      <PinButton id={id} className={`absolute end-1 top-1/2 -translate-y-1/2 ${pinned ? "" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"}`} />
+    </div>
   );
 }
 
@@ -572,6 +586,8 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
       return chosen?.admin && <UsersSection key={chosen.server.id} server={chosen.server} />;
     case "plugins":
       return chosen?.admin && <PluginsSection key={chosen.server.id} server={chosen.server} />;
+    case "indexer-search":
+      return <IndexerSearch />;
   }
 }
 

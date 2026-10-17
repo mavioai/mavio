@@ -1,7 +1,8 @@
 // The sidebar of the desktop layout (docs/clients.md §6.3): the wordmark,
-// the assistant, search, Home, the libraries of the shown sign-in and the
-// user at its foot. Collapsed, it is a rail of icons.
-import { useDiscovery, useLibraries } from "@mavio/client-ts";
+// the assistant, search, Home, the advanced tools pinned, the libraries of
+// the shown sign-in and the user at its foot. Collapsed, it is a rail of
+// icons.
+import { useAdminServers, useDiscovery, useLibraries } from "@mavio/client-ts";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
@@ -10,7 +11,8 @@ import { Tip } from "../controls/tooltip.tsx";
 import { discoverLanguage, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { shortcutLabel, useShortcutsShown } from "../keys.ts";
-import { prefs, setPrefs, sidebarWidths } from "../prefs.ts";
+import { prefs, setPrefs, sidebarWidths, usePrefs } from "../prefs.ts";
+import { isTool, toolLooks } from "../screens/settings-menus.ts";
 import { Wordmark } from "../logo.tsx";
 import { libraryIcon } from "../ui.tsx";
 import { UserButton } from "./user-menu.tsx";
@@ -21,6 +23,10 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
   const several = libraries.length > 1;
   const discovers = !!useDiscovery(discoverLanguage).server;
   const shortcuts = useShortcutsShown();
+  // The tools are an administrator's.
+  const administers = useAdminServers().length > 0;
+  const tools = usePrefs().pinned.filter(isTool);
+  const pinned = administers ? tools : [];
   return (
     <nav
       aria-label={t("nav.navigation")}
@@ -53,6 +59,24 @@ export function SidebarPanel({ rail, onToggle }: { rail: boolean; onToggle: () =
         )}
         <NavItem rail={rail} to="/" icon="home" label={t("nav.home")} exact />
         {discovers && <NavItem rail={rail} to="/discover" icon="discover" label={t("nav.discover")} />}
+        {pinned.length > 0 &&
+          (rail ? (
+            <div className="my-2 h-px w-8 bg-border" />
+          ) : (
+            <div className="px-2.5 pt-4 pb-1 type-caption font-semibold text-text-tertiary">{t("nav.features")}</div>
+          ))}
+        {pinned.map((id) => (
+          <Tip key={id} label={toolLooks[id].title()} side="right" disabled={!rail}>
+            <Link to="/tools/$tool" params={{ tool: id }} aria-label={rail ? toolLooks[id].title() : undefined} className={itemClass(rail)}>
+              {({ isActive }) => (
+                <>
+                  <Icon name={toolLooks[id].icon} fill={isActive} size={20} className="shrink-0" />
+                  {!rail && <span className="truncate">{toolLooks[id].title()}</span>}
+                </>
+              )}
+            </Link>
+          </Tip>
+        ))}
         {rail ? (
           <div className="my-2 h-px w-8 bg-border" />
         ) : (

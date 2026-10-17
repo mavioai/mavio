@@ -50,10 +50,12 @@ export interface Prefs {
   assistantVoice: string;
   /** Which recognizer the assistant tries first: the server's or the browser's. */
   assistantRecognition: "server" | "device";
+  /** The advanced tools pinned to the sidebar's Features group, in the order pinned. */
+  pinned: string[];
 }
 
 const key = prefsKey;
-const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, assistantSpeak: true, assistantVoice: "", assistantRecognition: "server" };
+const defaults: Prefs = { appearance: "system", language: "system", tv: false, sidebar: true, quality: "auto", autoplayNext: true, assistantSpeak: true, assistantVoice: "", assistantRecognition: "server", pinned: [] };
 
 function read(): Prefs {
   try {

@@ -713,6 +713,8 @@ flowchart TD
   - [x] Web UI 的获取：想要的电影与剧集，按季或按集添加与监控，搜索与 RSS 同步（`WantedService`）；作品在索引器中的发布，带其质量、自定义格式与拒绝原因，可抓取（`SearchReleases`、`GrabRelease`）；以及下载的队列、历史、黑名单与手动导入（`DownloadService`）
     - [x] 设置中的“想要”与“下载”（`apps/web/src/screens/admin/wanted.tsx`、`apps/web/src/screens/admin/downloads.tsx`、`libs/client-ts/src/acquisition.ts`）：缺失与未达截止质量的电影与分集，可搜索、取消监控与 RSS 同步；队列、历史、黑名单与文件夹的手动导入
     - [x] 详情中条目的获取（`apps/web/src/screens/acquire.tsx`）：监控、质量配置、自动与交互式搜索及抓取，以及该条目的下载与历史
+    - [x] 索引搜索（`apps/web/src/screens/indexer-search.tsx`，§6.3.31）：在所管理的全部服务器或其中一台上按文字搜索索引器，不带条目把发布发送到下载客户端（不带 `item_id` 的 `GrabRelease`），并可固定到侧边栏的“功能”分组
+    - [ ] Apple、Android 与桌面应用中的索引搜索
     - [ ] 剧集的监控选项（带 `series` 的 `SetMonitored`）及其他想要设置：标签、最低可用性、新条目、季文件夹
     - [ ] 手动导入与想要的电影都不匹配的文件，为其选择电影或分集
     - [ ] 从发现的作品将电影与剧集添加到想要（`AddMovie`、`AddSeries`）
