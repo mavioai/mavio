@@ -37,7 +37,9 @@ type acquisitionServer struct {
 	ffmpeg, ffprobe string
 	fake            *fakeServices
 	adminID         string
-	recycleBin      string
+	// token authenticates the administrator on the device e2e.
+	token      connect.ClientOption
+	recycleBin string
 
 	auth        authv1connect.AuthServiceClient
 	system      systemv1connect.SystemServiceClient
@@ -119,7 +121,7 @@ func startAcquisition(t *testing.T, routes map[string]string, processPlugins boo
 	}
 	token := withToken(first.GetAccessToken())
 	s := &acquisitionServer{
-		t: t, url: srv.url, ffmpeg: ffmpeg, ffprobe: ffprobe, fake: fake, adminID: first.GetUser().GetId(), recycleBin: t.TempDir(),
+		t: t, url: srv.url, ffmpeg: ffmpeg, ffprobe: ffprobe, fake: fake, adminID: first.GetUser().GetId(), recycleBin: t.TempDir(), token: token,
 		auth:        auth,
 		system:      systemv1connect.NewSystemServiceClient(http.DefaultClient, srv.url, token),
 		pluginAdmin: systemv1connect.NewPluginManagementServiceClient(http.DefaultClient, srv.url, token),

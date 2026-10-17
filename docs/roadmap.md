@@ -915,14 +915,16 @@ flowchart TD
 - [x] `AssistantService` and the tools in `apps/server`: slot resolution with pinyin, client actions, other devices through `SendCommand`, the activity log; the assistant settings in the server settings and who may use the AI path ([Domain Model](domain.md))
 - [x] Remote tools in `AGENT_SESSION` and `plugins/agent`: declarations, `WatchAgentToolCalls`, `SubmitAgentToolResult`, the server's record of calls by ID, `AddAgentMessages`
 - [x] Code mode in `plugins/agent`, tested under `bun test`
-- [ ] Code mode's QuickJS sandbox checked in the built Bun executable on every platform
+- [x] Code mode's QuickJS sandbox checked in the built Bun executable on macOS (arm64), by `TestAssistantAI`
+- [ ] The same on Linux and Windows
 - [x] Rolling conversations and memory: idle time and days, retention, `EndAgentSession` and consolidation, the memory RPCs and `recall`
 - [x] `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` in `libs/proto`; `plugins/voice` with whisper-asr-webservice, moved from `plugins/subtitles` with its test cases, and the OpenAI-compatible transcription and speech APIs
 - [x] Subtitle transcription as the server's source over the recognizers: `audio_url` and `audio_streams` of `SubtitleVideo` reserved, `/subtitles/audio` replaced by `/speech/audio`, and P26's end-to-end test moved to it
 - [x] Listening and speech: `StartListening`, the WebSocket with Silero VAD ending utterances, `/assistant/speech`, `GetAssistantHints`
 - [x] The web UI: the panel, push to talk, capture by `AudioWorklet`, the browser's `SpeechRecognition` and `speechSynthesis`, server voices, the fast path in the browser, the Assistant settings and the assistant's part of the AI settings
-- [ ] The end-to-end test of **Done when**
-- [ ] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
+- [x] The end-to-end test of **Done when** through the API: `TestAssistant` (the fast path, listening and transcription) and `TestAssistantAI` (code mode, a call interrupted by a restart, memory)
+- [ ] The web UI's part of **Done when**: a spoken request plays a title
+- [x] `read_subtitles`, the tool reading an item's subtitle up to the position the user has reached
 - [ ] Deciding which tools require confirmation beyond `request_title`
 - [ ] Streaming recognition: a bidirectional `StreamSpeech` giving partial text as the user speaks, and the streaming services reached over their WebSockets
 - [ ] The web player: the subtitle offset and queues of several items, which the assistant's actions ask for and the player cannot yet carry out; V listed with the player's shortcuts
@@ -959,7 +961,7 @@ flowchart TD
 | HDR on Linux | The Linux app draws video with OpenGL in a GTK 3 `GtkGLArea`, which presents SDR only, so HDR is tone mapped | Revisit when MyGo's Linux backend can present HDR surfaces |
 | MyGo | `apps/desktop` builds on MyGo, started in September 2026 and still in 0.x, mostly by one maintainer. Its release has no element that places a native surface drawn by another renderer under its native UI, which the player needs for mpv's video (a view on macOS, a child window on Windows, a `GtkGLArea` on Linux) | The video element, done on macOS in the fork `mavioai/mygo` (branch `v0.4.5-mavio`), pinned to a commit and rebased on MyGo's releases; contribute it upstream; Windows with HDR10 next |
 | mpv on macOS | mpv's macOS output cannot embed in a host's view; Mavio's patch in mavio-deps makes it, and must follow mpv's changes to that code | Rebase the patch with each mpv pin; offer it to mpv |
-| Code mode in the Bun executable | pi-durable's code mode runs scripts in quickjs-wasi, a WASM module, which must load inside `plugins/agent`'s Bun executable on every platform | Check first in P29; until it does, conversations offer the tools directly only |
+| Code mode in the Bun executable | pi-durable's code mode runs scripts in quickjs-wasi, a WASM module, which must load inside `plugins/agent`'s Bun executable on every platform | Checked on macOS (arm64) by `TestAssistantAI`, which runs the built executable; Linux and Windows still to check; until it loads, conversations offer the tools directly only |
 | Microphones in browsers | `getUserMedia` works only on secure pages, so a standalone server reached over plain HTTP on the local network cannot record in the web UI | Servers' HTTPS addresses (P28); typed requests elsewhere |
 | Recognizing titles | Recognizers misspell titles and names, Chinese ones as homophones | Hints to recognizers that take them; pinyin and tolerant matching in slot resolution (P29) |
 | The Siri Remote's microphone | tvOS gives apps no recording from the Siri Remote | Dictation in the assistant's field; App Intents |

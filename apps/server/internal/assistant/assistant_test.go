@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"connectrpc.com/connect"
+
 	"github.com/mavioai/mavio/apps/server/internal/assistant/intent"
 	"github.com/mavioai/mavio/apps/server/internal/auth"
 	"github.com/mavioai/mavio/libs/core"
@@ -20,9 +22,15 @@ import (
 type fakeItems struct {
 	libraryv1connect.UnimplementedItemServiceHandler
 	items []*libraryv1.Item
+	// sources are the items' media sources by item ID.
+	sources map[string][]*libraryv1.MediaSource
 }
 
 func (f *fakeItems) ListItems(_ context.Context, req *libraryv1.ListItemsRequest) (*libraryv1.ListItemsResponse, error) {
+	// As the item service, which takes no recursive query without a parent.
+	if req.GetRecursive() && req.GetParentId() == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("recursive query without a parent"))
+	}
 	var out []*libraryv1.Item
 	for _, it := range f.items {
 		if ks := req.GetKinds(); len(ks) > 0 && !slices.Contains(ks, it.GetKind()) {
@@ -39,7 +47,7 @@ func (f *fakeItems) ListItems(_ context.Context, req *libraryv1.ListItemsRequest
 func (f *fakeItems) GetItem(_ context.Context, req *libraryv1.GetItemRequest) (*libraryv1.GetItemResponse, error) {
 	for _, it := range f.items {
 		if it.GetId() == req.GetId() {
-			return libraryv1.GetItemResponse_builder{Item: it}.Build(), nil
+			return libraryv1.GetItemResponse_builder{Item: it, MediaSources: f.sources[it.GetId()]}.Build(), nil
 		}
 	}
 	return nil, errors.New("not found")

@@ -26,14 +26,19 @@ import (
 
 var agentSource = filepath.Join("..", "..", "..", "..", "plugins", "agent")
 
-// agentBuild compiles the agent plugin with Bun once per test binary.
+// agentBuild builds the agent plugin with Bun once per test binary, as its
+// releases are built.
 var agentBuild = sync.OnceValues(func() (string, error) {
-	out := filepath.Join(smokeRoot, "agent")
-	build := exec.Command("bun", "build", "--compile", "src/main.ts", "--outfile", out)
+	dir, err := filepath.Abs(filepath.Join(smokeRoot, "agent"))
+	if err != nil {
+		return "", err
+	}
+	build := exec.Command("bun", "scripts/build.ts", "", dir)
 	build.Dir = agentSource
 	if msg, err := build.CombinedOutput(); err != nil {
 		return "", fmt.Errorf("build the agent plugin: %w\n%s", err, msg)
 	}
+	out := filepath.Join(dir, "plugin")
 	if filepath.Separator == '\\' {
 		out += ".exe"
 	}

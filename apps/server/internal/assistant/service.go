@@ -24,6 +24,7 @@ import (
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/plugin/v1/pluginv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/session/v1/sessionv1connect"
 	"github.com/mavioai/mavio/libs/proto/gen/go/mavio/user/v1/userv1connect"
+	"github.com/mavioai/mavio/libs/subtitle"
 )
 
 // Services are the server's own services the tools call, as the user of
@@ -38,6 +39,9 @@ type Services struct {
 	// none.
 	Discover acquisitionv1connect.DiscoverServiceHandler
 	Requests acquisitionv1connect.RequestServiceHandler
+	// Subtitles reads a text subtitle stream of an item by its index,
+	// once Items has shown the user may see the item; nil reads none.
+	Subtitles func(ctx context.Context, itemID core.ID, index int) (*subtitle.Subtitle, error)
 }
 
 // Config configures a Service.

@@ -534,3 +534,41 @@ func TestAudioStream(t *testing.T) {
 		t.Errorf("audioStream = %d, want = 1 (the original language)", got)
 	}
 }
+
+func TestRead(t *testing.T) {
+	e := newEnv(t)
+	if _, err := e.rt.Read(e.ctx, e.movie.ID, 2); !errors.Is(err, ErrUnavailable) {
+		t.Errorf("Read without extraction: err = %v, want ErrUnavailable", err)
+	}
+	e.rt.Extracted = func(context.Context, core.ID, *core.MediaSource, *core.MediaStream) ([]byte, string, error) {
+		return []byte("1\n00:00:01,000 --> 00:00:02,000\n<i>Hello</i>\n"), "srt", nil
+	}
+	p, err := e.rt.Upload(e.ctx, e.movie.ID, []byte("1\n00:00:03,000 --> 00:00:04,000\nBonjour\n"), "srt", core.SubtitleLanguage{Language: "fr"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	subs, err := e.rt.Item(e.ctx, e.movie.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := -1
+	for _, s := range subs.Streams {
+		if s.Stream.ExternalPath == p {
+			file = s.Stream.Index
+		}
+	}
+	for _, c := range []struct {
+		index int
+		text  string
+		want  error
+	}{{2, "<i>Hello</i>", nil}, {file, "Bonjour", nil}, {1, "", core.ErrNotFound}, {9, "", core.ErrNotFound}} {
+		sub, err := e.rt.Read(e.ctx, e.movie.ID, c.index)
+		if !errors.Is(err, c.want) {
+			t.Errorf("Read(stream %d): err = %v, want %v", c.index, err, c.want)
+			continue
+		}
+		if c.want == nil && (len(sub.Cues) != 1 || sub.Cues[0].Text != c.text) {
+			t.Errorf("Read(stream %d) = %+v, want one cue %q", c.index, sub.Cues, c.text)
+		}
+	}
+}
