@@ -6131,8 +6131,11 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("indexers.sent", bundle: .module, comment: ""), client)
     }
 
-    /// Opens a release's magnet link.
+    /// Copies a release's magnet link, for a torrent client of the user's own.
     public static var indexersMagnet: String { NSLocalizedString("indexers.magnet", bundle: .module, comment: "") }
+
+    /// Shown after copying a release's magnet link.
+    public static var indexersMagnetCopied: String { NSLocalizedString("indexers.magnetCopied", bundle: .module, comment: "") }
 
     /// Opens a release's page on its indexer.
     public static var indexersInfo: String { NSLocalizedString("indexers.info", bundle: .module, comment: "") }

@@ -1924,6 +1924,7 @@ export type MessageKey =
   | 'indexers.send'
   | 'indexers.sent'
   | 'indexers.magnet'
+  | 'indexers.magnetCopied'
   | 'indexers.info'
   | 'indexers.results'
   | 'indexers.page'
@@ -3845,7 +3846,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "indexers.peers": "Peers",
     "indexers.send": "Send to Download Client",
     "indexers.sent": "Sent to {client}",
-    "indexers.magnet": "Open Magnet Link",
+    "indexers.magnet": "Copy Magnet Link",
+    "indexers.magnetCopied": "Magnet Link Copied",
     "indexers.info": "Open Release Page",
     "indexers.results": "{count, plural, one {# release} other {# releases}}",
     "indexers.page": "Page {page} of {pages}",
@@ -5765,7 +5767,8 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "indexers.peers": "做种 / 用户",
     "indexers.send": "发送到下载客户端",
     "indexers.sent": "已发送到 {client}",
-    "indexers.magnet": "打开磁力链接",
+    "indexers.magnet": "复制磁力链接",
+    "indexers.magnetCopied": "已复制磁力链接",
     "indexers.info": "打开发布页面",
     "indexers.results": "{count, plural, other {# 个发布}}",
     "indexers.page": "第 {page} / {pages} 页",

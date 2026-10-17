@@ -3889,8 +3889,10 @@
     <string name="indexers_send">Send to Download Client</string>
     <!-- A release was sent to the named download client. -->
     <string name="indexers_sent">Sent to %s</string>
-    <!-- Opens a release's magnet link. -->
-    <string name="indexers_magnet">Open Magnet Link</string>
+    <!-- Copies a release's magnet link, for a torrent client of the user's own. -->
+    <string name="indexers_magnet">Copy Magnet Link</string>
+    <!-- Shown after copying a release's magnet link. -->
+    <string name="indexers_magnet_copied">Magnet Link Copied</string>
     <!-- Opens a release's page on its indexer. -->
     <string name="indexers_info">Open Release Page</string>
     <!-- How many releases a server's search found. -->

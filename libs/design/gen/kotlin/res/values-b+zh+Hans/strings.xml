@@ -1956,7 +1956,8 @@
     <string name="indexers_peers">做种 / 用户</string>
     <string name="indexers_send">发送到下载客户端</string>
     <string name="indexers_sent">已发送到 %s</string>
-    <string name="indexers_magnet">打开磁力链接</string>
+    <string name="indexers_magnet">复制磁力链接</string>
+    <string name="indexers_magnet_copied">已复制磁力链接</string>
     <string name="indexers_info">打开发布页面</string>
     <plurals name="indexers_results">
         <item quantity="other">%d 个发布</item>

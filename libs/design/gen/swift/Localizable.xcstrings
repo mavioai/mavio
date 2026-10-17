@@ -34868,19 +34868,37 @@
       }
     },
     "indexers.magnet": {
-      "comment": "Opens a release's magnet link.",
+      "comment": "Copies a release's magnet link, for a torrent client of the user's own.",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Open Magnet Link"
+            "value": "Copy Magnet Link"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "打开磁力链接"
+            "value": "复制磁力链接"
+          }
+        }
+      }
+    },
+    "indexers.magnetCopied": {
+      "comment": "Shown after copying a release's magnet link.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Magnet Link Copied"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制磁力链接"
           }
         }
       }
