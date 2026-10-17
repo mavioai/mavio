@@ -83,6 +83,20 @@ func (_u *PluginContainerUpdate) SetNillableUseGpu(v *bool) *PluginContainerUpda
 	return _u
 }
 
+// SetProxy sets the "proxy" field.
+func (_u *PluginContainerUpdate) SetProxy(v string) *PluginContainerUpdate {
+	_u.mutation.SetProxy(v)
+	return _u
+}
+
+// SetNillableProxy sets the "proxy" field if the given value is not nil.
+func (_u *PluginContainerUpdate) SetNillableProxy(v *string) *PluginContainerUpdate {
+	if v != nil {
+		_u.SetProxy(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PluginContainerUpdate) SetUpdatedAt(v time.Time) *PluginContainerUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -159,6 +173,9 @@ func (_u *PluginContainerUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.UseGpu(); ok {
 		_spec.SetField(plugincontainer.FieldUseGpu, field.TypeBool, value)
 	}
+	if value, ok := _u.mutation.Proxy(); ok {
+		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)
 	}
@@ -234,6 +251,20 @@ func (_u *PluginContainerUpdateOne) SetUseGpu(v bool) *PluginContainerUpdateOne 
 func (_u *PluginContainerUpdateOne) SetNillableUseGpu(v *bool) *PluginContainerUpdateOne {
 	if v != nil {
 		_u.SetUseGpu(*v)
+	}
+	return _u
+}
+
+// SetProxy sets the "proxy" field.
+func (_u *PluginContainerUpdateOne) SetProxy(v string) *PluginContainerUpdateOne {
+	_u.mutation.SetProxy(v)
+	return _u
+}
+
+// SetNillableProxy sets the "proxy" field if the given value is not nil.
+func (_u *PluginContainerUpdateOne) SetNillableProxy(v *string) *PluginContainerUpdateOne {
+	if v != nil {
+		_u.SetProxy(*v)
 	}
 	return _u
 }
@@ -343,6 +374,9 @@ func (_u *PluginContainerUpdateOne) sqlSave(ctx context.Context) (_node *PluginC
 	}
 	if value, ok := _u.mutation.UseGpu(); ok {
 		_spec.SetField(plugincontainer.FieldUseGpu, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Proxy(); ok {
+		_spec.SetField(plugincontainer.FieldProxy, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(plugincontainer.FieldUpdatedAt, field.TypeTime, value)

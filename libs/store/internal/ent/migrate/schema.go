@@ -1135,6 +1135,7 @@ var (
 		{Name: "address", Type: field.TypeString, Default: ""},
 		{Name: "secrets", Type: field.TypeJSON, Nullable: true},
 		{Name: "use_gpu", Type: field.TypeBool, Default: false},
+		{Name: "proxy", Type: field.TypeString, Default: "system"},
 		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// PluginContainersTable holds the schema information for the "plugin_containers" table.

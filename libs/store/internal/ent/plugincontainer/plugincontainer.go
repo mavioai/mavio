@@ -26,6 +26,8 @@ const (
 	FieldSecrets = "secrets"
 	// FieldUseGpu holds the string denoting the use_gpu field in the database.
 	FieldUseGpu = "use_gpu"
+	// FieldProxy holds the string denoting the proxy field in the database.
+	FieldProxy = "proxy"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
 	// Table holds the table name of the plugincontainer in the database.
@@ -41,6 +43,7 @@ var Columns = []string{
 	FieldAddress,
 	FieldSecrets,
 	FieldUseGpu,
+	FieldProxy,
 	FieldUpdatedAt,
 }
 
@@ -59,6 +62,8 @@ var (
 	DefaultAddress string
 	// DefaultUseGpu holds the default value on creation for the "use_gpu" field.
 	DefaultUseGpu bool
+	// DefaultProxy holds the default value on creation for the "proxy" field.
+	DefaultProxy string
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
@@ -96,6 +101,11 @@ func ByAddress(opts ...sql.OrderTermOption) OrderOption {
 // ByUseGpu orders the results by the use_gpu field.
 func ByUseGpu(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUseGpu, opts...).ToFunc()
+}
+
+// ByProxy orders the results by the proxy field.
+func ByProxy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProxy, opts...).ToFunc()
 }
 
 // ByUpdatedAt orders the results by the updated_at field.

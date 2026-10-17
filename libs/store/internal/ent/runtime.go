@@ -715,8 +715,12 @@ func init() {
 	plugincontainerDescUseGpu := plugincontainerFields[6].Descriptor()
 	// plugincontainer.DefaultUseGpu holds the default value on creation for the use_gpu field.
 	plugincontainer.DefaultUseGpu = plugincontainerDescUseGpu.Default.(bool)
+	// plugincontainerDescProxy is the schema descriptor for proxy field.
+	plugincontainerDescProxy := plugincontainerFields[7].Descriptor()
+	// plugincontainer.DefaultProxy holds the default value on creation for the proxy field.
+	plugincontainer.DefaultProxy = plugincontainerDescProxy.Default.(string)
 	// plugincontainerDescUpdatedAt is the schema descriptor for updated_at field.
-	plugincontainerDescUpdatedAt := plugincontainerFields[7].Descriptor()
+	plugincontainerDescUpdatedAt := plugincontainerFields[8].Descriptor()
 	// plugincontainer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	plugincontainer.DefaultUpdatedAt = plugincontainerDescUpdatedAt.Default.(func() time.Time)
 	// plugincontainerDescID is the schema descriptor for id field.

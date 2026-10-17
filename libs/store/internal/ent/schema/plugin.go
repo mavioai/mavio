@@ -47,6 +47,7 @@ func (PluginContainer) Fields() []ent.Field {
 		field.String("address").Default(""),
 		field.JSON("secrets", map[string]string{}).Optional().Sensitive(),
 		field.Bool("use_gpu").Default(false),
+		field.String("proxy").Default("system"),
 		field.Time("updated_at").Default(time.Now),
 	}
 }

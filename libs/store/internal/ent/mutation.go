@@ -31735,6 +31735,7 @@ type PluginContainerMutation struct {
 	address       *string
 	secrets       *map[string]string
 	use_gpu       *bool
+	proxy         *string
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	done          bool
@@ -32075,6 +32076,42 @@ func (m *PluginContainerMutation) ResetUseGpu() {
 	m.use_gpu = nil
 }
 
+// SetProxy sets the "proxy" field.
+func (m *PluginContainerMutation) SetProxy(s string) {
+	m.proxy = &s
+}
+
+// Proxy returns the value of the "proxy" field in the mutation.
+func (m *PluginContainerMutation) Proxy() (r string, exists bool) {
+	v := m.proxy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProxy returns the old "proxy" field's value of the PluginContainer entity.
+// If the PluginContainer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PluginContainerMutation) OldProxy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProxy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProxy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProxy: %w", err)
+	}
+	return oldValue.Proxy, nil
+}
+
+// ResetProxy resets all changes to the "proxy" field.
+func (m *PluginContainerMutation) ResetProxy() {
+	m.proxy = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *PluginContainerMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -32145,7 +32182,7 @@ func (m *PluginContainerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PluginContainerMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.plugin_id != nil {
 		fields = append(fields, plugincontainer.FieldPluginID)
 	}
@@ -32163,6 +32200,9 @@ func (m *PluginContainerMutation) Fields() []string {
 	}
 	if m.use_gpu != nil {
 		fields = append(fields, plugincontainer.FieldUseGpu)
+	}
+	if m.proxy != nil {
+		fields = append(fields, plugincontainer.FieldProxy)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, plugincontainer.FieldUpdatedAt)
@@ -32187,6 +32227,8 @@ func (m *PluginContainerMutation) Field(name string) (ent.Value, bool) {
 		return m.Secrets()
 	case plugincontainer.FieldUseGpu:
 		return m.UseGpu()
+	case plugincontainer.FieldProxy:
+		return m.Proxy()
 	case plugincontainer.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -32210,6 +32252,8 @@ func (m *PluginContainerMutation) OldField(ctx context.Context, name string) (en
 		return m.OldSecrets(ctx)
 	case plugincontainer.FieldUseGpu:
 		return m.OldUseGpu(ctx)
+	case plugincontainer.FieldProxy:
+		return m.OldProxy(ctx)
 	case plugincontainer.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -32262,6 +32306,13 @@ func (m *PluginContainerMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUseGpu(v)
+		return nil
+	case plugincontainer.FieldProxy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProxy(v)
 		return nil
 	case plugincontainer.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -32345,6 +32396,9 @@ func (m *PluginContainerMutation) ResetField(name string) error {
 		return nil
 	case plugincontainer.FieldUseGpu:
 		m.ResetUseGpu()
+		return nil
+	case plugincontainer.FieldProxy:
+		m.ResetProxy()
 		return nil
 	case plugincontainer.FieldUpdatedAt:
 		m.ResetUpdatedAt()

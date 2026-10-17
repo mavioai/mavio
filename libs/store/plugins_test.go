@@ -64,7 +64,7 @@ func TestPluginContainers(t *testing.T) {
 		}
 		puts := []core.PluginContainer{
 			{PluginID: id, Name: "whisper", Mode: core.ContainerUnset, Secrets: map[string]string{"api-key": "s3cret"}},
-			{PluginID: id, Name: "tts", Mode: core.ContainerManaged, UseGPU: true},
+			{PluginID: id, Name: "tts", Mode: core.ContainerManaged, UseGPU: true, Proxy: core.SystemProxyID},
 			{PluginID: "org.example.other", Name: "whisper", Mode: core.ContainerUnset},
 		}
 		for i := range puts {
@@ -84,7 +84,7 @@ func TestPluginContainers(t *testing.T) {
 		if len(got) != 2 || got[0].Name != "tts" || got[1].Name != "whisper" {
 			t.Fatalf("List = %+v, want tts and whisper", got)
 		}
-		if g := got[0]; g.Mode != core.ContainerManaged || !g.UseGPU || g.Address != "" || len(g.Secrets) != 0 || g.UpdatedAt.IsZero() {
+		if g := got[0]; g.Mode != core.ContainerManaged || !g.UseGPU || g.Proxy != core.SystemProxyID || g.Address != "" || len(g.Secrets) != 0 || g.UpdatedAt.IsZero() {
 			t.Errorf("tts = %+v, want managed with a GPU", g)
 		}
 		if g := got[1]; g.Mode != core.ContainerExternal || g.Address != ext.Address || g.Secrets["api-key"] != "s3cret" || g.UseGPU {

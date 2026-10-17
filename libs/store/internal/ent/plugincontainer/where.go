@@ -80,6 +80,11 @@ func UseGpu(v bool) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldEQ(FieldUseGpu, v))
 }
 
+// Proxy applies equality check predicate on the "proxy" field. It's identical to ProxyEQ.
+func Proxy(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldEQ(FieldProxy, v))
+}
+
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldEQ(FieldUpdatedAt, v))
@@ -363,6 +368,71 @@ func UseGpuEQ(v bool) predicate.PluginContainer {
 // UseGpuNEQ applies the NEQ predicate on the "use_gpu" field.
 func UseGpuNEQ(v bool) predicate.PluginContainer {
 	return predicate.PluginContainer(sql.FieldNEQ(FieldUseGpu, v))
+}
+
+// ProxyEQ applies the EQ predicate on the "proxy" field.
+func ProxyEQ(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldEQ(FieldProxy, v))
+}
+
+// ProxyNEQ applies the NEQ predicate on the "proxy" field.
+func ProxyNEQ(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldNEQ(FieldProxy, v))
+}
+
+// ProxyIn applies the In predicate on the "proxy" field.
+func ProxyIn(vs ...string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldIn(FieldProxy, vs...))
+}
+
+// ProxyNotIn applies the NotIn predicate on the "proxy" field.
+func ProxyNotIn(vs ...string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldNotIn(FieldProxy, vs...))
+}
+
+// ProxyGT applies the GT predicate on the "proxy" field.
+func ProxyGT(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldGT(FieldProxy, v))
+}
+
+// ProxyGTE applies the GTE predicate on the "proxy" field.
+func ProxyGTE(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldGTE(FieldProxy, v))
+}
+
+// ProxyLT applies the LT predicate on the "proxy" field.
+func ProxyLT(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldLT(FieldProxy, v))
+}
+
+// ProxyLTE applies the LTE predicate on the "proxy" field.
+func ProxyLTE(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldLTE(FieldProxy, v))
+}
+
+// ProxyContains applies the Contains predicate on the "proxy" field.
+func ProxyContains(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldContains(FieldProxy, v))
+}
+
+// ProxyHasPrefix applies the HasPrefix predicate on the "proxy" field.
+func ProxyHasPrefix(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldHasPrefix(FieldProxy, v))
+}
+
+// ProxyHasSuffix applies the HasSuffix predicate on the "proxy" field.
+func ProxyHasSuffix(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldHasSuffix(FieldProxy, v))
+}
+
+// ProxyEqualFold applies the EqualFold predicate on the "proxy" field.
+func ProxyEqualFold(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldEqualFold(FieldProxy, v))
+}
+
+// ProxyContainsFold applies the ContainsFold predicate on the "proxy" field.
+func ProxyContainsFold(v string) predicate.PluginContainer {
+	return predicate.PluginContainer(sql.FieldContainsFold(FieldProxy, v))
 }
 
 // UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
