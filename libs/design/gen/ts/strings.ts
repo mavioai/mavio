@@ -4074,7 +4074,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "libraries.create": "添加",
     "libraries.none": "还没有媒体库。添加一个来扫描你的媒体。",
     "libraries.notFound": "此媒体库已不存在。",
-    "libraries.folderCount": "{count} 个文件夹",
+    "libraries.folderCount": "{count, plural, other {# 个文件夹}}",
     "libraries.scan": "扫描",
     "libraries.scanQueued": "已开始扫描",
     "libraries.scanPending": "已有扫描在等待",

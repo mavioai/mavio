@@ -257,9 +257,11 @@ func TestLink(t *testing.T) {
 	dev.AddChange(key.ID(), nil)
 	dev.AddChange(key.ID(), nil)
 	eventually(t, "the missed changes are applied", func() bool { return count() == 3 })
-	if a, _ := st.Settings().Accounts(ctx); a.Cursor != 3 {
-		t.Errorf("cursor = %d, want = 3", a.Cursor)
-	}
+	// The cursor is saved as the transaction applying the changes commits.
+	eventually(t, "the cursor is saved", func() bool {
+		a, _ := st.Settings().Accounts(ctx)
+		return a.Cursor == 3
+	})
 	mu.Lock()
 	if applied[0] != 1 || applied[1] != 2 || applied[2] != 3 {
 		t.Errorf("applied = %v, want [1 2 3]", applied)

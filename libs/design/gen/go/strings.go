@@ -2283,7 +2283,7 @@ var catalog = map[string]map[string]Message{
 		"libraries.create":                        {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "添加"}}}},
 		"libraries.none":                          {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "还没有媒体库。添加一个来扫描你的媒体。"}}}},
 		"libraries.notFound":                      {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "此媒体库已不存在。"}}}},
-		"libraries.folderCount":                   {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Arg: "count"}, {Text: " 个文件夹"}}}},
+		"libraries.folderCount":                   {Plural: "count", Forms: map[plural.Form][]Part{plural.Other: []Part{{Count: true}, {Text: " 个文件夹"}}}},
 		"libraries.scan":                          {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "扫描"}}}},
 		"libraries.scanQueued":                    {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "已开始扫描"}}}},
 		"libraries.scanPending":                   {Plural: "", Forms: map[plural.Form][]Part{plural.Other: []Part{{Text: "已有扫描在等待"}}}},

@@ -5,7 +5,9 @@
 # mise.toml pins for the platform, checked against its SHA-256. Each
 # platform is a folder, dist/mavio-<os>-<arch>, and its archive, a .zip for
 # Windows and a .tar.gz otherwise. Downloads of rclone are kept in
-# $MAVIO_DIST_CACHE, by default ~/.cache/mavio-dist.
+# $MAVIO_DIST_CACHE, by default ~/.cache/mavio-dist. $MAVIO_DIST_JOBS
+# platforms build at once, by default 2: more, built afresh, exhaust the
+# memory of a CI runner.
 # Usage: scripts/dist.sh [os/arch ...]
 set -eu
 cd "$(dirname "$0")/.."
@@ -55,9 +57,18 @@ fetch_rclone() {
 
 rm -rf dist
 mkdir -p dist
-# The platforms build in parallel, as each build's tail is serial.
-pids=
+# The platforms build in parallel, as each build's tail is serial, a few at
+# a time.
+jobs=${MAVIO_DIST_JOBS:-2}
+running=
+failed=0
 for target in $targets; do
+	set -- $running
+	if [ $# -ge "$jobs" ]; then
+		wait "$1" || failed=1
+		shift
+		running=$*
+	fi
 	os=${target%/*}
 	arch=${target#*/}
 	ext=
@@ -74,10 +85,9 @@ for target in $targets; do
 			echo "dist/$name.tar.gz"
 		fi
 	) &
-	pids="$pids $!"
+	running="$running $!"
 done
-failed=0
-for pid in $pids; do
+for pid in $running; do
 	wait "$pid" || failed=1
 done
 exit $failed

@@ -1492,6 +1492,15 @@ public enum MavioStrings {
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 
+    /// Adds another server to sign in to.
+    public static var authAddServer: String { NSLocalizedString("auth.addServer", bundle: .module, comment: "") }
+
+    /// State of a server whose session ended; the user signs in again.
+    public static var authSignedOut: String { NSLocalizedString("auth.signedOut", bundle: .module, comment: "") }
+
+    /// Error when the address entered answers but is not a Mavio server.
+    public static var authNotMavio: String { NSLocalizedString("auth.notMavio", bundle: .module, comment: "") }
+
     /// Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's.
     public static func authOthersUseApp(host: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("auth.othersUseApp", bundle: .module, comment: ""), host)
