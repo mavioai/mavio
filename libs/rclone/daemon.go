@@ -33,7 +33,10 @@ type DaemonOptions struct {
 	StartTimeout time.Duration
 	// MaxBackoff caps the delay between restarts; one minute when 0.
 	MaxBackoff time.Duration
-	Logger     *slog.Logger
+	// Track records each rcd started, by its process ID, until it exits
+	// and the returned function is called; nil records none.
+	Track  func(pid int) (done func())
+	Logger *slog.Logger
 }
 
 // Daemon is an rcd the server runs, listening on a Unix socket in a
@@ -182,10 +185,15 @@ func (d *Daemon) launch(ctx context.Context) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start rclone: %w", err)
 	}
+	untrack := func() {}
+	if d.opts.Track != nil {
+		untrack = d.opts.Track(cmd.Process.Pid)
+	}
 	exited := make(chan struct{})
 	go d.forward(stderr)
 	go func() {
 		_ = cmd.Wait()
+		untrack()
 		close(exited)
 	}()
 
