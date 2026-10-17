@@ -510,6 +510,7 @@ export type MessageKey =
   | 'auth.createWithPasskey'
   | 'schema.add'
   | 'schema.remove'
+  | 'schema.needsContainer'
   | 'schema.item'
   | 'schema.onePerLine'
   | 'schema.invalidJson'
@@ -2390,6 +2391,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.createWithPasskey": "Create with a Passkey",
     "schema.add": "Add",
     "schema.remove": "Remove",
+    "schema.needsContainer": "Set up the container dependency {name} below to turn this on.",
     "schema.item": "Item {number}",
     "schema.onePerLine": "One per line",
     "schema.invalidJson": "Not valid JSON",
@@ -4268,6 +4270,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "auth.createWithPasskey": "使用通行密钥创建",
     "schema.add": "添加",
     "schema.remove": "移除",
+    "schema.needsContainer": "需先在下方的容器依赖中设置 {name}，才能开启。",
     "schema.item": "第 {number} 项",
     "schema.onePerLine": "每行一项",
     "schema.invalidJson": "不是有效的 JSON",

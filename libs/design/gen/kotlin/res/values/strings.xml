@@ -1024,6 +1024,8 @@
     <string name="schema_add">Add</string>
     <!-- Button removing an entry from a list in a plugin's configuration. -->
     <string name="schema_remove">Remove</string>
+    <!-- Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name. -->
+    <string name="schema_needs_container">Set up the container dependency %s below to turn this on.</string>
     <!-- Title of an unnamed entry of a list in a plugin's configuration; number is its place. -->
     <string name="schema_item">Item %s</string>
     <!-- Placeholder of a field taking a list, one value per line. -->

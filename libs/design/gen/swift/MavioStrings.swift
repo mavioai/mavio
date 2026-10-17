@@ -1656,6 +1656,11 @@ public enum MavioStrings {
     /// Button removing an entry from a list in a plugin's configuration.
     public static var schemaRemove: String { NSLocalizedString("schema.remove", bundle: .module, comment: "") }
 
+    /// Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name.
+    public static func schemaNeedsContainer(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.needsContainer", bundle: .module, comment: ""), name)
+    }
+
     /// Title of an unnamed entry of a list in a plugin's configuration; number is its place.
     public static func schemaItem(number: String) -> String {
         String.localizedStringWithFormat(NSLocalizedString("schema.item", bundle: .module, comment: ""), number)

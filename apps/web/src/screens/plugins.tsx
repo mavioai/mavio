@@ -503,6 +503,11 @@ function Configuration({ server, id, schema, page }: { server: ServerEntry; id: 
 function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: string; schema: Schema; saved: string }) {
   const actions = usePluginActions(server);
   const options = usePluginConfigOptions(server, id, optionSources(schema));
+  const containers = usePluginContainers(server, id);
+  const unset = (name: string) => {
+    const c = containers.data?.find((c) => c.dependency?.name === name);
+    return !!c && (c.status?.mode ?? ContainerMode.UNSPECIFIED) === ContainerMode.UNSPECIFIED;
+  };
   const [value, setValue] = useState<unknown>(() => (saved ? JSON.parse(saved) : {}));
   const [done, setDone] = useState(false);
   const text = JSON.stringify(value);
@@ -520,7 +525,7 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
       }}
     >
       {guard.dialog}
-      <SchemaForm schema={schema} value={value} options={options} onChange={(v) => (setValue(v), setDone(false))} />
+      <SchemaForm schema={schema} value={value} options={options} unset={unset} onChange={(v) => (setValue(v), setDone(false))} />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={!changed || actions.configure.isPending}>
           {actions.configure.isPending ? "…" : t("action.save")}

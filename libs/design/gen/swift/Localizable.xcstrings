@@ -9199,6 +9199,24 @@
         }
       }
     },
+    "schema.needsContainer": {
+      "comment": "Why a switch of a plugin's configuration is off and cannot be turned on; name is a container dependency's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up the container dependency %@ below to turn this on."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需先在下方的容器依赖中设置 %@，才能开启。"
+          }
+        }
+      }
+    },
     "schema.item": {
       "comment": "Title of an unnamed entry of a list in a plugin's configuration; number is its place.",
       "extractionState": "manual",

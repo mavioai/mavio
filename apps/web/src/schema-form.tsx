@@ -4,7 +4,9 @@
 // choices, values of a source the schema names (x-mavio-options) as a
 // searchable choice whose option gives its settings' schema, and what has
 // no shape the form knows, such as an object of arbitrary keys, as JSON.
-// Properties the server generates are left out.
+// Properties the server generates are left out; a switch needing a
+// container dependency (x-mavio-requires-container) stays off until the
+// dependency is set up.
 import { createContext, type ReactNode, useContext, useState } from "react";
 
 import { Tip } from "./controls/tooltip.tsx";
@@ -32,6 +34,8 @@ export interface Schema {
   oneOf?: Schema[];
   const?: unknown;
   "x-mavio-options"?: OptionsSpec;
+  /** The sibling property whose value names the container dependency a switch needs on. */
+  "x-mavio-requires-container"?: string;
 }
 
 /** Where a property's values come from, and the sibling properties a chosen option fills. */
@@ -56,6 +60,11 @@ export interface SchemaOption {
 type Options = (source: string) => SchemaOption[] | undefined;
 
 const OptionsContext = createContext<Options>(() => undefined);
+
+/** Whether a container dependency of the plugin is not set up, by its name. */
+type Unset = (name: string) => boolean;
+
+const UnsetContext = createContext<Unset>(() => false);
 
 /** The sources of options a schema names. */
 export function optionSources(s: Schema): string[] {
@@ -206,10 +215,25 @@ const input =
   "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";
 
 /** The form of a configuration object; options gives the values of the sources its schema names. */
-export function SchemaForm({ schema, value, onChange, options }: { schema: Schema; value: Json; onChange: (v: Json) => void; options?: Options }) {
+export function SchemaForm({
+  schema,
+  value,
+  onChange,
+  options,
+  unset,
+}: {
+  schema: Schema;
+  value: Json;
+  onChange: (v: Json) => void;
+  options?: Options;
+  /** Whether a container dependency is not set up, which the switches needing it wait for. */
+  unset?: Unset;
+}) {
   return (
     <OptionsContext value={options ?? (() => undefined)}>
-      <ObjectFields schema={schema} value={isObj(value) ? value : {}} onChange={onChange} />
+      <UnsetContext value={unset ?? (() => false)}>
+        <ObjectFields schema={schema} value={isObj(value) ? value : {}} onChange={onChange} />
+      </UnsetContext>
     </OptionsContext>
   );
 }
@@ -217,6 +241,7 @@ export function SchemaForm({ schema, value, onChange, options }: { schema: Schem
 /** An object's properties, as the rows of a group. */
 function ObjectFields({ schema, value, onChange }: { schema: Schema; value: Obj; onChange: (v: Obj) => void }) {
   const options = useContext(OptionsContext);
+  const unset = useContext(UnsetContext);
   const props = Object.entries(schema.properties ?? {}).filter(([, p]) => !generated(p));
   if (props.length === 0) return <JsonField value={value} onChange={(v) => onChange(isObj(v) ? v : {})} />;
   const set = (k: string, v: Json) => {
@@ -258,7 +283,10 @@ function ObjectFields({ schema, value, onChange }: { schema: Schema; value: Obj;
         const list = spec && options(spec.source);
         if (spec && list)
           return <Property key={k} name={k} schema={p} required={required} value={value[k]} onChange={(v) => set(k, v)} choices={list} onChoose={(v) => choose(k, spec, list, v)} />;
-        return <Property key={k} name={k} schema={p} required={required} value={value[k]} onChange={(v) => set(k, v)} />;
+        const needs = p["x-mavio-requires-container"];
+        const dep = needs !== undefined ? value[needs] : undefined;
+        const waiting = typeof dep === "string" && dep && unset(dep) ? dep : undefined;
+        return <Property key={k} name={k} schema={p} required={required} value={value[k]} onChange={(v) => set(k, v)} waiting={waiting} />;
       })}
     </div>
   );
@@ -273,6 +301,7 @@ function Property({
   onChange,
   choices: list,
   onChoose,
+  waiting,
 }: {
   name: string;
   schema: Schema;
@@ -282,6 +311,8 @@ function Property({
   /** The options of the source the property's schema names, chosen by onChoose. */
   choices?: SchemaOption[];
   onChoose?: (v: string | undefined) => void;
+  /** The container dependency not set up that a switch waits for, which keeps it off. */
+  waiting?: string;
 }) {
   const type = typeOf(s);
   const label = (
@@ -327,6 +358,16 @@ function Property({
   if (s.readOnly && !type) return head();
   switch (type) {
     case "boolean":
+      if (waiting)
+        return (
+          <div className="flex min-h-13 flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
+            <div className="min-w-0 flex-1 basis-56">
+              {label}
+              <div className="type-footnote text-text-secondary">{t("schema.needsContainer", { name: waiting })}</div>
+            </div>
+            <Switch on={false} disabled label={labelOf(name, s)} onChange={() => {}} />
+          </div>
+        );
       return head(
         <Switch on={typeof value === "boolean" ? value : s.default === true} label={labelOf(name, s)} onChange={(on) => onChange(on)} />,
       );
