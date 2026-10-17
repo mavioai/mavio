@@ -483,6 +483,16 @@ export type MessageKey =
   | 'plugins.containerCommands'
   | 'plugins.containerGpuCommands'
   | 'plugins.containerCommandsHint'
+  | 'plugins.proxyProcessDetail'
+  | 'plugins.proxyRestartTitle'
+  | 'plugins.proxyRestartMessage'
+  | 'plugins.proxyRestart'
+  | 'plugins.containerProxyDetail'
+  | 'plugins.containerProxyTitle'
+  | 'plugins.containerProxyMessage'
+  | 'plugins.containerRecreate'
+  | 'plugins.showCommand'
+  | 'plugins.hideCommand'
   | 'auth.unreachable'
   | 'auth.othersUseApp'
   | 'auth.setUpElsewhere'
@@ -691,6 +701,10 @@ export type MessageKey =
   | 'overview.ffmpeg'
   | 'overview.ffmpegMissing'
   | 'overview.uptime'
+  | 'overview.containerEngine'
+  | 'overview.containerEngineRootless'
+  | 'overview.containerEngineNone'
+  | 'overview.containerEngineEndpoint'
   | 'overview.load'
   | 'overview.loadFooter'
   | 'overview.loadUnknown'
@@ -714,6 +728,10 @@ export type MessageKey =
   | 'overview.upload'
   | 'overview.received'
   | 'overview.sent'
+  | 'overview.containers'
+  | 'overview.containersNone'
+  | 'overview.containerOf'
+  | 'overview.containerExternal'
   | 'activity.nowPlaying'
   | 'activity.nothingPlaying'
   | 'activity.directPlay'
@@ -2342,6 +2360,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerCommands": "Run It Yourself",
     "plugins.containerGpuCommands": "With a GPU",
     "plugins.containerCommandsHint": "Run one of these, then set the address to {address}. They hold the dependency's secrets.",
+    "plugins.proxyProcessDetail": "The plugin's HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin's own settings choose comes first.",
+    "plugins.proxyRestartTitle": "Restart {name}?",
+    "plugins.proxyRestartMessage": "The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now.",
+    "plugins.proxyRestart": "Restart",
+    "plugins.containerProxyDetail": "The container's HTTP and HTTPS requests go through it, by the server; the local network is reached directly.",
+    "plugins.containerProxyTitle": "Recreate {name}?",
+    "plugins.containerProxyMessage": "The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.",
+    "plugins.containerRecreate": "Recreate",
+    "plugins.showCommand": "Show Command",
+    "plugins.hideCommand": "Hide Command",
     "auth.unreachable": "Can't be reached",
     "auth.othersUseApp": "Only the administrator signs in here. Everyone else watches at {host}.",
     "auth.setUpElsewhere": "Set Up {server} on a Computer or Phone",
@@ -2550,6 +2578,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "Not found",
     "overview.uptime": "Running for",
+    "overview.containerEngine": "Container Engine",
+    "overview.containerEngineRootless": "rootless",
+    "overview.containerEngineNone": "Unavailable: {reason}",
+    "overview.containerEngineEndpoint": "Engine Endpoint",
     "overview.load": "Load",
     "overview.loadFooter": "Sampled every two seconds while this page is open. Totals are since the computer started.",
     "overview.loadUnknown": "Not told on this system",
@@ -2573,6 +2605,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.upload": "Upload",
     "overview.received": "Received",
     "overview.sent": "Sent",
+    "overview.containers": "Containers",
+    "overview.containersNone": "No plugin uses containers.",
+    "overview.containerOf": "For {plugin}",
+    "overview.containerExternal": "At {address}",
     "activity.nowPlaying": "Now Playing",
     "activity.nothingPlaying": "Nothing is playing.",
     "activity.directPlay": "Direct Play",
@@ -4199,6 +4235,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.containerCommands": "自行运行",
     "plugins.containerGpuCommands": "使用 GPU",
     "plugins.containerCommandsHint": "运行其中一条命令，然后把地址设为 {address}。命令中含有该依赖的密钥。",
+    "plugins.proxyProcessDetail": "插件的 HTTP 和 HTTPS 请求经服务器发往此代理；本机和局域网直连。插件自身设置中选择的代理优先。",
+    "plugins.proxyRestartTitle": "重启 {name}？",
+    "plugins.proxyRestartMessage": "插件将从直连改为经服务器代理，或反过来，这要在插件重新启动后才生效。现在将重启插件。",
+    "plugins.proxyRestart": "重启",
+    "plugins.containerProxyDetail": "容器的 HTTP 和 HTTPS 请求经服务器发往此代理；局域网直连。",
+    "plugins.containerProxyTitle": "重建 {name}？",
+    "plugins.containerProxyMessage": "容器将从直连改为经服务器代理，或反过来，这需要重新创建容器。现在将重建容器，其数据卷保留。",
+    "plugins.containerRecreate": "重建",
+    "plugins.showCommand": "显示运行命令",
+    "plugins.hideCommand": "隐藏运行命令",
     "auth.unreachable": "无法连接",
     "auth.othersUseApp": "只有管理员可以登录，其他人请在 {host} 观看。",
     "auth.setUpElsewhere": "请在电脑或手机上设置 {server}",
@@ -4407,6 +4453,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.ffmpeg": "FFmpeg",
     "overview.ffmpegMissing": "未找到",
     "overview.uptime": "已运行",
+    "overview.containerEngine": "容器引擎",
+    "overview.containerEngineRootless": "无 root",
+    "overview.containerEngineNone": "不可用：{reason}",
+    "overview.containerEngineEndpoint": "引擎地址",
     "overview.load": "负载",
     "overview.loadFooter": "页面打开期间每两秒采样一次；累计值自电脑启动起计。",
     "overview.loadUnknown": "此系统不提供",
@@ -4430,6 +4480,10 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.upload": "上传",
     "overview.received": "已接收",
     "overview.sent": "已发送",
+    "overview.containers": "容器",
+    "overview.containersNone": "没有插件使用容器。",
+    "overview.containerOf": "{plugin} 依赖",
+    "overview.containerExternal": "位于 {address}",
     "activity.nowPlaying": "正在播放",
     "activity.nothingPlaying": "当前没有播放。",
     "activity.directPlay": "直接播放",

@@ -1550,6 +1550,40 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("plugins.containerCommandsHint", bundle: .module, comment: ""), address)
     }
 
+    /// Explains a process plugin's proxy.
+    public static var pluginsProxyProcessDetail: String { NSLocalizedString("plugins.proxyProcessDetail", bundle: .module, comment: "") }
+
+    /// Title asking to restart a plugin for its new proxy; name is the plugin's name.
+    public static func pluginsProxyRestartTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.proxyRestartTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains why changing a plugin's proxy restarts it.
+    public static var pluginsProxyRestartMessage: String { NSLocalizedString("plugins.proxyRestartMessage", bundle: .module, comment: "") }
+
+    /// Action restarting a plugin with its new proxy.
+    public static var pluginsProxyRestart: String { NSLocalizedString("plugins.proxyRestart", bundle: .module, comment: "") }
+
+    /// Explains a managed container's proxy.
+    public static var pluginsContainerProxyDetail: String { NSLocalizedString("plugins.containerProxyDetail", bundle: .module, comment: "") }
+
+    /// Title asking to recreate a container for its new proxy; name is the container's name.
+    public static func pluginsContainerProxyTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.containerProxyTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains why changing a container's proxy recreates it.
+    public static var pluginsContainerProxyMessage: String { NSLocalizedString("plugins.containerProxyMessage", bundle: .module, comment: "") }
+
+    /// Action recreating a container with its new proxy.
+    public static var pluginsContainerRecreate: String { NSLocalizedString("plugins.containerRecreate", bundle: .module, comment: "") }
+
+    /// Shows the docker run command equivalent to how the server runs a container.
+    public static var pluginsShowCommand: String { NSLocalizedString("plugins.showCommand", bundle: .module, comment: "") }
+
+    /// Hides the docker run command of a container.
+    public static var pluginsHideCommand: String { NSLocalizedString("plugins.hideCommand", bundle: .module, comment: "") }
+
     /// State of a server of the account that does not answer at any of its addresses.
     public static var authUnreachable: String { NSLocalizedString("auth.unreachable", bundle: .module, comment: "") }
 
@@ -2225,6 +2259,20 @@ public enum MavioStrings {
     /// How long the server has been running.
     public static var overviewUptime: String { NSLocalizedString("overview.uptime", bundle: .module, comment: "") }
 
+    /// Label of the container engine the server runs plugins' containers on: its name and version.
+    public static var overviewContainerEngine: String { NSLocalizedString("overview.containerEngine", bundle: .module, comment: "") }
+
+    /// Marks a container engine running without root.
+    public static var overviewContainerEngineRootless: String { NSLocalizedString("overview.containerEngineRootless", bundle: .module, comment: "") }
+
+    /// The server found no container engine; reason tells why.
+    public static func overviewContainerEngineNone(reason: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerEngineNone", bundle: .module, comment: ""), reason)
+    }
+
+    /// Label of where the server reaches the container engine, such as its socket.
+    public static var overviewContainerEngineEndpoint: String { NSLocalizedString("overview.containerEngineEndpoint", bundle: .module, comment: "") }
+
     /// The load of the server's computer.
     public static var overviewLoad: String { NSLocalizedString("overview.load", bundle: .module, comment: "") }
 
@@ -2297,6 +2345,22 @@ public enum MavioStrings {
 
     /// Bytes sent since the computer started.
     public static var overviewSent: String { NSLocalizedString("overview.sent", bundle: .module, comment: "") }
+
+    /// Heading of the plugins' containers on the overview.
+    public static var overviewContainers: String { NSLocalizedString("overview.containers", bundle: .module, comment: "") }
+
+    /// Shown when no plugin container is run or given an address.
+    public static var overviewContainersNone: String { NSLocalizedString("overview.containersNone", bundle: .module, comment: "") }
+
+    /// Tells which plugin a container is for; plugin is the plugin's name.
+    public static func overviewContainerOf(plugin: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerOf", bundle: .module, comment: ""), plugin)
+    }
+
+    /// A container an administrator runs, reached at the address.
+    public static func overviewContainerExternal(address: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("overview.containerExternal", bundle: .module, comment: ""), address)
+    }
 
     /// Group of what devices are playing.
     public static var activityNowPlaying: String { NSLocalizedString("activity.nowPlaying", bundle: .module, comment: "") }

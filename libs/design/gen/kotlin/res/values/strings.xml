@@ -970,6 +970,26 @@
     <string name="plugins_container_gpu_commands">With a GPU</string>
     <!-- Hint above the commands running a container dependency; address is where it will be. -->
     <string name="plugins_container_commands_hint">Run one of these, then set the address to %s. They hold the dependency\'s secrets.</string>
+    <!-- Explains a process plugin's proxy. -->
+    <string name="plugins_proxy_process_detail">The plugin\'s HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin\'s own settings choose comes first.</string>
+    <!-- Title asking to restart a plugin for its new proxy; name is the plugin's name. -->
+    <string name="plugins_proxy_restart_title">Restart %s\?</string>
+    <!-- Explains why changing a plugin's proxy restarts it. -->
+    <string name="plugins_proxy_restart_message">The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now.</string>
+    <!-- Action restarting a plugin with its new proxy. -->
+    <string name="plugins_proxy_restart">Restart</string>
+    <!-- Explains a managed container's proxy. -->
+    <string name="plugins_container_proxy_detail">The container\'s HTTP and HTTPS requests go through it, by the server; the local network is reached directly.</string>
+    <!-- Title asking to recreate a container for its new proxy; name is the container's name. -->
+    <string name="plugins_container_proxy_title">Recreate %s\?</string>
+    <!-- Explains why changing a container's proxy recreates it. -->
+    <string name="plugins_container_proxy_message">The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay.</string>
+    <!-- Action recreating a container with its new proxy. -->
+    <string name="plugins_container_recreate">Recreate</string>
+    <!-- Shows the docker run command equivalent to how the server runs a container. -->
+    <string name="plugins_show_command">Show Command</string>
+    <!-- Hides the docker run command of a container. -->
+    <string name="plugins_hide_command">Hide Command</string>
     <!-- State of a server of the account that does not answer at any of its addresses. -->
     <string name="auth_unreachable">Can\'t be reached</string>
     <!-- Under Sign In with Mavio on a server's own web UI, which only its administrator signs in to; host is app.mavio.dev's. -->
@@ -1392,6 +1412,14 @@
     <string name="overview_ffmpeg_missing">Not found</string>
     <!-- How long the server has been running. -->
     <string name="overview_uptime">Running for</string>
+    <!-- Label of the container engine the server runs plugins' containers on: its name and version. -->
+    <string name="overview_container_engine">Container Engine</string>
+    <!-- Marks a container engine running without root. -->
+    <string name="overview_container_engine_rootless">rootless</string>
+    <!-- The server found no container engine; reason tells why. -->
+    <string name="overview_container_engine_none">Unavailable: %s</string>
+    <!-- Label of where the server reaches the container engine, such as its socket. -->
+    <string name="overview_container_engine_endpoint">Engine Endpoint</string>
     <!-- The load of the server's computer. -->
     <string name="overview_load">Load</string>
     <!-- Footer of the load cards. -->
@@ -1438,6 +1466,14 @@
     <string name="overview_received">Received</string>
     <!-- Bytes sent since the computer started. -->
     <string name="overview_sent">Sent</string>
+    <!-- Heading of the plugins' containers on the overview. -->
+    <string name="overview_containers">Containers</string>
+    <!-- Shown when no plugin container is run or given an address. -->
+    <string name="overview_containers_none">No plugin uses containers.</string>
+    <!-- Tells which plugin a container is for; plugin is the plugin's name. -->
+    <string name="overview_container_of">For %s</string>
+    <!-- A container an administrator runs, reached at the address. -->
+    <string name="overview_container_external">At %s</string>
     <!-- Group of what devices are playing. -->
     <string name="activity_now_playing">Now Playing</string>
     <!-- Shown when no device plays anything. -->

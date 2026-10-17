@@ -8659,6 +8659,186 @@
         }
       }
     },
+    "plugins.proxyProcessDetail": {
+      "comment": "Explains a process plugin's proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plugin's HTTP and HTTPS requests go through it, by the server; this machine and the local network are reached directly. A proxy the plugin's own settings choose comes first."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件的 HTTP 和 HTTPS 请求经服务器发往此代理；本机和局域网直连。插件自身设置中选择的代理优先。"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestartTitle": {
+      "comment": "Title asking to restart a plugin for its new proxy; name is the plugin's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启 %@？"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestartMessage": {
+      "comment": "Explains why changing a plugin's proxy restarts it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plugin goes from reaching sites directly to through the server, or back, which takes effect when it starts again. It restarts now."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件将从直连改为经服务器代理，或反过来，这要在插件重新启动后才生效。现在将重启插件。"
+          }
+        }
+      }
+    },
+    "plugins.proxyRestart": {
+      "comment": "Action restarting a plugin with its new proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重启"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyDetail": {
+      "comment": "Explains a managed container's proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container's HTTP and HTTPS requests go through it, by the server; the local network is reached directly."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器的 HTTP 和 HTTPS 请求经服务器发往此代理；局域网直连。"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyTitle": {
+      "comment": "Title asking to recreate a container for its new proxy; name is the container's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建 %@？"
+          }
+        }
+      }
+    },
+    "plugins.containerProxyMessage": {
+      "comment": "Explains why changing a container's proxy recreates it.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The container goes from reaching sites directly to through the server, or back, which takes another container. It is created again now; its volumes stay."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器将从直连改为经服务器代理，或反过来，这需要重新创建容器。现在将重建容器，其数据卷保留。"
+          }
+        }
+      }
+    },
+    "plugins.containerRecreate": {
+      "comment": "Action recreating a container with its new proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recreate"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建"
+          }
+        }
+      }
+    },
+    "plugins.showCommand": {
+      "comment": "Shows the docker run command equivalent to how the server runs a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示运行命令"
+          }
+        }
+      }
+    },
+    "plugins.hideCommand": {
+      "comment": "Hides the docker run command of a container.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide Command"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏运行命令"
+          }
+        }
+      }
+    },
     "auth.unreachable": {
       "comment": "State of a server of the account that does not answer at any of its addresses.",
       "extractionState": "manual",
@@ -12493,6 +12673,78 @@
         }
       }
     },
+    "overview.containerEngine": {
+      "comment": "Label of the container engine the server runs plugins' containers on: its name and version.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container Engine"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器引擎"
+          }
+        }
+      }
+    },
+    "overview.containerEngineRootless": {
+      "comment": "Marks a container engine running without root.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rootless"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无 root"
+          }
+        }
+      }
+    },
+    "overview.containerEngineNone": {
+      "comment": "The server found no container engine; reason tells why.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unavailable: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不可用：%@"
+          }
+        }
+      }
+    },
+    "overview.containerEngineEndpoint": {
+      "comment": "Label of where the server reaches the container engine, such as its socket.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engine Endpoint"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "引擎地址"
+          }
+        }
+      }
+    },
     "overview.load": {
       "comment": "The load of the server's computer.",
       "extractionState": "manual",
@@ -12903,6 +13155,78 @@
           "stringUnit": {
             "state": "translated",
             "value": "已发送"
+          }
+        }
+      }
+    },
+    "overview.containers": {
+      "comment": "Heading of the plugins' containers on the overview.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Containers"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "容器"
+          }
+        }
+      }
+    },
+    "overview.containersNone": {
+      "comment": "Shown when no plugin container is run or given an address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No plugin uses containers."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有插件使用容器。"
+          }
+        }
+      }
+    },
+    "overview.containerOf": {
+      "comment": "Tells which plugin a container is for; plugin is the plugin's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 依赖"
+          }
+        }
+      }
+    },
+    "overview.containerExternal": {
+      "comment": "A container an administrator runs, reached at the address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位于 %@"
           }
         }
       }
