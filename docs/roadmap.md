@@ -48,6 +48,7 @@ flowchart TD
     P26["P26 Subtitle acquisition<br/>libs/acquire/subtitles, plugins/subtitles, porting Bazarr"]
     P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
     P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/voice, remote tools and memory"]
+    P30["P30 Container dependencies<br/>libs/containers, engine detection, managed and external dependencies of plugins"]
     P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
 
     P0 --> P1
@@ -90,6 +91,8 @@ flowchart TD
     P21 --> P28
     P21 --> P29
     P27 --> P29
+    P13 --> P30
+    P29 --> P30
 ```
 
 | Phase | Theme | Status |
@@ -124,6 +127,7 @@ flowchart TD
 | P27 | AI gateway and subtitle translation | In progress |
 | P28 | Accounts | In progress |
 | P29 | Assistant | In progress |
+| P30 | Container dependencies | Not started |
 
 ---
 
@@ -934,6 +938,27 @@ flowchart TD
 - [ ] The desktop app: the server's recognizer and voices
 - [ ] More languages in the grammar
 
+### P30 Container Dependencies
+**Scope**: the container dependencies of [Architecture §16](architecture.md#16-container-dependencies-libscontainers) and [Plugins §11](plugins.md#11-container-dependencies): `libs/containers` with engine detection and the Engine API client; the manifest's `containers`, `PluginContainer` and the management and host RPCs; managed dependencies on Linux, the server on the host first, then in a container; external dependencies with their commands; `plugins/voice` declaring whisper-asr-webservice; the web UI.
+
+- `libs/containers`: endpoints, checks, the client over Unix sockets, named pipes and loopback TCP
+- The manifest's `containers` in `mavio.plugin.v1`, `PluginContainer` in `libs/core` and `libs/store`, `GetContainerRuntime`, `ListPluginContainers`, `SetPluginContainer`, `HostService.ListContainers`
+- Managed dependencies: pulls as jobs, names and labels, the `mavio` network, health checks and restarts, reconciliation, removal on uninstall
+- External dependencies: health checks, the `docker run` and Compose commands with their GPU variants
+- `plugins/voice` declaring whisper-asr-webservice; the web UI's dependencies in the plugin's page
+
+**Done when**: an end-to-end test on Linux with Docker (skipped without it): a test plugin declaring a small HTTP image gets a managed dependency ready at the address its `ListContainers` returns, from a server on the host and from a server in a container with the socket mounted; the container is replaced when the declared digest changes, restarted after it is killed, and removed with its volume when the plugin is uninstalled; with no engine, the same dependency made external at the address of a container started by its generated `docker run` command becomes ready.
+
+**Progress**:
+- [ ] `libs/containers`
+- [ ] Contracts, domain and storage
+- [ ] Managed dependencies, the server on the host
+- [ ] Managed dependencies, the server in a container
+- [ ] External dependencies and commands
+- [ ] `plugins/voice` and the web UI
+- [ ] The end-to-end test of **Done when**
+- [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
+
 ---
 
 ## 4. Risks and Open Items
@@ -964,4 +989,6 @@ flowchart TD
 | Code mode in the Bun executable | pi-durable's code mode runs scripts in quickjs-wasi, a WASM module, which must load inside `plugins/agent`'s Bun executable on every platform | Checked on macOS (arm64) by `TestAssistantAI`, which runs the built executable; Linux and Windows still to check; until it loads, conversations offer the tools directly only |
 | Microphones in browsers | `getUserMedia` works only on secure pages, so a standalone server reached over plain HTTP on the local network cannot record in the web UI | Servers' HTTPS addresses (P28); typed requests elsewhere |
 | Recognizing titles | Recognizers misspell titles and names, Chinese ones as homophones | Hints to recognizers that take them; pinyin and tolerant matching in slot resolution (P29) |
+| The container engine's socket | Access to Docker's socket is root on the host, so a server that has it, and any flaw in what it lets plugins declare, is as powerful | The server is given the socket only by an administrator; declarations are fixed in the manifest and approved on installation; no privileged mode, host namespaces, devices or bind mounts; external dependencies need no socket (P30) |
+| Container engines differ | Docker, rootless Docker, Docker Desktop and Podman differ in their sockets, networks and GPU support | Engine API 1.41 at least; the tests run on Docker on Linux, the others checked by hand (P30) |
 | The Siri Remote's microphone | tvOS gives apps no recording from the Siri Remote | Dictation in the assistant's field; App Intents |

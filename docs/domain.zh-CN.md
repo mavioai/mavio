@@ -38,6 +38,7 @@ erDiagram
 | `UserData` | 某个用户对某个条目的状态：是否已播放、续播位置、收藏等 |
 | `Job` | 持久化的后台任务 |
 | `PluginConfig` | 管理员为某个插件设置的配置 |
+| `PluginContainer` | 插件的某个容器依赖如何访问：由服务端运行，或在管理员给出的地址上 |
 | `ServerSettings` | 管理员在服务端运行时修改的设置：转码、网络、插件目录、密码重置插件、会话闲置多久后结束 |
 | `AccountSettings` | 服务端如何登录用户：安装时选择的模式，以及 mavio.dev 模式下的认领 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
@@ -260,6 +261,7 @@ erDiagram
 | `ScanRepository` | 媒体库扫描的 `NextGeneration`；每个已扫描文件夹的 `FolderState`（`ModTime`、`FileID`、`Entries`），由 `PutFolders` 记录，文件夹消失后由 `DeleteFolders` 移除 |
 | `ItemRepository`（整理类） | `Links` 按顺序列出合集或播放列表的条目项；`ReplaceLinks` 设置它们，保留给定的 ID，并为没有 ID 的条目项分配新 ID |
 | `PluginConfigRepository` | `Get` 某个插件的配置（从未配置时返回 `ErrNotFound`），`Put` 写入并替换之前的配置，`Delete` 删除 |
+| `PluginContainerRepository` | `List` 某个插件的容器依赖，`Put` 写入一个并替换之前的，`Delete` 删除一个或某插件的全部 |
 | `StorageJobRepository` | 按类型与键 `Get` 存储任务（未保存时返回 `ErrNotFound`），`List` 某一类型的任务（最早在前），`Put`（替换类型与键相同的任务，保留其创建时间），`Delete` |
 | `DisplayPreferencesRepository` | `Get` 用户对某个客户端视图的偏好（从未设置时返回 `ErrNotFound`），`Put` 写入并替换之前的偏好 |
 | `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入，只写与已保存内容不同的分组；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
@@ -323,6 +325,11 @@ erDiagram
 
 * 按 `PluginID`（清单中的 ID）保存，而不是跟随已安装的文件，因此插件升级后配置仍在；卸载插件时删除。
 * `Validate` 要求有插件 ID 且 JSON 格式正确；是否符合 schema 由了解清单的服务端在保存配置之前检查。
+
+`PluginContainer` 是服务端为插件清单声明的某个容器依赖（[插件 §11](plugins.zh-CN.md#11-容器依赖)）保存的内容，按 `PluginID` 与 `Name` 保存：其 `Mode`（`unset`、`managed`、`external`）、管理员为外部依赖给出的 `Address`、按键为它生成的 `Secrets`、托管依赖是否可以使用 GPU（`UseGPU`），以及 `UpdatedAt`。
+
+* `Validate` 要求有插件 ID、名称、已知的模式，`external` 时还要求绝对的 `http` 或 `https` URL；托管或未设置的依赖没有地址。
+* 插件升级后保留；卸载插件时删除该插件的全部记录，清单不再声明的依赖在插件启动时删除。
 
 ---
 

@@ -38,6 +38,7 @@ erDiagram
 | `UserData` | One user's state for one item: played, resume position, favorite, … |
 | `Job` | A durable unit of background work |
 | `PluginConfig` | The configuration an administrator gave a plugin |
+| `PluginContainer` | How a plugin's container dependency is reached: run by the server or at an address an administrator gave |
 | `DisplayPreferences` | A user's settings for how one client shows one view |
 | `ServerSettings` | What administrators change while the server runs: transcoding, network, plugin catalogs, the password reset plugin, how long sessions last unused |
 | `AccountSettings` | How the server signs people in: its mode, chosen at setup, and in mavio.dev mode its claim |
@@ -260,6 +261,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `ScanRepository` | `NextGeneration` of a library's scans; the `FolderState` of each scanned folder (`ModTime`, `FileID`, `Entries`), recorded with `PutFolders` and removed with `DeleteFolders` when gone |
 | `ItemRepository` (curated) | `Links` lists a collection's or playlist's entries in order; `ReplaceLinks` sets them, keeping the IDs given and assigning new ones |
 | `PluginConfigRepository` | `Get` a plugin's configuration (`ErrNotFound` when never configured), `Put` it, replacing the earlier one, `Delete` it |
+| `PluginContainerRepository` | `List` a plugin's container dependencies, `Put` one, replacing the earlier one, `Delete` one or all of a plugin's |
 | `StorageJobRepository` | `Get` a storage job by kind and key (`ErrNotFound` when not stored), `List` those of a kind (oldest first), `Put` (replacing the job of the same kind and key, keeping when it was created), `Delete` |
 | `DisplayPreferencesRepository` | `Get` a user's preferences for a client's view (`ErrNotFound` when never set), `Put` them, replacing the earlier ones |
 | `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`, writing only the groups that differ from those stored; `Accounts` (zero until stored) and `PutAccounts` the account settings |
@@ -323,6 +325,11 @@ A `PluginConfig` is the configuration an administrator gave a plugin: a JSON doc
 
 * It is kept by `PluginID`, the ID in the manifest, not by the installed files, so it survives upgrades of the plugin; uninstalling the plugin deletes it.
 * `Validate` requires a plugin ID and well-formed JSON; conformance to the schema is checked by the server, which knows the manifest, before the configuration is stored.
+
+A `PluginContainer` is what the server keeps of a container dependency a plugin's manifest declares ([Plugins §11](plugins.md#11-container-dependencies)), by `PluginID` and `Name`: its `Mode` (`unset`, `managed`, `external`), the `Address` an administrator gave an external one, the `Secrets` generated for it by key, whether a managed one may use a GPU (`UseGPU`), and `UpdatedAt`.
+
+* `Validate` requires a plugin ID, a name, a known mode and, for `external`, an absolute `http` or `https` URL; a managed or unset one has no address.
+* Upgrades keep it; uninstalling the plugin deletes the plugin's, and a dependency the manifest no longer declares is deleted when the plugin starts.
 
 ---
 

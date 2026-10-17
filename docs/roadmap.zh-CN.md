@@ -48,6 +48,7 @@ flowchart TD
     P26["P26 字幕获取<br/>libs/acquire/subtitles、plugins/subtitles，移植 Bazarr"]
     P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
     P29["P29 助手<br/>libs/intent、AssistantService、plugins/voice、远程工具与记忆"]
+    P30["P30 容器依赖<br/>libs/containers、引擎检测、插件的托管与外部依赖"]
     P28["P28 账户<br/>mavio.dev 模式与独立模式、媒体库访问、托管用户、用户切换、Home、好友、绑定设备的令牌；mavio.dev、中转、DNS 与证书"]
 
     P0 --> P1
@@ -90,6 +91,8 @@ flowchart TD
     P21 --> P28
     P21 --> P29
     P27 --> P29
+    P13 --> P30
+    P29 --> P30
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -124,6 +127,7 @@ flowchart TD
 | P27 | AI 网关与字幕翻译 | 进行中 |
 | P28 | 账户 | 进行中 |
 | P29 | 助手 | 进行中 |
+| P30 | 容器依赖 | 未开始 |
 
 ---
 
@@ -934,6 +938,27 @@ flowchart TD
 - [ ] 桌面应用：服务端的识别器与语音
 - [ ] 语法支持更多语言
 
+### P30 容器依赖
+**范围**：[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers) 与[插件 §11](plugins.zh-CN.md#11-容器依赖) 的容器依赖：带引擎检测与 Engine API 客户端的 `libs/containers`；清单的 `containers`、`PluginContainer` 以及管理与宿主 RPC；Linux 上的托管依赖，先是运行在宿主机上的服务端，再是运行在容器中的服务端；带命令的外部依赖；`plugins/voice` 声明 whisper-asr-webservice；Web UI。
+
+- `libs/containers`：端点、检查、经 Unix socket、命名管道与回环 TCP 的客户端
+- `mavio.plugin.v1` 中清单的 `containers`，`libs/core` 与 `libs/store` 中的 `PluginContainer`，`GetContainerRuntime`、`ListPluginContainers`、`SetPluginContainer`、`HostService.ListContainers`
+- 托管依赖：作为任务的镜像拉取、名称与标签、`mavio` 网络、健康检查与重启、对账、卸载时删除
+- 外部依赖：健康检查，`docker run` 与 Compose 命令及其 GPU 变体
+- `plugins/voice` 声明 whisper-asr-webservice；Web UI 在插件页面中展示依赖
+
+**完成标准**：在装有 Docker 的 Linux 上的端到端测试（没有 Docker 时跳过）：声明一个小型 HTTP 镜像的测试插件，在其 `ListContainers` 返回的地址上得到一个就绪的托管依赖，服务端分别运行在宿主机上与挂载了 socket 的容器中；声明的 digest 改变时容器被替换，被杀死后被重启，插件卸载时连同其卷被删除；没有引擎时，同一依赖设为外部、地址指向由生成的 `docker run` 命令启动的容器，随后变为就绪。
+
+**进度**：
+- [ ] `libs/containers`
+- [ ] 契约、领域与存储
+- [ ] 托管依赖，服务端在宿主机上
+- [ ] 托管依赖，服务端在容器中
+- [ ] 外部依赖与命令
+- [ ] `plugins/voice` 与 Web UI
+- [ ] **完成标准**中的端到端测试
+- [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
+
 ---
 
 ## 4. 风险与待决事项
@@ -964,4 +989,6 @@ flowchart TD
 | Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | 已由运行构建好的可执行文件的 `TestAssistantAI` 在 macOS（arm64）上验证；Linux 与 Windows 仍待验证；能加载之前，会话只直接提供工具 |
 | 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
 | 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
+| 容器引擎的 socket | 能访问 Docker 的 socket 即等于宿主机的 root，因此拥有它的服务端，以及它允许插件声明的内容中的任何漏洞，都具有同等权力 | 只有管理员才能把 socket 交给服务端；声明固定在清单中，安装时批准；不允许特权模式、宿主机命名空间、设备或绑定挂载；外部依赖不需要 socket（P30） |
+| 容器引擎之间的差异 | Docker、rootless Docker、Docker Desktop 与 Podman 的 socket、网络与 GPU 支持各不相同 | 至少 Engine API 1.41；测试在 Linux 上的 Docker 运行，其他手工检查（P30） |
 | Siri Remote 的麦克风 | tvOS 不允许应用从 Siri Remote 录音 | 助手输入框中的听写；App Intents |

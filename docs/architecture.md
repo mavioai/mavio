@@ -104,6 +104,7 @@ mavio/
 │   ├── release/                 # [Go] Release title parsing: numbering, quality, languages, edition, group
 │   ├── acquire/                 # [Go] Acquisition engine: profiles, decisions, searches, queue, import (movie, series)
 │   ├── rclone/                  # [Go] rclone rcd: rc client, storage on remotes, media proxy, rcd supervision
+│   ├── containers/              # (P30) [Go] Container engines: detection, Engine API client, plugins' container dependencies
 │   ├── client-ts/               # [TS] connect-es client and Query hooks of the web UI (see clients.md)
 │   ├── intent/                  # [Rust] The assistant's grammar: one parser for the clients and, as WASM, the web UI and the server (see assistant.md)
 │   ├── client-rust/             # [Rust] Shared core of the native clients (see clients.md)
@@ -145,6 +146,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
      ├──────▶ rclone ──▶ core
+     ├──────▶ containers ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
@@ -154,6 +156,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `acquire`, like `library`, reaches storage, scans and plugins only through ports in `core`, which `apps/server` implements.
 * `media` depends only on `core` and knows nothing about databases or plugins.
 * `rclone` depends only on `core`: it implements `core.Storage` over an rcd's HTTP API and links none of rclone's code.
+* `containers` depends only on `core`: it speaks the Docker Engine API over the engine's socket with `net/http` and links no Docker SDK (§16).
 * `libs/intent`, in Rust, depends on nothing but its generated messages from `libs/proto`; `libs/client-rust` links it, and `apps/server` embeds its WASM build and runs it on wazero ([Assistant §4.3](assistant.md#43-one-implementation-three-hosts)).
 * Only `apps/server` does wiring. The dependency direction is enforced in CI by depguard rules.
 
@@ -331,6 +334,7 @@ A plugin registers its handlers in `init` with `guest.Handle(pluginv1connect.New
 * **Authentication and notifications**: users whose `AuthProvider` names a plugin sign in when the plugin's `Authenticate` accepts their name and password. Every activity of the activity log goes to the notification plugins as an `Event`. Event-consuming plugins get the events their manifest names, logged or not, in batches through a queue of their own ([Plugins §4](plugins.md#4-events)).
 * **Tasks and data folders**: plugins' tasks run as `plugin.task` jobs on a worker of their own and appear in `TaskService`; each plugin has a data folder in `--plugin-data-dir` ([Plugins §6](plugins.md#6-tasks-and-data-folder)).
 * **Segment providers**: every started segment plugin is asked for the segments of probed movies and episodes, with their IDs, duration and chapters.
+* **Container dependencies**: the services a manifest declares in `containers` are run by the server on a container engine or reached at the addresses an administrator gives (§16, [Plugins §11](plugins.md#11-container-dependencies)).
 * **Subtitle providers**: every started subtitle plugin is searched by subtitle acquisition (§14), automatically and through `SubtitleService.SearchItemSubtitles`, and finds nothing while it is not ready.
 
 ---
@@ -484,7 +488,7 @@ A library path `rclone:<remote>:<path>` lies on a remote of rclone, reached thro
 
 * **Server binaries**: `pnpm nx run server:dist` cross-compiles `cmd/mavio` with `CGO_ENABLED=0` and `-trimpath` for Linux, macOS and Windows on amd64 and arm64 into `apps/server/dist/`, stamping `$VERSION` into `internal/buildinfo` when set; every binary is static. Each platform's binary lies beside Mavio's fork of rclone, the platform's build of the release `mise.toml` pins, checked against its SHA-256 digest, in `apps/server/dist/mavio-<os>-<arch>/`, archived as a `.zip` for Windows and a `.tar.gz` otherwise; downloads of rclone are kept in `~/.cache/mavio-dist` (`MAVIO_DIST_CACHE`).
 * **Container image** (`apps/server/Dockerfile`, built from the repository root): the server is cross-compiled on the build machine's platform, so linux/amd64 and linux/arm64 images build without emulation of Go. The image bundles jellyfin-ffmpeg's portable build in `/usr/lib/jellyfin-ffmpeg`, the version `mise.toml` pins, checked against GitHub's SHA-256 digest of the release asset, on Debian slim with CA certificates and time zone data, and Mavio's fork of rclone in `/usr/local/bin/rclone`, the Linux build of the release `mise.toml` pins, checked against its SHA-256 digest, which the server runs as its rcd (§9.2) with its config in `/config/rclone/rclone.conf`.
-* **Image layout**: the server runs as `mavio` (uid and gid 1000) on port 8686, answering discovery on UDP port 7359, with its home in `/config` (`config.toml`, the SQLite database, plugin folder, chosen artwork and backups), images, compiled plugins and transcodes in `/cache`, and media libraries mounted under `/media`. The image sets these and the jellyfin-ffmpeg binaries through `MAVIO_*` environment variables, which flags after the image name and `-e` variables override. The DLNA plugin is built with the server and seeded from `/usr/lib/mavio/plugins`; its SSDP on UDP port 1900 reaches the container only with `--network host`. The indexers, download clients, subtitles and agent plugins are seeded alike, the agent plugin compiled by Bun for the image's platform; with no indexers configured the first only fetches the Cardigann definitions daily, and with no clients, providers or credentials configured the others do nothing. A health check calls `SystemService.GetHealth`.
+* **Image layout**: the server runs as `mavio` (uid and gid 1000) on port 8686, answering discovery on UDP port 7359, with its home in `/config` (`config.toml`, the SQLite database, plugin folder, chosen artwork and backups), images, compiled plugins and transcodes in `/cache`, and media libraries mounted under `/media`. The image sets these and the jellyfin-ffmpeg binaries through `MAVIO_*` environment variables, which flags after the image name and `-e` variables override. The DLNA plugin is built with the server and seeded from `/usr/lib/mavio/plugins`; its SSDP on UDP port 1900 reaches the container only with `--network host`. The indexers, download clients, subtitles and agent plugins are seeded alike, the agent plugin compiled by Bun for the image's platform; with no indexers configured the first only fetches the Cardigann definitions daily, and with no clients, providers or credentials configured the others do nothing. A health check calls `SystemService.GetHealth`. The engine's socket is not mounted by default; mounted (`-v /var/run/docker.sock:/var/run/docker.sock`, with the socket's group added to the server's user), it lets the server run plugins' container dependencies beside its own container (§16.2).
 
 ---
 
@@ -607,3 +611,40 @@ The assistant is specified in [Assistant](assistant.md). In the server:
 * **The tools** call the server's own services as the user; the requesting device is acted on through client actions, other devices through `SessionService.SendCommand`.
 * **The AI path** goes through the `AGENT_SESSION` plugin ([Plugins §8.15](plugins.md#815-ai-gateway-and-agent-sessions)): the server watches its tool calls, runs them and keeps their results for a day by call ID, and records each conversation's user and device.
 * **Speech** goes through the `SPEECH_TO_TEXT` and `TEXT_TO_SPEECH` plugins ([Plugins §8.16](plugins.md#816-speech-recognition-and-synthesis)); the end of an utterance is detected by Silero VAD (`libs/media/vad`), and audio is never stored.
+
+---
+
+## 16. Container Dependencies (libs/containers)
+
+Some plugins use a service that runs best as a container image, such as whisper-asr-webservice for `plugins/voice`. A plugin declares such services in its manifest ([Plugins §11](plugins.md#11-container-dependencies)), and the server makes each available at an address, either by running it on a container engine it can reach (managed) or at an address an administrator gives (external), for which it shows the command that runs it. Plugins only ever see the address; nothing in Mavio requires a container engine.
+
+### 16.1 Engine Detection
+* **Endpoints**: `--container-endpoint` (`MAVIO_CONTAINER_ENDPOINT`), else `DOCKER_HOST`, else the first of these that answers: `/var/run/docker.sock`, `$XDG_RUNTIME_DIR/docker.sock` (rootless Docker), `~/.docker/run/docker.sock` (Docker Desktop on macOS), `$XDG_RUNTIME_DIR/podman/podman.sock`, `/run/podman/podman.sock`, and on Windows the named pipe `//./pipe/docker_engine`. `unix://`, `npipe://` and `tcp://` endpoints are accepted; a `tcp://` endpoint must be on a loopback address.
+* **Checks**: `GET /_ping` and `GET /version`; an engine below Engine API 1.41 (Docker 20.10, Podman 3) is refused. The server detects at startup and when an administrator asks; the result (`ContainerRuntime`: available or the reason not, the endpoint, engine name and version, rootless, and where the server runs) is reported by `PluginManagementService.GetContainerRuntime`.
+* **Where the server runs**: in a container when `/.dockerenv` or `/run/.containerenv` exists. With an engine, the server inspects its own container (by its host name, the container's ID) to learn its network mode; a server on the host network counts as on the host.
+* **Client**: `libs/containers` calls the dozen endpoints it needs (ping, version, image pull and inspect, network create, connect and inspect, container create, start, stop, inspect, list and remove, volume list and remove) with `net/http` over the socket, the named pipe opened as a file on Windows. Podman's Docker-compatible API is the same API.
+
+### 16.2 Naming, Labels and Networks
+* **Names** carry Mavio's prefix, `--container-prefix` (`MAVIO_CONTAINER_PREFIX`, `mavio`), which a second server on the same engine changes: the container of dependency `<name>` of plugin `<plugin>` is `mavio-<plugin>-<name>`, its volume `<v>` is `mavio-<plugin>-<name>-<v>`, and the network is `mavio`. External commands use the same names.
+* **Labels**: every container, volume and network the server creates carries `dev.mavio.server` (the server's ID), `dev.mavio.plugin`, `dev.mavio.dependency` and `dev.mavio.spec` (a hash of the resolved declaration). The server touches only what carries its own server ID; a name taken by anything else is an error naming it.
+* **Server on the host**: the dependency's port is published on `127.0.0.1` at a port the engine picks, and its address is `http://127.0.0.1:<port>`.
+* **Server in a container**: the server creates the `mavio` bridge network, connects its own container to it and runs dependencies there without publishing ports; the address is `http://mavio-<plugin>-<name>:<port>`.
+
+### 16.3 Managed Dependencies
+* **Allowed**: the image named by digest; the declared command, environment, port and named volumes; memory and CPU limits; NVIDIA GPUs through device requests when the declaration asks for one and the administrator allows it. Never privileged mode, added capabilities, host network, PID or IPC namespaces, devices, or bind mounts of host paths.
+* **Lifecycle**: a managed dependency runs while its plugin runs: when the plugin starts, the server ensures the network, pulls the image if missing (a `plugin.container_pull` job, its progress shown in `TaskService`), replaces the container when its `dev.mavio.spec` differs, starts it and waits for its health check; when the plugin stops, is disabled or the server shuts down, the container is stopped. Containers have no restart policy: the server checks their health every 30 seconds and restarts one after three failures, with the process runtime's backoff (§7.3).
+* **Reconciliation**: at startup the server lists what carries its ID and removes containers of dependencies no longer declared or no longer managed. Uninstalling a plugin removes its containers and volumes, as it deletes its data folder; switching a dependency to external removes its container and keeps its volumes.
+* **Secrets**: values a declaration asks the server to generate (`${secret:<key>}`, [Plugins §11.1](plugins.md#111-declaration)) are kept with the dependency and given to the container's environment; they are never logged.
+
+### 16.4 External Dependencies
+* An external dependency is reached at the address an administrator sets; the server only checks its health and reports its state. Clients show the commands that run it, which `ListPluginContainers` returns, built from the same declaration:
+  * a `docker run` command: `-d --name mavio-<plugin>-<name> --restart unless-stopped`, the named volumes, the environment with generated secrets, the image by digest, and `-p 127.0.0.1:<port>:<port>` when the server runs on the host; with the address `http://127.0.0.1:<port>` filled in;
+  * a Compose service of the same, to add beside the server's own service when the server runs in a container, with the address `http://mavio-<plugin>-<name>:<port>`; the `docker run` form then takes `--network <network>`, the network left for the administrator to name;
+  * a variant with `--gpus all` (Compose's device reservation) and the declaration's GPU image for declarations that can use a GPU.
+* Named volumes are used rather than host paths, since a server in a container cannot know the host's path of its own folders. The commands run unchanged with `podman` for `docker`.
+* Commands holding generated secrets are shown only to administrators, with a warning.
+
+### 16.5 States and API
+* A dependency is `unset` (the administrator has not chosen), `managed` or `external` (`PluginContainer`, [Domain Model](domain.md) §10), and its state is `pulling`, `starting`, `ready`, `unhealthy` or `unavailable` (no engine for a managed dependency, no address for an external one), with the last error.
+* `PluginManagementService.GetContainerRuntime` reports and re-detects the engine; `ListPluginContainers` lists a plugin's dependencies with their declarations, modes, addresses, states and commands; `SetPluginContainer` sets a dependency's mode and, for an external one, its address. Choosing managed requires an available engine.
+* A plugin reads its dependencies' addresses and states with `HostService.ListContainers` and is configured again (`Configure`) when an address changes. A WASM plugin's `http_hosts` include its dependencies' addresses.

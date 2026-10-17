@@ -44,6 +44,7 @@ libs/streaming/       HLS (fMP4/CMAF)
 libs/release/         Release title parsing (from P15, pure functions)
 libs/acquire/         Acquisition engine: profiles, decisions, searches, queue, import (from P18)
 libs/rclone/          rclone rcd: rc client, storage on remotes, media proxy, rcd supervision (from P25)
+libs/containers/      Container engines: detection, Engine API client, plugins' container dependencies (from P30)
 plugins/<name>/       Plugins (built as wasip1 WASM by default)
 plugins/agent/        AI gateway and agent sessions: a TypeScript process plugin compiled by Bun (pi-ai, pi-durable)
 plugins/voice/        Speech recognition and synthesis services, Whisper among them: a Go process plugin (from P29)
@@ -101,7 +102,7 @@ Every Go project has these inferred Nx targets: `build` (`CGO_ENABLED=0`), `test
   ```
 - New module: create the directory → `go mod init github.com/mavioai/mavio/<dir>` → change the `go` directive to `1.27.0` → add it to `use` in `go.work`. Nx picks it up automatically with no `project.json`; add one only to override default targets (see `plugins/scraper-tmdb/project.json`).
 - `libs/proto` and `libs/plugin` are imported by third-party plugins and are tagged independently (e.g. `libs/proto/v0.1.0`); before releasing `libs/plugin`, release the `libs/proto` version it depends on and update its `require`. Other modules promise no stable external API.
-- The dependency direction is enforced by the depguard rules in `.golangci.yml` (architecture document §3.2): `core` depends only on the standard library; `naming`, `subtitle`, `release` and `rclone` depend only on `core`; `media`, `imaging`, `metadata` and `store` do not depend on `library`, `streaming` or `plugin`; `library`, `streaming` and `acquire` access storage only through ports in `core`; `plugin` depends only on `proto`; no lib depends on `apps/*` or `plugins/*`. **Only `apps/server` does wiring.** To change the dependency direction, update the architecture document first.
+- The dependency direction is enforced by the depguard rules in `.golangci.yml` (architecture document §3.2): `core` depends only on the standard library; `naming`, `subtitle`, `release`, `rclone` and `containers` depend only on `core`; `media`, `imaging`, `metadata` and `store` do not depend on `library`, `streaming` or `plugin`; `library`, `streaming` and `acquire` access storage only through ports in `core`; `plugin` depends only on `proto`; no lib depends on `apps/*` or `plugins/*`. **Only `apps/server` does wiring.** To change the dependency direction, update the architecture document first.
 
 ### Third-party Dependency Guidelines
 - **No CGO**: the server is built with `CGO_ENABLED=0`. When native capabilities are needed, prefer an ffmpeg child process or a WASM module running on wazero.

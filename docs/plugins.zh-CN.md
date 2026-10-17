@@ -4,7 +4,7 @@
 
 > 相关文档：[系统架构](architecture.zh-CN.md) · [领域模型](domain.zh-CN.md) · [路线图](roadmap.zh-CN.md) · [AGENTS.zh-CN.md](../AGENTS.zh-CN.md)
 
-> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布；以及资源获取新增的提供者类型。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段，资源获取提供者在 P15 至 P18。
+> [架构 §7](architecture.zh-CN.md#7-插件系统libsplugin) 描述两种插件运行时，以及服务端如何调用插件。本文档描述插件如何获得 Jellyfin 插件所能获得的能力（频道与直播电视除外）：服务端 API、事件、HTTP 路由、任务、数据目录、远程设备以及其余提供者类型。本文档还描述 DLNA：Mavio 把它作为基于这些能力构建的第一方插件发布；以及资源获取新增的提供者类型，和插件可以声明的容器依赖。相应工作是[路线图](roadmap.zh-CN.md)的 P13（平台）与 P14（DLNA）阶段，资源获取提供者在 P15 至 P18。
 
 ---
 
@@ -200,6 +200,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 | 网络 | 仅 `http_hosts` | 操作系统的全部网络，包括 UDP |
 | 解析器 | 可以 | 不可以 |
 | 长任务 | 至多任务超时 | 不限 |
+| 容器依赖 | 支持；其地址加入 `http_hosts` | 支持 |
 
 ## 10. DLNA（`plugins/dlna`）
 DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和长期运行的监听。它为服务端支持的每个平台构建，并打包进容器镜像（§10.6）。
@@ -224,3 +225,31 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 
 ### 10.6 打包
 `tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
+
+## 11. 容器依赖
+插件可以依赖以容器镜像运行的服务，例如 whisper-asr-webservice。插件在清单中声明该服务；由服务端在容器引擎上运行它，或由管理员运行它并给出地址（[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers)）。插件只看到地址，因此两种方式下插件的行为相同；没有容器引擎的管理员也可以让插件指向以其他方式运行的服务。
+
+### 11.1 声明
+清单的 `containers` 列出依赖，每个依赖包含：
+* `name`：在插件内唯一，由小写字母、数字与连字符组成；容器名为 `mavio-<plugin>-<name>`，其中 `<plugin>` 是插件 ID 的最后一段。
+* `description`：用途，向管理员显示。
+* `image`：带 digest 的引用（`repository:tag@sha256:…`）；没有 digest 的镜像被拒绝。
+* `port`：服务在容器内监听的端口；`health_path`：服务就绪时返回 2xx 的 HTTP 路径，未设置时以端口可连接为准。
+* `command`、`env`：参数与环境变量。值 `${secret:<key>}` 是服务端为该依赖生成一次的随机密钥；`${address}` 是该依赖自己的地址。
+* `volumes`：按挂载路径给出的命名卷，例如 `{"cache": "/root/.cache"}`。
+* `gpu`：`none`、`optional` 或 `required`（NVIDIA），以及 `gpu_image`：使用 GPU 时若为另一个镜像，则为该镜像；`memory` 与 `cpus`：托管容器的限制。
+* `required`：插件是否离不开它。可选依赖（例如与插件的 OpenAI 兼容识别器并列的 whisper-asr-webservice）在管理员选择之前保持 `unset`。
+
+安装或升级插件时显示其依赖及镜像，管理员随插件一并批准；升级带来新的镜像 digest 时，插件启动时替换托管容器。
+
+### 11.2 地址
+* `HostService.ListContainers` 返回插件的依赖及其模式（`unset`、`managed`、`external`）、地址与状态（`pulling`、`starting`、`ready`、`unhealthy`、`unavailable`）。与 `HostService` 的其他方法一样，任何插件都可调用（§7）。
+* 地址变化时，服务端用已保存的配置再次调用 `Configure`，因此插件在被配置时读取地址。
+* 依赖未就绪时插件照常工作，并报告需要该依赖的操作的失败，如同面对一个无法访问的服务。
+
+### 11.3 管理
+* `PluginManagementService.GetContainerRuntime` 说明是否有可用的容器引擎，`ListPluginContainers` 列出插件的依赖及运行它们的命令，`SetPluginContainer` 把某个依赖设为托管，或设为外部并给出地址。
+* 有引擎时客户端提供托管；否则提供命令（`docker run` 与一个 Compose 服务），并预填它们对应的地址（[架构 §16.4](architecture.zh-CN.md#164-外部依赖)）。
+
+### 11.4 `plugins/voice`
+whisper-asr-webservice 是第一个被声明的依赖：其 CPU 镜像，`gpu: optional` 并以其 GPU 镜像为 `gpu_image`，端口 9000，模型缓存放在一个卷中。它不为 `unset` 时，插件的 `whisper-asr` 识别器使用该依赖的地址，代替其 `url` 设置。

@@ -104,6 +104,7 @@ mavio/
 │   ├── release/                 # [Go] release 标题解析：编号、质量、语言、版本、发布组
 │   ├── acquire/                 # [Go] 资源获取引擎：档案、决策、搜索、队列、入库（movie、series）
 │   ├── rclone/                  # [Go] rclone rcd：rc 客户端、远端上的存储、媒体代理、rcd 托管
+│   ├── containers/              # (P30) [Go] 容器引擎：检测、Engine API 客户端、插件的容器依赖
 │   ├── client-ts/               # [TS] Web UI 的 connect-es 客户端与 Query hooks（见 clients.zh-CN.md）
 │   ├── intent/                  # [Rust] 助手的语法：客户端共用的一份解析器，以 WASM 形式也供 Web UI 与服务端使用（见 assistant.zh-CN.md）
 │   ├── client-rust/             # [Rust] 原生客户端的共享核心（见 clients.zh-CN.md）
@@ -145,6 +146,7 @@ apps/server ──▶ streaming ──▶ media ──▶ core
      ├──────▶ acquire ──▶ release / naming ──▶ core
      ├──────▶ store ──▶ core
      ├──────▶ rclone ──▶ core
+     ├──────▶ containers ──▶ core
      └──────▶ plugin ──▶ proto
 
 plugins/* ──▶ plugin ──▶ proto
@@ -154,6 +156,7 @@ plugins/* ──▶ plugin ──▶ proto
 * `acquire` 与 `library` 一样，只通过 `core` 中的端口访问存储、扫描与插件，这些端口由 `apps/server` 实现。
 * `media` 只依赖 `core`，不感知数据库与插件。
 * `rclone` 只依赖 `core`：它基于 rcd 的 HTTP API 实现 `core.Storage`，不链接 rclone 的任何代码。
+* `containers` 只依赖 `core`：它用 `net/http` 经引擎的 socket 调用 Docker Engine API，不链接任何 Docker SDK（§16）。
 * `libs/intent` 用 Rust 编写，只依赖 `libs/proto` 为它生成的消息；`libs/client-rust` 链接它，`apps/server` 嵌入它的 WASM 构建并在 wazero 上运行（[助手 §4.3](assistant.zh-CN.md#43-一份实现三处运行)）。
 * 只有 `apps/server` 负责装配。依赖方向由 depguard 规则在 CI 中强制。
 
@@ -331,6 +334,7 @@ libs/plugin/
 * **认证与通知**：`AuthProvider` 指向某个插件的用户，在该插件的 `Authenticate` 接受其用户名与密码时登录。活动日志中的每项活动都作为 `Event` 发送给通知插件。消费事件的插件通过各自的队列，分批收到其清单列出的事件，无论是否进入日志（[插件平台 §4](plugins.zh-CN.md#4-事件)）。
 * **任务与数据目录**：插件的任务作为 `plugin.task` 作业在单独的 worker 上运行，并出现在 `TaskService` 中；每个插件在 `--plugin-data-dir` 中有一个数据目录（[插件平台 §6](plugins.zh-CN.md#6-任务与数据目录)）。
 * **片段提供者**：对每个已探测的电影与剧集，以其 ID、时长与章节询问每个已启动的片段插件。
+* **容器依赖**：清单在 `containers` 中声明的服务，由服务端在容器引擎上运行，或在管理员给出的地址上访问（§16，[插件 §11](plugins.zh-CN.md#11-容器依赖)）。
 * **字幕提供者**：字幕获取（§14）自动地、并通过 `SubtitleService.SearchItemSubtitles` 搜索每个已启动的字幕插件；未就绪的插件什么也找不到。
 
 ---
@@ -484,7 +488,7 @@ Mavio 通过**全量对账扫描**发现媒体库变更，本地磁盘与网络�
 
 * **服务端二进制**：`pnpm nx run server:dist` 以 `CGO_ENABLED=0` 和 `-trimpath` 将 `cmd/mavio` 交叉编译为 Linux、macOS、Windows 的 amd64 与 arm64 版本，输出到 `apps/server/dist/`；设置了 `$VERSION` 时将其写入 `internal/buildinfo`。所有二进制均为静态链接。每个平台的二进制与 Mavio 的 rclone 分支放在一起，即 `mise.toml` 锁定版本中该平台的构建，按其 SHA-256 摘要校验，位于 `apps/server/dist/mavio-<os>-<arch>/`，Windows 打包为 `.zip`，其余为 `.tar.gz`；下载的 rclone 保存在 `~/.cache/mavio-dist`（`MAVIO_DIST_CACHE`）。
 * **容器镜像**（`apps/server/Dockerfile`，从仓库根目录构建）：服务端在构建机自身平台上交叉编译，因此构建 linux/amd64 与 linux/arm64 镜像时 Go 部分无需模拟。镜像在 `/usr/lib/jellyfin-ffmpeg` 内置 jellyfin-ffmpeg 便携版，即 `mise.toml` 锁定的版本，并按 GitHub 为该发布文件给出的 SHA-256 摘要校验；基础镜像为 Debian slim，附带 CA 证书与时区数据；镜像还在 `/usr/local/bin/rclone` 内置 Mavio 的 rclone fork，即 `mise.toml` 锁定的发布版本的 Linux 构建，并按其 SHA-256 摘要校验，服务端将其作为 rcd 运行（§9.2），配置位于 `/config/rclone/rclone.conf`。
-* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器、下载客户端、字幕与智能体插件同样从此播种，智能体插件由 Bun 为镜像的平台编译；未配置索引器时第一个只每日拉取 Cardigann 定义，未配置客户端、提供者或凭据时其他插件什么也不做。健康检查调用 `SystemService.GetHealth`。
+* **镜像布局**：服务端以 `mavio` 用户（uid 与 gid 均为 1000）在 8686 端口运行，并在 UDP 7359 端口应答局域网发现；主目录为 `/config`（`config.toml`、SQLite 数据库、插件目录、选定的图片与备份），图片、编译后的插件与转码文件位于 `/cache`，媒体库挂载在 `/media` 下。镜像通过 `MAVIO_*` 环境变量设定这些路径与 jellyfin-ffmpeg 的可执行文件，镜像名之后的参数与 `-e` 传入的变量可覆盖它们。DLNA 插件随服务端一起构建，并从 `/usr/lib/mavio/plugins` 播种；它在 UDP 1900 端口上的 SSDP 只有在 `--network host` 下才能到达容器。索引器、下载客户端、字幕与智能体插件同样从此播种，智能体插件由 Bun 为镜像的平台编译；未配置索引器时第一个只每日拉取 Cardigann 定义，未配置客户端、提供者或凭据时其他插件什么也不做。健康检查调用 `SystemService.GetHealth`。默认不挂载引擎的 socket；挂载后（`-v /var/run/docker.sock:/var/run/docker.sock`，并把 socket 的用户组加给服务端的用户），服务端可在自身容器旁运行插件的容器依赖（§16.2）。
 
 ---
 
@@ -607,3 +611,40 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * **工具**以用户身份调用服务端自己的服务；对发出请求的设备通过客户端动作执行，对其他设备通过 `SessionService.SendCommand` 执行。
 * **AI 路径**经由 `AGENT_SESSION` 插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）：服务端监听其工具调用并运行，按调用 ID 把结果保留一天，并记录每个会话的用户与设备。
 * **语音**经由 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH` 插件（[插件 §8.16](plugins.zh-CN.md#816-语音识别与合成)）；一段话的结束由 Silero VAD（`libs/media/vad`）检测，音频从不保存。
+
+---
+
+## 16. 容器依赖（libs/containers）
+
+有些插件使用的服务最适合以容器镜像运行，例如 `plugins/voice` 的 whisper-asr-webservice。插件在清单中声明这些服务（[插件 §11](plugins.zh-CN.md#11-容器依赖)），服务端让每个服务在某个地址上可用：要么在它能访问的容器引擎上运行该服务（托管），要么使用管理员给出的地址（外部），并为后者显示运行它的命令。插件始终只看到地址；Mavio 的任何部分都不要求有容器引擎。
+
+### 16.1 引擎检测
+* **端点**：`--container-endpoint`（`MAVIO_CONTAINER_ENDPOINT`），否则 `DOCKER_HOST`，否则以下第一个有应答的：`/var/run/docker.sock`、`$XDG_RUNTIME_DIR/docker.sock`（rootless Docker）、`~/.docker/run/docker.sock`（macOS 上的 Docker Desktop）、`$XDG_RUNTIME_DIR/podman/podman.sock`、`/run/podman/podman.sock`，Windows 上为命名管道 `//./pipe/docker_engine`。接受 `unix://`、`npipe://` 与 `tcp://` 端点；`tcp://` 端点必须是回环地址。
+* **检查**：`GET /_ping` 与 `GET /version`；Engine API 低于 1.41（Docker 20.10、Podman 3）的引擎被拒绝。服务端在启动时以及管理员要求时检测；结果（`ContainerRuntime`：是否可用或不可用的原因、端点、引擎名称与版本、是否 rootless、服务端运行在何处）由 `PluginManagementService.GetContainerRuntime` 报告。
+* **服务端运行在何处**：存在 `/.dockerenv` 或 `/run/.containerenv` 时视为运行在容器中。有引擎时，服务端检查自己的容器（按其主机名，即容器 ID）以获知网络模式；使用宿主机网络的服务端视为运行在宿主机上。
+* **客户端**：`libs/containers` 用 `net/http` 经 socket 调用它需要的十几个端点（ping、version、镜像拉取与检查、网络创建、连接与检查、容器创建、启动、停止、检查、列出与删除、卷列出与删除），Windows 上把命名管道作为文件打开。Podman 兼容 Docker 的 API 就是同一套 API。
+
+### 16.2 命名、标签与网络
+* **名称**带 Mavio 的前缀 `--container-prefix`（`MAVIO_CONTAINER_PREFIX`，默认 `mavio`），同一引擎上的第二个服务端需修改它：插件 `<plugin>` 的依赖 `<name>` 的容器为 `mavio-<plugin>-<name>`，其卷 `<v>` 为 `mavio-<plugin>-<name>-<v>`，网络为 `mavio`。外部命令使用同样的名称。
+* **标签**：服务端创建的每个容器、卷与网络都带 `dev.mavio.server`（服务端的 ID）、`dev.mavio.plugin`、`dev.mavio.dependency` 与 `dev.mavio.spec`（解析后的声明的哈希）。服务端只操作带自己服务端 ID 的对象；名称被其他对象占用时报错并指出它。
+* **服务端在宿主机上**：依赖的端口发布在 `127.0.0.1` 上由引擎选定的端口，地址为 `http://127.0.0.1:<port>`。
+* **服务端在容器中**：服务端创建 `mavio` 桥接网络，把自己的容器连入，并在其中运行依赖而不发布端口；地址为 `http://mavio-<plugin>-<name>:<port>`。
+
+### 16.3 托管依赖
+* **允许**：按 digest 指定的镜像；声明的命令、环境变量、端口与命名卷；内存与 CPU 限制；声明需要且管理员允许时，经设备请求使用 NVIDIA GPU。绝不使用特权模式、额外的 capability、宿主机的网络、PID 或 IPC 命名空间、设备，或宿主机路径的绑定挂载。
+* **生命周期**：托管依赖随其插件运行：插件启动时，服务端确保网络存在，镜像缺失时拉取（`plugin.container_pull` 任务，进度显示在 `TaskService` 中），`dev.mavio.spec` 不同时替换容器，启动它并等待其健康检查通过；插件停止、被禁用或服务端关闭时，容器被停止。容器不设重启策略：服务端每 30 秒检查一次健康状态，连续三次失败后重启，退避方式与进程运行时相同（§7.3）。
+* **对账**：启动时服务端列出带自己 ID 的对象，删除不再声明或不再托管的依赖的容器。卸载插件时删除其容器与卷，如同删除其数据目录；把依赖改为外部时删除其容器、保留其卷。
+* **密钥**：声明要求服务端生成的值（`${secret:<key>}`，[插件 §11.1](plugins.zh-CN.md#111-声明)）随依赖保存，并传入容器的环境变量；它们从不写入日志。
+
+### 16.4 外部依赖
+* 外部依赖在管理员设置的地址上访问；服务端只检查其健康状态并报告状态。客户端显示运行它的命令，由 `ListPluginContainers` 返回，基于同一份声明生成：
+  * 一条 `docker run` 命令：`-d --name mavio-<plugin>-<name> --restart unless-stopped`、命名卷、含生成密钥的环境变量、按 digest 指定的镜像，服务端在宿主机上时加 `-p 127.0.0.1:<port>:<port>`；预填地址 `http://127.0.0.1:<port>`；
+  * 同样内容的一个 Compose 服务，供服务端运行在容器中时加在服务端自己的服务旁边，预填地址 `http://mavio-<plugin>-<name>:<port>`；此时 `docker run` 形式带 `--network <network>`，网络名留给管理员填写；
+  * 对可使用 GPU 的声明，另给出带 `--gpus all`（Compose 中为设备预留）与声明的 GPU 镜像的变体。
+* 使用命名卷而不是宿主机路径，因为运行在容器中的服务端无法知道自身目录在宿主机上的路径。把 `docker` 换成 `podman` 后命令无需改动即可运行。
+* 含生成密钥的命令只向管理员显示，并附警告。
+
+### 16.5 状态与 API
+* 依赖的模式为 `unset`（管理员尚未选择）、`managed` 或 `external`（`PluginContainer`，[领域模型](domain.zh-CN.md) §10），状态为 `pulling`、`starting`、`ready`、`unhealthy` 或 `unavailable`（托管依赖没有引擎，外部依赖没有地址），并附最近的错误。
+* `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址。选择托管要求有可用的引擎。
+* 插件通过 `HostService.ListContainers` 读取其依赖的地址与状态，地址变化时会被再次配置（`Configure`）。WASM 插件的 `http_hosts` 包含其依赖的地址。
