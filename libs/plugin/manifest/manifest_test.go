@@ -95,7 +95,9 @@ func TestValidate(t *testing.T) {
 		t.Fatalf("manifest with containers: %v", err)
 	}
 	withContainer := func(mut func(c *pluginv1.ContainerDependency)) func(m *pluginv1.Manifest) {
-		return func(m *pluginv1.Manifest) { m.SetContainers([]*pluginv1.ContainerDependency{container("whisper", mut)}) }
+		return func(m *pluginv1.Manifest) {
+			m.SetContainers([]*pluginv1.ContainerDependency{container("whisper", mut)})
+		}
 	}
 	tests := []struct {
 		name string

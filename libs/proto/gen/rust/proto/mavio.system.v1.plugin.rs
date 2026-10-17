@@ -3036,6 +3036,21 @@ pub struct PluginContainer {
     ///
     /// Field 3: `use_gpu`
     pub use_gpu: ::core::option::Option<bool>,
+    /// How to run it without a GPU, for an external dependency; unset when
+    /// it needs one. They hold its generated secrets.
+    ///
+    /// Field 4: `commands`
+    pub commands: ::buffa::MessageField<
+        ContainerCommands,
+        ::buffa::Inline<ContainerCommands>,
+    >,
+    /// How to run it with a GPU, for a dependency that can use one.
+    ///
+    /// Field 5: `gpu_commands`
+    pub gpu_commands: ::buffa::MessageField<
+        ContainerCommands,
+        ::buffa::Inline<ContainerCommands>,
+    >,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -3045,6 +3060,8 @@ impl ::core::fmt::Debug for PluginContainer {
             .field("dependency", &self.dependency)
             .field("status", &self.status)
             .field("use_gpu", &self.use_gpu)
+            .field("commands", &self.commands)
+            .field("gpu_commands", &self.gpu_commands)
             .finish()
     }
 }
@@ -3103,6 +3120,22 @@ impl ::buffa::Message for PluginContainer {
         if self.use_gpu.is_some() {
             size += 1u64 + ::buffa::types::BOOL_ENCODED_LEN as u64;
         }
+        if self.commands.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.commands.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
+        if self.gpu_commands.is_set() {
+            let __slot = __cache.reserve();
+            let inner_size = self.gpu_commands.compute_size(__cache);
+            __cache.set(__slot, inner_size);
+            size
+                += 1u64 + ::buffa::encoding::varint_len(inner_size as u64) as u64
+                    + inner_size as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -3131,6 +3164,22 @@ impl ::buffa::Message for PluginContainer {
         }
         if let Some(v) = self.use_gpu {
             ::buffa::types::put_bool_field(3u32, v, buf);
+        }
+        if self.commands.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                4u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.commands.write_to(__cache, buf);
+        }
+        if self.gpu_commands.is_set() {
+            ::buffa::types::put_len_delimited_header(
+                5u32,
+                u64::from(__cache.consume_next()),
+                buf,
+            );
+            self.gpu_commands.write_to(__cache, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -3176,6 +3225,28 @@ impl ::buffa::Message for PluginContainer {
                     ::buffa::types::decode_bool(buf)?,
                 );
             }
+            4u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.commands.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
+            5u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::Message::merge_length_delimited(
+                    self.gpu_commands.get_or_insert_default(),
+                    buf,
+                    ctx,
+                )?;
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -3187,11 +3258,197 @@ impl ::buffa::Message for PluginContainer {
         self.dependency = ::buffa::MessageField::none();
         self.status = ::buffa::MessageField::none();
         self.use_gpu = ::core::option::Option::None;
+        self.commands = ::buffa::MessageField::none();
+        self.gpu_commands = ::buffa::MessageField::none();
         self.__buffa_unknown_fields.clear();
     }
 }
 impl ::buffa::ExtensionSet for PluginContainer {
     const PROTO_FQN: &'static str = "mavio.system.v1.PluginContainer";
+    fn unknown_fields(&self) -> &::buffa::UnknownFields {
+        &self.__buffa_unknown_fields
+    }
+    fn unknown_fields_mut(&mut self) -> &mut ::buffa::UnknownFields {
+        &mut self.__buffa_unknown_fields
+    }
+}
+/// ContainerCommands run a container dependency outside the server, under
+/// the name and volumes a managed one would have.
+#[derive(Clone, PartialEq, Default)]
+pub struct ContainerCommands {
+    /// A docker run command; for a server in a container it joins a network
+    /// written "\<network\>", for the administrator to name.
+    ///
+    /// Field 1: `docker_run`
+    pub docker_run: ::core::option::Option<::buffa::alloc::string::String>,
+    /// A Compose file of the service, to merge beside the server's own.
+    ///
+    /// Field 2: `compose`
+    pub compose: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The address to set once it runs.
+    ///
+    /// Field 3: `address`
+    pub address: ::core::option::Option<::buffa::alloc::string::String>,
+    #[doc(hidden)]
+    pub __buffa_unknown_fields: ::buffa::UnknownFields,
+}
+impl ::core::fmt::Debug for ContainerCommands {
+    fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        f.debug_struct("ContainerCommands")
+            .field("docker_run", &self.docker_run)
+            .field("compose", &self.compose)
+            .field("address", &self.address)
+            .finish()
+    }
+}
+impl ContainerCommands {
+    /// Protobuf type URL for this message, for use with `Any::pack` and
+    /// `Any::unpack_if`.
+    ///
+    /// Format: `type.googleapis.com/<fully.qualified.TypeName>`
+    pub const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ContainerCommands";
+}
+impl ContainerCommands {
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::docker_run`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_docker_run(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.docker_run = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::compose`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_compose(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.compose = Some(value.into());
+        self
+    }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::address`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_address(
+        mut self,
+        value: impl Into<::buffa::alloc::string::String>,
+    ) -> Self {
+        self.address = Some(value.into());
+        self
+    }
+}
+::buffa::impl_default_instance!(ContainerCommands);
+impl ::buffa::MessageName for ContainerCommands {
+    const PACKAGE: &'static str = "mavio.system.v1";
+    const NAME: &'static str = "ContainerCommands";
+    const FULL_NAME: &'static str = "mavio.system.v1.ContainerCommands";
+    const TYPE_URL: &'static str = "type.googleapis.com/mavio.system.v1.ContainerCommands";
+}
+impl ::buffa::Message for ContainerCommands {
+    /// Returns the total encoded size in bytes.
+    ///
+    /// Accumulates in `u64` (which cannot overflow for in-memory
+    /// data) and saturates to `u32` at return, so a message whose
+    /// encoded size exceeds the 2 GiB protobuf limit yields a value
+    /// above [`::buffa::MAX_MESSAGE_BYTES`] that the encode entry
+    /// points reject, never a silently wrapped size.
+    #[allow(clippy::let_and_return)]
+    fn compute_size(&self, _cache: &mut ::buffa::SizeCache) -> u32 {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        let mut size = 0u64;
+        if let Some(ref v) = self.docker_run {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.compose {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        if let Some(ref v) = self.address {
+            size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
+        }
+        size += self.__buffa_unknown_fields.encoded_len() as u64;
+        ::buffa::saturate_size(size)
+    }
+    fn write_to(
+        &self,
+        _cache: &mut ::buffa::SizeCache,
+        buf: &mut impl ::buffa::EncodeSink,
+    ) {
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        if let Some(ref v) = self.docker_run {
+            ::buffa::types::put_string_field(1u32, v, buf);
+        }
+        if let Some(ref v) = self.compose {
+            ::buffa::types::put_string_field(2u32, v, buf);
+        }
+        if let Some(ref v) = self.address {
+            ::buffa::types::put_string_field(3u32, v, buf);
+        }
+        self.__buffa_unknown_fields.write_to(buf);
+    }
+    fn merge_field(
+        &mut self,
+        tag: ::buffa::encoding::Tag,
+        buf: &mut impl ::buffa::bytes::Buf,
+        ctx: ::buffa::DecodeContext<'_>,
+    ) -> ::core::result::Result<(), ::buffa::DecodeError> {
+        #[allow(unused_imports)]
+        use ::buffa::bytes::Buf as _;
+        #[allow(unused_imports)]
+        use ::buffa::Enumeration as _;
+        match tag.field_number() {
+            1u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self
+                        .docker_run
+                        .get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            2u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.compose.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            3u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::LengthDelimited,
+                )?;
+                ::buffa::types::merge_string(
+                    self.address.get_or_insert_with(::buffa::alloc::string::String::new),
+                    buf,
+                )?;
+            }
+            _ => {
+                self.__buffa_unknown_fields
+                    .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
+            }
+        }
+        ::core::result::Result::Ok(())
+    }
+    fn clear(&mut self) {
+        self.docker_run = ::core::option::Option::None;
+        self.compose = ::core::option::Option::None;
+        self.address = ::core::option::Option::None;
+        self.__buffa_unknown_fields.clear();
+    }
+}
+impl ::buffa::ExtensionSet for ContainerCommands {
+    const PROTO_FQN: &'static str = "mavio.system.v1.ContainerCommands";
     fn unknown_fields(&self) -> &::buffa::UnknownFields {
         &self.__buffa_unknown_fields
     }

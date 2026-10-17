@@ -19771,6 +19771,29 @@
         ],
         "description": "ColonReplacement is what replaces colons in file names."
       },
+      "mavio.system.v1.ContainerCommands": {
+        "type": "object",
+        "properties": {
+          "dockerRun": {
+            "type": "string",
+            "title": "docker_run",
+            "description": "A docker run command; for a server in a container it joins a network\n written \"\u003cnetwork\u003e\", for the administrator to name."
+          },
+          "compose": {
+            "type": "string",
+            "title": "compose",
+            "description": "A Compose file of the service, to merge beside the server's own."
+          },
+          "address": {
+            "type": "string",
+            "title": "address",
+            "description": "The address to set once it runs."
+          }
+        },
+        "title": "ContainerCommands",
+        "additionalProperties": false,
+        "description": "ContainerCommands run a container dependency outside the server, under\n the name and volumes a managed one would have."
+      },
       "mavio.system.v1.ContainerRuntime": {
         "type": "object",
         "properties": {
@@ -21292,6 +21315,24 @@
             "type": "boolean",
             "title": "use_gpu",
             "description": "Whether a managed container may use a GPU."
+          },
+          "commands": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.ContainerCommands"
+              }
+            ],
+            "title": "commands",
+            "description": "How to run it without a GPU, for an external dependency; unset when\n it needs one. They hold its generated secrets."
+          },
+          "gpuCommands": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.ContainerCommands"
+              }
+            ],
+            "title": "gpu_commands",
+            "description": "How to run it with a GPU, for a dependency that can use one."
           }
         },
         "title": "PluginContainer",

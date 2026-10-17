@@ -955,7 +955,7 @@ flowchart TD
 - [x] 托管依赖，服务端在宿主机上：`containers.Supervisor` 创建 `mavio` 网络、拉取缺失的镜像、替换 `dev.mavio.spec` 不同的容器、在回环地址上发布端口、等待健康检查，并在连续三次检查失败后按退避重启；托管依赖随插件启动与停止，卸载时连同卷删除，启动时对账；`container-prefix` 设置；针对内存中的引擎（`containerstest`）以及在 OrbStack 上的 Docker 29 测试（`TestEngineSupervisor`）
   - [ ] 以 `plugin.container_pull` 任务拉取镜像，并在 `TaskService` 中显示进度；目前拉取在监管器内进行，只报告为 `pulling`
 - [x] 托管依赖，服务端在容器中：服务端的容器加入 `mavio` 网络，依赖按名称访问而不发布端口；针对内存中的引擎测试
-- [ ] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址
+- [x] 外部依赖与命令，以及 WASM 插件 `http_hosts` 中依赖的地址：`containers.RunCommands` 生成带与不带 GPU 的 `docker run` 命令与 Compose 文件，作为 `PluginContainer.commands` 与 `gpu_commands` 返回；WASM 插件可以访问其依赖地址的主机
 - [ ] `plugins/voice` 与 Web UI
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查

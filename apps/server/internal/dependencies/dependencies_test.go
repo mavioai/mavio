@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -123,6 +124,17 @@ func TestSetExternal(t *testing.T) {
 	if plugs.reconfigured.Load() != 1 {
 		t.Errorf("reconfigured %d times, want 1", plugs.reconfigured.Load())
 	}
+	host := strings.TrimPrefix(srv.URL, "http://")
+	if !s.AllowsHost(ctx, pluginID, host) || s.AllowsHost(ctx, pluginID, "example.com") {
+		t.Errorf("AllowsHost does not tell %s from example.com", host)
+	}
+	deps, err := s.List(ctx, pluginID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c, g := deps[0].Commands, deps[0].GPUCommands; c == nil || g == nil || !strings.Contains(c.DockerRun, secret) || !strings.Contains(g.DockerRun, "--gpus all") {
+		t.Errorf("commands = %+v and %+v, want both, with the secret", c, g)
+	}
 
 	// The same address keeps the secret and leaves the plugin alone.
 	d, err = s.Set(ctx, pluginID, "whisper", core.ContainerExternal, srv.URL, false)
@@ -135,7 +147,7 @@ func TestSetExternal(t *testing.T) {
 
 	// Health is checked again once its result is old.
 	healthy = false
-	deps, _ := s.List(ctx, pluginID)
+	deps, _ = s.List(ctx, pluginID)
 	if st := deps[0].Status.GetState(); st != pluginv1.ContainerState_CONTAINER_STATE_READY {
 		t.Errorf("state before the result aged = %v, want the last, ready", st)
 	}

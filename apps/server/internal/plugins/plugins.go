@@ -107,6 +107,14 @@ type ContainerHooks interface {
 	PluginStopped(ctx context.Context, id string)
 	// PluginRemoved is told of a plugin uninstalled.
 	PluginRemoved(ctx context.Context, id string)
+	// AllowsHost reports whether host is that of one of a plugin's
+	// dependencies' addresses, which its WASM module may fetch.
+	AllowsHost(ctx context.Context, id, host string) bool
+}
+
+// allowHost lets WASM plugins fetch their container dependencies.
+func (c Config) allowHost(ctx context.Context, id, host string) bool {
+	return c.Containers != nil && c.Containers.AllowsHost(ctx, id, host)
 }
 
 // Manager runs the plugins of a plugin folder, and installs, upgrades and
@@ -175,7 +183,7 @@ func Open(ctx context.Context, cfg Config) (*Manager, error) {
 	// Event delivery outlives the request that installs a plugin.
 	m.ctx, m.cancel = context.WithCancel(context.WithoutCancel(ctx))
 	m.opts = host.Options{
-		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, Logger: m.log},
+		WASM:    wasm.Options{CacheDir: cfg.CacheDir, FetchClient: cfg.Fetch, AllowHost: cfg.allowHost, Logger: m.log},
 		Process: process.Options{Logger: m.log},
 		DataDir: cfg.DataDir,
 	}

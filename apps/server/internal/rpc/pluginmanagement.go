@@ -315,5 +315,15 @@ func (s *PluginManagementService) SetPluginContainer(ctx context.Context, req *s
 }
 
 func pluginContainerToProto(d dependencies.Dependency) *systemv1.PluginContainer {
-	return systemv1.PluginContainer_builder{Dependency: d.Spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU)}.Build()
+	return systemv1.PluginContainer_builder{
+		Dependency: d.Spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU),
+		Commands: containerCommandsToProto(d.Commands), GpuCommands: containerCommandsToProto(d.GPUCommands),
+	}.Build()
+}
+
+func containerCommandsToProto(c *containers.Commands) *systemv1.ContainerCommands {
+	if c == nil {
+		return nil
+	}
+	return systemv1.ContainerCommands_builder{DockerRun: new(c.DockerRun), Compose: new(c.Compose), Address: new(c.Address)}.Build()
 }

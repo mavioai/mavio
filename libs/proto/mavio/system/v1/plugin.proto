@@ -196,6 +196,23 @@ message PluginContainer {
   mavio.plugin.v1.ContainerStatus status = 2;
   // Whether a managed container may use a GPU.
   bool use_gpu = 3;
+  // How to run it without a GPU, for an external dependency; unset when
+  // it needs one. They hold its generated secrets.
+  ContainerCommands commands = 4;
+  // How to run it with a GPU, for a dependency that can use one.
+  ContainerCommands gpu_commands = 5;
+}
+
+// ContainerCommands run a container dependency outside the server, under
+// the name and volumes a managed one would have.
+message ContainerCommands {
+  // A docker run command; for a server in a container it joins a network
+  // written "<network>", for the administrator to name.
+  string docker_run = 1;
+  // A Compose file of the service, to merge beside the server's own.
+  string compose = 2;
+  // The address to set once it runs.
+  string address = 3;
 }
 
 message ListPluginContainersRequest {

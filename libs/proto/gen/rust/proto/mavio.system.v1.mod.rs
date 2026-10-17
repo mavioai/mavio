@@ -148,6 +148,10 @@ pub use self::__buffa::view::PluginContainerView;
 #[doc(inline)]
 pub use self::__buffa::view::PluginContainerOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ContainerCommandsView;
+#[doc(inline)]
+pub use self::__buffa::view::ContainerCommandsOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListPluginContainersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListPluginContainersRequestOwnedView;

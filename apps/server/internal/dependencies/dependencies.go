@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"maps"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -383,6 +384,9 @@ type Dependency struct {
 	Spec   *pluginv1.ContainerDependency
 	Kept   core.PluginContainer
 	Status *pluginv1.ContainerStatus
+	// Commands run it without a GPU, nil when it needs one; GPUCommands
+	// with one, nil when it cannot use one.
+	Commands, GPUCommands *containers.Commands
 }
 
 // List returns a plugin's container dependencies in manifest order;
@@ -400,6 +404,7 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 	for _, c := range kept {
 		byName[c.Name] = c
 	}
+	rt, _ := s.Runtime(ctx, false)
 	out := make([]Dependency, len(m.GetContainers()))
 	for i, spec := range m.GetContainers() {
 		c, ok := byName[spec.GetName()]
@@ -407,8 +412,48 @@ func (s *Service) List(ctx context.Context, pluginID string) ([]Dependency, erro
 			c = core.PluginContainer{PluginID: pluginID, Name: spec.GetName(), Mode: core.ContainerUnset}
 		}
 		out[i] = Dependency{Spec: spec, Kept: c, Status: s.status(ctx, spec, c)}
+		out[i].Commands, out[i].GPUCommands = s.commands(spec, c, rt.OnHost())
 	}
 	return out, nil
+}
+
+// commands returns the commands running a dependency without and with a
+// GPU, nil for the variants it cannot run as.
+func (s *Service) commands(spec *pluginv1.ContainerDependency, c core.PluginContainer, onHost bool) (plain, gpu *containers.Commands) {
+	if spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_REQUIRED {
+		c.UseGPU = false
+		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c), onHost)
+		plain = &cmds
+	}
+	if spec.GetGpu() != pluginv1.GpuSupport_GPU_SUPPORT_UNSPECIFIED {
+		c.UseGPU = true
+		cmds := containers.RunCommands(s.cfg.Names, Resolve(s.cfg.Names, spec, c), onHost)
+		gpu = &cmds
+	}
+	return plain, gpu
+}
+
+// AllowsHost reports whether host (a host name with an optional port) is
+// that of one of a plugin's dependencies' addresses, which its WASM
+// module may then fetch.
+func (s *Service) AllowsHost(ctx context.Context, pluginID, host string) bool {
+	kept, err := s.cfg.Store.List(ctx, pluginID)
+	if err != nil {
+		s.cfg.Logger.WarnContext(ctx, "list container dependencies", "plugin", pluginID, "err", err)
+		return false
+	}
+	for _, c := range kept {
+		addr := c.Address
+		if c.Mode == core.ContainerManaged {
+			s.mu.Lock()
+			addr = s.told[key(pluginID, c.Name)]
+			s.mu.Unlock()
+		}
+		if u, err := url.Parse(addr); err == nil && addr != "" && (u.Host == host || u.Hostname() == host) {
+			return true
+		}
+	}
+	return false
 }
 
 // Set sets how a dependency is reached and returns it, generating its

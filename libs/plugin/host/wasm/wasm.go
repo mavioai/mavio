@@ -59,7 +59,10 @@ type Options struct {
 	HostAPI http.Handler
 	// DataDir is mounted writable at /data; empty mounts nothing.
 	DataDir string
-	Logger  *slog.Logger
+	// AllowHost lets a plugin fetch hosts its manifest does not name,
+	// such as its container dependencies'; nil allows none.
+	AllowHost func(ctx context.Context, plugin, host string) bool
+	Logger    *slog.Logger
 }
 
 // DataMount is where WASM plugins see their data folder.
@@ -408,7 +411,8 @@ func (p *Plugin) fetch(ctx context.Context, in []byte) abi.FetchResponse {
 	if u.Host == abi.HostName {
 		return p.serveHost(ctx, method, u, req)
 	}
-	if !manifest.AllowsHost(p.manifest, u.Host) && !manifest.AllowsHost(p.manifest, u.Hostname()) {
+	if !manifest.AllowsHost(p.manifest, u.Host) && !manifest.AllowsHost(p.manifest, u.Hostname()) &&
+		(p.opts.AllowHost == nil || !p.opts.AllowHost(ctx, p.manifest.GetId(), u.Host)) {
 		p.log.WarnContext(ctx, "plugin request denied", "host", u.Host)
 		return abi.FetchResponse{Error: "host " + u.Host + " is not in the plugin's permissions"}
 	}

@@ -955,7 +955,7 @@ flowchart TD
 - [x] Managed dependencies, the server on the host: `containers.Supervisor` creates the `mavio` network, pulls missing images, replaces a container whose `dev.mavio.spec` differs, publishes its port on loopback, waits for its health check and restarts it with backoff after three failed checks; managed dependencies start and stop with their plugins, are removed with their volumes on uninstall and reconciled at startup; the `container-prefix` setting; tested against an in-memory engine (`containerstest`) and on Docker 29 through OrbStack (`TestEngineSupervisor`)
   - [ ] Pulls as `plugin.container_pull` jobs with their progress in `TaskService`; pulls run inside the supervisor for now, reported only as `pulling`
 - [x] Managed dependencies, the server in a container: the server's container joins the `mavio` network and dependencies are reached by name without published ports; tested against the in-memory engine
-- [ ] External dependencies and commands, and dependencies' addresses in WASM plugins' `http_hosts`
+- [x] External dependencies and commands, and dependencies' addresses in WASM plugins' `http_hosts`: `containers.RunCommands` builds the `docker run` command and the Compose file, with and without a GPU, returned as `PluginContainer.commands` and `gpu_commands`; a WASM plugin may fetch the hosts of its dependencies' addresses
 - [ ] `plugins/voice` and the web UI
 - [ ] The end-to-end test of **Done when**
 - [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
