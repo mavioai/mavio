@@ -19,6 +19,10 @@ const (
 	ProxySOCKS5 ProxyKind = "socks5"
 )
 
+// SystemProxyID is the ID of the system proxy, which every server has
+// without storing it: the proxy its environment or operating system sets.
+const SystemProxyID = "system"
+
 // Proxy is one of the server's proxies, which plugins reach sites
 // through.
 type Proxy struct {
