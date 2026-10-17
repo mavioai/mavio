@@ -24,6 +24,14 @@ type Engine struct {
 	volumes    map[string]map[string]string
 	nextPort   int
 	calls      []string
+	progress   []containers.PullProgress
+}
+
+// OnPull sets the progress messages pulls tell of.
+func (e *Engine) OnPull(progress ...containers.PullProgress) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.progress = progress
 }
 
 type container struct {
@@ -75,11 +83,17 @@ func (e *Engine) InspectImage(_ context.Context, ref string) (containers.Image, 
 	return containers.Image{ID: ref}, nil
 }
 
-func (e *Engine) PullImage(_ context.Context, ref string, _ func(containers.PullProgress)) error {
+func (e *Engine) PullImage(_ context.Context, ref string, progress func(containers.PullProgress)) error {
 	e.mu.Lock()
-	defer e.mu.Unlock()
 	e.call("pull %s", ref)
 	e.images[ref] = true
+	msgs := e.progress
+	e.mu.Unlock()
+	for _, p := range msgs {
+		if progress != nil {
+			progress(p)
+		}
+	}
 	return nil
 }
 

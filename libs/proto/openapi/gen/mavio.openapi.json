@@ -16766,6 +16766,12 @@
             "type": "string",
             "title": "error",
             "description": "Why it is unhealthy or unavailable."
+          },
+          "progress": {
+            "type": "number",
+            "title": "progress",
+            "format": "double",
+            "description": "While its image is pulled, the fraction downloaded, 0 to 1."
           }
         },
         "title": "ContainerStatus",
@@ -20454,6 +20460,12 @@
             "type": "string",
             "title": "payload_json",
             "description": "The kind-specific argument, as JSON."
+          },
+          "progress": {
+            "type": "number",
+            "title": "progress",
+            "format": "double",
+            "description": "The fraction done of a running job that tells it, 0 to 1, such as\n the download of an image a plugin.container_pull job pulls."
           }
         },
         "title": "Job",

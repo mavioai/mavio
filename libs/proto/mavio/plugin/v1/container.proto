@@ -90,6 +90,8 @@ message ContainerStatus {
   ContainerState state = 4;
   // Why it is unhealthy or unavailable.
   string error = 5;
+  // While its image is pulled, the fraction downloaded, 0 to 1.
+  double progress = 6;
 }
 
 message ListContainersRequest {}

@@ -139,6 +139,8 @@ type Status struct {
 	State   State
 	Address string
 	Err     error
+	// Progress is the fraction of the image downloaded while Pulling.
+	Progress float64
 }
 
 // Engine is the part of the Engine API the Supervisor uses; *Client
@@ -173,6 +175,9 @@ type SupervisorOptions struct {
 	// dependencies are reached there by name rather than through ports
 	// published on the loopback interface. Empty for a server on the host.
 	Self string
+	// Pull pulls an image, telling of its progress; nil pulls it with
+	// Engine.PullImage. The server runs pulls as jobs through it.
+	Pull func(ctx context.Context, ref string, progress func(PullProgress)) error
 	// OnChange is called with a dependency's status whenever it changes,
 	// never concurrently for one dependency; nil calls nothing.
 	OnChange func(plugin, name string, st Status)
@@ -227,6 +232,9 @@ func NewSupervisor(o SupervisorOptions) *Supervisor {
 	if o.Probe == nil {
 		client := &http.Client{Timeout: 5 * time.Second}
 		o.Probe = func(ctx context.Context, address, path string) error { return Probe(ctx, client, address, path) }
+	}
+	if o.Pull == nil {
+		o.Pull = o.Engine.PullImage
 	}
 	if o.Interval == 0 {
 		o.Interval = 30 * time.Second
@@ -438,7 +446,8 @@ func (s *Supervisor) Close(ctx context.Context) error {
 func (s *Supervisor) set(r *run, st Status) {
 	s.mu.Lock()
 	current := s.runs[key(r.dep.Plugin, r.dep.Name)] == r
-	changed := current && (r.status.State != st.State || r.status.Address != st.Address || errString(r.status.Err) != errString(st.Err))
+	changed := current && (r.status.State != st.State || r.status.Address != st.Address || r.status.Progress != st.Progress ||
+		errString(r.status.Err) != errString(st.Err))
 	if current {
 		r.status = st
 	}
@@ -529,7 +538,19 @@ func (s *Supervisor) ensure(ctx context.Context, r *run, name string) (id, addr 
 		if _, err := e.InspectImage(ctx, d.Image); errors.Is(err, core.ErrNotFound) {
 			s.set(r, Status{State: Pulling})
 			s.o.Logger.InfoContext(ctx, "pulling a dependency's image", "container", name, "image", d.Image)
-			if err := e.PullImage(ctx, d.Image, nil); err != nil {
+			var (
+				mu   sync.Mutex
+				frac PullFraction
+			)
+			err := s.o.Pull(ctx, d.Image, func(p PullProgress) {
+				mu.Lock()
+				f, moved := frac.Add(p)
+				mu.Unlock()
+				if moved {
+					s.set(r, Status{State: Pulling, Progress: f})
+				}
+			})
+			if err != nil {
 				return "", "", fmt.Errorf("pull %s: %w", d.Image, err)
 			}
 		} else if err != nil {

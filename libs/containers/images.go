@@ -95,3 +95,44 @@ func (c *Client) InspectImage(ctx context.Context, ref string) (Image, error) {
 	err := c.call(ctx, http.MethodGet, "/images/"+ref+"/json", nil, nil, &img)
 	return img, err
 }
+
+// PullFraction sums the progress of a pull's layers into the fraction
+// downloaded. It is not safe for concurrent use.
+type PullFraction struct {
+	layers  map[string][2]int64
+	percent int
+}
+
+// Add records a progress message and returns the fraction downloaded,
+// reporting whether it moved by a percent or more since last reported.
+func (f *PullFraction) Add(p PullProgress) (float64, bool) {
+	if p.Layer == "" {
+		return 0, false
+	}
+	if f.layers == nil {
+		f.layers = map[string][2]int64{}
+	}
+	l := f.layers[p.Layer]
+	switch {
+	case p.Status == "Downloading" && p.Total > 0:
+		l = [2]int64{p.Current, p.Total}
+	case p.Status == "Download complete" || p.Status == "Pull complete" || p.Status == "Already exists":
+		l[0] = l[1]
+	default:
+		return 0, false
+	}
+	f.layers[p.Layer] = l
+	var cur, total int64
+	for _, l := range f.layers {
+		cur, total = cur+l[0], total+l[1]
+	}
+	if total == 0 {
+		return 0, false
+	}
+	frac := float64(cur) / float64(total)
+	if pct := int(frac * 100); pct != f.percent {
+		f.percent = pct
+		return frac, true
+	}
+	return frac, false
+}

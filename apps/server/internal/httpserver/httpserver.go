@@ -204,6 +204,9 @@ func Handler(opts Options) (http.Handler, error) {
 	}
 	// Acquisition jobs run only where the server runs their worker.
 	tasks.Acquisition = opts.Acquisition
+	if opts.Containers != nil {
+		tasks.Progress = opts.Containers.JobProgress
+	}
 	tasks.Requests = opts.Requests != nil
 	tasks.Subtitles = opts.SubtitleRuntime
 	mux.Handle(systemv1connect.NewTaskServiceHandler(tasks, interceptors))

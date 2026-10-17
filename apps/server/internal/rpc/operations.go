@@ -57,6 +57,8 @@ type TaskService struct {
 	// Requests adds the requests' availability task; false leaves it
 	// out.
 	Requests bool
+	// Progress tells the fraction done of a running job; nil tells none.
+	Progress func(id core.ID) (float64, bool)
 }
 
 var _ systemv1connect.TaskServiceHandler = (*TaskService)(nil)
@@ -311,6 +313,11 @@ func (s *TaskService) ListJobs(ctx context.Context, req *systemv1.ListJobsReques
 	out := make([]*systemv1.Job, len(page.Items))
 	for i := range page.Items {
 		out[i] = jobToProto(&page.Items[i])
+		if s.Progress != nil && page.Items[i].State == core.JobRunning {
+			if f, ok := s.Progress(page.Items[i].ID); ok {
+				out[i].SetProgress(f)
+			}
+		}
 	}
 	return systemv1.ListJobsResponse_builder{Jobs: out, Total: new(int32(page.Total))}.Build(), nil
 }

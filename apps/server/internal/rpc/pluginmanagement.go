@@ -41,6 +41,8 @@ type ContainerDependencies interface {
 	Runtime(ctx context.Context, detect bool) (containers.Runtime, error)
 	List(ctx context.Context, pluginID string) ([]dependencies.Dependency, error)
 	Set(ctx context.Context, pluginID, name string, mode core.ContainerMode, address string, useGPU bool) (dependencies.Dependency, error)
+	// JobProgress returns the fraction done of a running image pull job.
+	JobProgress(id core.ID) (float64, bool)
 }
 
 // PluginManager runs the server's plugins; *plugins.Manager implements it.

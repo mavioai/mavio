@@ -352,3 +352,58 @@ func TestManaged(t *testing.T) {
 		t.Error("the container or its volume is left after the plugin was removed")
 	}
 }
+
+// queue is a job queue that hands the jobs enqueued to the test.
+type queue struct {
+	core.JobQueue
+	jobs chan core.Job
+}
+
+func (q *queue) Enqueue(_ context.Context, j *core.Job) (bool, error) {
+	q.jobs <- *j
+	return true, nil
+}
+
+func TestPullJob(t *testing.T) {
+	engine := containerstest.New()
+	engine.OnPull(containers.PullProgress{Layer: "a", Status: "Downloading", Current: 1, Total: 4})
+	q := &queue{jobs: make(chan core.Job, 4)}
+	s, plugs, _ := newService(t, func(c *dependencies.Config) {
+		c.Detect = onHost
+		c.Engine = func(containers.Runtime) containers.Engine { return engine }
+		c.Jobs = q
+		c.Poll = 5 * time.Millisecond
+		c.Probe = func(context.Context, string, string) error { return nil }
+	})
+	ctx := t.Context()
+	if _, err := s.Set(ctx, pluginID, "whisper", core.ContainerManaged, "", false); err != nil {
+		t.Fatal(err)
+	}
+	s.PluginStarted(ctx, plugs.manifest)
+	var job core.Job
+	select {
+	case job = <-q.jobs:
+	case <-time.After(5 * time.Second):
+		t.Fatal("no pull job was queued")
+	}
+	if job.Kind != dependencies.JobPull || !strings.Contains(string(job.Payload), "whisper:1") {
+		t.Errorf("job = %s %s, want a pull of whisper:1", job.Kind, job.Payload)
+	}
+	deps, err := s.List(ctx, pluginID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st := deps[0].Status.GetState(); st != pluginv1.ContainerState_CONTAINER_STATE_PULLING {
+		t.Errorf("state while the job waits = %v, want pulling", st)
+	}
+	if _, err := s.RunPull(ctx, job); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := s.JobProgress(job.ID); ok {
+		t.Error("JobProgress of a finished job is set")
+	}
+	eventually(t, "whisper ready", func() bool {
+		deps, _ := s.List(ctx, pluginID)
+		return deps[0].Status.GetState() == pluginv1.ContainerState_CONTAINER_STATE_READY
+	})
+}

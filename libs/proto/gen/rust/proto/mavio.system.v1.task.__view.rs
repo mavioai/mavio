@@ -38,6 +38,11 @@ pub struct JobView<'a> {
     ///
     /// Field 11: `payload_json`
     pub payload_json: ::core::option::Option<&'a str>,
+    /// The fraction done of a running job that tells it, 0 to 1, such as
+    /// the download of an image a plugin.container_pull job pulls.
+    ///
+    /// Field 12: `progress`
+    pub progress: ::core::option::Option<f64>,
     pub __buffa_unknown_fields: ::buffa::UnknownFieldsView<'a>,
 }
 impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
@@ -191,6 +196,13 @@ impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
                 )?;
                 view.payload_json = Some(::buffa::types::borrow_str(&mut cur)?);
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                view.progress = Some(::buffa::types::decode_double(&mut cur)?);
+            }
             _ => {
                 ::buffa::encoding::skip_field_depth(tag, &mut cur, ctx.depth())?;
                 let span_len = before_tag.len() - cur.len();
@@ -248,6 +260,7 @@ impl<'a> ::buffa::MessageView<'a> for JobView<'a> {
             },
             last_error: self.last_error.map(|s| s.to_string()),
             payload_json: self.payload_json.map(|s| s.to_string()),
+            progress: self.progress,
             __buffa_unknown_fields: self.__buffa_unknown_fields.to_owned()?.into(),
             ..::core::default::Default::default()
         })
@@ -307,6 +320,9 @@ impl<'a> ::buffa::ViewEncode<'a> for JobView<'a> {
         if let Some(ref v) = self.payload_json {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.progress.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -365,6 +381,9 @@ impl<'a> ::buffa::ViewEncode<'a> for JobView<'a> {
         }
         if let Some(ref v) = self.payload_json {
             ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(v) = self.progress {
+            ::buffa::types::put_double_field(12u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -527,6 +546,14 @@ impl JobOwnedView {
     #[must_use]
     pub fn payload_json(&self) -> ::core::option::Option<&'_ str> {
         self.0.reborrow().payload_json
+    }
+    /// The fraction done of a running job that tells it, 0 to 1, such as
+    /// the download of an image a plugin.container_pull job pulls.
+    ///
+    /// Field 12: `progress`
+    #[must_use]
+    pub fn progress(&self) -> ::core::option::Option<f64> {
+        self.0.reborrow().progress
     }
 }
 impl ::core::convert::From<::buffa::OwnedView<JobView<'static>>> for JobOwnedView {

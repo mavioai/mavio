@@ -55,6 +55,9 @@ type Config struct {
 	// Engine returns the engine managed dependencies run on; nil uses
 	// the detected runtime's client.
 	Engine func(rt containers.Runtime) containers.Engine
+	// Jobs runs image pulls as JobPull jobs, which RunPull handles; nil
+	// pulls at once.
+	Jobs core.JobQueue
 	// Probe checks a dependency's health; nil uses containers.Probe.
 	Probe func(ctx context.Context, address, path string) error
 	// Poll is the time between health checks of a starting managed
@@ -86,6 +89,10 @@ type Service struct {
 	// told are the addresses of managed dependencies their plugins were
 	// configured with, by key.
 	told map[string]string
+	// pulls are the images being pulled as jobs, and progress the
+	// fraction done of each running JobPull job.
+	pulls    map[string]*pull
+	progress map[core.ID]float64
 }
 
 // health is the result of a health check.
@@ -116,6 +123,7 @@ func New(cfg Config) *Service {
 	return &Service{
 		cfg: cfg, ctx: ctx, cancel: cancel, plugins: cfg.Plugins,
 		health: map[string]health{}, started: map[string]bool{}, told: map[string]string{},
+		pulls: map[string]*pull{}, progress: map[core.ID]float64{},
 	}
 }
 
@@ -196,7 +204,7 @@ func (s *Service) supervisor(ctx context.Context) (*containers.Supervisor, error
 	defer s.mu.Unlock()
 	if s.sup == nil && s.ctx.Err() == nil {
 		s.sup = containers.NewSupervisor(containers.SupervisorOptions{
-			Engine: s.cfg.Engine(rt), Names: s.cfg.Names, Server: s.cfg.Server, Self: self, OnChange: s.changed,
+			Engine: s.cfg.Engine(rt), Pull: s.pullImage(s.cfg.Engine(rt)), Names: s.cfg.Names, Server: s.cfg.Server, Self: self, OnChange: s.changed,
 			Probe: s.cfg.Probe, Poll: s.cfg.Poll, Logger: s.cfg.Logger,
 		})
 	}
@@ -602,6 +610,9 @@ func (s *Service) status(ctx context.Context, spec *pluginv1.ContainerDependency
 		case ok:
 			st.SetState(managedStates[ms.State])
 			st.SetAddress(managedAddress(ms))
+			if ms.State == containers.Pulling {
+				st.SetProgress(ms.Progress)
+			}
 			if ms.Err != nil {
 				st.SetError(ms.Err.Error())
 			}

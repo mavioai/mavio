@@ -514,7 +514,11 @@ function ContainerDependency({ server, id, c }: { server: ServerEntry; id: strin
   const [chosen, setChosen] = useState(mode);
   const set = (m: ContainerMode, extra: { address?: string; useGpu?: boolean } = {}) =>
     actions.setContainer.mutate({ pluginId: id, name: d.name, mode: m, useGpu: c.useGpu, ...extra });
-  const state = st && containerStates[st.state]();
+  const state =
+    st &&
+    (st.state === ContainerState.PULLING && st.progress > 0
+      ? `${containerStates[st.state]()} ${Math.floor(st.progress * 100)}%`
+      : containerStates[st.state]());
   const commands = (title: string, cmds: ContainerCommands | undefined) =>
     cmds && (
       <div className="flex flex-col gap-1.5 px-4 py-2.5">

@@ -154,6 +154,7 @@ function JobRow({ job: j }: { job: Job }) {
             <span className="size-2 rounded-full" style={{ background: s.color }} />
             {s.title()}
           </span>
+          {j.progress !== undefined && <span>· {Math.floor(j.progress * 100)}%</span>}
           {when && <span>· {when}</span>}
           {j.attempts > 1 && <span>· {t("tasks.attempts", { attempts: j.attempts, max: j.maxAttempts })}</span>}
           {j.lastError && <span className="basis-full break-words text-danger">{j.lastError}</span>}

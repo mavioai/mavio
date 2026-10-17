@@ -47,6 +47,9 @@ message Job {
   string last_error = 10;
   // The kind-specific argument, as JSON.
   string payload_json = 11;
+  // The fraction done of a running job that tells it, 0 to 1, such as
+  // the download of an image a plugin.container_pull job pulls.
+  double progress = 12;
 }
 
 // Task is a recurring piece of work.

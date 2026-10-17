@@ -120,6 +120,11 @@ pub struct Job {
     ///
     /// Field 11: `payload_json`
     pub payload_json: ::core::option::Option<::buffa::alloc::string::String>,
+    /// The fraction done of a running job that tells it, 0 to 1, such as
+    /// the download of an image a plugin.container_pull job pulls.
+    ///
+    /// Field 12: `progress`
+    pub progress: ::core::option::Option<f64>,
     #[doc(hidden)]
     pub __buffa_unknown_fields: ::buffa::UnknownFields,
 }
@@ -137,6 +142,7 @@ impl ::core::fmt::Debug for Job {
             .field("finish_time", &self.finish_time)
             .field("last_error", &self.last_error)
             .field("payload_json", &self.payload_json)
+            .field("progress", &self.progress)
             .finish()
     }
 }
@@ -213,6 +219,13 @@ impl Job {
         self.payload_json = Some(value.into());
         self
     }
+    #[must_use = "with_* setters return `self` by value; assign or chain the result"]
+    #[inline]
+    ///Sets [`Self::progress`] to `Some(value)`, consuming and returning `self`.
+    pub fn with_progress(mut self, value: f64) -> Self {
+        self.progress = Some(value);
+        self
+    }
 }
 ::buffa::impl_default_instance!(Job);
 impl ::buffa::MessageName for Job {
@@ -282,6 +295,9 @@ impl ::buffa::Message for Job {
         if let Some(ref v) = self.payload_json {
             size += 1u64 + ::buffa::types::string_encoded_len(v) as u64;
         }
+        if self.progress.is_some() {
+            size += 1u64 + ::buffa::types::FIXED64_ENCODED_LEN as u64;
+        }
         size += self.__buffa_unknown_fields.encoded_len() as u64;
         ::buffa::saturate_size(size)
     }
@@ -339,6 +355,9 @@ impl ::buffa::Message for Job {
         }
         if let Some(ref v) = self.payload_json {
             ::buffa::types::put_string_field(11u32, v, buf);
+        }
+        if let Some(v) = self.progress {
+            ::buffa::types::put_double_field(12u32, v, buf);
         }
         self.__buffa_unknown_fields.write_to(buf);
     }
@@ -466,6 +485,15 @@ impl ::buffa::Message for Job {
                     buf,
                 )?;
             }
+            12u32 => {
+                ::buffa::encoding::check_wire_type(
+                    tag,
+                    ::buffa::encoding::WireType::Fixed64,
+                )?;
+                self.progress = ::core::option::Option::Some(
+                    ::buffa::types::decode_double(buf)?,
+                );
+            }
             _ => {
                 self.__buffa_unknown_fields
                     .push(::buffa::encoding::decode_unknown_field(tag, buf, ctx)?);
@@ -485,6 +513,7 @@ impl ::buffa::Message for Job {
         self.finish_time = ::buffa::MessageField::none();
         self.last_error = ::core::option::Option::None;
         self.payload_json = ::core::option::Option::None;
+        self.progress = ::core::option::Option::None;
         self.__buffa_unknown_fields.clear();
     }
 }

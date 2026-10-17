@@ -87,6 +87,7 @@ type Job struct {
 	xxx_hidden_FinishTime  *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=finish_time,json=finishTime"`
 	xxx_hidden_LastError   *string                `protobuf:"bytes,10,opt,name=last_error,json=lastError"`
 	xxx_hidden_PayloadJson *string                `protobuf:"bytes,11,opt,name=payload_json,json=payloadJson"`
+	xxx_hidden_Progress    float64                `protobuf:"fixed64,12,opt,name=progress"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -209,34 +210,41 @@ func (x *Job) GetPayloadJson() string {
 	return ""
 }
 
+func (x *Job) GetProgress() float64 {
+	if x != nil {
+		return x.xxx_hidden_Progress
+	}
+	return 0
+}
+
 func (x *Job) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 12)
 }
 
 func (x *Job) SetKind(v string) {
 	x.xxx_hidden_Kind = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 12)
 }
 
 func (x *Job) SetState(v JobState) {
 	x.xxx_hidden_State = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 12)
 }
 
 func (x *Job) SetPriority(v int32) {
 	x.xxx_hidden_Priority = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 12)
 }
 
 func (x *Job) SetAttempts(v int32) {
 	x.xxx_hidden_Attempts = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 12)
 }
 
 func (x *Job) SetMaxAttempts(v int32) {
 	x.xxx_hidden_MaxAttempts = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 12)
 }
 
 func (x *Job) SetRunTime(v *timestamppb.Timestamp) {
@@ -253,12 +261,17 @@ func (x *Job) SetFinishTime(v *timestamppb.Timestamp) {
 
 func (x *Job) SetLastError(v string) {
 	x.xxx_hidden_LastError = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 9, 12)
 }
 
 func (x *Job) SetPayloadJson(v string) {
 	x.xxx_hidden_PayloadJson = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 11)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 10, 12)
+}
+
+func (x *Job) SetProgress(v float64) {
+	x.xxx_hidden_Progress = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 11, 12)
 }
 
 func (x *Job) HasId() bool {
@@ -338,6 +351,13 @@ func (x *Job) HasPayloadJson() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 10)
 }
 
+func (x *Job) HasProgress() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 11)
+}
+
 func (x *Job) ClearId() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Id = nil
@@ -390,6 +410,11 @@ func (x *Job) ClearPayloadJson() {
 	x.xxx_hidden_PayloadJson = nil
 }
 
+func (x *Job) ClearProgress() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 11)
+	x.xxx_hidden_Progress = 0
+}
+
 type Job_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -407,6 +432,9 @@ type Job_builder struct {
 	LastError  *string
 	// The kind-specific argument, as JSON.
 	PayloadJson *string
+	// The fraction done of a running job that tells it, 0 to 1, such as
+	// the download of an image a plugin.container_pull job pulls.
+	Progress *float64
 }
 
 func (b0 Job_builder) Build() *Job {
@@ -414,39 +442,43 @@ func (b0 Job_builder) Build() *Job {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 12)
 		x.xxx_hidden_Id = b.Id
 	}
 	if b.Kind != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 12)
 		x.xxx_hidden_Kind = b.Kind
 	}
 	if b.State != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 12)
 		x.xxx_hidden_State = *b.State
 	}
 	if b.Priority != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 12)
 		x.xxx_hidden_Priority = *b.Priority
 	}
 	if b.Attempts != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 12)
 		x.xxx_hidden_Attempts = *b.Attempts
 	}
 	if b.MaxAttempts != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 12)
 		x.xxx_hidden_MaxAttempts = *b.MaxAttempts
 	}
 	x.xxx_hidden_RunTime = b.RunTime
 	x.xxx_hidden_CreateTime = b.CreateTime
 	x.xxx_hidden_FinishTime = b.FinishTime
 	if b.LastError != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 9, 12)
 		x.xxx_hidden_LastError = b.LastError
 	}
 	if b.PayloadJson != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 11)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 10, 12)
 		x.xxx_hidden_PayloadJson = b.PayloadJson
+	}
+	if b.Progress != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 11, 12)
+		x.xxx_hidden_Progress = *b.Progress
 	}
 	return m0
 }
@@ -1293,7 +1325,7 @@ var File_mavio_system_v1_task_proto protoreflect.FileDescriptor
 
 const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"\n" +
-	"\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa8\x03\n" +
+	"\x1amavio/system/v1/task.proto\x12\x0fmavio.system.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc4\x03\n" +
 	"\x03Job\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n" +
@@ -1309,7 +1341,8 @@ const file_mavio_system_v1_task_proto_rawDesc = "" +
 	"\n" +
 	"last_error\x18\n" +
 	" \x01(\tR\tlastError\x12!\n" +
-	"\fpayload_json\x18\v \x01(\tR\vpayloadJson\"\xbf\x02\n" +
+	"\fpayload_json\x18\v \x01(\tR\vpayloadJson\x12\x1a\n" +
+	"\bprogress\x18\f \x01(\x01R\bprogress\"\xbf\x02\n" +
 	"\x04Task\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +

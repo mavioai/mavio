@@ -317,3 +317,54 @@ func TestSupervisorRemoveAndReconcile(t *testing.T) {
 		}
 	})
 }
+
+func TestPullFraction(t *testing.T) {
+	var f containers.PullFraction
+	steps := []struct {
+		p     containers.PullProgress
+		want  float64
+		moved bool
+	}{
+		{containers.PullProgress{Layer: "a", Status: "Pulling fs layer"}, 0, false},
+		{containers.PullProgress{Layer: "a", Status: "Downloading", Current: 25, Total: 100}, 0.25, true},
+		{containers.PullProgress{Layer: "b", Status: "Downloading", Current: 0, Total: 100}, 0.125, true},
+		{containers.PullProgress{Layer: "b", Status: "Downloading", Current: 1, Total: 100}, 0.13, true},
+		{containers.PullProgress{Layer: "b", Status: "Downloading", Current: 2, Total: 100}, 0.135, false},
+		{containers.PullProgress{Layer: "a", Status: "Download complete"}, 0.51, true},
+	}
+	for i, s := range steps {
+		got, moved := f.Add(s.p)
+		if moved != s.moved || (moved && got != s.want) {
+			t.Errorf("step %d: got = %v %v, want = %v %v", i, got, moved, s.want, s.moved)
+		}
+	}
+}
+
+func TestSupervisorPullProgress(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e, h := containerstest.New(), &health{}
+		release := make(chan struct{})
+		var seen []containers.Status
+		var mu sync.Mutex
+		s := containers.NewSupervisor(containers.SupervisorOptions{
+			Engine: e, Server: "server-1", Probe: h.probe,
+			OnChange: func(_, _ string, st containers.Status) { mu.Lock(); seen = append(seen, st); mu.Unlock() },
+			Pull: func(ctx context.Context, ref string, progress func(containers.PullProgress)) error {
+				progress(containers.PullProgress{Layer: "a", Status: "Downloading", Current: 50, Total: 100})
+				<-release
+				return e.PullImage(ctx, ref, nil)
+			},
+		})
+		defer s.Close(context.Background())
+		s.Start(whisper())
+		synctest.Wait()
+		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Pulling || st.Progress != 0.5 {
+			t.Errorf("Status while pulling = %+v, want pulling at 0.5", st)
+		}
+		close(release)
+		synctest.Wait()
+		if st, _ := s.Status("dev.mavio.voice", "whisper"); st.State != containers.Ready {
+			t.Errorf("Status after the pull = %+v, want ready", st)
+		}
+	})
+}

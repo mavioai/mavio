@@ -233,7 +233,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	// The plugins' managed container dependencies run while the plugins
 	// do; they stop after the plugins when the server stops.
 	deps := dependencies.New(dependencies.Config{
-		Store: db.PluginContainers(), Server: key.ID(), Names: containers.Names{Prefix: cfg.ContainerPrefix}, Logger: log,
+		Store: db.PluginContainers(), Jobs: db.Jobs(), Server: key.ID(), Names: containers.Names{Prefix: cfg.ContainerPrefix}, Logger: log,
 		Detect: func(ctx context.Context) (containers.Runtime, error) {
 			return containers.Detect(ctx, containers.Options{Endpoint: cfg.ContainerEndpoint})
 		},
@@ -550,6 +550,17 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 	}
 	g.Go(func() error {
 		if err := taskWorker.Run(ctx); !errors.Is(err, context.Canceled) {
+			return err
+		}
+		return nil
+	})
+	// Image pulls have one too, as they take minutes.
+	pullWorker := &library.Worker{
+		Queue: db.Jobs(), Owner: fmt.Sprintf("%s:%d:pulls", hostname, os.Getpid()),
+		Handlers: map[string]library.Handler{dependencies.JobPull: deps.RunPull}, Logger: log,
+	}
+	g.Go(func() error {
+		if err := pullWorker.Run(ctx); !errors.Is(err, context.Canceled) {
 			return err
 		}
 		return nil
