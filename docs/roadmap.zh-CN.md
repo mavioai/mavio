@@ -915,13 +915,15 @@ flowchart TD
 - [x] `apps/server` 中的 `AssistantService` 与工具：带拼音的槽位解析、客户端动作、经 `SendCommand` 控制其他设备、活动日志；服务端设置中的助手设置与可使用 AI 路径的用户（[领域模型](domain.zh-CN.md)）
 - [x] `AGENT_SESSION` 与 `plugins/agent` 中的远程工具：声明、`WatchAgentToolCalls`、`SubmitAgentToolResult`、服务端按 ID 记录的调用、`AddAgentMessages`
 - [x] `plugins/agent` 中的代码模式，由 `bun test` 测试
-- [ ] 在各平台构建好的 Bun 可执行文件中验证代码模式的 QuickJS 沙箱
+- [x] 在 macOS（arm64）构建好的 Bun 可执行文件中验证代码模式的 QuickJS 沙箱，由 `TestAssistantAI` 验证
+- [ ] 在 Linux 与 Windows 上同样验证
 - [x] 滚动会话与记忆：空闲时间与跨天、保留期、`EndAgentSession` 与整理、记忆 RPC 与 `recall`
 - [x] `libs/proto` 中的 `SPEECH_TO_TEXT` 与 `TEXT_TO_SPEECH`；`plugins/voice`，包括从 `plugins/subtitles` 连同测试用例移来的 whisper-asr-webservice，以及 OpenAI 兼容的转写与语音 API
 - [x] 字幕转写作为服务端基于识别器的来源：`SubtitleVideo` 的 `audio_url` 与 `audio_streams` 保留编号，`/subtitles/audio` 改为 `/speech/audio`，P26 的端到端测试随之迁移
 - [x] 收听与语音：`StartListening`、以 Silero VAD 结束语音的 WebSocket、`/assistant/speech`、`GetAssistantHints`
 - [x] Web UI：面板、按住说话、`AudioWorklet` 采集、浏览器的 `SpeechRecognition` 与 `speechSynthesis`、服务端语音、浏览器中的快速路径、“助手”设置以及 AI 设置中的助手部分
-- [ ] **完成标准**中的端到端测试
+- [x] **完成标准**中经由 API 的端到端测试：`TestAssistant`（快速路径、收听与转写）与 `TestAssistantAI`（代码模式、被重启中断的调用、记忆）
+- [ ] **完成标准**中 Web UI 的部分：一个说出的请求播放一部作品
 - [x] `read_subtitles`：读取条目字幕直到用户已看到的位置的工具
 - [ ] 决定 `request_title` 之外还有哪些工具需要确认
 - [ ] 流式识别：双向的 `StreamSpeech` 在用户说话时给出部分文本，并经由 WebSocket 连接流式服务
@@ -959,7 +961,7 @@ flowchart TD
 | Linux 上的 HDR | Linux 应用以 OpenGL 在 GTK 3 的 `GtkGLArea` 中绘制视频，后者只能呈现 SDR，因此 HDR 经色调映射输出 | MyGo 的 Linux 后端能呈现 HDR 表面时再评估 |
 | MyGo | `apps/desktop` 基于 MyGo 构建，该框架始于 2026 年 9 月，仍处于 0.x，主要由一位维护者开发。其发布版没有能把由其他渲染器绘制的原生表面放在其原生 UI 之下的元素，而播放器显示 mpv 的视频需要它（macOS 上的视图、Windows 上的子窗口、Linux 上的 `GtkGLArea`） | 视频元素已在分叉 `mavioai/mygo`（`v0.4.5-mavio` 分支）中于 macOS 上完成，固定到某一提交，并随 MyGo 的发布变基；贡献给上游；接下来是带 HDR10 的 Windows |
 | macOS 上的 mpv | mpv 的 macOS 输出不能嵌入宿主的视图；mavio-deps 中 Mavio 的补丁使之可行，并须跟随 mpv 对该代码的修改 | 每次更新 mpv 的固定版本时变基补丁；提交给 mpv |
-| Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | P29 中首先验证；验证通过之前，会话只直接提供工具 |
+| Bun 可执行文件中的代码模式 | pi-durable 的代码模式在 quickjs-wasi（一个 WASM 模块）中运行脚本，它必须能在各平台 `plugins/agent` 的 Bun 可执行文件中加载 | 已由运行构建好的可执行文件的 `TestAssistantAI` 在 macOS（arm64）上验证；Linux 与 Windows 仍待验证；能加载之前，会话只直接提供工具 |
 | 浏览器中的麦克风 | `getUserMedia` 只在安全页面可用，因此在局域网上通过普通 HTTP 访问的独立服务端无法在 Web UI 中录音 | 服务端的 HTTPS 地址（P28）；其他情况下打字输入 |
 | 识别作品名称 | 识别器会写错作品与人物的名称，中文常写成同音字 | 向接受提示的识别器提供提示；槽位解析中的拼音与容错匹配（P29） |
 | Siri Remote 的麦克风 | tvOS 不允许应用从 Siri Remote 录音 | 助手输入框中的听写；App Intents |
