@@ -224,7 +224,7 @@ Built-in profiles cover Samsung, LG, Sony and Panasonic televisions, Kodi and VL
 The `user` whose libraries are served (required), the `server_name` shown, `media_server` and `play_to` (default on), the `interfaces` to use (default every interface up with multicast and IPv4), `announce_interval_minutes` (default 30), `ssdp_port` (for tests), `renderers` (extra description URLs) and `profiles`.
 
 ### 10.6 Packaging
-`tools/plugindist` builds the plugin for Linux, macOS and Windows on amd64 and arm64 and packs each as a catalog zip of `manifest.json` and the executable, with the other first-party plugins ([Development §7](development.md#7-releases-and-versioning)). The container image ships the plugin in its plugin seed folder (architecture document §12); SSDP multicast reaches a container only on the host network.
+`tools/plugindist` builds the plugin for Linux, macOS and Windows on amd64 and arm64 and packs each as a catalog zip of `manifest.json`, its translations and the executable, with the other first-party plugins ([Development §7](development.md#7-releases-and-versioning)). The container image ships the plugin in its plugin seed folder (architecture document §12); SSDP multicast reaches a container only on the host network.
 
 ## 11. Container Dependencies
 A plugin may depend on a service that runs as a container image, such as whisper-asr-webservice. It declares the service in its manifest; the server runs it on a container engine or an administrator runs it and gives its address ([Architecture §16](architecture.md#16-container-dependencies-libscontainers)). The plugin sees only the address, so a plugin works the same either way, and an administrator without a container engine can point it at a service run any other way.

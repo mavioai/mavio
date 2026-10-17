@@ -224,7 +224,7 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 提供其媒体库的 `user`（必填）、显示的 `server_name`、`media_server` 与 `play_to`（默认开启）、使用的 `interfaces`（默认为所有已启用、支持组播且有 IPv4 地址的接口）、`announce_interval_minutes`（默认 30）、`ssdp_port`（供测试）、`renderers`（额外的描述 URL）与 `profiles`。
 
 ### 10.6 打包
-`tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json` 与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
+`tools/plugindist` 与其他第一方插件一起，为 Linux、macOS 与 Windows 的 amd64 和 arm64 构建插件，并把每个平台打成包含 `manifest.json`、其译文与可执行文件的目录 zip 包（[开发指南 §7](development.zh-CN.md#7-发布与版本)）。容器镜像在其插件种子目录中附带该插件（架构文档 §12）；SSDP 组播只能到达使用宿主网络的容器。
 
 ## 11. 容器依赖
 插件可以依赖以容器镜像运行的服务，例如 whisper-asr-webservice。插件在清单中声明该服务；由服务端在容器引擎上运行它，或由管理员运行它并给出地址（[架构 §16](architecture.zh-CN.md#16-容器依赖libscontainers)）。插件只看到地址，因此两种方式下插件的行为相同；没有容器引擎的管理员也可以让插件指向以其他方式运行的服务。

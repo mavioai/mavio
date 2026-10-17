@@ -51,13 +51,22 @@ type Catalog struct {
 
 // Plugin is a plugin a catalog offers.
 type Plugin struct {
-	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Author      string    `json:"author"`
-	Homepage    string    `json:"homepage"`
-	Category    string    `json:"category"`
-	Versions    []Version `json:"versions"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Author      string `json:"author"`
+	Homepage    string `json:"homepage"`
+	Category    string `json:"category"`
+	// Locales are the name and description in other languages, by BCP 47
+	// tag; either is left out when not translated.
+	Locales  map[string]Strings `json:"locales,omitempty"`
+	Versions []Version          `json:"versions"`
+}
+
+// Strings are a plugin's name and description in a language.
+type Strings struct {
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
 // Version is a package of a plugin's version.
@@ -72,10 +81,11 @@ type Version struct {
 	ReleaseTime time.Time `json:"release_time"`
 }
 
-// source is a plugin's folder and manifest.
+// source is a plugin's folder, manifest and translations.
 type source struct {
 	dir      string
 	manifest *pluginv1.Manifest
+	locales  manifest.Locales
 }
 
 // sources reads the manifests of the plugins in dir, ordered by id.
@@ -96,7 +106,11 @@ func sources(dir string) ([]source, error) {
 		if m.GetCategory() == pluginv1.Category_CATEGORY_UNSPECIFIED {
 			return nil, fmt.Errorf("%s: no category", p)
 		}
-		srcs = append(srcs, source{filepath.Dir(p), m})
+		locales, err := manifest.LoadLocales(filepath.Dir(p))
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", filepath.Dir(p), err)
+		}
+		srcs = append(srcs, source{filepath.Dir(p), m, locales})
 	}
 	slices.SortFunc(srcs, func(a, b source) int { return cmp.Compare(a.manifest.GetId(), b.manifest.GetId()) })
 	return srcs, nil
@@ -164,6 +178,15 @@ func Dist(ctx context.Context, o Options) (string, error) {
 		catalog.Plugins[i] = Plugin{
 			ID: m.GetId(), Name: m.GetName(), Description: m.GetDescription(), Author: m.GetAuthor(),
 			Homepage: m.GetHomepage(), Category: m.GetCategory().String(), Versions: []Version{},
+		}
+		for tag, strs := range s.locales {
+			t := Strings{Name: strs[m.GetName()], Description: strs[m.GetDescription()]}
+			if t != (Strings{}) {
+				if catalog.Plugins[i].Locales == nil {
+					catalog.Plugins[i].Locales = map[string]Strings{}
+				}
+				catalog.Plugins[i].Locales[tag] = t
+			}
 		}
 	}
 	for i, j := range jobs {
@@ -242,14 +265,26 @@ func pack(ctx context.Context, o Options, s source, goos, arch string) (Version,
 	return v, nil
 }
 
-// zipFolder zips the plugin's manifest and the executable exe of folder.
+// zipFolder zips the plugin's manifest and translations, and the
+// executable exe of folder.
 func zipFolder(src, folder, exe string, modified time.Time) ([]byte, error) {
-	var buf bytes.Buffer
-	zw := zip.NewWriter(&buf)
-	for _, f := range []struct {
+	type file struct {
 		path, name string
 		mode       fs.FileMode
-	}{{filepath.Join(src, manifest.File), manifest.File, 0o644}, {filepath.Join(folder, exe), exe, 0o755}} {
+	}
+	files := []file{{filepath.Join(src, manifest.File), manifest.File, 0o644}}
+	locales, err := filepath.Glob(filepath.Join(src, manifest.LocalesDir, "*.json"))
+	if err != nil {
+		return nil, err
+	}
+	slices.Sort(locales)
+	for _, l := range locales {
+		files = append(files, file{l, manifest.LocalesDir + "/" + filepath.Base(l), 0o644})
+	}
+	files = append(files, file{filepath.Join(folder, exe), exe, 0o755})
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	for _, f := range files {
 		data, err := os.ReadFile(f.path)
 		if err != nil {
 			return nil, err

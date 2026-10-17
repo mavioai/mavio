@@ -1,0 +1,19 @@
+{
+  "DLNA": "DLNA",
+  "A DLNA media server for televisions and other devices on the local network, and Play To, which plays on DLNA renderers.": "为局域网中的电视和其他设备提供 DLNA 媒体服务器，并支持「播放到」，在 DLNA 渲染器上播放。",
+  "User": "用户",
+  "The user whose libraries the media server serves": "媒体服务器提供其媒体库的用户",
+  "Server name": "服务器名称",
+  "The name devices show; empty uses the server's": "设备上显示的名称；留空则使用服务器的名称",
+  "Media server": "媒体服务器",
+  "Play To": "播放到",
+  "Interfaces": "网络接口",
+  "Network interfaces to use; empty uses every one that takes multicast": "要使用的网络接口；留空则使用所有支持组播的接口",
+  "Announce interval (minutes)": "广播间隔（分钟）",
+  "SSDP port": "SSDP 端口",
+  "Replaces SSDP's port 1900, for tests": "替换 SSDP 的 1900 端口，用于测试",
+  "Renderers": "渲染器",
+  "Description URLs of renderers to control besides those found": "除自动发现的渲染器外，要控制的渲染器的描述 URL",
+  "Profiles": "设备配置文件",
+  "Device profiles replacing or added to the built-in ones": "替换或补充内置配置的设备配置文件"
+}

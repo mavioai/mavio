@@ -1,0 +1,8 @@
+{
+  "MusicBrainz": "MusicBrainz",
+  "Metadata for music artists, albums and tracks from MusicBrainz, with album covers from the Cover Art Archive.": "来自 MusicBrainz 的音乐艺人、专辑和曲目元数据，专辑封面来自 Cover Art Archive。",
+  "Base URL": "基础 URL",
+  "MusicBrainz server, for mirrors": "MusicBrainz 服务器，用于镜像",
+  "Requests per second": "每秒请求数",
+  "At most 1 on musicbrainz.org": "在 musicbrainz.org 上最多为 1"
+}

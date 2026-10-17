@@ -1,0 +1,9 @@
+{
+  "TMDB": "TMDB",
+  "Metadata and images for movies and TV series, the episodes of series, and movies and series to discover, from The Movie Database (TMDB).": "来自 The Movie Database（TMDB）的电影、电视剧及其各集的元数据和图片，以及供发现的电影和剧集。",
+  "API key": "API 密钥",
+  "TMDB API key or API read access token; without one, Radarr's token is used": "TMDB API 密钥或 API 读取访问令牌；留空则使用 Radarr 的令牌",
+  "Max cast members": "最多演员数",
+  "Hide missing cast members": "隐藏信息缺失的演员",
+  "Include adult titles": "包含成人内容"
+}

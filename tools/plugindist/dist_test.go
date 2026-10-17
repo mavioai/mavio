@@ -9,13 +9,21 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/mavioai/mavio/libs/plugin/manifest"
 )
 
+// firstPartyLocales are the languages every first-party plugin is
+// translated into, as the clients' strings are.
+var firstPartyLocales = []string{"zh-Hans"}
+
 // TestFirstPartyPlugins checks that every plugin of plugins/ has a manifest
-// the catalog can be made of.
+// the catalog can be made of, titles for the properties of its
+// configuration, and translations of all its strings.
 func TestFirstPartyPlugins(t *testing.T) {
 	srcs, err := sources(filepath.Join("..", "..", "plugins"))
 	if err != nil {
@@ -25,7 +33,57 @@ func TestFirstPartyPlugins(t *testing.T) {
 		if !strings.HasPrefix(s.manifest.GetId(), "dev.mavio.") {
 			t.Errorf("%s: id = %s, want dev.mavio.*", s.dir, s.manifest.GetId())
 		}
+		if schema := s.manifest.GetConfigSchema(); schema != "" {
+			var v any
+			if err := json.Unmarshal([]byte(schema), &v); err != nil {
+				t.Fatalf("%s: config schema: %v", s.dir, err)
+			}
+			for _, p := range untitled(v, "") {
+				t.Errorf("%s: config property %s has no title", s.dir, p)
+			}
+		}
+		for _, tag := range firstPartyLocales {
+			strs, ok := s.locales[tag]
+			if !ok {
+				t.Errorf("%s: no locales/%s.json", s.dir, tag)
+				continue
+			}
+			for _, str := range manifest.Strings(s.manifest) {
+				if _, ok := strs[str]; !ok {
+					t.Errorf("%s: locales/%s.json does not translate %q", s.dir, tag, str)
+				}
+			}
+		}
 	}
+}
+
+// untitled returns the paths of the properties of a schema without a
+// title.
+func untitled(schema any, at string) []string {
+	var out []string
+	switch s := schema.(type) {
+	case map[string]any:
+		for k, v := range s {
+			if k == "properties" {
+				props, _ := v.(map[string]any)
+				for name, p := range props {
+					if ps, ok := p.(map[string]any); ok && ps["title"] == nil {
+						out = append(out, at+"/"+name)
+					}
+					out = append(out, untitled(p, at+"/"+name)...)
+				}
+				continue
+			}
+			if k != "default" && k != "const" && k != "enum" && k != "examples" {
+				out = append(out, untitled(v, at)...)
+			}
+		}
+	case []any:
+		for _, v := range s {
+			out = append(out, untitled(v, at)...)
+		}
+	}
+	return out
 }
 
 // plugin writes a Go plugin with an empty main and its manifest into
@@ -40,7 +98,10 @@ func plugin(t *testing.T, dir, name, runtime, category string) {
 			"author": "Tests", "homepage": "https://example.com", "runtime": "` + runtime + `", "category": "` + category + `",
 			"capabilities": ["CAPABILITY_METADATA_PROVIDER"], "apiVersion": "1.0"}`,
 	}
-	if err := os.MkdirAll(p, 0o755); err != nil {
+	if runtime == "RUNTIME_WASM" {
+		files["locales/zh-Hans.json"] = `{"A test plugin.": "一个测试插件。"}`
+	}
+	if err := os.MkdirAll(filepath.Join(p, "locales"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for f, data := range files {
@@ -89,6 +150,12 @@ func TestDist(t *testing.T) {
 			if got := c.Plugins[1].Versions; len(got) != 1 || got[0].OS != "" || got[0].Runtime != "RUNTIME_WASM" {
 				t.Errorf("wasm versions = %+v, want one for every platform", got)
 			}
+			if got := c.Plugins[1].Locales; len(got) != 1 || got["zh-Hans"] != (Strings{Description: "一个测试插件。"}) {
+				t.Errorf("wasm locales = %+v, want its description in Chinese", got)
+			}
+			if got := c.Plugins[0].Locales; got != nil {
+				t.Errorf("proc locales = %+v, want none", got)
+			}
 			for _, p := range c.Plugins {
 				for _, v := range p.Versions {
 					path := filepath.Join(o.Out, v.URL)
@@ -98,15 +165,15 @@ func TestDist(t *testing.T) {
 						}
 						path = filepath.Join(plugins, strings.TrimPrefix(p.ID, "org.example."), "dist", filepath.Base(v.URL))
 					}
-					check(t, path, v)
+					check(t, path, v, p.Locales != nil)
 				}
 			}
 		})
 	}
 }
 
-// check checks the package of a version.
-func check(t *testing.T, path string, v Version) {
+// check checks the package of a version, holding translations or not.
+func check(t *testing.T, path string, v Version, translated bool) {
 	t.Helper()
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -124,8 +191,16 @@ func check(t *testing.T, path string, v Version) {
 	if exe == "" {
 		exe = "plugin"
 	}
-	if len(zr.File) != 2 || zr.File[0].Name != "manifest.json" || zr.File[1].Name != exe || zr.File[1].Mode()&0o111 == 0 {
-		t.Errorf("%s holds %v, want manifest.json and the executable %s", path, zr.File, exe)
+	var names []string
+	for _, f := range zr.File {
+		names = append(names, f.Name)
+	}
+	want := []string{"manifest.json", exe}
+	if translated {
+		want = []string{"manifest.json", "locales/zh-Hans.json", exe}
+	}
+	if !slices.Equal(names, want) || zr.File[len(zr.File)-1].Mode()&0o111 == 0 {
+		t.Errorf("%s holds %v, want %v, the executable executable", path, names, want)
 	}
 }
 
