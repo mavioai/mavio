@@ -406,6 +406,7 @@ export type MessageKey =
   | 'settings.backups'
   | 'settings.logs'
   | 'settings.apiKeys'
+  | 'settings.proxies'
   | 'settings.wanted'
   | 'settings.downloads'
   | 'settings.issues'
@@ -1396,6 +1397,31 @@ export type MessageKey =
   | 'keys.revoke'
   | 'keys.revokeTitle'
   | 'keys.revokeMessage'
+  | 'proxies.message'
+  | 'proxies.add'
+  | 'proxies.list'
+  | 'proxies.empty'
+  | 'proxies.system'
+  | 'proxies.systemUnset'
+  | 'proxies.systemFooter'
+  | 'proxies.bypass'
+  | 'proxies.none'
+  | 'proxies.noneDetail'
+  | 'proxies.name'
+  | 'proxies.kind'
+  | 'proxies.host'
+  | 'proxies.port'
+  | 'proxies.username'
+  | 'proxies.password'
+  | 'proxies.passwordKept'
+  | 'proxies.clearPassword'
+  | 'proxies.test'
+  | 'proxies.testOk'
+  | 'proxies.exit'
+  | 'proxies.testFailed'
+  | 'proxies.remove'
+  | 'proxies.removeTitle'
+  | 'proxies.removeMessage'
   | 'requests.title'
   | 'requests.all'
   | 'requests.pending'
@@ -2225,6 +2251,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "Backups",
     "settings.logs": "Logs",
     "settings.apiKeys": "API Keys",
+    "settings.proxies": "Proxies",
     "settings.wanted": "Wanted",
     "settings.downloads": "Downloads",
     "settings.issues": "Issues",
@@ -3215,6 +3242,31 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "Revoke",
     "keys.revokeTitle": "Revoke {name}?",
     "keys.revokeMessage": "What uses this key can no longer call the server.",
+    "proxies.message": "The proxies plugins reach sites through, such as indexers and subtitle sites; each plugin's settings choose one.",
+    "proxies.add": "Add Proxy",
+    "proxies.list": "Proxies",
+    "proxies.empty": "No proxies added.",
+    "proxies.system": "System proxy",
+    "proxies.systemUnset": "Not set; sites are reached directly",
+    "proxies.systemFooter": "The system proxy is read from the server's environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system's network settings, every 30 seconds. It cannot be changed here.",
+    "proxies.bypass": "Reached directly: {hosts}",
+    "proxies.none": "No proxy",
+    "proxies.noneDetail": "Sites are reached directly",
+    "proxies.name": "Name",
+    "proxies.kind": "Kind",
+    "proxies.host": "Host",
+    "proxies.port": "Port",
+    "proxies.username": "Username",
+    "proxies.password": "Password",
+    "proxies.passwordKept": "Unchanged",
+    "proxies.clearPassword": "Remove the password",
+    "proxies.test": "Test",
+    "proxies.testOk": "Reached in {ms} ms",
+    "proxies.exit": "Exit address {address}",
+    "proxies.testFailed": "Failed: {error}",
+    "proxies.remove": "Delete",
+    "proxies.removeTitle": "Delete {name}?",
+    "proxies.removeMessage": "Plugins using this proxy fail until another one is chosen in their settings.",
     "requests.title": "Requests",
     "requests.all": "All",
     "requests.pending": "Pending",
@@ -4042,6 +4094,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "settings.backups": "备份",
     "settings.logs": "日志",
     "settings.apiKeys": "API 密钥",
+    "settings.proxies": "代理",
     "settings.wanted": "想要",
     "settings.downloads": "下载",
     "settings.issues": "问题",
@@ -5032,6 +5085,31 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "撤销",
     "keys.revokeTitle": "撤销 {name}？",
     "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。",
+    "proxies.message": "插件访问站点（如索引器与字幕站点）时使用的代理；由各插件的设置选择其一。",
+    "proxies.add": "添加代理",
+    "proxies.list": "代理",
+    "proxies.empty": "尚未添加代理。",
+    "proxies.system": "系统代理",
+    "proxies.systemUnset": "未设置；直接访问站点",
+    "proxies.systemFooter": "系统代理每 30 秒从服务器的环境变量（HTTPS_PROXY、HTTP_PROXY、ALL_PROXY 与 NO_PROXY）读取，未设置时读取操作系统的网络设置。它不能在此更改。",
+    "proxies.bypass": "直接访问：{hosts}",
+    "proxies.none": "不使用代理",
+    "proxies.noneDetail": "直接访问站点",
+    "proxies.name": "名称",
+    "proxies.kind": "类型",
+    "proxies.host": "主机",
+    "proxies.port": "端口",
+    "proxies.username": "用户名",
+    "proxies.password": "密码",
+    "proxies.passwordKept": "保持不变",
+    "proxies.clearPassword": "移除密码",
+    "proxies.test": "测试",
+    "proxies.testOk": "{ms} 毫秒内连通",
+    "proxies.exit": "出口地址 {address}",
+    "proxies.testFailed": "失败：{error}",
+    "proxies.remove": "删除",
+    "proxies.removeTitle": "删除 {name}？",
+    "proxies.removeMessage": "使用此代理的插件将无法工作，直到在其设置中另选代理。",
     "requests.title": "请求",
     "requests.all": "全部",
     "requests.pending": "待审批",

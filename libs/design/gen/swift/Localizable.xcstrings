@@ -7273,6 +7273,24 @@
         }
       }
     },
+    "settings.proxies": {
+      "comment": "Settings section of a server's proxies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理"
+          }
+        }
+      }
+    },
     "settings.wanted": {
       "comment": "Settings section of the monitored movies and episodes still to acquire.",
       "extractionState": "manual",
@@ -25251,6 +25269,456 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用此密钥的程序将无法再调用服务器。"
+          }
+        }
+      }
+    },
+    "proxies.message": {
+      "comment": "Description of the proxies settings.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The proxies plugins reach sites through, such as indexers and subtitle sites; each plugin's settings choose one."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "插件访问站点（如索引器与字幕站点）时使用的代理；由各插件的设置选择其一。"
+          }
+        }
+      }
+    },
+    "proxies.add": {
+      "comment": "Opens the form adding a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加代理"
+          }
+        }
+      }
+    },
+    "proxies.list": {
+      "comment": "Heading of the server's own proxies.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proxies"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "代理"
+          }
+        }
+      }
+    },
+    "proxies.empty": {
+      "comment": "Shown when the server has no proxies of its own.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No proxies added."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未添加代理。"
+          }
+        }
+      }
+    },
+    "proxies.system": {
+      "comment": "The proxy the server's environment or operating system sets.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统代理"
+          }
+        }
+      }
+    },
+    "proxies.systemUnset": {
+      "comment": "Shown for the system proxy when the system sets none.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not set; sites are reached directly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未设置；直接访问站点"
+          }
+        }
+      }
+    },
+    "proxies.systemFooter": {
+      "comment": "Explains where the system proxy comes from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system proxy is read from the server's environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system's network settings, every 30 seconds. It cannot be changed here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统代理每 30 秒从服务器的环境变量（HTTPS_PROXY、HTTP_PROXY、ALL_PROXY 与 NO_PROXY）读取，未设置时读取操作系统的网络设置。它不能在此更改。"
+          }
+        }
+      }
+    },
+    "proxies.bypass": {
+      "comment": "The hosts a proxy does not carry; hosts is their list.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reached directly: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接访问：%@"
+          }
+        }
+      }
+    },
+    "proxies.none": {
+      "comment": "A plugin's choice of reaching sites without a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No proxy"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不使用代理"
+          }
+        }
+      }
+    },
+    "proxies.noneDetail": {
+      "comment": "Explains choosing no proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sites are reached directly"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直接访问站点"
+          }
+        }
+      }
+    },
+    "proxies.name": {
+      "comment": "Label of a proxy's name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称"
+          }
+        }
+      }
+    },
+    "proxies.kind": {
+      "comment": "Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kind"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "类型"
+          }
+        }
+      }
+    },
+    "proxies.host": {
+      "comment": "Label of a proxy's host name or address.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主机"
+          }
+        }
+      }
+    },
+    "proxies.port": {
+      "comment": "Label of a proxy's port.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Port"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "端口"
+          }
+        }
+      }
+    },
+    "proxies.username": {
+      "comment": "Label of the username a proxy takes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Username"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户名"
+          }
+        }
+      }
+    },
+    "proxies.password": {
+      "comment": "Label of the password a proxy takes.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码"
+          }
+        }
+      }
+    },
+    "proxies.passwordKept": {
+      "comment": "Placeholder of a proxy's password while the stored one is kept.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unchanged"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保持不变"
+          }
+        }
+      }
+    },
+    "proxies.clearPassword": {
+      "comment": "Removes the stored password of a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the password"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除密码"
+          }
+        }
+      }
+    },
+    "proxies.test": {
+      "comment": "Tests reaching a site through a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "测试"
+          }
+        }
+      }
+    },
+    "proxies.testOk": {
+      "comment": "A proxy's test passed; ms is how long the site took to answer.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reached in %@ ms"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 毫秒内连通"
+          }
+        }
+      }
+    },
+    "proxies.exit": {
+      "comment": "The address sites see a proxy's requests come from.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit address %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出口地址 %@"
+          }
+        }
+      }
+    },
+    "proxies.testFailed": {
+      "comment": "A proxy's test failed; error says why.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败：%@"
+          }
+        }
+      }
+    },
+    "proxies.remove": {
+      "comment": "Deletes a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
+          }
+        }
+      }
+    },
+    "proxies.removeTitle": {
+      "comment": "Asks before deleting a proxy; name is its name.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除 %@？"
+          }
+        }
+      }
+    },
+    "proxies.removeMessage": {
+      "comment": "Explains deleting a proxy.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plugins using this proxy fail until another one is chosen in their settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用此代理的插件将无法工作，直到在其设置中另选代理。"
           }
         }
       }

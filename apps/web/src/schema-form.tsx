@@ -119,6 +119,26 @@ function pickerOptions(list: SchemaOption[]): PickerOption[] {
   }));
 }
 
+/**
+ * The server's proxies as a picker lists them: none first, then the system
+ * proxy, then the others by name, each with its address.
+ */
+function proxyOptions(list: SchemaOption[]): PickerOption[] {
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  const system = list.find((o) => o.value === systemProxy);
+  return [
+    { value: "", label: t("proxies.none"), detail: t("proxies.noneDetail") },
+    ...(system ? [{ value: systemProxy, label: t("proxies.system"), detail: system.description || t("proxies.systemUnset") }] : []),
+    ...list
+      .filter((o) => o.value !== systemProxy)
+      .toSorted((a, b) => collator.compare(a.name, b.name))
+      .map((o) => ({ value: o.value, label: o.name, detail: o.description })),
+  ];
+}
+
+/** The system proxy's ID. */
+const systemProxy = "system";
+
 /** The groups of filters a list of options can be told apart by, those of two tags or more. */
 function pickerFilters(list: SchemaOption[]): PickerFilter[][] {
   const present = new Set(list.flatMap((o) => o.tags));
@@ -290,8 +310,8 @@ function Property({
       <Picker
         className="w-full sm:w-80"
         label={labelOf(name, s)}
-        value={typeof value === "string" ? value : undefined}
-        options={pickerOptions(list)}
+        value={typeof value === "string" ? value : typeof s.default === "string" ? s.default : undefined}
+        options={s["x-mavio-options"]?.source === "proxies" ? proxyOptions(list) : pickerOptions(list)}
         filters={pickerFilters(list)}
         labels={{
           placeholder: t("schema.choose"),

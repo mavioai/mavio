@@ -977,7 +977,7 @@ flowchart TD
 - [x] 系统代理：来自环境变量、macOS 的网络设置或 Windows 的 Internet 选项，连同其直连的主机，每 30 秒读取一次；可访问宿主机的容器依赖（`host_access`）
 - [x] `plugins/solvers`：以容器依赖运行的 FlareSolverr、按代理的会话、合并请求、并发、POST
 - [x] `plugins/indexers` 与 `plugins/subtitles` 改用服务端的代理与 `HostService.SolveChallenge`
-- [ ] Web UI 的代理页面
+- [x] Web UI 的代理页面：系统代理，代理的添加、编辑、测试与删除；插件设置中的代理选择
 - [ ] 没有发布镜像的求解器，各需在 mavio-deps 中构建 Mavio 自己的镜像：Zendriver、Camoufox、invisible_playwright（Byparr 所用）；同时为容器声明加入浏览器所需的共享内存与 tmpfs
 - [ ] Linux 桌面设置（GNOME、KDE）与代理自动配置（PAC）文件中的系统代理，目前只能由环境变量设置
 - [ ] 服务端自身的请求（TMDB 及资源获取的其他服务、插件目录）经设置中选择的代理

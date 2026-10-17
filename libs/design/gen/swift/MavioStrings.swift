@@ -1307,6 +1307,9 @@ public enum MavioStrings {
     /// Settings section of a server's API keys.
     public static var settingsApiKeys: String { NSLocalizedString("settings.apiKeys", bundle: .module, comment: "") }
 
+    /// Settings section of a server's proxies.
+    public static var settingsProxies: String { NSLocalizedString("settings.proxies", bundle: .module, comment: "") }
+
     /// Settings section of the monitored movies and episodes still to acquire.
     public static var settingsWanted: String { NSLocalizedString("settings.wanted", bundle: .module, comment: "") }
 
@@ -4413,6 +4416,91 @@ public enum MavioStrings {
 
     /// Explains revoking an API key.
     public static var keysRevokeMessage: String { NSLocalizedString("keys.revokeMessage", bundle: .module, comment: "") }
+
+    /// Description of the proxies settings.
+    public static var proxiesMessage: String { NSLocalizedString("proxies.message", bundle: .module, comment: "") }
+
+    /// Opens the form adding a proxy.
+    public static var proxiesAdd: String { NSLocalizedString("proxies.add", bundle: .module, comment: "") }
+
+    /// Heading of the server's own proxies.
+    public static var proxiesList: String { NSLocalizedString("proxies.list", bundle: .module, comment: "") }
+
+    /// Shown when the server has no proxies of its own.
+    public static var proxiesEmpty: String { NSLocalizedString("proxies.empty", bundle: .module, comment: "") }
+
+    /// The proxy the server's environment or operating system sets.
+    public static var proxiesSystem: String { NSLocalizedString("proxies.system", bundle: .module, comment: "") }
+
+    /// Shown for the system proxy when the system sets none.
+    public static var proxiesSystemUnset: String { NSLocalizedString("proxies.systemUnset", bundle: .module, comment: "") }
+
+    /// Explains where the system proxy comes from.
+    public static var proxiesSystemFooter: String { NSLocalizedString("proxies.systemFooter", bundle: .module, comment: "") }
+
+    /// The hosts a proxy does not carry; hosts is their list.
+    public static func proxiesBypass(hosts: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.bypass", bundle: .module, comment: ""), hosts)
+    }
+
+    /// A plugin's choice of reaching sites without a proxy.
+    public static var proxiesNone: String { NSLocalizedString("proxies.none", bundle: .module, comment: "") }
+
+    /// Explains choosing no proxy.
+    public static var proxiesNoneDetail: String { NSLocalizedString("proxies.noneDetail", bundle: .module, comment: "") }
+
+    /// Label of a proxy's name.
+    public static var proxiesName: String { NSLocalizedString("proxies.name", bundle: .module, comment: "") }
+
+    /// Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5.
+    public static var proxiesKind: String { NSLocalizedString("proxies.kind", bundle: .module, comment: "") }
+
+    /// Label of a proxy's host name or address.
+    public static var proxiesHost: String { NSLocalizedString("proxies.host", bundle: .module, comment: "") }
+
+    /// Label of a proxy's port.
+    public static var proxiesPort: String { NSLocalizedString("proxies.port", bundle: .module, comment: "") }
+
+    /// Label of the username a proxy takes.
+    public static var proxiesUsername: String { NSLocalizedString("proxies.username", bundle: .module, comment: "") }
+
+    /// Label of the password a proxy takes.
+    public static var proxiesPassword: String { NSLocalizedString("proxies.password", bundle: .module, comment: "") }
+
+    /// Placeholder of a proxy's password while the stored one is kept.
+    public static var proxiesPasswordKept: String { NSLocalizedString("proxies.passwordKept", bundle: .module, comment: "") }
+
+    /// Removes the stored password of a proxy.
+    public static var proxiesClearPassword: String { NSLocalizedString("proxies.clearPassword", bundle: .module, comment: "") }
+
+    /// Tests reaching a site through a proxy.
+    public static var proxiesTest: String { NSLocalizedString("proxies.test", bundle: .module, comment: "") }
+
+    /// A proxy's test passed; ms is how long the site took to answer.
+    public static func proxiesTestOk(ms: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.testOk", bundle: .module, comment: ""), ms)
+    }
+
+    /// The address sites see a proxy's requests come from.
+    public static func proxiesExit(address: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.exit", bundle: .module, comment: ""), address)
+    }
+
+    /// A proxy's test failed; error says why.
+    public static func proxiesTestFailed(error: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.testFailed", bundle: .module, comment: ""), error)
+    }
+
+    /// Deletes a proxy.
+    public static var proxiesRemove: String { NSLocalizedString("proxies.remove", bundle: .module, comment: "") }
+
+    /// Asks before deleting a proxy; name is its name.
+    public static func proxiesRemoveTitle(name: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("proxies.removeTitle", bundle: .module, comment: ""), name)
+    }
+
+    /// Explains deleting a proxy.
+    public static var proxiesRemoveMessage: String { NSLocalizedString("proxies.removeMessage", bundle: .module, comment: "") }
 
     /// Title of the requests screen and the link to it from Discover.
     public static var requestsTitle: String { NSLocalizedString("requests.title", bundle: .module, comment: "") }

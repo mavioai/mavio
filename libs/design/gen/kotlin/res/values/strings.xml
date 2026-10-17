@@ -816,6 +816,8 @@
     <string name="settings_logs">Logs</string>
     <!-- Settings section of a server's API keys. -->
     <string name="settings_api_keys">API Keys</string>
+    <!-- Settings section of a server's proxies. -->
+    <string name="settings_proxies">Proxies</string>
     <!-- Settings section of the monitored movies and episodes still to acquire. -->
     <string name="settings_wanted">Wanted</string>
     <!-- Settings section of the server's downloads: queue, history, blocklist and manual import. -->
@@ -2814,6 +2816,56 @@
     <string name="keys_revoke_title">Revoke %s\?</string>
     <!-- Explains revoking an API key. -->
     <string name="keys_revoke_message">What uses this key can no longer call the server.</string>
+    <!-- Description of the proxies settings. -->
+    <string name="proxies_message">The proxies plugins reach sites through, such as indexers and subtitle sites; each plugin\'s settings choose one.</string>
+    <!-- Opens the form adding a proxy. -->
+    <string name="proxies_add">Add Proxy</string>
+    <!-- Heading of the server's own proxies. -->
+    <string name="proxies_list">Proxies</string>
+    <!-- Shown when the server has no proxies of its own. -->
+    <string name="proxies_empty">No proxies added.</string>
+    <!-- The proxy the server's environment or operating system sets. -->
+    <string name="proxies_system">System proxy</string>
+    <!-- Shown for the system proxy when the system sets none. -->
+    <string name="proxies_system_unset">Not set; sites are reached directly</string>
+    <!-- Explains where the system proxy comes from. -->
+    <string name="proxies_system_footer">The system proxy is read from the server\'s environment (HTTPS_PROXY, HTTP_PROXY, ALL_PROXY and NO_PROXY) or else its operating system\'s network settings, every 30 seconds. It cannot be changed here.</string>
+    <!-- The hosts a proxy does not carry; hosts is their list. -->
+    <string name="proxies_bypass">Reached directly: %s</string>
+    <!-- A plugin's choice of reaching sites without a proxy. -->
+    <string name="proxies_none">No proxy</string>
+    <!-- Explains choosing no proxy. -->
+    <string name="proxies_none_detail">Sites are reached directly</string>
+    <!-- Label of a proxy's name. -->
+    <string name="proxies_name">Name</string>
+    <!-- Label of a proxy's kind: HTTP, SOCKS4 or SOCKS5. -->
+    <string name="proxies_kind">Kind</string>
+    <!-- Label of a proxy's host name or address. -->
+    <string name="proxies_host">Host</string>
+    <!-- Label of a proxy's port. -->
+    <string name="proxies_port">Port</string>
+    <!-- Label of the username a proxy takes. -->
+    <string name="proxies_username">Username</string>
+    <!-- Label of the password a proxy takes. -->
+    <string name="proxies_password">Password</string>
+    <!-- Placeholder of a proxy's password while the stored one is kept. -->
+    <string name="proxies_password_kept">Unchanged</string>
+    <!-- Removes the stored password of a proxy. -->
+    <string name="proxies_clear_password">Remove the password</string>
+    <!-- Tests reaching a site through a proxy. -->
+    <string name="proxies_test">Test</string>
+    <!-- A proxy's test passed; ms is how long the site took to answer. -->
+    <string name="proxies_test_ok">Reached in %s ms</string>
+    <!-- The address sites see a proxy's requests come from. -->
+    <string name="proxies_exit">Exit address %s</string>
+    <!-- A proxy's test failed; error says why. -->
+    <string name="proxies_test_failed">Failed: %s</string>
+    <!-- Deletes a proxy. -->
+    <string name="proxies_remove">Delete</string>
+    <!-- Asks before deleting a proxy; name is its name. -->
+    <string name="proxies_remove_title">Delete %s\?</string>
+    <!-- Explains deleting a proxy. -->
+    <string name="proxies_remove_message">Plugins using this proxy fail until another one is chosen in their settings.</string>
     <!-- Title of the requests screen and the link to it from Discover. -->
     <string name="requests_title">Requests</string>
     <!-- Filter showing every request. -->

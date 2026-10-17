@@ -977,7 +977,7 @@ flowchart TD
 - [x] The system proxy: from the environment, macOS's network settings or Windows's Internet Options, with the hosts it reaches directly, read every 30 seconds; container dependencies reaching the host (`host_access`)
 - [x] `plugins/solvers`: FlareSolverr as a container dependency, sessions per proxy, coalescing, concurrency, POST
 - [x] `plugins/indexers` and `plugins/subtitles` moved to the server's proxies and to `HostService.SolveChallenge`
-- [ ] The web UI's proxies page
+- [x] The web UI's proxies page: the system proxy, adding, editing, testing and deleting proxies; the proxy picker of plugins' settings
 - [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need
 - [ ] The system proxy of Linux desktops' settings (GNOME, KDE) and of proxy auto-configuration (PAC) files, which only the environment sets for now
 - [ ] The server's own requests (TMDB and the other services of acquisition, the plugin catalog) through a proxy chosen in the settings
