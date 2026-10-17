@@ -2270,9 +2270,6 @@ public enum MavioStrings {
         String.localizedStringWithFormat(NSLocalizedString("overview.containerEngineNone", bundle: .module, comment: ""), reason)
     }
 
-    /// Label of where the server reaches the container engine, such as its socket.
-    public static var overviewContainerEngineEndpoint: String { NSLocalizedString("overview.containerEngineEndpoint", bundle: .module, comment: "") }
-
     /// The load of the server's computer.
     public static var overviewLoad: String { NSLocalizedString("overview.load", bundle: .module, comment: "") }
 

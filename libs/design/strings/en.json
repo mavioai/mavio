@@ -705,7 +705,6 @@
   "overview.containerEngine": { "message": "Container Engine", "description": "Label of the container engine the server runs plugins' containers on: its name and version." },
   "overview.containerEngineRootless": { "message": "rootless", "description": "Marks a container engine running without root." },
   "overview.containerEngineNone": { "message": "Unavailable: {reason}", "description": "The server found no container engine; reason tells why." },
-  "overview.containerEngineEndpoint": { "message": "Engine Endpoint", "description": "Label of where the server reaches the container engine, such as its socket." },
   "overview.load": { "message": "Load", "description": "The load of the server's computer." },
   "overview.loadFooter": { "message": "Sampled every two seconds while this page is open. Totals are since the computer started.", "description": "Footer of the load cards." },
   "overview.loadUnknown": { "message": "Not told on this system", "description": "Shown when the operating system does not tell a load." },

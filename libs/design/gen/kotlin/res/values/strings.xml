@@ -1418,8 +1418,6 @@
     <string name="overview_container_engine_rootless">rootless</string>
     <!-- The server found no container engine; reason tells why. -->
     <string name="overview_container_engine_none">Unavailable: %s</string>
-    <!-- Label of where the server reaches the container engine, such as its socket. -->
-    <string name="overview_container_engine_endpoint">Engine Endpoint</string>
     <!-- The load of the server's computer. -->
     <string name="overview_load">Load</string>
     <!-- Footer of the load cards. -->

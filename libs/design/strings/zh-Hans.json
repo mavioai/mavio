@@ -704,7 +704,6 @@
   "overview.containerEngine": "容器引擎",
   "overview.containerEngineRootless": "无 root",
   "overview.containerEngineNone": "不可用：{reason}",
-  "overview.containerEngineEndpoint": "引擎地址",
   "overview.load": "负载",
   "overview.loadFooter": "页面打开期间每两秒采样一次；累计值自电脑启动起计。",
   "overview.loadUnknown": "此系统不提供",

@@ -715,7 +715,6 @@
     <string name="overview_container_engine">容器引擎</string>
     <string name="overview_container_engine_rootless">无 root</string>
     <string name="overview_container_engine_none">不可用：%s</string>
-    <string name="overview_container_engine_endpoint">引擎地址</string>
     <string name="overview_load">负载</string>
     <string name="overview_load_footer">页面打开期间每两秒采样一次；累计值自电脑启动起计。</string>
     <string name="overview_load_unknown">此系统不提供</string>

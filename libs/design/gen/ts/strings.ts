@@ -704,7 +704,6 @@ export type MessageKey =
   | 'overview.containerEngine'
   | 'overview.containerEngineRootless'
   | 'overview.containerEngineNone'
-  | 'overview.containerEngineEndpoint'
   | 'overview.load'
   | 'overview.loadFooter'
   | 'overview.loadUnknown'
@@ -2581,7 +2580,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.containerEngine": "Container Engine",
     "overview.containerEngineRootless": "rootless",
     "overview.containerEngineNone": "Unavailable: {reason}",
-    "overview.containerEngineEndpoint": "Engine Endpoint",
     "overview.load": "Load",
     "overview.loadFooter": "Sampled every two seconds while this page is open. Totals are since the computer started.",
     "overview.loadUnknown": "Not told on this system",
@@ -4456,7 +4454,6 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "overview.containerEngine": "容器引擎",
     "overview.containerEngineRootless": "无 root",
     "overview.containerEngineNone": "不可用：{reason}",
-    "overview.containerEngineEndpoint": "引擎地址",
     "overview.load": "负载",
     "overview.loadFooter": "页面打开期间每两秒采样一次；累计值自电脑启动起计。",
     "overview.loadUnknown": "此系统不提供",
