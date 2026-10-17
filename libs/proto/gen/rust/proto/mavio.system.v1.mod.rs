@@ -92,6 +92,18 @@ pub use self::__buffa::view::SetPluginConfigResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginConfigResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::ListPluginConfigOptionsResponseOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginConfigOptionView;
+#[doc(inline)]
+pub use self::__buffa::view::PluginConfigOptionOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::CatalogPluginView;
 #[doc(inline)]
 pub use self::__buffa::view::CatalogPluginOwnedView;

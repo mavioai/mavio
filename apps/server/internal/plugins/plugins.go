@@ -386,22 +386,24 @@ func (m *Manager) Config(ctx context.Context, id string) (core.PluginConfig, err
 }
 
 // SetConfig validates configJSON against the plugin's schema, delivers it
-// to the running plugin and stores it once the plugin accepts it. The
-// plugin is ready afterwards, even if its stored configuration had failed.
+// to the running plugin and stores it once the plugin accepts it,
+// returning the configuration stored: the properties the schema marks
+// generated are given new values where configJSON lacks them. The plugin
+// is ready afterwards, even if its stored configuration had failed.
 //
 // m.mu is not held while the configuration is stored: a store transaction
 // holding SQLite's one write connection may wait on m.mu (publishing an
 // event asks Wants), and waiting on that connection under m.mu would
 // deadlock with it.
-func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, error) {
+func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, string, error) {
 	m.setConfig.Lock()
 	defer m.setConfig.Unlock()
-	e, err := m.deliverConfig(ctx, id, configJSON)
+	e, configJSON, err := m.deliverConfig(ctx, id, configJSON)
 	if err != nil {
-		return Info{}, err
+		return Info{}, "", err
 	}
 	if err := m.store.PluginConfigs().Put(ctx, &core.PluginConfig{PluginID: id, JSON: configJSON}); err != nil {
-		return Info{}, err
+		return Info{}, "", err
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -411,7 +413,7 @@ func (m *Manager) SetConfig(ctx context.Context, id, configJSON string) (Info, e
 		e.state, e.err = Ready, nil
 	}
 	m.log.InfoContext(ctx, "plugin configured", "plugin", id)
-	return e.info(), nil
+	return e.info(), configJSON, nil
 }
 
 // Manifest returns the manifest of a plugin started or disabled, without
@@ -469,29 +471,35 @@ func (m *Manager) pruneContainers(ctx context.Context, mf *pluginv1.Manifest) {
 	}
 }
 
-// deliverConfig validates configJSON against a running plugin's schema and
-// delivers it to the plugin, returning the plugin's entry.
-func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*entry, error) {
+// deliverConfig gives the properties a running plugin's schema marks
+// generated new values where configJSON lacks them, validates it against
+// the schema and delivers it to the plugin, returning the plugin's entry
+// and the configuration delivered.
+func (m *Manager) deliverConfig(ctx context.Context, id, configJSON string) (*entry, string, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	e, err := m.find(id)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	if e.plugin == nil {
-		return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
+		return nil, "", connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("plugin %s is not running: %w", id, e.err))
+	}
+	configJSON, err = manifest.GenerateIDs(e.manifest, configJSON)
+	if err != nil {
+		return nil, "", fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
 	}
 	if err := manifest.ValidateConfig(e.manifest, configJSON); err != nil {
-		return nil, fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
+		return nil, "", fmt.Errorf("%w: plugin %s: %w", core.ErrInvalid, id, err)
 	}
 	if err := host.Configure(ctx, e.plugin, configJSON); err != nil {
 		if connect.CodeOf(err) == connect.CodeInvalidArgument {
-			return nil, fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
+			return nil, "", fmt.Errorf("%w: plugin %s rejected the configuration: %w", core.ErrInvalid, id, err)
 		}
-		return nil, fmt.Errorf("configure plugin %s: %w", id, err)
+		return nil, "", fmt.Errorf("configure plugin %s: %w", id, err)
 	}
 	e.revision = m.revisions.Add(1)
-	return e, nil
+	return e, configJSON, nil
 }
 
 // Close stops the plugins, dropping the events they wait for.

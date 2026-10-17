@@ -323,7 +323,7 @@ libs/plugin/
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
-* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，或服务器发送发布的全部下载客户端；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **翻译**：插件的 `locales` 文件夹中每种语言一个 JSON 文件，以其 BCP 47 标签命名（`zh-Hans.json`），把清单中的每个英文字符串映射为其译文。服务端随清单读取它们；无法读取的文件使插件失败。`ListPlugins`、`InstallPlugin`、`SetPluginEnabled` 与 `SetPluginConfig` 返回的插件，以及 `TaskService` 中插件的任务，使用请求的 `Accept-Language` 在插件的语言中匹配到的语言（`zh-CN` 读取 `zh-Hans`）：插件的名称与简介、任务的名称与说明、外部 ID 类型的名称，以及配置 schema 的标题与说明，schema 的成员保持原有顺序。没有译文的字符串，以及插件没有的语言，保持英文；`PluginChanged` 事件由使用各种语言的管理员读取，携带未翻译的字符串。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。

@@ -118,8 +118,13 @@ func TestEndToEnd(t *testing.T) {
 	set, err := pluginAdmin.SetPluginConfig(ctx, systemv1.SetPluginConfigRequest_builder{
 		PluginId: new("dev.mavio.smoke"), ConfigJson: new(`{"api_key":"secret"}`),
 	}.Build())
-	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY {
-		t.Fatalf("SetPluginConfig = %v, %v; want ready", set, err)
+	if err != nil || set.GetPlugin().GetState() != systemv1.PluginState_PLUGIN_STATE_READY || set.GetConfigJson() != `{"api_key":"secret"}` {
+		t.Fatalf("SetPluginConfig = %v, %v; want ready with the configuration stored", set, err)
+	}
+	if _, err := pluginAdmin.ListPluginConfigOptions(ctx, systemv1.ListPluginConfigOptionsRequest_builder{
+		PluginId: new("dev.mavio.smoke"), Source: new("indexer-definitions"),
+	}.Build()); connect.CodeOf(err) != connect.CodeInvalidArgument {
+		t.Errorf("ListPluginConfigOptions of a plugin providing no indexers: %v, want invalid_argument", err)
 	}
 
 	// Scan → scrape.

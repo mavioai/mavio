@@ -20921,6 +20921,40 @@
         "title": "ListMyActivitiesResponse",
         "additionalProperties": false
       },
+      "mavio.system.v1.ListPluginConfigOptionsRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "source": {
+            "type": "string",
+            "title": "source",
+            "description": "The source x-mavio-options names: \"indexer-definitions\" and\n \"download-client-definitions\", the definitions of the plugin's\n providers, or \"download-clients\", the clients of every download client\n provider."
+          }
+        },
+        "title": "ListPluginConfigOptionsRequest",
+        "required": [
+          "pluginId",
+          "source"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.ListPluginConfigOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/mavio.system.v1.PluginConfigOption"
+            },
+            "title": "options"
+          }
+        },
+        "title": "ListPluginConfigOptionsResponse",
+        "additionalProperties": false
+      },
       "mavio.system.v1.ListPluginContainersRequest": {
         "type": "object",
         "properties": {
@@ -21302,6 +21336,39 @@
         "title": "Plugin",
         "additionalProperties": false,
         "description": "Plugin is a plugin found in the server's plugin folder."
+      },
+      "mavio.system.v1.PluginConfigOption": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "value"
+          },
+          "name": {
+            "type": "string",
+            "title": "name"
+          },
+          "description": {
+            "type": "string",
+            "title": "description"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "tags",
+            "description": "What sets the option apart, as keys clients show in their words:\n \"torrent\" or \"usenet\", \"public\", \"semi-private\" or \"private\", and a\n BCP 47 language tag such as \"en-US\"."
+          },
+          "settingsSchema": {
+            "type": "string",
+            "title": "settings_schema",
+            "description": "The JSON Schema of the settings the option takes, which the property\n x-mavio-options names as its settings holds; empty for none."
+          }
+        },
+        "title": "PluginConfigOption",
+        "additionalProperties": false,
+        "description": "PluginConfigOption is a value a property of a configuration takes."
       },
       "mavio.system.v1.PluginContainer": {
         "type": "object",
@@ -21780,6 +21847,11 @@
               }
             ],
             "title": "plugin"
+          },
+          "configJson": {
+            "type": "string",
+            "title": "config_json",
+            "description": "The configuration stored, with the generated properties set."
           }
         },
         "title": "SetPluginConfigResponse",
@@ -23960,14 +24032,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.ProfileService/DeleteDelayProfile": {
+    "/mavio.acquisition.v1.WantedService/SetMonitored": {
       "post": {
         "tags": [
-          "ProfileService"
+          "WantedService"
         ],
-        "summary": "DeleteDelayProfile",
-        "description": "DeleteDelayProfile fails with FAILED_PRECONDITION for the default\n profile.",
-        "operationId": "mavio.acquisition.v1.ProfileService.DeleteDelayProfile",
+        "summary": "SetMonitored",
+        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
+        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -23992,7 +24064,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
               }
             }
           },
@@ -24014,7 +24086,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
                 }
               }
             }
@@ -25321,14 +25393,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
       "post": {
         "tags": [
-          "HubService"
+          "IssueService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "ReopenIssue",
+        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
+        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25353,7 +25425,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
               }
             }
           },
@@ -25375,7 +25447,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
                 }
               }
             }
@@ -25813,14 +25885,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/AddToCollection": {
+    "/mavio.acquisition.v1.ProfileService/DeleteDelayProfile": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ProfileService"
         ],
-        "summary": "AddToCollection",
-        "description": "AddToCollection appends items not yet in the collection.",
-        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
+        "summary": "DeleteDelayProfile",
+        "description": "DeleteDelayProfile fails with FAILED_PRECONDITION for the default\n profile.",
+        "operationId": "mavio.acquisition.v1.ProfileService.DeleteDelayProfile",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -25845,7 +25917,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileRequest"
               }
             }
           },
@@ -25867,7 +25939,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.DeleteDelayProfileResponse"
                 }
               }
             }
@@ -29333,14 +29405,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleSettings": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
-          "SubtitleService"
+          "HubService"
         ],
-        "summary": "UpdateSubtitleSettings",
-        "description": "UpdateSubtitleSettings replaces the settings and applies them at once.",
-        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29365,7 +29437,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -29387,7 +29459,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
                 }
               }
             }
@@ -29829,14 +29901,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.WantedService/SetMonitored": {
+    "/mavio.library.v1.CollectionService/AddToCollection": {
       "post": {
         "tags": [
-          "WantedService"
+          "CollectionService"
         ],
-        "summary": "SetMonitored",
-        "description": "SetMonitored monitors or unmonitors seasons and episodes, a season\n taking its episodes along, or applies a monitoring option to the\n seasons and episodes of wanted series, as Sonarr's season pass.",
-        "operationId": "mavio.acquisition.v1.WantedService.SetMonitored",
+        "summary": "AddToCollection",
+        "description": "AddToCollection appends items not yet in the collection.",
+        "operationId": "mavio.library.v1.CollectionService.AddToCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -29861,7 +29933,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionRequest"
               }
             }
           },
@@ -29883,7 +29955,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.SetMonitoredResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.AddToCollectionResponse"
                 }
               }
             }
@@ -31442,14 +31514,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/LoginWithQuickConnect": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
-          "AuthService"
+          "CollectionService"
         ],
-        "summary": "LoginWithQuickConnect",
-        "description": "LoginWithQuickConnect gives the authorized device its access token,\n once.",
-        "operationId": "mavio.auth.v1.AuthService.LoginWithQuickConnect",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -31474,7 +31545,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -31496,7 +31567,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -32372,14 +32443,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.IssueService/ReopenIssue": {
+    "/mavio.acquisition.v1.SubtitleService/UpdateSubtitleSettings": {
       "post": {
         "tags": [
-          "IssueService"
+          "SubtitleService"
         ],
-        "summary": "ReopenIssue",
-        "description": "ReopenIssue reopens an issue: its reporter or an administrator.",
-        "operationId": "mavio.acquisition.v1.IssueService.ReopenIssue",
+        "summary": "UpdateSubtitleSettings",
+        "description": "UpdateSubtitleSettings replaces the settings and applies them at once.",
+        "operationId": "mavio.acquisition.v1.SubtitleService.UpdateSubtitleSettings",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32404,7 +32475,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsRequest"
               }
             }
           },
@@ -32426,7 +32497,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.ReopenIssueResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.UpdateSubtitleSettingsResponse"
                 }
               }
             }
@@ -32496,13 +32567,14 @@
         }
       }
     },
-    "/mavio.library.v1.ItemService/ListItems": {
+    "/mavio.auth.v1.AuthService/LoginWithQuickConnect": {
       "post": {
         "tags": [
-          "ItemService"
+          "AuthService"
         ],
-        "summary": "ListItems",
-        "operationId": "mavio.library.v1.ItemService.ListItems",
+        "summary": "LoginWithQuickConnect",
+        "description": "LoginWithQuickConnect gives the authorized device its access token,\n once.",
+        "operationId": "mavio.auth.v1.AuthService.LoginWithQuickConnect",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32527,7 +32599,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectRequest"
               }
             }
           },
@@ -32549,7 +32621,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.LoginWithQuickConnectResponse"
                 }
               }
             }
@@ -32924,13 +32996,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.library.v1.ItemService/ListItems": {
       "post": {
         "tags": [
-          "CollectionService"
+          "ItemService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "ListItems",
+        "operationId": "mavio.library.v1.ItemService.ListItems",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32955,7 +33027,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.ListItemsRequest"
               }
             }
           },
@@ -32977,7 +33049,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.ListItemsResponse"
                 }
               }
             }
@@ -38360,6 +38432,68 @@
         }
       }
     },
+    "/mavio.system.v1.PluginManagementService/ListPluginConfigOptions": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "ListPluginConfigOptions",
+        "description": "ListPluginConfigOptions lists the values a property of a plugin's\n configuration takes, from the source its schema names with\n x-mavio-options, such as the definitions of an indexer provider.",
+        "operationId": "mavio.system.v1.PluginManagementService.ListPluginConfigOptions",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.ListPluginConfigOptionsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.ListPluginConfigOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/mavio.system.v1.PluginManagementService/ListPluginContainers": {
       "post": {
         "tags": [
@@ -38490,7 +38624,7 @@
           "PluginManagementService"
         ],
         "summary": "SetPluginConfig",
-        "description": "SetPluginConfig validates a configuration against the plugin's schema,\n delivers it to the running plugin and stores it once the plugin\n accepts it.",
+        "description": "SetPluginConfig validates a configuration against the plugin's schema,\n delivers it to the running plugin and stores it once the plugin\n accepts it. Properties the schema marks generated, strings of format\n uuid that are readOnly, are given new UUIDs where they are missing or\n empty.",
         "operationId": "mavio.system.v1.PluginManagementService.SetPluginConfig",
         "parameters": [
           {

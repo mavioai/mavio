@@ -181,7 +181,7 @@ func Handler(opts Options) (http.Handler, error) {
 		Load: load.New(),
 	}, interceptors))
 	mux.Handle(systemv1connect.NewPluginManagementServiceHandler(&rpc.PluginManagementService{
-		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers,
+		Plugins: opts.Plugins, Hub: opts.Hub, Activity: opts.Activity, Containers: opts.Containers, DownloadClients: opts.Downloads,
 	}, interceptors))
 	passkeys := auth.NewPasskeys()
 	totp := auth.NewTOTP(opts.Identity.Derive(auth.SecretKeyPurpose))

@@ -17,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file mavio/system/v1/plugin.proto.
  */
 export const file_mavio_system_v1_plugin: GenFile = /*@__PURE__*/
-  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvcGx1Z2luLnByb3RvEg9tYXZpby5zeXN0ZW0udjEicQoGUGx1Z2luEisKCG1hbmlmZXN0GAEgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1hbmlmZXN0EisKBXN0YXRlGAIgASgOMhwubWF2aW8uc3lzdGVtLnYxLlBsdWdpblN0YXRlEg0KBWVycm9yGAMgASgJIhQKEkxpc3RQbHVnaW5zUmVxdWVzdCI/ChNMaXN0UGx1Z2luc1Jlc3BvbnNlEigKB3BsdWdpbnMYASADKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIjMKFkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQEiXwoXR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2USEwoLY29uZmlnX2pzb24YASABKAkSLwoLdXBkYXRlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIlAKFlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESGwoLY29uZmlnX2pzb24YAiABKAlCBrpIA8gBASJCChdTZXRQbHVnaW5Db25maWdSZXNwb25zZRInCgZwbHVnaW4YASABKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIvABCg1DYXRhbG9nUGx1Z2luEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSDgoGYXV0aG9yGAQgASgJEhAKCGhvbWVwYWdlGAUgASgJEhMKC2NhdGFsb2dfdXJsGAYgASgJEjEKCHZlcnNpb25zGAcgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dWZXJzaW9uEhkKEWluc3RhbGxlZF92ZXJzaW9uGAggASgJEisKCGNhdGVnb3J5GAkgASgOMhkubWF2aW8ucGx1Z2luLnYxLkNhdGVnb3J5ImYKDkNhdGFsb2dWZXJzaW9uEg8KB3ZlcnNpb24YASABKAkSEQoJY2hhbmdlbG9nGAIgASgJEjAKDHJlbGVhc2VfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiGwoZTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdCJNChpMaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZRIvCgdwbHVnaW5zGAEgAygLMh4ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dQbHVnaW4iQgoUSW5zdGFsbFBsdWdpblJlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESDwoHdmVyc2lvbhgCIAEoCSJAChVJbnN0YWxsUGx1Z2luUmVzcG9uc2USJwoGcGx1Z2luGAEgASgLMhcubWF2aW8uc3lzdGVtLnYxLlBsdWdpbiIzChZVbmluc3RhbGxQbHVnaW5SZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBIhkKF1VuaW5zdGFsbFBsdWdpblJlc3BvbnNlIkUKF1NldFBsdWdpbkVuYWJsZWRSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEg8KB2VuYWJsZWQYAiABKAgiQwoYU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4itgEKEENvbnRhaW5lclJ1bnRpbWUSEQoJYXZhaWxhYmxlGAEgASgIEg4KBnJlYXNvbhgCIAEoCRIQCghlbmRwb2ludBgDIAEoCRIOCgZlbmdpbmUYBCABKAkSDwoHdmVyc2lvbhgFIAEoCRITCgthcGlfdmVyc2lvbhgGIAEoCRIQCghyb290bGVzcxgHIAEoCBIUCgxpbl9jb250YWluZXIYCCABKAgSDwoHb25faG9zdBgJIAEoCCIsChpHZXRDb250YWluZXJSdW50aW1lUmVxdWVzdBIOCgZkZXRlY3QYASABKAgiUQobR2V0Q29udGFpbmVyUnVudGltZVJlc3BvbnNlEjIKB3J1bnRpbWUYASABKAsyIS5tYXZpby5zeXN0ZW0udjEuQ29udGFpbmVyUnVudGltZSL+AQoPUGx1Z2luQ29udGFpbmVyEjgKCmRlcGVuZGVuY3kYASABKAsyJC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyRGVwZW5kZW5jeRIwCgZzdGF0dXMYAiABKAsyIC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdHVzEg8KB3VzZV9ncHUYAyABKAgSNAoIY29tbWFuZHMYBCABKAsyIi5tYXZpby5zeXN0ZW0udjEuQ29udGFpbmVyQ29tbWFuZHMSOAoMZ3B1X2NvbW1hbmRzGAUgASgLMiIubWF2aW8uc3lzdGVtLnYxLkNvbnRhaW5lckNvbW1hbmRzIkkKEUNvbnRhaW5lckNvbW1hbmRzEhIKCmRvY2tlcl9ydW4YASABKAkSDwoHY29tcG9zZRgCIAEoCRIPCgdhZGRyZXNzGAMgASgJIjgKG0xpc3RQbHVnaW5Db250YWluZXJzUmVxdWVzdBIZCglwbHVnaW5faWQYASABKAlCBrpIA8gBASJUChxMaXN0UGx1Z2luQ29udGFpbmVyc1Jlc3BvbnNlEjQKCmNvbnRhaW5lcnMYASADKAsyIC5tYXZpby5zeXN0ZW0udjEuUGx1Z2luQ29udGFpbmVyIqYBChlTZXRQbHVnaW5Db250YWluZXJSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEhQKBG5hbWUYAiABKAlCBrpIA8gBARIsCgRtb2RlGAMgASgOMh4ubWF2aW8ucGx1Z2luLnYxLkNvbnRhaW5lck1vZGUSGQoHYWRkcmVzcxgEIAEoCUIIukgFcgOIAQESDwoHdXNlX2dwdRgFIAEoCCJRChpTZXRQbHVnaW5Db250YWluZXJSZXNwb25zZRIzCgljb250YWluZXIYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuUGx1Z2luQ29udGFpbmVyKpYBCgtQbHVnaW5TdGF0ZRIcChhQTFVHSU5fU1RBVEVfVU5TUEVDSUZJRUQQABIWChJQTFVHSU5fU1RBVEVfUkVBRFkQARIdChlQTFVHSU5fU1RBVEVfVU5DT05GSUdVUkVEEAISFwoTUExVR0lOX1NUQVRFX0ZBSUxFRBADEhkKFVBMVUdJTl9TVEFURV9ESVNBQkxFRBAEMswIChdQbHVnaW5NYW5hZ2VtZW50U2VydmljZRJdCgtMaXN0UGx1Z2lucxIjLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luc1JlcXVlc3QaJC5tYXZpby5zeXN0ZW0udjEuTGlzdFBsdWdpbnNSZXNwb25zZSIDkAIBEmkKD0dldFBsdWdpbkNvbmZpZxInLm1hdmlvLnN5c3RlbS52MS5HZXRQbHVnaW5Db25maWdSZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLkdldFBsdWdpbkNvbmZpZ1Jlc3BvbnNlIgOQAgESZAoPU2V0UGx1Z2luQ29uZmlnEicubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QaKC5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29uZmlnUmVzcG9uc2UScgoSTGlzdENhdGFsb2dQbHVnaW5zEioubWF2aW8uc3lzdGVtLnYxLkxpc3RDYXRhbG9nUGx1Z2luc1JlcXVlc3QaKy5tYXZpby5zeXN0ZW0udjEuTGlzdENhdGFsb2dQbHVnaW5zUmVzcG9uc2UiA5ACARJeCg1JbnN0YWxsUGx1Z2luEiUubWF2aW8uc3lzdGVtLnYxLkluc3RhbGxQbHVnaW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkluc3RhbGxQbHVnaW5SZXNwb25zZRJkCg9Vbmluc3RhbGxQbHVnaW4SJy5tYXZpby5zeXN0ZW0udjEuVW5pbnN0YWxsUGx1Z2luUmVxdWVzdBooLm1hdmlvLnN5c3RlbS52MS5Vbmluc3RhbGxQbHVnaW5SZXNwb25zZRJnChBTZXRQbHVnaW5FbmFibGVkEigubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkVuYWJsZWRSZXF1ZXN0GikubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkVuYWJsZWRSZXNwb25zZRJ1ChNHZXRDb250YWluZXJSdW50aW1lEisubWF2aW8uc3lzdGVtLnYxLkdldENvbnRhaW5lclJ1bnRpbWVSZXF1ZXN0GiwubWF2aW8uc3lzdGVtLnYxLkdldENvbnRhaW5lclJ1bnRpbWVSZXNwb25zZSIDkAIBEngKFExpc3RQbHVnaW5Db250YWluZXJzEiwubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5Db250YWluZXJzUmVxdWVzdBotLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luQ29udGFpbmVyc1Jlc3BvbnNlIgOQAgESbQoSU2V0UGx1Z2luQ29udGFpbmVyEioubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkNvbnRhaW5lclJlcXVlc3QaKy5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29udGFpbmVyUmVzcG9uc2VCxQEKE2NvbS5tYXZpby5zeXN0ZW0udjFCC1BsdWdpblByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zeXN0ZW0vdjE7c3lzdGVtdjGiAgNNU1iqAg9NYXZpby5TeXN0ZW0uVjHKAg9NYXZpb1xTeXN0ZW1cVjHiAhtNYXZpb1xTeXN0ZW1cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6U3lzdGVtOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_container, file_mavio_plugin_v1_plugin]);
+  fileDesc("ChxtYXZpby9zeXN0ZW0vdjEvcGx1Z2luLnByb3RvEg9tYXZpby5zeXN0ZW0udjEicQoGUGx1Z2luEisKCG1hbmlmZXN0GAEgASgLMhkubWF2aW8ucGx1Z2luLnYxLk1hbmlmZXN0EisKBXN0YXRlGAIgASgOMhwubWF2aW8uc3lzdGVtLnYxLlBsdWdpblN0YXRlEg0KBWVycm9yGAMgASgJIhQKEkxpc3RQbHVnaW5zUmVxdWVzdCI/ChNMaXN0UGx1Z2luc1Jlc3BvbnNlEigKB3BsdWdpbnMYASADKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luIjMKFkdldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQEiXwoXR2V0UGx1Z2luQ29uZmlnUmVzcG9uc2USEwoLY29uZmlnX2pzb24YASABKAkSLwoLdXBkYXRlX3RpbWUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIlAKFlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESGwoLY29uZmlnX2pzb24YAiABKAlCBrpIA8gBASJXChdTZXRQbHVnaW5Db25maWdSZXNwb25zZRInCgZwbHVnaW4YASABKAsyFy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luEhMKC2NvbmZpZ19qc29uGAIgASgJIlMKHkxpc3RQbHVnaW5Db25maWdPcHRpb25zUmVxdWVzdBIZCglwbHVnaW5faWQYASABKAlCBrpIA8gBARIWCgZzb3VyY2UYAiABKAlCBrpIA8gBASJXCh9MaXN0UGx1Z2luQ29uZmlnT3B0aW9uc1Jlc3BvbnNlEjQKB29wdGlvbnMYASADKAsyIy5tYXZpby5zeXN0ZW0udjEuUGx1Z2luQ29uZmlnT3B0aW9uIm0KElBsdWdpbkNvbmZpZ09wdGlvbhINCgV2YWx1ZRgBIAEoCRIMCgRuYW1lGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEgwKBHRhZ3MYBCADKAkSFwoPc2V0dGluZ3Nfc2NoZW1hGAUgASgJIvABCg1DYXRhbG9nUGx1Z2luEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSDgoGYXV0aG9yGAQgASgJEhAKCGhvbWVwYWdlGAUgASgJEhMKC2NhdGFsb2dfdXJsGAYgASgJEjEKCHZlcnNpb25zGAcgAygLMh8ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dWZXJzaW9uEhkKEWluc3RhbGxlZF92ZXJzaW9uGAggASgJEisKCGNhdGVnb3J5GAkgASgOMhkubWF2aW8ucGx1Z2luLnYxLkNhdGVnb3J5ImYKDkNhdGFsb2dWZXJzaW9uEg8KB3ZlcnNpb24YASABKAkSEQoJY2hhbmdlbG9nGAIgASgJEjAKDHJlbGVhc2VfdGltZRgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiGwoZTGlzdENhdGFsb2dQbHVnaW5zUmVxdWVzdCJNChpMaXN0Q2F0YWxvZ1BsdWdpbnNSZXNwb25zZRIvCgdwbHVnaW5zGAEgAygLMh4ubWF2aW8uc3lzdGVtLnYxLkNhdGFsb2dQbHVnaW4iQgoUSW5zdGFsbFBsdWdpblJlcXVlc3QSGQoJcGx1Z2luX2lkGAEgASgJQga6SAPIAQESDwoHdmVyc2lvbhgCIAEoCSJAChVJbnN0YWxsUGx1Z2luUmVzcG9uc2USJwoGcGx1Z2luGAEgASgLMhcubWF2aW8uc3lzdGVtLnYxLlBsdWdpbiIzChZVbmluc3RhbGxQbHVnaW5SZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBIhkKF1VuaW5zdGFsbFBsdWdpblJlc3BvbnNlIkUKF1NldFBsdWdpbkVuYWJsZWRSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEg8KB2VuYWJsZWQYAiABKAgiQwoYU2V0UGx1Z2luRW5hYmxlZFJlc3BvbnNlEicKBnBsdWdpbhgBIAEoCzIXLm1hdmlvLnN5c3RlbS52MS5QbHVnaW4itgEKEENvbnRhaW5lclJ1bnRpbWUSEQoJYXZhaWxhYmxlGAEgASgIEg4KBnJlYXNvbhgCIAEoCRIQCghlbmRwb2ludBgDIAEoCRIOCgZlbmdpbmUYBCABKAkSDwoHdmVyc2lvbhgFIAEoCRITCgthcGlfdmVyc2lvbhgGIAEoCRIQCghyb290bGVzcxgHIAEoCBIUCgxpbl9jb250YWluZXIYCCABKAgSDwoHb25faG9zdBgJIAEoCCIsChpHZXRDb250YWluZXJSdW50aW1lUmVxdWVzdBIOCgZkZXRlY3QYASABKAgiUQobR2V0Q29udGFpbmVyUnVudGltZVJlc3BvbnNlEjIKB3J1bnRpbWUYASABKAsyIS5tYXZpby5zeXN0ZW0udjEuQ29udGFpbmVyUnVudGltZSL+AQoPUGx1Z2luQ29udGFpbmVyEjgKCmRlcGVuZGVuY3kYASABKAsyJC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyRGVwZW5kZW5jeRIwCgZzdGF0dXMYAiABKAsyIC5tYXZpby5wbHVnaW4udjEuQ29udGFpbmVyU3RhdHVzEg8KB3VzZV9ncHUYAyABKAgSNAoIY29tbWFuZHMYBCABKAsyIi5tYXZpby5zeXN0ZW0udjEuQ29udGFpbmVyQ29tbWFuZHMSOAoMZ3B1X2NvbW1hbmRzGAUgASgLMiIubWF2aW8uc3lzdGVtLnYxLkNvbnRhaW5lckNvbW1hbmRzIkkKEUNvbnRhaW5lckNvbW1hbmRzEhIKCmRvY2tlcl9ydW4YASABKAkSDwoHY29tcG9zZRgCIAEoCRIPCgdhZGRyZXNzGAMgASgJIjgKG0xpc3RQbHVnaW5Db250YWluZXJzUmVxdWVzdBIZCglwbHVnaW5faWQYASABKAlCBrpIA8gBASJUChxMaXN0UGx1Z2luQ29udGFpbmVyc1Jlc3BvbnNlEjQKCmNvbnRhaW5lcnMYASADKAsyIC5tYXZpby5zeXN0ZW0udjEuUGx1Z2luQ29udGFpbmVyIqYBChlTZXRQbHVnaW5Db250YWluZXJSZXF1ZXN0EhkKCXBsdWdpbl9pZBgBIAEoCUIGukgDyAEBEhQKBG5hbWUYAiABKAlCBrpIA8gBARIsCgRtb2RlGAMgASgOMh4ubWF2aW8ucGx1Z2luLnYxLkNvbnRhaW5lck1vZGUSGQoHYWRkcmVzcxgEIAEoCUIIukgFcgOIAQESDwoHdXNlX2dwdRgFIAEoCCJRChpTZXRQbHVnaW5Db250YWluZXJSZXNwb25zZRIzCgljb250YWluZXIYASABKAsyIC5tYXZpby5zeXN0ZW0udjEuUGx1Z2luQ29udGFpbmVyKpYBCgtQbHVnaW5TdGF0ZRIcChhQTFVHSU5fU1RBVEVfVU5TUEVDSUZJRUQQABIWChJQTFVHSU5fU1RBVEVfUkVBRFkQARIdChlQTFVHSU5fU1RBVEVfVU5DT05GSUdVUkVEEAISFwoTUExVR0lOX1NUQVRFX0ZBSUxFRBADEhkKFVBMVUdJTl9TVEFURV9ESVNBQkxFRBAEMtAJChdQbHVnaW5NYW5hZ2VtZW50U2VydmljZRJdCgtMaXN0UGx1Z2lucxIjLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luc1JlcXVlc3QaJC5tYXZpby5zeXN0ZW0udjEuTGlzdFBsdWdpbnNSZXNwb25zZSIDkAIBEmkKD0dldFBsdWdpbkNvbmZpZxInLm1hdmlvLnN5c3RlbS52MS5HZXRQbHVnaW5Db25maWdSZXF1ZXN0GigubWF2aW8uc3lzdGVtLnYxLkdldFBsdWdpbkNvbmZpZ1Jlc3BvbnNlIgOQAgESZAoPU2V0UGx1Z2luQ29uZmlnEicubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkNvbmZpZ1JlcXVlc3QaKC5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29uZmlnUmVzcG9uc2USgQEKF0xpc3RQbHVnaW5Db25maWdPcHRpb25zEi8ubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5Db25maWdPcHRpb25zUmVxdWVzdBowLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luQ29uZmlnT3B0aW9uc1Jlc3BvbnNlIgOQAgEScgoSTGlzdENhdGFsb2dQbHVnaW5zEioubWF2aW8uc3lzdGVtLnYxLkxpc3RDYXRhbG9nUGx1Z2luc1JlcXVlc3QaKy5tYXZpby5zeXN0ZW0udjEuTGlzdENhdGFsb2dQbHVnaW5zUmVzcG9uc2UiA5ACARJeCg1JbnN0YWxsUGx1Z2luEiUubWF2aW8uc3lzdGVtLnYxLkluc3RhbGxQbHVnaW5SZXF1ZXN0GiYubWF2aW8uc3lzdGVtLnYxLkluc3RhbGxQbHVnaW5SZXNwb25zZRJkCg9Vbmluc3RhbGxQbHVnaW4SJy5tYXZpby5zeXN0ZW0udjEuVW5pbnN0YWxsUGx1Z2luUmVxdWVzdBooLm1hdmlvLnN5c3RlbS52MS5Vbmluc3RhbGxQbHVnaW5SZXNwb25zZRJnChBTZXRQbHVnaW5FbmFibGVkEigubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkVuYWJsZWRSZXF1ZXN0GikubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkVuYWJsZWRSZXNwb25zZRJ1ChNHZXRDb250YWluZXJSdW50aW1lEisubWF2aW8uc3lzdGVtLnYxLkdldENvbnRhaW5lclJ1bnRpbWVSZXF1ZXN0GiwubWF2aW8uc3lzdGVtLnYxLkdldENvbnRhaW5lclJ1bnRpbWVSZXNwb25zZSIDkAIBEngKFExpc3RQbHVnaW5Db250YWluZXJzEiwubWF2aW8uc3lzdGVtLnYxLkxpc3RQbHVnaW5Db250YWluZXJzUmVxdWVzdBotLm1hdmlvLnN5c3RlbS52MS5MaXN0UGx1Z2luQ29udGFpbmVyc1Jlc3BvbnNlIgOQAgESbQoSU2V0UGx1Z2luQ29udGFpbmVyEioubWF2aW8uc3lzdGVtLnYxLlNldFBsdWdpbkNvbnRhaW5lclJlcXVlc3QaKy5tYXZpby5zeXN0ZW0udjEuU2V0UGx1Z2luQ29udGFpbmVyUmVzcG9uc2VCxQEKE2NvbS5tYXZpby5zeXN0ZW0udjFCC1BsdWdpblByb3RvUAFaQ2dpdGh1Yi5jb20vbWF2aW9haS9tYXZpby9saWJzL3Byb3RvL2dlbi9nby9tYXZpby9zeXN0ZW0vdjE7c3lzdGVtdjGiAgNNU1iqAg9NYXZpby5TeXN0ZW0uVjHKAg9NYXZpb1xTeXN0ZW1cVjHiAhtNYXZpb1xTeXN0ZW1cVjFcR1BCTWV0YWRhdGHqAhFNYXZpbzo6U3lzdGVtOjpWMWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate, file_google_protobuf_timestamp, file_mavio_plugin_v1_container, file_mavio_plugin_v1_plugin]);
 
 /**
  * Plugin is a plugin found in the server's plugin folder.
@@ -159,6 +159,13 @@ export type SetPluginConfigResponse = Message<"mavio.system.v1.SetPluginConfigRe
    * @generated from field: mavio.system.v1.Plugin plugin = 1;
    */
   plugin?: Plugin | undefined;
+
+  /**
+   * The configuration stored, with the generated properties set.
+   *
+   * @generated from field: string config_json = 2;
+   */
+  configJson: string;
 };
 
 /**
@@ -167,6 +174,96 @@ export type SetPluginConfigResponse = Message<"mavio.system.v1.SetPluginConfigRe
  */
 export const SetPluginConfigResponseSchema: GenMessage<SetPluginConfigResponse> = /*@__PURE__*/
   messageDesc(file_mavio_system_v1_plugin, 6);
+
+/**
+ * @generated from message mavio.system.v1.ListPluginConfigOptionsRequest
+ */
+export type ListPluginConfigOptionsRequest = Message<"mavio.system.v1.ListPluginConfigOptionsRequest"> & {
+  /**
+   * @generated from field: string plugin_id = 1;
+   */
+  pluginId: string;
+
+  /**
+   * The source x-mavio-options names: "indexer-definitions" and
+   * "download-client-definitions", the definitions of the plugin's
+   * providers, or "download-clients", the clients of every download client
+   * provider.
+   *
+   * @generated from field: string source = 2;
+   */
+  source: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.ListPluginConfigOptionsRequest.
+ * Use `create(ListPluginConfigOptionsRequestSchema)` to create a new message.
+ */
+export const ListPluginConfigOptionsRequestSchema: GenMessage<ListPluginConfigOptionsRequest> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 7);
+
+/**
+ * @generated from message mavio.system.v1.ListPluginConfigOptionsResponse
+ */
+export type ListPluginConfigOptionsResponse = Message<"mavio.system.v1.ListPluginConfigOptionsResponse"> & {
+  /**
+   * @generated from field: repeated mavio.system.v1.PluginConfigOption options = 1;
+   */
+  options: PluginConfigOption[];
+};
+
+/**
+ * Describes the message mavio.system.v1.ListPluginConfigOptionsResponse.
+ * Use `create(ListPluginConfigOptionsResponseSchema)` to create a new message.
+ */
+export const ListPluginConfigOptionsResponseSchema: GenMessage<ListPluginConfigOptionsResponse> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 8);
+
+/**
+ * PluginConfigOption is a value a property of a configuration takes.
+ *
+ * @generated from message mavio.system.v1.PluginConfigOption
+ */
+export type PluginConfigOption = Message<"mavio.system.v1.PluginConfigOption"> & {
+  /**
+   * @generated from field: string value = 1;
+   */
+  value: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description: string;
+
+  /**
+   * What sets the option apart, as keys clients show in their words:
+   * "torrent" or "usenet", "public", "semi-private" or "private", and a
+   * BCP 47 language tag such as "en-US".
+   *
+   * @generated from field: repeated string tags = 4;
+   */
+  tags: string[];
+
+  /**
+   * The JSON Schema of the settings the option takes, which the property
+   * x-mavio-options names as its settings holds; empty for none.
+   *
+   * @generated from field: string settings_schema = 5;
+   */
+  settingsSchema: string;
+};
+
+/**
+ * Describes the message mavio.system.v1.PluginConfigOption.
+ * Use `create(PluginConfigOptionSchema)` to create a new message.
+ */
+export const PluginConfigOptionSchema: GenMessage<PluginConfigOption> = /*@__PURE__*/
+  messageDesc(file_mavio_system_v1_plugin, 9);
 
 /**
  * CatalogPlugin is a plugin a catalog offers.
@@ -232,7 +329,7 @@ export type CatalogPlugin = Message<"mavio.system.v1.CatalogPlugin"> & {
  * Use `create(CatalogPluginSchema)` to create a new message.
  */
 export const CatalogPluginSchema: GenMessage<CatalogPlugin> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 7);
+  messageDesc(file_mavio_system_v1_plugin, 10);
 
 /**
  * CatalogVersion is a version of a catalog plugin.
@@ -261,7 +358,7 @@ export type CatalogVersion = Message<"mavio.system.v1.CatalogVersion"> & {
  * Use `create(CatalogVersionSchema)` to create a new message.
  */
 export const CatalogVersionSchema: GenMessage<CatalogVersion> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 8);
+  messageDesc(file_mavio_system_v1_plugin, 11);
 
 /**
  * @generated from message mavio.system.v1.ListCatalogPluginsRequest
@@ -274,7 +371,7 @@ export type ListCatalogPluginsRequest = Message<"mavio.system.v1.ListCatalogPlug
  * Use `create(ListCatalogPluginsRequestSchema)` to create a new message.
  */
 export const ListCatalogPluginsRequestSchema: GenMessage<ListCatalogPluginsRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 9);
+  messageDesc(file_mavio_system_v1_plugin, 12);
 
 /**
  * @generated from message mavio.system.v1.ListCatalogPluginsResponse
@@ -291,7 +388,7 @@ export type ListCatalogPluginsResponse = Message<"mavio.system.v1.ListCatalogPlu
  * Use `create(ListCatalogPluginsResponseSchema)` to create a new message.
  */
 export const ListCatalogPluginsResponseSchema: GenMessage<ListCatalogPluginsResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 10);
+  messageDesc(file_mavio_system_v1_plugin, 13);
 
 /**
  * @generated from message mavio.system.v1.InstallPluginRequest
@@ -315,7 +412,7 @@ export type InstallPluginRequest = Message<"mavio.system.v1.InstallPluginRequest
  * Use `create(InstallPluginRequestSchema)` to create a new message.
  */
 export const InstallPluginRequestSchema: GenMessage<InstallPluginRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 11);
+  messageDesc(file_mavio_system_v1_plugin, 14);
 
 /**
  * @generated from message mavio.system.v1.InstallPluginResponse
@@ -332,7 +429,7 @@ export type InstallPluginResponse = Message<"mavio.system.v1.InstallPluginRespon
  * Use `create(InstallPluginResponseSchema)` to create a new message.
  */
 export const InstallPluginResponseSchema: GenMessage<InstallPluginResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 12);
+  messageDesc(file_mavio_system_v1_plugin, 15);
 
 /**
  * @generated from message mavio.system.v1.UninstallPluginRequest
@@ -349,7 +446,7 @@ export type UninstallPluginRequest = Message<"mavio.system.v1.UninstallPluginReq
  * Use `create(UninstallPluginRequestSchema)` to create a new message.
  */
 export const UninstallPluginRequestSchema: GenMessage<UninstallPluginRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 13);
+  messageDesc(file_mavio_system_v1_plugin, 16);
 
 /**
  * @generated from message mavio.system.v1.UninstallPluginResponse
@@ -362,7 +459,7 @@ export type UninstallPluginResponse = Message<"mavio.system.v1.UninstallPluginRe
  * Use `create(UninstallPluginResponseSchema)` to create a new message.
  */
 export const UninstallPluginResponseSchema: GenMessage<UninstallPluginResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 14);
+  messageDesc(file_mavio_system_v1_plugin, 17);
 
 /**
  * @generated from message mavio.system.v1.SetPluginEnabledRequest
@@ -384,7 +481,7 @@ export type SetPluginEnabledRequest = Message<"mavio.system.v1.SetPluginEnabledR
  * Use `create(SetPluginEnabledRequestSchema)` to create a new message.
  */
 export const SetPluginEnabledRequestSchema: GenMessage<SetPluginEnabledRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 15);
+  messageDesc(file_mavio_system_v1_plugin, 18);
 
 /**
  * @generated from message mavio.system.v1.SetPluginEnabledResponse
@@ -401,7 +498,7 @@ export type SetPluginEnabledResponse = Message<"mavio.system.v1.SetPluginEnabled
  * Use `create(SetPluginEnabledResponseSchema)` to create a new message.
  */
 export const SetPluginEnabledResponseSchema: GenMessage<SetPluginEnabledResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 16);
+  messageDesc(file_mavio_system_v1_plugin, 19);
 
 /**
  * ContainerRuntime is the container engine the server found.
@@ -471,7 +568,7 @@ export type ContainerRuntime = Message<"mavio.system.v1.ContainerRuntime"> & {
  * Use `create(ContainerRuntimeSchema)` to create a new message.
  */
 export const ContainerRuntimeSchema: GenMessage<ContainerRuntime> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 17);
+  messageDesc(file_mavio_system_v1_plugin, 20);
 
 /**
  * @generated from message mavio.system.v1.GetContainerRuntimeRequest
@@ -490,7 +587,7 @@ export type GetContainerRuntimeRequest = Message<"mavio.system.v1.GetContainerRu
  * Use `create(GetContainerRuntimeRequestSchema)` to create a new message.
  */
 export const GetContainerRuntimeRequestSchema: GenMessage<GetContainerRuntimeRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 18);
+  messageDesc(file_mavio_system_v1_plugin, 21);
 
 /**
  * @generated from message mavio.system.v1.GetContainerRuntimeResponse
@@ -507,7 +604,7 @@ export type GetContainerRuntimeResponse = Message<"mavio.system.v1.GetContainerR
  * Use `create(GetContainerRuntimeResponseSchema)` to create a new message.
  */
 export const GetContainerRuntimeResponseSchema: GenMessage<GetContainerRuntimeResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 19);
+  messageDesc(file_mavio_system_v1_plugin, 22);
 
 /**
  * PluginContainer is a container dependency of a plugin.
@@ -555,7 +652,7 @@ export type PluginContainer = Message<"mavio.system.v1.PluginContainer"> & {
  * Use `create(PluginContainerSchema)` to create a new message.
  */
 export const PluginContainerSchema: GenMessage<PluginContainer> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 20);
+  messageDesc(file_mavio_system_v1_plugin, 23);
 
 /**
  * ContainerCommands run a container dependency outside the server, under
@@ -592,7 +689,7 @@ export type ContainerCommands = Message<"mavio.system.v1.ContainerCommands"> & {
  * Use `create(ContainerCommandsSchema)` to create a new message.
  */
 export const ContainerCommandsSchema: GenMessage<ContainerCommands> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 21);
+  messageDesc(file_mavio_system_v1_plugin, 24);
 
 /**
  * @generated from message mavio.system.v1.ListPluginContainersRequest
@@ -609,7 +706,7 @@ export type ListPluginContainersRequest = Message<"mavio.system.v1.ListPluginCon
  * Use `create(ListPluginContainersRequestSchema)` to create a new message.
  */
 export const ListPluginContainersRequestSchema: GenMessage<ListPluginContainersRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 22);
+  messageDesc(file_mavio_system_v1_plugin, 25);
 
 /**
  * @generated from message mavio.system.v1.ListPluginContainersResponse
@@ -628,7 +725,7 @@ export type ListPluginContainersResponse = Message<"mavio.system.v1.ListPluginCo
  * Use `create(ListPluginContainersResponseSchema)` to create a new message.
  */
 export const ListPluginContainersResponseSchema: GenMessage<ListPluginContainersResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 23);
+  messageDesc(file_mavio_system_v1_plugin, 26);
 
 /**
  * @generated from message mavio.system.v1.SetPluginContainerRequest
@@ -670,7 +767,7 @@ export type SetPluginContainerRequest = Message<"mavio.system.v1.SetPluginContai
  * Use `create(SetPluginContainerRequestSchema)` to create a new message.
  */
 export const SetPluginContainerRequestSchema: GenMessage<SetPluginContainerRequest> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 24);
+  messageDesc(file_mavio_system_v1_plugin, 27);
 
 /**
  * @generated from message mavio.system.v1.SetPluginContainerResponse
@@ -687,7 +784,7 @@ export type SetPluginContainerResponse = Message<"mavio.system.v1.SetPluginConta
  * Use `create(SetPluginContainerResponseSchema)` to create a new message.
  */
 export const SetPluginContainerResponseSchema: GenMessage<SetPluginContainerResponse> = /*@__PURE__*/
-  messageDesc(file_mavio_system_v1_plugin, 25);
+  messageDesc(file_mavio_system_v1_plugin, 28);
 
 /**
  * PluginState is whether a plugin is in use.
@@ -767,7 +864,9 @@ export const PluginManagementService: GenService<{
   /**
    * SetPluginConfig validates a configuration against the plugin's schema,
    * delivers it to the running plugin and stores it once the plugin
-   * accepts it.
+   * accepts it. Properties the schema marks generated, strings of format
+   * uuid that are readOnly, are given new UUIDs where they are missing or
+   * empty.
    *
    * @generated from rpc mavio.system.v1.PluginManagementService.SetPluginConfig
    */
@@ -775,6 +874,18 @@ export const PluginManagementService: GenService<{
     methodKind: "unary";
     input: typeof SetPluginConfigRequestSchema;
     output: typeof SetPluginConfigResponseSchema;
+  },
+  /**
+   * ListPluginConfigOptions lists the values a property of a plugin's
+   * configuration takes, from the source its schema names with
+   * x-mavio-options, such as the definitions of an indexer provider.
+   *
+   * @generated from rpc mavio.system.v1.PluginManagementService.ListPluginConfigOptions
+   */
+  listPluginConfigOptions: {
+    methodKind: "unary";
+    input: typeof ListPluginConfigOptionsRequestSchema;
+    output: typeof ListPluginConfigOptionsResponseSchema;
   },
   /**
    * ListCatalogPlugins lists the plugins of the configured plugin

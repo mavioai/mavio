@@ -22,6 +22,18 @@ pub type OwnedSetPluginConfigRequestView = ::buffa::view::OwnedView<
 pub type OwnedSetPluginConfigResponseView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::SetPluginConfigResponseView<'static>,
 >;
+///Shorthand for `OwnedView<ListPluginConfigOptionsRequestView<'static>>`.
+pub type OwnedListPluginConfigOptionsRequestView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsRequestView<
+        'static,
+    >,
+>;
+///Shorthand for `OwnedView<ListPluginConfigOptionsResponseView<'static>>`.
+pub type OwnedListPluginConfigOptionsResponseView = ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+        'static,
+    >,
+>;
 ///Shorthand for `OwnedView<ListCatalogPluginsRequestView<'static>>`.
 pub type OwnedListCatalogPluginsRequestView = ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::ListCatalogPluginsRequestView<
@@ -174,6 +186,48 @@ for crate::proto::mavio::system::v1::__buffa::view::SetPluginConfigResponseView<
 impl ::connectrpc::Encodable<crate::proto::mavio::system::v1::SetPluginConfigResponse>
 for ::buffa::view::OwnedView<
     crate::proto::mavio::system::v1::__buffa::view::SetPluginConfigResponseView<'static>,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self.reborrow(), codec)
+    }
+    /// An `OwnedView` still holds the buffer it was decoded from, so
+    /// its large fields can be handed to the response body by
+    /// reference count instead of copied. The bare view impl above
+    /// cannot do this: it has borrows but no buffer to name.
+    fn encode_segments(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::connectrpc::EncodedBody, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body_segments(
+            self.reborrow(),
+            self.bytes(),
+            codec,
+        )
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
+>
+for crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+    '_,
+> {
+    fn encode(
+        &self,
+        codec: ::connectrpc::CodecFormat,
+    ) -> ::std::result::Result<::buffa::bytes::Bytes, ::connectrpc::ConnectError> {
+        ::connectrpc::__codegen::encode_view_body(self, codec)
+    }
+}
+impl ::connectrpc::Encodable<
+    crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
+>
+for ::buffa::view::OwnedView<
+    crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+        'static,
+    >,
 > {
     fn encode(
         &self,
@@ -472,6 +526,12 @@ pub const PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONFIG_SPEC: ::connectrpc::Spec =
         ::connectrpc::StreamType::Unary,
     )
     .with_idempotency_level(::connectrpc::IdempotencyLevel::Unknown);
+/// Static [`Spec`](::connectrpc::Spec) for the `ListPluginConfigOptions` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
+pub const PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
+        "/mavio.system.v1.PluginManagementService/ListPluginConfigOptions",
+        ::connectrpc::StreamType::Unary,
+    )
+    .with_idempotency_level(::connectrpc::IdempotencyLevel::NoSideEffects);
 /// Static [`Spec`](::connectrpc::Spec) for the `ListCatalogPlugins` RPC, as seen by the server; the generated client passes it with [`origin`](::connectrpc::Spec::origin) `Client` (compare across sides with [`Spec::same_method`](::connectrpc::Spec::same_method)).
 pub const PLUGIN_MANAGEMENT_SERVICE_LIST_CATALOG_PLUGINS_SPEC: ::connectrpc::Spec = ::connectrpc::Spec::server(
         "/mavio.system.v1.PluginManagementService/ListCatalogPlugins",
@@ -615,7 +675,9 @@ pub trait PluginManagementService: Send + Sync + 'static {
     > + Send;
     /// SetPluginConfig validates a configuration against the plugin's schema,
     /// delivers it to the running plugin and stores it once the plugin
-    /// accepts it.
+    /// accepts it. Properties the schema marks generated, strings of format
+    /// uuid that are readOnly, are given new UUIDs where they are missing or
+    /// empty.
     ///
     /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
     ///
@@ -635,6 +697,31 @@ pub trait PluginManagementService: Send + Sync + 'static {
         Output = ::connectrpc::ServiceResult<
             impl ::connectrpc::Encodable<
                 crate::proto::mavio::system::v1::SetPluginConfigResponse,
+            > + Send + use<'a, Self>,
+        >,
+    > + Send;
+    /// ListPluginConfigOptions lists the values a property of a plugin's
+    /// configuration takes, from the source its schema names with
+    /// x-mavio-options, such as the definitions of an indexer provider.
+    ///
+    /// `'a` lets the response body borrow from `&self` (e.g. server-resident state).
+    ///
+    /// `request` is borrowed from the request body and is valid for the
+    /// duration of the call; message fields are read directly on it
+    /// (zero-copy). The response cannot borrow from `request` — use
+    /// `.to_owned_message()` (or copy the specific fields) for anything
+    /// returned, stored, or moved into `tokio::spawn`.
+    fn list_plugin_config_options<'a>(
+        &'a self,
+        ctx: ::connectrpc::RequestContext,
+        request: ::connectrpc::ServiceRequest<
+            '_,
+            crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+        >,
+    ) -> impl ::std::future::Future<
+        Output = ::connectrpc::ServiceResult<
+            impl ::connectrpc::Encodable<
+                crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
             > + Send + use<'a, Self>,
         >,
     > + Send;
@@ -929,6 +1016,35 @@ impl<S: PluginManagementService> PluginManagementServiceExt for S {
             .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONFIG_SPEC)
             .route_view_idempotent(
                 PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
+                "ListPluginConfigOptions",
+                {
+                    let svc = ::std::sync::Arc::clone(&self);
+                    ::connectrpc::view_handler_fn(move |
+                        ctx,
+                        req: ::buffa::view::OwnedView<
+                            crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsRequestView<
+                                'static,
+                            >,
+                        >,
+                        format|
+                    {
+                        let svc = ::std::sync::Arc::clone(&svc);
+                        async move {
+                            let sreq = ::connectrpc::ServiceRequest::<
+                                crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+                            >::from_parts(req.reborrow(), req.bytes());
+                            svc.list_plugin_config_options(ctx, sreq)
+                                .await?
+                                .encode::<
+                                    crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
+                                >(format)
+                        }
+                    })
+                },
+            )
+            .with_spec(PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC)
+            .route_view_idempotent(
+                PLUGIN_MANAGEMENT_SERVICE_SERVICE_NAME,
                 "ListCatalogPlugins",
                 {
                     let svc = ::std::sync::Arc::clone(&self);
@@ -1205,6 +1321,14 @@ for PluginManagementServiceServer<T> {
                         .with_spec(PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONFIG_SPEC),
                 )
             }
+            "ListPluginConfigOptions" => {
+                Some(
+                    ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
+                        .with_spec(
+                            PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC,
+                        ),
+                )
+            }
             "ListCatalogPlugins" => {
                 Some(
                     ::connectrpc::dispatcher::codegen::MethodDescriptor::unary(true)
@@ -1326,6 +1450,28 @@ for PluginManagementServiceServer<T> {
                         .await?
                         .encode::<
                             crate::proto::mavio::system::v1::SetPluginConfigResponse,
+                        >(format)
+                })
+            }
+            "ListPluginConfigOptions" => {
+                let svc = ::std::sync::Arc::clone(&self.inner);
+                Box::pin(async move {
+                    let body = ::connectrpc::dispatcher::codegen::request_proto_bytes::<
+                        crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+                    >(request.encoded()?, format)?;
+                    let req: crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsRequestView<
+                        '_,
+                    > = ::connectrpc::dispatcher::codegen::decode_borrowed_request_view(
+                        &body,
+                        ctx.decode_options(),
+                    )?;
+                    let req = ::connectrpc::ServiceRequest::<
+                        crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+                    >::from_parts(&req, &body);
+                    svc.list_plugin_config_options(ctx, req)
+                        .await?
+                        .encode::<
+                            crate::proto::mavio::system::v1::ListPluginConfigOptionsResponse,
                         >(format)
                 })
             }
@@ -1743,6 +1889,51 @@ where
                 &self.transport,
                 &self.config,
                 PLUGIN_MANAGEMENT_SERVICE_SET_PLUGIN_CONFIG_SPEC
+                    .with_origin(::connectrpc::SpecOrigin::Client),
+                request,
+                options,
+            )
+            .await
+    }
+    /// Call the ListPluginConfigOptions RPC. Sends a request to /mavio.system.v1.PluginManagementService/ListPluginConfigOptions.
+    pub async fn list_plugin_config_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        self.list_plugin_config_options_with_options(
+                request,
+                ::connectrpc::client::CallOptions::default(),
+            )
+            .await
+    }
+    /// Call the ListPluginConfigOptions RPC with explicit per-call options. Options override [`ClientConfig`](::connectrpc::client::ClientConfig) defaults.
+    pub async fn list_plugin_config_options_with_options(
+        &self,
+        request: crate::proto::mavio::system::v1::ListPluginConfigOptionsRequest,
+        options: ::connectrpc::client::CallOptions,
+    ) -> Result<
+        ::connectrpc::client::UnaryResponse<
+            ::buffa::view::OwnedView<
+                crate::proto::mavio::system::v1::__buffa::view::ListPluginConfigOptionsResponseView<
+                    'static,
+                >,
+            >,
+        >,
+        ::connectrpc::ConnectError,
+    > {
+        ::connectrpc::client::call_unary(
+                &self.transport,
+                &self.config,
+                PLUGIN_MANAGEMENT_SERVICE_LIST_PLUGIN_CONFIG_OPTIONS_SPEC
                     .with_origin(::connectrpc::SpecOrigin::Client),
                 request,
                 options,

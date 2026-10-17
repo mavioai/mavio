@@ -452,7 +452,7 @@ func Run(ctx context.Context, cfg Config, ln net.Listener) error {
 		},
 		SignIn: claimer, Assertions: assertions, MavioDevURL: cfg.MavioDevURL,
 		Authenticate: plugs.Authenticate, ResetPlugin: func() string { return set.Get().PasswordResetPlugin }, StartReset: plugs.StartPasswordReset, PluginRoutes: plugs.Routes, Wake: warmer.Wake, ExternalIDKinds: plugs.ExternalIDKinds, Indexers: plugs.IndexerProviders,
-		Downloads: plugs.DownloadClientProviders, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
+		Downloads: clients, Acquisition: acq, Requests: reqs, Dev: cfg.Dev,
 	})
 	if err != nil {
 		return err

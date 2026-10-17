@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
 
 	"connectrpc.com/connect"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
 	"github.com/mavioai/mavio/apps/server/internal/dependencies"
+	"github.com/mavioai/mavio/apps/server/internal/downloads"
 	"github.com/mavioai/mavio/apps/server/internal/events"
 	"github.com/mavioai/mavio/apps/server/internal/plugins"
 	"github.com/mavioai/mavio/libs/containers"
@@ -33,6 +35,10 @@ type PluginManagementService struct {
 	Hub *events.Hub
 	// Activity records administrators' changes; nil records none.
 	Activity *activity.Log
+	// DownloadClients returns the download client providers, whose
+	// clients are the options of manifest.OptionsDownloadClients; nil has
+	// none.
+	DownloadClients func() []downloads.Provider
 	// Containers keeps plugins' container dependencies; nil means none.
 	Containers ContainerDependencies
 }
@@ -51,7 +57,8 @@ type ContainerDependencies interface {
 type PluginManager interface {
 	Plugins() []plugins.Info
 	Config(ctx context.Context, id string) (core.PluginConfig, error)
-	SetConfig(ctx context.Context, id, configJSON string) (plugins.Info, error)
+	SetConfig(ctx context.Context, id, configJSON string) (plugins.Info, string, error)
+	Definitions(ctx context.Context, id, source string) ([]plugins.ConfigOption, error)
 	Catalog(ctx context.Context) ([]plugins.CatalogPlugin, error)
 	Install(ctx context.Context, id, version string) (plugins.Info, error)
 	Uninstall(ctx context.Context, id string) error
@@ -217,12 +224,67 @@ func (s *PluginManagementService) SetPluginConfig(ctx context.Context, req *syst
 	if s.Plugins == nil {
 		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
 	}
-	info, err := s.Plugins.SetConfig(ctx, req.GetPluginId(), req.GetConfigJson())
+	info, config, err := s.Plugins.SetConfig(ctx, req.GetPluginId(), req.GetConfigJson())
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
 	plugin := s.pluginChanged(ctx, info, "plugin.configured", "configured")
-	return systemv1.SetPluginConfigResponse_builder{Plugin: plugin}.Build(), nil
+	return systemv1.SetPluginConfigResponse_builder{Plugin: plugin, ConfigJson: &config}.Build(), nil
+}
+
+// ListPluginConfigOptions lists the options of a source for a plugin's
+// configuration: its providers' definitions, or the download clients.
+func (s *PluginManagementService) ListPluginConfigOptions(ctx context.Context, req *systemv1.ListPluginConfigOptionsRequest) (*systemv1.ListPluginConfigOptionsResponse, error) {
+	if _, err := admin(ctx); err != nil {
+		return nil, err
+	}
+	if s.Plugins == nil {
+		return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
+	}
+	var options []plugins.ConfigOption
+	if req.GetSource() == manifest.OptionsDownloadClients {
+		if !slices.ContainsFunc(s.Plugins.Plugins(), func(p plugins.Info) bool { return p.Manifest.GetId() == req.GetPluginId() }) {
+			return nil, connectError(ctx, fmt.Errorf("plugin %s: %w", req.GetPluginId(), core.ErrNotFound))
+		}
+		options = s.downloadClients(ctx)
+	} else {
+		var err error
+		if options, err = s.Plugins.Definitions(ctx, req.GetPluginId(), req.GetSource()); err != nil {
+			return nil, connectError(ctx, err)
+		}
+	}
+	out := make([]*systemv1.PluginConfigOption, 0, len(options))
+	for _, o := range options {
+		out = append(out, systemv1.PluginConfigOption_builder{
+			Value: &o.Value, Name: &o.Name, Description: &o.Description, Tags: o.Tags, SettingsSchema: &o.SettingsSchema,
+		}.Build())
+	}
+	return systemv1.ListPluginConfigOptionsResponse_builder{Options: out}.Build(), nil
+}
+
+// downloadClients returns the clients of every download client provider
+// as options, "<plugin>/<client>"; a provider failing to list them is
+// left out.
+func (s *PluginManagementService) downloadClients(ctx context.Context) []plugins.ConfigOption {
+	if s.DownloadClients == nil {
+		return nil
+	}
+	var out []plugins.ConfigOption
+	for _, p := range s.DownloadClients() {
+		resp, err := p.Client.ListDownloadClients(ctx, &pluginv1.ListDownloadClientsRequest{})
+		if err != nil {
+			slog.WarnContext(ctx, "list download clients", "plugin", p.ID, "err", err)
+			continue
+		}
+		for _, c := range resp.GetClients() {
+			o := plugins.ConfigOption{Value: p.ID + "/" + c.GetId(), Name: c.GetName()}
+			if t := plugins.ProtocolTag(c.GetProtocol()); t != "" {
+				o.Tags = []string{t}
+			}
+			out = append(out, o)
+		}
+	}
+	return out
 }
 
 var pluginStates = map[plugins.State]systemv1.PluginState{

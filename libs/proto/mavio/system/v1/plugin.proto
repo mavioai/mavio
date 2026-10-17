@@ -21,8 +21,16 @@ service PluginManagementService {
   }
   // SetPluginConfig validates a configuration against the plugin's schema,
   // delivers it to the running plugin and stores it once the plugin
-  // accepts it.
+  // accepts it. Properties the schema marks generated, strings of format
+  // uuid that are readOnly, are given new UUIDs where they are missing or
+  // empty.
   rpc SetPluginConfig(SetPluginConfigRequest) returns (SetPluginConfigResponse);
+  // ListPluginConfigOptions lists the values a property of a plugin's
+  // configuration takes, from the source its schema names with
+  // x-mavio-options, such as the definitions of an indexer provider.
+  rpc ListPluginConfigOptions(ListPluginConfigOptionsRequest) returns (ListPluginConfigOptionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
   // ListCatalogPlugins lists the plugins of the configured plugin
   // catalogs, with the versions the server can run.
   rpc ListCatalogPlugins(ListCatalogPluginsRequest) returns (ListCatalogPluginsResponse) {
@@ -104,6 +112,35 @@ message SetPluginConfigRequest {
 
 message SetPluginConfigResponse {
   Plugin plugin = 1;
+  // The configuration stored, with the generated properties set.
+  string config_json = 2;
+}
+
+message ListPluginConfigOptionsRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // The source x-mavio-options names: "indexer-definitions" and
+  // "download-client-definitions", the definitions of the plugin's
+  // providers, or "download-clients", the clients of every download client
+  // provider.
+  string source = 2 [(buf.validate.field).required = true];
+}
+
+message ListPluginConfigOptionsResponse {
+  repeated PluginConfigOption options = 1;
+}
+
+// PluginConfigOption is a value a property of a configuration takes.
+message PluginConfigOption {
+  string value = 1;
+  string name = 2;
+  string description = 3;
+  // What sets the option apart, as keys clients show in their words:
+  // "torrent" or "usenet", "public", "semi-private" or "private", and a
+  // BCP 47 language tag such as "en-US".
+  repeated string tags = 4;
+  // The JSON Schema of the settings the option takes, which the property
+  // x-mavio-options names as its settings holds; empty for none.
+  string settings_schema = 5;
 }
 
 // CatalogPlugin is a plugin a catalog offers.
