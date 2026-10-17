@@ -447,7 +447,9 @@ func (s *fakeSolver) SolveChallenge(_ context.Context, req *pluginv1.SolveChalle
 }
 
 func TestSolveChallenge(t *testing.T) {
+	var sent int
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sent++
 		if c, err := r.Cookie("cf_clearance"); err == nil && c.Value == "yes" && r.UserAgent() == "Solved/1" {
 			fmt.Fprint(w, "a 1\n")
 			return
@@ -490,11 +492,19 @@ func TestSolveChallenge(t *testing.T) {
 			if got := tt.solver.got[0].GetChallenge().GetUrl(); got != "http://site/" {
 				t.Errorf("challenge URL got = %q, want = http://site/", got)
 			}
-			if got := ix.Session.client.solvedAgent("site", px); got != "Solved/1" {
+			if got := ix.Session.client.solution("site", px).GetUserAgent(); got != "Solved/1" {
 				t.Errorf("solved agent got = %q, want = Solved/1", got)
 			}
-			if got := ix.Session.client.solvedAgent("site", nil); got != "" {
-				t.Errorf("solved agent without the proxy got = %q, want = none", got)
+			if got := ix.Session.client.solution("site", nil); got != nil {
+				t.Errorf("solution without the proxy got = %v, want = none", got)
+			}
+			// Later requests send the solution, neither challenged nor solving again.
+			sent = 0
+			if rs, err := ix.Search(t.Context(), &Query{Term: "y"}); err != nil || len(rs) != 1 {
+				t.Fatalf("second Search() got = %v, %v, want = 1 release", titles(rs), err)
+			}
+			if sent != 1 || len(tt.solver.got) != 1 {
+				t.Errorf("second Search() got = %d requests, %d solves, want = 1 request, 1 solve in all", sent, len(tt.solver.got))
 			}
 		})
 	}

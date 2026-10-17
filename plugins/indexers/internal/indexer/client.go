@@ -44,9 +44,9 @@ type Client struct {
 	next map[string]time.Time
 	// transports are by proxy ID, "" for none.
 	transports map[string]http.RoundTripper
-	// solvedAgents are the user agents hosts' challenges were solved
-	// with, by solvedKey.
-	solvedAgents map[string]string
+	// solved are the solutions of hosts' challenges, by solvedKey, whose
+	// cookies and user agent later requests send until challenged again.
+	solved map[string]*pluginv1.ChallengeSolution
 }
 
 // NewClient returns a client.
@@ -115,23 +115,23 @@ func (c *Client) Forget() {
 	c.transports = nil
 }
 
-// solvedKey keys a host's solved agent: a solution holds only through the
+// solvedKey keys a host's solution: a solution holds only through the
 // proxy it was solved through.
 func solvedKey(host string, p *pluginv1.Proxy) string { return host + "\x00" + p.GetId() }
 
-func (c *Client) solvedAgent(host string, p *pluginv1.Proxy) string {
+func (c *Client) solution(host string, p *pluginv1.Proxy) *pluginv1.ChallengeSolution {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.solvedAgents[solvedKey(host, p)]
+	return c.solved[solvedKey(host, p)]
 }
 
-func (c *Client) setSolvedAgent(host string, p *pluginv1.Proxy, agent string) {
+func (c *Client) setSolution(host string, p *pluginv1.Proxy, sol *pluginv1.ChallengeSolution) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.solvedAgents == nil {
-		c.solvedAgents = map[string]string{}
+	if c.solved == nil {
+		c.solved = map[string]*pluginv1.ChallengeSolution{}
 	}
-	c.solvedAgents[solvedKey(host, p)] = agent
+	c.solved[solvedKey(host, p)] = sol
 }
 
 // Session sends an indexer's requests.
@@ -180,10 +180,11 @@ func (s *Session) Do(ctx context.Context, r *Request) (*Response, error) {
 	return nil, fmt.Errorf("%s redirected more than %d times", r.URL, maxRedirects)
 }
 
-// do sends a request once, solving a challenge if one answers. Without a
-// solver plugin, the challenge is returned as it is.
+// do sends a request once, solving a challenge if one answers and sending
+// it again with the solution, which the host's later requests send too.
+// Without a solver plugin, the challenge is returned as it is.
 func (s *Session) do(ctx context.Context, r *Request) (*Response, error) {
-	resp, err := s.send(ctx, r, "")
+	resp, err := s.send(ctx, r)
 	if err != nil || s.solver == nil || !IsCloudflareProtected(resp) {
 		return resp, err
 	}
@@ -194,11 +195,8 @@ func (s *Session) do(ctx context.Context, r *Request) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	s.client.setSolvedAgent(hostOf(r.URL), s.proxy, sol.GetUserAgent())
-	for _, c := range sol.GetCookies() {
-		r.Cookies[c.GetName()] = c.GetValue()
-	}
-	return s.send(ctx, r, sol.GetUserAgent())
+	s.client.setSolution(hostOf(r.URL), s.proxy, sol)
+	return s.send(ctx, r)
 }
 
 // solve has the server solve the challenge answering a request, through
@@ -215,7 +213,9 @@ func (s *Session) solve(ctx context.Context, r *Request) (*pluginv1.ChallengeSol
 	return challenge.Solve(ctx, s.solver, req, r.Body, s.proxy.GetId(), 0)
 }
 
-func (s *Session) send(ctx context.Context, r *Request, agent string) (*Response, error) {
+// send sends a request once, with its host's solution: its user agent
+// unless the request sets one, and its cookies over the request's.
+func (s *Session) send(ctx context.Context, r *Request) (*Response, error) {
 	host := hostOf(r.URL)
 	if err := s.client.wait(ctx, host, max(r.RateLimit, s.RateLimit)); err != nil {
 		return nil, err
@@ -242,17 +242,28 @@ func (s *Session) send(ctx context.Context, r *Request, agent string) (*Response
 	for k, v := range r.Header {
 		req.Header[k] = slices.Clone(v)
 	}
-	if agent == "" && req.Header.Get("User-Agent") == "" && s.solver != nil {
-		agent = s.client.solvedAgent(host, s.proxy)
+	cookies := r.Cookies
+	var sol *pluginv1.ChallengeSolution
+	if s.solver != nil {
+		sol = s.client.solution(host, s.proxy)
 	}
 	switch {
-	case agent != "":
-		req.Header.Set("User-Agent", agent)
+	case sol != nil:
+		// The challenge's cookies hold only with the agent they were
+		// obtained with.
+		req.Header.Set("User-Agent", sol.GetUserAgent())
+		cookies = maps.Clone(cookies)
+		if cookies == nil {
+			cookies = map[string]string{}
+		}
+		for _, c := range sol.GetCookies() {
+			cookies[c.GetName()] = c.GetValue()
+		}
 	case req.Header.Get("User-Agent") == "":
 		req.Header.Set("User-Agent", s.client.UserAgent)
 	}
-	if len(r.Cookies) > 0 {
-		req.Header.Set("Cookie", cookieHeader(r.Cookies))
+	if len(cookies) > 0 {
+		req.Header.Set("Cookie", cookieHeader(cookies))
 	}
 
 	hc := &http.Client{
