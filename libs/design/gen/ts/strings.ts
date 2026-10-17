@@ -260,6 +260,7 @@ export type MessageKey =
   | 'action.delete'
   | 'action.save'
   | 'action.back'
+  | 'action.continue'
   | 'action.scrollBack'
   | 'action.scrollForward'
   | 'action.showLess'
@@ -2069,6 +2070,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.delete": "Delete",
     "action.save": "Save",
     "action.back": "Back",
+    "action.continue": "Continue",
     "action.scrollBack": "Scroll Back",
     "action.scrollForward": "Scroll Forward",
     "action.showLess": "Show Less",
@@ -3876,6 +3878,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "action.delete": "删除",
     "action.save": "保存",
     "action.back": "返回",
+    "action.continue": "继续",
     "action.scrollBack": "向前滚动",
     "action.scrollForward": "向后滚动",
     "action.showLess": "收起",

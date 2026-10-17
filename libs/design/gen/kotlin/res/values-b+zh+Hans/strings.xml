@@ -271,6 +271,7 @@
     <string name="action_delete">删除</string>
     <string name="action_save">保存</string>
     <string name="action_back">返回</string>
+    <string name="action_continue">继续</string>
     <string name="action_scroll_back">向前滚动</string>
     <string name="action_scroll_forward">向后滚动</string>
     <string name="action_show_less">收起</string>

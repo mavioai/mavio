@@ -4735,6 +4735,24 @@
         }
       }
     },
+    "action.continue": {
+      "comment": "Button that goes on to the next step.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
+          }
+        }
+      }
+    },
     "action.scrollBack": {
       "comment": "Accessibility label of the arrow scrolling a shelf back.",
       "extractionState": "manual",

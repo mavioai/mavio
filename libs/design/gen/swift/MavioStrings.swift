@@ -861,6 +861,9 @@ public enum MavioStrings {
     /// Button that goes back one step.
     public static var actionBack: String { NSLocalizedString("action.back", bundle: .module, comment: "") }
 
+    /// Button that goes on to the next step.
+    public static var actionContinue: String { NSLocalizedString("action.continue", bundle: .module, comment: "") }
+
     /// Accessibility label of the arrow scrolling a shelf back.
     public static var actionScrollBack: String { NSLocalizedString("action.scrollBack", bundle: .module, comment: "") }
 

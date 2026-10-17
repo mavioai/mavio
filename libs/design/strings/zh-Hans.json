@@ -256,6 +256,7 @@
   "action.delete": "删除",
   "action.save": "保存",
   "action.back": "返回",
+  "action.continue": "继续",
   "action.scrollBack": "向前滚动",
   "action.scrollForward": "向后滚动",
   "action.showLess": "收起",

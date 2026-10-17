@@ -533,6 +533,8 @@
     <string name="action_save">Save</string>
     <!-- Button that goes back one step. -->
     <string name="action_back">Back</string>
+    <!-- Button that goes on to the next step. -->
+    <string name="action_continue">Continue</string>
     <!-- Accessibility label of the arrow scrolling a shelf back. -->
     <string name="action_scroll_back">Scroll Back</string>
     <!-- Accessibility label of the arrow scrolling a shelf forward. -->
