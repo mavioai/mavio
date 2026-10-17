@@ -13,6 +13,9 @@ use mavio_api::proto::mavio::auth::v1::{
 };
 use mavio_api::proto::mavio::user::v1::User;
 
+use mavio_api::proto::mavio::auth::v1::AccountMode as AccountModeProto;
+
+use crate::account::MavioDev;
 use crate::connection::Connection;
 use crate::error::{Error, Result};
 use crate::session::{Credential, DeviceKey, Session, expiry};
@@ -72,6 +75,22 @@ pub struct ServerInfo {
     /// Whether the server has no user yet, and the first one is created
     /// instead of signing in.
     pub setup_required: bool,
+    /// Who the server's users are.
+    pub mode: AccountMode,
+    /// The API of the mavio.dev the server's accounts are kept by, in the
+    /// Mavio account mode.
+    pub mavio_dev_url: String,
+}
+
+/// Who a server's users are (`docs/accounts.md` §2).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AccountMode {
+    /// The server's setup has not chosen yet.
+    Unspecified,
+    /// The server keeps its own users, who sign in with a password.
+    Standalone,
+    /// Every user is a Mavio account, signed in at mavio.dev.
+    MavioDev,
 }
 
 /// A Quick Connect request: the device shows the code, the user enters it
@@ -95,6 +114,7 @@ pub struct Servers {
     tokens: Arc<dyn TokenStore>,
     device: DeviceInfo,
     key: Arc<DeviceKey>,
+    mavio_dev: Arc<MavioDev>,
     connections: RwLock<HashMap<String, Connection>>,
 }
 
@@ -105,11 +125,28 @@ impl Servers {
         let key = Arc::new(DeviceKey::load(tokens.as_ref()));
         Servers {
             store,
+            mavio_dev: Arc::new(MavioDev::new(tokens.clone(), key.clone())),
             tokens,
             device,
             key,
             connections: RwLock::default(),
         }
+    }
+
+    pub(crate) fn tokens(&self) -> &Arc<dyn TokenStore> {
+        &self.tokens
+    }
+
+    pub(crate) fn device_key(&self) -> &DeviceKey {
+        &self.key
+    }
+
+    pub(crate) fn device_proto(&self) -> Device {
+        self.device.to_proto(&self.key)
+    }
+
+    pub(crate) fn mavio_dev(&self) -> &Arc<MavioDev> {
+        &self.mavio_dev
     }
 
     /// The device signing in.
@@ -351,7 +388,7 @@ impl Servers {
         self.store.order_servers(ids)
     }
 
-    fn signed_in_as(
+    pub(crate) fn signed_in_as(
         &self,
         conn: &Connection,
         info: &ServerInfo,
@@ -381,7 +418,7 @@ impl Servers {
     }
 }
 
-async fn probe(conn: &Connection) -> Result<ServerInfo> {
+pub(crate) async fn probe(conn: &Connection) -> Result<ServerInfo> {
     let info = conn
         .auth()
         .get_auth_info(GetAuthInfoRequest::default())
@@ -400,6 +437,12 @@ async fn probe(conn: &Connection) -> Result<ServerInfo> {
         version: info.version.unwrap_or_default(),
         address: address.trim_end_matches('/').to_owned(),
         setup_required: info.setup_required.unwrap_or_default(),
+        mode: match info.mode.and_then(|m| m.as_known()) {
+            Some(AccountModeProto::ACCOUNT_MODE_STANDALONE) => AccountMode::Standalone,
+            Some(AccountModeProto::ACCOUNT_MODE_MAVIO_DEV) => AccountMode::MavioDev,
+            _ => AccountMode::Unspecified,
+        },
+        mavio_dev_url: info.mavio_dev_url.unwrap_or_default(),
     })
 }
 

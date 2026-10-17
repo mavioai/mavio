@@ -17,7 +17,7 @@ doctest = false
 buffa.workspace = true
 mavio-api = { path = "../api" }
 mavio-core = { path = "../core" }
-tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
 
 [lints]
 workspace = true

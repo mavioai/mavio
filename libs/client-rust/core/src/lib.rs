@@ -3,6 +3,7 @@
 //! reporting, downloads and the view models of the screens. It draws
 //! nothing and decodes nothing; the apps reach it through `mavio-uniffi`.
 
+mod account;
 mod client;
 mod connection;
 mod discovery;
@@ -18,6 +19,7 @@ mod session;
 mod store;
 mod view;
 
+pub use account::{Account, BrowserSignIn, LinkCode, MAVIO_DEV_API};
 pub use client::{
     AudioStream, Core, CreditEntry, Details, DownloadEntry, Filter, HomeObserver, Libraries,
     LibraryEntry, LibraryType, Listener, Page, SearchResults, Sort, Source,
@@ -29,7 +31,7 @@ pub use error::{Error, Result};
 pub use events::{Backoff, EventSink, StreamState, spawn as stream_events};
 pub use home::{Content, Entry, Hubs, Section, ServerHubs, Trending, Version, merge as merge_home};
 pub use reporting::{Playback, PlaybackOptions, REPORT_INTERVAL, Reporter, Session};
-pub use servers::{DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
+pub use servers::{AccountMode, DeviceInfo, QuickConnect, ServerInfo, Servers, TokenStore};
 pub use session::Transport;
 pub use store::{DownloadRecord, DownloadState, PendingProgress, ServerRecord, Store};
 pub use view::{Artwork, Card, CardKind, Row, RowContent, RowKind, TitleCard};

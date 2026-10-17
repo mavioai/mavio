@@ -55,6 +55,11 @@ impl DeviceKey {
         self.0.public_key().as_ref().to_vec()
     }
 
+    /// The signature of a message.
+    pub(crate) fn sign(&self, message: &[u8]) -> Vec<u8> {
+        self.0.sign(message).as_ref().to_vec()
+    }
+
     /// The signature refreshing session_id with nonce.
     pub(crate) fn sign_refresh(&self, session_id: &str, nonce: &[u8]) -> Result<Vec<u8>> {
         let id = from_hex(&session_id.replace('-', ""))

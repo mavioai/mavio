@@ -100,6 +100,42 @@ pub use self::__buffa::view::AuthorizeQuickConnectView;
 #[doc(inline)]
 pub use self::__buffa::view::AuthorizeQuickConnectOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::StartAccountSignInView;
+#[doc(inline)]
+pub use self::__buffa::view::StartAccountSignInOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishAccountSignInView;
+#[doc(inline)]
+pub use self::__buffa::view::FinishAccountSignInOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAccountSignInView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelAccountSignInOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::StartLinkView;
+#[doc(inline)]
+pub use self::__buffa::view::StartLinkOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::PollLinkView;
+#[doc(inline)]
+pub use self::__buffa::view::PollLinkOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelLinkView;
+#[doc(inline)]
+pub use self::__buffa::view::CancelLinkOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAccountView;
+#[doc(inline)]
+pub use self::__buffa::view::GetAccountOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncAccountView;
+#[doc(inline)]
+pub use self::__buffa::view::SyncAccountOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SignOutView;
+#[doc(inline)]
+pub use self::__buffa::view::SignOutOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::LoadHomeView;
 #[doc(inline)]
 pub use self::__buffa::view::LoadHomeOwnedView;
@@ -171,6 +207,18 @@ pub use self::__buffa::view::DoneOwnedView;
 pub use self::__buffa::view::ServerInfoView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerInfoOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountSignInView;
+#[doc(inline)]
+pub use self::__buffa::view::AccountSignInOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::LinkCodeView;
+#[doc(inline)]
+pub use self::__buffa::view::LinkCodeOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerRecordView;
 #[doc(inline)]
@@ -275,6 +323,10 @@ pub use self::__buffa::view::SubtitleTrackOwnedView;
 pub use self::__buffa::view::EventView;
 #[doc(inline)]
 pub use self::__buffa::view::EventOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServersChangedView;
+#[doc(inline)]
+pub use self::__buffa::view::ServersChangedOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::StreamStateView;
 #[doc(inline)]

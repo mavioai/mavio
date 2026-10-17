@@ -59,7 +59,7 @@ pub fn parse_address(input: &str) -> Result<Uri> {
 
 /// The TLS configuration of `https` servers: the Mozilla root
 /// certificates, the same on every platform.
-fn tls_config() -> Arc<rustls::ClientConfig> {
+pub(crate) fn tls_config() -> Arc<rustls::ClientConfig> {
     let roots = rustls::RootCertStore {
         roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
     };

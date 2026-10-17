@@ -29,10 +29,14 @@ use buffa::Message as _;
 use mavio_api::proto::mavio::playback::v1::ClientCapabilities;
 use mavio_api::proto::mavio::session::v1::__buffa::oneof::event::Kind as EventKind;
 use mavio_api::proto::mavio::session::v1::Event;
-use mavio_core::{Core, DeviceInfo, HomeObserver, QuickConnect, Session, Store, StreamState};
+use mavio_core::{
+    BrowserSignIn, Core, DeviceInfo, HomeObserver, LinkCode, QuickConnect, Session, Store,
+    StreamState,
+};
 use proto::mavio::capi::v1 as pb;
 use proto::mavio::capi::v1::__buffa::oneof::{message::Kind as Answer, request::Kind as Call};
 use tokio::runtime::Runtime;
+use tokio::sync::Notify;
 
 /// The callback of the app: its context and a `Message` of `len` bytes at
 /// `message`.
@@ -165,6 +169,10 @@ impl mavio_core::Listener for Listener {
         };
         self.0.event(server_id, kind);
     }
+
+    fn servers_changed(&self) {
+        self.0.event("", pb::ServersChanged::default().into());
+    }
 }
 
 /// Sends Home's rows as parts of the answer to a call.
@@ -187,6 +195,9 @@ pub struct Client {
     /// The number of the last Quick Connect request or playback session.
     handles: AtomicU64,
     quick_connects: Mutex<HashMap<u64, QuickConnect>>,
+    /// Sign-ins in the browser, each with what cancels it.
+    sign_ins: Mutex<HashMap<u64, Arc<(BrowserSignIn, Notify)>>>,
+    links: Mutex<HashMap<u64, LinkCode>>,
     sessions: Mutex<HashMap<u64, Arc<Session>>>,
 }
 
@@ -231,8 +242,29 @@ fn server_info(s: mavio_core::ServerInfo) -> pb::ServerInfo {
         version: s.version,
         address: s.address,
         setup_required: s.setup_required,
+        mode: match s.mode {
+            mavio_core::AccountMode::Unspecified => pb::AccountMode::ACCOUNT_MODE_UNSPECIFIED,
+            mavio_core::AccountMode::Standalone => pb::AccountMode::ACCOUNT_MODE_STANDALONE,
+            mavio_core::AccountMode::MavioDev => pb::AccountMode::ACCOUNT_MODE_MAVIO_DEV,
+        }
+        .into(),
+        mavio_dev_url: s.mavio_dev_url,
         ..Default::default()
     }
+}
+
+fn account(a: Option<mavio_core::Account>) -> Answer {
+    let a = a.unwrap_or(mavio_core::Account {
+        id: String::new(),
+        name: String::new(),
+        api: String::new(),
+    });
+    Answer::Account(Box::new(pb::Account {
+        id: a.id,
+        name: a.name,
+        api: a.api,
+        ..Default::default()
+    }))
 }
 
 fn record(s: mavio_core::ServerRecord) -> pb::ServerRecord {
@@ -450,6 +482,90 @@ impl Client {
                     .await,
                 |()| done(),
             ),
+            Call::StartAccountSignIn(s) => {
+                let sign_in = match core.start_browser_sign_in(&s.api, &s.client_id).await {
+                    Ok(s) => s,
+                    Err(e) => return e.into(),
+                };
+                let request = self.handle_number();
+                let answer = pb::AccountSignIn {
+                    request,
+                    url: sign_in.url.clone(),
+                    ..Default::default()
+                };
+                let mut sign_ins = self.sign_ins.lock().unwrap_or_else(|e| e.into_inner());
+                sign_ins.insert(request, Arc::new((sign_in, Notify::new())));
+                answer.into()
+            }
+            Call::FinishAccountSignIn(f) => {
+                let sign_in = {
+                    let sign_ins = self.sign_ins.lock().unwrap_or_else(|e| e.into_inner());
+                    sign_ins.get(&f.request).cloned()
+                };
+                let Some(sign_in) = sign_in else {
+                    return error(pb::error::Code::CODE_NOT_FOUND, "no such sign-in");
+                };
+                let (browser, cancel) = &*sign_in;
+                let result = tokio::select! {
+                    r = core.finish_browser_sign_in(browser) => r,
+                    () = cancel.notified() => Err(mavio_core::Error::NotFound("the sign-in was cancelled".into())),
+                };
+                let mut sign_ins = self.sign_ins.lock().unwrap_or_else(|e| e.into_inner());
+                sign_ins.remove(&f.request);
+                answer(result, |a| account(Some(a)))
+            }
+            Call::CancelAccountSignIn(c) => {
+                let mut sign_ins = self.sign_ins.lock().unwrap_or_else(|e| e.into_inner());
+                if let Some(s) = sign_ins.remove(&c.request) {
+                    s.1.notify_one();
+                }
+                done()
+            }
+            Call::StartLink(s) => {
+                let link = match core.start_link(&s.api, &s.client_id).await {
+                    Ok(l) => l,
+                    Err(e) => return e.into(),
+                };
+                let request = self.handle_number();
+                let answer = pb::LinkCode {
+                    request,
+                    user_code: link.user_code.clone(),
+                    verification_uri: link.verification_uri.clone(),
+                    verification_uri_complete: link.verification_uri_complete.clone(),
+                    expires_ms: convert::time(link.expires),
+                    interval_ms: u32::try_from(link.interval.as_millis()).unwrap_or(u32::MAX),
+                    ..Default::default()
+                };
+                let mut links = self.links.lock().unwrap_or_else(|e| e.into_inner());
+                links.insert(request, link);
+                answer.into()
+            }
+            Call::PollLink(p) => {
+                let link = {
+                    let links = self.links.lock().unwrap_or_else(|e| e.into_inner());
+                    links.get(&p.request).cloned()
+                };
+                let Some(link) = link else {
+                    return error(pb::error::Code::CODE_NOT_FOUND, "no such link code");
+                };
+                match core.poll_link(&link).await {
+                    Ok(Some(a)) => {
+                        let mut links = self.links.lock().unwrap_or_else(|e| e.into_inner());
+                        links.remove(&p.request);
+                        account(Some(a))
+                    }
+                    Ok(None) => done(),
+                    Err(e) => e.into(),
+                }
+            }
+            Call::CancelLink(c) => {
+                let mut links = self.links.lock().unwrap_or_else(|e| e.into_inner());
+                links.remove(&c.request);
+                done()
+            }
+            Call::GetAccount(_) => account(core.account()),
+            Call::SyncAccount(_) => answer(core.sync_account().await, |()| done()),
+            Call::SignOut(_) => answer(core.sign_out().await, |()| done()),
             Call::LoadHome(_) => {
                 let home = Home {
                     sender: self.sender,
@@ -548,6 +664,8 @@ pub extern "C" fn mavio_open(callback: Callback, context: usize) -> *mut Client 
         core: OnceLock::new(),
         handles: AtomicU64::new(0),
         quick_connects: Mutex::new(HashMap::new()),
+        sign_ins: Mutex::new(HashMap::new()),
+        links: Mutex::new(HashMap::new()),
         sessions: Mutex::new(HashMap::new()),
     });
     Arc::into_raw(client).cast_mut()

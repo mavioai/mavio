@@ -20,6 +20,7 @@ use tokio::sync::mpsc;
 
 type Unary =
     Arc<dyn Fn(&Request<()>, Bytes) -> Result<Bytes, (StatusCode, &'static str)> + Send + Sync>;
+type Plain = Arc<dyn Fn(&Request<()>, Bytes) -> (StatusCode, String) + Send + Sync>;
 type Stream = Arc<dyn Fn() -> Result<mpsc::UnboundedReceiver<Bytes>, &'static str> + Send + Sync>;
 
 /// A fake server; it stops when dropped.
@@ -27,6 +28,7 @@ type Stream = Arc<dyn Fn() -> Result<mpsc::UnboundedReceiver<Bytes>, &'static st
 pub struct Fake {
     unary: Arc<Mutex<HashMap<String, Unary>>>,
     streams: Arc<Mutex<HashMap<String, Stream>>>,
+    plain: Arc<Mutex<HashMap<String, Plain>>>,
 }
 
 /// The status and code of a Connect error.
@@ -65,6 +67,20 @@ impl Fake {
             .lock()
             .unwrap()
             .insert(procedure.to_owned(), handler);
+        self
+    }
+
+    /// Answers plain HTTP requests to a path, such as an OAuth endpoint,
+    /// with the status and JSON body f returns.
+    pub fn http(
+        &self,
+        path: &str,
+        f: impl Fn(&Request<()>, Bytes) -> (StatusCode, String) + Send + Sync + 'static,
+    ) -> &Self {
+        self.plain
+            .lock()
+            .unwrap()
+            .insert(path.to_owned(), Arc::new(f));
         self
     }
 
@@ -145,6 +161,15 @@ impl Fake {
             .unwrap_or_default();
         let head = Request::from_parts(parts, ());
 
+        let plain = self.plain.lock().unwrap().get(&path).cloned();
+        if let Some(f) = plain {
+            let (status, body) = f(&head, body);
+            return Response::builder()
+                .status(status)
+                .header("content-type", "application/json")
+                .body(BodyExt::boxed(Full::new(Bytes::from(body))))
+                .unwrap();
+        }
         let stream = self.streams.lock().unwrap().get(&path).cloned();
         if let Some(stream) = stream {
             let frames = match stream() {

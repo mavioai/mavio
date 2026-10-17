@@ -45,6 +45,21 @@ pub mod request {
         Play(::buffa::alloc::boxed::Box<super::super::super::Play>),
         UpdatePlayback(::buffa::alloc::boxed::Box<super::super::super::UpdatePlayback>),
         StopPlayback(::buffa::alloc::boxed::Box<super::super::super::StopPlayback>),
+        StartAccountSignIn(
+            ::buffa::alloc::boxed::Box<super::super::super::StartAccountSignIn>,
+        ),
+        FinishAccountSignIn(
+            ::buffa::alloc::boxed::Box<super::super::super::FinishAccountSignIn>,
+        ),
+        CancelAccountSignIn(
+            ::buffa::alloc::boxed::Box<super::super::super::CancelAccountSignIn>,
+        ),
+        StartLink(::buffa::alloc::boxed::Box<super::super::super::StartLink>),
+        PollLink(::buffa::alloc::boxed::Box<super::super::super::PollLink>),
+        CancelLink(::buffa::alloc::boxed::Box<super::super::super::CancelLink>),
+        GetAccount(::buffa::alloc::boxed::Box<super::super::super::GetAccount>),
+        SyncAccount(::buffa::alloc::boxed::Box<super::super::super::SyncAccount>),
+        SignOut(::buffa::alloc::boxed::Box<super::super::super::SignOut>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Open> for Kind {
@@ -318,6 +333,98 @@ pub mod request {
             Self::Some(Kind::from(v))
         }
     }
+    impl From<super::super::super::StartAccountSignIn> for Kind {
+        fn from(v: super::super::super::StartAccountSignIn) -> Self {
+            Self::StartAccountSignIn(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::StartAccountSignIn> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::StartAccountSignIn) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::FinishAccountSignIn> for Kind {
+        fn from(v: super::super::super::FinishAccountSignIn) -> Self {
+            Self::FinishAccountSignIn(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::FinishAccountSignIn>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::FinishAccountSignIn) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::CancelAccountSignIn> for Kind {
+        fn from(v: super::super::super::CancelAccountSignIn) -> Self {
+            Self::CancelAccountSignIn(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CancelAccountSignIn>
+    for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CancelAccountSignIn) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::StartLink> for Kind {
+        fn from(v: super::super::super::StartLink) -> Self {
+            Self::StartLink(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::StartLink> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::StartLink) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::PollLink> for Kind {
+        fn from(v: super::super::super::PollLink) -> Self {
+            Self::PollLink(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::PollLink> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::PollLink) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::CancelLink> for Kind {
+        fn from(v: super::super::super::CancelLink) -> Self {
+            Self::CancelLink(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::CancelLink> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::CancelLink) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::GetAccount> for Kind {
+        fn from(v: super::super::super::GetAccount) -> Self {
+            Self::GetAccount(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::GetAccount> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::GetAccount) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SyncAccount> for Kind {
+        fn from(v: super::super::super::SyncAccount) -> Self {
+            Self::SyncAccount(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SyncAccount> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SyncAccount) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::SignOut> for Kind {
+        fn from(v: super::super::super::SignOut) -> Self {
+            Self::SignOut(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::SignOut> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::SignOut) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
 }
 pub mod message {
     #[allow(unused_imports)]
@@ -339,6 +446,9 @@ pub mod message {
         Details(::buffa::alloc::boxed::Box<super::super::super::Details>),
         SearchResults(::buffa::alloc::boxed::Box<super::super::super::SearchResults>),
         Playback(::buffa::alloc::boxed::Box<super::super::super::Playback>),
+        Account(::buffa::alloc::boxed::Box<super::super::super::Account>),
+        AccountSignIn(::buffa::alloc::boxed::Box<super::super::super::AccountSignIn>),
+        LinkCode(::buffa::alloc::boxed::Box<super::super::super::LinkCode>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::Error> for Kind {
@@ -481,6 +591,36 @@ pub mod message {
             Self::Some(Kind::from(v))
         }
     }
+    impl From<super::super::super::Account> for Kind {
+        fn from(v: super::super::super::Account) -> Self {
+            Self::Account(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::Account> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::Account) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::AccountSignIn> for Kind {
+        fn from(v: super::super::super::AccountSignIn) -> Self {
+            Self::AccountSignIn(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::AccountSignIn> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::AccountSignIn) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::LinkCode> for Kind {
+        fn from(v: super::super::super::LinkCode) -> Self {
+            Self::LinkCode(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::LinkCode> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::LinkCode) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
 }
 pub mod row {
     #[allow(unused_imports)]
@@ -539,6 +679,7 @@ pub mod event {
             ::buffa::alloc::boxed::Box<super::super::super::SessionsChanged>,
         ),
         TokenChanged(::buffa::alloc::boxed::Box<super::super::super::TokenChanged>),
+        ServersChanged(::buffa::alloc::boxed::Box<super::super::super::ServersChanged>),
     }
     impl ::buffa::Oneof for Kind {}
     impl From<super::super::super::StreamState> for Kind {
@@ -598,6 +739,16 @@ pub mod event {
     }
     impl From<super::super::super::TokenChanged> for ::core::option::Option<Kind> {
         fn from(v: super::super::super::TokenChanged) -> Self {
+            Self::Some(Kind::from(v))
+        }
+    }
+    impl From<super::super::super::ServersChanged> for Kind {
+        fn from(v: super::super::super::ServersChanged) -> Self {
+            Self::ServersChanged(::buffa::alloc::boxed::Box::new(v))
+        }
+    }
+    impl From<super::super::super::ServersChanged> for ::core::option::Option<Kind> {
+        fn from(v: super::super::super::ServersChanged) -> Self {
             Self::Some(Kind::from(v))
         }
     }

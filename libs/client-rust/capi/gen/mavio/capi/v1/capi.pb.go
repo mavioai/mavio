@@ -86,6 +86,54 @@ func (x Sort) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
+// Who a server's users are.
+type AccountMode int32
+
+const (
+	// The server's setup has not chosen yet.
+	AccountMode_ACCOUNT_MODE_UNSPECIFIED AccountMode = 0
+	// The server keeps its own users, who sign in with a password.
+	AccountMode_ACCOUNT_MODE_STANDALONE AccountMode = 1
+	// Every user is a Mavio account, signed in at mavio.dev.
+	AccountMode_ACCOUNT_MODE_MAVIO_DEV AccountMode = 2
+)
+
+// Enum value maps for AccountMode.
+var (
+	AccountMode_name = map[int32]string{
+		0: "ACCOUNT_MODE_UNSPECIFIED",
+		1: "ACCOUNT_MODE_STANDALONE",
+		2: "ACCOUNT_MODE_MAVIO_DEV",
+	}
+	AccountMode_value = map[string]int32{
+		"ACCOUNT_MODE_UNSPECIFIED": 0,
+		"ACCOUNT_MODE_STANDALONE":  1,
+		"ACCOUNT_MODE_MAVIO_DEV":   2,
+	}
+)
+
+func (x AccountMode) Enum() *AccountMode {
+	p := new(AccountMode)
+	*p = x
+	return p
+}
+
+func (x AccountMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AccountMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_mavio_capi_v1_capi_proto_enumTypes[1].Descriptor()
+}
+
+func (AccountMode) Type() protoreflect.EnumType {
+	return &file_mavio_capi_v1_capi_proto_enumTypes[1]
+}
+
+func (x AccountMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
 // What a card stands for.
 type CardKind int32
 
@@ -164,11 +212,11 @@ func (x CardKind) String() string {
 }
 
 func (CardKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[1].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[2].Descriptor()
 }
 
 func (CardKind) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[1]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[2]
 }
 
 func (x CardKind) Number() protoreflect.EnumNumber {
@@ -259,11 +307,11 @@ func (x RowKind) String() string {
 }
 
 func (RowKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[2].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[3].Descriptor()
 }
 
 func (RowKind) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[2]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[3]
 }
 
 func (x RowKind) Number() protoreflect.EnumNumber {
@@ -326,11 +374,11 @@ func (x LibraryType) String() string {
 }
 
 func (LibraryType) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[3].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[4].Descriptor()
 }
 
 func (LibraryType) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[3]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[4]
 }
 
 func (x LibraryType) Number() protoreflect.EnumNumber {
@@ -374,11 +422,11 @@ func (x PlayKind) String() string {
 }
 
 func (PlayKind) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[4].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[5].Descriptor()
 }
 
 func (PlayKind) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[4]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[5]
 }
 
 func (x PlayKind) Number() protoreflect.EnumNumber {
@@ -441,11 +489,11 @@ func (x Error_Code) String() string {
 }
 
 func (Error_Code) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[5].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[6].Descriptor()
 }
 
 func (Error_Code) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[5]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[6]
 }
 
 func (x Error_Code) Number() protoreflect.EnumNumber {
@@ -491,11 +539,11 @@ func (x StreamState_State) String() string {
 }
 
 func (StreamState_State) Descriptor() protoreflect.EnumDescriptor {
-	return file_mavio_capi_v1_capi_proto_enumTypes[6].Descriptor()
+	return file_mavio_capi_v1_capi_proto_enumTypes[7].Descriptor()
 }
 
 func (StreamState_State) Type() protoreflect.EnumType {
-	return &file_mavio_capi_v1_capi_proto_enumTypes[6]
+	return &file_mavio_capi_v1_capi_proto_enumTypes[7]
 }
 
 func (x StreamState_State) Number() protoreflect.EnumNumber {
@@ -778,6 +826,87 @@ func (x *Request) GetStopPlayback() *StopPlayback {
 	return nil
 }
 
+func (x *Request) GetStartAccountSignIn() *StartAccountSignIn {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_StartAccountSignIn); ok {
+			return x.StartAccountSignIn
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetFinishAccountSignIn() *FinishAccountSignIn {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_FinishAccountSignIn); ok {
+			return x.FinishAccountSignIn
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetCancelAccountSignIn() *CancelAccountSignIn {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_CancelAccountSignIn); ok {
+			return x.CancelAccountSignIn
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetStartLink() *StartLink {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_StartLink); ok {
+			return x.StartLink
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetPollLink() *PollLink {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_PollLink); ok {
+			return x.PollLink
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetCancelLink() *CancelLink {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_CancelLink); ok {
+			return x.CancelLink
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetGetAccount() *GetAccount {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_GetAccount); ok {
+			return x.GetAccount
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetSyncAccount() *SyncAccount {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_SyncAccount); ok {
+			return x.SyncAccount
+		}
+	}
+	return nil
+}
+
+func (x *Request) GetSignOut() *SignOut {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*request_SignOut); ok {
+			return x.SignOut
+		}
+	}
+	return nil
+}
+
 func (x *Request) SetOpen(v *Open) {
 	if v == nil {
 		x.xxx_hidden_Kind = nil
@@ -992,6 +1121,78 @@ func (x *Request) SetStopPlayback(v *StopPlayback) {
 		return
 	}
 	x.xxx_hidden_Kind = &request_StopPlayback{v}
+}
+
+func (x *Request) SetStartAccountSignIn(v *StartAccountSignIn) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_StartAccountSignIn{v}
+}
+
+func (x *Request) SetFinishAccountSignIn(v *FinishAccountSignIn) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_FinishAccountSignIn{v}
+}
+
+func (x *Request) SetCancelAccountSignIn(v *CancelAccountSignIn) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_CancelAccountSignIn{v}
+}
+
+func (x *Request) SetStartLink(v *StartLink) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_StartLink{v}
+}
+
+func (x *Request) SetPollLink(v *PollLink) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_PollLink{v}
+}
+
+func (x *Request) SetCancelLink(v *CancelLink) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_CancelLink{v}
+}
+
+func (x *Request) SetGetAccount(v *GetAccount) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_GetAccount{v}
+}
+
+func (x *Request) SetSyncAccount(v *SyncAccount) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_SyncAccount{v}
+}
+
+func (x *Request) SetSignOut(v *SignOut) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &request_SignOut{v}
 }
 
 func (x *Request) HasKind() bool {
@@ -1217,6 +1418,78 @@ func (x *Request) HasStopPlayback() bool {
 	return ok
 }
 
+func (x *Request) HasStartAccountSignIn() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_StartAccountSignIn)
+	return ok
+}
+
+func (x *Request) HasFinishAccountSignIn() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_FinishAccountSignIn)
+	return ok
+}
+
+func (x *Request) HasCancelAccountSignIn() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_CancelAccountSignIn)
+	return ok
+}
+
+func (x *Request) HasStartLink() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_StartLink)
+	return ok
+}
+
+func (x *Request) HasPollLink() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_PollLink)
+	return ok
+}
+
+func (x *Request) HasCancelLink() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_CancelLink)
+	return ok
+}
+
+func (x *Request) HasGetAccount() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_GetAccount)
+	return ok
+}
+
+func (x *Request) HasSyncAccount() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_SyncAccount)
+	return ok
+}
+
+func (x *Request) HasSignOut() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*request_SignOut)
+	return ok
+}
+
 func (x *Request) ClearKind() {
 	x.xxx_hidden_Kind = nil
 }
@@ -1383,6 +1656,60 @@ func (x *Request) ClearStopPlayback() {
 	}
 }
 
+func (x *Request) ClearStartAccountSignIn() {
+	if _, ok := x.xxx_hidden_Kind.(*request_StartAccountSignIn); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearFinishAccountSignIn() {
+	if _, ok := x.xxx_hidden_Kind.(*request_FinishAccountSignIn); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearCancelAccountSignIn() {
+	if _, ok := x.xxx_hidden_Kind.(*request_CancelAccountSignIn); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearStartLink() {
+	if _, ok := x.xxx_hidden_Kind.(*request_StartLink); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearPollLink() {
+	if _, ok := x.xxx_hidden_Kind.(*request_PollLink); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearCancelLink() {
+	if _, ok := x.xxx_hidden_Kind.(*request_CancelLink); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearGetAccount() {
+	if _, ok := x.xxx_hidden_Kind.(*request_GetAccount); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearSyncAccount() {
+	if _, ok := x.xxx_hidden_Kind.(*request_SyncAccount); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Request) ClearSignOut() {
+	if _, ok := x.xxx_hidden_Kind.(*request_SignOut); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Request_Kind_not_set_case case_Request_Kind = 0
 const Request_Open_case case_Request_Kind = 1
 const Request_GetVersion_case case_Request_Kind = 2
@@ -1411,6 +1738,15 @@ const Request_Search_case case_Request_Kind = 24
 const Request_Play_case case_Request_Kind = 25
 const Request_UpdatePlayback_case case_Request_Kind = 26
 const Request_StopPlayback_case case_Request_Kind = 27
+const Request_StartAccountSignIn_case case_Request_Kind = 28
+const Request_FinishAccountSignIn_case case_Request_Kind = 29
+const Request_CancelAccountSignIn_case case_Request_Kind = 30
+const Request_StartLink_case case_Request_Kind = 31
+const Request_PollLink_case case_Request_Kind = 32
+const Request_CancelLink_case case_Request_Kind = 33
+const Request_GetAccount_case case_Request_Kind = 34
+const Request_SyncAccount_case case_Request_Kind = 35
+const Request_SignOut_case case_Request_Kind = 36
 
 func (x *Request) WhichKind() case_Request_Kind {
 	if x == nil {
@@ -1471,6 +1807,24 @@ func (x *Request) WhichKind() case_Request_Kind {
 		return Request_UpdatePlayback_case
 	case *request_StopPlayback:
 		return Request_StopPlayback_case
+	case *request_StartAccountSignIn:
+		return Request_StartAccountSignIn_case
+	case *request_FinishAccountSignIn:
+		return Request_FinishAccountSignIn_case
+	case *request_CancelAccountSignIn:
+		return Request_CancelAccountSignIn_case
+	case *request_StartLink:
+		return Request_StartLink_case
+	case *request_PollLink:
+		return Request_PollLink_case
+	case *request_CancelLink:
+		return Request_CancelLink_case
+	case *request_GetAccount:
+		return Request_GetAccount_case
+	case *request_SyncAccount:
+		return Request_SyncAccount_case
+	case *request_SignOut:
+		return Request_SignOut_case
 	default:
 		return Request_Kind_not_set_case
 	}
@@ -1507,6 +1861,15 @@ type Request_builder struct {
 	Play                  *Play
 	UpdatePlayback        *UpdatePlayback
 	StopPlayback          *StopPlayback
+	StartAccountSignIn    *StartAccountSignIn
+	FinishAccountSignIn   *FinishAccountSignIn
+	CancelAccountSignIn   *CancelAccountSignIn
+	StartLink             *StartLink
+	PollLink              *PollLink
+	CancelLink            *CancelLink
+	GetAccount            *GetAccount
+	SyncAccount           *SyncAccount
+	SignOut               *SignOut
 	// -- end of xxx_hidden_Kind
 }
 
@@ -1594,6 +1957,33 @@ func (b0 Request_builder) Build() *Request {
 	}
 	if b.StopPlayback != nil {
 		x.xxx_hidden_Kind = &request_StopPlayback{b.StopPlayback}
+	}
+	if b.StartAccountSignIn != nil {
+		x.xxx_hidden_Kind = &request_StartAccountSignIn{b.StartAccountSignIn}
+	}
+	if b.FinishAccountSignIn != nil {
+		x.xxx_hidden_Kind = &request_FinishAccountSignIn{b.FinishAccountSignIn}
+	}
+	if b.CancelAccountSignIn != nil {
+		x.xxx_hidden_Kind = &request_CancelAccountSignIn{b.CancelAccountSignIn}
+	}
+	if b.StartLink != nil {
+		x.xxx_hidden_Kind = &request_StartLink{b.StartLink}
+	}
+	if b.PollLink != nil {
+		x.xxx_hidden_Kind = &request_PollLink{b.PollLink}
+	}
+	if b.CancelLink != nil {
+		x.xxx_hidden_Kind = &request_CancelLink{b.CancelLink}
+	}
+	if b.GetAccount != nil {
+		x.xxx_hidden_Kind = &request_GetAccount{b.GetAccount}
+	}
+	if b.SyncAccount != nil {
+		x.xxx_hidden_Kind = &request_SyncAccount{b.SyncAccount}
+	}
+	if b.SignOut != nil {
+		x.xxx_hidden_Kind = &request_SignOut{b.SignOut}
 	}
 	return m0
 }
@@ -1720,6 +2110,42 @@ type request_StopPlayback struct {
 	StopPlayback *StopPlayback `protobuf:"bytes,27,opt,name=stop_playback,json=stopPlayback,oneof"`
 }
 
+type request_StartAccountSignIn struct {
+	StartAccountSignIn *StartAccountSignIn `protobuf:"bytes,28,opt,name=start_account_sign_in,json=startAccountSignIn,oneof"`
+}
+
+type request_FinishAccountSignIn struct {
+	FinishAccountSignIn *FinishAccountSignIn `protobuf:"bytes,29,opt,name=finish_account_sign_in,json=finishAccountSignIn,oneof"`
+}
+
+type request_CancelAccountSignIn struct {
+	CancelAccountSignIn *CancelAccountSignIn `protobuf:"bytes,30,opt,name=cancel_account_sign_in,json=cancelAccountSignIn,oneof"`
+}
+
+type request_StartLink struct {
+	StartLink *StartLink `protobuf:"bytes,31,opt,name=start_link,json=startLink,oneof"`
+}
+
+type request_PollLink struct {
+	PollLink *PollLink `protobuf:"bytes,32,opt,name=poll_link,json=pollLink,oneof"`
+}
+
+type request_CancelLink struct {
+	CancelLink *CancelLink `protobuf:"bytes,33,opt,name=cancel_link,json=cancelLink,oneof"`
+}
+
+type request_GetAccount struct {
+	GetAccount *GetAccount `protobuf:"bytes,34,opt,name=get_account,json=getAccount,oneof"`
+}
+
+type request_SyncAccount struct {
+	SyncAccount *SyncAccount `protobuf:"bytes,35,opt,name=sync_account,json=syncAccount,oneof"`
+}
+
+type request_SignOut struct {
+	SignOut *SignOut `protobuf:"bytes,36,opt,name=sign_out,json=signOut,oneof"`
+}
+
 func (*request_Open) isRequest_Kind() {}
 
 func (*request_GetVersion) isRequest_Kind() {}
@@ -1773,6 +2199,24 @@ func (*request_Play) isRequest_Kind() {}
 func (*request_UpdatePlayback) isRequest_Kind() {}
 
 func (*request_StopPlayback) isRequest_Kind() {}
+
+func (*request_StartAccountSignIn) isRequest_Kind() {}
+
+func (*request_FinishAccountSignIn) isRequest_Kind() {}
+
+func (*request_CancelAccountSignIn) isRequest_Kind() {}
+
+func (*request_StartLink) isRequest_Kind() {}
+
+func (*request_PollLink) isRequest_Kind() {}
+
+func (*request_CancelLink) isRequest_Kind() {}
+
+func (*request_GetAccount) isRequest_Kind() {}
+
+func (*request_SyncAccount) isRequest_Kind() {}
+
+func (*request_SignOut) isRequest_Kind() {}
 
 // Opens the core, before any other call.
 type Open struct {
@@ -2810,6 +3254,524 @@ func (b0 AuthorizeQuickConnect_builder) Build() *AuthorizeQuickConnect {
 	return m0
 }
 
+// Starts signing a Mavio account in in the browser, at the mavio.dev whose
+// API is api, as client_id, such as dev.mavio.desktop: answered with an
+// AccountSignIn, whose page the app opens.
+type StartAccountSignIn struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Api      string                 `protobuf:"bytes,1,opt,name=api"`
+	xxx_hidden_ClientId string                 `protobuf:"bytes,2,opt,name=client_id,json=clientId"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *StartAccountSignIn) Reset() {
+	*x = StartAccountSignIn{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartAccountSignIn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartAccountSignIn) ProtoMessage() {}
+
+func (x *StartAccountSignIn) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartAccountSignIn) GetApi() string {
+	if x != nil {
+		return x.xxx_hidden_Api
+	}
+	return ""
+}
+
+func (x *StartAccountSignIn) GetClientId() string {
+	if x != nil {
+		return x.xxx_hidden_ClientId
+	}
+	return ""
+}
+
+func (x *StartAccountSignIn) SetApi(v string) {
+	x.xxx_hidden_Api = v
+}
+
+func (x *StartAccountSignIn) SetClientId(v string) {
+	x.xxx_hidden_ClientId = v
+}
+
+type StartAccountSignIn_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Api      string
+	ClientId string
+}
+
+func (b0 StartAccountSignIn_builder) Build() *StartAccountSignIn {
+	m0 := &StartAccountSignIn{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Api = b.Api
+	x.xxx_hidden_ClientId = b.ClientId
+	return m0
+}
+
+// Waits for the browser to come back from a sign-in, then signs the
+// account in and follows its servers: answered with the Account, or with
+// CODE_PERMISSION_DENIED when the account declined.
+type FinishAccountSignIn struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request uint64                 `protobuf:"varint,1,opt,name=request"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *FinishAccountSignIn) Reset() {
+	*x = FinishAccountSignIn{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FinishAccountSignIn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FinishAccountSignIn) ProtoMessage() {}
+
+func (x *FinishAccountSignIn) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FinishAccountSignIn) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *FinishAccountSignIn) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+type FinishAccountSignIn_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Request uint64
+}
+
+func (b0 FinishAccountSignIn_builder) Build() *FinishAccountSignIn {
+	m0 := &FinishAccountSignIn{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	return m0
+}
+
+// Gives up a sign-in in the browser; its FinishAccountSignIn answers
+// CODE_NOT_FOUND.
+type CancelAccountSignIn struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request uint64                 `protobuf:"varint,1,opt,name=request"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *CancelAccountSignIn) Reset() {
+	*x = CancelAccountSignIn{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelAccountSignIn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelAccountSignIn) ProtoMessage() {}
+
+func (x *CancelAccountSignIn) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CancelAccountSignIn) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *CancelAccountSignIn) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+type CancelAccountSignIn_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Request uint64
+}
+
+func (b0 CancelAccountSignIn_builder) Build() *CancelAccountSignIn {
+	m0 := &CancelAccountSignIn{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	return m0
+}
+
+// Starts signing a Mavio account in with a link code, at the mavio.dev
+// whose API is api, as client_id: answered with a LinkCode.
+type StartLink struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Api      string                 `protobuf:"bytes,1,opt,name=api"`
+	xxx_hidden_ClientId string                 `protobuf:"bytes,2,opt,name=client_id,json=clientId"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *StartLink) Reset() {
+	*x = StartLink{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartLink) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartLink) ProtoMessage() {}
+
+func (x *StartLink) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *StartLink) GetApi() string {
+	if x != nil {
+		return x.xxx_hidden_Api
+	}
+	return ""
+}
+
+func (x *StartLink) GetClientId() string {
+	if x != nil {
+		return x.xxx_hidden_ClientId
+	}
+	return ""
+}
+
+func (x *StartLink) SetApi(v string) {
+	x.xxx_hidden_Api = v
+}
+
+func (x *StartLink) SetClientId(v string) {
+	x.xxx_hidden_ClientId = v
+}
+
+type StartLink_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Api      string
+	ClientId string
+}
+
+func (b0 StartLink_builder) Build() *StartLink {
+	m0 := &StartLink{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Api = b.Api
+	x.xxx_hidden_ClientId = b.ClientId
+	return m0
+}
+
+// Asks whether a link code was approved: answered with the Account signed
+// in once it was, after following its servers, which ends the request, or
+// with Done while it waits; an expired code is CODE_NOT_FOUND.
+type PollLink struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request uint64                 `protobuf:"varint,1,opt,name=request"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *PollLink) Reset() {
+	*x = PollLink{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PollLink) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PollLink) ProtoMessage() {}
+
+func (x *PollLink) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PollLink) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *PollLink) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+type PollLink_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Request uint64
+}
+
+func (b0 PollLink_builder) Build() *PollLink {
+	m0 := &PollLink{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	return m0
+}
+
+// Gives up a link code.
+type CancelLink struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request uint64                 `protobuf:"varint,1,opt,name=request"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *CancelLink) Reset() {
+	*x = CancelLink{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelLink) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelLink) ProtoMessage() {}
+
+func (x *CancelLink) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *CancelLink) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *CancelLink) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+type CancelLink_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Request uint64
+}
+
+func (b0 CancelLink_builder) Build() *CancelLink {
+	m0 := &CancelLink{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	return m0
+}
+
+// Answered with the Mavio account signed in, whose id is empty without
+// one.
+type GetAccount struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAccount) Reset() {
+	*x = GetAccount{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAccount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAccount) ProtoMessage() {}
+
+func (x *GetAccount) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type GetAccount_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 GetAccount_builder) Build() *GetAccount {
+	m0 := &GetAccount{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+// Follows the Mavio account's servers now.
+type SyncAccount struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SyncAccount) Reset() {
+	*x = SyncAccount{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SyncAccount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SyncAccount) ProtoMessage() {}
+
+func (x *SyncAccount) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SyncAccount_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SyncAccount_builder) Build() *SyncAccount {
+	m0 := &SyncAccount{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+// Signs out of the Mavio account and its servers, or of every server
+// signed in to without one, forgetting them.
+type SignOut struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SignOut) Reset() {
+	*x = SignOut{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SignOut) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SignOut) ProtoMessage() {}
+
+func (x *SignOut) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SignOut_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SignOut_builder) Build() *SignOut {
+	m0 := &SignOut{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 // Loads Home from every server at once: answered with Rows, all of them,
 // each time a server answers, marked more, then with Done.
 type LoadHome struct {
@@ -2820,7 +3782,7 @@ type LoadHome struct {
 
 func (x *LoadHome) Reset() {
 	*x = LoadHome{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[17]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2832,7 +3794,7 @@ func (x *LoadHome) String() string {
 func (*LoadHome) ProtoMessage() {}
 
 func (x *LoadHome) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[17]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2868,7 +3830,7 @@ type GetHub struct {
 
 func (x *GetHub) Reset() {
 	*x = GetHub{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[18]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2880,7 +3842,7 @@ func (x *GetHub) String() string {
 func (*GetHub) ProtoMessage() {}
 
 func (x *GetHub) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[18]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2966,7 +3928,7 @@ type GetRecommended struct {
 
 func (x *GetRecommended) Reset() {
 	*x = GetRecommended{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[19]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2978,7 +3940,7 @@ func (x *GetRecommended) String() string {
 func (*GetRecommended) ProtoMessage() {}
 
 func (x *GetRecommended) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[19]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3037,7 +3999,7 @@ type ListLibraries struct {
 
 func (x *ListLibraries) Reset() {
 	*x = ListLibraries{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[20]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3049,7 +4011,7 @@ func (x *ListLibraries) String() string {
 func (*ListLibraries) ProtoMessage() {}
 
 func (x *ListLibraries) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[20]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3100,7 +4062,7 @@ type ListLibraryItems struct {
 
 func (x *ListLibraryItems) Reset() {
 	*x = ListLibraryItems{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[21]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3112,7 +4074,7 @@ func (x *ListLibraryItems) String() string {
 func (*ListLibraryItems) ProtoMessage() {}
 
 func (x *ListLibraryItems) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[21]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3238,7 +4200,7 @@ type Filter struct {
 
 func (x *Filter) Reset() {
 	*x = Filter{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[22]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3250,7 +4212,7 @@ func (x *Filter) String() string {
 func (*Filter) ProtoMessage() {}
 
 func (x *Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[22]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3342,7 +4304,7 @@ type GetDetails struct {
 
 func (x *GetDetails) Reset() {
 	*x = GetDetails{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[23]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3354,7 +4316,7 @@ func (x *GetDetails) String() string {
 func (*GetDetails) ProtoMessage() {}
 
 func (x *GetDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[23]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3415,7 +4377,7 @@ type SetPlayed struct {
 
 func (x *SetPlayed) Reset() {
 	*x = SetPlayed{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[24]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3427,7 +4389,7 @@ func (x *SetPlayed) String() string {
 func (*SetPlayed) ProtoMessage() {}
 
 func (x *SetPlayed) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[24]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3501,7 +4463,7 @@ type SetFavorite struct {
 
 func (x *SetFavorite) Reset() {
 	*x = SetFavorite{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[25]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3513,7 +4475,7 @@ func (x *SetFavorite) String() string {
 func (*SetFavorite) ProtoMessage() {}
 
 func (x *SetFavorite) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[25]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3585,7 +4547,7 @@ type Search struct {
 
 func (x *Search) Reset() {
 	*x = Search{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[26]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3597,7 +4559,7 @@ func (x *Search) String() string {
 func (*Search) ProtoMessage() {}
 
 func (x *Search) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[26]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3647,7 +4609,7 @@ type Play struct {
 
 func (x *Play) Reset() {
 	*x = Play{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[27]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3659,7 +4621,7 @@ func (x *Play) String() string {
 func (*Play) ProtoMessage() {}
 
 func (x *Play) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[27]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3765,7 +4727,7 @@ type PlaybackOptions struct {
 
 func (x *PlaybackOptions) Reset() {
 	*x = PlaybackOptions{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[28]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3777,7 +4739,7 @@ func (x *PlaybackOptions) String() string {
 func (*PlaybackOptions) ProtoMessage() {}
 
 func (x *PlaybackOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[28]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3932,7 +4894,7 @@ type UpdatePlayback struct {
 
 func (x *UpdatePlayback) Reset() {
 	*x = UpdatePlayback{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[29]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3944,7 +4906,7 @@ func (x *UpdatePlayback) String() string {
 func (*UpdatePlayback) ProtoMessage() {}
 
 func (x *UpdatePlayback) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[29]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4019,7 +4981,7 @@ type StopPlayback struct {
 
 func (x *StopPlayback) Reset() {
 	*x = StopPlayback{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[30]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4031,7 +4993,7 @@ func (x *StopPlayback) String() string {
 func (*StopPlayback) ProtoMessage() {}
 
 func (x *StopPlayback) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[30]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4109,7 +5071,7 @@ type Message struct {
 
 func (x *Message) Reset() {
 	*x = Message{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[31]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4121,7 +5083,7 @@ func (x *Message) String() string {
 func (*Message) ProtoMessage() {}
 
 func (x *Message) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[31]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4274,6 +5236,33 @@ func (x *Message) GetPlayback() *Playback {
 	return nil
 }
 
+func (x *Message) GetAccount() *Account {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*message_Account); ok {
+			return x.Account
+		}
+	}
+	return nil
+}
+
+func (x *Message) GetAccountSignIn() *AccountSignIn {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*message_AccountSignIn); ok {
+			return x.AccountSignIn
+		}
+	}
+	return nil
+}
+
+func (x *Message) GetLinkCode() *LinkCode {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*message_LinkCode); ok {
+			return x.LinkCode
+		}
+	}
+	return nil
+}
+
 func (x *Message) GetMore() bool {
 	if x != nil {
 		return x.xxx_hidden_More
@@ -4399,6 +5388,30 @@ func (x *Message) SetPlayback(v *Playback) {
 		return
 	}
 	x.xxx_hidden_Kind = &message_Playback{v}
+}
+
+func (x *Message) SetAccount(v *Account) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &message_Account{v}
+}
+
+func (x *Message) SetAccountSignIn(v *AccountSignIn) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &message_AccountSignIn{v}
+}
+
+func (x *Message) SetLinkCode(v *LinkCode) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &message_LinkCode{v}
 }
 
 func (x *Message) SetMore(v bool) {
@@ -4532,6 +5545,30 @@ func (x *Message) HasPlayback() bool {
 	return ok
 }
 
+func (x *Message) HasAccount() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*message_Account)
+	return ok
+}
+
+func (x *Message) HasAccountSignIn() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*message_AccountSignIn)
+	return ok
+}
+
+func (x *Message) HasLinkCode() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*message_LinkCode)
+	return ok
+}
+
 func (x *Message) ClearKind() {
 	x.xxx_hidden_Kind = nil
 }
@@ -4626,6 +5663,24 @@ func (x *Message) ClearPlayback() {
 	}
 }
 
+func (x *Message) ClearAccount() {
+	if _, ok := x.xxx_hidden_Kind.(*message_Account); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Message) ClearAccountSignIn() {
+	if _, ok := x.xxx_hidden_Kind.(*message_AccountSignIn); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
+func (x *Message) ClearLinkCode() {
+	if _, ok := x.xxx_hidden_Kind.(*message_LinkCode); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Message_Kind_not_set_case case_Message_Kind = 0
 const Message_Error_case case_Message_Kind = 2
 const Message_Done_case case_Message_Kind = 3
@@ -4642,6 +5697,9 @@ const Message_Libraries_case case_Message_Kind = 14
 const Message_Details_case case_Message_Kind = 15
 const Message_SearchResults_case case_Message_Kind = 16
 const Message_Playback_case case_Message_Kind = 17
+const Message_Account_case case_Message_Kind = 18
+const Message_AccountSignIn_case case_Message_Kind = 19
+const Message_LinkCode_case case_Message_Kind = 20
 
 func (x *Message) WhichKind() case_Message_Kind {
 	if x == nil {
@@ -4678,6 +5736,12 @@ func (x *Message) WhichKind() case_Message_Kind {
 		return Message_SearchResults_case
 	case *message_Playback:
 		return Message_Playback_case
+	case *message_Account:
+		return Message_Account_case
+	case *message_AccountSignIn:
+		return Message_AccountSignIn_case
+	case *message_LinkCode:
+		return Message_LinkCode_case
 	default:
 		return Message_Kind_not_set_case
 	}
@@ -4704,6 +5768,9 @@ type Message_builder struct {
 	Details       *Details
 	SearchResults *SearchResults
 	Playback      *Playback
+	Account       *Account
+	AccountSignIn *AccountSignIn
+	LinkCode      *LinkCode
 	// -- end of xxx_hidden_Kind
 	// More Messages answer the call after this one.
 	More bool
@@ -4759,6 +5826,15 @@ func (b0 Message_builder) Build() *Message {
 	if b.Playback != nil {
 		x.xxx_hidden_Kind = &message_Playback{b.Playback}
 	}
+	if b.Account != nil {
+		x.xxx_hidden_Kind = &message_Account{b.Account}
+	}
+	if b.AccountSignIn != nil {
+		x.xxx_hidden_Kind = &message_AccountSignIn{b.AccountSignIn}
+	}
+	if b.LinkCode != nil {
+		x.xxx_hidden_Kind = &message_LinkCode{b.LinkCode}
+	}
 	x.xxx_hidden_More = b.More
 	return m0
 }
@@ -4766,7 +5842,7 @@ func (b0 Message_builder) Build() *Message {
 type case_Message_Kind protoreflect.FieldNumber
 
 func (x case_Message_Kind) String() string {
-	md := file_mavio_capi_v1_capi_proto_msgTypes[31].Descriptor()
+	md := file_mavio_capi_v1_capi_proto_msgTypes[40].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -4837,6 +5913,18 @@ type message_Playback struct {
 	Playback *Playback `protobuf:"bytes,17,opt,name=playback,oneof"`
 }
 
+type message_Account struct {
+	Account *Account `protobuf:"bytes,18,opt,name=account,oneof"`
+}
+
+type message_AccountSignIn struct {
+	AccountSignIn *AccountSignIn `protobuf:"bytes,19,opt,name=account_sign_in,json=accountSignIn,oneof"`
+}
+
+type message_LinkCode struct {
+	LinkCode *LinkCode `protobuf:"bytes,20,opt,name=link_code,json=linkCode,oneof"`
+}
+
 func (*message_Error) isMessage_Kind() {}
 
 func (*message_Done) isMessage_Kind() {}
@@ -4867,6 +5955,12 @@ func (*message_SearchResults) isMessage_Kind() {}
 
 func (*message_Playback) isMessage_Kind() {}
 
+func (*message_Account) isMessage_Kind() {}
+
+func (*message_AccountSignIn) isMessage_Kind() {}
+
+func (*message_LinkCode) isMessage_Kind() {}
+
 // Why a call failed.
 type Error struct {
 	state             protoimpl.MessageState `protogen:"opaque.v1"`
@@ -4878,7 +5972,7 @@ type Error struct {
 
 func (x *Error) Reset() {
 	*x = Error{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[32]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4890,7 +5984,7 @@ func (x *Error) String() string {
 func (*Error) ProtoMessage() {}
 
 func (x *Error) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[32]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4948,7 +6042,7 @@ type Done struct {
 
 func (x *Done) Reset() {
 	*x = Done{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[33]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4960,7 +6054,7 @@ func (x *Done) String() string {
 func (*Done) ProtoMessage() {}
 
 func (x *Done) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[33]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4991,13 +6085,15 @@ type ServerInfo struct {
 	xxx_hidden_Version       string                 `protobuf:"bytes,3,opt,name=version"`
 	xxx_hidden_Address       string                 `protobuf:"bytes,4,opt,name=address"`
 	xxx_hidden_SetupRequired bool                   `protobuf:"varint,5,opt,name=setup_required,json=setupRequired"`
+	xxx_hidden_Mode          AccountMode            `protobuf:"varint,6,opt,name=mode,enum=mavio.capi.v1.AccountMode"`
+	xxx_hidden_MavioDevUrl   string                 `protobuf:"bytes,7,opt,name=mavio_dev_url,json=mavioDevUrl"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
 
 func (x *ServerInfo) Reset() {
 	*x = ServerInfo{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[34]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5009,7 +6105,7 @@ func (x *ServerInfo) String() string {
 func (*ServerInfo) ProtoMessage() {}
 
 func (x *ServerInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[34]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5055,6 +6151,20 @@ func (x *ServerInfo) GetSetupRequired() bool {
 	return false
 }
 
+func (x *ServerInfo) GetMode() AccountMode {
+	if x != nil {
+		return x.xxx_hidden_Mode
+	}
+	return AccountMode_ACCOUNT_MODE_UNSPECIFIED
+}
+
+func (x *ServerInfo) GetMavioDevUrl() string {
+	if x != nil {
+		return x.xxx_hidden_MavioDevUrl
+	}
+	return ""
+}
+
 func (x *ServerInfo) SetId(v string) {
 	x.xxx_hidden_Id = v
 }
@@ -5075,6 +6185,14 @@ func (x *ServerInfo) SetSetupRequired(v bool) {
 	x.xxx_hidden_SetupRequired = v
 }
 
+func (x *ServerInfo) SetMode(v AccountMode) {
+	x.xxx_hidden_Mode = v
+}
+
+func (x *ServerInfo) SetMavioDevUrl(v string) {
+	x.xxx_hidden_MavioDevUrl = v
+}
+
 type ServerInfo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
@@ -5086,6 +6204,10 @@ type ServerInfo_builder struct {
 	// The server has no user yet, and the first one is created instead of
 	// signing in.
 	SetupRequired bool
+	Mode          AccountMode
+	// The API of the mavio.dev the server's accounts are kept by, in
+	// ACCOUNT_MODE_MAVIO_DEV.
+	MavioDevUrl string
 }
 
 func (b0 ServerInfo_builder) Build() *ServerInfo {
@@ -5097,6 +6219,303 @@ func (b0 ServerInfo_builder) Build() *ServerInfo {
 	x.xxx_hidden_Version = b.Version
 	x.xxx_hidden_Address = b.Address
 	x.xxx_hidden_SetupRequired = b.SetupRequired
+	x.xxx_hidden_Mode = b.Mode
+	x.xxx_hidden_MavioDevUrl = b.MavioDevUrl
+	return m0
+}
+
+// The Mavio account signed in.
+type Account struct {
+	state           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id   string                 `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Name string                 `protobuf:"bytes,2,opt,name=name"`
+	xxx_hidden_Api  string                 `protobuf:"bytes,3,opt,name=api"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *Account) Reset() {
+	*x = Account{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Account) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Account) ProtoMessage() {}
+
+func (x *Account) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *Account) GetId() string {
+	if x != nil {
+		return x.xxx_hidden_Id
+	}
+	return ""
+}
+
+func (x *Account) GetName() string {
+	if x != nil {
+		return x.xxx_hidden_Name
+	}
+	return ""
+}
+
+func (x *Account) GetApi() string {
+	if x != nil {
+		return x.xxx_hidden_Api
+	}
+	return ""
+}
+
+func (x *Account) SetId(v string) {
+	x.xxx_hidden_Id = v
+}
+
+func (x *Account) SetName(v string) {
+	x.xxx_hidden_Name = v
+}
+
+func (x *Account) SetApi(v string) {
+	x.xxx_hidden_Api = v
+}
+
+type Account_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id string
+	// Its display name, or its user name without one.
+	Name string
+	// The API of the mavio.dev it is kept by.
+	Api string
+}
+
+func (b0 Account_builder) Build() *Account {
+	m0 := &Account{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Id = b.Id
+	x.xxx_hidden_Name = b.Name
+	x.xxx_hidden_Api = b.Api
+	return m0
+}
+
+// A sign-in in the browser.
+type AccountSignIn struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request uint64                 `protobuf:"varint,1,opt,name=request"`
+	xxx_hidden_Url     string                 `protobuf:"bytes,2,opt,name=url"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AccountSignIn) Reset() {
+	*x = AccountSignIn{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccountSignIn) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccountSignIn) ProtoMessage() {}
+
+func (x *AccountSignIn) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *AccountSignIn) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *AccountSignIn) GetUrl() string {
+	if x != nil {
+		return x.xxx_hidden_Url
+	}
+	return ""
+}
+
+func (x *AccountSignIn) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+func (x *AccountSignIn) SetUrl(v string) {
+	x.xxx_hidden_Url = v
+}
+
+type AccountSignIn_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The request's number, for FinishAccountSignIn.
+	Request uint64
+	// The page of mavio.dev to open.
+	Url string
+}
+
+func (b0 AccountSignIn_builder) Build() *AccountSignIn {
+	m0 := &AccountSignIn{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	x.xxx_hidden_Url = b.Url
+	return m0
+}
+
+// A link code to show, with a QR code of verification_uri_complete.
+type LinkCode struct {
+	state                              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Request                 uint64                 `protobuf:"varint,1,opt,name=request"`
+	xxx_hidden_UserCode                string                 `protobuf:"bytes,2,opt,name=user_code,json=userCode"`
+	xxx_hidden_VerificationUri         string                 `protobuf:"bytes,3,opt,name=verification_uri,json=verificationUri"`
+	xxx_hidden_VerificationUriComplete string                 `protobuf:"bytes,4,opt,name=verification_uri_complete,json=verificationUriComplete"`
+	xxx_hidden_ExpiresMs               int64                  `protobuf:"varint,5,opt,name=expires_ms,json=expiresMs"`
+	xxx_hidden_IntervalMs              uint32                 `protobuf:"varint,6,opt,name=interval_ms,json=intervalMs"`
+	unknownFields                      protoimpl.UnknownFields
+	sizeCache                          protoimpl.SizeCache
+}
+
+func (x *LinkCode) Reset() {
+	*x = LinkCode{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LinkCode) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LinkCode) ProtoMessage() {}
+
+func (x *LinkCode) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *LinkCode) GetRequest() uint64 {
+	if x != nil {
+		return x.xxx_hidden_Request
+	}
+	return 0
+}
+
+func (x *LinkCode) GetUserCode() string {
+	if x != nil {
+		return x.xxx_hidden_UserCode
+	}
+	return ""
+}
+
+func (x *LinkCode) GetVerificationUri() string {
+	if x != nil {
+		return x.xxx_hidden_VerificationUri
+	}
+	return ""
+}
+
+func (x *LinkCode) GetVerificationUriComplete() string {
+	if x != nil {
+		return x.xxx_hidden_VerificationUriComplete
+	}
+	return ""
+}
+
+func (x *LinkCode) GetExpiresMs() int64 {
+	if x != nil {
+		return x.xxx_hidden_ExpiresMs
+	}
+	return 0
+}
+
+func (x *LinkCode) GetIntervalMs() uint32 {
+	if x != nil {
+		return x.xxx_hidden_IntervalMs
+	}
+	return 0
+}
+
+func (x *LinkCode) SetRequest(v uint64) {
+	x.xxx_hidden_Request = v
+}
+
+func (x *LinkCode) SetUserCode(v string) {
+	x.xxx_hidden_UserCode = v
+}
+
+func (x *LinkCode) SetVerificationUri(v string) {
+	x.xxx_hidden_VerificationUri = v
+}
+
+func (x *LinkCode) SetVerificationUriComplete(v string) {
+	x.xxx_hidden_VerificationUriComplete = v
+}
+
+func (x *LinkCode) SetExpiresMs(v int64) {
+	x.xxx_hidden_ExpiresMs = v
+}
+
+func (x *LinkCode) SetIntervalMs(v uint32) {
+	x.xxx_hidden_IntervalMs = v
+}
+
+type LinkCode_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// The request's number, for PollLink.
+	Request  uint64
+	UserCode string
+	// Where to enter the code.
+	VerificationUri string
+	// The same with the code filled in.
+	VerificationUriComplete string
+	// When the code expires, in milliseconds since the Unix epoch.
+	ExpiresMs int64
+	// How often to poll.
+	IntervalMs uint32
+}
+
+func (b0 LinkCode_builder) Build() *LinkCode {
+	m0 := &LinkCode{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Request = b.Request
+	x.xxx_hidden_UserCode = b.UserCode
+	x.xxx_hidden_VerificationUri = b.VerificationUri
+	x.xxx_hidden_VerificationUriComplete = b.VerificationUriComplete
+	x.xxx_hidden_ExpiresMs = b.ExpiresMs
+	x.xxx_hidden_IntervalMs = b.IntervalMs
 	return m0
 }
 
@@ -5115,7 +6534,7 @@ type ServerRecord struct {
 
 func (x *ServerRecord) Reset() {
 	*x = ServerRecord{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[35]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5127,7 +6546,7 @@ func (x *ServerRecord) String() string {
 func (*ServerRecord) ProtoMessage() {}
 
 func (x *ServerRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[35]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5238,7 +6657,7 @@ type Servers struct {
 
 func (x *Servers) Reset() {
 	*x = Servers{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[36]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5250,7 +6669,7 @@ func (x *Servers) String() string {
 func (*Servers) ProtoMessage() {}
 
 func (x *Servers) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[36]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5298,7 +6717,7 @@ type FoundServers struct {
 
 func (x *FoundServers) Reset() {
 	*x = FoundServers{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[37]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5310,7 +6729,7 @@ func (x *FoundServers) String() string {
 func (*FoundServers) ProtoMessage() {}
 
 func (x *FoundServers) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[37]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5361,7 +6780,7 @@ type FoundServer struct {
 
 func (x *FoundServer) Reset() {
 	*x = FoundServer{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[38]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5373,7 +6792,7 @@ func (x *FoundServer) String() string {
 func (*FoundServer) ProtoMessage() {}
 
 func (x *FoundServer) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[38]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5464,7 +6883,7 @@ type QuickConnect struct {
 
 func (x *QuickConnect) Reset() {
 	*x = QuickConnect{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[39]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5476,7 +6895,7 @@ func (x *QuickConnect) String() string {
 func (*QuickConnect) ProtoMessage() {}
 
 func (x *QuickConnect) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[39]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5577,7 +6996,7 @@ type Artwork struct {
 
 func (x *Artwork) Reset() {
 	*x = Artwork{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[40]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5589,7 +7008,7 @@ func (x *Artwork) String() string {
 func (*Artwork) ProtoMessage() {}
 
 func (x *Artwork) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[40]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5666,7 +7085,7 @@ type Version struct {
 
 func (x *Version) Reset() {
 	*x = Version{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[41]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5678,7 +7097,7 @@ func (x *Version) String() string {
 func (*Version) ProtoMessage() {}
 
 func (x *Version) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[41]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5751,7 +7170,7 @@ type Card struct {
 
 func (x *Card) Reset() {
 	*x = Card{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[42]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5763,7 +7182,7 @@ func (x *Card) String() string {
 func (*Card) ProtoMessage() {}
 
 func (x *Card) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[42]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6023,7 +7442,7 @@ type TitleCard struct {
 
 func (x *TitleCard) Reset() {
 	*x = TitleCard{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[43]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6035,7 +7454,7 @@ func (x *TitleCard) String() string {
 func (*TitleCard) ProtoMessage() {}
 
 func (x *TitleCard) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[43]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6217,7 +7636,7 @@ type Row struct {
 
 func (x *Row) Reset() {
 	*x = Row{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[44]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6229,7 +7648,7 @@ func (x *Row) String() string {
 func (*Row) ProtoMessage() {}
 
 func (x *Row) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[44]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6554,7 +7973,7 @@ func (b0 Row_builder) Build() *Row {
 type case_Row_Content protoreflect.FieldNumber
 
 func (x case_Row_Content) String() string {
-	md := file_mavio_capi_v1_capi_proto_msgTypes[44].Descriptor()
+	md := file_mavio_capi_v1_capi_proto_msgTypes[56].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -6601,7 +8020,7 @@ type Cards struct {
 
 func (x *Cards) Reset() {
 	*x = Cards{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[45]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6613,7 +8032,7 @@ func (x *Cards) String() string {
 func (*Cards) ProtoMessage() {}
 
 func (x *Cards) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[45]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6661,7 +8080,7 @@ type TitleCards struct {
 
 func (x *TitleCards) Reset() {
 	*x = TitleCards{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[46]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6673,7 +8092,7 @@ func (x *TitleCards) String() string {
 func (*TitleCards) ProtoMessage() {}
 
 func (x *TitleCards) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[46]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6720,7 +8139,7 @@ type Loading struct {
 
 func (x *Loading) Reset() {
 	*x = Loading{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[47]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6732,7 +8151,7 @@ func (x *Loading) String() string {
 func (*Loading) ProtoMessage() {}
 
 func (x *Loading) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[47]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6765,7 +8184,7 @@ type Rows struct {
 
 func (x *Rows) Reset() {
 	*x = Rows{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[48]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6777,7 +8196,7 @@ func (x *Rows) String() string {
 func (*Rows) ProtoMessage() {}
 
 func (x *Rows) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[48]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6829,7 +8248,7 @@ type Page struct {
 
 func (x *Page) Reset() {
 	*x = Page{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[49]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6841,7 +8260,7 @@ func (x *Page) String() string {
 func (*Page) ProtoMessage() {}
 
 func (x *Page) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[49]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6937,7 +8356,7 @@ type Library struct {
 
 func (x *Library) Reset() {
 	*x = Library{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[50]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6949,7 +8368,7 @@ func (x *Library) String() string {
 func (*Library) ProtoMessage() {}
 
 func (x *Library) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[50]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7049,7 +8468,7 @@ type Libraries struct {
 
 func (x *Libraries) Reset() {
 	*x = Libraries{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[51]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7061,7 +8480,7 @@ func (x *Libraries) String() string {
 func (*Libraries) ProtoMessage() {}
 
 func (x *Libraries) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[51]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7127,7 +8546,7 @@ type Credit struct {
 
 func (x *Credit) Reset() {
 	*x = Credit{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[52]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7139,7 +8558,7 @@ func (x *Credit) String() string {
 func (*Credit) ProtoMessage() {}
 
 func (x *Credit) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[52]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7258,7 +8677,7 @@ type Source struct {
 
 func (x *Source) Reset() {
 	*x = Source{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[53]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7270,7 +8689,7 @@ func (x *Source) String() string {
 func (*Source) ProtoMessage() {}
 
 func (x *Source) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[53]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7419,7 +8838,7 @@ type AudioStream struct {
 
 func (x *AudioStream) Reset() {
 	*x = AudioStream{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[54]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7431,7 +8850,7 @@ func (x *AudioStream) String() string {
 func (*AudioStream) ProtoMessage() {}
 
 func (x *AudioStream) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[54]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7561,7 +8980,7 @@ type Details struct {
 
 func (x *Details) Reset() {
 	*x = Details{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[55]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7573,7 +8992,7 @@ func (x *Details) String() string {
 func (*Details) ProtoMessage() {}
 
 func (x *Details) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[55]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7898,7 +9317,7 @@ type SearchResults struct {
 
 func (x *SearchResults) Reset() {
 	*x = SearchResults{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[56]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7910,7 +9329,7 @@ func (x *SearchResults) String() string {
 func (*SearchResults) ProtoMessage() {}
 
 func (x *SearchResults) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[56]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7961,7 +9380,7 @@ type ServerResults struct {
 
 func (x *ServerResults) Reset() {
 	*x = ServerResults{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[57]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7973,7 +9392,7 @@ func (x *ServerResults) String() string {
 func (*ServerResults) ProtoMessage() {}
 
 func (x *ServerResults) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[57]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8070,7 +9489,7 @@ type Playback struct {
 
 func (x *Playback) Reset() {
 	*x = Playback{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[58]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8082,7 +9501,7 @@ func (x *Playback) String() string {
 func (*Playback) ProtoMessage() {}
 
 func (x *Playback) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[58]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8281,7 +9700,7 @@ type SubtitleTrack struct {
 
 func (x *SubtitleTrack) Reset() {
 	*x = SubtitleTrack{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[59]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8293,7 +9712,7 @@ func (x *SubtitleTrack) String() string {
 func (*SubtitleTrack) ProtoMessage() {}
 
 func (x *SubtitleTrack) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[59]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8422,7 +9841,7 @@ type Event struct {
 
 func (x *Event) Reset() {
 	*x = Event{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[60]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8434,7 +9853,7 @@ func (x *Event) String() string {
 func (*Event) ProtoMessage() {}
 
 func (x *Event) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[60]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8506,6 +9925,15 @@ func (x *Event) GetTokenChanged() *TokenChanged {
 	return nil
 }
 
+func (x *Event) GetServersChanged() *ServersChanged {
+	if x != nil {
+		if x, ok := x.xxx_hidden_Kind.(*event_ServersChanged); ok {
+			return x.ServersChanged
+		}
+	}
+	return nil
+}
+
 func (x *Event) SetServerId(v string) {
 	x.xxx_hidden_ServerId = v
 }
@@ -8556,6 +9984,14 @@ func (x *Event) SetTokenChanged(v *TokenChanged) {
 		return
 	}
 	x.xxx_hidden_Kind = &event_TokenChanged{v}
+}
+
+func (x *Event) SetServersChanged(v *ServersChanged) {
+	if v == nil {
+		x.xxx_hidden_Kind = nil
+		return
+	}
+	x.xxx_hidden_Kind = &event_ServersChanged{v}
 }
 
 func (x *Event) HasKind() bool {
@@ -8613,6 +10049,14 @@ func (x *Event) HasTokenChanged() bool {
 	return ok
 }
 
+func (x *Event) HasServersChanged() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Kind.(*event_ServersChanged)
+	return ok
+}
+
 func (x *Event) ClearKind() {
 	x.xxx_hidden_Kind = nil
 }
@@ -8653,6 +10097,12 @@ func (x *Event) ClearTokenChanged() {
 	}
 }
 
+func (x *Event) ClearServersChanged() {
+	if _, ok := x.xxx_hidden_Kind.(*event_ServersChanged); ok {
+		x.xxx_hidden_Kind = nil
+	}
+}
+
 const Event_Kind_not_set_case case_Event_Kind = 0
 const Event_State_case case_Event_Kind = 2
 const Event_Connected_case case_Event_Kind = 3
@@ -8660,6 +10110,7 @@ const Event_LibraryChanged_case case_Event_Kind = 4
 const Event_UserDataChanged_case case_Event_Kind = 5
 const Event_SessionsChanged_case case_Event_Kind = 6
 const Event_TokenChanged_case case_Event_Kind = 7
+const Event_ServersChanged_case case_Event_Kind = 8
 
 func (x *Event) WhichKind() case_Event_Kind {
 	if x == nil {
@@ -8678,6 +10129,8 @@ func (x *Event) WhichKind() case_Event_Kind {
 		return Event_SessionsChanged_case
 	case *event_TokenChanged:
 		return Event_TokenChanged_case
+	case *event_ServersChanged:
+		return Event_ServersChanged_case
 	default:
 		return Event_Kind_not_set_case
 	}
@@ -8694,6 +10147,7 @@ type Event_builder struct {
 	UserDataChanged *UserDataChanged
 	SessionsChanged *SessionsChanged
 	TokenChanged    *TokenChanged
+	ServersChanged  *ServersChanged
 	// -- end of xxx_hidden_Kind
 }
 
@@ -8720,13 +10174,16 @@ func (b0 Event_builder) Build() *Event {
 	if b.TokenChanged != nil {
 		x.xxx_hidden_Kind = &event_TokenChanged{b.TokenChanged}
 	}
+	if b.ServersChanged != nil {
+		x.xxx_hidden_Kind = &event_ServersChanged{b.ServersChanged}
+	}
 	return m0
 }
 
 type case_Event_Kind protoreflect.FieldNumber
 
 func (x case_Event_Kind) String() string {
-	md := file_mavio_capi_v1_capi_proto_msgTypes[60].Descriptor()
+	md := file_mavio_capi_v1_capi_proto_msgTypes[72].Descriptor()
 	if x == 0 {
 		return "not set"
 	}
@@ -8761,6 +10218,10 @@ type event_TokenChanged struct {
 	TokenChanged *TokenChanged `protobuf:"bytes,7,opt,name=token_changed,json=tokenChanged,oneof"`
 }
 
+type event_ServersChanged struct {
+	ServersChanged *ServersChanged `protobuf:"bytes,8,opt,name=servers_changed,json=serversChanged,oneof"`
+}
+
 func (*event_State) isEvent_Kind() {}
 
 func (*event_Connected) isEvent_Kind() {}
@@ -8772,6 +10233,53 @@ func (*event_UserDataChanged) isEvent_Kind() {}
 func (*event_SessionsChanged) isEvent_Kind() {}
 
 func (*event_TokenChanged) isEvent_Kind() {}
+
+func (*event_ServersChanged) isEvent_Kind() {}
+
+// The servers changed as the Mavio account's servers were followed; the
+// app lists them again. Its server_id is empty.
+type ServersChanged struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServersChanged) Reset() {
+	*x = ServersChanged{}
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServersChanged) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServersChanged) ProtoMessage() {}
+
+func (x *ServersChanged) ProtoReflect() protoreflect.Message {
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type ServersChanged_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ServersChanged_builder) Build() *ServersChanged {
+	m0 := &ServersChanged{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
 
 // The server's stream came up or went down, or the server signed the
 // device out.
@@ -8785,7 +10293,7 @@ type StreamState struct {
 
 func (x *StreamState) Reset() {
 	*x = StreamState{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[61]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8797,7 +10305,7 @@ func (x *StreamState) String() string {
 func (*StreamState) ProtoMessage() {}
 
 func (x *StreamState) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[61]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8856,7 +10364,7 @@ type Connected struct {
 
 func (x *Connected) Reset() {
 	*x = Connected{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[62]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8868,7 +10376,7 @@ func (x *Connected) String() string {
 func (*Connected) ProtoMessage() {}
 
 func (x *Connected) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[62]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8903,7 +10411,7 @@ type LibraryChanged struct {
 
 func (x *LibraryChanged) Reset() {
 	*x = LibraryChanged{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[63]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8915,7 +10423,7 @@ func (x *LibraryChanged) String() string {
 func (*LibraryChanged) ProtoMessage() {}
 
 func (x *LibraryChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[63]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8987,7 +10495,7 @@ type UserDataChanged struct {
 
 func (x *UserDataChanged) Reset() {
 	*x = UserDataChanged{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[64]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8999,7 +10507,7 @@ func (x *UserDataChanged) String() string {
 func (*UserDataChanged) ProtoMessage() {}
 
 func (x *UserDataChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[64]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9044,7 +10552,7 @@ type SessionsChanged struct {
 
 func (x *SessionsChanged) Reset() {
 	*x = SessionsChanged{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[65]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9056,7 +10564,7 @@ func (x *SessionsChanged) String() string {
 func (*SessionsChanged) ProtoMessage() {}
 
 func (x *SessionsChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[65]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9091,7 +10599,7 @@ type TokenChanged struct {
 
 func (x *TokenChanged) Reset() {
 	*x = TokenChanged{}
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[66]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9103,7 +10611,7 @@ func (x *TokenChanged) String() string {
 func (*TokenChanged) ProtoMessage() {}
 
 func (x *TokenChanged) ProtoReflect() protoreflect.Message {
-	mi := &file_mavio_capi_v1_capi_proto_msgTypes[66]
+	mi := &file_mavio_capi_v1_capi_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9143,7 +10651,7 @@ var File_mavio_capi_v1_capi_proto protoreflect.FileDescriptor
 
 const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\n" +
-	"\x18mavio/capi/v1/capi.proto\x12\rmavio.capi.v1\"\xcd\r\n" +
+	"\x18mavio/capi/v1/capi.proto\x12\rmavio.capi.v1\"\xc0\x12\n" +
 	"\aRequest\x12)\n" +
 	"\x04open\x18\x01 \x01(\v2\x13.mavio.capi.v1.OpenH\x00R\x04open\x12<\n" +
 	"\vget_version\x18\x02 \x01(\v2\x19.mavio.capi.v1.GetVersionH\x00R\n" +
@@ -9175,7 +10683,19 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x06search\x18\x18 \x01(\v2\x15.mavio.capi.v1.SearchH\x00R\x06search\x12)\n" +
 	"\x04play\x18\x19 \x01(\v2\x13.mavio.capi.v1.PlayH\x00R\x04play\x12H\n" +
 	"\x0fupdate_playback\x18\x1a \x01(\v2\x1d.mavio.capi.v1.UpdatePlaybackH\x00R\x0eupdatePlayback\x12B\n" +
-	"\rstop_playback\x18\x1b \x01(\v2\x1b.mavio.capi.v1.StopPlaybackH\x00R\fstopPlaybackB\x06\n" +
+	"\rstop_playback\x18\x1b \x01(\v2\x1b.mavio.capi.v1.StopPlaybackH\x00R\fstopPlayback\x12V\n" +
+	"\x15start_account_sign_in\x18\x1c \x01(\v2!.mavio.capi.v1.StartAccountSignInH\x00R\x12startAccountSignIn\x12Y\n" +
+	"\x16finish_account_sign_in\x18\x1d \x01(\v2\".mavio.capi.v1.FinishAccountSignInH\x00R\x13finishAccountSignIn\x12Y\n" +
+	"\x16cancel_account_sign_in\x18\x1e \x01(\v2\".mavio.capi.v1.CancelAccountSignInH\x00R\x13cancelAccountSignIn\x129\n" +
+	"\n" +
+	"start_link\x18\x1f \x01(\v2\x18.mavio.capi.v1.StartLinkH\x00R\tstartLink\x126\n" +
+	"\tpoll_link\x18  \x01(\v2\x17.mavio.capi.v1.PollLinkH\x00R\bpollLink\x12<\n" +
+	"\vcancel_link\x18! \x01(\v2\x19.mavio.capi.v1.CancelLinkH\x00R\n" +
+	"cancelLink\x12<\n" +
+	"\vget_account\x18\" \x01(\v2\x19.mavio.capi.v1.GetAccountH\x00R\n" +
+	"getAccount\x12?\n" +
+	"\fsync_account\x18# \x01(\v2\x1a.mavio.capi.v1.SyncAccountH\x00R\vsyncAccount\x123\n" +
+	"\bsign_out\x18$ \x01(\v2\x16.mavio.capi.v1.SignOutH\x00R\asignOutB\x06\n" +
 	"\x04kind\"\xce\x01\n" +
 	"\x04Open\x12#\n" +
 	"\rdatabase_path\x18\x01 \x01(\tR\fdatabasePath\x12-\n" +
@@ -9219,7 +10739,26 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\arequest\x18\x01 \x01(\x04R\arequest\"H\n" +
 	"\x15AuthorizeQuickConnect\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\"\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"C\n" +
+	"\x12StartAccountSignIn\x12\x10\n" +
+	"\x03api\x18\x01 \x01(\tR\x03api\x12\x1b\n" +
+	"\tclient_id\x18\x02 \x01(\tR\bclientId\"/\n" +
+	"\x13FinishAccountSignIn\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\"/\n" +
+	"\x13CancelAccountSignIn\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\":\n" +
+	"\tStartLink\x12\x10\n" +
+	"\x03api\x18\x01 \x01(\tR\x03api\x12\x1b\n" +
+	"\tclient_id\x18\x02 \x01(\tR\bclientId\"$\n" +
+	"\bPollLink\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\"&\n" +
+	"\n" +
+	"CancelLink\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\"\f\n" +
+	"\n" +
+	"GetAccount\"\r\n" +
+	"\vSyncAccount\"\t\n" +
+	"\aSignOut\"\n" +
 	"\n" +
 	"\bLoadHome\"j\n" +
 	"\x06GetHub\x12\x1b\n" +
@@ -9279,7 +10818,7 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\fStopPlayback\x12\x18\n" +
 	"\asession\x18\x01 \x01(\x04R\asession\x12&\n" +
 	"\vposition_ms\x18\x02 \x01(\x03B\x05\xaa\x01\x02\b\x01R\n" +
-	"positionMs\"\xcf\x06\n" +
+	"positionMs\"\x83\b\n" +
 	"\aMessage\x12\x12\n" +
 	"\x04call\x18\x01 \x01(\x04R\x04call\x12,\n" +
 	"\x05error\x18\x02 \x01(\v2\x14.mavio.capi.v1.ErrorH\x00R\x05error\x12)\n" +
@@ -9298,7 +10837,10 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\tlibraries\x18\x0e \x01(\v2\x18.mavio.capi.v1.LibrariesH\x00R\tlibraries\x122\n" +
 	"\adetails\x18\x0f \x01(\v2\x16.mavio.capi.v1.DetailsH\x00R\adetails\x12E\n" +
 	"\x0esearch_results\x18\x10 \x01(\v2\x1c.mavio.capi.v1.SearchResultsH\x00R\rsearchResults\x125\n" +
-	"\bplayback\x18\x11 \x01(\v2\x17.mavio.capi.v1.PlaybackH\x00R\bplayback\x12\x12\n" +
+	"\bplayback\x18\x11 \x01(\v2\x17.mavio.capi.v1.PlaybackH\x00R\bplayback\x122\n" +
+	"\aaccount\x18\x12 \x01(\v2\x16.mavio.capi.v1.AccountH\x00R\aaccount\x12F\n" +
+	"\x0faccount_sign_in\x18\x13 \x01(\v2\x1c.mavio.capi.v1.AccountSignInH\x00R\raccountSignIn\x126\n" +
+	"\tlink_code\x18\x14 \x01(\v2\x17.mavio.capi.v1.LinkCodeH\x00R\blinkCode\x12\x12\n" +
 	"\x04more\x18\t \x01(\bR\x04moreB\x06\n" +
 	"\x04kind\"\x9e\x02\n" +
 	"\x05Error\x12-\n" +
@@ -9315,14 +10857,32 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\vCODE_SERVER\x10\a\x12\x0e\n" +
 	"\n" +
 	"CODE_STORE\x10\b\"\x06\n" +
-	"\x04Done\"\x8b\x01\n" +
+	"\x04Done\"\xdf\x01\n" +
 	"\n" +
 	"ServerInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
 	"\aversion\x18\x03 \x01(\tR\aversion\x12\x18\n" +
 	"\aaddress\x18\x04 \x01(\tR\aaddress\x12%\n" +
-	"\x0esetup_required\x18\x05 \x01(\bR\rsetupRequired\"\x9c\x01\n" +
+	"\x0esetup_required\x18\x05 \x01(\bR\rsetupRequired\x12.\n" +
+	"\x04mode\x18\x06 \x01(\x0e2\x1a.mavio.capi.v1.AccountModeR\x04mode\x12\"\n" +
+	"\rmavio_dev_url\x18\a \x01(\tR\vmavioDevUrl\"?\n" +
+	"\aAccount\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03api\x18\x03 \x01(\tR\x03api\";\n" +
+	"\rAccountSignIn\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\"\xe8\x01\n" +
+	"\bLinkCode\x12\x18\n" +
+	"\arequest\x18\x01 \x01(\x04R\arequest\x12\x1b\n" +
+	"\tuser_code\x18\x02 \x01(\tR\buserCode\x12)\n" +
+	"\x10verification_uri\x18\x03 \x01(\tR\x0fverificationUri\x12:\n" +
+	"\x19verification_uri_complete\x18\x04 \x01(\tR\x17verificationUriComplete\x12\x1d\n" +
+	"\n" +
+	"expires_ms\x18\x05 \x01(\x03R\texpiresMs\x12\x1f\n" +
+	"\vinterval_ms\x18\x06 \x01(\rR\n" +
+	"intervalMs\"\x9c\x01\n" +
 	"\fServerRecord\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x12\n" +
@@ -9490,7 +11050,7 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\adefault\x18\x04 \x01(\bR\adefault\x12\x16\n" +
 	"\x06forced\x18\x05 \x01(\bR\x06forced\x12\x16\n" +
 	"\x06format\x18\x06 \x01(\tR\x06format\x12\x10\n" +
-	"\x03url\x18\a \x01(\tR\x03url\"\xc3\x03\n" +
+	"\x03url\x18\a \x01(\tR\x03url\"\x8d\x04\n" +
 	"\x05Event\x12\x1b\n" +
 	"\tserver_id\x18\x01 \x01(\tR\bserverId\x122\n" +
 	"\x05state\x18\x02 \x01(\v2\x1a.mavio.capi.v1.StreamStateH\x00R\x05state\x128\n" +
@@ -9498,8 +11058,10 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x0flibrary_changed\x18\x04 \x01(\v2\x1d.mavio.capi.v1.LibraryChangedH\x00R\x0elibraryChanged\x12L\n" +
 	"\x11user_data_changed\x18\x05 \x01(\v2\x1e.mavio.capi.v1.UserDataChangedH\x00R\x0fuserDataChanged\x12K\n" +
 	"\x10sessions_changed\x18\x06 \x01(\v2\x1e.mavio.capi.v1.SessionsChangedH\x00R\x0fsessionsChanged\x12B\n" +
-	"\rtoken_changed\x18\a \x01(\v2\x1b.mavio.capi.v1.TokenChangedH\x00R\ftokenChangedB\x06\n" +
-	"\x04kind\"\xb8\x01\n" +
+	"\rtoken_changed\x18\a \x01(\v2\x1b.mavio.capi.v1.TokenChangedH\x00R\ftokenChanged\x12H\n" +
+	"\x0fservers_changed\x18\b \x01(\v2\x1d.mavio.capi.v1.ServersChangedH\x00R\x0eserversChangedB\x06\n" +
+	"\x04kind\"\x10\n" +
+	"\x0eServersChanged\"\xb8\x01\n" +
 	"\vStreamState\x126\n" +
 	"\x05state\x18\x01 \x01(\x0e2 .mavio.capi.v1.StreamState.StateR\x05state\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"Y\n" +
@@ -9525,7 +11087,11 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\rSORT_RELEASED\x10\x02\x12\x0f\n" +
 	"\vSORT_RATING\x10\x03\x12\x14\n" +
 	"\x10SORT_LAST_PLAYED\x10\x04\x12\x0f\n" +
-	"\vSORT_RANDOM\x10\x05*\x92\x03\n" +
+	"\vSORT_RANDOM\x10\x05*d\n" +
+	"\vAccountMode\x12\x1c\n" +
+	"\x18ACCOUNT_MODE_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17ACCOUNT_MODE_STANDALONE\x10\x01\x12\x1a\n" +
+	"\x16ACCOUNT_MODE_MAVIO_DEV\x10\x02*\x92\x03\n" +
 	"\bCardKind\x12\x19\n" +
 	"\x15CARD_KIND_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fCARD_KIND_MOVIE\x10\x01\x12\x14\n" +
@@ -9580,178 +11146,206 @@ const file_mavio_capi_v1_capi_proto_rawDesc = "" +
 	"\x13PLAY_KIND_TRANSCODE\x10\x02B\xc2\x01\n" +
 	"\x11com.mavio.capi.v1B\tCapiProtoP\x01ZGgithub.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1;capiv1\xa2\x02\x03MCX\xaa\x02\rMavio.Capi.V1\xca\x02\rMavio\\Capi\\V1\xe2\x02\x19Mavio\\Capi\\V1\\GPBMetadata\xea\x02\x0fMavio::Capi::V1\x92\x03\x02\b\x02b\beditionsp\xe8\a"
 
-var file_mavio_capi_v1_capi_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
-var file_mavio_capi_v1_capi_proto_msgTypes = make([]protoimpl.MessageInfo, 69)
+var file_mavio_capi_v1_capi_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
+var file_mavio_capi_v1_capi_proto_msgTypes = make([]protoimpl.MessageInfo, 82)
 var file_mavio_capi_v1_capi_proto_goTypes = []any{
 	(Sort)(0),                     // 0: mavio.capi.v1.Sort
-	(CardKind)(0),                 // 1: mavio.capi.v1.CardKind
-	(RowKind)(0),                  // 2: mavio.capi.v1.RowKind
-	(LibraryType)(0),              // 3: mavio.capi.v1.LibraryType
-	(PlayKind)(0),                 // 4: mavio.capi.v1.PlayKind
-	(Error_Code)(0),               // 5: mavio.capi.v1.Error.Code
-	(StreamState_State)(0),        // 6: mavio.capi.v1.StreamState.State
-	(*Request)(nil),               // 7: mavio.capi.v1.Request
-	(*Open)(nil),                  // 8: mavio.capi.v1.Open
-	(*Device)(nil),                // 9: mavio.capi.v1.Device
-	(*GetVersion)(nil),            // 10: mavio.capi.v1.GetVersion
-	(*Probe)(nil),                 // 11: mavio.capi.v1.Probe
-	(*SignIn)(nil),                // 12: mavio.capi.v1.SignIn
-	(*Start)(nil),                 // 13: mavio.capi.v1.Start
-	(*Stop)(nil),                  // 14: mavio.capi.v1.Stop
-	(*ListServers)(nil),           // 15: mavio.capi.v1.ListServers
-	(*CreateFirstUser)(nil),       // 16: mavio.capi.v1.CreateFirstUser
-	(*Discover)(nil),              // 17: mavio.capi.v1.Discover
-	(*RemoveServer)(nil),          // 18: mavio.capi.v1.RemoveServer
-	(*OrderServers)(nil),          // 19: mavio.capi.v1.OrderServers
-	(*StartQuickConnect)(nil),     // 20: mavio.capi.v1.StartQuickConnect
-	(*PollQuickConnect)(nil),      // 21: mavio.capi.v1.PollQuickConnect
-	(*CancelQuickConnect)(nil),    // 22: mavio.capi.v1.CancelQuickConnect
-	(*AuthorizeQuickConnect)(nil), // 23: mavio.capi.v1.AuthorizeQuickConnect
-	(*LoadHome)(nil),              // 24: mavio.capi.v1.LoadHome
-	(*GetHub)(nil),                // 25: mavio.capi.v1.GetHub
-	(*GetRecommended)(nil),        // 26: mavio.capi.v1.GetRecommended
-	(*ListLibraries)(nil),         // 27: mavio.capi.v1.ListLibraries
-	(*ListLibraryItems)(nil),      // 28: mavio.capi.v1.ListLibraryItems
-	(*Filter)(nil),                // 29: mavio.capi.v1.Filter
-	(*GetDetails)(nil),            // 30: mavio.capi.v1.GetDetails
-	(*SetPlayed)(nil),             // 31: mavio.capi.v1.SetPlayed
-	(*SetFavorite)(nil),           // 32: mavio.capi.v1.SetFavorite
-	(*Search)(nil),                // 33: mavio.capi.v1.Search
-	(*Play)(nil),                  // 34: mavio.capi.v1.Play
-	(*PlaybackOptions)(nil),       // 35: mavio.capi.v1.PlaybackOptions
-	(*UpdatePlayback)(nil),        // 36: mavio.capi.v1.UpdatePlayback
-	(*StopPlayback)(nil),          // 37: mavio.capi.v1.StopPlayback
-	(*Message)(nil),               // 38: mavio.capi.v1.Message
-	(*Error)(nil),                 // 39: mavio.capi.v1.Error
-	(*Done)(nil),                  // 40: mavio.capi.v1.Done
-	(*ServerInfo)(nil),            // 41: mavio.capi.v1.ServerInfo
-	(*ServerRecord)(nil),          // 42: mavio.capi.v1.ServerRecord
-	(*Servers)(nil),               // 43: mavio.capi.v1.Servers
-	(*FoundServers)(nil),          // 44: mavio.capi.v1.FoundServers
-	(*FoundServer)(nil),           // 45: mavio.capi.v1.FoundServer
-	(*QuickConnect)(nil),          // 46: mavio.capi.v1.QuickConnect
-	(*Artwork)(nil),               // 47: mavio.capi.v1.Artwork
-	(*Version)(nil),               // 48: mavio.capi.v1.Version
-	(*Card)(nil),                  // 49: mavio.capi.v1.Card
-	(*TitleCard)(nil),             // 50: mavio.capi.v1.TitleCard
-	(*Row)(nil),                   // 51: mavio.capi.v1.Row
-	(*Cards)(nil),                 // 52: mavio.capi.v1.Cards
-	(*TitleCards)(nil),            // 53: mavio.capi.v1.TitleCards
-	(*Loading)(nil),               // 54: mavio.capi.v1.Loading
-	(*Rows)(nil),                  // 55: mavio.capi.v1.Rows
-	(*Page)(nil),                  // 56: mavio.capi.v1.Page
-	(*Library)(nil),               // 57: mavio.capi.v1.Library
-	(*Libraries)(nil),             // 58: mavio.capi.v1.Libraries
-	(*Credit)(nil),                // 59: mavio.capi.v1.Credit
-	(*Source)(nil),                // 60: mavio.capi.v1.Source
-	(*AudioStream)(nil),           // 61: mavio.capi.v1.AudioStream
-	(*Details)(nil),               // 62: mavio.capi.v1.Details
-	(*SearchResults)(nil),         // 63: mavio.capi.v1.SearchResults
-	(*ServerResults)(nil),         // 64: mavio.capi.v1.ServerResults
-	(*Playback)(nil),              // 65: mavio.capi.v1.Playback
-	(*SubtitleTrack)(nil),         // 66: mavio.capi.v1.SubtitleTrack
-	(*Event)(nil),                 // 67: mavio.capi.v1.Event
-	(*StreamState)(nil),           // 68: mavio.capi.v1.StreamState
-	(*Connected)(nil),             // 69: mavio.capi.v1.Connected
-	(*LibraryChanged)(nil),        // 70: mavio.capi.v1.LibraryChanged
-	(*UserDataChanged)(nil),       // 71: mavio.capi.v1.UserDataChanged
-	(*SessionsChanged)(nil),       // 72: mavio.capi.v1.SessionsChanged
-	(*TokenChanged)(nil),          // 73: mavio.capi.v1.TokenChanged
-	nil,                           // 74: mavio.capi.v1.Open.TokensEntry
-	nil,                           // 75: mavio.capi.v1.TitleCard.ExternalIdsEntry
+	(AccountMode)(0),              // 1: mavio.capi.v1.AccountMode
+	(CardKind)(0),                 // 2: mavio.capi.v1.CardKind
+	(RowKind)(0),                  // 3: mavio.capi.v1.RowKind
+	(LibraryType)(0),              // 4: mavio.capi.v1.LibraryType
+	(PlayKind)(0),                 // 5: mavio.capi.v1.PlayKind
+	(Error_Code)(0),               // 6: mavio.capi.v1.Error.Code
+	(StreamState_State)(0),        // 7: mavio.capi.v1.StreamState.State
+	(*Request)(nil),               // 8: mavio.capi.v1.Request
+	(*Open)(nil),                  // 9: mavio.capi.v1.Open
+	(*Device)(nil),                // 10: mavio.capi.v1.Device
+	(*GetVersion)(nil),            // 11: mavio.capi.v1.GetVersion
+	(*Probe)(nil),                 // 12: mavio.capi.v1.Probe
+	(*SignIn)(nil),                // 13: mavio.capi.v1.SignIn
+	(*Start)(nil),                 // 14: mavio.capi.v1.Start
+	(*Stop)(nil),                  // 15: mavio.capi.v1.Stop
+	(*ListServers)(nil),           // 16: mavio.capi.v1.ListServers
+	(*CreateFirstUser)(nil),       // 17: mavio.capi.v1.CreateFirstUser
+	(*Discover)(nil),              // 18: mavio.capi.v1.Discover
+	(*RemoveServer)(nil),          // 19: mavio.capi.v1.RemoveServer
+	(*OrderServers)(nil),          // 20: mavio.capi.v1.OrderServers
+	(*StartQuickConnect)(nil),     // 21: mavio.capi.v1.StartQuickConnect
+	(*PollQuickConnect)(nil),      // 22: mavio.capi.v1.PollQuickConnect
+	(*CancelQuickConnect)(nil),    // 23: mavio.capi.v1.CancelQuickConnect
+	(*AuthorizeQuickConnect)(nil), // 24: mavio.capi.v1.AuthorizeQuickConnect
+	(*StartAccountSignIn)(nil),    // 25: mavio.capi.v1.StartAccountSignIn
+	(*FinishAccountSignIn)(nil),   // 26: mavio.capi.v1.FinishAccountSignIn
+	(*CancelAccountSignIn)(nil),   // 27: mavio.capi.v1.CancelAccountSignIn
+	(*StartLink)(nil),             // 28: mavio.capi.v1.StartLink
+	(*PollLink)(nil),              // 29: mavio.capi.v1.PollLink
+	(*CancelLink)(nil),            // 30: mavio.capi.v1.CancelLink
+	(*GetAccount)(nil),            // 31: mavio.capi.v1.GetAccount
+	(*SyncAccount)(nil),           // 32: mavio.capi.v1.SyncAccount
+	(*SignOut)(nil),               // 33: mavio.capi.v1.SignOut
+	(*LoadHome)(nil),              // 34: mavio.capi.v1.LoadHome
+	(*GetHub)(nil),                // 35: mavio.capi.v1.GetHub
+	(*GetRecommended)(nil),        // 36: mavio.capi.v1.GetRecommended
+	(*ListLibraries)(nil),         // 37: mavio.capi.v1.ListLibraries
+	(*ListLibraryItems)(nil),      // 38: mavio.capi.v1.ListLibraryItems
+	(*Filter)(nil),                // 39: mavio.capi.v1.Filter
+	(*GetDetails)(nil),            // 40: mavio.capi.v1.GetDetails
+	(*SetPlayed)(nil),             // 41: mavio.capi.v1.SetPlayed
+	(*SetFavorite)(nil),           // 42: mavio.capi.v1.SetFavorite
+	(*Search)(nil),                // 43: mavio.capi.v1.Search
+	(*Play)(nil),                  // 44: mavio.capi.v1.Play
+	(*PlaybackOptions)(nil),       // 45: mavio.capi.v1.PlaybackOptions
+	(*UpdatePlayback)(nil),        // 46: mavio.capi.v1.UpdatePlayback
+	(*StopPlayback)(nil),          // 47: mavio.capi.v1.StopPlayback
+	(*Message)(nil),               // 48: mavio.capi.v1.Message
+	(*Error)(nil),                 // 49: mavio.capi.v1.Error
+	(*Done)(nil),                  // 50: mavio.capi.v1.Done
+	(*ServerInfo)(nil),            // 51: mavio.capi.v1.ServerInfo
+	(*Account)(nil),               // 52: mavio.capi.v1.Account
+	(*AccountSignIn)(nil),         // 53: mavio.capi.v1.AccountSignIn
+	(*LinkCode)(nil),              // 54: mavio.capi.v1.LinkCode
+	(*ServerRecord)(nil),          // 55: mavio.capi.v1.ServerRecord
+	(*Servers)(nil),               // 56: mavio.capi.v1.Servers
+	(*FoundServers)(nil),          // 57: mavio.capi.v1.FoundServers
+	(*FoundServer)(nil),           // 58: mavio.capi.v1.FoundServer
+	(*QuickConnect)(nil),          // 59: mavio.capi.v1.QuickConnect
+	(*Artwork)(nil),               // 60: mavio.capi.v1.Artwork
+	(*Version)(nil),               // 61: mavio.capi.v1.Version
+	(*Card)(nil),                  // 62: mavio.capi.v1.Card
+	(*TitleCard)(nil),             // 63: mavio.capi.v1.TitleCard
+	(*Row)(nil),                   // 64: mavio.capi.v1.Row
+	(*Cards)(nil),                 // 65: mavio.capi.v1.Cards
+	(*TitleCards)(nil),            // 66: mavio.capi.v1.TitleCards
+	(*Loading)(nil),               // 67: mavio.capi.v1.Loading
+	(*Rows)(nil),                  // 68: mavio.capi.v1.Rows
+	(*Page)(nil),                  // 69: mavio.capi.v1.Page
+	(*Library)(nil),               // 70: mavio.capi.v1.Library
+	(*Libraries)(nil),             // 71: mavio.capi.v1.Libraries
+	(*Credit)(nil),                // 72: mavio.capi.v1.Credit
+	(*Source)(nil),                // 73: mavio.capi.v1.Source
+	(*AudioStream)(nil),           // 74: mavio.capi.v1.AudioStream
+	(*Details)(nil),               // 75: mavio.capi.v1.Details
+	(*SearchResults)(nil),         // 76: mavio.capi.v1.SearchResults
+	(*ServerResults)(nil),         // 77: mavio.capi.v1.ServerResults
+	(*Playback)(nil),              // 78: mavio.capi.v1.Playback
+	(*SubtitleTrack)(nil),         // 79: mavio.capi.v1.SubtitleTrack
+	(*Event)(nil),                 // 80: mavio.capi.v1.Event
+	(*ServersChanged)(nil),        // 81: mavio.capi.v1.ServersChanged
+	(*StreamState)(nil),           // 82: mavio.capi.v1.StreamState
+	(*Connected)(nil),             // 83: mavio.capi.v1.Connected
+	(*LibraryChanged)(nil),        // 84: mavio.capi.v1.LibraryChanged
+	(*UserDataChanged)(nil),       // 85: mavio.capi.v1.UserDataChanged
+	(*SessionsChanged)(nil),       // 86: mavio.capi.v1.SessionsChanged
+	(*TokenChanged)(nil),          // 87: mavio.capi.v1.TokenChanged
+	nil,                           // 88: mavio.capi.v1.Open.TokensEntry
+	nil,                           // 89: mavio.capi.v1.TitleCard.ExternalIdsEntry
 }
 var file_mavio_capi_v1_capi_proto_depIdxs = []int32{
-	8,  // 0: mavio.capi.v1.Request.open:type_name -> mavio.capi.v1.Open
-	10, // 1: mavio.capi.v1.Request.get_version:type_name -> mavio.capi.v1.GetVersion
-	11, // 2: mavio.capi.v1.Request.probe:type_name -> mavio.capi.v1.Probe
-	12, // 3: mavio.capi.v1.Request.sign_in:type_name -> mavio.capi.v1.SignIn
-	13, // 4: mavio.capi.v1.Request.start:type_name -> mavio.capi.v1.Start
-	14, // 5: mavio.capi.v1.Request.stop:type_name -> mavio.capi.v1.Stop
-	15, // 6: mavio.capi.v1.Request.list_servers:type_name -> mavio.capi.v1.ListServers
-	16, // 7: mavio.capi.v1.Request.create_first_user:type_name -> mavio.capi.v1.CreateFirstUser
-	17, // 8: mavio.capi.v1.Request.discover:type_name -> mavio.capi.v1.Discover
-	18, // 9: mavio.capi.v1.Request.remove_server:type_name -> mavio.capi.v1.RemoveServer
-	19, // 10: mavio.capi.v1.Request.order_servers:type_name -> mavio.capi.v1.OrderServers
-	20, // 11: mavio.capi.v1.Request.start_quick_connect:type_name -> mavio.capi.v1.StartQuickConnect
-	21, // 12: mavio.capi.v1.Request.poll_quick_connect:type_name -> mavio.capi.v1.PollQuickConnect
-	22, // 13: mavio.capi.v1.Request.cancel_quick_connect:type_name -> mavio.capi.v1.CancelQuickConnect
-	23, // 14: mavio.capi.v1.Request.authorize_quick_connect:type_name -> mavio.capi.v1.AuthorizeQuickConnect
-	24, // 15: mavio.capi.v1.Request.load_home:type_name -> mavio.capi.v1.LoadHome
-	25, // 16: mavio.capi.v1.Request.get_hub:type_name -> mavio.capi.v1.GetHub
-	26, // 17: mavio.capi.v1.Request.get_recommended:type_name -> mavio.capi.v1.GetRecommended
-	27, // 18: mavio.capi.v1.Request.list_libraries:type_name -> mavio.capi.v1.ListLibraries
-	28, // 19: mavio.capi.v1.Request.list_library_items:type_name -> mavio.capi.v1.ListLibraryItems
-	30, // 20: mavio.capi.v1.Request.get_details:type_name -> mavio.capi.v1.GetDetails
-	31, // 21: mavio.capi.v1.Request.set_played:type_name -> mavio.capi.v1.SetPlayed
-	32, // 22: mavio.capi.v1.Request.set_favorite:type_name -> mavio.capi.v1.SetFavorite
-	33, // 23: mavio.capi.v1.Request.search:type_name -> mavio.capi.v1.Search
-	34, // 24: mavio.capi.v1.Request.play:type_name -> mavio.capi.v1.Play
-	36, // 25: mavio.capi.v1.Request.update_playback:type_name -> mavio.capi.v1.UpdatePlayback
-	37, // 26: mavio.capi.v1.Request.stop_playback:type_name -> mavio.capi.v1.StopPlayback
-	9,  // 27: mavio.capi.v1.Open.device:type_name -> mavio.capi.v1.Device
-	74, // 28: mavio.capi.v1.Open.tokens:type_name -> mavio.capi.v1.Open.TokensEntry
-	0,  // 29: mavio.capi.v1.ListLibraryItems.sort:type_name -> mavio.capi.v1.Sort
-	29, // 30: mavio.capi.v1.ListLibraryItems.filter:type_name -> mavio.capi.v1.Filter
-	35, // 31: mavio.capi.v1.Play.options:type_name -> mavio.capi.v1.PlaybackOptions
-	39, // 32: mavio.capi.v1.Message.error:type_name -> mavio.capi.v1.Error
-	40, // 33: mavio.capi.v1.Message.done:type_name -> mavio.capi.v1.Done
-	41, // 34: mavio.capi.v1.Message.server_info:type_name -> mavio.capi.v1.ServerInfo
-	42, // 35: mavio.capi.v1.Message.server:type_name -> mavio.capi.v1.ServerRecord
-	43, // 36: mavio.capi.v1.Message.servers:type_name -> mavio.capi.v1.Servers
-	67, // 37: mavio.capi.v1.Message.event:type_name -> mavio.capi.v1.Event
-	44, // 38: mavio.capi.v1.Message.found_servers:type_name -> mavio.capi.v1.FoundServers
-	46, // 39: mavio.capi.v1.Message.quick_connect:type_name -> mavio.capi.v1.QuickConnect
-	55, // 40: mavio.capi.v1.Message.rows:type_name -> mavio.capi.v1.Rows
-	56, // 41: mavio.capi.v1.Message.page:type_name -> mavio.capi.v1.Page
-	58, // 42: mavio.capi.v1.Message.libraries:type_name -> mavio.capi.v1.Libraries
-	62, // 43: mavio.capi.v1.Message.details:type_name -> mavio.capi.v1.Details
-	63, // 44: mavio.capi.v1.Message.search_results:type_name -> mavio.capi.v1.SearchResults
-	65, // 45: mavio.capi.v1.Message.playback:type_name -> mavio.capi.v1.Playback
-	5,  // 46: mavio.capi.v1.Error.code:type_name -> mavio.capi.v1.Error.Code
-	42, // 47: mavio.capi.v1.Servers.servers:type_name -> mavio.capi.v1.ServerRecord
-	45, // 48: mavio.capi.v1.FoundServers.servers:type_name -> mavio.capi.v1.FoundServer
-	41, // 49: mavio.capi.v1.QuickConnect.server:type_name -> mavio.capi.v1.ServerInfo
-	1,  // 50: mavio.capi.v1.Card.kind:type_name -> mavio.capi.v1.CardKind
-	47, // 51: mavio.capi.v1.Card.poster:type_name -> mavio.capi.v1.Artwork
-	47, // 52: mavio.capi.v1.Card.thumb:type_name -> mavio.capi.v1.Artwork
-	48, // 53: mavio.capi.v1.Card.versions:type_name -> mavio.capi.v1.Version
-	75, // 54: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
-	48, // 55: mavio.capi.v1.TitleCard.available:type_name -> mavio.capi.v1.Version
-	2,  // 56: mavio.capi.v1.Row.kind:type_name -> mavio.capi.v1.RowKind
-	52, // 57: mavio.capi.v1.Row.items:type_name -> mavio.capi.v1.Cards
-	53, // 58: mavio.capi.v1.Row.titles:type_name -> mavio.capi.v1.TitleCards
-	54, // 59: mavio.capi.v1.Row.loading:type_name -> mavio.capi.v1.Loading
-	49, // 60: mavio.capi.v1.Cards.cards:type_name -> mavio.capi.v1.Card
-	50, // 61: mavio.capi.v1.TitleCards.titles:type_name -> mavio.capi.v1.TitleCard
-	51, // 62: mavio.capi.v1.Rows.rows:type_name -> mavio.capi.v1.Row
-	49, // 63: mavio.capi.v1.Page.cards:type_name -> mavio.capi.v1.Card
-	3,  // 64: mavio.capi.v1.Library.kind:type_name -> mavio.capi.v1.LibraryType
-	57, // 65: mavio.capi.v1.Libraries.libraries:type_name -> mavio.capi.v1.Library
-	47, // 66: mavio.capi.v1.Credit.photo:type_name -> mavio.capi.v1.Artwork
-	61, // 67: mavio.capi.v1.Source.audio:type_name -> mavio.capi.v1.AudioStream
-	49, // 68: mavio.capi.v1.Details.card:type_name -> mavio.capi.v1.Card
-	47, // 69: mavio.capi.v1.Details.backdrop:type_name -> mavio.capi.v1.Artwork
-	47, // 70: mavio.capi.v1.Details.logo:type_name -> mavio.capi.v1.Artwork
-	59, // 71: mavio.capi.v1.Details.credits:type_name -> mavio.capi.v1.Credit
-	60, // 72: mavio.capi.v1.Details.sources:type_name -> mavio.capi.v1.Source
-	49, // 73: mavio.capi.v1.Details.children:type_name -> mavio.capi.v1.Card
-	49, // 74: mavio.capi.v1.Details.similar:type_name -> mavio.capi.v1.Card
-	64, // 75: mavio.capi.v1.SearchResults.servers:type_name -> mavio.capi.v1.ServerResults
-	49, // 76: mavio.capi.v1.ServerResults.cards:type_name -> mavio.capi.v1.Card
-	4,  // 77: mavio.capi.v1.Playback.kind:type_name -> mavio.capi.v1.PlayKind
-	66, // 78: mavio.capi.v1.Playback.subtitles:type_name -> mavio.capi.v1.SubtitleTrack
-	68, // 79: mavio.capi.v1.Event.state:type_name -> mavio.capi.v1.StreamState
-	69, // 80: mavio.capi.v1.Event.connected:type_name -> mavio.capi.v1.Connected
-	70, // 81: mavio.capi.v1.Event.library_changed:type_name -> mavio.capi.v1.LibraryChanged
-	71, // 82: mavio.capi.v1.Event.user_data_changed:type_name -> mavio.capi.v1.UserDataChanged
-	72, // 83: mavio.capi.v1.Event.sessions_changed:type_name -> mavio.capi.v1.SessionsChanged
-	73, // 84: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
-	6,  // 85: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
-	86, // [86:86] is the sub-list for method output_type
-	86, // [86:86] is the sub-list for method input_type
-	86, // [86:86] is the sub-list for extension type_name
-	86, // [86:86] is the sub-list for extension extendee
-	0,  // [0:86] is the sub-list for field type_name
+	9,   // 0: mavio.capi.v1.Request.open:type_name -> mavio.capi.v1.Open
+	11,  // 1: mavio.capi.v1.Request.get_version:type_name -> mavio.capi.v1.GetVersion
+	12,  // 2: mavio.capi.v1.Request.probe:type_name -> mavio.capi.v1.Probe
+	13,  // 3: mavio.capi.v1.Request.sign_in:type_name -> mavio.capi.v1.SignIn
+	14,  // 4: mavio.capi.v1.Request.start:type_name -> mavio.capi.v1.Start
+	15,  // 5: mavio.capi.v1.Request.stop:type_name -> mavio.capi.v1.Stop
+	16,  // 6: mavio.capi.v1.Request.list_servers:type_name -> mavio.capi.v1.ListServers
+	17,  // 7: mavio.capi.v1.Request.create_first_user:type_name -> mavio.capi.v1.CreateFirstUser
+	18,  // 8: mavio.capi.v1.Request.discover:type_name -> mavio.capi.v1.Discover
+	19,  // 9: mavio.capi.v1.Request.remove_server:type_name -> mavio.capi.v1.RemoveServer
+	20,  // 10: mavio.capi.v1.Request.order_servers:type_name -> mavio.capi.v1.OrderServers
+	21,  // 11: mavio.capi.v1.Request.start_quick_connect:type_name -> mavio.capi.v1.StartQuickConnect
+	22,  // 12: mavio.capi.v1.Request.poll_quick_connect:type_name -> mavio.capi.v1.PollQuickConnect
+	23,  // 13: mavio.capi.v1.Request.cancel_quick_connect:type_name -> mavio.capi.v1.CancelQuickConnect
+	24,  // 14: mavio.capi.v1.Request.authorize_quick_connect:type_name -> mavio.capi.v1.AuthorizeQuickConnect
+	34,  // 15: mavio.capi.v1.Request.load_home:type_name -> mavio.capi.v1.LoadHome
+	35,  // 16: mavio.capi.v1.Request.get_hub:type_name -> mavio.capi.v1.GetHub
+	36,  // 17: mavio.capi.v1.Request.get_recommended:type_name -> mavio.capi.v1.GetRecommended
+	37,  // 18: mavio.capi.v1.Request.list_libraries:type_name -> mavio.capi.v1.ListLibraries
+	38,  // 19: mavio.capi.v1.Request.list_library_items:type_name -> mavio.capi.v1.ListLibraryItems
+	40,  // 20: mavio.capi.v1.Request.get_details:type_name -> mavio.capi.v1.GetDetails
+	41,  // 21: mavio.capi.v1.Request.set_played:type_name -> mavio.capi.v1.SetPlayed
+	42,  // 22: mavio.capi.v1.Request.set_favorite:type_name -> mavio.capi.v1.SetFavorite
+	43,  // 23: mavio.capi.v1.Request.search:type_name -> mavio.capi.v1.Search
+	44,  // 24: mavio.capi.v1.Request.play:type_name -> mavio.capi.v1.Play
+	46,  // 25: mavio.capi.v1.Request.update_playback:type_name -> mavio.capi.v1.UpdatePlayback
+	47,  // 26: mavio.capi.v1.Request.stop_playback:type_name -> mavio.capi.v1.StopPlayback
+	25,  // 27: mavio.capi.v1.Request.start_account_sign_in:type_name -> mavio.capi.v1.StartAccountSignIn
+	26,  // 28: mavio.capi.v1.Request.finish_account_sign_in:type_name -> mavio.capi.v1.FinishAccountSignIn
+	27,  // 29: mavio.capi.v1.Request.cancel_account_sign_in:type_name -> mavio.capi.v1.CancelAccountSignIn
+	28,  // 30: mavio.capi.v1.Request.start_link:type_name -> mavio.capi.v1.StartLink
+	29,  // 31: mavio.capi.v1.Request.poll_link:type_name -> mavio.capi.v1.PollLink
+	30,  // 32: mavio.capi.v1.Request.cancel_link:type_name -> mavio.capi.v1.CancelLink
+	31,  // 33: mavio.capi.v1.Request.get_account:type_name -> mavio.capi.v1.GetAccount
+	32,  // 34: mavio.capi.v1.Request.sync_account:type_name -> mavio.capi.v1.SyncAccount
+	33,  // 35: mavio.capi.v1.Request.sign_out:type_name -> mavio.capi.v1.SignOut
+	10,  // 36: mavio.capi.v1.Open.device:type_name -> mavio.capi.v1.Device
+	88,  // 37: mavio.capi.v1.Open.tokens:type_name -> mavio.capi.v1.Open.TokensEntry
+	0,   // 38: mavio.capi.v1.ListLibraryItems.sort:type_name -> mavio.capi.v1.Sort
+	39,  // 39: mavio.capi.v1.ListLibraryItems.filter:type_name -> mavio.capi.v1.Filter
+	45,  // 40: mavio.capi.v1.Play.options:type_name -> mavio.capi.v1.PlaybackOptions
+	49,  // 41: mavio.capi.v1.Message.error:type_name -> mavio.capi.v1.Error
+	50,  // 42: mavio.capi.v1.Message.done:type_name -> mavio.capi.v1.Done
+	51,  // 43: mavio.capi.v1.Message.server_info:type_name -> mavio.capi.v1.ServerInfo
+	55,  // 44: mavio.capi.v1.Message.server:type_name -> mavio.capi.v1.ServerRecord
+	56,  // 45: mavio.capi.v1.Message.servers:type_name -> mavio.capi.v1.Servers
+	80,  // 46: mavio.capi.v1.Message.event:type_name -> mavio.capi.v1.Event
+	57,  // 47: mavio.capi.v1.Message.found_servers:type_name -> mavio.capi.v1.FoundServers
+	59,  // 48: mavio.capi.v1.Message.quick_connect:type_name -> mavio.capi.v1.QuickConnect
+	68,  // 49: mavio.capi.v1.Message.rows:type_name -> mavio.capi.v1.Rows
+	69,  // 50: mavio.capi.v1.Message.page:type_name -> mavio.capi.v1.Page
+	71,  // 51: mavio.capi.v1.Message.libraries:type_name -> mavio.capi.v1.Libraries
+	75,  // 52: mavio.capi.v1.Message.details:type_name -> mavio.capi.v1.Details
+	76,  // 53: mavio.capi.v1.Message.search_results:type_name -> mavio.capi.v1.SearchResults
+	78,  // 54: mavio.capi.v1.Message.playback:type_name -> mavio.capi.v1.Playback
+	52,  // 55: mavio.capi.v1.Message.account:type_name -> mavio.capi.v1.Account
+	53,  // 56: mavio.capi.v1.Message.account_sign_in:type_name -> mavio.capi.v1.AccountSignIn
+	54,  // 57: mavio.capi.v1.Message.link_code:type_name -> mavio.capi.v1.LinkCode
+	6,   // 58: mavio.capi.v1.Error.code:type_name -> mavio.capi.v1.Error.Code
+	1,   // 59: mavio.capi.v1.ServerInfo.mode:type_name -> mavio.capi.v1.AccountMode
+	55,  // 60: mavio.capi.v1.Servers.servers:type_name -> mavio.capi.v1.ServerRecord
+	58,  // 61: mavio.capi.v1.FoundServers.servers:type_name -> mavio.capi.v1.FoundServer
+	51,  // 62: mavio.capi.v1.QuickConnect.server:type_name -> mavio.capi.v1.ServerInfo
+	2,   // 63: mavio.capi.v1.Card.kind:type_name -> mavio.capi.v1.CardKind
+	60,  // 64: mavio.capi.v1.Card.poster:type_name -> mavio.capi.v1.Artwork
+	60,  // 65: mavio.capi.v1.Card.thumb:type_name -> mavio.capi.v1.Artwork
+	61,  // 66: mavio.capi.v1.Card.versions:type_name -> mavio.capi.v1.Version
+	89,  // 67: mavio.capi.v1.TitleCard.external_ids:type_name -> mavio.capi.v1.TitleCard.ExternalIdsEntry
+	61,  // 68: mavio.capi.v1.TitleCard.available:type_name -> mavio.capi.v1.Version
+	3,   // 69: mavio.capi.v1.Row.kind:type_name -> mavio.capi.v1.RowKind
+	65,  // 70: mavio.capi.v1.Row.items:type_name -> mavio.capi.v1.Cards
+	66,  // 71: mavio.capi.v1.Row.titles:type_name -> mavio.capi.v1.TitleCards
+	67,  // 72: mavio.capi.v1.Row.loading:type_name -> mavio.capi.v1.Loading
+	62,  // 73: mavio.capi.v1.Cards.cards:type_name -> mavio.capi.v1.Card
+	63,  // 74: mavio.capi.v1.TitleCards.titles:type_name -> mavio.capi.v1.TitleCard
+	64,  // 75: mavio.capi.v1.Rows.rows:type_name -> mavio.capi.v1.Row
+	62,  // 76: mavio.capi.v1.Page.cards:type_name -> mavio.capi.v1.Card
+	4,   // 77: mavio.capi.v1.Library.kind:type_name -> mavio.capi.v1.LibraryType
+	70,  // 78: mavio.capi.v1.Libraries.libraries:type_name -> mavio.capi.v1.Library
+	60,  // 79: mavio.capi.v1.Credit.photo:type_name -> mavio.capi.v1.Artwork
+	74,  // 80: mavio.capi.v1.Source.audio:type_name -> mavio.capi.v1.AudioStream
+	62,  // 81: mavio.capi.v1.Details.card:type_name -> mavio.capi.v1.Card
+	60,  // 82: mavio.capi.v1.Details.backdrop:type_name -> mavio.capi.v1.Artwork
+	60,  // 83: mavio.capi.v1.Details.logo:type_name -> mavio.capi.v1.Artwork
+	72,  // 84: mavio.capi.v1.Details.credits:type_name -> mavio.capi.v1.Credit
+	73,  // 85: mavio.capi.v1.Details.sources:type_name -> mavio.capi.v1.Source
+	62,  // 86: mavio.capi.v1.Details.children:type_name -> mavio.capi.v1.Card
+	62,  // 87: mavio.capi.v1.Details.similar:type_name -> mavio.capi.v1.Card
+	77,  // 88: mavio.capi.v1.SearchResults.servers:type_name -> mavio.capi.v1.ServerResults
+	62,  // 89: mavio.capi.v1.ServerResults.cards:type_name -> mavio.capi.v1.Card
+	5,   // 90: mavio.capi.v1.Playback.kind:type_name -> mavio.capi.v1.PlayKind
+	79,  // 91: mavio.capi.v1.Playback.subtitles:type_name -> mavio.capi.v1.SubtitleTrack
+	82,  // 92: mavio.capi.v1.Event.state:type_name -> mavio.capi.v1.StreamState
+	83,  // 93: mavio.capi.v1.Event.connected:type_name -> mavio.capi.v1.Connected
+	84,  // 94: mavio.capi.v1.Event.library_changed:type_name -> mavio.capi.v1.LibraryChanged
+	85,  // 95: mavio.capi.v1.Event.user_data_changed:type_name -> mavio.capi.v1.UserDataChanged
+	86,  // 96: mavio.capi.v1.Event.sessions_changed:type_name -> mavio.capi.v1.SessionsChanged
+	87,  // 97: mavio.capi.v1.Event.token_changed:type_name -> mavio.capi.v1.TokenChanged
+	81,  // 98: mavio.capi.v1.Event.servers_changed:type_name -> mavio.capi.v1.ServersChanged
+	7,   // 99: mavio.capi.v1.StreamState.state:type_name -> mavio.capi.v1.StreamState.State
+	100, // [100:100] is the sub-list for method output_type
+	100, // [100:100] is the sub-list for method input_type
+	100, // [100:100] is the sub-list for extension type_name
+	100, // [100:100] is the sub-list for extension extendee
+	0,   // [0:100] is the sub-list for field type_name
 }
 
 func init() { file_mavio_capi_v1_capi_proto_init() }
@@ -9787,8 +11381,17 @@ func file_mavio_capi_v1_capi_proto_init() {
 		(*request_Play)(nil),
 		(*request_UpdatePlayback)(nil),
 		(*request_StopPlayback)(nil),
+		(*request_StartAccountSignIn)(nil),
+		(*request_FinishAccountSignIn)(nil),
+		(*request_CancelAccountSignIn)(nil),
+		(*request_StartLink)(nil),
+		(*request_PollLink)(nil),
+		(*request_CancelLink)(nil),
+		(*request_GetAccount)(nil),
+		(*request_SyncAccount)(nil),
+		(*request_SignOut)(nil),
 	}
-	file_mavio_capi_v1_capi_proto_msgTypes[31].OneofWrappers = []any{
+	file_mavio_capi_v1_capi_proto_msgTypes[40].OneofWrappers = []any{
 		(*message_Error)(nil),
 		(*message_Done)(nil),
 		(*message_Version)(nil),
@@ -9804,28 +11407,32 @@ func file_mavio_capi_v1_capi_proto_init() {
 		(*message_Details)(nil),
 		(*message_SearchResults)(nil),
 		(*message_Playback)(nil),
+		(*message_Account)(nil),
+		(*message_AccountSignIn)(nil),
+		(*message_LinkCode)(nil),
 	}
-	file_mavio_capi_v1_capi_proto_msgTypes[44].OneofWrappers = []any{
+	file_mavio_capi_v1_capi_proto_msgTypes[56].OneofWrappers = []any{
 		(*row_Items)(nil),
 		(*row_Titles)(nil),
 		(*row_Loading)(nil),
 		(*row_Unavailable)(nil),
 	}
-	file_mavio_capi_v1_capi_proto_msgTypes[60].OneofWrappers = []any{
+	file_mavio_capi_v1_capi_proto_msgTypes[72].OneofWrappers = []any{
 		(*event_State)(nil),
 		(*event_Connected)(nil),
 		(*event_LibraryChanged)(nil),
 		(*event_UserDataChanged)(nil),
 		(*event_SessionsChanged)(nil),
 		(*event_TokenChanged)(nil),
+		(*event_ServersChanged)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mavio_capi_v1_capi_proto_rawDesc), len(file_mavio_capi_v1_capi_proto_rawDesc)),
-			NumEnums:      7,
-			NumMessages:   69,
+			NumEnums:      8,
+			NumMessages:   82,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

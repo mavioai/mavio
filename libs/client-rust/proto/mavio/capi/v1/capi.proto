@@ -40,6 +40,15 @@ message Request {
     Play play = 25;
     UpdatePlayback update_playback = 26;
     StopPlayback stop_playback = 27;
+    StartAccountSignIn start_account_sign_in = 28;
+    FinishAccountSignIn finish_account_sign_in = 29;
+    CancelAccountSignIn cancel_account_sign_in = 30;
+    StartLink start_link = 31;
+    PollLink poll_link = 32;
+    CancelLink cancel_link = 33;
+    GetAccount get_account = 34;
+    SyncAccount sync_account = 35;
+    SignOut sign_out = 36;
   }
 }
 
@@ -137,6 +146,57 @@ message AuthorizeQuickConnect {
   string server_id = 1;
   string code = 2;
 }
+
+// Starts signing a Mavio account in in the browser, at the mavio.dev whose
+// API is api, as client_id, such as dev.mavio.desktop: answered with an
+// AccountSignIn, whose page the app opens.
+message StartAccountSignIn {
+  string api = 1;
+  string client_id = 2;
+}
+
+// Waits for the browser to come back from a sign-in, then signs the
+// account in and follows its servers: answered with the Account, or with
+// CODE_PERMISSION_DENIED when the account declined.
+message FinishAccountSignIn {
+  uint64 request = 1;
+}
+
+// Gives up a sign-in in the browser; its FinishAccountSignIn answers
+// CODE_NOT_FOUND.
+message CancelAccountSignIn {
+  uint64 request = 1;
+}
+
+// Starts signing a Mavio account in with a link code, at the mavio.dev
+// whose API is api, as client_id: answered with a LinkCode.
+message StartLink {
+  string api = 1;
+  string client_id = 2;
+}
+
+// Asks whether a link code was approved: answered with the Account signed
+// in once it was, after following its servers, which ends the request, or
+// with Done while it waits; an expired code is CODE_NOT_FOUND.
+message PollLink {
+  uint64 request = 1;
+}
+
+// Gives up a link code.
+message CancelLink {
+  uint64 request = 1;
+}
+
+// Answered with the Mavio account signed in, whose id is empty without
+// one.
+message GetAccount {}
+
+// Follows the Mavio account's servers now.
+message SyncAccount {}
+
+// Signs out of the Mavio account and its servers, or of every server
+// signed in to without one, forgetting them.
+message SignOut {}
 
 // Loads Home from every server at once: answered with Rows, all of them,
 // each time a server answers, marked more, then with Done.
@@ -281,6 +341,9 @@ message Message {
     Details details = 15;
     SearchResults search_results = 16;
     Playback playback = 17;
+    Account account = 18;
+    AccountSignIn account_sign_in = 19;
+    LinkCode link_code = 20;
   }
   // More Messages answer the call after this one.
   bool more = 9;
@@ -322,6 +385,52 @@ message ServerInfo {
   // The server has no user yet, and the first one is created instead of
   // signing in.
   bool setup_required = 5;
+  AccountMode mode = 6;
+  // The API of the mavio.dev the server's accounts are kept by, in
+  // ACCOUNT_MODE_MAVIO_DEV.
+  string mavio_dev_url = 7;
+}
+
+// Who a server's users are.
+enum AccountMode {
+  // The server's setup has not chosen yet.
+  ACCOUNT_MODE_UNSPECIFIED = 0;
+  // The server keeps its own users, who sign in with a password.
+  ACCOUNT_MODE_STANDALONE = 1;
+  // Every user is a Mavio account, signed in at mavio.dev.
+  ACCOUNT_MODE_MAVIO_DEV = 2;
+}
+
+// The Mavio account signed in.
+message Account {
+  string id = 1;
+  // Its display name, or its user name without one.
+  string name = 2;
+  // The API of the mavio.dev it is kept by.
+  string api = 3;
+}
+
+// A sign-in in the browser.
+message AccountSignIn {
+  // The request's number, for FinishAccountSignIn.
+  uint64 request = 1;
+  // The page of mavio.dev to open.
+  string url = 2;
+}
+
+// A link code to show, with a QR code of verification_uri_complete.
+message LinkCode {
+  // The request's number, for PollLink.
+  uint64 request = 1;
+  string user_code = 2;
+  // Where to enter the code.
+  string verification_uri = 3;
+  // The same with the code filled in.
+  string verification_uri_complete = 4;
+  // When the code expires, in milliseconds since the Unix epoch.
+  int64 expires_ms = 5;
+  // How often to poll.
+  uint32 interval_ms = 6;
 }
 
 // A server the device is signed in to.
@@ -711,8 +820,13 @@ message Event {
     UserDataChanged user_data_changed = 5;
     SessionsChanged sessions_changed = 6;
     TokenChanged token_changed = 7;
+    ServersChanged servers_changed = 8;
   }
 }
+
+// The servers changed as the Mavio account's servers were followed; the
+// app lists them again. Its server_id is empty.
+message ServersChanged {}
 
 // The server's stream came up or went down, or the server signed the
 // device out.

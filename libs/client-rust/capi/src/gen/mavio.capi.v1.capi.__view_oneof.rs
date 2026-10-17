@@ -141,6 +141,51 @@ pub mod request {
                 super::super::super::super::__buffa::view::StopPlaybackView<'a>,
             >,
         ),
+        StartAccountSignIn(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::StartAccountSignInView<'a>,
+            >,
+        ),
+        FinishAccountSignIn(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::FinishAccountSignInView<'a>,
+            >,
+        ),
+        CancelAccountSignIn(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CancelAccountSignInView<'a>,
+            >,
+        ),
+        StartLink(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::StartLinkView<'a>,
+            >,
+        ),
+        PollLink(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::PollLinkView<'a>,
+            >,
+        ),
+        CancelLink(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::CancelLinkView<'a>,
+            >,
+        ),
+        GetAccount(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::GetAccountView<'a>,
+            >,
+        ),
+        SyncAccount(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SyncAccountView<'a>,
+            >,
+        ),
+        SignOut(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::SignOutView<'a>,
+            >,
+        ),
     }
 }
 pub mod message {
@@ -219,6 +264,21 @@ pub mod message {
                 super::super::super::super::__buffa::view::PlaybackView<'a>,
             >,
         ),
+        Account(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::AccountView<'a>,
+            >,
+        ),
+        AccountSignIn(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::AccountSignInView<'a>,
+            >,
+        ),
+        LinkCode(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::LinkCodeView<'a>,
+            >,
+        ),
     }
 }
 pub mod row {
@@ -277,6 +337,11 @@ pub mod event {
         TokenChanged(
             ::buffa::alloc::boxed::Box<
                 super::super::super::super::__buffa::view::TokenChangedView<'a>,
+            >,
+        ),
+        ServersChanged(
+            ::buffa::alloc::boxed::Box<
+                super::super::super::super::__buffa::view::ServersChangedView<'a>,
             >,
         ),
     }

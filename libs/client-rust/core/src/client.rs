@@ -17,6 +17,7 @@ use mavio_api::proto::mavio::session::v1::Event;
 use mavio_api::proto::mavio::user::v1::UpdateUserDataRequest;
 use tokio::task::{JoinHandle, JoinSet};
 
+use crate::account::{Account, BrowserSignIn, LinkCode};
 use crate::connection::Connection;
 use crate::downloads::Downloads;
 use crate::error::{Error, Result};
@@ -54,6 +55,9 @@ pub trait Listener: Send + Sync {
     /// A server sent an event, such as a change of the user's data, after
     /// which the app reloads what it shows of it.
     fn event(&self, server_id: &str, event: &Event);
+    /// The servers changed as the Mavio account's servers were followed,
+    /// after which the app reloads them.
+    fn servers_changed(&self) {}
 }
 
 /// Receives Home as it fills in.
@@ -300,7 +304,46 @@ pub struct Core {
     reporter: Reporter,
     downloads: Downloads,
     relay: Arc<Relay>,
-    streams: Mutex<HashMap<String, JoinHandle<()>>>,
+    streams: Arc<Streams>,
+}
+
+/// The event streams followed, by server.
+type Streams = Mutex<HashMap<String, JoinHandle<()>>>;
+
+/// Follows a server's event stream unless it is followed already.
+fn follow(streams: &Streams, servers: &Arc<Servers>, relay: &Arc<Relay>, server_id: &str) {
+    let mut streams = streams.lock().unwrap_or_else(|e| e.into_inner());
+    if streams.get(server_id).is_some_and(|t| !t.is_finished()) {
+        return;
+    }
+    let task = events::spawn(servers.clone(), server_id.to_owned(), relay.clone());
+    streams.insert(server_id.to_owned(), task);
+}
+
+/// Follows the Mavio account's servers, then their event streams, stopping
+/// those of the servers removed.
+async fn sync_account(streams: &Streams, servers: &Arc<Servers>, relay: &Arc<Relay>) -> Result<()> {
+    if !servers.sync_account().await? {
+        return Ok(());
+    }
+    let list = servers.list()?;
+    streams
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .retain(|id, task| {
+            let keep = list.iter().any(|s| &s.id == id);
+            if !keep {
+                task.abort();
+            }
+            keep
+        });
+    for s in &list {
+        if servers.signed_in(&s.id) {
+            follow(streams, servers, relay, &s.id);
+        }
+    }
+    relay.listener.servers_changed();
+    Ok(())
 }
 
 /// Passes the streams' events on to the app, replaying missed progress
@@ -335,14 +378,7 @@ impl EventSink for Relay {
 
 impl Drop for Core {
     fn drop(&mut self) {
-        for (_, task) in self
-            .streams
-            .get_mut()
-            .unwrap_or_else(|e| e.into_inner())
-            .drain()
-        {
-            task.abort();
-        }
+        self.stop();
     }
 }
 
@@ -372,7 +408,7 @@ impl Core {
             store,
             servers,
             reporter,
-            streams: Mutex::default(),
+            streams: Arc::default(),
         }
     }
 
@@ -420,13 +456,25 @@ impl Core {
             .collect())
     }
 
-    /// Follows the event streams of every signed-in server; the app calls
-    /// it when it comes to the foreground.
+    /// Follows the event streams of every signed-in server, and in the
+    /// background the Mavio account's servers; the app calls it when it
+    /// comes to the foreground.
     pub fn start(&self) -> Result<()> {
         for s in self.servers.list()? {
             if self.servers.signed_in(&s.id) {
                 self.follow(&s.id);
             }
+        }
+        if self.servers.account().is_some() {
+            let (streams, servers, relay) = (
+                self.streams.clone(),
+                self.servers.clone(),
+                self.relay.clone(),
+            );
+            tokio::spawn(async move {
+                // A failure leaves the servers for the next start.
+                let _ = sync_account(&streams, &servers, &relay).await;
+            });
         }
         Ok(())
     }
@@ -445,16 +493,7 @@ impl Core {
     }
 
     fn follow(&self, server_id: &str) {
-        let mut streams = self.streams.lock().unwrap_or_else(|e| e.into_inner());
-        if streams.get(server_id).is_some_and(|t| !t.is_finished()) {
-            return;
-        }
-        let task = events::spawn(
-            self.servers.clone(),
-            server_id.to_owned(),
-            self.relay.clone(),
-        );
-        streams.insert(server_id.to_owned(), task);
+        follow(&self.streams, &self.servers, &self.relay, server_id);
     }
 
     /// The state of a server's stream, unknown before it first connects.
@@ -510,6 +549,58 @@ impl Core {
             task.abort();
         }
         self.servers.remove(server_id).await
+    }
+
+    /// The Mavio account signed in, if any.
+    pub fn account(&self) -> Option<Account> {
+        self.servers.account()
+    }
+
+    /// Starts signing a Mavio account in with a link code.
+    pub async fn start_link(&self, api: &str, client_id: &str) -> Result<LinkCode> {
+        self.servers.start_link(api, client_id).await
+    }
+
+    /// Asks whether a link code was approved; once it was, signs the
+    /// account in and follows its servers.
+    pub async fn poll_link(&self, link: &LinkCode) -> Result<Option<Account>> {
+        let a = self.servers.poll_link(link).await?;
+        if a.is_some() {
+            self.sync_account().await?;
+        }
+        Ok(a)
+    }
+
+    /// Starts signing a Mavio account in in the browser.
+    pub async fn start_browser_sign_in(&self, api: &str, client_id: &str) -> Result<BrowserSignIn> {
+        self.servers.start_browser_sign_in(api, client_id).await
+    }
+
+    /// Waits for the browser to come back, signs the account in and
+    /// follows its servers.
+    pub async fn finish_browser_sign_in(&self, sign_in: &BrowserSignIn) -> Result<Account> {
+        let a = self.servers.finish_browser_sign_in(sign_in).await?;
+        self.sync_account().await?;
+        Ok(a)
+    }
+
+    /// Follows the Mavio account's servers now.
+    pub async fn sync_account(&self) -> Result<()> {
+        sync_account(&self.streams, &self.servers, &self.relay).await
+    }
+
+    /// Signs out: of the Mavio account and its servers, or of every server
+    /// signed in to without one, forgetting them with what they kept
+    /// offline.
+    pub async fn sign_out(&self) -> Result<()> {
+        self.stop();
+        if self.servers.account().is_some() {
+            return self.servers.sign_out_account().await;
+        }
+        for s in self.servers.list()? {
+            self.servers.remove(&s.id).await?;
+        }
+        Ok(())
     }
 
     /// The connection to resolve a server's paths, signed out when the
