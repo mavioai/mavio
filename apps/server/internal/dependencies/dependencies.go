@@ -392,8 +392,9 @@ func (s *Service) PluginRemoved(ctx context.Context, id string) {
 }
 
 // Reconcile removes the containers the server runs for dependencies no
-// longer declared or no longer managed; their volumes stay. It does
-// nothing without an engine.
+// longer declared or no longer managed, their volumes staying, and stops
+// those of plugins not running that a server before left running. It
+// does nothing without an engine.
 func (s *Service) Reconcile(ctx context.Context) error {
 	sup, err := s.supervisor(ctx)
 	if err != nil {
@@ -428,7 +429,12 @@ func (s *Service) Reconcile(ctx context.Context) error {
 		}
 		return names[name]
 	}
-	errs = append(errs, sup.Reconcile(ctx, keep))
+	started := func(plugin string) bool {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		return s.started[plugin]
+	}
+	errs = append(errs, sup.Reconcile(ctx, keep, started))
 	return errors.Join(errs...)
 }
 

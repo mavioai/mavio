@@ -429,8 +429,10 @@ func (s *Supervisor) each(ctx context.Context, plugin, name string, f func(Conta
 
 // Reconcile removes the containers the server created for dependencies
 // keep rejects, those no longer declared or no longer managed; their
-// volumes stay.
-func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name string) bool) error {
+// volumes stay. It stops those it keeps that run with nothing running
+// them, left by a server that ended without stopping them, whose plugin
+// started reports not running.
+func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name string) bool, started func(plugin string) bool) error {
 	cs, err := s.o.Engine.ListContainers(ctx, s.labels("", ""))
 	if err != nil {
 		return err
@@ -439,6 +441,17 @@ func (s *Supervisor) Reconcile(ctx context.Context, keep func(plugin, name strin
 	for _, c := range cs {
 		plugin, name := c.Labels[LabelPlugin], c.Labels[LabelDependency]
 		if keep(plugin, name) {
+			if c.State != "running" || started(plugin) {
+				continue
+			}
+			if _, runs := s.Status(plugin, name); runs {
+				continue
+			}
+			if err := s.o.Engine.StopContainer(ctx, c.ID, stopTimeout); err != nil && !errors.Is(err, core.ErrNotFound) {
+				errs = append(errs, fmt.Errorf("stop container %s: %w", c.ID, err))
+				continue
+			}
+			s.o.Logger.InfoContext(ctx, "stopped the container of a plugin not running", "plugin", plugin, "dependency", name)
 			continue
 		}
 		s.forget(plugin, name)

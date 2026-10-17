@@ -219,7 +219,11 @@ func (e *Engine) ListContainers(_ context.Context, labels map[string]string) ([]
 	for _, name := range slices.Sorted(maps.Keys(e.containers)) {
 		c := e.containers[name]
 		if matches(c.spec.Labels, labels) {
-			out = append(out, containers.ContainerSummary{ID: c.id, Names: []string{"/" + name}, Labels: c.spec.Labels})
+			state := "exited"
+			if c.running {
+				state = "running"
+			}
+			out = append(out, containers.ContainerSummary{ID: c.id, Names: []string{"/" + name}, Labels: c.spec.Labels, State: state})
 		}
 	}
 	return out, nil

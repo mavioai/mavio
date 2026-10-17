@@ -252,6 +252,42 @@ func TestSupervisorInContainer(t *testing.T) {
 	})
 }
 
+func TestSupervisorReconcileStopsLeftRunning(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		e, h, c := containerstest.New(), &health{}, &changes{}
+		// A server ended without stopping its container.
+		before := newTestSupervisor(e, h, c)
+		before.Start(whisper())
+		synctest.Wait()
+		e.Took()
+
+		s := newTestSupervisor(e, h, c)
+		keep := func(string, string) bool { return true }
+		ctx := context.Background()
+		// Its plugin runs: the container is left for it.
+		if err := s.Reconcile(ctx, keep, func(string) bool { return true }); err != nil {
+			t.Fatal(err)
+		}
+		if got := e.Took(); len(got) != 0 {
+			t.Errorf("calls of Reconcile for a plugin running = %q, want none", got)
+		}
+		// Its plugin does not run: the container stops, and stays.
+		if err := s.Reconcile(ctx, keep, func(string) bool { return false }); err != nil {
+			t.Fatal(err)
+		}
+		if got, want := e.Took(), []string{"stop mavio-voice-whisper"}; !slices.Equal(got, want) {
+			t.Errorf("calls of Reconcile for a plugin not running = %q, want %q", got, want)
+		}
+		if _, running, ok := e.Spec("mavio-voice-whisper"); !ok || running {
+			t.Errorf("container exists = %v, runs = %v; want it stopped and kept", ok, running)
+		}
+		// End the earlier server's run, whose container is stopped already.
+		if err := before.Close(ctx); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func TestSupervisorRemoveAndReconcile(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		e, h, c := containerstest.New(), &health{}, &changes{}
@@ -279,7 +315,7 @@ func TestSupervisorRemoveAndReconcile(t *testing.T) {
 		}
 
 		// Reconcile removes the containers keep rejects.
-		err := s.Reconcile(ctx, func(plugin, name string) bool { return plugin == "dev.mavio.voice" })
+		err := s.Reconcile(ctx, func(plugin, name string) bool { return plugin == "dev.mavio.voice" }, func(string) bool { return true })
 		if err != nil {
 			t.Fatal(err)
 		}
