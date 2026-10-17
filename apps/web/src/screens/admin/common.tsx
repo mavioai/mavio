@@ -89,6 +89,31 @@ export function BackLink({ section, label }: { section: string; label: string })
   );
 }
 
+/**
+ * The last row of a group, adding to what it lists: a link to the
+ * section's page of the new one, or a button.
+ */
+export function AddRow({ label, search, onClick }: { label: string; search?: SettingsSearch; onClick?: () => void }) {
+  const cur = useSearch({ strict: false }) as SettingsSearch;
+  const { section } = useParams({ strict: false });
+  const className = "flex min-h-13 w-full items-center gap-3 px-4 py-2.5 text-left type-body text-accent-text hover:tint";
+  const content = (
+    <>
+      <Icon name="add" size={20} />
+      {label}
+    </>
+  );
+  return search ? (
+    <Link to="/settings/$section" params={{ section: section ?? "" }} search={{ server: cur.server, ...search }} className={className}>
+      {content}
+    </Link>
+  ) : (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+}
+
 /** A row linking to a page of the section shown, or of another section, or of Plugins for a plugin. */
 export function PageLink({
   search,

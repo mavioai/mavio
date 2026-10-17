@@ -217,11 +217,6 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
       title={c.title || t("conversations.untitled")}
       message={`${c.model} (${c.provider}) · ${usageOf(c.usage)}`}
       back={back}
-      actions={
-        <Button variant="plain" className="text-danger" onClick={() => setConfirming(true)}>
-          {t("conversations.delete")}
-        </Button>
-      }
     >
       {confirming && (
         <Confirm
@@ -271,6 +266,11 @@ function ConversationPage({ server, id, first, onFirstSent }: { server: ServerEn
         />
         <Button disabled={!text.trim() || sending} onClick={submit}>
           {sending ? "…" : t("conversations.send")}
+        </Button>
+      </div>
+      <div>
+        <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
+          {t("conversations.delete")}
         </Button>
       </div>
     </Page>

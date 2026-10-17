@@ -35,7 +35,7 @@ import { Avatar, Button, Group, Row } from "../../ui.tsx";
 import { Checkbox, NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import type { SettingsSearch } from "../settings.tsx";
-import { BackLink, Page } from "./common.tsx";
+import { AddRow, BackLink, Page } from "./common.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
 import { useUnsavedGuard } from "../../controls/unsaved.tsx";
@@ -68,20 +68,6 @@ export function UsersSection({ server }: { server: ServerEntry }) {
   return <UserList server={server} />;
 }
 
-function LinkButton({ search, icon, children }: { search: SettingsSearch; icon: "add"; children: string }) {
-  return (
-    <Link
-      to="/settings/$section"
-      params={{ section: "users" }}
-      search={search}
-      className="inline-flex min-h-11 items-center gap-2 rounded-md bg-button px-4 type-headline text-on-button hover:opacity-85"
-    >
-      <Icon name={icon} size={18} />
-      {children}
-    </Link>
-  );
-}
-
 function UserList({ server }: { server: ServerEntry }) {
   const cur = useSearch({ strict: false }) as SettingsSearch;
   const users = useUsers(server);
@@ -91,10 +77,9 @@ function UserList({ server }: { server: ServerEntry }) {
     <Page
       title={t("settings.users")}
       message={standalone ? t("users.message") : t("users.messageMavioDev")}
-      actions={standalone && <LinkButton search={{ server: cur.server, user: "new" }} icon="add">{t("users.add")}</LinkButton>}
     >
       {users.isError && <p className="type-callout text-danger">{errorMessage(users.error)}</p>}
-      {list.length > 0 && (
+      {(list.length > 0 || standalone) && (
         <Group>
           {list.map((u) => (
             <Link
@@ -117,6 +102,7 @@ function UserList({ server }: { server: ServerEntry }) {
               <Icon name="forward" size={16} className="text-text-tertiary" />
             </Link>
           ))}
+          {standalone && users.isSuccess && <AddRow label={t("users.add")} search={{ user: "new" }} />}
         </Group>
       )}
       {standalone && <Invitations server={server} users={users.data ?? []} />}
@@ -381,13 +367,6 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
         </span>
       }
       message={!standalone && t("users.mavioDevNote")}
-      actions={
-        deletable && (
-          <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
-            {t("action.delete")}
-          </Button>
-        )
-      }
     >
       {confirming && (
         <Confirm
@@ -508,6 +487,13 @@ function UserForm({ server, user }: { server: ServerEntry; user: User }) {
         {actions.update.isError && <span className="type-callout text-danger">{errorMessage(actions.update.error)}</span>}
       </div>
       {standalone && <SignIns server={server} user={user} />}
+      {deletable && (
+        <div>
+          <Button variant="secondary" className="text-danger" onClick={() => setConfirming(true)}>
+            {t("action.delete")}
+          </Button>
+        </div>
+      )}
     </Page>
   );
 }

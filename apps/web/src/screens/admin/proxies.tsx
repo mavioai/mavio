@@ -14,7 +14,7 @@ import { NumberField, Switch } from "../../controls/inputs.tsx";
 import { Select } from "../../controls/select.tsx";
 import { input } from "../../controls/styles.ts";
 import { Confirm } from "../../controls/dialog.tsx";
-import { ColorTile, Page } from "./common.tsx";
+import { AddRow, ColorTile, Page } from "./common.tsx";
 
 /** The kinds of proxies, by the scheme of their addresses. */
 const kinds: { value: string; kind: ProxyKind; label: string }[] = [
@@ -41,14 +41,6 @@ export function ProxiesSection({ server }: { server: ServerEntry }) {
     <Page
       title={t("settings.proxies")}
       message={t("proxies.message")}
-      actions={
-        editing === undefined &&
-        list.isSuccess && (
-          <Button variant="secondary" onClick={() => setEditing("")}>
-            {t("proxies.add")}
-          </Button>
-        )
-      }
     >
       {system && (
         <Group footer={t("proxies.systemFooter")}>
@@ -66,6 +58,7 @@ export function ProxiesSection({ server }: { server: ServerEntry }) {
         )}
         {list.isSuccess && own.length === 0 && editing !== "" && <p className="px-4 py-3 type-callout text-text-secondary">{t("proxies.empty")}</p>}
         {list.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(list.error)}</p>}
+        {editing === undefined && list.isSuccess && <AddRow label={t("proxies.add")} onClick={() => setEditing("")} />}
       </Group>
       <ServerRequests server={server} />
     </Page>

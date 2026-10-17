@@ -210,7 +210,7 @@ export function SettingsScreen() {
     // as does a menu left with one.
     if (!chosen?.known) return null;
     const ids = menuItems(section, chosen);
-    if (compact && ids.length > 1) return <MenuList menu={section} ids={ids} />;
+    if (compact && ids.length > 1) return <MenuList menu={section} ids={ids} chosen={chosen} />;
     return ids[0] ? (
       <Navigate to="/settings/$section" params={{ section: ids[0] }} search={{ server: search.server }} replace />
     ) : (
@@ -475,12 +475,16 @@ function Members({ server }: { server: ServerEntry }) {
  * A menu on a phone and a television: its sections, below a link back to
  * the list on a phone; the television's Back returns to the list.
  */
-function MenuList({ menu, ids }: { menu: MenuId; ids: SectionId[] }) {
+function MenuList({ menu, ids, chosen }: { menu: MenuId; ids: SectionId[]; chosen: Chosen }) {
   const tv = usePrefs().tv;
   return (
     <div className={`mx-auto flex min-h-screen flex-col gap-6 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
       {!tv && <UpLink />}
-      <h1 className="type-display">{menus[menu].title()}</h1>
+      {/* The menus are the server's: their title names the server chosen. */}
+      <div className="flex items-center gap-4">
+        <h1 className="min-w-0 flex-1 type-display">{menus[menu].title()}</h1>
+        <ServerChoice chosen={chosen} place="title" />
+      </div>
       <Group>
         {ids.map((s) => (
           <EntryRow key={s} id={s} />
