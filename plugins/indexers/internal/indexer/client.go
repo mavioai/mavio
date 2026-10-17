@@ -81,13 +81,6 @@ func (c *Client) wait(ctx context.Context, host string, interval time.Duration) 
 	return sleep(ctx, at.Sub(now))
 }
 
-// local reports the hosts reached directly whichever the proxy, as
-// Prowlarr's BypassLocalAddresses: those of this machine and the local
-// network.
-var local = proxy.Bypass([]string{
-	"<local>", "localhost", "127.0.0.0/8", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
-})
-
 // transport returns the transport through a proxy. A configuration
 // replaces its plugin's proxies, sessions with them, and their
 // transports.
@@ -103,7 +96,7 @@ func (c *Client) transport(p *pluginv1.Proxy) http.RoundTripper {
 	}
 	t := c.transports[key]
 	if t == nil {
-		t = proxy.Transport(p, local)
+		t = proxy.Transport(p, proxy.Local)
 		c.transports[key] = t
 	}
 	return t

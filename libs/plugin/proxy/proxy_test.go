@@ -59,6 +59,26 @@ func TestBypass(t *testing.T) {
 	}
 }
 
+func TestLocal(t *testing.T) {
+	for host, want := range map[string]bool{
+		"localhost:8080":     true,
+		"nas:8080":           true,
+		"127.0.0.1":          true,
+		"[::1]:80":           true,
+		"10.1.2.3":           true,
+		"172.20.0.5:9696":    true,
+		"192.168.31.1":       true,
+		"[fd00::1]:80":       true,
+		"172.32.0.1":         false,
+		"api.themoviedb.org": false,
+		"8.8.8.8":            false,
+	} {
+		if got := Local(host); got != want {
+			t.Errorf("Local(%q) got = %v, want = %v", host, got, want)
+		}
+	}
+}
+
 func TestURL(t *testing.T) {
 	for _, tc := range []struct {
 		p    *pluginv1.Proxy

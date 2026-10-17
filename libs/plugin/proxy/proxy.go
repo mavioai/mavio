@@ -96,6 +96,16 @@ func Bypass(hosts []string) func(host string) bool {
 	}
 }
 
+// Local reports whether a host is one of this machine or of the local
+// network, which Prowlarr's BypassLocalAddresses reaches directly
+// whichever the proxy: names without a dot, localhost, and loopback and
+// private addresses.
+func Local(host string) bool { return local(host) }
+
+var local = Bypass([]string{
+	"<local>", "localhost", "127.0.0.0/8", "::1/128", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7",
+})
+
 // Transport returns a transport through p, a direct one for nil and for
 // a system proxy setting none, reaching directly the hosts p's bypass
 // list and bypass report; bypass may be nil.

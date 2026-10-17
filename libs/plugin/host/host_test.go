@@ -16,6 +16,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -201,6 +202,31 @@ func TestFetchPermissions(t *testing.T) {
 		t.Errorf("denied fetch error = %v", err)
 	}
 }
+
+func TestFetchingPlugin(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "fetched")
+	}))
+	t.Cleanup(srv.Close)
+	u, _ := url.Parse(srv.URL)
+	var plugin atomic.Value
+	p := openWith(t, "wasm", func(o *host.Options) {
+		o.WASM.FetchClient = &http.Client{Transport: roundTripper(func(r *http.Request) (*http.Response, error) {
+			plugin.Store(wasm.FetchingPlugin(r.Context()))
+			return http.DefaultTransport.RoundTrip(r)
+		})}
+	}, u.Hostname())
+	if _, err := search(t.Context(), p, "fetch:"+srv.URL+"/a"); err != nil {
+		t.Fatalf("fetch: %v", err)
+	}
+	if got := plugin.Load(); got != "dev.mavio.testplugin" {
+		t.Errorf("FetchingPlugin() got = %v, want = dev.mavio.testplugin", got)
+	}
+}
+
+type roundTripper func(*http.Request) (*http.Response, error)
+
+func (f roundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestHostAPI(t *testing.T) {
 	eachRuntime(t, func(t *testing.T, rt string) {
