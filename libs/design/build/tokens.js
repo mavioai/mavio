@@ -7,6 +7,12 @@ export const THEMES = ['dark', 'light'];
 export const TYPE_SCALES = ['standard', 'tv'];
 export const FORM_FACTORS = ['phone', 'tablet', 'desktop', 'tv'];
 
+// The smallest window widths of the layouts, in points (CSS px). Below tablet
+// the phone layout applies; from tablet the desktop layout, with its sidebar
+// collapsed to a rail until expanded (the window size classes of
+// docs/clients.md §6.3); desktop switches to the desktop sizes.
+export const BREAKPOINTS = { tablet: 600, expanded: 840, desktop: 1200 };
+
 // Text color pairs that must meet WCAG AA (4.5:1) in every theme.
 const CONTRAST_PAIRS = [
   ['textPrimary', 'background'],

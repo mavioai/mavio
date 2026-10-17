@@ -260,3 +260,10 @@ var (
 		FocusScale:  1.05,
 	}
 )
+
+// The smallest window widths, in points, of the tablet layout, of the expanded sidebar and of the desktop sizes.
+const (
+	BreakpointTablet   = 600
+	BreakpointExpanded = 840
+	BreakpointDesktop  = 1200
+)

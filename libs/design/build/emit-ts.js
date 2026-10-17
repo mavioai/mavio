@@ -1,11 +1,7 @@
 // Writes gen/ts: tokens.ts, tokens.css, icons.ts and strings.ts for the web UI.
 import { HEADER, hex, write } from './util.js';
 import { entriesFor } from './strings.js';
-
-// CSS px. Below tablet the phone layout applies; from tablet the desktop
-// layout, with its sidebar collapsed to a rail until expanded (the window size
-// classes of docs/clients.md §6.3); desktop switches to the desktop sizes.
-const BREAKPOINTS = { tablet: 600, expanded: 840, desktop: 1200 };
+import { BREAKPOINTS } from './tokens.js';
 
 const json = (v) => JSON.stringify(v, null, 2);
 

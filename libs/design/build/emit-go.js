@@ -1,7 +1,8 @@
-// Writes gen/go, the Go package design, for the Windows and Linux app:
+// Writes gen/go, the Go package design, for the desktop app:
 // tokens, icon path data and the strings with their formatter.
 import { HEADER, num, pascal, write } from './util.js';
 import { entriesFor, formParts, SOURCE_LOCALE } from './strings.js';
+import { BREAKPOINTS } from './tokens.js';
 
 const PKG = 'package design';
 const head = () => `${HEADER('//')}\n\n${PKG}`;
@@ -74,6 +75,8 @@ ${vars('The easing curves of motion.', 'Easing', t.easing, (e) => `Easing{${e.ma
 ${structType('Layout', 'Layout holds the layout values of a form factor, in points (FocusScale is a factor).', Object.keys(t.layout.phone), 'float32')}
 
 ${vars('The layouts of the form factors.', '', Object.fromEntries(Object.entries(t.layout).map(([k, v]) => [`${k}Layout`, v])), (l) => `Layout{\n${fields(l, num, '\t\t')}\n\t}`)}
+
+${consts('The smallest window widths, in points, of the tablet layout, of the expanded sidebar and of the desktop sizes.', 'Breakpoint', BREAKPOINTS, num)}
 `.replace(/\n{3,}/g, '\n\n');
 }
 
