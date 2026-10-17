@@ -132,7 +132,8 @@ func (a *App) Start() {
 			if err != nil {
 				slog.ErrorContext(a.ctx, "list the servers", "error", err)
 			}
-			if acc.HasAccount() {
+			// Without a Mavio account, the core answers with an empty one.
+			if acc.GetAccount().GetId() != "" {
 				a.account = acc.GetAccount()
 			}
 			a.setServers(m.GetServers().GetServers())
