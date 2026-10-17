@@ -307,7 +307,7 @@ func (o Ordered[V]) Get(key string) (V, bool) {
 // by form, and its single search path as a list of paths.
 func Parse(data []byte) (*Definition, error) {
 	var d Definition
-	if err := yaml.Unmarshal(data, &d); err != nil {
+	if err := yaml.Unmarshal(solidusEscapes(data), &d); err != nil {
 		return nil, fmt.Errorf("parse definition: %w", err)
 	}
 	if d.Settings == nil {
