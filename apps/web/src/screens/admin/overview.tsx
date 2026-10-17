@@ -52,8 +52,14 @@ function ServerInfo({ server }: { server: ServerEntry }) {
       {fact(t("overview.platform"), i && `${i.os}/${i.arch}`)}
       {fact(t("overview.database"), i && (i.database === "postgres" ? "PostgreSQL" : i.database === "sqlite" ? "SQLite" : i.database))}
       {fact(t("overview.ffmpeg"), i && (i.ffmpegVersion || t("overview.ffmpegMissing")))}
-      {fact(t("overview.containerEngine"), engine)}
-      {fact(t("overview.containerEngineEndpoint"), rt?.available ? rt.endpoint : undefined)}
+      {engine && (
+        <Row label={t("overview.containerEngine")}>
+          <span className="flex min-w-0 flex-col items-end text-right type-callout text-text-secondary">
+            <span className="break-all">{engine}</span>
+            {rt?.available && <span className="break-all type-footnote">{rt.endpoint}</span>}
+          </span>
+        </Row>
+      )}
       {fact(t("overview.uptime"), i?.startTime && lengthOf(Date.now() - timestampDate(i.startTime).getTime()))}
       {info.isError && <p className="px-4 py-3 type-callout text-danger">{errorMessage(info.error)}</p>}
     </Group>
