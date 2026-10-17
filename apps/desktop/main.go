@@ -14,7 +14,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/egoist/mygo"
@@ -25,6 +27,7 @@ import (
 
 	"github.com/mavioai/mavio/apps/desktop/internal/app"
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
+	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/secrets"
 )
 
@@ -107,6 +110,15 @@ func run() error {
 			win.Update(fn)
 		}
 	}
+	// libmpv loads as the first video plays: on macOS after MoltenVK,
+	// which it links.
+	mpvLibrary := sync.OnceValues(func() (*mpv.Library, error) {
+		var deps []string
+		if runtime.GOOS == "darwin" {
+			deps = append(deps, library(resources, "MoltenVK"))
+		}
+		return mpv.Load(library(resources, mpvName[runtime.GOOS]), deps...)
+	})
 	loader := images.New(ctx, &http.Client{Timeout: 30 * time.Second}, filepath.Join(cacheDir, "images"), 600, update)
 	a = app.New(ctx, app.Options{
 		Core:          client,
@@ -116,6 +128,16 @@ func run() error {
 		SetAppearance: setAppearance,
 		OpenURL:       mygo.Shell.OpenExternal,
 		MavioDev:      cmp.Or(os.Getenv("MAVIO_DEV_URL"), "https://mavio.dev/api"),
+		NewVideo: func(changed func(mpv.State)) (app.Video, error) {
+			return newVideo(win, mpvLibrary, changed)
+		},
+		KeepAwake: func(reason string) func() { return mygo.Power.KeepAwake(reason, true) },
+		ToggleFullScreen: func() {
+			if win != nil {
+				win.ToggleFullScreen()
+			}
+		},
+		IsFullScreen: func() bool { return win != nil && win.IsFullScreen() },
 	})
 	setAppearance(a.Appearance())
 
@@ -145,6 +167,9 @@ func run() error {
 	})
 	return mygo.App.Run()
 }
+
+// mpvName is the name of libmpv's shared library, as library takes it.
+var mpvName = map[string]string{"darwin": "mpv.2", "windows": "mpv-2", "linux": "mpv"}
 
 // platforms names the operating systems.
 var platforms = map[string]string{"darwin": "macOS", "windows": "Windows", "linux": "Linux"}
@@ -181,6 +206,63 @@ func library(resources, name string) string {
 		}
 	}
 	return filepath.Join(resources, "lib", name)
+}
+
+// loadMPV loads the libmpv the app ships with, once.
+
+// video is a video view of the window that mpv draws into.
+type video struct {
+	*mpv.Player
+	view *mygo.VideoView
+}
+
+func (v video) View() ui.NativeVideoView { return v.view }
+
+// Close stops mpv, then closes its view.
+func (v video) Close() {
+	v.Player.Close()
+	v.view.Destroy()
+}
+
+// newVideo makes a video view of win with mpv drawing into it.
+func newVideo(win *mygo.Window, mpvLibrary func() (*mpv.Library, error), changed func(mpv.State)) (app.Video, error) {
+	lib, err := mpvLibrary()
+	if err != nil {
+		return nil, err
+	}
+	view, err := win.NewVideoView()
+	if err != nil {
+		return nil, err
+	}
+	options := [][2]string{
+		{"config", "no"},
+		{"terminal", "no"},
+		{"wid", strconv.FormatUint(uint64(view.Handle()), 10)},
+		{"vo", "gpu-next"},
+		{"hwdec", "auto-safe"},
+		// HDR goes out as it is, through EDR on the Mac.
+		{"target-colorspace-hint", "yes"},
+		{"idle", "yes"},
+		{"force-window", "yes"},
+		{"keep-open", "no"},
+		// The app's controller takes the pointer and the keyboard.
+		{"input-default-bindings", "no"},
+		{"input-vo-keyboard", "no"},
+		{"input-cursor", "no"},
+		{"cursor-autohide", "no"},
+		{"osd-level", "0"},
+		{"sub-auto", "no"},
+		{"audio-display", "no"},
+	}
+	if runtime.GOOS == "darwin" {
+		options = append(options, [2]string{"gpu-api", "vulkan"}, [2]string{"gpu-context", "macvk"})
+	}
+	p, err := lib.New(options, changed)
+	if err != nil {
+		view.Destroy()
+		return nil, err
+	}
+	return video{Player: p, view: view}, nil
 }
 
 // deviceID returns the installation's ID, made the first time.

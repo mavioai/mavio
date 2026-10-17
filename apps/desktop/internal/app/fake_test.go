@@ -23,6 +23,7 @@ import (
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
+	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 )
 
 // screens is the fixed data of the snapshot tests, libs/design/snapshots/screens.json.
@@ -65,8 +66,9 @@ type fakeCore struct {
 	images  string // the artwork server's URL
 	servers []*capiv1.ServerRecord
 
-	mu    sync.Mutex
-	calls []string
+	mu       sync.Mutex
+	calls    []string
+	requests []*capiv1.Request
 }
 
 func newFakeCore(s *screens, images string, signedIn bool) *fakeCore {
@@ -139,6 +141,7 @@ func (f *fakeCore) Call(ctx context.Context, req *capiv1.Request) (*capiv1.Messa
 func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*capiv1.Message)) (*capiv1.Message, error) {
 	f.mu.Lock()
 	f.calls = append(f.calls, req.WhichKind().String())
+	f.requests = append(f.requests, req)
 	f.mu.Unlock()
 	m := capiv1.Message_builder{}
 	switch {
@@ -203,7 +206,36 @@ func (f *fakeCore) Stream(ctx context.Context, req *capiv1.Request, part func(*c
 			Overview: "A made-up title of the snapshot tests, whose overview runs long enough to wrap over a few lines of the details.",
 			Genres:   []string{"Drama", "Science Fiction"}, OfficialRating: "PG-13", CommunityRating: new(float32(7.8)),
 			Backdrop: f.artwork(id + "-thumb"),
+			Sources: []*capiv1.Source{capiv1.Source_builder{
+				ServerId: f.s.Server.ID, ItemId: id, MediaSourceId: id + "-source", Name: "1080p", Container: "mkv",
+				Audio: []*capiv1.AudioStream{
+					capiv1.AudioStream_builder{Index: 1, Language: "eng", Title: "English Stereo", Codec: "aac", Channels: 2}.Build(),
+					capiv1.AudioStream_builder{Index: 2, Language: "jpn", Codec: "ac3", Channels: 6}.Build(),
+				},
+			}.Build()},
 		}.Build()
+	case req.HasPlay():
+		play := req.GetPlay()
+		pb := capiv1.Playback_builder{
+			Session: uint64(len(f.requests)), Url: "http://mavio.test/videos/" + play.GetItemId(),
+			MediaSourceId: play.GetItemId() + "-source", AudioStreamIndex: new(int32(1)), SubtitleStreamIndex: new(int32(3)),
+			Subtitles: []*capiv1.SubtitleTrack{
+				capiv1.SubtitleTrack_builder{StreamIndex: 3, Language: "eng", Format: "subrip", Default: true}.Build(),
+				capiv1.SubtitleTrack_builder{StreamIndex: 4, Language: "jpn", Format: "ass", Forced: true}.Build(),
+			},
+		}
+		if o := play.GetOptions(); o.HasAudioStreamIndex() {
+			pb.AudioStreamIndex = new(o.GetAudioStreamIndex())
+		}
+		if o := play.GetOptions(); o.HasSubtitleStreamIndex() {
+			pb.SubtitleStreamIndex = new(o.GetSubtitleStreamIndex())
+		}
+		if o := play.GetOptions(); o.HasStartPositionMs() {
+			pb.StartPositionMs = new(o.GetStartPositionMs())
+		}
+		m.Playback = pb.Build()
+	case req.HasUpdatePlayback(), req.HasStopPlayback():
+		m.Done = &capiv1.Done{}
 	case req.HasSearch():
 		var cards []*capiv1.Card
 		q := strings.ToLower(req.GetSearch().GetQuery())
@@ -279,6 +311,8 @@ type harness struct {
 	core    *fakeCore
 	tt      *ui.Tester
 	updates chan func()
+	// video is the player's latest video.
+	video *fakeVideo
 }
 
 func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
@@ -292,6 +326,10 @@ func newHarness(t testing.TB, signedIn bool, width, height int) *harness {
 		Core:   h.core,
 		Images: images.New(ctx, srv.Client(), t.TempDir(), 200, update),
 		Update: update,
+		NewVideo: func(changed func(mpv.State)) (Video, error) {
+			h.video = &fakeVideo{changed: changed}
+			return h.video, nil
+		},
 	})
 	h.tt = ui.NewTester(h.app.View, width, height)
 	h.app.Start()

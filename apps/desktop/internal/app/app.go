@@ -14,6 +14,7 @@ import (
 	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
 
 	"github.com/mavioai/mavio/apps/desktop/internal/images"
+	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
 	"github.com/mavioai/mavio/apps/desktop/internal/style"
 )
 
@@ -52,6 +53,16 @@ type Options struct {
 	OpenURL func(string) error
 	// MavioDev is the API of the mavio.dev Mavio accounts sign in at.
 	MavioDev string
+	// NewVideo makes a video to play in, which tells of its changes from
+	// its own goroutine; nil plays nothing.
+	NewVideo func(changed func(mpv.State)) (Video, error)
+	// KeepAwake keeps the display awake, for a reason the system shows,
+	// until release is called.
+	KeepAwake func(reason string) (release func())
+	// ToggleFullScreen enters or leaves full screen; IsFullScreen tells
+	// which.
+	ToggleFullScreen func()
+	IsFullScreen     func() bool
 }
 
 // phase is where the app is: starting, signing in, or showing the
@@ -70,6 +81,8 @@ type preferences struct {
 	SidebarCollapsed bool       `json:"sidebarCollapsed,omitempty"`
 	// TV is the TV mode (docs/tv.md).
 	TV bool `json:"tv,omitempty"`
+	// Quality is the key of the quality played, of qualities.
+	Quality string `json:"quality,omitempty"`
 }
 
 // App is the app's state, owned by the main thread.
@@ -80,6 +93,8 @@ type App struct {
 	router *ui.Router
 
 	phase phase
+	// player is what plays, if anything.
+	player *player
 	// account is the Mavio account signed in, if any.
 	account *capiv1.Account
 	servers []*capiv1.ServerRecord
@@ -286,6 +301,10 @@ func (a *App) View(c *ui.Context) {
 	case phaseSignIn:
 		a.signInView(c)
 	default:
+		if a.player != nil {
+			a.playerView(c)
+			return
+		}
 		a.shell(c)
 	}
 }

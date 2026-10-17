@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -233,9 +234,15 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 	card := d.GetCard()
 	white := ui.RGB(255, 255, 255)
 	target, label, position := card, "", d.GetPositionMs()
+	// The episodes after the target, which play in a row.
+	var following []*capiv1.Card
 	switch card.GetKind() {
 	case capiv1.CardKind_CARD_KIND_SERIES, capiv1.CardKind_CARD_KIND_SEASON:
-		target = nextEpisode(a.episodesOf(st, d))
+		episodes := a.episodesOf(st, d)
+		target = nextEpisode(episodes)
+		if i := slices.Index(episodes, target); i >= 0 {
+			following = episodes[i+1:]
+		}
 		position = 0
 		if target != nil {
 			name := episodeName(c, target)
@@ -265,7 +272,7 @@ func (a *App) actions(c *ui.Context, st *detailsState, d *capiv1.Details) {
 				if target == card {
 					opts.StartPositionMs = new(position)
 				}
-				a.play(target.GetServerId(), target.GetItemId(), opts.Build())
+				a.play(target.GetServerId(), target.GetItemId(), opts.Build(), following...)
 			}
 			if position > 0 && target == card && overButton(c, "retry", style.T(c, "item.fromStart"), false).Clicked() {
 				a.play(card.GetServerId(), card.GetItemId(), capiv1.PlaybackOptions_builder{MediaSourceId: source, StartPositionMs: new(int64(0))}.Build())

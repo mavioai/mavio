@@ -1,0 +1,180 @@
+package app
+
+import (
+	"slices"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/egoist/mygo/ui"
+
+	capiv1 "github.com/mavioai/mavio/libs/client-rust/capi/gen/mavio/capi/v1"
+
+	"github.com/mavioai/mavio/apps/desktop/internal/mpv"
+)
+
+// fakeVideo records what the player asks of mpv, whose state the test
+// sends with emit.
+type fakeVideo struct {
+	changed func(mpv.State)
+
+	mu       sync.Mutex
+	loads    []string
+	commands []string
+	closed   bool
+}
+
+func (v *fakeVideo) View() ui.NativeVideoView { return nil }
+
+func (v *fakeVideo) Load(url string, start time.Duration) error {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.loads = append(v.loads, url+"@"+start.String())
+	return nil
+}
+
+func (v *fakeVideo) Command(args ...string) error {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.commands = append(v.commands, strings.Join(args, " "))
+	return nil
+}
+
+func (v *fakeVideo) Set(name, value string) error { return v.Command("set", name, value) }
+
+func (v *fakeVideo) Close() {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.closed = true
+}
+
+func (v *fakeVideo) emit(s mpv.State) { v.changed(s) }
+
+func (v *fakeVideo) has(command string) bool {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	return slices.Contains(v.commands, command)
+}
+
+// tracks are the tracks of the fake core's sources as mpv lists them.
+var tracks = []mpv.Track{
+	{ID: 1, Type: "video", Index: 0, Selected: true},
+	{ID: 1, Type: "audio", Index: 1, Language: "eng", Title: "English Stereo", Selected: true},
+	{ID: 2, Type: "audio", Index: 2, Language: "jpn"},
+	{ID: 1, Type: "sub", Index: 3, Language: "eng"},
+	{ID: 2, Type: "sub", Index: 4, Language: "jpn"},
+}
+
+// requests returns the fake core's requests of a kind.
+func (f *fakeCore) requestsOf(has func(*capiv1.Request) bool) []*capiv1.Request {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	var rs []*capiv1.Request
+	for _, r := range f.requests {
+		if has(r) {
+			rs = append(rs, r)
+		}
+	}
+	return rs
+}
+
+func TestPlayer(t *testing.T) {
+	h := newHarness(t, true, 1280, 800)
+	server := h.core.s.Server.ID
+	next := capiv1.Card_builder{ServerId: server, ItemId: "atlas-s2e4", Kind: capiv1.CardKind_CARD_KIND_EPISODE, Title: "Next"}.Build()
+	start := int64(12 * time.Minute / time.Millisecond)
+	h.app.play(server, "atlas-s2e3", capiv1.PlaybackOptions_builder{StartPositionMs: &start}.Build(), next)
+	h.settle()
+	v := h.video
+	if got, want := v.loads, []string{"http://mavio.test/videos/atlas-s2e3@12m0s"}; !slices.Equal(got, want) {
+		t.Fatalf("loads = %q, want = %q", got, want)
+	}
+	plays := h.core.requestsOf((*capiv1.Request).HasPlay)
+	if len(plays) != 1 || plays[0].GetPlay().GetOptions().GetMaxBitrate() != 40_000_000 || len(plays[0].GetPlay().GetCapabilities()) == 0 {
+		t.Fatalf("plays = %v, want = one with the auto quality and capabilities", plays)
+	}
+
+	playing := mpv.State{Loaded: true, Position: 12 * time.Minute, Duration: 42 * time.Minute, Speed: 1, Tracks: tracks}
+	v.emit(playing)
+	h.settle()
+	for _, want := range []string{"set aid 1", "set sid 1"} {
+		if !v.has(want) {
+			t.Errorf("commands = %q, want %q", v.commands, want)
+		}
+	}
+	if !h.tt.HasText("Atlas Station · S2:E3") {
+		t.Errorf("texts = %q, want the episode's series", h.tt.Texts())
+	}
+	updates := h.core.requestsOf((*capiv1.Request).HasUpdatePlayback)
+	if len(updates) != 1 || updates[0].GetUpdatePlayback().GetPositionMs() != start {
+		t.Errorf("updates = %v, want = one at %d", updates, start)
+	}
+	h.save(shots, "player")
+
+	h.tt.Key(0, ui.KeySpace)
+	h.settle()
+	if !v.has("set pause yes") {
+		t.Errorf("commands = %q, want the pause", v.commands)
+	}
+	h.tt.Key(0, ui.KeyRight)
+	h.settle()
+	if !v.has("seek 730.000 absolute+exact") {
+		t.Errorf("commands = %q, want a seek 10 s later", v.commands)
+	}
+
+	for _, tab := range []struct {
+		tab  panelTab
+		name string
+		text string
+	}{
+		{tabAudio, "player-audio", "English Stereo"},
+		{tabSubtitles, "player-subtitles", "Off"},
+		{tabQuality, "player-quality", "720p"},
+	} {
+		h.app.player.panel = tab.tab
+		h.settle()
+		if !h.tt.HasText(tab.text) {
+			t.Errorf("%s texts = %q, want %q", tab.name, h.tt.Texts(), tab.text)
+		}
+		h.save(shots, tab.name)
+	}
+	// A quality restarts the playback where it is.
+	if err := h.tt.Click("720p"); err != nil {
+		t.Fatal(err)
+	}
+	h.settle()
+	plays = h.core.requestsOf((*capiv1.Request).HasPlay)
+	if len(plays) != 2 {
+		t.Fatalf("plays = %d, want = 2", len(plays))
+	}
+	if o := plays[1].GetPlay().GetOptions(); o.GetMaxBitrate() != 4_000_000 || o.GetStartPositionMs() != (12*time.Minute+10*time.Second).Milliseconds() {
+		t.Errorf("options = %v, want = 720p from 12:10", o)
+	}
+	if stops := h.core.requestsOf((*capiv1.Request).HasStopPlayback); len(stops) != 1 || !stops[0].GetStopPlayback().HasPositionMs() {
+		t.Errorf("stops = %v, want = one at a position", stops)
+	}
+
+	// The end plays the next episode.
+	v.emit(mpv.State{Ended: true, Position: 42 * time.Minute, Duration: 42 * time.Minute, Tracks: tracks})
+	h.settle()
+	stops := h.core.requestsOf((*capiv1.Request).HasStopPlayback)
+	if len(stops) != 2 || stops[1].GetStopPlayback().HasPositionMs() {
+		t.Errorf("stops = %v, want a second one played to the end", stops)
+	}
+	if !v.closed {
+		t.Error("the ended video did not close")
+	}
+	plays = h.core.requestsOf((*capiv1.Request).HasPlay)
+	if got := plays[len(plays)-1].GetPlay().GetItemId(); got != "atlas-s2e4" {
+		t.Errorf("played = %s, want = atlas-s2e4", got)
+	}
+
+	// Escape leaves the player.
+	h.app.player.panel = tabNone
+	h.tt.Key(0, ui.KeyEscape)
+	h.settle()
+	if h.app.player != nil {
+		t.Error("Escape did not close the player")
+	}
+}

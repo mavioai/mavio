@@ -741,6 +741,9 @@ flowchart TD
 - [ ] Apple TV and Android TV apps
 - [ ] Mac app
 - [ ] Desktop app (macOS, Windows and Linux)
+  - [x] On macOS: sign-in as the web UI does (a link code with its QR code, and TV mode), Home, libraries, details and search, and the player: libmpv loaded with purego into MyGo's video element, direct play and HLS as the server decides from the app's capabilities, audio, subtitles and their offset, speed and quality, the keyboard shortcuts, progress reported and resumed, and the season's next episodes played in turn; tested with a fake core and a fake video, and libmpv's binding with a fixture
+  - [ ] The player's Picture in Picture, chapters and trickplay thumbnails, the next episode beyond the season, and hiding the pointer with the controls (MyGo has no hidden cursor yet); Now Playing and the media keys
+  - [ ] Development builds signed ad hoc ask for the keychain after every rebuild; sign them with a stable development identity
   - [ ] Television mode beyond sign-in: the top navigation, remote focus and the television's screens ([Television](tv.md))
   - [ ] Downloads, Discover and requests, the assistant, settings, person pages, and switching users with PINs
   - [ ] Tried on Windows and Linux; signed and notarized on macOS; the app's icon
