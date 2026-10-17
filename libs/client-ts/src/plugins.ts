@@ -3,7 +3,7 @@
 // updating, uninstalling, enabling and disabling them, and the catalogs.
 import type { ContainerMode } from "@mavio/proto/mavio/plugin/v1/container_pb";
 import { UserService } from "@mavio/proto/mavio/user/v1/user_pb";
-import { PluginManagementService } from "@mavio/proto/mavio/system/v1/plugin_pb";
+import { type PluginConfigOption, PluginManagementService } from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { SystemService } from "@mavio/proto/mavio/system/v1/system_pb";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -78,6 +78,24 @@ export function usePluginContainers(server: ServerEntry, id: string, enabled = t
   });
 }
 
+/**
+ * The options of the sources a plugin's configuration schema names
+ * (x-mavio-options), by source: undefined while they load or when they
+ * cannot be had.
+ */
+export function usePluginConfigOptions(server: ServerEntry, id: string, sources: string[]): (source: string) => PluginConfigOption[] | undefined {
+  const servers = useServersStore();
+  const options = useQueries({
+    queries: sources.map((source) => ({
+      queryKey: serverKey(server.id, "plugins", "options", id, source),
+      queryFn: async () => (await servers.client(PluginManagementService, server).listPluginConfigOptions({ pluginId: id, source })).options,
+      retry: false,
+    })),
+    combine: (results) => new Map(sources.map((s, i) => [s, results[i]?.data])),
+  });
+  return (source) => options.get(source);
+}
+
 /** What can be done to a server's plugins, each refreshing them when done. */
 export function usePluginActions(server: ServerEntry) {
   const servers = useServersStore();
@@ -93,7 +111,7 @@ export function usePluginActions(server: ServerEntry) {
       mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) => client().setPluginEnabled({ pluginId: id, enabled }),
       onSettled,
     }),
-    /** Sets a plugin's configuration, JSON its schema accepts. */
+    /** Sets a plugin's configuration, JSON its schema accepts; the response holds the configuration stored. */
     configure: useMutation({
       mutationFn: ({ id, config }: { id: string; config: string }) => client().setPluginConfig({ pluginId: id, configJson: config }),
       onSettled,

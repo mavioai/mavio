@@ -11,6 +11,7 @@ import {
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,
+  usePluginConfigOptions,
   usePluginContainers,
   usePlugins,
 } from "@mavio/client-ts";
@@ -29,7 +30,7 @@ import { type FormEvent, type ReactNode, useState } from "react";
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
 import { up } from "../shell/up.ts";
-import { type Schema, SchemaForm } from "../schema-form.tsx";
+import { optionSources, type Schema, SchemaForm } from "../schema-form.tsx";
 import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
@@ -456,6 +457,7 @@ function Configuration({ server, id, schema, page }: { server: ServerEntry; id: 
 
 function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: string; schema: Schema; saved: string }) {
   const actions = usePluginActions(server);
+  const options = usePluginConfigOptions(server, id, optionSources(schema));
   const [value, setValue] = useState<unknown>(() => (saved ? JSON.parse(saved) : {}));
   const [done, setDone] = useState(false);
   const text = JSON.stringify(value);
@@ -468,11 +470,12 @@ function ConfigForm({ server, id, schema, saved }: { server: ServerEntry; id: st
       onSubmit={(ev) => {
         ev.preventDefault();
         setDone(false);
-        actions.configure.mutate({ id, config: text }, { onSuccess: () => setDone(true) });
+        // The configuration stored holds the IDs the server generated.
+        actions.configure.mutate({ id, config: text }, { onSuccess: (r) => (setValue(JSON.parse(r.configJson)), setDone(true)) });
       }}
     >
       {guard.dialog}
-      <SchemaForm schema={schema} value={value} onChange={(v) => (setValue(v), setDone(false))} />
+      <SchemaForm schema={schema} value={value} options={options} onChange={(v) => (setValue(v), setDone(false))} />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={!changed || actions.configure.isPending}>
           {actions.configure.isPending ? "…" : t("action.save")}

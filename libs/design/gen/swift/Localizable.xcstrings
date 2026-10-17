@@ -8983,6 +8983,204 @@
         }
       }
     },
+    "schema.choose": {
+      "comment": "Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择"
+          }
+        }
+      }
+    },
+    "schema.noMatches": {
+      "comment": "Shown when no option of a plugin's configuration matches what was typed.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matches"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配项"
+          }
+        }
+      }
+    },
+    "schema.tagTorrent": {
+      "comment": "Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Torrent"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "种子"
+          }
+        }
+      }
+    },
+    "schema.tagUsenet": {
+      "comment": "Tag of an option of a plugin's configuration downloaded from Usenet.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usenet"
+          }
+        }
+      }
+    },
+    "schema.tagPublic": {
+      "comment": "Tag of an indexer anyone may use.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公开"
+          }
+        }
+      }
+    },
+    "schema.tagSemiPrivate": {
+      "comment": "Tag of an indexer anyone who signs up may use.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semi-private"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "半公开"
+          }
+        }
+      }
+    },
+    "schema.tagPrivate": {
+      "comment": "Tag of an indexer for members only, by invitation.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "私有"
+          }
+        }
+      }
+    },
+    "schema.all": {
+      "comment": "Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "schema.matches": {
+      "comment": "How many options of a plugin's configuration match the search and filters.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld option"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld options"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld 项"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schema.matchesFirst": {
+      "comment": "Shown when only some of the options matching the search are listed; typing more narrows them.",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First %1$@ of %2$@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示前 %1$@ 项，共 %2$@ 项"
+          }
+        }
+      }
+    },
     "libraries.message": {
       "comment": "Explanation under the Libraries settings section.",
       "extractionState": "manual",

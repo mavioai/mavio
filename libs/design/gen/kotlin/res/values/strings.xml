@@ -1000,6 +1000,29 @@
     <string name="schema_show">Show</string>
     <!-- Button hiding a secret revealed in a field. -->
     <string name="schema_hide">Hide</string>
+    <!-- Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them. -->
+    <string name="schema_choose">Choose</string>
+    <!-- Shown when no option of a plugin's configuration matches what was typed. -->
+    <string name="schema_no_matches">No matches</string>
+    <!-- Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind. -->
+    <string name="schema_tag_torrent">Torrent</string>
+    <!-- Tag of an option of a plugin's configuration downloaded from Usenet. -->
+    <string name="schema_tag_usenet">Usenet</string>
+    <!-- Tag of an indexer anyone may use. -->
+    <string name="schema_tag_public">Public</string>
+    <!-- Tag of an indexer anyone who signs up may use. -->
+    <string name="schema_tag_semi_private">Semi-private</string>
+    <!-- Tag of an indexer for members only, by invitation. -->
+    <string name="schema_tag_private">Private</string>
+    <!-- Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol. -->
+    <string name="schema_all">All</string>
+    <!-- How many options of a plugin's configuration match the search and filters. -->
+    <plurals name="schema_matches">
+        <item quantity="one">%d option</item>
+        <item quantity="other">%d options</item>
+    </plurals>
+    <!-- Shown when only some of the options matching the search are listed; typing more narrows them. -->
+    <string name="schema_matches_first">First %1$s of %2$s</string>
     <!-- Explanation under the Libraries settings section. -->
     <string name="libraries_message">The folders the server scans, each library of one kind of media.</string>
     <!-- Button and title of adding a library. -->

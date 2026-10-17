@@ -1,16 +1,18 @@
 // A form drawn from a JSON Schema, as plugins describe their configuration
-// (docs/plugins.md §4): objects as groups of rows, arrays of objects as
+// (docs/clients.md §6.3.3): objects as groups of rows, arrays of objects as
 // cards to add and remove, lists of strings as lines, enumerations as
-// choices, and what has no shape the form knows, such as an object of
-// arbitrary keys, as JSON.
-import { type ReactNode, useState } from "react";
+// choices, values of a source the schema names (x-mavio-options) as a
+// searchable choice whose option gives its settings' schema, and what has
+// no shape the form knows, such as an object of arbitrary keys, as JSON.
+// Properties the server generates are left out.
+import { createContext, type ReactNode, useContext, useState } from "react";
 
 import { Tip } from "./controls/tooltip.tsx";
-import { t } from "./i18n.ts";
+import { locale, t } from "./i18n.ts";
 import { Icon } from "./icon.tsx";
 import { Button } from "./ui.tsx";
 import { Checkbox, NumberField, Switch } from "./controls/inputs.tsx";
-import { Select } from "./controls/select.tsx";
+import { Picker, type PickerFilter, type PickerOption, type PickerTone, Select } from "./controls/select.tsx";
 
 /** The subset of JSON Schema the form draws. */
 export interface Schema {
@@ -26,6 +28,112 @@ export interface Schema {
   minimum?: number;
   maximum?: number;
   writeOnly?: boolean;
+  readOnly?: boolean;
+  oneOf?: Schema[];
+  const?: unknown;
+  "x-mavio-options"?: OptionsSpec;
+}
+
+/** Where a property's values come from, and the sibling properties a chosen option fills. */
+interface OptionsSpec {
+  source: string;
+  /** The property taking the chosen option's settings, by their schema. */
+  settings?: string;
+  /** The property given the chosen option's name while it has none of its own. */
+  name?: string;
+}
+
+/** A value of a source of options, with the schema of the settings it takes. */
+export interface SchemaOption {
+  value: string;
+  name: string;
+  description: string;
+  tags: string[];
+  settingsSchema: string;
+}
+
+/** The options of a source, undefined while they load or when they cannot be had. */
+type Options = (source: string) => SchemaOption[] | undefined;
+
+const OptionsContext = createContext<Options>(() => undefined);
+
+/** The sources of options a schema names. */
+export function optionSources(s: Schema): string[] {
+  const out = new Set<string>();
+  const walk = (s: Schema) => {
+    if (s["x-mavio-options"]) out.add(s["x-mavio-options"].source);
+    Object.values(s.properties ?? {}).forEach(walk);
+    if (s.items) walk(s.items);
+  };
+  walk(s);
+  return [...out];
+}
+
+/** Whether the server generates a property: a readOnly UUID. */
+const generated = (s: Schema) => s.readOnly === true && s.format === "uuid";
+
+/** The choices of an enumeration, of enum or of oneOf's constants with their titles. */
+function choices(s: Schema): { value: unknown; label: string }[] | undefined {
+  if (s.enum) return s.enum.map((v) => ({ value: v, label: String(v) }));
+  if (s.oneOf?.length && s.oneOf.every((c) => "const" in c)) return s.oneOf.map((c) => ({ value: c.const, label: c.title ?? String(c.const) }));
+  return undefined;
+}
+
+/** The tags of options a picker filters by, in groups, with their words and tones. */
+const tagGroups: { key: string; label: () => string; tone: PickerTone }[][] = [
+  [
+    { key: "torrent", label: () => t("schema.tagTorrent"), tone: "neutral" },
+    { key: "usenet", label: () => t("schema.tagUsenet"), tone: "neutral" },
+  ],
+  [
+    { key: "public", label: () => t("schema.tagPublic"), tone: "success" },
+    { key: "semi-private", label: () => t("schema.tagSemiPrivate"), tone: "warning" },
+    { key: "private", label: () => t("schema.tagPrivate"), tone: "danger" },
+  ],
+];
+
+const knownTags = new Map(tagGroups.flat().map((g) => [g.key, g]));
+
+/** A language's name without its region, the tag itself when it has none. */
+function languageName(tag: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: "language" }).of(new Intl.Locale(tag).language) ?? tag;
+  } catch {
+    return tag;
+  }
+}
+
+/** Options as a picker lists them, by name: protocol and privacy as badges, the language beside them. */
+function pickerOptions(list: SchemaOption[]): PickerOption[] {
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  return list.toSorted((a, b) => collator.compare(a.name, b.name)).map((o) => ({
+    value: o.value,
+    label: o.name,
+    detail: o.description,
+    meta: o.tags.filter((tag) => !knownTags.has(tag)).map(languageName).join(" · ") || undefined,
+    badges: o.tags.flatMap((tag) => {
+      const known = knownTags.get(tag);
+      return known ? [{ label: known.label(), tone: known.tone }] : [];
+    }),
+    keys: o.tags,
+  }));
+}
+
+/** The groups of filters a list of options can be told apart by, those of two tags or more. */
+function pickerFilters(list: SchemaOption[]): PickerFilter[][] {
+  const present = new Set(list.flatMap((o) => o.tags));
+  return tagGroups
+    .map((group) => group.filter((g) => present.has(g.key)).map((g) => ({ key: g.key, label: g.label() })))
+    .filter((group) => group.length > 1);
+}
+
+/** A schema of JSON, undefined when it does not parse. */
+function parseSchema(text: string): Schema | undefined {
+  try {
+    return JSON.parse(text) as Schema;
+  } catch {
+    return undefined;
+  }
 }
 
 type Json = unknown;
@@ -36,7 +144,7 @@ const isObj = (v: Json): v is Obj => typeof v === "object" && v !== null && !Arr
 function typeOf(s: Schema): string | undefined {
   if (Array.isArray(s.type)) return s.type.find((x) => x !== "null");
   if (s.type) return s.type;
-  if (s.enum) return "enum";
+  if (choices(s)) return "enum";
   if (s.properties) return "object";
   return undefined;
 }
@@ -77,14 +185,19 @@ function initial(s: Schema): Json {
 const input =
   "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";
 
-/** The form of a configuration object. */
-export function SchemaForm({ schema, value, onChange }: { schema: Schema; value: Json; onChange: (v: Json) => void }) {
-  return <ObjectFields schema={schema} value={isObj(value) ? value : {}} onChange={onChange} />;
+/** The form of a configuration object; options gives the values of the sources its schema names. */
+export function SchemaForm({ schema, value, onChange, options }: { schema: Schema; value: Json; onChange: (v: Json) => void; options?: Options }) {
+  return (
+    <OptionsContext value={options ?? (() => undefined)}>
+      <ObjectFields schema={schema} value={isObj(value) ? value : {}} onChange={onChange} />
+    </OptionsContext>
+  );
 }
 
 /** An object's properties, as the rows of a group. */
 function ObjectFields({ schema, value, onChange }: { schema: Schema; value: Obj; onChange: (v: Obj) => void }) {
-  const props = Object.entries(schema.properties ?? {});
+  const options = useContext(OptionsContext);
+  const props = Object.entries(schema.properties ?? {}).filter(([, p]) => !generated(p));
   if (props.length === 0) return <JsonField value={value} onChange={(v) => onChange(isObj(v) ? v : {})} />;
   const set = (k: string, v: Json) => {
     const next = { ...value };
@@ -92,11 +205,41 @@ function ObjectFields({ schema, value, onChange }: { schema: Schema; value: Obj;
     else next[k] = v;
     onChange(next);
   };
+  // The properties whose schema a chosen option gives, null when it takes
+  // no settings.
+  const given = new Map<string, Schema | null>();
+  for (const [k, p] of props) {
+    const spec = p["x-mavio-options"];
+    const chosen = spec?.settings ? options(spec.source)?.find((o) => o.value === value[k]) : undefined;
+    if (spec?.settings && chosen) given.set(spec.settings, (chosen.settingsSchema && parseSchema(chosen.settingsSchema)) || null);
+  }
+  // Choosing another option leaves the settings of the one before, and
+  // names the object after it while it bears that one's name or none.
+  const choose = (k: string, spec: OptionsSpec, list: SchemaOption[], v: string | undefined) => {
+    const before = list.find((o) => o.value === value[k]);
+    const after = list.find((o) => o.value === v);
+    const next = { ...value };
+    if (v === undefined) delete next[k];
+    else next[k] = v;
+    if (spec.settings && before?.value !== after?.value) delete next[spec.settings];
+    if (spec.name && after && (!next[spec.name] || next[spec.name] === before?.name)) next[spec.name] = after.name;
+    onChange(next);
+  };
   return (
     <div className="flex flex-col divide-y divide-border overflow-hidden rounded-[14px] bg-surface">
-      {props.map(([k, p]) => (
-        <Property key={k} name={k} schema={p} required={schema.required?.includes(k) ?? false} value={value[k]} onChange={(v) => set(k, v)} />
-      ))}
+      {props.map(([k, p]) => {
+        const required = schema.required?.includes(k) ?? false;
+        if (given.has(k)) {
+          const s = given.get(k);
+          if (!s?.properties || Object.keys(s.properties).length === 0) return null;
+          return <Property key={k} name={k} schema={{ ...s, title: p.title, description: p.description }} required value={value[k]} onChange={(v) => set(k, v)} />;
+        }
+        const spec = p["x-mavio-options"];
+        const list = spec && options(spec.source);
+        if (spec && list)
+          return <Property key={k} name={k} schema={p} required={required} value={value[k]} onChange={(v) => set(k, v)} choices={list} onChoose={(v) => choose(k, spec, list, v)} />;
+        return <Property key={k} name={k} schema={p} required={required} value={value[k]} onChange={(v) => set(k, v)} />;
+      })}
     </div>
   );
 }
@@ -108,12 +251,17 @@ function Property({
   required,
   value,
   onChange,
+  choices: list,
+  onChoose,
 }: {
   name: string;
   schema: Schema;
   required: boolean;
   value: Json;
   onChange: (v: Json) => void;
+  /** The options of the source the property's schema names, chosen by onChoose. */
+  choices?: SchemaOption[];
+  onChoose?: (v: string | undefined) => void;
 }) {
   const type = typeOf(s);
   const label = (
@@ -137,6 +285,26 @@ function Property({
       <div className="px-4">{control}</div>
     </div>
   );
+  if (list && onChoose)
+    return head(
+      <Picker
+        className="w-full sm:w-80"
+        label={labelOf(name, s)}
+        value={typeof value === "string" ? value : undefined}
+        options={pickerOptions(list)}
+        filters={pickerFilters(list)}
+        labels={{
+          placeholder: t("schema.choose"),
+          empty: t("schema.noMatches"),
+          all: t("schema.all"),
+          count: (count) => t("schema.matches", { count }),
+          first: (shown, count) => t("schema.matchesFirst", { shown, count }),
+        }}
+        onChange={onChoose}
+      />,
+    );
+  // Text shown to administrators, which takes no value.
+  if (s.readOnly && !type) return head();
   switch (type) {
     case "boolean":
       return head(
@@ -144,7 +312,7 @@ function Property({
       );
     case "enum":
     case "string":
-      if (s.enum) return head(<EnumField label={labelOf(name, s)} schema={s} required={required} value={value} onChange={onChange} />);
+      if (choices(s)) return head(<EnumField label={labelOf(name, s)} schema={s} required={required} value={value} onChange={onChange} />);
       return head(
         <div className="w-full sm:w-80">
           <TextField
@@ -192,7 +360,7 @@ function Property({
       const list = Array.isArray(value) ? value : [];
       const itemType = typeOf(items);
       if (itemType === "object" && items.properties) return below(<ObjectList schema={items} value={list} onChange={onChange} />);
-      if (items.enum) return below(<EnumSet schema={items} value={list} onChange={(v) => onChange(v.length ? v : undefined)} />);
+      if (choices(items)) return below(<EnumSet schema={items} value={list} onChange={(v) => onChange(v.length ? v : undefined)} />);
       if (itemType === "string" || itemType === "integer" || itemType === "number")
         return below(<Lines label={labelOf(name, s)} numeric={itemType !== "string"} value={list} onChange={(v) => onChange(v.length ? v : undefined)} />);
       return below(<JsonField value={value ?? []} onChange={onChange} />);
@@ -262,17 +430,18 @@ function EnumField({
   value: Json;
   onChange: (v: Json) => void;
 }) {
-  const options = s.enum ?? [];
-  const index = options.findIndex((o) => o === value);
+  const options = choices(s) ?? [];
+  const index = options.findIndex((o) => o.value === value);
+  const fallback = s.default !== undefined && (options.find((o) => o.value === s.default)?.label ?? String(s.default));
   return (
     <Select
       label={label}
       value={index < 0 ? "" : String(index)}
       options={[
-        ...(!required || index < 0 ? [{ value: "", label: s.default !== undefined ? t("schema.default", { value: String(s.default) }) : "—" }] : []),
-        ...options.map((o, i) => ({ value: String(i), label: String(o) })),
+        ...(!required || index < 0 ? [{ value: "", label: fallback ? t("schema.default", { value: fallback }) : "—" }] : []),
+        ...options.map((o, i) => ({ value: String(i), label: o.label })),
       ]}
-      onChange={(v) => onChange(v === "" ? undefined : options[Number(v)])}
+      onChange={(v) => onChange(v === "" ? undefined : options[Number(v)]?.value)}
     />
   );
 }
@@ -281,9 +450,9 @@ function EnumField({
 function EnumSet({ schema: s, value, onChange }: { schema: Schema; value: Json[]; onChange: (v: Json[]) => void }) {
   return (
     <div className="flex flex-wrap gap-x-5 gap-y-2">
-      {(s.enum ?? []).map((o) => (
-        <Checkbox key={String(o)} checked={value.includes(o)} onChange={(on) => onChange(on ? [...value, o] : value.filter((x) => x !== o))}>
-          {String(o)}
+      {(choices(s) ?? []).map((o) => (
+        <Checkbox key={String(o.value)} checked={value.includes(o.value)} onChange={(on) => onChange(on ? [...value, o.value] : value.filter((x) => x !== o.value))}>
+          {o.label}
         </Checkbox>
       ))}
     </div>

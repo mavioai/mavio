@@ -46,6 +46,8 @@
   --color-accent-text: var(--mavio-color-accent-text);
   --color-focus: var(--mavio-color-focus);
   --color-danger: var(--mavio-color-danger);
+  --color-success: var(--mavio-color-success);
+  --color-warning: var(--mavio-color-warning);
   --color-progress: var(--mavio-color-progress);
   --color-scrim: var(--mavio-color-scrim);
   --radius-xs: var(--mavio-radius-xs);

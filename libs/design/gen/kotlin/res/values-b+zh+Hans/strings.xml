@@ -505,6 +505,18 @@
     <string name="schema_default">默认（%s）</string>
     <string name="schema_show">显示</string>
     <string name="schema_hide">隐藏</string>
+    <string name="schema_choose">选择</string>
+    <string name="schema_no_matches">没有匹配项</string>
+    <string name="schema_tag_torrent">种子</string>
+    <string name="schema_tag_usenet">Usenet</string>
+    <string name="schema_tag_public">公开</string>
+    <string name="schema_tag_semi_private">半公开</string>
+    <string name="schema_tag_private">私有</string>
+    <string name="schema_all">全部</string>
+    <plurals name="schema_matches">
+        <item quantity="other">%d 项</item>
+    </plurals>
+    <string name="schema_matches_first">显示前 %1$s 项，共 %2$s 项</string>
     <string name="libraries_message">服务器扫描的文件夹，每个媒体库存放一类媒体。</string>
     <string name="libraries_add">添加媒体库</string>
     <string name="libraries_create">添加</string>

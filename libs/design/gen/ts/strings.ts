@@ -498,6 +498,16 @@ export type MessageKey =
   | 'schema.default'
   | 'schema.show'
   | 'schema.hide'
+  | 'schema.choose'
+  | 'schema.noMatches'
+  | 'schema.tagTorrent'
+  | 'schema.tagUsenet'
+  | 'schema.tagPublic'
+  | 'schema.tagSemiPrivate'
+  | 'schema.tagPrivate'
+  | 'schema.all'
+  | 'schema.matches'
+  | 'schema.matchesFirst'
   | 'libraries.message'
   | 'libraries.add'
   | 'libraries.create'
@@ -2307,6 +2317,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "schema.default": "Default ({value})",
     "schema.show": "Show",
     "schema.hide": "Hide",
+    "schema.choose": "Choose",
+    "schema.noMatches": "No matches",
+    "schema.tagTorrent": "Torrent",
+    "schema.tagUsenet": "Usenet",
+    "schema.tagPublic": "Public",
+    "schema.tagSemiPrivate": "Semi-private",
+    "schema.tagPrivate": "Private",
+    "schema.all": "All",
+    "schema.matches": "{count, plural, one {# option} other {# options}}",
+    "schema.matchesFirst": "First {shown} of {count}",
     "libraries.message": "The folders the server scans, each library of one kind of media.",
     "libraries.add": "Add Library",
     "libraries.create": "Add",
@@ -4114,6 +4134,16 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "schema.default": "默认（{value}）",
     "schema.show": "显示",
     "schema.hide": "隐藏",
+    "schema.choose": "选择",
+    "schema.noMatches": "没有匹配项",
+    "schema.tagTorrent": "种子",
+    "schema.tagUsenet": "Usenet",
+    "schema.tagPublic": "公开",
+    "schema.tagSemiPrivate": "半公开",
+    "schema.tagPrivate": "私有",
+    "schema.all": "全部",
+    "schema.matches": "{count, plural, other {# 项}}",
+    "schema.matchesFirst": "显示前 {shown} 项，共 {count} 项",
     "libraries.message": "服务器扫描的文件夹，每个媒体库存放一类媒体。",
     "libraries.add": "添加媒体库",
     "libraries.create": "添加",

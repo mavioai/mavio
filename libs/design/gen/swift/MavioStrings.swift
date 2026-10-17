@@ -1616,6 +1616,40 @@ public enum MavioStrings {
     /// Button hiding a secret revealed in a field.
     public static var schemaHide: String { NSLocalizedString("schema.hide", bundle: .module, comment: "") }
 
+    /// Placeholder of a field choosing one of many options in a plugin's configuration, such as an indexer's kind; typing searches them.
+    public static var schemaChoose: String { NSLocalizedString("schema.choose", bundle: .module, comment: "") }
+
+    /// Shown when no option of a plugin's configuration matches what was typed.
+    public static var schemaNoMatches: String { NSLocalizedString("schema.noMatches", bundle: .module, comment: "") }
+
+    /// Tag of an option of a plugin's configuration downloaded as torrents, such as an indexer's kind.
+    public static var schemaTagTorrent: String { NSLocalizedString("schema.tagTorrent", bundle: .module, comment: "") }
+
+    /// Tag of an option of a plugin's configuration downloaded from Usenet.
+    public static var schemaTagUsenet: String { NSLocalizedString("schema.tagUsenet", bundle: .module, comment: "") }
+
+    /// Tag of an indexer anyone may use.
+    public static var schemaTagPublic: String { NSLocalizedString("schema.tagPublic", bundle: .module, comment: "") }
+
+    /// Tag of an indexer anyone who signs up may use.
+    public static var schemaTagSemiPrivate: String { NSLocalizedString("schema.tagSemiPrivate", bundle: .module, comment: "") }
+
+    /// Tag of an indexer for members only, by invitation.
+    public static var schemaTagPrivate: String { NSLocalizedString("schema.tagPrivate", bundle: .module, comment: "") }
+
+    /// Filter of the options of a plugin's configuration showing them all, such as indexers of every protocol.
+    public static var schemaAll: String { NSLocalizedString("schema.all", bundle: .module, comment: "") }
+
+    /// How many options of a plugin's configuration match the search and filters.
+    public static func schemaMatches(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.matches", bundle: .module, comment: ""), count)
+    }
+
+    /// Shown when only some of the options matching the search are listed; typing more narrows them.
+    public static func schemaMatchesFirst(shown: String, count: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("schema.matchesFirst", bundle: .module, comment: ""), shown, count)
+    }
+
     /// Explanation under the Libraries settings section.
     public static var librariesMessage: String { NSLocalizedString("libraries.message", bundle: .module, comment: "") }
 

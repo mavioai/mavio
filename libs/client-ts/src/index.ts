@@ -74,6 +74,7 @@ export {
   usePluginActions,
   usePluginCatalogs,
   usePluginConfig,
+  usePluginConfigOptions,
   usePluginContainers,
   usePlugins,
 } from "./plugins.ts";
