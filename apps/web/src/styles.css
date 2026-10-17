@@ -64,6 +64,17 @@
   --spacing-thumbnail: var(--mavio-layout-thumbnail);
 }
 
+/* The desktop's controls (docs/clients.md §6.4): from the width the
+   desktop type scale starts at, outside TV mode, controls take the sizes
+   of macOS's rather than the phone's. */
+@custom-variant desk {
+  @media (min-width: 1200px) {
+    &:where(:root:not([data-tv]) *) {
+      @slot;
+    }
+  }
+}
+
 /* The type scale of the design tokens. */
 @utility type-display {
   font-size: var(--mavio-type-display-size);

@@ -8,7 +8,7 @@ export const popup =
 
 /** An item of a popup, highlighted by the pointer and the keys alike. */
 export const popupItem =
-  "flex min-h-10 w-full cursor-default items-center gap-2.5 rounded-lg px-2.5 text-start type-body outline-none select-none data-disabled:opacity-50 data-highlighted:bg-fill";
+  "flex min-h-10 w-full cursor-default items-center gap-2.5 rounded-lg px-2.5 text-start type-body desk:min-h-7 desk:gap-2 desk:rounded-md desk:px-2 outline-none select-none data-disabled:opacity-50 data-highlighted:bg-fill";
 
 /** A dialog's backdrop, dimming and blurring the page. */
 export const backdrop =
@@ -20,8 +20,8 @@ export const dialogFrame =
 
 /** A text field's style in a dialog. */
 export const field =
-  "min-h-11 min-w-0 flex-1 rounded-[10px] border border-border bg-surface px-3 type-body placeholder:text-text-tertiary focus:border-focus focus:outline-none";
+  "min-h-11 min-w-0 flex-1 rounded-[10px] border border-border bg-surface px-3 type-body desk:min-h-8 desk:rounded-md desk:px-2.5 placeholder:text-text-tertiary focus:border-focus focus:outline-none";
 
 /** A text field's style inside a settings row. */
 export const input =
-  "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";
+  "min-h-9 w-full min-w-0 rounded-md border border-border bg-surface px-3 type-body desk:min-h-7 desk:px-2 text-on-background placeholder:text-text-tertiary focus:border-focus focus:outline-none";

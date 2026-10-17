@@ -30,8 +30,8 @@ export function Select<T extends string>({
   className?: string;
 }) {
   const look = quiet
-    ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote text-text-secondary hover:bg-fill data-popup-open:bg-fill"
-    : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
+    ? "min-h-7 gap-1 ps-2 pe-1.5 type-footnote desk:min-h-6 text-text-secondary hover:bg-fill data-popup-open:bg-fill"
+    : "min-h-9 gap-2 bg-fill ps-2.5 pe-2.5 type-callout desk:min-h-7 desk:gap-1.5 desk:ps-2 desk:pe-1.5 text-on-background hover:bg-fill-selected data-popup-open:bg-fill-selected";
   return (
     <Base.Root items={options} value={value} disabled={disabled} onValueChange={(v) => v !== null && onChange(v)}>
       <Base.Trigger
@@ -133,7 +133,7 @@ export function Picker({
   const count = items.filter((o) => pickerMatch(o, searched)).length;
   const choose = (group: number, key: string | undefined) => setChosen((c) => Object.assign([...c], { [group]: key }));
   const chip = (on: boolean) =>
-    `min-h-7 rounded-full px-2.5 type-caption font-medium ${on ? "bg-fill-selected text-on-background" : "text-text-secondary hover:bg-fill"}`;
+    `min-h-7 rounded-full px-2.5 type-caption desk:min-h-6 desk:px-2 font-medium ${on ? "bg-fill-selected text-on-background" : "text-text-secondary hover:bg-fill"}`;
   return (
     <Combobox.Root
       items={items}

@@ -171,7 +171,7 @@ function PluginList({ server, search }: { server: ServerEntry; search: SettingsS
             to="/settings/$section"
             params={{ section: "plugins" }}
             search={{ server: cur.server, catalogs: true as const }}
-            className="inline-flex min-h-9 items-center rounded-md bg-fill px-3 type-callout font-semibold hover:bg-fill-selected"
+            className="inline-flex min-h-9 items-center rounded-md bg-fill px-3 type-callout font-semibold desk:min-h-7 desk:px-2.5 hover:bg-fill-selected"
           >
             {t("plugins.manageCatalogs")}
           </Link>

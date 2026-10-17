@@ -221,7 +221,7 @@ function LoginEvent({ event }: { event: AiLoginEvent }) {
             href={e.value.url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex min-h-11 items-center self-start rounded-md bg-fill px-4 type-headline text-on-background transition hover:bg-fill-selected"
+            className="inline-flex min-h-11 items-center self-start rounded-md bg-fill px-4 type-headline desk:min-h-7 desk:px-3 text-on-background transition hover:bg-fill-selected"
           >
             {t("ai.openPage")}
           </a>

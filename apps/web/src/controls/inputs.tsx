@@ -26,9 +26,9 @@ export function Switch({ on, onChange, label, disabled }: { on: boolean; onChang
       disabled={disabled}
       aria-label={label}
       onCheckedChange={onChange}
-      className="relative h-[31px] w-[51px] shrink-0 rounded-full bg-fill-selected transition-colors data-checked:bg-[#34C759] data-disabled:opacity-50"
+      className="relative h-[31px] w-[51px] shrink-0 rounded-full bg-fill-selected transition-colors data-checked:bg-[#34C759] data-disabled:opacity-50 desk:h-[22px] desk:w-[38px]"
     >
-      <BaseSwitch.Thumb className="absolute top-[2px] left-[2px] size-[27px] rounded-full bg-white shadow-level1 transition-transform data-checked:translate-x-5" />
+      <BaseSwitch.Thumb className="absolute top-[2px] left-[2px] size-[27px] rounded-full bg-white shadow-level1 transition-transform data-checked:translate-x-5 desk:size-[18px] desk:data-checked:translate-x-4" />
     </BaseSwitch.Root>
   );
 }
@@ -55,7 +55,7 @@ export function Checkbox({
       disabled={disabled}
       aria-label={children ? undefined : label}
       onCheckedChange={onChange}
-      className="flex size-5 shrink-0 items-center justify-center rounded-[6px] border-2 border-text-tertiary data-checked:border-accent data-checked:bg-accent data-disabled:opacity-50"
+      className="flex size-5 shrink-0 items-center justify-center rounded-[6px] border-2 desk:size-4 desk:rounded-[4px] desk:border-[1.5px] border-text-tertiary data-checked:border-accent data-checked:bg-accent data-disabled:opacity-50"
     >
       <BaseCheckbox.Indicator className="flex text-on-accent">
         <Icon name="check" size={14} />
@@ -166,7 +166,7 @@ export function NumberField({
       onValueChange={(v) => onChange(v ?? undefined)}
       className={`min-w-0 ${className ?? ""}`}
     >
-      <BaseNumberField.Group className="flex min-h-9 w-full overflow-hidden rounded-md border border-border bg-surface focus-within:border-focus data-disabled:opacity-50">
+      <BaseNumberField.Group className="flex min-h-9 w-full overflow-hidden rounded-md border desk:min-h-7 border-border bg-surface focus-within:border-focus data-disabled:opacity-50">
         <BaseNumberField.Decrement aria-label={`${label} −`} className={button}>
           <span aria-hidden className="type-body">−</span>
         </BaseNumberField.Decrement>
@@ -256,7 +256,7 @@ export function Segmented<T extends string>({
           value={o.value}
           aria-label={o.iconOnly ? o.label : undefined}
           className={`flex items-center justify-center gap-1.5 rounded-full text-text-secondary hover:text-on-background data-checked:bg-surface-raised data-checked:text-on-background data-checked:shadow-level1 ${
-            o.iconOnly ? (size === "small" ? "size-7" : "size-9") : size === "small" ? "h-7 px-3 type-footnote font-semibold" : "h-9 px-4 type-callout font-semibold"
+            o.iconOnly ? (size === "small" ? "size-7 desk:size-6" : "size-9 desk:size-7") : size === "small" ? "h-7 px-3 type-footnote font-semibold desk:h-6 desk:px-2.5" : "h-9 px-4 type-callout font-semibold desk:h-7 desk:px-3"
           }`}
         >
           {o.icon && <Icon name={o.icon} fill={o.value === value} size={size === "small" ? 16 : 18} />}
@@ -321,10 +321,10 @@ export function Pictures<T extends string>({
 
 /** A chosen one of several, filled as a button is. */
 const pill =
-  "inline-flex min-h-9 items-center justify-center rounded-full bg-fill px-4 type-callout font-semibold hover:bg-fill-selected data-active:bg-button data-active:text-on-button data-checked:bg-button data-checked:text-on-button";
+  "inline-flex min-h-9 items-center justify-center rounded-full bg-fill px-4 type-callout font-semibold desk:min-h-7 desk:px-3 hover:bg-fill-selected data-active:bg-button data-active:text-on-button data-checked:bg-button data-checked:text-on-button";
 
 const chip =
-  "inline-flex min-h-8 items-center gap-1.5 rounded-full bg-fill px-3 type-footnote font-semibold hover:bg-fill-selected data-checked:bg-accent data-checked:text-on-accent data-pressed:bg-accent data-pressed:text-on-accent";
+  "inline-flex min-h-8 items-center gap-1.5 rounded-full bg-fill px-3 type-footnote font-semibold desk:min-h-6 desk:px-2.5 hover:bg-fill-selected data-checked:bg-accent data-checked:text-on-accent data-pressed:bg-accent data-pressed:text-on-accent";
 
 /** A chip turned on and off, as a filter's value; with its logo when it has one. */
 export function ToggleChip({ on, onChange, label, image }: { on: boolean; onChange: (on: boolean) => void; label: string; image?: string }) {
@@ -423,7 +423,7 @@ export function Progress({ value, label, className }: { value: number; label: st
 export function FileField({ label, accept, file, onChange }: { label: string; accept: string; file?: File; onChange: (file?: File) => void }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <label className="inline-flex min-h-9 shrink-0 cursor-pointer items-center rounded-[8px] bg-fill px-3 type-callout font-semibold hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
+      <label className="inline-flex min-h-9 shrink-0 cursor-pointer items-center rounded-[8px] bg-fill px-3 type-callout font-semibold desk:min-h-7 desk:rounded-md desk:px-2.5 hover:bg-fill-selected has-focus-visible:outline-2 has-focus-visible:outline-focus">
         {label}
         <input type="file" accept={accept} className="sr-only" onChange={(e) => onChange(e.target.files?.[0])} />
       </label>
