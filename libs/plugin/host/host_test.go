@@ -508,6 +508,20 @@ func TestHostOS(t *testing.T) {
 	})
 }
 
+// TestEnv checks that a process plugin's environment gets what Env
+// returns for it, over Process.Env.
+func TestEnv(t *testing.T) {
+	p := openWith(t, "process", func(o *host.Options) {
+		o.Process.Env = []string{"HTTPS_PROXY=http://other", "MAVIO_TEST=kept"}
+		o.Env = func(m *pluginv1.Manifest) []string { return []string{"HTTPS_PROXY=http://" + m.GetId()} }
+	})
+	for name, want := range map[string]string{"HTTPS_PROXY": "http://dev.mavio.testplugin", "MAVIO_TEST": "kept"} {
+		if got, err := search(t.Context(), p, "env:"+name); err != nil || got != want {
+			t.Errorf("%s got = %q, %v, want = %q", name, got, err, want)
+		}
+	}
+}
+
 func TestResolver(t *testing.T) {
 	p := open(t, "wasm")
 	folder := pluginv1.Folder_builder{

@@ -6,6 +6,7 @@
 //
 //	"config"        returns the current configuration in the overview
 //	"os"            returns guest.HostOS in the overview
+//	"env:<name>"    returns the environment variable's value
 //	"events"        returns the types of the events consumed so far, which
 //	                the data folder keeps, as WASM instances share no memory
 //	"fetch:<url>"   GETs the URL with guest.HTTPClient and returns the body
@@ -509,6 +510,8 @@ func (provider) Search(ctx context.Context, req *pluginv1.SearchRequest) (*plugi
 	switch {
 	case name == "os":
 		overview = guest.HostOS()
+	case strings.HasPrefix(name, "env:"):
+		overview = os.Getenv(strings.TrimPrefix(name, "env:"))
 	case name == "config":
 		mu.Lock()
 		overview = config
