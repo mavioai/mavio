@@ -30,6 +30,7 @@ type Store interface {
 	APIKeys() APIKeyRepository
 	Invitations() InvitationRepository
 	Activities() ActivityRepository
+	Proxies() ProxyRepository
 	Trickplay() TrickplayRepository
 	MediaSegments() MediaSegmentRepository
 	QualityDefinitions() QualityDefinitionRepository
@@ -314,6 +315,20 @@ type ActivityRepository interface {
 	List(ctx context.Context, q ActivityQuery) (Page[Activity], error)
 	// Purge deletes the activities before a time and reports how many.
 	Purge(ctx context.Context, before time.Time) (int, error)
+}
+
+// ProxyRepository stores the server's proxies.
+type ProxyRepository interface {
+	// List returns the proxies ordered by name.
+	List(ctx context.Context) ([]Proxy, error)
+	// Get returns ErrNotFound for an unknown proxy.
+	Get(ctx context.Context, id ID) (Proxy, error)
+	// Put inserts or replaces a proxy by ID after Validate. A proxy with
+	// the name, ignoring case, or the Key of another is ErrConflict,
+	// naming the other.
+	Put(ctx context.Context, p *Proxy) error
+	// Delete returns ErrNotFound for an unknown proxy.
+	Delete(ctx context.Context, id ID) error
 }
 
 // PluginConfigRepository stores plugin configurations.

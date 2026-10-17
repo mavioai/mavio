@@ -87,3 +87,27 @@ func (Activity) Fields() []ent.Field {
 func (Activity) Indexes() []ent.Index {
 	return []ent.Index{index.Fields("time")}
 }
+
+// Proxy holds the schema of core.Proxy. NameKey and AddressKey keep
+// core.Proxy's NameKey and Key unique.
+type Proxy struct{ ent.Schema }
+
+// Annotations of Proxy.
+func (Proxy) Annotations() []schema.Annotation {
+	return []schema.Annotation{entsql.Annotation{Table: "proxies"}}
+}
+
+// Fields of Proxy.
+func (Proxy) Fields() []ent.Field {
+	return []ent.Field{
+		idField(),
+		field.String("name"),
+		field.String("name_key").Unique(),
+		field.String("kind"),
+		field.String("host"),
+		field.Int("port"),
+		field.String("username").Default(""),
+		field.String("password").Default("").Sensitive(),
+		field.String("address_key").Unique(),
+	}
+}

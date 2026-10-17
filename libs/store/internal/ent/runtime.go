@@ -36,6 +36,7 @@ import (
 	"github.com/mavioai/mavio/libs/store/internal/ent/person"
 	"github.com/mavioai/mavio/libs/store/internal/ent/pluginconfig"
 	"github.com/mavioai/mavio/libs/store/internal/ent/plugincontainer"
+	"github.com/mavioai/mavio/libs/store/internal/ent/proxy"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualitydefinition"
 	"github.com/mavioai/mavio/libs/store/internal/ent/qualityprofile"
 	"github.com/mavioai/mavio/libs/store/internal/ent/releaseprofile"
@@ -722,6 +723,20 @@ func init() {
 	plugincontainerDescID := plugincontainerFields[0].Descriptor()
 	// plugincontainer.DefaultID holds the default value on creation for the id field.
 	plugincontainer.DefaultID = plugincontainerDescID.Default.(func() core.ID)
+	proxyFields := schema.Proxy{}.Fields()
+	_ = proxyFields
+	// proxyDescUsername is the schema descriptor for username field.
+	proxyDescUsername := proxyFields[6].Descriptor()
+	// proxy.DefaultUsername holds the default value on creation for the username field.
+	proxy.DefaultUsername = proxyDescUsername.Default.(string)
+	// proxyDescPassword is the schema descriptor for password field.
+	proxyDescPassword := proxyFields[7].Descriptor()
+	// proxy.DefaultPassword holds the default value on creation for the password field.
+	proxy.DefaultPassword = proxyDescPassword.Default.(string)
+	// proxyDescID is the schema descriptor for id field.
+	proxyDescID := proxyFields[0].Descriptor()
+	// proxy.DefaultID holds the default value on creation for the id field.
+	proxy.DefaultID = proxyDescID.Default.(func() core.ID)
 	qualitydefinitionFields := schema.QualityDefinition{}.Fields()
 	_ = qualitydefinitionFields
 	// qualitydefinitionDescMinSize is the schema descriptor for min_size field.
