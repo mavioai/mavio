@@ -101,8 +101,9 @@ func (l Locales) Translator(wanted []language.Tag) func(string) string {
 
 // Localize returns a copy of m with its strings translated by tr: its
 // name and description, its tasks' names and descriptions, the names of
-// its kinds of external IDs, and the titles and descriptions of its
-// configuration schema.
+// its kinds of external IDs, the descriptions of its container
+// dependencies, and the titles and descriptions of its configuration
+// schema.
 func Localize(m *pluginv1.Manifest, tr func(string) string) *pluginv1.Manifest {
 	out := proto.Clone(m).(*pluginv1.Manifest)
 	out.SetName(tr(m.GetName()))
@@ -117,6 +118,11 @@ func Localize(m *pluginv1.Manifest, tr func(string) string) *pluginv1.Manifest {
 	}
 	for _, k := range out.GetExternalIdKinds() {
 		k.SetName(tr(k.GetName()))
+	}
+	for _, c := range out.GetContainers() {
+		if c.HasDescription() {
+			c.SetDescription(tr(c.GetDescription()))
+		}
 	}
 	if m.GetConfigSchema() != "" {
 		out.SetConfigSchema(localizeSchema(m.GetConfigSchema(), tr))

@@ -9,6 +9,7 @@ import (
 
 	"connectrpc.com/connect"
 	"golang.org/x/text/language"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/mavioai/mavio/apps/server/internal/activity"
@@ -347,9 +348,10 @@ func (s *PluginManagementService) ListPluginContainers(ctx context.Context, req 
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}
+	tr := s.translator(ctx, req.GetPluginId())
 	out := make([]*systemv1.PluginContainer, len(deps))
 	for i, d := range deps {
-		out[i] = pluginContainerToProto(d)
+		out[i] = pluginContainerToProto(d, tr)
 	}
 	return systemv1.ListPluginContainersResponse_builder{Containers: out}.Build(), nil
 }
@@ -387,12 +389,34 @@ func (s *PluginManagementService) SetPluginContainer(ctx context.Context, req *s
 		Title:      fmt.Sprintf("%s set container %s of plugin %s to %s", p.User.Name, req.GetName(), req.GetPluginId(), mode),
 		Attributes: map[string]string{"plugin": req.GetPluginId(), "container": req.GetName(), "mode": string(mode)},
 	})
-	return systemv1.SetPluginContainerResponse_builder{Container: pluginContainerToProto(d)}.Build(), nil
+	return systemv1.SetPluginContainerResponse_builder{Container: pluginContainerToProto(d, s.translator(ctx, req.GetPluginId()))}.Build(), nil
 }
 
-func pluginContainerToProto(d dependencies.Dependency) *systemv1.PluginContainer {
+// translator returns what translates a plugin's strings into the caller's
+// language, nil when they stay as they are.
+func (s *PluginManagementService) translator(ctx context.Context, pluginID string) func(string) string {
+	wanted := wantedLanguages(ctx)
+	if len(wanted) == 0 || s.Plugins == nil {
+		return nil
+	}
+	for _, p := range s.Plugins.Plugins() {
+		if p.Manifest.GetId() == pluginID && len(p.Locales) > 0 {
+			return p.Locales.Translator(wanted)
+		}
+	}
+	return nil
+}
+
+// pluginContainerToProto returns a dependency with its description
+// translated by tr, when not nil.
+func pluginContainerToProto(d dependencies.Dependency, tr func(string) string) *systemv1.PluginContainer {
+	spec := d.Spec
+	if tr != nil && spec.HasDescription() {
+		spec = proto.CloneOf(spec)
+		spec.SetDescription(tr(spec.GetDescription()))
+	}
 	return systemv1.PluginContainer_builder{
-		Dependency: d.Spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU),
+		Dependency: spec, Status: d.Status, UseGpu: new(d.Kept.UseGPU),
 		Commands: containerCommandsToProto(d.Commands), GpuCommands: containerCommandsToProto(d.GPUCommands),
 	}.Build()
 }

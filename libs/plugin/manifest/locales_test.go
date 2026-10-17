@@ -95,6 +95,7 @@ func TestLocalize(t *testing.T) {
 	withTasks(m, task("refresh", 0, 0))
 	m.GetTasks()[0].SetDescription("Refreshes <everything> & more.")
 	m.SetExternalIdKinds([]*pluginv1.ExternalIdKind{pluginv1.ExternalIdKind_builder{Key: proto.String("trakt"), Name: proto.String("Trakt")}.Build()})
+	m.SetContainers([]*pluginv1.ContainerDependency{pluginv1.ContainerDependency_builder{Name: proto.String("solver"), Description: proto.String("Solves challenges")}.Build()})
 	// The schema's members keep their order; data named like keywords,
 	// such as a default's description or a property named title, does not
 	// change.
@@ -104,7 +105,7 @@ func TestLocalize(t *testing.T) {
 		`"description":"Zeta"}`)
 	tr := map[string]string{
 		"TMDB": "TMDB", "Metadata from TMDB.": "来自 TMDB 的元数据。", "Task refresh": "刷新", "Refreshes <everything> & more.": "刷新<全部>",
-		"Trakt": "特拉克特", "Zeta": "泽塔", "Last <one>": "最后<一个>",
+		"Trakt": "特拉克特", "Solves challenges": "求解质询", "Zeta": "泽塔", "Last <one>": "最后<一个>",
 	}
 	got := Localize(m, func(s string) string {
 		if t, ok := tr[s]; ok {
@@ -117,6 +118,7 @@ func TestLocalize(t *testing.T) {
 		{"task name", got.GetTasks()[0].GetName(), "刷新"},
 		{"task description", got.GetTasks()[0].GetDescription(), "刷新<全部>"},
 		{"external ID kind", got.GetExternalIdKinds()[0].GetName(), "特拉克特"},
+		{"container", got.GetContainers()[0].GetDescription(), "求解质询"},
 		{"schema", got.GetConfigSchema(), `{"type":"object","properties":{"zeta":{"type":"string","title":"泽塔","description":"最后<一个>"},` +
 			`"title":{"type":"object","default":{"description":"Zeta"},"properties":{"x":{"type":"number","minimum":1.5,"title":"泽塔"}}},` +
 			`"list":{"type":"array","items":{"title":"泽塔","enum":["Zeta",null,true]}},"either":{"anyOf":[{"title":"泽塔"}]}},` +
@@ -128,7 +130,7 @@ func TestLocalize(t *testing.T) {
 		}
 	}
 
-	want := []string{"TMDB", "Metadata from TMDB.", "Task refresh", "Refreshes <everything> & more.", "Trakt", "Zeta", "Last <one>"}
+	want := []string{"TMDB", "Metadata from TMDB.", "Task refresh", "Refreshes <everything> & more.", "Trakt", "Solves challenges", "Zeta", "Last <one>"}
 	if got := Strings(m); !slices.Equal(got, want) {
 		t.Errorf("Strings() = %q, want = %q", got, want)
 	}

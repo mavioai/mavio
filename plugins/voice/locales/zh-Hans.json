@@ -9,5 +9,6 @@
   "The settings the recognizer takes": "该识别服务所需的设置",
   "Synthesizers": "合成服务",
   "The synthesis services and their settings": "语音合成服务及其设置",
-  "The settings the synthesizer takes": "该合成服务所需的设置"
+  "The settings the synthesizer takes": "该合成服务所需的设置",
+  "whisper-asr-webservice, recognizing speech with faster-whisper": "whisper-asr-webservice，使用 faster-whisper 识别语音"
 }
