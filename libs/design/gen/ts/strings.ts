@@ -1888,7 +1888,48 @@ export type MessageKey =
   | 'assistant.language'
   | 'assistant.addVoice'
   | 'assistant.noSpeech'
-  | 'assistant.saved';
+  | 'assistant.saved'
+  | 'settings.advancedGroup'
+  | 'settings.pin'
+  | 'settings.unpin'
+  | 'nav.features'
+  | 'indexers.title'
+  | 'indexers.message'
+  | 'indexers.allServers'
+  | 'indexers.query'
+  | 'indexers.search'
+  | 'indexers.type'
+  | 'indexers.typeAny'
+  | 'indexers.typeMovie'
+  | 'indexers.typeTv'
+  | 'indexers.category'
+  | 'indexers.allCategories'
+  | 'indexers.categoryConsole'
+  | 'indexers.categoryMovies'
+  | 'indexers.categoryAudio'
+  | 'indexers.categoryPc'
+  | 'indexers.categoryTv'
+  | 'indexers.categoryXxx'
+  | 'indexers.categoryBooks'
+  | 'indexers.categoryOther'
+  | 'indexers.indexer'
+  | 'indexers.allIndexers'
+  | 'indexers.protocol'
+  | 'indexers.torrent'
+  | 'indexers.age'
+  | 'indexers.releaseTitle'
+  | 'indexers.size'
+  | 'indexers.grabs'
+  | 'indexers.peers'
+  | 'indexers.send'
+  | 'indexers.sent'
+  | 'indexers.magnet'
+  | 'indexers.info'
+  | 'indexers.results'
+  | 'indexers.page'
+  | 'indexers.previous'
+  | 'indexers.next'
+  | 'indexers.prompt';
 
 /** The ICU MessageFormat strings of each locale. */
 export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: string } } = {
@@ -3769,7 +3810,48 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.language": "Language",
     "assistant.addVoice": "Add Voice",
     "assistant.noSpeech": "No speech plugin is ready: requests are typed, or recognized by the browser.",
-    "assistant.saved": "Saved."
+    "assistant.saved": "Saved.",
+    "settings.advancedGroup": "Advanced",
+    "settings.pin": "Pin to Sidebar",
+    "settings.unpin": "Unpin from Sidebar",
+    "nav.features": "Features",
+    "indexers.title": "Indexer Search",
+    "indexers.message": "Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.",
+    "indexers.allServers": "All Servers",
+    "indexers.query": "Search the indexers",
+    "indexers.search": "Search",
+    "indexers.type": "Type",
+    "indexers.typeAny": "Anything",
+    "indexers.typeMovie": "Movies",
+    "indexers.typeTv": "TV",
+    "indexers.category": "Category",
+    "indexers.allCategories": "All Categories",
+    "indexers.categoryConsole": "Console",
+    "indexers.categoryMovies": "Movies",
+    "indexers.categoryAudio": "Audio",
+    "indexers.categoryPc": "PC",
+    "indexers.categoryTv": "TV",
+    "indexers.categoryXxx": "XXX",
+    "indexers.categoryBooks": "Books",
+    "indexers.categoryOther": "Other",
+    "indexers.indexer": "Indexer",
+    "indexers.allIndexers": "All Indexers",
+    "indexers.protocol": "Protocol",
+    "indexers.torrent": "Torrent",
+    "indexers.age": "Age",
+    "indexers.releaseTitle": "Title",
+    "indexers.size": "Size",
+    "indexers.grabs": "Grabs",
+    "indexers.peers": "Peers",
+    "indexers.send": "Send to Download Client",
+    "indexers.sent": "Sent to {client}",
+    "indexers.magnet": "Open Magnet Link",
+    "indexers.info": "Open Release Page",
+    "indexers.results": "{count, plural, one {# release} other {# releases}}",
+    "indexers.page": "Page {page} of {pages}",
+    "indexers.previous": "Previous Page",
+    "indexers.next": "Next Page",
+    "indexers.prompt": "Enter what to search for."
   },
   "zh-Hans": {
     "nav.home": "首页",
@@ -5648,6 +5730,47 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "assistant.language": "语言",
     "assistant.addVoice": "添加语音",
     "assistant.noSpeech": "没有可用的语音插件：请求需要输入，或由浏览器识别。",
-    "assistant.saved": "已保存。"
+    "assistant.saved": "已保存。",
+    "settings.advancedGroup": "高级功能",
+    "settings.pin": "固定到侧边栏",
+    "settings.unpin": "从侧边栏取消固定",
+    "nav.features": "功能",
+    "indexers.title": "索引搜索",
+    "indexers.message": "按文字搜索索引器，并把发布发送到下载客户端；下载的内容不会加入媒体库。",
+    "indexers.allServers": "全部服务器",
+    "indexers.query": "搜索索引器",
+    "indexers.search": "搜索",
+    "indexers.type": "类型",
+    "indexers.typeAny": "全部",
+    "indexers.typeMovie": "电影",
+    "indexers.typeTv": "剧集",
+    "indexers.category": "分类",
+    "indexers.allCategories": "全部分类",
+    "indexers.categoryConsole": "游戏主机",
+    "indexers.categoryMovies": "电影",
+    "indexers.categoryAudio": "音频",
+    "indexers.categoryPc": "电脑",
+    "indexers.categoryTv": "电视",
+    "indexers.categoryXxx": "成人",
+    "indexers.categoryBooks": "图书",
+    "indexers.categoryOther": "其他",
+    "indexers.indexer": "索引器",
+    "indexers.allIndexers": "全部索引器",
+    "indexers.protocol": "协议",
+    "indexers.torrent": "Torrent",
+    "indexers.age": "发布时间",
+    "indexers.releaseTitle": "标题",
+    "indexers.size": "大小",
+    "indexers.grabs": "抓取数",
+    "indexers.peers": "做种 / 用户",
+    "indexers.send": "发送到下载客户端",
+    "indexers.sent": "已发送到 {client}",
+    "indexers.magnet": "打开磁力链接",
+    "indexers.info": "打开发布页面",
+    "indexers.results": "{count, plural, other {# 个发布}}",
+    "indexers.page": "第 {page} / {pages} 页",
+    "indexers.previous": "上一页",
+    "indexers.next": "下一页",
+    "indexers.prompt": "输入要搜索的内容。"
   }
 };

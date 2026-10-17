@@ -3821,4 +3821,89 @@
     <string name="assistant_no_speech">No speech plugin is ready: requests are typed, or recognized by the browser.</string>
     <!-- Notice after the assistant's settings are saved. -->
     <string name="assistant_saved">Saved.</string>
+    <!-- Group of the settings' advanced tools, which can be pinned to the sidebar. -->
+    <string name="settings_advanced_group">Advanced</string>
+    <!-- Shows an advanced tool in the sidebar's Features group. -->
+    <string name="settings_pin">Pin to Sidebar</string>
+    <!-- Removes an advanced tool from the sidebar's Features group. -->
+    <string name="settings_unpin">Unpin from Sidebar</string>
+    <!-- Group of the sidebar listing the advanced tools pinned to it. -->
+    <string name="nav_features">Features</string>
+    <!-- Advanced tool searching a server's indexers by text, as Prowlarr's search. -->
+    <string name="indexers_title">Indexer Search</string>
+    <!-- Line under the indexer search's title. -->
+    <string name="indexers_message">Search the indexers by text and send releases to a download client, which downloads them without adding them to a library.</string>
+    <!-- Server choice of the indexer search searching every server the user administers. -->
+    <string name="indexers_all_servers">All Servers</string>
+    <!-- Placeholder and label of the indexer search's text field. -->
+    <string name="indexers_query">Search the indexers</string>
+    <!-- Runs the indexer search. -->
+    <string name="indexers_search">Search</string>
+    <!-- Label of the indexer search's choice of what to search for. -->
+    <string name="indexers_type">Type</string>
+    <!-- Search type: any release. -->
+    <string name="indexers_type_any">Anything</string>
+    <!-- Search type: movies. -->
+    <string name="indexers_type_movie">Movies</string>
+    <!-- Search type: television. -->
+    <string name="indexers_type_tv">TV</string>
+    <!-- Label of the indexer search's category choice, and its column. -->
+    <string name="indexers_category">Category</string>
+    <!-- Category choice of the indexer search: every category. -->
+    <string name="indexers_all_categories">All Categories</string>
+    <!-- Newznab category 1000. -->
+    <string name="indexers_category_console">Console</string>
+    <!-- Newznab category 2000. -->
+    <string name="indexers_category_movies">Movies</string>
+    <!-- Newznab category 3000. -->
+    <string name="indexers_category_audio">Audio</string>
+    <!-- Newznab category 4000. -->
+    <string name="indexers_category_pc">PC</string>
+    <!-- Newznab category 5000. -->
+    <string name="indexers_category_tv">TV</string>
+    <!-- Newznab category 6000. -->
+    <string name="indexers_category_xxx">XXX</string>
+    <!-- Newznab category 7000. -->
+    <string name="indexers_category_books">Books</string>
+    <!-- Newznab category 8000. -->
+    <string name="indexers_category_other">Other</string>
+    <!-- Label of the indexer search's indexer choice, and its column. -->
+    <string name="indexers_indexer">Indexer</string>
+    <!-- Indexer choice of the indexer search: every enabled indexer. -->
+    <string name="indexers_all_indexers">All Indexers</string>
+    <!-- Column of a release's protocol. -->
+    <string name="indexers_protocol">Protocol</string>
+    <!-- A torrent release's protocol. -->
+    <string name="indexers_torrent">Torrent</string>
+    <!-- Column of how long ago a release was published. -->
+    <string name="indexers_age">Age</string>
+    <!-- Column of a release's title. -->
+    <string name="indexers_release_title">Title</string>
+    <!-- Column of a release's size. -->
+    <string name="indexers_size">Size</string>
+    <!-- Column of how often a release was grabbed. -->
+    <string name="indexers_grabs">Grabs</string>
+    <!-- Column of a torrent's seeders and peers. -->
+    <string name="indexers_peers">Peers</string>
+    <!-- Sends a release to a download client without a library item. -->
+    <string name="indexers_send">Send to Download Client</string>
+    <!-- A release was sent to the named download client. -->
+    <string name="indexers_sent">Sent to %s</string>
+    <!-- Opens a release's magnet link. -->
+    <string name="indexers_magnet">Open Magnet Link</string>
+    <!-- Opens a release's page on its indexer. -->
+    <string name="indexers_info">Open Release Page</string>
+    <!-- How many releases a server's search found. -->
+    <plurals name="indexers_results">
+        <item quantity="one">%d release</item>
+        <item quantity="other">%d releases</item>
+    </plurals>
+    <!-- Which page of a server's releases is shown. -->
+    <string name="indexers_page">Page %1$s of %2$s</string>
+    <!-- Shows a server's previous page of releases. -->
+    <string name="indexers_previous">Previous Page</string>
+    <!-- Shows a server's next page of releases. -->
+    <string name="indexers_next">Next Page</string>
+    <!-- Shown before the first indexer search. -->
+    <string name="indexers_prompt">Enter what to search for.</string>
 </resources>

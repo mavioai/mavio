@@ -6026,4 +6026,133 @@ public enum MavioStrings {
 
     /// Notice after the assistant's settings are saved.
     public static var assistantSaved: String { NSLocalizedString("assistant.saved", bundle: .module, comment: "") }
+
+    /// Group of the settings' advanced tools, which can be pinned to the sidebar.
+    public static var settingsAdvancedGroup: String { NSLocalizedString("settings.advancedGroup", bundle: .module, comment: "") }
+
+    /// Shows an advanced tool in the sidebar's Features group.
+    public static var settingsPin: String { NSLocalizedString("settings.pin", bundle: .module, comment: "") }
+
+    /// Removes an advanced tool from the sidebar's Features group.
+    public static var settingsUnpin: String { NSLocalizedString("settings.unpin", bundle: .module, comment: "") }
+
+    /// Group of the sidebar listing the advanced tools pinned to it.
+    public static var navFeatures: String { NSLocalizedString("nav.features", bundle: .module, comment: "") }
+
+    /// Advanced tool searching a server's indexers by text, as Prowlarr's search.
+    public static var indexersTitle: String { NSLocalizedString("indexers.title", bundle: .module, comment: "") }
+
+    /// Line under the indexer search's title.
+    public static var indexersMessage: String { NSLocalizedString("indexers.message", bundle: .module, comment: "") }
+
+    /// Server choice of the indexer search searching every server the user administers.
+    public static var indexersAllServers: String { NSLocalizedString("indexers.allServers", bundle: .module, comment: "") }
+
+    /// Placeholder and label of the indexer search's text field.
+    public static var indexersQuery: String { NSLocalizedString("indexers.query", bundle: .module, comment: "") }
+
+    /// Runs the indexer search.
+    public static var indexersSearch: String { NSLocalizedString("indexers.search", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's choice of what to search for.
+    public static var indexersType: String { NSLocalizedString("indexers.type", bundle: .module, comment: "") }
+
+    /// Search type: any release.
+    public static var indexersTypeAny: String { NSLocalizedString("indexers.typeAny", bundle: .module, comment: "") }
+
+    /// Search type: movies.
+    public static var indexersTypeMovie: String { NSLocalizedString("indexers.typeMovie", bundle: .module, comment: "") }
+
+    /// Search type: television.
+    public static var indexersTypeTv: String { NSLocalizedString("indexers.typeTv", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's category choice, and its column.
+    public static var indexersCategory: String { NSLocalizedString("indexers.category", bundle: .module, comment: "") }
+
+    /// Category choice of the indexer search: every category.
+    public static var indexersAllCategories: String { NSLocalizedString("indexers.allCategories", bundle: .module, comment: "") }
+
+    /// Newznab category 1000.
+    public static var indexersCategoryConsole: String { NSLocalizedString("indexers.categoryConsole", bundle: .module, comment: "") }
+
+    /// Newznab category 2000.
+    public static var indexersCategoryMovies: String { NSLocalizedString("indexers.categoryMovies", bundle: .module, comment: "") }
+
+    /// Newznab category 3000.
+    public static var indexersCategoryAudio: String { NSLocalizedString("indexers.categoryAudio", bundle: .module, comment: "") }
+
+    /// Newznab category 4000.
+    public static var indexersCategoryPc: String { NSLocalizedString("indexers.categoryPc", bundle: .module, comment: "") }
+
+    /// Newznab category 5000.
+    public static var indexersCategoryTv: String { NSLocalizedString("indexers.categoryTv", bundle: .module, comment: "") }
+
+    /// Newznab category 6000.
+    public static var indexersCategoryXxx: String { NSLocalizedString("indexers.categoryXxx", bundle: .module, comment: "") }
+
+    /// Newznab category 7000.
+    public static var indexersCategoryBooks: String { NSLocalizedString("indexers.categoryBooks", bundle: .module, comment: "") }
+
+    /// Newznab category 8000.
+    public static var indexersCategoryOther: String { NSLocalizedString("indexers.categoryOther", bundle: .module, comment: "") }
+
+    /// Label of the indexer search's indexer choice, and its column.
+    public static var indexersIndexer: String { NSLocalizedString("indexers.indexer", bundle: .module, comment: "") }
+
+    /// Indexer choice of the indexer search: every enabled indexer.
+    public static var indexersAllIndexers: String { NSLocalizedString("indexers.allIndexers", bundle: .module, comment: "") }
+
+    /// Column of a release's protocol.
+    public static var indexersProtocol: String { NSLocalizedString("indexers.protocol", bundle: .module, comment: "") }
+
+    /// A torrent release's protocol.
+    public static var indexersTorrent: String { NSLocalizedString("indexers.torrent", bundle: .module, comment: "") }
+
+    /// Column of how long ago a release was published.
+    public static var indexersAge: String { NSLocalizedString("indexers.age", bundle: .module, comment: "") }
+
+    /// Column of a release's title.
+    public static var indexersReleaseTitle: String { NSLocalizedString("indexers.releaseTitle", bundle: .module, comment: "") }
+
+    /// Column of a release's size.
+    public static var indexersSize: String { NSLocalizedString("indexers.size", bundle: .module, comment: "") }
+
+    /// Column of how often a release was grabbed.
+    public static var indexersGrabs: String { NSLocalizedString("indexers.grabs", bundle: .module, comment: "") }
+
+    /// Column of a torrent's seeders and peers.
+    public static var indexersPeers: String { NSLocalizedString("indexers.peers", bundle: .module, comment: "") }
+
+    /// Sends a release to a download client without a library item.
+    public static var indexersSend: String { NSLocalizedString("indexers.send", bundle: .module, comment: "") }
+
+    /// A release was sent to the named download client.
+    public static func indexersSent(client: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.sent", bundle: .module, comment: ""), client)
+    }
+
+    /// Opens a release's magnet link.
+    public static var indexersMagnet: String { NSLocalizedString("indexers.magnet", bundle: .module, comment: "") }
+
+    /// Opens a release's page on its indexer.
+    public static var indexersInfo: String { NSLocalizedString("indexers.info", bundle: .module, comment: "") }
+
+    /// How many releases a server's search found.
+    public static func indexersResults(count: Int) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.results", bundle: .module, comment: ""), count)
+    }
+
+    /// Which page of a server's releases is shown.
+    public static func indexersPage(page: String, pages: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("indexers.page", bundle: .module, comment: ""), page, pages)
+    }
+
+    /// Shows a server's previous page of releases.
+    public static var indexersPrevious: String { NSLocalizedString("indexers.previous", bundle: .module, comment: "") }
+
+    /// Shows a server's next page of releases.
+    public static var indexersNext: String { NSLocalizedString("indexers.next", bundle: .module, comment: "") }
+
+    /// Shown before the first indexer search.
+    public static var indexersPrompt: String { NSLocalizedString("indexers.prompt", bundle: .module, comment: "") }
 }

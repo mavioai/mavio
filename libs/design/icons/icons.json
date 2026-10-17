@@ -39,6 +39,8 @@
   "add": "plus",
   "filter": "funnel",
   "sort": "sort-ascending",
+  "pin": "push-pin",
+  "magnet": "magnet",
   "retry": "arrow-clockwise",
   "rating": "star",
   "info": "info",
