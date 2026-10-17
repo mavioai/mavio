@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../design"),
-        .package(url: "https://github.com/superuser404notfound/AetherEngine", exact: "7.34.0"),
+        .package(url: "https://github.com/mavioai/AetherEngine", branch: "v7.39.0-mavio"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", exact: "1.19.6"),
     ],
     targets: [
@@ -32,7 +32,10 @@ let package = Package(
         .target(name: "MavioKit", dependencies: ["MavioCore"]),
         .target(
             name: "MavioPlayer",
-            dependencies: ["Libass", .product(name: "AetherEngine", package: "AetherEngine")]
+            dependencies: [
+                // MavioCoreFFI exports libdovi, which AetherEngine calls.
+                "Libass", "MavioCoreFFI", .product(name: "AetherEngine", package: "AetherEngine"),
+            ]
         ),
         .target(name: "MavioUI", dependencies: ["MavioKit", .product(name: "MavioDesign", package: "design")]),
         .testTarget(name: "MavioKitTests", dependencies: ["MavioKit"]),

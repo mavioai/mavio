@@ -45,9 +45,10 @@ export IPHONEOS_DEPLOYMENT_TARGET=18.0 TVOS_DEPLOYMENT_TARGET=18.0 MACOSX_DEPLOY
 cd "$core"
 # shellcheck disable=SC2086
 rustup target add $targets >/dev/null
-# One build, so that Cargo compiles the targets in parallel.
+# One build, so that Cargo compiles the targets in parallel; with libdovi,
+# whose C API the AetherEngine fork calls.
 # shellcheck disable=SC2046,SC2086
-cargo build --locked --profile "$profile" -p mavio-uniffi --lib $(printf -- ' --target %s' $targets)
+cargo build --locked --profile "$profile" -p mavio-uniffi --lib --features dovi $(printf -- ' --target %s' $targets)
 
 # Only what this script writes; build/ holds the other libraries too.
 rm -rf "$out/MavioCore" "$out/MavioCoreFFI.xcframework" "$out/gen" "$out/frameworks"

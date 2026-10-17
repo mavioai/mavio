@@ -25,6 +25,10 @@ use tokio::runtime::Runtime;
 
 pub use caps::*;
 
+// Links libdovi, whose C API the library exports.
+#[cfg(feature = "dovi")]
+use dolby_vision as _;
+
 uniffi::setup_scaffolding!();
 
 /// The version of the core.

@@ -1,13 +1,13 @@
 {
-  "originHash" : "3806d0e122d3f5b4b6e87d0a23a9abd7a1834bb27bb4f48d31f0772e494bb485",
+  "originHash" : "54e57ed6c7a8611f3aefe29d4dedfe777caa5f92c3f75aa650f75e38e29b45ef",
   "pins" : [
     {
       "identity" : "aetherengine",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/superuser404notfound/AetherEngine",
+      "location" : "https://github.com/mavioai/AetherEngine",
       "state" : {
-        "revision" : "ed8f8c7a4213efdc5369da17f7597514c7e00777",
-        "version" : "7.34.0"
+        "branch" : "v7.39.0-mavio",
+        "revision" : "d5de6115c22ccc7caf5a38f211ed2d776f4fa6b1"
       }
     },
     {
@@ -15,26 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/superuser404notfound/FFmpegBuild",
       "state" : {
-        "revision" : "9baf6d00611548ddfbbabda19493d9ff36d336c1",
-        "version" : "3.7.0"
-      }
-    },
-    {
-      "identity" : "libdovi",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/superuser404notfound/LibDovi",
-      "state" : {
-        "revision" : "0d7cce1d6836a30d13a3a2326e50a153af53f014",
-        "version" : "2.1.0"
-      }
-    },
-    {
-      "identity" : "libtruehd",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/superuser404notfound/LibTrueHD",
-      "state" : {
-        "revision" : "53ac5dc1ba87e098a4f96172e3490f26a152baf3",
-        "version" : "2.1.0"
+        "revision" : "013c48bd4d3073428f31cade039ec4ed958d0ceb",
+        "version" : "3.7.1"
       }
     },
     {

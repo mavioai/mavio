@@ -11,10 +11,17 @@ publish.workspace = true
 name = "mavio"
 # A shared library, for the Apple frameworks and for Android: it keeps its
 # Rust standard library to itself, which a static library would clash with
-# the other Rust static libraries of an app (AetherEngine's LibDovi).
+# the other Rust static libraries of an app.
 crate-type = ["lib", "cdylib"]
 
+[features]
+# libdovi's C API, exported for AetherEngine on Apple platforms, whose fork
+# calls it here instead of linking its own Rust library (docs/clients.md §4.2).
+dovi = ["dep:dolby_vision"]
+
 [dependencies]
+# The version of the header in the AetherEngine fork's Dovi module.
+dolby_vision = { version = "=3.4.0", features = ["capi"], optional = true }
 mavio-api = { path = "../api" }
 mavio-core = { path = "../core" }
 tokio = { version = "1", features = ["rt-multi-thread"] }
