@@ -168,6 +168,62 @@ export const typography = {
       "tracking": 0
     }
   },
+  "desktop": {
+    "display": {
+      "size": 26,
+      "lineHeight": 32,
+      "weight": 700,
+      "tracking": 0
+    },
+    "title1": {
+      "size": 22,
+      "lineHeight": 28,
+      "weight": 700,
+      "tracking": 0
+    },
+    "title2": {
+      "size": 17,
+      "lineHeight": 22,
+      "weight": 600,
+      "tracking": 0
+    },
+    "title3": {
+      "size": 15,
+      "lineHeight": 20,
+      "weight": 600,
+      "tracking": 0
+    },
+    "headline": {
+      "size": 13,
+      "lineHeight": 18,
+      "weight": 600,
+      "tracking": 0
+    },
+    "body": {
+      "size": 13,
+      "lineHeight": 18,
+      "weight": 400,
+      "tracking": 0
+    },
+    "callout": {
+      "size": 13,
+      "lineHeight": 18,
+      "weight": 400,
+      "tracking": 0
+    },
+    "footnote": {
+      "size": 11,
+      "lineHeight": 14,
+      "weight": 400,
+      "tracking": 0
+    },
+    "caption": {
+      "size": 10,
+      "lineHeight": 13,
+      "weight": 500,
+      "tracking": 0
+    }
+  },
   "tv": {
     "display": {
       "size": 52,

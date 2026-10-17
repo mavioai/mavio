@@ -194,7 +194,7 @@ flowchart LR
 ### 6.1 设计 tokens
 颜色、字体、间距、圆角、层级与动效在 `libs/design/tokens` 中以 W3C Design Tokens（DTCG）格式一次定义。由 Style Dictionary 解析，`pnpm nx run design:generate` 将其与图标、字符串一起编译到 `libs/design/gen/{ts,swift,kotlin,go}`。生成的代码提交入库，CI 检查其是否最新，与 `libs/proto/gen` 相同。
 * **颜色**：深色主题适合海报图与暗光环境，另有浅色主题，两者都参照 Apple 的系统颜色；两者对比度均达到 WCAG AA，由生成器检查每一组文字与背景。外观跟随系统，除非用户在设置中选择浅色或深色；电视默认深色，播放器始终为深色。主按钮以文字颜色填充；强调色是取自标志的橙色，只用于进度、选中、链接与开关。
-* **字体**：字号层级（字号、字重、行高）共享；字体族用平台的系统字体——Apple 平台用 SF Pro，Android 用 Roboto，Windows 用 Segoe UI Variable，Linux 与 Web 用随应用附带的 Inter——以便 Dynamic Type 与字体缩放生效。不使用品牌字体：标题（包括叠在海报图上的标题）用系统字体的粗体，在海报图上为白色并垫暗色渐变；标志是画出来的，不用字体排出（§6.2.1）。
+* **字体**：字号层级（字号、字重、行高）共享，每种设备形态一套：standard 用于手机与平板，接近 iOS 的默认字号（body 16、callout 15）；desktop 如同 Mac，正文为 13（callout 13、footnote 11），Web UI 在桌面布局下使用，Mac 应用与桌面应用也使用；以及电视的一套（[电视](tv.zh-CN.md)）；字体族用平台的系统字体——Apple 平台用 SF Pro，Android 用 Roboto，Windows 用 Segoe UI Variable，Linux 与 Web 用随应用附带的 Inter——以便 Dynamic Type 与字体缩放生效。不使用品牌字体：标题（包括叠在海报图上的标题）用系统字体的粗体，在海报图上为白色并垫暗色渐变；标志是画出来的，不用字体排出（§6.2.1）。
 * **按设备形态取值**：tokens 有手机、平板、桌面与电视四档取值（电视按 3 米观看距离设计，并留出防过扫描边距）。
 
 ### 6.2 图标

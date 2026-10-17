@@ -97,7 +97,7 @@ public struct MavioTypeStyle: Sendable {
     public let tracking: CGFloat
 }
 
-/// A type scale: standard for phones, tablets and the Mac, tv for Apple TV.
+/// A type scale: standard for phones and tablets, desktop for the Mac, tv for Apple TV.
 public struct MavioTypography: Sendable {
     public let display: MavioTypeStyle
     public let title1: MavioTypeStyle
@@ -119,6 +119,18 @@ public struct MavioTypography: Sendable {
         callout: MavioTypeStyle(size: 15, lineHeight: 20, weight: .regular, tracking: 0),
         footnote: MavioTypeStyle(size: 13, lineHeight: 18, weight: .regular, tracking: 0),
         caption: MavioTypeStyle(size: 12, lineHeight: 16, weight: .medium, tracking: 0)
+    )
+
+    public static let desktop = MavioTypography(
+        display: MavioTypeStyle(size: 26, lineHeight: 32, weight: .bold, tracking: 0),
+        title1: MavioTypeStyle(size: 22, lineHeight: 28, weight: .bold, tracking: 0),
+        title2: MavioTypeStyle(size: 17, lineHeight: 22, weight: .semibold, tracking: 0),
+        title3: MavioTypeStyle(size: 15, lineHeight: 20, weight: .semibold, tracking: 0),
+        headline: MavioTypeStyle(size: 13, lineHeight: 18, weight: .semibold, tracking: 0),
+        body: MavioTypeStyle(size: 13, lineHeight: 18, weight: .regular, tracking: 0),
+        callout: MavioTypeStyle(size: 13, lineHeight: 18, weight: .regular, tracking: 0),
+        footnote: MavioTypeStyle(size: 11, lineHeight: 14, weight: .regular, tracking: 0),
+        caption: MavioTypeStyle(size: 10, lineHeight: 13, weight: .medium, tracking: 0)
     )
 
     public static let tv = MavioTypography(

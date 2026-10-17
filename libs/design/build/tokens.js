@@ -4,7 +4,7 @@ import StyleDictionary from 'style-dictionary';
 
 const BASE = ['palette', 'spacing', 'radius', 'elevation', 'motion'];
 export const THEMES = ['dark', 'light'];
-export const TYPE_SCALES = ['standard', 'tv'];
+export const TYPE_SCALES = ['standard', 'desktop', 'tv'];
 export const FORM_FACTORS = ['phone', 'tablet', 'desktop', 'tv'];
 
 // Text color pairs that must meet WCAG AA (4.5:1) in every theme.

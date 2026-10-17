@@ -118,7 +118,7 @@ type Typography struct {
 	Caption  TypeStyle
 }
 
-// The type scales: standard for desktops, tv for television.
+// The type scales: standard for phones and tablets, desktop for desktops, tv for television.
 var (
 	StandardTypography = Typography{
 		Display:  TypeStyle{Size: 34, LineHeight: 40, Weight: 700, Tracking: 0},
@@ -130,6 +130,17 @@ var (
 		Callout:  TypeStyle{Size: 15, LineHeight: 20, Weight: 400, Tracking: 0},
 		Footnote: TypeStyle{Size: 13, LineHeight: 18, Weight: 400, Tracking: 0},
 		Caption:  TypeStyle{Size: 12, LineHeight: 16, Weight: 500, Tracking: 0},
+	}
+	DesktopTypography = Typography{
+		Display:  TypeStyle{Size: 26, LineHeight: 32, Weight: 700, Tracking: 0},
+		Title1:   TypeStyle{Size: 22, LineHeight: 28, Weight: 700, Tracking: 0},
+		Title2:   TypeStyle{Size: 17, LineHeight: 22, Weight: 600, Tracking: 0},
+		Title3:   TypeStyle{Size: 15, LineHeight: 20, Weight: 600, Tracking: 0},
+		Headline: TypeStyle{Size: 13, LineHeight: 18, Weight: 600, Tracking: 0},
+		Body:     TypeStyle{Size: 13, LineHeight: 18, Weight: 400, Tracking: 0},
+		Callout:  TypeStyle{Size: 13, LineHeight: 18, Weight: 400, Tracking: 0},
+		Footnote: TypeStyle{Size: 11, LineHeight: 14, Weight: 400, Tracking: 0},
+		Caption:  TypeStyle{Size: 10, LineHeight: 13, Weight: 500, Tracking: 0},
 	}
 	TvTypography = Typography{
 		Display:  TypeStyle{Size: 52, LineHeight: 60, Weight: 700, Tracking: 0},

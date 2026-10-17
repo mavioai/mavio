@@ -1,6 +1,6 @@
 {
   "typography": {
-    "$description": "The type scale of phones, tablets and desktops; the family is the platform's system font.",
+    "$description": "The type scale of phones and tablets; the family is the platform's system font.",
     "$type": "typography",
     "display": {
       "$value": {

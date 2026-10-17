@@ -76,19 +76,24 @@ function layoutVars(l) {
     .join('\n');
 }
 
+function typeVars(scale) {
+  return Object.entries(scale)
+    .flatMap(([k, s]) => [
+      `  --mavio-type-${kebab(k)}-size: ${s.size}px;`,
+      `  --mavio-type-${kebab(k)}-line-height: ${s.lineHeight}px;`,
+      `  --mavio-type-${kebab(k)}-weight: ${s.weight};`,
+    ])
+    .join('\n');
+}
+
 function tokensCss(t) {
-  const type = Object.entries(t.typography.standard).flatMap(([k, s]) => [
-    `  --mavio-type-${kebab(k)}-size: ${s.size}px;`,
-    `  --mavio-type-${kebab(k)}-line-height: ${s.lineHeight}px;`,
-    `  --mavio-type-${kebab(k)}-weight: ${s.weight};`,
-  ]);
   return `${HEADER('/*', ' */')}
 /* The dark theme is the default; the light theme follows the system unless
    data-theme on the root element picks one. */
 :root {
   --mavio-font-family: Inter, system-ui, sans-serif;
 ${themeVars(t.themes.dark)}
-${type.join('\n')}
+${typeVars(t.typography.standard)}
 ${vars('spacing', t.spacing, 'px').join('\n')}
 ${vars('radius', t.radius, 'px').join('\n')}
 ${vars('elevation', mapValues(t.elevation, shadow)).join('\n')}
@@ -116,6 +121,7 @@ ${layoutVars(t.layout.tablet).replace(/^/gm, '  ')}
 @media (min-width: ${BREAKPOINTS.desktop}px) {
   :root {
 ${layoutVars(t.layout.desktop).replace(/^/gm, '  ')}
+${typeVars(t.typography.desktop).replace(/^/gm, '  ')}
   }
 }
 `;

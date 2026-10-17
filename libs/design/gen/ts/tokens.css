@@ -181,5 +181,32 @@
     --mavio-layout-sidebar: 262px;
     --mavio-layout-rail: 86px;
     --mavio-layout-focus-scale: 1;
+    --mavio-type-display-size: 26px;
+    --mavio-type-display-line-height: 32px;
+    --mavio-type-display-weight: 700;
+    --mavio-type-title1-size: 22px;
+    --mavio-type-title1-line-height: 28px;
+    --mavio-type-title1-weight: 700;
+    --mavio-type-title2-size: 17px;
+    --mavio-type-title2-line-height: 22px;
+    --mavio-type-title2-weight: 600;
+    --mavio-type-title3-size: 15px;
+    --mavio-type-title3-line-height: 20px;
+    --mavio-type-title3-weight: 600;
+    --mavio-type-headline-size: 13px;
+    --mavio-type-headline-line-height: 18px;
+    --mavio-type-headline-weight: 600;
+    --mavio-type-body-size: 13px;
+    --mavio-type-body-line-height: 18px;
+    --mavio-type-body-weight: 400;
+    --mavio-type-callout-size: 13px;
+    --mavio-type-callout-line-height: 18px;
+    --mavio-type-callout-weight: 400;
+    --mavio-type-footnote-size: 11px;
+    --mavio-type-footnote-line-height: 14px;
+    --mavio-type-footnote-weight: 400;
+    --mavio-type-caption-size: 10px;
+    --mavio-type-caption-line-height: 13px;
+    --mavio-type-caption-weight: 500;
   }
 }
