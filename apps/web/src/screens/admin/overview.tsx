@@ -15,7 +15,7 @@ import { ContainerCommand, containerStates } from "../plugins.tsx";
 /** The section of the server chosen in the settings. */
 export function OverviewSection({ server }: { server: ServerEntry }) {
   return (
-    <Page title={t("settings.overview")} message={server.name}>
+    <Page title={t("settings.overview")}>
       <ServerInfo server={server} />
       <Load server={server} />
       <Containers server={server} />

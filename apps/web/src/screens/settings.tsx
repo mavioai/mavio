@@ -44,6 +44,7 @@ import { IssuesSection } from "./issues.tsx";
 import { LibrariesSection } from "./admin/libraries.tsx";
 import { ActivitySection } from "./admin/activity.tsx";
 import { OverviewSection } from "./admin/overview.tsx";
+import { Page, TitleAccessory } from "./admin/common.tsx";
 import { TasksSection } from "./admin/tasks.tsx";
 import { AcquisitionSection } from "./admin/acquisition.tsx";
 import { StorageSection } from "./admin/storage.tsx";
@@ -117,6 +118,8 @@ function lookOf(e: Entry) {
  * of its media, of acquiring media, of what extends it, and of watching
  * over and maintaining it.
  */
+const deviceSections: SectionId[] = ["appearance", "playback", "subtitles-audio", "assistant", "account"];
+
 const allGroups: { title: () => string; entries: Entry[]; server?: boolean }[] = [
   { title: () => t("settings.thisDevice"), entries: ["appearance", "playback", "subtitles-audio", "assistant"] },
   { title: () => t("settings.serverGroup"), entries: ["overview", "general", "users", "devices", "api-keys", "proxies", "media", "acquiring", "extensions", "maintenance"], server: true },
@@ -260,10 +263,11 @@ export function SettingsScreen() {
 /**
  * The choice of the server whose settings are shown, with a Mavio account
  * alone: a standalone server's user is signed in to one server. The server
- * serving the web UI is marked. In a group, on a phone, it is padded as
- * the group's rows.
+ * serving the web UI is marked. In the sidebar; in a group, on a phone,
+ * padded as the group's rows; or at the end of a section's title line
+ * where no sidebar shows.
  */
-function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; section?: SectionId; inGroup?: boolean }) {
+function ServerChoice({ chosen, section, place = "sidebar" }: { chosen: Chosen; section?: SectionId; place?: "sidebar" | "group" | "title" }) {
   const servers = useServersStore();
   const signIn = useSignIn();
   const signedIn = useSignedIn();
@@ -271,8 +275,10 @@ function ServerChoice({ chosen, section, inGroup = false }: { chosen: Chosen; se
   if (signIn?.kind !== "mavioDev") return null;
   const home = servers.homeServer();
   return (
-    <div className={`flex flex-col [&>select]:min-h-10 [&>select]:w-full ${inGroup ? "px-4 py-2.5" : "px-2 pb-1.5"}`}>
+    <div className={place === "title" ? "flex max-w-[50%] shrink-0" : `flex flex-col ${place === "group" ? "px-4 py-2.5" : "pb-1.5"}`}>
       <Select
+        // In the sidebar as wide and tall as its rows.
+        className={place === "sidebar" ? "min-h-10 w-full rounded-[10px]!" : place === "group" ? "min-h-10 w-full" : undefined}
         value={chosen.server.id}
         label={t("settings.serverChoice")}
         options={signedIn.map((s) => ({ value: s.id, label: s.id === home?.id ? t("settings.thisServer", { name: s.name }) : s.name }))}
@@ -409,7 +415,7 @@ function ProfileList({ groups }: { groups: Groups }) {
       {shown?.kind === "standalone" && <Members server={shown.servers[0]} />}
       {groups.map((g) => (
         <Group key={g.title()} title={g.title()}>
-          {g.server && chosen && <ServerChoice chosen={chosen} inGroup />}
+          {g.server && chosen && <ServerChoice chosen={chosen} place="group" />}
           {g.entries.map((e) => (
             <EntryRow key={e} id={e} />
           ))}
@@ -507,10 +513,14 @@ function UpLink({ menu }: { menu?: MenuId }) {
  */
 function CompactSection({ id, menu, chosen }: { id: SectionId; menu: MenuId | undefined; chosen: Chosen | undefined }) {
   const tv = usePrefs().tv;
+  // A server's section names the server chosen, as the sidebar would.
+  const choice = chosen && !deviceSections.includes(id) && <ServerChoice chosen={chosen} section={id} place="title" />;
   return (
     <div className={`mx-auto flex flex-col gap-4 px-margin pb-12 ${tv ? "max-w-3xl pt-16" : "max-w-xl pt-[calc(env(safe-area-inset-top)+12px)]"}`}>
       {!tv && <UpLink menu={menu} />}
-      <SectionView id={id} chosen={chosen} />
+      <TitleAccessory value={choice}>
+        <SectionView id={id} chosen={chosen} />
+      </TitleAccessory>
     </div>
   );
 }
@@ -579,13 +589,9 @@ function SectionView({ id, chosen }: { id: SectionId; chosen: Chosen | undefined
 /** A section's title, the line under it and its groups. */
 function Section({ title, message, children }: { title: string; message?: ReactNode; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-7">
-      <header>
-        <h2 data-title className="type-title1">{title}</h2>
-        {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
-      </header>
+    <Page title={title} message={message}>
       {children}
-    </div>
+    </Page>
   );
 }
 

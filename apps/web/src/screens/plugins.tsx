@@ -26,7 +26,7 @@ import {
   PluginState,
 } from "@mavio/proto/mavio/system/v1/plugin_pb";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { type FormEvent, type ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useContext, useState } from "react";
 
 import { locale, t } from "../i18n.ts";
 import { Icon, type IconName } from "../icon.tsx";
@@ -37,6 +37,7 @@ import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
 import { proxyChoices, proxyDirect } from "./admin/proxies.tsx";
+import { TitleAccessory } from "./admin/common.tsx";
 import { Confirm } from "../controls/dialog.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
@@ -119,6 +120,7 @@ const segment =
 
 function PluginList({ server, search }: { server: ServerEntry; search: SettingsSearch }) {
   const cur = search;
+  const accessory = useContext(TitleAccessory);
   const { installed, catalog, available, installedEntries } = useEntries(server);
   const tabInstalled = search.tab === "installed";
   const shown = tabInstalled ? installedEntries : available;
@@ -131,7 +133,10 @@ function PluginList({ server, search }: { server: ServerEntry; search: SettingsS
   return (
     <div className="flex flex-col gap-7">
       <header>
-        <h2 className="type-title1">{t("settings.plugins")}</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="min-w-0 flex-1 type-title1">{t("settings.plugins")}</h2>
+          {accessory}
+        </div>
         <p className="mt-1 type-body text-text-secondary">{t("settings.pluginsMessage")}</p>
       </header>
       <div className="flex flex-wrap items-center gap-3">

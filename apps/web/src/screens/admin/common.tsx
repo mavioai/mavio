@@ -3,14 +3,24 @@
 // confirmation of what cannot be undone, and times and their lengths.
 import { clone, type DescMessage, type MessageShape } from "@bufbuild/protobuf";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
 
 import { locale } from "../../i18n.ts";
 import { Icon, type IconName } from "../../icon.tsx";
 import { up } from "../../shell/up.ts";
 import type { SettingsSearch } from "../settings.tsx";
 
-/** A page's title, the line under it, the buttons beside it, and its groups. */
+/**
+ * What a section's title line ends with where no sidebar shows the
+ * settings: the choice of the server whose settings are shown.
+ */
+export const TitleAccessory = createContext<ReactNode>(null);
+
+/**
+ * A page's title, the line under it, the buttons beside it, and its
+ * groups; a section's page, without a link back, ends its title line with
+ * the TitleAccessory.
+ */
 export function Page({
   title,
   message,
@@ -24,12 +34,16 @@ export function Page({
   back?: ReactNode;
   children: ReactNode;
 }) {
+  const accessory = useContext(TitleAccessory);
   return (
     <div className="flex flex-col gap-7">
       {back}
       <header className="flex flex-wrap items-center gap-4">
         <div className="min-w-0 flex-1">
-          <h2 data-title className="type-title1">{title}</h2>
+          <div className="flex items-center gap-4">
+            <h2 data-title className="min-w-0 flex-1 type-title1">{title}</h2>
+            {!back && accessory}
+          </div>
           {message && <p className="mt-1 type-body text-text-secondary">{message}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
