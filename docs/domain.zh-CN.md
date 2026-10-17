@@ -43,6 +43,7 @@ erDiagram
 | `AccountSettings` | 服务端如何登录用户：安装时选择的模式，以及 mavio.dev 模式下的认领 |
 | `APIKey` | 集成调用 API 所用的令牌，以创建它的管理员身份行事 |
 | `Activity` | 服务端上发生的事情，记录在活动日志中 |
+| `Proxy` | 插件访问站点所经由的 HTTP、SOCKS4 或 SOCKS5 代理 |
 | `QualityDefinition`、`QualityProfile`、`CustomFormat`、`DelayProfile`、`ReleaseProfile` | 想要哪些发布及其排序（§13） |
 | `Wanted` | 被监控的电影或剧集如何获取：其质量档案、最低可用状态、新条目监控、季文件夹标志与标签 |
 | `EpisodeState` | 获取按季号与集号为剧集的单集保存的内容：其 scene 编号与上次搜索时间 |
@@ -267,6 +268,7 @@ erDiagram
 | `SettingsRepository` | `Get` 服务端设置（保存之前为默认值），经 `Validate` 后 `Put` 写入，只写与已保存内容不同的分组；`Accounts`（保存之前为零值）与 `PutAccounts` 读写账户设置 |
 | `APIKeyRepository` | `Create`、`GetByTokenHash`、`List`（最新的在前）、`Touch`、`Delete`；删除用户时一并删除其密钥 |
 | `ActivityRepository` | `Add`、`List`（分页，最新的在前，可按时间、用户、类型与最低严重程度筛选）、`Purge` 清除某时间之前的活动 |
+| `ProxyRepository` | `List`（按名称排序）、`Get`、`Put`（按 ID 插入或替换；名称或地址相同时返回 `ErrConflict` 并指出该代理）、`Delete` |
 | `TrickplayRepository` | `Put` 某条目在某宽度下的拼图（替换之前的）、`List` 某条目的拼图（最窄的在前）、`Delete` 删除 |
 | `MediaSegmentRepository` | `List` 某条目的片段（按开始时间）、`Replace` 替换 |
 | `QualityDefinitionRepository` | `List` 某类型的定义（保存之前为空）、`Replace` 替换 |
@@ -367,6 +369,9 @@ erDiagram
 
 ### 12.3 活动日志
 `Activity` 是发生过的一件事：点分的 `Type`、`Severity`（`info`、`warning`、`error`）、`Title` 与 `Message`、相关的 `UserID` 与 `ItemID`，以及因类型而异的 `Attributes`。日志记录登录（`user.login`）与失败的登录（`user.login_failed`，警告）、API 密钥的创建与吊销（`apikey.created`、`apikey.revoked`）、请求与问题（§13.6、§13.7）、账户变更（`user.created`、`user.updated`、`user.deleted`、`user.password_changed`）、插件的安装、更新、配置、卸载与启动失败（`plugin.installed`、`plugin.updated`、`plugin.configured`、`plugin.uninstalled`、`plugin.failed`）、设置的修改（`settings.updated`）、AI 凭据的变更与登录的开始（`ai.credential_changed`、`ai.login_started`）、备份（`backup.created`）、播放的开始与停止（`playback.started`、`playback.stopped`），以及失败的任务运行与字幕下载（`task.failed`、`subtitle.download_failed`）。活动保留 90 天，用户可列出与自己相关的活动，即其通知；活动并作为事件发送给通知插件；消费事件的插件还会收到不进入日志的事件（见[插件平台 §4](plugins.zh-CN.md#4-事件)）。
+
+### 12.4 代理
+`Proxy` 是服务端的一个代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）：其 `ID`、唯一的 `Name`、`Kind`（`http`、`socks4`、`socks5`）、`Host`（名称或 IP 地址，不带方括号）、`Port`（1–65535）以及可选的 `Username` 与 `Password`；SOCKS4 不接受密码。`Validate` 检查这些值。其 `Key`——不含种类，主机转为小写或 IP 地址规范化，加上端口与用户名——用于判断重复；`URL` 写作 `kind://user:password@host:port`。插件按 ID 引用代理；删除代理后，引用它的配置在修改之前会一直失败。
 
 ---
 

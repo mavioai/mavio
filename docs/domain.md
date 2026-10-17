@@ -44,6 +44,7 @@ erDiagram
 | `AccountSettings` | How the server signs people in: its mode, chosen at setup, and in mavio.dev mode its claim |
 | `APIKey` | A token an integration calls the API with, as the administrator who created it |
 | `Activity` | Something that happened on the server, kept in the activity log |
+| `Proxy` | An HTTP, SOCKS4 or SOCKS5 proxy plugins reach sites through |
 | `QualityDefinition`, `QualityProfile`, `CustomFormat`, `DelayProfile`, `ReleaseProfile` | What releases are wanted and how they rank (§13) |
 | `Wanted` | How a monitored movie or series is acquired: its quality profile, minimum availability, new item monitoring, season folder flag and tags |
 | `EpisodeState` | What acquisition keeps of an episode of a series by its season and number: its scene numbering and last search time |
@@ -267,6 +268,7 @@ A `Job` is durable background work stored in the database (scans, metadata refre
 | `SettingsRepository` | `Get` the server settings (the defaults until stored), `Put` them after `Validate`, writing only the groups that differ from those stored; `Accounts` (zero until stored) and `PutAccounts` the account settings |
 | `APIKeyRepository` | `Create`, `GetByTokenHash`, `List` (newest first), `Touch`, `Delete`; deleting the user deletes their keys |
 | `ActivityRepository` | `Add`, `List` (paged, newest first, by time, user, types and least severity), `Purge` of activities before a time |
+| `ProxyRepository` | `List` (by name), `Get`, `Put` (insert or replace by ID; `ErrConflict` naming the proxy of the same name or address), `Delete` |
 | `TrickplayRepository` | `Put` an item's sheets at a width (replacing the earlier), `List` an item's (narrowest first), `Delete` them |
 | `MediaSegmentRepository` | `List` an item's segments by start, `Replace` them |
 | `QualityDefinitionRepository` | `List` a kind's definitions (none until stored), `Replace` them |
@@ -367,6 +369,9 @@ An `APIKey` lets an integration call the API without signing in: its token, show
 
 ### 12.3 Activity Log
 An `Activity` is something that happened: a dotted `Type`, a `Severity` (`info`, `warning`, `error`), a `Title` and `Message`, the `UserID` and `ItemID` it concerns and type-specific `Attributes`. The log keeps sign-ins (`user.login`) and failed ones (`user.login_failed`, a warning), API keys created and revoked (`apikey.created`, `apikey.revoked`), requests and issues (§13.6, §13.7), account changes (`user.created`, `user.updated`, `user.deleted`, `user.password_changed`), plugins installed, updated, configured, uninstalled and failing to start (`plugin.installed`, `plugin.updated`, `plugin.configured`, `plugin.uninstalled`, `plugin.failed`), settings changes (`settings.updated`), AI credentials changed and logins started (`ai.credential_changed`, `ai.login_started`), backups (`backup.created`), playbacks starting and stopping (`playback.started`, `playback.stopped`), and failed task runs and subtitle downloads (`task.failed`, `subtitle.download_failed`). It keeps them for 90 days; users list those concerning them, their notifications; and they are sent to notification plugins as events; event-consuming plugins also get the events left out of the log (see [Plugins §4](plugins.md#4-events)).
+
+### 12.4 Proxies
+A `Proxy` is one of the server's proxies ([Architecture §17.1](architecture.md#171-proxies)): its `ID`, unique `Name`, `Kind` (`http`, `socks4`, `socks5`), `Host` (a name or an IP address, without brackets), `Port` (1–65535) and optional `Username` and `Password`; SOCKS4 takes no password. `Validate` checks them. Its `Key` — the kind left out, the host lowercased or its IP address normalized, the port and the username — tells duplicates apart; `URL` writes it as `kind://user:password@host:port`. Plugins refer to proxies by ID; deleting one leaves the configurations referring to it failing until changed.
 
 ---
 

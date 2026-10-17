@@ -164,7 +164,7 @@ Acquisition ([Architecture §13](architecture.md#13-acquisition-libsacquire)) ad
 
 Each indexer and download client configured has an ID the server generates (Architecture §7.5) and a name the administrator gives, by default its definition's, unique among the plugin's indexers or clients ignoring case; a definition can be configured more than once, as in Prowlarr. The configuration schema offers the definitions, and for an indexer the download clients, as options.
 
-Both network-facing providers are process plugins: indexers and download clients are at addresses the administrator configures, which a WASM manifest's `http_hosts` cannot list, and indexers need proxies and long-lived sessions.
+Both network-facing providers are process plugins: indexers and download clients are at addresses the administrator configures, which a WASM manifest's `http_hosts` cannot list, and indexers need long-lived sessions.
 
 ### 8.13 Subtitle Providers
 `SUBTITLE_PROVIDER` serves subtitle acquisition ([Architecture §14](architecture.md#14-subtitle-acquisition-libsacquiresubtitles)) as Bazarr's providers serve it. `SubtitleProviderService.ListSubtitleProviders` lists the providers the plugin implements with the settings each takes (secrets marked), whether each is enabled and whether it is throttled, and until when; `SearchSubtitles` takes a video's description (names, alternative titles, IDs, season, episode and absolute number, year, release name with its source, release group, resolution, codecs, edition and streaming service, frame rate, file name, size and OpenSubtitles hash) and several languages with their forced and hearing-impaired wishes, and returns candidates with their provider, release names, language, flags and the properties the provider found matching, which the server scores; `DownloadSubtitle` returns one, extracted from its archive. Failures carry their kind (too many requests, download limit, service unavailable, authentication, configuration, a subtitle to blocklist), from which the plugin throttles the provider. `plugins/subtitles` provides it as a process plugin: its sites are behind logins, cookies, Cloudflare and captchas, some are self-hosted at addresses the administrator gives, and it keeps sessions, throttling state and captcha services' accounts in its data folder.
@@ -193,6 +193,9 @@ Conversations of the assistant ([Assistant §6](assistant.md#6-ai-path)) also ca
 `TEXT_TO_SPEECH` speaks the assistant's answers. `TextToSpeechService.ListVoices` lists the plugin's synthesizers, with their settings and whether they are enabled, and the voices of those enabled (`<synthesizer>/<voice>`), each with its name and languages; `SynthesizeSpeech` returns the speech of a text with a voice, at a speed, in the format the request names (Opus in Ogg, or MP3).
 
 `plugins/voice` provides both as a Go process plugin: its settings enable and configure each recognizer and synthesizer, with its address, key (a secret) and model — whisper-asr-webservice and the OpenAI-compatible transcription API for recognition, the OpenAI-compatible speech API for synthesis — and the server names them by the plugin's ID and theirs. whisper-asr-webservice is Bazarr's Whisper provider moved from `plugins/subtitles` with its language mapping, its two timeouts and its test cases; each utterance is given to a service whole.
+
+### 8.17 Challenge Solvers
+`CHALLENGE_SOLVER` solves the challenges of sites behind Cloudflare or DDoS-Guard ([Architecture §17.2](architecture.md#172-challenge-solvers)). `ChallengeSolverService.SolveChallenge` takes a URL, a method (GET, or POST with its form body and content type), the proxy to solve through and a timeout, and returns the cookies (name, value, domain, path) that pass the challenge, the user agent they were obtained with and the solver that solved it. Other plugins never call it: they call `HostService.SolveChallenge` with a proxy's ID, which the server resolves and passes on to the ready solver plugins in turn; it answers unavailable when there is none. `plugins/solvers` provides it with FlareSolverr (§12).
 
 ## 9. Runtime Differences
 | | WASM | Process |
@@ -255,3 +258,14 @@ Installing or upgrading a plugin shows its dependencies with their images, so an
 
 ### 11.4 `plugins/voice`
 whisper-asr-webservice is the first dependency declared, named `whisper`: its CPU image, with `GPU_SUPPORT_OPTIONAL` and its GPU image as `gpu_image`, port 9000 with `/docs` as its health check, faster-whisper's `small` model, its model cache in a volume. The plugin reads its dependencies' addresses with `HostService.ListContainers` when configured; while `whisper` has one, the plugin's `whisper` recognizer uses it in place of its `endpoint` setting.
+
+## 12. Proxies and `plugins/solvers`
+
+### 12.1 Proxies
+The server's proxies ([Architecture §17.1](architecture.md#171-proxies)) reach plugins through their configuration: a string property with `"x-mavio-options": "proxies"` takes a proxy's ID, offered by `ListPluginConfigOptions` with the proxy's name, its `kind://host:port` as description and its kind as tag. `HostService.ListProxies` returns the proxies a plugin asks for by ID (all when none), with their kinds, hosts, ports, usernames and passwords; only plugins whose schema has such a property may call it. Such plugins are configured again when a proxy changes or is deleted, and fail what uses a proxy that no longer exists. `libs/plugin/proxy` makes an `http.Transport` of a proxy, with hosts reached directly.
+
+### 12.2 `plugins/solvers`
+A first-party process plugin providing `CHALLENGE_SOLVER` with FlareSolverr, declared as the optional container dependency `flaresolverr` (its image by digest, port 8191, `/health`). Its configuration lists the solvers tried in turn, each enabled or not with its timeout and `disable_media`, and the plugin's `session_ttl_minutes` and `max_concurrent`. It keeps a FlareSolverr session per proxy, solves one request at a time per session and shares a solution among concurrent requests for the same host and proxy ([Architecture §17.3](architecture.md#173-pluginssolvers)).
+
+### 12.3 Indexers and Subtitle Providers
+Each indexer of `plugins/indexers` has a `proxy`, one of the server's proxies, none by default; an indexer whose proxy no longer exists is left out with that error. `plugins/subtitles` has one `proxy` for every provider and the hosts reached directly (`exclude`, by default `localhost` and `127.0.0.1`). Both solve challenges through `HostService.SolveChallenge` with the proxy they use, keeping the cookies and user agent per host.

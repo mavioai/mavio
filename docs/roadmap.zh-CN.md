@@ -49,6 +49,7 @@ flowchart TD
     P27["P27 AI 网关与字幕翻译<br/>plugins/agent，移植 Lingarr"]
     P29["P29 助手<br/>libs/intent、AssistantService、plugins/voice、远程工具与记忆"]
     P30["P30 容器依赖<br/>libs/containers、引擎检测、插件的托管与外部依赖"]
+    P31["P31 代理与质询求解<br/>服务端的代理、CHALLENGE_SOLVER、带 FlareSolverr 的 plugins/solvers"]
     P28["P28 账户<br/>mavio.dev 模式与独立模式、媒体库访问、托管用户、用户切换、Home、好友、绑定设备的令牌；mavio.dev、中转、DNS 与证书"]
 
     P0 --> P1
@@ -93,6 +94,9 @@ flowchart TD
     P27 --> P29
     P13 --> P30
     P29 --> P30
+    P17 --> P31
+    P26 --> P31
+    P30 --> P31
 ```
 
 | 阶段 | 主题 | 状态 |
@@ -128,6 +132,7 @@ flowchart TD
 | P28 | 账户 | 进行中 |
 | P29 | 助手 | 进行中 |
 | P30 | 容器依赖 | 未开始 |
+| P31 | 代理与质询求解 | 进行中 |
 
 ---
 
@@ -421,7 +426,7 @@ flowchart TD
 - [x] 端到端测试（`apps/server/internal/server/sources_test.go`）
 
 ### P17 索引器
-**范围**：`plugins/indexers`，移植 Prowlarr 的第一方进程插件：Newznab、Torznab、Cardigann 引擎及 `indexers.prowlarr.com` 的定义、Prowlarr 以代码实现的全部站点、分类与能力、限速与退避、索引器代理（HTTP、SOCKS、FlareSolverr）。能力类型 `INDEXER_PROVIDER`；`ReleaseService` 搜索已配置的索引器，并用 `libs/release` 解析其结果。
+**范围**：`plugins/indexers`，移植 Prowlarr 的第一方进程插件：Newznab、Torznab、Cardigann 引擎及 `indexers.prowlarr.com` 的定义、Prowlarr 以代码实现的全部站点、分类与能力、限速与退避、索引器代理（HTTP、SOCKS、FlareSolverr；自 P31 起为服务端的代理与质询求解器）。能力类型 `INDEXER_PROVIDER`；`ReleaseService` 搜索已配置的索引器，并用 `libs/release` 解析其结果。
 
 **完成标准**：移植的 Prowlarr 用例通过；通过装配好的服务端，对 Newznab、Torznab、Cardigann 定义与代码实现站点的录制响应进行搜索，并解析为 release。
 
@@ -462,7 +467,7 @@ flowchart TD
     - [x] Anidub 的分辨率，从每个种子的质量块读取（Prowlarr 从错误的元素读取，因而读不到）
   - [x] AvistaZ 与 SpeedApp 站点的 API 令牌跨重启保存在插件的数据目录中，如同 Prowlarr 将其存入设置
   - [x] torrent 索引器的做种设置：决策检查最少做种数，分享率、做种时间与整季包做种时间在抓取时交给下载客户端，如同 Radarr 与 Sonarr 的 SeedConfigProvider
-- [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr）
+- [x] 限速、退避与索引器代理（HTTP、SOCKS、FlareSolverr），在 P31 中由服务端的代理与质询求解器取代
 - [x] `ReleaseService`（`mavio/acquisition/v1/release.proto`、`apps/server/internal/releases`）：列出各就绪提供方的索引器；如 Radarr 与 Sonarr 的 FetchReleases 那样逐级为媒体库中的电影、季或单集搜索（先按各索引器支持的 ID，再按标题），或按文本搜索；用 `libs/release` 解析 release
   - [x] 如 Sonarr 的 SearchAnimeSeason 那样逐集搜索动漫的季，每个已播出的单集按其绝对集数搜索
   - [x] Newznab 的 `title` 参数：如 Sonarr 那样，以原始标题发给支持它的索引器
@@ -807,7 +812,7 @@ flowchart TD
 - [x] `plugins/subtitles`：插件本身、压缩包（zip、RAR、7z）、限流、代理与 FlareSolverr、验证码识别服务（Anti-Captcha、CaptchaAI、DeathByCaptcha）；移入 OpenSubtitles.com，删除 `subtitles-opensubtitles`
   - [x] 插件本身：提供者设置、同时搜索所有启用的提供者、按失败类型的 Bazarr 限流并保存在其数据目录中，按 Bazarr 的提供者移植 OpenSubtitles.com（无 IMDb ID 时按名称查找标题、过滤强制与翻译字幕、其重试与失败）；删除 `subtitles-opensubtitles`
   - [x] 压缩包：zip、RAR 与 7z，以及未压缩直接提供的字幕文件，按内容区分；按 Bazarr 的 `get_subtitle_from_archive` 挑选字幕，依据剧集标题（difflib 的相似度）、集号（按 guessit 读取文件名的方式）或电影取第一个；移植 Bazarr 的压缩包用例
-  - [x] 网络：所有提供者共用一个代理（HTTP、SOCKS4、SOCKS5），带 Bazarr 的直连主机列表；用 FlareSolverr 解答 Cloudflare 的质询，按主机复用其 cookie 与 user agent；按 Bazarr 的 pitcher 用 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 识别验证码（reCAPTCHA v2 与图片）
+  - [x] 网络：所有提供者共用一个代理（HTTP、SOCKS4、SOCKS5；自 P31 起为服务端的一个代理），带 Bazarr 的直连主机列表；用 FlareSolverr 解答 Cloudflare 的质询（自 P31 起经质询求解器），按主机复用其 cookie 与 user agent；按 Bazarr 的 pitcher 用 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 识别验证码（reCAPTCHA v2 与图片）
   - [x] 需要账号的 JSON API：SubDL、SubSource、Jimaku、Assrt、BetaSeries、Titlovi、LegendasNet、SubX、Subs.ro、HDBits、Ktuvit、SubsDump、Subsarr
   - [x] 无需账号的 JSON API 与其他协议：Gestdown、AnimeTosho（两者）、Tsukihime、Subtis、RegieLive、Bayflix、Vladoonmooo、Subsynchro、Wizdom、BSPlayer、NapiProjekt、Napisy24；用于动漫 ID 的 AniDB 与 anime lists
   - [x] 无需账号的抓取站点：AnimeKalesi、AnimeSubInfo、GreekSubs、GreekSubtitles、Hosszupuska、Nekur、PrijevodiOnline、SousTitres.eu、SubClub、Subf2m、Subs4Free、SubsCenter、SubsSabbz、SubsUnacs、SubtitleCat、Subtitrari Noi、Subtitriid、SubtitulamosTV、SuperSubtitles、Titrari、TVSubtitles、YavkaNet、YIFY Subtitles
@@ -960,6 +965,22 @@ flowchart TD
 - [ ] **完成标准**中的端到端测试
 - [ ] macOS 与 Windows 上的 Docker Desktop，以及 Podman，手工检查
 
+### P31 代理与质询求解
+**范围**：[架构 §17](architecture.zh-CN.md#17-代理与质询求解) 与[插件 §12](plugins.zh-CN.md#12-代理与-pluginssolvers) 的代理与质询求解器：`libs/core` 与 `libs/store` 中的 `Proxy`、`ProxyService`、`proxies` 选项来源与 `HostService.ListProxies`；`CHALLENGE_SOLVER` 能力与 `HostService.SolveChallenge`；`libs/plugin/proxy` 与 `libs/plugin/challenge`；以容器依赖运行 FlareSolverr 并参照 Byparr 的做法的 `plugins/solvers`；`plugins/indexers` 与 `plugins/subtitles` 改用它们，移除各自的代理与 FlareSolverr；Web UI 的代理页面。
+
+**完成标准**：管理员在 Web UI 中添加代理，重复的被拒绝；配置了代理的索引器与字幕提供者经由它访问站点；索引器遇到的质询由 `plugins/solvers` 经索引器的代理解答，测试中使用录制的 FlareSolverr，设置 `MAVIO_FLARESOLVERR_URL` 时使用真实的 FlareSolverr。
+
+**进度**：
+- [ ] 领域、存储与契约：`Proxy`、带迁移的 `ProxyRepository`、`ProxyService`、`ChallengeSolverService`、`HostService.ListProxies` 与 `SolveChallenge`
+- [ ] 插件 SDK：`libs/plugin/proxy`、`libs/plugin/challenge`、`proxies` 选项来源、`CHALLENGE_SOLVER` 客户端
+- [ ] 服务端：代理及其测试、选项来源、代理变更时再次配置插件、把质询转交求解插件
+- [ ] `plugins/solvers`：以容器依赖运行的 FlareSolverr、按代理的会话、合并请求、并发、POST
+- [ ] `plugins/indexers` 与 `plugins/subtitles` 改用服务端的代理与 `HostService.SolveChallenge`
+- [ ] Web UI 的代理页面
+- [ ] 没有发布镜像的求解器，各需在 mavio-deps 中构建 Mavio 自己的镜像：Zendriver、Camoufox、invisible_playwright（Byparr 所用）；同时为容器声明加入浏览器所需的共享内存与 tmpfs
+- [ ] 服务端自身的请求（TMDB 及资源获取的其他服务、插件目录）经设置中选择的代理
+- [ ] WASM 插件的 HTTP 请求经代理，由宿主的 HTTP 客户端支持
+
 ---
 
 ## 4. 风险与待决事项
@@ -993,3 +1014,4 @@ flowchart TD
 | 容器引擎的 socket | 能访问 Docker 的 socket 即等于宿主机的 root，因此拥有它的服务端，以及它允许插件声明的内容中的任何漏洞，都具有同等权力 | 只有管理员才能把 socket 交给服务端；声明固定在清单中，安装时批准；不允许特权模式、宿主机命名空间、设备或绑定挂载；外部依赖不需要 socket（P30） |
 | 容器引擎之间的差异 | Docker、rootless Docker、Docker Desktop 与 Podman 的 socket、网络与 GPU 支持各不相同 | 至少 Engine API 1.41；测试在 Linux 上的 Docker 运行，其他手工检查（P30） |
 | Siri Remote 的麦克风 | tvOS 不允许应用从 Siri Remote 录音 | 助手输入框中的听写；App Intents |
+| 质询求解器跟不上 | Cloudflare 会改变其质询，而维护者不多的 FlareSolverr 可能一段时间内无法通过 | 求解器位于 `plugins/solvers`，无需发布服务端即可从插件目录升级，并按顺序依次尝试；有了镜像后加入基于其他浏览器的求解器（Zendriver、Camoufox）（P31） |

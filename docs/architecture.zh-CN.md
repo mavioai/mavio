@@ -125,6 +125,7 @@ mavio/
 │   ├── download-clients/        # [Go → 子进程] 下载客户端：qBittorrent、Transmission、SABnzbd、NZBGet 等
 │   ├── agent/                   # [TS → 子进程，Bun] AI 网关（pi-ai）与智能体会话（pi-durable）
 │   ├── voice/                   # [Go → 子进程] 语音识别与合成服务：Whisper、OpenAI 兼容 API 等
+│   ├── solvers/                 # （P31）[Go → 子进程] 质询求解器：以容器依赖运行的 FlareSolverr
 │   ├── notifier-webhook/        # [Go → wasm] Webhook 通知
 │   └── auth-ldap/               # [Go → 子进程] LDAP 认证（需要原生 TCP 长连接）
 │
@@ -323,7 +324,7 @@ libs/plugin/
 
 ### 7.5 服务端中的插件
 * **插件目录**：服务端通过 `libs/plugin/host` 启动插件目录（`--plugin-dir`）中每个含有 `manifest.json` 的文件夹。无法读取的文件夹、重复的插件 ID 或启动失败的插件会被报告为失败并跳过，服务端照常运行。在此之前，种子目录（`--plugin-seed-dir`，例如容器镜像附带的插件）中的插件会被复制到插件目录，每个只复制一次：插件目录中的标记文件记录已播种的插件，因此被卸载或升级的插件保持原样，插件目录中已有的插件不会被复制。
-* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，或服务器发送发布的全部下载客户端；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称。
+* **配置**：管理员设置的配置按插件 ID 保存（[领域模型](domain.zh-CN.md) §10），通过 `PluginManagementService.SetPluginConfig` 设置：先按清单的 `config_schema` 校验，再通过 `Configure` RPC 下发，插件接受后才保存，无需重启。启动时每个插件会重新收到已保存的配置。校验之前，服务器为 schema 标有 `"format": "uuid", "readOnly": true` 而配置中缺失或为空的属性生成 UUIDv7——插件无法改写自己的配置——并返回保存的配置。schema 带有 `x-mavio-options` 的属性从服务器通过 `ListPluginConfigOptions` 列出的来源取值：插件的索引器或下载客户端提供者的定义，服务器发送发布的全部下载客户端，或服务端的代理（§17.1）；每个选项带有名称、描述、标签（协议、隐私、语言）及其设置的 JSON Schema，由 schema 的 `settings` 同级属性保存，而 `name` 同级属性默认取选项的名称。
 * **状态**：插件以其配置运行、或其 schema 接受空配置时为就绪；在等待其 schema 所要求的配置时为未配置；无法启动或拒绝已保存的配置时为失败；被管理员停用时为已停用。`SystemService.ListPlugins` 连同清单一起报告这些状态。
 * **翻译**：插件的 `locales` 文件夹中每种语言一个 JSON 文件，以其 BCP 47 标签命名（`zh-Hans.json`），把清单中的每个英文字符串映射为其译文。服务端随清单读取它们；无法读取的文件使插件失败。`ListPlugins`、`InstallPlugin`、`SetPluginEnabled` 与 `SetPluginConfig` 返回的插件、`ListPluginContainers` 与 `SetPluginContainer` 返回的依赖，以及 `TaskService` 中插件的任务，使用请求的 `Accept-Language` 在插件的语言中匹配到的语言（`zh-CN` 读取 `zh-Hans`）：插件的名称与简介、任务的名称与说明、外部 ID 类型的名称、容器依赖的说明，以及配置 schema 的标题与说明，schema 的成员保持原有顺序。没有译文的字符串，以及插件没有的语言，保持英文；`PluginChanged` 事件由使用各种语言的管理员读取，携带未翻译的字符串。
 * **元数据提供者**：每个已启动的元数据插件都是媒体库刷新的提供者；未就绪时它不提供任何信息，因此之后才配置的插件会参与下一次刷新。只提供图片的提供者（如 fanart.tv）凭靠前的提供者找到的 ID 查找图片，靠后的提供者能看到这些 ID。
@@ -532,7 +533,7 @@ Mavio 为用户查找、下载并入库他们想要的电影与剧集，即 Seer
 8. **通知**：请求变为可用，并通过活动日志通知请求者。
 
 ### 13.4 索引器（`plugins/indexers`）
-移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避、索引器代理（HTTP、SOCKS、FlareSolverr）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
+移植 Prowlarr 的第一方进程插件：Newznab 与 Torznab、在运行时从 `indexers.prowlarr.com` 拉取定义的 Cardigann 引擎，以及 Prowlarr 以代码实现的全部站点；能力与分类、限速与失败后的退避；每个索引器可使用服务端的一个代理，质询由质询求解器解答（§17）。其配置列出已配置的索引器；定义以及每个定义所需的字段由插件给出。`IndexerProviderService` 列出索引器及其能力，搜索它们（电影、剧集或文本，带 ID、季与集、分类），读取其 RSS，并获取 release 的种子文件、磁力链接或 NZB。
 
 ### 13.5 下载客户端（`plugins/download-clients`）
 包含 Radarr 与 Sonarr 支持的全部下载客户端的第一方进程插件，如 qBittorrent、Transmission、Deluge、rTorrent、Aria2、SABnzbd、NZBGet 与监视目录。其配置列出已配置的客户端，每个客户端有电影与剧集各自的分类。`DownloadClientProviderService` 添加 release（种子文件、磁力链接或 NZB，使用其类型的分类与优先级，以及其索引器的做种限制），列出下载及其状态、进度与输出路径，将下载标记为已入库，并删除下载。远程路径映射属于服务端。云盘的离线下载是服务端内置的下载客户端（§9.2）。
@@ -593,7 +594,7 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 用于转写的音频（§14.5）只在本地和网络存储上提供，内嵌字幕也只在那里翻译；云存储上转写找不到字幕，只翻译字幕文件。
 
 ### 14.4 字幕提供者（`plugins/subtitles`）
-移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经与索引器同类的代理与 FlareSolverr），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
+移植 Bazarr 各提供者的第一方进程插件：位于 cookie、登录与 Cloudflare 之后的字幕站点（经服务端的代理与质询求解器，§17），用管理员的 Anti-Captcha、CaptchaAI 或 DeathByCaptcha 账号识别验证码，压缩包（zip、RAR、7z），以及 WASM 清单无法列出地址的自托管提供者。其配置启用各提供者并给出设置；`SubtitleProviderService` 列出它们，按多种语言为一个视频搜索，返回带 release 名称、标记与匹配属性的候选，并下载其中之一。失败的提供者按 Bazarr 按失败类型给出的时长限流（请求过多、下载额度、服务不可用、认证），有的直到其站点时区的午夜，计数类失败在两分钟内达到五次才限流；状态保存在插件的数据目录中。OpenSubtitles.com 是其提供者之一。
 
 ### 14.5 翻译与转写
 * **翻译**移植自 Lingarr。管理员把电影或剧集的一个外挂字幕文件，或本地与网络存储上的一条内嵌文字字幕流（取自播放的提取缓存），翻译成一种语言并带上其 forced 与听障标记，作为 `subtitles.translate` 任务运行。翻译器有两类：AI 模型 `ai/<提供商>/<模型>`，经由具有 `AI_GATEWAY` 能力的插件（[插件 §8.15](plugins.zh-CN.md#815-ai-网关与智能体会话)）补全，该插件保管全部凭据；以及 `SUBTITLE_TRANSLATOR` 插件的翻译器（[插件 §8.14](plugins.zh-CN.md#814-字幕翻译器)）`<插件>/<翻译器>`。翻译链为指定的翻译器，否则为设置中的翻译器，否则为第一个已启用的插件翻译器，其后是设置中的后备翻译器；链按各翻译器的语言与源语言和目标语言的匹配程度排序（完全、别名、文字、父语言如基础语言、变体；同一语言的其他地区从不匹配，pt-PT 不代替 pt-BR），某个翻译器失败的一组字幕条交给下一个。
@@ -649,3 +650,27 @@ Mavio 为电影与单集查找缺少的字幕，即 Bazarr 在 Sonarr 与 Radarr
 * 依赖的模式为 `unset`（管理员尚未选择）、`managed` 或 `external`（`PluginContainer`，[领域模型](domain.zh-CN.md) §10），状态为 `pulling`、`starting`、`ready`、`unhealthy` 或 `unavailable`（尚未选择、托管依赖没有引擎、外部依赖没有地址），并附最近的错误。外部依赖的健康状况在查询其状态时检查，30 秒内的结果直接复用。
 * `PluginManagementService.GetContainerRuntime` 报告并重新检测引擎；`ListPluginContainers` 列出插件的依赖及其声明、模式、地址、状态与命令；`SetPluginContainer` 设置依赖的模式，外部依赖还设置地址。选择托管要求有可用的引擎。
 * 插件通过 `HostService.ListContainers` 读取其依赖的地址与状态，地址变化时会被再次配置（`Configure`）。托管依赖在其健康检查首次通过后才有地址，因此插件被配置时拿到的是可用的地址。WASM 插件的 `http_hosts` 包含其依赖的地址。
+
+## 17. 代理与质询求解
+
+索引器与字幕提供者访问的站点可能需要代理，或位于 Cloudflare、DDoS-Guard 的质询之后，只有真实的浏览器才能通过。代理属于服务端，配置一次，插件按 ID 选用；质询由质询求解插件解答，其他插件经服务端调用它们，从不直接访问。
+
+### 17.1 代理
+* **种类**：HTTP（HTTPS 经 CONNECT）、SOCKS4 与 SOCKS5，各可带用户名与密码。管理员通过 `ProxyService`（`mavio.system.v1`）配置任意多个，同一种类也可有多个；它们保存为 `Proxy`（[领域模型 §12.4](domain.zh-CN.md#124-代理)）。
+* **去重**：主机、端口与用户名相同的代理即同一个代理，与种类无关；主机按小写比较，IP 地址按其规范形式比较，从不解析域名。名称忽略大小写唯一。重复的代理被拒绝，并指出与之重复的代理。
+* **密码**：`ProxyService` 从不返回密码，只告知是否已设置；更新时不带密码即保留已保存的密码。
+* **测试**：`TestProxy` 经已保存或未保存的代理获取一个 URL，默认 `https://www.cloudflare.com/cdn-cgi/trace`，返回延迟，以及从 trace 读出的出口地址与其国家。
+* **插件**：schema 带 `"x-mavio-options": "proxies"` 的配置属性取代理的 ID，从服务端的代理中选择（§7.5）；不选即直连。带此类属性的插件通过 `HostService.ListProxies` 读取代理（含密码），代理变更或删除时会被再次配置。已不存在的代理使用它的请求失败，而不会退回直连。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可列出直连的主机。
+
+### 17.2 质询求解器
+* **契约**：`CHALLENGE_SOLVER` 插件实现 `ChallengeSolverService.SolveChallenge`：给定 URL、方法（GET，或带表单正文的 POST）、代理与超时，返回通过质询的 cookie 及取得它们时的 user agent，之后对该站点的请求都须带上。
+* **经由服务端**：插件以其所用代理的 ID 调用 `HostService.SolveChallenge`；服务端填入代理，按 ID 顺序依次询问就绪的 `CHALLENGE_SOLVER` 插件，没有时答复 unavailable。因此插件既不需要求解器的地址，也不需要自己所用之外的代理。
+* **识别**：`libs/plugin/challenge` 按 Prowlarr 的方式识别质询（Cloudflare 或 DDoS-Guard 返回 403 或 503 及其质询页面）；其 transport 解答质询，按主机与代理复用 cookie 与 user agent，并重试一次请求。
+
+### 17.3 `plugins/solvers`
+第一方进程插件：一次质询可长达一分钟，会话在调用之间保持，而 WASM 实例受调用超时限制且不共享内存，无法做到。其求解方式参照 Byparr。
+* **求解器**：FlareSolverr，以容器依赖 `flaresolverr` 运行（§16），每种只有一个容器。配置列出启用的求解器，按尝试的顺序，各带超时（60 秒）以及是否不加载图片、字体与样式（`disable_media`）。
+* **会话**：如同 Byparr 保持一个预热的浏览器，插件为每个代理保持一个 FlareSolverr 会话（`mavio-<代理的哈希>`，无代理时为 `mavio-direct`），创建时带上代理及其凭据——FlareSolverr 只在创建会话时接受凭据；会话在 `session_ttl_minutes` 后轮换，FlareSolverr 丢失会话时重新创建一次，插件被配置时销毁不再使用的代理的会话。
+* **并发**：每个会话同时只处理一个请求（一个会话即一个浏览器），全局至多 `max_concurrent`（2）个；同一主机与代理的并发请求共享一次解答，并在 30 秒内复用。
+* **请求**：`request.get`，或带表单正文的 `request.post`，并带 `returnOnlyCookies`；FlareSolverr 的错误答复（HTTP 500）给出其消息；没有 cookie 或 user agent 的解答视为失败。
+* **回环地址**：托管的 FlareSolverr 运行在容器中，无法访问宿主机的回环接口，因此回环地址上的代理会以此原因失败。

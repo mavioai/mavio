@@ -49,6 +49,7 @@ flowchart TD
     P27["P27 AI gateway and subtitle translation<br/>plugins/agent, porting Lingarr"]
     P29["P29 Assistant<br/>libs/intent, AssistantService, plugins/voice, remote tools and memory"]
     P30["P30 Container dependencies<br/>libs/containers, engine detection, managed and external dependencies of plugins"]
+    P31["P31 Proxies and challenge solving<br/>the server's proxies, CHALLENGE_SOLVER, plugins/solvers with FlareSolverr"]
     P28["P28 Accounts<br/>mavio.dev and standalone modes, library access, managed users, user switching, Homes, friends, device-bound tokens; mavio.dev, relay, DNS and certificates"]
 
     P0 --> P1
@@ -93,6 +94,9 @@ flowchart TD
     P27 --> P29
     P13 --> P30
     P29 --> P30
+    P17 --> P31
+    P26 --> P31
+    P30 --> P31
 ```
 
 | Phase | Theme | Status |
@@ -128,6 +132,7 @@ flowchart TD
 | P28 | Accounts | In progress |
 | P29 | Assistant | In progress |
 | P30 | Container dependencies | Not started |
+| P31 | Proxies and challenge solving | In progress |
 
 ---
 
@@ -421,7 +426,7 @@ flowchart TD
 - [x] End-to-end test (`apps/server/internal/server/sources_test.go`)
 
 ### P17 Indexers
-**Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
+**Scope**: `plugins/indexers`, a first-party process plugin porting Prowlarr: Newznab, Torznab, the Cardigann engine with the definitions of `indexers.prowlarr.com`, every site Prowlarr implements in code, categories and capabilities, rate limits and backoff, indexer proxies (HTTP, SOCKS, FlareSolverr; the server's proxies and challenge solvers since P31). The capability `INDEXER_PROVIDER`; `ReleaseService` searches the configured indexers and parses what they return with `libs/release`.
 
 **Done when**: Prowlarr's ported cases pass; recorded responses of Newznab, Torznab, Cardigann definitions and the sites implemented in code are searched and parsed into releases through the assembled server.
 
@@ -462,7 +467,7 @@ flowchart TD
     - [x] Anidub's resolution, read from each torrent's quality block (Prowlarr reads it from the wrong element and finds none)
   - [x] The API tokens of AvistaZ and SpeedApp sites kept across restarts in the plugin's data folder, as Prowlarr keeps them in the settings
   - [x] The seeding settings of torrent indexers: the minimum seeders the decisions check, and the seed ratio, seed time and season pack seed time download clients are given with grabs, as Radarr's and Sonarr's SeedConfigProvider
-- [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr)
+- [x] Rate limits, backoff and indexer proxies (HTTP, SOCKS, FlareSolverr), replaced by the server's proxies and challenge solvers in P31
 - [x] `ReleaseService` (`mavio/acquisition/v1/release.proto`, `apps/server/internal/releases`): lists the indexers of every ready provider; searches them for a movie, season or episode of the library tier by tier as Radarr's and Sonarr's FetchReleases do (the IDs each indexer takes, then its titles), or for text; parses the releases with `libs/release`
   - [x] Seasons of anime searched episode by episode, each aired episode by its absolute number, as Sonarr's SearchAnimeSeason
   - [x] Newznab's `title` parameter, sent with the raw titles to indexers taking it, as Sonarr does
@@ -807,7 +812,7 @@ flowchart TD
 - [x] `plugins/subtitles`: the plugin, archives (zip, RAR, 7z), throttling, proxies and FlareSolverr, anti-captcha services (Anti-Captcha, CaptchaAI, DeathByCaptcha); OpenSubtitles.com moved in, `subtitles-opensubtitles` removed
   - [x] The plugin: provider settings, searches of every enabled provider at once, Bazarr's throttling by kind of failure kept in its data folder, OpenSubtitles.com ported from Bazarr's provider (titles found by name without an IMDb ID, forced and translated subtitles filtered, its retries and failures); `subtitles-opensubtitles` removed
   - [x] Archives: zip, RAR and 7z, and subtitle files served bare, told apart by their content; the subtitle picked as Bazarr's `get_subtitle_from_archive`, by episode title (difflib's ratio), number (read as guessit reads file names) or the first for a movie; Bazarr's archive cases ported
-  - [x] Network: one proxy for every provider (HTTP, SOCKS4, SOCKS5) with Bazarr's list of hosts reached directly; Cloudflare's challenges solved with FlareSolverr, whose cookies and user agent are reused per host; captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha (reCAPTCHA v2 and images), as Bazarr's pitchers
+  - [x] Network: one proxy for every provider (HTTP, SOCKS4, SOCKS5; one of the server's proxies since P31) with Bazarr's list of hosts reached directly; Cloudflare's challenges solved with FlareSolverr (through the challenge solvers since P31), whose cookies and user agent are reused per host; captchas solved by Anti-Captcha, CaptchaAI or DeathByCaptcha (reCAPTCHA v2 and images), as Bazarr's pitchers
   - [x] JSON APIs with accounts: SubDL, SubSource, Jimaku, Assrt, BetaSeries, Titlovi, LegendasNet, SubX, Subs.ro, HDBits, Ktuvit, SubsDump, Subsarr
   - [x] JSON APIs without accounts and other protocols: Gestdown, AnimeTosho (both), Tsukihime, Subtis, RegieLive, Bayflix, Vladoonmooo, Subsynchro, Wizdom, BSPlayer, NapiProjekt, Napisy24; AniDB and the anime lists for anime IDs
   - [x] Sites scraped without accounts: AnimeKalesi, AnimeSubInfo, GreekSubs, GreekSubtitles, Hosszupuska, Nekur, PrijevodiOnline, SousTitres.eu, SubClub, Subf2m, Subs4Free, SubsCenter, SubsSabbz, SubsUnacs, SubtitleCat, Subtitrari Noi, Subtitriid, SubtitulamosTV, SuperSubtitles, Titrari, TVSubtitles, YavkaNet, YIFY Subtitles
@@ -960,6 +965,22 @@ flowchart TD
 - [ ] The end-to-end test of **Done when**
 - [ ] Docker Desktop on macOS and Windows, and Podman, checked by hand
 
+### P31 Proxies and Challenge Solving
+**Scope**: the proxies and challenge solvers of [Architecture §17](architecture.md#17-proxies-and-challenge-solving) and [Plugins §12](plugins.md#12-proxies-and-pluginssolvers): `Proxy` in `libs/core` and `libs/store`, `ProxyService`, the `proxies` options source and `HostService.ListProxies`; the `CHALLENGE_SOLVER` capability and `HostService.SolveChallenge`; `libs/plugin/proxy` and `libs/plugin/challenge`; `plugins/solvers` with FlareSolverr as a container dependency, following Byparr's ways; `plugins/indexers` and `plugins/subtitles` moved to them, their own proxies and FlareSolverr removed; the web UI's proxies page.
+
+**Done when**: an administrator adds proxies in the web UI, a duplicate refused; an indexer and the subtitle providers configured with one reach sites through it; a challenge met by an indexer is solved by `plugins/solvers` through the indexer's proxy, with a recorded FlareSolverr in the tests and a live one when `MAVIO_FLARESOLVERR_URL` is set.
+
+**Progress**:
+- [ ] Domain, storage and contracts: `Proxy`, `ProxyRepository` with its migrations, `ProxyService`, `ChallengeSolverService`, `HostService.ListProxies` and `SolveChallenge`
+- [ ] Plugin SDK: `libs/plugin/proxy`, `libs/plugin/challenge`, the `proxies` options source, the `CHALLENGE_SOLVER` client
+- [ ] Server: proxies and their tests, the options source, plugins configured again when proxies change, challenges routed to solver plugins
+- [ ] `plugins/solvers`: FlareSolverr as a container dependency, sessions per proxy, coalescing, concurrency, POST
+- [ ] `plugins/indexers` and `plugins/subtitles` moved to the server's proxies and to `HostService.SolveChallenge`
+- [ ] The web UI's proxies page
+- [ ] Solvers without published images, each needing an image of Mavio's own built in mavio-deps: Zendriver, Camoufox, invisible_playwright (Byparr's); with them the container declaration's shared memory and tmpfs, which browsers need
+- [ ] The server's own requests (TMDB and the other services of acquisition, the plugin catalog) through a proxy chosen in the settings
+- [ ] WASM plugins' HTTP requests through a proxy, the host's HTTP client honoring one
+
 ---
 
 ## 4. Risks and Open Items
@@ -993,3 +1014,4 @@ flowchart TD
 | The container engine's socket | Access to Docker's socket is root on the host, so a server that has it, and any flaw in what it lets plugins declare, is as powerful | The server is given the socket only by an administrator; declarations are fixed in the manifest and approved on installation; no privileged mode, host namespaces, devices or bind mounts; external dependencies need no socket (P30) |
 | Container engines differ | Docker, rootless Docker, Docker Desktop and Podman differ in their sockets, networks and GPU support | Engine API 1.41 at least; the tests run on Docker on Linux, the others checked by hand (P30) |
 | The Siri Remote's microphone | tvOS gives apps no recording from the Siri Remote | Dictation in the assistant's field; App Intents |
+| Challenge solvers falling behind | Cloudflare changes its challenges, and FlareSolverr, maintained by few, may stop passing them for a while | Solvers are in `plugins/solvers`, upgraded from the catalog without a server release, tried in turn; solvers on other browsers (Zendriver, Camoufox) when their images exist (P31) |

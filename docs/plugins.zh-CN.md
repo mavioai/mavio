@@ -164,7 +164,7 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 
 配置的每个索引器与下载客户端都有一个由服务器生成的 ID（架构 §7.5）和一个由管理员给定的名称——默认取其定义的名称——在插件的索引器或下载客户端中唯一（不区分大小写）；与 Prowlarr 一样，同一定义可以配置多次。配置 schema 把定义、以及索引器的下载客户端作为选项提供。
 
-两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要代理与长期会话。
+两个面向网络的提供者都是进程插件：索引器与下载客户端的地址由管理员配置，WASM 清单的 `http_hosts` 无法列出它们，而且索引器需要长期会话。
 
 ### 8.13 字幕提供者
 `SUBTITLE_PROVIDER` 为字幕获取（[架构 §14](architecture.zh-CN.md#14-字幕获取libsacquiresubtitles)）服务，如 Bazarr 的提供者为其服务。`SubtitleProviderService.ListSubtitleProviders` 列出插件实现的提供者及各自的设置（标出机密项）、是否启用、是否被限流及限流到何时；`SearchSubtitles` 接受视频的描述（名称、别名、ID、季、集与绝对集数、年份、release 名称及其来源、发布组、分辨率、编码、版本与流媒体服务、帧率、文件名、大小与 OpenSubtitles 哈希）与多种语言及其 forced 与听障要求，返回带提供者、release 名称、语言、标记以及提供者判定匹配的属性的候选，由服务端评分；`DownloadSubtitle` 返回其中之一，已从压缩包中取出。失败带有类型（请求过多、下载额度、服务不可用、认证、配置、应阻止的字幕），插件据此限流该提供者。`plugins/subtitles` 以进程插件提供它：其站点位于登录、cookie、Cloudflare 与验证码之后，有的自托管在管理员给出的地址，且它在数据目录中保存会话、限流状态与验证码服务的账号。
@@ -193,6 +193,9 @@ manifest 在 `external_id_kinds` 中声明外部 ID 类型：键、显示名称�
 `TEXT_TO_SPEECH` 朗读助手的回答。`TextToSpeechService.ListVoices` 列出插件的合成器及其设置与是否启用，以及已启用合成器的语音（`<synthesizer>/<voice>`），每个都有名称与语言；`SynthesizeSpeech` 以请求指定的语速与格式（Ogg 封装的 Opus，或 MP3）返回用某个语音朗读一段文本的语音。
 
 `plugins/voice` 以 Go 子进程插件提供这两项能力：其设置启用并配置每个识别器与合成器，包括地址、key（机密项）与模型——识别有 whisper-asr-webservice 与 OpenAI 兼容的转写 API，合成有 OpenAI 兼容的语音 API——服务端以插件的 ID 加上它们自己的名称来命名它们。whisper-asr-webservice 是从 `plugins/subtitles` 移来的 Bazarr Whisper 提供者，连同其语言映射、两个超时设置与测试用例；每段话一次性交给服务。
+
+### 8.17 质询求解器
+`CHALLENGE_SOLVER` 解答位于 Cloudflare 或 DDoS-Guard 之后的站点的质询（[架构 §17.2](architecture.zh-CN.md#172-质询求解器)）。`ChallengeSolverService.SolveChallenge` 接受 URL、方法（GET，或带表单正文及其内容类型的 POST）、求解时经由的代理与超时，返回通过质询的 cookie（名称、值、域、路径）、取得它们时的 user agent 以及解答它的求解器。其他插件从不直接调用它：它们以代理的 ID 调用 `HostService.SolveChallenge`，由服务端解析代理后依次交给就绪的求解插件；没有时答复 unavailable。由 `plugins/solvers` 以 FlareSolverr 提供（§12）。
 
 ## 9. 运行时差异
 | | WASM | 进程 |
@@ -255,3 +258,14 @@ DLNA 是第一方进程插件：它需要 UDP 组播（WASM 没有 socket）和�
 
 ### 11.4 `plugins/voice`
 whisper-asr-webservice 是第一个被声明的依赖，名为 `whisper`：其 CPU 镜像，`GPU_SUPPORT_OPTIONAL` 并以其 GPU 镜像为 `gpu_image`，端口 9000 并以 `/docs` 作健康检查，faster-whisper 的 `small` 模型，模型缓存放在一个卷中。插件被配置时通过 `HostService.ListContainers` 读取其依赖的地址；`whisper` 有地址时，插件的 `whisper` 识别器用它代替其 `endpoint` 设置。
+
+## 12. 代理与 `plugins/solvers`
+
+### 12.1 代理
+服务端的代理（[架构 §17.1](architecture.zh-CN.md#171-代理)）通过配置交给插件：带 `"x-mavio-options": "proxies"` 的字符串属性取代理的 ID，由 `ListPluginConfigOptions` 列出，选项名称为代理名称，描述为 `kind://host:port`，标签为其种类。`HostService.ListProxies` 按 ID 返回插件请求的代理（未指定时返回全部），含种类、主机、端口、用户名与密码；只有 schema 中带此类属性的插件才能调用。这些插件在代理变更或删除时会被再次配置，而使用已不存在的代理的请求会失败。`libs/plugin/proxy` 由代理构建 `http.Transport`，并可指定直连的主机。
+
+### 12.2 `plugins/solvers`
+以 FlareSolverr 提供 `CHALLENGE_SOLVER` 的第一方进程插件，FlareSolverr 声明为可选的容器依赖 `flaresolverr`（按摘要引用的镜像，端口 8191，`/health`）。其配置列出依次尝试的求解器，各带是否启用、超时与 `disable_media`，以及插件的 `session_ttl_minutes` 与 `max_concurrent`。它为每个代理保持一个 FlareSolverr 会话，每个会话同时只处理一个请求，并让同一主机与代理的并发请求共享一次解答（[架构 §17.3](architecture.zh-CN.md#173-pluginssolvers)）。
+
+### 12.3 索引器与字幕提供者
+`plugins/indexers` 的每个索引器有一个 `proxy`，取服务端的一个代理，默认不用；代理已不存在的索引器会带着该错误被排除。`plugins/subtitles` 的所有提供者共用一个 `proxy`，并有直连的主机（`exclude`，默认 `localhost` 与 `127.0.0.1`）。两者都以所用代理调用 `HostService.SolveChallenge` 解答质询，并按主机保留 cookie 与 user agent。
