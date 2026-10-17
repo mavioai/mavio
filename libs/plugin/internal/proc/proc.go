@@ -20,7 +20,15 @@ const (
 	// both runtimes, as Servarr applications name them in their
 	// User-Agent, such as "ubuntu 22.04".
 	EnvHostOS = "MAVIO_HOST_OS"
+	// EnvLifeline is "stdin" when the plugin's stdin is a pipe the host
+	// holds open while it lives: the plugin exits, as on SIGTERM, when it
+	// reads the pipe's end, which comes however the host ends, killed
+	// included.
+	EnvLifeline = "MAVIO_PLUGIN_LIFELINE"
 )
+
+// LifelineStdin is EnvLifeline's value for a lifeline on stdin.
+const LifelineStdin = "stdin"
 
 // ProtocolVersion is the handshake protocol version.
 const ProtocolVersion = 1

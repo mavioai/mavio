@@ -1,7 +1,8 @@
 // Package process is the guest entry point for child-process plugins: it
 // serves the registered handlers over the Unix domain socket the host
 // provides, authenticates the host's token, prints the handshake line and
-// exits after the Shutdown RPC or a termination signal.
+// exits after the Shutdown RPC, a termination signal, or the end of its
+// stdin when the host makes it a lifeline.
 //
 //	func main() {
 //		if err := process.Serve(context.Background(), "org.example.my-plugin"); err != nil {
@@ -16,6 +17,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -63,6 +65,9 @@ func Serve(ctx context.Context, pluginID string) error {
 	}
 	ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if os.Getenv(proc.EnvLifeline) == proc.LifelineStdin {
+		ctx = lifeline(ctx, os.Stdin)
+	}
 
 	var lc net.ListenConfig
 	ln, err := lc.Listen(ctx, "unix", socket)
@@ -102,6 +107,17 @@ func Serve(ctx context.Context, pluginID string) error {
 		return err
 	}
 	return nil
+}
+
+// lifeline returns ctx ended also when r ends: the host holds the other
+// end of the pipe while it lives.
+func lifeline(ctx context.Context, r io.Reader) context.Context {
+	ctx, cancel := context.WithCancel(ctx)
+	go func() {
+		_, _ = io.Copy(io.Discard, r)
+		cancel()
+	}()
+	return ctx
 }
 
 // authenticate requires the host's token: in the Authorization header of

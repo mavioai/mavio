@@ -1,7 +1,8 @@
 // The guest side of child-process plugins written in TypeScript, as
 // guest/process is for Go: it serves the plugin's Connect services to the
 // host, authenticates the host's token, prints the handshake line and
-// returns after the Shutdown RPC or a termination signal.
+// returns after the Shutdown RPC, a termination signal, or the end of its
+// stdin when the host makes it a lifeline.
 
 import { timingSafeEqual } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -18,6 +19,11 @@ export const env = {
 	hostAddress: "MAVIO_HOST_ADDRESS",
 	data: "MAVIO_PLUGIN_DATA",
 	hostOS: "MAVIO_HOST_OS",
+	/**
+	 * "stdin" when stdin is a pipe the host holds open while it lives: the
+	 * plugin stops when it ends, however the host ended.
+	 */
+	lifeline: "MAVIO_PLUGIN_LIFELINE",
 } as const;
 
 /** The handshake protocol version. */
@@ -60,6 +66,8 @@ export interface ServeOptions {
 	http?: (req: http2.Http2ServerRequest, res: http2.Http2ServerResponse) => void;
 	/** Where the handshake line goes; stdout by default. */
 	stdout?: NodeJS.WritableStream;
+	/** The lifeline, when the host gives one; stdin by default. */
+	stdin?: NodeJS.ReadableStream;
 }
 
 function sameToken(got: string | undefined, want: string): boolean {
@@ -120,6 +128,13 @@ export async function serve(options: ServeOptions): Promise<void> {
 	const signals = () => void stop();
 	process.once("SIGTERM", signals);
 	process.once("SIGINT", signals);
+	const lifeline: NodeJS.ReadableStream | undefined = process.env[env.lifeline] === "stdin" ? (options.stdin ?? process.stdin) : undefined;
+	if (lifeline) {
+		lifeline.on("end", signals);
+		lifeline.on("close", signals);
+		lifeline.on("error", signals);
+		lifeline.resume();
+	}
 
 	let address: string | undefined;
 	await new Promise<void>((resolve, reject) => {
@@ -143,6 +158,14 @@ export async function serve(options: ServeOptions): Promise<void> {
 	await stop();
 	process.off("SIGTERM", signals);
 	process.off("SIGINT", signals);
+	if (lifeline) {
+		lifeline.off("end", signals);
+		lifeline.off("close", signals);
+		lifeline.off("error", signals);
+		// Reading it no longer holds the plugin open.
+		lifeline.pause();
+		(lifeline as Partial<net.Socket>).unref?.();
+	}
 }
 
 /**
