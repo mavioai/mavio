@@ -11,7 +11,16 @@ type Network struct {
 	Name       string
 	Driver     string
 	Labels     map[string]string
-	Containers map[string]struct{ Name string }
+	Containers map[string]NetworkMember
+}
+
+// NetworkMember is a container on a network, by its name and address
+// there.
+type NetworkMember struct {
+	Name string
+	// IPv4Address is its address with the network's prefix length, as
+	// "172.18.0.2/16".
+	IPv4Address string
 }
 
 // CreateNetwork creates a bridge network and returns its ID;

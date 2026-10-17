@@ -395,3 +395,42 @@ func TestSupervisorHostGateway(t *testing.T) {
 		})
 	}
 }
+
+func TestSupervisorProxy(t *testing.T) {
+	proxied := func() containers.Dependency {
+		d := whisper()
+		d.ProxyEnv = func(host string) map[string]string {
+			return map[string]string{"HTTPS_PROXY": "http://u:p@" + host + ":8686", "B": "from the proxy"}
+		}
+		return d
+	}
+	if containers.Hash(proxied()) == containers.Hash(whisper()) {
+		t.Error("Hash of a proxied dependency got = that of one not proxied, want = another")
+	}
+	for _, tc := range []struct {
+		name, self, want string
+	}{
+		{"server on the host", "", "HTTPS_PROXY=http://u:p@host.docker.internal:8686"},
+		{"server in a container", "self", "HTTPS_PROXY=http://u:p@172.18.0.2:8686"},
+	} {
+		synctest.Test(t, func(t *testing.T) {
+			e, h := containerstest.New(), &health{}
+			s := containers.NewSupervisor(containers.SupervisorOptions{
+				Engine: e, Server: "server-1", Self: tc.self, OnChange: (&changes{}).record, Probe: h.probe, HostGateway: true,
+			})
+			defer s.Close(context.Background())
+			s.Start(proxied())
+			synctest.Wait()
+			spec, _, _ := e.Spec("mavio-voice-whisper")
+			if !slices.Contains(spec.Env, tc.want) || !slices.Contains(spec.Env, "B=2") {
+				t.Errorf("%s: Env got = %v, want %s and the dependency's own B=2", tc.name, spec.Env, tc.want)
+			}
+			if spec.HostGateway != (tc.self == "") {
+				t.Errorf("%s: HostGateway got = %v, want = %v", tc.name, spec.HostGateway, tc.self == "")
+			}
+			if cmd := s.Command(proxied()); !strings.Contains(cmd, "-e "+tc.want) || !strings.HasPrefix(cmd, "docker run -d --name mavio-voice-whisper --network mavio") {
+				t.Errorf("%s: Command got = %q, want the docker run with %s", tc.name, cmd, tc.want)
+			}
+		})
+	}
+}
