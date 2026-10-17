@@ -60,6 +60,10 @@ service PluginManagementService {
   // SetPluginContainer sets how a container dependency is reached: run by
   // the server, which requires a container engine, or at an address.
   rpc SetPluginContainer(SetPluginContainerRequest) returns (SetPluginContainerResponse);
+
+  // SetPluginProxy sets the proxy a WASM plugin's HTTP requests, which the
+  // server performs, go through.
+  rpc SetPluginProxy(SetPluginProxyRequest) returns (SetPluginProxyResponse);
 }
 
 // PluginState is whether a plugin is in use.
@@ -84,6 +88,11 @@ message Plugin {
   PluginState state = 2;
   // Why the plugin failed, for PLUGIN_STATE_FAILED.
   string error = 3;
+  // For a WASM plugin, the proxy its HTTP requests go through: the ID of
+  // one of the server's proxies, "system" for the system proxy, or empty
+  // for none. The hosts of this machine and of the local network are
+  // reached directly.
+  string proxy = 4;
 }
 
 message ListPluginsRequest {}
@@ -274,4 +283,15 @@ message SetPluginContainerRequest {
 
 message SetPluginContainerResponse {
   PluginContainer container = 1;
+}
+
+message SetPluginProxyRequest {
+  string plugin_id = 1 [(buf.validate.field).required = true];
+  // The ID of one of the server's proxies, "system" for the system proxy,
+  // or empty for none.
+  string proxy = 2;
+}
+
+message SetPluginProxyResponse {
+  Plugin plugin = 1;
 }

@@ -21379,11 +21379,48 @@
             "type": "boolean",
             "title": "relay",
             "description": "In mavio.dev mode, lets clients reach the server through mavio.dev's\n relay when they cannot reach it directly."
+          },
+          "proxies": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.OutboundProxies"
+              }
+            ],
+            "title": "proxies",
+            "description": "The proxies of the server's own HTTP requests; unset in an update\n keeps the current ones."
           }
         },
         "title": "NetworkSettings",
         "additionalProperties": false,
-        "description": "NetworkSettings decide how the server is reached."
+        "description": "NetworkSettings decide how the server is reached and how it reaches\n other sites."
+      },
+      "mavio.system.v1.OutboundProxies": {
+        "type": "object",
+        "properties": {
+          "pluginCatalogs": {
+            "type": "string",
+            "title": "plugin_catalogs",
+            "description": "Plugin catalogs and plugin packages."
+          },
+          "images": {
+            "type": "string",
+            "title": "images",
+            "description": "Items' remote images, such as posters."
+          },
+          "mavioDev": {
+            "type": "string",
+            "title": "mavio_dev",
+            "description": "mavio.dev's API."
+          },
+          "acme": {
+            "type": "string",
+            "title": "acme",
+            "description": "The certificate authorities of mavio.site certificates."
+          }
+        },
+        "title": "OutboundProxies",
+        "additionalProperties": false,
+        "description": "OutboundProxies are the proxies the server's own HTTP requests go\n through, by what they reach: each the ID of one of the server's proxies\n (ProxyService), \"system\" for the system proxy, or empty for none. The\n hosts of this machine and of the local network are reached directly."
       },
       "mavio.system.v1.Plugin": {
         "type": "object",
@@ -21409,6 +21446,11 @@
             "type": "string",
             "title": "error",
             "description": "Why the plugin failed, for PLUGIN_STATE_FAILED."
+          },
+          "proxy": {
+            "type": "string",
+            "title": "proxy",
+            "description": "For a WASM plugin, the proxy its HTTP requests go through: the ID of\n one of the server's proxies, \"system\" for the system proxy, or empty\n for none. The hosts of this machine and of the local network are\n reached directly."
           }
         },
         "title": "Plugin",
@@ -22105,6 +22147,40 @@
           }
         },
         "title": "SetPluginEnabledResponse",
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginProxyRequest": {
+        "type": "object",
+        "properties": {
+          "pluginId": {
+            "type": "string",
+            "title": "plugin_id"
+          },
+          "proxy": {
+            "type": "string",
+            "title": "proxy",
+            "description": "The ID of one of the server's proxies, \"system\" for the system proxy,\n or empty for none."
+          }
+        },
+        "title": "SetPluginProxyRequest",
+        "required": [
+          "pluginId"
+        ],
+        "additionalProperties": false
+      },
+      "mavio.system.v1.SetPluginProxyResponse": {
+        "type": "object",
+        "properties": {
+          "plugin": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/mavio.system.v1.Plugin"
+              }
+            ],
+            "title": "plugin"
+          }
+        },
+        "title": "SetPluginProxyResponse",
         "additionalProperties": false
       },
       "mavio.system.v1.Severity": {
@@ -24294,14 +24370,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/GetHub": {
+    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
       "post": {
         "tags": [
           "HubService"
         ],
-        "summary": "GetHub",
-        "description": "GetHub lists a page of a hub's items.",
-        "operationId": "mavio.hub.v1.HubService.GetHub",
+        "summary": "UpdateHomeLayout",
+        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
+        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24326,7 +24402,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
               }
             }
           },
@@ -24348,7 +24424,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
                 }
               }
             }
@@ -24356,14 +24432,14 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/ResetPassword": {
+    "/mavio.session.v1.SyncPlayService/JoinGroup": {
       "post": {
         "tags": [
-          "AuthService"
+          "SyncPlayService"
         ],
-        "summary": "ResetPassword",
-        "description": "ResetPassword sets a new password with the PIN ForgotPassword\n delivered, and ends the user's sessions.",
-        "operationId": "mavio.auth.v1.AuthService.ResetPassword",
+        "summary": "JoinGroup",
+        "description": "JoinGroup adds the calling device to a group, leaving its earlier one.",
+        "operationId": "mavio.session.v1.SyncPlayService.JoinGroup",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -24388,7 +24464,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.JoinGroupRequest"
               }
             }
           },
@@ -24410,7 +24486,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.JoinGroupResponse"
                 }
               }
             }
@@ -32024,13 +32100,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/DeleteCollection": {
+    "/mavio.auth.v1.AuthService/ResetPassword": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AuthService"
         ],
-        "summary": "DeleteCollection",
-        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
+        "summary": "ResetPassword",
+        "description": "ResetPassword sets a new password with the PIN ForgotPassword\n delivered, and ends the user's sessions.",
+        "operationId": "mavio.auth.v1.AuthService.ResetPassword",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32055,7 +32132,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordRequest"
               }
             }
           },
@@ -32077,7 +32154,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.ResetPasswordResponse"
                 }
               }
             }
@@ -32085,13 +32162,14 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/CreateCollection": {
+    "/mavio.auth.v1.AuthService/RevokeApiKey": {
       "post": {
         "tags": [
-          "CollectionService"
+          "AuthService"
         ],
-        "summary": "CreateCollection",
-        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
+        "summary": "RevokeApiKey",
+        "description": "RevokeApiKey deletes an API key. Administrators only.",
+        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32116,7 +32194,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
+                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
               }
             }
           },
@@ -32138,7 +32216,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
                 }
               }
             }
@@ -32642,14 +32720,14 @@
         }
       }
     },
-    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
+    "/mavio.hub.v1.HubService/GetHub": {
       "post": {
         "tags": [
-          "DiscoverService"
+          "HubService"
         ],
-        "summary": "GetCollection",
-        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
-        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
+        "summary": "GetHub",
+        "description": "GetHub lists a page of a hub's items.",
+        "operationId": "mavio.hub.v1.HubService.GetHub",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32674,7 +32752,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
+                "$ref": "#/components/schemas/mavio.hub.v1.GetHubRequest"
               }
             }
           },
@@ -32696,7 +32774,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.hub.v1.GetHubResponse"
                 }
               }
             }
@@ -32766,14 +32844,14 @@
         }
       }
     },
-    "/mavio.hub.v1.HubService/UpdateHomeLayout": {
+    "/mavio.acquisition.v1.DiscoverService/GetCollection": {
       "post": {
         "tags": [
-          "HubService"
+          "DiscoverService"
         ],
-        "summary": "UpdateHomeLayout",
-        "description": "UpdateHomeLayout replaces the calling user's choice of Home's\n libraries and hidden hubs. Libraries the user may not access fail\n with INVALID_ARGUMENT.",
-        "operationId": "mavio.hub.v1.HubService.UpdateHomeLayout",
+        "summary": "GetCollection",
+        "description": "GetCollection tells of a collection of movies by its TMDB ID with its\n parts marked as Discover's titles, as Seerr's collection page. It\n fails with NOT_FOUND when no discovery provider knows it.",
+        "operationId": "mavio.acquisition.v1.DiscoverService.GetCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32798,7 +32876,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutRequest"
+                "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionRequest"
               }
             }
           },
@@ -32820,7 +32898,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.hub.v1.UpdateHomeLayoutResponse"
+                  "$ref": "#/components/schemas/mavio.acquisition.v1.GetCollectionResponse"
                 }
               }
             }
@@ -32890,14 +32968,13 @@
         }
       }
     },
-    "/mavio.auth.v1.AuthService/RevokeApiKey": {
+    "/mavio.session.v1.SyncPlayService/NextItem": {
       "post": {
         "tags": [
-          "AuthService"
+          "SyncPlayService"
         ],
-        "summary": "RevokeApiKey",
-        "description": "RevokeApiKey deletes an API key. Administrators only.",
-        "operationId": "mavio.auth.v1.AuthService.RevokeApiKey",
+        "summary": "NextItem",
+        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32922,7 +32999,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyRequest"
+                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
               }
             }
           },
@@ -32944,7 +33021,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.auth.v1.RevokeApiKeyResponse"
+                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
                 }
               }
             }
@@ -33014,13 +33091,14 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/NextItem": {
+    "/mavio.system.v1.AiConversationService/DeleteAiConversation": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "AiConversationService"
         ],
-        "summary": "NextItem",
-        "operationId": "mavio.session.v1.SyncPlayService.NextItem",
+        "summary": "DeleteAiConversation",
+        "description": "DeleteAiConversation deletes a conversation.",
+        "operationId": "mavio.system.v1.AiConversationService.DeleteAiConversation",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -33045,7 +33123,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.NextItemRequest"
+                "$ref": "#/components/schemas/mavio.system.v1.DeleteAiConversationRequest"
               }
             }
           },
@@ -33067,7 +33145,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.NextItemResponse"
+                  "$ref": "#/components/schemas/mavio.system.v1.DeleteAiConversationResponse"
                 }
               }
             }
@@ -35791,14 +35869,13 @@
         }
       }
     },
-    "/mavio.session.v1.SyncPlayService/JoinGroup": {
+    "/mavio.library.v1.CollectionService/DeleteCollection": {
       "post": {
         "tags": [
-          "SyncPlayService"
+          "CollectionService"
         ],
-        "summary": "JoinGroup",
-        "description": "JoinGroup adds the calling device to a group, leaving its earlier one.",
-        "operationId": "mavio.session.v1.SyncPlayService.JoinGroup",
+        "summary": "DeleteCollection",
+        "operationId": "mavio.library.v1.CollectionService.DeleteCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -35823,7 +35900,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.session.v1.JoinGroupRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionRequest"
               }
             }
           },
@@ -35845,7 +35922,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.session.v1.JoinGroupResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.DeleteCollectionResponse"
                 }
               }
             }
@@ -35976,13 +36053,13 @@
         }
       }
     },
-    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
+    "/mavio.library.v1.CollectionService/CreateCollection": {
       "post": {
         "tags": [
           "CollectionService"
         ],
-        "summary": "RemoveFromCollection",
-        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
+        "summary": "CreateCollection",
+        "operationId": "mavio.library.v1.CollectionService.CreateCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -36007,7 +36084,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionRequest"
               }
             }
           },
@@ -36029,7 +36106,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.CreateCollectionResponse"
                 }
               }
             }
@@ -37458,14 +37535,13 @@
         }
       }
     },
-    "/mavio.system.v1.AiConversationService/DeleteAiConversation": {
+    "/mavio.library.v1.CollectionService/RemoveFromCollection": {
       "post": {
         "tags": [
-          "AiConversationService"
+          "CollectionService"
         ],
-        "summary": "DeleteAiConversation",
-        "description": "DeleteAiConversation deletes a conversation.",
-        "operationId": "mavio.system.v1.AiConversationService.DeleteAiConversation",
+        "summary": "RemoveFromCollection",
+        "operationId": "mavio.library.v1.CollectionService.RemoveFromCollection",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -37490,7 +37566,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/mavio.system.v1.DeleteAiConversationRequest"
+                "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionRequest"
               }
             }
           },
@@ -37512,7 +37588,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/mavio.system.v1.DeleteAiConversationResponse"
+                  "$ref": "#/components/schemas/mavio.library.v1.RemoveFromCollectionResponse"
                 }
               }
             }
@@ -39121,6 +39197,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/mavio.system.v1.SetPluginEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mavio.system.v1.PluginManagementService/SetPluginProxy": {
+      "post": {
+        "tags": [
+          "PluginManagementService"
+        ],
+        "summary": "SetPluginProxy",
+        "description": "SetPluginProxy sets the proxy a WASM plugin's HTTP requests, which the\n server performs, go through.",
+        "operationId": "mavio.system.v1.PluginManagementService.SetPluginProxy",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "description": "Define the version of the Connect protocol",
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            },
+            "example": 1
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "description": "Define the timeout, in ms",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            },
+            "example": 1000
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mavio.system.v1.SetPluginProxyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/mavio.system.v1.SetPluginProxyResponse"
                 }
               }
             }

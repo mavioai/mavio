@@ -184,6 +184,14 @@ pub use self::__buffa::view::SetPluginContainerResponseView;
 #[doc(inline)]
 pub use self::__buffa::view::SetPluginContainerResponseOwnedView;
 #[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyRequestView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyRequestOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyResponseView;
+#[doc(inline)]
+pub use self::__buffa::view::SetPluginProxyResponseOwnedView;
+#[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestView;
 #[doc(inline)]
 pub use self::__buffa::view::ListAiProvidersRequestOwnedView;
@@ -455,6 +463,10 @@ pub use self::__buffa::view::TranscodingSettingsOwnedView;
 pub use self::__buffa::view::NetworkSettingsView;
 #[doc(inline)]
 pub use self::__buffa::view::NetworkSettingsOwnedView;
+#[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesView;
+#[doc(inline)]
+pub use self::__buffa::view::OutboundProxiesOwnedView;
 #[doc(inline)]
 pub use self::__buffa::view::ServerSettingsView;
 #[doc(inline)]
