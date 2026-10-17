@@ -121,6 +121,11 @@ export function usePluginActions(server: ServerEntry) {
       mutationFn: (req: { pluginId: string; name: string; mode: ContainerMode; address?: string; useGpu?: boolean }) => client().setPluginContainer(req),
       onSettled,
     }),
+    /** Sets the proxy a WASM plugin's HTTP requests go through: a proxy's ID, "system", or "" for none. */
+    setProxy: useMutation({
+      mutationFn: ({ id, proxy }: { id: string; proxy: string }) => client().setPluginProxy({ pluginId: id, proxy }),
+      onSettled,
+    }),
     /** Replaces the catalogs' URLs, keeping the other settings. */
     setCatalogs: useMutation({
       mutationFn: async (urls: string[]) => {

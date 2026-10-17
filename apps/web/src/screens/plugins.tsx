@@ -14,9 +14,10 @@ import {
   usePluginConfigOptions,
   usePluginContainers,
   usePlugins,
+  useProxies,
 } from "@mavio/client-ts";
 import { ContainerMode, ContainerState, GpuSupport } from "@mavio/proto/mavio/plugin/v1/container_pb";
-import { Category } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
+import { Category, Runtime } from "@mavio/proto/mavio/plugin/v1/plugin_pb";
 import {
   type CatalogPlugin,
   type ContainerCommands,
@@ -35,6 +36,7 @@ import { Button, Group, Row } from "../ui.tsx";
 import { Switch } from "../controls/inputs.tsx";
 import { Select } from "../controls/select.tsx";
 import type { SettingsSearch } from "./settings.tsx";
+import { proxyChoices } from "./admin/proxies.tsx";
 import { useUnsavedGuard } from "../controls/unsaved.tsx";
 
 const states: Record<PluginState, () => string> = {
@@ -390,6 +392,7 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
         <Configuration server={server} id={id} schema={m.configSchema} page={m.configPage} />
       )}
       {e.installed && m && m.containers.length > 0 && <Containers server={server} id={id} />}
+      {e.installed && m?.runtime === Runtime.WASM && hosts.length > 0 && <PluginProxy server={server} id={id} hosts={hosts} proxy={e.installed.proxy} />}
       <Group title={t("plugins.information")}>
         {info.map(([label, value]) => (
           <div key={label} className="flex min-h-11 flex-wrap items-baseline gap-x-6 gap-y-1 px-4 py-2.5">
@@ -424,6 +427,28 @@ function PluginPage({ server, id }: { server: ServerEntry; id: string }) {
 }
 
 /** The schema of a manifest, undefined when it has none the form can draw. */
+/** The proxy a WASM plugin's requests, which the server performs, go through, saved as it is chosen. */
+function PluginProxy({ server, id, hosts, proxy }: { server: ServerEntry; id: string; hosts: string[]; proxy: string }) {
+  const { list } = useProxies(server);
+  const { setProxy } = usePluginActions(server);
+  const value = setProxy.isPending && setProxy.variables ? setProxy.variables.proxy : proxy;
+  return (
+    <Group title={t("plugins.network")}>
+      <Row label={t("plugins.proxy")} detail={t("plugins.proxyDetail", { hosts: hosts.join(", ") })}>
+        <Select
+          value={value}
+          label={t("plugins.proxy")}
+          className="w-48"
+          disabled={setProxy.isPending}
+          options={proxyChoices(list.data, value)}
+          onChange={(p) => setProxy.mutate({ id, proxy: p })}
+        />
+      </Row>
+      {setProxy.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(setProxy.error)}</p>}
+    </Group>
+  );
+}
+
 function parseSchema(s: string): Schema | undefined {
   try {
     const schema = JSON.parse(s) as Schema;

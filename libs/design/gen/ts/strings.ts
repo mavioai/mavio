@@ -460,6 +460,9 @@ export type MessageKey =
   | 'plugins.catalog'
   | 'plugins.state'
   | 'plugins.networkAccess'
+  | 'plugins.network'
+  | 'plugins.proxy'
+  | 'plugins.proxyDetail'
   | 'plugins.versions'
   | 'plugins.installThis'
   | 'plugins.configuration'
@@ -1422,6 +1425,17 @@ export type MessageKey =
   | 'proxies.remove'
   | 'proxies.removeTitle'
   | 'proxies.removeMessage'
+  | 'proxies.serverRequests'
+  | 'proxies.serverRequestsFooter'
+  | 'proxies.forCatalogs'
+  | 'proxies.forCatalogsDetail'
+  | 'proxies.forImages'
+  | 'proxies.forImagesDetail'
+  | 'proxies.forMavioDev'
+  | 'proxies.forMavioDevDetail'
+  | 'proxies.forAcme'
+  | 'proxies.forAcmeDetail'
+  | 'proxies.unknown'
   | 'requests.title'
   | 'requests.all'
   | 'requests.pending'
@@ -2305,6 +2319,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.catalog": "Catalog",
     "plugins.state": "State",
     "plugins.networkAccess": "Network Access",
+    "plugins.network": "Network",
+    "plugins.proxy": "Proxy",
+    "plugins.proxyDetail": "Requests to {hosts} go through it",
     "plugins.versions": "Versions",
     "plugins.installThis": "Install This Version",
     "plugins.configuration": "Configuration",
@@ -3242,7 +3259,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "Revoke",
     "keys.revokeTitle": "Revoke {name}?",
     "keys.revokeMessage": "What uses this key can no longer call the server.",
-    "proxies.message": "The proxies plugins reach sites through, such as indexers and subtitle sites; each plugin's settings choose one.",
+    "proxies.message": "The proxies the server and its plugins reach sites through: plugins choose one in their settings, the server's own requests below.",
     "proxies.add": "Add Proxy",
     "proxies.list": "Proxies",
     "proxies.empty": "No proxies added.",
@@ -3266,7 +3283,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "proxies.testFailed": "Failed: {error}",
     "proxies.remove": "Delete",
     "proxies.removeTitle": "Delete {name}?",
-    "proxies.removeMessage": "Plugins using this proxy fail until another one is chosen in their settings.",
+    "proxies.removeMessage": "Plugins using this proxy fail until another one is chosen in their settings. A proxy the server's requests or a plugin's network settings use cannot be deleted.",
+    "proxies.serverRequests": "The Server's Requests",
+    "proxies.serverRequestsFooter": "The proxies the server's own requests go through. Addresses of this machine and of the local network are reached directly.",
+    "proxies.forCatalogs": "Plugin Catalogs",
+    "proxies.forCatalogsDetail": "Catalogs and plugin downloads",
+    "proxies.forImages": "Images",
+    "proxies.forImagesDetail": "Posters and other artwork of items",
+    "proxies.forMavioDev": "mavio.dev",
+    "proxies.forMavioDevDetail": "Accounts, sign-in and the relay",
+    "proxies.forAcme": "Certificates",
+    "proxies.forAcmeDetail": "Obtaining the mavio.site certificate",
+    "proxies.unknown": "Unknown proxy",
     "requests.title": "Requests",
     "requests.all": "All",
     "requests.pending": "Pending",
@@ -4148,6 +4176,9 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "plugins.catalog": "插件目录",
     "plugins.state": "状态",
     "plugins.networkAccess": "网络访问",
+    "plugins.network": "网络",
+    "plugins.proxy": "代理",
+    "plugins.proxyDetail": "访问 {hosts} 时经由它",
     "plugins.versions": "版本",
     "plugins.installThis": "安装此版本",
     "plugins.configuration": "配置",
@@ -5085,7 +5116,7 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "keys.revoke": "撤销",
     "keys.revokeTitle": "撤销 {name}？",
     "keys.revokeMessage": "使用此密钥的程序将无法再调用服务器。",
-    "proxies.message": "插件访问站点（如索引器与字幕站点）时使用的代理；由各插件的设置选择其一。",
+    "proxies.message": "服务器与插件访问站点时使用的代理：插件在各自的设置中选择，服务器自身的请求在下方选择。",
     "proxies.add": "添加代理",
     "proxies.list": "代理",
     "proxies.empty": "尚未添加代理。",
@@ -5109,7 +5140,18 @@ export const messages: { readonly [L in Locale]: { readonly [K in MessageKey]: s
     "proxies.testFailed": "失败：{error}",
     "proxies.remove": "删除",
     "proxies.removeTitle": "删除 {name}？",
-    "proxies.removeMessage": "使用此代理的插件将无法工作，直到在其设置中另选代理。",
+    "proxies.removeMessage": "在设置中使用此代理的插件将无法工作，直到另选代理。服务器的请求或插件的网络设置正在使用的代理不能删除。",
+    "proxies.serverRequests": "服务器的请求",
+    "proxies.serverRequestsFooter": "服务器自身的请求所经由的代理。本机与局域网的地址直接访问。",
+    "proxies.forCatalogs": "插件目录",
+    "proxies.forCatalogsDetail": "插件目录与插件的下载",
+    "proxies.forImages": "图片",
+    "proxies.forImagesDetail": "条目的海报等图片",
+    "proxies.forMavioDev": "mavio.dev",
+    "proxies.forMavioDevDetail": "账号、登录与中继",
+    "proxies.forAcme": "证书",
+    "proxies.forAcmeDetail": "申请 mavio.site 证书",
+    "proxies.unknown": "未知代理",
     "requests.title": "请求",
     "requests.all": "全部",
     "requests.pending": "待审批",

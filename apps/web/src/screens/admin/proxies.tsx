@@ -1,9 +1,11 @@
 // The settings' Proxies (docs/clients.md §6.3.30): the server's proxies,
-// which plugins reach sites through, added, edited, tested and deleted
-// here; the system proxy first, read only.
+// which the server and its plugins reach sites through, added, edited,
+// tested and deleted here; the system proxy first, read only; and the
+// proxies of the server's own requests.
 import { create } from "@bufbuild/protobuf";
-import { errorMessage, type ServerEntry, useProxies, useTestProxy } from "@mavio/client-ts";
+import { errorMessage, type ServerEntry, systemProxyId, useProxies, useServerSettings, useTestProxy, useUpdateServerSettings } from "@mavio/client-ts";
 import { type Proxy as ProxyMessage, ProxyKind, ProxySchema, type TestProxyResponse } from "@mavio/proto/mavio/system/v1/proxy_pb";
+import { NetworkSettingsSchema, OutboundProxiesSchema } from "@mavio/proto/mavio/system/v1/system_pb";
 import { type ReactNode, useState } from "react";
 
 import { locale, t } from "../../i18n.ts";
@@ -65,7 +67,75 @@ export function ProxiesSection({ server }: { server: ServerEntry }) {
         {list.isSuccess && own.length === 0 && editing !== "" && <p className="px-4 py-3 type-callout text-text-secondary">{t("proxies.empty")}</p>}
         {list.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(list.error)}</p>}
       </Group>
+      <ServerRequests server={server} />
     </Page>
+  );
+}
+
+/** The choices of a proxy: none, the system proxy, then the server's by name; one chosen but gone by its ID. */
+export function proxyChoices(list: ProxyMessage[] | undefined, current: string): { value: string; label: string }[] {
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  const own = (list ?? []).filter((p) => !p.system).toSorted((a, b) => collator.compare(a.name, b.name));
+  const out = [
+    { value: "", label: t("proxies.none") },
+    { value: systemProxyId, label: t("proxies.system") },
+    ...own.map((p) => ({ value: p.id, label: p.name })),
+  ];
+  if (list && !out.some((o) => o.value === current)) out.push({ value: current, label: t("proxies.unknown") });
+  return out;
+}
+
+/** What the server's own requests reach, as OutboundProxies names it. */
+type RequestKey = "pluginCatalogs" | "images" | "mavioDev" | "acme";
+
+/** What the server's own requests reach, each with its proxy; mavio.dev and its certificates only in mavio.dev mode. */
+const requests: { key: RequestKey; label: () => string; detail: () => string; mavioDev?: boolean }[] = [
+  { key: "pluginCatalogs", label: () => t("proxies.forCatalogs"), detail: () => t("proxies.forCatalogsDetail") },
+  { key: "images", label: () => t("proxies.forImages"), detail: () => t("proxies.forImagesDetail") },
+  { key: "mavioDev", label: () => t("proxies.forMavioDev"), detail: () => t("proxies.forMavioDevDetail"), mavioDev: true },
+  { key: "acme", label: () => t("proxies.forAcme"), detail: () => t("proxies.forAcmeDetail"), mavioDev: true },
+];
+
+/** The proxies of the server's own requests, each saved as it is chosen. */
+function ServerRequests({ server }: { server: ServerEntry }) {
+  const { list } = useProxies(server);
+  const settings = useServerSettings(server);
+  const update = useUpdateServerSettings(server);
+  // The choice being saved, shown until the settings come back.
+  const [choosing, setChoosing] = useState<{ key: RequestKey; id: string }>();
+  const current = settings.data?.settings?.network?.proxies;
+  if (!current) return null;
+  const choose = (key: RequestKey, id: string) => {
+    setChoosing({ key, id });
+    update.mutate(
+      (s) => {
+        const n = (s.network ??= create(NetworkSettingsSchema));
+        (n.proxies ??= create(OutboundProxiesSchema))[key] = id;
+      },
+      { onSettled: () => setChoosing(undefined) },
+    );
+  };
+  return (
+    <Group title={t("proxies.serverRequests")} footer={t("proxies.serverRequestsFooter")}>
+      {requests
+        .filter((r) => !r.mavioDev || server.mode === "mavioDev")
+        .map((r) => {
+          const value = choosing?.key === r.key ? choosing.id : current[r.key];
+          return (
+            <Row key={r.key} label={r.label()} detail={r.detail()}>
+              <Select
+                value={value}
+                label={r.label()}
+                className="w-48"
+                disabled={update.isPending}
+                options={proxyChoices(list.data, value)}
+                onChange={(id) => choose(r.key, id)}
+              />
+            </Row>
+          );
+        })}
+      {update.isError && <p className="px-4 py-3 type-callout break-words text-danger">{errorMessage(update.error)}</p>}
+    </Group>
   );
 }
 

@@ -924,6 +924,12 @@
     <string name="plugins_state">State</string>
     <!-- The hosts a plugin may reach. -->
     <string name="plugins_network_access">Network Access</string>
+    <!-- Heading of how a plugin reaches sites. -->
+    <string name="plugins_network">Network</string>
+    <!-- Label of the proxy a plugin's requests go through. -->
+    <string name="plugins_proxy">Proxy</string>
+    <!-- Explains a plugin's proxy; hosts is the list of hosts the plugin reaches. -->
+    <string name="plugins_proxy_detail">Requests to %s go through it</string>
     <!-- Group of the versions a catalog offers of a plugin. -->
     <string name="plugins_versions">Versions</string>
     <!-- Button installing an older or newer version of an installed plugin. -->
@@ -2817,7 +2823,7 @@
     <!-- Explains revoking an API key. -->
     <string name="keys_revoke_message">What uses this key can no longer call the server.</string>
     <!-- Description of the proxies settings. -->
-    <string name="proxies_message">The proxies plugins reach sites through, such as indexers and subtitle sites; each plugin\'s settings choose one.</string>
+    <string name="proxies_message">The proxies the server and its plugins reach sites through: plugins choose one in their settings, the server\'s own requests below.</string>
     <!-- Opens the form adding a proxy. -->
     <string name="proxies_add">Add Proxy</string>
     <!-- Heading of the server's own proxies. -->
@@ -2865,7 +2871,29 @@
     <!-- Asks before deleting a proxy; name is its name. -->
     <string name="proxies_remove_title">Delete %s\?</string>
     <!-- Explains deleting a proxy. -->
-    <string name="proxies_remove_message">Plugins using this proxy fail until another one is chosen in their settings.</string>
+    <string name="proxies_remove_message">Plugins using this proxy fail until another one is chosen in their settings. A proxy the server\'s requests or a plugin\'s network settings use cannot be deleted.</string>
+    <!-- Heading of the proxies the server's own requests go through. -->
+    <string name="proxies_server_requests">The Server\'s Requests</string>
+    <!-- Explains the proxies of the server's own requests. -->
+    <string name="proxies_server_requests_footer">The proxies the server\'s own requests go through. Addresses of this machine and of the local network are reached directly.</string>
+    <!-- The server's requests for plugin catalogs. -->
+    <string name="proxies_for_catalogs">Plugin Catalogs</string>
+    <!-- Explains the requests for plugin catalogs. -->
+    <string name="proxies_for_catalogs_detail">Catalogs and plugin downloads</string>
+    <!-- The server's requests for items' remote images. -->
+    <string name="proxies_for_images">Images</string>
+    <!-- Explains the requests for images. -->
+    <string name="proxies_for_images_detail">Posters and other artwork of items</string>
+    <!-- The server's requests to mavio.dev. -->
+    <string name="proxies_for_mavio_dev">mavio.dev</string>
+    <!-- Explains the requests to mavio.dev. -->
+    <string name="proxies_for_mavio_dev_detail">Accounts, sign-in and the relay</string>
+    <!-- The server's requests to certificate authorities. -->
+    <string name="proxies_for_acme">Certificates</string>
+    <!-- Explains the requests to certificate authorities. -->
+    <string name="proxies_for_acme_detail">Obtaining the mavio.site certificate</string>
+    <!-- A proxy chosen that the server no longer has. -->
+    <string name="proxies_unknown">Unknown proxy</string>
     <!-- Title of the requests screen and the link to it from Discover. -->
     <string name="requests_title">Requests</string>
     <!-- Filter showing every request. -->

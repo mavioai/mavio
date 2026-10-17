@@ -1477,6 +1477,17 @@ public enum MavioStrings {
     /// The hosts a plugin may reach.
     public static var pluginsNetworkAccess: String { NSLocalizedString("plugins.networkAccess", bundle: .module, comment: "") }
 
+    /// Heading of how a plugin reaches sites.
+    public static var pluginsNetwork: String { NSLocalizedString("plugins.network", bundle: .module, comment: "") }
+
+    /// Label of the proxy a plugin's requests go through.
+    public static var pluginsProxy: String { NSLocalizedString("plugins.proxy", bundle: .module, comment: "") }
+
+    /// Explains a plugin's proxy; hosts is the list of hosts the plugin reaches.
+    public static func pluginsProxyDetail(hosts: String) -> String {
+        String.localizedStringWithFormat(NSLocalizedString("plugins.proxyDetail", bundle: .module, comment: ""), hosts)
+    }
+
     /// Group of the versions a catalog offers of a plugin.
     public static var pluginsVersions: String { NSLocalizedString("plugins.versions", bundle: .module, comment: "") }
 
@@ -4501,6 +4512,39 @@ public enum MavioStrings {
 
     /// Explains deleting a proxy.
     public static var proxiesRemoveMessage: String { NSLocalizedString("proxies.removeMessage", bundle: .module, comment: "") }
+
+    /// Heading of the proxies the server's own requests go through.
+    public static var proxiesServerRequests: String { NSLocalizedString("proxies.serverRequests", bundle: .module, comment: "") }
+
+    /// Explains the proxies of the server's own requests.
+    public static var proxiesServerRequestsFooter: String { NSLocalizedString("proxies.serverRequestsFooter", bundle: .module, comment: "") }
+
+    /// The server's requests for plugin catalogs.
+    public static var proxiesForCatalogs: String { NSLocalizedString("proxies.forCatalogs", bundle: .module, comment: "") }
+
+    /// Explains the requests for plugin catalogs.
+    public static var proxiesForCatalogsDetail: String { NSLocalizedString("proxies.forCatalogsDetail", bundle: .module, comment: "") }
+
+    /// The server's requests for items' remote images.
+    public static var proxiesForImages: String { NSLocalizedString("proxies.forImages", bundle: .module, comment: "") }
+
+    /// Explains the requests for images.
+    public static var proxiesForImagesDetail: String { NSLocalizedString("proxies.forImagesDetail", bundle: .module, comment: "") }
+
+    /// The server's requests to mavio.dev.
+    public static var proxiesForMavioDev: String { NSLocalizedString("proxies.forMavioDev", bundle: .module, comment: "") }
+
+    /// Explains the requests to mavio.dev.
+    public static var proxiesForMavioDevDetail: String { NSLocalizedString("proxies.forMavioDevDetail", bundle: .module, comment: "") }
+
+    /// The server's requests to certificate authorities.
+    public static var proxiesForAcme: String { NSLocalizedString("proxies.forAcme", bundle: .module, comment: "") }
+
+    /// Explains the requests to certificate authorities.
+    public static var proxiesForAcmeDetail: String { NSLocalizedString("proxies.forAcmeDetail", bundle: .module, comment: "") }
+
+    /// A proxy chosen that the server no longer has.
+    public static var proxiesUnknown: String { NSLocalizedString("proxies.unknown", bundle: .module, comment: "") }
 
     /// Title of the requests screen and the link to it from Discover.
     public static var requestsTitle: String { NSLocalizedString("requests.title", bundle: .module, comment: "") }
